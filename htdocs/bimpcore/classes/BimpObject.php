@@ -4603,6 +4603,10 @@ class BimpObject extends BimpCache
                     $this->set('user_create', $uc);
                 }
 
+                if ($this->params['positions'] && $this->params['position_insert'] === 'after') {
+                    $this->set('position', $this->getNextPosition());
+                }
+
                 if (!is_null($this->dol_object)) {
                     $this->checkDolFieldsHistory();
                     $result = $this->createDolObject($errors, $warnings);
@@ -4613,9 +4617,6 @@ class BimpObject extends BimpCache
                         $errors[] = 'Fichier de configuration invalide (table non renseignée)';
                         $result = 0;
                     } else {
-                        if ($this->getConf('positions', false, false, 'bool')) {
-                            $this->set('position', $this->getNextPosition());
-                        }
                         $result = $this->db->insert($table, $this->getDbData(), true);
                     }
                 }
@@ -4631,13 +4632,8 @@ class BimpObject extends BimpCache
 
                     self::setBimpObjectInstance($this);
 
-                    if ($this->getConf('positions', false, false, 'bool')) {
-                        $insert_mode = $this->getConf('position_insert', 'before');
-                        switch ($insert_mode) {
-                            case 'before':
-                                $this->setPosition(1);
-                                break;
-                        }
+                    if ($this->params['positions'] && $this->params['position_insert'] === 'before') {
+                        $this->setPosition(1);
                     }
 
                     $this->initData = $this->data;
@@ -6138,7 +6134,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             return false;
         }
 
-        if ($this->getConf('positions', false, false, 'bool')) {
+        if ($this->params['positions']) {
             $old_position = (int) $this->getInitData('position');
             if ($old_position === $new_position) {
                 return true;
@@ -6166,114 +6162,116 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $primary = $this->getPrimary();
             $check = true;
 
-            // Modifié pour compat avec Bimp_Menu (nécessaire pour contourner un index unique sur le champ position) 
-//            $items = $this->getList($filters, null, null, 'position', 'desc', 'array', array($primary, 'position'));
-//            if ($this->db->update($table, array(
-//                        'position' => (int) $position
-//                            ), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
-//                $check = false;
-//            }
-//
-//            if ($check) {
-//                $this->set('position', (int) $position);
-//                $i = 1;
-//                foreach ($items as $item) {
-//                    if ($i === (int) $position) {
-//                        $i++;
-//                    }
-//
-//                    if ((int) $item[$primary] === (int) $this->id) {
-//                        continue;
-//                    }
-//
-//                    if ((int) $item['position'] !== (int) $i) {
-//                        if ($this->db->update($table, array(
-//                                    'position' => (int) $i
-//                                        ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
-//                            $check = false;
-//                        }
-//                    }
-//                    $i++;
-//                }
-//            }
-//            
-            $this->db->db->begin();
-
-            // On attribue temporairement la position suivante à l'élément déplacé pour libérer sa position actuelle.
-            if ($this->db->update($table, array(
-                        'position' => (int) $this->getNextPosition()
-                            ), '`' . $primary . '` = ' . $this->id) <= 0) {
-                $errors[] = $this->db->err();
-                $check = false;
-            }
-
-            if ($check) {
-                // On décale une par une les positions des éléments affectés: 
-                $items_filters = $filters;
-                if ($new_position > $old_position) {
-                    $items_filters['position'] = array(
-                        'and' => array(
-                            array(
-                                'operator' => '>',
-                                'value'    => $old_position
-                            ),
-                            array(
-                                'operator' => '<=',
-                                'value'    => $new_position
-                            )
-                        )
-                    );
-                    $items = $this->getList($items_filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
-                    foreach ($items as $item) {
-                        if ($check) {
-                            if ($this->db->update($table, array(
-                                        'position' => ((int) $item['position'] - 1)
-                                            ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
-                                $errors[] = $this->db->err();
-                                $check = false;
-                            }
-                        }
-                    }
-                } else {
-                    $items_filters['position'] = array(
-                        'and' => array(
-                            array(
-                                'operator' => '>=',
-                                'value'    => $new_position
-                            ),
-                            array(
-                                'operator' => '<',
-                                'value'    => $old_position
-                            )
-                        )
-                    );
-                    $items = $this->getList($items_filters, null, null, 'position', 'desc', 'array', array($primary, 'position'));
-                    foreach ($items as $item) {
-                        if ($check) {
-                            if ($this->db->update($table, array(
-                                        'position' => ((int) $item['position'] + 1)
-                                            ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
-                                $errors[] = $this->db->err();
-                                $check = false;
-                            }
-                        }
-                    }
+            if (!in_array($this->object_name, array('Bimp_Menu'))) {
+                $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'), array(), $primary, ($this->params['position_insert'] === 'before' ? 'DESC' : 'ASC'));
+                if ($this->db->update($table, array(
+                            'position' => (int) $new_position
+                                ), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
+                    $check = false;
                 }
 
                 if ($check) {
-                    // on Attribue la position finale à l'élément déplacé (qui a normalement été libérée)
-                    if ($this->db->update($table, array(
-                                'position' => $new_position
-                                    ), '`' . $primary . '` = ' . $this->id) <= 0) {
-                        $errors[] = $this->db->err();
-                        $check = false;
+                    $this->set('position', (int) $new_position);
+                    $i = 1;
+                    foreach ($items as $item) {
+                        if ($i === (int) $new_position) {
+                            $i++;
+                        }
+
+                        if ((int) $item[$primary] === (int) $this->id) {
+                            continue;
+                        }
+
+                        if ((int) $item['position'] !== (int) $i) {
+                            if ($this->db->update($table, array(
+                                        'position' => (int) $i
+                                            ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
+                                $check = false;
+                            }
+                        }
+                        $i++;
                     }
+                }
+            } else {
+                // Nécessaire pour contourner un index unique sur le champ position) 
+                $this->db->db->begin();
+
+                // On attribue temporairement la position suivante à l'élément déplacé pour libérer sa position actuelle.
+                if ($this->db->update($table, array(
+                            'position' => (int) $this->getNextPosition()
+                                ), '`' . $primary . '` = ' . $this->id) <= 0) {
+                    $errors[] = $this->db->err();
+                    $check = false;
                 }
 
                 if ($check) {
-                    $this->db->db->commit();
-                } else {
-                    $this->db->db->rollback();
+                    // On décale une par une les positions des éléments affectés: 
+                    $items_filters = $filters;
+                    if ($new_position > $old_position) {
+                        $items_filters['position'] = array(
+                            'and' => array(
+                                array(
+                                    'operator' => '>',
+                                    'value'    => $old_position
+                                ),
+                                array(
+                                    'operator' => '<=',
+                                    'value'    => $new_position
+                                )
+                            )
+                        );
+                        $items = $this->getList($items_filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+                        foreach ($items as $item) {
+                            if ($check) {
+                                if ($this->db->update($table, array(
+                                            'position' => ((int) $item['position'] - 1)
+                                                ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
+                                    $errors[] = $this->db->err();
+                                    $check = false;
+                                }
+                            }
+                        }
+                    } else {
+                        $items_filters['position'] = array(
+                            'and' => array(
+                                array(
+                                    'operator' => '>=',
+                                    'value'    => $new_position
+                                ),
+                                array(
+                                    'operator' => '<',
+                                    'value'    => $old_position
+                                )
+                            )
+                        );
+                        $items = $this->getList($items_filters, null, null, 'position', 'desc', 'array', array($primary, 'position'));
+                        foreach ($items as $item) {
+                            if ($check) {
+                                if ($this->db->update($table, array(
+                                            'position' => ((int) $item['position'] + 1)
+                                                ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
+                                    $errors[] = $this->db->err();
+                                    $check = false;
+                                }
+                            }
+                        }
+                    }
+
+                    if ($check) {
+                        // on Attribue la position finale à l'élément déplacé (qui a normalement été libérée)
+                        if ($this->db->update($table, array(
+                                    'position' => $new_position
+                                        ), '`' . $primary . '` = ' . $this->id) <= 0) {
+                            $errors[] = $this->db->err();
+                            $check = false;
+                        }
+                    }
+
+                    if ($check) {
+                        $this->db->db->commit();
+                    } else {
+                        $this->db->db->rollback();
+                    }
                 }
             }
 

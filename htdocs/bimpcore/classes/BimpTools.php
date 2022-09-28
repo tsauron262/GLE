@@ -2965,6 +2965,21 @@ class BimpTools
         return BimpRender::renderBacktrace(BimpTools::getBacktraceArray(debug_backtrace(null, $nb_lines)));
     }
 
+    public static function clearAllPhpErrors()
+    {
+        $err = error_get_last();
+        $n = 0;
+        while (!empty($err)) {
+            error_clear_last();
+            $err = error_get_last();
+            $n++;
+
+            if ($n > 10000) {
+                break;
+            }
+        }
+    }
+
     // Gestion des couleurs: 
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)

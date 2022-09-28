@@ -4009,9 +4009,9 @@ class Bimp_Commande extends BimpComm
         
         if(in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))){
             if($this->getData('date_livraison') == '')
-                $errors[] = 'Date prévue de livraison obligatoire pour les livraison direct';
+                $errors[] = 'Pour les livraisons directes la date de livraison prévue est obligatoire';
             if(!$this->dol_object->getIdContact('external', 'SHIPPING'))
-                $errors[] = 'Contact de livraison obligatoire pour les livraison direct';
+                $errors[] = 'Pour les livraisons directes le contact client est obligatoire';
             
         }
         

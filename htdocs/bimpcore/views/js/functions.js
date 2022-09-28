@@ -1329,7 +1329,7 @@ function bimp_copyTabsUrl($button, url, server) {
         var regex = new RegExp('^' + server + '(.*)$', 'i');
         if (!regex.test(url_base)) {
             var protocol = window.location.protocol;
-            if(protocol != '')
+            if (protocol != '')
                 server = protocol + '//' + server;
             url += server;
         }
@@ -1363,6 +1363,29 @@ function bimp_copyTabsUrl($button, url, server) {
     }
 
     bimp_msg('Lien: </br></br>' + url);
+}
+
+function selectElementText($element) {
+    if ($.isOk($element)) {
+        var element = $element.get(0);
+
+        if (element) {
+            var text = document.getElementById(element);
+            if (document.body.createTextRange) { // Internet Explorer
+                var range = document.body.createTextRange();
+                range.moveToElementText(text);
+                range.select();
+            } else if (window.getSelection) { // Mozilla, Chrome, Opera
+                var selection = window.getSelection();
+                var range = document.createRange();
+                range.selectNodeContents(text);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                bimp_msg('Sélection du text non disponible sur votre navigateur', 'danger', null, true);
+            }
+        }
+    }
 }
 
 // Ajouts jQuery:

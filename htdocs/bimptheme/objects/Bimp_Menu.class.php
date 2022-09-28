@@ -60,11 +60,23 @@ class Bimp_Menu extends BimpObject
             );
         }
 
-        $buttons[] = array(
-            'label'   => 'Afficher l\'arborescence complète',
-            'icon'    => 'fas_stream',
-            'onclick' => $this->getJsActionOnclick('displayFullTree')
-        );
+        if ($this->isActionAllowed('displayFullTree') && $this->canSetAction('displayFullTree')) {
+            $buttons[] = array(
+                'label'   => 'Afficher l\'arborescence complète',
+                'icon'    => 'fas_stream',
+                'onclick' => $this->getJsActionOnclick('displayFullTree', array(), array())
+            );
+        }
+
+        if ($this->isActionAllowed('updateFullMenuSql') && $this->canSetAction('updateFullMenuSql')) {
+            $buttons[] = array(
+                'label'   => 'Re-générer le fichier SQL du menu complet',
+                'icon'    => 'fas_redo',
+                'onclick' => $this->getJsActionOnclick('updateFullMenuSql', array(), array(
+                    'confirm_msg' => 'Veillez confirmer. ATTENTION: vous devez être sûr que qu\\\'il s\\\'agit d\\\'une version complète du menu pour éviter une perte de données'
+                ))
+            );
+        }
 
         return $buttons;
     }
@@ -386,7 +398,7 @@ class Bimp_Menu extends BimpObject
             $this->checkCodePath($code_path, true);
 
             if (!count($errors)) {
-                $sql = 'INSERT INTO `llx_menu` (`menu_handler`, `fk_menu`, `position`, `url`, `titre`, `perms`, `enabled`, `code_path`, `active`, `bimp_icon`, `bimp_object`)';
+                $sql = 'INSERT INTO `llx_menu` (`menu_handler`, `fk_menu`, `position`, `url`, `titre`, `perms`, `enabled`, `code_path`, `active`, `bimp_module`, `bimp_icon`, `bimp_object`)';
                 $sql .= ' VALUES (';
                 $sql .= '\'' . $this->getData('menu_handler') . '\',';
 
@@ -403,6 +415,7 @@ class Bimp_Menu extends BimpObject
                 $sql .= '\'' . addslashes($this->getData('enabled')) . '\', ';
                 $sql .= '\'' . addslashes($this->getData('code_path')) . '\', ';
                 $sql .= (int) $this->getData('active') . ', ';
+                $sql .= '\'' . addslashes($this->getData('bimp_module')) . '\', ';
                 $sql .= '\'' . addslashes($this->getData('bimp_icon')) . '\', ';
                 $sql .= '\'' . addslashes($this->getData('bimp_object')) . '\'';
                 $sql .= ');' . "\n";
@@ -577,6 +590,89 @@ class Bimp_Menu extends BimpObject
         );
     }
 
+    public function actionUpdateFullMenuSql($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fichier mis à jour avec succès';
+        $html = '';
+
+        $sql = '';
+        $menu_instance = BimpObject::getInstance('bimptheme', 'Bimp_Menu');
+
+        $rows = $menu_instance->getList(array(
+            'menu_handler' => 'bimptheme',
+            'fk_menu'      => 0
+                ), null, null, 'position', 'ASC', 'array', array('rowid'));
+
+        foreach ($rows as $r) {
+            $menu = BimpCache::getBimpObjectInstance('bimptheme', 'Bimp_Menu', (int) $r['rowid']);
+
+            if (BimpObject::objectLoaded($menu)) {
+                $line_errors = array();
+                $insert_sql = $menu->getInsertSql($line_errors);
+                if ($insert_sql) {
+                    $sql .= $insert_sql;
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $menu->getData('position') . ' - ' . $menu->getData('titre'));
+                }
+            }
+        }
+
+        if (!$sql) {
+            $errors[] = 'Aucune ligne à insérer trouvée';
+        }
+
+        if (!count($errors)) {
+            $dir = DOL_DOCUMENT_ROOT . '/bimptheme/sql';
+            if (is_dir($dir)) {
+                $version = 0;
+                foreach (scandir($dir) as $f) {
+                    if (strpos($f, 'fullmenu') !== 0) {
+                        continue;
+                    }
+
+                    if (preg_match('/^fullmenu_(\d+)\.sql$/', $f, $matches)) {
+                        if ((int) $matches[1] > $version) {
+                            $version = (int) $matches[1];
+                        }
+                        if (!unlink($dir . '/' . $f)) {
+                            $warnings[] = 'Echec de la suppression du fichier "' . $f . '"';
+                        }
+                    }
+                }
+
+                $version++;
+                if (!file_put_contents($dir . '/' . 'fullmenu_' . $version . '.sql', $sql)) {
+                    $html .= BimpRender::renderAlerts('Echec de la création du fichier "fullmenu_' . $version . '.sql"');
+                    $html .= '<br/><br/>Création manuel du fichier "fullmenu_' . $version . '.sql" : <br/><br/>';
+//                        $html .= '<span class="btn btn-default" onclick="selectElementText($(this).parent().find(\'pre.sql_content\'))">';
+//                        $html .= 'Tout sélectionner';
+//                        $html .= '</span>';
+                    $html .= '<pre class="sql_content">';
+                    $html .= $sql;
+                    $html .= '</pre>';
+                } else {
+                    BimpCore::setConf('full_menu_version', $version, 'bimptheme');
+                    $html .= '<div class = "warning" style = "font-size: 16px; margin: 60px 0; text-align: center">';
+                    $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                    $html .= 'IMPORTANT: ne pas oublier de télécharger le fichier "fullmenu_' . $version . '.sql" du serveur et de supprimer tous les autres fichiers "fullmenu_xxx.sql" des sources';
+                    $html .= '</div>';
+                }
+            } else {
+                $errors[] = 'Dossier sql absent du module "bimptheme"';
+            }
+        }
+
+        return array(
+            'errors'     => $errors,
+            'warnings'   => $warnings,
+            'modal_html' => $html
+        );
+    }
+
     // Overrides: 
 
     public function validate()
@@ -630,6 +726,75 @@ class Bimp_Menu extends BimpObject
                         $warnings[] = BimpTools::getMsgFromArray($menu_warnings, 'Erreurs lors de la suppression de la sous-ligne #' . $id_menu);
                     }
                 }
+            }
+        }
+
+        return $errors;
+    }
+
+    // Méthodes statiques: 
+
+    public static function getFullMenuUpdateVersion()
+    {
+        if ((int) BimpCore::getConf('use_full_menu', null, 'bimptheme')) {
+            $cur_version = (int) BimpCore::getConf('full_menu_version', 0, 'bimptheme');
+
+            $dir = DOL_DOCUMENT_ROOT . '/bimptheme/sql';
+            if (is_dir($dir)) {
+                $version = 0;
+                foreach (scandir($dir) as $f) {
+                    if (strpos($f, 'fullmenu') !== 0) {
+                        continue;
+                    }
+
+                    if (preg_match('/^fullmenu_(\d+)\.sql$/', $f, $matches)) {
+                        if ((int) $matches[1] > $version) {
+                            $version = (int) $matches[1];
+                        }
+                    }
+                }
+
+                if ($version > $cur_version) {
+                    return $version;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public static function updateFullMenu()
+    {
+        $errors = array();
+        $version = self::getFullMenuUpdateVersion();
+
+        if ($version) {
+            $file = DOL_DOCUMENT_ROOT . '/bimptheme/sql/fullmenu_' . $version . '.sql';
+
+            if (!file_exists($file)) {
+                $errors[] = 'Fichier non trouuvé';
+            } else {
+                $sql = file_get_contents($file);
+                if (!$sql) {
+                    $errors[] = 'Fichier vide';
+                } else {
+                    $bdb = BimpCache::getBdb();                    
+                    $bdb->db->begin();
+
+                    if ($bdb->delete('menu', 'menu_handler = \'bimptheme\'') <= 0) {
+                        $errors[] = 'Echec de la suppression des éléments actuels du menu bimptheme';
+                    } else {
+                        $bdb->executeFile($file, $errors);
+                    }
+                }
+
+                if (!count($errors)) {
+                    $bdb->db->commit();
+                } else {
+                    $bdb->db->rollback();
+                }
+
+                BimpCore::setConf('full_menu_version', $version, 'bimptheme');
             }
         }
 

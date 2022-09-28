@@ -141,7 +141,7 @@ class modBimptheme extends DolibarrModules {
          
         require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
         $name = 'module_version_'. strtolower($this->name);
-        if(BimpCore::getConf($name) == ""){
+        if(BimpCore::getConf($name, '') == ""){
             BimpCore::setConf($name, floatval($this->version));
         }
         

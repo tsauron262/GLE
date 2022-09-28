@@ -42,7 +42,7 @@ sections:
                 list: 
                     name: default
                     object: demande
-                    children: refinanceurs
+                    children: demandes_refinanceurs
           - id: files
             title: Fichiers joints
             struct:

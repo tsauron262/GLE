@@ -129,7 +129,7 @@ class BF_DemandeRefinanceur extends BimpObject
             $loyer = $this->vpm($tauxPM, 0, $nbPeriodes, $totalDemande, -$vr, $isEchoir);
 
             $totalEmprunt = $this->va($tauxPM, 0, $nbPeriodes, $amount_ht, -$vr, $isEchoir);
-//            die($totalEmprunt);
+            
             if ($coef > 0) {
                 $coutWithCoef = $total_loyer - $totalEmprunt;
             } else
@@ -366,7 +366,6 @@ class BF_DemandeRefinanceur extends BimpObject
     public function reset()
     {
         $this->calcValues = null;
-
         parent::reset();
     }
 
@@ -376,11 +375,11 @@ class BF_DemandeRefinanceur extends BimpObject
     }
 
     function vpm($taux, $coef, $npm, $va, $vc = 0, $type = 0)
-    {//Calcul loyé avec taux et capital
+    {
+        //Calcul loyé avec taux et capital
         if ($coef > 0) {
             return $coef / 100 * ($va);
         }
-
 
         if (!is_numeric($taux) || !is_numeric($npm) || !is_numeric($va) || !is_numeric($vc)):
             return false;

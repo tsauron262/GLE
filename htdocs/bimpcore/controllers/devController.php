@@ -216,11 +216,7 @@ class devController extends BimpController
 
         $html .= '<div class="toolsBarInput fileSelectContainer">';
         $html .= '<label>Fichier: </label>';
-        $html .= BimpInput::renderInput('select', 'yml_file_select', ''/* htmlentities(json_encode(array(
-                          'type'   => 'object',
-                          'module' => 'bimpcore',
-                          'name'   => 'objExt2'
-                          ))) */, array(
+        $html .= BimpInput::renderInput('select', 'yml_file_select', '', array(
                     'options' => BimpYml::getYmlFilesArray()
         ));
         $html .= '</div>';
@@ -271,8 +267,7 @@ class devController extends BimpController
         return $menu->renderItemsList();
     }
 
-    // Ajax processes: 
-    // Config modules: 
+    // Ajax processes - Config modules: 
 
     public function ajaxProcessLoadModuleConfForm()
     {
@@ -335,7 +330,7 @@ class devController extends BimpController
         );
     }
 
-    // Gestionnaire YML: 
+    // Ajax processes - Gestionnaire YML: 
 
     public function ajaxProcessLoadYmlFilesSelect()
     {

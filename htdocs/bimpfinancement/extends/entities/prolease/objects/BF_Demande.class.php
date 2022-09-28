@@ -1,13 +1,91 @@
 <?php
 
-// Entitié: bimp => A transférer vers prolease
+// Entitié: prolease
 
 require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/objects/BF_Demande.class.php';
 
 class BF_Demande_ExtEntity extends BF_Demande
 {
 
+    public static $origines = array(
+        'none' => array('label' => 'Interne'),
+        'bimp' => array('label' => 'BIMP', 'id_api' => 0, 'id_api_user_account')
+    );
+
+    // Getters données: 
+
+    public function getExtDataFieldLabel($field)
+    {
+        $origine = $this->getData('ext_origine');
+
+        if (!$origine || $origine == 'none' || !isset(self::$origines[$origine])) {
+            switch ($field) {
+                case 'id_ext_propale':
+                    return 'ID devis externe';
+
+                case 'id_ext_client':
+                    return 'ID client externe';
+
+                case 'id_ext_contact':
+                    return 'ID contact client  externe';
+
+                case 'id_ext_commercial':
+                    return 'ID commercial externe';
+
+                case 'ext_propale':
+                    return 'Données devis externe';
+
+                case 'ext_client':
+                    return 'Données client externe';
+
+                case 'ext_contact':
+                    return 'Données contact client  externe';
+
+                case 'ext_commercial':
+                    return 'Données commercial externe';
+            }
+        } else {
+            switch ($field) {
+                case 'id_ext_propale':
+                    return 'ID devis ' . self::$origines[$origine];
+
+                case 'id_ext_client':
+                    return 'ID client ' . self::$origines[$origine];
+
+                case 'id_ext_contact':
+                    return 'ID contact client  ' . self::$origines[$origine];
+
+                case 'id_ext_commercial':
+                    return 'ID commercial ' . self::$origines[$origine];
+
+                case 'ext_propale':
+                    return 'Données devis ' . self::$origines[$origine];
+
+                case 'ext_client':
+                    return 'Données client ' . self::$origines[$origine];
+
+                case 'ext_contact':
+                    return 'Données contact client  ' . self::$origines[$origine];
+
+                case 'ext_commercial':
+                    return 'Données commercial ' . self::$origines[$origine];
+            }
+        }
+    }
+
     // Rendus HTML: 
+
+    public function renderHeaderExtraLeft()
+    {
+        $ext_origine = $this->getData('ext_origine');
+
+        if ($ext_origine) {
+            $html = '';
+            $html .= '<bOrigine : </b>' . $this->displayData('ext_origine', 'default', false);
+        } else {
+            return parent::renderHeaderExtraLeft();
+        }
+    }
 
     public function renderBimpPropalData()
     {
@@ -234,7 +312,20 @@ class BF_Demande_ExtEntity extends BF_Demande
         ));
     }
 
+    // Traitements: 
+
+    public function generateDevis($data)
+    {
+        if ($this->getData('ext_origine')) {
+            $errors = array();
+            return $errors;
+        } else {
+            return parent::generateDevis($data);
+        }
+    }
+
     // Méthodes statiques: 
+
     public static function createFromBimpPropale($data, &$errors = array(), &$warnings = array())
     {
         $errors = array();

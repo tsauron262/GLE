@@ -197,7 +197,6 @@ fields:
 
     agreement_number:
         label: N° d'accord
-        type: int
 
     id_facture:
         label: Facture banque

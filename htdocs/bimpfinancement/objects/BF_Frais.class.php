@@ -1,6 +1,6 @@
 <?php
 
-abstract class BF_Frais extends BimpObject
+class BF_Frais extends BimpObject
 {
 
     // Getters:
@@ -163,7 +163,7 @@ abstract class BF_Frais extends BimpObject
                             $line->desc = 'Frais divers: ' . $this->getData('description');
                             break;
 
-                        case 'BF_RentExcept':
+                        case 'BF_RbtExcept':
                             $line->desc = 'Loyer intercalaire à la date du ' . $this->displayData('date');
                             break;
                     }
@@ -212,7 +212,7 @@ abstract class BF_Frais extends BimpObject
                             $line->desc = 'Frais divers: ' . $this->getData('description');
                             break;
 
-                        case 'BF_RentExcept':
+                        case 'BF_RbtExcept':
                             $line->desc = 'Loyer intercalaires à la date du ' . $this->displayData('date');
                             break;
                     }

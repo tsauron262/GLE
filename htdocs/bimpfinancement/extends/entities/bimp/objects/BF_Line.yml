@@ -1,5 +1,0 @@
-fields: 
-    id_bimp_propale_line: 
-        label: ID Ligne devis BIMP
-        type: id
-        default_value: 0

@@ -56,6 +56,7 @@ class BimpObject extends BimpCache
         'name_syntaxe'             => array('default' => ''),
         'nom_url'                  => array('type' => 'definitions', 'defs_type' => 'nom_url'),
         'has_graph'                => array('data_type' => 'bool', 'default' => 0),
+        'new_status_logs'          => array('data_type' => 'bool', 'default' => 0),
         'objects'                  => array('type' => 'keys'),
         'associations'             => array('type' => 'keys'),
         'fields'                   => array('type' => 'keys'),
@@ -749,7 +750,7 @@ class BimpObject extends BimpCache
 
         return '';
     }
-    
+
     public function getDateUpdateProperty()
     {
         foreach (static::$date_update_properties as $prop) {
@@ -4687,6 +4688,12 @@ class BimpObject extends BimpCache
                 $errors = $this->validate();
 
                 if (!count($errors)) {
+                    $status_prop = $this->getStatusProperty();
+                    $init_status = null;
+                    if ($status_prop) {
+                        $init_status = $this->getInitData($status_prop);
+                    }
+
                     if ($this->use_commom_fields) {
                         $this->data['date_update'] = date('Y-m-d H:i:s');
                         global $user;
@@ -4734,6 +4741,7 @@ class BimpObject extends BimpCache
                             $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de l\'enregistrement des champs supplémentaires');
                         }
 
+                        // Notes nouvelles valeurs de champs: 
                         $notes = array();
                         foreach ($this->fieldsWithAddNoteOnUpdate as $champAddNote) {
                             if ($this->getData($champAddNote) != $this->getInitData($champAddNote)) {
@@ -4746,6 +4754,13 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                         if (count($notes)) {
                             $this->addNote(implode('
 ', $notes));
+                        }
+
+                        // Log changement de statut
+                        if ($status_prop && (int) $this->params['new_status_logs']) {
+                            if ($init_status != $this->getData($status_prop)) {
+                                $this->addObjectLog('Mise au statut: ' . $this->displayData($status_prop, 'default', false, true), 'NEW_STATUS_' . $this->getData($status_prop));
+                            }
                         }
 
                         $this->initData = $this->data;
@@ -7709,12 +7724,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $errors = array();
         if ($this->isLoaded($errors)) {
-            if (count($errors)) {
-                $html .= '<pre>';
-                $html .= print_r($errors, 1);
-                $html .= '</pre>';
-            }
-
             $log = BimpObject::getInstance('bimpcore', 'BimpObjectLog');
             $title = 'Historique ' . $this->getLabel('of_the') . ' ' . $this->getRef();
             $list = new BC_ListTable($log, 'object', 1, null, $title, 'fas_history');

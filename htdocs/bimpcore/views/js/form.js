@@ -2202,7 +2202,7 @@ function toggleInputDisplay($container, $input) {
             }
         }
     } else {
-// Règle pour display_if sur plusieurs inputs: 
+// Règles pour display_if sur plusieurs inputs: 
 //      - Tous les show_values doivent être vrai pour afficher. 
 //      - Si un seul hide_values vrai : champ masqué. 
 

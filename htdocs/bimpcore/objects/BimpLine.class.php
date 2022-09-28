@@ -6,9 +6,6 @@ class BimpLine extends BimpObject
     const BL_PRODUCT = 1;
     const BL_FREE = 2;
     const BL_TEXT = 3;
-    const BL_PRODUIT = 1;
-    const BL_SERVICE = 2;
-    const BL_LOGICIEL = 3;
 
     public static $types = array(
         self::BL_PRODUCT => 'Produit / Service',

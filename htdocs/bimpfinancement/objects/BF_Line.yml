@@ -12,6 +12,17 @@ labels:
     name: élément financé
     name_plur: éléments financés
     
+objects: 
+    fourn_price: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                object_name: Bimp_ProductFournisseurPrice
+            id_object: 
+                field_value: id_fourn_price
+                
 fields:
     id_demande: 
         label: Demande de financement
@@ -38,7 +49,25 @@ fields:
         type: html
         display_if: 
             field_name: type
-            show_values: 2,3
+            show_values: 2
+            
+    description: 
+        label: Description
+        type: html
+            
+    product_type: 
+        label: Type de produit
+        type: int
+        values:
+            callback: getProductTypesArray
+        search: 
+            input: 
+                type: select
+                options: 
+                    array: product_types
+        display_if: 
+            field_name: type
+            show_values: 2
         
     qty: 
         label: Quantité
@@ -51,11 +80,6 @@ fields:
         display_if: 
             field_name: type
             show_values: 1,2
-        default_value: 
-            callback: 
-                method: getDefaultValue
-                params: 
-                    - qty
         
     pu_ht: 
         label: Prix unitaire HT
@@ -63,11 +87,6 @@ fields:
         display_if: 
             field_name: type
             show_values: 1,2
-        default_value: 
-            callback: 
-                method: getDefaultValue
-                params: 
-                    - pu_ht
         depends_on: id_product
         
     tva_tx: 
@@ -77,27 +96,42 @@ fields:
         display_if: 
             field_name: type
             show_values: 1,2
-        default_value: 
-            callback: 
-                method: getDefaultValue
-                params: 
-                    - tva_tx
         depends_on: id_product
         
     pa_ht: 
         label: Prix d'achat HT
         type: money
         display_if: 
-            fields_names: type
+            fields_names: type,use_pu_for_pa
             type: 
                 hide_values: 3
-        default_value:
-            callback: 
-                method: getDefaultValue
-                params: 
-                    - pa_ht
+            use_pu_for_pa: 
+                hide_values: 1
         depends_on: id_product
         
+    id_fourn_price: 
+        label: Prix d'achat fournisseur
+        type: id_object
+        object: fourn_price
+        default_value: 0
+        input: 
+            type: select
+            options: 
+                array: productFournPrices
+        display_if:
+            fields_names: type,use_pu_for_pa
+            type: 
+                show_values: 1
+            use_pu_for_pa: 
+                hide_values: 1
+        depends_on: id_product
+                
+    commandes_fourn:
+        label: Commandes fournisseurs
+        type: json
+        input: 
+            type: hidden
+            
     remise: 
         label: Remise
         type: percent
@@ -121,27 +155,19 @@ fields:
         type: bool
         default_value: 0
         
-    equipments: 
-        label: Equipements
-        type: items_list
-        items_data_type: id_object
-        items_sortable: 1
-        items_braces: 1
-        object: equipment
-        create_form: default
-        create_form_values: 
-            fields: 
-                id_product: 
-                    field_value: id_product
-        values: 
-            array: equipments
+    serials: 
+        label: N° de série
+        type: text
+        input: 
+            rows: 3
+            auto_expand: 1
+            help: Entrez une liste de numéros de série séparés par une virgule, un point-virgule, un espace ou un saut de ligne
         display_if: 
-            fields_names: type,id_product
-            type:
-                show_values: 1
-            id_product: 
+            fields_names: type,serialisable
+            type: 
+                show_values: 1,2
+            serialisable: 
                 hide_values: 0
-        depends_on: id_product
         sortable: 0
             
 forms: 
@@ -150,17 +176,93 @@ forms:
             - field: type
             - field: id_product
             - field: label
+            - field: serialisable
             - field: qty
+            - field: serials
             - field: pu_ht
             - field: tva_tx
-            - field: pa_ht
             - field: remise
-            
+            - custom: 1
+              input_name: use_pu_for_pa
+              label: Prix d'achat identique au prix de vente
+              data_type: bool
+              input: 
+                  type: toggle
+              display_if: 
+                  field_name: type
+                  hide_values: 3  
+            - field: pa_ht
+            - field: id_fourn_price
+            - field: description
+     
+fields_tables: 
+    infos: 
+        panel_header: 0
+        rows: 
+            - field: label
+            - field: description
+            - field: id_product
+              card: default
+              show: 
+                  field_value: id_product
+            - field: qty
+            - field: serialisable
+            - field: serials
+              show: 
+                  field_value: serialisable
+                  
+    vente: 
+        title: Montants vente
+        icon: fas_euro-sign
+        rows: 
+            - field: pu_ht
+            - field: remise
+            - field: total_ht
+            - field: total_ttc
+
+    achat: 
+        title: Montants achat
+        icon: fas_euro-sign
+        rows: 
+            - field: id_fourn_price
+              show: 
+                  field_value: id_fourn_price
+            - field: pa_ht
+                
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_md: 6
+                  col_lg: 6
+                  fields_table: 
+                      name: infos
+                
+                - type: rows
+                  col_md: 6
+                  col_lg: 6
+                  rows: 
+                      - cols: 
+                          - type: fields_table
+                            fields_table: 
+                                name: vente
+                          - type: fields_table
+                            fields_table: 
+                                name: achat      
+                  
 lists_cols: 
     desc: 
         label: Description
         value: 
             callback: displayDesc
+    desc_light: 
+        label: Description courte
+        value: 
+            callback: 
+                method: displayDesc
+                params: 
+                    - 1
             
 lists: 
     default: 
@@ -188,6 +290,7 @@ lists:
         add_btn_label: Ajouter une ligne
         edit_btn: 1
         delete_btn: 1
+        modal_view: default
         item_checkbox: 
             callback: isDeletable
         extra_btn: 

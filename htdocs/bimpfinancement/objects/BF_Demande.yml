@@ -1,4 +1,3 @@
-
 table: bf_demande
 controller: demande
 icon: fas_comment-dollar
@@ -20,12 +19,52 @@ objects:
         instance: 
             id_object:
                 field_value: id_contact_client
+    
+    supplier: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Fournisseur
+            id_object: 
+                field_value: id_supplier
+                
+    supplier_contact:
+        extends: contact
+        instance:
+            id_object:
+                field_value: id_supplier_contact
+                
+    lines: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_Line
             
-    refinanceurs:
+    demandes_refinanceurs:
         relation: hasMany
         delete: 1
         instance: 
             bimp_object: BF_DemandeRefinanceur
+            
+    rbts_except: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_RbtExcept
+            
+    frais_divers:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_FraisDivers
+            
+    frais_fournisseur:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_FraisFournisseur
 
     files:
         instance:
@@ -42,21 +81,19 @@ objects:
                 fields: 
                     parent_module: bimpfinancement
                     parent_object_name: BF_Demande
-                    
-    lines: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: BF_Line
 
 fields:
+    ref: 
+        label: Référence
+        
     id_client:
         label: Client
         type: id_object
         object: client
-        create_form: light
         input:
             card: default
+        create_form: light
+        edit_form: default
             
     id_contact_client: 
         label: Contact client
@@ -78,7 +115,37 @@ fields:
         display_if:
             field_name: id_client
             hide_values: 0,''
+            
+    id_supplier:
+        label: Apporteur
+        type: id_object
+        object: supplier
+        input: 
+            card: defaukt
+        create_form: light
+        edit_form: default
         
+    id_supplier_contact:
+        label: Contact apporteur
+        type: id_object
+        object: supplier_contact
+        input: 
+            type: select
+            options:
+                array: supplierContacts
+        search: 
+            input: 
+                type: search_object
+        display_if: 
+            field_name: id_supplier
+            hide_values: 0,''
+        depends_on: id_supplier
+        create_form: default
+        create_form_values:
+            fields: 
+                fk_soc: 
+                    field_value: id_supplier
+                    
     status:
         label: Statut
         type: int
@@ -106,7 +173,22 @@ fields:
         default_value: 2
         values: 
             array: calc_modes
+       
+    montant_materiels:
+        label: Montant matériels
+        type: money
+        default_value: 0
+        
+    montant_services:
+        label: Montant services
+        type: money
+        default_value: 0
                 
+    montant_logiciels:
+        label: Montant logiciels
+        type: money
+        default_value: 0
+        
     vr_achat: 
         label: VR achat
         type: money
@@ -130,10 +212,27 @@ fields:
     date_loyer:
         label: Date de mise en loyer
         type: date
+        
+    agreement_number:
+        label: N° d'accord
+        
+    commission_commerciale:
+        label: Commission commerciale
+        type: percent
+        default_value: 0
+        decimals: 6
+                
+    commission_financiere:
+        label: Commission financière
+        type: percent
+        default_value: 0
+        decimals: 6
       
 forms: 
     create: 
         rows: 
+            user_resp: 
+                field: id_user_resp
             label: 
                 field: label
             client:    
@@ -166,8 +265,7 @@ fields_tables:
         title: Infos
         icon: fas_info-circle
         rows: 
-            - field: status
-              edit: 1
+            - field: id_user_resp
             - field: date_loyer
               edit: 1
     
@@ -205,7 +303,7 @@ views:
     default: 
         title: nom
         edit_form: default
-        delete_btn: 1
+        objects_change_reload: BF_DemandeRefinanceur,BF_Line
         rows:
             0: 
                 cols: 
@@ -216,13 +314,13 @@ views:
                       col_lg: 6
                       col_md: 6
                       fields_table:
-                          name: options
-
+                          name: infos
+                          
                     - type: fields_table
                       col_lg: 6
                       col_md: 6
                       fields_table:
-                          name: infos
+                          name: options
             
             2: 
                 cols: 

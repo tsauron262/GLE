@@ -1,0 +1,5 @@
+fields: 
+    id_ext_propale_line: 
+        label: ID Ligne devis externe
+        type: id
+        default_value: 0

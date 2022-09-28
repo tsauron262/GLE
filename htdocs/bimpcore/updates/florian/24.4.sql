@@ -1,0 +1,1 @@
+UPDATE `llx_usergroup_extrafields` SET `secteur` = '' WHERE `secteur` IS NULL OR `secteur` = 0;

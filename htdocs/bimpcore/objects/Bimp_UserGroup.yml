@@ -4,6 +4,7 @@ common_fields: 0
 icon: fas_users
 controller: userGroup
 
+header_edit_form: default
 header_btn: 
     callback: getActionsButtons
 
@@ -137,6 +138,7 @@ lists:
         sort_way: desc
         n: 10
         page_btn: 1
+        edit_btn: 1
         cols: 
             nom:
             mail: 

@@ -313,10 +313,11 @@ class BimpCore
 
         $modules_updates = BimpCore::getModulesUpdates();
         $modules_extends_updates = BimpCore::getModulesExtendsUpdates();
-        if (self::isModuleActive('bimptheme')) {
-            BimpObject::loadClass('bimptheme', 'Bimp_Menu');
-            $menu_update = (int) Bimp_Menu::getFullMenuUpdateVersion();
-        }
+//        if (self::isModuleActive('bimptheme')) {
+//            BimpObject::loadClass('bimptheme', 'Bimp_Menu');
+//            $menu_update = (int) Bimp_Menu::getFullMenuUpdateVersion();
+//        }
+        $menu_update = 0;
 
         if (!empty($updates) || !empty($modules_updates) || !empty($modules_extends_updates) || $menu_update) {
             if (!BimpTools::isSubmit('bimpcore_update_confirm')) {

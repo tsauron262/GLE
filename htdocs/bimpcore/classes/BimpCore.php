@@ -320,12 +320,10 @@ class BimpCore
 
         if (!empty($updates) || !empty($modules_updates) || !empty($modules_extends_updates) || $menu_update) {
             if (!BimpTools::isSubmit('bimpcore_update_confirm')) {
+                echo 'MISE A JOUR SQL AUTO <br/><br/>';
                 if ($menu_update) {
                     echo 'Le liste complète des élements du menu BimpThème doit être mise à jour à la version: ' . $menu_update . '<br/><br/>';
                 }
-
-                echo 'Le module BimpCore doit etre mis a jour<br/><br/>';
-                echo 'Liste des mise à jour: <br/><br/>';
                 if (!empty($updates)) {
                     echo 'Màj SQL bimpcore: <pre>';
                     print_r($updates);

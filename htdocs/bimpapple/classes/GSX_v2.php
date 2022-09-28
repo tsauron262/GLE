@@ -1024,7 +1024,7 @@ class GSX_v2 extends GSX_Const
 
     // Stocks consignés: 
 
-    public function consignmentOrdersLookup($type, $status = 'OPEN', $from = '', $to = '')
+    public function consignmentOrdersLookup($type, $status = 'OPEN', $from = '', $to = '', $page = 0)
     {
         $params = array(
             'orderStatusGroupCode' => $status,
@@ -1035,8 +1035,15 @@ class GSX_v2 extends GSX_Const
             $params['createdFromDate'] = $from;
             $params['createdToDate'] = $to;
         }
-
-        return $this->exec('consignmentOrderLookup', $params);
+        
+        $head = array();
+        $return = $this->exec('consignmentOrderLookup', $params, $head, array('url_params'=>array('pageNumber'=>$page)));
+        $total = $head['X-Apple-Total-Count'];
+        while(count($return) < $total && $page < 10){
+            $page++;
+            $return = BimpTools::merge_array($return, $this->exec('consignmentOrderLookup', $params, $head, array('url_params'=>array('pageNumber'=>$page))));
+        }
+        return $return;
     }
 
     public function consignmentOrderLookup($orderId, $type = 'DECREASE', $status = 'OPEN')

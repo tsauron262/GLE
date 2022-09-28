@@ -326,8 +326,6 @@ class Bimp_User extends BimpObject
             );
         }
 
-        $buttons[] = array();
-
         return $buttons;
     }
 
@@ -1926,7 +1924,7 @@ class Bimp_User extends BimpObject
                 $this->updateField('statut', $statut);
             }
         }
-        
+
         return $errors;
     }
 

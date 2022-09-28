@@ -1170,40 +1170,71 @@
   /* line 312, ../scss/bimptheme.scss */
   #BimpThemeWrapper .footer {
     background-color: #fff; }
-  /* line 322, ../scss/bimptheme.scss */
+  /* line 317, ../scss/bimptheme.scss */
+  #BimpThemeWrapper .bimptheme_menu_extra_sections_title {
+    color: #fff;
+    margin: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #9FADC4; }
+  /* line 324, ../scss/bimptheme.scss */
+  #BimpThemeWrapper .bimptheme_menu_extra_section {
+    padding-top: 6px 10px;
+    margin: 10px;
+    color: #fff; }
+    /* line 329, ../scss/bimptheme.scss */
+    #BimpThemeWrapper .bimptheme_menu_extra_section .title {
+      color: #fff;
+      font-weight: bold; }
+    /* line 334, ../scss/bimptheme.scss */
+    #BimpThemeWrapper .bimptheme_menu_extra_section a {
+      cursor: pointer;
+      color: #fff !important; }
+      /* line 338, ../scss/bimptheme.scss */
+      #BimpThemeWrapper .bimptheme_menu_extra_section a:hover {
+        color: #fff !important;
+        text-decoration: underline !important; }
+  /* line 345, ../scss/bimptheme.scss */
+  #BimpThemeWrapper #showDetailChrono2 {
+    cursor: pointer;
+    color: #fff !important; }
+    /* line 349, ../scss/bimptheme.scss */
+    #BimpThemeWrapper #showDetailChrono2:hover {
+      color: #fff !important;
+      text-decoration: underline !important; }
+  /* line 360, ../scss/bimptheme.scss */
   #BimpThemeWrapper .boxstatscontent {
     padding: 0; }
-  /* line 326, ../scss/bimptheme.scss */
+  /* line 364, ../scss/bimptheme.scss */
   #BimpThemeWrapper .boxstats130 {
     width: 168px;
     height: 58px; }
-  /* line 335, ../scss/bimptheme.scss */
+  /* line 373, ../scss/bimptheme.scss */
   #BimpThemeWrapper .wc-header .wc-user-header a, #BimpThemeWrapper .wc-header .wc-user-header {
     height: 110px;
     width: 90px; }
   @media (max-device-width: 940px) {
-    /* line 341, ../scss/bimptheme.scss */
+    /* line 379, ../scss/bimptheme.scss */
     #BimpThemeWrapper a img, #BimpThemeWrapper td img {
       height: 25px !important;
       width: auto !important; }
-    /* line 345, ../scss/bimptheme.scss */
+    /* line 383, ../scss/bimptheme.scss */
     #BimpThemeWrapper .footer {
       background-color: #fff; } }
   @media only screen and (min-width: 1024px) {
-    /* line 352, ../scss/bimptheme.scss */
+    /* line 390, ../scss/bimptheme.scss */
     #BimpThemeWrapper .mobile-visible {
       display: none; } }
   @media only screen and (max-width: 1023px) {
-    /* line 358, ../scss/bimptheme.scss */
+    /* line 396, ../scss/bimptheme.scss */
     #BimpThemeWrapper .mobile-hidden {
       display: none; }
-    /* line 362, ../scss/bimptheme.scss */
+    /* line 400, ../scss/bimptheme.scss */
     #BimpThemeWrapper .modifDropdown {
       margin-left: 10px !important; }
-    /* line 366, ../scss/bimptheme.scss */
+    /* line 404, ../scss/bimptheme.scss */
     #BimpThemeWrapper .header-icon, #BimpThemeWrapper .header-icon > a {
       margin: 0 2px; } }
   @media only screen and (max-width: 650px) {
-    /* line 372, ../scss/bimptheme.scss */
+    /* line 410, ../scss/bimptheme.scss */
     #BimpThemeWrapper .login_block_other {
       display: none; } }

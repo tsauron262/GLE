@@ -1202,7 +1202,7 @@ class Bimp_Societe extends BimpDolObject
     
     public function getRemainToPay($true_value = false, $round = true, &$debug = ''){
         $amount = 0;
-        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc'=>$this->id, 'paye'=>0));
+        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc'=>$this->id, 'paye'=>0, 'fk_statut' => 1));
         foreach($facts as $fact){
             $value = $fact->getRemainToPay($true_value = false, $round = true);
             $debug .= '<br/>Fact : '.$fact->getLink() . ' '. BimpTools::displayMoneyValue($value);
@@ -1884,7 +1884,7 @@ class Bimp_Societe extends BimpDolObject
 
         $encours = $this->getAllEncoursForSiret(true, false, $debug);
 
-        $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]);
+        $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]).' TTC';
 
         if (count($encours['commandes']['socs']) > 1) {
             $html .= '<br/>';
@@ -1912,7 +1912,7 @@ class Bimp_Societe extends BimpDolObject
         }
 
         if ($encours['commandes']['total'] && $encours['factures']['total']) {
-            $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']);
+            $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']).' TTC';
         }
         
         $this->debug[] = $debug;

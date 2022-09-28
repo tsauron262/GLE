@@ -2179,6 +2179,44 @@ class BimpObject extends BimpCache
         return $result;
     }
 
+    public function initBdsAction($action, &$action_data = array(), &$errors = array(), $extra_data = array(), $force_action = false)
+    {
+        $method = 'initBdsAction' . ucfirst($action);
+
+        if (!method_exists($this, $method)) {
+            $errors[] = 'Méthode inexistante: ' . $method;
+        } else {
+            if (!$force_action && !$this->canSetAction($action)) {
+                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
+            } elseif (!$this->isActionAllowed($action, $errors)) {
+                $errors[] = 'Action impossible';
+            }
+
+            if (!count($errors)) {
+                $this->{$method}($action_data, $errors, $extra_data);
+            }
+        }
+    }
+
+    public function executeBdsAction($action, $step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array(), $force_action = false)
+    {
+        $method = 'executeBdsAction' . ucfirst($action);
+
+        if (!method_exists($this, $method)) {
+            $errors[] = 'Méthode inexistante: ' . $method;
+        } else {
+            if (!$force_action && !$this->canSetAction($action)) {
+                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
+            } elseif (!$this->isActionAllowed($action, $errors)) {
+                $errors[] = 'Action impossible';
+            }
+
+            if (!count($errors)) {
+                $this->{$method}($step_name, $elements, $errors, $operation_extra_data, $action_extra_data);
+            }
+        }
+    }
+
     public function addMultipleValuesItem($name, $value)
     {
         $errors = array();
@@ -6223,7 +6261,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
 
                 if ($check) {
-                    // on Attribue la position finale à l'élément déplacé (qui a normalement été libérée
+                    // on Attribue la position finale à l'élément déplacé (qui a normalement été libérée)
                     if ($this->db->update($table, array(
                                 'position' => $new_position
                                     ), '`' . $primary . '` = ' . $this->id) <= 0) {
@@ -6353,6 +6391,11 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
         $note = BimpObject::getInstance('bimpcore', 'BimpNote');
         $note->initBdd($this->getConf('no_transaction_db', 0, false, 'bool'));
+
+        if (is_string($fk_group_dest))
+            eval('if(BimpNote::' . $fk_group_dest . ' != null) $fk_group_dest = BimpNote::' . $fk_group_dest . ';');
+        if (is_string($fk_user_dest))
+            eval('if(BimpNote::' . $fk_user_dest . ' != null) $fk_user_dest = BimpNote::' . $fk_user_dest . ';');
 
         if (is_null($visibility)) {
             $visibility = BimpNote::BIMP_NOTE_MEMBERS;
@@ -8011,6 +8054,12 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $js .= '\'' . $params['modal_title'] . '\'';
         } else {
             $js .= '\'\'';
+        }
+        $js .= ', ';
+        if (isset($params['use_bimpdatasync'])) {
+            $js .= ((int) $params['use_bimpdatasync'] ? 'true' : 'false');
+        } else {
+            $js .= 'false';
         }
         $js .= ');';
 

@@ -4669,7 +4669,7 @@ class ObjectLine extends BimpObject
         }
     }
 
-    public function setPosition($position)
+    public function setPosition($position, &$errors = array())
     {
         $check = true;
 

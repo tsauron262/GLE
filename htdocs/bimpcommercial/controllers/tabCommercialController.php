@@ -195,7 +195,7 @@ class tabCommercialController extends BimpController {
         $html .= '<br/><br/>';
         $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=commandesFourn" class="btn btn-default">Commandes Fournisseurs</a>';
         $html .= '<br/><br/>';
-        $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=facturesFourn" class="btn btn-default">Factures Fournisseurs</a>';
+        $html .= '<a href="'.DOL_URL_ROOT.'/bimpcommercial/index.php?fc=achats" class="btn btn-default">Factures Fournisseurs</a>';
         $html .= '<br/><br/>';
         $html .= '<a href="'.DOL_URL_ROOT.'/bimpvalidateorder/index.php?fc=index&tab=my_validations2" class="btn btn-default">Validations</a>';
         $html .= '<br/><br/>';

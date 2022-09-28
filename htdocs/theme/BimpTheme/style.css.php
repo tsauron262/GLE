@@ -2164,7 +2164,7 @@ div.blockvmenubookmarks
     padding-top: 10px !important;
     padding-bottom: 16px !important;
 }
-div.blockvmenupair, div.blockvmenuimpair, div.blockvmenubookmarks, div.blockvmenuend
+/*div.blockvmenupair, div.blockvmenuimpair, div.blockvmenubookmarks, div.blockvmenuend
 {
     font-family: <?php print $fontlist ?>;
     color: #000000;
@@ -2180,7 +2180,7 @@ div.blockvmenupair, div.blockvmenuimpair, div.blockvmenubookmarks, div.blockvmen
  
     border-left: 1px solid #AAA;
     border-right: 1px solid #BBB;
-}
+}*/
  
 div.blockvmenusearch
 {
@@ -5778,6 +5778,12 @@ div.tabsElem a.tab {
         min-width: auto;
         font-size: 12px;
     }
+    
+}
+
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #444!important;
 }
  
 <?php

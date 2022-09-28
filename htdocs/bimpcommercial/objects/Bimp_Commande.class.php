@@ -118,7 +118,7 @@ class Bimp_Commande extends BimpComm
 //                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 //                return (int) $facture->can('create');
                 return $user->rights->bimpcommercial->factureAnticipe;
-                
+
             case 'sendMailLatePayment':
                 $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                 $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_ENCOURS);
@@ -411,16 +411,16 @@ class Bimp_Commande extends BimpComm
                 if ($client_facture->getData('outstanding_limit') < 1 and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement')) {
                     if (!in_array($user->id, array(232, 97))) {
                         $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
-                        if($available_discounts < $this->getData('total_ttc'))
+                        if ($available_discounts < $this->getData('total_ttc'))
                             $errors[] = "Les clients sans encours doivent régler à la commande";
                     }
                 }
             }
-            
-            
+
+
             //ref externe si consigne
-            if($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == ''){
-                $errors[] = 'Attention la réf client ne peut pas être vide : <br/>'.nl2br($client->getData('consigne_ref_ext'));
+            if ($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == '') {
+                $errors[] = 'Attention la réf client ne peut pas être vide : <br/>' . nl2br($client->getData('consigne_ref_ext'));
             }
         }
 
@@ -1959,6 +1959,15 @@ class Bimp_Commande extends BimpComm
                     'icon'       => 'far_check-square',
                     'menu_right' => true
         ));
+
+        $html .= '<div>';
+        $html .= '<span class="btn btn-default btn-small" onclick="selectAllCommandeLinesReservationsStatus()">';
+        $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Séctionner tous les statuts';
+        $html .= '</span>';
+        $html .= '<span class="btn btn-default btn-small" onclick="unselectAllCommandeLinesReservationsStatus()">';
+        $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Désélectionner tous les statuts';
+        $html .= '</span>';
+        $html .= '</div>';
 
         return $html;
     }
@@ -3995,6 +4004,17 @@ class Bimp_Commande extends BimpComm
         if (count($res_errors)) {
             $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
         }
+        
+        
+        
+        if(in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))){
+            if($this->getData('date_livraison') == '')
+                $errors[] = 'Date prévue de livraison obligatoire pour les livraison direct';
+            if(!$this->dol_object->getIdContact('external', 'SHIPPING'))
+                $errors[] = 'Contact de livraison obligatoire pour les livraison direct';
+            
+        }
+        
 
         // Validation encours
         if (empty($errors)) {

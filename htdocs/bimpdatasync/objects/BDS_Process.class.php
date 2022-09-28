@@ -11,7 +11,7 @@ class BDS_Process extends BimpObject
         'other'  => array('label' => 'Autre', 'icon' => 'fas_cogs'),
     );
 
-    // Droits users: 
+    // Droits users:
 
     public function canCreate()
     {

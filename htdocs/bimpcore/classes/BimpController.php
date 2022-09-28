@@ -134,6 +134,7 @@ class BimpController
 
     public function init()
     {
+        
     }
 
     public function initLayout()
@@ -304,12 +305,19 @@ class BimpController
 
     public function onExit()
     {
-        BimpCore::forceUnlockCurrentObject();
+        global $no_force_current_object_unlock;
+        if (is_null($no_force_current_object_unlock) || !(int) $no_force_current_object_unlock) {
+            BimpCore::forceUnlockCurrentObject();
+        }
+
         $error = error_get_last();
         // On cache les identifiants de la base
         $error = preg_replace('/mysqli->real_connect(.*)3306/', 'mysqli->real_connect(adresse_caché, login_caché, mdp_caché, bdd_caché, port_caché', $error);
 
         if (isset($error['type']) && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR))) {
+            if ((int) $no_force_current_object_unlock) {
+                BimpCore::forceUnlockCurrentObject();
+            }
             $this->handleError(E_ERROR, $error['message'], $error['file'], $error['line']);
         } else {
             BimpConfig::saveCacheServeur();
@@ -1315,7 +1323,7 @@ class BimpController
                         $del_warnings = array();
                         $del_errors = $instance->delete($del_warnings);
                         if (!is_array($del_errors)) {
-                            BimpCore::addlog('Retour d\'erreurs invalide pour la fonction delete() : '.print_r($del_errors), Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance);
+                            BimpCore::addlog('Retour d\'erreurs invalide pour la fonction delete() : ' . print_r($del_errors), Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance);
                         } elseif (count($del_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression ' . $instance->getLabel('of_the') . ' d\'ID ' . $id_object);
                         }

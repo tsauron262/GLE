@@ -28,7 +28,7 @@
         public $tiers = Array();
         public $moment;
         public $rollBack = false;
-        public $excludeArrayScanDire = Array('..', '.', 'imported_auto', 'auto', 'rollback');
+        public $excludeArrayScanDire = Array('..', '.', 'imported_auto', 'imported', 'rollback', 'a importer');
         
         function __construct($db) {
             $hier = new DateTime();
@@ -48,17 +48,9 @@
         public function exportFactureFournisseur($ref = ''):void {
             global $db;
             $errors = Array();
-            switch($this->moment) {
-                case 'AM':
-                    $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$this->lastDateExported->format('Y-m-d').' 00:00:00" AND "'.$this->yesterday->format('Y-m-d').' 23:59:59" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
-                    break;
-                case 'PM':
-                    $toDay = new DateTime();
-                    $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$toDay->format('Y-m-d').' 00:00:00" AND "'.$toDay->format('Y-m-d').' 23:59:59" OR date_valid BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'")');
-                    break;
-                default:
-                    $list = [];
-            }
+            
+            $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec > "'.$this->lastDateExported->format('Y-m-d').' 00:00:00" OR date_valid > "'.$this->lastDateExported->format('Y-m-d').'")');
+            
             $file = PATH_TMP . $this->dir . $this->getMyFile("achats");
             if(count($list) > 0) {
                 foreach($list as $facture) {
@@ -80,17 +72,7 @@
         public function exportFacture($ref = ""):void {
             global $db;
             $errors = [];
-            switch($this->moment) {
-                case 'AM':
-                    $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
-                    break;
-                case 'PM':
-                    $toDay = new DateTime();
-                    $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'" OR date_valid BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'")');
-                    break;
-                default:
-                    $list = [];
-            }
+            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef > "'.$this->lastDateExported->format('Y-m-d').'" OR date_valid > "'.$this->lastDateExported->format('Y-m-d').'")');
                                     
             $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
             if(count($list) > 0) {
@@ -162,7 +144,7 @@
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile('deplacementPaiements');
             
-            $list = $this->bdb->getRows('mvt_paiement', 'traite = 0 AND date BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'"');
+            $list = $this->bdb->getRows('mvt_paiement', 'traite = 0 AND date > "'.$this->lastDateExported->format('Y-m-d').'"');
             
             if(count($list) > 0)  {
                 foreach ($list as $line)  {
@@ -214,16 +196,7 @@
             global $db;
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile("paiements");
-            
-            switch ($this->moment) {
-                case 'AM':
-                    $list = $this->bdb->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.$this->lastDateExported->format('Y-m-d').' 00:00:00" AND "'.$this->yesterday->format('Y-m-d').' 23:59:59"');
-                    break;
-                case 'PM':
-                    $toDay = new DateTime();
-                    $list = $this->bdb->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.$toDay->format('Y-m-d').' 00:00:00" AND "'.$toDay->format('Y-m-d').' 23:59:59"');
-                    break;
-            }
+            $list = $this->bdb->getRows('paiement', 'exported = 0 AND datec > "'.$this->lastDateExported->format('Y-m-d').' 00:00:00"');
 
             foreach($list as $pay) {
                 $reglement = $this->bdb->getRow('c_paiement', 'id = ' . $pay->fk_paiement);

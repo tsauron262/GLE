@@ -59,10 +59,10 @@ class Bimp_Menu extends BimpObject
                 ))
             );
         }
-        
+
         $buttons[] = array(
-            'label' => 'Afficher l\'arborescence complète',
-            'icon' => 'fas_stream',
+            'label'   => 'Afficher l\'arborescence complète',
+            'icon'    => 'fas_stream',
             'onclick' => $this->getJsActionOnclick('displayFullTree')
         );
 
@@ -103,7 +103,7 @@ class Bimp_Menu extends BimpObject
     {
         $html = '';
 
-        $html .= $this->getData('titre') .'<br/>';
+        $html .= $this->getData('titre') . '<br/>';
 
         $children = BimpCache::getBimpObjectObjects('bimptheme', 'Bimp_Menu', array(
                     'fk_menu' => (int) $this->id
@@ -262,7 +262,6 @@ class Bimp_Menu extends BimpObject
             $handlers[] = 'All';
         }
 
-
         $items = array();
         $instance = BimpObject::getInstance('bimptheme', 'Bimp_Menu');
 
@@ -293,6 +292,66 @@ class Bimp_Menu extends BimpObject
 
             $items[(int) $r['rowid']] = $r;
             $items[(int) $r['rowid']]['sub_items'] = self::getMenuItems((int) $r['rowid'], $active_only, $enabled, $check_perms);
+        }
+        return $items;
+    }
+
+    public static function checkItems($items, $active_only = true, $enabled = true, $check_perms = true)
+    {
+        $return = array();
+
+        foreach ($items as $id => $item) {
+            if ($active_only && !(int) $item['active']) {
+                continue;
+            }
+
+            if ($enabled && isset($item['enabled']) && $item['enabled']) {
+                if (!verifCond($item['enabled'])) {
+                    continue;
+                }
+            }
+            if ($check_perms && isset($item['perms']) && $item['perms']) {
+                if (!verifCond($item['perms'])) {
+                    continue;
+                }
+            }
+
+            if (isset($item['sub_items'])) {
+                $item['sub_items'] = self::checkItems($item['sub_items'], $active_only, $enabled, $check_perms);
+            }
+
+            $return[$id] = $item;
+        }
+
+        return $return;
+    }
+
+    public static function getFullMenu($handler = null, $active_only = true, $enabled = true, $check_perms = true)
+    {
+        if (is_null($handler)) {
+            $handler = BimpCore::getConf('menu_handler', null, 'bimptheme');
+        }
+        $handlers = array($handler);
+        if ($handler === 'auguria') {
+            $handlers[] = 'All';
+        }
+
+        $items = array();
+
+        if (BimpCore::getConf('use_cache_server_for_menu', null, 'bimptheme')) {
+            $items = BimpCache::getCacheServeur('bimpmenu_' . $handler . '_items');
+        }
+
+        if (empty($items)) {
+            $items = self::getMenuItems(0, false, false, false);
+
+            if (BimpCore::getConf('use_cache_server_for_menu', null, 'bimptheme')) {
+                BimpCache::setCacheServeur('bimpmenu_' . $handler . '_items', $items);
+            }
+        }
+
+        if (!empty($items)) {
+            $items = self::checkItems($items, $active_only, $enabled, $check_perms);
         }
 
         return $items;
@@ -523,7 +582,7 @@ class Bimp_Menu extends BimpObject
         return $errors;
     }
 
-    public function update($warnings = array(), $force_update = false)
+    public function update(&$warnings = array(), $force_update = false)
     {
         $init_code_path = $this->getInitData('code_path');
 

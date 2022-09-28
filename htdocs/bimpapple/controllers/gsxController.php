@@ -1232,6 +1232,10 @@ class gsxController extends BimpController
                 $errors = $this->gsx_v2->getErrors();
             }
         }
+        
+        if(count($errors)){
+            $errors[] = $html;
+        }
 
         return array(
             'errors' => $errors,

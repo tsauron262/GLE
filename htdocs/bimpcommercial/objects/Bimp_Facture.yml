@@ -973,6 +973,10 @@ lists_cols:
         label: Paiements
         value:
             callback: displayPaiements
+    clients_commandes:
+        label: Client(s) Commande(s)
+        value:
+            callback: displayClientsCommandes
         
                    
 lists: 

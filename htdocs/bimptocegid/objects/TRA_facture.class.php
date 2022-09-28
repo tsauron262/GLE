@@ -43,7 +43,7 @@
             $fatcure_source      = $facture->getChildObject('facture_source');
             $is_client_interco   = false;
             $date_facture        = new DateTime($facture->getData('datef'));
-            $date_facture_source = new DateTime($fatcure_source->getData('datef'));
+            $date_facture_source = new DateTime($fatcure_source->getData('datef')); // Soit la date de la facture source soit la date du jour.
             $date_creation       = new dateTime($facture->getData('datec'));
             $date_echeance       = new DateTime($facture->getData('date_lim_reglement'));
             $id_reglement        = ($facture->getData('fk_mode_reglement') > 0) ? $facture->getData('fk_mode_reglement') : 6;
@@ -207,11 +207,11 @@
                                 
                 $total_mis_en_ligne =  (round($total_deee,2) + round($total_tva, 2) + round($total_ht, 2));
                 $controlle_ttc = (round($TTC, 2));
-                $reste = round($total_mis_en_ligne - $controlle_ttc,2);
+                $reste = round($controlle_ttc - $total_mis_en_ligne,2);
                 
                 if($reste != 0) {
                     $structure['COMPTE_GENERAL']        = sizing($compte_le_plus_grand, 17);
-                    $structure['SENS']                  = sizing($this->getSensRectification($reste, $controlle_ttc),1);
+                    $structure['SENS']                  = sizing($this->getSens($reste),1);
                     $structure['MONTANT']               = sizing(abs($reste), 20, true);
                     $structure['REF_LIBRE']             = sizing($facture->getRef(),35);
                     $ecriture .= implode('', $structure) . "\n";
@@ -234,35 +234,10 @@
             
         }
         
-        private function getSensRectification($montant, $ttc_facture) {
-            
-            $is_avoir   = ($ttc_facture > 0) ? false : true;
-            $is_facture = ($ttc_facture > 0) ? true : false;
-            
-            if($is_avoir) {
-                if($montant > 0) return 'D';
-                return 'C';
-            }
-            
-            if($is_facture) {
-                if($montant < 0) return 'C';
-                return 'D';
-            }
-            
-        }
-        
         private function getSens($montant) {            
             
-            if($this->sens_facture == 'D') { // Facture standard : FA
-                if($montant < 0) return $this->sens_facture;
-                return 'C';
-            }
-            
-            if($this->sens_facture == 'C') { // Facture avoir : AV
-                if($montant > 0) return $this->sens_facture;
-                return 'D';
-            }
-            
+            return ($montant > 0) ? 'C' : 'D';
+   
         }
         
     }

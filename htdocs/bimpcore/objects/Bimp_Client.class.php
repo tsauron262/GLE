@@ -1124,6 +1124,10 @@ class Bimp_Client extends Bimp_Societe
     }
 
     // Affichagges: 
+    
+    public function displayOutstandingLimitTtc(){
+        return '<div style="float:left">'.$this->displayData('outstanding_limit'). ' </div><div>. HT soit : '. BimpTools::displayMoneyValue($this->getData('outstanding_limit')*1.2).' TTC</div>';
+    }
 
     public function displayOutstanding()
     {
@@ -1133,7 +1137,7 @@ class Bimp_Client extends Bimp_Societe
             $encours = $this->getAllEncoursForSiret(false);
             if ($encours['total'] != 0) {
                 $html .= '<b>Encours sur factures restant dues: </b>';
-                $html .= BimpTools::displayMoneyValue($encours['factures']['socs'][$this->id]);
+                $html .= BimpTools::displayMoneyValue($encours['factures']['socs'][$this->id]).' TTC';
 
                 if (count($encours['factures']['socs']) > 1) {
                     $html .= '<br/>';
@@ -1617,7 +1621,14 @@ class Bimp_Client extends Bimp_Societe
 
             case 'commandes':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'client', 1, null, 'Commandes du client "' . $client_label . '"');
-                $list->addFieldFilterValue('fk_soc', (int) $this->id);
+//                $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                
+                $list->addFieldFilterValue('or_client',array(
+                    'or' => array(
+                        'fk_soc' => $this->id,
+                        'id_client_facture' => $this->id
+                    )
+                ));
                 break;
 
             case 'shipments':

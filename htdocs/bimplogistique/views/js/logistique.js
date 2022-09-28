@@ -1,5 +1,13 @@
 // Logistique commande client: 
 
+function selectAllCommandeLinesReservationsStatus(id_commande) {
+    $('input.reservation_check').prop('checked', true).change();
+}
+
+function unselectAllCommandeLinesReservationsStatus(id_commande) {
+    $('input.reservation_check').prop('checked', false).change();
+}
+
 function setSelectedCommandeLinesReservationsStatus($button, id_commande, new_status) {
     if ($button.hasClass('disabled')) {
         return;

@@ -220,6 +220,12 @@ lists:
             to:
             viewed:
                 edit: 1
+            user_update:
+                show: 
+                    callback: iAmAdmin
+            date_update:
+                show: 
+                    callback: iAmAdmin
                 
     global: 
         extends: default

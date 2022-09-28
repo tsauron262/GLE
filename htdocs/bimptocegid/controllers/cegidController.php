@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . 'bimptocegid/class/export.class.php';
+require_once DOL_DOCUMENT_ROOT . 'bimptocegid/class/cron.class.php';
 require_once DOL_DOCUMENT_ROOT . 'bimptocegid/class/controle.class.php';
 require_once DOL_DOCUMENT_ROOT . 'bimptocegid/objects/TRA.class.php';
 require_once DOL_DOCUMENT_ROOT . 'bimpcore/classes/BimpDocumentation.php';
@@ -55,6 +56,27 @@ class cegidController extends BimpController {
         
         return $this->traClass->db->getCount($table, 'exported = 1', $primary);
         
+    }
+    
+    public function renderCheckTab() {
+        
+        $html = '';
+        
+        $tabs[] = array(
+            'id'            => 'check_paiement',
+            'title'         => 'Paiements',
+            'ajax'          => 1,
+            'ajax_callback' => $this->traClass->getJsLoadCustomContent('renderNavTabCheck', '$(\'#check_paiement .nav_tab_ajax_result\')', array('data' => Array('paiement')), array())
+        );
+        
+        $html .= BimpRender::renderNavTabs($tabs, 'card_view');
+        
+        return $html;
+        
+    }
+    
+    public function renderCheckTitle() {
+        return 'Check ' . BimpRender::renderIcon('check');
     }
     
     public function renderPaiementsTab() {
@@ -113,6 +135,10 @@ class cegidController extends BimpController {
         global $user;
         
         $html = '';
+        
+        $cron = new Cron();
+        
+        $html .= '<div id=\'button_edit\' >' . '<button onClick=\'transfert()\' class=\'btn btn-info\' ><i class=\'fas fa5-paper-plane\' ></i> Envoyer les fichiers manuellement</button>';
                 
         $html .= $this->getExportedFilesArray();
 
@@ -330,6 +356,20 @@ class cegidController extends BimpController {
         $js .= '\'' . 'large' . '\'';
         $js .= ');';
          
+         die(json_encode(array(
+            'success_callback' => $js,
+            'request_id'       => BimpTools::getValue('request_id', 0),
+            'errors'           => $errors
+        )));
+    }
+    
+    protected function ajaxProcessTransfertFile(){
+        
+        $cron = new Cron();
+        $cron->manualSendTRA();
+        
+        $js  = 'location.reload()';
+        
          die(json_encode(array(
             'success_callback' => $js,
             'request_id'       => BimpTools::getValue('request_id', 0),

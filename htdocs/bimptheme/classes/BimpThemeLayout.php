@@ -101,9 +101,34 @@ class BimpThemeLayout extends BimpLayout
         $html .= '<div class="nav-container">' . "\n";
         $html .= '<nav id="main-menu-navigation" class="navigation-main">' . "\n";
 
+        
         BimpObject::loadClass('bimptheme', 'Bimp_Menu');
-        $items = Bimp_Menu::getMenuItems(0, true, true, true);
+        $items = Bimp_Menu::getFullMenu(null, true, true, true);
         $html .= $this->renderMenuItems($items, 1);
+
+        // todo: à refondre: 
+//        BimpObject::loadClass('bimpsupport', 'BS_SAV');
+//        $html .= BS_SAV::renderMenuQuickAccess();
+        
+                // Define $bookmarks
+        
+        // Execute hook printLeftBlock
+        $html .= '<div class="bimptheme_menu_extra_section">';
+        global $hookmanager, $user, $db, $conf, $langs;
+        if (!empty($conf->bookmark->enabled) && $user->rights->bookmark->lire) {
+            include_once (DOL_DOCUMENT_ROOT . '/bookmarks/bookmarks.lib.php');
+            $langs->load("bookmarks");
+
+            $html .= printBookmarksList($db, $langs);
+        }
+        $parameters = array();
+        $reshook = $hookmanager->executeHooks('printLeftBlock', $parameters);    // Note that $action and $object may have been modified by some hooks
+        $html .= $hookmanager->resPrint;
+        
+        $parameters = array();
+        $reshook = $hookmanager->executeHooks('printMenuAfter', $parameters);    // Note that $action and $object may have been modified by some hooks
+        $html .= $hookmanager->resPrint;
+        $html .= '</div>';
 
         $html .= ' </nav><!-- End #main-menu-navigation -->' . "\n";
         $html .= '</div><!-- End .nav-container-->' . "\n";

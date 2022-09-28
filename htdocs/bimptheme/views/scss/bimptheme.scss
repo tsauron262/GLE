@@ -269,9 +269,9 @@
                     width: auto!important;
                     margin-right: 8px;
                 }
-/*                &:hover {
-                    color: $primary;
-                }*/
+                /*                &:hover {
+                                    color: $primary;
+                                }*/
             }
 
             span.select2-container {
@@ -313,6 +313,44 @@
         background-color: #fff;
     }
 
+    // Menu extras: 
+    .bimptheme_menu_extra_sections_title {
+        color: #fff;
+        margin: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #9FADC4;
+    }
+
+    .bimptheme_menu_extra_section {
+        padding-top: 6px 10px;
+        margin: 10px;
+        color: #fff;
+
+        .title {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        a {
+            cursor: pointer;
+            color: #fff!important;
+
+            &:hover {
+                color: #fff!important;
+                text-decoration: underline!important;
+            }
+        }
+    }
+
+    #showDetailChrono2 {
+        cursor: pointer;
+        color: #fff!important;
+
+        &:hover {
+            color: #fff!important;
+            text-decoration: underline!important;
+        }
+    }
 
     /************
     * Dashboard

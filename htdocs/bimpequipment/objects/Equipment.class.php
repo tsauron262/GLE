@@ -59,7 +59,7 @@ class Equipment extends BimpObject
         }
 
         global $user;
-        return (int) $user->admin;
+        return (int) ($user->admin || $user->login == 'l.gay');
     }
 
     public function isCreatable($force_create = false, &$errors = array())
@@ -1613,18 +1613,18 @@ class Equipment extends BimpObject
                         }
 
                         /* obsolete
-                        if (preg_match('/^.+(.{4})$/', $identifiers['serial'], $matches)) {
-                            $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
-                                        'code_config' => $matches[1],
-                                        'ref'         => array(
-                                            'part'      => 'APP-',
-                                            'part_type' => 'beginning'
-                                        )
-                                            ), true);
-                            if (BimpObject::objectLoaded($product)) {
-                                $identifiers['id_product'] = (int) $product->id;
-                            }
-                        }*/
+                          if (preg_match('/^.+(.{4})$/', $identifiers['serial'], $matches)) {
+                          $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                          'code_config' => $matches[1],
+                          'ref'         => array(
+                          'part'      => 'APP-',
+                          'part_type' => 'beginning'
+                          )
+                          ), true);
+                          if (BimpObject::objectLoaded($product)) {
+                          $identifiers['id_product'] = (int) $product->id;
+                          }
+                          } */
                     }
                 }
             } else
@@ -1805,22 +1805,21 @@ class Equipment extends BimpObject
             }
         }
 
-        $init_serial = (string) $this->getInitData('serial');
-
-        if ($serial &&
-                (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial)) && !$this->majGsx) {
-//            $identifiers = self::gsxFetchIdentifiers($serial);
-//            $this->set('imei', $identifiers['imei']);
-//            $this->set('imei2', $identifiers['imei2']);
-//            $this->set('meid', $identifiers['meid']);
-//
-//            if ($identifiers['serial']) {
-//                $this->set('serial', $identifiers['serial']);
-//                $serial = $identifiers['serial'];
-//            }
-            $war = array();
-            $this->majWithGsx($war, false);
-        }
+//        $init_serial = (string) $this->getInitData('serial');
+//        if ($serial &&
+//                (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial)) && !$this->majGsx) {
+////            $identifiers = self::gsxFetchIdentifiers($serial);
+////            $this->set('imei', $identifiers['imei']);
+////            $this->set('imei2', $identifiers['imei2']);
+////            $this->set('meid', $identifiers['meid']);
+////
+////            if ($identifiers['serial']) {
+////                $this->set('serial', $identifiers['serial']);
+////                $serial = $identifiers['serial'];
+////            }
+//            $war = array();
+//            $this->majWithGsx($war, false);
+//        }
 
         if (!$id_product && $serial && (!$this->getInitData('serial') || $this->getInitData('serial') !== $serial)) {
             // Pas de correction du id_product pour l'instant car trop dangereux (stocks, incohérences commandes / factures, etc.)
@@ -1881,8 +1880,16 @@ class Equipment extends BimpObject
             if ((int) $current_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
                 $product = $this->getChildObject('bimp_product');
                 $id_entrepot = (int) $current_place->getData('id_entrepot');
-                $codemove = 'EQ' . $this->id . '_SUPPR';
-                $label = 'Suppression de l\'équipement ' . $this->id . ' - serial: ' . $this->getData('serial');
+                if (isset($this->delete_code_mvt)) {
+                    $codemove = $this->delete_code_mvt;
+                } else {
+                    $codemove = 'EQ' . $this->id . '_SUPPR';
+                }
+                if (isset($this->delete_label_mvt)) {
+                    $label = $this->delete_label_mvt;
+                } else {
+                    $label = 'Suppression de l\'équipement ' . $this->id . ' - serial: ' . $this->getData('serial');
+                }
             }
         }
 

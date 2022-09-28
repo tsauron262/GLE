@@ -217,7 +217,7 @@ class BContract_contrat extends BimpDolObject
                 $totalHeuresVendues += $time;
             }
         }
-                        
+        
         $reste = $totalHeuresVendues - $totalHeuresFaites;
         
         return $reste;
@@ -228,7 +228,6 @@ class BContract_contrat extends BimpDolObject
         
         $return = Array();
         
-        $hourInDay = 7;
         //$services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI', 'SERV19-FD01', 'AUTRE');
         $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
         $children = $this->getChildrenList('lines', ($justActif) ? Array('statut' => 4) : Array());
@@ -236,10 +235,9 @@ class BContract_contrat extends BimpDolObject
         foreach($children as $id_child) {
             
             $child = $this->getChildObject('lines', $id_child);
-            $instance->fetch($child->getData('fk_product'));            
-            
+            $instance->fetch($child->getData('fk_product'));       
             //if(in_array($instance->getRef(), $services)) {
-                $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $hourInDay;
+                $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $instance->getData('duree_i')/3600;
             //}
                         
         }
@@ -1508,7 +1506,7 @@ class BContract_contrat extends BimpDolObject
         $errors = Array();
         if (!count($errors)) {
             $success = "Contrat ré-ouvert avec succès";
-            $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
+            $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
             $this->addLog('Contrat ré-ouvert');
             foreach ($this->dol_object->lines as $line) {
                 $the_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);

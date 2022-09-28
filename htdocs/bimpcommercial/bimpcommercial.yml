@@ -84,6 +84,11 @@ params:
         type: bool
         def: 0
         
+    use_bds_for_receptions: 
+        label: Utiliser bimpdatasync pour la validation des réceptions
+        type: bool
+        def: 0
+        
     # PDFs: 
     pdf_add_cgv: 
         label: Ajouter CGV dans les docs PDF
@@ -132,5 +137,9 @@ params:
                   relances_clients_entrepots_speciaux: 
                       label: ID Entrepôts spéciaux pour les relances
                       info: Liste des entrepôts à relancer séparément lors des relances globales
+                      
+    entrepots_ld:
+        label: Entrepots en livraison direct
+        info: Tableau json de type [1,2]
                     
                   

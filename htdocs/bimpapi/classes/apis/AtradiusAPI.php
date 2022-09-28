@@ -4,6 +4,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/BimpAPI.php';
 
 class AtradiusAPI extends BimpAPI {
     
+    // pass web documentation: 885xcMaS
+    
     const CREDIT_CHECK = 'credit-check'; // Limité à 7000 euros
     const CREDIT_LIMIT = 'credit-limit'; // Utilisé à partir de + de 7000 euros
     
@@ -522,13 +524,7 @@ class AtradiusAPI extends BimpAPI {
     
     public function testRequest(&$errors = array(), &$warnings = array()) {
         
-        $this->getCover(array(
-//              'buyerId' => 53242955,
-            'buyerId' => $this->getBuyerIdBySiren(389271214),
-//            'coverType' => self::CREDIT_LIMIT
-//            'coverType' => self::CREDIT_LIMIT
-                ), $errors);
-
+        $this->getMyBuyer(array());
 
     }
 

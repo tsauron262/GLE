@@ -313,11 +313,10 @@ class BimpCore
 
         $modules_updates = BimpCore::getModulesUpdates();
         $modules_extends_updates = BimpCore::getModulesExtendsUpdates();
-//        if (self::isModuleActive('bimptheme')) {
-//            BimpObject::loadClass('bimptheme', 'Bimp_Menu');
-//            $menu_update = (int) Bimp_Menu::getFullMenuUpdateVersion();
-//        }
-        $menu_update = 0;
+        if (self::isModuleActive('bimptheme')) {
+            BimpObject::loadClass('bimptheme', 'Bimp_Menu');
+            $menu_update = (int) Bimp_Menu::getFullMenuUpdateVersion();
+        }
 
         if (!empty($updates) || !empty($modules_updates) || !empty($modules_extends_updates) || $menu_update) {
             if (!BimpTools::isSubmit('bimpcore_update_confirm')) {
@@ -359,18 +358,18 @@ class BimpCore
                     BimpCore::setConf('check_versions_lock', 1);
                 }
 
-//                if ($menu_update) {
-//                    echo 'Mise àjour du menu BimpThème complet: ';
-//                    $menu_errors = Bimp_Menu::updateFullMenu();
-//                    if (count($menu_errors)) {
-//                        echo '<br/>Erreurs: <pre>';
-//                        print_r($menu_errors);
-//                        echo '</pre>';
-//                    } else {
-//                        echo '[OK]';
-//                    }
-//                    echo '<br/><br/>';
-//                }
+                if ($menu_update) {
+                    echo 'Mise àjour du menu BimpThème complet: ';
+                    $menu_errors = Bimp_Menu::updateFullMenu();
+                    if (count($menu_errors)) {
+                        echo '[ECHEC]<pre>';
+                        print_r($menu_errors);
+                        echo '</pre>';
+                    } else {
+                        echo '[OK]';
+                    }
+                    echo '<br/><br/>';
+                }
 
                 if (!empty($updates)) {
                     foreach ($updates as $dev => $dev_updates) {
@@ -390,10 +389,11 @@ class BimpCore
                                 continue;
                             }
                             echo 'Mise a jour du module bimpcore a la version: ' . $dev . '/' . $version;
-                            if ($bdb->executeFile($dev_dir . $version . '.sql')) {
+                            $file_errors = array();
+                            if ($bdb->executeFile($dev_dir . $version . '.sql', $file_errors)) {
                                 echo ' [OK]<br/>';
                             } else {
-                                echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
+                                echo ' [ECHEC]<pre>' . print_r($file_errors, 1) . '</pre><br/>';
                             }
                         }
                         echo '<br/>';
@@ -428,10 +428,10 @@ class BimpCore
                                 continue;
                             }
                             echo 'Mise a jour du module "' . $module . '" à la version: ' . $version;
-                            if ($bdb->executeFile($dir . $version . '.sql')) {
+                            if ($bdb->executeFile($dir . $version . '.sql', $file_errors)) {
                                 echo ' [OK]<br/>';
                             } else {
-                                echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
+                                echo ' [ECHEC]<pre>' . print_r($file_errors, 1) . '</pre><br/>';
                             }
                         }
                         echo '<br/>';
@@ -467,10 +467,10 @@ class BimpCore
                                     continue;
                                 }
                                 echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de la version "' . BIMP_EXTENDS_VERSION . '"';
-                                if ($bdb->executeFile($dir . $extend_version . '.sql')) {
+                                if ($bdb->executeFile($dir . $extend_version . '.sql', $file_errors)) {
                                     echo ' [OK]<br/>';
                                 } else {
-                                    echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
+                                    echo ' [ECHEC]<pre>' . print_r($file_errors, 1) . '</pre><br/>';
                                 }
                             }
                             echo '<br/>';
@@ -503,10 +503,10 @@ class BimpCore
                                     continue;
                                 }
                                 echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de l\'entité "' . BIMP_EXTENDS_ENTITY . '"';
-                                if ($bdb->executeFile($dir . $extend_version . '.sql')) {
+                                if ($bdb->executeFile($dir . $extend_version . '.sql', $file_errors)) {
                                     echo ' [OK]<br/>';
                                 } else {
-                                    echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
+                                    echo ' [ECHEC]<pre>' . print_r($file_errors, 1) . '</pre><br/>';
                                 }
                             }
                             echo '<br/>';

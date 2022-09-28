@@ -4004,6 +4004,17 @@ class Bimp_Commande extends BimpComm
         if (count($res_errors)) {
             $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
         }
+        
+        
+        
+        if(in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))){
+            if($this->getData('date_livraison') == '')
+                $errors[] = 'Date prévue de livraison obligatoire pour les livraison direct';
+            if(!$this->dol_object->getIdContact('external', 'SHIPPING'))
+                $errors[] = 'Contact de livraison obligatoire pour les livraison direct';
+            
+        }
+        
 
         // Validation encours
         if (empty($errors)) {

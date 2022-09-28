@@ -239,6 +239,12 @@ class TRA extends BimpObject {
         return Bimprender::renderPanel('Comptes 7', $html);
     }
     
+    public function renderNavTabCheck() {
+        
+        return Bimprender::renderPanel('Comptes 7', print_r($data, 1));
+        
+    }
+    
     public function renderNavTabAchats() {
         $html = '';
         

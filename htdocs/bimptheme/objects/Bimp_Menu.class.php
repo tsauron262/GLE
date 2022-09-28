@@ -279,15 +279,8 @@ class Bimp_Menu extends BimpObject
         $rows = $instance->getList($filters, null, null, 'position', 'ASC', 'array');
 
         foreach ($rows as $r) {
-            if ($enabled && isset($r['enabled']) && $r['enabled']) {
-                if (!verifCond($r['enabled'])) {
-                    continue;
-                }
-            }
-            if ($check_perms && isset($r['perms']) && $r['perms']) {
-                if (!verifCond($r['perms'])) {
-                    continue;
-                }
+            if (!self::checkItem($r, $active_only, $enabled, $check_perms)) {
+                continue;
             }
 
             $items[(int) $r['rowid']] = $r;
@@ -296,24 +289,40 @@ class Bimp_Menu extends BimpObject
         return $items;
     }
 
+    public static function checkItem($item, $active_only = true, $enabled = true, $check_perms = true)
+    {
+        if ($active_only && !(int) $item['active']) {
+            return false;
+        }
+
+        if ($enabled) {
+            if (isset($item['enabled']) && $item['enabled']) {
+                if (!verifCond($item['enabled'])) {
+                    return false;
+                }
+            }
+            if (isset($item['bimp_module']) && $item['bimp_module'] && strpos($item['bimp_module'], 'bimp') === 0) {
+                if (!BimpCore::isModuleActive($item['bimp_module'])) {
+                    return false;
+                }
+            }
+        }
+        if ($check_perms && isset($item['perms']) && $item['perms']) {
+            if (!verifCond($item['perms'])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static function checkItems($items, $active_only = true, $enabled = true, $check_perms = true)
     {
         $return = array();
 
         foreach ($items as $id => $item) {
-            if ($active_only && !(int) $item['active']) {
+            if (!self::checkItem($item, $active_only, $enabled, $check_perms)) {
                 continue;
-            }
-
-            if ($enabled && isset($item['enabled']) && $item['enabled']) {
-                if (!verifCond($item['enabled'])) {
-                    continue;
-                }
-            }
-            if ($check_perms && isset($item['perms']) && $item['perms']) {
-                if (!verifCond($item['perms'])) {
-                    continue;
-                }
             }
 
             if (isset($item['sub_items'])) {

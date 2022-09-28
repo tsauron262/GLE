@@ -11,7 +11,7 @@ labels:
     name_plur: lignes de menu
     is_female: 1
     
-fields:             
+fields: 
     menu_handler: 
         label: handler
         default_value: bimptheme
@@ -50,10 +50,11 @@ fields:
     bimp_icon: 
         label: Icône FontAwesome 5
         
+    bimp_module: 
+        label: Module BIMP
+        
     bimp_object: 
         label: BimpObject lié
-        input: 
-            help: 'Saisir: "nom_module/nom_objet"'
             
 forms:
     add_sub_item: 
@@ -140,8 +141,6 @@ lists:
         edit_btn: 1
         edit_form: default
         delete_btn: 1
-#        add_object_row: 1
-#        add_object_row_open: 1
         extra_btn: 
             callback: getListExtraBtn
         cols:
@@ -150,6 +149,10 @@ lists:
             code_path: 
                 edit: 1
             url: 
+                edit: 1
+            bimp_module: 
+                edit: 1
+            bimp_object: 
                 edit: 1
             bimp_icon: 
                 edit: 1

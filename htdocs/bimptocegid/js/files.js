@@ -60,3 +60,14 @@ function setStateButton() {
     $preEditing.attr('contenteditable', contenteditable);
     
 }
+
+function transfert() {
+    
+    BimpAjax('transfertFile', {}, '', {display_processing: true}, {
+        success: function (result, bimpAjax) {
+            
+        }, error: function (result, bimpAjax) {
+            console.log(result);
+        }
+    });
+}

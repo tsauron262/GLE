@@ -362,13 +362,13 @@ class BF_Line extends BimpObject
         BimpObject::loadClass('bimpcommercial', 'ObjectLine');
 
         switch ((int) $this->getData('type')) {
-            case self::BL_PRODUCT:
+            case self::TYPE_PRODUCT:
                 return ObjectLine::LINE_PRODUCT;
 
-            case self::BL_FREE:
+            case self::TYPE_FREE:
                 return ObjectLine::LINE_FREE;
 
-            case self::BL_TEXT:
+            case self::TYPE_TEXT:
                 return ObjectLine::LINE_TEXT;
         }
 
@@ -450,7 +450,7 @@ class BF_Line extends BimpObject
             switch ($type) {
                 case self::TYPE_PRODUCT:
                 case self::TYPE_FREE:
-                    if ($type === self::BL_PRODUCT) {
+                    if ($type === self::TYPE_PRODUCT) {
                         $objectLine->id_product = (int) $this->getData('id_product');
                         $objectLine->id_fourn_price = (int) $this->getData('id_fourn_price');
                         $objectLine->desc = '';
@@ -474,7 +474,7 @@ class BF_Line extends BimpObject
                     }
                     break;
 
-                case self::BL_TEXT:
+                case self::TYPE_TEXT:
                     $objectLine->id_product = 0;
                     $objectLine->id_fourn_price = 0;
                     $objectLine->qty = 0;

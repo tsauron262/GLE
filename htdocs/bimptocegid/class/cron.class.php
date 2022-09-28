@@ -75,12 +75,13 @@
             }
                         
             if(((defined('ID_ERP') && ID_ERP == 2) || $this->modeTest)) {
+                $this->export_class = new export($db);
                 if(!count(scandir($this->local_path, $this->export_class->excludeArrayScanDire))) {
                     $db->begin(); //Ouvre la transaction
 
                     $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
                     $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
-                    $this->export_class = new export($db);
+                    
                     $this->export_class->create_daily_files();
                     $this->files_for_ftp = $this->getFilesArrayForTranfert();
 

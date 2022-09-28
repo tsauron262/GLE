@@ -1048,8 +1048,6 @@ class BimpRender
             $html .= '</div>';
         } else {
             $nTabs = (int) $params['nTabs'];
-            ;
-
             if ($title) {
                 if ($nTabs) {
                     for ($i = 0; $i < $nTabs; $i++) {

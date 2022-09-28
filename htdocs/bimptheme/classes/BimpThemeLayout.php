@@ -110,9 +110,17 @@ class BimpThemeLayout extends BimpLayout
 //        BimpObject::loadClass('bimpsupport', 'BS_SAV');
 //        $html .= BS_SAV::renderMenuQuickAccess();
         
+                // Define $bookmarks
+        
         // Execute hook printLeftBlock
         $html .= '<div class="bimptheme_menu_extra_section">';
-        global $hookmanager;
+        global $hookmanager, $user, $db, $conf, $langs;
+        if (!empty($conf->bookmark->enabled) && $user->rights->bookmark->lire) {
+            include_once (DOL_DOCUMENT_ROOT . '/bookmarks/bookmarks.lib.php');
+            $langs->load("bookmarks");
+
+            $html .= printBookmarksList($db, $langs);
+        }
         $parameters = array();
         $reshook = $hookmanager->executeHooks('printLeftBlock', $parameters);    // Note that $action and $object may have been modified by some hooks
         $html .= $hookmanager->resPrint;

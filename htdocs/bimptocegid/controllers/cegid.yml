@@ -8,6 +8,13 @@ sections:
         callback: renderHeader
     - type: nav_tabs
       nav_tabs:
+#        - id: check
+#          title: 
+#            callback: renderCheckTitle
+#          struct:
+#            type: custom
+#            custom:
+#                callback: renderCheckTab
         - id: repertoire_export
           title: Export
           struct:

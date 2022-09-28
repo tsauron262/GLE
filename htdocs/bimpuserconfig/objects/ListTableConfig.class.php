@@ -437,7 +437,7 @@ class ListTableConfig extends ListConfig
             if ((string) $object->params['controller'] && !is_null($bc_field) && $bc_field->params['type'] === 'string' && !$bc_field->hasValuesArray()) {
                 $object_link = (int) BimpTools::getArrayValueFromPath($values, 'object_link', BimpTools::getArrayValueFromPath($col_params, 'object_link', (int) ($field_name === $object->getRefProperty())));
                 $html .= '<div class="row fieldRow">';
-                $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-3">Lien vers la fiche ' . $object->getLabel('of_the') . '</div>';
+                $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-3">Lien vers la fiche ' . $object->getLabel('of_the') .$object->getRefProperty().$field_name. '</div>';
                 $html .= '<div class="fieldRowInput field col-xs-12 col-sm-6 col-md-9 colOptionInput" data-input_name="object_link">';
                 $html .= BimpInput::renderInput('toggle', 'object_link', $object_link);
                 $html .= '</div>';

@@ -778,7 +778,7 @@ class Bimp_Menu extends BimpObject
                 if (!$sql) {
                     $errors[] = 'Fichier vide';
                 } else {
-                    $bdb = BimpCache::getBdb();
+                    $bdb = BimpCache::getBdb();                    
                     $bdb->db->begin();
 
                     if ($bdb->delete('menu', 'menu_handler = \'bimptheme\'') <= 0) {

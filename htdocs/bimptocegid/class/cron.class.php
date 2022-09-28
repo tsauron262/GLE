@@ -117,7 +117,7 @@
                         //}
                     }
                 } else {
-                    mailSyn2('URGENT COMPTA', 'dev@bimp.fr', null, 'Dossier d\'export non vide. Rien à été fait');
+                    mailSyn2('URGENT COMPTA', 'dev@bimp.fr', null, 'Dossier d\'export non vide. Rien à été fait. <br />' . print_r(scandir($this->local_path, $this->export_class->excludeArrayScanDire), 1));
                 }
             } else {
                 die('Pas sur la bonne instance de l\'ERP');

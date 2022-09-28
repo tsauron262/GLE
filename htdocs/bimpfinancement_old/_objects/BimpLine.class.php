@@ -12,6 +12,10 @@ class BimpLine extends BimpObject
         self::BL_FREE    => 'Ligne libre',
         self::BL_TEXT    => 'Texte seulement'
     );
+    
+    const BL_PRODUIT = 1;
+    const BL_SERVICE = 2;
+    const BL_LOGICIEL = 3;
     public static $product_types = array(
         0                 => '',
         self::BL_PRODUIT  => array('label' => 'Produit', 'icon' => 'fas_box'),

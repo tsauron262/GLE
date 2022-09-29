@@ -4867,9 +4867,12 @@ class BContract_contrat extends BimpDolObject
     public function onSigned($bimpSignature, $data)
     {
         $errors = array();
+        $success = '';
         $data_post = array();
-        $this->actionSigned($data_post, $success);
-        
+        $return_sign = $this->actionSigned($data_post, $success);
+        $return_download = $this->actionDownloadSignature($data_post, $success);
+        $errors = BimpTools::merge_array($return_sign['errors'], $return_download['errors']);
+
         return $errors;
     }
 

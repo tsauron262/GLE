@@ -236,7 +236,7 @@ class DocusignAPI extends BimpAPI {
                 'recipientId' => '2',
                 'routingOrder'=> '2',
                 'emailNotification' => array(
-                    'emailSubject' => "Merci de signer " . $object->getLabel('this'),
+                    'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
                     'emailBody' => $object->getDefaultSignDistEmailContent()
                 ),
                 'tabs'        => array(

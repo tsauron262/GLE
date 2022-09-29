@@ -457,7 +457,9 @@ fields:
         label: Montant encours autorisé
         type: money
         default_value: 
-            conf: societe_default_outstanding_limit
+            conf: 
+                name: societe_default_outstanding_limit
+                is_int: 0
         history: 1
         history_user: 1
         input: 

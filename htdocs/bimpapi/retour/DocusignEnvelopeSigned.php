@@ -8,9 +8,9 @@ require_once("../../main.inc.php");
 $errors = array();
 
 $body = file_get_contents('php://input');
-file_put_contents(DOL_DATA_ROOT . '/docusign_webhook.txt', $body);
+//file_put_contents(DOL_DATA_ROOT . '/docusign_webhook.txt', $body);
 
-$in = json_decode(file_get_contents(DOL_DATA_ROOT . '/docusign_webhook.txt'));
+$in = json_decode(file_get_contents(DOL_DATA_ROOT . '/docusign_webhook.txt'), 1);
 //$in = json_decode(file_get_contents('/var/www/html/bimp-erp/documents/docusign_webhook.txt'), 1);
 
 //print_r($in);

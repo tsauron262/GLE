@@ -146,8 +146,8 @@ class DocusignAPI extends BimpAPI {
         
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
         
-        if(!$user->field_exists('id_docusign'))
-            $errors[] = "Le champs id_docusign n'existe pas";
+//        if(!$user->field_exists('id_docusign'))
+//            $errors[] = "Le champs id_docusign n'existe pas";
         
         if($user->getData('email') == '')
             $errors[] = "L'utilisateur n'a pas d'email";
@@ -229,12 +229,13 @@ class DocusignAPI extends BimpAPI {
         $signers = array(
             
             // Client
+            // Client
             array (
-                'email'       => 'pelegrinromain@gmail.com', // TODO $comm['email']
+                'email'       => 'tysauron@gmail.com', // TODO $comm['email']
                 'name'        =>  $client['prenom']  . ' ' . $client['nom'],
-                'signerEmail' => 'pelegrinromain@gmail.com', // TODO $client['email']
-                'recipientId' => '1',
-                'routingOrder'=> '1',
+                'signerEmail' => 'tysauron@gmail.com', // TODO $client['email']
+                'recipientId' => '2',
+                'routingOrder'=> '2',
                 'emailNotification' => array(
                     'emailSubject' => "Merci de signer " . $object->getLabel('this'),
                     'emailBody' => $object->getDefaultSignDistEmailContent()
@@ -246,6 +247,64 @@ class DocusignAPI extends BimpAPI {
                             'anchorString'  => "Signature des conditions générales de contrat",
                             'anchorXOffset' => 0,
                             'anchorYOffset' => 75
+                        ),
+                        array(
+                            'anchorString'  => "+ paraphe sur chaque page",
+                            'anchorXOffset' => 0,
+                            'anchorYOffset' => 85,
+                            'fontSize'      => 'Size12'
+                        )
+                    ),
+                    'textTabs' => array(
+                        array(
+                            'name'          => "Paraphe",
+                            'anchorString'  => "Paraphe :",
+                            'anchorXOffset' => 37,
+                            'anchorYOffset' => -3,
+                            'value'         => ucfirst(substr($client['nom'], 0, 1)) . ucfirst(substr($client['prenom'], 0, 1)),                ),
+                        array(
+                            'name'          => "Nom + fonction",
+                            'anchorString'  => "+ paraphe sur chaque page",
+                            'anchorXOffset' => 0,
+                            'anchorYOffset' => 33,
+                            'value'         => $client['nom'] . ' ' . (isset($client['fonction']) ? $client['fonction'] : '')
+                        ),
+                        array(
+                            'name'          => "Lu et approuvé",
+                            'anchorString'  => "Nom, fonction et cachet du signataire :",
+                            'anchorXOffset' => 120,
+                            'anchorYOffset' => -18,
+                            'value'         => "Lu et approuvé"
+                        ),
+                        array(
+                            'name'          => "Nom",
+                            'anchorString'  => "Nom, fonction et cachet du signataire :",
+                            'anchorXOffset' => 120,
+                            'anchorYOffset' => -8,
+                            'value'         => $client['nom'] . ' ' . $client['prenom']
+                        ),
+                        array(
+                            'name'          => "Fonction",
+                            'anchorString'  => "Nom, fonction et cachet du signataire :",
+                            'anchorXOffset' => 120,
+                            'anchorYOffset' => 5,
+                            'value'         => (isset($client['fonction']) ? $client['fonction'] : '')
+                        )
+                    ),
+                    'dateSignedTabs' => array(
+                        array(
+                            'name'          => "Date signature 1",
+                            'anchorString'  => "Signature des conditions générales de contrat",
+                            'anchorXOffset' => 11,
+                            'anchorYOffset' => 15,
+                            'fontSize'      => 'Size12'
+                        ),
+                        array(
+                            'name'          => "Date signature 2",
+                            'anchorString'  => "+ paraphe sur chaque page",
+                            'anchorXOffset' => 0,
+                            'anchorYOffset' => 20,
+                            'fontSize'      => 'Size12'
                         )
                     )
                 )

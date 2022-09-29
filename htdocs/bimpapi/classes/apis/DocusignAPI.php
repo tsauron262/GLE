@@ -70,9 +70,9 @@ class DocusignAPI extends BimpAPI {
     
     public function createEnvelope($params, $object, &$errors = array(), &$warnings = array()) {
         
-        $signature = $object->getChildObject('signature');
-        if (!BimpObject::objectLoaded($signature))
-            $errors[] = ucfirst($object->getLabel('this')) . ' n\'est lié à aucune signature';
+//        $signature = $object->getChildObject('signature');
+//        if (!BimpObject::objectLoaded($signature))
+//            $errors[] = ucfirst($object->getLabel('this')) . ' n\'est lié à aucune signature';
 
         
 
@@ -108,6 +108,9 @@ class DocusignAPI extends BimpAPI {
         return $data;
     }
     
+    /**
+     * Pour télécharger le certificat $params['id_document'] = 'certificat'
+    */
     public function getEnvelopeFile($params, &$errors = array(), &$warnings = array()) {
         
         if(!isset($params['id_document']))
@@ -162,7 +165,7 @@ class DocusignAPI extends BimpAPI {
         $remote_user = $data['users'][0];
         
         if(!is_array($remote_user)) {
-            $errors[] = "Client inconnu pour l'adresse email : " . $user->getData('email');
+            $errors[] = "Utilisateur inconnu pour l'adresse email : " . $user->getData('email') . '. Cet utilisateur appartient-il à Bimp ?';
             return '';
         }
         
@@ -432,9 +435,13 @@ class DocusignAPI extends BimpAPI {
     
     private function execCurlCustom($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1, &$warnings = array()) {
         
-        if(isset($params['depth'])) {
-            if(4 < $params['depth']) {
-                $errors[] = "execCurlCustom exécuté " . $params['depth'] . " fois";
+//        $params['depth']++;
+//        if(isset($params['depth'])) {
+//            if(4 < $params['depth']) {
+//        $this->tentative_connexion++;
+        if(isset($this->tentative_connexion)) {
+            if(4 < $this->tentative_connexion) {
+                $errors[] = "execCurlCustom exécuté " . $this->tentative_connexion . " fois";
                 return array();
             }
         }
@@ -466,7 +473,8 @@ class DocusignAPI extends BimpAPI {
                         $connexion_ok = $this->connect($errors, $warnings);
                         
                         if($connexion_ok and !count($warnings)) {
-                            $params['depth']++;
+//                            $params['depth']++;
+//                            $this->tentative_connexion++;
                             return $this->execCurlCustom($request_name, $params, $errors, $response_headers, $response_code, $warnings);
                         } else {
                             return array();
@@ -481,8 +489,8 @@ class DocusignAPI extends BimpAPI {
             }
         }
         
-        if(isset($params['depth']))
-            unset($params['depth']);
+//        if(isset($params['depth']))
+//            unset($params['depth']);
 
         if(empty($errors) and empty($warnings))
             $return = $this->execCurl($request_name, $params, $errors, $response_headers, $response_code);
@@ -516,7 +524,13 @@ class DocusignAPI extends BimpAPI {
 
     }
 
-    public function connect(&$errors = array(), &$warnings = array(), $tentative = 0) {
+    public function connect(&$errors = array(), &$warnings = array()) {
+        
+        $this->tentative_connexion++;
+        if($this->tentative_connexion > 4) {
+            $errors[] = 'Trop de tentative de connexion ' . $this->tentative_connexion;
+            return 0;
+        }
         
         if($this->userAccount->isLogged())
             return count($errors);
@@ -525,13 +539,11 @@ class DocusignAPI extends BimpAPI {
         }
         
         $result = '';
-//        $url_redirect = DOL_URL_ROOT . '/bimpapi/retour/RetDocuSign.php';
-        $url_redirect = 'http://localhost/bimp-erp/htdocs/bimpapi/retour/RetDocuSign.php';
+//        $url_redirect = DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php';
+        $url_redirect = 'http://localhost/bimp-erp/htdocs/bimpapi/retour/DocusignAuthentificationSuccess.php';
        $client_id = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_oauth_client_id', '');
 
-        $tentative++;
-        if($tentative > 4)
-            die('boucle infinit');
+
         
         $code = $this->userAccount->getToken('code');
         $refresh_token = $this->userAccount->getToken('refresh');

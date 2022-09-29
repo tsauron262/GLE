@@ -28,10 +28,6 @@ sections:
           - id: fiche
             title: Fiche
             struct:
-#                type: view
-#                view:
-#                    object: product
-#                    name: fiche
                 type: custom
                 custom: 
                     callback: 
@@ -46,6 +42,8 @@ sections:
                     name: product_price
           - id: stock
             title: Stocks
+            show: 
+                dol_conf: stock->enabled
             struct:
                 type: view
                 view:
@@ -53,19 +51,14 @@ sections:
                     name: stock
           - id: commercial
             title: Commercial
+            show: 
+                is_module_active: bimpcommercial
             struct: 
                 type: custom
                 custom: 
                     callback: 
                         method: renderCommercialView
                         object: product
-#          - id: history
-#            title: Commercial
-#            struct:
-#                type: view
-#                view:
-#                    object: product
-#                    name: product_history
           - id: equipments
             title: Equipements
             show: 
@@ -112,9 +105,3 @@ sections:
                     callback: 
                         method: renderBimpOjectDivers
                         object: product
-#          - id: Categoriser
-#            show:
-#                callback: 
-#                    object: product
-#                    method: productBrowserIsActif
-#            title: Catégoriser

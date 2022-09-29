@@ -341,6 +341,11 @@ class Bimp_Menu extends BimpObject
                 $item['sub_items'] = self::checkItems($item['sub_items'], $active_only, $enabled, $check_perms);
             }
 
+            if ($active_only || $enabled || $check_perms) {
+                if ((!isset($item['url']) || !$item['url']) && (!isset($item['sub_items']) || empty($item['sub_items']))) {
+                    continue;
+                }
+            }
             $return[$id] = $item;
         }
 
@@ -778,7 +783,7 @@ class Bimp_Menu extends BimpObject
                 if (!$sql) {
                     $errors[] = 'Fichier vide';
                 } else {
-                    $bdb = BimpCache::getBdb();                    
+                    $bdb = BimpCache::getBdb();
                     $bdb->db->begin();
 
                     if ($bdb->delete('menu', 'menu_handler = \'bimptheme\'') <= 0) {

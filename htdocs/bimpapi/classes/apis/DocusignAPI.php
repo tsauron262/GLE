@@ -255,13 +255,21 @@ class DocusignAPI extends BimpAPI {
                             'fontSize'      => 'Size12'
                         )
                     ),
-                    'textTabs' => array(
+                    'initialHereTabs'  => array(
                         array(
-                            'name'          => "Paraphe",
                             'anchorString'  => "Paraphe :",
                             'anchorXOffset' => 37,
-                            'anchorYOffset' => -3,
-                            'value'         => ucfirst(substr($client['nom'], 0, 1)) . ucfirst(substr($client['prenom'], 0, 1)),                ),
+                            'anchorYOffset' => -3
+                        )
+                    ),
+                    'textTabs' => array(
+//                        array(
+//                            'name'          => "Paraphe",
+//                            'anchorString'  => "Paraphe :",
+//                            'anchorXOffset' => 37,
+//                            'anchorYOffset' => -3,
+//                            'value'         => ucfirst(substr($client['nom'], 0, 1)) . ucfirst(substr($client['prenom'], 0, 1)),
+//                        ),
                         array(
                             'name'          => "Nom + fonction",
                             'anchorString'  => "+ paraphe sur chaque page",

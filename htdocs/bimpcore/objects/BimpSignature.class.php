@@ -2028,17 +2028,17 @@ class BimpSignature extends BimpObject
 
         if ($this->isObjectValid($errors, $obj)) {
             
-//            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
-//            $api = BimpAPI::getApiInstance('docusign');
-//            if (is_a($api, 'DocusignAPI')) {
-//                
-//                $params = array(
-//                    'id_account'  => $data['id_account'],
-//                    'id_envelope' => $data['id_envelope']
-//                );
-//                
-//                $envelope = $api->getEnvelope($params, $errors, $warnings);
-//                print_r($envelope);
+            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+            $api = BimpAPI::getApiInstance('docusign');
+            if (is_a($api, 'DocusignAPI')) {
+                
+                $params = array(
+                    'id_account'  => $data['id_account'],
+                    'id_envelope' => $data['id_envelope']
+                );
+                
+                $envelope = $api->getEnvelope($params, $errors, $warnings);
+                print_r($envelope);
                 
                 if (!count($errors)) {
                     $this->set('signed', 1);
@@ -2052,7 +2052,7 @@ class BimpSignature extends BimpObject
 
                     }
                 }
-//            }
+            }
         }
 
         return array(

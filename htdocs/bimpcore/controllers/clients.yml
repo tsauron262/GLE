@@ -105,7 +105,7 @@ sections:
               label: Relances paiements
               show: 
                   conf: 
-                      module: bimpcommerical
+                      module: bimpcommercial
                       name: use_relances_paiements_clients
               sections: 
                   - type: list
@@ -114,7 +114,7 @@ sections:
           relances_lines: 
               show: 
                   conf: 
-                      module: bimpcommerical
+                      module: bimpcommercial
                       name: use_relances_paiements_clients
               label: Détails des relances
               sections: 
@@ -124,7 +124,7 @@ sections:
           relances_reports: 
               show: 
                   conf: 
-                      module: bimpcommerical
+                      module: bimpcommercial
                       name: use_relances_paiements_clients
               label: Rapports relances auto
               sections: 
@@ -135,7 +135,7 @@ sections:
           suivis_recouvrement: 
               show: 
                   conf: 
-                      module: bimpcommerical
+                      module: bimpcommercial
                       name: use_relances_paiements_clients
               label: Suivis recouvrements
               sections: 

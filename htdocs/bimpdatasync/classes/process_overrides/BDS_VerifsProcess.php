@@ -5,7 +5,9 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    // Vérifs marges factures:
+    public static $default_public_title = 'Vérifications et corrections diverses';
+
+    // Vérifs marges factures : 
 
     public function initCheckFacsMargin(&$data, &$errors = array())
     {
@@ -190,6 +192,8 @@ class BDS_VerifsProcess extends BDSProcess
         $date_from = $this->getOption('date_from', '');
         $date_to = $this->getOption('date_to', '');
         $nbElementsPerIteration = $this->getOption('nb_elements_per_iterations', 100);
+        $include_serialized = (int) $this->getOption('include_serialized', 0);
+
         if (!preg_match('/^[0-9]+$/', $nbElementsPerIteration) || !(int) $nbElementsPerIteration) {
             $errors[] = 'Le nombre d\'élements par itération doit être un nombre entier positif';
         }
@@ -199,34 +203,34 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if (!count($errors)) {
-            
-            
             $this->db->execute('TRUNCATE TABLE llx_stock_mouvement_reverse;');
-            $this->db->execute('INSERT INTO llx_stock_mouvement_reverse (SELECT *, REVERSE(inventorycode) as inventorycodereverse FROM llx_stock_mouvement'.($date_from? ' WHERE datem >= \'' . $date_from . ' 00:00:00\'' : '').');');
-
-
+            $this->db->execute('INSERT INTO llx_stock_mouvement_reverse (SELECT *, REVERSE(inventorycode) as inventorycodereverse FROM llx_stock_mouvement WHERE datem > \'2021-01-01 00:00:00\' AND (inventorycode LIKE \'CMDF%\' OR inventorycode LIKE \'ANNUL$_CMDF%\' ESCAPE \'$\'));'); //. ($date_from ? ' WHERE datem >= \'' . $date_from . ' 00:00:00\'' : '') . ');');
+//
             $elements = array();
 
             // Recherche par réception existantes: 
-//             $where = 'status = 1';
-//            if ($date_from) {
-//                $where .= ' AND date_received >= \'' . $date_from . ' 00:00:00\'';
-//            }
-//            if ($date_to) {
-//                $where .= ' AND date_received <= \'' . $date_from . ' 23:59:59\'';
-//            }
-//            $rows = $this->db->getRows('bl_commande_fourn_reception', $where, null, 'array', array('id'), 'id', 'asc');
-//            if (is_array($rows)) {
-//                $elements = array();
-//                foreach ($rows as $r) {
-//                    $elements[] = (int) $r['id'];
-//                }
-//            } else {
-//                $errors[] = $this->db->err();
-//            }
+            $where = 'status = 1';
+            if ($date_from) {
+                $where .= ' AND date_received >= \'' . $date_from . ' 00:00:00\'';
+            }
+            if ($date_to) {
+                $where .= ' AND date_received <= \'' . $date_from . ' 23:59:59\'';
+            }
+            $rows = $this->db->getRows('bl_commande_fourn_reception', $where, null, 'array', array('id'), 'id', 'asc');
+            if (is_array($rows)) {
+                $elements = array();
+                foreach ($rows as $r) {
+                    $elements[] = (int) $r['id'];
+                }
+            } else {
+                $errors[] = $this->db->err();
+            }
+
             // Recherche par codes mouvements: 
             $where = 'a.inventorycode LIKE \'%$_RECEP%\' ESCAPE \'$\'';
-            $where .= ' AND p.serialisable = 0';
+            if (!$include_serialized) {
+                $where .= ' AND p.serialisable = 0';
+            }
             if ($date_from) {
                 $where .= ' AND a.datem >= \'' . $date_from . ' 00:00:00\'';
             }
@@ -275,6 +279,7 @@ class BDS_VerifsProcess extends BDSProcess
     public function executeCheckReceptions($step_name, &$errors = array(), $extra_data = array())
     {
         if (!empty($this->references)) {
+            $include_serialized = (int) $this->getOption('include_serialized', 0);
             $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
             $this->setCurrentObject(BimpObject::getInstance('bimplogistique', 'BL_CommandeFournReception'));
 
@@ -288,8 +293,17 @@ class BDS_VerifsProcess extends BDSProcess
                     $reception_status = (int) $reception_status;
                     $reception_status_label = BimpTools::getArrayValueFromPath(BL_CommandeFournReception::$status_list[$reception_status], 'label', 'Statut #' . $reception_status);
                 }
-                $where = '(inventorycode LIKE \'%$_RECEP' . $id_r . '\' ESCAPE \'$\' OR inventorycode LIKE \'%$_RECEP$_' . $id_r . '\' ESCAPE \'$\')';
-                $where = '(inventorycodereverse LIKE REVERSE(\'%_RECEP' . $id_r . '\') ESCAPE \'$\' OR inventorycodereverse LIKE REVERSE(\'%_RECEP_' . $id_r . '\') ESCAPE \'$\')';
+//                $where = '(inventorycode LIKE \'%$_RECEP' . $id_r . '\' ESCAPE \'$\' OR inventorycode LIKE \'%$_RECEP$_' . $id_r . '\' ESCAPE \'$\')';
+//                $mvts = $this->db->getRows('stock_mouvement a', $where, null, 'array', array('a.*', 'p.serialisable'), null, null, array(
+//                    array(
+//                        'alias' => 'p',
+//                        'table' => 'product_extrafields',
+//                        'on'    => 'p.fk_object = a.fk_product'
+//                    )
+//                ));
+//                $this->DebugData($mvts, 'MVTS 1');
+
+                $where = '(inventorycodereverse LIKE REVERSE(\'%_$RECEP' . $id_r . '\') ESCAPE \'$\' OR inventorycodereverse LIKE REVERSE(\'%_$RECEP_$' . $id_r . '\') ESCAPE \'$\')';
                 $mvts = $this->db->getRows('stock_mouvement_reverse a', $where, null, 'array', array('a.*', 'p.serialisable'), null, null, array(
                     array(
                         'alias' => 'p',
@@ -298,14 +312,14 @@ class BDS_VerifsProcess extends BDSProcess
                     )
                 ));
 
-//                $this->DebugData($mvts, 'MVTS'); 
+//                $this->DebugData($mvts, 'MVTS 2'); 
 
                 if (is_array($mvts)) {
                     $lines = array();
 
                     // Trie par ligne: 
                     foreach ($mvts as $m) {
-                        if ((int) $m['serialisable']) {
+                        if (!$include_serialized && (int) $m['serialisable']) {
                             continue;
                         }
                         $prod_instance->id = (int) $m['fk_product'];
@@ -320,10 +334,16 @@ class BDS_VerifsProcess extends BDSProcess
                                 }
                                 if (!isset($lines[$id_cmd][$id_line])) {
                                     $lines[$id_cmd][$id_line] = array(
-                                        'recep'   => array(),
-                                        'annul'   => array(),
-                                        'id_prod' => (int) $m['fk_product']
+                                        'recep'      => array(),
+                                        'annul'      => array(),
+                                        'id_prod'    => (int) $m['fk_product'],
+                                        'receptions' => array()
                                     );
+
+                                    $receptions = $this->db->getValue('bimp_commande_fourn_line', 'receptions', 'id = ' . $id_line);
+                                    if ($receptions) {
+                                        $lines[$id_cmd][$id_line]['receptions'] = json_decode($receptions, 1);
+                                    }
                                 }
 
                                 if ($matches[1]) {
@@ -343,12 +363,8 @@ class BDS_VerifsProcess extends BDSProcess
                         $this->incProcessed();
                         foreach ($lines as $id_comm => $comm_lines) {
                             foreach ($comm_lines as $id_line => $line) {
-                                $lineObj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id_line);
-                                $shipmentData = $lineObj->getReceptionData($id_r);
-//                                if($id_r == 257587){
-//                                print_r($shipmentData);die;
-//                                }
-                                $qtyAttendu = (isset($shipmentData['received']) && $shipmentData['received'] ? $shipmentData['qty'] : 0);
+                                $reception_data = BimpTools::getArrayValueFromPath($line, 'receptions/' . $id_r, array('received' => 0, 'qty' => 0));
+                                $qtyAttendu = (isset($reception_data['received']) && $reception_data['received'] ? $reception_data['qty'] : 0);
                                 $qtyMvt = 0;
                                 foreach ($line['recep'] as $m) {
                                     $qtyMvt += $m['value'];
@@ -364,19 +380,19 @@ class BDS_VerifsProcess extends BDSProcess
                                     $title .= (isset($entrepots[(int) $m['fk_entrepot']]) ? $entrepots[(int) $m['fk_entrepot']] : 'Entrepôt #' . $m['fk_entrepot']) . ' - ';
                                     $title .= 'Réception #' . $id_r . ' (' . $reception_status_label . ')';
                                     $title .= '</a> : ';
+
                                     $html = '<br/><br/>';
-                                    $title .= 'Réception #' . $id_r . ': ';
-                                    $title .= '</a>';
-                                    $html .= '<br/><br/>Attendu ' . $qtyAttendu . ' Mouvement ' . $qtyMvt . '<br/>';
+                                    $html .= 'Attendu : <b>' . $qtyAttendu . '</b> - Mouvements : <b>' . $qtyMvt . '</b><br/>';
 
                                     foreach (array('recep' => 'réception(s)', 'annul' => 'annulation(s)') as $code => $label) {
                                         if (count($line[$code])) {
                                             $html .= '<b>' . count($line[$code]) . ' ' . $label . '</b><br/>';
                                             foreach ($line[$code] as $m) {
-                                                $html .= '   - <b>' . ((int) $m['type_mouvement'] ? 'Sortie' : 'Entrée') . '</b> : ' . $m['value'] . ' - ' . $m['rowid'] . '<br/>';
+                                                $html .= '   - <b>' . ((int) $m['type_mouvement'] ? 'Sortie' : 'Entrée') . '</b> : ' . $m['value'] . ' - Mvt #' . $m['rowid'] . '<br/>';
                                             }
                                         }
                                     }
+                                    $html .= '<a target="_blank" href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=product&id=' . $line['id_prod'] . '&navtab-maintabs=stock&navtab-stocks_view=stocks_mvts_tab">Mouvements produit ' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
 
                                     if (!$diff) {
                                         $this->Alert($title . 'tous les mouvements annulés.' . $html, $prod_instance, $m['inventorycode']);
@@ -604,7 +620,9 @@ class BDS_VerifsProcess extends BDSProcess
 
     public function initCorrectCodeMvt(&$data, &$errors = array())
     {
-        $where = 'inventorycode LIKE \'%$_RECEP$_%\' ESCAPE \'$\'';
+//        $where = 'inventorycode LIKE \'%$_RECEP$_%\' ESCAPE \'$\'';
+        $where = 'inventorycode LIKE \'EQ%$_SUPPR\' ESCAPE \'$\'';
+        $where .= ' AND origintype = \'order_supplier\' AND fk_origin > 0';
         $rows = $this->db->getRows('stock_mouvement', $where, null, 'array', array('rowid'), 'rowid', 'asc');
 
         if (is_array($rows)) {
@@ -617,7 +635,7 @@ class BDS_VerifsProcess extends BDSProcess
                     'label'                  => 'Correction des codes mouvement',
                     'on_error'               => 'continue',
                     'elements'               => $elements,
-                    'nbElementsPerIteration' => (int) 100
+                    'nbElementsPerIteration' => 100
                 )
             );
         } else {
@@ -627,36 +645,155 @@ class BDS_VerifsProcess extends BDSProcess
 
     public function executeCorrectCodeMvt($step_name, &$errors = array(), $extra_data = array())
     {
-        $rows = $this->db->getRows('stock_mouvement', 'rowid IN (' . implode(',', $this->references) . ')', null, 'array', array('rowid', 'inventorycode'));
+        $rows = $this->db->getRows('stock_mouvement', 'rowid IN (' . implode(',', $this->references) . ')', null, 'array', array('rowid', 'inventorycode', 'label', 'datem', 'fk_origin'));
 
         if (is_array($rows)) {
+            $mvt_instance = BimpObject::getInstance('bimpcore', 'BimpProductMouvement');
+            $this->setCurrentObject($mvt_instance);
             foreach ($rows as $r) {
-                if (preg_match('/^(ANNUL_)?CMDF_(\d+)_LN_(\d+)_RECEP_(\d+)$/', $r['inventorycode'], $matches)) {
-                    $code = $matches[1] . 'CMDF' . $matches[2] . '_LN' . $matches[3] . '_RECEP' . $matches[4];
+                $this->incProcessed();
+//                if (preg_match('/^(ANNUL_)?CMDF_(\d+)_LN_(\d+)_RECEP_(\d+)$/', $r['inventorycode'], $matches)) {
+//                    $code = $matches[1] . 'CMDF' . $matches[2] . '_LN' . $matches[3] . '_RECEP' . $matches[4];
+//                    if ($this->db->update('stock_mouvement', array(
+//                                'inventorycode' => $code
+//                                    ), 'rowid = ' . (int) $r['rowid']) <= 0) {
+//                        $this->Error('ECHEC - ' . $this->db->err(), null, $r['inventorycode']);
+//                    } else {
+//                        $this->Success('Code corrigé: ' . $code, null, $r['inventorycode']);
+//                    }
+//                } else {
+//                    $this->Alert('Code incorrect: ' . $r['inventorycode']);
+//                }
+
+                if (preg_match('/^.+ \- serial: (.+)$/', $r['label'], $matches)) {
+                    $serial = $matches[1];
+                    $where = 'inventorycode LIKE \'CMDF%\' AND datem < \'' . $r['datem'] . '\'';
+                    $where .= ' AND origintype = \'order_supplier\' AND fk_origin = ' . $r['fk_origin'];
+                    $where .= ' AND label LIKE \'% - serial: "' . $serial . '"\'';
+                    $mvt = $this->db->getRow('stock_mouvement', $where, array('rowid', 'inventorycode'), 'array', 'rowid', 'DESC');
+
+                    $mvt_instance->id = (int) $r['rowid'];
                     if ($this->db->update('stock_mouvement', array(
-                                'inventorycode' => $code
+                                'inventorycode' => 'ANNUL_' . $mvt['inventorycode'],
+                                'label'         => $r['label'] . ' - (Code inventaire corrigé automatiquement depuis mvt #' . $mvt['rowid'] . ' - ancien code: ' . $r['inventorycode'] . ')'
                                     ), 'rowid = ' . (int) $r['rowid']) <= 0) {
-                        $this->Error('ECHEC - ' . $this->db->err(), null, $r['inventorycode']);
+                        $this->Error('Echec mise à jour du code inventaire - ' . $this->db->err(), $mvt_instance, $r['inventorycode']);
                     } else {
-                        $this->Success('Code corrigé: ' . $code, null, $r['inventorycode']);
+                        $this->Success('Code inventaire corrigé (Ancien code: ' . $r['inventorycode'] . ')', $mvt_instance, 'ANNUL_' . $mvt['inventorycode']);
+                        $this->incUpdated();
+                        continue;
                     }
-                } else {
-                    $this->Alert('Code incorrect: ' . $r['inventorycode']);
                 }
+                $this->incIgnored();
             }
         } else {
             $this->Error($this->db->err());
         }
     }
 
+    // Correcetions positions: 
+
+    public function initCorrectPositions(&$data, &$errors = array())
+    {
+        $objects = array(
+            'equipements' => array(
+                'table' => 'be_equipment_place',
+                'field' => 'id_equipment'
+            ),
+            'packages'    => array(
+                'table' => 'be_package_place',
+                'field' => 'id_package'
+            )
+        );
+
+        $data['steps'] = array();
+
+        foreach ($objects as $name => $obj) {
+            $elements = array();
+            $rows = $this->db->getRows($obj['table'], 'position = 0', null, 'array', array($obj['field']), null, 'id', 'desc');
+
+            foreach ($rows as $r) {
+                if (!in_array((int) $r[$obj['field']], $elements)) {
+                    $elements[] = (int) $r[$obj['field']];
+                }
+            }
+
+            if (!empty($elements)) {
+                $data['steps']['correct_' . $name] = array(
+                    'label'                  => 'Correction ' . $name,
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => 250
+                );
+            }
+        }
+    }
+
+    public function executeCorrectPositions($step_name, &$errors = array(), $extra_data = array())
+    {
+        $objects = array(
+            'equipements' => array(
+                'instance'     => BimpObject::getInstance('bimpequipment', 'Equipment'),
+                'table'        => 'be_equipment_place',
+                'parent_field' => 'id_equipment',
+                'way'          => 'DESC'
+            ),
+            'packages'    => array(
+                'instance'     => BimpObject::getInstance('bimpequipment', 'BE_Package'),
+                'table'        => 'be_package_place',
+                'parent_field' => 'id_package',
+                'way'          => 'DESC'
+            )
+        );
+
+        if (preg_match('/^correct_(.+)$/', $step_name, $matches)) {
+            $name = $matches[1];
+
+            if (isset($objects[$name])) {
+                $obj = $objects[$name];
+                $this->setCurrentObject($obj['instance']);
+
+                foreach ($this->references as $id_obj) {
+                    $this->incProcessed();
+                    $obj['instance']->id = $id_obj;
+                    $rows = $this->db->getRows($obj['table'], $obj['parent_field'] . ' = ' . (int) $id_obj, null, 'array', array('id'), 'id', $obj['way']);
+
+                    if (is_array($rows)) {
+                        $check = true;
+                        $i = 1;
+                        foreach ($rows as $r) {
+                            if ($this->db->update($obj['table'], array(
+                                        'position' => $i
+                                            ), 'id = ' . (int) $r['id']) <= 0) {
+                                $this->Error($name . ' - Echec mise à jour ligne n° ' . $i . ' - ' . $this->db->err(), $obj['instance'], $r['id']);
+                                $check = false;
+                                break 2;
+                            }
+                            $i++;
+                        }
+
+                        if ($check) {
+                            $this->incUpdated();
+                            $this->Success('Correction des position OK', $obj['instance']);
+                            continue;
+                        }
+                    } else {
+                        $errors[] = $this->db->err();
+                    }
+                    $this->incIgnored();
+                }
+            }
+        }
+    }
+
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process:
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'Verifs',
-                    'title'       => 'Vérifications',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => '',
                     'type'        => 'other',
                     'active'      => 1

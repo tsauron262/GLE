@@ -9,6 +9,8 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
 //    DELETE FROM llx_actioncomm WHERE id >  	4530150;
 //DELETE FROM llx_actioncomm_resources WHERE fk_actioncomm > 4530150
     
+    public static $default_public_title = 'Imports calendriers';
+    
     const LOGIN = 'LOGIN';
     const DATE  = 'DTE';
     const ABS   = 'ABS_NBJ';
@@ -116,12 +118,12 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
 
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array()) {
+    public static function install(&$errors = array(), &$warnings = array(), $title = '') {
         // Process: 
 
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'ImportsCalendar',
-                    'title'       => 'Imports calendrier',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => 'Importe les évènements du calendrier et les congés envoyés par LDLC',
                     'type'        => 'import',
                     'active'      => 1

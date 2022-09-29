@@ -141,7 +141,7 @@ class BimpModuleConf
         $html .= '<div style="display: inline-block; width: 49%">';
         $html .= '<h3>Module ' . $this->module . '</h3>';
         if ($module_version) {
-            $html .= '<h5>Version <b>' . $module_version . '</b></h5>';
+            $html .= '<h4>Version <b>' . $module_version . '</b></h4>';
         }
         $html .= '</div>';
 

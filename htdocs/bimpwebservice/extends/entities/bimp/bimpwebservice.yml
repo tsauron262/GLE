@@ -1,0 +1,8 @@
+# Entité: bimp
+
+params: 
+    addDemandeFinancement_allowed: 
+        label: Requête addDemandeFinancement autorisée
+        type: bool
+        def: 1
+        cat: allowed

@@ -41,8 +41,13 @@ fields:
         label: Mot de passe
         type: password
         
-    key: 
-        label: Clé
+    token: 
+        label: Token
+        type: password
+        
+    token_expire: 
+        label: Expiration du token
+        type: datetime
         
     profiles: 
         label: Profiles
@@ -57,6 +62,8 @@ fields:
         type: id_object
         object: user
         default_value: 0
+        input: 
+            help: Laisser vide pour utiliser l'utilisateur lié au profile principal
         
     active: 
         label: Actif
@@ -80,7 +87,6 @@ fields_tables:
               edit: 1
             - field: name
             - field: email
-            - field: key 
             - field: profiles
             - field: id_user
             

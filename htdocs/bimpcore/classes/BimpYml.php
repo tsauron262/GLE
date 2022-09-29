@@ -300,22 +300,22 @@ class BimpYml
         $instance = BimpObject::getInstance($module, $name);
         $full_params = $instance->config->getParams('');
         
-        $tabs[] = array(
-            'id'      => 'full_params_formates',
-            'title'   => 'Tous les paramètres (formaté)',
-            'content' => BimpRender::renderRecursiveArrayContent($full_params, array(
-                'title'    => 'Tous les paramètres après fusion',
-                'foldable' => 1,
-                'open'     => 0
-            ))
-        );
-
+//        $tabs[] = array(
+//            'id'      => 'full_params_formates',
+//            'title'   => 'Tous les paramètres (formaté)',
+//            'content' => BimpRender::renderRecursiveArrayContent($full_params, array(
+//                'title'    => 'Tous les paramètres après fusion',
+//                'foldable' => 1,
+//                'open'     => 0
+//            )),
+//        );
+        
         $tabs[] = array(
             'id'      => 'full_params_bruts',
             'title'   => 'Tous les paramètres (brut)',
-            'content' => '<pre>' . print_r($full_params, 1) . '</pre>'
+            'content' => '<div><pre>' . print_r($full_params, 1) .  '</pre></div>'
         );
-
+        
         $html .= BimpRender::renderNavTabs($tabs, 'yml_analyser');
 
         return $html;

@@ -139,7 +139,7 @@ class BimpDb
         return $rows;
     }
 
-    public function executeFile($file)
+    public function executeFile($file, &$errors = array())
     {
         if (file_exists($file)) {
             $sql = file_get_contents($file);
@@ -154,14 +154,17 @@ class BimpDb
                         if ($result = $this->execute($req) < 0) {
                             BimpCore::addlog('Erreur SQL maj', 3, 'sql', null, array(
                                 'Requête' => (!is_null($req) ? $req : ''),
-                                'Erreur'  => $this->lasterror()
+                                'Erreur'  => $this->err()
                             ));
+                            $errors[] = 'Echec requête "' . $req . '" - ' . $this->err();
                             return false;
                         }
                 }
             }
             return true;
         }
+
+        $errors[] = 'Le fichier "' . $file . '" n\'existe pas';
         return false;
     }
 
@@ -242,6 +245,12 @@ class BimpDb
         }
 
         $sql .= ' LIMIT 1';
+
+//        if ($table == 'stock_mouvement') {
+//            die($sql);
+//        }
+
+
 
         $result = $this->db->query($sql);
         if ($result && $this->db->num_rows($result)) {

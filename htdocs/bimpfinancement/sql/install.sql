@@ -1,0 +1,131 @@
+CREATE TABLE IF NOT EXISTS `llx_bf_demande` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `ref` VARCHAR(20) NULL DEFAULT NULL,
+  `id_client` int(11) NOT NULL DEFAULT 0,
+  `id_contact_client` int(11) NOT NULL DEFAULT 0,
+  `id_supplier` int(11) NOT NULL DEFAULT 0,
+  `id_supplier_contact` int(11) NOT NULL DEFAULT 0,
+  `id_user_resp` int(11) NOT NULL DEFAULT 0,
+  `status` int(11) NOT NULL DEFAULT 0,
+  `label` VARCHAR(255) NOT NULL DEFAULT '',
+  `duration` int(11) NOT NULL DEFAULT 0,
+  `periodicity` int(11) NOT NULL DEFAULT 0,
+  `mode_calcul` int(11) NOT NULL DEFAULT 2,
+  `montant_materiels` double(24,8) NOT NULL DEFAULT 0,
+  `montant_services` double(24,8) NOT NULL DEFAULT 0,
+  `montant_logiciels` double(24,8) NOT NULL DEFAULT 0,
+  `vr_achat` double(24,8) NOT NULL DEFAULT 0,
+  `vr_vente` double(24,8) NOT NULL DEFAULT 0,
+  `ca_prevu` double(24,8) NOT NULL DEFAULT 0,
+  `pba_prevu` double(24,8) NOT NULL DEFAULT 0,
+  `date_loyer` datetime NULL DEFAULT NULL,
+  `agreement_number` VARCHAR(255) NOT NULL DEFAULT '',
+  `commission_commerciale` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `commission_financiere` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `date_create` datetime NOT NULL DEFAULT current_timestamp(),
+  `user_create` int(11) NOT NULL DEFAULT 0,
+  `date_update` datetime NOT NULL DEFAULT current_timestamp(),
+  `user_update` int(11) NOT NULL DEFAULT 0,
+  KEY `id_client` (`id_client`),
+  KEY `id_contact_client` (`id_contact_client`),
+  KEY `id_supplier` (`id_client`),
+  KEY `id_supplier_contact` (`id_contact_client`)
+);
+
+CREATE TABLE IF NOT EXISTS `llx_bf_demande_line` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_demande` int(11) NOT NULL DEFAULT 0,
+  `type` int(11) NOT NULL DEFAULT 0,
+  `id_product` int(11) NOT NULL DEFAULT 0,
+  `label` text NOT NULL DEFAULT '',
+  `description` text NOT NULL DEFAULT '',
+  `product_type` INT(11) NOT NULL DEFAULT 0,
+  `qty` double(24,8) NOT NULL DEFAULT 0,
+  `pu_ht` double(24,8) NOT NULL DEFAULT 0,
+  `tva_tx` double(8,2) NOT NULL DEFAULT 0,
+  `pa_ht` double(24,8) NOT NULL DEFAULT 0,
+  `id_fourn_price` int(11) NOT NULL DEFAULT 0,
+  `commandes_fourn` text NOT NULL DEFAULT '',
+  `remise` double(24,8) NOT NULL DEFAULT 0,
+  `total_ht` double(24,8) NOT NULL DEFAULT 0,
+  `total_ttc` double(24,8) NOT NULL DEFAULT 0,
+  `serialisable` tinyint(1) NOT NULL DEFAULT 0,
+  `serials` mediumtext NOT NULL DEFAULT '',
+  `position` int(11) NOT NULL DEFAULT 0,
+  KEY `id_demande` (`id_demande`),
+  KEY `id_product` (`id_product`)
+);
+
+CREATE TABLE IF NOT EXISTS `llx_bf_refinanceur` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_societe` int(11) NOT NULL DEFAULT 0,
+  `url_demande` VARCHAR(255) NOT NULL DEFAULT '',
+  KEY `id_societe` (`id_societe`)
+);
+
+CREATE TABLE IF NOT EXISTS `llx_bf_demande_refinanceur` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_demande` int(11) NOT NULL DEFAULT 0,
+  `id_refinanceur` int(11) NOT NULL DEFAULT 0,
+  `status` int(11) NOT NULL DEFAULT 0,
+  `rate` double(24,8) NOT NULL DEFAULT 0,
+  `coef` double(24,8) NOT NULL DEFAULT 0,
+  `qty` int(11) NOT NULL DEFAULT 0,
+  `amount_ht` double(24,8) NOT NULL DEFAULT 0,
+  `payment` int(11) NOT NULL DEFAULT 0,
+  `periodicity` int(11) NOT NULL DEFAULT 0,
+  `comment` text NOT NULL DEFAULT '',
+  `date_create` datetime NOT NULL DEFAULT current_timestamp(),
+  `user_create` int(11) NOT NULL DEFAULT 0,
+  `date_update` datetime NOT NULL DEFAULT current_timestamp(),
+  `user_update` int(11) NOT NULL DEFAULT 0,
+  `position` int(11) NOT NULL DEFAULT 0,
+  KEY `id_demande` (`id_demande`),
+  KEY `id_refinanceur` (`id_refinanceur`)
+);
+
+CREATE TABLE IF NOT EXISTS `llx_bf_frais_divers` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_demande` int(10) UNSIGNED NOT NULL,
+  `date` date NOT NULL DEFAULT '0000-00-00',
+  `description` text NOT NULL,
+  `amount` float NOT NULL DEFAULT '0',
+  `id_facture` int(11) NOT NULL DEFAULT '0',
+  `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `id_demande` (`id_demande`)
+);
+
+CREATE TABLE IF NOT EXISTS `llx_bf_frais_fournisseur` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_demande` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `date` date NOT NULL DEFAULT '0000-00-00',
+  `id_soc_supplier` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `supplier_name` varchar(256) NOT NULL DEFAULT '',
+  `description` varchar(256) NOT NULL DEFAULT '',
+  `amount` float NOT NULL DEFAULT '0',
+  `paid` tinyint(1) NOT NULL DEFAULT 0,
+  `id_file` int(11) NOT NULL DEFAULT 0,
+  `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `id_demande` (`id_demande`),
+  KEY `id_soc_supplier` (`id_soc_supplier`)
+);
+
+CREATE TABLE IF NOT EXISTS `llx_bf_rbt_except` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_demande` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `date` date NOT NULL DEFAULT '0000-00-00',
+  `amount` float NOT NULL DEFAULT '0',
+  `payment` int(11) NOT NULL,
+  `id_facture` int(11) NOT NULL DEFAULT '0',
+  `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `id_demande` (`id_demande`)
+);

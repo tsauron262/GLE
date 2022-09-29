@@ -2170,7 +2170,7 @@ class BL_CommandeFournReception extends BimpObject
                     $line_prod = $line->getProduct();
                     if (BimpObject::objectLoaded($line_prod) && $line_prod->isTypeProduct()) {
                         $r_data = $line->getReceptionData($this->id);
-
+                        
                         if (!isset($r_data['qty']) || !(int) $r_data['qty']) {
                             continue;
                         }

@@ -1,0 +1,54 @@
+# Entité: bimp
+
+fields:
+    df_status: 
+        label: Statut demande de financement
+        type: int
+        default_value: 0
+        values: 
+            array: df_status_list
+            
+    id_df_prolease: 
+        label: ID demande de financement LDLC Pro Lease
+        type: id
+        default_value: 0
+            
+forms: 
+    demande_financement: 
+        title: Demande de financement
+        rows: 
+            - custom: 1
+              label: Contact destinataire du devis de financement
+              input_name: id_contact
+              required: 1
+              input: 
+                  type: select
+                  options:
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                              - field_value: fk_soc
+                              - 1
+              value: 
+                  callbac: getDefaultIdContactForDF
+            - custom: 1
+              label: Durée
+              input_name: duration
+              input: 
+                  type: select
+                  options: 
+                      callback: getDFDurationsArray
+            - custom: 1
+              label: Périodicité
+              input_name: periodicity
+              input: 
+                  type: select
+                  options: 
+                      callback: getDFPeriodicitiesArray
+            - custom: 1
+              label: Mode de calcul
+              input_name: calc_mode
+              input: 
+                  type: select
+                  options: 
+                      callback: getDFCalcModesArray

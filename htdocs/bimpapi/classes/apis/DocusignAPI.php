@@ -75,7 +75,6 @@ class DocusignAPI extends BimpAPI {
 //        if (!BimpObject::objectLoaded($signature))
 //            $errors[] = ucfirst($object->getLabel('this')) . ' n\'est lié à aucune signature';
 
-        
 
 //        $id_account = $this->userAccount->getData('login');
         $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
@@ -83,7 +82,7 @@ class DocusignAPI extends BimpAPI {
         $result = $this->execCurlCustom('sendEnvelope', array(
             'fields' => array(
                 'status' => 'sent',
-                'emailSubject' => "Merci de signer " . $object->getLabel('this'),
+                'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
                 'documents' => array(
                         array(
                             'documentBase64' => base64_encode(file_get_contents($params['file'])),

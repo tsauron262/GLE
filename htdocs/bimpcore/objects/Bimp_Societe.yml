@@ -721,32 +721,6 @@ fields:
     consigne_ref_ext:
         label: Consigne référence externe
         type: text
-        
-        
-#    *** Champs non gérés: ***
-#    entity
-#    ref_ext
-#    ref_int
-#    prefix_comm
-#    price_level
-#    model_pdf
-#    webservices_url
-#    webservices_key
-#    parent
-#    fk_stcomm
-#    localtax1_assuj
-#    localtax1_value
-#    localtax2_assuj
-#    localtax2_value
-#    fk_prospectlevel
-#    default_lang
-#    fk_shipping_method
-#    import_key
-#    canvas
-#    fk_incoterms
-#    location_incoterms
-#    fk_multicurrency
-#    multicurrency_code
 
 fields_tables: 
     identity:

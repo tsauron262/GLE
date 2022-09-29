@@ -225,9 +225,6 @@ fields:
     photo:
         label: photo
         
-    id_docusign: 
-        label: Identifiant DocuSign
-        
 forms:
     light: 
         rows:

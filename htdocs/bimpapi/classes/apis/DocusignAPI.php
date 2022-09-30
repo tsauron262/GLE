@@ -22,7 +22,7 @@ class DocusignAPI extends BimpAPI {
     public static $urls_bases = array(
         'default' => array(
             'test' => 'https://demo.docusign.net',
-            'prod' => 'https://docusign.net'
+            'prod' => 'https://eu.docusign.net'
         ),
         'auth' => array(
             'test' => 'https://account-d.docusign.com',
@@ -185,7 +185,7 @@ class DocusignAPI extends BimpAPI {
             'users' => array((int) $user->id),
             'name' => $user->getData('firstname') . ' ' . $user->getData('lastname'),
             'login' => $remote_user['userId'],
-            'pword' => 'inutile',
+            'pword' => '',
             'tokens' => array()
         );
         $errors = BimpTools::merge_array($errors, $user_account->validateArray($values));
@@ -206,11 +206,16 @@ class DocusignAPI extends BimpAPI {
         $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
         
         $params = array(
-            'event' => 'envelope-completed',
-            'uri' => "https://localhost/bimp-erp/htdocs/",
+            'allUsers' => 'true',
+            'allowEnvelopePublish' => 'true',
+            'enableLog' => 'true',
+            'requiresAcknowledgement' => 'true',
+            "eventData" => array('version' => "restv2.1"),
+            'deliveryMode' => 'SIM',
+            'envelopeEvents' => array('Completed'),
             'connectId' => "1", // hook_enveloppe_signed
             'configurationType' => 'custom',
-            'urlToPublishTo' => 'https://destination.com',
+            'urlToPublishTo' => "https:/".DOL_URL_ROOT."/bimpapi/retour/DocusignEnvelopeSigned.php",
             'name' => 'Hook enveloppe signée',
             
             
@@ -523,22 +528,24 @@ class DocusignAPI extends BimpAPI {
     }
 
     public function testRequest(&$errors = array(), &$warnings = array()) {
+//        return $this->setUserIdAccount(242, $errors, $warnings);
         
-        $id_account = $this->userAccount->getData('login');
         
-        
-        $params = array();
-        $params['id_account'] = $id_account;
-//        $params['id_envelope'] = '829172a0-2169-4716-8b72-89f7ed6b7cec';
+//        $id_account = $this->userAccount->getData('login');
 //        
-//        $this->getEnvelope($params);
-        
-//        $this->getTemplates($params);
-        
-//        $this->setUserIdAccount(1224, $errors);
-
-//        $this->reqCreateEnvelope($params, $errors);
-        
+//        
+//        $params = array();
+//        $params['id_account'] = $id_account;
+////        $params['id_envelope'] = '829172a0-2169-4716-8b72-89f7ed6b7cec';
+////        
+////        $this->getEnvelope($params);
+//        
+////        $this->getTemplates($params);
+//        
+////        $this->setUserIdAccount(1224, $errors);
+//
+////        $this->reqCreateEnvelope($params, $errors);
+//        
         $this->createHook($params, $errors);
 
     }

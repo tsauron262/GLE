@@ -76,7 +76,7 @@
                         
             if(((defined('ID_ERP') && ID_ERP == 2) || $this->modeTest)) {
                 $this->export_class = new export($db);
-                if(!count(scandir($this->local_path, $this->export_class->excludeArrayScanDire))) {
+                if(!count(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire))) {
                     $db->begin(); //Ouvre la transaction
 
                     $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
@@ -118,7 +118,7 @@
                         //}
                     }
                 } else {
-                    mailSyn2('URGENT COMPTA', 'dev@bimp.fr', null, 'Dossier d\'export non vide. Rien à été fait. <br />' . print_r(scandir($this->local_path, $this->export_class->excludeArrayScanDire), 1));
+                    mailSyn2('URGENT COMPTA', 'dev@bimp.fr', null, 'Dossier d\'export non vide. Rien à été fait. <br />' . print_r(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire), 1));
                 }
             } else {
                 die('Pas sur la bonne instance de l\'ERP');

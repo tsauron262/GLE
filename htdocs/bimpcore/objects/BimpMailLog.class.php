@@ -25,7 +25,7 @@ class BimpMailLog extends BimpObject
         }
         else
             $this->addNote($str, null, 0, 0, '', null, null, null, null, $note);
-        $note->updateField('date_create', $date);
+//        $note->updateField('date_create', $date);
     }
     
     function canViewField($field_name) {

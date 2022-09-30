@@ -7,9 +7,13 @@ abstract class BDSProcess
 
     public static $debug = false;
     public static $process_name = null;
+    public static $default_public_title = '';
+    public static $allow_multiple_instances = false;
     public static $files_dir_name = '';
     public static $memory_limit = '1000M';
     public static $max_execution_time = 3600;
+    
+    
     public static $objects = array();
     public $db = null;
     public $user = null;
@@ -1154,15 +1158,9 @@ abstract class BDSProcess
         $process = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_Process', (int) $id_process);
 
         if (BimpObject::objectLoaded($process)) {
-            $name = $process->getData('name');
-            if ($name) {
-                $className = 'BDS_' . $name . 'Process';
-                if (!class_exists($className)) {
-                    self::loadProcessClass($className);
-                    if (!class_exists($className)) {
-                        $className = null;
-                    }
-                }
+            $className = $process->getProcessClassName(true);
+            if (!class_exists($className)) {
+                $className = null;
             }
         }
 

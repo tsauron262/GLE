@@ -62,6 +62,7 @@ fields:
         
     pword: 
         label: MDP
+        type: password
         
     tokens: 
         label: Tokens

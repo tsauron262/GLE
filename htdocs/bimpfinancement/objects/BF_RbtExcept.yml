@@ -1,0 +1,27 @@
+extends: BF_Frais
+
+table: bf_rbt_except
+
+labels:
+    name: remboursement exceptionnel
+    name_plur: remboursements exceptionnels
+                
+fields: 
+    payment:
+        label: Règlement
+        type: int
+        values: 
+            array: payments
+        
+list:
+    positions: 1
+    title: Remboursements exceptionnels
+    icon: calendar-plus-o
+    cols:
+        date: 
+            edit: 1
+        amount: 
+            edit: 1
+        payment:
+            edit: 1
+        id_facture:

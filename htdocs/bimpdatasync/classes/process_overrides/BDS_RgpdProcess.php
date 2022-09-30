@@ -5,6 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_RgpdProcess extends BDSProcess
 {
 
+    public static $default_public_title = 'Traiements RGPD';
     public static $object_default_params = array(
         'date_field'        => 'date_create',
         'date_create_field' => 'date_create',
@@ -1293,13 +1294,12 @@ class BDS_RgpdProcess extends BDSProcess
 
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process: 
-
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'Rgpd',
-                    'title'       => 'Traiements RGPD',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => 'Suppression / anonymisation des données clients',
                     'type'        => 'other',
                     'active'      => 1

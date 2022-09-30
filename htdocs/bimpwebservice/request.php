@@ -26,8 +26,8 @@ if (!$request_name) {
     );
 } else {
     $login = (isset($_SERVER['HTTP_BWS_LOGIN']) ? $_SERVER['HTTP_BWS_LOGIN'] : '');
-    $pword = (isset($_SERVER['HTTP_BWS_LOGIN']) ? $_SERVER['HTTP_BWS_PW'] : '');
-    
+    $token = (isset($_SERVER['HTTP_BWS_TOKEN']) ? $_SERVER['HTTP_BWS_TOKEN'] : '');
+
     if (!$login) {
         $errors[] = array(
             'code'    => 'LOGIN_MISSING',
@@ -35,16 +35,18 @@ if (!$request_name) {
         );
     }
 
-    if (!$pword) {
-        $errors[] = array(
-            'code'    => 'PWORD_MISSING',
-            'message' => 'Mot de passe absent'
-        );
+    if ($request_name !== 'authenticate') {
+        if (!$token) {
+            $errors[] = array(
+                'code'    => 'TOKEN_MISSING',
+                'message' => 'Token absent'
+            );
+        }
     }
 
     if (!count($errors)) {
-        $bws = new BWSApi($request_name, $_POST);
-        if ($bws->init(base64_decode($login), base64_decode($pword))) {
+        $bws = BWSApi::getInstance($request_name, $_POST);
+        if ($bws->init($login, $token)) {
             $response = $bws->exec();
         }
         $errors = $bws->getErrors();

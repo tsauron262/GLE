@@ -14,7 +14,7 @@ class Bimp_UserGroup extends BimpObject
     public function canCreate()
     {
         global $user;
-        return (int) $user->admin;
+        return ($user->rights->user->user->creer || $user->admin);
     }
 
     public function canEdit()

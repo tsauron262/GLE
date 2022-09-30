@@ -43,6 +43,20 @@ class BDS_Process extends BimpObject
         return parent::canSetAction($action);
     }
 
+    // Getters booléens: 
+
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        switch ($field) {
+            case 'name':
+                if (!$force_edit && $this->isLoaded()) {
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::isFieldEditable($field, $force_edit);
+    }
+
     // Getters params: 
 
     public function getDefaultListHeaderButtons()
@@ -74,6 +88,66 @@ class BDS_Process extends BimpObject
         return array('title');
     }
 
+    public function getDefaultProcessToInstallName()
+    {
+        $class_name = BimpTools::getPostFieldValue('classname', '');
+
+        if ($class_name && self::loadProcessClass($class_name)) {
+            if (preg_match('/^BDS_(.+)Process$/', $class_name, $matches)) {
+                $name = $matches[1];
+
+                if ($class_name::$allow_multiple_instances) {
+                    $name .= '_' . self::getNextProcessIdx($name);
+                }
+
+                return $name;
+            }
+        }
+
+        return '';
+    }
+
+    public function getDefaultProcessToInstallTitle()
+    {
+        $class_name = BimpTools::getPostFieldValue('classname', '');
+
+        if ($class_name && self::loadProcessClass($class_name)) {
+            return $class_name::$default_public_title;
+        }
+
+        return '';
+    }
+
+    public function getProcessClassName($load_class = true)
+    {
+        $name = $this->getData('name');
+
+        if ($name) {
+            if (preg_match('/^(.+)_[0-9]+$/', $name, $matches)) {
+                $name = $matches[1];
+            }
+
+            $className = 'BDS_' . $name . 'Process';
+
+            if ($load_class && !class_exists($className)) {
+                self::loadProcessClass($className);
+            }
+            return $className;
+        }
+
+        return '';
+    }
+
+    public static function getNextProcessIdx($process_name)
+    {
+        $last_name = self::getBdb()->getMax('bds_process', 'name', 'name LIKE \'' . $process_name . '_%\'');
+        if ($last_name && preg_match('/^' . $process_name . '_([0-9]+)$/', $last_name, $matches)) {
+            return (int) $matches[1] + 1;
+        }
+
+        return 1;
+    }
+
     // Getters Array: 
 
     public function getInstallableProcessesArray()
@@ -83,25 +157,24 @@ class BDS_Process extends BimpObject
         $dir = DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/process_overrides';
 
         if (is_dir($dir)) {
-            $files = scandir($dir);
-
             $currents = array();
-
             foreach (BimpCache::getBimpObjectObjects('bimpdatasync', 'BDS_Process') as $process) {
-                $currents[] = 'BDS_' . $process->getData('name') . 'Process';
+                $currents[] = $process->getProcessClassName();
             }
 
-            foreach ($files as $f) {
+            foreach (scandir($dir) as $f) {
+                if (in_array($f, array('.', '..'))) {
+                    continue;
+                }
+
                 if (preg_match('/^(.+)\.php$/', $f, $matches)) {
                     $className = $matches[1];
 
-                    if (!in_array($className, $currents)) {
-                        if (!class_exists($className)) {
-                            require_once $dir . '/' . $f;
-                        }
-
-                        if (class_exists($className) && method_exists($className, 'install')) {
-                            $processes[$className] = $className;
+                    if (self::loadProcessClass($className)) {
+                        if (method_exists($className, 'install')) {
+                            if ($className::$allow_multiple_instances || !in_array($className, $currents)) {
+                                $processes[$className] = $className;
+                            }
                         }
                     }
                 }
@@ -246,6 +319,36 @@ class BDS_Process extends BimpObject
         return $html;
     }
 
+    // Traitements: 
+
+    public static function loadProcessClass($class_name = '', $process_name = '', &$errors = array())
+    {
+        if (!$class_name) {
+            if ($process_name) {
+                $class_name = 'BDS_' . $process_name . 'Process';
+            } else {
+                $errors[] = 'Nom de la classe non spécifié';
+                return false;
+            }
+        }
+
+        if (!class_exists($class_name)) {
+            $file = DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/process_overrides/' . $class_name . '.php';
+            if (file_exists($file)) {
+                require_once $file;
+            } else {
+                $errors[] = 'Le fichier de la classe "' . $class_name . '" n\'existe pas';
+            }
+        }
+
+        if (!class_exists($class_name)) {
+            $errors[] = 'La classe "' . $class_name . '" n\'existe pas';
+            return false;
+        }
+
+        return true;
+    }
+
     // Actions: 
 
     public function actionInstallProcess($data, &$success)
@@ -258,20 +361,11 @@ class BDS_Process extends BimpObject
 
         if (!$className) {
             $errors[] = 'Aucun processus sélectionné';
-        } else {
-            $file = DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/process_overrides/' . $className . '.php';
-            if (!file_exists($file)) {
-                $errors[] = 'Le fichier "' . $file . '" n\'existe pas';
+        } elseif (self::loadProcessClass($className, '', $errors)) {
+            if (!method_exists($className, 'install')) {
+                $errors[] = 'Méthode "install" absente de la classe "' . $className . '"';
             } else {
-                require_once $file;
-
-                if (!class_exists($className)) {
-                    $errors[] = 'La classe "' . $className . '" n\'existe pas';
-                } elseif (!method_exists($className, 'install')) {
-                    $errors[] = 'Méthode "install" absente de la classe "' . $className . '"';
-                } else {
-                    $className::install($errors, $warnings);
-                }
+                $className::install($errors, $warnings, BimpTools::getArrayValueFromPath($data, 'title', ''));
             }
         }
 
@@ -279,5 +373,29 @@ class BDS_Process extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    // Overrides: 
+
+    public function create(&$warnings = [], $force_create = false)
+    {
+        $errors = array();
+
+        $name = $this->getData('name');
+        if ($name) {
+            $className = 'BDS_' . $name . 'Process';
+            if (self::loadProcessClass($className, '', $errors)) {
+                if ($className::$allow_multiple_instances) {
+                    $name .= '_' . self::getNextProcessIdx($name);
+                    $this->set('name', $name);
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            $errors = parent::create($warnings, $force_create);
+        }
+
+        return $errors;
     }
 }

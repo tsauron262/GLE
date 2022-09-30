@@ -1,6 +1,6 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/BimpAPI.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
 class API_Api extends BimpObject
 {
@@ -260,6 +260,11 @@ class API_Api extends BimpObject
         }
 
         return null;
+    }
+
+    public function getPageTitle()
+    {
+        return 'API ' . $this->getData('title');
     }
 
     // Affichages: 

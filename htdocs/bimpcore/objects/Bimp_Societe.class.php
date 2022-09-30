@@ -488,15 +488,15 @@ class Bimp_Societe extends BimpDolObject
         $buttons = array();
 
         if ($this->isLoaded()) {
-            
-            if($this->canSetAction('deleteInCompta')) {
+
+            if ($this->canSetAction('deleteInCompta')) {
                 $buttons[] = array(
                     'label'   => 'DeleteInCompta',
                     'icon'    => 'fas_time',
                     'onclick' => $this->getJsActionOnclick('deleteInCompta')
                 );
             }
-            
+
             if ($this->can('edit') && $this->isEditable()) {
                 $buttons[] = array(
                     'label'   => 'Changer le logo',
@@ -1428,26 +1428,31 @@ class Bimp_Societe extends BimpDolObject
 
         return $encours;
     }
-    
-    public static function getCommercialCsvValue($needed_fields = array()){
+
+    public static function getCommercialCsvValue($needed_fields = array())
+    {
         global $db;
-        
+
         $list = static::getCommercialClients();
-        
-        if(isset($list[$needed_fields['rowid']]))
+
+        if (isset($list[$needed_fields['rowid']]))
             return implode("\n", $list[$needed_fields['rowid']]);
         return '';
     }
-    public static function getCodeClientNameCsvValue($needed_fields = array()){
-        return $needed_fields['code_client']. ' - '. $needed_fields['nom'];
+
+    public static function getCodeClientNameCsvValue($needed_fields = array())
+    {
+        return $needed_fields['code_client'] . ' - ' . $needed_fields['nom'];
     }
-    
-    public static function getFull_addressCsvValue($needed_fields = array()){
+
+    public static function getFull_addressCsvValue($needed_fields = array())
+    {
         return static::concatAdresse($needed_fields['address'], $needed_fields['zip'], $needed_fields['town'], $needed_fields['fk_dep'], $needed_fields['fk_pays']);
     }
-    
-    public function displayCodeClientNom(){
-        return $this->getData('code_client').' - '.$this->getData('nom');
+
+    public function displayCodeClientNom()
+    {
+        return $this->getData('code_client') . ' - ' . $this->getData('nom');
     }
 
     public static function getRegionCsvValue($needed_fields = array())
@@ -1529,16 +1534,16 @@ class Bimp_Societe extends BimpDolObject
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     $disabled_label = static::getDiscountUsedLabel((int) $r['id'], false, $allowed);
-                    
+
                     $label = BimpTools::getRemiseExceptLabel($r['description']);
-                    if($r['fk_facture'] > 0){
+                    if ($r['fk_facture'] > 0) {
                         $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $r['fk_facture']);
-                        $label .= ' '.$fact->getData('facnumber');
+                        $label .= ' ' . $fact->getData('facnumber');
                     }
                     $label .= ' (' . BimpTools::displayMoneyValue((float) $r['amount'], '') . ' TTC)' . ($disabled_label ? ' - ' . $disabled_label : '');
 
                     $discounts[(int) $r['id']] = array(
-                        'label'    =>  $label,
+                        'label'    => $label,
                         'disabled' => ($disabled_label ? 1 : 0),
                         'data'     => array(
                             'amount_ttc' => (float) $r['amount']
@@ -1629,8 +1634,9 @@ class Bimp_Societe extends BimpDolObject
 
         return '';
     }
-    
-    public static function staticDisplayCountry($id){
+
+    public static function staticDisplayCountry($id)
+    {
         if ($id) {
             $countries = BimpCache::getCountriesArray();
             if (isset($countries[$id])) {
@@ -1642,12 +1648,13 @@ class Bimp_Societe extends BimpDolObject
 
     public function displayCountry($id = 0)
     {
-        if(!$id)
+        if (!$id)
             $id = (int) $this->getData('fk_pays');
         return self::staticDisplayCountry($id);
     }
-    
-    public static function staticDisplayDepartement($fk_dep, $fk_pays){
+
+    public static function staticDisplayDepartement($fk_dep, $fk_pays)
+    {
         if ((int) $fk_dep) {
             $deps = BimpCache::getStatesArray((int) $fk_pays);
             if (isset($deps[$fk_dep])) {
@@ -1659,50 +1666,16 @@ class Bimp_Societe extends BimpDolObject
 
     public function displayDepartement($fk_dep = 0, $fk_pays = 0)
     {
-        if(!$fk_dep)
+        if (!$fk_dep)
             $fk_dep = (int) $this->getData('fk_departement');
-        if(!$fk_pays)
+        if (!$fk_pays)
             $fk_pays = (int) $this->getData('fk_pays');
         return static::staticDisplayDepartement($fk_dep, $fk_pays);
     }
-    
-    public static function concatAdresse($address, $zip, $town, $fk_dep = 0, $fk_pays = 0, $icon = false, $single_line = false){
-        
-        $html = '';
 
-        if ($address) {
-            $html .= $address . ($single_line ? ' - ' : '<br/>');
-        }
-
-        if ($zip) {
-            $html .= $zip;
-
-            if ($town) {
-                $html .= ' ' . $town;
-            }
-            $html .= ($single_line ? '' : '<br/>');
-        } elseif ($town) {
-            $html .= $town . ($single_line ? '' : '<br/>');
-        }
-
-        if (!$single_line && $fk_dep) {
-            $html .= static::staticDisplayDepartement($fk_dep, $fk_pays);
-
-            if ($fk_pays) {
-                $html .= ' - ' . static::staticDisplayCountry($fk_pays);
-            }
-        } elseif ($fk_pays) {
-            if ($single_line) {
-                $html .= ' - ';
-            }
-            $html .= static::staticDisplayCountry($fk_pays);
-        }
-
-        if ($html && $icon) {
-            $html = BimpRender::renderIcon('fas_map-marker-alt', 'iconLeft') . $html;
-        }
-
-        return $html;
+    public static function concatAdresse($address, $zip, $town, $fk_dep = 0, $fk_pays = 0, $icon = false, $single_line = false)
+    {
+        return BimpTools::displayAddress($address, $zip, $town, static::staticDisplayDepartement($fk_dep, $fk_pays), static::staticDisplayCountry($fk_pays));
     }
 
     public function displayFullAddress($icon = false, $single_line = false)
@@ -3291,19 +3264,20 @@ class Bimp_Societe extends BimpDolObject
             'warnings' => $warnings
         );
     }
-    
-    public function actionDeleteInCompta($data, &$success) {
+
+    public function actionDeleteInCompta($data, &$success)
+    {
         $errors = Array();
         $warnings = Array();
-        
+
         $errors = $this->updateField('code_compta', '');
         $errors = BimpTools::merge_array($errors, $this->updateField('code_compta_fournisseur', ''));
         $errors = BimpTools::merge_array($errors, $this->updateField('exported', 0));
-        
+
         return Array(
-            'errors' => $errors,
+            'errors'   => $errors,
             'warnings' => $wawrnings,
-            'success' => $success
+            'success'  => $success
         );
     }
 
@@ -3848,7 +3822,7 @@ class Bimp_Societe extends BimpDolObject
         $init_relance_actives = (int) $this->getInitData('relances_actives');
 
         $limit = 0;
-        
+
         if ($this->getData('outstanding_limit_atradius') > -1)
             $limit = $this->getData('outstanding_limit_atradius');
         if ($this->getData('outstanding_limit_icba') > $limit)

@@ -5,7 +5,9 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    // Vérifs marges factures:
+    public static $default_public_title = 'Vérifications et corrections diverses';
+
+    // Vérifs marges factures : 
 
     public function initCheckFacsMargin(&$data, &$errors = array())
     {
@@ -689,14 +691,109 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
+    // Correcetions positions: 
+
+    public function initCorrectPositions(&$data, &$errors = array())
+    {
+        $objects = array(
+            'equipements' => array(
+                'table' => 'be_equipment_place',
+                'field' => 'id_equipment'
+            ),
+            'packages'    => array(
+                'table' => 'be_package_place',
+                'field' => 'id_package'
+            )
+        );
+
+        $data['steps'] = array();
+
+        foreach ($objects as $name => $obj) {
+            $elements = array();
+            $rows = $this->db->getRows($obj['table'], 'position = 0', null, 'array', array($obj['field']), null, 'id', 'desc');
+
+            foreach ($rows as $r) {
+                if (!in_array((int) $r[$obj['field']], $elements)) {
+                    $elements[] = (int) $r[$obj['field']];
+                }
+            }
+
+            if (!empty($elements)) {
+                $data['steps']['correct_' . $name] = array(
+                    'label'                  => 'Correction ' . $name,
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => 250
+                );
+            }
+        }
+    }
+
+    public function executeCorrectPositions($step_name, &$errors = array(), $extra_data = array())
+    {
+        $objects = array(
+            'equipements' => array(
+                'instance'     => BimpObject::getInstance('bimpequipment', 'Equipment'),
+                'table'        => 'be_equipment_place',
+                'parent_field' => 'id_equipment',
+                'way'          => 'DESC'
+            ),
+            'packages'    => array(
+                'instance'     => BimpObject::getInstance('bimpequipment', 'BE_Package'),
+                'table'        => 'be_package_place',
+                'parent_field' => 'id_package',
+                'way'          => 'DESC'
+            )
+        );
+
+        if (preg_match('/^correct_(.+)$/', $step_name, $matches)) {
+            $name = $matches[1];
+
+            if (isset($objects[$name])) {
+                $obj = $objects[$name];
+                $this->setCurrentObject($obj['instance']);
+
+                foreach ($this->references as $id_obj) {
+                    $this->incProcessed();
+                    $obj['instance']->id = $id_obj;
+                    $rows = $this->db->getRows($obj['table'], $obj['parent_field'] . ' = ' . (int) $id_obj, null, 'array', array('id'), 'id', $obj['way']);
+
+                    if (is_array($rows)) {
+                        $check = true;
+                        $i = 1;
+                        foreach ($rows as $r) {
+                            if ($this->db->update($obj['table'], array(
+                                        'position' => $i
+                                            ), 'id = ' . (int) $r['id']) <= 0) {
+                                $this->Error($name . ' - Echec mise à jour ligne n° ' . $i . ' - ' . $this->db->err(), $obj['instance'], $r['id']);
+                                $check = false;
+                                break 2;
+                            }
+                            $i++;
+                        }
+
+                        if ($check) {
+                            $this->incUpdated();
+                            $this->Success('Correction des position OK', $obj['instance']);
+                            continue;
+                        }
+                    } else {
+                        $errors[] = $this->db->err();
+                    }
+                    $this->incIgnored();
+                }
+            }
+        }
+    }
+
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process:
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'Verifs',
-                    'title'       => 'Vérifications',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => '',
                     'type'        => 'other',
                     'active'      => 1

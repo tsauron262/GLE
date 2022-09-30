@@ -89,6 +89,12 @@ params:
         type: bool
         def: 0
         
+    use_logistique_periodicity: 
+        label: Activer les opérations logistiques périodiques
+        info: Achat / livraison / facturation périodiques
+        type: bool
+        def: 1
+        
     # PDFs: 
     pdf_add_cgv: 
         label: Ajouter CGV dans les docs PDF

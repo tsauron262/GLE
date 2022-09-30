@@ -1,0 +1,98 @@
+# Entité: prolease
+
+fields: 
+    ext_origine: 
+        label: Origine externe
+        values: 
+            array: origines
+        
+    id_ext_propale: 
+        label: 
+            callback: 
+                method: getExtDataFieldLabel
+                params:
+                    - id_ext_propale
+        type: id
+        default_value: 0
+        
+    id_ext_client: 
+        label:
+            callback: 
+                method: getExtDataFieldLabel
+                params:
+                    - id_ext_client
+        type: id
+        default_value: 0
+        
+    id_ext_contact: 
+        label:
+            callback: 
+                method: getExtDataFieldLabel
+                params:
+                    - id_ext_contact
+        type: id
+        default_value: 0
+        
+    id_ext_commercial: 
+        label: 
+            callback: 
+                method: getExtDataFieldLabel
+                params:
+                    - id_ext_commercial
+        type: id
+        default_value: 0
+        
+    ext_propale: 
+        label: 
+            callback: 
+                method: getExtDataFieldLabel
+                params:
+                    - ext_propale
+        type: json
+        
+    ext_client: 
+        label: 
+            callback: 
+                method: getExtDataFieldLabel
+                params:
+                    - ext_client
+        type: json
+        
+    ext_contact: 
+        label:
+            callback: 
+                method: getExtDataFieldLabel
+                params:
+                    - ext_contact
+        type: json
+        
+    ext_commercial: 
+        label:
+            callback: 
+                method: getExtDataFieldLabel
+                params:
+                    - ext_commercial
+        type: json
+        
+views: 
+    demande: 
+        rows: 
+            3: 
+                cols: 
+                    - type: custom
+                      show: 
+                          field_value: id_ext_client
+                      col_lg: 6
+                      col_md: 6
+                      custom: 
+                          callback: renderBimpClientData
+                    - type: custom
+                      show: 
+                          field_value: id_ext_propale
+                      col_lg: 6
+                      col_md: 6
+                      custom: 
+                          callback: renderBimpPropalData
+                      
+        
+        

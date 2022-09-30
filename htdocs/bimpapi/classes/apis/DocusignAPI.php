@@ -54,6 +54,9 @@ class DocusignAPI extends BimpAPI {
         ),
         'getUser' => array(
             'label' => 'Obtention de l\'utilisateur'
+        ),
+        'createHook' => array(
+            'label' => 'Création du webhook'
         )
     );
     
@@ -197,6 +200,77 @@ class DocusignAPI extends BimpAPI {
         
         return $remote_user['defaultAccountId'];
     }
+    
+    public function createHook($params, &$errors) {
+
+        $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
+        
+        $params = array(
+            'event' => 'envelope-completed',
+            'uri' => "https://localhost/bimp-erp/htdocs/",
+            'connectId' => "1", // hook_enveloppe_signed
+            'configurationType' => 'custom',
+            'urlToPublishTo' => 'https://destination.com',
+            'name' => 'Hook enveloppe signée',
+            
+            
+        );
+        
+       
+        $result = $this->execCurlCustom('createHook', array(
+            'fields' => $params,
+            'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/connect'
+            ), $errors, $response_headers, $response_code, $warnings);
+//{
+//
+//  "connectId": "sample string 1",
+//
+//  "configurationType": "sample string 2",
+//
+//  "urlToPublishTo": "sample string 3",
+//
+//  "name": "sample string 4",
+//
+//  "allowEnvelopePublish": "sample string 5",
+//
+//  "enableLog": "sample string 6",
+//
+//  "includeDocuments": "sample string 7",
+//
+//  "includeCertificateOfCompletion": "sample string 8",
+//
+//  "requiresAcknowledgement": "sample string 9",
+//
+//  "signMessageWithX509Certificate": "sample string 10",
+//
+//  "useSoapInterface": "sample string 11",
+//
+//  "includeTimeZoneInformation": "sample string 12",
+//
+//  "includeHMAC": "sample string 13",
+//
+//  "includeEnvelopeVoidReason": "sample string 14",
+//
+//  "includeSenderAccountasCustomField": "sample string 15",
+//
+//  "envelopeEvents": "sample string 16",
+//
+//  "recipientEvents": "sample string 17",
+//
+//  "userIds": "sample string 18",
+//
+//  "soapNamespace": "sample string 19",
+//
+//  "allUsers": "sample string 20",
+//
+//  "includeCertSoapHeader": "sample string 21",
+//
+//  "includeDocumentFields": "sample string 22"
+//
+//}
+    
+    }
+    
     
     // Getters
     
@@ -451,11 +525,13 @@ class DocusignAPI extends BimpAPI {
     public function testRequest(&$errors = array(), &$warnings = array()) {
         
         $id_account = $this->userAccount->getData('login');
-        $params = array();
-        $params['id_account'] = '46a93e07-3d31-4e8b-9cca-42706740d150';
-        $params['id_envelope'] = '829172a0-2169-4716-8b72-89f7ed6b7cec';
         
-        $this->getEnvelope($params);
+        
+        $params = array();
+        $params['id_account'] = $id_account;
+//        $params['id_envelope'] = '829172a0-2169-4716-8b72-89f7ed6b7cec';
+//        
+//        $this->getEnvelope($params);
         
 //        $this->getTemplates($params);
         
@@ -463,10 +539,10 @@ class DocusignAPI extends BimpAPI {
 
 //        $this->reqCreateEnvelope($params, $errors);
         
-        
+        $this->createHook($params, $errors);
 
     }
-
+    
     public function connect(&$errors = array(), &$warnings = array()) {
         
         $this->tentative_connexion++;
@@ -614,21 +690,21 @@ class DocusignAPI extends BimpAPI {
                         'id_api' => $api->id,
                         'name' => 'prod_oauth_client_secret',
                         'title' => 'Secret client OAuth en mode prod',
-                        'value' => ''
+                        'value' => 'fb0418e3-8213-43c0-a655-3c6c0bed91b2'
                             ), true, $warnings, $warnings);
 
             $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name' => 'prod_oauth_client_id',
                         'title' => 'ID Client OAuth en mode prod',
-                        'value' => ''
+                        'value' => '3b602db6-78eb-47f2-8a61-454fcb21836e'
                             ), true, $warnings, $warnings);
 
             $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name' => 'prod_id_compte_api',
                         'title' => 'ID Client OAuth en mode prod',
-                        'value' => ''
+                        'value' => '9684ecbb-84b3-4191-b5ff-9f93878eda82'
                             ), true, $warnings, $warnings);
 
 //                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(

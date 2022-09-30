@@ -303,7 +303,11 @@ class box_bimp_core extends ModeleBoxes
     }
     
     function addCamenbere($titre, $data){
-        $this->camenberes[] = array('titre'=>$titre, 'data'=>$data);
+        if(count($data) > 0)
+            $this->camenberes[] = array('titre'=>$titre, 'data'=>$data);
+        else{
+            BimpCore::addlog('Ajout de camenbere sans data '.$titre);
+        }
     }
     
     function addList($legend, $data){

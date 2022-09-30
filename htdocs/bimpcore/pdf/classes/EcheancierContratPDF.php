@@ -7,6 +7,7 @@
         public static $type = 'contract';
         public $contrat;
         public $echeancier;
+        public $client;
 
         public function __construct($db)
         {
@@ -24,6 +25,7 @@
             
             $echeancier         = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
             $this->contrat      = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->object->id);
+            $this->client             = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->contrat->getData('fk_soc'));
             
             if($echeancier->find(Array('id_contrat' => $this->contrat->id), 1)) {
                 $this->echeancier = $echeancier;
@@ -97,6 +99,44 @@
         public function renderTop()
         {
 
+        }
+        
+        public function renderDocInfos() {
+            $primary = BimpCore::getParam('pdf/primary', '000000');
+
+            $html = '';
+
+            $html .= '<div class="section addresses_section">';
+            $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
+            $html .= '<tr>';
+            $html .= '<td style="width: 55%"></td>';
+            $html .= '<td style="width: 5%"></td>';
+            $html .= '<td class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">';
+            $html .= '<span style="color: #' . $this->primary . '">DESTINATAIRE</span></td>';
+            $html .= '</tr>';
+            $html .= '</table>';
+
+            $html .= '<table style="width: 100%" cellspacing="0" cellpadding="10px">';
+            $html .= '<tr>';
+            $html .= '<td class="sender_address" style="width: 55%">';
+            $html .= $this->getDocInfosHtml();
+            $html .= '</td>';
+            $html .= '<td style="width: 5%"></td>';
+            $html .= '<td style="width: 40%">';
+            
+            $html .= $this->client->getName() . '<br />';
+            $html .= $this->client->getData('address') . '<br />';
+            $html .= $this->client->getData('zip') . ', ' . $this->client->getData('town');
+            
+            //$html .= $this->getTargetInfosHtml();
+
+            $html .= '</td>';
+            $html .= '</tr>';
+            $html .= '</table>';
+            $html .= '</div>';
+
+            $this->writeContent($html);
+            
         }
 
         public function renderLines()

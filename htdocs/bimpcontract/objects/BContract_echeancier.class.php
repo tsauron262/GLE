@@ -856,6 +856,7 @@ class BContract_echeancier extends BimpObject {
         $parent = $this->getParentInstance();
         $this->dol_object->id_contrat = $this->getData('id_contrat');
         $this->dol_object->afficher_total = $data['total_lines'];
+        //$this->afficherContact = (int) $data['afficherContact']; 
         $url = DOL_URL_ROOT . '/document.php?modulepart=' . 'contrat' . '&file=' . $parent->getRef() . '/Echeancier.pdf';
         $errors = $warnings = array();
         $success = "PDF de l'échéancier généré avec succès";

@@ -12,5 +12,7 @@ class Actionsbimptheme
         if ($conf->theme == 'BimpTheme') {
             BimpTheme::initLayout();
         }
+
+        return 0;
     }
 }

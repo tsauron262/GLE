@@ -7403,20 +7403,25 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public static function renderListFileForObject($objT, $with_delete = 0)
     {
-        $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
-        $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers ' . $objT->getNomUrl(), 'fas_bars');
+        if (is_a($objT, 'BimpObject')) {
+            $obj = BimpObject::getBimpObjectInstance('bimpcore', 'BimpFile');
+            $bc_list = new BC_ListTable($obj, 'default', 1, null, 'Liste des fichiers ' . $objT->getLink(), 'fas_bars');
 
-        $bc_list->addFieldFilterValue('a.parent_object_name', get_class($objT));
-        $bc_list->params['add_form_values']['fields']['parent_object_name'] = get_class($objT);
-        $bc_list->addFieldFilterValue('a.parent_module', $objT->module);
-        $bc_list->params['add_form_values']['fields']['parent_module'] = $objT->module;
-        $bc_list->addFieldFilterValue('a.id_parent', $objT->id);
-        $bc_list->params['add_form_values']['fields']['id_parent'] = $objT->id;
-        if (!$with_delete)
-            $bc_list->addFieldFilterValue('a.deleted', 0);
-        $bc_list->identifier .= get_class($objT) . "-" . $objT->id;
+//            $bc_list->addFieldFilterValue('a.parent_object_name', get_class($objT));
+            $bc_list->addFieldFilterValue('a.parent_object_name', $objT->object_name);
+            $bc_list->params['add_form_values']['fields']['parent_object_name'] = $objT->object_name;
+            $bc_list->addFieldFilterValue('a.parent_module', $objT->module);
+            $bc_list->params['add_form_values']['fields']['parent_module'] = $objT->module;
+            $bc_list->addFieldFilterValue('a.id_parent', $objT->id);
+            $bc_list->params['add_form_values']['fields']['id_parent'] = $objT->id;
+            if (!$with_delete)
+                $bc_list->addFieldFilterValue('a.deleted', 0);
+            $bc_list->identifier .= $objT->object_name . "-" . $objT->id;
 
-        return $bc_list->renderHtml();
+            return $bc_list->renderHtml();
+        }
+
+        return '';
     }
 
     public function renderLogo($format = 'mini', $preview = false)

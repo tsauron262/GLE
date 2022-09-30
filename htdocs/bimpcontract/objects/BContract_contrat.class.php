@@ -2278,37 +2278,39 @@ class BContract_contrat extends BimpDolObject
             );
         }
         
-//        // Téléchargement des fichiers
-//        if($this->getData('id_signature')) {
-//            
-//            $file_name = $this->getSignatureDocFileName('contrat', true);
-//            $file_dir = $this->getSignatureDocFileDir('contrat');
-//            if(file_exists($file_dir . $file_name)) {
-//                $button_download = array(
-//                    'label'   => 'Retélécharger contrat signé DocuSign',
-//                    'icon'    => 'fas_file-download',
-//                    'onclick' => $this->getJsActionOnclick('downloadSignature', array(), array('confirm_msg' => "Le fichier existe déjà, remplacer ?")));
-//            } else {
-//                $button_download = array(
-//                    'label'   => 'Télécharger contrat signé DocuSign',
-//                    'icon'    => 'fas_file-download',
-//                    'onclick' => $this->getJsActionOnclick('downloadSignature'));
-//            }
-//            $buttons[] = $button_download;
-//            
-//        }
-//        
-//        // Création signature TODO remettre les conditions
-//        elseif($user->rights->contrat->creer and 
-//                    ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_SUP || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUT_WAIT_ACTIVER)) {
-//
-//            $buttons[] = array(
-//                'label'   => 'Créer signature DocuSign',
-//                'icon'    => 'fas_signature',
-//                'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
-//                    'form_name' => 'create_signature_docu_sign'
-//            )));
-//        }
+        if($user->admin){
+        // Téléchargement des fichiers
+        if($this->getData('id_signature')) {
+            
+            $file_name = $this->getSignatureDocFileName('contrat', true);
+            $file_dir = $this->getSignatureDocFileDir('contrat');
+            if(file_exists($file_dir . $file_name)) {
+                $button_download = array(
+                    'label'   => 'Retélécharger contrat signé DocuSign',
+                    'icon'    => 'fas_file-download',
+                    'onclick' => $this->getJsActionOnclick('downloadSignature', array(), array('confirm_msg' => "Le fichier existe déjà, remplacer ?")));
+            } else {
+                $button_download = array(
+                    'label'   => 'Télécharger contrat signé DocuSign',
+                    'icon'    => 'fas_file-download',
+                    'onclick' => $this->getJsActionOnclick('downloadSignature'));
+            }
+            $buttons[] = $button_download;
+            
+        }
+        
+        // Création signature TODO remettre les conditions
+        elseif($user->rights->contrat->creer and 
+                    ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_SUP || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUT_WAIT_ACTIVER)) {
+
+            $buttons[] = array(
+                'label'   => 'Créer signature DocuSign',
+                'icon'    => 'fas_signature',
+                'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
+                    'form_name' => 'create_signature_docu_sign'
+            )));
+        }
+        }
                     
         return $buttons;
     }

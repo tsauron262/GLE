@@ -75,6 +75,8 @@ class ActionsBimpcore
 
             define('BIMPCORE_INIT', 1);
         }
+
+        return 0;
     }
 
     function initBimpLayout($parameters, &$object, &$action, $hookmanager)
@@ -86,6 +88,8 @@ class ActionsBimpcore
         if (is_a($main_controller, 'BimpController')) {
             $main_controller->initLayout();
         }
+
+        return 0;
     }
 
     function getNomUrl($parameters, &$object, &$action, $hookmanager)

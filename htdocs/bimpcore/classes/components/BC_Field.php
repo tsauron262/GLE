@@ -236,6 +236,13 @@ class BC_Field extends BimpComponent
             if ($this->isEditable()) {
                 $html .= $this->renderInput();
             } else {
+                if (method_exists($this->object, 'getInputValue')) {
+                    $input_val = $this->object->getInputValue($this->name);
+
+                    if (!is_null($input_val)) {
+                        $this->value = $input_val;
+                    }
+                }
                 $content = $this->displayValue();
 
                 $help = $this->object->getConf('fields/' . $this->name . '/input/help', '');
@@ -363,7 +370,7 @@ class BC_Field extends BimpComponent
             }
             $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($value) . '">';
         }
-        
+
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/displays/' . $this->display_name, $this->name, $this->params, $this->value);
         $display->no_html = $this->no_html;
         $display->setDisplayOptions($this->display_options);

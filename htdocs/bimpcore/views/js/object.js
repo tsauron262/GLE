@@ -179,7 +179,7 @@ function setObjectNewStatus($button, object_data, new_status, extra_data, $resul
         id_object: object_data.id_object,
         success: function (result, bimpAjax) {
             if (typeof (successCallback) === 'function') {
-                successCallback(result);
+                successCallback(result, bimpAjax);
             }
             $('body').trigger($.Event('objectChange', {
                 module: bimpAjax.module,

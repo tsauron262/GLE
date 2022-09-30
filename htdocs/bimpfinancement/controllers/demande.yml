@@ -24,25 +24,61 @@ sections:
             struct: 
                 type: view
                 view: 
-                    panel: 1
+                    panel: 0
                     name: demande
                     object: demande
           - id: elements
             title: Elements financés
             struct: 
-                type: list
-                list: 
-                    name: default
-                    object: demande
-                    children: lines
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view: 
+                              name: montants
+                              object: demande
+                    - cols: 
+                        - type: list
+                          list: 
+                              name: default
+                              object: demande
+                              children: lines
+                    - cols: 
+                        - type: list
+                          col_md: 6
+                          col_lg: 6
+                          list: 
+                              name: default
+                              object: demande
+                              children: frais_divers
+                        - type: list
+                          col_md: 6
+                          col_lg: 6
+                          list: 
+                              name: default
+                              object: demande
+                              children: rents_except
           - id: refinanceurs
             title: Demandes refinanceurs
-            struct: 
-                type: list
-                list: 
-                    name: default
+            show: 
+                callback: 
+                    method: showDemandesRefinanceurs
                     object: demande
-                    children: demandes_refinanceurs
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view: 
+                              name: montants
+                              object: demande
+                    - cols: 
+                        - type: list
+                          list: 
+                              name: default
+                              object: demande
+                              children: demandes_refinanceurs
+                              
           - id: files
             title: Fichiers joints
             struct:

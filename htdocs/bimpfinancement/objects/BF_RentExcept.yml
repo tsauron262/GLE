@@ -1,10 +1,10 @@
 extends: BF_Frais
 
-table: bf_rbt_except
+table: bf_rent_except
 
 labels:
-    name: remboursement exceptionnel
-    name_plur: remboursements exceptionnels
+    name: loyer intercalaire
+    name_plur: loyers intercalaires
                 
 fields: 
     payment:
@@ -15,7 +15,7 @@ fields:
         
 list:
     positions: 1
-    title: Remboursements exceptionnels
+    title: Loyers intercalaires
     icon: calendar-plus-o
     cols:
         date: 

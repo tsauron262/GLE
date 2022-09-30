@@ -80,9 +80,16 @@ class BimpCore
             }
 
             if (self::isContextPrivate()) {
+                if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . BIMP_EXTENDS_ENTITY . '.css')) {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . BIMP_EXTENDS_ENTITY . '.css';
+                }
                 self::$files['js'][] = '/bimpcore/views/js/notification.js';
             } else {
-                self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+                if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . BIMP_EXTENDS_ENTITY . '.css')) {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . BIMP_EXTENDS_ENTITY . '.css';
+                } else {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+                }
             }
 
             if (!self::isModuleActive('bimpdatasync')) {

@@ -2041,7 +2041,7 @@ class BimpObject extends BimpCache
         }
     }
 
-    public function setNewStatus($new_status, $extra_data = array(), &$warnings = array())
+    public function setNewStatus($new_status, $extra_data = array(), &$warnings = array(), $force_status = false)
     {
 //        BimpLog::actionStart('bimpobject_new_status', 'Nouveau statut', $this);
 
@@ -2054,9 +2054,9 @@ class BimpObject extends BimpCache
             $status_label = is_array(static::$status_list[$new_status]) ? static::$status_list[$new_status]['label'] : static::$status_list[$new_status];
             $object_label = $this->getLabel('the') . (isset($this->id) && $this->id ? ' ' . $this->id : '');
 
-            if (!$this->canSetStatus($new_status)) {
+            if (!$force_status && !$this->canSetStatus($new_status)) {
                 $errors[] = 'Vous n\'avez pas la permission de passer ' . $this->getLabel('this') . ' au statut "' . $status_label . '"';
-            } elseif ($this->isNewStatusAllowed($new_status, $errors)) {
+            } elseif ($force_status || $this->isNewStatusAllowed($new_status, $errors)) {
                 $error_msg = 'Impossible de passer ' . $object_label;
                 $error_msg .= ' au statut "' . $status_label . '"';
 

@@ -1158,7 +1158,7 @@ class BC_ListTable extends BC_List
 
         if (!is_null($this->params['filters_panel'])) {
             $html .= '<div class="row" style="margin-top: 0">';
-            $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-4 col-md-3 col-lg-2"' . (!(int) $this->params['filters_panel_open'] ? ' style="display: none"' : '') . '>';
+            $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-4 col-md-3 col-lg-2" style="' . (!(int) $this->params['filters_panel_open'] ? ' display: none;' : '') . '">';
             $html .= $this->renderFiltersPanel();
             $html .= '</div>';
             $html .= '<div class="objectlistTableContainer ' . ((int) $this->params['filters_panel_open'] ? 'col-xs-12 col-sm-8 col-md-9 col-lg-10' : 'col-xs-12') . '">';

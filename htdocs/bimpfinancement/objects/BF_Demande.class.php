@@ -5,7 +5,8 @@ class BF_Demande extends BimpObject
 
     const STATUS_NEW = -1;
     const STATUS_DRAFT = 0;
-    const STATUS_ATTENTE = 1;
+    const STATUS_VALIDATED = 1;
+    const STATUS_ATTENTE = 2;
     const STATUS_ACCEPTED = 10;
     const STATUS_REFUSED = 20;
     const STATUS_CANCELED = 21;
@@ -13,10 +14,11 @@ class BF_Demande extends BimpObject
     public static $status_list = array(
         self::STATUS_NEW       => array('label' => 'Nouvelle demande', 'far_file', 'classes' => array('info')),
         self::STATUS_DRAFT     => array('label' => 'Brouillon', 'icon' => 'far_file', 'classes' => array('warning')),
-        self:: STATUS_ATTENTE  => array('label' => 'Acceptation refinanceur en attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
-        self:: STATUS_ACCEPTED => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
-        self:: STATUS_REFUSED  => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
-        self:: STATUS_CANCELED => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger'))
+        self::STATUS_VALIDATED => array('label' => 'Demande refinanceur à effectuer', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        self::STATUS_ATTENTE   => array('label' => 'Acceptation refinanceur en attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        self::STATUS_ACCEPTED  => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::STATUS_REFUSED   => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
+        self::STATUS_CANCELED  => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger'))
     );
 
     const DEVIS_NONE = 0;
@@ -51,6 +53,7 @@ class BF_Demande extends BimpObject
         1 => 'A terme échu',
         2 => 'A terme à échoir'
     );
+    protected $montants = null;
 
     // Getters booléens: 
 
@@ -79,7 +82,15 @@ class BF_Demande extends BimpObject
         return 1;
     }
 
-    public function areDemandesRefinanceursEditable()
+    public function showDemandesRefinanceurs()
+    {
+        if ($this->isLoaded() && (int) $this->getData('status') > 0) {
+            return 1;
+        }
+        return 0;
+    }
+
+    public function areDemandesRefinanceursEditable(&$errors = array())
     {
         if (!$this->isLoaded()) {
             return 0;
@@ -87,15 +98,9 @@ class BF_Demande extends BimpObject
 
         $status = (int) $this->getData('status');
 
-        if ($status === self::STATUS_CANCELED) {
+        if ($status <= 0 || in_array($status, array(BF_Demande::STATUS_ACCEPTED, BF_Demande::STATUS_CANCELED))) {
+            $errors[] = 'Le statut actuel de la demande de financement ne permet pas d\'ajouter des demandes refinanceurs';
             return 0;
-        }
-
-        if ($status === self::STATUS_ACCEPTED) {
-            $devis_status = (int) $this->getData('devis_status');
-            if ($devis_status >= 10) {
-                return 0;
-            }
         }
 
         return 1;
@@ -110,30 +115,60 @@ class BF_Demande extends BimpObject
         switch ($action) {
             case 'cancel':
                 if ((int) $this->getData('status') >= 10) {
-                    $errors[] = 'Le statut actuel de cette demande de financement ne permet pas son annulation';
+                    $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas son annulation';
                     return 0;
                 }
                 return 1;
 
             case 'reopen':
                 if ((int) $this->getData('status') !== self::STATUS_CANCELED) {
-                    $errors[] = 'Cette demande de financement n\'est pas au statut "Annulée"';
+                    $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut ' . self::$status_list[self::STATUS_CANCELED]['label'];
                     return 0;
                 }
                 return 1;
 
             case 'generateDevisFinancement':
                 if ((int) $this->getData('status') !== self::STATUS_ACCEPTED) {
-                    $errors[] = 'Cette demande de financement n\'est pas au statut "Acceptée"';
+                    $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut ' . self::$status_list[self::STATUS_ACCEPTED]['label'];
                     return 0;
                 }
                 if ((int) $this->getData('id_devis_financement')) {
-                    $errors[] = 'Le devis de financement a déj) été généré';
+                    $errors[] = 'Le devis de financement a déjà été généré';
                     return 0;
                 }
                 return 1;
         }
         return parent::isActionAllowed($action, $errors);
+    }
+
+    public function isNewStatusAllowed($new_status, &$errors = array())
+    {
+        switch ($new_status) {
+            case self::STATUS_VALIDATED:
+                if ((int) $this->getData('status') !== self::STATUS_DRAFT) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut ' . self::$status_list[self::STATUS_DRAFT]['label'];
+                    return 0;
+                }
+                $lines = $this->getLines('not_text');
+                if (empty($lines)) {
+                    $errors[] = 'Aucun élément à financer ajouté à cette demande';
+                    return 0;
+                }
+                return 1;
+
+            case self::STATUS_DRAFT:
+                if ((int) $this->getData('status') !== self::STATUS_VALIDATED) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut ' . self::$status_list[self::STATUS_VALIDATED]['label'];
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::isNewStatusAllowed($new_status, $errors);
+    }
+
+    public function isDemandeValid(&$errors = array())
+    {
+        return 1;
     }
 
     // Getters Params: 
@@ -142,11 +177,32 @@ class BF_Demande extends BimpObject
     {
         $buttons = array();
 
-        if ($this->isActionAllowed('generateDevis') && $this->canSetAction('generateDevis')) {
+        if ($this->isNewStatusAllowed(self::STATUS_VALIDATED) && $this->canSetStatus(self::STATUS_VALIDATED)) {
+            $buttons[] = array(
+                'label'   => 'Valider les élements financés',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsNewStatusOnclick(self::STATUS_VALIDATED, array(), array(
+                    'confirm_msg'      => 'Veuillez confirmer',
+                    'success_callback' => 'function($result, bimpAjax) {bimp_reloadPage()}'
+                ))
+            );
+        }
+        if ($this->isNewStatusAllowed(self::STATUS_DRAFT) && $this->canSetStatus(self::STATUS_DRAFT)) {
+            $buttons[] = array(
+                'label'   => 'Remettre en brouillon',
+                'icon'    => 'fas_undo',
+                'onclick' => $this->getJsNewStatusOnclick(self::STATUS_DRAFT, array(), array(
+                    'confirm_msg'      => 'Veuillez confirmer',
+                    'success_callback' => 'function($result, bimpAjax) {bimp_reloadPage()}'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('generateDevisFinancement') && $this->canSetAction('generateDevisFinancement')) {
             $buttons[] = array(
                 'label'   => 'Générer le devis de financement',
                 'icon'    => 'fas_cogs',
-                'onclick' => $this->getJsActionOnclick('generateDevis', array(), array())
+                'onclick' => $this->getJsActionOnclick('generateDevisFinancement', array(), array())
             );
         }
 
@@ -182,7 +238,7 @@ class BF_Demande extends BimpObject
         return array();
     }
 
-    public function getSupplierContactsAray($include_empty = true, $active_only = true)
+    public function getSupplierContactsArray($include_empty = true, $active_only = true)
     {
         $id_supplier = (int) $this->getData('id_supplier');
 
@@ -217,7 +273,82 @@ class BF_Demande extends BimpObject
         return $factures;
     }
 
-    // Getters données:
+    // Getters montants:
+
+    public function getMontants($recalculate = false)
+    {
+        if ($recalculate || is_null($this->montants)) {
+            $this->montants = array(
+                'total_emprunt'      => $this->getTotalEmprunt(),
+                'total_demande'      => $this->getTotalDemande(),
+                'total_frais_div'    => $this->getTotalFraisDivers(),
+                'total_loyers'       => $this->getTotalLoyer(),
+                'total_loyers_inter' => $this->getTotalRentsExcept(),
+                'commisson_comm'     => $this->getCommissionCommerciale(),
+                'commission_fin'     => $this->getCommissionFinanciere()
+            );
+            $this->montants['marge_financement'] = $this->montants['total_emprunt'] - $this->montants['total_demande'] - $this->montants['commisson_comm'];
+            $this->montants['marge_extra'] = $this->montants['total_loyers_inter'] + $this->montants['total_frais_div'];
+            $this->montants['total_marges'] = $this->montants['marge_financement'] + $this->montants['marge_extra'];
+        }
+
+        return $this->montants;
+    }
+
+    public function getTotalDemande($withComm = true)
+    {
+        $tot = $this->getData('montant_materiels') + (float) $this->getData('montant_services') + (float) $this->getData('montant_logiciels');
+
+        if ($withComm) {
+            $tot += $this->getCommissionCommerciale() + $this->getCommissionFinanciere();
+        }
+        return (float) $tot;
+    }
+
+    public function getTotalEmprunt()
+    {
+        // Todo: selon refin. sélectionné
+        return 0;
+    }
+
+    public function getTotalLoyer()
+    {
+        // Todo: selon refin. sélectionné
+        return 0;
+    }
+
+    public function getTotalRentsExcept()
+    {
+        $total = 0;
+
+        $loyerInters = $this->getChildrenObjects('rents_except');
+        foreach ($loyerInters as $loyerInter) {
+            $total += $loyerInter->getData("amount");
+        }
+
+        return $total;
+    }
+
+    public function getTotalFraisDivers()
+    {
+        $fraisDivs = $this->getChildrenObjects('frais_divers');
+        $total = 0;
+        foreach ($fraisDivs as $fraisDiv)
+            $total += $fraisDiv->getData("amount");
+        return $total;
+    }
+
+    public function getCommissionCommerciale()
+    {
+        return $this->getTotalDemande(0) * $this->getData("commission_commerciale") / 100;
+    }
+
+    public function getCommissionFinanciere()
+    {
+        return ($this->getTotalDemande(0) + $this->getCommissionCommerciale()) * $this->getData("commission_financiere") / 100;
+    }
+
+    // getters données: 
 
     public function getLines($types = null)
     {
@@ -273,80 +404,6 @@ class BF_Demande extends BimpObject
             }
         }
         return 0;
-    }
-
-    public function getTotalDemande($withComm = true)
-    {
-        $tot = $this->getData('montant_materiels') + (float) $this->getData('montant_services') + (float) $this->getData('montant_logiciels');
-
-        if ($withComm) {
-            $tot += $this->getCommissionCommerciale() + $this->getCommissionFinanciere();
-        }
-        return (float) $tot;
-    }
-
-    public function getTotalEmprunt()
-    {
-        $total_emprunt = 0;
-        $refinanceurs = $this->getChildrenObjects('demandes_refinanceurs', array(
-            'status' => array('not_in' => 3)
-        ));
-
-        foreach ($refinanceurs as $refinanceur) {
-            $total_emprunt += $refinanceur->getTotalEmprunt();
-        }
-        return $total_emprunt;
-    }
-
-    public function getTotalLoyer()
-    {
-        $totalEmp = 0;
-        $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
-            'status'   => 2, 'periode2' => 0
-        ));
-        foreach ($refinanceurs as $refinanceur) {
-            $totalEmp += $refinanceur->getTotalLoyer();
-        }
-        return $totalEmp;
-    }
-
-    public function getMarge($type = 0)
-    {//type = 0 tous    1 = Financement  2 = Frais divers + Remb excep
-        $total = 0;
-        if ($type == 0 || $type == 1) {
-            $total += $this->getTotalEmprunt() - $this->getTotalDemande(0) - $this->getCommissionCommerciale();
-        }
-        if ($type == 0 || $type == 2)
-            $total += $this->getTotalRbtsExcept() + $this->getTotalFraisDivers();
-        return $total;
-    }
-
-    public function getTotalRbtsExcept()
-    {
-        $loyerInters = $this->getChildrenObjects('rbts_except');
-        $total = 0;
-        foreach ($loyerInters as $loyerInter)
-            $total += $loyerInter->getData("amount");
-        return $total;
-    }
-
-    public function getTotalFraisDivers()
-    {
-        $fraisDivs = $this->getChildrenObjects('frais_divers');
-        $total = 0;
-        foreach ($fraisDivs as $fraisDiv)
-            $total += $fraisDiv->getData("amount");
-        return $total;
-    }
-
-    public function getCommissionCommerciale()
-    {
-        return $this->getTotalDemande(0) * $this->getData("commission_commerciale") / 100;
-    }
-
-    public function getCommissionFinanciere()
-    {
-        return ($this->getTotalDemande(0) + $this->getCommissionCommerciale()) * $this->getData("commission_financiere") / 100;
     }
 
     public function getRemainingElementsToOrder()
@@ -409,6 +466,14 @@ class BF_Demande extends BimpObject
         }
 
         return $commFourns;
+    }
+
+    // Affichages: 
+
+    public function displayTotalDemande()
+    {
+        $total = $this->getTotalDemande();
+        return '<span style="font-size: 14px; font-weight: bold">' . BimpTools::displayMoneyValue($total, 'EUR', 1, 0, 0, 2, 1) . '</span>';
     }
 
     // Rendus HTML: 
@@ -764,7 +829,7 @@ class BF_Demande extends BimpObject
                 $bc_list = new BC_ListTable($facture, 'default', 1, null, 'Factures frais divers et loyers intercalaires', 'fas_file-invoice-dollar');
                 $bc_list->addObjectAssociationFilter($this, $this->id, 'factures');
                 $bc_list->addObjectChangeReload('BF_FraisDivers');
-                $bc_list->addObjectChangeReload('BF_RbtExcept');
+                $bc_list->addObjectChangeReload('BF_RentExcept');
                 $html = $bc_list->renderHtml();
             }
         }
@@ -961,28 +1026,29 @@ class BF_Demande extends BimpObject
         return $html;
     }
 
-    public function renderInfoFin()
+    public function renderInfosFin()
     {
-        $this->checkObject();
-        $html .= '<table class="bimp_list_table">';
-        $html .= '<tr>';
-        $html .= '<th>Total emprunt</th>';
-        $html .= '<td>' . BimpTools::displayMoneyValue($this->getTotalEmprunt()) . '</td>';
-        $html .= '</tr>';
-        $html .= '<tr>';
-        $html .= '<th>Marge sur le financement</th>';
-        $html .= '<td>' . BimpTools::displayMoneyValue($this->marges['marge1']) . '</td>';
-        $html .= '</tr>';
-        $html .= '<tr>';
-        $html .= '<th>Marge loyers inter + frais divers</th>';
-        $html .= '<td>' . BimpTools::displayMoneyValue($this->marges['marge2']) . '</td>';
-        $html .= '</tr>';
-        $html .= '<tr>';
-        $html .= '<th>Marge totale</th>';
-        $html .= '<td>' . BimpTools::displayMoneyValue($this->marges['total_marge']) . '</td>';
-        $html .= '</tr>';
-        $html .= '</table>';
+//        $this->checkObject();
+//        $html .= '<table class="bimp_list_table">';
+//        $html .= '<tr>';
+//        $html .= '<th>Total emprunt</th>';
+//        $html .= '<td>' . BimpTools::displayMoneyValue($this->getTotalEmprunt()) . '</td>';
+//        $html .= '</tr>';
+//        $html .= '<tr>';
+//        $html .= '<th>Marge sur le financement</th>';
+//        $html .= '<td>' . BimpTools::displayMoneyValue($this->marges['marge1']) . '</td>';
+//        $html .= '</tr>';
+//        $html .= '<tr>';
+//        $html .= '<th>Marge loyers inter + frais divers</th>';
+//        $html .= '<td>' . BimpTools::displayMoneyValue($this->marges['marge2']) . '</td>';
+//        $html .= '</tr>';
+//        $html .= '<tr>';
+//        $html .= '<th>Marge totale</th>';
+//        $html .= '<td>' . BimpTools::displayMoneyValue($this->marges['total_marge']) . '</td>';
+//        $html .= '</tr>';
+//        $html .= '</table>';
 
+        $html .= BimpRender::renderAlerts('En cours de dev', 'warning');
         return BimpRender::renderPanel('Totaux', $html, '', array(
                     'type' => 'secondary',
                     'icon' => 'fas_euro-sign'
@@ -1017,7 +1083,41 @@ class BF_Demande extends BimpObject
 
     // Traitements: 
 
-    public function calcMontants()
+    public function checkObject($context = '', $field = '')
+    {
+//        $this->resetMsgs();
+//
+//        $factBanque = $this->getChildObject('facture_banque');
+//        if (BimpObject::objectLoaded($factBanque)) {
+//            $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');
+//            if ($diference > 0.1 || $diference < -0.1)
+//                $this->msgs['errors'][] = "Attention différence entre facture banque et emprunt de : " . BimpTools::displayMoneyValue($diference);
+//            
+//        }
+//
+//        $marge1 = $this->getMarge(1);
+//        $marge2 = $this->getMarge(2);
+//        $marge = $marge1 + $marge2;
+//        if ($marge < -1)
+//            $this->msgs['errors']['marge-'] = "Attention la marge est négative : " . $marge;
+//
+//        $asso = new BimpAssociation($this, 'factures');
+//        $tot = $nbF = 0;
+//        foreach ($asso->getAssociatesList() as $id_facture) {
+//            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+//            if (BimpObject::objectLoaded($facture)) {
+//                $tot += $facture->getData('total');
+//                $nbF++;
+//            }
+//        }
+//        if ($nbF) {
+//            $diference = ($this->getTotalFraisDiv() + $this->getTotalLoyerInter()) - $tot;
+//            if ($diference > 0.1 || $diference < -0.1)
+//                $this->msgs['errors']['fraisdivdif'] = "Les factures de frais divers et de loyers intercalaires ne correspondent pas. Différence de : " . BimpTools::displayMoneyValue($diference);
+//        }
+    }
+
+    public function calcLinesMontants()
     {
         $errors = array();
 
@@ -1075,49 +1175,53 @@ class BF_Demande extends BimpObject
         return $errors;
     }
 
-    public function checkStatus()
+    public function checkStatus(&$warnings = array())
     {
+        $errors = array();
         if ($this->isLoaded()) {
             $cur_status = (int) $this->getData('status');
+
             if ($cur_status === self::STATUS_CANCELED) {
                 return;
             }
 
-            $new_status = self::STATUS_DRAFT;
-            if ($cur_status < 0) {
-                $new_status = self::STATUS_NEW;
-            }
+            if ($cur_status >= self::STATUS_VALIDATED) {
+                $new_status = self::STATUS_VALIDATED;
+                $drs = $this->getChildrenObjects('demandes_refinanceurs');
 
-            $drs = $this->getChildrenObjects('demandes_refinanceurs');
+                if (count($drs)) {
+                    $has_attente = false;
+                    $has_accepted = false;
+                    $has_refused = false;
 
-            if (count($drs)) {
-                $new_status = self::STATUS_DRAFT;
+                    foreach ($drs as $dr) {
+                        $dr_status = (int) $dr->getData('status');
+                        if ($dr_status == BF_DemandeRefinanceur::STATUS_SELECTIONNEE) {
+                            $has_accepted = true;
+                        } elseif ($dr_status < 20 && $dr_status > 0) {
+                            $has_attente = true;
+                        } elseif ($dr_status == BF_DemandeRefinanceur::STATUS_REFUSEE) {
+                            $has_refused = true;
+                        }
+                    }
 
-                $has_attente = false;
-                $has_accepted = false;
-                $has_refused = false;
-
-                foreach ($drs as $dr) {
-                    $dr_status = (int) $dr->getData('status');
-                    if ($dr_status == BF_DemandeRefinanceur::STATUS_SELECTIONNEE) {
-                        $has_accepted = true;
-                    } elseif ($dr_status < 20) {
-                        $has_attente = true;
-                    } elseif ($dr_status == BF_DemandeRefinanceur::STATUS_REFUSEE) {
-                        $has_refused = true;
+                    if ($has_accepted) {
+                        $new_status = self::STATUS_ACCEPTED;
+                    } elseif ($has_attente) {
+                        $new_status = self::STATUS_ATTENTE;
+                    } elseif ($has_refused) {
+                        $new_status = self::STATUS_REFUSED;
                     }
                 }
 
-                if ($has_accepted) {
-                    $new_status = self::STATUS_ACCEPTED;
-                } elseif ($has_attente) {
-                    $new_status = self::STATUS_ATTENTE;
-                } elseif ($has_refused) {
-                    $new_status = self::STATUS_REFUSED;
-                }
-
                 if ($new_status !== $cur_status) {
-                    $this->setNewStatus($new_status);
+                    $errors = $this->setNewStatus($new_status, array(), $warnings, true);
+
+                    if (count($errors)) {
+                        echo '<pre>';
+                        print_r($errors);
+                        exit;
+                    }
                 }
             }
         }
@@ -1128,7 +1232,7 @@ class BF_Demande extends BimpObject
         if (is_a($child, 'BF_DemandeRefinanceur')) {
             $this->checkStatus();
         } elseif (is_a($child, 'BF_Line')) {
-            $this->calcMontants();
+            $this->calcLinesMontants();
         }
 
         return array();
@@ -1139,7 +1243,7 @@ class BF_Demande extends BimpObject
         if (is_a($child, 'BF_DemandeRefinanceur')) {
             $this->checkStatus();
         } elseif (is_a($child, 'BF_Line')) {
-            $this->calcMontants();
+            $this->calcLinesMontants();
         }
 
         return array();
@@ -1284,9 +1388,17 @@ class BF_Demande extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = '';
+        $success = 'Devis de financement généré avec succès';
 
-        $errors[] = 'En cours de dev.';
+        if ($this->isDemandeValid($errors)) {
+            $propal = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Propal', array(
+                
+            ), true, $errors, $warnings);
+            
+            if (BimpObject::objectLoaded($propal)) {
+                
+            }
+        }
 
         return array(
             'errors'   => $errors,

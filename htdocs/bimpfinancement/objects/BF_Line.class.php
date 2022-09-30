@@ -18,10 +18,11 @@ class BF_Line extends BimpObject
     const LOGICIEL = 3;
 
     public static $product_types = array(
-        self::PRODUIT  => array('label' => 'Produit', 'icon' => 'fas_box'),
-        self::SERVICE  => array('label' => 'Service', 'icon' => 'fas_hand-holding'),
-        self::LOGICIEL => array('label' => 'Logiciel', 'icon' => 'fas_cogs')
+        self::PRODUIT => array('label' => 'Produit', 'icon' => 'fas_box'),
+        self::SERVICE => array('label' => 'Service', 'icon' => 'fas_hand-holding'),
+//        self::LOGICIEL => array('label' => 'Logiciel', 'icon' => 'fas_cogs')
     );
+    public $product = null;
 
     // Getters booléens: 
 
@@ -57,8 +58,16 @@ class BF_Line extends BimpObject
             }
         }
 
-        if (in_array($field, array('qty', 'pu_ht', 'tva_tx', 'pa_ht', 'remise'))) {
+        if (in_array($field, array('qty', 'pu_ht', 'tva_tx', 'pa_ht', 'remise', 'id_fourn_price', 'product_type'))) {
             return $this->isParentEditable();
+        }
+
+        switch ($field) {
+            case 'serialisable':
+                if (!$force_edit && (int) $this->getData('type') === self::TYPE_PRODUCT) {
+                    return 0;
+                }
+                return 1;
         }
 
         return 1;
@@ -127,6 +136,16 @@ class BF_Line extends BimpObject
                     return 0;
                 }
                 break;
+
+            case 'serialisable':
+                $product = $this->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    return (int) $product->isSerialisable();
+                }
+                if (isset($this->data['serialisable'])) {
+                    return (int) $this->data['serialisable'];
+                }
+                return 0;
 
             case 'qty':
                 switch ($type) {
@@ -240,6 +259,8 @@ class BF_Line extends BimpObject
                 }
                 return 0;
         }
+
+        return $this->getData($field_name);
     }
 
     public function getListExtraButtons()
@@ -331,8 +352,18 @@ class BF_Line extends BimpObject
 
     public function getProduct()
     {
-        if ((int) $this->getData('id_product')) {
-            return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('id_product'));
+        $id_product = (int) $this->getData('id_product');
+
+        if (BimpObject::objectLoaded($this->product) && (!$id_product || $this->product->id !== $id_product)) {
+            $this->product = null;
+        }
+
+        if ($id_product) {
+            if (!BimpObject::objectLoaded($this->product)) {
+                $this->product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+            }
+
+            return $this->product;
         }
 
         return null;
@@ -739,6 +770,12 @@ class BF_Line extends BimpObject
 
     // Overrides: 
 
+    public function reset()
+    {
+        $this->product = null;
+        parent::reset();
+    }
+
     public function validate()
     {
         $use_pu_for_pa = (int) BimpTools::getValue('use_pu_for_pa', 0);
@@ -754,9 +791,6 @@ class BF_Line extends BimpObject
                     } else {
                         $isSerialisable = (int) $product->isSerialisable();
                         $this->set('serialisable', $isSerialisable);
-                        if (!$isSerialisable) {
-                            $this->set('serials', '');
-                        }
                         if ($use_pu_for_pa) {
                             $this->set('id_fourn_price', 0);
                             $this->set('pa_ht', (float) $this->getData('pu_ht'));

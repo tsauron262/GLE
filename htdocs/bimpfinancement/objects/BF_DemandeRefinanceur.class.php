@@ -139,9 +139,9 @@ class BF_DemandeRefinanceur extends BimpObject
         $demande = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($demande)) {
-            if (!(int) $demande->getData('accepted')) {
-                return 1;
-            }
+            return $demande->areDemandesRefinanceursEditable($errors);
+        } else {
+            $errors[] = 'Demande liée non spécifiée';
         }
 
         return 0;
@@ -314,8 +314,8 @@ class BF_DemandeRefinanceur extends BimpObject
 
         return 0;
     }
-    
-    public function getTotalRemboursement()
+
+    public function getTotalLoyers()
     {
         return $this->getData("quantity") * $this->getData("amount_ht");
     }

@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_frais_fournisseur` (
   KEY `id_soc_supplier` (`id_soc_supplier`)
 );
 
-CREATE TABLE IF NOT EXISTS `llx_bf_rbt_except` (
+CREATE TABLE IF NOT EXISTS `llx_bf_rent_except` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_demande` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date` date NOT NULL DEFAULT '0000-00-00',

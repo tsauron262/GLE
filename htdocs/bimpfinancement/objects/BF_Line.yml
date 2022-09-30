@@ -102,11 +102,13 @@ fields:
         label: Prix d'achat HT
         type: money
         display_if: 
-            fields_names: type,use_pu_for_pa
+            fields_names: type,use_pu_for_pa,id_fourn_price
             type: 
                 hide_values: 3
             use_pu_for_pa: 
                 hide_values: 1
+            id_fourn_price: 
+                show_values: 0
         depends_on: id_product
         
     id_fourn_price: 
@@ -117,7 +119,7 @@ fields:
         input: 
             type: select
             options: 
-                array: productFournPrices
+                callback: getFournPricesArray
         display_if:
             fields_names: type,use_pu_for_pa
             type: 
@@ -154,6 +156,10 @@ fields:
         label: Produit sérialisé
         type: bool
         default_value: 0
+        depends_on: id_product,type
+        display_if: 
+            field_name: type
+            show_values: 1,2
         
     serials: 
         label: N° de série
@@ -176,6 +182,7 @@ forms:
             - field: type
             - field: id_product
             - field: label
+            - field: product_type
             - field: serialisable
             - field: qty
             - field: serials
@@ -183,6 +190,8 @@ forms:
             - field: tva_tx
             - field: remise
             - custom: 1
+              show: 
+                  callback: isParentEditable
               input_name: use_pu_for_pa
               label: Prix d'achat identique au prix de vente
               data_type: bool
@@ -191,8 +200,8 @@ forms:
               display_if: 
                   field_name: type
                   hide_values: 3  
-            - field: pa_ht
             - field: id_fourn_price
+            - field: pa_ht
             - field: description
      
 fields_tables: 
@@ -202,7 +211,7 @@ fields_tables:
             - field: label
             - field: description
             - field: id_product
-              card: default
+              display: card
               show: 
                   field_value: id_product
             - field: qty

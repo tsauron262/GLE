@@ -74,7 +74,7 @@ fields:
         decimals: 0
         
     amount_ht:
-        label: Montant HT d'un remboursement
+        label: Montant Loyer HT
         type: money
         required: 0
         

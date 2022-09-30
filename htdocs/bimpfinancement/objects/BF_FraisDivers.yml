@@ -13,7 +13,7 @@ fields:
         
 list:
     title: Frais divers
-    icon: sticky-note
+    icon: fas_notes-medical
     cols:
         date: 
             edit: 1

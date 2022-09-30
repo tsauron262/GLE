@@ -606,7 +606,7 @@ class DocusignAPI extends BimpAPI {
             $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name' => 'test_id_compte_api',
-                        'title' => 'ID Client OAuth en mode test',
+                        'title' => 'Identifiant de compte API mode test',
                         'value' => '4214323f-c281-4a0e-80f7-37b3ea7d8665'
                             ), true, $warnings, $warnings);
 
@@ -627,7 +627,7 @@ class DocusignAPI extends BimpAPI {
             $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name' => 'prod_id_compte_api',
-                        'title' => 'ID Client OAuth en mode prod',
+                        'title' => 'Identifiant de compte API mode prod',
                         'value' => ''
                             ), true, $warnings, $warnings);
 

@@ -155,9 +155,7 @@ class DocusignAPI extends BimpAPI {
             return '';
 
         // Requête
-//         $id_account = $this->userAccount->getData('login');
         $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
-//        $id_account = BimpTools::getArrayValueFromPath($this->params, 'default_acc_id', ''); // TODO
         
         $data = $this->execCurlCustom('getUser', array(
             'url_params' => array('email' => $user->getData('email'), 'additional_info' => 'true'),
@@ -230,9 +228,9 @@ class DocusignAPI extends BimpAPI {
             // Client
             // Client
             array (
-                'email'       => 'tysauron@gmail.com', // TODO $comm['email']
+                'email'       => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
                 'name'        =>  $client['prenom']  . ' ' . $client['nom'],
-                'signerEmail' => 'tysauron@gmail.com', // TODO $client['email']
+                'signerEmail' => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
                 'recipientId' => '2',
                 'routingOrder'=> '2',
                 'emailNotification' => array(
@@ -269,152 +267,6 @@ class DocusignAPI extends BimpAPI {
 //                            'anchorYOffset' => -3,
 //                            'value'         => ucfirst(substr($client['nom'], 0, 1)) . ucfirst(substr($client['prenom'], 0, 1)),
 //                        ),
-                        array(
-                            'name'          => "Nom + fonction",
-                            'anchorString'  => "+ paraphe sur chaque page",
-                            'anchorXOffset' => 0,
-                            'anchorYOffset' => 33,
-                            'value'         => $client['nom'] . ' ' . (isset($client['fonction']) ? $client['fonction'] : '')
-                        ),
-                        array(
-                            'name'          => "Lu et approuvé",
-                            'anchorString'  => "Nom, fonction et cachet du signataire :",
-                            'anchorXOffset' => 120,
-                            'anchorYOffset' => -18,
-                            'value'         => "Lu et approuvé"
-                        ),
-                        array(
-                            'name'          => "Nom",
-                            'anchorString'  => "Nom, fonction et cachet du signataire :",
-                            'anchorXOffset' => 120,
-                            'anchorYOffset' => -8,
-                            'value'         => $client['nom'] . ' ' . $client['prenom']
-                        ),
-                        array(
-                            'name'          => "Fonction",
-                            'anchorString'  => "Nom, fonction et cachet du signataire :",
-                            'anchorXOffset' => 120,
-                            'anchorYOffset' => 5,
-                            'value'         => (isset($client['fonction']) ? $client['fonction'] : '')
-                        )
-                    ),
-                    'dateSignedTabs' => array(
-                        array(
-                            'name'          => "Date signature 1",
-                            'anchorString'  => "Signature des conditions générales de contrat",
-                            'anchorXOffset' => 11,
-                            'anchorYOffset' => 15,
-                            'fontSize'      => 'Size12'
-                        ),
-                        array(
-                            'name'          => "Date signature 2",
-                            'anchorString'  => "+ paraphe sur chaque page",
-                            'anchorXOffset' => 0,
-                            'anchorYOffset' => 20,
-                            'fontSize'      => 'Size12'
-                        )
-                    )
-                )
-            )
-        );
-        
-        return $signers;
-    }
-    
-    // TODO supprimé une fois l'autre validé
-    public function getSignersContractOld($params, $object = null) {
-       $client = $params['client'];
-       $comm = $params['comm'];
-       
-        $signers = array(
-            
-            // Commercial
-//            array(
-//                'email'       => 'r.pelegrin@bimp.fr', // TODO $comm['email']
-//                'name'        =>  $comm['nom'] . ' ' . $comm['prenom'],
-//                'signerEmail' => 'r.pelegrin@bimp.fr', // TODO $comm['email']
-//                'recipientId' => '1',
-//                'routingOrder'=> '1',
-//                'emailNotification' => array(
-//                    'emailSubject' => "Merci de signer " . $object->getLabel('this'),
-//                    'emailBody' => $object->getDefaultSignDistEmailContent()
-//                ),
-//                'tabs'        =>  array(
-//                    'signHereTabs' => array(
-//                        array(
-//                            'name'          => "Signez ici vendeur 1 ",
-//                            'anchorString'  => "Nom et fonction du signataire :",
-//                            'anchorXOffset' => 25,
-//                            'anchorYOffset' => 95
-//                        ),
-//                        array(
-//                            'name'          => "Signez ici vendeur 2",
-//                            'anchorString'  => "+ paraphe sur chaque page",
-//                            'anchorXOffset' => -200,
-//                            'anchorYOffset' => 20
-//                        )
-//                    ),
-//                    'dateSignedTabs' => array(
-//                        array(
-//                            'name'          => "Date signature",
-//                            'anchorString'  => "Nom et fonction du signataire :",
-//                            'anchorXOffset' => 17,
-//                            'anchorYOffset' => 15,
-//                            'fontSize'      => 'Size12'
-//                        )
-//                    ),
-//                    'textTabs' => array(
-//                        array(
-//                            'name'          => "Nom",
-//                            'anchorString'  => "Nom et fonction du signataire :",
-//                            'anchorXOffset' => 100,
-//                            'anchorYOffset' => 0,
-//                            'value'         => $comm['nom'] . ' ' . $comm['prenom']
-//                        ),
-//                        array(
-//                            'name'          => "Fonction",
-//                            'anchorString'  => "Nom et fonction du signataire :",
-//                            'anchorXOffset' => 100,
-//                            'anchorYOffset' => 15,
-//                            'value'         => $comm['fonction']
-//                        )
-//                    ),
-//                )
-//            ),
-            
-            // Client
-            array (
-                'email'       => 'dev@bimp.fr', // TODO $comm['email']
-                'name'        =>  $client['prenom']  . ' ' . $client['nom'],
-                'signerEmail' => 'dev@bimp.fr', // TODO $client['email']
-                'recipientId' => '2',
-                'routingOrder'=> '2',
-                'emailNotification' => array(
-                    'emailSubject' => "Merci de signer " . $object->getLabel('this'),
-                    'emailBody' => $object->getDefaultSignDistEmailContent()
-                ),
-                'tabs'        => array(
-                    'signHereTabs' => array(
-                        array(
-                            'name'          => "Signez ici",
-                            'anchorString'  => "Signature des conditions générales de contrat",
-                            'anchorXOffset' => 0,
-                            'anchorYOffset' => 75
-                        ),
-                        array(
-                            'anchorString'  => "+ paraphe sur chaque page",
-                            'anchorXOffset' => 0,
-                            'anchorYOffset' => 85,
-                            'fontSize'      => 'Size12'
-                        )
-                    ),
-                    'textTabs' => array(
-                        array(
-                            'name'          => "Paraphe",
-                            'anchorString'  => "Paraphe :",
-                            'anchorXOffset' => 37,
-                            'anchorYOffset' => -3,
-                            'value'         => ucfirst(substr($client['nom'], 0, 1)) . ucfirst(substr($client['prenom'], 0, 1)),                ),
                         array(
                             'name'          => "Nom + fonction",
                             'anchorString'  => "+ paraphe sur chaque page",
@@ -548,7 +400,7 @@ class DocusignAPI extends BimpAPI {
             if(!$this->userAccount->isUserIn($user->id)) {
                 // L'utilisateur a un compte DocuSign renseigné dans l'ERP
                 /*if($id_docusign) {
-                    $this->fetchUserAccount(0, $id_docusign);
+                    $this->fetchUserAccount(0);
                 
                 // Le compte DocuSign de l'utilisateur n'est pas définit
                 } else {*/
@@ -560,7 +412,7 @@ class DocusignAPI extends BimpAPI {
                     // Il existe, si le compte utilisateur de l'API n'existe pas on le créer
                     // On connecte le compte utilisateur de l'API
                     if($remote_id_user) {
-                        $this->fetchUserAccount(0, $remote_id_user);
+                        $this->fetchUserAccount(0);
                         $connexion_ok = $this->connect($errors, $warnings);
                         
                         if($connexion_ok and !count($warnings)) {
@@ -721,57 +573,6 @@ class DocusignAPI extends BimpAPI {
 
         return array();
     }
-    
-//    protected function fetchUserAccount($id_user_account = 0, $id_docusign = '') {
-//        global $user;
-//        $fetch_user_acc++;
-//        if($fetch_user_acc >= 4)
-//            die('Trop de fetch user acc');
-//        
-//        
-//        if($id_docusign == '') {
-//            $bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
-//            $id_docusign = $bimp_user->getData('id_docusign');
-//        }
-//        
-//        
-//        if($id_docusign != '') {
-//            $user_account = BimpCache::findBimpObjectInstance('bimpapi', 'API_UserAccount', array(
-//                                        'id_api' => $this->apiObject->id,
-//                                        'login'  => $id_docusign
-//                                        ), true);
-//            
-//            // Le compte utilisateur n'existe pas dans l'ERP, on le créer
-//            if(!BimpObject::objectLoaded($user_account)) {
-//                
-//                if(!BimpObject::objectLoaded($bimp_user))
-//                    $bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
-//                
-//                if(!$this->id)
-//                    $id_api = (int) BimpCache::getBdb()->getValue('bimpapi_api', 'id', 'name = "docusign"');
-//                else
-//                    $id_api = (int) $this->id;
-//
-//                global $dont_rollback;
-//                $dont_rollback = true;
-//                $user_account = BimpObject::getInstance("bimpapi", "API_UserAccount");
-//                $values = array(
-//                    'id_api' => (int) $id_api,
-//                    'users' => array((int) $bimp_user->id),
-//                    'name' => $bimp_user->getData('firstname') . ' ' . $bimp_user->getData('lastname'),
-//                    'login' => $id_docusign,
-//                    'pword' => 'inutile',
-//                    'tokens' => array()
-//                );
-//                $e_v = $user_account->validateArray($values);
-//                $e_c = $user_account->create();
-//            }
-//            
-//            $id_user_account = $user_account->id;
-//        }
-//        
-//        return parent::fetchUserAccount($id_user_account);
-//    }
 
     public static function getDefaultApiTitle()
     {

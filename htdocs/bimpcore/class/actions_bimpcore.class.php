@@ -153,6 +153,8 @@ class ActionsBimpcore
             $nb = BimpCore::getConf($conf, 0);
             BimpCore::setConf($conf, $nb + 1);
         }
+        
+        return 0;
     }
 
     function printLeftBlock($parameters, &$object, &$action, $hookmanager)
@@ -172,7 +174,7 @@ class ActionsBimpcore
 //        $html = '';
 //
 //        $this->resprints = $html;
-//        return 0;
+        return 0;
     }
 
     function addSearchEntry($parameters, &$object, &$action, $hookmanager)

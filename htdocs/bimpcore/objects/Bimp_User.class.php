@@ -2132,7 +2132,8 @@ class Bimp_User extends BimpObject
             $data2[] = array('user' => $ln->lastname . ' ' . $ln->firstname, 'nb' => $ln->nb);
         }
 
-        $boxObj->addCamenbere('', $data);
+        if(count($data) > 0)
+            $boxObj->addCamenbere('', $data);
 
         $boxObj->addList(array('user' => 'Utilisateur', 'nb' => 'Nombre de créations'), $data2);
         return 1;

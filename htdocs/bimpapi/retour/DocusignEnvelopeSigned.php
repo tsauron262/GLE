@@ -58,11 +58,11 @@ if(count($errors)) {
     }
     $output .= "<br/><br/>Body en entrée :<br/>";
     $output .= print_r($in, 1);
+    mailSyn2('Erreurs Webhook DocusignEnvelopeSigned', BimpCore::getConf('devs_email'), '', $output);   
 }
 
 echo $output;
 
-//mailSyn2('Erreurs Webhook DocusignEnvelopeSigned', BimpCore::getConf('devs_email'), '', $output);
 
 
 //echo $a->apiVersion;

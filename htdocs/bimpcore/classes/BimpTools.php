@@ -3161,7 +3161,8 @@ class BimpTools
                     }
                 }
 
-                $line = $trace['line'] . ': ';
+                if(isset($trace['line']))
+                    $line = $trace['line'] . ': ';
 
                 if (isset($trace['class']) && $trace['class']) {
                     $line .= $trace['class'] . BimpTools::getArrayValueFromPath($trace, 'type', '->');

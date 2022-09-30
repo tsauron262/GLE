@@ -173,7 +173,18 @@ class BimpContratAuto {
                     }
                 }
 
-                $statut = $this->checkStatut($line->statut, dol_time_plus_duree($line->date_ouverture, $line->qty, 'm'));
+                $nb = $line->qty;
+                $unite = 'm';
+                if($nb != (int)$nb){
+                    $nb = $nb * 31;
+                    $unite = 'd';
+                    if($nb != (int)$nb){
+                        $nb = $nb * 24;
+                        $unite = 'h';
+                    }
+                }
+                
+                $statut = $this->checkStatut($line->statut, dol_time_plus_duree($line->date_ouverture, $nb, $unite));
 
                 $services[] = array(
                     'id_product' => $line->id, // attention l'id n'est pas toujours définit

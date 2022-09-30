@@ -3128,17 +3128,19 @@ class BimpTools
             $lines = array();
 
             foreach ($backtrace as $idx => $trace) {
-                $file = str_replace($base_dir, '', $trace['file']);
-                if (!$current_file) {
-                    $current_file = $file;
-                } elseif ($file != $current_file) {
-                    // Changement de fichier: 
-                    $files[] = array(
-                        'file'  => $current_file,
-                        'lines' => $lines
-                    );
-                    $current_file = $file;
-                    $lines = array();
+                if(isset($trace['file'])){
+                    $file = str_replace($base_dir, '', $trace['file']);
+                    if (!$current_file) {
+                        $current_file = $file;
+                    } elseif ($file != $current_file) {
+                        // Changement de fichier: 
+                        $files[] = array(
+                            'file'  => $current_file,
+                            'lines' => $lines
+                        );
+                        $current_file = $file;
+                        $lines = array();
+                    }
                 }
 
                 $args = '';

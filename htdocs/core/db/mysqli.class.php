@@ -401,7 +401,7 @@ class DoliDBMysqli extends DoliDB
                 'open' => false
             ));
 
-            if ($ret <= 0) {
+            if (!$ret) {
                 $content = BimpRender::renderAlerts('Erreur SQL - ' . $this->lasterror());
                 BimpDebug::addDebug('sql', '', $content, array(
                     'foldable' => false

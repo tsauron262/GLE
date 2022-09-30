@@ -78,7 +78,7 @@ class Synopsisfichinter extends Fichinter {
      *    \param      DB            Handler acces base de donnees
      *    \param      socid            Id societe
      */
-    function Synopsisfichinter($DB, $socid = "") {
+    function __construct($DB, $socid = "") {
         global $langs;
 
         $this->db = $DB;

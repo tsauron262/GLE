@@ -9,7 +9,7 @@
 		var $error;
         var $timeDrift = 0;
 		
-		function Smsdecanet($DB) {
+		function __construct($DB) {
 		
 		}
 		

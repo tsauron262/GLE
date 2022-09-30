@@ -1,10 +1,10 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once __DIR__ . '/BimpDocumentPDF.php';
+require_once __DIR__ . '/BimpCommDocumentPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
 
-class OrderPDF extends BimpDocumentPDF
+class OrderPDF extends BimpCommDocumentPDF
 {
 
     public static $type = 'order';

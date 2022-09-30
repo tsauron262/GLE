@@ -298,7 +298,7 @@ class BimpCore
             }
 
             if (preg_match('/^[a-z]+$/', $subDir) && is_dir($dir . '/' . $subDir)) {
-                $current_version = (float) BimpCore::getVersion($subDir);
+                $current_version = (float) BimpCore::getBimpCoreSqlVersion($subDir);
                 foreach (scandir($dir . '/' . $subDir) as $f) {
                     if (in_array($f, array('.', '..'))) {
                         continue;
@@ -645,7 +645,7 @@ class BimpCore
         return $updates;
     }
 
-    public static function getVersion($dev = '')
+    public static function getBimpCoreSqlVersion($dev = '')
     {
         $versions = self::getConf('bimpcore_version');
 
@@ -707,7 +707,7 @@ class BimpCore
 
     public static function setVersion($dev, $version)
     {
-        $versions = self::getVersion();
+        $versions = self::getBimpCoreSqlVersion();
 
         if (!isset($versions[$dev])) {
             $versions[$dev] = 0;
@@ -893,8 +893,17 @@ class BimpCore
 
     public static function getEntity()
     {
-        if (defined('BIMP_ENTITY')) {
-            return BIMP_ENTITY;
+        if (defined('BIMP_EXTENDS_ENTITY')) {
+            return BIMP_EXTENDS_ENTITY;
+        }
+
+        return '';
+    }
+
+    public static function getVersion()
+    {
+        if (defined('BIMP_EXTENDS_VERSION')) {
+            return BIMP_EXTENDS_VERSION;
         }
 
         return '';

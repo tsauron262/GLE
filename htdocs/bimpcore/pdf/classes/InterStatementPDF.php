@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/BimpDocumentPDF.php';
+require_once __DIR__ . '/BimpCommDocumentPDF.php';
 
-class InterStatementPDF extends BimpDocumentPDF
+class InterStatementPDF extends BimpCommDocumentPDF
 {
 
     public static $type = 'fichinter';

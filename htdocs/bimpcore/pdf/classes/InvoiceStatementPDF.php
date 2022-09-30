@@ -1,9 +1,9 @@
 <?php
 
-require_once __DIR__ . '/BimpDocumentPDF.php';
+require_once __DIR__ . '/BimpCommDocumentPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 
-class InvoiceStatementPDF extends BimpDocumentPDF
+class InvoiceStatementPDF extends BimpCommDocumentPDF
 {
 
     public static $type = 'societe';

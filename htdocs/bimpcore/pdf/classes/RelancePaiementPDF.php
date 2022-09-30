@@ -327,7 +327,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $this->writeContent($html);
 
-            $this->content_html = $this->getCommercialInfosHtml(false) . '<br/><br/>';
+            $this->content_html = $this->getFromUsersInfosHtml(false) . '<br/><br/>';
             $this->content_html .= $html;
 
             $this->content_html .= '{FACTURES_DUPLICATA_NOTIF}';
@@ -404,12 +404,12 @@ class RelancePaiementPDF extends BimpModelPDF
             $html .= '<span style="font-weight: bold;">N° TVA client: </span>' . $this->client->getData('tva_intra') . '<br/>';
         }
 
-        $html .= $this->getCommercialInfosHtml();
+        $html .= $this->getFromUsersInfosHtml();
 
         return $html;
     }
 
-    public function getCommercialInfosHtml($with_border = true)
+    public function getFromUsersInfosHtml($with_border = true)
     {
         $html = '';
 

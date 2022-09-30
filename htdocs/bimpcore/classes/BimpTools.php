@@ -3153,6 +3153,8 @@ class BimpTools
                             $args .= '*' . get_class($arg) . (isset($arg->id) ? ' #' . $arg->id : '');
                         } elseif (is_bool($arg)) {
                             $args .= ((int) $arg ? 'true' : 'false');
+                        } elseif (is_array($arg)) {
+                            $args .= print_r($arg,1);
                         } else {
                             $args .= (string) $arg;
                         }

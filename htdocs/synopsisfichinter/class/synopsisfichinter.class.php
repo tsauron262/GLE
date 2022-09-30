@@ -1002,7 +1002,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
      *      \brief     Constructeur d'objets ligne d'intervention
      *      \param     DB      handler d'acces base de donnee
      */
-    function SynopsisfichinterLigne($DB) {
+    function __construct($DB) {
         $this->db = $DB;
     }
 

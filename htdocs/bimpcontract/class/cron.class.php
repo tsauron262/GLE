@@ -143,6 +143,10 @@
                     $to_send = true;
                     $this->output .= $contrat->getRef() . ": Relance jour<br />";
                     $msg .= $contrat->getNomUrl() . " => date d'activation prévu: <b>" . $date->format('d/m/Y') . "</b><br />";
+                    BimpObject::loadClass('bimpcore', 'BimpNote');
+                    $contrat->addNote("Contrat en attente de validation".$contrat->getNomUrl() . " => date d'activation prévu: <b>" . $date->format('d/m/Y'),
+                        BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
+                        BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_CONTRAT); 
                 } 
             }
             if($to_send) {

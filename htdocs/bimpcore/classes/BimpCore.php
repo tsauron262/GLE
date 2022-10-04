@@ -850,7 +850,6 @@ class BimpCore
     public static function isUserDev()
     {
         global $user;
-
         if (BimpObject::objectLoaded($user)) {
             $bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
 

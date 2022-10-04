@@ -3856,12 +3856,13 @@ class BimpObject extends BimpCache
         }
     }
 
-    public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false)
+    public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false, $no_history = false)
     {
         $bc_field = new BC_Field($this, $field);
         $bc_field->display_name = $display_name;
         $bc_field->display_input_value = $display_input_value;
         $bc_field->no_html = $no_html;
+        $bc_field->no_history = $no_history;
 
         $display = $bc_field->renderHtml();
         unset($bc_field);

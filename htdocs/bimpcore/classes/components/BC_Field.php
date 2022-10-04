@@ -13,6 +13,7 @@ class BC_Field extends BimpComponent
     public $container_id = null;
     public $display_input_value = true;
     public $no_html = false;
+    public $no_history = false;
     public $name_prefix = '';
     public $display_card_mode = 'none'; // hint / visible
     public $force_edit = false;
@@ -340,7 +341,7 @@ class BC_Field extends BimpComponent
         }
 
         $history_html = '';
-        if (!$this->no_html && !$label_only && $this->params['history'] && BimpCore::isContextPrivate()) {
+        if (!$this->no_html && !$label_only && $this->params['history'] && BimpCore::isContextPrivate() && !$this->no_history) {
             $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
             $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name, 15, $history_user);
         }

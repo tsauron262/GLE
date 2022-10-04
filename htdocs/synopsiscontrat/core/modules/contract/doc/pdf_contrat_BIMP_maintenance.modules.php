@@ -889,7 +889,7 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                 $pdf->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->Cell($W, 8, "Fonction du signataire: " . BimpCore::getConf('pdf_signataire_function', '', 'bimpcontract'), 1, null, 'L', true);
-                $pdf->Cell($W, 8, "Précédé de la mention 'Lu et approuvé' + Paraphe de toutes les pages", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Précédé de la mention 'Lu et approuvé'", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
                 $pdf->Cell($W, 8, "+ Signature des conditions générales de contrat", 1, null, 'L', true);
@@ -918,7 +918,7 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                 $pdf1->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
-                $pdf1->Cell($W, 8, "Précédé de la mention 'Lu et approuvé' + Paraphe de toutes les pages", 1, null, 'L', true);
+                $pdf1->Cell($W, 8, "Précédé de la mention 'Lu et approuvé'", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->Cell($W, 8, "", 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "+ Signature des conditions générales de contrat", 1, null, 'L', true);

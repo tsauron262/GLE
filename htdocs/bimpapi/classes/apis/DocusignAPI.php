@@ -351,7 +351,7 @@ class DocusignAPI extends BimpAPI {
                             'anchorString'  => "+ paraphe sur chaque page",
                             'anchorXOffset' => 0,
                             'anchorYOffset' => 33,
-                            'value'         => $client['nom'] . ' ' . (isset($client['fonction']) ? $client['fonction'] : '')
+                            'value'         => $client['nom'] . ' ' . $client['prenom'] . ' ' . (isset($client['fonction']) ? $client['fonction'] : '')
                         ),
                         array(
                             'name'          => "Lu et approuvé",

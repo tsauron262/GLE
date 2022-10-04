@@ -144,7 +144,7 @@ fields:
 #        type: int
         
     date_livraison: 
-        label: Date prévue de livraison
+        label: Date de livraison souhaitée
         type: date
         
     total_ttc: 
@@ -266,6 +266,18 @@ fields:
         type: bool
         default_value: 1
         
+    mode_liv:
+        label: Mode de livraison
+        type: int
+        values:
+            - Livraison en totalité
+            - Livraison partielle
+        default_value: 1
+    
+    consigne_liv:
+        label: Consigne de livraison
+        type: text
+        
 fields_tables: 
     infos: 
         rows: 
@@ -290,12 +302,6 @@ fields_tables:
             - field: date_commande
               edit: 
                   callback: isEditable
-            - field: date_livraison
-              edit: 
-                  callback: isEditable
-            - field: fk_availability
-              edit: 
-                  callback: isEditable
             - field: validComm
             - field: validFin
             - field: zone_vente
@@ -305,6 +311,32 @@ fields_tables:
             - field: rappel_service_expire
               edit:
                   callback: isCommercialOrSup
+                  
+    livraison: 
+        title: Livraison
+        icon: truck
+        rows: 
+            - field: mode_liv
+              edit: 
+                  callback: isEditable
+            - field: date_livraison
+              edit: 
+                  callback: isEditable
+            - field: fk_availability
+              edit: 
+                  callback: isEditable
+            - field: consigne_liv
+              edit: 
+                  callback: isEditable
+            - label: Contact livraison
+              value: 
+                  callback: 
+                    method: renderContacts
+                    params:
+                        - external
+                        - SHIPPING
+                  
+            
                   
                   
     payment:
@@ -379,6 +411,16 @@ fields_tables:
 views: 
     default: 
         objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
+        rows: 
+            0: 
+                cols: 
+                    1: 
+                        rows: 
+                            2: 
+                                cols: 
+                                        - type: fields_table
+                                          fields_table: 
+                                              name: livraison
     content_infos: 
         objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
         rows: 
@@ -730,6 +772,23 @@ forms:
               input: 
                   type: qty
               value: 1
+              
+    livraison:
+        rows:
+            - field: mode_liv
+            - field: date_livraison
+            - field: fk_availability
+            - field: consigne_liv
+            - custom: 1
+              input_name: liv_contact
+              label: Contact livraison
+              content: 
+                  callback: 
+                    method: renderContacts
+                    params:
+                        - external
+                        - SHIPPING
+                        - liv_contact
     
 filters_panels: 
     default: 

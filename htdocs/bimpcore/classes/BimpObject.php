@@ -39,6 +39,7 @@ class BimpObject extends BimpCache
         'icon'                     => array('default' => ''),
         'primary'                  => array('default' => 'id'),
         'common_fields'            => array('data_type' => 'bool', 'default' => 1),
+        'in_cache_serveur'         => array('data_type' => 'bool', 'default' => 1),
         'collections'              => array('data_type' => 'bool', 'default' => 1),
         'header_list_name'         => array('default' => ''),
 //        'header_btn'               => array('data_type' => 'array', 'default' => array()),

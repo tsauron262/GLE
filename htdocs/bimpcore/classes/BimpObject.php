@@ -7251,9 +7251,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
 
+            if (stripos($search_value, 'prov') === 0)
+                $search_value = str_ireplace('prov', '', $search_value);
             $search = new BC_Search($this, $search_name, $search_value);
-            if (!count($search->searchItems()) && stripos($search_value, 'prov') !== false)
-                $search = new BC_Search($this, $search_name, str_ireplace('prov', '', $search_value));
             $html = $list_button;
             $html .= $search->renderHtml();
             $html .= $list_button;

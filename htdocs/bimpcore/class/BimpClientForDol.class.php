@@ -69,7 +69,7 @@ class BimpClientForDol extends Bimp_Client{
         }
         
         $this->output .= "<br/><br/>Nombre de rappels envoyé: $nb_rappels";
-        return 1;
+        return 0;
     }
     
     
@@ -145,7 +145,7 @@ class BimpClientForDol extends Bimp_Client{
         }
         
         $this->output .= "<br/><br/>Nombre de rappels envoyé: $nb_rappels";
-        return 1;
+        return 0;
     }
     
     private function addError($error_msg) {

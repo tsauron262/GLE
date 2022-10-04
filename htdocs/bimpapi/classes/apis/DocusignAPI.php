@@ -321,8 +321,8 @@ class DocusignAPI extends BimpAPI {
                         array(
                             'name'          => "Signez ici",
                             'anchorString'  => "Signature des conditions générales de contrat",
-                            'anchorXOffset' => 0,
-                            'anchorYOffset' => 75
+                            'anchorXOffset' => 35,
+                            'anchorYOffset' => 55
                         ),
                         array(
                             'anchorString'  => "+ paraphe sur chaque page",
@@ -331,13 +331,13 @@ class DocusignAPI extends BimpAPI {
                             'fontSize'      => 'Size12'
                         )
                     ),
-                    'initialHereTabs'  => array(
-                        array(
-                            'anchorString'  => "Paraphe :",
-                            'anchorXOffset' => 37,
-                            'anchorYOffset' => -3
-                        )
-                    ),
+//                    'initialHereTabs'  => array(
+//                        array(
+//                            'anchorString'  => "Paraphe :",
+//                            'anchorXOffset' => 37,
+//                            'anchorYOffset' => -3
+//                        )
+//                    ),
                     'textTabs' => array(
 //                        array(
 //                            'name'          => "Paraphe",

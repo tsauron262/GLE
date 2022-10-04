@@ -325,9 +325,10 @@ class DocusignAPI extends BimpAPI {
                             'anchorYOffset' => 55
                         ),
                         array(
-                            'anchorString'  => "+ paraphe sur chaque page",
-                            'anchorXOffset' => 0,
-                            'anchorYOffset' => 85,
+                            'anchorString'  => "Pour le CLIENT
+Signature",
+                            'anchorXOffset' => 130,
+                            'anchorYOffset' => 25,
                             'fontSize'      => 'Size12'
                         )
                     ),
@@ -348,10 +349,13 @@ class DocusignAPI extends BimpAPI {
 //                        ),
                         array(
                             'name'          => "Nom + fonction",
-                            'anchorString'  => "+ paraphe sur chaque page",
+                            'anchorString'  => "Pour le CLIENT
+Signature",
                             'anchorXOffset' => 0,
-                            'anchorYOffset' => 33,
-                            'value'         => $client['nom'] . ' ' . $client['prenom'] . ' ' . (isset($client['fonction']) ? $client['fonction'] : '')
+                            'anchorYOffset' => 45,
+                            'width'         => 120,
+                            'value'         => $client['nom'] . ' ' . $client['prenom'] . '
+' . (isset($client['fonction']) ? $client['fonction'] : '')
                         ),
                         array(
                             'name'          => "Lu et approuvé",
@@ -385,9 +389,10 @@ class DocusignAPI extends BimpAPI {
                         ),
                         array(
                             'name'          => "Date signature 2",
-                            'anchorString'  => "+ paraphe sur chaque page",
+                            'anchorString'  => "Pour le CLIENT
+Signature",
                             'anchorXOffset' => 0,
-                            'anchorYOffset' => 20,
+                            'anchorYOffset' => 30,
                             'fontSize'      => 'Size12'
                         )
                     )

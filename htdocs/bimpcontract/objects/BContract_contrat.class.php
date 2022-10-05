@@ -3661,9 +3661,9 @@ class BContract_contrat extends BimpDolObject
                 if (/*$instance->getData('type') == 0*/1)
                     $montant += $instance->getData('total');
             }
-            $return = $this->getCurrentTotal() - $montant;
+            $return = $this->getTotalContrat() - $montant;
         } else {
-            $return = $this->ggetCurrentTotal();
+            $return = $this->getTotalContrat();
         }
         return $return;
     }

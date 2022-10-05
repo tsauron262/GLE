@@ -633,12 +633,17 @@ class Bimp_Commande extends BimpComm
                 $errors = array();
                 if ($this->isActionAllowed('validate', $errors)) {
                     if ($this->canSetAction('validate')) {
+                        
+                        if(in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))){
+                            $data['form_name'] = 'livraison';
+                        }
+                        else{
+                            $data['confirm_msg'] = 'Veuillez confirmer la validation de cette commande';
+                        }
                         $buttons[] = array(
                             'label'   => 'Valider',
                             'icon'    => 'fas_check',
-                            'onclick' => $this->getJsActionOnclick('validate', array(), array(
-                                'confirm_msg' => 'Veuillez confirmer la validation de cette commande'
-                            ))
+                            'onclick' => $this->getJsActionOnclick('validate', array(), $data)
                         );
                     } else {
                         $errors[] = 'Vous n\'avez pas la permission';
@@ -4008,8 +4013,6 @@ class Bimp_Commande extends BimpComm
         
         
         if(in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))){
-            if($this->getData('date_livraison') == '')
-                $errors[] = 'Pour les livraisons directes la date de livraison prévue est obligatoire';
             if(!$this->dol_object->getIdContact('external', 'SHIPPING'))
                 $errors[] = 'Pour les livraisons directes le contact client est obligatoire';
             

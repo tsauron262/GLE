@@ -1848,10 +1848,12 @@ class Bimp_Product extends BimpObject
     {
         $html = '';
         $barcode = $this->getData('barcode');
-        if (isset($barcode) and ( strlen($barcode) == 12 or strlen($barcode) == 13)) {
+        if (isset($barcode) and strlen($barcode) > 5) {
+            $this->dol_object->fetch_barcode();
             $html .= '<img src="';
-            $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&amp;generator=phpbarcode&amp;';
-            $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
+            $html .= DOL_URL_ROOT.'/viewimage.php?modulepart=barcode&generator='.urlencode($this->dol_object->barcode_type_coder).'&code='.urlencode($barcode).'&encoding='.urlencode($this->dol_object->barcode_type_code);
+            $html .= '">';
+            
         }
 
 

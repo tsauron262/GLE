@@ -6,6 +6,8 @@ define('NO_REDIRECT_LOGIN', 1);
 require_once("../../main.inc.php");
 
 $errors = array();
+global $user;
+$user->fetch(1);
 
 $body = file_get_contents('php://input');
 file_put_contents(DOL_DATA_ROOT . '/docusign_webhook.txt', $body);
@@ -56,11 +58,11 @@ if(count($errors)) {
     }
     $output .= "<br/><br/>Body en entrée :<br/>";
     $output .= print_r($in, 1);
+    mailSyn2('Erreurs Webhook DocusignEnvelopeSigned', BimpCore::getConf('devs_email'), '', $output);   
 }
 
 echo $output;
 
-//mailSyn2('Erreurs Webhook DocusignEnvelopeSigned', BimpCore::getConf('devs_email'), '', $output);
 
 
 //echo $a->apiVersion;

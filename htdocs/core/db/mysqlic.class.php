@@ -1124,7 +1124,8 @@ class DoliDBMysqliC extends DoliDB
             $classLog = 'sql_duplicate';
         }
         
-        $timer = synopsisHook::getTime();
+        if(class_exists('synopsisHook'))
+            $timer = synopsisHook::getTime();
         
         $msg = get_class($this)."::query SQL Error message: ";
         $msg .= '<br/>Lasterrno : '.$this->lasterrno;

@@ -3128,17 +3128,19 @@ class BimpTools
             $lines = array();
 
             foreach ($backtrace as $idx => $trace) {
-                $file = str_replace($base_dir, '', $trace['file']);
-                if (!$current_file) {
-                    $current_file = $file;
-                } elseif ($file != $current_file) {
-                    // Changement de fichier: 
-                    $files[] = array(
-                        'file'  => $current_file,
-                        'lines' => $lines
-                    );
-                    $current_file = $file;
-                    $lines = array();
+                if(isset($trace['file'])){
+                    $file = str_replace($base_dir, '', $trace['file']);
+                    if (!$current_file) {
+                        $current_file = $file;
+                    } elseif ($file != $current_file) {
+                        // Changement de fichier: 
+                        $files[] = array(
+                            'file'  => $current_file,
+                            'lines' => $lines
+                        );
+                        $current_file = $file;
+                        $lines = array();
+                    }
                 }
 
                 $args = '';
@@ -3153,13 +3155,16 @@ class BimpTools
                             $args .= '*' . get_class($arg) . (isset($arg->id) ? ' #' . $arg->id : '');
                         } elseif (is_bool($arg)) {
                             $args .= ((int) $arg ? 'true' : 'false');
+                        } elseif (is_array($arg)) {
+                            $args .= print_r($arg,1);
                         } else {
                             $args .= (string) $arg;
                         }
                     }
                 }
 
-                $line = $trace['line'] . ': ';
+                if(isset($trace['line']))
+                    $line = $trace['line'] . ': ';
 
                 if (isset($trace['class']) && $trace['class']) {
                     $line .= $trace['class'] . BimpTools::getArrayValueFromPath($trace, 'type', '->');

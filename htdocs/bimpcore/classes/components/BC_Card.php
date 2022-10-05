@@ -146,6 +146,7 @@ class BC_Card extends BimpComponent
                         }
                     }
                     $field = new BC_Field($this->display_object, $field_params['field']);
+                    $field->no_history = true;
                     $field->display_input_value = false;
                     if ($field_params['display']) {
                         $field->display_name = $field_params['display'];
@@ -190,7 +191,7 @@ class BC_Card extends BimpComponent
 
         $status = null;
         if ($this->params['status']) {
-            $status = $this->display_object->displayData($this->params['status'], 'default', false);
+            $status = $this->display_object->displayData($this->params['status'], 'default', false, false, true);
         }
 
         $img_url = '';

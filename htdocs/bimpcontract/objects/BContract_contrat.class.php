@@ -3661,9 +3661,9 @@ class BContract_contrat extends BimpDolObject
                 if (/*$instance->getData('type') == 0*/1)
                     $montant += $instance->getData('total');
             }
-            $return = $this->getTotalContrat() - $montant;
+            $return = $this->getCurrentTotal() - $montant;
         } else {
-            $return = $this->getTotalContrat();
+            $return = $this->ggetCurrentTotal();
         }
         return $return;
     }
@@ -4234,7 +4234,9 @@ class BContract_contrat extends BimpDolObject
         $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
         $interval = $now->diff($diff);
         //print_r($interval);
-
+        
+        //if($interval->hours > 0 || $insterval->)
+        
         $signe = ($interval->invert == 1) ? "-" : "";
 
         return $signe . $interval->days;

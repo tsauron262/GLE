@@ -481,6 +481,8 @@ fields:
         items_braces: 1
         items_data_type: id_object
         object: sac
+        input:
+            scanner: 1
     j_date_create:
         label: Jour de la création
         extra: 1

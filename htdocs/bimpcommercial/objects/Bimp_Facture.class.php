@@ -4227,9 +4227,9 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    public function onChildDelete($child)
+    public function onChildDelete($child, $id_child_deleted)
     {
-        $errors = parent::onChildDelete($child);
+        $errors = parent::onChildDelete($child, $id_child_deleted);
 
         if (!is_array($errors)) {
             $errors = array();

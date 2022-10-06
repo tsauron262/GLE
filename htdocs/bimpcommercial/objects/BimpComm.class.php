@@ -4499,7 +4499,7 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
-    public function onChildDelete($child)
+    public function onChildDelete($child, $id_child_deleted)
     {
         if ($this->isLoaded() && !$this->isDeleting) {
             if (is_a($child, 'objectLine')) {

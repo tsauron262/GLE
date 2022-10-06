@@ -1507,7 +1507,7 @@ class BMP_EventMontant extends Abstract_margeprod
         }
     }
 
-    public function onChildDelete(BimpObject $child)
+    public function onChildDelete(BimpObject $child, $id_child_deleted)
     {
         if ($child->object_name === 'BMP_EventMontantDetail') {
             $this->calcDetailsTotal();

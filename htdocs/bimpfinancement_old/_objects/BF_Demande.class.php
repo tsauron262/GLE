@@ -1234,7 +1234,7 @@ class BF_Demande extends BimpObject
         return array();
     }
 
-    public function onChildDelete($child)
+    public function onChildDelete($child, $id_child_deleted)
     {
         if (isset($child->object_name)) {
             if ($child->object_name === 'BF_Line') {

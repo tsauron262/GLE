@@ -900,6 +900,7 @@ fields_tables:
                   callback: displayCurrentPaHt
             - field: pmp
             - field: pa_prevu
+            - field: infos_pa
         
     stock:
         title: Options

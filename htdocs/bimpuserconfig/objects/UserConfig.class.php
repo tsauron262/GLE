@@ -250,7 +250,7 @@ class UserConfig extends BimpObject
                     return static::getUserDefaultConfig($id_user, $default_config_filters);
                 }
             } elseif ((int) $id_config) {
-                $config = self::getInstance('bimpuserconfig', static::$config_object_name, (int) $id_config);
+                $config = BimpCache::getBimpObjectInstance('bimpuserconfig', static::$config_object_name, (int) $id_config);
                 if (BimpObject::objectLoaded($config)) {
                     return $config;
                 }

@@ -53,7 +53,7 @@ class BDS_ProcessOperation extends BimpObject
                         if (isset($_FILES[$input_name]['tmp_name']) && $_FILES[$input_name]['tmp_name']) {
                             if (!file_exists($_FILES[$input_name]['tmp_name'])) {
                                 $errors[] = 'Echec du transfert du fichier';
-                                continue;
+                                break;
                             }
 
                             $dir = 'bimpdatasync/processes/' . $process->id . '/' . $this->id . '/' . date('Y') . '/' . date('m') . '/' . date('d');
@@ -63,7 +63,7 @@ class BDS_ProcessOperation extends BimpObject
 
                                 if ($error) {
                                     $errors[] = 'Echec de la création des dossiers de destination des fichiers';
-                                    continue;
+                                    break;
                                 }
                             }
 

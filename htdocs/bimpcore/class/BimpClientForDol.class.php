@@ -69,7 +69,7 @@ class BimpClientForDol extends Bimp_Client{
         }
         
         $this->output .= "<br/><br/>Nombre de rappels envoyé: $nb_rappels";
-        return 1;
+        return 0;
     }
     
     
@@ -145,7 +145,7 @@ class BimpClientForDol extends Bimp_Client{
         }
         
         $this->output .= "<br/><br/>Nombre de rappels envoyé: $nb_rappels";
-        return 1;
+        return 0;
     }
     
     private function addError($error_msg) {
@@ -179,6 +179,6 @@ class BimpClientForDol extends Bimp_Client{
         $nb_update = Bimp_Client::updateAllAtradius($from->format('Y-m-d\TH:i:s'), $errors, $warnings, $success);
         $this->output .= "Nombre de clients mis à jour : " . $nb_update . "<br/><br/>" . $success;
         $this->addError(implode(',', $errors));
-        return $nb_update;
+        return 0;
     }
 }

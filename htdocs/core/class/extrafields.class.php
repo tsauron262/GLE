@@ -790,11 +790,11 @@ class ExtraFields
 
                 /*moddrsi*/
                 if ($elementtype && defined('BIMP_LIB') && (int) BimpCore::getConf('use_cache_for_extrafields')) {
-                    $cache_key = 'dol_object_' . $elementtype . '_extrafields';
+                    $cache_key = 'dol_object_' . $elementtype . '_extrafields_'.$conf->entity;
                     
                     $result = BimpCache::getCacheServeur($cache_key);
                     
-                    if (is_array($result) && count($result) > 0) {                    
+                    if (is_array($result) /*&& count($result) > 0*/) {                    
                         $labels = array();
                         
                         foreach ($result as $name => $fields) {
@@ -883,7 +883,7 @@ class ExtraFields
                         
                         /*moddrsi*/
                         if ($elementtype && isset($this->attributes[$elementtype]) && defined('BIMP_LIB')) {
-                            $cache_key = 'dol_object_' . $elementtype . '_extrafields';
+//                            $cache_key = 'dol_object_' . $elementtype . '_extrafields';
                             if (!BimpCache::cacheServerExists($cache_key)) {
                                 $rows = array();     
                                 

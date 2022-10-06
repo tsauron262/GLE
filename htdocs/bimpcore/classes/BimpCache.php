@@ -70,6 +70,14 @@ class BimpCache
 
         return self::$bdb_noTransac;
     }
+    
+    public static function setCache($key, $value){
+        static::$cache[$key] = $value;
+    }
+    
+    public static function getCache($key){
+        return static::$cache[$key];
+    }
 
     public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
     {
@@ -1159,7 +1167,17 @@ class BimpCache
             return array();
         }
 
-        $rows = $instance->getList($filters, $n, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
+        
+        
+        $use_cache_serveur = $instance->getConf('in_cache_serveur', 0, false, 'bool');
+        $cacheKey = 'BimpObjectObjects_'.$module.'_'.$object_name.'_'.json_encode($filters).'_'.$n.'_'.$order_by.'_'.$sortorder;
+        if($use_cache_serveur && static::cacheServerExists($cacheKey)){
+            $rows = static::getCacheServeur($cacheKey);
+        }
+        else{
+            $rows = $instance->getList($filters, $n, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
+            static::setCacheServeur($cacheKey, $rows);
+        }
         $items = array();
 
         foreach ($rows as $r) {

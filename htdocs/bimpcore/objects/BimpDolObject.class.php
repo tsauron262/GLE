@@ -817,16 +817,25 @@ class BimpDolObject extends BimpObject
 
         return $html;
     }
+    
+    public function getIdTypeContact($type = 0, $code = ''){
+        $list = $this->dol_object->liste_type_contact($type, 'position', 0, 0, $code);
+        foreach($list as $id => $inut)
+            return $id;
+    }
 
-    public function renderContactsList()
+    public function renderContactsList($type = 0, $code = '', $list_id = '')
     {
         $html = '';
 
         $list = array();
 
         if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
-            $list_int = $this->dol_object->liste_contact(-1, 'internal');
-            $list_ext = $this->dol_object->liste_contact(-1, 'external');
+            $list_int = $list_ext = array();
+            if($type == 0 || $type == 1)
+                $list_int = $this->dol_object->liste_contact(-1, 'internal', 0, $code);
+            if($type == 0 || $type == 2)
+                $list_ext = $this->dol_object->liste_contact(-1, 'external', 0, $code);
             $list = BimpTools::merge_array($list_int, $list_ext);
         }
 
@@ -835,14 +844,16 @@ class BimpDolObject extends BimpObject
             BimpTools::loadDolClass('societe');
             BimpTools::loadDolClass('contact');
 
-            $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
+            if($list_id == '')
+                $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list_'.$type.'_'.$code;
 
             foreach ($list as $item) {
                 $html .= '<tr>';
                 switch ($item['source']) {
                     case 'internal':
                         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $item['id']);
-                        $html .= '<td>Utilisateur</td>';
+                        if($type == 0)
+                            $html .= '<td>Utilisateur</td>';
                         $html .= '<td>' . $conf->global->MAIN_INFO_SOCIETE_NOM . '</td>';
                         $html .= '<td>';
                         if (BimpObject::objectLoaded($user)) {
@@ -857,7 +868,8 @@ class BimpDolObject extends BimpObject
                         $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['socid']);
                         $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $item['id']);
 
-                        $html .= '<td>Contact tiers</td>';
+                        if($type == 0)
+                            $html .= '<td>Contact tiers</td>';
                         $html .= '<td>';
                         if (BimpObject::objectLoaded($soc)) {
                             $html .= $soc->getLink();
@@ -874,7 +886,8 @@ class BimpDolObject extends BimpObject
                         $html .= '</td>';
                         break;
                 }
-                $html .= '<td>' . $item['libelle'] . '</td>';
+                if($code == '')
+                    $html .= '<td>' . $item['libelle'] . '</td>';
                 $html .= '<td style="text-align: right">';
                 $html .= BimpRender::renderRowButton('Supprimer le contact', 'trash', $this->getJsActionOnclick('removeContact', array('id_contact' => (int) $item['rowid']), array(
                                     'confirm_msg'      => 'Etes-vous sûr de vouloir supprimer ce contact?',
@@ -1190,7 +1203,8 @@ class BimpDolObject extends BimpObject
         return array(
             'errors'            => $errors,
             'warnings'          => $warnings,
-            'contact_list_html' => $this->renderContactsList()
+            'contact_list_html' => $this->renderContactsList(),
+            'succes_callback'   => 'if('
         );
     }
 

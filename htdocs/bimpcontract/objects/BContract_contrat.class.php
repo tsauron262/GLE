@@ -821,9 +821,9 @@ class BContract_contrat extends BimpDolObject
         if ($this->isLoaded()) {
             $id_commercial = $this->db->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $this->getData('fk_soc'));
 
-            $commercial = $this->getInstance('bimpcore', 'Bimp_User', $id_commercial);
+            $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
 
-            return $commercial->dol_object->getNomUrl();
+            return $commercial->getLink();
         }
     }
 
@@ -4234,7 +4234,9 @@ class BContract_contrat extends BimpDolObject
         $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
         $interval = $now->diff($diff);
         //print_r($interval);
-
+        
+        //if($interval->hours > 0 || $insterval->)
+        
         $signe = ($interval->invert == 1) ? "-" : "";
 
         return $signe . $interval->days;

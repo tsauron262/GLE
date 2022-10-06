@@ -183,7 +183,14 @@ class histoNavigation
         if ($obj) {
             $sysLogActive = $conf->syslog->enabled;
             $conf->syslog->enabled = 0;
-            $result = $obj->fetch($res->element_id);
+//            print_r($obj);
+//            die($obj->module.' '. $obj->object_name);
+            if(is_a($obj, 'BimpObject')){
+                $obj = BimpCache::getBimpObjectInstance($obj->module, $obj->object_name, $res->element_id);  
+                $result = $obj->isLoaded();
+            }
+            else
+                $result = $obj->fetch($res->element_id);
             $conf->syslog->enabled = $sysLogActive;
             if ($result > 0 && $obj->id > 0) {
                 $replace = ($tabMenu[0] ? '&mainmenu=' . $tabMenu[0] : '') . ($tabMenu[1] ? '&leftmenu=' . $tabMenu[1] : '') . '">';

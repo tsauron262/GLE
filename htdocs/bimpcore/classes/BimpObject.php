@@ -39,6 +39,7 @@ class BimpObject extends BimpCache
         'icon'                     => array('default' => ''),
         'primary'                  => array('default' => 'id'),
         'common_fields'            => array('data_type' => 'bool', 'default' => 1),
+        'in_cache_serveur'         => array('data_type' => 'bool', 'default' => 1),
         'collections'              => array('data_type' => 'bool', 'default' => 1),
         'header_list_name'         => array('default' => ''),
 //        'header_btn'               => array('data_type' => 'array', 'default' => array()),
@@ -218,7 +219,7 @@ class BimpObject extends BimpCache
 
             if ($use_clones && (int) $instance->params['use_clones']) {
                 $cache_key = $module . '_' . $object_name . '_base_instance';
-                self::$cache[$cache_key] = $instance;
+                self::setCache($cache_key, $instance);
                 $instance = clone self::$cache[$cache_key];
             }
         }
@@ -1991,8 +1992,8 @@ class BimpObject extends BimpCache
     {
         if ($this->isLoaded()) {
             $cache_key = 'bimp_object_' . $this->module . '_' . $this->object_name . '_' . $this->id;
-            if (isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = null;
+            if (self::cacheExists($cache_key) && self::getCache($cache_key) == $this) {
+                self::setCache($cache_key, null);
             }
         }
         $this->parent = null;
@@ -2029,7 +2030,7 @@ class BimpObject extends BimpCache
         // /!\ Cette méthode ne doit être appellée QUE par BimpCollection /!\
 
         if ((int) $this->id != (int) $id) {
-            $this->reset();
+            $this->reset($delete_in_cache);
             $this->id = $id;
             $this->data = $data;
             $this->initData = $data;
@@ -3869,12 +3870,13 @@ class BimpObject extends BimpCache
         }
     }
 
-    public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false)
+    public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false, $no_history = false)
     {
         $bc_field = new BC_Field($this, $field);
         $bc_field->display_name = $display_name;
         $bc_field->display_input_value = $display_input_value;
         $bc_field->no_html = $no_html;
+        $bc_field->no_history = $no_history;
 
         $display = $bc_field->renderHtml();
         unset($bc_field);
@@ -5276,7 +5278,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             // Trigger sur le parent:
             if (BimpObject::objectLoaded($parent)) {
                 if (method_exists($parent, 'onChildDelete')) {
-                    $parent->onChildDelete($this);
+                    $parent->onChildDelete($this, $id);
                 }
             }
 
@@ -7263,9 +7265,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
 
+            if (stripos($search_value, 'prov') === 0)
+                $search_value = str_ireplace('prov', '', $search_value);
             $search = new BC_Search($this, $search_name, $search_value);
-            if (!count($search->searchItems()) && stripos($search_value, 'prov') !== false)
-                $search = new BC_Search($this, $search_name, str_ireplace('prov', '', $search_value));
             $html = $list_button;
             $html .= $search->renderHtml();
             $html .= $list_button;
@@ -8968,7 +8970,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($this->isDolObject() && method_exists($this->dol_object, 'liste_type_contact')) {
             $cache_key = $this->module . '_' . $this->object_name . '_internal_contact_types_array';
             if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = $this->dol_object->liste_type_contact('internal');
+                self::setCache($cache_key, $this->dol_object->liste_type_contact('internal'));
             }
             return self::$cache[$cache_key];
         }
@@ -8981,7 +8983,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($this->isDolObject() && method_exists($this->dol_object, 'liste_type_contact')) {
             $cache_key = $this->module . '_' . $this->object_name . '_external_contact_types_array';
             if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = $this->dol_object->liste_type_contact('external');
+                self::setCache($cache_key,$this->dol_object->liste_type_contact('external'));
             }
             return self::$cache[$cache_key];
         }

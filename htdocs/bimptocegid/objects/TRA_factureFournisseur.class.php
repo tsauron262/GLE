@@ -168,9 +168,14 @@
                 
                 if($facture->getData('zone_vente') == $this->zoneAchat['france']) {
                     if($total_d3e != 0) {
+                        if($interco) {
+                            $compteLigne = sizing(interco_code(Bimpcore::getConf('achat_dee_fr', null, 'bimptocegid'), $this->compte_general), 8, false, true);
+                        } else {
+                            $compteLigne = Bimpcore::getConf('achat_dee_fr', null, 'bimptocegid');
+                        }
                         $structure['SENS']                      = sizing($this->getSens($total_d3e, 2), 1);
                         $structure['REF_LIBRE']                 = sizing('DEEE',35);
-                        $structure['COMPTE_GENERAL']            = sizing(Bimpcore::getConf('achat_dee_fr', null, 'bimptocegid'), 17);
+                        $structure['COMPTE_GENERAL']            = sizing($compteLigne, 17);
                         $structure['MONTANT']                   = sizing(abs(round($total_d3e, 2)), 20, true);
                         $ecriture .= implode('', $structure) . "\n";
                     }

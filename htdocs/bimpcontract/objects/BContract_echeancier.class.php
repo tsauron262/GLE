@@ -50,14 +50,14 @@ class BContract_echeancier extends BimpObject {
         if ($this->isLoaded()) {
             $parent = $this->getParentInstance();
 
-            $commercial = $this->getInstance('bimpcore', 'Bimp_User', $parent->getData('fk_commercial_suivi'));
+            $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $parent->getData('fk_commercial_suivi'));
 
             return "<a target='_blank' href='".$commercial->getUrl()."'>".$commercial->getData('firstname') . " " . $commercial->getData('lastname') ." </a>";
         }
     }
     
     public function isEnRetard() {
-        $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
+        $parent = $this->getParentInstance();
         $aujourdui = new DateTime();
         $next = new Datetime($this->getData('next_facture_date'));
         $diff = $aujourdui->diff($next);
@@ -80,7 +80,7 @@ class BContract_echeancier extends BimpObject {
         }
         $lastFactureId = $this->getLastFactureId();
         if($lastFactureId > 0) {
-            $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $lastFactureId);
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $lastFactureId);
             if($facture->isLoaded()) {
                 if($facture->getData('fk_statut') == 0) {
                     return 1;

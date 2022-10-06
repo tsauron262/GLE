@@ -820,12 +820,13 @@ class BimpRevalorisation extends BimpObject
 
     public function delete(&$warnings = array(), $force_delete = false)
     {
+        $id = $this->id;
         $facture = $this->getChildObject('facture');
 
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors) && BimpObject::objectLoaded($facture)) {
-            $facture->onChildDelete($this);
+            $facture->onChildDelete($this, $id);
         }
         return $errors;
     }

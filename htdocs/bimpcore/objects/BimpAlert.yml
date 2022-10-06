@@ -1,5 +1,6 @@
 table: bimpcore_alert
 common_fields: 0
+in_cache_serveur: 1
 
 labels: 
     name: alerte

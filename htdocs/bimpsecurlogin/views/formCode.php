@@ -20,7 +20,7 @@
                     <input type="number" name="sms_code_4" maxLength="1" size="1" min="0" max="9" pattern="[0-9]{1}" />
                     <br /><br />
                         <center id="error_js"></center>
-		    <button class='btn'>
+		    <button class='btn' id="valide">
 			<span>Valider</span>
                     </button>
 		</form>

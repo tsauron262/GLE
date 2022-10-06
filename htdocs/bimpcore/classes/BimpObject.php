@@ -1402,7 +1402,7 @@ class BimpObject extends BimpCache
 
     // Getters données: 
 
-    public function getData($field)
+    public function getData($field, $default = true)
     {
         if ($field === $this->getPrimary() || $field === 'id') {
             return $this->id;
@@ -1412,7 +1412,8 @@ class BimpObject extends BimpCache
             return $this->data[$field];
         }
 
-        return $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
+        if($default)
+            return $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
     }
 
     public function getInitData($field)
@@ -2025,7 +2026,8 @@ class BimpObject extends BimpCache
 
             if ($this->isDolObject()) {
                 $this->dol_object->id = $id;
-                $this->hydrateDolObject();
+                $bimpObjectFields = array();
+                $this->hydrateDolObject($bimpObjectFields, false);
             }
         }
     }
@@ -5345,7 +5347,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     // Gestion DolObjects: 
 
-    public function hydrateDolObject(&$bimpObjectFields = array())
+    public function hydrateDolObject(&$bimpObjectFields = array(), $withDefault = true)
     {
         $errors = array();
 
@@ -5359,7 +5361,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         foreach ($this->params['fields'] as $field) {
             if ($this->field_exists($field)) {
-                $value = $this->getData($field);
+                $value = $this->getData($field, $withDefault);
                 if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
                     if (preg_match('/^ef_(.*)$/', $field, $matches)) {
                         $extrafield = $matches[1];

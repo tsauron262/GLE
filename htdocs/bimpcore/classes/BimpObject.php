@@ -5265,7 +5265,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             // Trigger sur le parent:
             if (BimpObject::objectLoaded($parent)) {
                 if (method_exists($parent, 'onChildDelete')) {
-                    $parent->onChildDelete($this);
+                    $parent->onChildDelete($this, $id);
                 }
             }
 

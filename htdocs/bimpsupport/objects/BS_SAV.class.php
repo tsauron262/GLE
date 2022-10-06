@@ -4535,7 +4535,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return array();
     }
 
-    public function onChildDelete($child)
+    public function onChildDelete($child, $id_child_deleted)
     {
         if (is_a($child, 'BS_ApplePart')) {
             return $this->checkAppleParts();

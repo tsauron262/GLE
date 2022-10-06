@@ -26,11 +26,11 @@ class BimpModuleConf
     {
         $cache_key = 'bimp_module_conf_' . $module;
 
-        if (!isset(BimpCache::$cache[$cache_key])) {
-            BimpCache::$cache[$cache_key] = new BimpModuleConf($module);
+        if (!BimpCache::cacheExists($cache_key)) {
+            BimpCache::setCache($cache_key, new BimpModuleConf($module));
         }
 
-        return BimpCache::$cache[$cache_key];
+        return BimpCache::getCache($cache_key);
     }
 
     public function __construct($module)

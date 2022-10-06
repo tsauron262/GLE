@@ -8,6 +8,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
     public static $label_prime = "Apport externe";
     public static $label_prime2 = "Apport externe2";
+    public static $use_cgv = false;
 
     # Objets: 
     public $bimpCommObject = null;
@@ -41,6 +42,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     {
         parent::__construct($db);
         BimpObject::loadClass('bimpcommercial', 'BimpComm');
+        $this->target_label = $this->langs->transnoentities('BillTo');
     }
 
     // Initialisation:
@@ -144,22 +146,8 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     {
         parent::initHeader();
 
-        $header_right = '';
         $doc_ref = '';
         $ref_extra = '';
-
-        if (isset($this->object->socid) && (int) $this->object->socid) {
-            if (isset($this->object->thirdparty->logo) && (string) $this->object->thirdparty->logo) {
-                $soc_logo_file = DOL_DATA_ROOT . '/societe/' . $this->object->thirdparty->id . '/logos/' . $this->object->thirdparty->logo;
-                if (file_exists($soc_logo_file)) {
-                    $sizes = dol_getImageSize($soc_logo_file, false);
-                    if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
-                        $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], 80, 80);
-                        $header_right = '<img src="' . $soc_logo_file . '" width="' . $tabTaille[0] . 'px" height="' . $tabTaille[1] . 'px"/>';
-                    }
-                }
-            }
-        }
 
         if (is_object($this->object) && isset($this->object->ref)) {
             $doc_ref = $this->object->ref;
@@ -180,7 +168,6 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
         $this->header_vars['doc_ref'] = $doc_ref;
         $this->header_vars['ref_extra'] = $ref_extra;
-        $this->header_vars['header_right'] = $header_right;
     }
 
     // Getters: 
@@ -679,6 +666,11 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         return $html . $htmlInfo;
     }
 
+    public function getPaymentsHtml()
+    {
+        return '';
+    }
+
     public function getAfterTotauxHtml()
     {
         $html = '<table style="width: 95%" cellpadding="3">';
@@ -700,7 +692,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                 $this->bimpCommObject->getData('ef_type') != 'M' && (int) BimpCore::getConf('propal_pdf_chorus_mention', null, 'bimpcommercial')) {
             $html .= '<tr>';
             $html .= '<td colspan="2">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture <br/>sur le portail Chorus</span>';
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture <br/>sur le portail Chorus</span>';
             $html .= '</td>';
             $html .= '</tr>';
         }

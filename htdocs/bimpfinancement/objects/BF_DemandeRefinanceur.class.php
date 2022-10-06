@@ -149,6 +149,10 @@ class BF_DemandeRefinanceur extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
+        if ($force_edit) {
+            return 1;
+        }
+
         return $this->isCreatable($force_edit, $errors);
     }
 
@@ -275,7 +279,7 @@ class BF_DemandeRefinanceur extends BimpObject
         return $buttons;
     }
 
-    // Getters array: 
+    // Getters array:
 
     public static function getRefinanceursArray($include_empty = true)
     {
@@ -298,6 +302,29 @@ class BF_DemandeRefinanceur extends BimpObject
     }
 
     // Getters données:
+
+    public function getInputValue($field_name)
+    {
+        if (!$this->isLoaded()) {
+            switch ($field_name) {
+                case 'qty':
+                    $demande = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($demande)) {
+                        return $demande->getNbLoyers();
+                    }
+                    return 0;
+
+                case 'periodicity':
+                    $demande = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($demande)) {
+                        return $demande->getData('periodicity');
+                    }
+                    return 0;
+            }
+        }
+
+        return $this->getData($field_name);
+    }
 
     public function getNbMois()
     {

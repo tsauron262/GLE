@@ -87,6 +87,7 @@ Abstract class BimpModelPDF
 
     protected function initHeader()
     {
+        
     }
 
     protected function initfooter()
@@ -108,8 +109,9 @@ Abstract class BimpModelPDF
 
     public function render($file_name, $display, $display_only = false)
     {
-        if (!$this->isInit)
+        if (!$this->isInit) {
             $this->init(null);
+        }
 
         if (is_null($this->header)) {
             if (file_exists(static::$tpl_dir . '/' . static::$type . '/header.html')) {
@@ -481,7 +483,7 @@ Abstract class BimpModelPDF
 
     // Tools:
 
-    public function calculeWidthHieghtLogo($width, $height, $maxWidth, $maxHeight)
+    public function calculeWidthHeightLogo($width, $height, $maxWidth, $maxHeight)
     {
         if ($width > $maxWidth) {
             $height = round(($maxWidth / $width) * $height);

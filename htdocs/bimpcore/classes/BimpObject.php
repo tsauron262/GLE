@@ -1952,6 +1952,19 @@ class BimpObject extends BimpCache
         return 'n_c.pdf';
     }
 
+    public function getObjectLogs()
+    {
+        if ($this->isLoaded()) {
+            return BimpCache::getBimpObjectObjects('bimpcore', 'BimpObjectLog', array(
+                        'obj_module' => $this->module,
+                        'obj_name'   => $this->object_name,
+                        'id_object'  => $this->id
+            ));
+        }
+
+        return array();
+    }
+
     // Gestion des données:
 
     public function printData($return_html = false)
@@ -7938,7 +7951,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $js = 'loadObjectCustomContent(' . ($params['button'] ? $params['button'] : 'null') . ', ' . $resultContainer . ', ';
             $js .= $data . ', \'' . $method . '\', ';
-            if (!empty($params)) {
+            if (!empty($method_params)) {
                 $js .= htmlentities(json_encode($method_params));
             } else {
                 $js .= '{}';
@@ -8293,8 +8306,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return $labels;
     }
 
-    public function getLabel($type = '')
+    public function getLabel($type = '', $ucfirst = false)
     {
+        $label = '';
         if (isset($this->params['labels']['name'])) {
             $labels = $this->params['labels'];
 
@@ -8333,92 +8347,106 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         switch ($type) {
             case '':
-                return $object_name;
+            default:
+                $label = $object_name;
+                break;
 
             case 'name_plur':
-                return $name_plur;
+                $label = $name_plur;
+                break;
 
             case 'the':
                 if ($vowel_first) {
-                    return 'l\'' . $object_name;
+                    $label = 'l\'' . $object_name;
                 } elseif ($isFemale) {
-                    return 'la ' . $object_name;
+                    $label = 'la ' . $object_name;
                 } else {
-                    return 'le ' . $object_name;
+                    $label = 'le ' . $object_name;
                 }
+                break;
 
             case 'a':
                 if ($isFemale) {
-                    return 'une ' . $object_name;
+                    $label = 'une ' . $object_name;
                 } else {
-                    return 'un ' . $object_name;
+                    $label = 'un ' . $object_name;
                 }
+                break;
 
             case 'to':
                 if ($vowel_first) {
-                    return 'à l\'' . $object_name;
+                    $label = 'à l\'' . $object_name;
                 } elseif ($isFemale) {
-                    return 'à la ' . $object_name;
+                    $label = 'à la ' . $object_name;
                 } else {
-                    return 'au ' . $object_name;
+                    $label = 'au ' . $object_name;
                 }
+                break;
 
             case 'this':
                 if ($isFemale) {
-                    return 'cette ' . $object_name;
+                    $label = 'cette ' . $object_name;
                 } elseif ($vowel_first) {
-                    return 'cet ' . $object_name;
+                    $label = 'cet ' . $object_name;
                 } else {
-                    return 'ce ' . $object_name;
+                    $label = 'ce ' . $object_name;
                 }
+                break;
 
             case 'of_a':
                 if ($isFemale) {
-                    return 'd\'une ' . $object_name;
+                    $label = 'd\'une ' . $object_name;
                 } else {
-                    return 'd\'un ' . $object_name;
+                    $label = 'd\'un ' . $object_name;
                 }
+                break;
 
             case 'of_the':
                 if ($vowel_first) {
-                    return 'de l\'' . $object_name;
+                    $label = 'de l\'' . $object_name;
                 } elseif ($isFemale) {
-                    return 'de la ' . $object_name;
+                    $label = 'de la ' . $object_name;
                 } else {
-                    return 'du ' . $object_name;
+                    $label = 'du ' . $object_name;
                 }
+                break;
 
             case 'of_this':
                 if ($isFemale) {
-                    return 'de cette ' . $object_name;
+                    $label = 'de cette ' . $object_name;
                 } elseif ($vowel_first) {
-                    return 'de cet ' . $object_name;
+                    $label = 'de cet ' . $object_name;
                 } else {
-                    return 'de ce ' . $object_name;
+                    $label = 'de ce ' . $object_name;
                 }
+                break;
 
             case 'the_plur':
-                return 'les ' . $name_plur;
+                $label = 'les ' . $name_plur;
+                break;
 
             case 'of_those':
-                return 'de ces ' . $name_plur;
+                $label = 'de ces ' . $name_plur;
+                break;
 
             case 'of_plur':
                 if ($vowel_first) {
-                    return 'd\'' . $name_plur;
+                    $label = 'd\'' . $name_plur;
                 } else {
-                    return 'de ' . $name_plur;
+                    $label = 'de ' . $name_plur;
                 }
+                break;
 
             case 'all_the':
                 if ($isFemale) {
-                    return 'toutes les ' . $name_plur;
+                    $label = 'toutes les ' . $name_plur;
                 } else {
-                    return 'tous les ' . $name_plur;
+                    $label = 'tous les ' . $name_plur;
                 }
+                break;
         }
 
-        return $object_name;
+        return ($ucfirst ? ucfirst($label) : $label);
     }
 
     public function isLabelFemale()

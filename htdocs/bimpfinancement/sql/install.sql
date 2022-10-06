@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande` (
   `id_supplier_contact` int(11) NOT NULL DEFAULT 0,
   `id_user_resp` int(11) NOT NULL DEFAULT 0,
   `status` int(11) NOT NULL DEFAULT 0,
+  `devis_status` int(11) NOT NULL DEFAULT 0,
+  `contrat_status` int(11) NOT NULL DEFAULT 0,
   `label` VARCHAR(255) NOT NULL DEFAULT '',
   `duration` int(11) NOT NULL DEFAULT 0,
   `periodicity` int(11) NOT NULL DEFAULT 0,
@@ -22,14 +24,31 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande` (
   `agreement_number` VARCHAR(255) NOT NULL DEFAULT '',
   `commission_commerciale` DECIMAL(24,6) NOT NULL DEFAULT '0',
   `commission_financiere` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `id_signature_devis` int(11) NOT NULL DEFAULT 0,
+  `signature_devis_params` text NOT NULL DEFAULT '',
+  `id_signature_contrat` int(11) NOT NULL DEFAULT 0,
+  `signature_contrat_params` text NOT NULL DEFAULT '',
   `date_create` datetime NOT NULL DEFAULT current_timestamp(),
   `user_create` int(11) NOT NULL DEFAULT 0,
   `date_update` datetime NOT NULL DEFAULT current_timestamp(),
   `user_update` int(11) NOT NULL DEFAULT 0,
+  `closed` tinyint(1) NOT NULL DEFAULT 0,
+  UNIQUE KEY `ref` (`ref`),
   KEY `id_client` (`id_client`),
   KEY `id_contact_client` (`id_contact_client`),
   KEY `id_supplier` (`id_client`),
   KEY `id_supplier_contact` (`id_contact_client`)
+);
+
+CREATE TABLE IF NOT EXISTS `llx_bf_demande_source` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_demande` int(11) NOT NULL DEFAULT 0,
+  `type` varchar(10) NOT NULL DEFAULT '',
+  `type_origine` varchar(10) NOT NULL DEFAULT '',
+  `origine_data` text NOT NULL DEFAULT '',
+  `client_data` text NOT NULL DEFAULT '',
+  `commercial_data` text NOT NULL DEFAULT '',
+  KEY `id_demande` (`id_demande`)
 );
 
 CREATE TABLE IF NOT EXISTS `llx_bf_demande_line` (
@@ -37,6 +56,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande_line` (
   `id_demande` int(11) NOT NULL DEFAULT 0,
   `type` int(11) NOT NULL DEFAULT 0,
   `id_product` int(11) NOT NULL DEFAULT 0,
+  `ref` VARCHAR(255) NOT NULL DEFAULT '',
   `label` text NOT NULL DEFAULT '',
   `description` text NOT NULL DEFAULT '',
   `product_type` INT(11) NOT NULL DEFAULT 0,

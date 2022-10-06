@@ -1,0 +1,10 @@
+params: 
+    use_frais_divers: 
+        label: Activer les frais divers
+        type: bool
+        def: 0
+        
+    use_loyers_inter: 
+        label: Activer les loyers intermédiaires
+        type: bool  
+        def: 0

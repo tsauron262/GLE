@@ -1,19 +1,19 @@
 colors: 
-    default: B4B4B4
-    primary: EF7D00
-    secondary: 636363
-    success: 348C41
+    default: 'B4B4B4'
+    primary: '4C71B3'
+    secondary: '4C5667'
+    success: '348C41'
     info: '3B6EA0'
-    warning: E69900
-    danger: A00000
+    warning: 'E69900'
+    danger: 'A00000'
     important: '963E96'
-    selection: 5897FB
+    selection: '5897FB'
         
 pdf:
-    primary: EF7D00
+    primary: '4C71B3'
 
 interface_client: 
-    primary: EF7D00
+    primary: '4C71B3'
     
 public_email: 
-    primary: EF7D00
+    primary: '4C71B3'

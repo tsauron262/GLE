@@ -1,0 +1,14 @@
+# Entité: prolease
+
+params: 
+    id_fourn_bimp: 
+        label: ID Fournisseur BIMP
+        def: 0
+        required: 1
+        
+    id_api_webservice_bimp: 
+        label: ID API Webservice BIMP
+        def: 0
+        required: 1
+        
+    

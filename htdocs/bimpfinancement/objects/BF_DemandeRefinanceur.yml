@@ -136,7 +136,7 @@ forms:
 #              display_if: 
 #                  field_name: calc_mode
 #                  show_values: coef
-            - field: payment
+#            - field: payment
             - field: comment
              
     demande_done: 
@@ -251,8 +251,8 @@ fields_tables:
               display: soc_card
             - field: periodicity
               edit: 1
-            - field: payment
-              edit: 1
+#            - field: payment
+#              edit: 1
             - field: comment
               edit: 1
             

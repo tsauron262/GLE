@@ -171,7 +171,7 @@ class BC_Field extends BimpComponent
             return 0;
         }
 
-        return (int) ((int) $this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit));
+        return (int) ((int) $this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isEditable($this->force_edit) && $this->object->isFieldEditable($this->name, $this->force_edit));
     }
 
     public function isUsed()

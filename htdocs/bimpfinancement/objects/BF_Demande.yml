@@ -11,6 +11,9 @@ header_edit_form: edit
 list_page_url: 
     controller: index
     
+nom_url: 
+    syntaxe: <ref>
+    
 labels:
     name: demande de financement
     name_plur: demandes de financement
@@ -38,6 +41,40 @@ objects:
         instance:
             id_object:
                 field_value: id_supplier_contact
+                
+    user_resp: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_resp
+        
+    main_source: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BF_DemandeSource
+            id_object: 
+                field_value: id_main_source
+                
+    signature_devis: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_devis
+            
+    signature_contrat: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_contrat
                 
     lines: 
         relation: hasMany
@@ -85,10 +122,7 @@ objects:
                     parent_module: bimpfinancement
                     parent_object_name: BF_Demande
 
-fields:
-    ref: 
-        label: Référence
-        
+fields: 
     id_client:
         label: Client
         type: id_object
@@ -149,14 +183,45 @@ fields:
                 fk_soc: 
                     field_value: id_supplier
                     
+    id_user_resp: 
+        label: Responsable
+        type: id_object
+        object: user_resp
+        input: 
+            type: search_user
+        default_value: 0
+        
+    id_main_source: 
+        label: Source principale
+        type: id_object
+        object: main_source
+        default_value: 0
+        
+    label: 
+        label: Libellé
+        
+    ref: 
+        label: Référence
+        
     status:
         label: Statut
         type: int
         values: 
             array: status_list
-            
-    label: 
-        label: Libellé
+        
+    devis_status: 
+        label: Statut Devis
+        type: int
+        values: 
+            array: doc_status_list
+        default_value: 0
+        
+    contrat_status: 
+        label: Statut Contrat
+        type: int
+        values: 
+            array: doc_status_list
+        default_value: 0
         
     duration:
         label: Durée
@@ -230,10 +295,37 @@ fields:
         type: percent
         default_value: 0
         decimals: 6
+    
+    id_signature_devis: 
+        label: Signature du devis
+        type: id_object
+        object: signature_devis
+        default_value: 0
+        
+    signature_devis_params: 
+        label: Paramètres signature du devis
+        type: json
+        
+    id_signature_contrat: 
+        label: Signature du contrat
+        type: id_object
+        object: signature_contrat
+        default_value: 0
+        
+    signature_contrat_params: 
+        label: Paramètres signature du contrat
+        type: json
       
+    closed: 
+        label: Demande Fermée
+        type: bool
+        default_value: 0
+        
 forms: 
     create: 
         rows: 
+            resp: 
+                field: id_user_resp
             label: 
                 field: label
             client:    
@@ -269,11 +361,192 @@ forms:
             date_loyer: 
                 field: date_loyer
                 
+    cancel: 
+        rows: 
+            - custom: 1
+              label: Raisons de l'abandon
+              input_name: reasons
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+                    
+                
+    create_signature: 
+        rows: 
+            contact_signature: 
+                custom: 1
+                label: Contact signataire
+                data_type: id_object
+                input_name: id_contact_signature
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getSocieteContactsArray
+                            params: 
+                                - field_value: id_client
+                    help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+                value: 
+                    callback: getDefaultSignatureContact
+                display_if: 
+                    field_name: create_signature
+                    show_values: 1
+            open_public_access: 
+                custom: 1
+                label: Ouvrir l'accès à la signature électronique à distance
+                input_name: open_public_access
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            email_content: 
+                custom: 1
+                label: Contenu e-mail client pour la signature à distance
+                input_name: email_content
+                input: 
+                    type: html
+                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+                value: 
+                    callback: 
+                        method: getDefaultSignDistEmailContent
+                display_if: 
+                    field_name: open_public_access
+                    show_values: 1
+    
+    create_signature_devis: 
+        extends: create_signature
+        title: Création de la signature du devis
+        rows: 
+            email_content:
+                value: 
+                    callback: 
+                        params: 
+                            - devis
+                            
+    create_signature_contrat: 
+        extends: create_signature
+        title: Création de la signature du contrat
+        rows: 
+            email_content:
+                value: 
+                    callback: 
+                        params: 
+                            - contrat
+                  
+    generate_document: 
+        rows: 
+            create_signature: 
+                custom: 1
+                label: Créer la fiche signature
+                input_name: create_signature
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            contact_signature: 
+                custom: 1
+                label: Contact signataire
+                data_type: id_object
+                input_name: id_contact_signature
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getSocieteContactsArray
+                            params: 
+                                - field_value: id_client
+                    help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+                value: 
+                    callback: getDefaultSignatureContact
+                display_if: 
+                    field_name: create_signature
+                    show_values: 1
+            open_public_access: 
+                custom: 1
+                label: Ouvrir l'accès à la signature électronique à distance
+                input_name: open_public_access
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+                display_if: 
+                    field_name: create_signature
+                    show_values: 1
+            email_content:
+                custom: 1
+                label: Contenu e-mail client pour la signature à distance
+                input_name: email_content
+                input: 
+                    type: html
+                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+                value: 
+                    callback: 
+                        method: getDefaultSignDistEmailContent
+                display_if: 
+                    fields_names: open_public_access,create_signature
+                    open_public_access: 
+                        show_values: 1
+                    create_signature:
+                        show_values: 1
+                        
+    generate_devis: 
+        extends: generate_document
+        title: Création du devis de financement
+        rows: 
+            email_content: 
+                value: 
+                    callback: 
+                        params: 
+                          - devis
+        
+    generate_contrat: 
+        extends: generate_document
+        title: Création du contrat de financement
+        rows: 
+            email_content: 
+                value: 
+                    callback: 
+                        params: 
+                          - contrat
+                          
+    submit_new_status: 
+        msgs: 
+          - type: warning
+        rows: 
+          - custom: 1
+            label: Notes à l'intention du commercial 
+            input_name: note
+            input: 
+                type: textarea
+                rows: 3
+                auto_expand: 1
+                
+    submit_accept: 
+        extends: submit_new_status
+        msgs: 
+            0: 
+                content: '<b>Attention: acceptation définitive</b>'
+                
+    submit_refuse: 
+        extends: submit_new_status
+        msgs: 
+            0: 
+                content: '<b>Attention: refus définitif - la demande sera fermée</b>'
+                
+    submit_cancel: 
+        extends: submit_new_status
+        msgs: 
+            0: 
+                content: '<b>Attention: abandon définitif - la demande sera fermée</b>'
+                
 fields_tables:
     infos: 
         title: Infos
         icon: fas_info-circle
         rows: 
+            - field: id_user_resp
             - field: date_loyer
               edit: 1
             - field: duration
@@ -330,6 +603,19 @@ fields_tables:
             - label: Total demande
               value: 
                   callback: displayTotalDemande
+                  
+    signatures: 
+        title: Signatures
+        icon: fas_signature
+        rows: 
+            - field: id_signature_devis
+              display: card
+              show: 
+                  field_value: id_signature_devis
+            - field: id_signature_contrat
+              display: card
+              show: 
+                  field_value: id_signature_contrat
         
 views:
     default: 
@@ -352,8 +638,11 @@ views:
                       col_md: 6
                       fields_table:
                           name: options
-                      
+            
+            # Row #2 utilisée par extends prolease
             2: 
+                
+            3: 
                 cols: 
                     - type: fields_table
                       col_lg: 6
@@ -367,9 +656,14 @@ views:
                       col_md: 6
                       fields_table:
                           name: supplier
-                    
-            # Attention row #3 utilisée par extends prolease / si ajout passer à 4
-        
+                    - type: fields_table
+                      show: 
+                          callback: hasSignature
+                      col_lg: 6
+                      col_md: 6
+                      fields_table:
+                          name: signatures
+    
     demande: 
         extends: default
         rows: 
@@ -395,6 +689,11 @@ lists_cols:
     id: 
         label: ID
         
+    client: 
+        label: Client
+        value: 
+            callback: displayClient
+        
 lists:
     default:
         checkboxes: 1
@@ -409,12 +708,18 @@ lists:
         delete_btn: 1
         page_btn: 1
         modal_view: demande
+        edit_btn: 1
         edit_form: edit
         delete_btn: 1
+        extra_btn: 
+            callback: getListExtraButtons
         cols:
             id:
+            ref: 
             date_create:
-            id_client: 
+            ext_origine: 
+            id_user_resp: 
+            client: 
             duration:
             periodicity:
             status:

@@ -78,9 +78,6 @@ class BimpPDF extends TCPDF
                         die("Le dossier " . $folder . " n'existe pas et ne peut être créé");
                     } else {
                         $errors[] = "Le dossier " . $folder . " n'existe pas et ne peut être créé";
-//                        echo '<pre>';
-//                        print_r($errors);
-//                        exit;
                         return 0;
                     }
                 }

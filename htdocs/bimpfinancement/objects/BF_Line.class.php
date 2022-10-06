@@ -18,9 +18,9 @@ class BF_Line extends BimpObject
     const LOGICIEL = 3;
 
     public static $product_types = array(
-        self::PRODUIT => array('label' => 'Produit', 'icon' => 'fas_box'),
-        self::SERVICE => array('label' => 'Service', 'icon' => 'fas_hand-holding'),
-//        self::LOGICIEL => array('label' => 'Logiciel', 'icon' => 'fas_cogs')
+        self::PRODUIT  => array('label' => 'Produit', 'icon' => 'fas_box'),
+        self::SERVICE  => array('label' => 'Service', 'icon' => 'fas_hand-holding'),
+        self::LOGICIEL => array('label' => 'Logiciel', 'icon' => 'fas_cogs')
     );
     public $product = null;
 
@@ -426,7 +426,7 @@ class BF_Line extends BimpObject
 
     // Affichages: 
 
-    public function displayDesc($mode_light = false)
+    public function displayDesc($mode_light = false, $no_link = false)
     {
         $html = '';
 
@@ -434,14 +434,19 @@ class BF_Line extends BimpObject
             case self::TYPE_PRODUCT:
                 $product = $this->getProduct();
                 if (BimpObject::objectLoaded($product)) {
-                    $html .= $product->getLink() . '<br/>';
+                    if ($no_link) {
+                        $html .= '<b>' . $product->getRef() . '</b><br/>';
+                    } else {
+                        $html .= $product->getLink() . '<br/>';
+                    }
                     $html .= $product->getName();
                 }
                 break;
 
             case self::TYPE_FREE:
+                $html .= '<b>' . $this->getData('ref') . '</b>';
             case self::TYPE_TEXT:
-                $html .= $this->getData('label');
+                $html .= ($html ? '<br/>' : '') . $this->getData('label');
                 break;
         }
 
@@ -789,6 +794,7 @@ class BF_Line extends BimpObject
                     if (!BimpObject::objectLoaded($product)) {
                         $errors[] = 'Le produit #' . $this->getData('id_product') . ' n\'existe plus';
                     } else {
+                        $this->set('ref', $product->getRef());
                         $isSerialisable = (int) $product->isSerialisable();
                         $this->set('serialisable', $isSerialisable);
                         if ($use_pu_for_pa) {
@@ -838,6 +844,7 @@ class BF_Line extends BimpObject
 
                 $this->set('id_product', 0);
                 $this->set('id_fourn_price', 0);
+                $this->set('ref', '');
                 $this->set('label', '');
                 $this->set('qty', 0);
                 $this->set('pu_ht', 0);

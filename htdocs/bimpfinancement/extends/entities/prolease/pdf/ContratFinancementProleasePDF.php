@@ -1,0 +1,76 @@
+<?php
+
+require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
+
+class ContratFinancementProleasePDF extends ContratFinancementPDF
+{
+
+    public $client_data = array();
+    public $contact_data = array();
+
+    public function __construct($db, $demande, $client_data = array(), $contact_data = array())
+    {
+        $this->client_data = $client_data;
+
+        if (empty($this->client_data)) {
+            $this->errors[] = 'Données du client absentes';
+        }
+        $this->contact_data = $contact_data;
+
+        parent::__construct($db, $demande);
+    }
+
+    public function initData()
+    {
+        BimpDocumentPDF::initData();
+    }
+
+    public function isTargetCompany()
+    {
+        if (isset($this->client_data['is_company'])) {
+            return (int) $this->client_data['is_company'];
+        }
+
+        return 0;
+    }
+
+    public function getDocInfosHtml()
+    {
+        $html = '';
+
+        $html .= '<div>';
+
+        // Réf. client: 
+        if (isset($this->client_data['ref']) && $this->client_data['ref']) {
+            $html .= '<span style="font-weight: bold;">Référence client : </span>' . $this->client_data['ref'] . '<br/>';
+        }
+
+        $html .= '</div>';
+
+        $html .= BimpDocumentPDF::getDocInfosHtml();
+
+        return $html;
+    }
+
+    public function getTargetInfosHtml()
+    {
+        $html = '';
+
+        if (!empty($this->client_data)) {
+            if ($this->client_data['is_company']) {
+                $html .= $this->client_data['nom'] . '<br/>';
+            }
+
+            if (!empty($this->contact_data)) {
+                $html .= $this->contact_data['nom'] . '<br/>';
+                $html .= $this->contact_data['full_adress'];
+            } else {
+                $html .= $this->client_data['full_adress'];
+            }
+        }
+
+        $html = str_replace("\n", '<br/>', $html);
+
+        return $html;
+    }
+}

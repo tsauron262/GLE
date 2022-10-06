@@ -38,7 +38,7 @@
       cursor: pointer; }
       /* line 38, ../scss/fixeTabs.scss */
       #bimp_fixe_tabs #bimp_fixe_tabs_captions > .fixe_tabs_refresh_btn:hover {
-        color: #EF7D00; }
+        color: #335899; }
     /* line 43, ../scss/fixeTabs.scss */
     #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption {
       -webkit-transition: all 0.3s ease;
@@ -49,7 +49,7 @@
       margin: 0 3px;
       border-left: 1px solid #636363;
       border-right: 1px solid #636363;
-      border-top: 3px solid #EF7D00;
+      border-top: 3px solid #335899;
       background-color: #fff;
       box-shadow: 0 0 4px #636363;
       cursor: pointer;
@@ -63,7 +63,7 @@
           margin: 0 2px; }
       /* line 65, ../scss/fixeTabs.scss */
       #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption.active, #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption:hover {
-        background-color: #EF7D00; }
+        background-color: #335899; }
         /* line 67, ../scss/fixeTabs.scss */
         #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption.active .title, #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption:hover .title {
           color: #fff; }

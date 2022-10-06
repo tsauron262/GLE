@@ -27,6 +27,12 @@ sections:
                     panel: 0
                     name: demande
                     object: demande
+          - id: sources
+            title: Sources
+            show: 
+                field_value: 
+                    object: demande
+                    field_name: id_main_source
           - id: elements
             title: Elements financés
             struct: 
@@ -58,6 +64,7 @@ sections:
                               name: default
                               object: demande
                               children: rents_except
+                              
           - id: refinanceurs
             title: Demandes refinanceurs
             show: 

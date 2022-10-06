@@ -53,7 +53,7 @@
             } else {
                 $sizes = dol_getImageSize($logo_file, false);
 
-                $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
+                $tabTaille = $this->calculeWidthHeightLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
 
                 $logo_width = $tabTaille[0];
                 $logo_height = $tabTaille[1];
@@ -66,7 +66,7 @@
                 if (file_exists($soc_logo_file)) {
                     $sizes = dol_getImageSize($soc_logo_file, false);
                     if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
-                        $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], 80, 80);
+                        $tabTaille = $this->calculeWidthHeightLogo($sizes['width'], $sizes['height'], 80, 80);
 
                         $header_right = '<img src="' . $soc_logo_file . '" width="' . $tabTaille[0] . 'px" height="' . $tabTaille[1] . 'px"/>';
                     }

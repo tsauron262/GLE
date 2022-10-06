@@ -13,6 +13,16 @@ labels:
     name_plur: éléments financés
     
 objects: 
+    source: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpfinancement
+                name: BF_DemandeSource
+            id_object: 
+                field_value: id_source
+                
     fourn_price: 
         relation: hasOne
         delete: 0
@@ -27,6 +37,17 @@ fields:
     id_demande: 
         label: Demande de financement
         type: id_parent
+        
+    id_source: 
+        label: Source
+        type: id_object
+        object: source
+        default_value: 0
+        
+    id_line_origine: 
+        label: ID ligne d'origine
+        type: id
+        default_value: 0
         
     type: 
         label: Type de ligne
@@ -43,10 +64,20 @@ fields:
         display_if: 
             field_name: type
             show_values: 1
-        
+            
+    ref: 
+        label: Réf. produit
+        display_if: 
+            field_name: type
+            show_values: 2
+            
     label: 
-        label: Libellé
-        type: html
+        label: Libellé produit
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+            help: Facultatif
         display_if: 
             field_name: type
             show_values: 2
@@ -181,6 +212,7 @@ forms:
         rows: 
             - field: type
             - field: id_product
+            - field: ref
             - field: label
             - field: product_type
             - field: serialisable
@@ -208,6 +240,7 @@ fields_tables:
     infos: 
         panel_header: 0
         rows: 
+            - field: ref
             - field: label
             - field: description
             - field: id_product

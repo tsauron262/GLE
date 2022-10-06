@@ -198,7 +198,7 @@ class OrderPDF extends BimpCommDocumentPDF
         if ($this->commande->ref_client) {
             $html .= '<tr>';
             $html .= '<td colspan="2" style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">' . $this->langs->transnoentities('RefCustomer') . ' : </span>';
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">' . $this->langs->transnoentities('RefCustomer') . ' : </span>';
             $html .= $this->langs->convToOutputCharset($this->commande->ref_client);
             $html .= '</td>';
             $html .= '</tr>';
@@ -208,13 +208,13 @@ class OrderPDF extends BimpCommDocumentPDF
         if (!is_null($this->user_suivi)) {
             $html .= '<tr>';
             $html .= '<td colspan="2" style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Dossier suivi par : </span>';
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Dossier suivi par : </span>';
             $html .= $this->user_suivi->firstname . ' ' . strtoupper($this->user_suivi->lastname);
             $html .= '</td>';
 
 //            if ($this->user_suivi->office_phone) {
 //                $html .= '<td  style="font-size: 8px">';
-//                $html .= '<span style="font-weight: bold; color: #EF7D00">Tél. : </span>';
+//                $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Tél. : </span>';
 //                $html .= $this->user_suivi->office_phone;
 //                $html .= '</td>';
 //            }
@@ -224,13 +224,13 @@ class OrderPDF extends BimpCommDocumentPDF
         if (!is_null($this->user_commercial)) {
             $html .= '<tr>';
             $html .= '<td' . (!$this->user_commercial->office_phone ? ' colspan="2"' : '') . ' style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Commercial : </span>';
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Commercial : </span>';
             $html .= $this->user_commercial->firstname . ' ' . strtoupper($this->user_commercial->lastname);
             $html .= '</td>';
 
             if ($this->user_commercial->office_phone) {
                 $html .= '<td style="font-size: 7px">';
-                $html .= '<span style="font-weight: bold; color: #EF7D00">Tél. : </span>';
+                $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Tél. : </span>';
                 $html .= $this->user_commercial->office_phone;
                 $html .= '</td>';
             }
@@ -243,7 +243,7 @@ class OrderPDF extends BimpCommDocumentPDF
         if (!is_null($this->contact)) {
             $html .= '<tr>';
             $html .= '<td colspan="2" style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Interlocuteur : </span>';
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Interlocuteur : </span>';
             $html .= $this->contact->firstname . ' ' . strtoupper($this->contact->lastname);
             $html .= '</td>';
             $html .= '</tr>';
@@ -257,15 +257,15 @@ class OrderPDF extends BimpCommDocumentPDF
             $email = (isset($this->contact->email) && $this->contact->email ? $this->contact->email : '');
 
             $html .= '<tr><td style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Tél. : </span>' . $phone;
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Tél. : </span>' . $phone;
             $html .= '</td><td style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Mobile : </span>' . $mobile;
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Mobile : </span>' . $mobile;
             $html .= '</td></tr>';
 
             $html .= '<tr><td style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Fax : </span>' . $fax;
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Fax : </span>' . $fax;
             $html .= '</td><td style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">E-mail : </span>' . $email;
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">E-mail : </span>' . $email;
             $html .= '</td></tr>';
 
             $html .= '<tr><td></td><td></td></tr>';
@@ -279,21 +279,21 @@ class OrderPDF extends BimpCommDocumentPDF
 
         $html .= '<tr>';
         $html .= '<td colspan="2" style="font-size: 7px">';
-        $html .= '<span style="font-weight: bold; color: #EF7D00">Code client : </span>';
+        $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Code client : </span>';
         $html .= isset($this->commande->thirdparty->code_client) ? $this->commande->thirdparty->code_client : '';
         $html .= '</td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
         $html .= '<td colspan="2" style="font-size: 7px">';
-        $html .= '<span style="font-weight: bold; color: #EF7D00">Ref. commande : </span>';
+        $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Ref. commande : </span>';
         $html .= $this->commande->ref;
         $html .= '</td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
         $html .= '<td colspan="2" style="font-size: 7px">';
-        $html .= '<span style="font-weight: bold; color: #EF7D00">Date commande : </span>';
+        $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Date commande : </span>';
         $html .= dol_print_date($this->commande->date);
         $html .= '</td>';
         $html .= '</tr>';

@@ -8,19 +8,21 @@ class BimpDocumentPDF extends BimpModelPDF
     # Constantes: 
 
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/document/';
-    public static $use_cgv = true;
+    public static $use_cgv = false;
 
     # Objets liés: 
     public $bimpObject = null;
     public $thirdparty = null;
     public $contact = null;
     public $contactFinal = null;
+    public $targetBimpSoc = null;
 
     # Données: 
-    public $target_label = '';
+    public $target_label = 'Destinataire';
     public $next_annexe_idx = 1;
     public $annexe_listings = array();
     public $file_logo = '';
+    public $object_signature_params_field_name = 'signature_params';
     public $signature_params = array();
     public $signature_bloc = true;
     public $signature_bloc_label = '';
@@ -28,7 +30,6 @@ class BimpDocumentPDF extends BimpModelPDF
     public function __construct($db)
     {
         parent::__construct($db, 'P', 'A4');
-        $this->target_label = $this->langs->transnoentities('BillTo');
     }
 
     // Initialisation:
@@ -68,11 +69,24 @@ class BimpDocumentPDF extends BimpModelPDF
             $logo_file = '';
         } else {
             $sizes = dol_getImageSize($logo_file, false);
-
-            $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
-
+            $tabTaille = $this->calculeWidthHeightLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
             $logo_width = $tabTaille[0];
             $logo_height = $tabTaille[1];
+        }
+
+        $header_right = '';
+        $soc = $this->getTargetBimpSociete();
+        if (BimpObject::objectLoaded($soc)) {
+            if (isset($soc->dol_object->logo) && (string) $soc->dol_object->logo) {
+                $soc_logo_file = DOL_DATA_ROOT . '/societe/' . $soc->dol_object->id . '/logos/' . $soc->dol_object->logo;
+                if (file_exists($soc_logo_file)) {
+                    $sizes = dol_getImageSize($soc_logo_file, false);
+                    if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
+                        $tabTaille = $this->calculeWidthHeightLogo($sizes['width'], $sizes['height'], 80, 80);
+                        $header_right = '<img src="' . $soc_logo_file . '" width="' . $tabTaille[0] . 'px" height="' . $tabTaille[1] . 'px"/>';
+                    }
+                }
+            }
         }
 
         $this->pdf->topMargin = 44;
@@ -85,7 +99,7 @@ class BimpDocumentPDF extends BimpModelPDF
             'doc_ref'       => '',
             'ref_extra'     => '',
             'header_infos'  => $this->getSenderInfosHtml(),
-            'header_right'  => '',
+            'header_right'  => $header_right,
         );
     }
 
@@ -193,14 +207,44 @@ class BimpDocumentPDF extends BimpModelPDF
         return 0;
     }
 
+    public function getTargetBimpSociete()
+    {
+        if (is_null($this->targetBimpSoc)) {
+            $id_soc = (int) $this->getTargetIdSoc();
+            if ($id_soc) {
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
+                if (BimpObject::objectLoaded($soc)) {
+                    $this->targetBimpSoc = $soc;
+                }
+            }
+        }
+
+        return $this->targetBimpSoc;
+    }
+
+    public function isTargetCompany()
+    {
+        $id_soc = $this->getTargetIdSoc();
+        if ($id_soc) {
+            $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $id_soc);
+
+            if (BimpObject::objectLoaded($soc)) {
+                return (int) $soc->isCompany();
+            }
+        }
+
+        return 0;
+    }
+
     // Rendus:
 
     protected function renderContent()
     {
-        if (is_object($this->thirdparty) || is_object($this->contact)) {
-            $this->renderDocInfos($this->thirdparty, $this->contact);
-        }
-
+//        if (is_object($this->thirdparty) || is_object($this->contact)) {
+//            $this->renderDocInfos($this->thirdparty, $this->contact);
+//        }
+        
+        $this->renderDocInfos();
         $this->renderTop();
         $this->renderBeforeLines();
         $this->renderLines();
@@ -233,7 +277,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $html .= '<div class="row" style="border-top: solid 1px #' . $this->primary . '">';
                     $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
                     $html .= $label . ' :</span>';
-                    $html .= '<br/>' . $usertmp->dol_object->getFullName($this->langs, 0, -1, 20);
+                    $html .= '<br/>' . $usertmp->dol_object->getFullName($this->langs, 0, -1, 40);
                     if ($usertmp->dol_object->email) {
                         $html .= '<br/><span style="font-size: 7px;">' . $usertmp->dol_object->email . '</span>';
                     }
@@ -366,28 +410,7 @@ class BimpDocumentPDF extends BimpModelPDF
         return '';
     }
 
-    public function getPaymentInfosHtml()
-    {
-        return '';
-    }
-
     public function getBottomRightHtml()
-    {
-
-        return '';
-    }
-
-    public function getTotauxRowsHtml()
-    {
-        return '';
-    }
-
-    public function getPaymentsHtml()
-    {
-        return '';
-    }
-
-    public function getAfterTotauxHtml()
     {
         return '';
     }
@@ -404,11 +427,6 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($this->signature_bloc) {
             $yPosOffset = 0;
 
-            $id_soc = $this->getTargetIdSoc();
-            if ($id_soc) {
-                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $id_soc);
-            }
-
             $html = '<table style="width: 95%;font-size: 7px;" cellpadding="3">';
             $html .= '<tr>';
             $html .= '<td style="width: 50%"></td>';
@@ -416,7 +434,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
             $html .= '<table cellpadding="3">';
             $html .= '<tr>';
-            if (BimpObject::objectLoaded($soc) && $soc->isCompany()) {
+            if ($this->isTargetCompany()) {
                 $html .= '<td style="text-align:center;"><i><b>' . $this->signature_bloc_label . '</b></i></td>';
 
                 $html .= '<td style="font-size: 6px">Signature + Cachet avec SIRET :</td>';
@@ -481,8 +499,8 @@ class BimpDocumentPDF extends BimpModelPDF
             $this->signature_params['page'] = $page;
 
             if (is_a($this->bimpObject, 'BimpObject')) {
-                if ($this->bimpObject->field_exists('signature_params')) {
-                    $this->bimpObject->updateField('signature_params', $this->signature_params);
+                if ($this->bimpObject->field_exists($this->object_signature_params_field_name)) {
+                    $this->bimpObject->updateField($this->object_signature_params_field_name, $this->signature_params);
                 }
             }
         }

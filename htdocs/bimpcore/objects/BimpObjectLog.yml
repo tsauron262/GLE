@@ -32,6 +32,11 @@ fields:
         label: Date
         type: datetime
         required: 1
+        displays: 
+            default: 
+                type: datetime
+                show_hour: 1
+                format: d / m / Y H:i
         
     id_user: 
         label: Utilisateur
@@ -48,6 +53,5 @@ lists:
             date: 
             id_user:
             msg: 
-            code: 
             
         

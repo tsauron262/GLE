@@ -39,6 +39,7 @@ class BimpCore
             'bds_operations'    => '/bimpdatasync/views/js/operations.js'
         ),
         'css' => array(
+            'fonts'          => '/bimpcore/views/css/fonts.css',
             'jPicker'        => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
             'bimpcore'       => '/bimpcore/views/css/bimpcore.css',
             'userConfig'     => '/bimpuserconfig/views/css/userConfig.css',

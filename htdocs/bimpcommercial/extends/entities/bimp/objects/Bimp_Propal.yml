@@ -1,6 +1,27 @@
 # Entité: bimp
 
+objects: 
+    signature_devis_fin: 
+        extends: signature
+        instance: 
+            id_object: 
+                field_value: id_signature_devis_fin
+                
+    signature_contrat_fin: 
+        extends: signature
+        instance: 
+            id_object: 
+                field_value: id_signature_contrat_fin
+    
 fields:
+    id_df_prolease: 
+        label: ID DF LDLC Pro Lease
+        type: id
+        default_value: 0
+        
+    ref_df_prolease: 
+        label: Ref. DF LDLC Pro Lease
+        
     df_status: 
         label: Statut demande de financement
         type: int
@@ -8,12 +29,54 @@ fields:
         values: 
             array: df_status_list
             
-    id_df_prolease: 
-        label: ID demande de financement LDLC Pro Lease
-        type: id
+    devis_fin_status: 
+        label: Statut devis de financement
+        type: int
         default_value: 0
+        values: 
+            array: doc_status_list
             
+    contrat_fin_status: 
+        label: Statut contrat de financement
+        type: int
+        default_value: 0
+        values: 
+            array: doc_status_list
+        
+    id_signature_devis_fin: 
+        label: Signature devis de financement
+        type: id_object
+        object: signature_devis_fin
+        
+    signature_df_params:
+        label: Paramètres signature devis de financement
+        type: json
+        
+    id_signature_contrat_fin: 
+        label: Signature contrat de financement
+        type: id_object
+        object: signature_contrat_fin
+        
+    signature_cf_params:
+        label: Paramètres signature contrat de financement
+        type: json
+            
+fields_tables: 
+    signatures_fin: 
+        title: Signatures
+        icon: fas_signature
+        rows: 
+            - field: id_signature_devis_fin
+              display: card
+            - field: id_signature_contrat_fin
+              display: card
 forms: 
+    validate: 
+        rows: 
+            create_signature: 
+                input: 
+                    help: Si vous envisagez d'émettre une demande de financement auprès de LDLC PRO LEASE, il est préférable d'attendre la mise en place du devis de financemnent pour demander la signature du client. 
+                    
     demande_financement: 
         title: Demande de financement
         rows: 
@@ -30,7 +93,7 @@ forms:
                               - field_value: fk_soc
                               - 1
               value: 
-                  callbac: getDefaultIdContactForDF
+                  callback: getDefaultIdContactForDF
             - custom: 1
               label: Durée
               input_name: duration
@@ -52,3 +115,54 @@ forms:
                   type: select
                   options: 
                       callback: getDFCalcModesArray
+              value: 2
+              
+    signature_fin:
+        rows: 
+            contact: 
+                custom: 1
+                label: Contact signataire
+                input_name: id_contact_signature
+                required: 1
+                input: 
+                    type: select
+                    options:
+                        callback: 
+                            method: getSocieteContactsArray
+                            params: 
+                                - field_value: fk_soc
+                                - 1
+                value: 
+                    callback: getDefaultIdContactForDF
+            email_content: 
+                custom: 1
+                label: Contenu e-mail client pour la signature à distance
+                input_name: email_content
+                input: 
+                    type: html
+                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+                value: 
+                    callback: 
+                        method: getDefaultSignDistEmailContent
+                        
+    signature_devis_fin: 
+        extends: signature_fin
+        rows: 
+            contact: 
+                label: Contact signataire du devis de financement
+            email_content: 
+                value: 
+                    callback: 
+                        params: 
+                            - devis_fin
+                            
+    signature_contrat_fin: 
+        extends: signature_fin
+        rows: 
+            contact: 
+                label: Contact signataire du contrat de financement
+            email_content: 
+                value: 
+                    callback: 
+                        params: 
+                            - contrat_fin

@@ -19,7 +19,7 @@ class BFTools
         if (!is_numeric($taux) || !is_numeric($npm) || !is_numeric($va) || !is_numeric($vc)) {
             return false;
         }
-
+        
         if ($type > 1 || $type < 0) {
             return false;
         }

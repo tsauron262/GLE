@@ -823,7 +823,7 @@ class BContract_contrat extends BimpDolObject
 
             $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
 
-            return $commercial->dol_object->getNomUrl();
+            return $commercial->getLink();
         }
     }
 

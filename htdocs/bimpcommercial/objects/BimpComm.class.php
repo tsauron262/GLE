@@ -2357,30 +2357,46 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function renderContacts()
+    public function renderContacts($type = 0, $code = '', $input_name = '')
     {
         $html = '';
+        if($input_name != ''){
+            $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \''.$input_name.'\');">';
+            $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+            $html .= '</span>';
+        }
 
         $html .= '<table class="bimp_list_table">';
 
         $html .= '<thead>';
         $html .= '<tr>';
+        if($type == 0)
         $html .= '<th>Nature</th>';
         $html .= '<th>Tiers</th>';
         $html .= '<th>Utilisateur / Contact</th>';
-        $html .= '<th>Type de contact</th>';
+        if($code == '')
+            $html .= '<th>Type de contact</th>';
         $html .= '<th></th>';
         $html .= '</tr>';
         $html .= '</thead>';
 
-        $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
+        $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list'.$type.'_'.$code;
         $html .= '<tbody id="' . $list_id . '">';
-        $html .= $this->renderContactsList();
+        $html .= $this->renderContactsList($type, $code);
 
         $html .= '</tbody>';
 
         $html .= '</table>';
 
+        $filtre = array('id_client' => (int) $this->getData('fk_soc'));
+        if($type && $code != ''){
+            if($type == 'internal'){
+                $filtre['user_type_contact'] = $this->getIdTypeContact($type, $code);
+            }
+            elseif($type == 'external'){
+                $filtre['tiers_type_contact'] = $this->getIdTypeContact($type, $code);
+            }
+        }
         return BimpRender::renderPanel('Liste des contacts', $html, '', array(
                     'type'           => 'secondary',
                     'icon'           => 'user-circle',
@@ -2390,7 +2406,7 @@ class BimpComm extends BimpDolObject
                             'icon_before' => 'plus-circle',
                             'classes'     => array('btn', 'btn-default'),
                             'attr'        => array(
-                                'onclick' => $this->getJsActionOnclick('addContact', array('id_client' => (int) $this->getData('fk_soc')), array(
+                                'onclick' => $this->getJsActionOnclick('addContact', $filtre, array(
                                     'form_name'        => 'contact',
                                     'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
                                 ))
@@ -2678,6 +2694,7 @@ class BimpComm extends BimpDolObject
         if (count($copy_errors)) {
             $errors[] = BimpTools::getMsgFromArray($copy_errors, 'Echec de la copie ' . $this->getLabel('of_the'));
         } else {
+            $new_object->addObjectLog('Créé' . $new_object->e() . ' par clonage ' . $this->getLabel('of_the') . $this->getRef());
             // Copie des contacts: 
             $new_object->copyContactsFromOrigin($this, $errors);
 
@@ -3503,14 +3520,12 @@ class BimpComm extends BimpDolObject
             if (BimpObject::objectLoaded($client)) {
                 // Vérif commercial suivi: 
                 $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-//                print_r($tabConatact);
                 if (count($tabConatact) < 1) {
                     $ok = false;
                     $tabComm = $client->dol_object->getSalesRepresentatives($user);
 
                     // Il y a un commercial pour ce client
                     if (count($tabComm) > 0) {
-//                        die('AAAAAAAAAAAAAAAA');
                         $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                         $ok = true;
 
@@ -3518,7 +3533,6 @@ class BimpComm extends BimpDolObject
                     } elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial')) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
-//                        die('CCCCCCCCCCCCCCCC');
                         // L'objet est une facture et elle a une facture d'origine
                     } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
                         $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
@@ -3539,8 +3553,6 @@ class BimpComm extends BimpDolObject
                 // Vérif contact signataire: 
                 $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
                 if (count($tabConatact) < 1) {
-//                                            die('DDDDDDDDDDDDDD');
-
                     $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
                 }
             }
@@ -4487,7 +4499,7 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
-    public function onChildDelete($child)
+    public function onChildDelete($child, $id_child_deleted)
     {
         if ($this->isLoaded() && !$this->isDeleting) {
             if (is_a($child, 'objectLine')) {

@@ -168,7 +168,7 @@ class Bimp_Propal extends BimpComm
 
             case 'close':
                 if ($status !== Propal::STATUS_VALIDATED) {
-                    $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permetffff pas cette opération';
+                    $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
                     return 0;
                 }
 

@@ -75,6 +75,8 @@ class ActionsBimpcore
 
             define('BIMPCORE_INIT', 1);
         }
+
+        return 0;
     }
 
     function initBimpLayout($parameters, &$object, &$action, $hookmanager)
@@ -86,6 +88,8 @@ class ActionsBimpcore
         if (is_a($main_controller, 'BimpController')) {
             $main_controller->initLayout();
         }
+
+        return 0;
     }
 
     function getNomUrl($parameters, &$object, &$action, $hookmanager)
@@ -149,6 +153,8 @@ class ActionsBimpcore
             $nb = BimpCore::getConf($conf, 0);
             BimpCore::setConf($conf, $nb + 1);
         }
+        
+        return 0;
     }
 
     function printLeftBlock($parameters, &$object, &$action, $hookmanager)
@@ -168,7 +174,7 @@ class ActionsBimpcore
 //        $html = '';
 //
 //        $this->resprints = $html;
-//        return 0;
+        return 0;
     }
 
     function addSearchEntry($parameters, &$object, &$action, $hookmanager)

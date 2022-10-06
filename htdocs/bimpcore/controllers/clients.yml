@@ -79,6 +79,8 @@ sections:
                         object: contact
           user_client: 
               label: Comptes espace client
+              show: 
+                  is_module_active: bimpinterfaceclient
               sections: 
                   - type: list
                     list: 
@@ -101,17 +103,29 @@ sections:
                       name: default
           relances: 
               label: Relances paiements
+              show: 
+                  conf: 
+                      module: bimpcommercial
+                      name: use_relances_paiements_clients
               sections: 
                   - type: list
                     list: 
                         object: relance
           relances_lines: 
+              show: 
+                  conf: 
+                      module: bimpcommercial
+                      name: use_relances_paiements_clients
               label: Détails des relances
               sections: 
                   - type: list
                     list: 
                         object: relance_lines
           relances_reports: 
+              show: 
+                  conf: 
+                      module: bimpcommercial
+                      name: use_relances_paiements_clients
               label: Rapports relances auto
               sections: 
                   - type: list
@@ -119,6 +133,10 @@ sections:
                         name: relances_clients
                         object: relances_report
           suivis_recouvrement: 
+              show: 
+                  conf: 
+                      module: bimpcommercial
+                      name: use_relances_paiements_clients
               label: Suivis recouvrements
               sections: 
                   - type: list

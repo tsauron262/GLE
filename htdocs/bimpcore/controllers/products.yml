@@ -60,6 +60,8 @@ sections:
                       name: default
         equipments:
             label: Equipements
+            show: 
+                is_module_active: bimpequipment
             sections:
                 - type: list
                   list: 
@@ -67,6 +69,10 @@ sections:
                       object: equipment
         productfourn:
             label: Produits Fournisseurs
+            show: 
+                conf: 
+                    module: bimpcore
+                    name: use_imports_fournisseurs
             sections: 
                 - type: list
                   list: 
@@ -76,6 +82,10 @@ sections:
                       
         productldlc:
             label: Imports produits Fournisseurs
+            show: 
+                conf: 
+                    module: bimpcore
+                    name: use_imports_fournisseurs
             sections: 
                 - type: list
                   list: 
@@ -85,12 +95,16 @@ sections:
                         
         packages:
             label: Packages
+            show: 
+                is_module_active: bimpequipment
             sections: 
                 - type: list
                   list: 
                       object: package  
         immos:
             label: Equipements + Package
+            show: 
+                is_module_active: bimpequipment
             sections: 
                 - type: list
                   list: 

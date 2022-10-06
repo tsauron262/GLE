@@ -1,6 +1,9 @@
 
 bootstrap: 1
-title: Admin APIs
+title: 
+    callback: 
+        method: getPageTitle
+        object: api
 
 js: 
     - /bimpapi/views/js/bimp_api.js

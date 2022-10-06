@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportFournCatalogPro
 class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
 {
 
+    public static $default_public_title = 'Imports FTP Ingram';
     public static $price_keys = array(
         1 => 'brand',
         3 => 'ref_fourn',
@@ -15,9 +16,9 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
     );
     public static $taxe_keys = array(
         'IM PART #' => 'ref_fourn',
-        'CP FEE D' => 'taxe1',
-        'RECYCFEE' => 'taxe2',
-        'CP FEE N' => 'taxe3'
+        'CP FEE D'  => 'taxe1',
+        'RECYCFEE'  => 'taxe2',
+        'CP FEE N'  => 'taxe3'
     );
 
     public function initUpdateFromFile(&$data, &$errors = array())
@@ -68,18 +69,19 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
 
         switch ($step_name) {
             case 'update_taxe_file':
-                if(isset($this->params['taxes_file']) && $this->params['taxes_file'] && isset($this->params['ftp_dir2']) && $this->params['ftp_dir2']){
-                    $fileNameTaxe = $this->params['taxes_file'];;
-                    $this->ftp_dir = $this->params['ftp_dir2']."/";
+                if (isset($this->params['taxes_file']) && $this->params['taxes_file'] && isset($this->params['ftp_dir2']) && $this->params['ftp_dir2']) {
+                    $fileNameTaxe = $this->params['taxes_file'];
+                    ;
+                    $this->ftp_dir = $this->params['ftp_dir2'] . "/";
                     $this->downloadFtpFile($fileNameTaxe, $errors);
                 }
                 break;
-            
+
             case 'update_prices_file':
                 if (isset($this->params['prices_file']) && $this->params['prices_file']) {
                     $fileName = pathinfo($this->params['prices_file'], PATHINFO_FILENAME) . '.ZIP';
                     $this->downloadFtpFile($fileName, $errors);
-                    
+
                     if (!count($errors)) {
                         if ($this->options['debug']) {
                             error_reporting(E_ALL);
@@ -136,11 +138,11 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                         $file_idx = (int) $this->references[0];
                     }
                 }
-                
-                
-                $dataTaxe = $this->getCsvFileDataByKeys(PATH_TMP."/".$this->params['local_dir'].$this->params['taxes_file'], static::$taxe_keys, $errors, $this->params['delimiter']);
-                $tmp =array();
-                foreach($dataTaxe as $datas)
+
+
+                $dataTaxe = $this->getCsvFileDataByKeys(PATH_TMP . "/" . $this->params['local_dir'] . $this->params['taxes_file'], static::$taxe_keys, $errors, $this->params['delimiter']);
+                $tmp = array();
+                foreach ($dataTaxe as $datas)
                     $tmp[$datas['ref_fourn']] = $datas;
                 $dataTaxe = $tmp;
                 $this->references = array();
@@ -149,25 +151,23 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                     'part_file_idx' => $file_idx,
                     'clean_value'   => true
                 ));
-                
-                foreach($file_data as $idT =>$datas){
-                    if(!isset($dataTaxe[$datas['ref_fourn']])){
+
+                foreach ($file_data as $idT => $datas) {
+                    if (!isset($dataTaxe[$datas['ref_fourn']])) {
                         unset($file_data[$idT]);
-                        $this->Alert('Pas d\'infos taxe trouvé pour la ref fournisseur :"'.$datas['ref_fourn'].'"', NULL, $datas['ref_fourn']);
-                    }
-                    else{
+                        $this->Alert('Pas d\'infos taxe trouvé pour la ref fournisseur :"' . $datas['ref_fourn'] . '"', NULL, $datas['ref_fourn']);
+                    } else {
                         $infoTaxe = $dataTaxe[$datas['ref_fourn']];
-                        if($infoTaxe['taxe1'] > 0){
+                        if ($infoTaxe['taxe1'] > 0) {
                             $file_data[$idT]['pa_ht'] += $infoTaxe['taxe1'];
                         }
-                        if($infoTaxe['taxe2'] > 0)
+                        if ($infoTaxe['taxe2'] > 0)
                             $file_data[$idT]['pa_ht'] += $infoTaxe['taxe2'];
-                        if($infoTaxe['taxe3'] > 0)
+                        if ($infoTaxe['taxe3'] > 0)
                             $file_data[$idT]['pa_ht'] += $infoTaxe['taxe3'];
                     }
-
                 }
-                
+
 //                $this->DebugData($file_data, 'Données fichier');
 
                 if (!count($errors) && !empty($file_data)) {
@@ -181,13 +181,13 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
 
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process: 
 
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'ImportsIngram',
-                    'title'       => 'Imports FTP Ingram',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => '',
                     'type'        => 'import',
                     'active'      => 1
@@ -266,7 +266,6 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                 'label'      => 'Dossier FTP2',
                 'value'      => '/FUSION/FR/AVAIL'
                     ), true, $warnings, $warnings);
-
 
             // Options: 
 

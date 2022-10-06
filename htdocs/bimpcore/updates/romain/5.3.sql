@@ -1,0 +1,1 @@
+ALTER TABLE `llx_user` DROP COLUMN `id_docusign`; 

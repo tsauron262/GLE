@@ -1,0 +1,73 @@
+table: bds_sync_object
+icon: fas_sync
+common_fields: 0
+
+labels: 
+    name: objet synchronisé
+    name_plur: objets synchronisés
+
+objects: 
+    bds_process: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpdatasync
+                name: BDS_Process
+            id_object: 
+                field_value: id_process
+    
+fields: 
+    obj_module: 
+        label: Module
+        values: 
+            callback: 
+                method: getBimpModulesArray
+                params: 
+                    - 1
+                    - 1
+        required: 1
+        
+    obj_name: 
+        label: Objet
+        required: 1
+        
+    id_loc: 
+        label: ID local
+        type: id
+        required: 1
+        
+    id_ext: 
+        label: ID externe
+        type: id
+        required: 1
+        
+    sync_date: 
+        label: Date dernière synchro
+        type: datetime
+        
+    id_process: 
+        label: ID Process
+        type: id_object
+        object: bds_process
+        required: 1
+
+lists: 
+    default: 
+        title: Objets synchronisés
+        configurable: 1
+        checkboxes: 0
+        filters_panel: default
+        sort_field: id
+        sort_way: desc
+        n: 30
+        edit_btn: 0
+        delete_btn: 0
+        page_btn: 0
+        cols: 
+            obj_module: 
+            obj_name: 
+            id_ext: 
+            id_loc: 
+            sync_date:
+                

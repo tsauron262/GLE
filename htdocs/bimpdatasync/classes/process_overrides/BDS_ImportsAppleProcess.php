@@ -5,6 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php');
 class BDS_ImportsAppleProcess extends BDSImportProcess
 {
 
+    public static $default_public_title = 'Imports produits Apple';
     public static $products_keys = array(
         'ArtCode'       => 'ref',
         'ArtLib'        => 'label',
@@ -363,13 +364,13 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
 
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process: 
 
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'ImportsApple',
-                    'title'       => 'Imports produits Apple',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => 'Import des produits Apple et/ou mise à jour des prix d\'achat',
                     'type'        => 'import',
                     'active'      => 1
@@ -494,7 +495,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             if (BimpObject::objectLoaded($opt)) {
                 $options[] = (int) $opt->id;
             }
-            
+
             $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
                         'id_process'    => (int) $process->id,
                         'label'         => 'Forcer la validation',
@@ -523,7 +524,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             if (BimpObject::objectLoaded($opt)) {
                 $options[] = (int) $opt->id;
             }
-            
+
             // Opérations: 
 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(

@@ -5,7 +5,9 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    // Vérifs marges factures:
+    public static $default_public_title = 'Vérifications et corrections diverses';
+
+    // Vérifs marges factures : 
 
     public function initCheckFacsMargin(&$data, &$errors = array())
     {
@@ -786,12 +788,12 @@ class BDS_VerifsProcess extends BDSProcess
 
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process:
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'Verifs',
-                    'title'       => 'Vérifications',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => '',
                     'type'        => 'other',
                     'active'      => 1

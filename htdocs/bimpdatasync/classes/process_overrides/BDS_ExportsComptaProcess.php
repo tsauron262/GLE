@@ -5,12 +5,14 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php');
 class BDS_ExportsComptaProcess extends BDSImportProcess
 {
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static $default_public_title = 'Processus comptabilité';
+
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
 
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'ExportsCompta',
-                    'title'       => 'Processus comptabilité',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => 'Exporte les pièces comptables + Exporte les fichiers TRA du FTP BIMP au FTP LDLC',
                     'type'        => 'export',
                     'active'      => 1

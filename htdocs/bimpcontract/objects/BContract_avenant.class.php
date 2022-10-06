@@ -512,7 +512,7 @@ class BContract_avenant extends BContract_contrat {
     }
     
     public function getRefAv() {
-        $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
+        $parent = $this->getParentInstance();
         $sufix = ($this->getData('type') == 1) ? 'AVP' : 'AV'; 
         return $parent->getData('ref') . '-' . $sufix . $this->getData('number_in_contrat');;
     }
@@ -528,7 +528,7 @@ class BContract_avenant extends BContract_contrat {
     }
     
     public function canCreate() {
-      $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
+      $parent = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
       
       if($parent->getData('statut') != 11) {
           return 0;

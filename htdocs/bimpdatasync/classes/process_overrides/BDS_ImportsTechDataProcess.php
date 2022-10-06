@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportFournCatalogPro
 class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
 {
 
+    public static $default_public_title = 'Imports FTP TechData';
     public static $price_keys = array(
         1 => 'ref_fourn',
         2 => 'lib',
@@ -195,13 +196,13 @@ class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
 
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process: 
 
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'ImportsTechData',
-                    'title'       => 'Imports FTP TechData',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => '',
                     'type'        => 'import',
                     'active'      => 1

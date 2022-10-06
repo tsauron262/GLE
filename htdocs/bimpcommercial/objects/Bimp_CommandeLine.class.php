@@ -5332,7 +5332,7 @@ class Bimp_CommandeLine extends ObjectLine
                 }
 
                 if (abs((int) $new_qty) > abs((int) $remain)) {
-                    $errors[] = 'Nouvelles quantités d\'unités assignées à l\'expédition invalides.<br/>Veuillez retirer ' . $new_qty - $remain . ' unité(s)';
+                    $errors[] = 'Nouvelles quantités d\'unités assignées à l\'expédition invalides.<br/>Veuillez retirer ' . ($new_qty - $remain) . ' unité(s)';
                 } else {
                     $shipment_data['qty'] = $new_qty;
                 }

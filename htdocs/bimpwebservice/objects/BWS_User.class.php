@@ -60,6 +60,18 @@ class BWS_User extends BimpObject
 
     // Getters données: 
 
+    public function getMainProfile()
+    {
+        foreach ($this->getData('profiles') as $id_profile) {
+            $profile = BimpCache::getBimpObjectInstance('bimpwebservice', 'BWS_Profile', $id_profile);
+            if (BimpObject::objectLoaded($profile)) {
+                return $profile;
+            }
+        }
+
+        return null;
+    }
+
     public function getRights()
     {
         if (is_null($this->rights)) {
@@ -313,6 +325,24 @@ class BWS_User extends BimpObject
         return (hash('sha256', $pword) === $this->getData('pword'));
     }
 
+    public function checkToken($token)
+    {
+        if ($this->isLoaded()) {
+            $cur_token = $this->getData('token');
+
+            if ($cur_token) {
+                $expire = $this->getData('token_expire');
+
+                if ($expire > date('Y-m-d H:i:s')) {
+                    return (hash('sha256', $token) === $cur_token);
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function reinitPassword(&$warnings = array(), &$pword_clear = '')
     {
         $errors = array();
@@ -328,6 +358,43 @@ class BWS_User extends BimpObject
         $bimpMail->setFromType('ldlc');
         $bimpMail->send($errors, $warnings);
         return $errors;
+    }
+
+    public function generateToken(&$errors = array(), &$warnings = array())
+    {
+        if ($this->isLoaded($errors)) {
+            $profile = $this->getMainProfile();
+
+            $delay_minutes = 0;
+            if (BimpObject::objectLoaded($profile)) {
+                $delay_minutes = (int) $profile->getData('token_expire_delay');
+            }
+
+            if (!$delay_minutes) {
+                $delay_minutes = BimpCore::getConf('default_tokens_expire_delay', null, 'bimpwebservice');
+            }
+
+            $token = BimpTools::randomPassword(24);
+            $this->set('token', hash('sha256', $token));
+
+            $dt = new DateTime();
+            $dt->add(new DateInterval('PT' . $delay_minutes . 'M'));
+            $expire = $dt->format('Y-m-d H:i:s');
+            $this->set('token_expire', $expire);
+
+            $up_errors = $this->update($warnings, true);
+
+            if (count($up_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du token');
+            } else {
+                return array(
+                    'token'  => $token,
+                    'expire' => $expire
+                );
+            }
+        }
+
+        return array();
     }
 
     // Actions: 

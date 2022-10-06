@@ -26,11 +26,11 @@ class BimpModuleConf
     {
         $cache_key = 'bimp_module_conf_' . $module;
 
-        if (!isset(BimpCache::$cache[$cache_key])) {
-            BimpCache::$cache[$cache_key] = new BimpModuleConf($module);
+        if (!BimpCache::cacheExists($cache_key)) {
+            BimpCache::setCache($cache_key, new BimpModuleConf($module));
         }
 
-        return BimpCache::$cache[$cache_key];
+        return BimpCache::getCache($cache_key);
     }
 
     public function __construct($module)
@@ -141,7 +141,7 @@ class BimpModuleConf
         $html .= '<div style="display: inline-block; width: 49%">';
         $html .= '<h3>Module ' . $this->module . '</h3>';
         if ($module_version) {
-            $html .= '<h5>Version <b>' . $module_version . '</b></h5>';
+            $html .= '<h4>Version <b>' . $module_version . '</b></h4>';
         }
         $html .= '</div>';
 

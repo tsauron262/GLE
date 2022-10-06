@@ -13,6 +13,7 @@ class BC_Field extends BimpComponent
     public $container_id = null;
     public $display_input_value = true;
     public $no_html = false;
+    public $no_history = false;
     public $name_prefix = '';
     public $display_card_mode = 'none'; // hint / visible
     public $force_edit = false;
@@ -126,6 +127,7 @@ class BC_Field extends BimpComponent
         $this->params_def['has_total'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['no_dol_prop'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['nl2br'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['sync'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->edit = $edit;
         $this->force_edit = $force_edit;
@@ -163,7 +165,7 @@ class BC_Field extends BimpComponent
     }
 
     // Getters booléens: 
-    
+
     public function isEditable()
     {
         if (!$this->isObjectValid()) {
@@ -339,7 +341,7 @@ class BC_Field extends BimpComponent
         }
 
         $history_html = '';
-        if (!$label_only && $this->params['history'] && BimpCore::isContextPrivate()) {
+        if (!$this->no_html && !$label_only && $this->params['history'] && BimpCore::isContextPrivate() && !$this->no_history) {
             $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
             $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name, 15, $history_user);
         }
@@ -351,7 +353,7 @@ class BC_Field extends BimpComponent
             $html .= '</div>';
         }
 
-        if (!$label_only && $this->display_input_value) {
+        if (!$this->no_html && !$label_only && $this->display_input_value) {
             $value = $this->value;
             if (is_array($value)) {
                 if ($this->params['type'] === 'json') {
@@ -362,6 +364,7 @@ class BC_Field extends BimpComponent
             }
             $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($value) . '">';
         }
+        
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/displays/' . $this->display_name, $this->name, $this->params, $this->value);
         $display->no_html = $this->no_html;
         $display->setDisplayOptions($this->display_options);
@@ -620,7 +623,7 @@ class BC_Field extends BimpComponent
                 return 120;
         }
     }
-    
+
     public static function getFieldObject($base_object, &$field_name, &$errors = array())
     {
         $field_object = null;

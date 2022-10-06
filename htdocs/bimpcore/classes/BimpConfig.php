@@ -15,7 +15,7 @@ class BimpConfig
     public $current = null;
     public $errors = array();
     public static $keywords = array(
-        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf'
+        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf', 'dol_conf', 'is_module_active'
     );
     public $cache_key = '';
     protected static $params = array();
@@ -725,6 +725,9 @@ class BimpConfig
             if (isset($value['bimpcore_conf'])) {
                 return $this->getBimpcoreConfValue($value['bimpcore_conf'], $path . '/bimpcore_conf');
             }
+            if (isset($value['dol_conf'])) {
+                return $this->getDolConfValue($value['dol_conf'], $path . '/dol_conf');
+            }
             if (isset($value['instance'])) {
                 return $this->getInstance($value['instance'], $path . '/instance');
             }
@@ -748,6 +751,9 @@ class BimpConfig
             }
             if (isset($value['dol_list'])) {
                 return $this->getDolList($value['dol_list'], $path . '/dol_list');
+            }
+            if (isset($value['is_module_active'])) {
+                return $this->getIsModuleActive($value['is_module_active'], $path . '/is_module_active');
             }
         }
         return $value;
@@ -1173,6 +1179,7 @@ class BimpConfig
         $name = '';
         $module = 'bimpcore';
         $default = null;
+        $is_int = 1;
 
         if (is_string($bimpcoreConf)) {
             $name = $bimpcoreConf;
@@ -1180,13 +1187,29 @@ class BimpConfig
             $module = $this->get($path . '/module', 'bimpcore');
             $name = $this->get($path . '/name', '', true);
             $default = $this->get($path . '/def', null);
+            $is_int = $this->get($path . 'is_int', 1);
         }
 
+        $val = null;
         if ($name) {
-            return BimpCore::getConf($name, $default, $module);
+            $val = BimpCore::getConf($name, $default, $module);
         }
 
-        return null;
+        if ($is_int) {
+            $val = (int) $val;
+        }
+
+        return $val;
+    }
+
+    protected function getDolConfValue($dol_conf, $path)
+    {
+        if ((string) $dol_conf) {
+            if (verifCond('$conf->' . $dol_conf)) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     protected function getRequestValue($request, $path, $is_field = false)
@@ -1276,6 +1299,17 @@ class BimpConfig
     protected function checkValueDataType(&$value, $data_type)
     {
         return BimpTools::checkValueByType($data_type, $value);
+    }
+
+    protected function getIsModuleActive($module, $path)
+    {
+        if (strpos($module, 'bimp') === 0) {
+            return (int) BimpCore::isModuleActive($module);
+        } else {
+            // todo
+        }
+
+        return 0;
     }
 
     // Gestion des objets: 

@@ -573,15 +573,14 @@ class Bimp_Product extends BimpObject
     {
         // ACHAT DE D3E juste pour la france
         // ACHAT DE TVA JUSTe PAR AUTOLIQUIDATION - si on a un numéro intracom sur un pro UE
-        
         // Condition spécifique surpassant absolument TOUT
-        
-        
-        
-        if(preg_match('.(applecare).', strtolower($this->getData('label')))){
+
+
+
+        if (preg_match('.(applecare).', strtolower($this->getData('label')))) {
             return BimpCore::getConf('applecare_compte', null, 'bimptocegid');
         }
-        
+
         if ($force_type == -1) {
             if (!$this->isLoaded())
                 return '';
@@ -715,29 +714,28 @@ class Bimp_Product extends BimpObject
 
     public function getActionsButtons()
     {
-        global $user;
         $buttons = array();
 
-        if ($this->isActionAllowed('validate') && $this->canSetAction('validate')) {
-            $buttons[] = array(
-                'label'   => 'Valider',
-                'icon'    => 'fas_check-circle',
-                'onclick' => $this->getJsActionOnclick('validate', array(), array(
-                ))
-            );
-        }
-
         if ($this->isActionAllowed('validate')) {
-            $buttons[] = array(
-                'label'   => 'Demande de validation',
-                'icon'    => 'fas_check-circle',
-                'onclick' => $this->getJsActionOnclick('mailValidate', array(), array(
-                ))
-            );
+            if ($this->canSetAction('validate')) {
+                $buttons['validate'] = array(
+                    'label'   => 'Valider',
+                    'icon'    => 'fas_check-circle',
+                    'onclick' => $this->getJsActionOnclick('validate', array(), array(
+                    ))
+                );
+            } else {
+                $buttons['demande_validate'] = array(
+                    'label'   => 'Demande de validation',
+                    'icon'    => 'fas_check-circle',
+                    'onclick' => $this->getJsActionOnclick('mailValidate', array(), array(
+                    ))
+                );
+            }
         }
 
         if ($this->isActionAllowed('merge') && $this->canSetAction('merge')) {
-            $buttons[] = array(
+            $buttons['merge'] = array(
                 'label'   => 'Fusionner',
                 'icon'    => 'fas_object-group',
                 'onclick' => $this->getJsActionOnclick('merge', array(), array(
@@ -747,7 +745,7 @@ class Bimp_Product extends BimpObject
         }
 
         if ($this->isActionAllowed('generateEtiquettes') && $this->canSetAction('generateEtiquettes')) {
-            $buttons[] = array(
+            $buttons['etiquettes'] = array(
                 'label'   => 'Etiquettes',
                 'icon'    => 'fas_sticky-note',
                 'onclick' => $this->getJsActionOnclick('generateEtiquettes', array(
@@ -759,7 +757,7 @@ class Bimp_Product extends BimpObject
         }
 
         if ($this->isActionAllowed('mouvement') && $this->canSetAction('mouvement')) {
-            $buttons[] = array(
+            $buttons['mouvement'] = array(
                 'label'   => 'Mouvement',
                 'icon'    => 'fas_random',
                 'onclick' => $this->getJsActionOnclick('mouvement', array(
@@ -1850,10 +1848,12 @@ class Bimp_Product extends BimpObject
     {
         $html = '';
         $barcode = $this->getData('barcode');
-        if (isset($barcode) and ( strlen($barcode) == 12 or strlen($barcode) == 13)) {
+        if (isset($barcode) and strlen($barcode) > 5) {
+            $this->dol_object->fetch_barcode();
             $html .= '<img src="';
-            $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&amp;generator=phpbarcode&amp;';
-            $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
+            $html .= DOL_URL_ROOT.'/viewimage.php?modulepart=barcode&generator='.urlencode($this->dol_object->barcode_type_coder).'&code='.urlencode($barcode).'&encoding='.urlencode($this->dol_object->barcode_type_code);
+            $html .= '">';
+            
         }
 
 
@@ -2268,55 +2268,68 @@ class Bimp_Product extends BimpObject
 
     public function renderCommercialView()
     {
+        global $conf;
         $tabs = array();
 
         // Propales
-        $tabs[] = array(
-            'id'            => 'product_propales_list_tab',
-            'title'         => BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Propositions commerciales',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_propales_list_tab .nav_tab_ajax_result\')', array('propales'), array('button' => ''))
-        );
+        if (isset($conf->propal->enabled) && $conf->propal->enabled) {
+            $tabs[] = array(
+                'id'            => 'product_propales_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Propositions commerciales',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_propales_list_tab .nav_tab_ajax_result\')', array('propales'), array('button' => ''))
+            );
+        }
 
         // Commandes client
-        $tabs[] = array(
-            'id'            => 'product_commandes_list_tab',
-            'title'         => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Commandes',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_commandes_list_tab .nav_tab_ajax_result\')', array('commandes'), array('button' => ''))
-        );
+        if (isset($conf->commande->enabled) && $conf->commande->enabled) {
+            $tabs[] = array(
+                'id'            => 'product_commandes_list_tab',
+                'title'         => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Commandes',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_commandes_list_tab .nav_tab_ajax_result\')', array('commandes'), array('button' => ''))
+            );
+        }
 
         // Factures
-        $tabs[] = array(
-            'id'            => 'product_factures_list_tab',
-            'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
-        );
+        if (isset($conf->facture->enabled) && $conf->facture->enabled) {
+            $tabs[] = array(
+                'id'            => 'product_factures_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
+            );
+        }
 
         // Contrats
-        $tabs[] = array(
-            'id'            => 'product_contrats_list_tab',
-            'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
-        );
+        if (isset($conf->contrat->enabled) && $conf->contrat->enabled) {
+            $tabs[] = array(
+                'id'            => 'product_contrats_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
+            );
+        }
 
         // Commandes fournisseurs
-        $tabs[] = array(
-            'id'            => 'product_commandes_fourn_list_tab',
-            'title'         => BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . 'Commandes fournisseurs',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_commandes_fourn_list_tab .nav_tab_ajax_result\')', array('commandes_fourn'), array('button' => ''))
-        );
+        if (isset($conf->supplier_order->enabled) && $conf->supplier_order->enabled) {
+            $tabs[] = array(
+                'id'            => 'product_commandes_fourn_list_tab',
+                'title'         => BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . 'Commandes fournisseurs',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_commandes_fourn_list_tab .nav_tab_ajax_result\')', array('commandes_fourn'), array('button' => ''))
+            );
+        }
 
         // Factures fournisseurs
-        $tabs[] = array(
-            'id'            => 'product_factures_fourn_list_tab',
-            'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures fournisseurs',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_factures_fourn_list_tab .nav_tab_ajax_result\')', array('factures_fourn'), array('button' => ''))
-        );
+        if (isset($conf->supplier_invoice->enabled) && $conf->supplier_invoice->enabled) {
+            $tabs[] = array(
+                'id'            => 'product_factures_fourn_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures fournisseurs',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_factures_fourn_list_tab .nav_tab_ajax_result\')', array('factures_fourn'), array('button' => ''))
+            );
+        }
 
         return BimpRender::renderNavTabs($tabs, 'commercial_view');
     }

@@ -7,6 +7,7 @@ require_once DOL_DOCUMENT_ROOT . "/bimpsupport/centre.inc.php";
 class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 {
 
+    public static $default_public_title = 'Imports Réservations GSX';
     public static $products_codes = array('IPOD', 'IPAD', 'IPHONE', 'WATCH', 'APPLETV', 'MAC', 'BEATS');
     protected $current_reservations = null;
     protected $apple_ids = null;
@@ -893,12 +894,12 @@ L’équipe BIMP";
 
     // Install:
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process: 
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'ImportsGSXReservations',
-                    'title'       => 'Imports Réservations GSX',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => 'Import des réservations SAV depuis la plateforme GSX d\'Apple',
                     'type'        => 'import',
                     'active'      => 1

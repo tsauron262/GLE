@@ -1,0 +1,57 @@
+parent_object: BF_Demande
+parent_id_property: id_demande
+
+labels:
+    name: frais
+    name_plur: frais
+    
+objects: 
+    facture: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Facture
+            id_object: 
+                field_value: id_facture
+                
+fields: 
+    id_demande: 
+        label: Demande
+        type: id_parent
+        input: 
+            type: hidden
+            
+    id_facture:
+        label: Facture
+        type: id_object
+        object: facture
+        input: 
+            type: hidden
+        
+    date: 
+        label: Date
+        type: date
+        required: 1
+        
+    amount:
+        label: Montant HT
+        type: money
+        required: 1
+        
+list:
+    checkboxes: 1
+    item_checkbox: 
+        callback: isEditable
+    bulk_actions: 
+        callback: getBulkActions
+        
+    sort_field: date_create
+    sort_way: desc
+    n: 25
+    extra_btn:
+        callback: getListExtraButtons
+    add_object_row: 1
+    update_btn: 1
+    delete_btn: 1

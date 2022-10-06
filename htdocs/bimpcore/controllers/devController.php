@@ -67,12 +67,31 @@ class devController extends BimpController
         }
         $html .= '</div>';
 
+        // Récap Paramètres ERP: 
+        $html .= '<div class="row" style="margin-bottom: 30px">';
+        $html .= '<div class="col-sm-12">';
+        $html .= 'Version:';
+        if (defined('BIMP_EXTENDS_VERSION')) {
+            $html .= '<b>' . BIMP_EXTENDS_VERSION . '</b>';
+        } else {
+            $html .= '<span class="danger">Aucune</span>';
+        }
+        $html .= ' - Entité: ';
+        if (defined('BIMP_EXTENDS_ENTITY')) {
+            $html .= '<b>' . BIMP_EXTENDS_ENTITY . '</b>';
+        } else {
+            $html .= '<span class="danger">Aucune</span>';
+        }
+        $html .= '</div>';
+        $html .= '</div>';
+        
+        
+        
         $html .= '<div class="row">';
-        $html .= '<div class="col-sm-12 col-md-8">';
-
+        
         // Récap logs: 
+        $html .= '<div class="col-sm-12 col-md-8">';
         $html .= Bimp_Log::renderBeforeListContent();
-
         $html .= '</div>';
 
         $html .= '<div class="col-sm-12 col-md-4">';
@@ -197,11 +216,7 @@ class devController extends BimpController
 
         $html .= '<div class="toolsBarInput fileSelectContainer">';
         $html .= '<label>Fichier: </label>';
-        $html .= BimpInput::renderInput('select', 'yml_file_select', ''/* htmlentities(json_encode(array(
-                          'type'   => 'object',
-                          'module' => 'bimpcore',
-                          'name'   => 'objExt2'
-                          ))) */, array(
+        $html .= BimpInput::renderInput('select', 'yml_file_select', '', array(
                     'options' => BimpYml::getYmlFilesArray()
         ));
         $html .= '</div>';
@@ -252,8 +267,7 @@ class devController extends BimpController
         return $menu->renderItemsList();
     }
 
-    // Ajax processes: 
-    // Config modules: 
+    // Ajax processes - Config modules: 
 
     public function ajaxProcessLoadModuleConfForm()
     {
@@ -316,7 +330,7 @@ class devController extends BimpController
         );
     }
 
-    // Gestionnaire YML: 
+    // Ajax processes - Gestionnaire YML: 
 
     public function ajaxProcessLoadYmlFilesSelect()
     {

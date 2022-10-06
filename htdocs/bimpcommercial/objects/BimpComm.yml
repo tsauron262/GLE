@@ -278,7 +278,6 @@ fields:
             options:
                 callback: getRibArray
         default_value: 0
-        
     expertise:
         label: Expertise Bimp
         type: id

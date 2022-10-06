@@ -315,7 +315,7 @@ class BimpYml
             'title'   => 'Tous les paramètres (brut)',
             'content' => '<div><pre>' . print_r($full_params, 1) .  '</pre></div>'
         );
-
+        
         $html .= BimpRender::renderNavTabs($tabs, 'yml_analyser');
 
         return $html;

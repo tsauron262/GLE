@@ -219,7 +219,7 @@ class BimpObject extends BimpCache
 
             if ($use_clones && (int) $instance->params['use_clones']) {
                 $cache_key = $module . '_' . $object_name . '_base_instance';
-                self::$cache[$cache_key] = $instance;
+                self::setCache($cache_key, $instance);
                 $instance = clone self::$cache[$cache_key];
             }
         }
@@ -1979,8 +1979,8 @@ class BimpObject extends BimpCache
     {
         if ($this->isLoaded()) {
             $cache_key = 'bimp_object_' . $this->module . '_' . $this->object_name . '_' . $this->id;
-            if (isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = null;
+            if (self::cacheExists($cache_key) && self::getCache($cache_key) == $this) {
+                self::setCache($cache_key, null);
             }
         }
         $this->parent = null;
@@ -2017,7 +2017,7 @@ class BimpObject extends BimpCache
         // /!\ Cette méthode ne doit être appellée QUE par BimpCollection /!\
 
         if ((int) $this->id != (int) $id) {
-            $this->reset();
+            $this->reset($delete_in_cache);
             $this->id = $id;
             $this->data = $data;
             $this->initData = $data;
@@ -8942,7 +8942,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($this->isDolObject() && method_exists($this->dol_object, 'liste_type_contact')) {
             $cache_key = $this->module . '_' . $this->object_name . '_internal_contact_types_array';
             if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = $this->dol_object->liste_type_contact('internal');
+                self::setCache($cache_key, $this->dol_object->liste_type_contact('internal'));
             }
             return self::$cache[$cache_key];
         }
@@ -8955,7 +8955,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($this->isDolObject() && method_exists($this->dol_object, 'liste_type_contact')) {
             $cache_key = $this->module . '_' . $this->object_name . '_external_contact_types_array';
             if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = $this->dol_object->liste_type_contact('external');
+                self::setCache($cache_key,$this->dol_object->liste_type_contact('external'));
             }
             return self::$cache[$cache_key];
         }

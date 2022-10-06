@@ -148,7 +148,8 @@ class BC_Input extends BimpComponent
             'search_name'     => array('default' => 'default'),
             'card'            => array('default', ''),
             'max_results'     => array('data_type' => 'int', 'default' => 200),
-            'display_results' => array('data_type' => 'bool', 'default' => 1)
+            'display_results' => array('data_type' => 'bool', 'default' => 1),
+            'scanner'        => array('data_type' => 'bool', 'default' => 0),
         ),
         'object_filters'              => array(
             'obj_input_name' => array('default' => ''),
@@ -465,6 +466,7 @@ class BC_Input extends BimpComponent
                 $options['card'] = isset($this->params['card']) ? $this->params['card'] : '';
                 $options['max_results'] = isset($this->params['max_results']) ? (int) $this->params['max_results'] : 200;
                 $options['display_results'] = isset($this->params['display_results']) ? (int) $this->params['display_results'] : 1;
+                $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
                 break;
 
             case 'search_user':

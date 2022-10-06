@@ -70,6 +70,14 @@ class BimpCache
 
         return self::$bdb_noTransac;
     }
+    
+    public static function setCache($key, $value){
+        static::$cache[$key] = $value;
+    }
+    
+    public static function getCache($key){
+        return static::$cache[$key];
+    }
 
     public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
     {

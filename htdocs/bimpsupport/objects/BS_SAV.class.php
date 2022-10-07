@@ -6517,8 +6517,33 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if ($this->getData('status') == 0) {
             $this->updateField('date_pc', $this->getData('date_create'));
         }
+        
+        if(!count($errors)){
+            $this->uploadFile ('file', $errors);
+            $this->uploadFile ('file2', $errors);
+        }
 
         return $errors;
+    }
+    
+    public function uploadFile($name, &$errors){
+        if (file_exists($_FILES[$name]["tmp_name"])) {
+                $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile');
+                $values = array();
+                $values['parent_module'] = $this->module;
+                $values['parent_object_name'] = $this->object_name;
+                $values['id_parent'] = $this->id;
+                $values['file_name'] = $_FILES[$name]['name'];
+                $values['is_deletable'] = 1;
+
+                $file->validateArray($values);
+
+                $errors = $file->create();
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
     }
 
     public function update(&$warnings = array(), $force_update = false)
@@ -6553,9 +6578,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
             }
         }
-
-        if (count($errors)) {
-            return $errors;
+        
+        if(!count($errors)){
+            $this->uploadFile('file', $errors);
+            $this->uploadFile('file2', $errors);
         }
 
 //        if ($this->getData("id_facture_acompte") > 0 && (int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {

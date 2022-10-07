@@ -1899,7 +1899,7 @@ class BimpComm extends BimpDolObject
 
     public function displayCountNotes($hideIfNotNotes = false)
     {
-        $notes = $this->getNotes();
+        $notes = $this->getNotes(false);
         $nb = count($notes);
         if ($nb > 0 || $hideIfNotNotes == false)
             return '<br/><span class="warning"><span class="badge badge-warning">' . $nb . '</span> Note' . ($nb > 1 ? 's' : '') . '</span>';

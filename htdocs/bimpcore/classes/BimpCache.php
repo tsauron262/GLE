@@ -847,13 +847,13 @@ class BimpCache
         return array();
     }
 
-    public static function getObjectNotes(BimpObject $object)
+    public static function getObjectNotes(BimpObject $object, $withObject = true)
     {
         if (!BimpObject::objectLoaded($object)) {
             return array();
         }
 
-        $cache_key = 'object_' . $object->module . '_' . $object->object_name . '_' . $object->id;
+        $cache_key = 'object_note_' . $object->module . '_' . $object->object_name . '_' . $object->id . '_' . (int) $withObject;
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
@@ -873,7 +873,10 @@ class BimpCache
 
             if (!is_null($list)) {
                 foreach ($list as $item) {
-                    self::$cache[$cache_key][] = BimpObject::getInstance('bimpcore', 'BimpNote', (int) $item['id']);
+                    if($withObject)
+                        self::$cache[$cache_key][] = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $item['id']);
+                    else
+                        self::$cache[$cache_key][] = $item['id'];
                 }
             }
         }

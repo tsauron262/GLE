@@ -3745,7 +3745,7 @@ class BContract_contrat extends BimpDolObject
         return $montant;
     }
 
-    public function getAddAmountAvenantProlongation()
+    public function getAddAmountAvenantProlongation($idAvenant = 0)
     {
 
         $now = new DateTime();
@@ -3768,7 +3768,8 @@ class BContract_contrat extends BimpDolObject
         foreach ($children as $id_child) {
             $av = $this->getChildObject('avenant', $id_child);
             $dureePrlong += $av->getNbMois();
-            $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getData('duree_mois') - $dureePrlong);
+            if(!$idAvenant || $idAvenant == $id_child)
+                $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getData('duree_mois') - $dureePrlong);
         }
 
         return $total;

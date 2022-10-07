@@ -1172,6 +1172,23 @@ class BContract_echeancier extends BimpObject {
                     'TVA' => $price * 0.2,
                     'FACTURE' => $factureStr
                 );
+                
+                $tmpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+                if($tmpFacture->find(Array('facnumber' => $factureStr), 1)) {
+                    if($tmpFacture->getData('fk_facture_source')) {
+                        $factureSource = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $tmpFacture->getData('fk_facture_source'));
+                        $periodes['periodes'][] = Array(
+                            'START' => $startDateStr,
+                            'STOP'  => $stopDateStr,
+                            'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDateStr : $startDateStr . ' ('.$factureStr.')',
+                            'HT' => $resteAPayer,
+                            'DUREE_MOIS' => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
+                            'PRICE' => $factureSource->getData('total'),
+                            'TVA' => $factureSource->getData('total') * 0.2,
+                            'FACTURE' => $factureSource->getRef()
+                        );
+                    }
+                }
 
                 $alternateStartDate = $stopDate;
 

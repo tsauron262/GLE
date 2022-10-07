@@ -2167,7 +2167,6 @@ function loadSearchObjectResults($input, idx) {
 
                                                         var input_name = $container.data('input_name');
                                                         if (input_name) {
-                                                            bimp_msg('ID: ' + id_object);
                                                             $container.find('[name="' + input_name + '"]').val(id_object).change();
                                                             if (bimpAjax.display_results) {
                                                                 $container.find('[name="' + input_name + '_search"]').val('');

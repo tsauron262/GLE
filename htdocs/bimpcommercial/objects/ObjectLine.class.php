@@ -1321,7 +1321,7 @@ class ObjectLine extends BimpObject
 
         if ((int) $this->id_product) {
             if (is_null($this->product)) {
-                $this->product = BimpObject::getInstance('bimpcore', 'Bimp_Product', (int) $this->id_product);
+                $this->product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->id_product);
                 if (!BimpObject::objectLoaded($this->product)) {
                     unset($this->product);
                     $this->product = null;

@@ -477,7 +477,7 @@ function getCountry($searchkey, $withcode='', $dbtouse=0, $outputlangs='', $entc
         
         
         if(class_exists('BimpCache')){
-            BimpCache::$cache[$clef] = $result;
+            BimpCache::setCache($clef,$result);
         }
     
     

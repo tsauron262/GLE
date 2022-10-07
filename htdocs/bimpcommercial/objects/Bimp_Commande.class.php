@@ -546,7 +546,7 @@ class Bimp_Commande extends BimpComm
 
     // Getters:
 
-    public function getData($field)
+    public function getData($field, $withDefault = true)
     {
         // Pour mettre à jour mode et cond réglement dans le formulaire en cas de sélection d'un nouveau client ou client facturation.
         if (in_array($field, array('fk_cond_reglement', 'fk_mode_reglement'))) {
@@ -561,7 +561,7 @@ class Bimp_Commande extends BimpComm
             }
         }
 
-        return parent::getData($field);
+        return parent::getData($field, $withDefault);
     }
 
     public function getDefaultListExtraButtons()

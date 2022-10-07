@@ -1134,7 +1134,7 @@ class BF_Demande extends BimpObject
         return array();
     }
 
-    public function onChildDelete($child)
+    public function onChildDelete($child, $id_child_deleted)
     {
         if (is_a($child, 'BF_DemandeRefinanceur')) {
             $this->checkStatus();

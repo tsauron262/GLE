@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpequipment/objects/Equipment.class.php';
 class Equipment_ExtEntity extends Equipment
 {
 //    function getD
-//    public function getData($field) {
+//    public function getData($field, $withDefault = true) {
 //        die('filed');
 //        return 'rr';
 //    }

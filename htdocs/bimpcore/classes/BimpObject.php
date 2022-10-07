@@ -6434,9 +6434,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return $errors;
     }
 
-    public function getNotes()
+    public function getNotes($withObject = true)
     {
-        return self::getObjectNotes($this);
+        return self::getObjectNotes($this, $withObject);
     }
 
     public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false)

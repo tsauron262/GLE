@@ -874,21 +874,53 @@ class BContract_echeancier extends BimpObject {
         
         foreach($allPeriodes['periodes'] as $periode) {
             
-            $html .= '<tr>';
+            $dateDebutDeLaPeriode   = new DateTime(str_replace('/', '-', $periode['START']));
+            $nextFactureDate        = new DateTime($this->getData('next_facture_date'));
             
-            $displayPeriode         = 'Du <strong>' . $periode['START'] . '</strong> au <strong>' . $periode['STOP'] . '</strong>';
-            $displayMontantHT       = price($periode['HT']) . '€';
-            $displayMontantTVA      = '';
-            $displayMontantTTC      = '';
-            $displayMontantPA       = '';
-            $displayMontantFacture  = '<span class="important">Periode non facturée</span>';
+            $html .= '<tr class=\'bs-popover\' ' . BimpRender::renderPopoverData($periode['DUREE_MOIS'] . ' mois' , 'left') . ' >';
+            
+            $displayPeriode             = '<span>Du <strong>' . $periode['START'] . '</strong> au <strong>' . $periode['STOP'] . '</strong></span>';
+            $displayMontantHT           = price($periode['PRICE']) . '€';
+            $displayMontantTVA          = price($periode['TVA']) . '€';
+            $displayMontantTTC          = price($periode['PRICE'] + $periode['TVA']) . '€';
+            $displayMontantPA           = price(0) . '€';
+            
+            $forDisplayReferenceFacture = 'Periode non facturée';
+            $displayEtatPaiment         = 'Periode non facturée';
+            $classForEtatPaiement       = 'important';
             
             if($periode['FACTURE'] != '') {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+                $facture->find(Array('facnumber' => $periode['FACTURE']), 1);
+                if($facture->isLoaded()) {
+                    $forDisplayReferenceFacture = $facture->getNomUrl();
+                    if($facture->getData('paye')) {
+                        $displayEtatPaiment         = 'PAY&Eacute;E';
+                        $classForEtatPaiement       = 'success';
+                    } else {
+                        $displayEtatPaiment         = 'INPAY&Eacute;E';
+                        $classForEtatPaiement       = 'danger';
+                    }
+                } else {
+                    $displayEtatPaiment         = 'Impossible de charger l\'état de paiement pour la facture: ' . $periode['FACTURE'];
+                    $classForEtatPaiement       = 'warning';
+                    $forDisplayReferenceFacture = 'Impossible de charger la facture: ' . $periode['FACTURE'];
+                }
                 
             }
             
-            $html .= '<td>' . $displayPeriode . '</td>';
-            $html .= '<td>' . $displayMontantHT . '</td>';
+            $displayReferenceFacture    = '<span style=\'color:grey; font-weight:bold\'>' . $forDisplayReferenceFacture . '</span>';
+            
+            $isLaPeriodeDeFacturation = ($dateDebutDeLaPeriode->format('Y-m-d') == $nextFactureDate->format('Y-m-d')) ? true : false;
+            
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayPeriode . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayMontantHT . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayMontantTVA . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayMontantTTC . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayMontantPA . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayReferenceFacture . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'><span class=\''.$classForEtatPaiement.'\' >'.$displayEtatPaiment.'</span></td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'></td>';
             
             $html .= '</tr>';
             
@@ -896,6 +928,8 @@ class BContract_echeancier extends BimpObject {
         
         $html .= '</tbody>';
         $html .= '</table>';
+        
+        $html .= '<pre>' . print_r($allPeriodes, 1) . '<pre>';
         
         return $html;
     }

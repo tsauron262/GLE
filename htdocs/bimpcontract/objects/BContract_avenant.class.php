@@ -43,20 +43,13 @@ class BContract_avenant extends BContract_contrat {
         return $product->getData('price');
     }
     
-    public function getTotalCoup($display = true) {
-        
-        $children = $this->getChildrenList("avenantdet");
-        $total = 0;
-        foreach($children as $id_child) {
-            $child = $this->getChildObject('avenantdet', $id_child);
-            $total += $child->getCoup(false);
-        }
-        
+    public function displayTotalCoup(){
+        $total = $this->getTotalCoup();
         $html = "<strong>";
-        
+
         $class = "warning";
         $icon = "arrow-right";
-        
+
         if($total > 0) {
             $class = "success";
             $icon = "arrow-up";
@@ -64,15 +57,30 @@ class BContract_avenant extends BContract_contrat {
             $class = "danger";
             $icon = "arrow-down";
         }
-        
+
         $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($total).'€</strong>';
-        
+
         $html .= '</strong>';
-        
-        if($display)
-            return $html;
-        else
-            return $total;
+
+        return $html;
+    }
+    
+    public function getTotalCoup() {
+        $total = 0;
+        if(stripos($this->displayData('type'), 'prolongation') !== false){//patch cr getData('type') ne fonctionne pas TODO
+            $parent = $this->getParentInstance();
+            $total += $parent->getAddAmountAvenantProlongation($this->id);
+        }
+        else{
+            $children = $this->getChildrenList("avenantdet");
+            foreach($children as $id_child) {
+                $child = $this->getChildObject('avenantdet', $id_child);
+                $total += $child->getCoup(false);
+            }
+
+            
+        }
+        return $total;
     }
     
     public function getAllSerialsContrat() {

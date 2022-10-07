@@ -119,7 +119,7 @@ lists:
             coup:
                 label: Coût de l'avenant au prorata
                 value:
-                    callback: getTotalCoup
+                    callback: displayTotalCoup
 #            adding:
 #                label: Adding Amount
 #                value:

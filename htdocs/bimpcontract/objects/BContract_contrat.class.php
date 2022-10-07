@@ -3761,10 +3761,13 @@ class BContract_contrat extends BimpDolObject
         ];
 
         $children = $this->getChildrenList('avenant', $filters);
+        
+        $dureePrlong = 0;
 
         foreach ($children as $id_child) {
-
-            $total += $this->getCurrentTotal();
+            $av = $this->getChildObject('avenant', $id_child);
+            $dureePrlong += $av->getNbMois();
+            $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getData('duree_mois') - $dureePrlong);
         }
 
         return $total;

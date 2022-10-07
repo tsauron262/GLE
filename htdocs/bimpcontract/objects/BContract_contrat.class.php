@@ -3722,6 +3722,7 @@ class BContract_contrat extends BimpDolObject
             $montant += $line->total_ht;
             //}
         }
+        $montant += $this->getAddAmountAvenantProlongation();
 
         return $montant;
     }

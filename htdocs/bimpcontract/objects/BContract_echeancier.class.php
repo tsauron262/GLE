@@ -708,7 +708,7 @@ class BContract_echeancier extends BimpObject {
                 $getEndDate = new DateTime($parent->displayRealEndDate("Y-m-d"));
                 if($getEndDate < $dateTime_end_mkTime)
                     $dateTime_end_mkTime = $getEndDate;
-                $amount = $parent->getAddAmountAvenantProlongation() / ($data->reste_periode / $morceauPeriode);
+                $amount = 0;//$parent->getAddAmountAvenantProlongation() / ($data->reste_periode / $morceauPeriode);
                 $firstPassage = false;
                 if($parent->getData('periodicity') != 1200 && $data->reste_periode > 1) {
                     $amount += $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);

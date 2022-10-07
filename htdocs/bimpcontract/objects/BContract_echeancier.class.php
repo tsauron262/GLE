@@ -874,21 +874,41 @@ class BContract_echeancier extends BimpObject {
         
         foreach($allPeriodes['periodes'] as $periode) {
             
-            $html .= '<tr>';
+            $html .= '<tr class=\'bs-popover\' ' . BimpRender::renderPopoverData($periode['DUREE_MOIS'] . ' mois' , 'left') . ' >';
             
-            $displayPeriode         = 'Du <strong>' . $periode['START'] . '</strong> au <strong>' . $periode['STOP'] . '</strong>';
-            $displayMontantHT       = price($periode['HT']) . '€';
-            $displayMontantTVA      = '';
-            $displayMontantTTC      = '';
-            $displayMontantPA       = '';
-            $displayMontantFacture  = '<span class="important">Periode non facturée</span>';
+            $displayPeriode             = '<span>Du <strong>' . $periode['START'] . '</strong> au <strong>' . $periode['STOP'] . '</strong></span>';
+            $displayMontantHT           = price($periode['PRICE']) . '€';
+            $displayMontantTVA          = price($periode['TVA']) . '€';
+            $displayMontantTTC          = price($periode['PRICE'] + $periode['TVA']) . '€';
+            $displayMontantPA           = price(0) . '€';
+            
+            $forDisplayReferenceFacture = 'Periode non facturée';
+            $displayEtatPaiment         = 'Periode non facturée';
+            $classForEtatPaiement       = 'important';
             
             if($periode['FACTURE'] != '') {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+                $facture->find(Array('facnumber' => $periode['FACTURE']), 1);
+                if($facture->isLoaded()) {
+                    $forDisplayReferenceFacture = $facture->getNomUrl();
+                } else {
+                    $displayEtatPaiment         = 'Impossible de charger l\'état de paiement pour la facture: ' . $periode['FACTURE'];
+                    $classForEtatPaiement       = 'warning';
+                    $forDisplayReferenceFacture = 'Impossible de charger la facture: ' . $periode['FACTURE'];
+                }
                 
             }
             
-            $html .= '<td>' . $displayPeriode . '</td>';
-            $html .= '<td>' . $displayMontantHT . '</td>';
+            $displayReferenceFacture    = '<span style=\'color:grey; font-weight:bold\'>' . $forDisplayReferenceFacture . '</span>';
+            
+            $html .= '<td style=\'text-align:center\'>' . $displayPeriode . '</td>';
+            $html .= '<td style=\'text-align:center\'>' . $displayMontantHT . '</td>';
+            $html .= '<td style=\'text-align:center\'>' . $displayMontantTVA . '</td>';
+            $html .= '<td style=\'text-align:center\'>' . $displayMontantTTC . '</td>';
+            $html .= '<td style=\'text-align:center\'>' . $displayMontantPA . '</td>';
+            $html .= '<td style=\'text-align:center\'>' . $displayReferenceFacture . '</td>';
+            $html .= '<td style=\'text-align:center;\'><span class=\''.$classForEtatPaiement.'\' >'.$displayEtatPaiment.'</span></td>';
+            $html .= '<td style=\'text-align:center\'></td>';
             
             $html .= '</tr>';
             
@@ -896,6 +916,8 @@ class BContract_echeancier extends BimpObject {
         
         $html .= '</tbody>';
         $html .= '</table>';
+        
+        $html .= '<pre>' . print_r($allPeriodes, 1) . '<pre>';
         
         return $html;
     }

@@ -3928,7 +3928,7 @@ class Bimp_Facture extends BimpComm
             $neg_lines = 0;
 
             if (!count($lines)) {
-                $errors[] = 'Aucune ligne ajoutée à cette facturdzadzadze';
+                $errors[] = 'Aucune ligne ajoutée à cette facture';
                 return $errors;
             }
 

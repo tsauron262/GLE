@@ -857,6 +857,8 @@ class BContract_echeancier extends BimpObject {
         
         $html .= '<pre>' . print_r($this->getAllPeriodes(), 1) . '</pre>';
         
+        $html .= '<pre>' . $this->addedMonthByAvenant() . '</pre>';
+        
         return $html;
     }
     
@@ -904,6 +906,16 @@ class BContract_echeancier extends BimpObject {
         
         return $reste_a_payer;
         
+    }
+    
+    public function addedMonthByAvenant() {
+
+        $sql = 'SELECT SUM(added_month) as sum FROM llx_bcontract_avenant WHERE ';
+        $sql.= 'id_contrat = ' . $this->getData('id_contrat') . ' ';
+        $sql.= 'AND statut IN(2,5) AND type = 1';
+        
+        return $this->db->executeS($sql)[0]->sum;
+
     }
     
     private $endDateTimeFactured = 0;
@@ -1014,12 +1026,14 @@ class BContract_echeancier extends BimpObject {
         if($periodicity == 1200){
             $periodicity = $dureeEnMois;
         }
+        $nombrePeriodesAdded      = $this->addedMonthByAvenant();    
         $dureePeriodeIncomplette  = $dureeEnMois % $periodicity;
         $dureePeriodesComplettes  = $dureeEnMois - $dureePeriodeIncomplette;
         $nombrePeriodesComplettes = $dureePeriodesComplettes / $periodicity;
 
         $periodes['infos'] = Array(
-            'nombre_periodes'           => $nombrePeriodesComplettes, 
+            'nombre_periodes'           => $nombrePeriodesComplettes,
+            'nombre_periodes_added'     => $nombrePeriodesAdded,
             'periode_incomplette_mois'  => $dureePeriodeIncomplette,
             'tarif_au_mois'             => $this->getAmountByMonth(),
             'factures'                  => $this->getAllFactures()

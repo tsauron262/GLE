@@ -2103,6 +2103,7 @@ function loadSearchObjectResults($input, idx) {
                                                         $container.find('[name="' + input_name + '_search"]').val('');
                                                         $input.val(choices[0].data.value).change();
                                                         $container.parent().find('.addValueBtn').click();
+                                                        bimpAjax.$input.data('auto_select', 0);
                                                         return;
                                                     }
                                                 }

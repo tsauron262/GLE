@@ -3592,10 +3592,10 @@ class BimpObject extends BimpCache
 
         $sql .= BimpTools::getSqlLimit($n, $p);
 
-        $cache_key = 'sql_'.$sql;
-        if($this->cacheExists($cache_key))
-            $rows = $this->getCache($cache_key);
-        else{
+//        $cache_key = 'sql_'.$sql;
+//        if($this->cacheExists($cache_key))
+//            $rows = $this->getCache($cache_key);
+//        else{
             $rows = $this->db->executeS($sql, $return);
 
             if (is_null($rows)) {
@@ -3618,8 +3618,8 @@ class BimpObject extends BimpCache
                     BimpDebug::addDebug('list_sql', $title, $content);
                 }
             }
-            $this->setCache($cache_key, $rows);
-        }
+//            $this->setCache($cache_key, $rows);
+//        }
 
         return $rows;
     }
@@ -5055,6 +5055,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function fetch($id, $parent = null)
     {
+        
+        if($id == 5591956){
+echo '<pre>';            print_r(BimpTools::getBacktraceArray(debug_backtrace(null, 10)));
+        }
         if (BimpDebug::isActive()) {
             BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
         }
@@ -10232,20 +10236,24 @@ var options = {
     public static function getListExtrafield($name, $type, $withVide = true)
     {
         $return = array();
-        $sql = self::getBdb()->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'");
-        while ($ln = self::getBdb()->db->fetch_object($sql)) {
-            $param = unserialize($ln->param);
-            if (isset($param['options']))
-                $return = $param['options'];
-        }
-        if (!isset($return[0]) && $withVide) {
-            $newReturn = array(0 => '');
-            foreach ($return as $id => $val)
-                $newReturn[$id] = $val;
-            $return = $newReturn;
-        }
+        $cash_key = 'extra_list_'.$name.'_'.$type.'_'. (int) $withVide;
+        if(!static::cacheServerExists($cash_key)){
+            $sql = self::getBdb()->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'");
+            while ($ln = self::getBdb()->db->fetch_object($sql)) {
+                $param = unserialize($ln->param);
+                if (isset($param['options']))
+                    $return = $param['options'];
+            }
+            if (!isset($return[0]) && $withVide) {
+                $newReturn = array(0 => '');
+                foreach ($return as $id => $val)
+                    $newReturn[$id] = $val;
+                $return = $newReturn;
+            }
 
-        return $return;
+            static::setCacheServeur($cash_key, $return);
+        }
+        return static::getCacheServeur($cash_key);
     }
 
     public static function useLogistique()

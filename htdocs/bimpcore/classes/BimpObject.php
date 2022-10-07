@@ -3592,27 +3592,33 @@ class BimpObject extends BimpCache
 
         $sql .= BimpTools::getSqlLimit($n, $p);
 
-        $rows = $this->db->executeS($sql, $return);
+        $cache_key = 'sql_'.$sql;
+        if($this->cacheExists($cache_key))
+            $rows = $this->getCache($cache_key);
+        else{
+            $rows = $this->db->executeS($sql, $return);
 
-        if (is_null($rows)) {
-            if (BimpDebug::isActive()) {
-                $content = BimpRender::renderSql($sql);
-                $content .= BimpRender::renderDebugInfo($this->db->err(), 'ERREUR SQL', 'fas_exclamation-circle');
-                $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));
-                $content .= BimpRender::renderFoldableContainer('Joins', '<pre>' . print_r($joins, 1) . '</pre>', array('open' => false, 'offset_left' => true));
-                $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
-                BimpDebug::addDebug('list_sql', $title, $content);
-            }
+            if (is_null($rows)) {
+                if (BimpDebug::isActive()) {
+                    $content = BimpRender::renderSql($sql);
+                    $content .= BimpRender::renderDebugInfo($this->db->err(), 'ERREUR SQL', 'fas_exclamation-circle');
+                    $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));
+                    $content .= BimpRender::renderFoldableContainer('Joins', '<pre>' . print_r($joins, 1) . '</pre>', array('open' => false, 'offset_left' => true));
+                    $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                    BimpDebug::addDebug('list_sql', $title, $content);
+                }
 
-            $rows = array();
-        } else {
-            if (BimpDebug::isActive()) {
-                $nRows = count($rows);
-                $content = BimpRender::renderSql($sql);
-                $content .= '<br/><span class="badge badge-' . ($nRows > 0 ? 'success' : 'danger') . '">' . $nRows . ' résultat' . ($nRows > 1 ? 's' : '') . '</span>';
-                $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
-                BimpDebug::addDebug('list_sql', $title, $content);
+                $rows = array();
+            } else {
+                if (BimpDebug::isActive()) {
+                    $nRows = count($rows);
+                    $content = BimpRender::renderSql($sql);
+                    $content .= '<br/><span class="badge badge-' . ($nRows > 0 ? 'success' : 'danger') . '">' . $nRows . ' résultat' . ($nRows > 1 ? 's' : '') . '</span>';
+                    $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                    BimpDebug::addDebug('list_sql', $title, $content);
+                }
             }
+            $this->setCache($cache_key, $rows);
         }
 
         return $rows;

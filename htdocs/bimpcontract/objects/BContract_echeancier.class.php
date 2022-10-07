@@ -855,9 +855,47 @@ class BContract_echeancier extends BimpObject {
         
         $html = '';
         
-        $html .= '<pre>' . print_r($this->getAllPeriodes(), 1) . '</pre>';
+        $allPeriodes = $this->getAllPeriodes();
         
-        $html .= '<pre>' . $this->addedMonthByAvenant() . '</pre>';
+        $html .= '<table class="objectlistTable" style="border: none; min-width: 400px" width="100%">';
+        $html .= '<thead>';
+        $html .= '<tr class="headerRow">';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Période de facturation<br />Début - Fin</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant HT</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">PA</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat du paiement</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody class="listRows">';
+        
+        foreach($allPeriodes['periodes'] as $periode) {
+            
+            $html .= '<tr>';
+            
+            $displayPeriode         = 'Du <strong>' . $periode['START'] . '</strong> au <strong>' . $periode['STOP'] . '</strong>';
+            $displayMontantHT       = price($periode['HT']) . '€';
+            $displayMontantTVA      = '';
+            $displayMontantTTC      = '';
+            $displayMontantPA       = '';
+            $displayMontantFacture  = '<span class="important">Periode non facturée</span>';
+            
+            if($periode['FACTURE'] != '') {
+                
+            }
+            
+            $html .= '<td>' . $displayPeriode . '</td>';
+            $html .= '<td>' . $displayMontantHT . '</td>';
+            
+            $html .= '</tr>';
+            
+        }
+        
+        $html .= '</tbody>';
+        $html .= '</table>';
         
         return $html;
     }

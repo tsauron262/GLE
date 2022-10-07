@@ -791,6 +791,8 @@ class BContract_echeancier extends BimpObject {
                 
                 // 
                 $html .= '<div class="btn-group"><button type="button" class="btn bs-popover" '.BimpRender::renderPopoverData('Générer le PDF').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('generatePdfEcheancier', array(), array('form_name' => 'pdfEcheancier')) . '">Générer le PDF</button></div>';
+                $html .= '<div class="btn-group"><button type="button" class="btn bs-popover" '.BimpRender::renderPopoverData('(ADMIN - Infos périodes)').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalCustomContent('displayNewEcheancier', 'Echeancier pour ce contrat') . '">New Echeancier</button></div>';
+
 //                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" >Facturation suplémentaire</i></span>';
 //                if($this->canEdit()) {
                   if($user->admin) {
@@ -848,6 +850,14 @@ class BContract_echeancier extends BimpObject {
             return $html;
         
         
+    }
+    public function displayNewEcheancier() {
+        
+        $html = '';
+        
+        $html .= '<pre>' . print_r($this->getAllPeriodes(), 1) . '</pre>';
+        
+        return $html;
     }
     
     public function actionGeneratePdfEcheancier($data, &$success)

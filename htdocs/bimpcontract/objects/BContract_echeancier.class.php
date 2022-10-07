@@ -855,7 +855,7 @@ class BContract_echeancier extends BimpObject {
         
         $html = '';
         
-        $allPeriodes = $this->getAllPeriodes();
+        $allPeriodes = $this->getAllPeriodes(true);
         
         $html .= '<table class="objectlistTable" style="border: none; min-width: 400px" width="100%">';
         $html .= '<thead>';
@@ -875,6 +875,7 @@ class BContract_echeancier extends BimpObject {
         foreach($allPeriodes['periodes'] as $periode) {
             
             $dateDebutDeLaPeriode   = new DateTime(str_replace('/', '-', $periode['START']));
+            $dateFinDeLaPeriode     = new DateTime(str_replace('/', '-', $periode['STOP']));
             $nextFactureDate        = new DateTime($this->getData('next_facture_date'));
             
             $html .= '<tr class=\'bs-popover\' ' . BimpRender::renderPopoverData($periode['DUREE_MOIS'] . ' mois' , 'left') . ' >';
@@ -911,7 +912,7 @@ class BContract_echeancier extends BimpObject {
             
             $displayReferenceFacture    = '<span style=\'color:grey; font-weight:bold\'>' . $forDisplayReferenceFacture . '</span>';
             
-            $isLaPeriodeDeFacturation = ($dateDebutDeLaPeriode->format('Y-m-d') == $nextFactureDate->format('Y-m-d')) ? true : false;
+            $isLaPeriodeDeFacturation = (($dateDebutDeLaPeriode->format('Y-m-d') == $nextFactureDate->format('Y-m-d')) && $periode['FACTURE'] == '') ? true : false;
             
             $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayPeriode . '</td>';
             $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayMontantHT . '</td>';
@@ -920,7 +921,13 @@ class BContract_echeancier extends BimpObject {
             $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayMontantPA . '</td>';
             $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayReferenceFacture . '</td>';
             $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'><span class=\''.$classForEtatPaiement.'\' >'.$displayEtatPaiment.'</span></td>';
-            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'></td>';
+            
+            if($isLaPeriodeDeFacturation) {
+                $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>'
+                        . '<span class="rowButton bs-popover">'.BimpRender::renderIcon('plus').'</span>' . '</td>';
+            } else {
+                $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'></td>';
+            }
             
             $html .= '</tr>';
             
@@ -1065,7 +1072,7 @@ class BContract_echeancier extends BimpObject {
         return $return;
     }
 
-    public function getAllPeriodes():array {
+    public function getAllPeriodes($display = false):array {
         
         $periodes = Array();
         
@@ -1205,13 +1212,14 @@ class BContract_echeancier extends BimpObject {
         foreach($periodes['periodes'] as $periode){
             $tot += $periode['PRICE'];
         }
-        if(price($tot) != price($parentInstance->getTotalContrat())){
-            die('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
-            BimpCore::addlog('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
-            die('PRobléme Technique');
+        
+        if(!$display) {
+            if(price($tot) != price($parentInstance->getTotalContrat())){
+                die('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
+                BimpCore::addlog('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
+                die('PRobléme Technique');
+            }
         }
-        
-        
 
         return $periodes;
         

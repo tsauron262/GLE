@@ -22,7 +22,7 @@ class BContract_contratLine extends BContract_contrat {
     public function createDolObject(&$errors = Array(), &$warnings = Array()) {
         $data = $this->getDataArray();
         $contrat = $this->getParentInstance();
-        $produit = $this->getInstance('bimpcore', 'Bimp_Product', $data['fk_product']);
+        $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $data['fk_product']);
         if (!BimpObject::objectLoaded($contrat)) {
             $errors[] = 'L\'id du contrat ' . $contrat->id . ' n\'éxiste pas';
             return 0;
@@ -188,7 +188,7 @@ class BContract_contratLine extends BContract_contrat {
                 $html .= '<tbody>';
                 foreach ($array as $serial) {
                     $html .= '<tr>';
-                    $equipment = $this->getInstance('bimpequipment', 'Equipment');
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment');
                     if (BimpTools::getContext() != 'public' && $equipment->find(['serial' => addslashes($serial)], true)) {
                             $html .= '<td>';
                             $html .= $equipment->getNomUrl(true, true, true);
@@ -250,7 +250,7 @@ class BContract_contratLine extends BContract_contrat {
         $parent = $this->getParentInstance();
         
         if($this->getData('fk_contrat') > 0 && $this->getData('renouvellement') == $parent->getData('current_renouvellement')) {
-            $parent = $this->getinstance('bimpcontract', 'BContract_contrat');
+            $parent = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
             $parent->find(['rowid' => $this->getData('fk_contrat')]);
 
             if ($parent->getData('statut') == 0 || 

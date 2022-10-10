@@ -3006,6 +3006,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if (!$id_mode_reglement)
                 $id_mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', $client->getData('mode_reglement'), 'bimpsupport');
 
+            if ($id_cond_reglement == 20 && $id_mode_reglement != 2) {
+                $id_cond_reglement = 1;
+            }
+            
             BimpTools::loadDolClass('comm/propal', 'propal');
             $prop = new Propal($this->db->db);
             $prop->modelpdf = self::$propal_model_pdf;

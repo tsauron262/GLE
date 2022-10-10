@@ -1134,42 +1134,42 @@ class Bimp_Client extends Bimp_Societe
         $html = '';
 
         if ($this->isLoaded()) {
-            $encours = $this->getAllEncoursForSiret(false);
-            if ($encours['total'] != 0) {
-                $html .= '<b>Encours sur factures restant dues: </b>';
-                $html .= BimpTools::displayMoneyValue($encours['factures']['socs'][$this->id]).' TTC';
-
-                if (count($encours['factures']['socs']) > 1) {
-                    $html .= '<br/>';
-
-                    foreach ($encours['factures']['socs'] as $id_soc => $soc_encours) {
-                        if ($id_soc == $this->id || $soc_encours == 0) {
-                            continue;
-                        }
-
-                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_soc);
-
-                        $html .= '<br/>Client ';
-
-                        if (BimpObject::objectLoaded($soc)) {
-                            $html .= $soc->getLink();
-                        } else {
-                            $html .= '#' . $id_soc;
-                        }
-
-                        $html .= ' : ' . BimpTools::displayMoneyValue($soc_encours);
-                    }
-
-                    $html .= '<br/><br/>';
-                    $html .= '<b>Total encours sur factures restant dues pour l\'entreprise (Siren): </b>' . BimpTools::displayMoneyValue($encours['factures']['total']);
-                }
-            } else {
-                $html .= '<span class="warning">Aucun encours trouvé sur cet établissement (Siret)</span>';
-            }
+//            $encours = $this->getAllEncoursForSiret(false);
+//            if ($encours['total'] != 0) {
+//                $html .= '<b>Encours sur factures restant dues: </b>';
+//                $html .= BimpTools::displayMoneyValue($encours['factures']['socs'][$this->id]).' TTC';
+//
+//                if (count($encours['factures']['socs']) > 1) {
+//                    $html .= '<br/>';
+//
+//                    foreach ($encours['factures']['socs'] as $id_soc => $soc_encours) {
+//                        if ($id_soc == $this->id || $soc_encours == 0) {
+//                            continue;
+//                        }
+//
+//                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_soc);
+//
+//                        $html .= '<br/>Client ';
+//
+//                        if (BimpObject::objectLoaded($soc)) {
+//                            $html .= $soc->getLink();
+//                        } else {
+//                            $html .= '#' . $id_soc;
+//                        }
+//
+//                        $html .= ' : ' . BimpTools::displayMoneyValue($soc_encours);
+//                    }
+//
+//                    $html .= '<br/><br/>';
+//                    $html .= '<b>Total encours sur factures restant dues pour l\'entreprise (Siren): </b>' . BimpTools::displayMoneyValue($encours['factures']['total']);
+//                }
+//            } else {
+//                $html .= '<span class="warning">Aucun encours trouvé sur cet établissement (Siret)</span>';
+//            }
 
             // Calcul encours sur commandes non facturées: 
             $html .= '<div style="margin: 10px 0; padding: 10px; border: 1px solid #737373">';
-            $html .= '<b>Encours sur les commandes non facturées: </b>';
+//            $html .= '<b>Encours sur les commandes non facturées: </b>';
             $html .= '<div id="client_' . $this->id . '_encours_non_facture"></div>';
             $onclick = $this->getJsLoadCustomContent('displayEncoursNonFacture', '$(\'#client_' . $this->id . '_encours_non_facture' . '\')');
 

@@ -379,7 +379,7 @@ class BContract_echeancier extends BimpObject {
         $errors = $warnings = [];
         
         if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
-            return  array('errors' => array("Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier"));
+            return  array('errors' => array("Contrat déjà facturé pour cette période, merci de rafraîchir la page pour voir cette facture dans l'échéancier"));
         }
 
         $parent = $this->getParentInstance();

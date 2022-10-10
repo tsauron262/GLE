@@ -229,13 +229,12 @@ class BContract_contrat extends BimpDolObject
         $return = Array();
         
         //$services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI', 'SERV19-FD01', 'AUTRE');
-        $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
+        
         $children = $this->getChildrenList('lines', ($justActif) ? Array('statut' => 4) : Array());
         
         foreach($children as $id_child) {
-            
             $child = $this->getChildObject('lines', $id_child);
-            $instance->fetch($child->getData('fk_product'));       
+            $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $child->getData('fk_product'));
             //if(in_array($instance->getRef(), $services)) {
                 $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $instance->getData('duree_i')/3600;
             //}
@@ -612,10 +611,9 @@ class BContract_contrat extends BimpDolObject
     public function getTotalInterTime()
     {
         $temps = 0;
-        $fiche = $this->getInstance('bimptechnique', 'BT_ficheInter');
         $fiches = $fiche->getList(['fk_contrat' => $this->id]);
         foreach ($fiches as $index => $infos) {
-            $fiche->fetch($infos['rowid']);
+            $fiche = $this->getInstance('bimptechnique', 'BT_ficheInter', $infos['rowid']);
             $allInters = $fiche->getChildrenList('inters');
             foreach ($allInters as $id) {
                 $inter = $fiche->getChildObject('inters', $id);
@@ -784,12 +782,11 @@ class BContract_contrat extends BimpDolObject
     public function getAcomptesClient()
     {
 
-        $client = $this->getInstance('bimpcore', 'Bimp_Client', $this->getData('fk_soc'));
-        $acc = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->getData('fk_soc'));
         $liste = $acc->getList(['fk_soc' => $this->getData('fk_soc'), 'type' => 3]);
         $array_acc = [];
         foreach ($liste as $nb => $facture) {
-            $acc->fetch($facture['rowid']);
+            $acc = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $facture['rowid']);
             // Si l'accompte n'est pas déjà lier au contrat
             if (!count(getElementElement('contrat', 'facture', $this->id, $acc->id))) {
                 $array_acc[$acc->id] = $acc->getData('facnumber');
@@ -1640,11 +1637,10 @@ class BContract_contrat extends BimpDolObject
     {
         $tickets = [];
 
-        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
         $list = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
 
         foreach ($list as $nb => $infos) {
-            $ticket->fetch($infos['id']);
+            $ticket = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Ticket', $infos['id']);
             $statut = $ticket->getData('status');
 
             $display_statut = "<strong class='" . BS_Ticket::$status_list[$statut]['classes'][0] . "' >";
@@ -1685,11 +1681,10 @@ class BContract_contrat extends BimpDolObject
     {
         $commandes = [];
 
-        $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
         $list = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
 
         foreach ($list as $nb => $infos) {
-            $commande->fetch($infos['rowid']);
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $infos['rowid']);
             $statut = $commande->getData('fk_statut');
 
             $display_statut = "<strong class='" . Bimp_Commande::$status_list[$statut]['classes'][0] . "' >";
@@ -4044,10 +4039,9 @@ class BContract_contrat extends BimpDolObject
             $errors = $contrat->create();
 
             if (!count($errors)) {
-                $service = BimpObject::getInstance('bimpcore', 'Bimp_Product');
                 foreach ($data->services as $nb => $infos) {
                     if ($infos['value'] != 'Non') {
-                        $service->fetch($infos['id']);
+                        $service = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $infos['id']);
                         $end_date = new DateTime($date->format('Y-m-d'));
                         $end_date->add(new DateInterval("P" . $mostHightDuring . "M"));
                         $idLine = $contrat->dol_object->addLine(
@@ -4179,9 +4173,8 @@ class BContract_contrat extends BimpDolObject
             $new_contrat->copyContactsFromOrigin($propal);
             addElementElement('propal', 'contrat', $propal->id, $new_contrat->id);
             $elementListPropal = getElementElement('propal', 'facture', $propal->id);
-            $fact = $this->getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($elementListPropal as $element => $type) {
-                $fact->fetch($type['d']);
+                $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $type['d']);
                 if ($fact->getData('type') == 3) {
                     addElementElement('contrat', 'facture', $new_contrat->id, $type['d']);
                 }

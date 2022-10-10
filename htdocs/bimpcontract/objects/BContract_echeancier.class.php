@@ -94,11 +94,10 @@ class BContract_echeancier extends BimpObject {
 
     public function isDejaFactured($date_start, $date_end) {
         $parent = $this->getParentInstance();
-        $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $listeFactures = getElementElement("contrat", 'facture', $parent->id);
         if(count($listeFactures) > 0) {
             foreach($listeFactures as $index => $i) {
-                $facture->fetch($i['d']);
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $i['d']);
                 if($facture->getData('type') == 0) {
                     $dateDebut = New DateTime();
                     $dateFin = New DateTime();
@@ -202,11 +201,10 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function getLastFactureId() {
-        $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $liste = getElementElement('contrat', 'facture', $this->getParentId());
         $lastId = 0;
         foreach($liste as $index => $i) {
-            $facture->fetch($i['d']);
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $i['d']);
             if($facture->getData('type') == 0) {
                 if($facture->id > $lastId) {
                     $lastId = $facture->id;

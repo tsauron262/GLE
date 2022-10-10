@@ -199,10 +199,9 @@ class BContract_avenant extends BContract_contrat {
                 
                 
                 $det = $this->getInstance('bimpcontract', 'BContract_avenantdet');
-                $laLigne = $this->getInstance('bimpcontract', 'BContract_contratLine');
                 if(is_array($parent->dol_object->lines) && BimpTools::getPostFieldValue('type') == 0)
                     foreach($parent->dol_object->lines as $line) {
-                        $laLigne->fetch($line->id);
+                        $laLigne = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $line->id);
                         if($laLigne->getData('renouvellement') == $parent->getData('current_renouvellement')) {
                             $nbSerial = count(BimpTools::json_decode_array($laLigne->getData('serials')));
                             if($nbSerial < 1)

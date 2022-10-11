@@ -165,6 +165,8 @@ class GSX_Repair extends BimpObject
 
                         if (isset($reason['messages']) && is_array($reason['messages'])) {
                             foreach ($reason['messages'] as $message) {
+                                if(is_array($message) && isset($message['description']))
+                                    $message = $message['description'];
                                 $msg .= ' - ' . $message . '<br/>';
                             }
                         }

@@ -96,7 +96,7 @@ class BContract_contratLine extends BContract_contrat {
                 );
             }
             
-            if($parent->getData('statut') == 11 && $user->admin) {
+            if($parent->getData('statut') == 11 && $user->admin && $this->getData('statut') == 5) {
                 $buttons[] = array(
                     'label'   => 'ADMIN - Activer le service',
                     'icon'    => 'fas_play',

@@ -13,19 +13,35 @@ objects:
             bimp_object: BT_ficheInter_det
 
 sections:
-    - type: nav_tabs
-      nav_tabs:
-          - id: user_panel
-            title: Rapport technicien
-            struct: 
-                type: custom
+#    - type: tabs
+#      tabs: 
+#        default:
+#            label: Accueil
+#            sections:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderAccueil
+#        dash:
+#            label: Dashboard
+#            sections:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderDash
+    - type: tabs
+      tabs:
+        default:
+            label: Rapport technicien
+            sections: 
+              - type: custom
                 custom: 
                     callback: 
                         method: renderTech
-          - id: liste_fiche
-            title: Fiches d'interventions
-            struct: 
-                type: rows
+        liste_fiche:
+            label: Fiches d'interventions
+            sections: 
+              - type: rows
                 rows:                                                   
                     - cols: 
                         - type: list
@@ -41,10 +57,45 @@ sections:
                               panel: 1
                               object: fi
                 
-          - id: stats
-            title: Liste des lignes des FIs
-            struct:
-                type: list
+        stats:
+            label: Liste des lignes des FIs
+            sections:
+              - type: list
                 list:
                     name: all
                     object: fi_det
+#    - type: nav_tabs
+#      nav_tabs:
+#          - id: user_panel
+#            title: Rapport technicien
+#            struct: 
+#                type: custom
+#                custom: 
+#                    callback: 
+#                        method: renderTech
+#          - id: liste_fiche
+#            title: Fiches d'interventions
+#            struct: 
+#                type: rows
+#                rows:                                                   
+#                    - cols: 
+#                        - type: list
+#                          list: 
+#                              title: Fiches d'interventions (nouvelle version)
+#                              name: default
+#                              panel: 1
+#                              object: fi
+#                        - type: list
+#                          list: 
+#                              title: Fiches d'interventions (Historique)
+#                              name: historique
+#                              panel: 1
+#                              object: fi
+#                
+#          - id: stats
+#            title: Liste des lignes des FIs
+#            struct:
+#                type: list
+#                list:
+#                    name: all
+#                    object: fi_det

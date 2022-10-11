@@ -1432,6 +1432,14 @@ class Bimp_Facture extends BimpComm
             );
         }
 
+        if ($this->canSetAction('classifyPaid') && $this->canSetAction('bulkEditField')) {
+            $actions[] = array(
+                'label'     => 'Classer envoyé par email pour chorus',
+                'icon'      => 'fas_file-pdf',
+                'action'    => 'classifyExportEmailChorusMasse'
+            );
+        }
+
         if ($this->canSetAction('sendEmail')) {
             $actions[] = array(
                 'label'  => 'Fichiers PDF',
@@ -5159,6 +5167,26 @@ class Bimp_Facture extends BimpComm
             if ($fact->isActionAllowed('classifyPaid') && $fact->canSetAction('classifyPaid')) {
                 $succ = '';
                 $ret = $fact->actionClassifyPaid(array('close_code' => $data['close_code'], 'close_note' => $data['close_note']), $succ);
+                if (isset($ret['errors']) && count($ret['errors'])) {
+                    $errors[] = BimpTools::getMsgFromArray($ret['errors'], $fact->getRef());
+                }
+            } else {
+                $errors[] = $fact->getRef() . ' n\'est pas fermable';
+            }
+        }
+        return $errors;
+    }
+    
+    public function actionClassifyExportEmailChorusMasse($data, &$success)
+    {
+        $errors = array();
+        $success = 'Ok';
+
+        foreach ($data['id_objects'] as $idF) {
+            $fact = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idF);
+            if ($fact->isActionAllowed('markSendNoChorusExport') && $fact->canSetAction('markSendNoChorusExport')) {
+                $succ = '';
+                $ret = $fact->actionMarkSendNoChorusExport(array(), $succ);
                 if (isset($ret['errors']) && count($ret['errors'])) {
                     $errors[] = BimpTools::getMsgFromArray($ret['errors'], $fact->getRef());
                 }

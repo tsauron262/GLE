@@ -62,6 +62,20 @@ class BContract_contratLine extends BContract_contrat {
         
     }
     
+    public function actionAdminActivateService($data, &$success) {
+        
+        $errors = $warnings = array();
+        
+        $errors = $this->updateField('statut', 4);
+        
+        if(!count($errors)) {
+            $success = 'Service activé avec succès';
+        }
+
+        return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
+        
+    }
+    
     public function getListExtraButtons()
     {
         global $user;
@@ -81,6 +95,15 @@ class BContract_contratLine extends BContract_contrat {
                     ))
                 );
             }
+            
+            if($parent->getData('statut') == 11 && $user->admin && $this->getData('statut') == 5) {
+                $buttons[] = array(
+                    'label'   => 'ADMIN - Activer le service',
+                    'icon'    => 'fas_play',
+                    'onclick' => $this->getJsActionOnclick('adminActivateService', array(), array())
+                );
+            }
+            
             if(($parent->getData('statut') == 11 || $parent->getData('statut') == 1) && $user->rights->bimpcontract->to_replace_serial) {
 //                $buttons[] = array(
 //                    'label'   => 'Remplacer un numéro de série',

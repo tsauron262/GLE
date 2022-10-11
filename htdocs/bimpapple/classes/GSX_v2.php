@@ -382,7 +382,7 @@ class GSX_v2 extends GSX_Const
 
         if ($request_name !== 'authenticate') {
             $headers[] = 'X-Apple-Auth-Token: ' . $this->auth_token;
-            $headers[] = 'X-Apple-Service-Version: v3';
+            $headers[] = 'X-Apple-Service-Version: v4';
         }
 
         if (isset($extra['headers']) && is_array($extra['headers'])) {

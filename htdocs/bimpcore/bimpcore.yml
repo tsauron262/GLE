@@ -96,6 +96,8 @@ params:
     date_archive: 
         label: Date archive
         def: ''
+    date_bilan:
+        label: Date dernier bilan
     
     # Defaults: 
     default_id_entrepot: 

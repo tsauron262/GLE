@@ -507,22 +507,36 @@ class BContract_contrat extends BimpDolObject
 
     public function getTmsArray()
     {
-        $fis = BimpCache::getBimpObjectObjects('bimptechnique', 'BT_ficheInter', array('fk_contrat' => $this->id));
         $tms_in_contrat = 0;
         $tms_out_contrat = 0;
-
-        foreach ($this->getListFi() as $ficheInter) {
-            $childrenFiche = $ficheInter->getChildrenList("inters");
-            foreach ($childrenFiche as $id_child) {
-                $child = $ficheInter->getChildObject('inters', $id_child);
-                $duration = $child->getData('duree');
-                if ($child->getData('id_line_contrat') || $child->getData('type') == 5 || $ficheInter->getData(('new_fi')) < 1) {
-                    $tms_in_contrat += $duration;
-                } else {
-                    $tms_out_contrat += $duration;
-                }
+        
+        
+        $lines = BimpCache::getBimpObjectObjects('bimptechnique', 'BT_ficheInter_det', ['p.fk_contrat' => $this->id], 'id', 'asc', array('p' => array(
+                'table' => 'fichinter',
+                'on'    => 'p.rowid = a.fk_fichinter',
+                'alias' => 'p'
+            )));
+        foreach($lines as $child){
+            $duration = $child->getData('duree');
+            if ($child->getData('id_line_contrat') || $child->getData('type') == 5) {
+                $tms_in_contrat += $duration;
+            } else {
+                $tms_out_contrat += $duration;
             }
         }
+
+//        foreach ($this->getListFi() as $ficheInter) {
+//            $childrenFiche = $ficheInter->getChildrenList("inters");
+//            foreach ($childrenFiche as $id_child) {
+//                $child = $ficheInter->getChildObject('inters', $id_child);
+//                $duration = $child->getData('duree');
+//                if ($child->getData('id_line_contrat') || $child->getData('type') == 5 || $ficheInter->getData(('new_fi')) < 1) {
+//                    $tms_in_contrat += $duration;
+//                } else {
+//                    $tms_out_contrat += $duration;
+//                }
+//            }
+//        }
 
         return (object) Array(
                     'in'  => $tms_in_contrat,
@@ -562,7 +576,8 @@ class BContract_contrat extends BimpDolObject
     {
         $html = "";
 
-        $fis = $this->getListFi();
+//        $fis = $this->getListFi();
+        $fis = BimpCache::getBimpObjectList('bimptechnique', 'BT_ficheInter', ['fk_contrat' => $this->id]);
         $in_out_tms = $this->getTmsArray();
         $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
         $total_fis = 0;

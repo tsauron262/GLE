@@ -3742,6 +3742,10 @@ class BContract_contrat extends BimpDolObject
     {
         return $this->getTotal($this->getData('current_renouvellement'));
     }
+    
+    public function getDureeInitial(){
+        return ($this->getData('duree_mois') / ($this->getData('current_renouvellement')+1));
+    }
 
     public function getTotal($renouvellement)
     {

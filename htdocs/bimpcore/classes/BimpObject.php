@@ -5055,10 +5055,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function fetch($id, $parent = null)
     {
-        
-        if($id == 5591956){
-echo '<pre>';            print_r(BimpTools::getBacktraceArray(debug_backtrace(null, 10)));
-        }
         if (BimpDebug::isActive()) {
             BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
         }

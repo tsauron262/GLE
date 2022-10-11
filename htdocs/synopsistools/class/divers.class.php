@@ -17,8 +17,8 @@ class synopsisHook {//FA1506-0369
 
     static $timeDeb = 0;
     static $timeDebRel = 0;
-    private static $MAX_TIME_LOG = 5;
-    private static $MAX_REQ_LOG = 1000;
+    private static $MAX_TIME_LOG = 6;
+    private static $MAX_REQ_LOG = 1200;
     private static $reload = false;
 
     function synopsisHook() {

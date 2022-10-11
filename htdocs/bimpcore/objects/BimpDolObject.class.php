@@ -560,6 +560,7 @@ class BimpDolObject extends BimpObject
         $html = '';
         if ($this->isLoaded()) {
             $objects = array();
+            $collection = array();
 
             if ($this->isDolObject()) {
                 $propal_instance = null;
@@ -567,23 +568,37 @@ class BimpDolObject extends BimpObject
                 $commande_instance = null;
                 $commande_fourn_instance = null;
                 foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
-                    switch ($item['type']) {
-                        case 'propal':
-                            $propal_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
-                            if ($propal_instance->isLoaded()) {
-                                $icon = $propal_instance->params['icon'];
+                    $collection[$item['type']][] = $item['id_object'];
+                }
+            }
+            
+            foreach($collection as $type => $ids){
+                switch ($type) {
+                    case 'fichinter':
+                        $bcInter = BimpCollection::getInstance('bimptechnique', 'BT_ficheInter');
+                        $bcInter->addFields(array('datec', 'fk_statut'));
+                        $bcInter->addItems($ids);
+                        foreach($ids as $id){
+                            $fi_instance = $bcInter->getObjectInstance((int) $id);
+
+                            if (BimpObject::objectLoaded($fi_instance)) {
+                                $icon = $fi_instance->params['icon'];
                                 $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($propal_instance->getLabel()),
-                                    'ref'      => $propal_instance->getNomUrl(0, true, true, null),
-                                    'date'     => $propal_instance->displayData('datep'),
-                                    'total_ht' => $propal_instance->displayData('total_ht'),
-                                    'status'   => $propal_instance->displayData('fk_statut')
+                                    'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($fi_instance->getLabel()),
+                                    'ref'    => $fi_instance->getNomUrl(0, true, true, null),
+                                    'date'   => $fi_instance->displayData('datec'),
+                                    'status' => $fi_instance->displayData('fk_statut')
                                 );
                             }
-                            break;
-
-                        case 'facture':
-                            $facture_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
+                        }
+                    break;
+                    case 'facture':
+                        $bc = BimpCollection::getInstance('bimpcommercial', 'Bimp_Facture');
+                        $bc->addFields(array('datef', 'total', 'fk_statut'));
+                        $bc->addItems($ids);
+                        foreach($ids as $id){
+                            $facture_instance = $bc->getObjectInstance((int) $id);
+//                            $facture_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
                             if ($facture_instance->isLoaded()) {
                                 $icon = $facture_instance->params['icon'];
                                 $objects[] = array(
@@ -594,100 +609,130 @@ class BimpDolObject extends BimpObject
                                     'status'   => $facture_instance->displayData('fk_statut')
                                 );
                             }
-                            break;
+                        }
+                    break;
+                    case 'propal':
+                        $bc = BimpCollection::getInstance('bimpcommercial', 'Bimp_Propal');
+                        $bc->addFields(array('datep', 'total_ht', 'fk_statut'));
+                        $bc->addItems($ids);
+                        foreach($ids as $id){
+                            $propal_instance = $bc->getObjectInstance((int) $id);
+                            if ($propal_instance->isLoaded()) {
+                                $icon = $propal_instance->params['icon'];
+                                $objects[] = array(
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($propal_instance->getLabel()),
+                                    'ref'      => $propal_instance->getNomUrl(0, true, true, null),
+                                    'date'     => $propal_instance->displayData('datep'),
+                                    'total_ht' => $propal_instance->displayData('total_ht'),
+                                    'status'   => $propal_instance->displayData('fk_statut')
+                                );
+                            }
+                        }
+                        break;
+                    default:
+                        foreach($ids as $id){//TODO a traduire au dessus en collection
+                            $item['id_object'] = $id;
+                            switch ($type) {
+                                case 'propal':
+                                    $propal_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
+                                    if ($propal_instance->isLoaded()) {
+                                        $icon = $propal_instance->params['icon'];
+                                        $objects[] = array(
+                                            'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($propal_instance->getLabel()),
+                                            'ref'      => $propal_instance->getNomUrl(0, true, true, null),
+                                            'date'     => $propal_instance->displayData('datep'),
+                                            'total_ht' => $propal_instance->displayData('total_ht'),
+                                            'status'   => $propal_instance->displayData('fk_statut')
+                                        );
+                                    }
+                                    break;
 
-                        case 'commande':
-                            $commande_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
-                            if ($commande_instance->isLoaded()) {
-                                $icon = $commande_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_instance->getLabel()),
-                                    'ref'      => $commande_instance->getNomUrl(0, true, true, null),
-                                    'date'     => $commande_instance->displayData('date_commande'),
-                                    'total_ht' => $commande_instance->displayData('total_ht'),
-                                    'status'   => $commande_instance->displayData('fk_statut')
-                                );
-                            }
-                            break;
+                                case 'commande':
+                                    $commande_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
+                                    if ($commande_instance->isLoaded()) {
+                                        $icon = $commande_instance->params['icon'];
+                                        $objects[] = array(
+                                            'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_instance->getLabel()),
+                                            'ref'      => $commande_instance->getNomUrl(0, true, true, null),
+                                            'date'     => $commande_instance->displayData('date_commande'),
+                                            'total_ht' => $commande_instance->displayData('total_ht'),
+                                            'status'   => $commande_instance->displayData('fk_statut')
+                                        );
+                                    }
+                                    break;
 
-                        case 'order_supplier':
-                            $commande_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $item['id_object']);
-                            if ($commande_fourn_instance->isLoaded()) {
-                                $icon = $commande_fourn_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_fourn_instance->getLabel()),
-                                    'ref'      => $commande_fourn_instance->getNomUrl(0, true, true, null),
-                                    'date'     => $commande_fourn_instance->displayData('date_commande'),
-                                    'total_ht' => $commande_fourn_instance->displayData('total_ht'),
-                                    'status'   => $commande_fourn_instance->displayData('fk_statut')
-                                );
-                            }
-                            break;
+                                case 'order_supplier':
+                                    $commande_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $item['id_object']);
+                                    if ($commande_fourn_instance->isLoaded()) {
+                                        $icon = $commande_fourn_instance->params['icon'];
+                                        $objects[] = array(
+                                            'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_fourn_instance->getLabel()),
+                                            'ref'      => $commande_fourn_instance->getNomUrl(0, true, true, null),
+                                            'date'     => $commande_fourn_instance->displayData('date_commande'),
+                                            'total_ht' => $commande_fourn_instance->displayData('total_ht'),
+                                            'status'   => $commande_fourn_instance->displayData('fk_statut')
+                                        );
+                                    }
+                                    break;
 
-                        case 'invoice_supplier':
-                            $facture_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $item['id_object']);
-                            if (BimpObject::objectLoaded($facture_fourn_instance)) {
-                                $icon = $facture_fourn_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_fourn_instance->getLabel()),
-                                    'ref'      => $facture_fourn_instance->getNomUrl(0, true, true, null),
-                                    'date'     => $facture_fourn_instance->displayData('datef'),
-                                    'total_ht' => $facture_fourn_instance->displayData('total_ht'),
-                                    'status'   => $facture_fourn_instance->displayData('fk_statut')
-                                );
+                                case 'invoice_supplier':
+                                    $facture_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $item['id_object']);
+                                    if (BimpObject::objectLoaded($facture_fourn_instance)) {
+                                        $icon = $facture_fourn_instance->params['icon'];
+                                        $objects[] = array(
+                                            'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_fourn_instance->getLabel()),
+                                            'ref'      => $facture_fourn_instance->getNomUrl(0, true, true, null),
+                                            'date'     => $facture_fourn_instance->displayData('datef'),
+                                            'total_ht' => $facture_fourn_instance->displayData('total_ht'),
+                                            'status'   => $facture_fourn_instance->displayData('fk_statut')
+                                        );
+                                    }
+                                    break;
+                                case 'contrat':
+                                    $contrat_instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', (int) $item['id_object']);
+                                    if (BimpObject::objectLoaded($contrat_instance)) {
+                                        $icon = $contrat_instance->params['icon'];
+                                        $objects[] = array(
+                                            'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($contrat_instance->getLabel()),
+                                            'ref'      => $contrat_instance->getNomUrl(0, true, true, 'fiche_contrat'),
+                                            'date'     => $contrat_instance->displayData('date_start'),
+                                            'total_ht' => $contrat_instance->getTotalContrat() . "€",
+                                            'status'   => $contrat_instance->displayData('statut')
+                                        );
+                                    }
+                                    break;
+                                case 'bimp_ticket':
+                                    $ticket_instance = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Ticket', (int) $item['id_object']);
+                                    if (BimpObject::objectLoaded($ticket_instance)) {
+                                        $icon = $ticket_instance->params['icon'];
+                                        $objects[] = array(
+                                            'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($ticket_instance->getLabel()),
+                                            'ref'    => $ticket_instance->getNomUrl(0, true, true),
+                                            'date'   => $ticket_instance->displayData('date_create'),
+                                            'status' => $ticket_instance->displayData('status')
+                                        );
+                                    }
+                                    break;
+                                case 'fichinter':
+                                    $collection['fichinter'][] = $item['id_object'];
+                                    break;
+                                case 'synopsisdemandeinterv':
+                                    $di_instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_demandeInter', (int) $item['id_object']);
+                                    if (BimpObject::objectLoaded($di_instance)) {
+                                        $icon = $di_instance->params['icon'];
+                                        $objects[] = array(
+                                            'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($di_instance->getLabel()),
+                                            'ref'      => $di_instance->getNomUrl(0, true, true, 'infos'),
+                                            'date'     => $di_instance->displayData('datec'),
+                                            'total_ht' => $di_instance->displayData('total_ht') . "€",
+                                            'status'   => $di_instance->displayData('fk_statut')
+                                        );
+                                    }
+                                    break;
                             }
-                            break;
-                        case 'contrat':
-                            $contrat_instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', (int) $item['id_object']);
-                            if (BimpObject::objectLoaded($contrat_instance)) {
-                                $icon = $contrat_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($contrat_instance->getLabel()),
-                                    'ref'      => $contrat_instance->getNomUrl(0, true, true, 'fiche_contrat'),
-                                    'date'     => $contrat_instance->displayData('date_start'),
-                                    'total_ht' => $contrat_instance->getTotalContrat() . "€",
-                                    'status'   => $contrat_instance->displayData('statut')
-                                );
-                            }
-                            break;
-                        case 'bimp_ticket':
-                            $ticket_instance = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Ticket', (int) $item['id_object']);
-                            if (BimpObject::objectLoaded($ticket_instance)) {
-                                $icon = $ticket_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($ticket_instance->getLabel()),
-                                    'ref'    => $ticket_instance->getNomUrl(0, true, true),
-                                    'date'   => $ticket_instance->displayData('date_create'),
-                                    'status' => $ticket_instance->displayData('status')
-                                );
-                            }
-                            break;
-                        case 'fichinter':
-                            $fi_instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', (int) $item['id_object']);
-                            if (BimpObject::objectLoaded($fi_instance)) {
-                                $icon = $fi_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($fi_instance->getLabel()),
-                                    'ref'    => $fi_instance->getNomUrl(0, true, true, null),
-                                    'date'   => $fi_instance->displayData('datec'),
-                                    'status' => $fi_instance->displayData('fk_statut')
-                                );
-                            }
-                            break;
-                        case 'synopsisdemandeinterv':
-                            $di_instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_demandeInter', (int) $item['id_object']);
-                            if (BimpObject::objectLoaded($di_instance)) {
-                                $icon = $di_instance->params['icon'];
-                                $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($di_instance->getLabel()),
-                                    'ref'      => $di_instance->getNomUrl(0, true, true, 'infos'),
-                                    'date'     => $di_instance->displayData('datec'),
-                                    'total_ht' => $di_instance->displayData('total_ht') . "€",
-                                    'status'   => $di_instance->displayData('fk_statut')
-                                );
-                            }
-                            break;
-                    }
+                        }
+                    break;
+                    
                 }
             }
 

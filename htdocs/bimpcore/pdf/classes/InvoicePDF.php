@@ -87,6 +87,13 @@ class InvoicePDF extends BimpDocumentPDF
                                 'id_facture' => (int) $this->bimpCommObject->getData('fk_facture_source')
                     ));
                 }
+                if(empty($this->shipments) && !empty($this->commandes)){//on chereche tous les BL de la commande
+                    foreach($this->commandes as $commande){
+                        $this->shipments = BimpTools::merge_array($this->shipments, BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
+                                    'id_commande_client' => (int) $commande->id
+                        )));
+                    }
+                }
 
                 // Contacts livraisons:
                 if (!empty($this->shipments)) {

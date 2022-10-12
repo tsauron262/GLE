@@ -3768,7 +3768,6 @@ class BContract_contrat extends BimpDolObject
         $total = 0;
 
         $filters = [
-            'statut'        => 2,
             'type'          => 1,
             'want_end_date' => [
                 'operator' => '>=',
@@ -3784,7 +3783,7 @@ class BContract_contrat extends BimpDolObject
             $av = $this->getChildObject('avenant', $id_child);
             $dureePrlong += $av->getNbMois();
             if(!$idAvenant || $idAvenant == $id_child)
-                $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getData('duree_mois') - $dureePrlong);
+                $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getDureeInitial());
         }
 
         return $total;

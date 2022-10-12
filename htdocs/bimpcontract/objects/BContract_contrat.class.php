@@ -3774,6 +3774,8 @@ class BContract_contrat extends BimpDolObject
                 'value'    => $now->format('Y-m-d')
             ]
         ];
+        if($idAvenant == 0)//veut le total des valide
+            $filters['fk_status'] = 2;
 
         $children = $this->getChildrenList('avenant', $filters);
         

@@ -139,6 +139,7 @@ class BimpCore
 
             foreach ($config_notification as $cn) {
                 $notifs .= $cn['nom'] . ": {";
+                $notifs .= "id_notification: '" . $cn['id'] . "', ";
                 $notifs .= "module: '" . $cn['module'] . "', ";
                 $notifs .= "class: '" . $cn['class'] . "', ";
                 $notifs .= "method: '" . $cn['method'] . "', ";

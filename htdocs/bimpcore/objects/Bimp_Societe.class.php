@@ -3019,22 +3019,6 @@ class Bimp_Societe extends BimpDolObject
                 }
                 $this->addObjectLog($msg, 'ANONYMISED');
 
-                // Suppression des fichiers du client: 
-                $dir = $this->getFilesDir();
-                if (is_dir($dir)) {
-                    $files = scandir($data);
-
-                    foreach ($files as $f) {
-                        if (in_array($f, array('.', '..'))) {
-                            continue;
-                        }
-
-                        if (!unlink($dir . '/' . $f)) {
-                            $warnings[] = 'Echec suppression du fichier "' . $f . '"';
-                        }
-                    }
-                }
-
                 // Anonymisation des contacts: 
                 $contacts = $this->getContactsArray(false);
                 if (!empty($contacts)) {

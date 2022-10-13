@@ -3233,11 +3233,14 @@ class BimpController
     {
         global $user;
         $errors = array();
+        $notifs_for_user = array();
 
         $notifs = BimpTools::getPostFieldValue('notificationActive');
 
-        $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-        $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
+        if(is_array($notifs)){
+            $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+            $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
+        }
 
         return array(
             'errors'        => $errors,

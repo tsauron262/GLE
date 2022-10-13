@@ -773,6 +773,29 @@ class BimpController
     }
 
     // Traitements Ajax:
+    
+    public function ajaxProcessNotificationAction()
+    {
+        $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', BimpTools::getvalue('id_notification'));
+        if(is_object($notif) && $notif->isLoaded()){
+            $obj = $notif->getObject(BimpTools::getvalue('id'));
+            if(is_object($obj) && $obj->isLoaded()){
+                $methode = 'action'. ucfirst(BimpTools::getvalue('actionNotif'));
+                if(method_exists($obj, $methode)){
+                    $success = '';
+                    $return = $obj->$methode($_REQUEST, $success);
+                    $return['success'] = $success;
+                    return $return;
+                }
+                else
+                    BimpCore::addlog('Methode '.$methode.' n\'existe pas dans '.get_class ($obj));
+            }
+            else
+                BimpCore::addlog('Objet introuvable pour notification '.BimpTools::getvalue('id_notification').' id '.BimpTools::getvalue('id'));
+        }
+        else
+            BimpCore::addlog('Notification introuvable '.BimpTools::getvalue('id_notification'));
+    }
 
     protected function ajaxProcess()
     {

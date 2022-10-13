@@ -6029,7 +6029,7 @@ class Bimp_Facture extends BimpComm
                 $facture = null;
 
                 $id_fac_src = (int) BimpTools::getPostFieldValue('id_facture_to_correct', 0);
-                $avoir_same_lines = (int) BimpTools::getPostFieldValue('avoir_same_lines', 0);
+                $avoir_same_lines = (int) BimpTools::getPostFieldValue('avoir_same_lines', 1);
                 $avoir_remain_to_pay = (int) BimpTools::getPostFieldValue('avoir_remain_to_pay', 0);
 
                 if ($avoir_same_lines && $avoir_remain_to_pay) {

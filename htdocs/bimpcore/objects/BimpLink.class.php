@@ -151,11 +151,20 @@ class BimpLink extends BimpObject
                 'value'    => (int) $id_max
             ),
             'linked_module'=> 'bimpcore',
-            'linked_name'  => 'Bimp_User',
-            'linked_id'    => $id_user,
+            'user_ou_groupe' => array('or' => array(
+                'user' => array('and_fields' => array(
+                    'linked_name'  => 'Bimp_User',
+                    'linked_id'    => $id_user,
+                )),
+                'group' => array('and_fields' => array(
+                    'linked_name'  => 'Bimp_UserGroup',
+                    'linked_id'    => self::getUserUserGroupsList($id_user),
+                )),
+            ))
+            
         );
         
-        $links = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filters, 'viewed, id', 'desc');
+        $links = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filters, 'a.viewed', 'DESC', array(), 15);
         
         
         foreach($links as $d) {

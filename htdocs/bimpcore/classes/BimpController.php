@@ -776,6 +776,7 @@ class BimpController
     
     public function ajaxProcessNotificationAction()
     {
+        $errors = array();
         $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', BimpTools::getvalue('id_notification'));
         if(is_object($notif) && $notif->isLoaded()){
             $obj = $notif->getObject(BimpTools::getvalue('id'));
@@ -787,14 +788,21 @@ class BimpController
                     $return['success'] = $success;
                     return $return;
                 }
-                else
+                else{
+                    $errors[] = 'Methode '.$methode.' n\'existe pas dans '.get_class ($obj);
                     BimpCore::addlog('Methode '.$methode.' n\'existe pas dans '.get_class ($obj));
+                }
             }
-            else
+            else{
+                $errors[] = 'Objet introuvable pour notification '.BimpTools::getvalue('id_notification').' id '.BimpTools::getvalue('id');
                 BimpCore::addlog('Objet introuvable pour notification '.BimpTools::getvalue('id_notification').' id '.BimpTools::getvalue('id'));
+            }
         }
-        else
+        else{
+                $errors[] = 'Notification introuvable '.BimpTools::getvalue('id_notification');
             BimpCore::addlog('Notification introuvable '.BimpTools::getvalue('id_notification'));
+        }
+        return array('errors'=>$errors);
     }
 
     protected function ajaxProcess()

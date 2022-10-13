@@ -141,7 +141,50 @@ class BimpLink extends BimpObject
     }
 
     // Affichage: 
+    
+    public function getMyLink($id_user, $id_max, &$errors = array()){
+           $demandes = array();
+        
+        $filters = array(
+            'id' => array(
+                'operator' => '>',
+                'value'    => (int) $id_max
+            ),
+            'linked_module'=> 'bimpcore',
+            'linked_name'  => 'Bimp_User',
+            'linked_id'    => $id_user,
+        );
+        
+        $links = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filters, 'viewed, id', 'desc');
+        
+        
+        foreach($links as $d) {
+            
+            $bimp_object = $d->getSourceObject();
+            
+            if($bimp_object->isLoaded()) {
+                $new_demande = array(
+                    'obj'        => array('nom_url'  => $bimp_object->getLink()),
+                    'id'         => $d->id,
+                    'content'    => $d->getSourceFieldLabel().'<br/>'.$d->displaySourceFieldContent(),
+                    'is_viewed'   => $d->getData('viewed')
+                );
+                
+            } else
+                $new_demande = array();
 
+            
+            $demandes['content'][] = $new_demande;
+        }
+        
+        if(!isset($demandes['content']))
+            $demandes['content'] = array();
+        
+        $demandes['nb_demande'] = (int) sizeof($links);
+        
+        return $demandes;
+    }
+    
     public function displayObj($object, $with_object_label = false)
     {
         $html = '';
@@ -318,6 +361,37 @@ class BimpLink extends BimpObject
         }
 
         return $errors;
+    }
+    
+    public function actionSetAsViewed($data, &$success = '')
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Marquer comme vue';
+
+        if (!$this->i_view())
+            $errors[] = 'Impossible';
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function i_view()
+    {
+        if (!$this->getData("viewed") && $this->i_am_dest()) {
+            $this->set('viewed', 1);
+            $warn = array();
+            if (empty($this->update($warn, true)))
+                return 1;
+        }
+
+        return 0;
+    }
+    
+    public function i_am_dest(){
+        return 1;
     }
 
     // Rendus HTML: 

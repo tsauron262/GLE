@@ -4348,6 +4348,7 @@ function BimpInputHashtags() {
                     val = bih.$curInput.html();
                 }
 
+                val = val.replace("\n", "<br/>");
                 if (/^(.* )?#(.*)$/.test(val)) {
                     var newValBegin = val.replace(/^(.* )?#(.*)$/, '$1');
                     newValBegin += '{{' + bih.curValue + '}} ';
@@ -4357,6 +4358,8 @@ function BimpInputHashtags() {
                     if (newValEnd) {
                         newValEnd = ' ' + newValEnd;
                     }
+                    newValBegin = newValBegin.replace("<br/>", "\n");
+                    newValEnd = newValEnd.replace("<br/>", "\n");
 
                     if (inputTag === 'input' || inputTag === 'textarea') {
                         bih.$curInput.val(newValBegin + newValEnd);
@@ -4573,7 +4576,7 @@ function BimpInputHashtags() {
                 // Input ou textarea classique: 
                 $input.keyup(function (e) {
                     var text = $(this).val();
-
+                    text = text.replace("\n", ' ');
                     // Si un hashtag vient d'être frappé:
                     if (/^(.* )?#( .*)?$/.test(text)) {
                         bih.openModal($(this));

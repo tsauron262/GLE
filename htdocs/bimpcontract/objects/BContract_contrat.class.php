@@ -3693,7 +3693,10 @@ class BContract_contrat extends BimpDolObject
         if ($this->isLoaded()) {
             $instance = BimpCache::findBimpObjectInstance('bimpcontract', 'BContract_echeancier', ['id_contrat' => $this->id]);
 
-            $date_1 = new DateTime($instance->getData('next_facture_date'));
+            if($instance && $instance->isLoaded())
+                $date_1 = new DateTime($instance->getData('next_facture_date'));
+            else
+                $date_1 = new DateTime();
 
             $date_2 = new DateTime($this->displayRealEndDate("Y-m-d"));
 //            if ($date_1->format('Y-m-d') == $this->getData('date_start')) {

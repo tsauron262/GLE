@@ -31,5 +31,11 @@ class BimpNotification extends BimpObject{
         return -1;
     }
     
+    public function getObject($id){
+        return BimpCache::getBimpObjectInstance($this->getData('module'), $this->getData('class'), $id);
+    }
     
+    public function setActionViewed($id){
+        die($id);
+    }
 }

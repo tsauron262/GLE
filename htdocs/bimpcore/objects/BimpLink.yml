@@ -35,6 +35,9 @@ fields:
     linked_id: 
         label: ID objet lié
         type: id
+    viewed:
+        label: Vue
+        type: bool
         
         
     

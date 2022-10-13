@@ -992,7 +992,7 @@ class BT_ficheInter_det extends BimpDolObject
                     $message    .= 'Heures restantes dans le contrat: ' . $this->convertTime($heuresRestantes);
                     $message    .= '<br />Heures renseignées dans la ligne de FI: ' . $this->convertTime($heuresFaites);
                     $message    .= '<br />Type: ' . self::$types[BimpTools::getPostFieldValue('type')]['label'];
-                    die($message);
+
                     mailSyn2($sujet, $commercial->getData('email') . ', contrat@bimp.fr', null, $message);
                     
                 }

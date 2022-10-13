@@ -3778,7 +3778,7 @@ class BContract_contrat extends BimpDolObject
             ]
         ];
         if($idAvenant == 0)//veut le total des valide
-            $filters['fk_status'] = 2;
+            $filters['statut'] = 2;
 
         $children = $this->getChildrenList('avenant', $filters);
         

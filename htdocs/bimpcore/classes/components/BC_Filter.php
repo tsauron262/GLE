@@ -2059,6 +2059,7 @@ class BC_Filter extends BimpComponent
             case 'text':
             case 'html':
             case 'id':
+            case 'json':
                 return 'value_part';
 
             case 'int':

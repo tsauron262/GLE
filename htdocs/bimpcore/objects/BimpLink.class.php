@@ -211,7 +211,7 @@ class BimpLink extends BimpObject
                 } else {
                     $html .= 'L\'objet "' . get_class($object) . '"';
                 }
-                $html .= ' d\'ID ' . $this->getData('linked_id');
+                $html .= ' d\'ID ' . $this->getData('src_id').' n\'existe plus';
                 $html .= '</span>';
             }
         }

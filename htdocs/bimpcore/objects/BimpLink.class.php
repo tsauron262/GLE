@@ -165,13 +165,13 @@ class BimpLink extends BimpObject
             if($bimp_object->isLoaded()) {
                 $new_demande = array(
                     'obj'        => array('nom_url'  => $bimp_object->getLink()),
-                    'id'         => $d->id,
-                    'content'    => $d->getSourceFieldLabel().'<br/>'.$d->displaySourceFieldContent(),
-                    'is_viewed'   => $d->getData('viewed')
+                    'content'    => $d->getSourceFieldLabel().'<br/>'.$d->displaySourceFieldContent()
                 );
                 
             } else
                 $new_demande = array();
+            $new_demande['id'] = $d->id;
+            $new_demande['is_viewed'] = $d->getData('viewed');
 
             
             $demandes['content'][] = $new_demande;

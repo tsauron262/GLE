@@ -381,38 +381,38 @@ forms:
                 depends_on: fk_soc
                 show: 
                     callback: isNotLoaded
-            avoir_same_lines: 
-                custom: 1
-                label: Créer l'avoir avec les même lignes que la factures dont il est issu
-                data_type: bool
-                input: 
-                    type: toggle
-                value: 1
-                input_name: avoir_same_lines
-                display_if: 
-                    fields_names: type,id_facture_to_correct
-                    type: 
-                        show_values: 2
-                    id_facture_to_correct:
-                        hide_values: 0
-                show: 
-                    callback: isNotLoaded
-            avoir_remain_to_pay: 
-                custom: 1
-                label: Créer l'avoir avec le montant restant à payer de la facture dont il est issu.
-                data_type: bool
-                input: 
-                    type: toggle
-                value: 0
-                input_name: avoir_remain_to_pay
-                display_if: 
-                    fields_names: type,id_facture_to_correct
-                    type: 
-                        show_values: 2
-                    id_facture_to_correct:
-                        hide_values: 0
-                show: 
-                    callback: isNotLoaded
+#            avoir_same_lines: 
+#                custom: 1
+#                label: Créer l'avoir avec les même lignes que la factures dont il est issu
+#                data_type: bool
+#                input: 
+#                    type: toggle
+#                value: 1
+#                input_name: avoir_same_lines
+#                display_if: 
+#                    fields_names: type,id_facture_to_correct
+#                    type: 
+#                        show_values: 2
+#                    id_facture_to_correct:
+#                        hide_values: 0
+#                show: 
+#                    callback: isNotLoaded
+#            avoir_remain_to_pay: 
+#                custom: 1
+#                label: Créer l'avoir avec le montant restant à payer de la facture dont il est issu.
+#                data_type: bool
+#                input: 
+#                    type: toggle
+#                value: 0
+#                input_name: avoir_remain_to_pay
+#                display_if: 
+#                    fields_names: type,id_facture_to_correct
+#                    type: 
+#                        show_values: 2
+#                    id_facture_to_correct:
+#                        hide_values: 0
+#                show: 
+#                    callback: isNotLoaded
             ef_type: 
                 field: ef_type
             entrepot:
@@ -504,8 +504,8 @@ forms:
             typedeposit: unset
             id_facture_replaced: unset
             id_facture_to_correct: unset
-            avoir_same_lines: unset
-            avoir_remain_to_pay: unset
+#            avoir_same_lines: unset
+#            avoir_remain_to_pay: unset
             typedeposit: unset
             typedeposit: unset
             
@@ -695,7 +695,6 @@ forms:
                     method: renderMailExtraFilesInput
                     params:
                         - files_compl
-                      
                   
 fields_tables: 
     infos: 

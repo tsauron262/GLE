@@ -233,7 +233,7 @@
                             $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrats->getData('fk_commercial_suivi'));
                             $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrats->getData('fk_soc'));
                             $email_commercial = $commercial->getData('email');
-                            if($commercial->getdata('statut') == 0) {
+                            if($commercial->getData('statut') == 0) {
                                 $email_commercial = "debugerp@bimp.fr";
                             } 
                             $this->output .= $email_commercial . "<br />";

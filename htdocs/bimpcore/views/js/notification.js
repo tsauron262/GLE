@@ -24,7 +24,7 @@ class AbstractNotification {
     /**
      * Méthode doit être appelée avec super()
      */
-    constructor (nom, id_notification) {
+    constructor (id_notification) {
         if (this.constructor == AbstractNotification) {
             throw new Error('La classe abstraite "AbstractNotification" ne peut être instanciée.');
             return;
@@ -32,15 +32,15 @@ class AbstractNotification {
         this.id_max = 0;
         this.id_notification = id_notification;
         this.content = [];
-        this.nom = nom;
-        this.ptr = 'notificationActive.' + this.nom + '.obj';
-        this.dropdown_id = 'dropdown_' + this.nom;
+//        this.nom = nom;
+        this.ptr = 'notificationActive.' + this.id_notification + '.obj';
+        this.dropdown_id = 'dropdown_' + this.id_notification;
         // Aussi dans BimpNotification
 //        this.parent_selector = 'div.dropdown.modifDropdown:last';
         this.parent_selector = 'div.login_block_other';
 //        this.display_notification = true;
-        if(bimp_storage.get(this.nom) === null)
-            bimp_storage.set(this.nom, this.id_max);
+        if(bimp_storage.get(this.id_notification) === null)
+            bimp_storage.set(this.id_notification, this.id_max);
         this.init();
     }
     
@@ -185,9 +185,9 @@ class AbstractNotification {
                     
                     // Affichage dans la notification
                     if(!is_multiple && id_max_changed) {
-                        var global_id_max = parseInt(bimp_storage.get(this.nom));
+                        var global_id_max = parseInt(bimp_storage.get(this.id_notification));
                         if(global_id_max < this.id_max) {
-                            bimp_storage.set(this.nom, this.id_max);
+                            bimp_storage.set(this.id_notification, this.id_max);
                             this.displayNotification(element.content[i]);
                         }
                     }
@@ -197,9 +197,9 @@ class AbstractNotification {
             }
             
             if (is_multiple && id_max_changed) {
-                    var global_id_max = parseInt(bimp_storage.get(this.nom));
+                    var global_id_max = parseInt(bimp_storage.get(this.id_notification));
                     if(global_id_max < this.id_max) {
-                        bimp_storage.set(this.nom, this.id_max);
+                        bimp_storage.set(this.id_notification, this.id_max);
                         this.displayMultipleNotification(element.content);
                     }
             }
@@ -328,14 +328,14 @@ class AbstractNotification {
     
     reloadNotif() {
         
-        bimp_notification.notificationActive[this.nom].obj.content = [];
-        bimp_notification.notificationActive[this.nom].obj.id_max = 0;
+        bimp_notification.notificationActive[this.id_notification].obj.content = [];
+        bimp_notification.notificationActive[this.id_notification].obj.id_max = 0;
         
         this.emptyNotifs();
         
         // TODO check la suite
 //        this.display_notification = false;
-        bimp_notification.reload(false);
+        bimp_notification.reload(false, this.id_notification);
     }
     
     emptyNotifs() {
@@ -369,7 +369,7 @@ function BimpNotification() {
 
     
 
-    this.reload = function (reiterate = true) {
+    this.reload = function (reiterate = true, id_notification = 0) {
         
         if (!bn.active || bn.processing) {
             bn.iterate();
@@ -391,14 +391,13 @@ function BimpNotification() {
             
             
             for(var i in this.notificationActive) {
-                var notif = {
-                    nom: this.notificationActive[i].obj.nom,
-                    module: this.notificationActive[i].module,
-                    class:  this.notificationActive[i].class,
-                    method: this.notificationActive[i].method,
-                    id_max: this.notificationActive[i].obj.id_max
-                };
-                data.notificationActive.push(notif);
+                if(id_notification == 0 || id_notification == this.notificationActive[i].id_notification){
+                    var notif = {
+                        id_notification: this.notificationActive[i].id_notification,
+                        id_max: this.notificationActive[i].obj.id_max
+                    };
+                    data.notificationActive.push(notif);
+                }
             }
             
             data.date_start = date_start;
@@ -415,8 +414,8 @@ function BimpNotification() {
                     
                     if (result.notifications) {
 //                        console.log(result.notifications);
-                        for (const [nom, value] of Object.entries(result.notifications)) {
-                            eval('bn.notificationActive.' + nom + '.obj.addElement(value);');
+                        for (const [id, value] of Object.entries(result.notifications)) {
+                            eval('bn.notificationActive[' + id + '].obj.addElement(value);');
                         }                     
 
 //                        bn.delay = 0;
@@ -544,10 +543,10 @@ function BimpNotification() {
         // Variable définie coté PHP (actions_bimpcore.class.php)
         this.notificationActive = notificationActive;
 
-        for (const [nom, value] of Object.entries(this.notificationActive)) {
+        for (const [id_notification, value] of Object.entries(this.notificationActive)) {
             var notification = this;
-            $.getScript(DOL_URL_ROOT + '/' + value.module + '/views/js/' + nom + '.js', function() {
-                eval('notification.notificationActive.' + nom + '.obj = new ' + nom + '("' + nom + '", '+value.id_notification+');');
+            $.getScript(DOL_URL_ROOT + '/' + value.module + '/views/js/' + value.nom + '.js', function() {
+                eval('notification.notificationActive[' + id_notification + '].obj = new ' + value.nom + '('+value.id_notification+');');
             });
             
         }

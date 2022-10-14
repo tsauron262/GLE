@@ -3265,6 +3265,7 @@ class BimpController
         global $user;
         $errors = array();
         $notifs_for_user = array();
+        BimpDebug::$active = false;
 
         $notifs = BimpTools::getPostFieldValue('notificationActive');
 

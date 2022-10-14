@@ -519,6 +519,9 @@ fields:
         items_braces: 1
         items_data_type: id_object
         object: file
+    name_reseller:
+        label: Nom du revendeur
+        type: string
         
 forms: 
     default:
@@ -657,6 +660,7 @@ forms:
               input_name: file2
               input: 
                   type: file_upload
+            - field: name_reseller
             
     public_edit: 
         rows: 
@@ -1006,6 +1010,7 @@ fields_tables:
             - field: bon_resti_raison
               show: 
                   callback: isGratuit
+            - field: name_reseller
                  
     facturation:
         title: Facturation

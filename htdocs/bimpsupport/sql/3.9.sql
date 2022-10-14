@@ -1,0 +1,1 @@
+ALTER TABLE llx_bs_sav ADD name_reseller varchar(63) DEFAULT '' NULL;

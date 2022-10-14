@@ -773,6 +773,37 @@ class BimpController
     }
 
     // Traitements Ajax:
+    
+    public function ajaxProcessNotificationAction()
+    {
+        $errors = array();
+        $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', BimpTools::getvalue('id_notification'));
+        if(is_object($notif) && $notif->isLoaded()){
+            $obj = $notif->getObject(BimpTools::getvalue('id'));
+            if(is_object($obj) && $obj->isLoaded()){
+                $methode = 'action'. ucfirst(BimpTools::getvalue('actionNotif'));
+                if(method_exists($obj, $methode)){
+                    $success = '';
+                    $return = $obj->$methode($_REQUEST, $success);
+                    $return['success'] = $success;
+                    return $return;
+                }
+                else{
+                    $errors[] = 'Methode '.$methode.' n\'existe pas dans '.get_class ($obj);
+                    BimpCore::addlog('Methode '.$methode.' n\'existe pas dans '.get_class ($obj));
+                }
+            }
+            else{
+                $errors[] = 'Objet introuvable pour notification '.BimpTools::getvalue('id_notification').' id '.BimpTools::getvalue('id');
+                BimpCore::addlog('Objet introuvable pour notification '.BimpTools::getvalue('id_notification').' id '.BimpTools::getvalue('id'));
+            }
+        }
+        else{
+                $errors[] = 'Notification introuvable '.BimpTools::getvalue('id_notification');
+            BimpCore::addlog('Notification introuvable '.BimpTools::getvalue('id_notification'));
+        }
+        return array('errors'=>$errors);
+    }
 
     protected function ajaxProcess()
     {
@@ -3233,11 +3264,14 @@ class BimpController
     {
         global $user;
         $errors = array();
+        $notifs_for_user = array();
 
         $notifs = BimpTools::getPostFieldValue('notificationActive');
 
-        $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-        $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
+        if(is_array($notifs)){
+            $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+            $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
+        }
 
         return array(
             'errors'        => $errors,

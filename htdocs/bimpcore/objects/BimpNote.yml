@@ -74,8 +74,9 @@ fields:
         type: text
         hashtags: 1
         input: 
+            hashtags: 1
             auto_expand: 1
-            rows: 1
+            rows: 3
             note: 1
     viewed: 
         label: Vue
@@ -166,8 +167,8 @@ forms:
               label: Texte
               input_name: content
               input: 
+                  hashtags: 1
                   type: textarea
-                  auto_expand: 1
                   rows: 3
                   
 lists_cols: 

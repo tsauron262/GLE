@@ -34,6 +34,7 @@ fields:
         
 lists:
     default:
+        add_form_name: default
         cols:
             label:
             nom:

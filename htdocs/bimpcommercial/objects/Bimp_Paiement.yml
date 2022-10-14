@@ -74,11 +74,18 @@ fields:
         type: bool
 
 #    Champs extra: 
-    type: 
+#    type: 
+#        label: Type
+#        values: 
+#            array: modeReglements
+#        extra: 1   
+        
+            
+    fk_paiement:
         label: Type
+        type: int
         values: 
             array: modeReglements
-        extra: 1   
     
 forms: 
     default: 
@@ -264,7 +271,7 @@ fields_tables:
         title: Infos
         icon: fas_info-circle
         rows: 
-            - field: type
+            - field: fk_paiement
             - field: amount
             - field: ref
             - field: num_paiement
@@ -320,7 +327,7 @@ filters_panels:
         filters: 
             ref: 
             datep: 
-            type: 
+            fk_paiement: 
             amount: 
             id_facture: 
             id_client:
@@ -359,7 +366,7 @@ lists:
         cols: 
             ref: 
             client: 
-            type: 
+            fk_paiement: 
             datep:  
             amount: 
             factures: 

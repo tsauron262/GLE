@@ -1031,9 +1031,11 @@ class DoliValidComm extends CommonObject {
         
         $this->output =  "Nombre de mails envoyés " . $nb_mail_envoyer . "<br/>";
         $this->output .= "Nombre de validations rappelés " . $nb_validation_rappeler . "<br/>";        
-        $this->output .= "Nombre de validations ignorés " . $nb_validation_ignorer . "<br/>";        
+        $this->output .= "Nombre de validations ignorés " . $nb_validation_ignorer . "<br/>";  
+        if(count($errors))
+            $this->output .= "Erreurs " . print_r($errors, 1) . "<br/>";        
         
-        return print_r($errors, 1);
+        return 1;
     }
     
     

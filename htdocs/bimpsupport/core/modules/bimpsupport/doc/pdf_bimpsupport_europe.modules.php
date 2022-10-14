@@ -54,8 +54,8 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 
         // Dimension page pour format A4
         $this->type = 'pdf';
-        $this->page_largeur = 210;
-        $this->page_hauteur = 297;
+        $this->page_largeur = 215;
+        $this->page_hauteur = 302;
         $this->format = array($this->page_largeur, $this->page_hauteur);
         $this->marge_gauche = 18;
         $this->marge_droite = 7;
@@ -388,6 +388,16 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 $this->addCheck($pdf, 144.7, 174.9);
                 
                 
+                
+                //signature client
+                if($sav->getData('id_signature_pc')){
+                    $signatureObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', $sav->getData('id_signature_pc'));
+                    $sign = ($signatureObj->getData('base_64_signature'));
+                    
+                    $pdf->Image($sign, 12, 220, 0, 50);
+                }
+                
+                
                 /* PAGE 1 : À remplir par le technicien */
                 /* Informations sur la validation par le centre de services */
                 $pdf->AddPage();
@@ -437,6 +447,16 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                     $pdf->SetXY('107', '186.5');
                     $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                     $pdf->MultiCell(100, 6, date('d/m/Y H:i:s'), 0, 'L');
+                    
+                    
+                    //signature tech
+                    if($sav->getChildObject('user_tech')->getData('signature_papier')){
+                        $sign = $sav->getChildObject('user_tech')->getData('signature_papier');
+
+                        $pdf->Image($sign, 12, 180, 0, 50);
+                    }
+                    else
+                        $this->error = 'LE technicien n\'a pas de signature';
                 }
 
                 if (method_exists($pdf, 'AliasNbPages'))

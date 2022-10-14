@@ -224,6 +224,11 @@ fields:
         default_value: 0
     photo:
         label: photo
+    day_off:
+        label: Jour OFF
+        type: int
+        values:
+            array: days        
         
 forms:
     light: 
@@ -372,6 +377,7 @@ fields_tables:
             - field: defaultentrepot
             - field: apple_centre
             - field: secteur
+            - field: day_off
         
     notes: 
         title: Notes

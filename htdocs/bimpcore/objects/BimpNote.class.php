@@ -429,10 +429,12 @@ class BimpNote extends BimpObject
                 $msg['is_viewed'] = (int) $c['lu'];
 
                 // Obj
-                $obj = BimpCache::getBimpObjectInstance($c['obj_module'], $c['obj_name'], (int) $c['id_obj']);
+//                $obj = BimpCache::getBimpObjectInstance($c['obj_module'], $c['obj_name'], (int) $c['id_obj']);
+                $bc = BimpCollection::getInstance($c['obj_module'], $c['obj_name']);
+                $link = $bc->getLink((int) $c['id_obj'], array('modal_view' => 'false'));
 
-                if (BimpObject::objectLoaded($obj)) {
-                    $msg['obj']['nom_url'] = $obj->getLink();
+                if ($link) {
+                    $msg['obj']['nom_url'] = $link;
                 } else {
                     $msg['introuvable'] = $c['obj_module'] . ' ' . $c['obj_name'] . ' ' . $c['id_obj'];
                 }
@@ -462,10 +464,10 @@ class BimpNote extends BimpObject
                 //                $msg['dest']['lastname'] = $dest->getData('lastname');
                 //            }
                 // Destinataire
-                if ($msg['is_user']) {
-                    $dest = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('fk_user_dest'));
-                    $msg['dest']['nom'] = $dest->getData('firstname') . ' ' . $dest->getData('lastname');
-                } elseif ($msg['is_grp'])
+//                if ($msg['is_user']) {
+//                    $dest = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('fk_user_dest'));
+//                    $msg['dest']['nom'] = $dest->getData('firstname') . ' ' . $dest->getData('lastname');
+//                } elseif ($msg['is_grp'])
                     $msg['dest']['nom'] = $note->displayDestinataire(false, true);
             }
             if (count($msg))

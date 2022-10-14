@@ -6677,7 +6677,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= ' onclick="' . $onclick . '"';
             $html .= BimpRender::renderPopoverData('Objets liés par citation');
             $html .= '>';
-            $html .= BimpRender::renderIcon('fas_comments');
+            $html .= BimpRender::renderIcon('fas_hashtag');
             $html .= '</span>';
 
             // Historique objet: 

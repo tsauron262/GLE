@@ -3457,12 +3457,26 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
+    
+    public function processOperationMasseLine($debut = true){
+        $this->procededOperationMasseLine = $debut;
+        if(!$debut){
+            $this->dol_object->fetch_lines();
+            $this->dol_object->update_price();
+            $lines = $this->getLines();
+            foreach ($lines as $line) {
+                $line->hydrateFromDolObject();
+            }
+        }
+    }
 
     public function processRemisesGlobales()
     {
         $errors = array();
 
-        if ($this->isLoaded($errors) && $this->areLinesEditable()) {
+        if ($this->isLoaded($errors) && $this->areLinesEditable() && !$this->processRemisesGlobalesProcessed) {
+            $this->processRemisesGlobalesProcessed = true;
+            $this->processOperationMasseLine();
             $remises = $this->getRemisesGlobales();
             $lines = $this->getLines('not_text');
 
@@ -3505,6 +3519,8 @@ class BimpComm extends BimpDolObject
             foreach ($lines as $line) {
                 $line->checkRemisesGlobales();
             }
+            $this->processOperationMasseLine(false);
+            $this->processRemisesGlobalesProcessed = false;
         }
 
         return $errors;
@@ -4491,10 +4507,12 @@ class BimpComm extends BimpDolObject
 
     public function onChildSave($child)
     {
-        if ($this->isLoaded() && !$this->isDeleting && !static::$dont_check_parent_on_update) {
+        if ($this->isLoaded() && !$this->isDeleting && !static::$dont_check_parent_on_update && !$this->onChildSaveProcessed) {
+            $this->onChildSaveProcessed = true;
             if (is_a($child, 'objectLine')) {
                 $this->processRemisesGlobales();
             }
+            $this->onChildSaveProcessed = false;
         }
         return array();
     }

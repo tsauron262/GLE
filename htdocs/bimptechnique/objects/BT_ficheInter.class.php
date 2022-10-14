@@ -3085,11 +3085,8 @@ class BT_ficheInter extends BimpDolObject
             $changement_horaire = false;
             if (($init_date != $this->getData('datei')) || ($init_time_from != $this->getData('time_from') || $init_time_to != $this->getData('time_to'))) {
                 $changement_horaire = true;
-                $table = 'actioncomm';
-                $where = 'code = \'AC_RDV\' AND fk_element = ' . $this->id . ' AND fk_soc = ' . $this->getData('fk_soc') . ' AND elementtype = \'fichinter\'';
-
-                $id_event = $this->db->getValue($table, 'id', $where);
-
+                
+                $id_event = $this->getEventId();
                 if ($id_event > 0) {
                     $actionComm->fetch($id_event);
                     $actionComm->datep = $dateTime_debut->getTimestamp();
@@ -3113,6 +3110,12 @@ class BT_ficheInter extends BimpDolObject
         }
 
         return $errors;
+    }
+    
+    public function getEventId(){
+        $where = 'code <> \'AC_FICHINTER_VALIDATE\' AND fk_element = ' . $this->id . ' AND elementtype = \'fichinter\'';
+
+        return $this->db->getValue('actioncomm', 'id', $where);
     }
 
     public function delete(&$warnings = [], $force_delete = false)

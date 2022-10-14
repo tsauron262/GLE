@@ -2849,9 +2849,11 @@ class ObjectLine extends BimpObject
             if (!is_null($result) && $result <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Des erreurs sont survenues lors de la mise à jour de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the'));
             } else {
-                $object->fetch_lines();
-                $object->update_price();
-                $this->hydrateFromDolObject();
+                if(!$instance->procededOperationMasseLine){
+                    $object->fetch_lines();
+                    $object->update_price();
+                    $this->hydrateFromDolObject();
+                }
             }
 
             if ($force_update) {

@@ -356,7 +356,7 @@ class BimpNote extends BimpObject
                 $buttons[] = array(
                     'label'   => 'Marquer comme vue',
                     'icon'    => 'fas_envelope-open',
-                    'onclick' => $this->getJsActionOnclick('iAmViewed')
+                    'onclick' => $this->getJsActionOnclick('setAsViewed')
                 );
         }
         return $buttons;

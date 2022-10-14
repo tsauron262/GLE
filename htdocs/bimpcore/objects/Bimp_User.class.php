@@ -13,7 +13,16 @@ class Bimp_User extends BimpObject
         'man'   => 'Homme',
         'woman' => 'Femme'
     );
-
+    public static $days = array(
+        0 => 'Non défini',
+        1 => 'lundi',
+        2 => 'mardi',
+        3 => 'mercredi',
+        4 => 'jeudi',
+        5 => 'vendredi',
+        6 => 'samedi'
+    );
+    
     // Gestion des droits: 
 
     public function canView()
@@ -2051,6 +2060,16 @@ class Bimp_User extends BimpObject
         // L'utilisateur est actif ?
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
         if (!$user->getData('statut'))
+            return 0;
+        
+        // L'utilisateur est-il OFF ?
+        if(is_null($from))
+            $dt = new DateTime();
+        else
+            $dt = new DateTime($from);
+    
+        // SI vrai => le user est en jour OFF
+        if((int) $user->getData('day_off') == (int) $dt->format('N'))
             return 0;
 
 

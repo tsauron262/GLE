@@ -6533,6 +6533,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     public function uploadFile($name, &$errors){
         if (file_exists($_FILES[$name]["tmp_name"])) {
                 $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile');
+                $file->htmlName = $name;
                 $values = array();
                 $values['parent_module'] = $this->module;
                 $values['parent_object_name'] = $this->object_name;

@@ -132,13 +132,15 @@ function prepareFormSubmit($form) {
                     var $input = $(this).find('input[name="' + field_name + '"]');
                     var pad_id = $signatureContainer.data('pad_id');
 
-                    if (pad_id && $input.length) {
+                    if (pad_id && $input.length && bimpSignaturePads[pad_id].toDataURL('image/png').length > 7200) {
                         if (typeof (bimpSignaturePads[pad_id]) !== 'undefined') {
                             $input.val(bimpSignaturePads[pad_id].toDataURL('image/png'));
                         } else {
                             $input.val('');
                         }
                     }
+                    else
+                        $input.remove();
                 } else {
                     switch (data_type) {
                         case 'json':
@@ -628,7 +630,7 @@ function validateForm($form) {
                     var $signatureContainer = $(this).find('.signaturePadContainer');
                     var pad_id = $signatureContainer.data('pad_id');
 
-                    if (pad_id && $input.length) {
+                    if (pad_id && $input.length && parseInt($(this).data('required'))) {
                         if (typeof (bimpSignaturePads[pad_id]) !== 'undefined') {
                             var _data = bimpSignaturePads[pad_id]._data;
                             var size = 0;

@@ -141,6 +141,7 @@ function prepareFormSubmit($form) {
                     }
                     else
                         $input.remove();
+                    
                 } else {
                     switch (data_type) {
                         case 'json':

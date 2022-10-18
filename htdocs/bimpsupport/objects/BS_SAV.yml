@@ -146,8 +146,8 @@ objects:
         delete: 1
         instance:
             bimp_object:
-                module: bimpcore
-                name: BimpFile
+                module: bimpsupport
+                name: BS_SavFile
         list: 
             filters:
                 parent_module: bimpsupport

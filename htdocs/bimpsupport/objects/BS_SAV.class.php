@@ -6367,7 +6367,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     }
 
     public function create(&$warnings = array(), $force_create = false)
-    {
+    {        
         $errors = array();
 
         $client = $this->getChildObject('client');

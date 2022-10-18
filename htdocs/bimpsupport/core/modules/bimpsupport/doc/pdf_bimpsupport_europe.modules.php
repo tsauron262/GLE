@@ -169,7 +169,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 
 
 
-                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/europeSAUV2.pdf');
+                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/europe2020.pdf');
                 $tplidx1 = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx1, 0, 0, 0, 0, true);
                 

@@ -6537,7 +6537,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $values['parent_module'] = $this->module;
                 $values['parent_object_name'] = $this->object_name;
                 $values['id_parent'] = $this->id;
-                $values['file_name'] = $_FILES[$name]['name'];
+                $values['file_name'] = $name.'_'.$_FILES[$name]['name'];
                 $values['is_deletable'] = 1;
 
                 $file->validateArray($values);

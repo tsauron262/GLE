@@ -396,6 +396,10 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                     
                     $pdf->Image($sign, 12, 220, 0, 50);
                 }
+                else{
+                     $this->error = 'Pas de signature client';
+                     return 0;
+                }
                 
                 
                 /* PAGE 1 : À remplir par le technicien */
@@ -450,13 +454,16 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                     
                     
                     //signature tech
-                    if($sav->getChildObject('user_tech')->getData('signature_papier')){
+                    $sign = $sav->getChildObject('user_tech')->getData('signature_papier');
+                    if($sign && strlen($sign) > 10000){
                         $sign = $sav->getChildObject('user_tech')->getData('signature_papier');
 
                         $pdf->Image($sign, 12, 180, 0, 50);
                     }
-                    else
+                    else{
                         $this->error = 'LE technicien n\'a pas de signature';
+                        return 0;
+                    }
                 }
 
                 if (method_exists($pdf, 'AliasNbPages'))

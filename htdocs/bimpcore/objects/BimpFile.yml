@@ -41,7 +41,6 @@ fields:
         type: id_parent
         input: 
             type: hidden
-        required: 1
         search: 
             input: 
                 type: text
@@ -109,7 +108,7 @@ fields:
         user_edit: 1
           
 forms:
-    upload: 
+    upload_light: 
         rows:
             module: 
                 field: parent_module
@@ -127,6 +126,13 @@ forms:
             file_name: 
                 field: file_name
                 label: Nom à donner au fichier
+                
+    default: 
+        extends: upload_light
+        
+    upload: 
+        extends: upload_light
+        rows:
             desc:
                 field: description
             visibility: 
@@ -140,7 +146,7 @@ forms:
                     type: toggle
             in_mails: 
                 field: in_emails
-                  
+        
     public_upload: 
         extends: upload
         rows: 

@@ -141,6 +141,25 @@ objects:
         instance: 
             bimp_object: BS_Sac
             
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpsupport
+                parent_object_name: BS_SAV
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpsupport
+                    parent_object_name: BS_SAV
+            
 associations: 
     propales:
         object: propal
@@ -577,16 +596,18 @@ forms:
             - field: id_ticket
               hidden: 1
             - field: sacs
-            - custom: 1
-              label: Fichier
-              input_name: file
-              input: 
-                  type: file_upload
-            - custom: 1
-              label: Fichier 2
-              input_name: file2
-              input: 
-                  type: file_upload
+            - object: files
+              multiple: 1
+#            - custom: 1
+#              label: Fichier
+#              input_name: file
+#              input: 
+#                  type: file_upload
+#            - custom: 1
+#              label: Fichier 2
+#              input_name: file2
+#              input: 
+#                  type: file_upload
               
     prise_en_charge: 
         rows: 
@@ -650,16 +671,16 @@ forms:
             - field: pword_admin
             - field: sacs
             - field: in_fac_emails_files
-            - custom: 1
-              label: Fichier
-              input_name: file
-              input: 
-                  type: file_upload
-            - custom: 1
-              label: Fichier 2
-              input_name: file2
-              input: 
-                  type: file_upload
+#            - custom: 1 => Pourquoi mettre ça dans le form d'édition du SAV alors qu'il suffit d'aller dans l'onglet "Fichiers" > Ajouter un fichier ?
+#              label: Fichier
+#              input_name: file
+#              input: 
+#                  type: file_upload
+#            - custom: 1
+#              label: Fichier 2
+#              input_name: file2
+#              input: 
+#                  type: file_upload
             - field: name_reseller
             
     public_edit: 

@@ -2631,7 +2631,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $html .= '<div class="bimptheme_menu_extra_sections_title">';
                 $html .= 'Accès rapides SAV';
                 $html .= '</div>';
-                
+
                 foreach ($tabGroupe as $ligne3) {
                     $html .= '<div class="bimptheme_menu_extra_section' . ($ligne3['valeur'] != "Tous" ? ' menu_contenueCache2' : '') . '">';
 
@@ -3009,7 +3009,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if ($id_cond_reglement == 20 && $id_mode_reglement != 2) {
                 $id_cond_reglement = 1;
             }
-            
+
             BimpTools::loadDolClass('comm/propal', 'propal');
             $prop = new Propal($this->db->db);
             $prop->modelpdf = self::$propal_model_pdf;
@@ -6521,29 +6521,30 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if ($this->getData('status') == 0) {
             $this->updateField('date_pc', $this->getData('date_create'));
         }
-        
-        if(!count($errors)){
-            $this->uploadFile ('file', $errors);
-            $this->uploadFile ('file2', $errors);
-        }
+
+//        if (!count($errors)) {
+//            $this->uploadFile('file', $errors);
+//            $this->uploadFile('file2', $errors);
+//        }
 
         return $errors;
     }
-    
-    public function uploadFile($name, &$errors){
+
+    public function uploadFile($name, &$errors)
+    {
         if (file_exists($_FILES[$name]["tmp_name"])) {
-                $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile');
-                $file->htmlName = $name;
-                $values = array();
-                $values['parent_module'] = $this->module;
-                $values['parent_object_name'] = $this->object_name;
-                $values['id_parent'] = $this->id;
-                $values['file_name'] = $name.'_'.$_FILES[$name]['name'];
-                $values['is_deletable'] = 1;
+            $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile');
+            $file->htmlName = $name;
+            $values = array();
+            $values['parent_module'] = $this->module;
+            $values['parent_object_name'] = $this->object_name;
+            $values['id_parent'] = $this->id;
+            $values['file_name'] = $name . '_' . $_FILES[$name]['name'];
+            $values['is_deletable'] = 1;
 
-                $file->validateArray($values);
+            $file->validateArray($values);
 
-                $errors = $file->create();
+            $errors = $file->create();
         }
 
         if (count($errors)) {
@@ -6583,11 +6584,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
             }
         }
-        
-        if(!count($errors)){
-            $this->uploadFile('file', $errors);
-            $this->uploadFile('file2', $errors);
-        }
+
+//        if (!count($errors)) {
+//            $this->uploadFile('file', $errors);
+//            $this->uploadFile('file2', $errors);
+//        }
 
 //        if ($this->getData("id_facture_acompte") > 0 && (int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
 //            $errors[] = 'Facture d\'acompte, impossible de changer de client';

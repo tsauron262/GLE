@@ -54,8 +54,8 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 
         // Dimension page pour format A4
         $this->type = 'pdf';
-        $this->page_largeur = 215;
-        $this->page_hauteur = 302;
+        $this->page_largeur = 210;
+        $this->page_hauteur = 297;
         $this->format = array($this->page_largeur, $this->page_hauteur);
         $this->marge_gauche = 18;
         $this->marge_droite = 7;
@@ -169,7 +169,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 
 
 
-                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/europe2020.pdf');
+                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/europe20202.pdf');
                 $tplidx1 = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx1, 0, 0, 0, 0, true);
                 

@@ -76,6 +76,16 @@ class BContract_contratLine extends BContract_contrat {
         
     }
     
+    public function actionAdminchangeAppartenance(Array $data,string &$success): Array {
+        
+        $errors = $warnings = array();
+        
+        $this->updateField('renouvellement', $data['renouvellement']);
+        
+        return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
+    }
+
+
     public function getListExtraButtons()
     {
         global $user;
@@ -101,6 +111,11 @@ class BContract_contratLine extends BContract_contrat {
                     'label'   => 'ADMIN - Activer le service',
                     'icon'    => 'fas_play',
                     'onclick' => $this->getJsActionOnclick('adminActivateService', array(), array())
+                );
+                $buttons[] = array(
+                    'label'   => 'ADMIN - Cahnge appartenance',
+                    'icon'    => 'fas_play',
+                    'onclick' => $this->getJsActionOnclick('adminchangeAppartenance', array(), array('form_name' => 'newAppartenance'))
                 );
             }
             

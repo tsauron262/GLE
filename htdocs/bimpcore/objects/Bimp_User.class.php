@@ -22,7 +22,7 @@ class Bimp_User extends BimpObject
         5 => 'vendredi',
         6 => 'samedi'
     );
-    
+
     // Gestion des droits: 
 
     public function canView()
@@ -37,7 +37,7 @@ class Bimp_User extends BimpObject
             return 1;
         }
 
-        return 0;
+        return $this->canCreate();
     }
 
     public function canCreate()
@@ -586,6 +586,7 @@ class Bimp_User extends BimpObject
 
         $tabs = array();
 
+        $isUsersAdmin = $this->canCreate();
         $isAdmin = $user->admin;
         $isItself = ($user->id == $this->id);
 
@@ -595,7 +596,7 @@ class Bimp_User extends BimpObject
             'content' => $this->renderView('default', false)
         );
 
-        if ($isAdmin || $isItself) {
+        if ($isAdmin || $isItself || $isUsersAdmin) {
             $tabs[] = array(
                 'id'      => 'params',
                 'title'   => BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Paramètres',
@@ -609,6 +610,9 @@ class Bimp_User extends BimpObject
                     'ajax'          => 1,
                     'ajax_callback' => $this->getJsLoadCustomContent('renderPermsView', '$(\'#perms .nav_tab_ajax_result\')', array(''), array('button' => ''))
                 );
+            }
+
+            if ($isAdmin || $isUsersAdmin) {
                 $tabs[] = array(
                     'id'            => 'groups',
                     'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Groupes',
@@ -2061,15 +2065,15 @@ class Bimp_User extends BimpObject
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
         if (!$user->getData('statut'))
             return 0;
-        
+
         // L'utilisateur est-il OFF ?
-        if(is_null($from))
+        if (is_null($from))
             $dt = new DateTime();
         else
             $dt = new DateTime($from);
-    
+
         // SI vrai => le user est en jour OFF
-        if((int) $user->getData('day_off') == (int) $dt->format('N'))
+        if ((int) $user->getData('day_off') == (int) $dt->format('N'))
             return 0;
 
 
@@ -2151,7 +2155,7 @@ class Bimp_User extends BimpObject
             $data2[] = array('user' => $ln->lastname . ' ' . $ln->firstname, 'nb' => $ln->nb);
         }
 
-        if(count($data) > 0)
+        if (count($data) > 0)
             $boxObj->addCamenbere('', $data);
 
         $boxObj->addList(array('user' => 'Utilisateur', 'nb' => 'Nombre de créations'), $data2);

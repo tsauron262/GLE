@@ -311,6 +311,7 @@ forms:
                   type: signature_pad
                   check_mentions: 
                       callback: getCheckMentions
+              required: 1
             
     sign_dist: 
         title: Signature à distance
@@ -344,6 +345,9 @@ forms:
               input_name: signature
               input: 
                   type: signature_pad
+                  
+              required: 1
+              
                   
     sign_no_scan: 
         title: Marquer signé sans scan du document

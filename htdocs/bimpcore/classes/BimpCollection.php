@@ -6,6 +6,7 @@ class BimpCollection
     public $object = null;
     public $data = array();
     public $active = true;
+    private $fields_sup = array();
 
     // Construction: 
 
@@ -70,6 +71,13 @@ class BimpCollection
     }
 
     // Gestion des données: 
+    
+    public function addFields($fields){
+        if(is_array($fields))
+            $this->fields_sup = BimpTools::merge_array ($this->fields_sup, $fields);
+        else
+            $this->fields_sup[] = $fields;
+    }
 
     public function addItems($ids_list, $needs = array())
     {
@@ -117,6 +125,8 @@ class BimpCollection
             if (!is_array($return_fields)) {
                 $return_fields = array();
             }
+            
+            $return_fields = BimpTools::merge_array($return_fields, $this->fields_sup);
 
             $ref_prop = $this->object->getRefProperty();
             if ($ref_prop && !in_array($ref_prop, $return_fields)) {

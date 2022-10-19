@@ -224,6 +224,15 @@ fields:
         default_value: 0
     photo:
         label: photo
+    day_off:
+        label: Jour OFF
+        type: int
+        values:
+            array: days   
+    signature_papier:
+        label: Signature
+        input: 
+            type: signature_pad
         
 forms:
     light: 
@@ -249,6 +258,7 @@ forms:
             - field: apple_centre
             - field: secteur
             - field: echec_auth
+            - field: signature_papier
             
     export_conges: 
         title: Générer fichier d'export des conges
@@ -372,6 +382,7 @@ fields_tables:
             - field: defaultentrepot
             - field: apple_centre
             - field: secteur
+            - field: day_off
         
     notes: 
         title: Notes

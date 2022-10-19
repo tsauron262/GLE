@@ -24,30 +24,31 @@ class AbstractNotification {
     /**
      * Méthode doit être appelée avec super()
      */
-    constructor (nom) {
+    constructor (id_notification) {
         if (this.constructor == AbstractNotification) {
             throw new Error('La classe abstraite "AbstractNotification" ne peut être instanciée.');
             return;
         }
         this.id_max = 0;
+        this.id_notification = id_notification;
         this.content = [];
-        this.nom = nom;
-        this.dropdown_id = 'dropdown_' + this.nom;
+//        this.nom = nom;
+        this.ptr = 'notificationActive[' + this.id_notification + '].obj';
+        this.dropdown_id = 'dropdown_' + this.id_notification;
         // Aussi dans BimpNotification
 //        this.parent_selector = 'div.dropdown.modifDropdown:last';
         this.parent_selector = 'div.login_block_other';
 //        this.display_notification = true;
-        if(bimp_storage.get(this.nom) === null)
-            bimp_storage.set(this.nom, this.id_max);
+        if(bimp_storage.get(this.id_notification) === null)
+            bimp_storage.set(this.id_notification, this.id_max);
         this.init();
     }
     
     init(an) {
         var instance = this;
-
         // Animation ouverture des notifs
         $('#' + an.dropdown_id).click(function(e) {
-            instance.expand(instance.dropdown_id);
+            an.expand();
             e.stopPropagation();
             
         });
@@ -73,9 +74,41 @@ class AbstractNotification {
         
     }
     
-    expand(dropdown_id) {
+    notificationAction(action, id, data, success){
+        data['actionNotif'] = action;
+        data['id_notification'] = this.id_notification;
+        data['id'] = id;
+        
+        BimpAjax('notificationAction', data, null, {
+            success: function(result, bimpAjax){
+                success(result, bimpAjax);
+            }
+        });
+    }
+    
+    setAsViewed(key, id) {
+        var data = {
+        };
+        
+        var thisClass = this;
+        var success = function (result, bimpAjax) {
+            thisClass.isViewed(key);
+        };
+        
+        this.notificationAction('setAsViewed', id, data, success);
+    }
+            
+ 
+    
+    
+    isViewed(key) {
+            $('div.list_part[key="' + key + '"] span.nonLu').removeClass('nonLu');
+            this.elementRemoved(1);
+    }
+    
+    expand() {
+        var instance = this;
         $(this.parent_selector).find('.bimp_notification_dropdown').each(function() {
-
             // Définition de l'attribut is_open
             if(typeof $(this).attr('is_open') === typeof undefined)
                 $(this).attr('is_open', 0);
@@ -89,7 +122,7 @@ class AbstractNotification {
             }
 
             // Ouverture de la dropdown cliquée si elle n'était pas déjà ouverte
-            if($(this).attr('aria-labelledby') === dropdown_id && was_open === 0) {
+            if($(this).attr('aria-labelledby') === instance.dropdown_id && was_open === 0) {
                 $(this).slideToggle(200);
                 $(this).attr('is_open', 1);
             }
@@ -152,9 +185,9 @@ class AbstractNotification {
                     
                     // Affichage dans la notification
                     if(!is_multiple && id_max_changed) {
-                        var global_id_max = parseInt(bimp_storage.get(this.nom));
+                        var global_id_max = parseInt(bimp_storage.get(this.id_notification));
                         if(global_id_max < this.id_max) {
-                            bimp_storage.set(this.nom, this.id_max);
+                            bimp_storage.set(this.id_notification, this.id_max);
                             this.displayNotification(element.content[i]);
                         }
                     }
@@ -164,15 +197,15 @@ class AbstractNotification {
             }
             
             if (is_multiple && id_max_changed) {
-                    var global_id_max = parseInt(bimp_storage.get(this.nom));
+                    var global_id_max = parseInt(bimp_storage.get(this.id_notification));
                     if(global_id_max < this.id_max) {
-                        bimp_storage.set(this.nom, this.id_max);
+                        bimp_storage.set(this.id_notification, this.id_max);
                         this.displayMultipleNotification(element.content);
                     }
             }
             
             
-            this.elementAdded(nb_unread, this.dropdown_id);
+            this.elementAdded(nb_unread);
             
         }
                 
@@ -241,34 +274,32 @@ class AbstractNotification {
                 ("0" + m.getSeconds()).slice(-2);
     }
     
-    elementAdded(nb_add, dropdown_id) {
-
+    elementAdded(nb_add) {
         // Aucun nouvel élément
         if(nb_add === 0)
             return;
         
-        var span_red = $('a#' + dropdown_id + ' > span.badge.bg-danger');
+        var span_red = $('a#' + this.dropdown_id + ' > span.badge.bg-danger');
         
         
         // Le span existe, on le met à jour
         if(0 < parseInt(span_red.length)) {
-            var nb_old = parseInt($('a#' + dropdown_id + ' > span.badge.bg-danger').html());
+            var nb_old = parseInt($('a#' + this.dropdown_id + ' > span.badge.bg-danger').html());
             span_red.html(nb_add + nb_old);
         }
         
         // Le span n'existe pas, il faut le créer
         else {
-            $('a#' + dropdown_id).append('<span class="badge bg-danger">' + nb_add + '</span>');
+            $('a#' + this.dropdown_id).append('<span class="badge bg-danger">' + nb_add + '</span>');
         }
     }
     
-    elementRemoved(nb_rm, dropdown_id) {
+    elementRemoved(nb_rm) {
         
         // Aucun élément à supprimer
         if(nb_rm === 0)
             return;
-                
-        var span_red = $('a#' + dropdown_id + ' > span.badge.bg-danger');
+        var span_red = $('a#' + this.dropdown_id + ' > span.badge.bg-danger');
         
         // Le span existe, on le met à jour
         if(0 < parseInt(span_red.length)) {
@@ -291,20 +322,20 @@ class AbstractNotification {
         return element.id;
     }
     
-    getBoutonReload(dropdown_id) {
-        return '<span dropdown_id="' + dropdown_id +'" name="reload_notif" class="objectIcon"><i class="fas fa5-redo-alt"></i></span>';
+    getBoutonReload() {
+        return '<span dropdown_id="' + this.dropdown_id +'" name="reload_notif" class="objectIcon"><i class="fas fa5-redo-alt"></i></span>';
     }
     
     reloadNotif() {
         
-        bimp_notification.notificationActive[this.nom].obj.content = [];
-        bimp_notification.notificationActive[this.nom].obj.id_max = 0;
+        bimp_notification.notificationActive[this.id_notification].obj.content = [];
+        bimp_notification.notificationActive[this.id_notification].obj.id_max = 0;
         
         this.emptyNotifs();
         
         // TODO check la suite
 //        this.display_notification = false;
-        bimp_notification.reload(false);
+        bimp_notification.reload(false, this.id_notification);
     }
     
     emptyNotifs() {
@@ -338,7 +369,7 @@ function BimpNotification() {
 
     
 
-    this.reload = function (reiterate = true) {
+    this.reload = function (reiterate = true, id_notification = 0) {
         
         if (!bn.active || bn.processing) {
             bn.iterate();
@@ -360,14 +391,13 @@ function BimpNotification() {
             
             
             for(var i in this.notificationActive) {
-                var notif = {
-                    nom: this.notificationActive[i].obj.nom,
-                    module: this.notificationActive[i].module,
-                    class:  this.notificationActive[i].class,
-                    method: this.notificationActive[i].method,
-                    id_max: this.notificationActive[i].obj.id_max
-                };
-                data.notificationActive.push(notif);
+                if(id_notification == 0 || id_notification == this.notificationActive[i].id_notification){
+                    var notif = {
+                        id_notification: this.notificationActive[i].id_notification,
+                        id_max: this.notificationActive[i].obj.id_max
+                    };
+                    data.notificationActive.push(notif);
+                }
             }
             
             data.date_start = date_start;
@@ -384,8 +414,8 @@ function BimpNotification() {
                     
                     if (result.notifications) {
 //                        console.log(result.notifications);
-                        for (const [nom, value] of Object.entries(result.notifications)) {
-                            eval('bn.notificationActive.' + nom + '.obj.addElement(value);');
+                        for (const [id, value] of Object.entries(result.notifications)) {
+                            eval('bn.notificationActive[' + id + '].obj.addElement(value);');
                         }                     
 
 //                        bn.delay = 0;
@@ -513,10 +543,10 @@ function BimpNotification() {
         // Variable définie coté PHP (actions_bimpcore.class.php)
         this.notificationActive = notificationActive;
 
-        for (const [nom, value] of Object.entries(this.notificationActive)) {
+        for (const [id_notification, value] of Object.entries(this.notificationActive)) {
             var notification = this;
-            $.getScript(DOL_URL_ROOT + '/' + value.module + '/views/js/' + nom + '.js', function() {
-                eval('notification.notificationActive.' + nom + '.obj = new ' + nom + '("' + nom + '");');
+            $.getScript(DOL_URL_ROOT + '/' + value.module + '/views/js/' + value.nom + '.js', function() {
+                eval('notification.notificationActive[' + id_notification + '].obj = new ' + value.nom + '('+value.id_notification+');');
             });
             
         }

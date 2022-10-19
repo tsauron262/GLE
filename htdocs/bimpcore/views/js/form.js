@@ -21,6 +21,10 @@ function addInputEvent(form_id, input_name, event, callback) {
 // Enregistrements ajax des objets:
 
 function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submit) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
     var $resultContainer = $('#' + form_id + '_result');
     var $form = $('#' + form_id);
     if (!$form.length) {
@@ -128,13 +132,16 @@ function prepareFormSubmit($form) {
                     var $input = $(this).find('input[name="' + field_name + '"]');
                     var pad_id = $signatureContainer.data('pad_id');
 
-                    if (pad_id && $input.length) {
+                    if (pad_id && $input.length && bimpSignaturePads[pad_id].toDataURL('image/png').length > 7200) {
                         if (typeof (bimpSignaturePads[pad_id]) !== 'undefined') {
                             $input.val(bimpSignaturePads[pad_id].toDataURL('image/png'));
                         } else {
                             $input.val('');
                         }
                     }
+                    else
+                        $input.remove();
+                    
                 } else {
                     switch (data_type) {
                         case 'json':
@@ -599,6 +606,11 @@ function validateForm($form) {
     var data_missing = false;
     var check = true;
 
+    if ($form.find('.is_reloading').length) {
+        bimp_msg('Un champ est en cours de rechargement. Veuillez attendre que celui-ci soit terminé avant de valider le formulaire', 'warning');
+        return false;
+    }
+
     $form.find('.inputContainer').each(function () {
         var $template = $(this).findParentByClass('subObjectFormTemplate');
         if (!$.isOk($template)) {
@@ -619,7 +631,7 @@ function validateForm($form) {
                     var $signatureContainer = $(this).find('.signaturePadContainer');
                     var pad_id = $signatureContainer.data('pad_id');
 
-                    if (pad_id && $input.length) {
+                    if (pad_id && $input.length && parseInt($(this).data('required'))) {
                         if (typeof (bimpSignaturePads[pad_id]) !== 'undefined') {
                             var _data = bimpSignaturePads[pad_id]._data;
                             var size = 0;
@@ -728,7 +740,6 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
             custom = 1;
         }
 
-//        value = $container.find('[name="' + input_name + '"]').val();
         value = getInputValue($container);
         if (typeof (value) === 'undefined') {
             value = '';
@@ -773,6 +784,9 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         data['form_row'] = $container.data('form_row');
     }
 
+    $container.addClass('is_reloading');
+    checkFormInputsReloads($form);
+
     BimpAjax('loadObjectInput', data, $container, {
         $form: $form,
         $container: $container,
@@ -808,6 +822,9 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
                     setInputEvents($form, $input);
                     $input.change();
                 }
+
+                checkFormInputsReloads($form);
+
                 $('body').trigger($.Event('inputReloaded', {
                     $form: $form,
                     input_name: bimpAjax.input_name,
@@ -816,6 +833,25 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
             }
         }
     });
+}
+
+function checkFormInputsReloads($form) {
+    if (!$.isOk($form)) {
+        console.error('onInputReloadingEnd() : $form invalide');
+        return;
+    }
+
+    var $button = getFormSubmitButton($form);
+
+    if ($.isOk($button)) {
+        if ($form.find('.is_reloading').length) {
+            if (!$button.hasClass('disabled')) {
+                $button.addClass('disabled');
+            }
+        } else {
+            $button.removeClass('disabled');
+        }
+    }
 }
 
 function reloadParentInput($button, input_name, depends_on_fields) {
@@ -960,6 +996,69 @@ function getFieldValue($form, field_name) {
     }
 
     return '';
+}
+
+function getFormSubmitButton($form) {
+    if (!$.isOk($form)) {
+        console.error('getFormSubmitButton() : $form invalide');
+        return null;
+    }
+
+    var $form_container = $form.findParentByClass('object_form_container');
+
+    if (!$.isOk($form_container)) {
+        console.error('getFormSubmitButton() : $form_container non trouvé');
+        return null;
+    }
+
+    if ($form_container.parent().hasClass('panel-body')) {
+        var $panelFooter = $form_container.parent().parent().children('panel-footer');
+
+        if (!$.isOk($panelFooter)) {
+            console.error('getFormSubmitButton() : $panelFooter non trouvé');
+            return null;
+        }
+
+        return $panelFooter.find('.save_object_button');
+    } else {
+        var $modal_content = $form_container.findParentByClass('modal_content');
+
+        if (!$.isOk($modal_content)) {
+            console.error('getFormSubmitButton() : $modal_content absent');
+            return null;
+        }
+
+        var modal_idx = parseInt($modal_content.data('idx'));
+
+        if (!modal_idx) {
+            console.error('getFormSubmitButton() : modal_idx absent');
+            return null;
+        }
+
+        var $modal = $modal_content.findParentByClass('modal-content');
+        if (!$.isOk($modal)) {
+            console.error('getFormSubmitButton() : $modal non trouvé');
+            return null;
+        }
+
+        var $modalFooter = $modal.find('.modal-footer');
+        if (!$.isOk($modalFooter)) {
+            console.error('getFormSubmitButton() : $modalFooter non trouvé');
+            return null;
+        }
+
+        var $buttons = $modalFooter.find('.set_action_button.modal_' + modal_idx);
+        if ($buttons.length) {
+            return $buttons;
+        }
+
+        $buttons = $modalFooter.find('.save_object_button.modal_' + modal_idx);
+        if ($buttons.length) {
+            return $buttons;
+        }
+    }
+
+    return null;
 }
 
 // Traitements des inputs: 
@@ -2586,6 +2685,8 @@ function onFormLoaded($form) {
     if (!$form.length) {
         return;
     }
+
+    checkFormInputsReloads($form);
 
     if (!parseInt($form.data('loaded_event_processed'))) {
         $form.data('loaded_event_processed', 1);
@@ -4250,6 +4351,7 @@ function BimpInputHashtags() {
                     val = bih.$curInput.html();
                 }
 
+                val = val.replace("\n", "<br/>");
                 if (/^(.* )?#(.*)$/.test(val)) {
                     var newValBegin = val.replace(/^(.* )?#(.*)$/, '$1');
                     newValBegin += '{{' + bih.curValue + '}} ';
@@ -4259,6 +4361,8 @@ function BimpInputHashtags() {
                     if (newValEnd) {
                         newValEnd = ' ' + newValEnd;
                     }
+                    newValBegin = newValBegin.replace("<br/>", "\n");
+                    newValEnd = newValEnd.replace("<br/>", "\n");
 
                     if (inputTag === 'input' || inputTag === 'textarea') {
                         bih.$curInput.val(newValBegin + newValEnd);
@@ -4475,7 +4579,7 @@ function BimpInputHashtags() {
                 // Input ou textarea classique: 
                 $input.keyup(function (e) {
                     var text = $(this).val();
-
+                    text = text.replace("\n", ' ');
                     // Si un hashtag vient d'être frappé:
                     if (/^(.* )?#( .*)?$/.test(text)) {
                         bih.openModal($(this));

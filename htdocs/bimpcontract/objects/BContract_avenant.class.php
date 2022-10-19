@@ -58,7 +58,7 @@ class BContract_avenant extends BContract_contrat {
             $icon = "arrow-down";
         }
 
-        $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($total).'€</strong>';
+        $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($total).' € HT</strong>';
 
         $html .= '</strong>';
 

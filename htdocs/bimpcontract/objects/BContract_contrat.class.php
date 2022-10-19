@@ -507,22 +507,36 @@ class BContract_contrat extends BimpDolObject
 
     public function getTmsArray()
     {
-        $fis = BimpCache::getBimpObjectObjects('bimptechnique', 'BT_ficheInter', array('fk_contrat' => $this->id));
         $tms_in_contrat = 0;
         $tms_out_contrat = 0;
-
-        foreach ($this->getListFi() as $ficheInter) {
-            $childrenFiche = $ficheInter->getChildrenList("inters");
-            foreach ($childrenFiche as $id_child) {
-                $child = $ficheInter->getChildObject('inters', $id_child);
-                $duration = $child->getData('duree');
-                if ($child->getData('id_line_contrat') || $child->getData('type') == 5 || $ficheInter->getData(('new_fi')) < 1) {
-                    $tms_in_contrat += $duration;
-                } else {
-                    $tms_out_contrat += $duration;
-                }
+        
+        
+        $lines = BimpCache::getBimpObjectObjects('bimptechnique', 'BT_ficheInter_det', ['p.fk_contrat' => $this->id], 'id', 'asc', array('p' => array(
+                'table' => 'fichinter',
+                'on'    => 'p.rowid = a.fk_fichinter',
+                'alias' => 'p'
+            )));
+        foreach($lines as $child){
+            $duration = $child->getData('duree');
+            if ($child->getData('id_line_contrat') || $child->getData('type') == 5) {
+                $tms_in_contrat += $duration;
+            } else {
+                $tms_out_contrat += $duration;
             }
         }
+
+//        foreach ($this->getListFi() as $ficheInter) {
+//            $childrenFiche = $ficheInter->getChildrenList("inters");
+//            foreach ($childrenFiche as $id_child) {
+//                $child = $ficheInter->getChildObject('inters', $id_child);
+//                $duration = $child->getData('duree');
+//                if ($child->getData('id_line_contrat') || $child->getData('type') == 5 || $ficheInter->getData(('new_fi')) < 1) {
+//                    $tms_in_contrat += $duration;
+//                } else {
+//                    $tms_out_contrat += $duration;
+//                }
+//            }
+//        }
 
         return (object) Array(
                     'in'  => $tms_in_contrat,
@@ -562,7 +576,8 @@ class BContract_contrat extends BimpDolObject
     {
         $html = "";
 
-        $fis = $this->getListFi();
+//        $fis = $this->getListFi();
+        $fis = BimpCache::getBimpObjectList('bimptechnique', 'BT_ficheInter', ['fk_contrat' => $this->id]);
         $in_out_tms = $this->getTmsArray();
         $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
         $total_fis = 0;
@@ -3678,7 +3693,10 @@ class BContract_contrat extends BimpDolObject
         if ($this->isLoaded()) {
             $instance = BimpCache::findBimpObjectInstance('bimpcontract', 'BContract_echeancier', ['id_contrat' => $this->id]);
 
-            $date_1 = new DateTime($instance->getData('next_facture_date'));
+            if($instance && $instance->isLoaded())
+                $date_1 = new DateTime($instance->getData('next_facture_date'));
+            else
+                $date_1 = new DateTime();
 
             $date_2 = new DateTime($this->displayRealEndDate("Y-m-d"));
 //            if ($date_1->format('Y-m-d') == $this->getData('date_start')) {
@@ -3727,6 +3745,10 @@ class BContract_contrat extends BimpDolObject
     {
         return $this->getTotal($this->getData('current_renouvellement'));
     }
+    
+    public function getDureeInitial(){
+        return ($this->getData('duree_mois') / ($this->getData('current_renouvellement')+1));
+    }
 
     public function getTotal($renouvellement)
     {
@@ -3749,13 +3771,14 @@ class BContract_contrat extends BimpDolObject
         $total = 0;
 
         $filters = [
-            'statut'        => 2,
             'type'          => 1,
             'want_end_date' => [
                 'operator' => '>=',
                 'value'    => $now->format('Y-m-d')
             ]
         ];
+        if($idAvenant == 0)//veut le total des valide
+            $filters['statut'] = 2;
 
         $children = $this->getChildrenList('avenant', $filters);
         
@@ -3765,7 +3788,7 @@ class BContract_contrat extends BimpDolObject
             $av = $this->getChildObject('avenant', $id_child);
             $dureePrlong += $av->getNbMois();
             if(!$idAvenant || $idAvenant == $id_child)
-                $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getData('duree_mois') - $dureePrlong);
+                $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getDureeInitial());
         }
 
         return $total;

@@ -203,6 +203,9 @@ lists:
             callback: getListFilters
         
 forms:
+    newAppartenance:
+        row:
+            - field: renouvellement
     default:
         rows:
             - field: rowid

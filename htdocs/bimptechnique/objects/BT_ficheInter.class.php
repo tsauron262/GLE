@@ -773,7 +773,7 @@ class BT_ficheInter extends BimpDolObject
             $reattachment[1] = 'Facture';
         if (!$this->getData('fk_contrat'))
             $reattachment[2] = 'Contrat';
-        if (!count(json_decode($this->getData('commandes'))))
+//        if (!count($this->getData('commandes')))
             $reattachment[3] = 'Commande';
 
         return $reattachment;

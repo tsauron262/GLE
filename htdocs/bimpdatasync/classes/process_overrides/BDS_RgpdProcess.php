@@ -280,33 +280,72 @@ class BDS_RgpdProcess extends BDSProcess
 
     public function initCheckClientsActivity(&$data, &$errors = array())
     {
-        if ((int) $this->getOption('test_one', 0)) {
-            $nb_clients = 1;
-        } else {
-            $where = 'client IN (1,2,3) AND solvabilite_status = 0';
-            if ((int) $this->getOption('null_only')) {
-                $where .= ' AND (date_last_activity IS NULL)'; //OR date_last_activity = \'0000-00-00\')';
-            }
+        if ((int) $this->getOption('null_only')) {
+            $soc_instance = BimpObject::getInstance('bimpcore', 'Bimp_Client');
 
-            $nb_clients = (int) $this->db->getCount('societe', $where, 'rowid');
-        }
-
-        if ($nb_clients) {
-            $pages = array();
-            for ($i = 1; $i <= ceil($nb_clients / 100); $i++) {
-                $pages[] = $i;
-            }
-
-            $data['steps'] = array(
-                'check_clients' => array(
-                    'label'                  => 'Vérification de la dernière activité des clients',
-                    'on_error'               => 'continue',
-                    'elements'               => $pages,
-                    'nbElementsPerIteration' => 1
-                )
+            $filters = array(
+                'client'             => array(
+                    'in' => array(1, 2, 3)
+                ),
+                'solvabilite_status' => 0
             );
+
+            if ((int) $this->getOption('null_only')) {
+//                $filters['date_last_activity'] = 'IS_NULL';
+                $filters['date_last_activity'] = array(
+                    'or_field' => array(
+                        'IS_NULL',
+                        '0000-00-00'
+                    )
+                );
+            }
+
+            $rows = $soc_instance->getList($filters, ((int) $this->getOption('test_one', 0) ? 1 : 0), null, 'rowid', 'ASC');
+            $clients = array();
+
+            if (!empty($rows)) {
+                foreach ($rows as $r) {
+                    $clients[] = (int) $r['rowid'];
+                }
+            }
+
+            if (!empty($clients)) {
+                $data['steps'] = array(
+                    'check_clients' => array(
+                        'label'                  => 'Vérification de la dernière activité des clients',
+                        'on_error'               => 'retry',
+                        'elements'               => $clients,
+                        'nbElementsPerIteration' => 100
+                    )
+                );
+            } else {
+                $data['result_html'] = BimpRender::renderAlerts('Aucun client à traiter', 'warning');
+            }
         } else {
-            $data['result_html'] = BimpRender::renderAlerts('Aucun client à traiter', 'warning');
+            if ((int) $this->getOption('test_one', 0)) {
+                $nb_clients = 1;
+            } else {
+                $where = 'client IN (1,2,3) AND solvabilite_status = 0';
+                $nb_clients = (int) $this->db->getCount('societe', $where, 'rowid');
+            }
+
+            if ($nb_clients) {
+                $pages = array();
+                for ($i = 1; $i <= ceil($nb_clients / 100); $i++) {
+                    $pages[] = $i;
+                }
+
+                $data['steps'] = array(
+                    'check_clients' => array(
+                        'label'                  => 'Vérification de la dernière activité des clients',
+                        'on_error'               => 'retry',
+                        'elements'               => $pages,
+                        'nbElementsPerIteration' => 1
+                    )
+                );
+            } else {
+                $data['result_html'] = BimpRender::renderAlerts('Aucun client à traiter', 'warning');
+            }
         }
     }
 
@@ -368,11 +407,15 @@ class BDS_RgpdProcess extends BDSProcess
 
         switch ($step_name) {
             case 'check_clients':
-                if (isset($this->references[0]) && (int) $this->references[0]) {
-                    $clients = $this->findClientCheckActivity((int) $this->references[0], $errors);
+                if ((int) $this->getOption('null_only')) {
+                    $this->checkClientsActivity($this->references, $errors);
+                } else {
+                    if (isset($this->references[0]) && (int) $this->references[0]) {
+                        $clients = $this->findClientCheckActivity((int) $this->references[0], $errors);
 
-                    if (!empty($clients)) {
-                        $this->checkClientsActivity($clients, $errors);
+                        if (!empty($clients)) {
+                            $this->checkClientsActivity($clients, $errors);
+                        }
                     }
                 }
                 break;
@@ -590,9 +633,7 @@ class BDS_RgpdProcess extends BDSProcess
             $n = ((int) $this->getOption('test_one', 0) ? 1 : 100);
             $rows = $soc_instance->getList($filters, $n, $p, 'rowid', 'ASC');
 
-            if (empty($rows)) {
-                $errors[] = 'Aucun client à traiter trouvé';
-            } else {
+            if (!empty($rows)) {
                 $clients = array();
 
                 foreach ($rows as $r) {
@@ -622,7 +663,7 @@ class BDS_RgpdProcess extends BDSProcess
         $dt_5y = $dt->format('Y-m-d');
 
         $where = 'is_anonymized = 0 AND client IN (1,2,3)';
-        $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity <= \'' . $dt_5y . '\''; // AND date_last_activity != \'0000-00-00\' 
+        $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity > \'0000-00-00\' date_last_activity <= \'' . $dt_5y . '\'';
 
         $rows = $this->db->getRows('societe', $where, ($limit ? $limit : null), 'array', array('rowid'), 'date_last_activity', 'ASC');
 
@@ -828,7 +869,7 @@ class BDS_RgpdProcess extends BDSProcess
             }
 
             if ($origin) {
-//                $this->debug_content .= '<br/>NEW #' . $id_client . ': date: ' . $date_last_activity . ' - Orgine: ' . $origin;
+                $this->debug_content .= '<br/>NEW #' . $id_client . ': date: ' . $date_last_activity . ' - Orgine: ' . $origin;
                 if ($this->db->update('societe', array(
                             'date_last_activity'   => $date_last_activity,
                             'last_activity_origin' => $origin

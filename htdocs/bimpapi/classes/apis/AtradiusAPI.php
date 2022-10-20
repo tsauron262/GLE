@@ -221,7 +221,7 @@ class AtradiusAPI extends BimpAPI {
                 break;
             default:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-                $errors .= $cover_type . " a été refusé<br/>";
+                $errors[] = $cover_type . " a été refusé<br/>";
                 break;
         }
 
@@ -524,7 +524,16 @@ class AtradiusAPI extends BimpAPI {
     
     public function testRequest(&$errors = array(), &$warnings = array()) {
         
-        $this->getMyBuyer(array());
+        $from = new DateTime();
+//        $from->sub(new DateInterval('PT1H')); TODO
+        $from->sub(new DateInterval('P5D'));
+                
+                $filters = array(
+            'buyerRatingUpdatedAfter' => $from->format('Y-m-d\TH:i:s')
+        );
+                
+                
+        $this->getMyBuyer($filters);
 
     }
 

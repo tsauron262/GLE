@@ -48,7 +48,6 @@ class Bimp_Societe extends BimpDolObject
         'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
     );
     public static $anonymization_fields = array('nom', 'name_alias', 'address', 'zip', 'town', 'email', 'skype', 'url', 'phone', 'fax', 'siren', 'siret', 'ape', 'idprof4', 'idprof5', 'idprof6', 'tva_intra');
-    
     private $debug = array();
 
 //    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
@@ -1199,13 +1198,14 @@ class Bimp_Societe extends BimpDolObject
 
         return (int) BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
-    
-    public function getRemainToPay($true_value = false, $round = true, &$debug = ''){
+
+    public function getRemainToPay($true_value = false, $round = true, &$debug = '')
+    {
         $amount = 0;
-        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc'=>$this->id, 'paye'=>0, 'fk_statut' => 1));
-        foreach($facts as $fact){
+        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc' => $this->id, 'paye' => 0, 'fk_statut' => 1));
+        foreach ($facts as $fact) {
             $value = $fact->getRemainToPay($true_value = false, $round = true);
-            $debug .= '<br/>Fact : '.$fact->getLink() . ' '. BimpTools::displayMoneyValue($value);
+            $debug .= '<br/>Fact : ' . $fact->getLink() . ' ' . BimpTools::displayMoneyValue($value);
             $amount += $value;
         }
         return $amount;
@@ -1215,16 +1215,16 @@ class Bimp_Societe extends BimpDolObject
     {
         $encours = 0;
         $first = false;
-        if($debug == ''){
-            $debug = '<h3>Calcul de l\'encours client : '.$this->getLink().'</h3>';
+        if ($debug == '') {
+            $debug = '<h3>Calcul de l\'encours client : ' . $this->getLink() . '</h3>';
             $first = true;
         }
         if ($withOtherSiret && $this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
             $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
-                $debug .= '<br/>Autre clients<br/>';
+            $debug .= '<br/>Autre clients<br/>';
             foreach ($lists as $idO => $obj) {
                 $encoursTmp = $obj->getEncours(false, $debug);
-                $debug .= $obj->getLink().' - '.$encoursTmp.'<br/>';
+                $debug .= $obj->getLink() . ' - ' . $encoursTmp . '<br/>';
                 $encours += $encoursTmp;
             }
         } else {
@@ -1237,20 +1237,18 @@ class Bimp_Societe extends BimpDolObject
 
             $encoursPAYNI = (float) $this->getTotalPaiementsInconnus();
             $encoursDicsount = (float) $this->getAvailableDiscountsAmounts();
-            
-            
-            $encours = $encoursFact - $encoursPAYNI - $encoursDicsount;
-            
-            
-            $debug .= '<br/>Encours du client sur les factures impayée :'.BimpTools::displayMoneyValue($encoursFact);
-            $debug .= '<br/> - Paiment Inconue : '.BimpTools::displayMoneyValue($encoursPAYNI);
-            $debug .= '<br/> - Reduction dispo : '.BimpTools::displayMoneyValue($encoursDicsount);
-        }
-        $debug .= '<br/> Total encours : '.BimpTools::displayMoneyValue($encours);
 
-        if($first){
+            $encours = $encoursFact - $encoursPAYNI - $encoursDicsount;
+
+            $debug .= '<br/>Encours du client sur les factures impayée :' . BimpTools::displayMoneyValue($encoursFact);
+            $debug .= '<br/> - Paiment Inconue : ' . BimpTools::displayMoneyValue($encoursPAYNI);
+            $debug .= '<br/> - Reduction dispo : ' . BimpTools::displayMoneyValue($encoursDicsount);
+        }
+        $debug .= '<br/> Total encours : ' . BimpTools::displayMoneyValue($encours);
+
+        if ($first) {
             $this->debug[] = $debug;
-            BimpDebug::addDebug('divers', 'Calcul de l\'encours', $debug, array('open'=>1)); 
+            BimpDebug::addDebug('divers', 'Calcul de l\'encours', $debug, array('open' => 1));
         }
         return $encours;
     }
@@ -1339,12 +1337,12 @@ class Bimp_Societe extends BimpDolObject
                         $pu -= ($pu * ($r['remise_percent'] / 100));
                     }
 
-                    $pu *= (1 + ($r['tva_tx'] / 100));//PASSAGE EN TTC
+                    $pu *= (1 + ($r['tva_tx'] / 100)); //PASSAGE EN TTC
                     $totLn = (($full_qty - $qty_billed) * $pu);
                     $encours += $totLn;
-                    
-                    if($totLn != 0)
-                    $debug .= '<br/>Commande : <a href="'.DOL_URL_ROOT.'/commande/card.php?id='.$r['id_obj'].'" target="_blanck">'.$r['id_obj'].'</a> ln : '.$r['position'].' ('.($full_qty - $qty_billed) .' X '. BimpTools::displayMoneyValue($pu) . ') = '.BimpTools::displayMoneyValue(($full_qty - $qty_billed) * $pu);
+
+                    if ($totLn != 0)
+                        $debug .= '<br/>Commande : <a href="' . DOL_URL_ROOT . '/commande/card.php?id=' . $r['id_obj'] . '" target="_blanck">' . $r['id_obj'] . '</a> ln : ' . $r['position'] . ' (' . ($full_qty - $qty_billed) . ' X ' . BimpTools::displayMoneyValue($pu) . ') = ' . BimpTools::displayMoneyValue(($full_qty - $qty_billed) * $pu);
                 }
             }
         }
@@ -1491,6 +1489,11 @@ class Bimp_Societe extends BimpDolObject
     public function getContratsList()
     {
         return BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', ['fk_soc' => $this->id], 'id', 'desc');
+    }
+
+    public function getSiret()
+    {
+        return substr($this->getData('siret'), 0, 14);
     }
 
     // Getters array: 
@@ -1868,7 +1871,7 @@ class Bimp_Societe extends BimpDolObject
 
         return 'nc';
     }
-    
+
     public function displayEncoursDetail()
     {
         $this->displayEncoursNonFacture();
@@ -1883,20 +1886,15 @@ class Bimp_Societe extends BimpDolObject
         $debug = '';
 
         $encours = $this->getAllEncoursForSiret(true, false, $debug);
-        
-        
-//        if($encours['factures']['total'] != 0){
-            $html .= '<b>Encours sur factures restant dues</b> : '.BimpTools::displayMoneyValue($encours['factures']['total']).' TTC<br/><br/>';
-//        }
-        
-        
-//        if($encours['commandes']['socs'][$this->id] != 0){
-            $html .= '<b>Encours sur les commandes non facturées</b> : '.BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]).' TTC<br/>';
-//        }
 
-        
+//        if($encours['factures']['total'] != 0){
+        $html .= '<b>Encours sur factures restant dues</b> : ' . BimpTools::displayMoneyValue($encours['factures']['total']) . ' TTC<br/><br/>';
+//        }
+//        if($encours['commandes']['socs'][$this->id] != 0){
+        $html .= '<b>Encours sur les commandes non facturées</b> : ' . BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]) . ' TTC<br/>';
+//        }
 //        $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]).' TTC';
-        
+
 
         if (count($encours['commandes']['socs']) > 1) {
             $html .= '<br/>';
@@ -1924,11 +1922,11 @@ class Bimp_Societe extends BimpDolObject
         }
 
         if ($encours['commandes']['total'] && $encours['factures']['total']) {
-            $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']).' TTC';
+            $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']) . ' TTC';
         }
-        
+
         $this->debug[] = $debug;
-        BimpDebug::addDebug('divers', 'Calcul de l\'encours sur les commandes', $debug, array('open'=>1)); 
+        BimpDebug::addDebug('divers', 'Calcul de l\'encours sur les commandes', $debug, array('open' => 1));
 
         return $html;
     }
@@ -2671,11 +2669,6 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $errors;
-    }
-
-    public function getSiret()
-    {
-        return substr($this->getData('siret'), 0, 14);
     }
 
     public function getCreditSafeLettre($noHtml = false)

@@ -33,7 +33,7 @@ class AbstractNotification {
         this.id_notification = id_notification;
         this.content = [];
 //        this.nom = nom;
-        this.ptr = 'notificationActive.' + this.id_notification + '.obj';
+        this.ptr = 'notificationActive[' + this.id_notification + '].obj';
         this.dropdown_id = 'dropdown_' + this.id_notification;
         // Aussi dans BimpNotification
 //        this.parent_selector = 'div.dropdown.modifDropdown:last';

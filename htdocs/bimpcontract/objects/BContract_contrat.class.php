@@ -3747,7 +3747,24 @@ class BContract_contrat extends BimpDolObject
     }
     
     public function getDureeInitial(){
-        return ($this->getData('duree_mois') / ($this->getData('current_renouvellement')+1));
+        
+        $filters = [
+            'type'          => 1
+        ];
+        $filters['statut'] = 2;
+
+        $children = $this->getChildrenList('avenant', $filters);
+        
+        $dureePrlong = 0;
+
+        foreach ($children as $id_child) {
+            $av = $this->getChildObject('avenant', $id_child);
+            $dureePrlong += $av->getNbMois();
+        }
+        
+        
+        
+        return ($this->getData('duree_mois') / ($this->getData('current_renouvellement')+1)) - $dureePrlong;
     }
 
     public function getTotal($renouvellement)

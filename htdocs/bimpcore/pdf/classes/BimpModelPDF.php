@@ -284,8 +284,8 @@ Abstract class BimpModelPDF
             global $mysoc;
             if ($this->fromCompany->zip != $mysoc->zip || $this->fromCompany->town != $mysoc->town) {
                 $html .= '<span style="font-size: 6px; font-style: italic; color: #5A5959"><br/>';
-                $html .= 'NB: ne pas envoyer de réglement à cette adresse<br/>';
-                $html .= 'mais uniquement à : <b>OLYS 2 rue des Erables</b><br/>';
+                $html .= 'NB: les règlements ne doivent être envoyés qu\'à<br/>';
+                $html .= 'notre siège social : <b>OLYS 2 rue des Erables</b><br/>';
                 $html .= '<b>CS 21055 69760 LIMONEST</b>';
                 $html .= '</span>';
             }

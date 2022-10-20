@@ -221,7 +221,7 @@ class AtradiusAPI extends BimpAPI {
                 break;
             default:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-                $errors .= $cover_type . " a été refusé<br/>";
+                $errors[] = $cover_type . " a été refusé<br/>";
                 break;
         }
 

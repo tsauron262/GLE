@@ -2310,11 +2310,11 @@ class BContract_contrat extends BimpDolObject
         }
         
         // Création signature TODO remettre les conditions
-        elseif($user->rights->contrat->creer and 
+        elseif($user->rights->contrat->creer and $user->admin and 
                     ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_SUP || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUT_WAIT_ACTIVER)) {
 
             $buttons[] = array(
-                'label'   => 'Créer signature DocuSign',
+                'label'   => 'Envoyer via DocuSign',
                 'icon'    => 'fas_signature',
                 'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
                     'form_name' => 'create_signature_docu_sign'

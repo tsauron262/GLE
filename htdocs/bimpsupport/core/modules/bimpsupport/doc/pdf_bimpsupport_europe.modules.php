@@ -381,7 +381,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 $pdf->SetXY('11.5', '153.5');
                 $pdf->setCellHeightRatio(2);
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-                $pdf->MultiCell(188, 1, '                                      ' . $sav->getData('symptomes'), 0, 'L');
+                $pdf->MultiCell(188, 1, '                                      ' . str_replace("\n", ' ', $sav->getData('symptomes')), 0, 'L');
                 $pdf->setCellHeightRatio(1);
                 
                 // Check Avez-vous acheté une extension de garantie tierce pour ce produit
@@ -431,7 +431,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                     $pdf->SetXY('15', '82.5');
                     $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                     $pdf->setCellHeightRatio(1.51);
-                    $pdf->MultiCell(185, 6, '                                  ' . $sav->getData('diagnostic'), 0, 'L');
+                    $pdf->MultiCell(185, 6, '                                  ' . str_replace("\n", ' ', $sav->getData('diagnostic')), 0, 'L');
                     $pdf->setCellHeightRatio(1);
                     
                     // Cette réclamation de réparation vous a-t-elle été envoyée par un revendeur ?

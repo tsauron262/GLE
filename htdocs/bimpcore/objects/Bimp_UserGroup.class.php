@@ -11,6 +11,16 @@ class Bimp_UserGroup extends BimpObject
 
     // Droits user: 
 
+    public function canView()
+    {
+        global $user;
+        if ($user->admin || $user->rights->user->user->lire) {
+            return 1;
+        }
+
+        return $this->canCreate();
+    }
+
     public function canCreate()
     {
         global $user;

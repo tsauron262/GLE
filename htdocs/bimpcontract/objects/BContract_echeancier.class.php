@@ -979,9 +979,12 @@ class BContract_echeancier extends BimpObject {
     
     public function getAmountByMonth() {
         $parentInstance = $this->getParentInstance();
-        $reste_a_payer = $parentInstance->reste_a_payer() / $parentInstance->reste_periode() / $parentInstance->getData('periodicity');
-        
-        return $reste_a_payer;
+        if($parentInstance->reste_periode() > 0){
+            $reste_a_payer = $parentInstance->reste_a_payer() / $parentInstance->reste_periode() / $parentInstance->getData('periodicity');
+
+            return $reste_a_payer;
+        }
+        return 0;
         
     }
     
@@ -1124,7 +1127,7 @@ class BContract_echeancier extends BimpObject {
         
         if($nombrePeriodesComplettes > 0) {
             while($i <= $nombrePeriodesComplettes) {
-                if(!count($periodes['periodes'])) {
+                if(!isset($periodes['periodes']) || !count($periodes['periodes'])) {
                     $haveOtherPeriodes = true;
                     $startDate = $dateStartEcheancier->format('d/m/Y');
                     $startDateForPeriode = $dateStartEcheancier->format('Y-m-d');

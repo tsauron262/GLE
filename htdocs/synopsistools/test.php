@@ -12,68 +12,22 @@ if(!isset($_REQUEST['no_menu']))
 
 
 
-$dir    = '/tmp';
-$files1 = scandir(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/');
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-print_r($files1);
 
-if(isset($_GET['file']))
-    echo '<br/><br/>'.nl2br(file_get_contents(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/'.$_GET['file']));
-die;
+$userd = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', 1);
+$userd = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', 242);
+//$user->fetch(242);
+$userd->fetch(1);
+echo 'millieu<br/>';
+$userd->fetch(242);
+$userd->fetch(1);
+echo 'apr<br/>';
 
-//Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36
-//Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15
-//Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0
-?>
 
-<script>
-    jQuery("document").ready(function(){
-        var src = "https://erp.bimp.fr/b/"+window.location.search.replace("?", "");
-        var ua = navigator.userAgent;
-        if(ua.indexOf("Chrome") == -1 && ua.indexOf("Firefox") == -1){
-            window.location = src;
-            
-            jQuery(".div_iframe").append("Votre navigateur n\'est pas compatible. <a href='"+src+"'>Merci de cliquer ici</a>");
-           
-        }
-        else{
-            var iframe = document.createElement("iframe");
-            iframe.src = src;
-            /* style peut être modifiée */
-            iframe.style["width"] = "100%";
-            iframe.style["min-height"] = "650px";
-            iframe.style["margin-top"] = "0";
-            /* fin style */
-            jQuery(".div_iframe").each(function(){
-                this.appendChild(iframe);
-            });
-        }
-    });
-</script>
-<div class="div_iframe"></div>
+die('fin');
 
-<script>
-    jQuery("document").ready(function(){
-        var src = "https://erp2.bimp.fr/bimpinv01072020//bimpinterfaceclient/client.php?"+window.location.search.replace("?", "");
-        var ua = navigator.userAgent;
-        if(ua.indexOf("Chrome") == -1 && ua.indexOf("Firefox") == -1){
-            window.location = src;
-            
-            jQuery(".div_iframe").append("Votre navigateur n\'est pas compatible. <a href='"+src+"'>Merci de cliquer ici</a>");
-           
-        }
-        else{
-            var iframe = document.createElement("iframe");
-            iframe.src = src;
-            /* style peut être modifiée */
-            iframe.style["width"] = "100%";
-            iframe.style["min-height"] = "650px";
-            iframe.style["margin-top"] = "0";
-            /* fin style */
-            jQuery(".div_iframe").each(function(){
-                this.appendChild(iframe);
-            });
-        }
-    });
-</script>
-<div class="div_iframe"></div>
+
+$cache = BimpCache::$cache_server;
+
+echo $cache->printAll();

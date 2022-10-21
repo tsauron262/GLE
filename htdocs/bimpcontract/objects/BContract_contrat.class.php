@@ -2310,11 +2310,11 @@ class BContract_contrat extends BimpDolObject
         }
         
         // Création signature TODO remettre les conditions
-        elseif($user->rights->contrat->creer and 
+        elseif($user->rights->contrat->creer and $user->admin and 
                     ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_SUP || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUT_WAIT_ACTIVER)) {
 
             $buttons[] = array(
-                'label'   => 'Créer signature DocuSign',
+                'label'   => 'Envoyer via DocuSign',
                 'icon'    => 'fas_signature',
                 'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
                     'form_name' => 'create_signature_docu_sign'
@@ -3747,7 +3747,24 @@ class BContract_contrat extends BimpDolObject
     }
     
     public function getDureeInitial(){
-        return ($this->getData('duree_mois') / ($this->getData('current_renouvellement')+1));
+        
+        $filters = [
+            'type'          => 1
+        ];
+        $filters['statut'] = 2;
+
+        $children = $this->getChildrenList('avenant', $filters);
+        
+        $dureePrlong = 0;
+
+        foreach ($children as $id_child) {
+            $av = $this->getChildObject('avenant', $id_child);
+            $dureePrlong += $av->getNbMois();
+        }
+        
+        
+        
+        return ($this->getData('duree_mois') - $dureePrlong) / ($this->getData('current_renouvellement')+1);
     }
 
     public function getTotal($renouvellement)

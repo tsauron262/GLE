@@ -5792,7 +5792,7 @@ class Bimp_Facture extends BimpComm
             $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', 0, \'soumettreFacture\', {}, ' . $params . ', 500);';
         }
 
-        if (!count($errors) && isset($data['files_compl']) && count($data['files_compl'])) {
+        if (!count($errors) && isset($data['files_compl']) && is_array($data['files_compl']) && count($data['files_compl'])) {
             $api = BimpAPI::getApiInstance('piste');
             $chorus_data = $this->getData('chorus_data');
             foreach ($data['files_compl'] as $idF) {

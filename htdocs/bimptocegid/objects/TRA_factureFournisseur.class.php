@@ -191,7 +191,7 @@
 
                 if($facture->getData('zone_vente') == $this->zoneAchat['UE'] || $facture->getData('zone_vente') == $this->zoneAchat['europe']) {
                     $structure['COMPTE_GENERAL']                = sizing(BimpCore::getConf('autoliquidation_tva_666', null, 'bimptocegid'), 17);
-                    $structure['SENS']                          = sizing($this->getSens(abs(round(20*$TTC / 100))), 1);
+                    $structure['SENS']                          = sizing(($this->sensFacture == 'D') ? 'C' : $this->sensFacture, 1);
                     $structure['MONTANT']                       = sizing(abs(round(20*$TTC / 100)), 20, true);
                     $ecriture .= implode('', $structure) . "\n";
                     $structure['COMPTE_GENERAL']                = sizing(BimpCore::getConf('autoliquidation_tva_711', null, 'bimptocegid'), 17);
@@ -216,7 +216,7 @@
             return $ecriture;
             
         }
-        
+
         private function getTypePiece($type) {
             switch($type) {
                 case 2: return 'AF'; break;

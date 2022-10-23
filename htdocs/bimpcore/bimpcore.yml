@@ -235,4 +235,8 @@ params:
         cat: cache
         type: bool
         def: 0
+    not_decimal_product:
+        label: Pas de decimals pour les produit
+        type: bool
+        def: 1
         

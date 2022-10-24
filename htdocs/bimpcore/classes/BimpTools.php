@@ -1574,6 +1574,9 @@ class BimpTools
                         $value = 0;
                     }
                 }
+                
+                if(is_bool($value))
+                    $value = ($value? 1 : 0);
 
                 if (is_numeric($value)) {
                     if ((int) $value !== 0) {

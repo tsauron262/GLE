@@ -625,6 +625,8 @@ class ValidComm extends BimpObject
                 'in' => array($object, self::OBJ_ALL)
             ),
         );
+        $date = new DateTime();
+        $jourSemaine = $date->format('w');
         
         $filter_pv = '(sur_marge = 0 AND val_min <= ' . $val . ' AND ' . $val . ' <= val_max)';
          
@@ -636,7 +638,15 @@ class ValidComm extends BimpObject
         }
         
         $sql  = BimpTools::getSqlSelect(array('id', 'user', 'val_max'));
-        $sql .= BimpTools::getSqlFrom($this->getTable());
+        $sql .= BimpTools::getSqlFrom($this->getTable(), 
+            array('user' => array(
+                'table' => 'user',
+                'on'    => 'a.user = user.rowid',
+                'alias' => 'user')
+            ));
+        $filters['user.day_off'] = array('operator' => '!=', 'value'    => $jourSemaine);
+        
+        
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= ' AND (only_child=' . self::USER_ASK_ALL;
         if($user_ask->fk_user > 0)
@@ -644,7 +654,7 @@ class ValidComm extends BimpObject
         $sql .= ')';
         $sql .= ' ORDER BY sur_marge DESC, val_min ASC, val_max ASC';
 //        $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
-//        echo($sql);
+//        echo($sql);die;
         $rows = self::getBdb()->executeS($sql, 'array');
         
         

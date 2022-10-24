@@ -257,14 +257,22 @@ class Bimp_CommissionApporteur extends BimpObject
 
         $errors = array();
 
-        if ($line->id_product < 1)
-            return $errors;
+//        if ($line->id_product < 1)
+//            return $errors;
 
         $old_fac_parent = $line->getParentInstance();
 
         $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine');
 
-        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
+        
+        if ($line->id_product > 0){
+            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
+            $label = $prod->getRef();
+        }
+        else{
+            $dol_line = $line->getChildObject('dol_line');
+            $label = $dol_line->getData('description');
+        }
 
         $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
                             'type'     => ObjectLine::LINE_FREE,
@@ -274,7 +282,7 @@ class Bimp_CommissionApporteur extends BimpObject
 
         $new_line->pu_ht = $amount;
         $new_line->qty = $line->qty;
-        $new_line->desc = $old_fac_parent->getRef() . " " . $prod->getRef();
+        $new_line->desc = $old_fac_parent->getRef() . " " . $label;
         $new_line->tva_tx = 20;
 
         if (empty($errors))

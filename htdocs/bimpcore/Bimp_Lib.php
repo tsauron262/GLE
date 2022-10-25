@@ -86,8 +86,8 @@ if (!defined('BIMP_LIB')) {
             }
         }
     }
-    elseif(!defined('PATH_EXTENDS'))
-        define('PATH_EXTENDS', DOL_DOCUMENT_ROOT."/bimpcore/extends/dev/");
+    elseif(!defined('BIMP_EXTENDS_ENTITY'))
+        define('BIMP_EXTENDS_ENTITY', DOL_DOCUMENT_ROOT."/bimpcore/extends/dev/");
 
     if (defined('BIMP_EXTENDS_VERSION')) {
         $dir_version = DOL_DOCUMENT_ROOT . '/bimpcore/extends/versions/' . BIMP_EXTENDS_VERSION . '/';

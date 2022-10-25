@@ -3291,7 +3291,7 @@ class BimpTools
 //            return 1;//unlink($file);
 //    }
 
-    public static function deloqueAll()
+    public static function deloqueAll(&$debloquer = array())
     {
         $i = 0;
         foreach (static::$bloquages as $id => $type) {
@@ -3299,6 +3299,7 @@ class BimpTools
                 BimpCore::addlog('Suppression fichier de lock impossible ' . static::getFileBloqued($type), Bimp_Log::BIMP_LOG_URGENT);
             unset(static::$bloquages[$id]);
             $i++;
+            $debloquer[] = $type;
         }
         return $i;
     }

@@ -338,6 +338,7 @@ fields_tables:
             - field: lastname
             - field: login
             - field: gender
+            
     security:
         title: Securité
         icon: lock
@@ -383,6 +384,7 @@ fields_tables:
             - field: apple_centre
             - field: secteur
             - field: day_off
+              edit: 1
         
     notes: 
         title: Notes

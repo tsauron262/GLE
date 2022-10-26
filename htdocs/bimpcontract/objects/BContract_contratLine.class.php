@@ -76,11 +76,9 @@ class BContract_contratLine extends BContract_contrat {
         
     }
     
-    public function actionAdminchangeAppartenance(Array $data,string &$success): Array {
+    public function adminchangeAppartenance(Array $data,string &$success): Array {
         
         $errors = $warnings = array();
-        
-        $this->updateField('renouvellement', $data['renouvellement']);
         
         return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
     }
@@ -209,6 +207,10 @@ class BContract_contratLine extends BContract_contrat {
             case 'buy_price_ht': return ($rights->can_change_pa) ? 1 : 0; break;
             case 'description': return ($rights->can_change_desc) ? 1 : 0; break;
             case 'qty' : return ($parent->getData('statut') == 0) ? 1 : 0; break;
+            case 'renouvellement': 
+            case 'statut': 
+                return $user-admin; 
+            break;
         }
         
         return 0;

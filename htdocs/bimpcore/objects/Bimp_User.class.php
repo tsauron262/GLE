@@ -13,7 +13,7 @@ class Bimp_User extends BimpObject
         'man'   => 'Homme',
         'woman' => 'Femme'
     );
-    public static $days = array(// de 1 à 7 : jours semaines impaires - de 8 à 14 : jours semaines paires
+    public static $days = array(// de 1 à 6 : jours semaines impaires - de 8 à 13 : jours semaines paires
         1  => 'Lundi (sem. impaires)',
         2  => 'Mardi (sem. impaires)',
         3  => 'Mercredi  (sem. impaires)',
@@ -26,20 +26,6 @@ class Bimp_User extends BimpObject
         11 => 'Jeudi (sem. paires)',
         12 => 'Vendredi (sem. paires)',
         13 => 'Samedi (sem. paires)'
-//        '[0]'            => 'Non défini', // 0
-//        '[1][8]'         => 'Lundi', // 1 
-//        '[2][9]'         => 'Mardi', // 2
-//        '[3][10]'        => 'Mercredi', //3
-//        '[4][11]'        => 'Jeudi', // 4
-//        '[5][12]'        => 'Vendredi', // 5
-//        '[6][13]'        => 'Samedi', // 6
-//        '[8][12]'        => 'Lundi (semaines paires) / vendredi (semaines impaires)', // 7
-//        '[1][12]'        => 'Lundi (semaines impaires) / vendredi (semaines paires)', // 8
-//        '[5][10]'        => 'Mercredi (semaines paires) / vendredi (semaines impaires)', // 9
-//        '[3][12]'        => 'Mercredi (semaines impaires) / vendredi (semaines paires)', // 10
-//        '[6][11]'        => 'Jeudi (semaines paires) / Samedi (semaines impaires)',
-//        '[4][13]'        => 'Jeudi (semaines impaires) / Samedi (semaines paires)',
-//        '[4][11][5][12]' => 'Jeudi et vendredi'
     );
 
     // Gestion des droits: 

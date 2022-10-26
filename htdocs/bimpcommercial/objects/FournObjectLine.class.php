@@ -267,7 +267,7 @@ class FournObjectLine extends ObjectLine
                             if($statut == 0)
                                 $errors[] = 'Le produit ' . $product->getData('ref') . ' est hors achat';
                             else{
-                                if ((int) $product->getData('fk_product_type') === 0) {
+                                if ((int) $product->getData('fk_product_type') === 0 && BimpCore::getConf('not_decimal_product', 1, 'bimpcore')) {
                                     $qty_str = (string) $this->qty;
 
                                     if (preg_match('/.*\..*/', $qty_str)) {

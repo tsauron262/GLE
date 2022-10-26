@@ -1824,7 +1824,7 @@ class Bimp_CommandeFourn extends BimpComm
 //            echo "<pre>";print_r($dataLiv);
 
 //            $name = ($dataLiv['name'] != '' ? $dataLiv['name'] . ' ' : '') . $dataLiv['contact'];
-            $name = $dataLiv['name'];
+            $name = str_replace('&', 'et', $dataLiv['name']);
             $contact = $dataLiv['contact'];
 //            if ($name == "")
 //                $name = "BIMP";
@@ -1894,7 +1894,7 @@ class Bimp_CommandeFourn extends BimpComm
                     $dom->Load($localFile);
                     libxml_use_internal_errors(true);
                     if (!$dom->schemaValidate(DOL_DOCUMENT_ROOT . '/bimpcommercial/ldlc.orders.valid.xsd')) {
-                        $errors[] = 'Ce document est invalide contactez l\'équipe dév';
+                        $errors[] = 'Ce document est invalide contactez l\'équipe dév : '.$localFile;
 
                         BimpCore::addlog('Probléme CML LDLC', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
                             'LIBXML Errors' => libxml_get_errors()

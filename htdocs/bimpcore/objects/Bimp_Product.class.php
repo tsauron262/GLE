@@ -1776,7 +1776,7 @@ class Bimp_Product extends BimpObject
             $html .= BimpRender::renderPopoverData('Stock virtuel');
             $html .= '>';
             $html .= '<span class="' . ($stocks['virtuel'] > 0 ? 'success' : 'danger') . '">';
-            $html .= BimpRender::renderIcon('fas_shipping-timed', 'iconLeft') . $stocks['virtuel'];
+            $html .= BimpRender::renderIcon('fas_hourglass-start', 'iconLeft') . $stocks['virtuel'];
             $html .= '</span>';
             $html .= '</div>';
 

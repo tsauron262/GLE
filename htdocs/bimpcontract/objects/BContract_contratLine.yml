@@ -219,6 +219,8 @@ forms:
             - field: qty
             - field: remise_percent
             - field: buy_price_ht
+            - field: renouvellement
+            - field: statut
             
     add:
         rows:

@@ -225,8 +225,11 @@ fields:
     photo:
         label: photo
     day_off:
-        label: Jour OFF
-        type: int
+        label: Jour(s) OFF
+        type: items_list
+        items_data_type: int
+        items_braces: 1
+        items_sortable: 1
         values:
             array: days   
     signature_papier:
@@ -328,6 +331,10 @@ forms:
                 display_if: 
                     field_name: no_photo
                     show_values: 0
+                    
+    day_off: 
+        rows: 
+            - field: day_off
               
 fields_tables: 
     identity:
@@ -383,8 +390,9 @@ fields_tables:
             - field: defaultentrepot
             - field: apple_centre
             - field: secteur
-            - field: day_off
-              edit: 1
+            - label: Jours off
+              value: 
+                  callback: displayDaysOff
         
     notes: 
         title: Notes

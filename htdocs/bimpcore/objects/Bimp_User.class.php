@@ -13,18 +13,33 @@ class Bimp_User extends BimpObject
         'man'   => 'Homme',
         'woman' => 'Femme'
     );
-    public static $days = array(
-        0 => 'Non défini',
-        1 => 'lundi',
-        2 => 'mardi',
-        3 => 'mercredi',
-        4 => 'jeudi',
-        5 => 'vendredi',
-        6 => 'samedi',
-        7 => 'Lundi (semaines paires) / vendredi (semaines impaires)',
-        8 => 'Lundi (semaines impaires) / vendredi (semaines paires)',
-        9 => 'Mercredi (semaines paires) / vendredi (semaines impaires)',
-        10 => 'Mercredi (semaines impaires) / vendredi (semaines paires)',
+    public static $days = array(// de 1 à 7 : jours semaines impaires - de 8 à 14 : jours semaines paires
+        1  => 'Lundi (sem. impaires)',
+        2  => 'Mardi (sem. impaires)',
+        3  => 'Mercredi  (sem. impaires)',
+        4  => 'Jeudi  (sem. impaires)',
+        5  => 'Vendredi  (sem. impaires)',
+        6  => 'Samedi  (sem. impaires)',
+        8  => 'Lundi (sem. paires)',
+        9  => 'Mardi (sem. paires)',
+        10 => 'Mercredi (sem. paires)',
+        11 => 'Jeudi (sem. paires)',
+        12 => 'Vendredi (sem. paires)',
+        13 => 'Samedi (sem. paires)'
+//        '[0]'            => 'Non défini', // 0
+//        '[1][8]'         => 'Lundi', // 1 
+//        '[2][9]'         => 'Mardi', // 2
+//        '[3][10]'        => 'Mercredi', //3
+//        '[4][11]'        => 'Jeudi', // 4
+//        '[5][12]'        => 'Vendredi', // 5
+//        '[6][13]'        => 'Samedi', // 6
+//        '[8][12]'        => 'Lundi (semaines paires) / vendredi (semaines impaires)', // 7
+//        '[1][12]'        => 'Lundi (semaines impaires) / vendredi (semaines paires)', // 8
+//        '[5][10]'        => 'Mercredi (semaines paires) / vendredi (semaines impaires)', // 9
+//        '[3][12]'        => 'Mercredi (semaines impaires) / vendredi (semaines paires)', // 10
+//        '[6][11]'        => 'Jeudi (semaines paires) / Samedi (semaines impaires)',
+//        '[4][13]'        => 'Jeudi (semaines impaires) / Samedi (semaines paires)',
+//        '[4][11][5][12]' => 'Jeudi et vendredi'
     );
 
     // Gestion des droits: 
@@ -552,6 +567,21 @@ class Bimp_User extends BimpObject
         }
 
         return '';
+    }
+
+    public function displayDaysOff()
+    {
+        $html = $this->displayData('day_off', 'default', false);
+
+        if ($this->canEditField('day_off')) {
+            $html .= '<div style="margin-top: 10px; text-align: right">';
+            $html .= '<span class="btn btn-default" onclick="' . $this->getJsLoadModalForm('day_off', 'Modifier vos jours off') . '">';
+            $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Modifier';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
+        return $html;
     }
 
     // Rendus HTML: 

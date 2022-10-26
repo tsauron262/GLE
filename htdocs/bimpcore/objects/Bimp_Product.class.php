@@ -1771,6 +1771,14 @@ class Bimp_Product extends BimpObject
             $html .= BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . $stocks['commandes'];
             $html .= '</span>';
             $html .= '</div>';
+            
+            $html .= '<div style="display: inline-block; margin-right: 8px" class="bs-popover"';
+            $html .= BimpRender::renderPopoverData('Stock virtuel');
+            $html .= '>';
+            $html .= '<span class="' . ($stocks['virtuel'] > 0 ? 'success' : 'danger') . '">';
+            $html .= BimpRender::renderIcon('fas_shipping-timed', 'iconLeft') . $stocks['virtuel'];
+            $html .= '</span>';
+            $html .= '</div>';
 
 //            $html .= '<div>';
 //            $html .= 'Total réservés: '.$stocks['total_reserves'].'<br/>';

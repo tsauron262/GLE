@@ -23,7 +23,8 @@ class Bimp_User extends BimpObject
         6 => 'samedi',
         7 => 'Lundi (semaines paires) / vendredi (semaines impaires)',
         8 => 'Lundi (semaines impaires) / vendredi (semaines paires)',
-        9 => 'Mercredi (semaines paires) / vendredi (semaines impaires)'
+        9 => 'Mercredi (semaines paires) / vendredi (semaines impaires)',
+        10 => 'Mercredi (semaines impaires) / vendredi (semaines paires)',
     );
 
     // Gestion des droits: 

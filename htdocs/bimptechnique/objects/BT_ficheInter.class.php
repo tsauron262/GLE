@@ -2431,6 +2431,8 @@ class BT_ficheInter extends BimpDolObject
         $this->set('fk_statut', 1);
         $this->set('date_signed', date('Y-m-d H:i:s'));
         $this->set('signed', 1);
+        
+        $errors = $this->update($warnings, true);
 
         return [
             'errors'   => $errors,

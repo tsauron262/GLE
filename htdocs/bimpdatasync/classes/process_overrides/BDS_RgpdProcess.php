@@ -663,10 +663,10 @@ class BDS_RgpdProcess extends BDSProcess
         $dt_5y = $dt->format('Y-m-d');
 
         $where = 'is_anonymized = 0 AND client IN (1,2,3)';
-        $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity > \'0000-00-00\' date_last_activity <= \'' . $dt_5y . '\'';
+        $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity > \'0000-00-00\' AND date_last_activity <= \'' . $dt_5y . '\'';
 
         $rows = $this->db->getRows('societe', $where, ($limit ? $limit : null), 'array', array('rowid'), 'date_last_activity', 'ASC');
-
+        
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 $clients[] = (int) $r['rowid'];
@@ -832,7 +832,7 @@ class BDS_RgpdProcess extends BDSProcess
             if ($date_last_activity === '0000-00-00') {
                 $check_factures = true;
             }
-            
+
 //            $this->debug_content .= '<br/>Client #' . $id_client . ': date: ' . $date_last_activity . ' - Orgine: ' . $origin;
 
             foreach (self::$objects as $type => $params) {
@@ -1497,6 +1497,8 @@ class BDS_RgpdProcess extends BDSProcess
                 $op_options = $options;
                 unset($op_options['delete_drafts']);
                 unset($op_options['delete_files']);
+                unset($op_options['anonymise_clients']);
+                unset($op_options['clients_to_anonymise_limit']);
 
                 $warnings = array_merge($warnings, $op->addAssociates('options', $options));
             }

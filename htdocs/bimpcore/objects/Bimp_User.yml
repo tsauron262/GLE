@@ -232,6 +232,8 @@ fields:
         items_sortable: 1
         values:
             array: days   
+        input: 
+            help: Veuillez ajouter vos jours off pour les semaines paires et impaires.<br/>Si vous avez un seul jours off fixe pour chaque semaine, vous devez donc ajouter le jour correspondant pour les semaines paires puis ajouter celui pour les semaines impaires. 
     signature_papier:
         label: Signature
         input: 

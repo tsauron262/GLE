@@ -1093,7 +1093,7 @@ class BimpCore
         if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
             include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
             $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-            $tab = array("src"=>"GLE-AUTO", "dst"=>$dst, "subj"=>$subject, "txt"=>$msg, "prio"=>20, "test_ferme"=> $test_ferme);
+            $tab = array("src"=>"GLE-AUTO", "dst"=>$dst, "subj"=>$subject, "txt"=>$msg, "prio"=>20, "test_ferme"=> $test_ferme, 'auto' => 1);
             $errors = array_merge($errors, $task->validateArray($tab));
             $errors = array_merge($errors, $task->createIfNotActif());        
         }

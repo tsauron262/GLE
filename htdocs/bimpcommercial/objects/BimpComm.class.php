@@ -236,6 +236,11 @@ class BimpComm extends BimpDolObject
         if ($this->useEntrepot() && !(int) $this->getData('entrepot')) {
             $errors[] = 'Aucun entrepôt associé';
         }
+        else{
+            $entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $this->getData('entrepot'));
+            if($entrepot->getData('statut') == 0)
+                $errors[] = 'L\'entrepot '.$entrepot->getRef().' n\'est plus actif';
+        }
 
         if (!count($errors)) {
             if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande', 'Bimp_Facture'))) {

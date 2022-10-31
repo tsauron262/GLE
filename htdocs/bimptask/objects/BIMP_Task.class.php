@@ -13,7 +13,8 @@ class BIMP_Task extends BimpObject
         'licences@bimp-groupe.net' => "LICENCES", 
         'vols@bimp-groupe.net' => "VOLS", 
         'sms-apple@bimp-groupe.net' => "Code APPLE", 
-        'suivicontrat@bimp-groupe.net' => "Suivi contrat", 
+        'suivicontrat@bimp-groupe.net' => "Suivi contrat",
+        'facturation'                   => "Facturation",
         'other' => 'Autre');
     
     public static $types_manuel = array(
@@ -63,6 +64,7 @@ class BIMP_Task extends BimpObject
         $tasks = $this->getList(array('dst' => $this->getData('dst'), 'src' => $this->getData('src'), 'subj' => $this->getData('subj'), 'txt' => $this->getData('txt'), 'prio' => $this->getData('prio'), 'status' => 0));
         if (count($tasks) == 0)
             parent::create();
+        return array();
     }
     
     public function create(&$warnings = array(), $force_create = false) {

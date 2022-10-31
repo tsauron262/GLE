@@ -3487,7 +3487,7 @@ class Bimp_Client extends Bimp_Societe
             'buyerRatingUpdatedAfter' => $from
         );
         
-        $buyers = $api->getMyBuyer($filters, $errors);
+        $buyers = $api->getMyBuyer2($filters, $errors);
         
         foreach($buyers['data'] as $b) {
             $id_client = (int) self::getBdb()->getValue('societe', 'rowid', 'id_atradius = ' . $b['buyerId']);

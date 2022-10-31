@@ -1,9 +1,9 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpCommAchat.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
 
-class Bimp_CommandeFourn extends BimpComm
+class Bimp_CommandeFourn extends BimpCommAchat
 {
 
     const DELIV_ENTREPOT = 0;

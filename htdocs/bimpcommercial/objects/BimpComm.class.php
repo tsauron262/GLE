@@ -9,6 +9,9 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
+    
+    
+    public static $achat = 0;
 
     public static $dont_check_parent_on_update = false;
     public static $discount_lines_allowed = true;
@@ -2847,8 +2850,10 @@ class BimpComm extends BimpDolObject
             
             if($line->id_product){
                 $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->id_product);
-                if(!$prod->getData('tosell'))
-                $errors[] = 'Le produit '.$prod->getRef().' n\'est plus en vente';
+                if(!static::$achat && !$prod->getData('tosell'))
+                    $errors[] = 'Le produit '.$prod->getRef().' n\'est plus en vente';
+                elseif(static::$achat && !$prod->getData('tobuy'))
+                    $errors[] = 'Le produit '.$prod->getRef().' n\'est plus en achat';
             }
 
             $new_line->validateArray($data);

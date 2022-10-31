@@ -54,6 +54,10 @@ class AtradiusAPI extends BimpAPI {
             'label' => 'Suppression assurance',
             'url' => '/credit-insurance/cover-management/v1/covers',
         ),
+        'decisions'   => array(
+            'label'  => 'Check des décisions',
+            'url'    => '/credit-insurance/cover-management/v1/covers'
+        )
     );
     public static $tokens_types = array(
         'access' => 'Token d\'accès'
@@ -64,6 +68,17 @@ class AtradiusAPI extends BimpAPI {
 
         
         $data = $this->execCurlCustom('getMyBuyer', array(
+            'url_params' => $filters
+                ), $errors);
+
+        return $data;
+    }
+    public function getMyBuyer2($filters, &$errors = array()) {
+        $filters['fromDate'] = $filters['buyerRatingUpdatedAfter'];
+        unset($filters['buyerRatingUpdatedAfter']);
+
+        
+        $data = $this->execCurlCustom('decisions', array(
             'url_params' => $filters
                 ), $errors);
 
@@ -529,11 +544,15 @@ class AtradiusAPI extends BimpAPI {
         $from->sub(new DateInterval('P5D'));
                 
                 $filters = array(
-            'buyerRatingUpdatedAfter' => $from->format('Y-m-d\TH:i:s')
+            'fromDate' => $from->format('Y-m-d\TH:i:s')
         );
                 
                 
-        $this->getMyBuyer($filters);
+        $data = $this->execCurlCustom('decisions', array(
+            'url_params' => $filters
+                ), $errors);
+
+        return $data;
 
     }
 

@@ -2844,6 +2844,12 @@ class BimpComm extends BimpDolObject
             if ($params['inverse_qty']) {
                 $qty *= -1;
             }
+            
+            if($line->id_product){
+                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->id_product);
+                if(!$prod->getData('tosell'))
+                $errors[] = 'Le produit '.$prod->getRef().' n\'est plus en vente';
+            }
 
             $new_line->validateArray($data);
 

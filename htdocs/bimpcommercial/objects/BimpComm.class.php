@@ -39,7 +39,7 @@ class BimpComm extends BimpDolObject
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
     public static $expertise = [
-        0   => "",
+        ''   => "",
         10  => "Arts graphiques",
         20  => "Constructions",
         30  => "Education et Administrations",

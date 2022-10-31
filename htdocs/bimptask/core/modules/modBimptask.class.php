@@ -304,7 +304,7 @@ class modBimptask extends DolibarrModules {
         
         
         
-        $sql[] = 'CREATE TABLE `'.MAIN_DB_PREFIX.'bimp_task` (
+        $sql[] = 'CREATE IF NOT EXIST TABLE `'.MAIN_DB_PREFIX.'bimp_task` (
   `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `src` varchar(127) NOT NULL,
   `dst` varchar(127) NOT NULL,

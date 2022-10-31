@@ -89,7 +89,7 @@ class notif_task extends AbstractNotification {
     isNew(element) {
 
         // Cette tâche concerne directement l'utilisateur connecté
-        if (element.user_type == this.my)
+//        if (element.user_type == this.my)
             return 1;
 
         // Cette tâche est non attribué

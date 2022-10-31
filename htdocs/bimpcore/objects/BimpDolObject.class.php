@@ -598,8 +598,8 @@ class BimpDolObject extends BimpObject
                         $bc->addItems($ids);
                         foreach($ids as $id){
                             $facture_instance = $bc->getObjectInstance((int) $id);
-//                            $facture_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
-                            if ($facture_instance->isLoaded()) {
+//                            $facture_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id);
+                            if ($facture_instance && $facture_instance->isLoaded()) {
                                 $icon = $facture_instance->params['icon'];
                                 $objects[] = array(
                                     'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_instance->getLabel()),

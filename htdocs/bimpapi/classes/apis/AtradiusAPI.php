@@ -452,13 +452,13 @@ class AtradiusAPI extends BimpAPI {
     private function getSuccess($response_code, &$success = '') {
         switch ($response_code) {
             case 200:
-                $success .= "Action réussi<br/>";
+                $success .= "Action réussie<br/>";
                 break;
             case 201:
-                $success .= "Action réussi, assurance créée<br/>";
+                $success .= "Action réussie, assurance créée<br/>";
                 break;
             case 202:
-                $success .= "Action réussi, en attente d'approbation<br/>";
+                $success .= "Action réussie, en attente d'approbation<br/>";
                 break;
         }
     }

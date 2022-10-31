@@ -209,7 +209,7 @@ class BContract_contratLine extends BContract_contrat {
             case 'qty' : return ($parent->getData('statut') == 0) ? 1 : 0; break;
             case 'renouvellement': 
             case 'statut': 
-                return $user-admin; 
+                return $user->admin; 
             break;
         }
         

@@ -663,10 +663,10 @@ class BDS_RgpdProcess extends BDSProcess
         $dt_5y = $dt->format('Y-m-d');
 
         $where = 'is_anonymized = 0 AND client IN (1,2,3)';
-        $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity > \'0000-00-00\' date_last_activity <= \'' . $dt_5y . '\'';
+        $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity > \'0000-00-00\' AND date_last_activity <= \'' . $dt_5y . '\'';
 
         $rows = $this->db->getRows('societe', $where, ($limit ? $limit : null), 'array', array('rowid'), 'date_last_activity', 'ASC');
-
+        
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 $clients[] = (int) $r['rowid'];
@@ -821,7 +821,9 @@ class BDS_RgpdProcess extends BDSProcess
                 $origin = 'Création de la fiche client';
             }
 
-            if ($date_last_activity) {
+            if ($date_last_activity === '0000-00-00 00:00:00') {
+                $date_last_activity = '0000-00-00';
+            } elseif ($date_last_activity) {
                 $date_last_activity = date('Y-m-d', strtotime($date_last_activity));
             } else {
                 $date_last_activity = '0000-00-00';
@@ -830,6 +832,7 @@ class BDS_RgpdProcess extends BDSProcess
             if ($date_last_activity === '0000-00-00') {
                 $check_factures = true;
             }
+
 //            $this->debug_content .= '<br/>Client #' . $id_client . ': date: ' . $date_last_activity . ' - Orgine: ' . $origin;
 
             foreach (self::$objects as $type => $params) {
@@ -865,6 +868,16 @@ class BDS_RgpdProcess extends BDSProcess
                             $origin = 'Création ' . $instance->getLabel('of_the') . ($params['objects_defs_kw'] ? ' {{' . $params['objects_defs_kw'] . ':' . $data['id'] . '}}' : ' #' . $data['id']);
                         }
                     }
+                }
+            }
+
+            if (!$date_last_activity || $date_last_activity == '0000-00-00') {
+                $sql = 'SELECT s.datec FROM ' . MAIN_DB_PREFIX . 'societe s';
+                $sql .= ' WHERE s.rowid = (SELECT MAX(s2.rowid) FROM llx_societe s2 WHERE s2.datec > \'0000-00-00 00:00:00\' AND s2.rowid < ' . $id_client . ')';
+                $result = $this->db->executeS($sql, 'array');
+                if (isset($result[0]['datec']) && $result[0]['datec']) {
+                    $date_last_activity = date('Y-m-d', strtotime($result[0]['datec']));
+                    $origin = 'Date de création estimée de la fiche client (client importé - date de création réelle inconnue)';
                 }
             }
 
@@ -1484,6 +1497,8 @@ class BDS_RgpdProcess extends BDSProcess
                 $op_options = $options;
                 unset($op_options['delete_drafts']);
                 unset($op_options['delete_files']);
+                unset($op_options['anonymise_clients']);
+                unset($op_options['clients_to_anonymise_limit']);
 
                 $warnings = array_merge($warnings, $op->addAssociates('options', $options));
             }

@@ -225,10 +225,15 @@ fields:
     photo:
         label: photo
     day_off:
-        label: Jour OFF
-        type: int
+        label: Jour(s) OFF
+        type: items_list
+        items_data_type: int
+        items_braces: 1
+        items_sortable: 1
         values:
             array: days   
+        input: 
+            help: Veuillez ajouter vos jours off pour les semaines paires et impaires.<br/>Si vous avez un seul jours off fixe pour chaque semaine, vous devez donc ajouter le jour correspondant pour les semaines paires puis ajouter celui pour les semaines impaires. 
     signature_papier:
         label: Signature
         input: 
@@ -328,6 +333,10 @@ forms:
                 display_if: 
                     field_name: no_photo
                     show_values: 0
+                    
+    day_off: 
+        rows: 
+            - field: day_off
               
 fields_tables: 
     identity:
@@ -338,6 +347,7 @@ fields_tables:
             - field: lastname
             - field: login
             - field: gender
+            
     security:
         title: Securité
         icon: lock
@@ -382,7 +392,9 @@ fields_tables:
             - field: defaultentrepot
             - field: apple_centre
             - field: secteur
-            - field: day_off
+            - label: Jours off
+              value: 
+                  callback: displayDaysOff
         
     notes: 
         title: Notes

@@ -1574,9 +1574,9 @@ class BimpTools
                         $value = 0;
                     }
                 }
-                
-                if(is_bool($value))
-                    $value = ($value? 1 : 0);
+
+                if (is_bool($value))
+                    $value = ($value ? 1 : 0);
 
                 if (is_numeric($value)) {
                     if ((int) $value !== 0) {
@@ -1971,6 +1971,18 @@ class BimpTools
         // todo
 
         return $month;
+    }
+
+    public static function getDayOfTwoWeeks()
+    {
+        $day = (int) date('w');
+        $week = (int) date('W');
+
+        if (floor($week / 2) * 2 == $week) { // sem. paire
+            $day += 7;
+        }
+
+        return $day;
     }
 
     // Devises / prix: 
@@ -3131,7 +3143,7 @@ class BimpTools
             $lines = array();
 
             foreach ($backtrace as $idx => $trace) {
-                if(isset($trace['file'])){
+                if (isset($trace['file'])) {
                     $file = str_replace($base_dir, '', $trace['file']);
                     if (!$current_file) {
                         $current_file = $file;
@@ -3159,14 +3171,14 @@ class BimpTools
                         } elseif (is_bool($arg)) {
                             $args .= ((int) $arg ? 'true' : 'false');
                         } elseif (is_array($arg)) {
-                            $args .= print_r($arg,1);
+                            $args .= print_r($arg, 1);
                         } else {
                             $args .= (string) $arg;
                         }
                     }
                 }
 
-                if(isset($trace['line']))
+                if (isset($trace['line']))
                     $line = $trace['line'] . ': ';
 
                 if (isset($trace['class']) && $trace['class']) {

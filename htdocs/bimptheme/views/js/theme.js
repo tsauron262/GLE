@@ -16,7 +16,7 @@
             isInFrame();
             
         new PerfectScrollbar(o, {
-            wheelSpeed: 10,
+            wheelSpeed: 1,
             wheelPropagation: !0,
             minScrollbarLength: 5
         });

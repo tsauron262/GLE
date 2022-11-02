@@ -1505,6 +1505,10 @@ class Bimp_CommandeFourn extends BimpCommAchat
                     $onclick = $this->getJsActionOnclick('validate', $data, array(
                     ));
                     
+                    $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
+                    $msg .= '</span><br/>';
+                    
                     foreach($prodstock as $ref => $infos){
                         $msg .= 'Attention le produit '.$ref.' semble étre en stock : <br/>';
                         foreach($infos as $info){
@@ -1512,9 +1516,6 @@ class Bimp_CommandeFourn extends BimpCommAchat
                         }
                     }
 
-                    $msg .= '<br/><span class="btn btn-default" onclick="' . $onclick . '">';
-                    $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
-                    $msg .= '</span>';
                     $result['errors'][] = $msg;
                 }
             }

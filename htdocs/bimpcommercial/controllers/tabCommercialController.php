@@ -224,9 +224,12 @@ class tabCommercialController extends BimpController {
         foreach($tabNomConfig as $info){
             $obj = BimpObject::getInstance($info[0], $info[1]);
             $list = ListConfig::getUserConfigsArray($user->id, $obj, $info[2], false, $info[3]);
+            $i = 0;
             foreach($list as $id => $nameL){
                 if(stripos($nameL, 'Dash') !== false){
+                    $i++;
                     $list_obj = new BC_ListTable($obj, $info[2], 1, null, str_replace("Dash ", "", $nameL), null, $id);
+                    $list_obj->addIdentifierSuffix('ls'.$i);
                     $html .= $list_obj->renderHtml();
                 }
             }

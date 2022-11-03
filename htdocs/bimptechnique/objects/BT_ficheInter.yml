@@ -546,6 +546,19 @@ forms:
               value: Bonjour, merci de bien vouloir facturer cette fiche d'intervention indépendante d'une commande ou d'un contrat en cours
               input:
                   type: textarea
+                  
+    duplicate:
+        extends: default
+        force_edit: 1
+        rows:
+            date: 
+              field: unset
+              custom: 1
+              label: Date prévu d'intervention
+              input_name: dateDuplicate
+              input:
+                  type: date
+                  multiple: 1
        
 fields_tables:
     infos:

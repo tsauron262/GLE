@@ -48,7 +48,7 @@ class BimpMailLog extends BimpObject
         return null;
     }
     
-    function getLinkFields(){
+    function getLinkFields($with_card = true){
         return array('obj_module', 'obj_name', 'id_obj');
     }
     

@@ -48,6 +48,10 @@ class BimpMailLog extends BimpObject
         return null;
     }
     
+    function getLinkFields(){
+        return array('obj_module', 'obj_name', 'id_obj');
+    }
+    
     function trad($str){
         if(isset(static::$traduc[$str]))
             $str = static::$traduc[$str];
@@ -56,10 +60,12 @@ class BimpMailLog extends BimpObject
     }
     
     function getLink($params = array(), $forced_context = ''): string {
-        $obj = $this->getParentInstance();
-        if($obj){
-            $params['after_link'] = '&open=suivi_mail';
-            return $obj->getLink($params, $forced_context);
+        if($this->getData('obj_module') != ''){
+            $obj = $this->getParentInstance();
+            if($obj){
+                $params['after_link'] = '&open=suivi_mail';
+                return $obj->getLink($params, $forced_context);
+            }
         }
         return parent::getLink($params, $forced_context);
     }

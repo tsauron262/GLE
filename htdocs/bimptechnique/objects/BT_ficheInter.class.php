@@ -2450,10 +2450,14 @@ class BT_ficheInter extends BimpDolObject
         $warnings = [];
 
         $success = 'Dupliquée';
-        foreach($data['dateDuplicate'] as $datei){
-            $data['datei'] = $datei;
-            $errors = BimpTools::merge_array($errors, $this->duplicate($data));
+        if(is_array($data['dateDuplicate'])){
+            foreach($data['dateDuplicate'] as $datei){
+                $data['datei'] = $datei;
+                $errors = BimpTools::merge_array($errors, $this->duplicate($data));
+            }
         }
+        else
+            $errors[] = 'Pas de date séléctionnée';
         return [
             'errors'   => $errors,
             'warnings' => $warnings
@@ -2542,7 +2546,14 @@ class BT_ficheInter extends BimpDolObject
             
             $new_line->set('fk_fichinter', $newParent->id);
             $new_line->set('date', $newParent->getData('datei'));
-
+            
+            $arrived = explode(' ', $new_line->getData('arrived'));
+            if(isset($arrived[1]))
+                $new_line->set('arrived', $this->getData('datei').' '.$arrived[1]);
+            $departure = explode(' ', $new_line->getData('departure'));
+            if(isset($departure[1]))
+                $new_line->set('departure', $this->getData('datei').' '.$departure[1]);
+            
             
 
             $line_errors = $new_line->create($warnings, true);
@@ -2917,7 +2928,7 @@ class BT_ficheInter extends BimpDolObject
         $errors = parent::validatePost();
 
         if (!count($errors)) {
-            if ((int) BimpTools::getValue('signature_set', 0)) {
+            if ((int) BimpTools::getPostFieldValue('signature_set', 0)) {
                 if (!count($this->getChildrenList("inters"))) {
                     $errors[] = "Vous ne pouvez pas faire signer une fiche d'intervention sans intervention enregistrée";
                 }
@@ -3057,17 +3068,17 @@ class BT_ficheInter extends BimpDolObject
                 $actioncomm->punctual = 1;
                 $actioncomm->userownerid = (int) $this->getData('fk_user_tech');
                 $actioncomm->elementtype = 'fichinter';
-                $actioncomm->type_id = BimpTools::getValue('type_planning', 0);
+                $actioncomm->type_id = BimpTools::getPostFieldValue('type_planning', 0);
                 $actioncomm->datep = strtotime($this->getData('datei') . " " . $this->getData('time_from'));
                 $actioncomm->datef = strtotime($this->getData('datei') . " " . $this->getData('time_to'));
                 $actioncomm->socid = $this->getData('fk_soc');
                 $actioncomm->fk_element = $this->id;
                 $actioncomm->create($user);
-
+                $errors = BimpTools::merge_array($errors, BimpTools::getErrorsFromDolObject($actioncomm));
                 // Envoi mail au tech: 
 
                 $tech = $this->getChildObject('user_tech');
-                if (BimpObject::objectLoaded($tech)) {
+                if (!count($errors) && BimpObject::objectLoaded($tech)) {
                     $de = new DateTime($this->getData('datei') . " " . $this->getData('time_from'));
                     $a = new DateTime($this->getData('datei') . " " . $this->getData('time_to'));
 
@@ -3112,7 +3123,7 @@ class BT_ficheInter extends BimpDolObject
         $errors = parent::update($warnings, $force_update);
 
         if (!$this->no_update_process && !count($errors)) {
-            if ((int) BimpTools::getValue('signature_set', 0)) {
+            if ((int) BimpTools::getPostFieldValue('signature_set', 0)) {
                 $this->setSigned($warnings);
             }
 

@@ -3315,7 +3315,7 @@ class Bimp_Client extends Bimp_Societe
                     if($field == 'date_atradius') {
                         $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
                     } else {
-                        if($value > 0)
+                        if($value > 0 || $c->getInitData($field) < 1)
                             $errors = BimpTools::merge_array($errors, $c->set($field, $value));
                         else{
                             $errors = BimpTools::merge_array($errors, $c->set('outstanding_limit_icba', $value));

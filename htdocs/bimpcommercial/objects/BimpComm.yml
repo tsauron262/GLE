@@ -409,6 +409,7 @@ forms:
                 depends_on: fk_soc,is_clone_form
             expertise:
                 field: expertise
+                required: 1
     
     releverFacturation:
         rows:

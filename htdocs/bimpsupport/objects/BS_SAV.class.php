@@ -4870,9 +4870,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         if (count($errors)) {
-            BimpCore::addlog('Echec validation propale SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
-                'Erreurs' => $errors
-            ));
+//            BimpCore::addlog('Echec validation propale SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+//                'Erreurs' => $errors
+//            ));
         }
 
         return array(

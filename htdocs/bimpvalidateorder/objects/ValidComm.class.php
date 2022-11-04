@@ -1043,6 +1043,6 @@ class DoliValidComm extends CommonObject
         if (count($errors))
             $this->output .= "Erreurs " . print_r($errors, 1) . "<br/>";
 
-        return 1;
+        return 0;
     }
 }

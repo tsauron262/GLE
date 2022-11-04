@@ -100,8 +100,10 @@ class Session {
         $time = (hrtime(true)-$this->timeDeb) / 1000000000;
         $_SESSION['time']['erp'.ID_ERP] += $time;
         $timeTot = 0;
-        for($i=0;$i<10;$i++)
-            $timeTot +=$_SESSION['time']['erp'.$i];
+        for($i=0;$i<10;$i++){
+            if(isset($_SESSION['time']['erp'.$i]))
+                $timeTot +=$_SESSION['time']['erp'.$i];
+        }
 //        $sessionData = addslashes($sessionData);
 //        $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, `update`) VALUES ('".$sessionID."', '".$sessionData."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE `data` = '".$sessionData."'");
         

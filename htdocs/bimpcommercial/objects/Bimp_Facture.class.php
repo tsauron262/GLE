@@ -5799,7 +5799,7 @@ class Bimp_Facture extends BimpComm
                 $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $idF);
 
                 $name = $file->getData('file_name') . '.' . $file->getData('file_ext');
-                $id = $api->uploadFile($file->getFileDir(), $name);
+                $id = $api->uploadFile($file->getFileDir(), $name, $errors);
                 if ($id > 0)
                     $chorus_data['pj'][$id] = $file->getData('file_name') . $file->getData('file_ext');
                 else

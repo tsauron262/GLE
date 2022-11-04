@@ -1,9 +1,9 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpCommAchat.class.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
 
-class Bimp_CommandeFourn extends BimpComm
+class Bimp_CommandeFourn extends BimpCommAchat
 {
 
     const DELIV_ENTREPOT = 0;
@@ -1482,7 +1482,46 @@ class Bimp_CommandeFourn extends BimpComm
                 }
                 $result['warnings'] = BimpTools::merge_array($result['warnings'], $result2['warnings']);
             }
+            
+            
+            if(!isset($data['confirm_stock']) || !$data['confirm_stock']){
+                $lines = $this->getLines('not_text');
+                $prodstock = array();
+                foreach ($lines as $line) {
+                    $prod = $line->getChildObject('product');
+                    if($prod && $prod->isLoaded()){
+                        $prod->fetchStocks();
+                        foreach($prod->stocks as $info){
+                            if($info['dispo'] > 0 || $info['virtuel'] > 0){
+                                $btnForce = true;
+                                $prodstock[$prod->getRef()][] = $info;
+                            }
+                        }
+                        
+                    }
+                }
+                if(count($prodstock)){
+                    $data['confirm_stock'] = 1;
+                    $onclick = $this->getJsActionOnclick('validate', $data, array(
+                    ));
+                    
+                    $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
+                    $msg .= '</span><br/>';
+                    
+                    foreach($prodstock as $ref => $infos){
+                        $msg .= 'Attention le produit '.$ref.' semble étre en stock : <br/>';
+                        foreach($infos as $info){
+                            $msg .= $info['entrepot_label'].' dispo '.$info['dispo'].' virtuel '.$info['virtuel'].'<br/>';
+                        }
+                    }
+
+                    $result['errors'][] = $msg;
+                }
+            }
         }
+        
+        
 
         return $result;
     }

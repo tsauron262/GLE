@@ -1388,7 +1388,8 @@ class BimpTools
                 $sql .= ' ' . $matches[1] . ' \'' . $matches[2] . '\'';
             } else {
 //                $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
-                $sql .= ' = \'' . $filter . '\'';
+                global $db;
+                $sql .= ' = \'' . $db->escape($filter) . '\'';
             }
         }
 

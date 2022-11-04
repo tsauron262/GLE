@@ -3315,7 +3315,13 @@ class Bimp_Client extends Bimp_Societe
                     if($field == 'date_atradius') {
                         $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
                     } else {
-                        $errors = BimpTools::merge_array($errors, $c->set($field, $value));
+                        if($value > 0 || $c->getInitData($field) < 1)
+                            $errors = BimpTools::merge_array($errors, $c->set($field, $value));
+                        else{
+                            $errors = BimpTools::merge_array($errors, $c->set('outstanding_limit_icba', $value));
+                            $errors = BimpTools::merge_array($errors, $c->set('outstanding_limit_credit_check', $value));
+                            $errors = BimpTools::merge_array($errors, $c->set('outstanding_limit_atradius', $value));
+                        }
                         $errors = BimpTools::merge_array($errors, $c->update($warnings, true));
                     }
                 }
@@ -3487,7 +3493,7 @@ class Bimp_Client extends Bimp_Societe
             'buyerRatingUpdatedAfter' => $from
         );
         
-        $buyers = $api->getMyBuyer($filters, $errors);
+        $buyers = $api->getMyBuyer2($filters, $errors);
         
         foreach($buyers['data'] as $b) {
             $id_client = (int) self::getBdb()->getValue('societe', 'rowid', 'id_atradius = ' . $b['buyerId']);

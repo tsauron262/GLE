@@ -13,7 +13,10 @@ class BIMP_Task extends BimpObject
         'licences@bimp-groupe.net' => "LICENCES", 
         'vols@bimp-groupe.net' => "VOLS", 
         'sms-apple@bimp-groupe.net' => "Code APPLE", 
-        'suivicontrat@bimp-groupe.net' => "Suivi contrat", 
+        'suivicontrat@bimp-groupe.net' => "Suivi contrat",
+        'facturation'                   => "Facturation",
+        'dispatch@bimp.fr'          => 'Dispatch',
+        'suivicontrat@bimp.fr'      => 'Suivi contrat',
         'other' => 'Autre');
     
     public static $types_manuel = array(
@@ -63,6 +66,7 @@ class BIMP_Task extends BimpObject
         $tasks = $this->getList(array('dst' => $this->getData('dst'), 'src' => $this->getData('src'), 'subj' => $this->getData('subj'), 'txt' => $this->getData('txt'), 'prio' => $this->getData('prio'), 'status' => 0));
         if (count($tasks) == 0)
             parent::create();
+        return array();
     }
     
     public function create(&$warnings = array(), $force_create = false) {
@@ -187,26 +191,48 @@ class BIMP_Task extends BimpObject
         $classRight = $this->getType();
         return $user->rights->bimptask->$classRight->$right;
     }
+    
+    public function getFiltreRightArray($user){
+        $filtre = array();
+        $tabFiltre = self::getFiltreDstRight($user);
+        if (count($tabFiltre[1])){
+            $filtre['dst_par_type'] = array(
+                    'or' => array(
+                        'mode_auto' => array(
+                            'and_fields' => array(
+                                        'auto' => 1, 
+                                        'dst' => array($tabFiltre[0] => $tabFiltre[1])
+                            )
+                        ),
+                        'mode_manu' => array(
+                            'and_fields' => array(
+                                        'auto' => 0, 
+                                        'type_manuel' => array($tabFiltre[0] => $tabFiltre[1])
+                            )
+                    )
+            ));
+        }
+        else
+            $filtre['id'] =array('operator' => '>', 'value' => '0');//toujours vraie
+        return $filtre;
+    }
 
     public function getListFiltre($type = "normal")
     {
         global $user;
         $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes tâches assignées' : ($type == "byMy" ? 'Mes tâches créées' : 'Toutes les tâches')));
         $list->addIdentifierSuffix($type);
-        $tabFiltre = self::getFiltreDstRight($user);
+        
         if($type == 'byMy')
             $list->addFieldFilterValue('user_create', (int) $user->id);
-        elseif (count($tabFiltre[1]) > 0)
-            $list->addFieldFilterValue('fgdg_dst', array(
-                ($type == "my" ? 'and_fields' : 'or') => array(
-                    'dst'           => array(
-                        $tabFiltre[0] => $tabFiltre[1]
-                    ),
-                    'id_user_owner' => $user->id
-                )
-            ));
         elseif ($type == "my")
             $list->addFieldFilterValue('id_user_owner', (int) $user->id);
+        else
+            $list->addFieldFilterValue('fgdg_dst', array(
+                ($type == "my" ? 'and_fields' : 'or') => BimpTools::merge_array(array(
+                    'id_user_owner' => $user->id
+                ), $this->getFiltreRightArray($user))
+            ));
         return $list;
     }
 
@@ -254,7 +280,7 @@ class BIMP_Task extends BimpObject
     
     public static function getTableSqlDroitPasDroit($user){
         $tabDroit = $tabPasDroit = $tabTous = array();
-        foreach (self::$valSrc as $src => $nom) {
+        foreach (self::getTypeArray() as $src => $nom) {
             if ($src != "other") {
                 if ($user->rights->bimptask->$src->read)
                     $tabDroit[] = '' . $src . '';
@@ -448,6 +474,7 @@ class BIMP_Task extends BimpObject
         $nb_my = 0;
         $nb_unaffected = 0;
         
+        global $user;
         
         $tasks['content'] = BimpTools::merge_array(
             // Tâches affectées à l'utilisateur actuel        
@@ -463,7 +490,7 @@ class BIMP_Task extends BimpObject
             )), 'my_task', $nb_my),
         
             // Tâches non affectées
-            self::getNewTasks(array(
+            self::getNewTasks(BimpTools::merge_array(array(
                 'id' => array(
                     'operator' => '>',
                     'value' => $id_max
@@ -473,7 +500,7 @@ class BIMP_Task extends BimpObject
                     'operator' => '<',
                     'value' => 4
                 )
-            ), 'unaffected_task', $nb_unaffected
+            ), $this->getFiltreRightArray($user)), 'unaffected_task', $nb_unaffected
         ));
         
         $tasks['nb_my'] = $nb_my;
@@ -485,7 +512,7 @@ class BIMP_Task extends BimpObject
         
         $tasks = array();
         
-        $max_task_view = 25;
+        $max_task_view = 40;
         $i = $j = 0;
         
         $sql = BimpTools::getSqlSelect(array('id'));

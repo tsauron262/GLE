@@ -9,6 +9,9 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
+    
+    
+    public static $achat = 0;
 
     public static $dont_check_parent_on_update = false;
     public static $discount_lines_allowed = true;
@@ -39,7 +42,7 @@ class BimpComm extends BimpDolObject
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
     public static $expertise = [
-        0   => "",
+        ''   => "",
         10  => "Arts graphiques",
         20  => "Constructions",
         30  => "Education et Administrations",
@@ -233,6 +236,11 @@ class BimpComm extends BimpDolObject
         if ($this->useEntrepot() && !(int) $this->getData('entrepot')) {
             $errors[] = 'Aucun entrepôt associé';
         }
+        else{
+            $entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $this->getData('entrepot'));
+            if($entrepot->getData('statut') == 0)
+                $errors[] = 'L\'entrepot '.$entrepot->getRef().' n\'est plus actif';
+        }
 
         if (!count($errors)) {
             if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande', 'Bimp_Facture'))) {
@@ -247,7 +255,7 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'Client absent';
                 } else {
                     if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0)
-                        $errors[] = 'Type de tier obligatoire';
+                        $errors[] = 'Type de tiers obligatoire';
 
                     // Module de validation activé
                     if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
@@ -2843,6 +2851,14 @@ class BimpComm extends BimpDolObject
 
             if ($params['inverse_qty']) {
                 $qty *= -1;
+            }
+            
+            if($line->id_product){
+                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->id_product);
+                if(!static::$achat && !$prod->getData('tosell'))
+                    $errors[] = 'Le produit '.$prod->getRef().' n\'est plus en vente';
+                elseif(static::$achat && !$prod->getData('tobuy'))
+                    $errors[] = 'Le produit '.$prod->getRef().' n\'est plus en achat';
             }
 
             $new_line->validateArray($data);

@@ -181,7 +181,7 @@ class InterStatementPDF extends BimpDocumentPDF
         if(isset($this->want_contrat) && is_object($this->want_contrat)){
             $vendue = $this->want_contrat->getDurreeVendu();
         }
-        $html = $this->getTotauxRowsHtml($this->total_time, $vendue);
+        $html = $this->getTotauxRowsHtmlCustom($this->total_time, $vendue);
         $this->writeContent($html);
         
         $inters_valid_nok = $intervention->getList(BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '=', 'value' => 0))));
@@ -234,7 +234,7 @@ class InterStatementPDF extends BimpDocumentPDF
         
     }
 
-    public function getTotauxRowsHtml($realisee, $vendue = 0)
+    public function getTotauxRowsHtmlCustom($realisee, $vendue = 0)
     {
         $html = "";
         $reste = 0;

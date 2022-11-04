@@ -537,7 +537,7 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-        add_form_name: default
+#        add_form_name: default
         delete_btn: 1
         page_btn: 1
         modal_view: default

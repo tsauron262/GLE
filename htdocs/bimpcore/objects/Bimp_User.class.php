@@ -375,7 +375,17 @@ class Bimp_User extends BimpObject
                 ))
             )
         );
-
+        $buttons[] = array(
+            'classes'     => array('btn', 'btn-default'),
+            'label'       => 'Ajouter un utilisateur',
+            'icon_before' => 'fas_plus-circle',
+            'attr'        => array(
+                'type'    => 'button',
+                'onclick' => "document.location.replace('".DOL_URL_ROOT."/user/card.php?leftmenu=users&action=create');"
+            )
+        );
+        
+        
         //        global $user;
         //
         //        if ($user->admin) {

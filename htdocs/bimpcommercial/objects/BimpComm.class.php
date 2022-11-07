@@ -610,7 +610,8 @@ class BimpComm extends BimpDolObject
 
         // Message facturation: 
         // SERV19-FPR
-        $msg = "Bonjour, merci de bien vouloir facturer cette commande.";
+        
+        $msg = "Bonjour, merci de bien vouloir facturer cette commande*\\n\\n*si vous souhaitez une facturation partielle, veuillez modifier ce texte et indiquer précisément vos besoins\\n\\nIMPORTANT : toute facturation anticipée de produits ou services non livrés doit rester exceptionnelle, doit être justifiée par une demande écrite du client (déposer ce justificatif en pièce jointe) et doit être systématiquement signalée à notre comptabilité @Compta Fournisseurs Olys et à @David TEIXEIRA RODRIGUES";
         foreach ($this->getLines() as $line) {
             $prod = $line->getChildObject('product');
             if (stripos($prod->getData('ref'), 'SERV19-FPR') !== false) {

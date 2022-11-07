@@ -337,6 +337,19 @@ forms:
     day_off: 
         rows: 
             - field: day_off
+            
+    add_to_groupe: 
+        rows: 
+            - custom: 1
+              label: Groupe
+              input_name: id_usergroup
+              data_type: id
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      callback: getUserGroupsArray
+                      
               
 fields_tables: 
     identity:

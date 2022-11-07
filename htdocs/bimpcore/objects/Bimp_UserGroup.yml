@@ -148,10 +148,15 @@ lists:
 
     user: 
         extends: default
+        objects_change_reload: Bimp_User
         joins: 
             - table: usergroup_user
               on: ugu.fk_usergroup = a.rowid
               alias: ugu
+        sort_field: nom
+        sort_way: asc
+        header_buttons: 
+            callback: getUserListHeaderButtons
         extra_btn: 
             callback: getUserListExtraButtons
 

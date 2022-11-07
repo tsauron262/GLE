@@ -3,7 +3,7 @@
 class Bimp_User extends BimpObject
 {
 
-    public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $status_list = array(
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
@@ -94,6 +94,7 @@ class Bimp_User extends BimpObject
         switch ($action) {
             case 'addRight':
             case 'removeRight':
+            case 'addToGroup':
                 if ((int) $user->rights->user->user->creer || $user->admin) {
                     return 1;
                 }
@@ -112,7 +113,7 @@ class Bimp_User extends BimpObject
 
     public function isActionAllowed($action, &$errors = [])
     {
-        if (in_array($action, array('addRight', 'removeRight'))) {
+        if (in_array($action, array('addRight', 'removeRight', 'addToGroup'))) {
             if (!$this->isLoaded($errors)) {
                 return 0;
             }
@@ -1930,6 +1931,40 @@ class Bimp_User extends BimpObject
 
         if ($nOk) {
             $success = $nOk . ' paramètre(s) enregistré(s) avec succès';
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionAddToGroup($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_group = (int) BimpTools::getArrayValueFromPath($data, 'id_usergroup', 0);
+        if (!$id_group) {
+            $errors[] = 'Veuillez sélectionner un groupe';
+        } else {
+            $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
+
+            if (BimpObject::objectLoaded($group)) {
+                if (!$this->db->insert('usergroup_user', array(
+                            'entity'       => 1,
+                            'fk_user'      => $this->id,
+                            'fk_usergroup' => $id_group
+                        ))) {
+
+                    $errors[] = 'Echec de l\'ajout de l\'utilisateur ' . $this->getName() . ' au groupe "' . $group->getName() . '" - ' . $this->db->err();
+                } else {
+                    $success = 'Ajout de l\'utilisateur ' . $this->getName() . ' au groupe ' . $group->getName() . ' effectué avec succès';
+                }
+            } else {
+                $errors[] = 'Le groupe #' . $id_group . ' n\'existe pas';
+            }
         }
 
         return array(

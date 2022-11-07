@@ -96,6 +96,31 @@ class Bimp_UserGroup extends BimpObject
         return $buttons;
     }
 
+    public function getUserListHeaderButtons()
+    {
+        $buttons = array();
+
+        $id_user = 0;
+        if (BimpTools::getValue('fc', '') === 'user') {
+            $id_user = (int) BimpTools::getValue('id', 0);
+
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+            if (BimpObject::objectLoaded($user)) {
+                if ($user->isActionAllowed('addToGroup') && $user->canSetAction('addToGroup')) {
+                    $buttons[] = array(
+                        'label'   => 'Ajouter l\'utilisateur à un groupe',
+                        'icon'    => 'fas_plus-circle',
+                        'onclick' => $user->getJsActionOnclick('addToGroup', array(), array(
+                            'form_name' => 'add_to_groupe'
+                        ))
+                    );
+                }
+            }
+        }
+
+        return $buttons;
+    }
+
     public function getActionsButtons()
     {
         $buttons = array();

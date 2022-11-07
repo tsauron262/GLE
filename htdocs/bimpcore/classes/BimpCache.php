@@ -1944,14 +1944,6 @@ class BimpCache
         $cache_key .= '_array';
 
         if (!isset(self::$cache[$cache_key])) {
-
-            // Ne pas faire ça, c'est géré via getCacheArray(): 
-//            if ($include_empty)
-//                self::$cache[$cache_key] = array("" => "");
-//            else
-//                self::$cache[$cache_key] = array();
-
-
             $rows = self::getBdb()->getRows('usergroup', '1', null, 'object', array('rowid', 'nom'), 'nom', 'asc');
             if (!is_null($rows)) {
                 $icon = BimpRender::renderIcon('fas_users', 'iconLeft');

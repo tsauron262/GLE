@@ -167,6 +167,7 @@ forms:
               label: Texte
               input_name: content
               input: 
+                  auto_expand: 1
                   hashtags: 1
                   type: textarea
                   rows: 3

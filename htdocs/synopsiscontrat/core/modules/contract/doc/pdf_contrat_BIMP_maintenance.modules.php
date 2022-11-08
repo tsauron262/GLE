@@ -380,7 +380,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->setDrawColor(255, 255, 255);
             $pdf->setColor('fill', 236, 147, 0);
             $pdf->setTextColor(255, 255, 255);
-            $pdf->Cell($W, 5, 'N° Série', 1, null, 'C', true);
+            $pdf->Cell($W, 7, 'N° Série', 1, null, 'C', true);
             $pdf->setDrawColor(255, 255, 255);
             $pdf->setColor('fill', 255, 255, 255);
             $pdf->setTextColor(0, 0, 0);
@@ -455,6 +455,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
 //            $chaine_description = str_replace("<p>", '', $chaine_description);
 //            $chaine_description = str_replace("</p>", '', $chaine_description);
             $pdf->SetMargins(36, 10,10);
+            $pdf->Cell('1', 7, ' ', 1, null, 'C', true);
             $pdf->writeHTML($chaine_description, false, false, true, false, ''); 
             $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
             
@@ -462,9 +463,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             
             
             $pdf->setDrawColor(220, 220, 220);
-            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", "B", 'L');
-            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", "T", 'L');
+            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'L');
+            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'L');
             $pdf->setDrawColor(255, 255, 255);
+            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L');
         }
     }
 

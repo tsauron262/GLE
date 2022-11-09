@@ -427,6 +427,7 @@ forms:
                 field: libelle
             expertise:
                 field: expertise
+                edit: 1
             datef: 
                 field: datef
                 show: 

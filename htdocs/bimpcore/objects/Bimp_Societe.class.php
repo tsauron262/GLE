@@ -3823,12 +3823,12 @@ class Bimp_Societe extends BimpDolObject
         if ($limit > -1 && $limit != $this->getInitData('outstanding_limit'))
             $this->set('outstanding_limit', $limit);
 
-        if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
-//            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
-//                return array("Code compta particulier, le type de tiers ne peut être différent.");
-            if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
-                return array("Code compta entreprise, le type de tiers ne peut être différent.");
-        }
+//        if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
+////            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
+////                return array("Code compta particulier, le type de tiers ne peut être différent.");
+////            if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
+////                return array("Code compta entreprise, le type de tiers ne peut être différent.");
+//        }
 
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;

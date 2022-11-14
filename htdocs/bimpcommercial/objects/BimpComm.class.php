@@ -488,6 +488,8 @@ class BimpComm extends BimpDolObject
             $result = $this->db->getRows('societe_rib', '`fk_soc` =' . $client->id, null, 'object', null, 'default_rib', 'DESC');
 
             foreach ($result as $row) {
+                if($row->default_rib)
+                    unset($return[0]);
                 $return[$row->rowid] = $row->label;
             }
         }

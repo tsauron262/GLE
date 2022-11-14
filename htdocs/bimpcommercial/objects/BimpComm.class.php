@@ -2655,7 +2655,7 @@ class BimpComm extends BimpDolObject
         $lines_errors = $this->checkLines();
 
         if (count($lines_errors)) {
-            return BimpTools::getMsgFromArray($lines_errors, 'Copie impossible');
+            return array(BimpTools::getMsgFromArray($lines_errors, 'Copie impossible'));
         }
 
         if ($this->field_exists('replaced_ref')) {

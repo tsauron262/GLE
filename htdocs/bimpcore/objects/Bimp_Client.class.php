@@ -1623,6 +1623,8 @@ class Bimp_Client extends Bimp_Societe
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'client', 1, null, 'Commandes du client "' . $client_label . '"');
 //                $list->addFieldFilterValue('fk_soc', (int) $this->id);
                 
+                $list->setAddFormValues(array('fields' => array('fk_soc' => $this->id)));
+                
                 $list->addFieldFilterValue('or_client',array(
                     'or' => array(
                         'fk_soc' => $this->id,

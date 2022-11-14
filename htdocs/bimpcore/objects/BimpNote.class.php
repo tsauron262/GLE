@@ -528,7 +528,8 @@ class BimpNote extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'reloadNote();'
         );
     }
 
@@ -586,7 +587,8 @@ class BimpNote extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'reloadNote();'
         );
     }
 

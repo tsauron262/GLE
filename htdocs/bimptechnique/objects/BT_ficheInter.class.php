@@ -82,7 +82,7 @@ class BT_ficheInter extends BimpDolObject
     const TYPE_SIGN_ELEC = 3;
 
     public static $types_signature = array(
-        0                      => array('label' => '', 'icon' => '', 'classes' => array('')),
+        0                      => array('label' => ' ', 'icon' => '', 'classes' => array('')),
         self::TYPE_SIGN_DIST   => array('label' => 'Signature à distance', 'icon' => 'fas_file-download'),
         self::TYPE_SIGN_PAPIER => array('label' => 'Signature papier', 'icon' => 'fas_file-signature'),
         self::TYPE_SIGN_ELEC   => array('label' => 'Signature électronique', 'icon' => 'fas_signature')

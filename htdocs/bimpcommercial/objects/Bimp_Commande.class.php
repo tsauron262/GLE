@@ -3209,6 +3209,19 @@ class Bimp_Commande extends BimpComm
                         ));
                     }
                     $this->updateField('invoice_status', $new_status);
+                    
+                    $idComm = $this->getIdCommercial();
+                    $mail = BimpTools::getMailOrSuperiorMail($idComm);
+
+                    $infoClient = "";
+                    $client = $this->getChildObject('client');
+                    if (is_object($client) && $client->isLoaded()) {
+                        $infoClient = " du client " . $client->getLink();
+                    }
+
+
+                    if (isset($mail) && $mail != "")
+                        mailSyn2("Status facturation", $mail, null, 'Bonjour le status facturation de votre commande ' . $this->getLink() . $infoClient . ' est  '.$this->displayData('invoice_status'));
                 }
             }
 

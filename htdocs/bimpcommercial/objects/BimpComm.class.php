@@ -4960,7 +4960,7 @@ class BimpComm extends BimpDolObject
 
     public function validate()
     {
-        if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente')) {
+        if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente') && $this->getData('fk_statut') == 0) {
             $zone = self::BC_ZONE_FR;
             if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) || $this->getData('entrepot') == '164' || $this->getInitData('entrepot') == '164'
                     ) && (((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) || (int) $this->getData('entrepot') !== (int) $this->getInitData('entrepot'))) {

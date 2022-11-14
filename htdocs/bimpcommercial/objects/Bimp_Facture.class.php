@@ -61,12 +61,14 @@ class Bimp_Facture extends BimpComm
     public function canCreate()
     {
         global $user;
-        return $user->rights->facture->creer;
+        return $user->admin || $user->rights->facture->creer;
     }
 
     public function canEdit()
     {
-        return $this->canCreate();
+        return 1; // nécessaire pour permettre l'édition de certains champs selon les droits défini dans canEditField(). 
+        // Par défaut l'édition des champs renvoi sur canCreate()
+//        return $this->canCreate();
     }
 
     public function canDelete()
@@ -189,6 +191,9 @@ class Bimp_Facture extends BimpComm
         global $user;
 
         switch ($field_name) {
+            case 'expertise':
+                return 1;
+
             case 'date_next_relance':
             case 'relance_active':
                 if ($user->admin || $user->rights->bimpcommercial->admin_relance_individuelle) {
@@ -220,10 +225,14 @@ class Bimp_Facture extends BimpComm
                 break;
 
             case 'litige':
-                return (int) $user->rights->bimpcommercial->admin_recouvrement or (int) $user->admin;
+                return (int) $user->rights->bimpcommercial->admin_recouvrement || (int) $user->admin;
+
+            case 'logs':
+                return parent::canEditField($field_name);
         }
 
-        return parent::canEditField($field_name);
+        // Par défaut: 
+        return $this->canCreate();
     }
 
     // Getters booléens:
@@ -1434,9 +1443,9 @@ class Bimp_Facture extends BimpComm
 
         if ($this->canSetAction('classifyPaid') && $this->canSetAction('bulkEditField')) {
             $actions[] = array(
-                'label'     => 'Classer envoyé par email pour chorus',
-                'icon'      => 'fas_file-pdf',
-                'action'    => 'classifyExportEmailChorusMasse'
+                'label'  => 'Classer envoyé par email pour chorus',
+                'icon'   => 'fas_file-pdf',
+                'action' => 'classifyExportEmailChorusMasse'
             );
         }
 
@@ -2756,19 +2765,20 @@ class Bimp_Facture extends BimpComm
 
         return $html;
     }
-    
-    public function displayClientsCommandes(){
-        if($this->isLoaded()){
+
+    public function displayClientsCommandes()
+    {
+        if ($this->isLoaded()) {
             $return = array();
             $list = getElementElement('commande', 'facture', null, $this->id);
-            foreach($list as $data){
+            foreach ($list as $data) {
                 $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $data['s']);
-                if($comm->getData('fk_soc') != $this->getData('fk_soc')){
+                if ($comm->getData('fk_soc') != $this->getData('fk_soc')) {
                     $return[$comm->getData('fk_soc')] = $comm->displayData('fk_soc');
                 }
             }
             return implode('<br/>', $return);
-    //        die;
+            //        die;
         }
     }
 
@@ -4126,7 +4136,7 @@ class Bimp_Facture extends BimpComm
 
             // A ce stade on est censé être sûr que la facture sera bien validée (Cette méthode doit être appellée par le dernier trigger) 
             // Le statut doit être à 1 pour les vérifs qui suivent. 
-            $this->set('fk_statut', 1); 
+            $this->set('fk_statut', 1);
             $this->checkIsPaid();
             $this->checkRemisesGlobales();
             $this->checkMargin(true);
@@ -5176,7 +5186,7 @@ class Bimp_Facture extends BimpComm
         }
         return $errors;
     }
-    
+
     public function actionClassifyExportEmailChorusMasse($data, &$success)
     {
         $errors = array();

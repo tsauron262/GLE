@@ -642,6 +642,7 @@ class BimpCore
     {
         $versions = self::getConf('bimpcore_version');
 
+        $bdb = BimpCache::getBdb();
         if (!is_array($versions) || empty($versions)) {
             if ((string) $versions) {
                 $versions = json_decode($versions, 1);
@@ -651,7 +652,6 @@ class BimpCore
 
             if (empty($versions)) {
                 // On vérifie valeur en base:
-                $bdb = BimpCache::getBdb();
                 $value = $bdb->getValue('bimpcore_conf', 'value', '`name` = \'bimpcore_version\'');
 
                 if (!(string) $value) {

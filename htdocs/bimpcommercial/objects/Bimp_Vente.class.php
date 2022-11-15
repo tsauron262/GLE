@@ -439,7 +439,8 @@ Preferred Field
                                     }
 
                                     $soc_data = $this->db->getRow('societe', 'rowid = ' . (int) $fac_data['fk_soc'], array('fk_typent', 'fk_pays', 'nom', 'address', 'town', 'zip'), 'array');
-
+                                    $soc_data['zip'] = substr($soc_data['zip'], 0, 5);
+                                    
                                     if ($secteur == 'E' || in_array((int) $fac_data['fk_soc'], array(527782, 8786))) {
                                         $customer_code = '1R';
                                         //                                } elseif ($secteur == 'BP') {
@@ -469,7 +470,7 @@ Preferred Field
 //                                        print_r($line_data);die;
                                         $file_str .= '"' . implode('";"', array(
                                                     $shipTo, // A
-                                                    substr($prod_ref, 0, 30), // B
+                                                    substr($prod_ref, 0, 15), // B
                                                     '',
                                                     '',
                                                     ($line_data['qty'] >= 0 ? $line_data['qty'] : 0), // E

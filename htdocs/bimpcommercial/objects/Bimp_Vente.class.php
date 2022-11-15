@@ -293,7 +293,7 @@ Preferred Field
                             if ((int) $prod['stock'] || (int) $prod['stock_showroom']) {
                                 $file_str .= implode(';', array(
                                             $shipTo, // A
-                                            substr($prod_ref, 0, 30), // B
+                                            substr($prod_ref, 0, 15), // B
                                             '',
                                             '',
                                             $prod['stock'], // E

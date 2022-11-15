@@ -31,10 +31,10 @@ class BIMP_Task extends BimpObject
     public static $valStatus = array(0 => array('label' => "En cours", 'classes' => array('error')), 4 => array('label' => "Terminé", 'classes' => array('info')));
     public static $valPrio = array(0 => array('label' => "Normal", 'classes' => array('info')), 20 => array('label' => "Urgent", 'classes' => array('error')));
 
-    public function areNotesEditable()
-    {
-        return ($this->can("edit") && $this->isEditable());
-    }
+//    public function areNotesEditable()
+//    {
+//        return ($this->can("edit") && $this->isEditable());
+//    }
 
     public function fetch($id, $parent = null)
     {

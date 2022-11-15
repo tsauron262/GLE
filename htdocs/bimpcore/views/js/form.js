@@ -4351,32 +4351,44 @@ function BimpInputHashtags() {
                     val = bih.$curInput.html();
                 }
 
-                val = val.replace("\n", "<br/>");
-                if (/^(.* )?#(.*)$/.test(val)) {
-                    var newValBegin = val.replace(/^(.* )?#(.*)$/, '$1');
-                    newValBegin += '{{' + bih.curValue + '}} ';
-
-                    var newValEnd = val.replace(/^(.* )?#(.*)$/, '$2');
-
-                    if (newValEnd) {
-                        newValEnd = ' ' + newValEnd;
-                    }
-                    newValBegin = newValBegin.replace("<br/>", "\n");
-                    newValEnd = newValEnd.replace("<br/>", "\n");
+//                val = val.replace("\n", "<br/>");
+                var reg = new RegExp(/^(.* )?#(.*)$/, 'm');
+                if (reg.test(val)) {
+                    
+                    valN = val.replace(reg, '$1'+'{{' + bih.curValue + '}} '+'$2');
+                    
+                    
+                    
+//                    var newValBegin = val.replace(reg, '$1');
+//                    console.log(newValBegin);
+//                    newValBegin += '{{' + bih.curValue + '}} ';
+//
+//                    var newValEnd = val.replace(reg, '$2');
+//
+//                    if (newValEnd) {
+//                        newValEnd = ' ' + newValEnd;
+//                    }
+//                    valN = val.replace('$0', newValBegin + newValEnd);
+//                    
+//                    console.log(newValEnd);
+//                    newValBegin = newValBegin.replace("<br/>", "\n");
+//                    newValEnd = newValEnd.replace("<br/>", "\n");
 
                     if (inputTag === 'input' || inputTag === 'textarea') {
-                        bih.$curInput.val(newValBegin + newValEnd);
+                        bih.$curInput.val(valN);
                     } else {
-                        bih.$curInput.html(newValBegin + newValEnd);
+                        bih.$curInput.html(valN);
                     }
 
-                    bih.curInputCursorPos = newValBegin.length;
+//                    bih.curInputCursorPos = newValBegin.length;
 
                     bih.modalOpen = false;
                     bih.$modal.modal('hide');
 
                     bih.reset();
                 }
+                else
+                    console.log('trouve pas #');
             }
         }
     };
@@ -4579,9 +4591,10 @@ function BimpInputHashtags() {
                 // Input ou textarea classique: 
                 $input.keyup(function (e) {
                     var text = $(this).val();
-                    text = text.replace("\n", ' ');
+//                    text = text.replace("\n", ' ');
                     // Si un hashtag vient d'être frappé:
-                    if (/^(.* )?#( .*)?$/.test(text)) {
+                    const regex2 = new RegExp(/^(.* )?#( .*)?$/, 'm');
+                    if (regex2.test(text)) {
                         bih.openModal($(this));
                     }
                 });

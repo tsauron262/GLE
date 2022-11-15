@@ -2062,7 +2062,10 @@ class BimpController
         $html .= '</div>';
         $html .= '<div id="bihCurValueLabel"></div>';
         $html .= '<div id="bihValidateMsg" class="info">';
-        $html .= 'Tapez "Entrée" pour valider';
+        $html .= 'Vous pouvez tapez "Entrée" pour valider';
+        $html .= '<br/><span class="btn btn-primary" onclick="BIH.validate()">';
+        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+        $html .= '</span>';
         $html .= '</div>';
 
         $html .= '<div id="bihAddHastagFormContainer">';

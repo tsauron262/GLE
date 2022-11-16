@@ -8,7 +8,7 @@ llxHeader();
 
 $lien = '/synopsistools/git_pull.php?no_menu=1&nolog=ujgjhkhkfghgkvgkfdkshfiohf5453FF454FFDzelef';
 
-$array = array("erp1", "erp2", "erp3", "erp4", "erp5");
+$array = array("erp1", "erp2", "erp3", "erp4", "erp5", "erp6");
 
 
 foreach($array as $erp){

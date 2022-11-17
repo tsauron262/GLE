@@ -261,7 +261,7 @@ class Bimp_Propal extends BimpComm
                 $linked_contrat = getElementElement('propal', 'contrat', $this->id);
                 foreach ($linked_contrat as $ln) {
                     $ct = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $ln['d']);
-                    if ($ct->getData('statut') != BContract_contrat::CONTRAT_STATUT_ABORT) {
+                    if ($ct->getData('statut') != BContract_contrat::CONTRAT_STATUT_ABORT && $ct->getData('statut') != BContract_contrat::CONTRAT_STATUS_REFUSE) {
                         $errors[] = 'Un contrat existe déjà pour cette proposition commerciale';
                         return 0;
                     }

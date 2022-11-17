@@ -92,7 +92,7 @@ foreach($constAGarder as $const){
         eval('$val = '.$const.";");
         if(!is_int($val))
             $val ='"'.$val.'"';
-        $conf .= "\n".'define("'.$const.'", '. $val .');';
+        $conf .= "\n".'define(\''.$const.'\', '. $val .');';
     }
     else {
         die($const ."non définit");

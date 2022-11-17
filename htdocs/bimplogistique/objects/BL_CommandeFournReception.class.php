@@ -24,6 +24,12 @@ class BL_CommandeFournReception extends BimpObject
     {
         return 1;
     }
+    
+    public function canCreate()
+    {
+        global $user;
+        return (int) ($user->rights->fournisseur->commande->creer || $user->rights->fournisseur->commande->receptionner);
+    }
 
     public function canEditStockOut()
     {

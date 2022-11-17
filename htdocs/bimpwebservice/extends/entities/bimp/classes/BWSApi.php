@@ -7,17 +7,22 @@ require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/classes/BWSApi.php';
 BWSApi::$requests['setDemandeFinancementStatus'] = array(
     'desc'   => 'Enregistrer le nouveau statut d\'une demande de financement',
     'params' => array(
-        'id_propal'  => array('label' => 'ID devis', 'data_type' => 'id', 'required' => 1),
-        'id_demande' => array('label' => 'ID demande de financement', 'data_type' => 'id', 'required' => 1),
-        'status'     => array('label' => 'Nouveau statut', 'data_type' => 'int', 'required' => 1),
-        'note'       => array('label' => 'Note', 'data_type' => 'text', 'default' => '')
+        'demande_target' => array('label' => 'Destinataire de la demande de financement', 'required' => 1),
+        'id_demande'     => array('label' => 'ID demande de financement', 'data_type' => 'id', 'required' => 1),
+        'type_origine'   => array('label' => 'Type de pièce d\'origine', 'required' => 1),
+        'id_origine'     => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
+        'status'         => array('label' => 'Nouveau statut', 'data_type' => 'int', 'required' => 1),
+        'note'           => array('label' => 'Note', 'data_type' => 'text', 'default' => '')
     )
 );
-BWSApi::$requests['sendContratFinancement'] = array(
-    'desc'   => 'Envoi du contrat de financement',
+BWSApi::$requests['sendDocFinancement'] = array(
+    'desc'   => 'Envoi d\'un document PDF de financement',
     'params' => array(
-        'id_propal'        => array('label' => 'ID devis', 'data_type' => 'id', 'required' => 1),
+        'demande_target'   => array('label' => 'Destinataire de la demande de financement', 'required' => 1),
         'id_demande'       => array('label' => 'ID demande de financement', 'data_type' => 'id', 'required' => 1),
+        'type_origine'     => array('label' => 'Type de pièce d\'origine', 'required' => 1),
+        'id_origine'       => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
+        'doc_type'         => array('label' => 'Type de document'),
         'doc_content'      => array('label' => 'Fichier', 'required' => 1),
         'signature_params' => array('label' => 'Paramètres signature', 'data_type' => 'json', 'required' => 1)
     )
@@ -33,15 +38,41 @@ class BWSApi_ExtEntity extends BWSApi
         $response = array();
 
         if (!count($this->errors)) {
-            $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $this->getParam('id_propal', 0));
+//            $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $this->getParam('id_propal', 0));
+//
+//            if (!BimpObject::objectLoaded($propal)) {
+//                $this->addError('UNFOUND', 'Devis #' . $this->getParam('id_propal', 0) . ' non trouvé');
+//            } else {
+//                if ((int) $propal->getData('id_df_prolease') !== (int) $this->getParam('id_demande', 0)) {
+//                    $this->addError('INVALID_PARAMETER', 'Le devis indiqué ne correspond pas à la demande de financement #' . $this->getParam('id_demande', 0));
+//                } else {
+//                    $errors = $propal->setDemandeFinancementStatus((int) $this->getParam('status', 0), $this->getParam('note', ''));
+//
+//                    if (count($errors)) {
+//                        $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+//                    }
+//                }
+//            }
 
-            if (!BimpObject::objectLoaded($propal)) {
-                $this->addError('UNFOUND', 'Devis #' . $this->getParam('id_propal', 0) . ' non trouvé');
+            $bcdf_class = '';
+            BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
+            $origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
+
+            if (!BimpObject::objectLoaded($origine)) {
+                $this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
             } else {
-                if ((int) $propal->getData('id_df_prolease') !== (int) $this->getParam('id_demande', 0)) {
-                    $this->addError('INVALID_PARAMETER', 'Le devis indiqué ne correspond pas à la demande de financement #' . $this->getParam('id_demande', 0));
+                $bcdf = BimpCache::findBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', array(
+                            'obj_module' => $origine->module,
+                            'obj_name'   => $origine->object_name,
+                            'id_obj'     => $origine->id,
+                            'target'     => $this->getParam('demande_target', ''),
+                            'id_ext_df'  => (int) $this->getParam('id_demande', 0)
+                ));
+
+                if (!BimpObject::objectLoaded($bcdf)) {
+                    $this->addError('UNFOUND', 'Aucune demande de financement trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
                 } else {
-                    $errors = $propal->setDemandeFinancementStatus((int) $this->getParam('status', 0), $this->getParam('note', ''));
+                    $errors = $bcdf->setNewStatusFromTarget($this->getParam('status', ''), $this->getParam('note', ''));
 
                     if (count($errors)) {
                         $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
@@ -53,20 +84,30 @@ class BWSApi_ExtEntity extends BWSApi
         return $response;
     }
 
-    protected function wsRequest_sendContratFinancement()
+    protected function wsRequest_sendDocFinancement()
     {
         $response = array();
 
         if (!count($this->errors)) {
-            $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $this->getParam('id_propal', 0));
+            $bcdf_class = '';
+            BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
+            $origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
 
-            if (!BimpObject::objectLoaded($propal)) {
-                $this->addError('UNFOUND', 'Devis #' . $this->getParam('id_propal', 0) . ' non trouvé');
+            if (!BimpObject::objectLoaded($origine)) {
+                $this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
             } else {
-                if ((int) $propal->getData('id_df_prolease') !== (int) $this->getParam('id_demande', 0)) {
-                    $this->addError('INVALID_PARAMETER', 'Le devis indiqué ne correspond pas à la demande de financement #' . $this->getParam('id_demande', 0));
+                $bcdf = BimpCache::findBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', array(
+                            'obj_module' => $origine->module,
+                            'obj_name'   => $origine->object_name,
+                            'id_obj'     => $origine->id,
+                            'target'     => $this->getParam('demande_target', ''),
+                            'id_ext_df'  => (int) $this->getParam('id_demande', 0)
+                ));
+
+                if (!BimpObject::objectLoaded($bcdf)) {
+                    $this->addError('UNFOUND', 'Aucune demande de financement trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
                 } else {
-                    $errors = $propal->onContratFinReceived($this->getParam('doc_content', ''), $this->getParam('signature_params', array()));
+                    $errors = $bcdf->onDocFinReceived($this->getParam('doc_type', '') . '_fin', $this->getParam('doc_content', ''), $this->getParam('signature_params', array()));
 
                     if (count($errors)) {
                         $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));

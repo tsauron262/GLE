@@ -2,49 +2,19 @@
 
 class BF_DemandeSource extends BimpObject
 {
-    /*
-     * Données pièces origine: 
-     *  array(
-     *      'id' => ID,
-     *      'ref' => Ref,
-     *      'extra_data' => extra data : array('label' => '...', 'value' => VALUE)
-     *      )
-     *  
-     * Données client: 
-     *  array(
-     *      'id' => ID,
-     *      'ref' => Ref,
-     *      'nom' => Nom,
-     *      'is_company' => 1/0
-     *      'extra_data' => array('label' => '...', 'value' => VALUE)
-     *      'contact' => array(
-     *                        'id' => ID,
-     *                        'nom' => Nom (Fac.)
-     *                        'address' => Adresse
-     *                        'zip' => zip
-     *                        'town' => town
-     *                        'pays' => Pays (en lettres),
-     *                        'tel' => Tel
-     *                        'mobile' => Mobile
-     *                        'email' => Email
-     *                        )
-     *       )
-     * 
-     *  Données Commercial: 
-     *  array(
-     *      'id' => ID,
-     *      'nom' => Nom,
-     *      'tel' => 'Tel.
-     *      'email' => Email
-     *       )
-     */
 
     public static $types = array();
     public static $types_origines = array(
-        'devis'    => 'Devis',
-        'commande' => 'Commmande',
-        'facture'  => 'Facture'
+        'propale'  => array('label' => 'Devis', 'icon' => 'fas_file-invoice', 'is_female' => 0),
+        'commande' => array('label' => 'Commmande', 'icon' => 'fas_dolly', 'is_female' => 1)
     );
+
+    // Droits user: 
+
+    public function canDelete()
+    {
+        return BimpCore::isUserDev();
+    }
 
     // Getters données: 
 
@@ -74,17 +44,13 @@ class BF_DemandeSource extends BimpObject
 
     public function getAPI(&$errors = array(), $check_validity = true)
     {
-        if ($this->getData('ext_origine')) {
-            $id_api = $this->getIDApi();
+        $id_api = $this->getIDApi();
 
-            if (!$id_api) {
-                $errors[] = 'ID API non configuré pour ' . $this->displayData('ext_origine', 'default', false);
-            } else {
-                BimpObject::loadClass('bimpapi', 'API_Api');
-                return API_Api::getApiInstanceByID($id_api, $errors, $check_validity);
-            }
+        if (!$id_api) {
+            $errors[] = 'ID API non configuré pour ' . $this->displayData('ext_origine', 'default', false);
         } else {
-            $errors[] = 'Aucune origine externe';
+            BimpObject::loadClass('bimpapi', 'API_Api');
+            return API_Api::getApiInstanceByID($id_api, $errors, $check_validity);
         }
 
         return null;
@@ -94,17 +60,11 @@ class BF_DemandeSource extends BimpObject
     {
         $client_data = $this->getData('client_data');
 
-        if (isset($client_data['contact'])) {
-            $contact = $client_data['contact'];
-            $address = '';
-            if (isset($contact['nom']) && $contact['nom']) {
-                $address .= $contact['nom'];
-            }
-
-            $address .= (($address) ? (($single_line) ? ' ' : '<br/>') : '') . BimpTools::getArrayValueFromPath($contact, 'address/value', '');
-            $zip = BimpTools::getArrayValueFromPath($contact, 'zip/value', '');
-            $town = BimpTools::getArrayValueFromPath($contact, 'town/value', '');
-            $pays = BimpTools::getArrayValueFromPath($contact, 'pays/value', '');
+        if (isset($client_data['address'])) {
+            $address = BimpTools::getArrayValueFromPath($client_data, 'address/address', '');
+            $zip = BimpTools::getArrayValueFromPath($client_data, 'address/zip', '');
+            $town = BimpTools::getArrayValueFromPath($client_data, 'address/town', '');
+            $pays = BimpTools::getArrayValueFromPath($client_data, 'address/pays', '');
 
             return BimpTools::displayAddress($address, $zip, $town, '', $pays, $icon, $single_line);
         }
@@ -121,10 +81,15 @@ class BF_DemandeSource extends BimpObject
         if (isset($client_data['contact'])) {
             $contact = $client_data['contact'];
 
-            $tel = BimpTools::getArrayValueFromPath($contact, 'tel/value', '');
-            $mobile = BimpTools::getArrayValueFromPath($contact, 'mobile/value', '');
-            $email = BimpTools::getArrayValueFromPath($contact, 'email/value', '');
+            $nom = BimpTools::getArrayValueFromPath($contact, 'prenom', '');
+            $nom .= ($nom ? ' ' : '') . BimpTools::getArrayValueFromPath($contact, 'nom', '');
+            $tel = BimpTools::getArrayValueFromPath($contact, 'tel', '');
+            $mobile = BimpTools::getArrayValueFromPath($contact, 'mobile', '');
+            $email = BimpTools::getArrayValueFromPath($contact, 'email', '');
 
+            if ($nom) {
+                $infos_contact .= ($infos_contact ? ($single_line ? ' - ' : '<br/>') : '') . ($icons ? BimpRender::renderIcon('fas_user-circle', 'iconLeft') : '') . $nom;
+            }
             if ($tel) {
                 $infos_contact .= ($infos_contact ? ($single_line ? ' - ' : '<br/>') : '') . ($icons ? BimpRender::renderIcon('fas_phone', 'iconLeft') : '') . $tel;
             }
@@ -132,7 +97,8 @@ class BF_DemandeSource extends BimpObject
                 $infos_contact .= ($infos_contact ? ($single_line ? ' - ' : '<br/>') : '') . ($icons ? BimpRender::renderIcon('fas_mobile', 'iconLeft') : '') . $mobile;
             }
             if ($email) {
-                $infos_contact .= ($infos_contact ? ($single_line ? ' - ' : '<br/>') : '') . ($icons ? BimpRender::renderIcon('fas_at', 'iconLeft') : '') . $email;
+                $infos_contact .= ($infos_contact ? ($single_line ? ' - ' : '<br/>') : '') . ($icons ? BimpRender::renderIcon('fas_at', 'iconLeft') : '');
+                $infos_contact .= '<a href="mailto: ' . BimpTools::cleanEmailsStr($email) . '">' . $email . '</a>';
             }
         }
 
@@ -146,8 +112,8 @@ class BF_DemandeSource extends BimpObject
         $comm_data = $this->getData('commercial_data');
 
         if (!empty($comm_data)) {
-            $tel = BimpTools::getArrayValueFromPath($comm_data, 'tel/value', '');
-            $email = BimpTools::getArrayValueFromPath($comm_data, 'email/value', '');
+            $tel = BimpTools::getArrayValueFromPath($comm_data, 'tel', '');
+            $email = BimpTools::getArrayValueFromPath($comm_data, 'email', '');
             if ($tel) {
                 $infos_contact .= ($infos_contact ? ($single_line ? ' - ' : '<br/>') : '') . ($icons ? BimpRender::renderIcon('fas_phone', 'iconLeft') : '') . $tel;
             }
@@ -165,32 +131,56 @@ class BF_DemandeSource extends BimpObject
     {
         $type = $this->getData('type');
         if ($type && isset(self::$types[$type])) {
-            return self::$types[$type]['label'];
+            return self::$types[$type];
         }
 
         return '';
     }
 
-    public function displayOrigine()
+    public function displayOrigine($with_type_source = false, $with_icon = false, $with_article = false)
     {
         $html = '';
 
         $type_origine = $this->getData('type_origine');
 
-        if (isset(self::$types_origines[$type_origine])) {
-            $html .= self::$types_origines[$type_origine];
+        if ($with_icon && isset(self::$types_origines[$type_origine]['icon'])) {
+            $html .= BimpRender::renderIcon(self::$types_origines[$type_origine]['icon'], 'iconLeft');
+        }
+
+        if (isset(self::$types_origines[$type_origine]['label'])) {
+            if ($with_article) {
+                $html .= ((int) BimpTools::getArrayValueFromPath(static::$types_origines, $type_origine . '/is_female', 0) ? 'la' : 'le') . ' ';
+            }
+            $label = self::$types_origines[$type_origine]['label'];
+
+            if ($with_article) {
+                $label = strtolower($label);
+            }
+
+            $html .= $label;
         } else {
-            $html .= $type_origine;
+            if ($with_article) {
+                $html .= 'la pièce "' . $type_origine . '"';
+            } else {
+                $html .= $type_origine;
+            }
+        }
+
+        if ($with_type_source) {
+            $type = $this->getData('type');
+            if ($type && isset(self::$types[$type])) {
+                $html .= ($html ? ' ' : '') . self::$types[$type];
+            }
         }
 
         $origine = $this->getData('origine_data');
 
         if (isset($origine['id'])) {
-            $html .= (($origine) ? ' ' : '') . '#' . $origine['id'];
+            $html .= ($html ? ' ' : '') . '#' . $origine['id'];
         }
 
         if (isset($origine['ref'])) {
-            $html .= (($origine) ? ' - ' : '') . $origine['ref'];
+            $html .= ($html ? ' - ' : '') . $origine['ref'];
         }
 
         return $html;
@@ -268,222 +258,249 @@ class BF_DemandeSource extends BimpObject
         return $html;
     }
 
+    public function displayExtraData($data, $key, $is_table_row = false)
+    {
+        $html = '';
+
+        $label = '';
+        $value = '';
+        $data_type = 'string';
+
+        if (is_array($data[$key])) {
+            $label = BimpTools::getArrayValueFromPath($data, $key . '/label', $key);
+            $value = BimpTools::getArrayValueFromPath($data, $key . '/value', '');
+            $data_type = BimpTools::getArrayValueFromPath($data, $key . '/type', 'string');
+        } else {
+            $label = $key;
+            $value = $data[$key];
+        }
+
+        switch ($data_type) {
+            case 'money':
+                $value = BimpTools::displayMoneyValue($value);
+                break;
+
+            case 'float':
+                $value = BimpTools::displayFloatValue($value);
+                break;
+        }
+
+        if ($is_table_row) {
+            $html .= '<tr>';
+            $html .= '<th>' . $label . '</th>';
+            $html .= '<td>';
+        } else {
+            $html .= '<span class="bold">' . $label . ' : </span>';
+        }
+
+        $html .= $value;
+
+        if ($is_table_row) {
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+
+        return $html;
+    }
+
     // Rendus HTML: 
+
+    public function renderView()
+    {
+        $html = '';
+
+        $html .= '<div class="row">';
+        $html .= '<div class="col-xs-12 col-sm-6">';
+        $html .= $this->renderClientData();
+        $html .= '</div>';
+
+        $html .= '<div class="col-xs-12 col-sm-6">';
+        $html .= '<div>';
+        $html .= $this->renderOrigineData();
+        $html .= '</div>';
+
+        $html .= '<div style="margin-top: 15px">';
+        $html .= $this->renderCommercialData();
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
 
     public function renderOrigineData()
     {
         $html = '';
 
-        $id_propale = $this->getData('id_ext_propale');
-        $propale_data = $this->getData('ext_propale');
+        $origine = $this->getData('origine_data');
 
-//        $html .= '<pre>';
-//        $html .= print_r($propale_data, 1);
-//        $html .= '</pre>';
-
-        $html .= '<h3 style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ccc">';
-        $html .= BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Devis';
-        if (isset($propale_data['ref']['value']) && $propale_data['ref']['value']) {
-            $html .= ' ' . $propale_data['ref']['value'];
-        }
-        $html .= '</h3>';
-        $html .= '<table cellpadding="5">';
-        $html .= '<tbody">';
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
         $html .= '<tr>';
-        $html .= '<td style="text-align: right; font-weight: bold; padding-right: 15px">ID BIMP :</td>';
-        if ($id_propale) {
-            $html .= '<td>' . $id_propale . '</td>';
-        } else {
-            $html .= '<td><span class="error">Non spécifié</span></td>';
-        }
+        $html .= '<th colspan="2" style="font-size: 14px">' . $this->displayOrigine(false, true) . '</th>';
         $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody">';
 
-        if (!empty($propale_data)) {
-            foreach ($propale_data as $data_name => $data) {
-                $value = BimpTools::getArrayValueFromPath($data, 'value', '');
-                if ((string) $value) {
-                    if (in_array($data_name, array('total_ht', 'total_ttc'))) {
-                        $value = BimpTools::displayMoneyValue($value, 'EUR');
-                    }
-                    $html .= '<tr>';
-                    $html .= '<td style="text-align: right; font-weight: bold; padding-right: 15px">' . BimpTools::getArrayValueFromPath($data, 'label', $data_name) . ' :</td>';
-                    $html .= '<td>' . $value . '</td>';
-                    $html .= '</tr>';
+        if (!empty($origine)) {
+            if (isset($origine['extra_data'])) {
+                foreach ($origine['extra_data'] as $data_name => $data_def) {
+                    $html .= $this->displayExtraData($origine['extra_data'], $data_name, true);
                 }
             }
         } else {
             $html .= '<tr>';
-            $html .= '<td colspan="2">' . BimpRender::renderAlerts('Données devis BIMP absentes') . '</td>';
+            $html .= '<td colspan="2">' . BimpRender::renderAlerts('Données absentes') . '</td>';
             $html .= '</tr>';
         }
 
         $html .= '</tbody>';
         $html .= '</table>';
 
-        $title = BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Infos devis BIMP';
-        return BimpRender::renderPanel($title, $html, '', array(
-                    'type' => 'secondary'
-        ));
+        return $html;
     }
 
     public function renderClientData()
     {
         $html = '';
 
-        $id_client = $this->getData('id_ext_client');
-        $id_contact = $this->getData('id_ext_contact');
-        $client_data = $this->getData('ext_client');
-        $contact_data = $this->getData('ext_contact');
-
         // Client: 
-        $html .= '<h3 style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ccc">';
-        $html .= BimpRender::renderIcon('fas_user-circle', 'iconLeft') . 'Client';
-        if (isset($client_data['ref']['value']) && $client_data['ref']['value']) {
-            $html .= ' ' . $client_data['ref']['value'];
-        }
-        if (isset($client_data['nom']['value']) && $client_data['nom']['value']) {
-            $html .= ' ' . $client_data['nom']['value'];
-        }
-        $html .= '</h3>';
-        $html .= '<table cellpadding="5">';
-        $html .= '<tbody">';
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
         $html .= '<tr>';
-        $html .= '<td style="text-align: right; font-weight: bold; padding-right: 15px">ID BIMP :</td>';
-        if ($id_client) {
-            $html .= '<td>' . $id_client . '</td>';
-        } else {
-            $html .= '<td><span class="error">Non spécifié</span></td>';
-        }
+        $html .= '<th colspan="2" style="font-size: 14px">' . $this->displayClient(false) . '</th>';
         $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody class="headers_col">';
+
+        $client_data = $this->getData('client_data');
 
         if (!empty($client_data)) {
-            foreach ($client_data as $data_name => $data) {
-                if (in_array($data_name, array('ref', 'nom', 'address', 'zip', 'town', 'pays', 'phone', 'email'))) {
-                    continue;
-                }
-
-                $value = BimpTools::getArrayValueFromPath($data, 'value', '');
-
-                if ((string) $value) {
-                    $html .= '<tr>';
-                    $html .= '<td style="text-align: right; font-weight: bold; padding-right: 15px">' . BimpTools::getArrayValueFromPath($data, 'label', $data_name) . ' :</td>';
-                    $html .= '<td>' . $value . '</td>';
-                    $html .= '</tr>';
-                }
+            $is_company = (int) BimpTools::getArrayValueFromPath($client_data, 'is_company', 0);
+            $html .= '<tr>';
+            $html .= '<th><span class="bold">Client pro</span></th>';
+            $html .= '<td>';
+            if ($is_company) {
+                $html .= '<span class="success">OUI</span>';
+            } else {
+                $html .= '<span class="danger">NON</span>';
             }
+            $html .= '</td>';
+            $html .= '</tr>';
 
-            $full_address = $this->getExtClientFullAddress(true, true);
-            if ($full_address) {
+            if ($is_company) {
+                // SIRET: 
                 $html .= '<tr>';
-                $html .= '<td style="text-align: right; font-weight: bold; padding-right: 15px">Adresse :</td>';
-                $html .= '<td>' . $full_address . '</td>';
+                $html .= '<th>N° SIRET</th>';
+                $html .= '<td>';
+                $html .= BimpTools::getArrayValueFromPath($client_data, 'siret', '');
+                $html .= '</td>';
+                $html .= '</tr>';
+
+                // SIREN: 
+                $html .= '<tr>';
+                $html .= '<th>N° SIREN</th>';
+                $html .= '<td>';
+                $html .= BimpTools::getArrayValueFromPath($client_data, 'siren', '');
+                $html .= '</td>';
+                $html .= '</tr>';
+
+                // Forme juridique: 
+                $html .= '<tr>';
+                $html .= '<th>Forme juridique</th>';
+                $html .= '<td>';
+                $html .= BimpTools::getArrayValueFromPath($client_data, 'forme_juridique', '');
+                $html .= '</td>';
+                $html .= '</tr>';
+
+                // Capital social: 
+                $html .= '<tr>';
+                $html .= '<th>Capital social</th>';
+                $html .= '<td>';
+                $html .= BimpTools::getArrayValueFromPath($client_data, 'capital', '');
+                $html .= '</td>';
                 $html .= '</tr>';
             }
 
-            $infos_contact = $this->getExtClientInfosContact();
-            if ($infos_contact) {
-                $html .= '<tr>';
-                $html .= '<td style="text-align: right; font-weight: bold; padding-right: 15px">Infos contact :</td>';
-                $html .= '<td>' . $infos_contact . '</td>';
-                $html .= '</tr>';
+            // Adresse: 
+            $html .= '<tr>';
+            $html .= '<th>Adresse</th>';
+            $html .= '<td>';
+            $html .= $this->getClientFullAddress(true, false);
+            $html .= '</td>';
+            $html .= '</tr>';
+
+            // Infos contact: 
+            $html .= '<tr>';
+            $html .= '<th>Infos contact</th>';
+            $html .= '<td>';
+            $html .= $this->getClientInfosContact(true, false);
+            $html .= '</td>';
+            $html .= '</tr>';
+
+            if (isset($client_data['extra_data'])) {
+                foreach ($client_data['extra_data'] as $data_name => $data_def) {
+                    $html .= $this->displayExtraData($client_data['extra_data'], $data_name, true);
+                }
             }
         } else {
             $html .= '<tr>';
-            $html .= '<td colspan="2">' . BimpRender::renderAlerts('Données client BIMP absentes') . '</td>';
+            $html .= '<td colspan="2">' . BimpRender::renderAlerts('Données absentes') . '</td>';
             $html .= '</tr>';
         }
 
         $html .= '</tbody>';
         $html .= '</table>';
 
-        // Contact: 
-        $html .= '<h3 style="margin-top: 20px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ccc">';
-        $html .= BimpRender::renderIcon('far_id-card', 'iconLeft') . 'Contact client';
-        if (isset($contact_data['civility']['value']) && $contact_data['civility']['value']) {
-            $html .= ' ' . $contact_data['civility']['value'];
-        }
-        if (isset($contact_data['firstname']['value']) && $contact_data['firstname']['value']) {
-            $html .= ' ' . $contact_data['firstname']['value'];
-        }
-        if (isset($contact_data['lastname']['value']) && $contact_data['lastname']['value']) {
-            $html .= ' ' . $contact_data['lastname']['value'];
-        }
-        $html .= '</h3>';
+        return $html;
+    }
 
-        $html .= '<table cellpadding="5">';
-        $html .= '<tbody">';
+    public function renderCommercialData()
+    {
+        $html = '';
+
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
         $html .= '<tr>';
-        $html .= '<td style="text-align: right; font-weight: bold; padding-right: 15px">ID BIMP :</td>';
-        if ($id_contact) {
-            $html .= '<td>' . $id_contact . '</td>';
-        } else {
-            $html .= '<td><span class="error">Non spécifié</span></td>';
-        }
+        $html .= '<th colspan="2" style="font-size: 14px">';
+        $html .= BimpRender::renderIcon('fas_user', 'iconLeft');
+        $html .= 'Commercial ' . $this->displayData('type', 'default', false);
+        $html .= '</th>';
         $html .= '</tr>';
+        $html .= '</thead>';
 
-        if (!empty($contact_data)) {
-            foreach ($contact_data as $data_name => $data) {
-                if (in_array($data_name, array('civility', 'firstname', 'lastname', 'address', 'zip', 'town', 'pays', 'phone_perso', 'phone_pro', 'phone_mobile', 'email'))) {
-                    continue;
-                }
+        $html .= '<tbody class="headers_col">';
 
-                $value = BimpTools::getArrayValueFromPath($data, 'value', '');
+        $comm_data = $this->getData('commercial_data');
 
-                if ((string) $value) {
-                    $html .= '<tr>';
-                    $html .= '<td style="text-align: right; font-weight: bold; padding-right: 15px">' . BimpTools::getArrayValueFromPath($data, 'label', $data_name) . ' :</td>';
-                    $html .= '<td>' . $value . '</td>';
-                    $html .= '</tr>';
-                }
-            }
-            $address = BimpTools::getArrayValueFromPath($contact_data, 'address/value', '');
-            $zip = BimpTools::getArrayValueFromPath($contact_data, 'zip/value', '');
-            $town = BimpTools::getArrayValueFromPath($contact_data, 'town/value', '');
-            $pays = BimpTools::getArrayValueFromPath($contact_data, 'pays/value', '');
+        if (!empty($comm_data)) {
+            $html .= '<tr>';
+            $html .= '<th><span class="bold">Nom</span></th>';
+            $html .= '<td>' . $this->displayCommercial(false) . '</td>';
+            $html .= '</tr>';
 
-            $full_address = BimpTools::displayAddress($address, $zip, $town, '', $pays, true, true);
-            if ($full_address) {
+            if (isset($comm_data['tel'])) {
                 $html .= '<tr>';
-                $html .= '<td style="text-align: right; font-weight: bold; padding-right: 15px">Adresse :</td>';
-                $html .= '<td>' . $full_address . '</td>';
+                $html .= '<th><span class="bold">Tel. pro</span></th>';
+                $html .= '<td>' . $comm_data['tel'] . '</td>';
                 $html .= '</tr>';
             }
-
-            $infos_contact = '';
-            $phone_pro = BimpTools::getArrayValueFromPath($contact_data, 'phone_pro/value', '');
-            $phone_perso = BimpTools::getArrayValueFromPath($contact_data, 'phone_perso/value', '');
-            $phone_mobile = BimpTools::getArrayValueFromPath($contact_data, 'phone_mobile/value', '');
-            $email = BimpTools::getArrayValueFromPath($contact_data, 'email/value', '');
-            if ($phone_pro) {
-                $infos_contact .= ($infos_contact ? '<br/>' : '') . BimpRender::renderIcon('fas_phone', 'iconLeft') . '(pro) ' . $phone_pro;
-            }
-            if ($phone_perso) {
-                $infos_contact .= ($infos_contact ? '<br/>' : '') . BimpRender::renderIcon('fas_phone', 'iconLeft') . '(perso) ' . $phone_perso;
-            }
-            if ($phone_mobile) {
-                $infos_contact .= ($infos_contact ? '<br/>' : '') . BimpRender::renderIcon('far_mobile', 'iconLeft') . $phone_mobile;
-            }
-            if ($email) {
-                $infos_contact .= ($infos_contact ? '<br/>' : '') . BimpRender::renderIcon('fas_at', 'iconLeft') . $email;
-            }
-            if ($infos_contact) {
+            if (isset($comm_data['email'])) {
                 $html .= '<tr>';
-                $html .= '<td style="text-align: right; font-weight: bold; padding-right: 15px">Infos contact :</td>';
-                $html .= '<td>' . $infos_contact . '</td>';
+                $html .= '<th><span class="bold">E-mail</span></th>';
+                $html .= '<td><a href="mailto: ' . BimpTools::cleanEmailsStr($comm_data['email']) . '">' . $comm_data['email'] . '</a></td>';
                 $html .= '</tr>';
             }
         } else {
             $html .= '<tr>';
-            $html .= '<td colspan="2">' . BimpRender::renderAlerts('Données contact client BIMP absentes') . '</td>';
+            $html .= '<td colspan="2">' . BimpRender::renderAlerts('Données absentes') . '</td>';
             $html .= '</tr>';
         }
 
         $html .= '</tbody>';
         $html .= '</table>';
 
-        $title = BimpRender::renderIcon('fas_user-circle', 'iconLeft') . 'Infos client BIMP';
-        return BimpRender::renderPanel($title, $html, '', array(
-                    'type' => 'secondary'
-        ));
+        return $html;
     }
 }

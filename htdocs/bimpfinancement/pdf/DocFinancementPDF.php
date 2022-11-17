@@ -1,12 +1,15 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpDocumentPDF.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/BF_Lib.php';
 
 class DocFinancementPDF extends BimpDocumentPDF
 {
 
     public static $doc_type = '';
     public $demande = null;
+    public $sources = array();
+    public $values = array();
     public $target_label = 'Destinataire';
 
     public function __construct($db, $demande)
@@ -17,9 +20,10 @@ class DocFinancementPDF extends BimpDocumentPDF
 
         if (!BimpObject::objectLoaded($this->demande)) {
             $this->errors[] = 'Demande invalide';
+        } else {
+            $this->values = $this->demande->getCalcValues(false, $this->errors);
         }
 
-        $this->doc_name = ucfirst(static::$doc_type) . ' de financement';
         $this->object_signature_params_field_name = 'signature_' . static::$doc_type . '_params';
     }
 
@@ -37,6 +41,8 @@ class DocFinancementPDF extends BimpDocumentPDF
             if (BimpObject::objectLoaded($contact)) {
                 $this->contact = $contact->dol_object;
             }
+
+            $this->sources = $this->demande->getChildrenObjects('sources');
         }
 
         parent::initData();
@@ -116,7 +122,7 @@ class DocFinancementPDF extends BimpDocumentPDF
         }
 
         if (count($table->rows)) {
-            $this->writeContent('<div style="font-weight: bold; font-size: 9px;">Eléments financés :</div>');
+            $this->writeContent('<div style="font-weight: bold; font-size: 9px;">Description des équipements et quantités :</div>');
             $this->pdf->addVMargin(1);
             $table->write();
         }

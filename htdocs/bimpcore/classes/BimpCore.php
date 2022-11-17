@@ -1056,7 +1056,11 @@ class BimpCore
                         if (BimpDebug::isActive()) {
                             BimpDebug::incCacheInfosCount('logs', true);
                         }
-                    } else {
+                    } elseif (BimpCore::isModeDev()) {
+                        echo 'Echec création du log "' . $msg . '"<br/>';
+                        echo 'Extra data : <pre>';
+                        print_r($extra_data);
+                        echo '</pre>';
                         echo '<pre>';
                         print_r($errors);
                         exit;

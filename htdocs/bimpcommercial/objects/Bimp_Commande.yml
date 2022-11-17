@@ -86,8 +86,10 @@ associations:
 fields: 
     fk_cond_reglement:
         depends_on: fk_soc,id_client_facture
+        
     fk_mode_reglement: 
         depends_on: fk_soc,id_client_facture
+        
     validComm:
         label: Validation Commerciale
         type: bool

@@ -1,21 +1,21 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/DevisFinancementPDF.php';
 
-class ContratFinancementProleasePDF extends ContratFinancementPDF
+class DevisFinancementProleasePDF extends DevisFinancementPDF
 {
 
     public $client_data = array();
 
-    public function __construct($db, $demande, $client_data = array())
+    public function __construct($db, $demande, $client_data = array(), $options = array())
     {
         $this->client_data = $client_data;
 
-//        if (empty($this->client_data)) {
-//            $this->errors[] = 'Données du client absentes';
-//        }
+        if (empty($this->client_data)) {
+            $this->errors[] = 'Données du client absentes';
+        }
 
-        parent::__construct($db, $demande);
+        parent::__construct($db, $demande, $options);
     }
 
     public function initData()

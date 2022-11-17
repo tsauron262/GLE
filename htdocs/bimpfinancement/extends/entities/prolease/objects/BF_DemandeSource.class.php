@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/objects/BF_DemandeSource.clas
 
 BF_DemandeSource::$types['bimp'] = 'BIMP';
 
-class BF_DemandeSource_ExtEntity extends BF_Demande
+class BF_DemandeSource_ExtEntity extends BF_DemandeSource
 {
     
 }

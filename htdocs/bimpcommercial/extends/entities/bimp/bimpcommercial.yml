@@ -6,13 +6,16 @@ params:
         type: bool
         def: 0
         
-    id_api_webservice_ldlc_pro_lease: 
+    allow_df_from_commande: 
+        label: Activer les demandes de financement LDLC Pro Lease depuis les commandes
+        type: bool
+        def: 0
+        
+    id_api_webservice_prolease: 
         label: ID API Webservice LDLC PRO LEASE
         def: 0
         
-# Entité: prolease (à déplacer) 
-
-    id_api_webservice_bimp: 
-        label: ID API Webservice BIMP
+    demande_fin_target_prolease_id_client: 
+        label: ID client LDLC Pro Lease
         def: 0
 

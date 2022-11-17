@@ -4715,7 +4715,6 @@ class BimpObject extends BimpCache
     public function update(&$warnings = array(), $force_update = false)
     {
         $this->noFetchOnTrigger = true;
-
         $this->force_update = $force_update;
 
         BimpLog::actionStart('bimpobject_update', 'Mise à jour', $this);
@@ -4796,7 +4795,7 @@ class BimpObject extends BimpCache
                             if ($this->getData($champAddNote) != $this->getInitData($champAddNote)) {
                                 $notes[] = html_entity_decode('Champ ' . $this->displayFieldName($champAddNote) . ' modifié. 
 Ancienne valeur : ' . $this->displayInitData($champAddNote, 'default', false, true) . '
-Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
+Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             }
                         }
 
@@ -8129,6 +8128,23 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return '';
     }
 
+    public function getJsTriggerParentChange()
+    {
+        $parent = $this->getParentInstance();
+
+        $js = '';
+
+        if (is_a($parent, 'BimpObject')) {
+            $js = 'triggerObjectChange(\'' . $parent->module . '\', \'' . $parent->object_name . '\'';
+
+            if ($parent->isLoaded()) {
+                $js .= ', ' . $parent->id . ')';
+            }
+        }
+
+        return $js;
+    }
+
     public function getJsDeleteOnClick($params = array())
     {
         if (!$this->isLoaded()) {
@@ -8983,7 +8999,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($this->isDolObject() && method_exists($this->dol_object, 'liste_type_contact')) {
             $cache_key = $this->module . '_' . $this->object_name . '_external_contact_types_array';
             if (!isset(self::$cache[$cache_key])) {
-                self::setCache($cache_key,$this->dol_object->liste_type_contact('external'));
+                self::setCache($cache_key, $this->dol_object->liste_type_contact('external'));
             }
             return self::$cache[$cache_key];
         }

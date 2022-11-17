@@ -791,6 +791,14 @@ class BimpRender
         return $return;
     }
 
+    public static function renderCopyTextIcon($text)
+    {
+        $html = '<span class="copyTextIcon" data-text="' . $text . '">';
+        $html .= self::renderIcon('fas_copy');
+        $html .= '</span>';
+        return $html;
+    }
+
     public static function rendercontentLoading($loading_text = '')
     {
         $html = '<div class="content-loading">';

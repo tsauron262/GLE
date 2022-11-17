@@ -42,11 +42,11 @@ class BF_Line extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = [])
     {
-        if (!$force_delete) {
-            return (int) $this->isParentEditable($errors);
+        if ($force_delete) {
+            return 1;
         }
 
-        return 1;
+        return (int) $this->isParentEditable($errors);
     }
 
     public function isFieldEditable($field, $force_edit = false)
@@ -877,21 +877,6 @@ class BF_Line extends BimpObject
                     $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la mise à jour des commandes fournisseur correspondantes');
                 }
             }
-        }
-
-        return $errors;
-    }
-
-    public function delete(&$warnings = array(), $force_delete = false)
-    {
-        $errors = array();
-
-        if (!$this->isDeletable()) {
-            $errors[] = 'Cette ligne n\'est pas supprimable';
-        } else {
-            $this->deleteCommandesFournLines(false);
-
-            $errors = parent::delete($warnings, $force_delete);
         }
 
         return $errors;

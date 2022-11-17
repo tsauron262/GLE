@@ -75,7 +75,25 @@ objects:
                 name: BimpSignature
             id_object: 
                 field_value: id_signature_contrat
-                
+
+    signature_pvr:
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_pvr
+    
+    sources: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpfinancement
+                name: BF_DemandeSource
+        
     lines: 
         relation: hasMany
         delete: 1
@@ -131,6 +149,7 @@ fields:
             card: default
         create_form: light
         edit_form: default
+        default_value: 0
             
     id_contact_client: 
         label: Contact client
@@ -161,6 +180,7 @@ fields:
             card: default
         create_form: light
         edit_form: default
+        default_value: 0
         
     id_supplier_contact:
         label: Contact apporteur
@@ -182,6 +202,16 @@ fields:
             fields: 
                 fk_soc: 
                     field_value: id_supplier
+                    
+    commission_apporteur:
+        label: Commission apporteur
+        type: percent
+        default_value: 0
+        decimals: 2
+        display_if: 
+            field_name: id_supplier
+            hide_values: 0,''
+        depends_on: id_supplier
                     
     id_user_resp: 
         label: Responsable
@@ -228,44 +258,75 @@ fields:
         type: int
         values: 
             array: durations
+        default_value:
+            conf: 
+                module: bimpfinancement
+                name: def_duration
         
     periodicity: 
         label: Périodicité
         type: int
         values: 
             array: periodicities
+        default_value: 
+            conf: 
+                module: bimpfinancement
+                name: def_periodicity
             
     mode_calcul:
         label: Mode de calcul
         type: int
-        default_value: 2
         values: 
             array: calc_modes
+        default_value: 
+            conf: 
+                module: bimpfinancement
+                name: def_mode_calcul
        
+    marge_souhaitee:
+        label: Marge
+        type: percent
+        decimals: 2
+        default_value:
+            conf: 
+                module: bimpfinancement
+                name: def_marge_souhaitee
+        
+    tx_cession:
+        label: Taux de cession annuel
+        type: percent
+        default_value: 0
+        
     montant_materiels:
-        label: Montant matériels
+        label: Montant matériels HT
         type: money
         default_value: 0
         
     montant_services:
-        label: Montant services
+        label: Montant services HT
         type: money
         default_value: 0
                 
     montant_logiciels:
-        label: Montant logiciels
+        label: Montant logiciels HT
         type: money
         default_value: 0
         
     vr_achat: 
         label: VR achat
-        type: money
-        default_value: 0
-        
+        type: percent
+        default_value:
+            conf: 
+                module: bimpfinancement
+                name: def_vr_achat
+            
     vr_vente: 
         label: VR vente
-        type: money
-        default_value: 0
+        type: percent
+        default_value:
+            conf: 
+                module: bimpfinancement
+                name: def_vr_vente
         
     ca_prevu: 
         label: CA prévu
@@ -281,21 +342,30 @@ fields:
         label: Date de mise en loyer
         type: date
         
+    formule: 
+        label: Formule choisie
+        values: 
+            array: formules
+        default_value: none
+            
     agreement_number:
         label: N° d'accord
-        
-    commission_commerciale:
-        label: Commission commerciale
-        type: percent
-        default_value: 0
-        decimals: 6
-                
-    commission_financiere:
-        label: Commission financière
-        type: percent
-        default_value: 0
-        decimals: 6
     
+    loyer_mensuel_evo_ht: 
+        label: Loyer mensuel HT (form. évo) 
+        type: money
+        default_value: 0
+        
+    loyer_mensuel_dyn_ht: 
+        label: Loyer mensuel HT (form. dyn) 
+        type: money
+        default_value: 0
+        
+    loyer_mensuel_suppl_ht: 
+        label: Loyer mensuel HT suppl. (form. dyn) 
+        type: money
+        default_value: 0
+        
     id_signature_devis: 
         label: Signature du devis
         type: id_object
@@ -316,6 +386,15 @@ fields:
         label: Paramètres signature du contrat
         type: json
       
+    id_signature_pvr: 
+        label: Signature du PV de réception
+        type: id_object
+        object: signature_pvr
+        
+    signature_pvr_params: 
+        label: Paramètres signature du pvr
+        type: json
+        
     closed: 
         label: Demande Fermée
         type: bool
@@ -336,16 +415,14 @@ forms:
                 field: id_supplier
             contact_supplier: 
                 field: id_supplier_contact
+            commission_apporteur: 
+                field: commission_apporteur
             duration: 
                 field: duration
             periodicity: 
                 field: periodicity
             mode_calcul: 
                 field: mode_calcul
-            commission_commerciale: 
-                field: commission_commerciale
-            commission_financiere: 
-                field: commission_financiere
             
     edit: 
         extends: create
@@ -371,7 +448,6 @@ forms:
                   type: textarea
                   rows: 3
                   auto_expand: 1
-                    
                 
     create_signature: 
         rows: 
@@ -434,83 +510,116 @@ forms:
                     callback: 
                         params: 
                             - contrat
-                  
-    generate_document: 
-        rows: 
-            create_signature: 
-                custom: 1
-                label: Créer la fiche signature
-                input_name: create_signature
-                data_type: bool
-                input: 
-                    type: toggle
-                value: 1
-            contact_signature: 
-                custom: 1
-                label: Contact signataire
-                data_type: id_object
-                input_name: id_contact_signature
-                input: 
-                    type: select
-                    options: 
-                        callback: 
-                            method: getSocieteContactsArray
-                            params: 
-                                - field_value: id_client
-                    help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
-                value: 
-                    callback: getDefaultSignatureContact
-                display_if: 
-                    field_name: create_signature
-                    show_values: 1
-            open_public_access: 
-                custom: 1
-                label: Ouvrir l'accès à la signature électronique à distance
-                input_name: open_public_access
-                data_type: bool
-                input: 
-                    type: toggle
-                value: 1
-                display_if: 
-                    field_name: create_signature
-                    show_values: 1
-            email_content:
-                custom: 1
-                label: Contenu e-mail client pour la signature à distance
-                input_name: email_content
-                input: 
-                    type: html
-                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
-                value: 
-                    callback: 
-                        method: getDefaultSignDistEmailContent
-                display_if: 
-                    fields_names: open_public_access,create_signature
-                    open_public_access: 
-                        show_values: 1
-                    create_signature:
-                        show_values: 1
-                        
+            
     generate_devis: 
-        extends: generate_document
         title: Création du devis de financement
         rows: 
-            email_content: 
-                value: 
-                    callback: 
-                        params: 
-                          - devis
-        
+            - custom: 1
+              label: Formules à proposer
+              input_name: formules
+              input: 
+                  type: check_list
+                  items:
+                      evo: Formule évolutive
+                      dyn: Formule dynamique
+              value: evo,dyn 
+                      
     generate_contrat: 
-        extends: generate_document
-        title: Création du contrat de financement
+        title: Création du contrat de location
         rows: 
-            email_content: 
-                value: 
-                    callback: 
-                        params: 
-                          - contrat
-                          
+            - custom: 1
+              label: Nom Client
+              input_name: client_name
+              input: 
+                  type: text
+            - custom: 1
+              label: Entreprise
+              input_name: client_is_company
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Type entreprise
+              input_name: client_type_entrepise
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+            - custom: 1
+              label: Capital
+              input_name: client_capital
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1      
+            - custom: 1
+              label: N° Siren
+              input_name: client_siren
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+            - custom: 1
+              label: adresse / siège (si pro)
+              input_name: client_adress
+              input: 
+                  type: textarea
+            - custom: 1
+              label: Représentant
+              input_name: client_representant
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+            - custom: 1
+              label: Qualité du représentant
+              input_name: client_repr_qualite
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+            - custom: 1
+              label: Site d'installation
+              input: 
+                  type: textarea
+              input_name: client_site
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+                  
+    upload_document:
+        rows: 
+            file: 
+                custom: 1
+                label: Fichier
+                input_name: doc_file
+                input: 
+                    type: file_upload  
+                    help: Format PDF uniquement
+            flag: 
+                custom: 1
+                hidden: 1
+                label: Dépôt doc
+                input_name: updload_doc_type
+                input: 
+                    type: hidden
+        
+    upload_devis: 
+        extends: upload_document
+        rows: 
+            flag: 
+                value: devis
+                
+    upload_contrat: 
+        extends: upload_document
+        rows: 
+            flag: 
+                value: contrat
+                
     submit_new_status: 
         msgs: 
           - type: warning
@@ -522,12 +631,6 @@ forms:
                 type: textarea
                 rows: 3
                 auto_expand: 1
-                
-    submit_accept: 
-        extends: submit_new_status
-        msgs: 
-            0: 
-                content: '<b>Attention: acceptation définitive</b>'
                 
     submit_refuse: 
         extends: submit_new_status
@@ -541,6 +644,21 @@ forms:
             0: 
                 content: '<b>Attention: abandon définitif - la demande sera fermée</b>'
                 
+    merge_demandes: 
+        msgs: 
+            callback: getDemandesToMergeErrorsMsgs
+        rows: 
+            - custom: 1
+              label: Source principale
+              input_name: id_main_source
+              data_type: id
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      array: demandesSources
+                  help: Sélectionnez la source qui sera en charge de transmettre au client les documents à signer.<br/>Ce sera la demande de financement correspondant à cette source qui sera conservée.
+                
 fields_tables:
     infos: 
         title: Infos
@@ -549,49 +667,43 @@ fields_tables:
             - field: id_user_resp
             - field: date_loyer
               edit: 1
+            - field: id_client
+              display: card
+              show: 
+                  field_value: id_client
+            - field: id_contact_client
+              display: card
+              show: 
+                  field_value: id_contact_client
+            - field: id_supplier
+              display: card
+              show: 
+                  field_value: id_supplier
+            - field: id_supplier_contact
+              display: card
+              show: 
+                  field_value: id_supplier_contact
+    
+    options: 
+        title: Options
+        icon: fas_check-square
+        rows: 
             - field: duration
               edit: 1
             - field: periodicity
               edit: 1
             - field: mode_calcul
               edit: 1 
-    
-    options: 
-        title: Options
-        icon: fas_check-square
-        rows: 
-            - field: commission_commerciale
-              edit: 1
-            - field: commission_financiere
-              edit: 1
             - field: vr_achat
-              edit: 1    
+              edit: 1
             - field: vr_vente
-              edit: 1    
-            - field: ca_prevu
               edit: 1
-            - field: pba_prevu
+            - field: marge_souhaitee
               edit: 1
-              
-    client: 
-        title: Client
-        icon: user-circle
-        rows: 
-            - field: id_client
-              label: Société
-              display: card
-            - field: id_contact_client
-              label: Contact
-              display: card
-              
-    supplier: 
-        title: Apporteur
-        icon: fas_handshake
-        rows: 
-            - field: id_supplier
-              display: card
-            - field: id_supplier_contact
-              display: card
+            - field: tx_cession
+              edit: 1
+            - field: formule
+              edit: 1
               
     montants: 
         title: Montants
@@ -600,9 +712,21 @@ fields_tables:
             - field: montant_materiels
             - field: montant_services
             - field: montant_logiciels
-            - label: Total demande
+            - label: Total demande HT
               value: 
-                  callback: displayTotalDemande
+                  callback: displayTotalDemande        
+            - field: loyer_mensuel_evo_ht
+              edit: 1
+              show: 
+                  callback: showLoyers
+            - field: loyer_mensuel_dyn_ht
+              edit: 1
+              show: 
+                  callback: showLoyers
+            - field: loyer_mensuel_suppl_ht
+              edit: 1
+              show: 
+                  callback: showLoyers
                   
     signatures: 
         title: Signatures
@@ -621,7 +745,7 @@ views:
     default: 
         title: nom
         edit_form: edit
-        objects_change_reload: BF_DemandeRefinanceur,BF_Line
+        objects_change_reload: BF_DemandeRefinanceur,BF_Line,BimpSignature
         rows:
             0: 
                 cols: 
@@ -633,29 +757,7 @@ views:
                       col_md: 6
                       fields_table:
                           name: infos
-                    - type: fields_table
-                      col_lg: 6
-                      col_md: 6
-                      fields_table:
-                          name: options
-            
-            # Row #2 utilisée par extends prolease
-            2: 
-                
-            3: 
-                cols: 
-                    - type: fields_table
-                      col_lg: 6
-                      col_md: 6
-                      show: 
-                          field_value: id_client
-                      fields_table:
-                          name: client
-                    - type: fields_table
-                      col_lg: 6
-                      col_md: 6
-                      fields_table:
-                          name: supplier
+                          
                     - type: fields_table
                       show: 
                           callback: hasSignature
@@ -671,7 +773,7 @@ views:
             
     montants: 
         panel: 0
-        objects_change_reload: BF_DemandeRefinanceur,BF_Line
+        objects_change_reload: BF_DemandeRefinanceur,BF_Line,BimpSignature
         rows: 
             - cols: 
                 - type: fields_table
@@ -679,11 +781,19 @@ views:
                   col_lg: 6
                   fields_table: 
                       name: options
-                - type: fields_table
+                      
+                - type: rows
                   col_md: 6
                   col_lg: 6
-                  fields_table: 
-                      name: montants
+                  rows: 
+                      - cols: 
+                          - type: fields_table
+                            fields_table: 
+                                name: montants
+                      - cols: 
+                          - type: custom
+                            custom: 
+                                callback: renderCalcValues
                       
 lists_cols: 
     id: 
@@ -701,6 +811,8 @@ lists:
             - label: supprimer les demandes de fincancement sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
         sort_field: date_create
         sort_way: desc
         n: 10

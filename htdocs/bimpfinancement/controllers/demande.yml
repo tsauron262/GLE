@@ -1,5 +1,8 @@
 bootstrap: 1
 
+js:
+    - /bimpfinancement/views/js/bimpfinancement.js
+    
 title: 
     callback: 
         object: demande
@@ -33,16 +36,17 @@ sections:
                 field_value: 
                     object: demande
                     field_name: id_main_source
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderSourcesView
+                        object: demande
           - id: elements
             title: Elements financés
             struct: 
                 type: rows
                 rows: 
-                    - cols: 
-                        - type: view
-                          view: 
-                              name: montants
-                              object: demande
                     - cols: 
                         - type: list
                           list: 
@@ -53,6 +57,10 @@ sections:
                         - type: list
                           col_md: 6
                           col_lg: 6
+                          show: 
+                              conf: 
+                                  module: bimpfinancement
+                                  name: use_frais_divers
                           list: 
                               name: default
                               object: demande
@@ -60,6 +68,10 @@ sections:
                         - type: list
                           col_md: 6
                           col_lg: 6
+                          show: 
+                              conf: 
+                                  module: bimpfinancement
+                                  name: use_loyers_inter
                           list: 
                               name: default
                               object: demande
@@ -74,11 +86,6 @@ sections:
             struct: 
                 type: rows
                 rows: 
-                    - cols: 
-                        - type: view
-                          view: 
-                              name: montants
-                              object: demande
                     - cols: 
                         - type: list
                           list: 
@@ -97,6 +104,11 @@ sections:
                     object: demande
                     children: files
                     
+    - type: view
+      view: 
+          name: montants
+          object: demande
+          
     - type: custom
       custom: 
           callback: 

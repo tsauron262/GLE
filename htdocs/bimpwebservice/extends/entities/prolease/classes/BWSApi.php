@@ -7,12 +7,64 @@ require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/classes/BWSApi.php';
 BWSApi::$requests['addDemandeFinancement'] = array(
     'desc'   => 'Ajout d\'une demande de financement',
     'params' => array(
-        'propale'       => array('label' => 'Données devis', 'data_type' => 'json'),
-        'propale_lines' => array('label' => 'Lignes devis', 'data_type' => 'json'),
-        'client'        => array('label' => 'Données client', 'data_type' => 'json'),
-        'contact'       => array('label' => 'Données contact', 'data_type' => 'json'),
-        'commercial'    => array('label' => 'Données commercial', 'data_type' => 'json'),
-        'extra_data'    => array('label' => 'Données supplémentaires', 'data_type' => 'json')
+        'data' => array('label'      => 'Données', 'data_type'  => 'json', 'sub_params' => array(
+                'type_source' => array('label' => 'Source', 'required' => 1),
+                'type_orgine' => array('label' => 'Type de pièce d\'origine', 'default' => 'propale'),
+                'demande'     => array('label'      => 'Options demande', 'data_type'  => 'array', 'sub_params' => array(
+                        'duration'    => array('label' => 'Durée', 'data_type' => 'int', 'required' => 1),
+                        'periodicity' => array('label' => 'Périodicité', 'data_type' => 'int', 'required' => 1),
+                        'mode_calcul' => array('label' => 'Mode de calcul', 'data_type' => 'int', 'required' => 1)
+                    )),
+                'origine'     => array('label'      => 'Pièce d\'origine', 'data_type'  => 'array', 'sub_params' => array(
+                        'id'         => array('label' => 'ID', 'data_type' => 'id', 'required' => 1),
+                        'ref'        => array('label' => 'Reférence', 'required' => 1),
+                        'extra_data' => array('label' => 'Données supplémentaires', 'data_type' => 'array')
+                    )),
+                'lines'       => array('label' => 'Lignes', 'data_type' => 'array'),
+                'client'      => array('label'      => 'Données client', 'data_type'  => 'json', 'sub_params' => array(
+                        'id'              => array('label' => 'ID', 'data_type' => 'id', 'required' => 1),
+                        'ref'             => array('label' => 'Reférence', 'required' => 1),
+                        'nom'             => array('label' => 'Nom', 'required' => 1),
+                        'is_company'      => array('label' => 'Entreprise', 'data_type' => 'bool', 'default' => 0),
+                        'siret'           => array('label' => 'N° SIRET', 'required_if' => 'data/client/is_company'),
+                        'siren'           => array('label' => 'N° SIREN', 'required_if' => 'data/client/is_company'),
+                        'forme_juridique' => array('label' => 'Forme juridique', 'required_if' => 'data/client/is_company'),
+                        'capital'         => array('label' => 'Capital social'),
+                        'address'         => array('label'      => 'Adresse client (siège si pro)', 'data_type'  => 'array', 'sub_params' => array(
+                                'address' => array('label' => 'Lignes adresse', 'required' => 1),
+                                'zip'     => array('label' => 'Code postal', 'required' => 1),
+                                'town'    => array('label' => 'Ville', 'required' => 1),
+                                'pays'    => array('label' => 'Pays', 'default' => 'France')
+                            )),
+                        'contact'         => array('label'      => 'Infos contact', 'data_type'  => 'array', 'sub_params' => array(
+                                'nom'    => array('label' => 'Nom'),
+                                'prenom' => array('label' => 'Prénom'),
+                                'email'  => array('label' => 'Adresse e-mail'),
+                                'tel'    => array('label' => 'Tel.'),
+                                'mobile' => array('label' => 'Tel. (mobile)')
+                            )),
+//                        'signataire'      => array('label'      => 'Signataire', 'data_type'  => array(), 'sub_params' => array(
+//                                'nom'      => array('label' => 'Nom', 'required' => 1),
+//                                'prenom'   => array('label' => 'Nom', 'required' => 1),
+//                                'fonction' => array('label' => 'Fonction', 'required_if' => 'data/client/is_company'),
+//                            )),
+                        'livraisons'      => array('label' => 'Adresses de livraison', 'data_type' => 'array')
+                    )),
+                'commercial'  => array('label'      => 'Données commercial', 'data_type'  => 'array', 'sub_params' => array(
+                        'id'    => array('label' => 'ID', 'data_type' => 'id'),
+                        'nom'   => array('label' => 'Nom'),
+                        'email' => array('label' => 'Adresse e-mail'),
+                        'tel'   => array('label' => 'Tel.'),
+                    )),
+                'demande'     => array('label' => 'Données supplémentaires', 'data_type' => 'json')
+            )),
+    )
+);
+BWSApi::$requests['cancelDemandeFinancement'] = array(
+    'desc'   => 'Annulation d\'une demande de financement',
+    'params' => array(
+        'id_demande' => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1),
+        'note'       => array('label' => 'Note', 'data_type' => 'text', 'default' => '')
     )
 );
 BWSApi::$requests['getDemandeFinancementInfos'] = array(
@@ -27,6 +79,14 @@ BWSApi::$requests['setDemandeFinancementDocSigned'] = array(
         'id_demande'  => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1),
         'doc_type'    => array('label' => 'Type de document', 'required' => 1),
         'doc_content' => array('label' => 'Fichier', 'required' => 1)
+    )
+);
+BWSApi::$requests['setDemandeFinancementDocRefused'] = array(
+    'desc'   => 'Refus d\'un document d\'une demande de financement',
+    'params' => array(
+        'id_demande' => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1),
+        'doc_type'   => array('label' => 'Type de document', 'required' => 1),
+        'note'       => array('label' => 'Note', 'data_type' => 'text', 'default' => '')
     )
 );
 
@@ -46,9 +106,9 @@ class BWSApi_ExtEntity extends BWSApi
             $errors = array();
             $warnings = array();
 
-            $demande = $BF_Demande_class::createFromExternalPropale($this->params, $errors, $warnings);
+            $demande = $BF_Demande_class::createFromSource($this->getParam('data'), $errors, $warnings);
 
-            if (BimpObject::objectLoaded($demande)) {
+            if (!count($errors) && BimpObject::objectLoaded($demande)) {
                 $demande->addObjectLog('Créé via webservice - compte utilisateur: ' . $this->ws_user->getLink());
                 $response = array(
                     'success'     => 1,
@@ -61,6 +121,30 @@ class BWSApi_ExtEntity extends BWSApi
                 }
             } else {
                 $this->addError('CREATION_FAIL', BimpTools::getMsgFromArray($errors, 'Echec de la création de la demande de financement', true));
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_cancelDemandeFinancement()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $id_demande = (int) $this->getParam('id_demande', 0);
+            $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
+
+            if (!BimpObject::objectLoaded($demande)) {
+                $this->addError('UNFOUND', 'La demande de financement #' . $id_demande . ' n\'existe pas');
+            } else {
+                $errors = $demande->onDemandeCancelledBySource($this->getParam('note', ''));
+
+                if (count($errors)) {
+                    $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+                } else {
+                    $response['success'] = 1;
+                }
             }
         }
 
@@ -143,7 +227,31 @@ class BWSApi_ExtEntity extends BWSApi
             if (!BimpObject::objectLoaded($demande)) {
                 $this->addError('UNFOUND', 'La demande de financement #' . $id_demande . ' n\'existe pas');
             } else {
-                $errors = $demande->onExternalDocSigned($this->getParam('doc_type', ''), $this->getParam('doc_content', ''));
+                $errors = $demande->onDocSignedFromSource($this->getParam('doc_type', ''), $this->getParam('doc_content', ''));
+
+                if (count($errors)) {
+                    $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+                } else {
+                    $response['success'] = 1;
+                }
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_setDemandeFinancementDocRefused()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $id_demande = (int) $this->getParam('id_demande', 0);
+            $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
+
+            if (!BimpObject::objectLoaded($demande)) {
+                $this->addError('UNFOUND', 'La demande de financement #' . $id_demande . ' n\'existe pas');
+            } else {
+                $errors = $demande->onDocRefused($this->getParam('doc_type', ''), $this->getParam('note', ''));
 
                 if (count($errors)) {
                     $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));

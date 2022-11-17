@@ -2,7 +2,42 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 
-class Bimp_Propal extends BimpComm
+if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/BimpComm.class.php';
+    }
+}
+
+if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/BimpComm.class.php';
+    }
+}
+
+if (class_exists('BimpComm_ExtEntity')) {
+
+    class Bimp_PropalTemp extends BimpComm_ExtEntity
+    {
+        
+    }
+
+} elseif (class_exists('BimpComm_ExtVersion')) {
+
+    class Bimp_PropalTemp extends BimpComm_ExtVersion
+    {
+        
+    }
+
+} else {
+
+    class Bimp_PropalTemp extends BimpComm
+    {
+        
+    }
+
+}
+
+class Bimp_Propal extends Bimp_PropalTemp
 {
 
     public static $dol_module = 'propal';
@@ -119,8 +154,7 @@ class Bimp_Propal extends BimpComm
                 return $this->can("edit");
 
             case 'createSignature':
-                // Todo suite à mise en place devis FIN. 
-                return 0;
+                return 1;
         }
         return 1;
     }
@@ -636,6 +670,7 @@ class Bimp_Propal extends BimpComm
                     if (!$signed) {
                         if ($use_signature) {
                             // Boutons signature: 
+                            $err = array();
                             $signature = $this->getChildObject('signature');
                             if (BimpObject::objectLoaded($signature)) {
                                 if (!(int) $signature->getData('signed')) {
@@ -643,7 +678,7 @@ class Bimp_Propal extends BimpComm
                                 } else {
                                     $signed = true;
                                 }
-                            } elseif ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
+                            } elseif ($this->isActionAllowed('createSignature', $err) && $this->canSetAction('createSignature')) {
                                 $no_signature = true;
                                 // Créer Signature: 
                                 $buttons[] = array(
@@ -996,14 +1031,14 @@ class Bimp_Propal extends BimpComm
         }
 
 
-        $html .= BimpRender::renderButton(array(
-                    'classes'     => array('btn', 'btn-default'),
-                    'label'       => 'Ancienne version',
-                    'icon_before' => 'fa_file',
-                    'attr'        => array(
-                        'href' => "../comm/propal/card.php?id=" . $this->id
-                    )
-                        ), "a");
+//        $html .= BimpRender::renderButton(array(
+//                    'classes'     => array('btn', 'btn-default'),
+//                    'label'       => 'Ancienne version',
+//                    'icon_before' => 'fa_file',
+//                    'attr'        => array(
+//                        'href' => "../comm/propal/card.php?id=" . $this->id
+//                    )
+//                        ), "a");
 
         if (!$no_div) {
             $html .= '</div>';

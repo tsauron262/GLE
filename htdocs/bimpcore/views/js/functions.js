@@ -753,6 +753,40 @@ function setCommonEvents($container) {
     });
     // Multiple values: 
     checkMultipleValues();
+    // Copy Icon: 
+    $container.find('.copyTextIcon').each(function () {
+//        $(this).click(function (e) {
+//            e.preventDefault();
+//            e.stopPropagation();
+//            var text = $(this).data('text');
+//
+//            if (text) {
+//                navigator.permissions.query({name: "clipboard-write"}).then((result) => {
+//                    if (result.state === "granted" || result.state === "prompt") {
+//                        bimp_msg('ici');
+//                        if (typeof (window.navigator.clipboard) !== 'undefined' && typeof (window.navigator.clipboard.writeText) === 'function') {
+//                            window.navigator.clipboard.writeText(text).then(
+//                                    () => {
+//                                bimp_msg('Copié', 'success', null, true);
+//                            },
+//                                    () => {
+//                                bimp_msg('Echec copie: ' + text, 'danger', null, true);
+//                            }
+//                            );
+//                        }
+//                        return;
+//                    } else {
+//                        bimp_msg('KO');
+//                    }
+//                });
+//
+//                bimp_msg('Copie impossible : ' + text, 'danger', null, false);
+//
+//            } else {
+//                bimp_msg('Aucun texte à copier', 'danger', null, true);
+//            }
+//        });
+    });
 }
 
 function setDisplayPopupButtonEvents($button) {

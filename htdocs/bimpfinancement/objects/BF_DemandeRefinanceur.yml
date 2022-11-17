@@ -58,13 +58,9 @@ fields:
         required: 1
         
     rate:
-        label: Taux d'emprunt annuel
+        label: Taux de cession annuel
         type: percent
-        
-#    coef:
-#        label: Coéficient
-#        type: float
-#        decimals: 5
+        depends_on: id_refinanceur
             
     qty: 
         label: Nombre de périodes
@@ -73,14 +69,16 @@ fields:
         default_value: 0
         decimals: 0
         
-    amount_ht:
-        label: Montant Loyer HT
-        type: money
-        required: 0
+#    amount_ht:
+#        label: Montant Loyer HT
+#        type: money
+#        required: 0
+#        input: 
+#            extra_content: 
+#                callback: renderAmountInputExtraContent
         
     payment:
         label: Mode de règlement
-        type: int
         values: 
             array: modes_paiements
         
@@ -118,25 +116,8 @@ forms:
                   show_values: 1
             - field: periodicity
             - field: qty
-            - field: amount_ht
-#            - custom: 1
-#              label: Mode de calcul
-#              input_name: calc_mode
-#              input: 
-#                  type: switch_options
-#                  options: 
-#                      rate: Taux
-#                      coef: Coéficient
-#              value: rate
             - field: rate
-#              display_if: 
-#                  field_name: calc_mode
-#                  show_values: rate
-#            - field: coef
-#              display_if: 
-#                  field_name: calc_mode
-#                  show_values: coef
-#            - field: payment
+#            - field: amount_ht
             - field: comment
              
     demande_done: 
@@ -156,24 +137,8 @@ forms:
                   display_now: 1
             - field: periodicity
             - field: qty
-            - field: amount_ht
-#            - custom: 1
-#              label: Mode de calcul
-#              input_name: calc_mode
-#              input: 
-#                  type: switch_options
-#                  options: 
-#                      rate: Taux
-#                      coef: Coéficient
-#              value: rate
             - field: rate
-#              display_if: 
-#                  field_name: calc_mode
-#                  show_values: rate
-#            - field: coef
-#              display_if: 
-#                  field_name: calc_mode
-#                  show_values: coef
+#            - field: amount_ht
             - field: payment
             - field: comment
 
@@ -204,24 +169,8 @@ forms:
                   show_values: 1                      
             - field: periodicity
             - field: qty
-            - field: amount_ht
-#            - custom: 1
-#              label: Mode de calcul
-#              input_name: calc_mode
-#              input: 
-#                  type: switch_options
-#                  options: 
-#                      rate: Taux
-#                      coef: Coéficient
-#              value: rate
             - field: rate
-#              display_if: 
-#                  field_name: calc_mode
-#                  show_values: rate
-#            - field: coef
-#              display_if: 
-#                  field_name: calc_mode
-#                  show_values: coef
+#            - field: amount_ht
             - field: payment
             - field: comment
             
@@ -251,24 +200,15 @@ fields_tables:
               display: soc_card
             - field: periodicity
               edit: 1
+            - field: qty
+              edit: 1
+            - field: rate
+              edit: 1
 #            - field: payment
 #              edit: 1
             - field: comment
               edit: 1
-            
-    montants: 
-        title: Montants
-        icon: fas_euro-sign
-        rows: 
-            - field: qty
-              edit: 1
-#            - field: coef
-#              edit: 1
-            - field: rate
-              edit: 1
-            - field: amount_ht
-              edit: 1
-            
+              
 views: 
     default: 
         rows: 
@@ -281,17 +221,23 @@ views:
                   fields_table: 
                       name: infos
                       
-                - type: fields_table
+                - type: custom
                   col_lg: 6
                   col_md: 6
-                  fields_table: 
-                      name: montants
+                  custom: 
+                      callback: renderMontants
                       
             - cols: 
                 - type: custom
                   custom: 
                       callback: renderLogsList
-                      
+      
+lists_cols: 
+    loyer_mensuel_ht: 
+        label: Loyer mensuel HT
+        value: 
+            callback: displayLoyerMensuelHT
+            
 lists:
     default: 
         checkboxes: 
@@ -323,10 +269,7 @@ lists:
                 edit: 1
             rate: 
                 edit: 1
-#            coef: 
-#                edit: 1
-            amount_ht: 
-                edit: 1
+            loyer_mensuel_ht: 
             comment: 
             
             

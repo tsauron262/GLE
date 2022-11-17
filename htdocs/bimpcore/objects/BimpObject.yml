@@ -123,6 +123,16 @@ objects:
             id_object: 
                 field_value: id_fourn_price
                 
+    signature: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
+        
 #    BimpComm objects: 
     
     paiement: 

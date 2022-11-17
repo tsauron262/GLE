@@ -2,6 +2,7 @@ table: bf_demande_source
 icon: fas_
 common_fields: 0
 
+parent_module: bimpfinancement
 parent_object: BF_Demande
 parent_id_property: id_demande
 
@@ -11,7 +12,7 @@ header_btn:
     callback: getActionsButtons
     
 labels:
-    name: Source
+    name: source
     is_female: 1
         
 fields: 
@@ -62,6 +63,17 @@ fields:
     commercial_data:
         label: Données commercial
         type: json
+        
+    cancel_submitted: 
+        label: Annulation soumise
+        type: bool
+        default_value: 0
+        
+    refuse_submitted: 
+        label: Refus soumis
+        type: bool
+        default_value: 0
+        
     
 fields_tables: 
     infos: 
@@ -148,7 +160,6 @@ lists:
             client: 
             origine: 
             commercial: 
-            
             
     demande: 
         extends: default

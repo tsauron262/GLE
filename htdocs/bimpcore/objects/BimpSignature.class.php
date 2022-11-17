@@ -29,14 +29,16 @@ class BimpSignature extends BimpObject
      * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
      */
 
+    const REFUSED = -2;
+    const CANCELLED = -1;
     const TYPE_DIST = 1;
     const TYPE_PAPIER = 2;
     const TYPE_ELEC = 3;
     const TYPE_PAPIER_NO_SCAN = 4;
 
     public static $types = array(
-        -2                        => array('label' => 'Refusée', 'icon' => 'fas_exclamation-cirlce', 'classes' => array('danger')),
-        -1                        => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
+        self::REFUSED             => array('label' => 'Refusée', 'icon' => 'fas_exclamation-cirlce', 'classes' => array('danger')),
+        self::CANCELLED           => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
         0                         => array('label' => 'En attente de signature', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::TYPE_DIST           => array('label' => 'Signature à distance', 'icon' => 'fas_sign-in-alt'),
         self::TYPE_PAPIER         => array('label' => 'Signature papier', 'icon' => 'fas_file-download'),
@@ -1753,14 +1755,14 @@ class BimpSignature extends BimpObject
 
         if (!$id_account)
             $errors[] = 'ID du compte utilisateur DocuSign absent';
-        
+
         if (!$id_envelope)
             $errors[] = 'ID de l\'envelope DocuSign absent';
 
         require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
         $api = BimpAPI::getApiInstance('docusign');
-        
+
         if (!is_a($api, 'DocusignAPI')) {
             $errors[] = 'ID de l\'API absent';
         }

@@ -11,4 +11,12 @@ params:
         def: 0
         required: 1
         
-    
+# Valeurs par défauts: 
+    def_duration: 
+        def: 36
+        
+    def_periodicity:
+        def: 3
+        
+    def_mode_calcul: 
+        def: 1

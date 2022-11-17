@@ -11,6 +11,8 @@ class BimpFile extends BimpObject
         1 => 'Membres Bimp et client',
         2 => 'Membres BIMP',
     );
+    
+    public $htmlName = 'file';
 
     // Droits users: 
 
@@ -309,13 +311,13 @@ class BimpFile extends BimpObject
             return array('Aucun dossier de destination spécifié');
         }
 
-        $_FILES['file']['name'] = $file_name . '.' . $file_ext;
+        $_FILES[$this->htmlName]['name'] = $file_name . '.' . $file_ext;
 
-        if (file_exists($file_dir . $_FILES['file']['name'])) {
+        if (file_exists($file_dir . $_FILES[$this->htmlName]['name'])) {
             $errors[] = "Le Fichier existe déja";
             $this->dontRemove = true;
         } else {
-            $ret = dol_add_file_process($file_dir, 0, 0, 'file');
+            $ret = dol_add_file_process($file_dir, 0, 0, $this->htmlName);
             if ($ret <= 0) {
                 $errors = BimpTools::getDolEventsMsgs(array('errors', 'warnings'));
                 if (!count($errors)) {
@@ -642,13 +644,13 @@ class BimpFile extends BimpObject
     {
         $errors = array();
 
-        if (!isset($_FILES['file']) || empty($_FILES['file'])) {
+        if (!isset($_FILES[$this->htmlName]) || empty($_FILES[$this->htmlName])) {
             $errors[] = 'Aucun fichier transféré';
         } else {
             $name = (string) $this->getData('file_name');
 
             if (!$name) {
-                $name = BimpTools::cleanStringForUrl(pathinfo($_FILES['file']['name'], PATHINFO_FILENAME));
+                $name = BimpTools::cleanStringForUrl(pathinfo($_FILES[$this->htmlName]['name'], PATHINFO_FILENAME));
 
                 if (!$name) {
                     $errors[] = 'Nom du fichier invalide';
@@ -660,14 +662,14 @@ class BimpFile extends BimpObject
             $this->set('file_name', $name);
 
             if (!count($errors)) {
-                $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+                $ext = pathinfo($_FILES[$this->htmlName]['name'], PATHINFO_EXTENSION);
 
                 if (!(string) $ext) {
                     $errors[] = 'Extension du fichier absente. Veuillez renommer le fichier à envoyer avec une extension valide';
                 }
                 if (!count($errors)) {
                     $this->set('file_ext', $ext);
-                    $this->set('file_size', $_FILES['file']['size']);
+                    $this->set('file_size', $_FILES[$this->htmlName]['size']);
                     $errors = $this->uploadFile();
 
                     if (!count($errors)) {

@@ -18,7 +18,7 @@ class BContract_echeancier extends BimpObject {
             $next = new Datetime($echeancier['next_facture_date']);
             $diff = $aujourdui->diff($next);
             $msg = null;
-            $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $echeancier['id_contrat']);
+            $parent = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $echeancier['id_contrat']);
             if ($this->isEnRetard()) {
                 $msg = "Bonjour,<br />L'échéancier du contrat N°" . $parent->getNomUrl() . ' est en retard de facturation de ' . $diff->d . ' Jours<br /> Merci de faire le nécéssaire pour régulariser la facturation';
             }
@@ -94,11 +94,10 @@ class BContract_echeancier extends BimpObject {
 
     public function isDejaFactured($date_start, $date_end) {
         $parent = $this->getParentInstance();
-        $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $listeFactures = getElementElement("contrat", 'facture', $parent->id);
         if(count($listeFactures) > 0) {
             foreach($listeFactures as $index => $i) {
-                $facture->fetch($i['d']);
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $i['d']);
                 if($facture->getData('type') == 0) {
                     $dateDebut = New DateTime();
                     $dateFin = New DateTime();
@@ -117,7 +116,7 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function getDateNextPeriodRegen() {
-        $facture = $this->getInstance("bimpcommercial", 'Bimp_Facture', $this->getLastFactureId());
+        $facture = BimpCache::getBimpObjectInstance("bimpcommercial", 'Bimp_Facture', $this->getLastFactureId());
         $date = new DateTime();
         $date->setTimestamp($facture->dol_object->lines[0]->date_start);
         return $date->format('Y-m-d');
@@ -129,9 +128,9 @@ class BContract_echeancier extends BimpObject {
         $card = null; 
         $facture = null;
         if($this->getLastFactureId() > 0)
-            $facture = $this->getInstance("bimpcommercial", 'Bimp_Facture', $this->getLastFactureId());
+            $facture = BimpCache::getBimpObjectInstance("bimpcommercial", 'Bimp_Facture', $this->getLastFactureId());
         if($avoir) {
-            $facture_avoir = $this->getInstance('bimpcommercial', 'Bimp_Facture', $this->getLastFactureAvoirId($facture->id));
+            $facture_avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $this->getLastFactureAvoirId($facture->id));
         }
 
         if(is_object($facture_avoir) && $facture_avoir->isLoaded()) {
@@ -156,7 +155,7 @@ class BContract_echeancier extends BimpObject {
         }
 
         if(!count($errors)) {
-            $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture_unlink']);
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture_unlink']);
             
             if($data['is_good_avoir'] == 1) {
                 $id_avoir = $data['id_avoir_unlink'];
@@ -164,7 +163,7 @@ class BContract_echeancier extends BimpObject {
                 $id_avoir = $data['new_avoir'];
             }
             
-            $avoir = $this->getInstance('bimpcommercial', "Bimp_Facture", $id_avoir);
+            $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', "Bimp_Facture", $id_avoir);
             
             if($avoir->getData('fk_statut') == 0) {
                 $errors[] = "L'opération ne peut être faite sur un avoir BROUILLON";
@@ -202,11 +201,10 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function getLastFactureId() {
-        $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $liste = getElementElement('contrat', 'facture', $this->getParentId());
         $lastId = 0;
         foreach($liste as $index => $i) {
-            $facture->fetch($i['d']);
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $i['d']);
             if($facture->getData('type') == 0) {
                 if($facture->id > $lastId) {
                     $lastId = $facture->id;
@@ -218,11 +216,11 @@ class BContract_echeancier extends BimpObject {
     
     public function getLastFactureAvoirId($id_facture = 0) {
         if($id_facture == 0)
-            $facture = $this->getInstance(('bimpcommercial'), 'Bimp_Facture', $this->getLastFactureId());
+            $facture = BimpCache::getBimpObjectInstance(('bimpcommercial'), 'Bimp_Facture', $this->getLastFactureId());
         else
-            $facture = $this->getInstance(('bimpcommercial'), 'Bimp_Facture', $id_facture);
+            $facture = BimpCache::getBimpObjectInstance(('bimpcommercial'), 'Bimp_Facture', $id_facture);
         
-        $facture_avoir = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $facture_avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
         if($facture_avoir->find(['fk_facture_source' => $facture->id, 'type' => 2],true)) {
             return $facture_avoir->id;
         }
@@ -331,7 +329,7 @@ class BContract_echeancier extends BimpObject {
     public function actionValidateFacture($data, &$success = '') {
         global $user;
 
-        $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture']);
+        $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture']);
         if ($instance->dol_object->validate($user) > 0) {
             $success = 'Facture <b>' . $facture->ref . '</b> validée avec succès';
         } else {
@@ -379,17 +377,17 @@ class BContract_echeancier extends BimpObject {
         $errors = $warnings = [];
         
         if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
-            return  array('errors' => array("Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier"));
+            return  array('errors' => array("Contrat déjà facturé pour cette période, merci de rafraîchir la page pour voir cette facture dans l'échéancier"));
         }
 
         $parent = $this->getParentInstance();
-        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $parent->getInitData('fk_soc'));
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parent->getInitData('fk_soc'));
 
         $linked_propal = $this->db->getValue('element_element', 'fk_source', 'targettype = "contrat" and fk_target = ' . $parent->id);
 
-        $propal = $this->getInstance('bimpcommercial', 'Bimp_Propal', $linked_propal);
+        $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $linked_propal);
         $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
-        $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
         $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
         
         $bill_label = (isset($data['label'])? $data['label'].' ': '')."Facture " . $parent->getPeriodeString();
@@ -415,7 +413,7 @@ class BContract_echeancier extends BimpObject {
         $errors = $instance->create($warnings, true);
         $instance->copyContactsFromOrigin($parent);
         
-        $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
+        $lines = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine');
         $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
         foreach ($lines->getList(['fk_contrat' => $parent->id,"renouvellement" => $parent->getData('current_renouvellement')]) as $idLine => $infos) {
             $desc .= $infos['description'] . "<br /><br />";
@@ -455,7 +453,7 @@ class BContract_echeancier extends BimpObject {
             addElementElement("contrat", "facture", $parent->id, $instance->id);
             
             
-            $new_first_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+            $new_first_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
             $errors = BimpTools::merge_array($errors, $new_first_line->validateArray(array(
                     'type' => ObjectLine::LINE_FREE,
                     'id_obj' => (int) $instance->id
@@ -477,7 +475,7 @@ class BContract_echeancier extends BimpObject {
             
             if (!count($errors)) {
 
-                $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                $new_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
                 $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
                     'type' => ObjectLine::LINE_TEXT,
                     'id_obj' => (int) $instance->id,
@@ -571,9 +569,9 @@ class BContract_echeancier extends BimpObject {
             $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emise", 'info', false);
         }
 
-        $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $instance_facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
         $parent = $this->getParentInstance();
-        $societe = $this->getInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));
+        $societe = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));
         
         if($header)
             $html .= $this->renderHeaderEcheancier();
@@ -598,7 +596,7 @@ class BContract_echeancier extends BimpObject {
             $avoir = [];
             
             foreach($data->factures_send as $e) {
-                $fact = $this->getInstance('bimpcommercial', 'Bimp_Facture', $e['d']);
+                $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $e['d']);
                 if($fact->getData('type') != 3 && $fact->getData('type') != 2) {
                     $id_avoir = $this->db->getValue('facture', 'rowid', 'type = 2 AND fk_facture_source = ' . $fact->id);
                     if($id_avoir) {
@@ -608,7 +606,7 @@ class BContract_echeancier extends BimpObject {
             }
             
             foreach ($data->factures_send as $element_element) {
-                $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);                
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);                
                 
                 if($facture->getData('type') != 3) {
                 
@@ -708,7 +706,7 @@ class BContract_echeancier extends BimpObject {
                 $getEndDate = new DateTime($parent->displayRealEndDate("Y-m-d"));
                 if($getEndDate < $dateTime_end_mkTime)
                     $dateTime_end_mkTime = $getEndDate;
-                $amount = $parent->getAddAmountAvenantProlongation() / ($data->reste_periode / $morceauPeriode);
+                $amount = 0;//$parent->getAddAmountAvenantProlongation() / ($data->reste_periode / $morceauPeriode);
                 $firstPassage = false;
                 if($parent->getData('periodicity') != 1200 && $data->reste_periode > 1) {
                     $amount += $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);
@@ -791,6 +789,8 @@ class BContract_echeancier extends BimpObject {
                 
                 // 
                 $html .= '<div class="btn-group"><button type="button" class="btn bs-popover" '.BimpRender::renderPopoverData('Générer le PDF').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('generatePdfEcheancier', array(), array('form_name' => 'pdfEcheancier')) . '">Générer le PDF</button></div>';
+                $html .= '<div class="btn-group"><button type="button" class="btn bs-popover" '.BimpRender::renderPopoverData('(ADMIN - Infos périodes)').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalCustomContent('displayNewEcheancier', 'Echeancier pour ce contrat') . '">New Echeancier</button></div>';
+
 //                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" >Facturation suplémentaire</i></span>';
 //                if($this->canEdit()) {
                   if($user->admin) {
@@ -849,6 +849,95 @@ class BContract_echeancier extends BimpObject {
         
         
     }
+    public function displayNewEcheancier() {
+        
+        $html = '';
+        
+        $allPeriodes = $this->getAllPeriodes(true);
+        
+        $html .= '<table class="objectlistTable" style="border: none; min-width: 400px" width="100%">';
+        $html .= '<thead>';
+        $html .= '<tr class="headerRow">';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Période de facturation<br />Début - Fin</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant HT</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">PA</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat du paiement</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $html .= '<tbody class="listRows">';
+        
+        foreach($allPeriodes['periodes'] as $periode) {
+            
+            $dateDebutDeLaPeriode   = new DateTime(str_replace('/', '-', $periode['START']));
+            $dateFinDeLaPeriode     = new DateTime(str_replace('/', '-', $periode['STOP']));
+            $nextFactureDate        = new DateTime($this->getData('next_facture_date'));
+            
+            $html .= '<tr class=\'bs-popover\' ' . BimpRender::renderPopoverData($periode['DUREE_MOIS'] . ' mois' , 'left') . ' >';
+            
+            $displayPeriode             = '<span>Du <strong>' . $periode['START'] . '</strong> au <strong>' . $periode['STOP'] . '</strong></span>';
+            $displayMontantHT           = price($periode['PRICE']) . '€';
+            $displayMontantTVA          = price($periode['TVA']) . '€';
+            $displayMontantTTC          = price($periode['PRICE'] + $periode['TVA']) . '€';
+            $displayMontantPA           = price(0) . '€';
+            
+            $forDisplayReferenceFacture = 'Periode non facturée';
+            $displayEtatPaiment         = 'Periode non facturée';
+            $classForEtatPaiement       = 'important';
+            
+            if($periode['FACTURE'] != '') {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+                $facture->find(Array('facnumber' => $periode['FACTURE']), 1);
+                if($facture->isLoaded()) {
+                    $forDisplayReferenceFacture = $facture->getNomUrl();
+                    if($facture->getData('paye')) {
+                        $displayEtatPaiment         = 'PAY&Eacute;E';
+                        $classForEtatPaiement       = 'success';
+                    } else {
+                        $displayEtatPaiment         = 'INPAY&Eacute;E';
+                        $classForEtatPaiement       = 'danger';
+                    }
+                } else {
+                    $displayEtatPaiment         = 'Impossible de charger l\'état de paiement pour la facture: ' . $periode['FACTURE'];
+                    $classForEtatPaiement       = 'warning';
+                    $forDisplayReferenceFacture = 'Impossible de charger la facture: ' . $periode['FACTURE'];
+                }
+                
+            }
+            
+            $displayReferenceFacture    = '<span style=\'color:grey; font-weight:bold\'>' . $forDisplayReferenceFacture . '</span>';
+            
+            $isLaPeriodeDeFacturation = (($dateDebutDeLaPeriode->format('Y-m-d') == $nextFactureDate->format('Y-m-d')) && $periode['FACTURE'] == '') ? true : false;
+            
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayPeriode . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayMontantHT . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayMontantTVA . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayMontantTTC . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayMontantPA . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>' . $displayReferenceFacture . '</td>';
+            $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'><span class=\''.$classForEtatPaiement.'\' >'.$displayEtatPaiment.'</span></td>';
+            
+            if($isLaPeriodeDeFacturation) {
+                $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'>'
+                        . '<span class="rowButton bs-popover">'.BimpRender::renderIcon('plus').'</span>' . '</td>';
+            } else {
+                $html .= '<td style=\'text-align:center; ' . (($isLaPeriodeDeFacturation) ? 'background-color:lightgrey !important' : '') . '\'></td>';
+            }
+            
+            $html .= '</tr>';
+            
+        }
+        
+        $html .= '</tbody>';
+        $html .= '</table>';
+        
+        $html .= '<pre>' . print_r($allPeriodes, 1) . '<pre>';
+        
+        return $html;
+    }
     
     public function actionGeneratePdfEcheancier($data, &$success)
     {
@@ -890,10 +979,23 @@ class BContract_echeancier extends BimpObject {
     
     public function getAmountByMonth() {
         $parentInstance = $this->getParentInstance();
-        $reste_a_payer = $parentInstance->reste_a_payer() / $parentInstance->reste_periode() / $parentInstance->getData('periodicity');
+        if($parentInstance->reste_periode() > 0){
+            $reste_a_payer = $parentInstance->reste_a_payer() / $parentInstance->reste_periode() / $parentInstance->getData('periodicity');
+
+            return $reste_a_payer;
+        }
+        return 0;
         
-        return $reste_a_payer;
+    }
+    
+    public function addedMonthByAvenant() {
+
+        $sql = 'SELECT SUM(added_month) as sum FROM llx_bcontract_avenant WHERE ';
+        $sql.= 'id_contrat = ' . $this->getData('id_contrat') . ' ';
+        $sql.= 'AND statut IN(2,5) AND type = 1';
         
+        return $this->db->executeS($sql)[0]->sum;
+
     }
     
     private $endDateTimeFactured = 0;
@@ -971,7 +1073,7 @@ class BContract_echeancier extends BimpObject {
         return $return;
     }
 
-    public function getAllPeriodes():array {
+    public function getAllPeriodes($display = false):array {
         
         $periodes = Array();
         
@@ -1004,12 +1106,14 @@ class BContract_echeancier extends BimpObject {
         if($periodicity == 1200){
             $periodicity = $dureeEnMois;
         }
+        $nombrePeriodesAdded      = $this->addedMonthByAvenant();    
         $dureePeriodeIncomplette  = $dureeEnMois % $periodicity;
         $dureePeriodesComplettes  = $dureeEnMois - $dureePeriodeIncomplette;
         $nombrePeriodesComplettes = $dureePeriodesComplettes / $periodicity;
 
         $periodes['infos'] = Array(
-            'nombre_periodes'           => $nombrePeriodesComplettes, 
+            'nombre_periodes'           => $nombrePeriodesComplettes,
+            'nombre_periodes_added'     => $nombrePeriodesAdded,
             'periode_incomplette_mois'  => $dureePeriodeIncomplette,
             'tarif_au_mois'             => $this->getAmountByMonth(),
             'factures'                  => $this->getAllFactures()
@@ -1023,7 +1127,7 @@ class BContract_echeancier extends BimpObject {
         
         if($nombrePeriodesComplettes > 0) {
             while($i <= $nombrePeriodesComplettes) {
-                if(!count($periodes['periodes'])) {
+                if(!isset($periodes['periodes']) || !count($periodes['periodes'])) {
                     $haveOtherPeriodes = true;
                     $startDate = $dateStartEcheancier->format('d/m/Y');
                     $startDateForPeriode = $dateStartEcheancier->format('Y-m-d');
@@ -1069,6 +1173,23 @@ class BContract_echeancier extends BimpObject {
                     'TVA' => $price * 0.2,
                     'FACTURE' => $factureStr
                 );
+                
+                $tmpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+                if($tmpFacture->find(Array('facnumber' => $factureStr), 1)) {
+                    if($tmpFacture->getData('fk_facture_source')) {
+                        $factureSource = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $tmpFacture->getData('fk_facture_source'));
+                        $periodes['periodes'][] = Array(
+                            'START' => $startDateStr,
+                            'STOP'  => $stopDateStr,
+                            'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDateStr : $startDateStr . ' ('.$factureStr.')',
+                            'HT' => $resteAPayer,
+                            'DUREE_MOIS' => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
+                            'PRICE' => $factureSource->getData('total'),
+                            'TVA' => $factureSource->getData('total') * 0.2,
+                            'FACTURE' => $factureSource->getRef()
+                        );
+                    }
+                }
 
                 $alternateStartDate = $stopDate;
 
@@ -1109,13 +1230,14 @@ class BContract_echeancier extends BimpObject {
         foreach($periodes['periodes'] as $periode){
             $tot += $periode['PRICE'];
         }
-        if(price($tot) != price($parentInstance->getTotalContrat())){
-            die('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
-            BimpCore::addlog('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
-            die('PRobléme Technique');
+        
+        if(!$display) {
+            if(price($tot) != price($parentInstance->getTotalContrat())){
+                die('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
+                BimpCore::addlog('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
+                die('PRobléme Technique');
+            }
         }
-        
-        
 
         return $periodes;
         
@@ -1126,7 +1248,7 @@ class BContract_echeancier extends BimpObject {
         global $user;
         $parent = $this->getParentInstance();
         $errors = $warnings = array();
-        $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture']);
+        $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture']);
 
         $dateDebutFacture = $instance->dol_object->lines[0]->date_start;
         
@@ -1158,7 +1280,7 @@ class BContract_echeancier extends BimpObject {
     
     
     public function parentGetData($field) {
-        $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
+        $parent = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
         $returned_info = $parent->getData($field);
     }
     
@@ -1169,7 +1291,7 @@ class BContract_echeancier extends BimpObject {
         $returned_info = $parent->getData($field);
 
         if (!is_null($module) && !is_null($bimp_object)) {
-            $instance = $this->getInstance($module, $bimp_object, $returned_info);
+            $instance = BimpCache::getBimpObjectInstance($module, $bimp_object, $returned_info);
             return $instance->getNomUrl();
         }
 

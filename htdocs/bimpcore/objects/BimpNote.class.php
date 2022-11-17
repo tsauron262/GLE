@@ -55,12 +55,12 @@ class BimpNote extends BimpObject
             foreach ($notes as $note)
                 if ($note['lu'] == 0 && count($data) < $maxForMail) {
                     $noteObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $note['idNoteRef']);
-                    $data[] = 'Message de ' . $noteObj->displayData('user_create', 'nom') . ' concernant ' . $noteObj->getParentLink() . ': <br/><i>' . $noteObj->getData('content') . '</i>';
+                    $data[] = 'Message de ' . $noteObj->displayData('user_create', 'nom') . ' concernant ' . $noteObj->getParentLink() . ': <br/><i>' . $noteObj->displayData('content') . '</i>';
                 }
             if (count($data) > 0) {
                 $userT->fetch($idUser);
                 $html = '';
-                $htmlTitre = '<h2>User : ' . $userT->getFullName($langs) . '</h3><br/>';
+//                $htmlTitre = '<h2>User : ' . $userT->getFullName($langs) . '</h3><br/>';
                 $html .= 'Bonjour vous avez ' . count($notes) . ' message(s) non lu : <br/>';
                 if (count($data) >= $maxForMail)
                     $html .= 'Voici les ' . count($data) . ' dérniéres<br/>';
@@ -69,7 +69,7 @@ class BimpNote extends BimpObject
                 $html .= implode('<br/><br/>', $data);
                 mailSyn2('Message dans l\'erp', $userT->email, null, $html);
 
-                echo $htmlTitre . $html;
+//                echo $htmlTitre . $html;
             }
         }
 
@@ -333,6 +333,13 @@ class BimpNote extends BimpObject
         }
         return $tabFils;
     }
+    
+    public function getLink($params = [], $forced_context = '') {
+        $parent = $this->getParentInstance();
+        if(is_object($parent) && method_exists($parent, 'getLink'))
+                return $parent->getLink($params, $forced_context);
+        return parent::getLink($params, $forced_context);
+    }
 
     public function getListExtraBtn()
     {
@@ -341,7 +348,7 @@ class BimpNote extends BimpObject
         if ($this->isLoaded() && !$this->modeArchive) {
             if ($this->getData('user_create') != $user->id)
                 $buttons[] = array(
-                    'label'   => 'Répondre par mail',
+                    'label'   => 'Répondre',
                     'icon'    => 'far fa-paper-plane',
                     'onclick' => $this->getJsRepondre());
 
@@ -349,7 +356,7 @@ class BimpNote extends BimpObject
                 $buttons[] = array(
                     'label'   => 'Marquer comme vue',
                     'icon'    => 'fas_envelope-open',
-                    'onclick' => $this->getJsActionOnclick('iAmViewed')
+                    'onclick' => $this->getJsActionOnclick('setAsViewed')
                 );
         }
         return $buttons;
@@ -403,7 +410,7 @@ class BimpNote extends BimpObject
             if ($note) {
                 // Note
                 //            $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
-                $msg['content'] = $note->getData('content');
+                $msg['content'] = $note->displayData('content');
                 $msg['id'] = (int) $c['idNoteRef'];
                 $msg['user_create'] = (int) $note->getData('user_create');
                 $msg['date_create'] = $note->getData('date_create');
@@ -422,10 +429,12 @@ class BimpNote extends BimpObject
                 $msg['is_viewed'] = (int) $c['lu'];
 
                 // Obj
-                $obj = BimpCache::getBimpObjectInstance($c['obj_module'], $c['obj_name'], (int) $c['id_obj']);
+//                $obj = BimpCache::getBimpObjectInstance($c['obj_module'], $c['obj_name'], (int) $c['id_obj']);
+                $bc = BimpCollection::getInstance($c['obj_module'], $c['obj_name']);
+                $link = $bc->getLink((int) $c['id_obj'], array('modal_view' => 'false'));
 
-                if (BimpObject::objectLoaded($obj)) {
-                    $msg['obj']['nom_url'] = $obj->getLink();
+                if ($link) {
+                    $msg['obj']['nom_url'] = $link;
                 } else {
                     $msg['introuvable'] = $c['obj_module'] . ' ' . $c['obj_name'] . ' ' . $c['id_obj'];
                 }
@@ -455,10 +464,10 @@ class BimpNote extends BimpObject
                 //                $msg['dest']['lastname'] = $dest->getData('lastname');
                 //            }
                 // Destinataire
-                if ($msg['is_user']) {
-                    $dest = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('fk_user_dest'));
-                    $msg['dest']['nom'] = $dest->getData('firstname') . ' ' . $dest->getData('lastname');
-                } elseif ($msg['is_grp'])
+//                if ($msg['is_user']) {
+//                    $dest = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('fk_user_dest'));
+//                    $msg['dest']['nom'] = $dest->getData('firstname') . ' ' . $dest->getData('lastname');
+//                } elseif ($msg['is_grp'])
                     $msg['dest']['nom'] = $note->displayDestinataire(false, true);
             }
             if (count($msg))
@@ -508,7 +517,7 @@ class BimpNote extends BimpObject
         return '';
     }
 
-    public function actionIAmViewed($data, &$success = '')
+    public function actionSetAsViewed($data, &$success = '')
     {
         $errors = array();
         $warnings = array();
@@ -519,7 +528,8 @@ class BimpNote extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'reloadNote();'
         );
     }
 
@@ -533,7 +543,7 @@ class BimpNote extends BimpObject
             <span data-toggle="tooltip" data-placement="top" title="' . $author . '" class="chat-img pull-left">
                 <img src="' . BimpTools::getAvatarImgSrc($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? '55C1E7' : '5500E7')) . '" alt="User Avatar" class="img-circle">
             </span>';
-        $html .= '<div class="msg_cotainer">' . $this->getData("content");
+        $html .= '<div class="msg_cotainer">' . $this->displayData("content");
         if ($style != "petit" && $this->getData('user_create') != $user->id)
             $html .= '<span class="rowButton bs-popover"><i class="fas fa-share link" onclick="' . $this->getJsRepondre() . '"></i></span>';
 
@@ -577,7 +587,8 @@ class BimpNote extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'reloadNote();'
         );
     }
 

@@ -173,14 +173,14 @@
                         } else {
                             $compteLigne = Bimpcore::getConf('achat_dee_fr', null, 'bimptocegid');
                         }
-                        $structure['SENS']                      = sizing($this->getSens($total_d3e, 2), 1);
+                        $structure['SENS']                      = sizing($this->getSens($total_d3e), 1);
                         $structure['REF_LIBRE']                 = sizing('DEEE',35);
                         $structure['COMPTE_GENERAL']            = sizing($compteLigne, 17);
                         $structure['MONTANT']                   = sizing(abs(round($total_d3e, 2)), 20, true);
                         $ecriture .= implode('', $structure) . "\n";
                     }
                     if($total_tva != 0) {
-                        $structure['SENS']                      = sizing($this->getSens($total_tva, 2), 1);
+                        $structure['SENS']                      = sizing($this->getSens($total_tva), 1);
                         $structure['REF_LIBRE']                 = sizing('TVA',35);
                         $structure['COMPTE_GENERAL']            = sizing(Bimpcore::getConf('achat_tva_fr', null, 'bimptocegid'), 17);
                         $structure['MONTANT']                   = sizing(abs(round($total_tva, 2)), 20, true);
@@ -191,11 +191,11 @@
 
                 if($facture->getData('zone_vente') == $this->zoneAchat['UE'] || $facture->getData('zone_vente') == $this->zoneAchat['europe']) {
                     $structure['COMPTE_GENERAL']                = sizing(BimpCore::getConf('autoliquidation_tva_666', null, 'bimptocegid'), 17);
-                    $structure['SENS']                          = sizing($this->getSens(abs(round(20*$TTC / 100))), 1);
+                    $structure['SENS']                          = sizing($this->getSens($TTC), 1);
                     $structure['MONTANT']                       = sizing(abs(round(20*$TTC / 100)), 20, true);
                     $ecriture .= implode('', $structure) . "\n";
                     $structure['COMPTE_GENERAL']                = sizing(BimpCore::getConf('autoliquidation_tva_711', null, 'bimptocegid'), 17);
-                    $structure['SENS']                          = sizing($this->sensFacture, 1);
+                    $structure['SENS']                          = sizing($this->getSens(-$TTC), 1);
                     $ecriture .= implode('', $structure) . "\n";
                 }
                                 
@@ -216,7 +216,7 @@
             return $ecriture;
             
         }
-        
+
         private function getTypePiece($type) {
             switch($type) {
                 case 2: return 'AF'; break;

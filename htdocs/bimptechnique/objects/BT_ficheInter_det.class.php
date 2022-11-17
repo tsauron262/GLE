@@ -23,7 +23,8 @@ class BT_ficheInter_det extends BimpDolObject
         self::TYPE_PLUS_ATELIER         => 'SERV19-FPR-ATE',
         self::TYPE_PLUS_SUR_SITE        => 'SERV19-FPR-1',
         self::TYPE_PLUS_TELEMAINTENANCE => 'SERV19-FPR-TELE',
-        self::TYPE_DEPLA                => 'SERV19-FD01'
+        self::TYPE_DEPLA                => 'SERV19-FD01',
+        self::TYPE_DEPLA_OFFERT         => 'SERV19-FD01'
     );
 
     public static $types = [
@@ -31,6 +32,7 @@ class BT_ficheInter_det extends BimpDolObject
         self::TYPE_DEPLACEMENT_VENDU    => ['label' => "Déplacement vendu", 'icon' => 'fas_car', 'classes' => ['success']],
         self::TYPE_PLUS                 => ['label' => "Intervention à facturer", 'icon' => 'fas_plus', 'classes' => ['warning']],
         self::TYPE_DEPLA                => ['label' => "Déplacement à facturer", 'icon' => 'fas_car', 'classes' => ['warning']],
+        self::TYPE_DEPLA_OFFERT         => ['label' => "Déplacement offert", 'icon' => 'fas_car', 'classes' => ['success']],
         self::TYPE_DEPLACEMENT_CONTRAT  => ['label' => "Déplacement sous contrat", 'icon' => 'fas_car', 'classes' => ['success']],
         self::TYPE_IMPON                => ['label' => "Impondérable", 'icon' => 'fas_cogs', 'classes' => ['important']],
         self::TYPE_LIBRE                => ['label' => "Ligne libre", 'icon' => 'fas_paper-plane', 'classes' => ['info']],
@@ -206,8 +208,10 @@ class BT_ficheInter_det extends BimpDolObject
         $types = self::$types;
         unset($types[self::TYPE_INTERNE]);
         
-        if($fi->getData('fk_statut') < 1)
+        if($fi->getData('fk_statut') < 1){
             unset($types[self::TYPE_OFFERT]);
+            unset($types[self::TYPE_DEPLA_OFFERT]);
+        }
 
         return $types;
     }
@@ -992,7 +996,7 @@ class BT_ficheInter_det extends BimpDolObject
                     $message    .= 'Heures restantes dans le contrat: ' . $this->convertTime($heuresRestantes);
                     $message    .= '<br />Heures renseignées dans la ligne de FI: ' . $this->convertTime($heuresFaites);
                     $message    .= '<br />Type: ' . self::$types[BimpTools::getPostFieldValue('type')]['label'];
-                    die($message);
+
                     mailSyn2($sujet, $commercial->getData('email') . ', contrat@bimp.fr', null, $message);
                     
                 }

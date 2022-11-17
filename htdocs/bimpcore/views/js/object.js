@@ -296,6 +296,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                         }, null, null, no_triggers, '', true, modal_title, use_bimpdatasync);
                     }
                 });
+                checkFormInputsReloads($form);
             }
         }, '', modal_format);
     } else {

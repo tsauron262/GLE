@@ -280,13 +280,10 @@ fields:
         default_value: 0
     expertise:
         label: Expertise Bimp
-        type: id
         dol_extra_field: 1
-        input:
-            type: select
-            options:
-                array: expertise
-        default_value: 0
+        type: int
+        values: 
+            array: expertise
     
 forms: 
     contact:
@@ -412,6 +409,7 @@ forms:
                 depends_on: fk_soc,is_clone_form
             expertise:
                 field: expertise
+                required: 1
     
     releverFacturation:
         rows:

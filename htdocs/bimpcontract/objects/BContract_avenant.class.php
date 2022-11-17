@@ -39,24 +39,17 @@ class BContract_avenant extends BContract_contrat {
     
     public function getProductPrice() {
         $id_service = BimpTools::getPostFieldValue('id_serv');
-        $product = $this->getInstance('bimpcore', 'Bimp_Product', $id_service);
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_service);
         return $product->getData('price');
     }
     
-    public function getTotalCoup($display = true) {
-        
-        $children = $this->getChildrenList("avenantdet");
-        $total = 0;
-        foreach($children as $id_child) {
-            $child = $this->getChildObject('avenantdet', $id_child);
-            $total += $child->getCoup(false);
-        }
-        
+    public function displayTotalCoup(){
+        $total = $this->getTotalCoup();
         $html = "<strong>";
-        
+
         $class = "warning";
         $icon = "arrow-right";
-        
+
         if($total > 0) {
             $class = "success";
             $icon = "arrow-up";
@@ -64,15 +57,30 @@ class BContract_avenant extends BContract_contrat {
             $class = "danger";
             $icon = "arrow-down";
         }
-        
-        $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($total).'€</strong>';
-        
+
+        $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($total).' € HT</strong>';
+
         $html .= '</strong>';
-        
-        if($display)
-            return $html;
-        else
-            return $total;
+
+        return $html;
+    }
+    
+    public function getTotalCoup() {
+        $total = 0;
+        if(stripos($this->displayData('type'), 'prolongation') !== false){//patch cr getData('type') ne fonctionne pas TODO
+            $parent = $this->getParentInstance();
+            $total += $parent->getAddAmountAvenantProlongation($this->id);
+        }
+        else{
+            $children = $this->getChildrenList("avenantdet");
+            foreach($children as $id_child) {
+                $child = $this->getChildObject('avenantdet', $id_child);
+                $total += $child->getCoup(false);
+            }
+
+            
+        }
+        return $total;
     }
     
     public function getAllSerialsContrat() {
@@ -190,11 +198,10 @@ class BContract_avenant extends BContract_contrat {
 //                $success = "Avenant créer avec succès";
                 
                 
-                $det = $this->getInstance('bimpcontract', 'BContract_avenantdet');
-                $laLigne = $this->getInstance('bimpcontract', 'BContract_contratLine');
+                $det = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet');
                 if(is_array($parent->dol_object->lines) && BimpTools::getPostFieldValue('type') == 0)
                     foreach($parent->dol_object->lines as $line) {
-                        $laLigne->fetch($line->id);
+                        $laLigne = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $line->id);
                         if($laLigne->getData('renouvellement') == $parent->getData('current_renouvellement')) {
                             $nbSerial = count(BimpTools::json_decode_array($laLigne->getData('serials')));
                             if($nbSerial < 1)
@@ -309,7 +316,7 @@ class BContract_avenant extends BContract_contrat {
     
     public function actionGeneratePdf($data, &$success = '', $errors = Array(), $warnings = Array()) {
         global $langs;
-        $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
+        $parent = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
         //print_r($parent, 1);
         $success = "PDF Avenant généré avec Succes";
         $parent->dol_object->pdf_avenant = $this->id;
@@ -382,7 +389,7 @@ class BContract_avenant extends BContract_contrat {
             $errors = $this->updateField('signed', 1);
             if(!count($errors)) {
                 $errors = $this->updateField('statut', 2);
-                $child = $this->getInstance('bimpcontract', 'BContract_avenantdet');
+                $child = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet');
                 $list = $child->getList(['id_line_contrat' => 0, 'id_avenant' => $this->id]);
                 $have_new_lines = (count($list) > 0 ? true : false);
                 
@@ -392,7 +399,7 @@ class BContract_avenant extends BContract_contrat {
                 if($have_new_lines) {
                     //print_r($list);
                     foreach($list as $nb => $i) {
-                        $service = BimpObject::getInstance('bimpcore', 'Bimp_Product', $i['id_serv']);
+                        $service = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $i['id_serv']);
                         $qty = count(BimpTools::json_decode_array($i['serials_in']));
                         $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet', $i['id']);
                         $id_line = $parent->dol_object->addLine(
@@ -401,7 +408,7 @@ class BContract_avenant extends BContract_contrat {
                                     $service->id, $i['remise'], 
                                     $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
                                 );
-                        $l = $this->getInstance('bimpcontract', 'BContract_contratLine', $id_line);
+                        $l = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $id_line);
                         $l->updateField('serials', $i['serials_in']);
                         $l->updateField('statut', 4);
                         $l->updateField('renouvellement', $parent->getData('current_renouvellement'));
@@ -673,13 +680,13 @@ class BContract_avenant extends BContract_contrat {
         
         if(!count($errors)) {
             if(!$data->ht){
-                $p = $this->getInstance('bimpcore', 'Bimp_Product', $data->id_service);
+                $p = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $data->id_service);
                 $ht = $p->getData('price');
             } else {
                 $ht = $data->ht;
             }
             
-            $new = $this->getInstance('bimpcontract', 'BContract_avenantdet');
+            $new = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet');
             $new->set('id_serv', $data->id_serv);
             $new->set('ht', $ht);
             $new->set('in_contrat', 1);

@@ -9,6 +9,9 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
+    
+    
+    public static $achat = 0;
 
     public static $dont_check_parent_on_update = false;
     public static $discount_lines_allowed = true;
@@ -39,7 +42,7 @@ class BimpComm extends BimpDolObject
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
     public static $expertise = [
-        0   => "",
+        ''   => "",
         10  => "Arts graphiques",
         20  => "Constructions",
         30  => "Education et Administrations",
@@ -233,6 +236,11 @@ class BimpComm extends BimpDolObject
         if ($this->useEntrepot() && !(int) $this->getData('entrepot')) {
             $errors[] = 'Aucun entrepôt associé';
         }
+        else{
+            $entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $this->getData('entrepot'));
+            if($entrepot->getData('statut') == 0)
+                $errors[] = 'L\'entrepot '.$entrepot->getRef().' n\'est plus actif';
+        }
 
         if (!count($errors)) {
             if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande', 'Bimp_Facture'))) {
@@ -247,7 +255,7 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'Client absent';
                 } else {
                     if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0)
-                        $errors[] = 'Type de tier obligatoire';
+                        $errors[] = 'Type de tiers obligatoire';
 
                     // Module de validation activé
                     if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
@@ -480,6 +488,8 @@ class BimpComm extends BimpDolObject
             $result = $this->db->getRows('societe_rib', '`fk_soc` =' . $client->id, null, 'object', null, 'default_rib', 'DESC');
 
             foreach ($result as $row) {
+                if($row->default_rib)
+                    unset($return[0]);
                 $return[$row->rowid] = $row->label;
             }
         }
@@ -602,7 +612,8 @@ class BimpComm extends BimpDolObject
 
         // Message facturation: 
         // SERV19-FPR
-        $msg = "Bonjour, merci de bien vouloir facturer cette commande.";
+        
+        $msg = "Bonjour, merci de bien vouloir facturer cette commande*\\n\\n*si vous souhaitez une facturation partielle, veuillez modifier ce texte et indiquer précisément vos besoins\\n\\nIMPORTANT : toute facturation anticipée de produits ou services non livrés doit rester exceptionnelle, doit être justifiée par une demande écrite du client (déposer ce justificatif en pièce jointe) et doit être systématiquement signalée à notre comptabilité @Compta Fournisseurs Olys et à @David TEIXEIRA RODRIGUES";
         foreach ($this->getLines() as $line) {
             $prod = $line->getChildObject('product');
             if (stripos($prod->getData('ref'), 'SERV19-FPR') !== false) {
@@ -1899,7 +1910,7 @@ class BimpComm extends BimpDolObject
 
     public function displayCountNotes($hideIfNotNotes = false)
     {
-        $notes = $this->getNotes();
+        $notes = $this->getNotes(false);
         $nb = count($notes);
         if ($nb > 0 || $hideIfNotNotes == false)
             return '<br/><span class="warning"><span class="badge badge-warning">' . $nb . '</span> Note' . ($nb > 1 ? 's' : '') . '</span>';
@@ -2644,7 +2655,7 @@ class BimpComm extends BimpDolObject
         $lines_errors = $this->checkLines();
 
         if (count($lines_errors)) {
-            return BimpTools::getMsgFromArray($lines_errors, 'Copie impossible');
+            return array(BimpTools::getMsgFromArray($lines_errors, 'Copie impossible'));
         }
 
         if ($this->field_exists('replaced_ref')) {
@@ -2843,6 +2854,14 @@ class BimpComm extends BimpDolObject
 
             if ($params['inverse_qty']) {
                 $qty *= -1;
+            }
+            
+            if($line->id_product){
+                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->id_product);
+                if(!static::$achat && !$prod->getData('tosell'))
+                    $errors[] = 'Le produit '.$prod->getRef().' n\'est plus en vente';
+                elseif(static::$achat && !$prod->getData('tobuy'))
+                    $errors[] = 'Le produit '.$prod->getRef().' n\'est plus en achat';
             }
 
             $new_line->validateArray($data);
@@ -3457,12 +3476,26 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
+    
+    public function processOperationMasseLine($debut = true){
+        $this->procededOperationMasseLine = $debut;
+        if(!$debut){
+            $this->dol_object->fetch_lines();
+            $this->dol_object->update_price();
+            $lines = $this->getLines();
+            foreach ($lines as $line) {
+                $line->hydrateFromDolObject();
+            }
+        }
+    }
 
     public function processRemisesGlobales()
     {
         $errors = array();
 
-        if ($this->isLoaded($errors) && $this->areLinesEditable()) {
+        if ($this->isLoaded($errors) && $this->areLinesEditable() && !$this->processRemisesGlobalesProcessed) {
+            $this->processRemisesGlobalesProcessed = true;
+            $this->processOperationMasseLine();
             $remises = $this->getRemisesGlobales();
             $lines = $this->getLines('not_text');
 
@@ -3505,6 +3538,8 @@ class BimpComm extends BimpDolObject
             foreach ($lines as $line) {
                 $line->checkRemisesGlobales();
             }
+            $this->processOperationMasseLine(false);
+            $this->processRemisesGlobalesProcessed = false;
         }
 
         return $errors;
@@ -4491,10 +4526,12 @@ class BimpComm extends BimpDolObject
 
     public function onChildSave($child)
     {
-        if ($this->isLoaded() && !$this->isDeleting && !static::$dont_check_parent_on_update) {
+        if ($this->isLoaded() && !$this->isDeleting && !static::$dont_check_parent_on_update && !$this->onChildSaveProcessed) {
+            $this->onChildSaveProcessed = true;
             if (is_a($child, 'objectLine')) {
                 $this->processRemisesGlobales();
             }
+            $this->onChildSaveProcessed = false;
         }
         return array();
     }
@@ -4923,7 +4960,7 @@ class BimpComm extends BimpDolObject
 
     public function validate()
     {
-        if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente')) {
+        if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente') && $this->getData('fk_statut') == 0) {
             $zone = self::BC_ZONE_FR;
             if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) || $this->getData('entrepot') == '164' || $this->getInitData('entrepot') == '164'
                     ) && (((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) || (int) $this->getData('entrepot') !== (int) $this->getInitData('entrepot'))) {

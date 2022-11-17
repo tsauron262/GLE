@@ -82,7 +82,7 @@ class BT_ficheInter extends BimpDolObject
     const TYPE_SIGN_ELEC = 3;
 
     public static $types_signature = array(
-        0                      => array('label' => 'Non signée', 'icon' => 'fas_times', 'classes' => array('warning')),
+        0                      => array('label' => ' ', 'icon' => '', 'classes' => array('')),
         self::TYPE_SIGN_DIST   => array('label' => 'Signature à distance', 'icon' => 'fas_file-download'),
         self::TYPE_SIGN_PAPIER => array('label' => 'Signature papier', 'icon' => 'fas_file-signature'),
         self::TYPE_SIGN_ELEC   => array('label' => 'Signature électronique', 'icon' => 'fas_signature')
@@ -214,6 +214,8 @@ class BT_ficheInter extends BimpDolObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        if($force_edit)
+            return 1;
         if ($this->isLoaded()) {
             $status = (int) $this->getData('fk_statut');
 
@@ -361,6 +363,12 @@ class BT_ficheInter extends BimpDolObject
             'label'   => 'Planning de la FI',
             'icon'    => 'fas_clock',
             'onclick' => $this->getJsLoadModalView("events")
+        );
+        
+        $buttons[] = array(
+            'label'   => 'Dupliquer',
+            'icon'    => 'fas_clone',
+            'onclick' => $this->getJsActionOnclick('duplicate', array(), array('form_name' => "duplicate"))
         );
 
         if (!$this->isOldFi()) {
@@ -773,7 +781,7 @@ class BT_ficheInter extends BimpDolObject
             $reattachment[1] = 'Facture';
         if (!$this->getData('fk_contrat'))
             $reattachment[2] = 'Contrat';
-        if (!count(json_decode($this->getData('commandes'))))
+//        if (!count($this->getData('commandes')))
             $reattachment[3] = 'Commande';
 
         return $reattachment;
@@ -2175,6 +2183,8 @@ class BT_ficheInter extends BimpDolObject
                                 'test_ferme' => 'fichinter:rowid=' . $this->id . ' && (commandes != "" OR fk_contrat > 0 OR fk_facture > 0)',
                                 "txt"        => "Bonjour,Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur. " . $this->getNomUrl(),
                             );
+                            if($email_comm != '')
+                                $data["dst"] .= ','.$email_comm;
                             $errors = BimpTools::merge_array($errors, $task->validateArray($data));
                             $errors = BimpTools::merge_array($errors, $task->create());
                             if (!count($errors)) {
@@ -2435,6 +2445,130 @@ class BT_ficheInter extends BimpDolObject
             'warnings' => $warnings
         ];
     }
+    
+    public function actionDuplicate($data, &$success = '')
+    {
+        $errors = [];
+        $warnings = [];
+
+        $success = 'Dupliquée';
+        if(is_array($data['dateDuplicate'])){
+            foreach($data['dateDuplicate'] as $datei){
+                $data['datei'] = $datei;
+                $errors = BimpTools::merge_array($errors, $this->duplicate($data));
+            }
+        }
+        else
+            $errors[] = 'Pas de date séléctionnée';
+        return [
+            'errors'   => $errors,
+            'warnings' => $warnings
+        ];
+    }
+        
+        
+    public function duplicate($new_data)
+    {
+        global $user;
+//        print_r($data);die;
+        $fieldsNonClone = array('signed', 'type_signature', 'old_status', 'fk_facture', 'no_finish_reason', 'client_want_contact', 'public_signature_date_cloture', 'public_signature_date_delivrance', 'public_signature_url', 'public_signature_code', 'attente_client', 'date_signed', 'signataire', 'base_64_signature', 'fk_user_modif', 'fk_user_valid');
+        
+        
+        $new_object = clone $this;
+        $new_object->id = null;
+        $new_object->id = 0;
+        
+        foreach ($new_data as $field => $value) {
+            $new_object->set($field, $value);
+        }
+
+        $new_object->set('id', 0);
+        $new_object->set('ref', '');
+        $new_object->set('fk_statut', 0);
+        $new_object->set('logs', '');
+        
+        foreach($fieldsNonClone as $fieldNC){
+            $new_object->set($fieldNC, null);
+        }
+        
+        $new_object->dol_object->user_author = $user->id;
+        $new_object->dol_object->user_valid = '';
+
+        $errors = $new_object->create($warnings, $force_create);
+        
+        $lines_errors = $new_object->createLinesFromOrigin($this, $new_object);
+//
+        if (count($lines_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la copie des lignes ' . $this->getLabel('of_the'));
+        }
+
+        // Copie des remises globales: 
+//        if (static::$remise_globale_allowed) {
+//            $new_object->copyRemisesGlobalesFromOrigin($this, $errors, $params['inverse_qty']);
+//        }
+//
+//        if (is_object($hookmanager)) {
+//            $parameters = array('objFrom' => $this->dol_object, 'clonedObj' => $new_object->dol_object);
+//            $action = '';
+//            $hookmanager->executeHooks('createFrom', $parameters, $new_object->dol_object, $action);
+//        }
+//        print_r($errors);
+//        die('ok');
+        
+        return $errors;
+    }
+    
+        public function createLinesFromOrigin($origin, $newParent)
+    {
+        $errors = array();
+
+        $params = BimpTools::overrideArray(array(
+                    'is_clone'              => false,
+                        ), $params);
+
+        if (!BimpObject::objectLoaded($origin) || !is_a($origin, 'BT_ficheInter')) {
+            return array('Element d\'origine absent ou invalide');
+        }
+
+        $lines = $origin->getChildrenObjects('inters', array(), 'position', 'asc');
+
+        $warnings = array();
+        $i = 0;
+
+        // Création des lignes: 
+        $lines_new = array();
+
+        foreach ($lines as $line) {
+            $i++;
+
+            // Lignes à ne pas copier en cas de clonage: 
+
+            $new_line = clone($line);
+
+            
+            $new_line->set('fk_fichinter', $newParent->id);
+            $new_line->set('date', $newParent->getData('datei'));
+            
+            $arrived = explode(' ', $new_line->getData('arrived'));
+            if(isset($arrived[1]))
+                $new_line->set('arrived', $this->getData('datei').' '.$arrived[1]);
+            $departure = explode(' ', $new_line->getData('departure'));
+            if(isset($departure[1]))
+                $new_line->set('departure', $this->getData('datei').' '.$departure[1]);
+            
+            
+
+            $line_errors = $new_line->create($warnings, true);
+            if (count($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne n°' . $i);
+
+                continue;
+            }  
+            
+        }
+        return $errors;
+    }
+
 
     public function actionSendfacturation($data, &$success = '')
     {
@@ -2796,7 +2930,7 @@ class BT_ficheInter extends BimpDolObject
         $errors = parent::validatePost();
 
         if (!count($errors)) {
-            if ((int) BimpTools::getValue('signature_set', 0)) {
+            if ((int) BimpTools::getPostFieldValue('signature_set', 0)) {
                 if (!count($this->getChildrenList("inters"))) {
                     $errors[] = "Vous ne pouvez pas faire signer une fiche d'intervention sans intervention enregistrée";
                 }
@@ -2936,17 +3070,17 @@ class BT_ficheInter extends BimpDolObject
                 $actioncomm->punctual = 1;
                 $actioncomm->userownerid = (int) $this->getData('fk_user_tech');
                 $actioncomm->elementtype = 'fichinter';
-                $actioncomm->type_id = BimpTools::getValue('type_planning', 0);
+                $actioncomm->type_id = BimpTools::getPostFieldValue('type_planning', 0);
                 $actioncomm->datep = strtotime($this->getData('datei') . " " . $this->getData('time_from'));
                 $actioncomm->datef = strtotime($this->getData('datei') . " " . $this->getData('time_to'));
                 $actioncomm->socid = $this->getData('fk_soc');
                 $actioncomm->fk_element = $this->id;
                 $actioncomm->create($user);
-
+                $errors = BimpTools::merge_array($errors, BimpTools::getErrorsFromDolObject($actioncomm));
                 // Envoi mail au tech: 
 
                 $tech = $this->getChildObject('user_tech');
-                if (BimpObject::objectLoaded($tech)) {
+                if (!count($errors) && BimpObject::objectLoaded($tech)) {
                     $de = new DateTime($this->getData('datei') . " " . $this->getData('time_from'));
                     $a = new DateTime($this->getData('datei') . " " . $this->getData('time_to'));
 
@@ -2991,7 +3125,7 @@ class BT_ficheInter extends BimpDolObject
         $errors = parent::update($warnings, $force_update);
 
         if (!$this->no_update_process && !count($errors)) {
-            if ((int) BimpTools::getValue('signature_set', 0)) {
+            if ((int) BimpTools::getPostFieldValue('signature_set', 0)) {
                 $this->setSigned($warnings);
             }
 
@@ -3085,11 +3219,8 @@ class BT_ficheInter extends BimpDolObject
             $changement_horaire = false;
             if (($init_date != $this->getData('datei')) || ($init_time_from != $this->getData('time_from') || $init_time_to != $this->getData('time_to'))) {
                 $changement_horaire = true;
-                $table = 'actioncomm';
-                $where = 'code = \'AC_RDV\' AND fk_element = ' . $this->id . ' AND fk_soc = ' . $this->getData('fk_soc') . ' AND elementtype = \'fichinter\'';
-
-                $id_event = $this->db->getValue($table, 'id', $where);
-
+                
+                $id_event = $this->getEventId();
                 if ($id_event > 0) {
                     $actionComm->fetch($id_event);
                     $actionComm->datep = $dateTime_debut->getTimestamp();
@@ -3113,6 +3244,12 @@ class BT_ficheInter extends BimpDolObject
         }
 
         return $errors;
+    }
+    
+    public function getEventId(){
+        $where = 'code <> \'AC_FICHINTER_VALIDATE\' AND fk_element = ' . $this->id . ' AND elementtype = \'fichinter\'';
+
+        return $this->db->getValue('actioncomm', 'id', $where);
     }
 
     public function delete(&$warnings = [], $force_delete = false)

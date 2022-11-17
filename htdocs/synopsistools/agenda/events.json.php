@@ -91,7 +91,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             60 => "orange", 63 => "green",
             61 => '#F5A9F2', 5 => "#F5A9F2",
             64 => "gray", 65 => "gray",
-            999 => "black");
+            999 => "black", 55 => 'purple');
         $colorStr = '';
         if (isset($tabColor[$ligne->fk_action]))
             $colorStr = ', "color":"' . $tabColor[$ligne->fk_action] . '"';

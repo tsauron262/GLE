@@ -43,7 +43,7 @@ class balController extends BimpController {
             
             $list->addFieldFilterValue('viewed', 0);
             $list->params['title'] = 'Non Lue';
-            $lis->identifier = 'nl';
+            $list->identifier = 'nl';
             $list2->params['title'] = 'Tous';
             $list2->identifier = 'tous';
             $html = $list->renderHtml(). $list2->renderHtml();
@@ -77,7 +77,7 @@ class balController extends BimpController {
             $filters = array('type_dest'=>1, 'fk_user_dest'=>$idUser, 'viewed'=>0);
             $list = BimpCache::getBimpObjectList('bimpcore', 'BimpNote', $filters);
             $button = array(
-                'label'   => 'Boite Envoie '.$name,
+                'label'   => 'Boite Envoi '.$name,
                 'icon'    => 'fas_comment',
                 'onclick' => 'window.location.href = \'?fc=bal&bal_type=user&dest=0&bal_value='.$idUser.'\';',
                 'url'     => 'google.com'

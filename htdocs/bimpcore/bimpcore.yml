@@ -72,7 +72,7 @@ params:
     USE_ENTREPOT: 
         label: Utiliser les entrepôts
         type: bool
-        def: 1
+        def: 0
     USE_SECTEUR: 
         label: Utiliser les secteurs
         type: bool
@@ -96,6 +96,8 @@ params:
     date_archive: 
         label: Date archive
         def: ''
+    date_bilan:
+        label: Date dernier bilan
     
     # Defaults: 
     default_id_entrepot: 
@@ -233,4 +235,8 @@ params:
         cat: cache
         type: bool
         def: 0
+    not_decimal_product:
+        label: Pas de decimals pour les produit
+        type: bool
+        def: 1
         

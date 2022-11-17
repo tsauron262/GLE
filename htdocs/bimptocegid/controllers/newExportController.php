@@ -6,6 +6,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_bordereauCHK.class.ph
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_payInc.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_importPaiement.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/cron.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpfinanc/objects/Bimp_ImportPaiement.class.php';
 
 class newExportController extends BimpController {
     private $dir = "/exportCegid/BY_DATE/";
@@ -26,8 +28,11 @@ class newExportController extends BimpController {
         $cheques      = null;
 //      
         $export = new export($db);
+        $cron = new Cron();
+        //$html .= $export->exportBordereauxCHK();
         
-        $html .= $export->exportBordereauxCHK();
+        $html .= print_r($cron->getFilesArrayForTranfert(), 1);
+        
         
         if($_GET['PAYNI']) {
             $tra_constructor = new TRA_payInc($bdd);

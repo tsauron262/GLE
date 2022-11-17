@@ -3,9 +3,8 @@ extends:
     object_name: BimpFile
     
 forms:
-    upload: 
-        rows:
-            in_emails: unset
+    upload_light: 
+        rows: 
             in_fac_email: 
                 custom: 1
                 label: Inclure dans le mail de facturation
@@ -14,3 +13,15 @@ forms:
                 input:
                     type: toggle
                 value: 0
+                
+    upload: 
+        rows:
+            in_emails: unset
+#            in_fac_email: 
+#                custom: 1
+#                label: Inclure dans le mail de facturation
+#                input_name: in_fac_email
+#                data_type: bool
+#                input:
+#                    type: toggle
+#                value: 0

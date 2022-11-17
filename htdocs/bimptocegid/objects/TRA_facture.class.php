@@ -170,7 +170,7 @@
                         
                         if(abs($current_montant) > abs($montant_le_plus_grand)) {
                             $montant_le_plus_grand = abs($current_montant);
-                            $compte_le_plus_grand = $this->compte_general;
+                            $compte_le_plus_grand = sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true);
                         }
                         
                     }

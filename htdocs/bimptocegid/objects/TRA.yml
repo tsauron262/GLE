@@ -1,4 +1,6 @@
 bootstrap: 1
+labels:
+    name: TRA
 forms:
     search:
         title: Recherche

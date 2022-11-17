@@ -86,6 +86,8 @@ if (!defined('BIMP_LIB')) {
             }
         }
     }
+//    elseif(!defined('BIMP_EXTENDS_ENTITY'))
+//        define('BIMP_EXTENDS_ENTITY', 'dev');
 
     if (defined('BIMP_EXTENDS_VERSION')) {
         $dir_version = DOL_DOCUMENT_ROOT . '/bimpcore/extends/versions/' . BIMP_EXTENDS_VERSION . '/';

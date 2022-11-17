@@ -11,6 +11,11 @@ icon: fas_file-signature
 public_icon: pe_news-paper
 
 
+parent_module: bimpcore
+parent_object: Bimp_Societe
+parent_id_property: fk_soc
+
+
 list_page_url: 
     controller: index  
 header_btn: 

@@ -13,6 +13,20 @@ class Bimp_User extends BimpObject
         'man'   => 'Homme',
         'woman' => 'Femme'
     );
+    public static $days = array(// de 1 à 6 : jours semaines impaires - de 8 à 13 : jours semaines paires
+        1  => 'Lundi (sem. impaires)',
+        2  => 'Mardi (sem. impaires)',
+        3  => 'Mercredi  (sem. impaires)',
+        4  => 'Jeudi  (sem. impaires)',
+        5  => 'Vendredi  (sem. impaires)',
+        6  => 'Samedi  (sem. impaires)',
+        8  => 'Lundi (sem. paires)',
+        9  => 'Mardi (sem. paires)',
+        10 => 'Mercredi (sem. paires)',
+        11 => 'Jeudi (sem. paires)',
+        12 => 'Vendredi (sem. paires)',
+        13 => 'Samedi (sem. paires)'
+    );
 
     // Gestion des droits: 
 
@@ -28,7 +42,7 @@ class Bimp_User extends BimpObject
             return 1;
         }
 
-        return 0;
+        return $this->canCreate();
     }
 
     public function canCreate()
@@ -80,6 +94,7 @@ class Bimp_User extends BimpObject
         switch ($action) {
             case 'addRight':
             case 'removeRight':
+            case 'addToGroup':
                 if ((int) $user->rights->user->user->creer || $user->admin) {
                     return 1;
                 }
@@ -98,7 +113,7 @@ class Bimp_User extends BimpObject
 
     public function isActionAllowed($action, &$errors = [])
     {
-        if (in_array($action, array('addRight', 'removeRight'))) {
+        if (in_array($action, array('addRight', 'removeRight', 'addToGroup'))) {
             if (!$this->isLoaded($errors)) {
                 return 0;
             }
@@ -361,7 +376,17 @@ class Bimp_User extends BimpObject
                 ))
             )
         );
-
+        $buttons[] = array(
+            'classes'     => array('btn', 'btn-default'),
+            'label'       => 'Ajouter un utilisateur',
+            'icon_before' => 'fas_plus-circle',
+            'attr'        => array(
+                'type'    => 'button',
+                'onclick' => "document.location.replace('".DOL_URL_ROOT."/user/card.php?leftmenu=users&action=create');"
+            )
+        );
+        
+        
         //        global $user;
         //
         //        if ($user->admin) {
@@ -541,6 +566,21 @@ class Bimp_User extends BimpObject
         return '';
     }
 
+    public function displayDaysOff()
+    {
+        $html = $this->displayData('day_off', 'default', false);
+
+        if ($this->canEditField('day_off')) {
+            $html .= '<div style="margin-top: 10px; text-align: right">';
+            $html .= '<span class="btn btn-default" onclick="' . $this->getJsLoadModalForm('day_off', 'Modifier vos jours off') . '">';
+            $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Modifier';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
     // Rendus HTML: 
 
     public function renderLogo($format = 'mini', $preview = false)
@@ -577,6 +617,7 @@ class Bimp_User extends BimpObject
 
         $tabs = array();
 
+        $isUsersAdmin = $this->canCreate();
         $isAdmin = $user->admin;
         $isItself = ($user->id == $this->id);
 
@@ -586,7 +627,7 @@ class Bimp_User extends BimpObject
             'content' => $this->renderView('default', false)
         );
 
-        if ($isAdmin || $isItself) {
+        if ($isAdmin || $isItself || $isUsersAdmin) {
             $tabs[] = array(
                 'id'      => 'params',
                 'title'   => BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Paramètres',
@@ -600,6 +641,9 @@ class Bimp_User extends BimpObject
                     'ajax'          => 1,
                     'ajax_callback' => $this->getJsLoadCustomContent('renderPermsView', '$(\'#perms .nav_tab_ajax_result\')', array(''), array('button' => ''))
                 );
+            }
+
+            if ($isAdmin || $isUsersAdmin) {
                 $tabs[] = array(
                     'id'            => 'groups',
                     'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Groupes',
@@ -1895,6 +1939,40 @@ class Bimp_User extends BimpObject
         );
     }
 
+    public function actionAddToGroup($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_group = (int) BimpTools::getArrayValueFromPath($data, 'id_usergroup', 0);
+        if (!$id_group) {
+            $errors[] = 'Veuillez sélectionner un groupe';
+        } else {
+            $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
+
+            if (BimpObject::objectLoaded($group)) {
+                if (!$this->db->insert('usergroup_user', array(
+                            'entity'       => 1,
+                            'fk_user'      => $this->id,
+                            'fk_usergroup' => $id_group
+                        ))) {
+
+                    $errors[] = 'Echec de l\'ajout de l\'utilisateur ' . $this->getName() . ' au groupe "' . $group->getName() . '" - ' . $this->db->err();
+                } else {
+                    $success = 'Ajout de l\'utilisateur ' . $this->getName() . ' au groupe ' . $group->getName() . ' effectué avec succès';
+                }
+            } else {
+                $errors[] = 'Le groupe #' . $id_group . ' n\'existe pas';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides
 
     public function onSave(&$errors = array(), &$warnings = array())
@@ -2053,6 +2131,16 @@ class Bimp_User extends BimpObject
         if (!$user->getData('statut'))
             return 0;
 
+        // L'utilisateur est-il OFF ?
+        if (is_null($from))
+            $dt = new DateTime();
+        else
+            $dt = new DateTime($from);
+
+        // SI vrai => le user est en jour OFF
+        if ((int) $user->getData('day_off') == (int) $dt->format('N'))
+            return 0;
+
 
         // L'utilisateur est disponible ?
         if (is_null($from)) {
@@ -2132,7 +2220,7 @@ class Bimp_User extends BimpObject
             $data2[] = array('user' => $ln->lastname . ' ' . $ln->firstname, 'nb' => $ln->nb);
         }
 
-        if(count($data) > 0)
+        if (count($data) > 0)
             $boxObj->addCamenbere('', $data);
 
         $boxObj->addList(array('user' => 'Utilisateur', 'nb' => 'Nombre de créations'), $data2);

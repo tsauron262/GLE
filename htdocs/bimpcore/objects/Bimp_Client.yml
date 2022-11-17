@@ -166,6 +166,7 @@ forms:
                 hidden: 0
             fournisseur: 
                 hidden: 0
+                value: unset
             mode_reglement_supplier: unset
             cond_reglement_supplier: unset
             code_compta_fournisseur: unset

@@ -11,6 +11,16 @@ class Bimp_UserGroup extends BimpObject
 
     // Droits user: 
 
+    public function canView()
+    {
+        global $user;
+        if ($user->admin || $user->rights->user->user->lire) {
+            return 1;
+        }
+
+        return $this->canCreate();
+    }
+
     public function canCreate()
     {
         global $user;
@@ -77,6 +87,31 @@ class Bimp_UserGroup extends BimpObject
                             'ids_users' => array($id_user)
                                 ), array(
                             'confirm_msg' => htmlentities('Veuillez confirmer le retrait de l\\\'utilisateur "' . $user->getName() . '" du groupe "' . $this->getName() . '"')
+                        ))
+                    );
+                }
+            }
+        }
+
+        return $buttons;
+    }
+
+    public function getUserListHeaderButtons()
+    {
+        $buttons = array();
+
+        $id_user = 0;
+        if (BimpTools::getValue('fc', '') === 'user') {
+            $id_user = (int) BimpTools::getValue('id', 0);
+
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+            if (BimpObject::objectLoaded($user)) {
+                if ($user->isActionAllowed('addToGroup') && $user->canSetAction('addToGroup')) {
+                    $buttons[] = array(
+                        'label'   => 'Ajouter l\'utilisateur à un groupe',
+                        'icon'    => 'fas_plus-circle',
+                        'onclick' => $user->getJsActionOnclick('addToGroup', array(), array(
+                            'form_name' => 'add_to_groupe'
                         ))
                     );
                 }

@@ -114,7 +114,7 @@ class BC_Search extends BimpComponent
         $list->params['positions'] = 0;
         $list->params['checkboxes'] = 0;
         $list->params['add_object_row'] = 0;
-        $list->params['n'] = 50;
+        $list->params['n'] = 20;
 
         $list->addFieldFilterValue($primary, array(
             'IN' => implode(',', $items)

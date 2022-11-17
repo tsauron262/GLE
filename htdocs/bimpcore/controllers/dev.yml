@@ -61,6 +61,11 @@ objects:
             bimp_object: 
                 module: bimpwebservice
                 name: BWS_ProfileRight
+    notification: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpNotification
                 
 sections:
     - type: tabs
@@ -192,6 +197,14 @@ sections:
                                 type: list
                                 list: 
                                     object: bws_profile_right
+        notification: 
+            label: Notification
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: notification
+                      name: default
                                     
         menu: 
             label: Menu BimpTheme

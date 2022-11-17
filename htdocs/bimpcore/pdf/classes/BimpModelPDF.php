@@ -134,10 +134,9 @@ Abstract class BimpModelPDF
                 $this->footer = $this->renderTemplate(static::$tpl_dir . '/footer.html', $this->footer_vars);
             }
         }
+
         $this->pdf->createFooter($this->footer);
-
         $this->pdf->newPage();
-
         $this->renderContent();
 
         return $this->pdf->render($file_name, $display, $display_only, $this->watermark, $this->errors);
@@ -278,13 +277,13 @@ Abstract class BimpModelPDF
 
     public function getSenderInfosHtml()
     {
-        $html = '<br/><span style="font-size: 15px; color: #' . $this->primary . ';">' . $this->fromCompany->name . '</span><br/>';
-        $html .= '<span style="font-size: 8px">' . $this->fromCompany->address . '<br/>' . $this->fromCompany->zip . ' ' . $this->fromCompany->town . '<br/>';
+        $html = '<br/><span style="font-size: 11px; color: #' . $this->primary . ';">' . $this->fromCompany->name . '</span><br/>';
+        $html .= '<span style="font-size: 7px">' . $this->fromCompany->address . '<br/>' . $this->fromCompany->zip . ' ' . $this->fromCompany->town;
         if ($this->fromCompany->phone) {
-            $html .= 'Tél. : ' . $this->fromCompany->phone . '<br/>';
+            $html .= '<br/>Tél. : ' . $this->fromCompany->phone;
         }
         $html .= '</span>';
-        $html .= '<span style="color: #' . $this->primary . '; font-size: 7px;">';
+        $html .= '<span style="color: #' . $this->primary . '; font-size: 7px;"><br/>';
         if ($this->fromCompany->url) {
             $html .= $this->fromCompany->url . ($this->fromCompany->email ? ' - ' : '');
         }
@@ -292,6 +291,16 @@ Abstract class BimpModelPDF
             $html .= $this->fromCompany->email;
         }
         $html .= '</span>';
+
+        if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY == 'bimp') {
+            global $mysoc;
+            if ($this->fromCompany->zip != $mysoc->zip || $this->fromCompany->town != $mysoc->town) {
+                $html .= '<span style="font-size: 6px; font-style: italic; color: #5A5959"><br/>';
+                $html .= 'NB:  les règlements ne doivent être envoyés<br/>qu\'à notre siège social : <b>OLYS 2 rue des Erables</b><br/>';
+                $html .= '<b>CS 21055 69760 LIMONEST</b>';
+                $html .= '</span>';
+            }
+        }
         return $html;
     }
 

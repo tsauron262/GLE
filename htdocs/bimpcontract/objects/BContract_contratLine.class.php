@@ -22,7 +22,7 @@ class BContract_contratLine extends BContract_contrat {
     public function createDolObject(&$errors = Array(), &$warnings = Array()) {
         $data = $this->getDataArray();
         $contrat = $this->getParentInstance();
-        $produit = $this->getInstance('bimpcore', 'Bimp_Product', $data['fk_product']);
+        $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $data['fk_product']);
         if (!BimpObject::objectLoaded($contrat)) {
             $errors[] = 'L\'id du contrat ' . $contrat->id . ' n\'éxiste pas';
             return 0;
@@ -47,6 +47,15 @@ class BContract_contratLine extends BContract_contrat {
         //return 0;
     }
     
+    public function validate() {
+        if (is_null($this->getData('description')) || empty($this->getData('description'))) {
+            $produit = $this->getChildObject('produit');
+            $this->set('description', $produit->getData('description'));
+        } 
+        
+        return parent::validate();
+    }
+    
     public function displayRenouvellementIn() {
         
         $renouvellement = $this->getData('renouvellement');
@@ -62,6 +71,28 @@ class BContract_contratLine extends BContract_contrat {
         
     }
     
+    public function actionAdminActivateService($data, &$success) {
+        
+        $errors = $warnings = array();
+        
+        $errors = $this->updateField('statut', 4);
+        
+        if(!count($errors)) {
+            $success = 'Service activé avec succès';
+        }
+
+        return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
+        
+    }
+    
+    public function adminchangeAppartenance(Array $data,string &$success): Array {
+        
+        $errors = $warnings = array();
+        
+        return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
+    }
+
+
     public function getListExtraButtons()
     {
         global $user;
@@ -81,6 +112,20 @@ class BContract_contratLine extends BContract_contrat {
                     ))
                 );
             }
+            
+            if($parent->getData('statut') == 11 && $user->admin && ($this->getData('statut') == 5 || $this->getData('statut') == 0)) {
+                $buttons[] = array(
+                    'label'   => 'ADMIN - Activer le service',
+                    'icon'    => 'fas_play',
+                    'onclick' => $this->getJsActionOnclick('adminActivateService', array(), array())
+                );
+                $buttons[] = array(
+                    'label'   => 'ADMIN - Cahnge appartenance',
+                    'icon'    => 'fas_play',
+                    'onclick' => $this->getJsActionOnclick('adminchangeAppartenance', array(), array('form_name' => 'newAppartenance'))
+                );
+            }
+            
             if(($parent->getData('statut') == 11 || $parent->getData('statut') == 1) && $user->rights->bimpcontract->to_replace_serial) {
 //                $buttons[] = array(
 //                    'label'   => 'Remplacer un numéro de série',
@@ -171,6 +216,10 @@ class BContract_contratLine extends BContract_contrat {
             case 'buy_price_ht': return ($rights->can_change_pa) ? 1 : 0; break;
             case 'description': return ($rights->can_change_desc) ? 1 : 0; break;
             case 'qty' : return ($parent->getData('statut') == 0) ? 1 : 0; break;
+            case 'renouvellement': 
+            case 'statut': 
+                return $user->admin; 
+            break;
         }
         
         return 0;
@@ -188,7 +237,7 @@ class BContract_contratLine extends BContract_contrat {
                 $html .= '<tbody>';
                 foreach ($array as $serial) {
                     $html .= '<tr>';
-                    $equipment = $this->getInstance('bimpequipment', 'Equipment');
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment');
                     if (BimpTools::getContext() != 'public' && $equipment->find(['serial' => addslashes($serial)], true)) {
                             $html .= '<td>';
                             $html .= $equipment->getNomUrl(true, true, true);
@@ -250,7 +299,7 @@ class BContract_contratLine extends BContract_contrat {
         $parent = $this->getParentInstance();
         
         if($this->getData('fk_contrat') > 0 && $this->getData('renouvellement') == $parent->getData('current_renouvellement')) {
-            $parent = $this->getinstance('bimpcontract', 'BContract_contrat');
+            $parent = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
             $parent->find(['rowid' => $this->getData('fk_contrat')]);
 
             if ($parent->getData('statut') == 0 || 

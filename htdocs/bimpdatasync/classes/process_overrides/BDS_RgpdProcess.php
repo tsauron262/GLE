@@ -66,7 +66,7 @@ class BDS_RgpdProcess extends BDSProcess
         'tickets'   => array(
             'module'          => 'bimpsupport',
             'object_name'     => 'BS_Ticket',
-            'draft_value'     => 1,
+            'delete_drafts'   => 0,
             'objects_defs_kw' => 'Ticket hotline'
         ),
         'fi'        => array(
@@ -280,33 +280,72 @@ class BDS_RgpdProcess extends BDSProcess
 
     public function initCheckClientsActivity(&$data, &$errors = array())
     {
-        if ((int) $this->getOption('test_one', 0)) {
-            $nb_clients = 1;
-        } else {
-            $where = 'client IN (1,2,3) AND solvabilite_status = 0';
-            if ((int) $this->getOption('null_only')) {
-                $where .= ' AND (date_last_activity IS NULL)'; //OR date_last_activity = \'0000-00-00\')';
-            }
+        if ((int) $this->getOption('null_only')) {
+            $soc_instance = BimpObject::getInstance('bimpcore', 'Bimp_Client');
 
-            $nb_clients = (int) $this->db->getCount('societe', $where, 'rowid');
-        }
-
-        if ($nb_clients) {
-            $pages = array();
-            for ($i = 1; $i <= ceil($nb_clients / 100); $i++) {
-                $pages[] = $i;
-            }
-
-            $data['steps'] = array(
-                'check_clients' => array(
-                    'label'                  => 'Vérification de la dernière activité des clients',
-                    'on_error'               => 'continue',
-                    'elements'               => $pages,
-                    'nbElementsPerIteration' => 1
-                )
+            $filters = array(
+                'client'             => array(
+                    'in' => array(1, 2, 3)
+                ),
+                'solvabilite_status' => 0
             );
+
+            if ((int) $this->getOption('null_only')) {
+//                $filters['date_last_activity'] = 'IS_NULL';
+                $filters['date_last_activity'] = array(
+                    'or_field' => array(
+                        'IS_NULL',
+                        '0000-00-00'
+                    )
+                );
+            }
+
+            $rows = $soc_instance->getList($filters, ((int) $this->getOption('test_one', 0) ? 1 : 0), null, 'rowid', 'ASC');
+            $clients = array();
+
+            if (!empty($rows)) {
+                foreach ($rows as $r) {
+                    $clients[] = (int) $r['rowid'];
+                }
+            }
+
+            if (!empty($clients)) {
+                $data['steps'] = array(
+                    'check_clients' => array(
+                        'label'                  => 'Vérification de la dernière activité des clients',
+                        'on_error'               => 'retry',
+                        'elements'               => $clients,
+                        'nbElementsPerIteration' => 100
+                    )
+                );
+            } else {
+                $data['result_html'] = BimpRender::renderAlerts('Aucun client à traiter', 'warning');
+            }
         } else {
-            $data['result_html'] = BimpRender::renderAlerts('Aucun client à traiter', 'warning');
+            if ((int) $this->getOption('test_one', 0)) {
+                $nb_clients = 1;
+            } else {
+                $where = 'client IN (1,2,3) AND solvabilite_status = 0';
+                $nb_clients = (int) $this->db->getCount('societe', $where, 'rowid');
+            }
+
+            if ($nb_clients) {
+                $pages = array();
+                for ($i = 1; $i <= ceil($nb_clients / 100); $i++) {
+                    $pages[] = $i;
+                }
+
+                $data['steps'] = array(
+                    'check_clients' => array(
+                        'label'                  => 'Vérification de la dernière activité des clients',
+                        'on_error'               => 'retry',
+                        'elements'               => $pages,
+                        'nbElementsPerIteration' => 1
+                    )
+                );
+            } else {
+                $data['result_html'] = BimpRender::renderAlerts('Aucun client à traiter', 'warning');
+            }
         }
     }
 
@@ -368,11 +407,15 @@ class BDS_RgpdProcess extends BDSProcess
 
         switch ($step_name) {
             case 'check_clients':
-                if (isset($this->references[0]) && (int) $this->references[0]) {
-                    $clients = $this->findClientCheckActivity((int) $this->references[0], $errors);
+                if ((int) $this->getOption('null_only')) {
+                    $this->checkClientsActivity($this->references, $errors);
+                } else {
+                    if (isset($this->references[0]) && (int) $this->references[0]) {
+                        $clients = $this->findClientCheckActivity((int) $this->references[0], $errors);
 
-                    if (!empty($clients)) {
-                        $this->checkClientsActivity($clients, $errors);
+                        if (!empty($clients)) {
+                            $this->checkClientsActivity($clients, $errors);
+                        }
                     }
                 }
                 break;
@@ -483,10 +526,6 @@ class BDS_RgpdProcess extends BDSProcess
         $dt->sub(new DateInterval('P10Y'));
         $date_to_10y = $dt->format('Y-m-d');
 
-        $dt = new DateTime();
-        $dt->sub(new DateInterval('P6Y'));
-        $date_to_6y = $dt->format('Y-m-d');
-
         if ($type === 'all') {
             foreach (self::$objects as $type => $obj_params) {
                 if ((int) $this->getOption('process_' . $type, 0)) {
@@ -506,7 +545,6 @@ class BDS_RgpdProcess extends BDSProcess
             }
 
             $date_from_10y = $this->getParam('files_from_10y_' . $type, '0000-00-00');
-            $date_from_6y = $this->getParam('files_from_6y_' . $type, '0000-00-00');
 
             $data[$type] = array();
 
@@ -514,41 +552,11 @@ class BDS_RgpdProcess extends BDSProcess
             $table = $instance->getTable();
             $primary = $instance->getPrimary();
 
-            // Recherche pièces de + de 10 ans >= 120 euros:
-            if ($params['total_field']) {
-                $where = 'a.' . $params['date_create_field'] . ' > \'' . $date_from_10y . '\' AND ' . 'a.' . $params['date_create_field'] . ' <= \'' . $date_to_10y . '\'';
-                $where .= ' AND a.' . $params['total_field'] . ' >= 120 AND s.is_anonymized = 1';
+            // Recherche pièces de + de 10 ans:
+            $where = 'a.' . $params['date_create_field'] . ' > \'' . $date_from_10y . '\'';
+            $where .= ' AND ' . 'a.' . $params['date_create_field'] . ' <= \'' . $date_to_10y . '\'';
 
-                $rows = $this->db->getRows($table . ' a', $where, null, 'array', array($primary), null, null, array(
-                    's' => array(
-                        'table' => 'societe',
-                        'on'    => 'a.' . $params['client_field'] . ' = s.rowid',
-                        'alias' => 's'
-                    )
-                ));
-
-                if (is_array($rows)) {
-                    foreach ($rows as $r) {
-                        $data[$type][] = (int) $r[$primary];
-
-                        if ($test_one) {
-                            break;
-                        }
-                    }
-                } else {
-                    die($this->db->err());
-                }
-            }
-
-            // Recherche pièces de + de 6 ans < 120 euros ou pas de montant:
-            $where = 'a.' . $params['date_create_field'] . ' > \'' . $date_from_6y . '\' AND a.' . $params['date_create_field'] . ' <= \'' . $date_to_6y . '\'';
-            $where .= ' AND s.is_anonymized = 1';
-
-            if ($params['total_field']) {
-                $where .= ' AND a.' . $params['total_field'] . ' < 120';
-            }
-
-            $rows = $this->db->getRows($table . ' a', $where, null, 'array', array($primary), null, null, array(
+            $rows = $this->db->getRows($table . ' a', $where, null, 'array', array('a.' . $primary), null, null, array(
                 's' => array(
                     'table' => 'societe',
                     'on'    => 'a.' . $params['client_field'] . ' = s.rowid',
@@ -625,9 +633,7 @@ class BDS_RgpdProcess extends BDSProcess
             $n = ((int) $this->getOption('test_one', 0) ? 1 : 100);
             $rows = $soc_instance->getList($filters, $n, $p, 'rowid', 'ASC');
 
-            if (empty($rows)) {
-                $errors[] = 'Aucun client à traiter trouvé';
-            } else {
+            if (!empty($rows)) {
                 $clients = array();
 
                 foreach ($rows as $r) {
@@ -653,45 +659,17 @@ class BDS_RgpdProcess extends BDSProcess
 
         // Recherche clients pros sans activité depuis 10 ans: 
         $dt = new DateTime();
-        $dt->sub(new DateInterval('P10Y'));
-        $dt_10y = $dt->format('Y-m-d');
+        $dt->sub(new DateInterval('P5Y'));
+        $dt_5y = $dt->format('Y-m-d');
 
-        $id_private_type = (int) $this->db->getValue('c_typent', 'id', 'code = \'TE_PRIVATE\'');
-
-        $where = 'is_anonymized = 0 AND client IN (1,2,3) AND fk_typent != ' . $id_private_type;
-        $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity <= \'' . $dt_10y . '\''; // AND date_last_activity != \'0000-00-00\' 
+        $where = 'is_anonymized = 0 AND client IN (1,2,3)';
+        $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity > \'0000-00-00\' AND date_last_activity <= \'' . $dt_5y . '\'';
 
         $rows = $this->db->getRows('societe', $where, ($limit ? $limit : null), 'array', array('rowid'), 'date_last_activity', 'ASC');
-
+        
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 $clients[] = (int) $r['rowid'];
-            }
-        }
-
-        if ($limit) {
-            $limit -= count($clients);
-
-            if (!$limit) {
-                return $clients;
-            }
-        }
-
-        if ($limit >= 0) {
-            // Recherche clients particuliers sans activité depuis 6 ans: 
-            $dt = new DateTime();
-            $dt->sub(new DateInterval('P6Y'));
-            $dt_6y = $dt->format('Y-m-d');
-
-            $where = 'is_anonymized = 0 AND client IN (1,2,3) AND fk_typent = ' . $id_private_type;
-            $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity <= \'' . $dt_6y . '\''; // AND date_last_activity != \'0000-00-00\'
-
-            $rows = $this->db->getRows('societe', $where, ($limit ? $limit : null), 'array', array('rowid'), 'date_last_activity', 'ASC');
-
-            if (is_array($rows)) {
-                foreach ($rows as $r) {
-                    $clients[] = (int) $r['rowid'];
-                }
             }
         }
 
@@ -765,45 +743,53 @@ class BDS_RgpdProcess extends BDSProcess
             if (BimpObject::objectLoaded($object)) {
                 $dir = $object->getFilesDir();
 
-                if ($dir && is_dir($dir)) {
-                    $files = scandir($dir);
-                    $this->DebugData($files, 'Fichiers (Dossier: ' . $dir . ')');
-
-                    $files_ok = array();
-                    $files_fails = array();
-                    foreach ($files as $f) {
-                        if (in_array($f, array('.', '..'))) {
-                            continue;
-                        }
-
-                        $this->incProcessed();
-                        error_clear_last();
-
-                        if (!unlink($dir . '/' . $f)) {
-                            $this->incIgnored();
-                            $err = error_get_last();
-                            $files_fails[] = $f . (isset($err['message']) ? ' - ' . $err['message'] : '');
-                        } else {
-                            $this->incDeleted();
-                            $files_ok[] = $f;
-                            $this->Success('Suppression OK', $object, $f);
-                        }
+                if ($dir) {
+                    if (preg_match('/^(.+)\/$/', $dir, $matches)) {
+                        $dir = $matches[1];
                     }
 
-                    if (count($files_ok)) {
-                        $msg = count($files_ok) . ' fichier(s) supprimé(s) avec succès';
-                        foreach ($files_ok as $file) {
-                            $msg .= '<br/><b>' . $file . '</b>';
-                        }
-                        $this->Success($msg, $object, $object->getRef());
-                    }
+                    foreach (array('', '_anonymized') as $suffix) {
+                        if (is_dir($dir . $suffix)) {
+                            $files = scandir($dir);
+                            $this->DebugData($files, 'Fichiers (Dossier: ' . $dir . ')');
 
-                    if (count($files_fails)) {
-                        $msg = count($files_fails) . ' échecs de suppression de fichier';
-                        foreach ($files_ok as $file) {
-                            $msg .= '<br/><b>' . $file . '</b>';
+                            $files_ok = array();
+                            $files_fails = array();
+                            foreach ($files as $f) {
+                                if (in_array($f, array('.', '..'))) {
+                                    continue;
+                                }
+
+                                $this->incProcessed();
+                                error_clear_last();
+
+                                if (!unlink($dir . '/' . $f)) {
+                                    $this->incIgnored();
+                                    $err = error_get_last();
+                                    $files_fails[] = $f . (isset($err['message']) ? ' - ' . $err['message'] : '');
+                                } else {
+                                    $this->incDeleted();
+                                    $files_ok[] = $f;
+                                    $this->Success('Suppression OK', $object, $f);
+                                }
+                            }
+
+                            if (count($files_ok)) {
+                                $msg = count($files_ok) . ' fichier(s) supprimé(s) avec succès';
+                                foreach ($files_ok as $file) {
+                                    $msg .= '<br/><b>' . $file . '</b>';
+                                }
+                                $this->Success($msg, $object, $object->getRef());
+                            }
+
+                            if (count($files_fails)) {
+                                $msg = count($files_fails) . ' échecs de suppression de fichier';
+                                foreach ($files_ok as $file) {
+                                    $msg .= '<br/><b>' . $file . '</b>';
+                                }
+                                $this->Error($msg, $object, $object->getRef());
+                            }
                         }
-                        $this->Error($msg, $object, $object->getRef());
                     }
                 }
             }
@@ -835,7 +821,9 @@ class BDS_RgpdProcess extends BDSProcess
                 $origin = 'Création de la fiche client';
             }
 
-            if ($date_last_activity) {
+            if ($date_last_activity === '0000-00-00 00:00:00') {
+                $date_last_activity = '0000-00-00';
+            } elseif ($date_last_activity) {
                 $date_last_activity = date('Y-m-d', strtotime($date_last_activity));
             } else {
                 $date_last_activity = '0000-00-00';
@@ -844,6 +832,7 @@ class BDS_RgpdProcess extends BDSProcess
             if ($date_last_activity === '0000-00-00') {
                 $check_factures = true;
             }
+
 //            $this->debug_content .= '<br/>Client #' . $id_client . ': date: ' . $date_last_activity . ' - Orgine: ' . $origin;
 
             foreach (self::$objects as $type => $params) {
@@ -882,8 +871,18 @@ class BDS_RgpdProcess extends BDSProcess
                 }
             }
 
+            if (!$date_last_activity || $date_last_activity == '0000-00-00') {
+                $sql = 'SELECT s.datec FROM ' . MAIN_DB_PREFIX . 'societe s';
+                $sql .= ' WHERE s.rowid = (SELECT MAX(s2.rowid) FROM llx_societe s2 WHERE s2.datec > \'0000-00-00 00:00:00\' AND s2.rowid < ' . $id_client . ')';
+                $result = $this->db->executeS($sql, 'array');
+                if (isset($result[0]['datec']) && $result[0]['datec']) {
+                    $date_last_activity = date('Y-m-d', strtotime($result[0]['datec']));
+                    $origin = 'Date de création estimée de la fiche client (client importé - date de création réelle inconnue)';
+                }
+            }
+
             if ($origin) {
-//                $this->debug_content .= '<br/>NEW #' . $id_client . ': date: ' . $date_last_activity . ' - Orgine: ' . $origin;
+                $this->debug_content .= '<br/>NEW #' . $id_client . ': date: ' . $date_last_activity . ' - Orgine: ' . $origin;
                 if ($this->db->update('societe', array(
                             'date_last_activity'   => $date_last_activity,
                             'last_activity_origin' => $origin
@@ -914,12 +913,8 @@ class BDS_RgpdProcess extends BDSProcess
         $this->setCurrentObjectData('bimpcore', 'Bimp_Client');
 
         $dt = new DateTime();
-        $dt->sub(new DateInterval('P6Y'));
-        $dt_6y = $dt->format('Y-m-d');
-
-        $dt = new DateTime();
-        $dt->sub(new DateInterval('P10Y'));
-        $dt_10y = $dt->format('Y-m-d');
+        $dt->sub(new DateInterval('P5Y'));
+        $dt_5y = $dt->format('Y-m-d');
 
         foreach ($clients as $id_client) {
             $this->incProcessed();
@@ -942,16 +937,9 @@ class BDS_RgpdProcess extends BDSProcess
 
                 // Vérif date dernière activité toujours ko:
                 $date_last_activity = $client->getSavedData('date_last_activity');
-                if ($client->dol_object->typent_code === 'TE_PRIVATE') {
-                    if ($date_last_activity > $dt_6y) {
-                        $this->incIgnored();
-                        continue;
-                    }
-                } else {
-                    if ($date_last_activity > $dt_10y) {
-                        $this->incIgnored();
-                        continue;
-                    }
+                if ($date_last_activity > $dt_5y) {
+                    $this->incIgnored();
+                    continue;
                 }
 
                 // Anonymisation des données: 
@@ -993,8 +981,8 @@ class BDS_RgpdProcess extends BDSProcess
         $date_10y = $dt->format('Y-m-d');
 
         $dt = new DateTime();
-        $dt->sub(new DateInterval('P6Y'));
-        $date_6y = $dt->format('Y-m-d');
+        $dt->sub(new DateInterval('P5Y'));
+        $date_5y = $dt->format('Y-m-d');
 
         foreach (self::$objects as $type => $obj_params) {
             if ((int) $this->getOption('process_' . $type, 0)) {
@@ -1033,7 +1021,7 @@ class BDS_RgpdProcess extends BDSProcess
                 $param_errors = array();
                 $param = BimpCache::findBimpObjectInstance('bimpdatasync', 'BDS_ProcessParam', array(
                             'id_process' => (int) $this->process->id,
-                            'name'       => 'files_from_6y_' . $type
+                            'name'       => 'files_from_5y_' . $type
                                 ), true);
 
                 if (!BimpObject::objectLoaded($param)) {
@@ -1041,21 +1029,21 @@ class BDS_RgpdProcess extends BDSProcess
 
                     $param = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                                 'id_process' => (int) $this->process->id,
-                                'name'       => 'files_from_6y_' . $type,
-                                'label'      => 'Date min recherche fichiers à supprimer pour les ' . $instance->getLabel('name_plur') . ' (6 ans)',
-                                'value'      => $date_6y
+                                'name'       => 'files_from_5y_' . $type,
+                                'label'      => 'Date min recherche fichiers à supprimer pour les ' . $instance->getLabel('name_plur') . ' (5 ans)',
+                                'value'      => $date_5y
                                     ), true, $param_errors);
 
                     if (count($param_errors)) {
-                        $dates_errors[] = BimpTools::getMsgFromArray($param_errors, 'Echec création du paramètre "files_from_6y_' . $type . '"');
+                        $dates_errors[] = BimpTools::getMsgFromArray($param_errors, 'Echec création du paramètre "files_from_5y_' . $type . '"');
                     } else {
                         $this->debug_content .= BimpRender::renderAlerts('Ajout paramètre "' . $param->getData('label') . '" OK', 'success');
                     }
                 } else {
-                    $param_errors = $param->updateField('value', $date_6y);
+                    $param_errors = $param->updateField('value', $date_5y);
 
                     if (count($param_errors)) {
-                        $dates_errors[] = BimpTools::getMsgFromArray($param_errors, 'Echec mise à jour du paramètre "files_from_6y_' . $type . '"');
+                        $dates_errors[] = BimpTools::getMsgFromArray($param_errors, 'Echec mise à jour du paramètre "files_from_5y_' . $type . '"');
                     } else {
                         $this->debug_content .= BimpRender::renderAlerts('Màj paramètre "' . $param->getData('label') . '" OK', 'success');
                     }
@@ -1114,12 +1102,8 @@ class BDS_RgpdProcess extends BDSProcess
             $errors[] = 'Objet client invalide';
         } elseif ($client->isLoaded($errors)) {
             $dt = new DateTime();
-            $dt->sub(new DateInterval('P10Y'));
-            $dt_10y = $dt->format('Y-m-d');
-
-            $dt = new DateTime();
-            $dt->sub(new DateInterval('P6Y'));
-            $dt_6y = $dt->format('Y-m-d');
+            $dt->sub(new DateInterval('P5Y'));
+            $dt_5y = $dt->format('Y-m-d');
 
             global $bimp_errors_handle_locked;
             $bimp_errors_handle_locked = true;
@@ -1127,6 +1111,7 @@ class BDS_RgpdProcess extends BDSProcess
             error_reporting(E_ALL);
             ini_set('display_errors', 1);
 
+            // Déplacement fichiers + 5 ans dans dossier d'archives:
             foreach (self::$objects as $type => $params) {
                 $params = $this->getObjectParams($type);
 
@@ -1137,7 +1122,11 @@ class BDS_RgpdProcess extends BDSProcess
                 $instance = $this->getObjectInstance($type);
 
                 foreach (BimpCache::getBimpObjectObjects($instance->module, $instance->object_name, array(
-                    $params['client_field'] => $client->id
+                    $params['client_field']      => $client->id,
+                    $params['date_create_field'] => array(
+                        'operator' => '<',
+                        'value'    => $dt_5y
+                    )
                 )) as $obj) {
                     $dir = $obj->getFilesDir();
                     if (!$dir || !is_dir($dir)) {
@@ -1147,43 +1136,12 @@ class BDS_RgpdProcess extends BDSProcess
                     if (preg_match('/^(.+)\/+$/', $dir, $matches)) {
                         $dir = $matches[1];
                     }
-
-                    $amount = 0;
-                    if ($params['total_field']) {
-                        $amount = (float) $obj->getData($params['total_field']);
-                    }
-
-                    $date = date('Y-m-d', strtotime($obj->getData($params['date_create_field'])));
-                    if (strtotime($date) && (($amount < 120 && $date < $dt_6y) || ($amount >= 120 && $date < $dt_10y))) {
-                        $errors[] = 'Suppr fichiers ' . $obj->getLabel() . ' ' . $obj->getRef();
-                        // Suppression fichiers: 
-                        $this->setCurrentObjectData('bimpcore', 'BimpFile');
-
-                        foreach (scandir($dir) as $file) {
-                            if (in_array($file, array('.', '..'))) {
-                                continue;
-                            }
-
-                            $this->incProcessed();
-                            error_clear_last();
-
-                            if (!unlink($dir . '/' . $file)) {
-                                $this->incIgnored();
-                                $err = error_get_last();
-                                $errors[] = 'Echec suppression du fichier "' . $file . '"' . (isset($err['message']) ? ' - ' . $err['message'] : '');
-                            } else {
-                                $this->incDeleted();
-                            }
-                        }
-                    } else {
-                        $errors[] = 'Dépl. fichiers ' . $obj->getLabel() . ' ' . $obj->getRef();
-                        // Renommage dossier:
-                        error_clear_last();
-                        if (!rename($dir, $dir . '_anonymized')) {
-                            $this->incIgnored();
-                            $err = error_get_last();
-                            $errors[] = 'Echec renommage du dossier "' . $dir . '" en "' . $dir . '_anonymized"' . (isset($err['message']) ? ' - ' . $err['message'] : '');
-                        }
+                    // Renommage dossier:
+                    error_clear_last();
+                    if (!rename($dir, $dir . '_anonymized')) {
+                        $this->incIgnored();
+                        $err = error_get_last();
+                        $errors[] = 'Echec renommage du dossier "' . $dir . '" en "' . $dir . '_anonymized"' . (isset($err['message']) ? ' - ' . $err['message'] : '');
                     }
                 }
             }
@@ -1323,13 +1281,6 @@ class BDS_RgpdProcess extends BDSProcess
                     'id_process' => (int) $process->id,
                     'name'       => 'files_from_10y_' . $type,
                     'label'      => 'Date min recherche fichiers à supprimer pour les ' . $instance->getLabel('name_plur') . ' (10 ans)',
-                    'value'      => '0000-00-00'
-                        ), true, $warnings, $warnings);
-
-                BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
-                    'id_process' => (int) $process->id,
-                    'name'       => 'files_from_6y_' . $type,
-                    'label'      => 'Date min recherche fichiers à supprimer pour les ' . $instance->getLabel('name_plur') . ' (6 ans)',
                     'value'      => '0000-00-00'
                         ), true, $warnings, $warnings);
             }
@@ -1546,6 +1497,8 @@ class BDS_RgpdProcess extends BDSProcess
                 $op_options = $options;
                 unset($op_options['delete_drafts']);
                 unset($op_options['delete_files']);
+                unset($op_options['anonymise_clients']);
+                unset($op_options['clients_to_anonymise_limit']);
 
                 $warnings = array_merge($warnings, $op->addAssociates('options', $options));
             }

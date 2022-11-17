@@ -304,7 +304,7 @@ class PisteAPI extends BimpAPI
         return $this->execCurl('ajouterFichierDansSysteme', $data, $errors);
     }
 
-    public function uploadFile($dir, $file_name)
+    public function uploadFile($dir, $file_name, &$errors = array())
     {
         $data = array('fields' => array(
                 "idUtilisateurCourant" => 0,

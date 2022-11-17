@@ -224,6 +224,20 @@ fields:
         default_value: 0
     photo:
         label: photo
+    day_off:
+        label: Jour(s) OFF
+        type: items_list
+        items_data_type: int
+        items_braces: 1
+        items_sortable: 1
+        values:
+            array: days   
+        input: 
+            help: Veuillez ajouter vos jours off pour les semaines paires et impaires.<br/>Si vous avez un seul jours off fixe pour chaque semaine, vous devez donc ajouter le jour correspondant pour les semaines paires puis ajouter celui pour les semaines impaires. 
+    signature_papier:
+        label: Signature
+        input: 
+            type: signature_pad
         
 forms:
     light: 
@@ -249,6 +263,7 @@ forms:
             - field: apple_centre
             - field: secteur
             - field: echec_auth
+            - field: signature_papier
             
     export_conges: 
         title: Générer fichier d'export des conges
@@ -318,6 +333,23 @@ forms:
                 display_if: 
                     field_name: no_photo
                     show_values: 0
+                    
+    day_off: 
+        rows: 
+            - field: day_off
+            
+    add_to_groupe: 
+        rows: 
+            - custom: 1
+              label: Groupe
+              input_name: id_usergroup
+              data_type: id
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      callback: getUserGroupsArray
+                      
               
 fields_tables: 
     identity:
@@ -328,6 +360,7 @@ fields_tables:
             - field: lastname
             - field: login
             - field: gender
+            
     security:
         title: Securité
         icon: lock
@@ -372,6 +405,9 @@ fields_tables:
             - field: defaultentrepot
             - field: apple_centre
             - field: secteur
+            - label: Jours off
+              value: 
+                  callback: displayDaysOff
         
     notes: 
         title: Notes
@@ -514,7 +550,7 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-        add_form_name: default
+#        add_form_name: default
         delete_btn: 1
         page_btn: 1
         modal_view: default

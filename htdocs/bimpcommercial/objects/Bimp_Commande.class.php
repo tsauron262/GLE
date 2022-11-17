@@ -582,7 +582,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     // Getters:
 
-    public function getData($field)
+    public function getData($field, $withDefault = true)
     {
         // Pour mettre à jour mode et cond réglement dans le formulaire en cas de sélection d'un nouveau client ou client facturation.
         if (in_array($field, array('fk_cond_reglement', 'fk_mode_reglement'))) {
@@ -597,7 +597,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
         }
 
-        return parent::getData($field);
+        return parent::getData($field, $withDefault);
     }
 
     public function getDefaultListExtraButtons()
@@ -3244,6 +3244,19 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         ));
                     }
                     $this->updateField('invoice_status', $new_status);
+                    
+                    $idComm = $this->getIdCommercial();
+                    $mail = BimpTools::getMailOrSuperiorMail($idComm);
+
+                    $infoClient = "";
+                    $client = $this->getChildObject('client');
+                    if (is_object($client) && $client->isLoaded()) {
+                        $infoClient = " du client " . $client->getLink();
+                    }
+
+
+                    if (isset($mail) && $mail != "")
+                        mailSyn2("Status facturation", $mail, null, 'Bonjour le status facturation de votre commande ' . $this->getLink() . $infoClient . ' est  '.$this->displayData('invoice_status'));
                 }
             }
 

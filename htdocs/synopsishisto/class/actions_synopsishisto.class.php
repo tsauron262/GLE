@@ -186,8 +186,11 @@ class histoNavigation
 //            print_r($obj);
 //            die($obj->module.' '. $obj->object_name);
             if(is_a($obj, 'BimpObject')){
-                $obj = BimpCache::getBimpObjectInstance($obj->module, $obj->object_name, $res->element_id);  
-                $result = $obj->isLoaded();
+                $bc = BimpCollection::getInstance($obj->module, $obj->object_name);
+                $obj = $bc->getObjectInstance($res->element_id);
+                $result = 1;
+//                $obj = BimpCache::getBimpObjectInstance($obj->module, $obj->object_name, $res->element_id);  
+//                $result = $obj->isLoaded();
             }
             else
                 $result = $obj->fetch($res->element_id);

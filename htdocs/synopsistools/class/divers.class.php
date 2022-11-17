@@ -10,15 +10,13 @@ include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 if(!defined('PATH_TMP'))
     define('PATH_TMP', DOL_DATA_ROOT);
 
-if(!defined('PATH_EXTENDS'))
-    define('PATH_EXTENDS', DOL_DOCUMENT_ROOT."/bimpcore/extends/dev/");
 
 class synopsisHook {//FA1506-0369
 
     static $timeDeb = 0;
     static $timeDebRel = 0;
-    private static $MAX_TIME_LOG = 5;
-    private static $MAX_REQ_LOG = 1000;
+    private static $MAX_TIME_LOG = 6;
+    private static $MAX_REQ_LOG = 1200;
     private static $reload = false;
 
     function synopsisHook() {
@@ -361,12 +359,12 @@ class synopsisHook {//FA1506-0369
             $tmRecon = "";
 
         $time = self::getTime();
-        if ($time > self::$MAX_TIME_LOG && (!isset($logLongTime) || $logLongTime))
+        if ($nbReq > self::$MAX_REQ_LOG / 1.4 && $time > self::$MAX_TIME_LOG / 1.4 && (!isset($logLongTime) || $logLongTime))
+            dol_syslog("Pages trop de req*temp " . $nbReq . " en " . $time . " s", 4, 0, "_time", '', false);
+        elseif ($time > self::$MAX_TIME_LOG && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages lente " . $time . " s", 4, 0, "_time", '', false);
-        if ($nbReq > self::$MAX_REQ_LOG && (!isset($logLongTime) || $logLongTime))
+        elseif ($nbReq > self::$MAX_REQ_LOG && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages trop de req " . $nbReq . " ", 4, 0, "_time", '', false);
-        if ($nbReq > self::$MAX_REQ_LOG / 2 && $time > self::$MAX_TIME_LOG / 2 && (!isset($logLongTime) || $logLongTime))
-            dol_syslog("Pages trop de req*temp " . $nbReq . " en " . $time . " s", 4, 0, "_time");
         $idErp = (defined('ID_ERP')? ' ('.ID_ERP.')': '');
         $return .= "<span class='timePage'>" . number_format($time, 4) . " s".$idErp." | " . $nbReq . " requetes + ". $nbReq2. $tmRecon. "</span>";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {

@@ -146,10 +146,10 @@ class BimpCore
             $config_notification = $notification->getList();
 
             foreach ($config_notification as $cn) {
-                $notifs .= $cn['nom'] . ": {";
+                $notifs .= $cn['id'] . ": {";
+                $notifs .= "nom: '" . $cn['nom'] . "', ";
+                $notifs .= "id_notification: '" . $cn['id'] . "', ";
                 $notifs .= "module: '" . $cn['module'] . "', ";
-                $notifs .= "class: '" . $cn['class'] . "', ";
-                $notifs .= "method: '" . $cn['method'] . "', ";
                 $notifs .= "obj: null},";
             }
         }
@@ -650,6 +650,7 @@ class BimpCore
     {
         $versions = self::getConf('bimpcore_version');
 
+        $bdb = BimpCache::getBdb();
         if (!is_array($versions) || empty($versions)) {
             if ((string) $versions) {
                 $versions = json_decode($versions, 1);
@@ -659,7 +660,6 @@ class BimpCore
 
             if (empty($versions)) {
                 // On vérifie valeur en base:
-                $bdb = BimpCache::getBdb();
                 $value = $bdb->getValue('bimpcore_conf', 'value', '`name` = \'bimpcore_version\'');
 
                 if (!(string) $value) {
@@ -1105,6 +1105,19 @@ class BimpCore
             $bimp_logs_locked = 0;
         }
 
+        return $errors;
+    }
+    
+    public function addAutoTask($dst, $subject, $msg, $test_ferme = ''){
+        global $conf;
+        $errors = array();
+        if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
+            include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+            $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+            $tab = array("src"=>"GLE-AUTO", "dst"=>$dst, "subj"=>$subject, "txt"=>$msg, "prio"=>20, "test_ferme"=> $test_ferme, 'auto' => 1);
+            $errors = array_merge($errors, $task->validateArray($tab));
+            $errors = array_merge($errors, $task->createIfNotActif());        
+        }
         return $errors;
     }
 

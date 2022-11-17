@@ -1479,6 +1479,11 @@ class Bimp_Societe extends BimpDolObject
         return BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', ['fk_soc' => $this->id], 'id', 'desc');
     }
 
+    public function getSiret()
+    {
+        return substr($this->getData('siret'), 0, 14);
+    }
+
     // Getters array: 
 
     public function getContactsArray($include_empty = true, $empty_label = '')
@@ -1870,7 +1875,14 @@ class Bimp_Societe extends BimpDolObject
 
         $encours = $this->getAllEncoursForSiret(true, false, $debug);
 
-        $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]) . ' TTC';
+//        if($encours['factures']['total'] != 0){
+        $html .= '<b>Encours sur factures restant dues</b> : ' . BimpTools::displayMoneyValue($encours['factures']['total']) . ' TTC<br/><br/>';
+//        }
+//        if($encours['commandes']['socs'][$this->id] != 0){
+        $html .= '<b>Encours sur les commandes non facturées</b> : ' . BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]) . ' TTC<br/>';
+//        }
+//        $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]).' TTC';
+
 
         if (count($encours['commandes']['socs']) > 1) {
             $html .= '<br/>';
@@ -2662,11 +2674,6 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
-    public function getSiret()
-    {
-        return substr($this->getData('siret'), 0, 14);
-    }
-
     public function getCreditSafeLettre($noHtml = false)
     {
         global $modeCSV;
@@ -3007,22 +3014,6 @@ class Bimp_Societe extends BimpDolObject
                     $msg .= '<br/>(' . $reason . ')';
                 }
                 $this->addObjectLog($msg, 'ANONYMISED');
-
-                // Suppression des fichiers du client: 
-                $dir = $this->getFilesDir();
-                if (is_dir($dir)) {
-                    $files = scandir($data);
-
-                    foreach ($files as $f) {
-                        if (in_array($f, array('.', '..'))) {
-                            continue;
-                        }
-
-                        if (!unlink($dir . '/' . $f)) {
-                            $warnings[] = 'Echec suppression du fichier "' . $f . '"';
-                        }
-                    }
-                }
 
                 // Anonymisation des contacts: 
                 $contacts = $this->getContactsArray(false);
@@ -3835,12 +3826,12 @@ class Bimp_Societe extends BimpDolObject
         if ($limit > -1 && $limit != $this->getInitData('outstanding_limit'))
             $this->set('outstanding_limit', $limit);
 
-        if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
-//            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
-//                return array("Code compta particulier, le type de tiers ne peut être différent.");
-            if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
-                return array("Code compta entreprise, le type de tiers ne peut être différent.");
-        }
+//        if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
+////            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
+////                return array("Code compta particulier, le type de tiers ne peut être différent.");
+////            if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
+////                return array("Code compta entreprise, le type de tiers ne peut être différent.");
+//        }
 
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;

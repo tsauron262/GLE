@@ -61,12 +61,14 @@ class Bimp_Facture extends BimpComm
     public function canCreate()
     {
         global $user;
-        return $user->rights->facture->creer;
+        return $user->admin || $user->rights->facture->creer;
     }
 
     public function canEdit()
     {
-        return $this->canCreate();
+        return 1; // nécessaire pour permettre l'édition de certains champs selon les droits défini dans canEditField(). 
+        // Par défaut l'édition des champs renvoi sur canCreate()
+//        return $this->canCreate();
     }
 
     public function canDelete()
@@ -189,6 +191,9 @@ class Bimp_Facture extends BimpComm
         global $user;
 
         switch ($field_name) {
+            case 'expertise':
+                return 1;
+
             case 'date_next_relance':
             case 'relance_active':
                 if ($user->admin || $user->rights->bimpcommercial->admin_relance_individuelle) {
@@ -220,10 +225,14 @@ class Bimp_Facture extends BimpComm
                 break;
 
             case 'litige':
-                return (int) $user->rights->bimpcommercial->admin_recouvrement or (int) $user->admin;
+                return (int) $user->rights->bimpcommercial->admin_recouvrement || (int) $user->admin;
+
+            case 'logs':
+                return parent::canEditField($field_name);
         }
 
-        return parent::canEditField($field_name);
+        // Par défaut: 
+        return $this->canCreate();
     }
 
     // Getters booléens:
@@ -277,7 +286,7 @@ class Bimp_Facture extends BimpComm
                     'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
                     'close_code', 'close_note',
                     'date_irrecouvrable', 'id_user_irrecouvrable',
-                    'prelevement', 'ef_type', 'fk_mode_reglement', 'fk_cond_reglement', 'pdf_nb_decimal', 'litige'
+                    'prelevement', 'ef_type', 'fk_mode_reglement', 'fk_cond_reglement', 'pdf_nb_decimal', 'litige', 'expertise'
                 ))) {
             return 1;
         }
@@ -1429,6 +1438,14 @@ class Bimp_Facture extends BimpComm
                 'icon'      => 'fas_file-pdf',
                 'action'    => 'classifyPaidMasse',
                 'form_name' => 'paid_partially'
+            );
+        }
+
+        if ($this->canSetAction('classifyPaid') && $this->canSetAction('bulkEditField')) {
+            $actions[] = array(
+                'label'  => 'Classer envoyé par email pour chorus',
+                'icon'   => 'fas_file-pdf',
+                'action' => 'classifyExportEmailChorusMasse'
             );
         }
 
@@ -2748,19 +2765,20 @@ class Bimp_Facture extends BimpComm
 
         return $html;
     }
-    
-    public function displayClientsCommandes(){
-        if($this->isLoaded()){
+
+    public function displayClientsCommandes()
+    {
+        if ($this->isLoaded()) {
             $return = array();
             $list = getElementElement('commande', 'facture', null, $this->id);
-            foreach($list as $data){
+            foreach ($list as $data) {
                 $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $data['s']);
-                if($comm->getData('fk_soc') != $this->getData('fk_soc')){
+                if ($comm->getData('fk_soc') != $this->getData('fk_soc')) {
                     $return[$comm->getData('fk_soc')] = $comm->displayData('fk_soc');
                 }
             }
             return implode('<br/>', $return);
-    //        die;
+            //        die;
         }
     }
 
@@ -3928,7 +3946,7 @@ class Bimp_Facture extends BimpComm
             $neg_lines = 0;
 
             if (!count($lines)) {
-                $errors[] = 'Aucune ligne ajoutée à cette facturdzadzadze';
+                $errors[] = 'Aucune ligne ajoutée à cette facture';
                 return $errors;
             }
 
@@ -4118,7 +4136,7 @@ class Bimp_Facture extends BimpComm
 
             // A ce stade on est censé être sûr que la facture sera bien validée (Cette méthode doit être appellée par le dernier trigger) 
             // Le statut doit être à 1 pour les vérifs qui suivent. 
-            $this->set('fk_statut', 1); 
+            $this->set('fk_statut', 1);
             $this->checkIsPaid();
             $this->checkRemisesGlobales();
             $this->checkMargin(true);
@@ -5169,6 +5187,26 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
+    public function actionClassifyExportEmailChorusMasse($data, &$success)
+    {
+        $errors = array();
+        $success = 'Ok';
+
+        foreach ($data['id_objects'] as $idF) {
+            $fact = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idF);
+            if ($fact->isActionAllowed('markSendNoChorusExport') && $fact->canSetAction('markSendNoChorusExport')) {
+                $succ = '';
+                $ret = $fact->actionMarkSendNoChorusExport(array(), $succ);
+                if (isset($ret['errors']) && count($ret['errors'])) {
+                    $errors[] = BimpTools::getMsgFromArray($ret['errors'], $fact->getRef());
+                }
+            } else {
+                $errors[] = $fact->getRef() . ' n\'est pas fermable';
+            }
+        }
+        return $errors;
+    }
+
     public function actionClassifyPaid($data, &$success)
     {
         $errors = array();
@@ -5764,14 +5802,14 @@ class Bimp_Facture extends BimpComm
             $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', 0, \'soumettreFacture\', {}, ' . $params . ', 500);';
         }
 
-        if (!count($errors) && isset($data['files_compl']) && count($data['files_compl'])) {
+        if (!count($errors) && isset($data['files_compl']) && is_array($data['files_compl']) && count($data['files_compl'])) {
             $api = BimpAPI::getApiInstance('piste');
             $chorus_data = $this->getData('chorus_data');
             foreach ($data['files_compl'] as $idF) {
                 $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $idF);
 
                 $name = $file->getData('file_name') . '.' . $file->getData('file_ext');
-                $id = $api->uploadFile($file->getFileDir(), $name);
+                $id = $api->uploadFile($file->getFileDir(), $name, $errors);
                 if ($id > 0)
                     $chorus_data['pj'][$id] = $file->getData('file_name') . $file->getData('file_ext');
                 else
@@ -6001,7 +6039,7 @@ class Bimp_Facture extends BimpComm
                 $facture = null;
 
                 $id_fac_src = (int) BimpTools::getPostFieldValue('id_facture_to_correct', 0);
-                $avoir_same_lines = (int) BimpTools::getPostFieldValue('avoir_same_lines', 0);
+                $avoir_same_lines = (int) BimpTools::getPostFieldValue('avoir_same_lines', 1);
                 $avoir_remain_to_pay = (int) BimpTools::getPostFieldValue('avoir_remain_to_pay', 0);
 
                 if ($avoir_same_lines && $avoir_remain_to_pay) {

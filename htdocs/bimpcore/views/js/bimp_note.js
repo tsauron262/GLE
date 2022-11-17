@@ -1,12 +1,13 @@
-
+notifNote = null;
 class bimp_note extends AbstractNotification {
     
     /**
      * Overrides
      */
     
-    constructor(nom) {
-        super(nom);
+    constructor(nom, id_notif) {
+        super(nom, id_notif);
+        notifNote = this;
     }
     
     init() {
@@ -42,7 +43,6 @@ class bimp_note extends AbstractNotification {
     }
     
     formatElement(element, key) {
-                        
         if($('div.list_part[key="' + key + '"]').length) {
             $('div.list_part[key="' + key + '"]').remove();
             AbstractNotification.prototype.elementRemoved(1, this.dropdown_id);
@@ -73,11 +73,11 @@ class bimp_note extends AbstractNotification {
             html += element.obj.nom_url;
         }
         
-        var callback_set_as_viewed = 'bimp_note.setAsViewed("' + element.obj_type +'", "' + element.obj_module +'", "' + element.obj_name +'", "' + element.id_obj + '", "' + key + '")';
+        var callback_set_as_viewed = this.ptr +'.setAsViewed("'+key+'","'+element.id+'")';
         
         // Voir conversation
         html += '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Vue rapide" data-html="false" data-viewport="{&quot;selector&quot;: &quot;body&quot;, &quot;padding&quot;: 0}" '
-        html += 'onclick=\'' + callback_set_as_viewed + ' ; loadModalObjectNotes($(this), "' + element.obj_module +'", "' + element.obj_name +'", "' + element.id_obj + '", "chat", true);\' data-original-title="" title="Voir toute la conversation"><i class="far fa5-eye"></i></span>'
+        html += 'onclick=\'loadModalObjectNotes($(this), "' + element.obj_module +'", "' + element.obj_name +'", "' + element.id_obj + '", "chat", true);\' data-original-title="" title="Voir toute la conversation"><i class="far fa5-eye"></i></span>'
         
         // Marquer comme lu
         html += '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Vue rapide" data-html="false" data-viewport="{&quot;selector&quot;: &quot;body&quot;, &quot;padding&quot;: 0}" '
@@ -167,38 +167,7 @@ class bimp_note extends AbstractNotification {
      * Fonctions spécifique à la classe
      */
     
-    static setAsViewed(obj_type, obj_module, obj_name, id_obj, key) {
-        var bn = this;
-
-        var data = {
-            obj_type: obj_type,
-            obj_module: obj_module,
-            obj_name: obj_name,
-            id_obj: id_obj
-        };
-        
-        var initAjaxRequestsUrl = ajaxRequestsUrl;
-        ajaxRequestsUrl = dol_url_root + '/bimpmsg/index.php';
-        
-        BimpAjax('setAsViewed', data, null, {
-            display_errors: false,
-            display_warnings: false,
-            display_success: false,
-            success: function (result, bimpAjax) {
-                bimp_note.isViewed(key, result.nb_set_as_viewed);
-            }
-        });
-        ajaxRequestsUrl = initAjaxRequestsUrl;
-
-    }
     
-    static isViewed(key, qty) {
-        
-        if(0 < qty) {
-            $('div.list_part[key="' + key + '"] span.nonLu').removeClass('nonLu');
-            AbstractNotification.prototype.elementRemoved(1, 'dropdown_' + this.name);
-        }
-    }
     
     getInitiales(nom) {
         var full_name = nom.split(' ');
@@ -209,4 +178,9 @@ class bimp_note extends AbstractNotification {
         return initials.toUpperCase();
     }
 
+}
+
+function reloadNote(){
+    if(notifNote !== null)
+        notifNote.reloadNotif();
 }

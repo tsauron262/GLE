@@ -1333,6 +1333,15 @@ class BimpInput
         $html .= ' data-display_results="' . $display_results . '"';
         $html .= ' autocomplete="off" class="search_object_search_input"/>';
         $html .= '<span class="spinner"><i class="fa fa-spinner fa-spin"></i></span>';
+        if (isset($params['scanner']) && (int) $params['scanner']) {
+            $onclick = 'var $parent = $(this).parent();';
+            $onclick .= 'if ($parent.hasClass(\'input-group\')) {';
+            $onclick .= '$parent = $parent.parent().parent();';
+            $onclick .= '}';
+            $onclick .= 'var $input = $parent.find(\'input[name=' . $input_name . '_search]\');';
+            $onclick .= 'BIS.openModal($input);';
+            $html .= BimpRender::renderRowButton('Scanner code-barres / Qr-Code', 'fas_camera', $onclick);
+        }
         $html .= '</div>';
 
         if (isset($params['help']) && $params['help']) {

@@ -174,6 +174,8 @@ fields:
         search:
             type: value_part
             part_type: beginning
+        input:
+            scanner: 1
             
     old_serial:
         label: Ancien(s) serial

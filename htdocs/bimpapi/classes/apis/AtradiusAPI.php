@@ -54,6 +54,10 @@ class AtradiusAPI extends BimpAPI {
             'label' => 'Suppression assurance',
             'url' => '/credit-insurance/cover-management/v1/covers',
         ),
+        'decisions'   => array(
+            'label'  => 'Check des décisions',
+            'url'    => '/credit-insurance/cover-management/v1/covers'
+        )
     );
     public static $tokens_types = array(
         'access' => 'Token d\'accès'
@@ -64,6 +68,17 @@ class AtradiusAPI extends BimpAPI {
 
         
         $data = $this->execCurlCustom('getMyBuyer', array(
+            'url_params' => $filters
+                ), $errors);
+
+        return $data;
+    }
+    public function getMyBuyer2($filters, &$errors = array()) {
+        $filters['fromDate'] = $filters['buyerRatingUpdatedAfter'];
+        unset($filters['buyerRatingUpdatedAfter']);
+
+        
+        $data = $this->execCurlCustom('decisions', array(
             'url_params' => $filters
                 ), $errors);
 
@@ -96,6 +111,11 @@ class AtradiusAPI extends BimpAPI {
             // Il y a une décision prise pour cet acheteur
             if(isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_VALID) {
                 $cover = $response['data'][$k];
+                
+                
+                if(isset($cover['totalDecision']['decisionAmtInPolicyCurrency']) && $cover['totalDecision']['decisionAmtInPolicyCurrency'] == 0){
+                    $status = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
+                }
                 
                 // Il y a 2 décisions prises
                 if(isset($c['firstAmtDecision'])  and is_array($c['firstAmtDecision'])
@@ -221,7 +241,7 @@ class AtradiusAPI extends BimpAPI {
                 break;
             default:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-                $errors .= $cover_type . " a été refusé<br/>";
+                $errors[] = $cover_type . " a été refusé<br/>";
                 break;
         }
 
@@ -437,13 +457,13 @@ class AtradiusAPI extends BimpAPI {
     private function getSuccess($response_code, &$success = '') {
         switch ($response_code) {
             case 200:
-                $success .= "Action réussi<br/>";
+                $success .= "Action réussie<br/>";
                 break;
             case 201:
-                $success .= "Action réussi, assurance créée<br/>";
+                $success .= "Action réussie, assurance créée<br/>";
                 break;
             case 202:
-                $success .= "Action réussi, en attente d'approbation<br/>";
+                $success .= "Action réussie, en attente d'approbation<br/>";
                 break;
         }
     }
@@ -524,7 +544,20 @@ class AtradiusAPI extends BimpAPI {
     
     public function testRequest(&$errors = array(), &$warnings = array()) {
         
-        $this->getMyBuyer(array());
+        $from = new DateTime();
+//        $from->sub(new DateInterval('PT1H')); TODO
+        $from->sub(new DateInterval('P5D'));
+                
+                $filters = array(
+            'fromDate' => $from->format('Y-m-d\TH:i:s')
+        );
+                
+                
+        $data = $this->execCurlCustom('decisions', array(
+            'url_params' => $filters
+                ), $errors);
+
+        return $data;
 
     }
 

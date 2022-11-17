@@ -1559,8 +1559,12 @@ class Equipment extends BimpObject
                             foreach ($out['reasons'] as $reason) {
                                 if (isset($reason['messages'])) {
                                     foreach ($reason['messages'] as $msg) {
+                                        if(is_array($msg) && isset($msg['description']))
+                                            $msg = $msg['description'];
                                         if (stripos($msg, 'Localiser mon ') !== false || stripos($msg, 'OP987') !== false)
                                             $identifiers['status_gsx'] = 3;
+                                        else
+                                            $identifiers['msg'] = $msg;
                                     }
                                 }
                             }

@@ -26,12 +26,12 @@ class BimpCommDemandeFin extends BimpObject
         self::DOC_STATUS_CANCELED => array('label' => 'Annulé', 'icon' => 'fas_times', 'classes' => array('danger'))
     );
     public static $signature_doc_types = array(
-        'devis_fin'   => 'Devis de financement',
-        'contrat_fin' => 'Contrat de financement'
+        'devis_fin'   => 'Devis de location',
+        'contrat_fin' => 'Contrat de location'
     );
     public static $doc_types = array(
-        'devis_fin'   => 'Devis de financement',
-        'contrat_fin' => 'Contrat de financement'
+        'devis_fin'   => 'Devis de location',
+        'contrat_fin' => 'Contrat de location'
     );
     public static $targets = array();
     public static $targets_defaults = array();
@@ -69,19 +69,19 @@ class BimpCommDemandeFin extends BimpObject
         switch ($action) {
             case 'createDemandeFinancement':
                 if ($this->isLoaded()) {
-                    $errors[] = 'Création d\'une demande de financement non possible depuis une instance existante';
+                    $errors[] = 'Création d\'une demande de location non possible depuis une instance existante';
                     return 0;
                 }
                 return 1;
 
             case 'cancelDemandeFinancement':
                 if ((int) $this->getData('status') >= 20) {
-                    $errors[] = 'Cette demande de financement est déjà au statut annulée ou refusée';
+                    $errors[] = 'Cette demande de location est déjà au statut annulée ou refusée';
                     return 0;
                 }
 
                 if ((int) $this->getData('contrat_fin_status') === self::DOC_STATUS_ACCEPTED) {
-                    $errors[] = 'Le contrat de financement a déjà été accepté et signé';
+                    $errors[] = 'Le contrat de location a déjà été accepté et signé';
                     return 0;
                 }
                 return 1;
@@ -89,12 +89,12 @@ class BimpCommDemandeFin extends BimpObject
             case 'createDevisFinSignature':
                 $file = $this->getFilesDir() . $this->getSignatureDocFileName('devis_fin');
                 if (!file_exists($file)) {
-                    $errors[] = 'Le devis de financement n\'a pas été généré';
+                    $errors[] = 'Le devis de location n\'a pas été généré';
                     return 0;
                 }
 
                 if ((int) $this->getData('id_signature_devis_fin')) {
-                    $errors[] = 'La fiche signature du devis de financement existe déjà';
+                    $errors[] = 'La fiche signature du devis de location existe déjà';
                     return 0;
                 }
                 return 1;
@@ -102,25 +102,25 @@ class BimpCommDemandeFin extends BimpObject
             case 'createContratFinSignature':
                 $file_name = $this->getSignatureDocFileName('contrat_fin');
                 if (!$file_name || !file_exists($this->getFilesDir() . $file_name)) {
-                    $errors[] = 'Le contrat de financement n\'a pas été généré';
+                    $errors[] = 'Le contrat de location n\'a pas été généré';
                     return 0;
                 }
                 if ((int) $this->getData('id_signature_contrat_fin')) {
-                    $errors[] = 'La fiche signature du contrat de financement existe déjà';
+                    $errors[] = 'La fiche signature du contrat de location existe déjà';
                     return 0;
                 }
                 return 1;
 
             case 'submitDevisFinRefused':
                 if ((int) $this->getData('devis_fin_status') !== self::DOC_STATUS_SEND) {
-                    $errors[] = 'Le devis de financement n\'est pas en attente de signature par le client';
+                    $errors[] = 'Le devis de location n\'est pas en attente de signature par le client';
                     return 0;
                 }
                 return 1;
 
             case 'submitContratFinRefused':
                 if ((int) $this->getData('contrat_fin_status') !== self::DOC_STATUS_SEND) {
-                    $errors[] = 'Le contrat de financement n\'est pas en attente de signature par le client';
+                    $errors[] = 'Le contrat de location n\'est pas en attente de signature par le client';
                     return 0;
                 }
                 return 1;
@@ -132,10 +132,10 @@ class BimpCommDemandeFin extends BimpObject
         $target = $this->getData('target');
 
         if (!$target) {
-            $errors[] = 'Destinataire de la demande de financement non spécifié';
+            $errors[] = 'Destinataire de la demande de location non spécifié';
             return 0;
         } elseif (!isset(static::$targets[$target])) {
-            $errors[] = 'Destinataire de la demande de financement invalide';
+            $errors[] = 'Destinataire de la demande de location invalide';
             return 0;
         }
 
@@ -150,7 +150,7 @@ class BimpCommDemandeFin extends BimpObject
 
         if ($this->isActionAllowed('cancelDemandeFinancement') && $this->canSetAction('cancelDemandeFinancement')) {
             $buttons[] = array(
-                'label'   => 'Annuler la demande de financement',
+                'label'   => 'Annuler la demande de location',
                 'icon'    => 'fas_times-circle',
                 'onclick' => $this->getJsActionOnclick('cancelDemandeFinancement', array(), array(
                     'form_name' => 'cancel'
@@ -160,7 +160,7 @@ class BimpCommDemandeFin extends BimpObject
 
         if ($this->isActionAllowed('createDevisFinSignature') && $this->canSetAction('createDevisFinSignature')) {
             $buttons[] = array(
-                'label'   => 'Envoyer le devis fin. pour signature',
+                'label'   => 'Envoyer le devis de location pour signature',
                 'icon'    => 'fas_arrow-circle-right',
                 'onclick' => $this->getJsActionOnclick('createDevisFinSignature', array(), array(
                     'form_name' => 'signature_devis_fin'
@@ -170,7 +170,7 @@ class BimpCommDemandeFin extends BimpObject
 
         if ($this->isActionAllowed('createContratFinSignature') && $this->canSetAction('createContratFinSignature')) {
             $buttons[] = array(
-                'label'   => 'Envoyer le contrat fin. pour signature',
+                'label'   => 'Envoyer le contrat de location pour signature',
                 'icon'    => 'fas_arrow-circle-right',
                 'onclick' => $this->getJsActionOnclick('createContratFinSignature', array(), array(
                     'form_name' => 'signature_contrat_fin'
@@ -180,7 +180,7 @@ class BimpCommDemandeFin extends BimpObject
 
         if ($this->isActionAllowed('submitDevisFinRefused') && $this->canSetAction('submitDevisFinRefused')) {
             $buttons[] = array(
-                'label'   => 'Devis fin. refusé',
+                'label'   => 'Devis de location refusé',
                 'icon'    => 'fas_times',
                 'onclick' => $this->getJsActionOnclick('submitDevisFinRefused', array(), array(
                     'form_name' => 'refuse'
@@ -190,7 +190,7 @@ class BimpCommDemandeFin extends BimpObject
 
         if ($this->isActionAllowed('submitContratFinRefused') && $this->canSetAction('submitContratFinRefused')) {
             $buttons[] = array(
-                'label'   => 'Contrat fin. refusé',
+                'label'   => 'Contrat de location refusé',
                 'icon'    => 'fas_times',
                 'onclick' => $this->getJsActionOnclick('submitContratFinRefused', array(), array(
                     'form_name' => 'refuse'
@@ -262,7 +262,7 @@ class BimpCommDemandeFin extends BimpObject
 
         $id_client = (int) BimpCore::getConf('demande_fin_target_' . $target . '_id_client', 0, 'bimpcommercial');
         if (!$id_client) {
-            BimpCore::addlog('ID Client non configuré pour le destinataire des demandes de financement "' . $this->displayTarget() . '"', 4, 'bimpcomm', $this, array(
+            BimpCore::addlog('ID Client non configuré pour le destinataire des demandes de location "' . $this->displayTarget() . '"', 4, 'bimpcomm', $this, array(
                 'Info' => 'Ajouter conf "demande_fin_target_' . $target . '_id_client" dans module bimpcommercial'
                     ), true);
         }
@@ -438,7 +438,7 @@ class BimpCommDemandeFin extends BimpObject
                     $html .= '<div style="margin-top: 10px">';
                     $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                     $msg .= '<a href="' . $signature->getUrl() . '" target="_blank">';
-                    $msg .= 'Signature du ' . str_replace('_fin', '', $doc_type) . ' de financement en attente';
+                    $msg .= 'Signature du ' . str_replace('_fin', '', $doc_type) . ' de location en attente';
                     $msg .= BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
 
                     $btn_html = $signature->renderSignButtonsGroup();
@@ -513,7 +513,7 @@ class BimpCommDemandeFin extends BimpObject
             }
 
             if (count($req_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de l\'obtention des données de la demande de financement');
+                $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de l\'obtention des données de la demande de location');
             } else {
                 if (isset($data['ref']) && $data['ref']) {
                     $content .= '<b>Référence :</b> ' . $data['ref'] . '<br/>';
@@ -575,7 +575,7 @@ class BimpCommDemandeFin extends BimpObject
                     }
                     $content .= '</ul>';
 
-                    $html .= BimpRender::renderPanel(BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Infos demande de financement ' . $this->displayTarget(), $content, '', array(
+                    $html .= BimpRender::renderPanel(BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Infos demande de location ' . $this->displayTarget(), $content, '', array(
                                 'type' => 'secondary'
                     ));
                 }
@@ -649,7 +649,7 @@ class BimpCommDemandeFin extends BimpObject
             $id_df = (int) $this->getData('id_ext_df');
 
             if (!$id_df) {
-                $errors[] = 'ID de la demande de financement ' . $this->displayTarget() . ' absent';
+                $errors[] = 'ID de la demande de location ' . $this->displayTarget() . ' absent';
             }
 
             if (!count($errors)) {
@@ -697,7 +697,7 @@ class BimpCommDemandeFin extends BimpObject
             } else {
                 $parent = $this->getParentInstance();
                 if (BimpObject::objectLoaded($parent)) {
-                    $msg = 'Demande de financement mise au statut "' . static::$status_list[$new_status]['label'] . '"';
+                    $msg = 'Demande de location mise au statut "' . static::$status_list[$new_status]['label'] . '"';
                     if ($note) {
                         $msg .= '.<br/><b>Note : </b>' . $note;
                     }
@@ -745,11 +745,11 @@ class BimpCommDemandeFin extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Demande de financement effectuée avec succès';
+        $success = 'Demande de location effectuée avec succès';
 
         $target = BimpTools::getArrayValueFromPath($data, 'target', '');
         if (!$target) {
-            $errors[] = 'Veuillez sélectionner le destinataire de la demande de financement';
+            $errors[] = 'Veuillez sélectionner le destinataire de la demande de location';
         }
 
         $type_origine = BimpTools::getArrayValueFromPath($data, 'type_origine', '');
@@ -979,7 +979,7 @@ class BimpCommDemandeFin extends BimpObject
                     $result = $api->addDemandeFinancement($type_origine, $demande_data, $req_errors, $warnings);
 
                     if (isset($result['id_demande']) && (int) $result['id_demande']) {
-                        $origine->addObjectLog('Création de la demande de financement sur ' . $this->displayTarget() . ' effectuée avec succès');
+                        $origine->addObjectLog('Création de la demande de location sur ' . $this->displayTarget() . ' effectuée avec succès');
 
                         $df_data = array(
                             'obj_module' => $origine->module,
@@ -995,7 +995,7 @@ class BimpCommDemandeFin extends BimpObject
                         $create_errors = $this->create($warnings, true);
 
                         if (count($create_errors)) {
-                            $msg = 'Création de la demande de financement sur ' . $this->displayTarget() . ' ok';
+                            $msg = 'Création de la demande de location sur ' . $this->displayTarget() . ' ok';
                             $msg .= ' mais échec de l\'enregistrement des données au niveau local.<br/>';
                             $msg .= 'L\'équipe de développement est prévenue et va procéder à une correction manuelle';
                             $warnings[] = BimpTools::getMsgFromArray($create_errors, $msg);
@@ -1014,11 +1014,11 @@ class BimpCommDemandeFin extends BimpObject
                             }
                         }
                     } elseif (count($req_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la création de la demande de financement sur ' . $this->displayTarget());
-                        $origine->addObjectLog(BimpTools::getMsgFromArray($req_errors, 'Echec de la création de la demande de financement sur LDLC PRO LEASE'));
+                        $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la création de la demande de location sur ' . $this->displayTarget());
+                        $origine->addObjectLog(BimpTools::getMsgFromArray($req_errors, 'Echec de la création de la demande de location sur LDLC PRO LEASE'));
                     } else {
                         $errors[] = 'Echec de la requête (Aucune réponse reçue)';
-                        $origine->addObjectLog('Echec de la création de la demande de financement sur ' . $this->displayTarget() . ' (Aucune réponse reçue suite à la requête)');
+                        $origine->addObjectLog('Echec de la création de la demande de location sur ' . $this->displayTarget() . ' (Aucune réponse reçue suite à la requête)');
                     }
                 }
             }
@@ -1035,14 +1035,14 @@ class BimpCommDemandeFin extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Demande de financement annulée avec succès';
+        $success = 'Demande de location annulée avec succès';
 
         if ($this->isTargetOk($errors)) {
             $api = $this->getExternalApi($errors);
             $id_df = (int) $this->getData('id_ext_df');
 
             if (!$id_df) {
-                $errors[] = 'ID de la demande de financement ' . $this->displayTarget() . ' absent';
+                $errors[] = 'ID de la demande de location ' . $this->displayTarget() . ' absent';
             }
 
             if (!count($errors)) {
@@ -1067,12 +1067,12 @@ class BimpCommDemandeFin extends BimpObject
 
                     $up_errors = $this->update($warnings, true);
                     if (count($up_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du statut de la demande de financement');
+                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du statut de la demande de location');
                     } else {
                         $parent = $this->getParentInstance();
 
                         if (BimpObject::objectLoaded($parent)) {
-                            $msg = 'Demande de financement annulée' . ($note ? '.<br/><b>Motif : </b>' . $note : '');
+                            $msg = 'Demande de location annulée' . ($note ? '.<br/><b>Motif : </b>' . $note : '');
                             $parent->addObjectLog($msg, 'DF_CANCELLED');
                         }
                     }
@@ -1107,7 +1107,7 @@ class BimpCommDemandeFin extends BimpObject
             }
 
             if ((int) $this->getData('id_signature_devis_fin')) {
-                $errors[] = 'La fiche signature du devis de financement a déjà été créée pour ' . $this->getLabel('this');
+                $errors[] = 'La fiche signature du devis de location a déjà été créée pour ' . $this->getLabel('this');
             }
 
             $id_contact_signature = BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
@@ -1125,7 +1125,7 @@ class BimpCommDemandeFin extends BimpObject
 
                 if (!count($errors) && BimpObject::objectLoaded($signature)) {
                     $success = 'Création de la fiche signature effectuée avec succès';
-                    $parent->addObjectLog('Fiche signature du devis de financement créée', 'SIGNATURE_DEVIS_FIN_CREEE');
+                    $parent->addObjectLog('Fiche signature du devis de location créée', 'SIGNATURE_DEVIS_FIN_CREEE');
                     $up_errors = $this->updateField('id_signature_devis_fin', (int) $signature->id);
 
                     if (count($up_errors)) {
@@ -1171,7 +1171,7 @@ class BimpCommDemandeFin extends BimpObject
             }
 
             if ((int) $this->getData('id_signature_contrat_fin')) {
-                $errors[] = 'La fiche signature du contrat de financement a déjà été créée pour ' . $this->getLabel('this');
+                $errors[] = 'La fiche signature du contrat de location a déjà été créée pour ' . $this->getLabel('this');
             }
 
             $id_contact_signature = BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
@@ -1189,7 +1189,7 @@ class BimpCommDemandeFin extends BimpObject
 
                 if (!count($errors) && BimpObject::objectLoaded($signature)) {
                     $success = 'Création de la fiche signature effectuée avec succès';
-                    $parent->addObjectLog('Fiche signature du contrat de financement créée', 'SIGNATURE_CONTRAT_FIN_CREEE');
+                    $parent->addObjectLog('Fiche signature du contrat de location créée', 'SIGNATURE_CONTRAT_FIN_CREEE');
                     $up_errors = $this->updateField('id_signature_contrat_fin', (int) $signature->id);
 
                     if (count($up_errors)) {
@@ -1230,11 +1230,11 @@ class BimpCommDemandeFin extends BimpObject
 
             $signature = $this->getChildObject('signature_' . $doc_type);
             if (!BimpObject::objectLoaded($signature)) {
-                $errors[] = 'La fiche signature du ' . $doc_label . ' de financement n\'existe pas';
+                $errors[] = 'La fiche signature du ' . $doc_label . ' de location n\'existe pas';
             } elseif (!$signature->getData('signed')) {
-                $errors[] = 'Le' . $doc_label . ' de financement n\'a pas encore été signé par le client';
+                $errors[] = 'Le' . $doc_label . ' de location n\'a pas encore été signé par le client';
             } elseif ((int) $this->getData($doc_type . '_status') === self::DOC_STATUS_ACCEPTED) {
-                $errors[] = 'Le' . $doc_label . ' de financement signé a déjà été envoyé à LDLC PRO LEASE avec succès';
+                $errors[] = 'Le' . $doc_label . ' de location signé a déjà été envoyé à LDLC PRO LEASE avec succès';
             } else {
                 $errors = $this->onSigned($signature, array());
 
@@ -1255,7 +1255,7 @@ class BimpCommDemandeFin extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Refus du devis de financement enregistré avec succès';
+        $success = 'Refus du devis de location enregistré avec succès';
 
         $errors = $this->submitDocFinRefused('devis_fin', BimpTools::getArrayValueFromPath($data, 'note', ''));
 
@@ -1270,7 +1270,7 @@ class BimpCommDemandeFin extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Refus du contrat de financement enregistré avec succès';
+        $success = 'Refus du contrat de location enregistré avec succès';
 
         $errors = $this->submitDocFinRefused('contrat_fin', BimpTools::getArrayValueFromPath($data, 'note', ''));
 
@@ -1359,7 +1359,7 @@ class BimpCommDemandeFin extends BimpObject
             $file_content = '';
 
             if (!$id_df) {
-                $errors[] = 'ID de la demande de financement ' . $this->displayTarget() . ' absent';
+                $errors[] = 'ID de la demande de location ' . $this->displayTarget() . ' absent';
             }
 
             $file_name = $this->getSignatureDocFileName($doc_type, true);

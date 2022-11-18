@@ -11,7 +11,7 @@ class BimpComm_ExtEntity extends BimpComm
 
     public function isDemandeFinAllowed(&$errors = array())
     {
-        $errors[] = 'Demandes de financement non autorisées pour les ' . $this->getLabel('name_plur');
+        $errors[] = 'Demandes de location non autorisées pour les ' . $this->getLabel('name_plur');
         return 0;
     }
 
@@ -26,12 +26,12 @@ class BimpComm_ExtEntity extends BimpComm
         }
 
         if (!$this->field_exists('id_demande_fin')) {
-            $errors[] = 'Demandes de financement non disponibles depuis les ' . $this->getLabel('name_plur');
+            $errors[] = 'Demandes de location non disponibles depuis les ' . $this->getLabel('name_plur');
             return 0;
         }
 
         if ((int) $this->getData('id_demande_fin')) {
-            $errors[] = 'Une demande de financement a déjà été faite';
+            $errors[] = 'Une demande de location a déjà été faite';
             return 0;
         }
         return 1;
@@ -67,7 +67,7 @@ class BimpComm_ExtEntity extends BimpComm
 
                         if ($type_origine) {
                             $buttons[] = array(
-                                'label'   => 'Demande de financement',
+                                'label'   => 'Demande de location',
                                 'icon'    => 'fas_comment-dollar',
                                 'onclick' => $df->getJsActionOnclick('createDemandeFinancement', array(
                                     'target'       => $df::$def_target,
@@ -163,7 +163,7 @@ class BimpComm_ExtEntity extends BimpComm
 
         $errors = array();
         if (!$this->field_exists('id_demande_fin')) {
-            $errors[] = 'Demande de financement non disponibles depuis les ' . $this->getLabel('name_plur');
+            $errors[] = 'Demande de location non disponibles depuis les ' . $this->getLabel('name_plur');
         } elseif ($this->isDemandeFinAllowed($errors)) {
             $html .= '<div class="buttonsContainer align-right" style="margin: 0">';
             $onclick = $this->getJsLoadCustomContent('renderDemandeFinancementView', '$(this).findParentByClass(\'nav_tab_ajax_result\')');
@@ -189,10 +189,10 @@ class BimpComm_ExtEntity extends BimpComm
                     }
                     $html .= '</div>';
                 } else {
-                    $errors[] = 'La demande de financement #' . $id_df . ' n\'existe plus';
+                    $errors[] = 'La demande de location #' . $id_df . ' n\'existe plus';
                 }
             } else {
-                $errors[] = 'Aucune demande de financement liée à ' . $this->getLabel('this');
+                $errors[] = 'Aucune demande de location liée à ' . $this->getLabel('this');
             }
 
             $html .= '</div>';
@@ -220,7 +220,7 @@ class BimpComm_ExtEntity extends BimpComm
                     $errors = $df->setNewStatus($status);
 
                     if (!count($errors)) {
-                        $msg = 'Demande de financement ' . lcfirst(BimpCommDemandeFin::$status_list[$status]['label']);
+                        $msg = 'Demande de location ' . lcfirst(BimpCommDemandeFin::$status_list[$status]['label']);
                         if ($note) {
                             $msg .= '<br/><b>Note : </b>' . $note;
                         }
@@ -230,10 +230,10 @@ class BimpComm_ExtEntity extends BimpComm
                         // Todo: mail commercial           
                     }
                 } else {
-                    $errors[] = 'La demande de financement #' . $this->getData('id_demande_fin') . ' n\'existe plus';
+                    $errors[] = 'La demande de location #' . $this->getData('id_demande_fin') . ' n\'existe plus';
                 }
             } else {
-                $errors[] = 'Aucune demande de financement associée à ' . $this->getLabel('this');
+                $errors[] = 'Aucune demande de location associée à ' . $this->getLabel('this');
             }
         }
 

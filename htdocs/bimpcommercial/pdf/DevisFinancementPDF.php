@@ -20,7 +20,7 @@ class DevisFinancementPDF extends BimpDocumentPDF
             $this->errors[] = 'Proposition commerciale invalide';
         }
 
-        $this->doc_name = 'Devis de financement';
+        $this->doc_name = 'Devis de location';
         $this->object_signature_params_field_name = 'signature_df_params';
     }
 

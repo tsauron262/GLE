@@ -3,6 +3,12 @@
 class BF_Refinanceur extends BimpObject
 {
 
+    public function canDelete()
+    {
+        global $user;
+        return $user->admin;
+    }
+
     public function getName($withGeneric = true)
     {
         $soc = $this->getChildObject('societe');
@@ -60,7 +66,7 @@ class BF_Refinanceur extends BimpObject
         }
 
         $html .= '<tr>';
-        $html .= '<th><b>< ' . $prev_amount . ' € :</th>';
+        $html .= '<th><b>&gt; ' . $prev_amount . ' € :</th>';
         $html .= '<td>' . (isset($taux[$prev_amount]) ? BimpTools::displayFloatValue($taux[$prev_amount]) : '0,00') . ' %</td>';
         $html .= '</tr>';
 
@@ -97,7 +103,7 @@ class BF_Refinanceur extends BimpObject
             $prev_amount = $amount;
         }
 
-        $html .= ($html ? '<br/><br/>' : '') . '<b>> ' . $prev_amount . ' € :</b><br/>';
+        $html .= ($html ? '<br/><br/>' : '') . '<b>&gt; ' . $prev_amount . ' € :</b><br/>';
         $html .= BimpInput::renderInput('text', 'taux_' . $prev_amount, (isset($taux[$prev_amount]) ? $taux[$prev_amount] : 0), array(
                     'data'        => array(
                         'data_type' => 'number',

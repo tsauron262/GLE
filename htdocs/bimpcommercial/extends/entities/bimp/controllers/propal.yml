@@ -8,7 +8,7 @@ sections:
                         nav_tabs: 
                             5: 
                                 id: demande_financement_tab
-                                title: Demande de financement
+                                title: Demande de location
                                 show: 
                                     field_value: 
                                         object: propal

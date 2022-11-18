@@ -96,12 +96,12 @@ class BF_DemandeRefinanceur extends BimpObject
 
                 $demande = $this->getParentInstance();
                 if (!BimpObject::objectLoaded($demande)) {
-                    $errors[] = 'Demande de financement liée absente';
+                    $errors[] = 'Demande de location liée absente';
                     return 0;
                 }
 
                 if ((int) $demande->getData('status') >= 10) {
-                    $errors[] = 'Le statut de la demande de financement ne permet pas cette opération';
+                    $errors[] = 'Le statut de la demande de location ne permet pas cette opération';
                     return 0;
                 }
                 return 1;
@@ -276,16 +276,26 @@ class BF_DemandeRefinanceur extends BimpObject
 
     // Getters array:
 
-    public static function getRefinanceursArray($include_empty = true)
+    public static function getRefinanceursArray($include_empty = true, $active_only = true)
     {
         $cache_key = 'bf_refinanceurs_array';
+
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
             $instance = BimpObject::getInstance('bimpfinancement', 'BF_Refinanceur');
 
-            foreach ($instance->getList(array(), null, null, 'id', 'asc', 'array', array('id', 'id_societe')) as $item) {
+            $filters = array();
+
+            if ($active_only) {
+                $filters['active'] = 1;
+            }
+
+            foreach ($instance->getList($filters, null, null, 'id', 'asc', 'array', array('id', 'id_societe')) as $item) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['id_societe']);
                 if ($soc->isLoaded()) {
                     self::$cache[$cache_key][(int) $item['id']] = $soc->getName();
@@ -362,14 +372,14 @@ class BF_DemandeRefinanceur extends BimpObject
                 $total_materiels = $demande->getData('montant_materiels');
                 $total_services = $demande->getData('montant_services') + $demande->getData('montant_logiciels');
                 $total_demande = $total_materiels + $total_services;
-                $marge = $demande->getMargePercent($total_demande) / 100;
+                $marge = $demande->getDefaultMargePercent($total_demande) / 100;
                 $tx_cession = (float) $this->getData('rate');
                 $nb_mois = $this->getNbMois();
                 $periodicity = (int) $this->getData('periodicity');
 
                 $values = BFTools::getCalcValues($total_materiels, $total_services, $tx_cession, $nb_mois, $marge, (float) $demande->getData('vr_achat'), $demande->getData('mode_calcul'), $periodicity, $errors);
             } else {
-                $errors[] = 'Demande de financement liée absente';
+                $errors[] = 'Demande de location liée absente';
             }
 
             $this->values = $values;
@@ -546,7 +556,7 @@ class BF_DemandeRefinanceur extends BimpObject
         $demande = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($demande)) {
-            $errors[] = 'Demande de financement liée absente';
+            $errors[] = 'Demande de location liée absente';
         }
 
         if (!count($errors)) {
@@ -568,7 +578,7 @@ class BF_DemandeRefinanceur extends BimpObject
                     $up_errors = $demande->update($up_warnings, true);
 
                     if (count($up_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des données de la demande de financement');
+                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des données de la demande de location');
                     }
                 }
             }

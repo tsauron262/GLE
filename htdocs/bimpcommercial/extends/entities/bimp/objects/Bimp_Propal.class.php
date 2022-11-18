@@ -21,17 +21,17 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                     if (BimpObject::objectLoaded($df)) {
                         $df_status = (int) $df->getData('status');
                         if ($df_status > 0 && $df_status < 10) {
-                            $errors[] = 'Une demande de financement est en attente d\'acceptation';
+                            $errors[] = 'Une demande de location est en attente d\'acceptation';
                             return 0;
                         }
 
                         if ($df_status === BimpCommDemandeFin::DOC_STATUS_ACCEPTED) {
                             if ((int) $df->getData('devis_fin_status') < 20) {
-                                $errors[] = 'Devis de financement non refusé ou annulé';
+                                $errors[] = 'Devis de location non refusé ou annulé';
                                 return 0;
                             }
                             if ((int) $df->getData('contrat_fin_status') < 20) {
-                                $errors[] = 'Contrat de financement non refusé ou annulé';
+                                $errors[] = 'Contrat de location non refusé ou annulé';
                                 return 0;
                             }
                         }
@@ -50,21 +50,21 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                     if (BimpObject::objectLoaded($df)) {
                         $df_status = (int) $df->getData('status');
                         if ($df_status > 0 && $df_status < 10) {
-                            $errors[] = 'Une demande de financement est en attente d\'acceptation';
+                            $errors[] = 'Une demande de location est en attente d\'acceptation';
                             return 0;
                         }
 
                         if ($df_status === BimpCommDemandeFin::DOC_STATUS_ACCEPTED) {
                             if ((int) $df->getData('devis_fin_status') !== BimpCommDemandeFin::DOC_STATUS_ACCEPTED) {
-                                $errors[] = 'Devis de financement non signé';
+                                $errors[] = 'Devis de location non signé';
                                 return 0;
                             }
                             if ((int) $df->getData('contrat_fin_status') !== BimpCommDemandeFin::DOC_STATUS_ACCEPTED) {
-                                $errors[] = 'Contrat de financement non signé';
+                                $errors[] = 'Contrat de location non signé';
                                 return 0;
                             }
                         } elseif ($df_status < 20) {
-                            $errors[] = 'Devis de financement non accepté par le client';
+                            $errors[] = 'Devis de location non accepté par le client';
                             return 0;
                         }
                     }
@@ -78,7 +78,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
     public function isDemandeFinAllowed(&$errors = array())
     {
         if (!(int) BimpCore::getConf('allow_df_from_propal', null, 'bimpcommercial')) {
-            $errors[] = 'Demandes de financement à partir des devis désactivées';
+            $errors[] = 'Demandes de location à partir des devis désactivées';
             return 0;
         }
 
@@ -101,7 +101,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
 
             if (BimpObject::objectLoaded($signature)) {
                 if (!(int) $signature->getData('type')) {
-                    $errors[] = ucfirst($this->getLabel('this')) . ' est en attente de signature.<br/>Vous devez attendre la signature du client (ou annuler la demande de signature) pour émettre une demande de financement';
+                    $errors[] = ucfirst($this->getLabel('this')) . ' est en attente de signature.<br/>Vous devez attendre la signature du client (ou annuler la demande de signature) pour émettre une demande de location';
                     return 0;
                 }
             }
@@ -121,7 +121,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
             return array(
                 'buttons_groups' => array(
                     array(
-                        'label'   => 'Financement',
+                        'label'   => 'Location',
                         'icon'    => 'fas_hand-holding-usd',
                         'buttons' => $df_buttons
                     ),

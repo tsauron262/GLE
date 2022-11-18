@@ -2,12 +2,12 @@
 # Entité : bimp
 params: 
     allow_df_from_propal: 
-        label: Activer les demandes de financement LDLC Pro Lease depuis les devis
+        label: Activer les demandes de location LDLC Pro Lease depuis les devis
         type: bool
         def: 0
         
     allow_df_from_commande: 
-        label: Activer les demandes de financement LDLC Pro Lease depuis les commandes
+        label: Activer les demandes de location LDLC Pro Lease depuis les commandes
         type: bool
         def: 0
         

@@ -13,7 +13,7 @@ objects:
                 
 fields: 
     id_demande_fin:
-        label: Demande de financement
+        label: Demande de location
         type: id_object
         object: demande_fin
         default_value: 0
@@ -23,5 +23,5 @@ forms:
         rows: 
             create_signature: 
                 input: 
-                    help: Si vous envisagez d'émettre une demande de financement auprès de LDLC PRO LEASE, il est préférable d'attendre la mise en place du devis de financemnent pour demander la signature du client. 
+                    help: Si vous envisagez d'émettre une demande de location auprès de LDLC PRO LEASE, il est préférable d'attendre la mise en place du devis de financemnent pour demander la signature du client. 
 

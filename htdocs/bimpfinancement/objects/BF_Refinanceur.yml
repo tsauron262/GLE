@@ -37,12 +37,19 @@ fields:
             type: custom
             content: 
                 callback: renderTauxInputs
+                
+    active: 
+        label: Actif
+        type: bool
+        default_value: 1
         
 fields_tables: 
     infos: 
         title: Infos
         icon: fas_info
         rows: 
+            - field: active
+              edit: 1
             - field: id_societe
               display: card
             - field: url_demande
@@ -79,4 +86,6 @@ lists:
             id_societe:
             url_demande: 
             taux:
+            active: 
+                edit: 1
     

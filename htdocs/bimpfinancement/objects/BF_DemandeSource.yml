@@ -132,7 +132,7 @@ lists_cols:
             
 lists:
     default: 
-        title: Sources des demandes de financement
+        title: Sources des demandes de location
         icon: fas_
         configurable: 1
         checkboxes: 1

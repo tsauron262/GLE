@@ -10,7 +10,7 @@ parent_object:
 parent_id_property: id_obj
 
 labels: 
-    name: demande de financement
+    name: demande de location
     name_plur: demandes de financements
     is_female: 1
 
@@ -65,35 +65,35 @@ fields:
             array: status_list
             
     devis_fin_status: 
-        label: Statut devis de financement
+        label: Statut devis de location
         type: int
         default_value: 0
         values: 
             array: doc_status_list
             
     contrat_fin_status: 
-        label: Statut contrat de financement
+        label: Statut contrat de location
         type: int
         default_value: 0
         values: 
             array: doc_status_list
         
     id_signature_devis_fin: 
-        label: Signature devis de financement
+        label: Signature devis de location
         type: id_object
         object: signature_devis_fin
         
     signature_df_params:
-        label: Paramètres signature devis de financement
+        label: Paramètres signature devis de location
         type: json
         
     id_signature_contrat_fin: 
-        label: Signature contrat de financement
+        label: Signature contrat de location
         type: id_object
         object: signature_contrat_fin
         
     signature_cf_params:
-        label: Paramètres signature contrat de financement
+        label: Paramètres signature contrat de location
         type: json
         
 fields_tables: 
@@ -108,7 +108,7 @@ fields_tables:
     
 forms: 
     demande_financement: 
-        title: Demande de financement
+        title: Demande de location
         rows: 
             - custom: 1
               label: Type origine
@@ -220,7 +220,7 @@ forms:
         extends: signature_fin
         rows: 
             contact: 
-                label: Contact signataire du devis de financement
+                label: Contact signataire du devis de location
             email_content: 
                 value: 
                     callback: 
@@ -231,7 +231,7 @@ forms:
         extends: signature_fin
         rows: 
             contact: 
-                label: Contact signataire du contrat de financement
+                label: Contact signataire du contrat de location
             email_content: 
                 value: 
                     callback: 
@@ -240,6 +240,6 @@ forms:
                             
 signatures: 
     devis_fin: 
-        label: Devis de financement
+        label: Devis de location
     contrat_fin: 
-        label: Contrat de financement
+        label: Contrat de location

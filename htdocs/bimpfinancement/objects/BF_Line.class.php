@@ -79,7 +79,7 @@ class BF_Line extends BimpObject
 
         if (BimpObject::objectLoaded($parent)) {
             if (!(int) $parent->areLinesEditable()) {
-                $errors[] = 'La demande de financement ne peut plus être mmodifiée';
+                $errors[] = 'La demande de location ne peut plus être modifiée';
                 return 0;
             }
 
@@ -760,7 +760,7 @@ class BF_Line extends BimpObject
     public function onCommandeFournCancel($id_commande)
     {
         if (!$this->isLoaded()) {
-            return array('ID de la ligne de financement absent');
+            return array('ID de la ligne de location absent');
         }
         $errors = array();
         $commandesFourn = $this->getData('commandes_fourn');

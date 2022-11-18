@@ -35,7 +35,7 @@ objects:
                 
 fields:
     id_demande: 
-        label: Demande de financement
+        label: Demande de location
         type: id_parent
         
     id_source: 

@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_refinanceur` (
   `id_societe` int(11) NOT NULL DEFAULT 0,
   `url_demande` VARCHAR(255) NOT NULL DEFAULT '',
   `taux` text NOT NULL DEFAULT '',
+  `active` tinyint(1) NOT NULL DEFAULT 1,
   KEY `id_societe` (`id_societe`)
 );
 

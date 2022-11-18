@@ -10,7 +10,7 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
     public function isDemandeFinAllowed(&$errors = array())
     {
         if (!(int) BimpCore::getConf('allow_df_from_commande', null, 'bimpcommercial')) {
-            $errors[] = 'Demandes de financement à partir des commnades désactivées';
+            $errors[] = 'Demandes de location à partir des commandes désactivées';
             return 0;
         }
 
@@ -48,7 +48,7 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
             return array(
                 'buttons_groups' => array(
                     array(
-                        'label'   => 'Financement',
+                        'label'   => 'Location',
                         'icon'    => 'fas_hand-holding-usd',
                         'buttons' => $df_buttons
                     ),

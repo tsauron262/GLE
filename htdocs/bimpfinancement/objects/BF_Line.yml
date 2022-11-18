@@ -13,6 +13,16 @@ labels:
     name_plur: éléments financés
     
 objects: 
+    source: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpfinancement
+                name: BF_DemandeSource
+            id_object: 
+                field_value: id_source
+                
     fourn_price: 
         relation: hasOne
         delete: 0
@@ -25,8 +35,19 @@ objects:
                 
 fields:
     id_demande: 
-        label: Demande de financement
+        label: Demande de location
         type: id_parent
+        
+    id_source: 
+        label: Source
+        type: id_object
+        object: source
+        default_value: 0
+        
+    id_line_origine: 
+        label: ID ligne d'origine
+        type: id
+        default_value: 0
         
     type: 
         label: Type de ligne
@@ -43,10 +64,20 @@ fields:
         display_if: 
             field_name: type
             show_values: 1
-        
+            
+    ref: 
+        label: Réf. produit
+        display_if: 
+            field_name: type
+            show_values: 2
+            
     label: 
-        label: Libellé
-        type: html
+        label: Libellé produit
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+            help: Facultatif
         display_if: 
             field_name: type
             show_values: 2
@@ -102,11 +133,13 @@ fields:
         label: Prix d'achat HT
         type: money
         display_if: 
-            fields_names: type,use_pu_for_pa
+            fields_names: type,use_pu_for_pa,id_fourn_price
             type: 
                 hide_values: 3
             use_pu_for_pa: 
                 hide_values: 1
+            id_fourn_price: 
+                show_values: 0
         depends_on: id_product
         
     id_fourn_price: 
@@ -117,7 +150,7 @@ fields:
         input: 
             type: select
             options: 
-                array: productFournPrices
+                callback: getFournPricesArray
         display_if:
             fields_names: type,use_pu_for_pa
             type: 
@@ -154,6 +187,10 @@ fields:
         label: Produit sérialisé
         type: bool
         default_value: 0
+        depends_on: id_product,type
+        display_if: 
+            field_name: type
+            show_values: 1,2
         
     serials: 
         label: N° de série
@@ -175,7 +212,9 @@ forms:
         rows: 
             - field: type
             - field: id_product
+            - field: ref
             - field: label
+            - field: product_type
             - field: serialisable
             - field: qty
             - field: serials
@@ -183,6 +222,8 @@ forms:
             - field: tva_tx
             - field: remise
             - custom: 1
+              show: 
+                  callback: isParentEditable
               input_name: use_pu_for_pa
               label: Prix d'achat identique au prix de vente
               data_type: bool
@@ -191,18 +232,19 @@ forms:
               display_if: 
                   field_name: type
                   hide_values: 3  
-            - field: pa_ht
             - field: id_fourn_price
+            - field: pa_ht
             - field: description
      
 fields_tables: 
     infos: 
         panel_header: 0
         rows: 
+            - field: ref
             - field: label
             - field: description
             - field: id_product
-              card: default
+              display: card
               show: 
                   field_value: id_product
             - field: qty

@@ -70,12 +70,14 @@ class BimpCache
 
         return self::$bdb_noTransac;
     }
-    
-    public static function setCache($key, $value){
+
+    public static function setCache($key, $value)
+    {
         static::$cache[$key] = $value;
     }
-    
-    public static function getCache($key){
+
+    public static function getCache($key)
+    {
         return static::$cache[$key];
     }
 
@@ -1170,14 +1172,13 @@ class BimpCache
             return array();
         }
 
-        
-        
+
+
         $use_cache_serveur = $instance->getConf('in_cache_serveur', 0, false, 'bool');
-        $cacheKey = 'BimpObjectObjects_'.$module.'_'.$object_name.'_'.json_encode($filters).'_'.$n.'_'.$order_by.'_'.$sortorder;
-        if($use_cache_serveur && static::cacheServerExists($cacheKey)){
+        $cacheKey = 'BimpObjectObjects_' . $module . '_' . $object_name . '_' . json_encode($filters) . '_' . $n . '_' . $order_by . '_' . $sortorder;
+        if ($use_cache_serveur && static::cacheServerExists($cacheKey)) {
             $rows = static::getCacheServeur($cacheKey);
-        }
-        else{
+        } else {
             $rows = $instance->getList($filters, $n, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
             static::setCacheServeur($cacheKey, $rows);
         }
@@ -3148,7 +3149,7 @@ class BimpCache
                     if (count($rows) > 500) {
                         if (!$mail_send) {
                             $message = 'Il y a plus de 500 entrées à traiter dans les logs.' . "\n\n";
-                            $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
+                            $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=dev&tab=logs' . "\n\n";
 
                             mailSyn2("TROP DE LOGS", BimpCore::getConf('devs_email'), null, $message);
                             BimpCore::setConf('bimpcore_to_much_logs_email_send', 1);

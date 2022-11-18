@@ -2,7 +2,42 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 
-class Bimp_Propal extends BimpComm
+if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/BimpComm.class.php';
+    }
+}
+
+if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/BimpComm.class.php';
+    }
+}
+
+if (class_exists('BimpComm_ExtEntity')) {
+
+    class Bimp_PropalTemp extends BimpComm_ExtEntity
+    {
+        
+    }
+
+} elseif (class_exists('BimpComm_ExtVersion')) {
+
+    class Bimp_PropalTemp extends BimpComm_ExtVersion
+    {
+        
+    }
+
+} else {
+
+    class Bimp_PropalTemp extends BimpComm
+    {
+        
+    }
+
+}
+
+class Bimp_Propal extends Bimp_PropalTemp
 {
 
     public static $dol_module = 'propal';
@@ -261,7 +296,7 @@ class Bimp_Propal extends BimpComm
                 $linked_contrat = getElementElement('propal', 'contrat', $this->id);
                 foreach ($linked_contrat as $ln) {
                     $ct = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $ln['d']);
-                    if ($ct->getData('statut') != BContract_contrat::CONTRAT_STATUT_ABORT) {
+                    if ($ct->getData('statut') != BContract_contrat::CONTRAT_STATUT_ABORT && $ct->getData('statut') != BContract_contrat::CONTRAT_STATUS_REFUSE) {
                         $errors[] = 'Un contrat existe déjà pour cette proposition commerciale';
                         return 0;
                     }
@@ -476,7 +511,7 @@ class Bimp_Propal extends BimpComm
         return 0;
     }
 
-    public function getDefaultSignDistEmailContent()
+    public function getDefaultSignDistEmailContent($doc_type = 'devis')
     {
         BimpObject::loadClass('bimpcore', 'BimpSignature');
         return BimpSignature::getDefaultSignDistEmailContent();
@@ -635,6 +670,7 @@ class Bimp_Propal extends BimpComm
                     if (!$signed) {
                         if ($use_signature) {
                             // Boutons signature: 
+                            $err = array();
                             $signature = $this->getChildObject('signature');
                             if (BimpObject::objectLoaded($signature)) {
                                 if (!(int) $signature->getData('signed')) {
@@ -642,7 +678,7 @@ class Bimp_Propal extends BimpComm
                                 } else {
                                     $signed = true;
                                 }
-                            } elseif ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
+                            } elseif ($this->isActionAllowed('createSignature', $err) && $this->canSetAction('createSignature')) {
                                 $no_signature = true;
                                 // Créer Signature: 
                                 $buttons[] = array(
@@ -947,11 +983,13 @@ class Bimp_Propal extends BimpComm
         return $html;
     }
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         $html = '';
 
-        $html .= '<div class="buttonsContainer">';
+        if (!$no_div) {
+            $html .= '<div class="buttonsContainer" style="display: inline-block">';
+        }
 
         $pdf_dir = $this->getDirOutput();
         $ref = dol_sanitizeFileName($this->getRef());
@@ -993,16 +1031,18 @@ class Bimp_Propal extends BimpComm
         }
 
 
-        $html .= BimpRender::renderButton(array(
-                    'classes'     => array('btn', 'btn-default'),
-                    'label'       => 'Ancienne version',
-                    'icon_before' => 'fa_file',
-                    'attr'        => array(
-                        'href' => "../comm/propal/card.php?id=" . $this->id
-                    )
-                        ), "a");
+//        $html .= BimpRender::renderButton(array(
+//                    'classes'     => array('btn', 'btn-default'),
+//                    'label'       => 'Ancienne version',
+//                    'icon_before' => 'fa_file',
+//                    'attr'        => array(
+//                        'href' => "../comm/propal/card.php?id=" . $this->id
+//                    )
+//                        ), "a");
 
-        $html .= '</div>';
+        if (!$no_div) {
+            $html .= '</div>';
+        }
 
         return $html;
     }
@@ -1195,17 +1235,22 @@ class Bimp_Propal extends BimpComm
     public function actionValidate($data, &$success)
     {
         $use_signature = (int) BimpCore::getConf('propal_use_signatures', null, 'bimpcommercial');
+        $id_contact_signature = 0;
 
         if ($use_signature) {
-            $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
-            $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0);
+            if (!(int) BimpTools::getArrayValueFromPath($data, 'create_signature', 0)) {
+                $use_signature = false;
+            } else {
+                $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
+                $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0);
 
-            if ($open_public_access) {
-                if (!$id_contact) {
-                    return array(
-                        'errors'   => array('Contact signataire obligatoire pour ouvrir l\'accès à la signature à distance'),
-                        'warnings' => array()
-                    );
+                if ($open_public_access) {
+                    if (!$id_contact) {
+                        return array(
+                            'errors'   => array('Contact signataire obligatoire pour ouvrir l\'accès à la signature à distance'),
+                            'warnings' => array()
+                        );
+                    }
                 }
             }
         }
@@ -1215,7 +1260,7 @@ class Bimp_Propal extends BimpComm
         if (!count($result['errors'])) {
             if ($use_signature) {
                 $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
-                $result['warnings'] = BimpTools::merge_array($result['warnings'], $this->createSignature($open_public_access, $id_contact, $email_content));
+                $result['warnings'] = BimpTools::merge_array($result['warnings'], $this->createSignature($open_public_access, $id_contact_signature, $email_content));
             }
         }
 
@@ -1333,20 +1378,20 @@ class Bimp_Propal extends BimpComm
         $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
         $autre_erreurs = true;
         $id_new_contrat = 0;
-        
-        if($data['objet_contrat'] != 'CDP') {
-            $arrayServiceDelegation = Array('SERV19-DP1','SERV19-DP2','SERV19-DP3');
-            foreach($this->dol_object->lines as $line) {
-                if($line->fk_product) {
-                    $product = BimpCache::getBimpObjectInstance('bimpcore','Bimp_Product', $line->fk_product);
-                    if(in_array($product->getRef(), $arrayServiceDelegation)) {
+
+        if ($data['objet_contrat'] != 'CDP') {
+            $arrayServiceDelegation = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3');
+            foreach ($this->dol_object->lines as $line) {
+                if ($line->fk_product) {
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                    if (in_array($product->getRef(), $arrayServiceDelegation)) {
                         $errors[] = 'Vous ne pouvez pas mettre le code service ' . $product->getRef() . ' dans un autre contrat que dans un contrat de délégation.';
                     }
                 }
             }
         }
-        
-        if(!count($errors)) {
+
+        if (!count($errors)) {
             if (count($data) == 0) {
                 $autre_erreurs = false;
                 $errors[] = "La création du contrat  est impossible en l'état. Si cela est une erreur merci d'envoyer un mail à debugerp@bimp.fr. Cordialement.";
@@ -1671,14 +1716,10 @@ class Bimp_Propal extends BimpComm
         $fileName = $this->getSignatureDocFileName($doc_type, $signed);
 
         if ($fileName) {
-            switch ($doc_type) {
-                case 'devis':
-                    if ($context === 'public') {
-                        return self::getPublicBaseUrl() . 'fc=doc&doc=devis' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
-                    } else {
-                        return $this->getFileUrl($fileName);
-                    }
-                    break;
+            if ($context === 'public') {
+                return self::getPublicBaseUrl() . 'fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
+            } else {
+                return $this->getFileUrl($fileName);
             }
         }
 
@@ -1702,14 +1743,23 @@ class Bimp_Propal extends BimpComm
             return $sav->getSignatureCommercialEmail($doc_type, $use_as_from);
         }
 
-        $client = $this->getChildObject('client');
+        $email = '';
+        $commercial = $this->getCommercial();
 
-        if (BimpObject::objectLoaded($client)) {
-            $use_as_from = false;
-            return $client->getCommercialEmail(false);
+        if (BimpObject::objectLoaded($commercial)) {
+            $email = $commercial->getData('email');
         }
 
-        return '';
+        if (!$email) {
+            $client = $this->getChildObject('client');
+
+            if (BimpObject::objectLoaded($client)) {
+                $use_as_from = false;
+                $email = $client->getCommercialEmail(false);
+            }
+        }
+
+        return $email;
     }
 
     public function getOnSignedEmailExtraInfos($doc_type)
@@ -1742,6 +1792,10 @@ class Bimp_Propal extends BimpComm
 
     public function isSignatureCancellable()
     {
+        $sav = $this->getSav();
+        if (!BimpObject::objectLoaded($sav)) {
+            return 1;
+        }
         return 0;
     }
 

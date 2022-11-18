@@ -1,0 +1,245 @@
+table: bimpcomm_demande_fin
+controller: demande
+icon: fas_comment-dollar
+common_fields: 0
+
+parent_module: 
+    field_value: obj_module
+parent_object: 
+    field_value: obj_name
+parent_id_property: id_obj
+
+labels: 
+    name: demande de location
+    name_plur: demandes de financements
+    is_female: 1
+
+objects: 
+    signature_devis_fin: 
+        extends: signature
+        instance: 
+            id_object: 
+                field_value: id_signature_devis_fin
+                
+    signature_contrat_fin: 
+        extends: signature
+        instance: 
+            id_object: 
+                field_value: id_signature_contrat_fin
+    
+fields:
+    obj_module: 
+        label: Module parent
+        required: 1
+        
+    obj_name: 
+        label: Objet parent
+        required: 1
+        
+    id_obj: 
+        label: ID parent
+        type: id_parent
+        required: 1
+        
+    target: 
+        label: Destinataire
+        required: 1
+        values: 
+            array: targets
+            
+    id_ext_df: 
+        label: ID DF externe
+        type: id
+        default_value: 0
+        required: 1
+        
+    ref_ext_df: 
+        label: Ref. DF externe
+        required: 1
+        
+    status: 
+        label: Statut
+        type: int
+        default_value: 0
+        values: 
+            array: status_list
+            
+    devis_fin_status: 
+        label: Statut devis de location
+        type: int
+        default_value: 0
+        values: 
+            array: doc_status_list
+            
+    contrat_fin_status: 
+        label: Statut contrat de location
+        type: int
+        default_value: 0
+        values: 
+            array: doc_status_list
+        
+    id_signature_devis_fin: 
+        label: Signature devis de location
+        type: id_object
+        object: signature_devis_fin
+        
+    signature_df_params:
+        label: Paramètres signature devis de location
+        type: json
+        
+    id_signature_contrat_fin: 
+        label: Signature contrat de location
+        type: id_object
+        object: signature_contrat_fin
+        
+    signature_cf_params:
+        label: Paramètres signature contrat de location
+        type: json
+        
+fields_tables: 
+    signatures_fin: 
+        title: Signatures
+        icon: fas_signature
+        rows: 
+            - field: id_signature_devis_fin
+              display: card
+            - field: id_signature_contrat_fin
+              display: card
+    
+forms: 
+    demande_financement: 
+        title: Demande de location
+        rows: 
+            - custom: 1
+              label: Type origine
+              input_name: type_origine
+              hidden: 1
+              input: 
+                  type: hidden
+            - custom: 1
+              label: ID Origine
+              input_name: id_origine
+              hidden: 1
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Destinataire
+              input_name: target
+              input: 
+                  type: select
+                  options: 
+                      array: targets
+            - custom: 1
+              label: Contact destinataire de l'offre de location
+              input_name: id_contact_suivi
+              required: 1
+              input: 
+                  type: select
+                  options:
+                      callback: getContactsArray
+              depends_on: type_origine,id_origine
+#            - custom: 1
+#              label: Nom Signataire
+#              input_name: nom_signataire
+#              depends_on: id_contact_suivi
+#            - custom: 1
+#              label: Prénom Signataire
+#              input_name: prenom_signataire
+#              depends_on: id_contact_suivi
+#            - custom: 1
+#              label: Fonction Signataire
+#              input_name: fonction_signataire
+#              depends_on: id_contact_suivi
+            - custom: 1
+              label: Durée
+              input_name: duration
+              input: 
+                  type: select
+                  options: 
+                      callback: getDFDurationsArray
+              depends_on: target
+            - custom: 1
+              label: Périodicité
+              input_name: periodicity
+              input: 
+                  type: select
+                  options: 
+                      callback: getDFPeriodicitiesArray
+              depends_on: target
+            - custom: 1
+              label: Mode de calcul
+              input_name: mode_calcul
+              input: 
+                  type: select
+                  options: 
+                      callback: getDFCalcModesArray
+              depends_on: target
+    
+    note: 
+        rows: 
+            - custom: 1
+              input_name: note
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+    
+    cancel: 
+        extends: note
+        rows: 
+            - label: Motif de l'annulation
+            
+    refuse: 
+        extends: note
+        rows: 
+            - label: Raisons du refus
+            
+    signature_fin:
+        rows: 
+            contact: 
+                custom: 1
+                label: Contact signataire
+                input_name: id_contact_signature
+                required: 1
+                input: 
+                    type: select
+                    options:
+                        callback: getContactsArray
+            email_content: 
+                custom: 1
+                label: Contenu e-mail client pour la signature à distance
+                input_name: email_content
+                input: 
+                    type: html
+                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+                value: 
+                    callback: 
+                        method: getDefaultSignDistEmailContent
+                        
+    signature_devis_fin: 
+        extends: signature_fin
+        rows: 
+            contact: 
+                label: Contact signataire du devis de location
+            email_content: 
+                value: 
+                    callback: 
+                        params: 
+                            - devis_fin
+                            
+    signature_contrat_fin: 
+        extends: signature_fin
+        rows: 
+            contact: 
+                label: Contact signataire du contrat de location
+            email_content: 
+                value: 
+                    callback: 
+                        params: 
+                            - contrat_fin
+                            
+signatures: 
+    devis_fin: 
+        label: Devis de location
+    contrat_fin: 
+        label: Contrat de location

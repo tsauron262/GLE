@@ -60,7 +60,7 @@ class BimpNote extends BimpObject
             if (count($data) > 0) {
                 $userT->fetch($idUser);
                 $html = '';
-                $htmlTitre = '<h2>User : ' . $userT->getFullName($langs) . '</h3><br/>';
+//                $htmlTitre = '<h2>User : ' . $userT->getFullName($langs) . '</h3><br/>';
                 $html .= 'Bonjour vous avez ' . count($notes) . ' message(s) non lu : <br/>';
                 if (count($data) >= $maxForMail)
                     $html .= 'Voici les ' . count($data) . ' dérniéres<br/>';
@@ -69,7 +69,7 @@ class BimpNote extends BimpObject
                 $html .= implode('<br/><br/>', $data);
                 mailSyn2('Message dans l\'erp', $userT->email, null, $html);
 
-                echo $htmlTitre . $html;
+//                echo $htmlTitre . $html;
             }
         }
 
@@ -528,7 +528,8 @@ class BimpNote extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'reloadNote();'
         );
     }
 
@@ -586,7 +587,8 @@ class BimpNote extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'reloadNote();'
         );
     }
 

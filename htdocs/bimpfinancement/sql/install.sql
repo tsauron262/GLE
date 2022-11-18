@@ -6,7 +6,10 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande` (
   `id_supplier` int(11) NOT NULL DEFAULT 0,
   `id_supplier_contact` int(11) NOT NULL DEFAULT 0,
   `id_user_resp` int(11) NOT NULL DEFAULT 0,
+  `id_main_source` int(11) NOT NULL DEFAULT 0,
   `status` int(11) NOT NULL DEFAULT 0,
+  `devis_status` int(11) NOT NULL DEFAULT 0,
+  `contrat_status` int(11) NOT NULL DEFAULT 0,
   `label` VARCHAR(255) NOT NULL DEFAULT '',
   `duration` int(11) NOT NULL DEFAULT 0,
   `periodicity` int(11) NOT NULL DEFAULT 0,
@@ -18,25 +21,63 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande` (
   `vr_vente` double(24,8) NOT NULL DEFAULT 0,
   `ca_prevu` double(24,8) NOT NULL DEFAULT 0,
   `pba_prevu` double(24,8) NOT NULL DEFAULT 0,
+  `formule` VARCHAR(30) NOT NULL DEFAULT 'none',
   `date_loyer` datetime NULL DEFAULT NULL,
   `agreement_number` VARCHAR(255) NOT NULL DEFAULT '',
-  `commission_commerciale` DECIMAL(24,6) NOT NULL DEFAULT '0',
-  `commission_financiere` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `commission_apporteur` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `marge_souhaitee` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `tx_cession` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `loyer_mensuel_evo_ht` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `loyer_mensuel_dyn_ht` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `loyer_mensuel_suppl_ht` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `id_signature_devis` int(11) NOT NULL DEFAULT 0,
+  `signature_devis_params` text NOT NULL DEFAULT '',
+  `id_signature_contrat` int(11) NOT NULL DEFAULT 0,
+  `signature_contrat_params` text NOT NULL DEFAULT '',
+  `id_signature_pvr` int(11) NOT NULL DEFAULT 0,
+  `signature_pvr_params` text NOT NULL DEFAULT '',
   `date_create` datetime NOT NULL DEFAULT current_timestamp(),
   `user_create` int(11) NOT NULL DEFAULT 0,
   `date_update` datetime NOT NULL DEFAULT current_timestamp(),
   `user_update` int(11) NOT NULL DEFAULT 0,
+  `closed` tinyint(1) NOT NULL DEFAULT 0,
+  UNIQUE KEY `ref` (`ref`),
   KEY `id_client` (`id_client`),
   KEY `id_contact_client` (`id_contact_client`),
   KEY `id_supplier` (`id_client`),
   KEY `id_supplier_contact` (`id_contact_client`)
 );
 
+CREATE TABLE IF NOT EXISTS `llx_bf_demande_source` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_demande` int(11) NOT NULL DEFAULT 0,
+  `type` varchar(10) NOT NULL DEFAULT '',
+  `type_origine` varchar(10) NOT NULL DEFAULT '',
+  `id_origine` int(11) NOT NULL DEFAULT 0,
+  `ref_origine` varchar(255) NOT NULL DEFAULT '',
+  `origine_data` text NOT NULL DEFAULT '',
+  `id_client` int(11) NOT NULL DEFAULT 0,
+  `client_data` text NOT NULL DEFAULT '',
+  `ref_client` varchar(255) NOT NULL DEFAULT '',
+  `id_commercial` int(11) NOT NULL DEFAULT 0,
+  `commercial_data` text NOT NULL DEFAULT '',
+  `cancel_submitted` tinyint(1) NOT NULL DEFAULT 0,
+  `refuse_submitted` tinyint(1) NOT NULL DEFAULT 0,
+  KEY `id_demande` (`id_demande`),
+  KEY `origine` (`type`, `type_origine`, `id_origine`),
+  KEY `id_origine` (`id_origine`),
+  KEY `id_client` (`id_client`),
+  KEY `id_commercial` (`id_commercial`)
+);
+
 CREATE TABLE IF NOT EXISTS `llx_bf_demande_line` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_demande` int(11) NOT NULL DEFAULT 0,
+  `id_source` int(11) NOT NULL DEFAULT 0,
+  `id_line_origine` int(11) NOT NULL DEFAULT 0,
   `type` int(11) NOT NULL DEFAULT 0,
   `id_product` int(11) NOT NULL DEFAULT 0,
+  `ref` VARCHAR(255) NOT NULL DEFAULT '',
   `label` text NOT NULL DEFAULT '',
   `description` text NOT NULL DEFAULT '',
   `product_type` INT(11) NOT NULL DEFAULT 0,
@@ -53,6 +94,8 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande_line` (
   `serials` mediumtext NOT NULL DEFAULT '',
   `position` int(11) NOT NULL DEFAULT 0,
   KEY `id_demande` (`id_demande`),
+  KEY `id_source` (`id_source`),
+  KEY `id_line_origine` (`id_line_origine`),
   KEY `id_product` (`id_product`)
 );
 
@@ -60,6 +103,8 @@ CREATE TABLE IF NOT EXISTS `llx_bf_refinanceur` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_societe` int(11) NOT NULL DEFAULT 0,
   `url_demande` VARCHAR(255) NOT NULL DEFAULT '',
+  `taux` text NOT NULL DEFAULT '',
+  `active` tinyint(1) NOT NULL DEFAULT 1,
   KEY `id_societe` (`id_societe`)
 );
 
@@ -72,7 +117,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande_refinanceur` (
   `coef` double(24,8) NOT NULL DEFAULT 0,
   `qty` int(11) NOT NULL DEFAULT 0,
   `amount_ht` double(24,8) NOT NULL DEFAULT 0,
-  `payment` int(11) NOT NULL DEFAULT 0,
+  `payment` varchar(30) NOT NULL DEFAULT '',
   `periodicity` int(11) NOT NULL DEFAULT 0,
   `comment` text NOT NULL DEFAULT '',
   `date_create` datetime NOT NULL DEFAULT current_timestamp(),
@@ -116,7 +161,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_frais_fournisseur` (
   KEY `id_soc_supplier` (`id_soc_supplier`)
 );
 
-CREATE TABLE IF NOT EXISTS `llx_bf_rbt_except` (
+CREATE TABLE IF NOT EXISTS `llx_bf_rent_except` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_demande` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date` date NOT NULL DEFAULT '0000-00-00',

@@ -89,7 +89,11 @@ class BimpThemeLayout extends BimpLayout
 
         $html .= '<a class="header-brand" href="' . DOL_URL_ROOT . '/">' . "\n";
         $html .= '<div id="logo-img" class="logo-img">';
-        $html .= '<img src="' . DOL_URL_ROOT . '/theme/BimpTheme/views/imgs/bimp-logo.png" class="header-brand-img" alt="Bimp logo" width="125">';
+        if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimptheme/extends/entities/' . BIMP_EXTENDS_ENTITY . '/logo.png')) {
+            $html .= '<img src="' . DOL_URL_ROOT . '/bimptheme/extends/entities/' . BIMP_EXTENDS_ENTITY . '/logo.png" class="header-brand-img" alt="Logo" width="125">';
+        } else {
+            $html .= 'GLE';
+        }
         $html .= '</div>';
         $html .= '</a>' . "\n";
 
@@ -101,7 +105,6 @@ class BimpThemeLayout extends BimpLayout
         $html .= '<div class="nav-container">' . "\n";
         $html .= '<nav id="main-menu-navigation" class="navigation-main">' . "\n";
 
-        
         BimpObject::loadClass('bimptheme', 'Bimp_Menu');
         $items = Bimp_Menu::getFullMenu(null, true, true, true);
         $html .= $this->renderMenuItems($items, 1);
@@ -109,9 +112,7 @@ class BimpThemeLayout extends BimpLayout
         // todo: à refondre: 
 //        BimpObject::loadClass('bimpsupport', 'BS_SAV');
 //        $html .= BS_SAV::renderMenuQuickAccess();
-        
-                // Define $bookmarks
-        
+        // Define $bookmarks
         // Execute hook printLeftBlock
         $html .= '<div class="bimptheme_menu_extra_section">';
         global $hookmanager, $user, $db, $conf, $langs;
@@ -124,7 +125,7 @@ class BimpThemeLayout extends BimpLayout
         $parameters = array();
         $reshook = $hookmanager->executeHooks('printLeftBlock', $parameters);    // Note that $action and $object may have been modified by some hooks
         $html .= $hookmanager->resPrint;
-        
+
         $parameters = array();
         $reshook = $hookmanager->executeHooks('printMenuAfter', $parameters);    // Note that $action and $object may have been modified by some hooks
         $html .= $hookmanager->resPrint;

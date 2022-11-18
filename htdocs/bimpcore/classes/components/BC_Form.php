@@ -30,7 +30,7 @@ class BC_Form extends BC_Panel
         'required'           => array('data_type' => 'bool', 'default' => null),
         'edit'               => array('data_type' => 'bool', 'default' => 1),
         'display_if'         => array('data_type' => 'array', 'compile' => 1, 'default' => null),
-        'value'              => array('data_type' => 'any', 'default' => null),
+        'value'              => array('data_type' => 'any', 'default' => null)
     );
     public static $association_params = array(
         'display_if' => array('data_type' => 'array'),
@@ -366,7 +366,7 @@ class BC_Form extends BC_Panel
                     $params['value'] = implode(',', $params['value']);
                 }
             }
-            
+
             $field->value = $params['value'];
         }
 

@@ -830,18 +830,6 @@ class Bimp_Societe extends BimpDolObject
         return $label;
     }
 
-//    public function getNumSepa()
-//    {
-//
-//
-//        if ($this->getData('num_sepa') == "") {
-//            $new = BimpTools::getNextRef('societe_extrafields', 'num_sepa', 'FR02ZZZ008801-', 7);
-//            $this->updateField('num_sepa', $new);
-//            $this->update();
-//        }
-//        return $this->getData('num_sepa');
-//    }
-
     public function getCountryCode()
     {
         $fk_pays = (int) $this->getData('fk_pays');
@@ -2473,18 +2461,33 @@ class Bimp_Societe extends BimpDolObject
             if ($code != '')
                 $errors = BimpTools::merge_array($errors, $this->checkSiren('siren', $code, $data));
         }
-        $this->set('lettrecreditsafe', $data['lettrecreditsafe']);
-        $this->set('notecreditsafe', $data['notecreditsafe']);
-        if ($majOutstandingLimit) {
+
+        if (isset($data[''])) {
+            $this->set('lettrecreditsafe', $data['lettrecreditsafe']);
+        }
+        if (isset($data[''])) {
+            $this->set('notecreditsafe', $data['notecreditsafe']);
+        }
+        
+        if ($majOutstandingLimit && isset($data['outstanding_limit'])) {
             if ($data['outstanding_limit'] > $maxOutstandingLimit)
                 $data['outstanding_limit'] = $maxOutstandingLimit;
             $this->set('outstanding_limit', $data['outstanding_limit']);
         }
-        $this->set('capital', $data['capital']);
-        $this->set('tva_intra', $data['tva_intra']);
-        $this->set('capital', $data['capital']);
-        $this->set('siret', $data['siret']);
-        $this->set('siren', $data['siren']);
+        
+        if (isset($data['capital'])) {
+            $this->set('capital', $data['capital']);
+        }
+        if (isset($data['tva_intra'])) {
+            $this->set('tva_intra', $data['tva_intra']);
+        }
+        if (isset($data['siret'])) {
+            $this->set('siret', $data['siret']);
+        }
+        if (isset($data['siren'])) {
+            $this->set('siren', $data['siren']);
+        }
+        
         $errors = BimpTools::merge_array($errors, $this->update($w, true));
         return $errors;
     }
@@ -3823,12 +3826,12 @@ class Bimp_Societe extends BimpDolObject
         if ($limit > -1 && $limit != $this->getInitData('outstanding_limit'))
             $this->set('outstanding_limit', $limit);
 
-        if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
-//            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
-//                return array("Code compta particulier, le type de tiers ne peut être différent.");
-            if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
-                return array("Code compta entreprise, le type de tiers ne peut être différent.");
-        }
+//        if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
+////            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
+////                return array("Code compta particulier, le type de tiers ne peut être différent.");
+////            if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
+////                return array("Code compta entreprise, le type de tiers ne peut être différent.");
+//        }
 
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;

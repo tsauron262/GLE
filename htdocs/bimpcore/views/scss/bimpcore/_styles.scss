@@ -309,6 +309,14 @@ div.alert {
     }
 }
 
+.copyTextIcon {
+    display: inline-block;
+    margin: 0 5px;
+    font-size: 10px;
+    font-weight: normal;
+    color: #505050;
+}
+
 /*Objects Components*/
 
 .object_component {
@@ -1086,7 +1094,7 @@ i.iconRight {
         font-size: 12px;
     }
     .btn:hover {
-        background-color: #EF7D00;
+        background-color: $primary;
         color: #fff;
     }
 }

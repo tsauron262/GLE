@@ -112,6 +112,11 @@ class AtradiusAPI extends BimpAPI {
             if(isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_VALID) {
                 $cover = $response['data'][$k];
                 
+                
+                if(isset($cover['totalDecision']['decisionAmtInPolicyCurrency']) && $cover['totalDecision']['decisionAmtInPolicyCurrency'] == 0){
+                    $status = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
+                }
+                
                 // Il y a 2 décisions prises
                 if(isset($c['firstAmtDecision'])  and is_array($c['firstAmtDecision'])
                and isset($c['secondAmtDecision']) and is_array($c['secondAmtDecision'])) {

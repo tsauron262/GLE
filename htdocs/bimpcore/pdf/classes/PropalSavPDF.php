@@ -61,9 +61,9 @@ class PropalSavPDF extends PropalPDF
         $this->header_vars['header_right'] = $rows;
     }
 
-    public function getCommercialInfosHtml()
+    public function getFromUsersInfosHtml()
     {
-        $html = parent::getCommercialInfosHtml();
+        $html = parent::getFromUsersInfosHtml();
 
         if (!is_null($this->sav)) {
             if ((int) $this->sav->getData('id_user_tech')) {

@@ -1,12 +1,12 @@
 <?php
 
-require_once __DIR__ . '/BimpDocumentPDF.php';
+require_once __DIR__ . '/BimpCommDocumentPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
 ini_set('display_errors', 1);
 
-class CepaPDF extends BimpDocumentPDF
+class CepaPDF extends BimpCommDocumentPDF
 {
 
     public static $type = 'societe';

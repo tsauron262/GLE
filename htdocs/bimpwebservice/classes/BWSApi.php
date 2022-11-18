@@ -130,9 +130,14 @@ class BWSApi
 
     // Getters: 
 
-    public function getParam($param_name, $default_value = null)
+    public function getParam($param_path, $default_value = null)
     {
-        return BimpTools::getArrayValueFromPath($this->params, $param_name, $default_value);
+        return BimpTools::getArrayValueFromPath($this->params, $param_path, $default_value);
+    }
+
+    public function setParam($param_path, $value)
+    {
+        return BimpTools::setArrayValueFromPath($this->params, $param_path, $value);
     }
 
     public function getErrors()
@@ -176,8 +181,10 @@ class BWSApi
         }
 
         // check params:
-        if (!$this->checkParams()) {
-            return false;
+        if (isset(self::$requests[$this->request_name]['params'])) {
+            if (!$this->checkParams(self::$requests[$this->request_name]['params'])) {
+                return false;
+            }
         }
 
         // check droit requête:
@@ -210,7 +217,7 @@ class BWSApi
             $this->addError('INTERNAL_ERROR', 'Erreur interne - opération non disponible actuellement');
             return false;
         }
-
+        
         return true;
     }
 
@@ -236,53 +243,62 @@ class BWSApi
         );
     }
 
-    protected function checkParams()
+    protected function checkParams($params_def, $path = '')
     {
         $check = true;
-        if (isset(self::$requests[$this->request_name]['params'])) {
-            foreach (self::$requests[$this->request_name]['params'] as $param_name => $param_def) {
-                $data_type = BimpTools::getArrayValueFromPath($param_def, 'data_type', 'string');
+        foreach ($params_def as $param_name => $param_def) {
+            $data_type = BimpTools::getArrayValueFromPath($param_def, 'data_type', 'string');
 
-                $missing = false;
+            $missing = false;
 
-                if (!isset($this->params[$param_name])) {
-                    $missing = true;
-                } elseif (in_array($data_type, BC_Field::$missing_if_empty_types) && empty($this->params[$param_name])) {
-                    $missing = true;
+            $param = BimpTools::getArrayValueFromPath($this->params, $path . $param_name);
+
+            if (is_null($param)) {
+                $missing = true;
+            } elseif (in_array($data_type, BC_Field::$missing_if_empty_types) && empty($param)) {
+                $missing = true;
+            } else {
+                $param_errors = array();
+                if (!BimpTools::checkValueByType($data_type, $param, $param_errors)) {
+                    if (empty($param_errors)) {
+                        $param_errors[] = 'Format invalide';
+                    }
+
+                    $this->addError('INVALID_PARAMETER', BimpTools::getMsgFromArray($param_errors, 'Paramètre "' . BimpTools::getArrayValueFromPath($param_def, 'label', $param_name) . '"', true));
+                    $check = false;
+                    continue;
                 } else {
-                    $param_errors = array();
-                    if (!BimpTools::checkValueByType($data_type, $this->params[$param_name], $param_errors)) {
-                        if (empty($param_errors)) {
-                            $param_errors[] = 'Format invalide';
-                        }
+                    $this->setParam($path . $param_name, $param);
+                }
+            }
 
-                        $this->addError('INVALID_PARAMETER', BimpTools::getMsgFromArray($param_errors, 'Paramètre "' . BimpTools::getArrayValueFromPath($param_def, 'label', $param_name) . '"', true));
-                        $check = false;
-                        continue;
+            if ($missing) {
+                $required = false;
+                if (BimpTools::getArrayValueFromPath($param_def, 'required', 0)) {
+                    $required = true;
+                } else {
+                    $required_if_param_name = BimpTools::getArrayValueFromPath($param_def, 'required_if', '');
+                    if ($required_if_param_name) {
+                        $required_if_data_type = BimpTools::getArrayValueFromPath(self::$requests, $this->request_name . '/params/' . $required_if_param_name . '/data_type', 'string');
+                        $required_if_value = $this->getParam($required_if_param_name);
+                        if (is_null($required_if_value) || (in_array($required_if_data_type, BC_Field::$missing_if_empty_types) && empty($required_if_value))) {
+                            $required = true;
+                        }
                     }
                 }
+                if ($required) {
+                    $check = false;
+                    $this->addError('MISSING_PARAMETER', 'Paramètre obligatoire absent: "' . BimpTools::getArrayValueFromPath($param_def, 'label', $param_name) . '" (' . $path . $param_name . ')');
+                }
+            }
 
-                if ($missing) {
-                    $required = false;
-                    if (BimpTools::getArrayValueFromPath($param_def, 'required', 0)) {
-                        $required = true;
-                    } else {
-                        $required_if_param_name = BimpTools::getArrayValueFromPath($param_def, '', '');
-                        if ($required_if_param_name) {
-                            $required_if_data_type = BimpTools::getArrayValueFromPath(self::$requests, $this->request_name . '/params/' . $required_if_param_name . '/data_type', 'string');
-                            if (!isset($this->params[$required_if_param_name]) || (in_array($required_if_data_type, BC_Field::$missing_if_empty_types) && empty($this->params[$required_if_param_name]))) {
-                                $required = true;
-                            }
-                        }
-                    }
-                    if ($required) {
-                        $check = false;
-                        $this->addError('MISSING_PARAMETER', 'Paramètre obligatoire absent: "' . BimpTools::getArrayValueFromPath($param_def, 'label', $param_name) . '" (' . $param_name . ')');
-                    }
+            if (isset($param_def['sub_params'])) {
+                if (!$this->checkParams($param_def['sub_params'], $path . $param_name . '/')) {
+                    $check = false;
                 }
             }
         }
-        
+
         return $check;
     }
 

@@ -97,7 +97,7 @@ if (!defined('BIMP_LIB')) {
     }
 
     if (defined('BIMP_EXTENDS_ENTITY')) {
-        $dir_entity = DOL_DOCUMENT_ROOT . '/bimpcore/extends/versions/' . BIMP_EXTENDS_ENTITY . '/';
+        $dir_entity = DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/' . BIMP_EXTENDS_ENTITY . '/';
         if (file_exists($dir_entity . 'classes/BimpMail.php')) {
             require_once $dir_entity . 'classes/BimpMail.php';
         }

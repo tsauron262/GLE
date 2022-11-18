@@ -37,8 +37,8 @@
 
     & > thead > tr.col_headers > th {
         padding: 5px 8px;
-        background-color: $primary;
-        color: #fff;
+        background-color: $bimp_headers_bk_color;
+        color: $bimp_headers_color;
         font-size: 13px;
         font-weight: bold;
     }
@@ -58,8 +58,8 @@
             & > th {
                 width: 20%;
                 min-width: 90px;
-                background-color: $primary;
-                color: #fff;
+                background-color: $bimp_headers_bk_color;
+                color: $bimp_headers_color;
                 font-weight: bold;
                 vertical-align: top;
                 text-align: right;

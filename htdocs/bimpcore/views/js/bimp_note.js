@@ -1,4 +1,4 @@
-
+notifNote = null;
 class bimp_note extends AbstractNotification {
     
     /**
@@ -7,6 +7,7 @@ class bimp_note extends AbstractNotification {
     
     constructor(nom, id_notif) {
         super(nom, id_notif);
+        notifNote = this;
     }
     
     init() {
@@ -177,4 +178,9 @@ class bimp_note extends AbstractNotification {
         return initials.toUpperCase();
     }
 
+}
+
+function reloadNote(){
+    if(notifNote !== null)
+        notifNote.reloadNotif();
 }

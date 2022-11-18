@@ -82,7 +82,7 @@ class BT_ficheInter extends BimpDolObject
     const TYPE_SIGN_ELEC = 3;
 
     public static $types_signature = array(
-        0                      => array('label' => 'Non signée', 'icon' => 'fas_times', 'classes' => array('warning')),
+        0                      => array('label' => ' ', 'icon' => '', 'classes' => array('')),
         self::TYPE_SIGN_DIST   => array('label' => 'Signature à distance', 'icon' => 'fas_file-download'),
         self::TYPE_SIGN_PAPIER => array('label' => 'Signature papier', 'icon' => 'fas_file-signature'),
         self::TYPE_SIGN_ELEC   => array('label' => 'Signature électronique', 'icon' => 'fas_signature')
@@ -2183,6 +2183,8 @@ class BT_ficheInter extends BimpDolObject
                                 'test_ferme' => 'fichinter:rowid=' . $this->id . ' && (commandes != "" OR fk_contrat > 0 OR fk_facture > 0)',
                                 "txt"        => "Bonjour,Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur. " . $this->getNomUrl(),
                             );
+                            if($email_comm != '')
+                                $data["dst"] .= ','.$email_comm;
                             $errors = BimpTools::merge_array($errors, $task->validateArray($data));
                             $errors = BimpTools::merge_array($errors, $task->create());
                             if (!count($errors)) {

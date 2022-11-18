@@ -47,6 +47,15 @@ class BContract_contratLine extends BContract_contrat {
         //return 0;
     }
     
+    public function validate() {
+        if (is_null($this->getData('description')) || empty($this->getData('description'))) {
+            $produit = $this->getChildObject('produit');
+            $this->set('description', $produit->getData('description'));
+        } 
+        
+        return parent::validate();
+    }
+    
     public function displayRenouvellementIn() {
         
         $renouvellement = $this->getData('renouvellement');

@@ -6724,7 +6724,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             // Extra right: 
             if (method_exists($this, 'renderHeaderExtraRight')) {
                 $html .= '<div style="margin: 10px 0;">';
-                $html .= $this->renderHeaderExtraRight();
+                $html .= $this->renderHeaderExtraRight($no_div = false);
                 $html .= '</div>';
             }
 

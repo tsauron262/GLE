@@ -1346,7 +1346,7 @@ class BF_Demande extends BimpObject
         return $html;
     }
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         $html = '';
 

@@ -4423,7 +4423,7 @@ class BContract_contrat extends BimpDolObject
     }
     
     
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         
         $hmtl = '';

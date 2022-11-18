@@ -4088,10 +4088,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     if ($demande)
                         $demande->delete($warnings, 1);
                     $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée (validation financière automatique, voir configuration client)";
-                    $msg_mail = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true);
-                    $msg_mail .= " a été validée financièrement par la configuration du client ";
-                    $msg_mail .= "(utilisateur: " . ucfirst($user->firstname) . ' ' . strtoupper($user->lastname) . ")";
-                    mailSyn2("Validation financière forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", $msg_mail);
+//                    $msg_mail = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true);
+//                    $msg_mail .= " a été validée financièrement par la configuration du client ";
+//                    $msg_mail .= "(utilisateur: " . ucfirst($user->firstname) . ' ' . strtoupper($user->lastname) . ")";
+//                    mailSyn2("Validation financière forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", $msg_mail);
                 }
             }
         }

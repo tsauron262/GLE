@@ -367,11 +367,11 @@ fields:
     date_end_renouvellement:
         label: Date de fin contrat (Renouvellement)
         type: date
-    initial_renouvellement:
-        label: Renouvellement initial
-        type: int
-        values:
-            array: renouvellement
+#    initial_renouvellement:
+#        label: Renouvellement initial
+#        type: int
+#        values:
+#            array: renouvellement
     next_contrat:
         label: Contrat de renouvellement
         type: id_object
@@ -725,7 +725,7 @@ forms:
         rows:
             - field: current_renouvellement
             - field: tacite
-            - field: initial_renouvellement
+#            - field: initial_renouvellement
             - field: date_end_renouvellement
             - custom: 1
               label: Lignes du contrat à supprimer

@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande` (
   `tx_cession` DECIMAL(24,6) NOT NULL DEFAULT '0',
   `loyer_mensuel_evo_ht` DECIMAL(24,6) NOT NULL DEFAULT '0',
   `loyer_mensuel_dyn_ht` DECIMAL(24,6) NOT NULL DEFAULT '0',
-  `loyer_mensuel_suppl_ht` DECIMAL(24,6) NOT NULL DEFAULT '0',)
+  `loyer_mensuel_suppl_ht` DECIMAL(24,6) NOT NULL DEFAULT '0',
   `id_signature_devis` int(11) NOT NULL DEFAULT 0,
   `signature_devis_params` text NOT NULL DEFAULT '',
   `id_signature_contrat` int(11) NOT NULL DEFAULT 0,

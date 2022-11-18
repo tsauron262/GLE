@@ -550,7 +550,52 @@ class BimpCommDemandeFin extends BimpObject
                 $content .= '<br/>';
 
                 if (isset($data['montants']) && !empty($data['montants'])) {
+                    $periodicity = (int) BimpTools::getArrayValueFromPath($data, 'periodicity', 1);
+                    require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/BF_Lib.php';
                     $content .= '<h4>Montants: </h4>';
+                    $content .= '<table class="bimp_list_table" style="text-align: center">';
+                    $content .= '<thead>';
+                    $content .= '<tr>';
+                    $content .= '<td></td>';
+                    $content .= '<th>Loyer mensuel</th>';
+                    if ($periodicity > 1) {
+                        $content .= '<th>Loyer ' . BFTools::$periodicities_masc[$periodicity] . ' </th>';
+                    }
+                    $content .= '</tr>';
+                    $content .= '</thead>';
+                    $content .= '<tbody>';
+
+                    if (isset($data['montants']['loyer_mensuel_evo_ht'])) {
+                        $content .= '<tr>';
+                        $content .= '<th>Formule évolutive</th>';
+                        $content .= '<td>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_evo_ht']) . '</td>';
+                        if ($periodicity > 1) {
+                            $content .= '<td>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_evo_ht'] * $periodicity) . '</td>';
+                        }
+                        $content .= '</tr>';
+                    }
+
+                    if (isset($data['montants']['loyer_mensuel_dyn_ht'])) {
+                        $content .= '<tr>';
+                        $content .= '<th>Formule évolutive</th>';
+                        $content .= '<td>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht']);
+                        if (isset($data['montants']['loyer_mensuel_suppl_ht'])) {
+                            $content .= '<br/>Puis : ' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht']);
+                        }
+                        $content .= '</td>';
+                        if ($periodicity > 1) {
+                            $content .= '<td>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht'] * $periodicity);
+                            if (isset($data['montants']['loyer_mensuel_suppl_ht'])) {
+                                $content .= 'Puis ' . (12 / $periodicity) . ' x ' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht'] * $periodicity);
+                            }
+                            $content .= '</td>';
+                        }
+                        $content .= '</tr>';
+                    }
+
+                    $content .= '</tbody>';
+                    $content .= '</table>';
+
                     if (isset($data['montants']['loyer_ht'])) {
                         $content .= '<b>Montant HT d\'un loyer :</b> ' . BimpTools::displayMoneyValue($data['montants']['loyer_ht'], 'EUR', false, false, false, 2, true) . '<br/>';
                     }
@@ -814,7 +859,6 @@ class BimpCommDemandeFin extends BimpObject
 //                $nom_signataire = BimpTools::getArrayValueFromPath($data, 'nom_signataire', '', $errors, 1, 'Nom signataire absent');
 //                $prenom_signataire = BimpTools::getArrayValueFromPath($data, 'prenom_signataire', '', $errors, 1, 'Prénom signataire absent');
 //                $fonction_signataire = BimpTools::getArrayValueFromPath($data, 'fonction_signataire', '');
-
 //                if ($client->isCompany() && !$fonction_signataire) {
 //                    $errors[] = 'Fonction signataire obligatoire pour les clients pros';
 //                }

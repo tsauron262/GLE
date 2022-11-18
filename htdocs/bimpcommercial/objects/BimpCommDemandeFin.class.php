@@ -542,7 +542,7 @@ class BimpCommDemandeFin extends BimpObject
                     $content .= '<b>Durée totale :</b> ' . $data['duration'] . ' mois<br/>';
                 }
                 if (isset($data['periodicity_label']) && $data['periodicity_label']) {
-                    $content .= '<b>Périodicité :</b> ' . $data['periodicity_label'] . ' mois<br/>';
+                    $content .= '<b>Périodicité :</b> ' . $data['periodicity_label'] . '<br/>';
                 }
                 if (isset($data['nb_loyers']) && $data['nb_loyers']) {
                     $content .= '<b>Nombre de loyers :</b> ' . $data['nb_loyers'] . '<br/>';
@@ -563,7 +563,7 @@ class BimpCommDemandeFin extends BimpObject
                     }
                     $content .= '</tr>';
                     $content .= '</thead>';
-                    $content .= '<tbody>';
+                    $content .= '<tbody class="headers_col">';
 
                     if (isset($data['montants']['loyer_mensuel_evo_ht'])) {
                         $content .= '<tr>';

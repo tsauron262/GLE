@@ -584,7 +584,7 @@ class BimpCommDemandeFin extends BimpObject
                         }
                         $content .= '</td>';
                         if ($periodicity > 1) {
-                            $content .= '<td>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht'] * $periodicity) . '</b>';
+                            $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht'] * $periodicity) . '</b>';
                             if (isset($data['montants']['loyer_mensuel_suppl_ht'])) {
                                 $content .= '<br/>Puis ' . (12 / $periodicity) . ' x <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht'] * $periodicity) . '</b>';
                             }

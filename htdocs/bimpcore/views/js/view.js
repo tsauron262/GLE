@@ -121,20 +121,6 @@ function loadModalView(module, object_name, id_object, view_name, $button, title
     }, {}, 'large');
 }
 
-function deleteObjectFromView(view_id, $button) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    var $view = $('#' + view_id);
-
-    if (!$view.length) {
-        return;
-    }
-
-    $button.addClass('disabled');
-}
-
 function saveObjectFromViewModalForm(view_id, $button) {
     if ($button.hasClass('disabled')) {
         return;

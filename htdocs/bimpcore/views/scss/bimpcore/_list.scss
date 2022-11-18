@@ -7,12 +7,13 @@ table.objectlistTable {
     border: none;
     box-shadow: none;
     width: 100%;
-
+    
     & > thead > tr > th {
         padding: 10px 6px;
         margin-bottom: 8px;
-        color: #fff;
-        background-color: $primary;
+        color: $bimp_list_header_color;
+        background-color: $bimp_list_header_bk_color;
+        border-bottom: $bimp_list_header_border;
         text-align: left;
         font-weight: bold;
 
@@ -34,8 +35,8 @@ table.objectlistTable {
 
         & > th {
             padding: 5px 12px 5px 6px;
-            background-color: $primary;
-            color: #fff;
+            color: $bimp_headers_color;
+            background-color: $bimp_headers_bk_color;
             border-bottom: 1px solid #fff;
             text-align: right;
 
@@ -204,8 +205,8 @@ table.objectlistTable {
     }
 
     & > tfoot > tr > th {
-        color: #fff;
-        background-color: $primary;
+        color: $bimp_headers_color;
+        background-color: $bimp_headers_bk_color;
         text-align: right;
         padding: 5px 12px 5px 6px;
         vertical-align: top;
@@ -382,7 +383,7 @@ table.objectSubList {
         font-family: 'FontAwesome';
         margin-left: 8px;
         opacity: 0;
-        color: #fff;
+        color: $bimp_list_header_color;
         transition: all 0.15s ease;
         -webkit-transition: all 0.15s ease;
     }
@@ -514,7 +515,7 @@ th.th_tools {
     .headerButton {
         display: inline-block;
         margin: 5px;
-        color: #fff;
+        color: $bimp_list_header_icons_color;
         font-weight: normal;
         margin: 0 3px;
         padding: 4px 6px;
@@ -526,8 +527,8 @@ th.th_tools {
         -webkit-transition: all 0.3s ease;
 
         &:hover {
-            color: #EF7D00;
-            background-color: #fff;
+            color: $bimp_list_header_icons_hover_color;
+            background-color: $bimp_list_header_icons_hover_bk_color;
         }
         &:before,
             &:after {
@@ -558,7 +559,7 @@ th.th_tools {
     .loadingIcon {
         display: inline-block;
         margin: 5px;
-        color: #fff;
+        color: $bimp_list_header_icons_color;
         font-weight: bold;
         margin: 0 3px;
         padding: 2px 6px;
@@ -588,7 +589,7 @@ td.buttons {
 }
 
 .rowButton {
-    color: #636363!important;
+    color: $gray-darker!important;
     text-align: center;
     width: 28px;
     height: 28px;
@@ -606,7 +607,7 @@ td.buttons {
 
     &:hover {
         color: #fff!important;
-        background-color: #EF7D00;
+        background-color: $primary;
         text-decoration: none;
 
         i {
@@ -630,7 +631,7 @@ td.buttons {
     }
 
     i {
-        color: #636363!important;
+        color: $gray-darker!important;
     }
 }
 
@@ -676,7 +677,7 @@ td.buttons {
 
         &:hover,
             &.selected {
-            color: #EF7D00;
+            color: $primary;
         }
         &:before,
             &:after {
@@ -719,7 +720,7 @@ td.buttons {
 
             &.active,
             &.active:hover {
-                color: #EF7D00;
+                color: $primary;
                 cursor: default;
             }
 

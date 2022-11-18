@@ -163,7 +163,7 @@ class BF_Frais extends BimpObject
                             $line->desc = 'Frais divers: ' . $this->getData('description');
                             break;
 
-                        case 'BF_RbtExcept':
+                        case 'BF_RentExcept':
                             $line->desc = 'Loyer intercalaire à la date du ' . $this->displayData('date');
                             break;
                     }
@@ -212,7 +212,7 @@ class BF_Frais extends BimpObject
                             $line->desc = 'Frais divers: ' . $this->getData('description');
                             break;
 
-                        case 'BF_RbtExcept':
+                        case 'BF_RentExcept':
                             $line->desc = 'Loyer intercalaires à la date du ' . $this->displayData('date');
                             break;
                     }

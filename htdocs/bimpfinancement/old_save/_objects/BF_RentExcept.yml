@@ -1,0 +1,27 @@
+extends: BF_Frais
+
+table: bf_rent_except
+
+labels:
+    name: loyer intercalaire
+    name_plur: loyers intercalaires
+                
+fields: 
+    payment:
+        label: Règlement
+        type: int
+        values: 
+            array: payments
+        
+list:
+    positions: 1
+    title: Loyers intercalaires
+    icon: calendar-plus-o
+    cols:
+        date: 
+            edit: 1
+        amount: 
+            edit: 1
+        payment:
+            edit: 1
+        id_facture:

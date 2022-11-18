@@ -1,4 +1,5 @@
 <?php
+
 /*
  * BIMP-ERP by Synopsis et DRSI
  *
@@ -20,18 +21,20 @@
   \ingroup    ProspectBabel
   \brief      Fichier de description et activation du module de Prospection Babel
  */
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once(DOL_DOCUMENT_ROOT . "/core/modules/DolibarrModules.class.php");
 
 /**     \class      modProspectBabel
   \brief      Classe de description et activation du module de Prospection Babel
  */
-class modBimptheme extends DolibarrModules {
+class modBimptheme extends DolibarrModules
+{
 
     /**
      *   \brief      Constructeur. Definit les noms, constantes et boites
      *   \param      DB      handler d'acces base
      */
-    function modBimptheme($DB) {
+    function modBimptheme($DB)
+    {
         $this->db = $DB;
         $this->numero = 47477;
 
@@ -54,14 +57,12 @@ class modBimptheme extends DolibarrModules {
 
         // Constantes
         $this->const = array();
-        
-        
+
         $this->module_parts = array(
             'hooks' => array('main', 'initBimpLayout')
         );
-        
-        $r = 0;
 
+        $r = 0;
 
         $r++;
 
@@ -76,28 +77,28 @@ class modBimptheme extends DolibarrModules {
 //    
 //    
         $this->menu = array();
-        
+
         $r = 0;
 
         $this->menu[$r] = array(
-            'fk_menu' => '', // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode of parent menu
-            'type' => 'top', // This is a Left menu entry
-            'titre' => 'Changer de thème',
+            'fk_menu'  => '', // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode of parent menu
+            'type'     => 'top', // This is a Left menu entry
+            'titre'    => 'Changer de thème',
             'mainmenu' => '',
             'leftmenu' => '',
-            'url' => '/bimptheme/switch.php',
-            'langs' => '', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+            'url'      => '/bimptheme/switch.php',
+            'langs'    => '', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'position' => 1000,
-            'enabled' => '1', // Define condition to show or hide menu entry. Use '$conf->monmodule->enabled' if entry must be visible if module is enabled.
-            'perms' => '1', // Use 'perms'=>'$user->rights->monmodule->level1->level2' if you want your menu with a permission rules
-            'target' => '',
-            'user' => 2);    // 0=Menu for internal users,1=external users, 2=both
+            'enabled'  => '1', // Define condition to show or hide menu entry. Use '$conf->monmodule->enabled' if entry must be visible if module is enabled.
+            'perms'    => '1', // Use 'perms'=>'$user->rights->monmodule->level1->level2' if you want your menu with a permission rules
+            'target'   => '',
+            'user'     => 2);    // 0=Menu for internal users,1=external users, 2=both
 
         $r++;
         // Permissions
         $this->rights = array();
         $this->rights_class = 'bimptheme';
-        
+
 //        $this->rights[1][0] = 161881;
 //        $this->rights[1][1] = 'Generer les PDF contrats';
 //        $this->rights[1][2] = 'r';
@@ -134,17 +135,24 @@ class modBimptheme extends DolibarrModules {
      *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
      *               Definit egalement les repertoires de donnees e creer pour ce module.
      */
-    function init() {
+    function init()
+    {
         global $conf;
         $sql = array();
 
-         
-        require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
-        $name = 'module_version_'. strtolower($this->name);
-        if(BimpCore::getConf($name, '') == ""){
+        require_once(DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php");
+        $name = 'module_version_' . strtolower($this->name);
+        if (BimpCore::getConf($name, '') == "") {
             BimpCore::setConf($name, floatval($this->version));
         }
-        
+
+        if (!file_exists(DOL_DATA_ROOT . '/bimptheme')) {
+            $error = BimpTools::makeDirectories('bimptheme', DOL_DATA_ROOT);
+            if ($error) {
+                setEventMessage($error, 'errors');
+            }
+        }
+
         return $this->_init($sql);
     }
 
@@ -152,10 +160,11 @@ class modBimptheme extends DolibarrModules {
      *    \brief      Fonction appelee lors de la desactivation d'un module.
      *                Supprime de la base les constantes, boites et permissions du module.
      */
-    function remove() {
+    function remove()
+    {
         global $conf;
         return $this->_remove($sql);
     }
-
 }
+
 ?>

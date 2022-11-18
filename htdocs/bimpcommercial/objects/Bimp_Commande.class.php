@@ -2,7 +2,42 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 
-class Bimp_Commande extends BimpComm
+if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/BimpComm.class.php';
+    }
+}
+
+if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY) {
+    if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/BimpComm.class.php')) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/BimpComm.class.php';
+    }
+}
+
+if (class_exists('BimpComm_ExtEntity')) {
+
+    class Bimp_CommandeTemp extends BimpComm_ExtEntity
+    {
+        
+    }
+
+} elseif (class_exists('BimpComm_ExtVersion')) {
+
+    class Bimp_CommandeTemp extends BimpComm_ExtVersion
+    {
+        
+    }
+
+} else {
+
+    class Bimp_CommandeTemp extends BimpComm
+    {
+        
+    }
+
+}
+
+class Bimp_Commande extends Bimp_CommandeTemp
 {
 
     public static $no_check_reservations = false;
@@ -327,10 +362,11 @@ class Bimp_Commande extends BimpComm
                 }
                 return 1;
 
-//            case 'paiement_comptant':
-//                if ((int) $this->getData('fk_statut') != 0 and !$user->admin)
-//                return 0;
-//                return 1;
+            case 'id_client_facture':
+                if (!$force_edit && $this->field_exists('id_demande_fin') && (int) $this->getData('id_demande_fin')) {
+                    return 0;
+                }
+                return 1;
         }
 
         return 1;
@@ -633,11 +669,10 @@ class Bimp_Commande extends BimpComm
                 $errors = array();
                 if ($this->isActionAllowed('validate', $errors)) {
                     if ($this->canSetAction('validate')) {
-                        
-                        if(in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))){
+
+                        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))) {
                             $data['form_name'] = 'livraison';
-                        }
-                        else{
+                        } else {
                             $data['confirm_msg'] = 'Veuillez confirmer la validation de cette commande';
                         }
                         $buttons[] = array(
@@ -4022,15 +4057,14 @@ class Bimp_Commande extends BimpComm
         if (count($res_errors)) {
             $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
         }
-        
-        
-        
-        if(in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))){
-            if(!$this->dol_object->getIdContact('external', 'SHIPPING'))
+
+
+
+        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))) {
+            if (!$this->dol_object->getIdContact('external', 'SHIPPING'))
                 $errors[] = 'Pour les livraisons directes le contact client est obligatoire';
-            
         }
-        
+
 
         // Validation encours
         if (empty($errors)) {
@@ -4211,6 +4245,20 @@ class Bimp_Commande extends BimpComm
 
                     // Copie des remises globales: 
                     $this->copyRemisesGlobalesFromOrigin($propal, $warnings);
+
+                    if ($this->field_exists('id_demande_fin') && $propal->field_exists('id_demande_fin')) {
+                        if ((int) $propal->getData('id_demande_fin')) {
+                            $demande_fin = $propal->getChildObject('demande_fin');
+
+                            if (BimpObject::objectLoaded($demande_fin)) {
+                                $id_client = (int) $demande_fin->getTargetIdClient();
+                                if ($id_client) {
+                                    $this->updateField('id_client_facture', $id_client);
+                                }
+                                $this->updateField('id_demande_fin', $demande_fin->id);
+                            }
+                        }
+                    }
                 }
             }
 

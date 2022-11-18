@@ -257,7 +257,6 @@ class BimpPDF_Table
     {
         // Vérification de l'affichage des colonnes: 
         $cols = array();
-
         foreach ($this->cols as $key => $col) {
             if ($this->remove_empty_cols) {
                 foreach ($this->rows as $row) {

@@ -3,34 +3,6 @@ $bootstrap-sass-asset-helper: false !default;
 // Variables
 // --------------------------------------------------
 
-
-//== Colors
-//
-//## Gray and brand colors for use across Bootstrap.
-
-$gray-base:              #000 !default;
-$gray-darker:            #282828 !default;
-$gray-dark:              #636363 !default;
-$gray:                   #B4B4B4 !default;
-$gray-light:             #DCDCDC !default;
-$gray-lighter:           #F5F5F5 !default; // #eee
-
-$brand-primary:         #EF7D00 !default;
-$brand-secondary:       $gray-dark !default;
-$brand-success:         #348C41 !default;
-$brand-info:            #3B6EA0 !default;
-$brand-warning:         #E69900 !default;
-$brand-danger:          #A00000 !default;
-
-$primary: $brand-primary;
-$secondary: $brand-secondary;
-$success: $brand-success;
-$info: $brand-info;
-$warning: $brand-warning;
-$danger: $brand-danger;
-$important: #963E96 !default;
-$selection: #5897FB !default;
-
 //== Scaffolding
 //
 //## Settings for some of the most global styles.

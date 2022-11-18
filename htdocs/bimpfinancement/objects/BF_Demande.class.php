@@ -1242,7 +1242,7 @@ class BF_Demande extends BimpObject
         return '';
     }
 
-    public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false)
+    public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false, $no_history = false)
     {
         if (in_array($field, array('status', 'devis_status', 'contrat_status'))) {
             if ((int) $this->getData('id_main_source')) {
@@ -1253,7 +1253,7 @@ class BF_Demande extends BimpObject
                 self::$doc_status_list[self::DOC_GENERATED]['label'] = 'A envoyer au client';
             }
         }
-        return parent::displayData($field, $display_name, $display_input_value, $no_html);
+        return parent::displayData($field, $display_name, $display_input_value, $no_html, $no_history);
     }
 
     public function displayDuration()

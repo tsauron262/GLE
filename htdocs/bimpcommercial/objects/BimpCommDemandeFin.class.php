@@ -557,9 +557,9 @@ class BimpCommDemandeFin extends BimpObject
                     $content .= '<thead>';
                     $content .= '<tr>';
                     $content .= '<td></td>';
-                    $content .= '<th>Loyer mensuel</th>';
+                    $content .= '<th style="text-align: center">Loyer mensuel</th>';
                     if ($periodicity > 1) {
-                        $content .= '<th>Loyer ' . BFTools::$periodicities_masc[$periodicity] . ' </th>';
+                        $content .= '<th style="text-align: center">Loyer ' . BFTools::$periodicities_masc[$periodicity] . ' </th>';
                     }
                     $content .= '</tr>';
                     $content .= '</thead>';
@@ -586,7 +586,7 @@ class BimpCommDemandeFin extends BimpObject
                         if ($periodicity > 1) {
                             $content .= '<td>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht'] * $periodicity);
                             if (isset($data['montants']['loyer_mensuel_suppl_ht'])) {
-                                $content .= 'Puis ' . (12 / $periodicity) . ' x ' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht'] * $periodicity);
+                                $content .= '<br/>Puis ' . (12 / $periodicity) . ' x ' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht'] * $periodicity);
                             }
                             $content .= '</td>';
                         }

@@ -552,7 +552,7 @@ class BimpCommDemandeFin extends BimpObject
                 if (isset($data['montants']) && !empty($data['montants'])) {
                     $periodicity = (int) BimpTools::getArrayValueFromPath($data, 'periodicity', 1);
                     require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/BF_Lib.php';
-                    $content .= '<h4>Montants: </h4>';
+                    $content .= '<h4>Loyers proposés: </h4>';
                     $content .= '<table class="bimp_list_table" style="text-align: center">';
                     $content .= '<thead>';
                     $content .= '<tr>';

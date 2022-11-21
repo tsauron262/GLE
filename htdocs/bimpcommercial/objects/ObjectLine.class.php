@@ -3884,7 +3884,10 @@ class ObjectLine extends BimpObject
 
         $this->getIdProductFromPost();
 
-        if ($field === 'id_product') {
+        
+        if(BimpTools::isSubmit('new_values/'.$this->id.'/'.$field))
+                $value = BimpTools::getValue('new_values/'.$this->id.'/'.$field);
+        elseif ($field === 'id_product') {
             $value = (int) $this->id_product;
         } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'pa_ht', 'remisable', 'desc', 'remise_crt_percent'))) {
             $value = $this->getValueByProduct($field);
@@ -3904,6 +3907,8 @@ class ObjectLine extends BimpObject
                 }
             }
         }
+        
+
 
         switch ($field) {
             case 'id_product':
@@ -3989,7 +3994,7 @@ class ObjectLine extends BimpObject
                 if (is_null($value)) {
                     $value = 1;
                 }
-
+                
                 if (BimpObject::objectLoaded($this->post_equipment)) {
                     $html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
                     $html .= '1';

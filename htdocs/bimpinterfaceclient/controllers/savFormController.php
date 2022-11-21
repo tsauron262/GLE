@@ -1748,7 +1748,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         $client->updateField('status', 1);
                         $msg = 'Bonjour,' . "\n\n";
                         $msg .= 'Le client ' . $client->getLink(array(), 'private') . ' a été réactivé automatiquement suite à sa prise de rendez-vous SAV en ligne';
-                        mailSyn2('Client activé automatiquement', 'a.delauzun@bimp.fr,f.martinez@bimp.fr,t.sauron@bimp.fr', '', $msg);
+                        mailSyn2('Client activé automatiquement', 's.reynaud@bimp.fr', '', $msg);
                     }
 
                     if (BimpObject::objectLoaded($client)) {

@@ -407,15 +407,15 @@ class BimpCommDemandeFin extends BimpObject
         $html = '';
 
         if ((int) $this->getData('status') > 0) {
-            $html .= '<br/>Demande de financememt: ' . $this->displayData('status', 'default', false);
+            $html .= '<br/>Demande de location: ' . $this->displayData('status', 'default', false);
         }
 
         if ((int) $this->getData('devis_fin_status') > 0) {
-            $html .= '<br/>Devis de financememt: ' . $this->displayData('devis_fin_status', 'default', false);
+            $html .= '<br/>Devis de location: ' . $this->displayData('devis_fin_status', 'default', false);
         }
 
         if ((int) $this->getData('contrat_fin_status') > 0) {
-            $html .= '<br/>Contrat de financememt: ' . $this->displayData('contrat_fin_status', 'default', false);
+            $html .= '<br/>Contrat de location: ' . $this->displayData('contrat_fin_status', 'default', false);
         }
 
         return $html;

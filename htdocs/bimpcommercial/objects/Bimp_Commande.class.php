@@ -4109,7 +4109,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 if ($demande)
                     $demande->delete($warnings, 1);
                 $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation de retard de paiement automatique, voir configuration client)";
-                mailSyn2("Validation impayé forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>Les retard de paiement de la commande " . $this->getNomUrl(1, true) . "ont été validée financièrement par la configuration du client.");
+                $this->addObjectLog("Les retard de paiement  ont été validée financièrement par la configuration du client.");
             }
         }
 

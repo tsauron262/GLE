@@ -613,7 +613,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         return $html;
     }
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         $html = '';
 

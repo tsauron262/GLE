@@ -77,6 +77,10 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
 
     public function isDemandeFinAllowed(&$errors = array())
     {
+        if (BimpCore::isUserDev()) {
+            return 1;
+        }
+        
         if (!(int) BimpCore::getConf('allow_df_from_propal', null, 'bimpcommercial')) {
             $errors[] = 'Demandes de location à partir des devis désactivées';
             return 0;
@@ -139,10 +143,10 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
 
     // Rendus HTML:
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         $html = '<div class="buttonsContainer">';
-        $html .= BimpComm_ExtEntity::renderHeaderExtraRight();
+        $html .= BimpComm_ExtEntity::renderHeaderExtraRight($no_div);
         $html .= parent::renderHeaderExtraRight(true);
         $html .= '</div>';
 

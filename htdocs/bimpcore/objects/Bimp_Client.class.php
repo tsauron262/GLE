@@ -1283,7 +1283,7 @@ class Bimp_Client extends Bimp_Societe
 
     // Rendus HTML:
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         $html = '';
 

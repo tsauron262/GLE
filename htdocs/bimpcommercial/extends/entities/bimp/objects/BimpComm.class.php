@@ -143,7 +143,7 @@ class BimpComm_ExtEntity extends BimpComm
         return $html;
     }
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         if ($this->field_exists('id_demande_fin') && (int) $this->getData('id_demande_fin')) {
             $df = $this->getChildObject('demande_fin');
@@ -152,7 +152,7 @@ class BimpComm_ExtEntity extends BimpComm
             }
         }
 
-        $html .= parent::renderHeaderExtraRight();
+        $html .= parent::renderHeaderExtraRight($no_div);
 
         return $html;
     }

@@ -1112,7 +1112,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         return $html;
     }
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         $html = '';
 

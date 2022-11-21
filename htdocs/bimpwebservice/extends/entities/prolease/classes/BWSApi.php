@@ -181,10 +181,9 @@ class BWSApi_ExtEntity extends BWSApi
                 );
 
                 if ($status >= 10 && $status < 20) {
-                    $response['montants']['loyer_ht'] = $demande->getLoyerAmountHT();
-                    $response['montants']['total_loyers_ht'] = $demande->getTotalLoyersHT();
-                    $response['montants']['total_loyers_tva'] = $demande->getTotalLoyersTVA();
-                    $response['montants']['total_loyers_ttc'] = $demande->getTotalLoyersTTC();
+                    $response['montants']['loyer_mensuel_evo_ht'] = $demande->getData('loyer_mensuel_evo_ht');
+                    $response['montants']['loyer_mensuel_dyn_ht'] = $demande->getData('loyer_mensuel_dyn_ht');
+                    $response['montants']['loyer_mensuel_suppl_ht'] = $demande->getData('loyer_mensuel_suppl_ht');
                 }
 
                 $user_resp = $demande->getChildObject('user_resp');

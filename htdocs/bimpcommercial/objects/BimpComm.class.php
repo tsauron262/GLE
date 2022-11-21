@@ -1938,7 +1938,7 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         $html = '';
         $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');

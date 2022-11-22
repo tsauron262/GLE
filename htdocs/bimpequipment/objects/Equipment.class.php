@@ -1642,10 +1642,11 @@ class Equipment extends BimpObject
     public function actionUpdateToNonSerilisable($data, &$success)
     {
         $success = 'Corrigé';
+        $warnings = array();
 
         define('DONT_CHECK_SERIAL', true);
         $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '', 1);
-        return $errors;
+        return array('warnings' => $warnings, 'errors' => $errors);;
     }
 
     public function actionUpdateInfosGsx($data, &$success)

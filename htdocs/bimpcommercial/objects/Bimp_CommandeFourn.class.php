@@ -1526,7 +1526,6 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
             }
         }
-        $result['errors'][] = 'fin';
         
 
         return $result;

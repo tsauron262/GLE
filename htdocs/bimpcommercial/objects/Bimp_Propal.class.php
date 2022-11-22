@@ -915,18 +915,18 @@ class Bimp_Propal extends Bimp_PropalTemp
                 
                 if($user->admin){
                     // Téléchargement des fichiers
-                    if($this->getData('id_signature')) {
+                    if($this->getData('id_signature') and $signature->getData('dist_type') == BimpSignature::DIST_DOCUSIGN) {
 
                         $file_name = $this->getSignatureDocFileName('propal', true);
                         $file_dir = $this->getSignatureDocFileDir('propal');
                         if(file_exists($file_dir . $file_name)) {
                             $button_download = array(
-                                'label'   => 'Retélécharger contrat signé DocuSign',
+                                'label'   => 'Retélécharger devis signé DocuSign',
                                 'icon'    => 'fas_file-download',
                                 'onclick' => $this->getJsActionOnclick('downloadSignature', array(), array('confirm_msg' => "Le fichier existe déjà, remplacer ?")));
                         } else {
                             $button_download = array(
-                                'label'   => 'Télécharger contrat signé DocuSign',
+                                'label'   => 'Télécharger devis signé DocuSign',
                                 'icon'    => 'fas_file-download',
                                 'onclick' => $this->getJsActionOnclick('downloadSignature'));
                         }
@@ -935,7 +935,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
 
                     // Création signature
-                    elseif(1) {//$user->rights->contrat->creer and $status == 1) {
+                    elseif(1) {//$user->rights->devis->creer and $status == 1) {
 
                         $buttons[] = array(
                             'label'   => 'Envoyer via DocuSign',
@@ -1947,10 +1947,9 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $this->getFilesDir();
     }
 
-    public function getSignatureDocFileName($doc_type = 'propal', $signed = false)
+    public function getSignatureDocFileName($doc_type = 'devis', $signed = false)
     {
         switch ($doc_type) {
-            case 'propal':
             case 'devis': 
                 return dol_sanitizeFileName($this->getRef()) . ($signed ? '_signe' : '') . '.pdf';
         }

@@ -1803,7 +1803,7 @@ class BimpTools
         $html = '';
 
         if ($address) {
-            $html .= $address . ($single_line ? ' - ' : '<br/>');
+            $html .= $address . ($single_line ? ', ' : '<br/>');
         }
 
         if ($zip) {
@@ -1821,11 +1821,11 @@ class BimpTools
             $html .= $dept;
 
             if ($pays) {
-                $html .= ' - ' . $pays;
+                $html .= ', ' . $pays;
             }
         } elseif ($pays) {
             if ($single_line) {
-                $html .= ' - ';
+                $html .= ', ';
             }
             $html .= $pays;
         }

@@ -416,9 +416,9 @@ Signature",
             // Client
             // Client
             array (
-                'email'       => 'r.pelegrin@bimp.fr',// ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
+                'email'       => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
                 'name'        =>  $client['prenom']  . ' ' . $client['nom'],
-                'signerEmail' => 'r.pelegrin@bimp.fr',//($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr', Todo
+                'signerEmail' => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr', 
                 'recipientId' => '1',
                 'routingOrder'=> '1',
                 'emailNotification' => array(

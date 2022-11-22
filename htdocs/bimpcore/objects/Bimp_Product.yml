@@ -583,6 +583,11 @@ fields:
         extra: 1
         has_total: 0
         
+    alerteActive: 
+        label: Activer les alerte de stocks
+        type: bool
+        default_value: 1
+        
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
     # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.
@@ -830,6 +835,8 @@ fields_tables:
             - field: remisable
               edit: 1
             - field: no_fixe_prices
+              edit: 1
+            - field: alerteActive
               edit: 1
             - field: duree
               edit: 1

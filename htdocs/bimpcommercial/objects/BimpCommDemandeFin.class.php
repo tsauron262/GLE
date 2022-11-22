@@ -865,11 +865,12 @@ class BimpCommDemandeFin extends BimpObject
                     if (!BimpObject::objectLoaded($contact_suivi)) {
                         $errors[] = 'Le contact de suivi sélectionné n\'existe plus';
                     }
-                } elseif ($is_company) {
-                    $errors[] = 'Client pro : sélection du contact destinataire de l\'offre de location obligatoire';
-                } elseif (BimpObject::objectLoaded($client) && !$client->getData('email')) {
-                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
                 }
+//                elseif ($is_company) {
+//                    $errors[] = 'Client pro : sélection du contact destinataire de l\'offre de location obligatoire';
+//                } elseif (BimpObject::objectLoaded($client) && !$client->getData('email')) {
+//                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
+//                }
 
                 $contact_signature = null;
                 $id_contact_signature = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
@@ -879,22 +880,23 @@ class BimpCommDemandeFin extends BimpObject
                     if (!BimpObject::objectLoaded($contact_signature)) {
                         $errors[] = 'Le contact signataire sélectionné n\'existe plus';
                     }
-                } elseif ($is_company) {
-                    $errors[] = 'Client pro: sélection du contact signataire obligatoire';
-                } elseif ($id_contact_suivi && BimpObject::objectLoaded($client) && !$client->getData('email')) {
-                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
                 }
+//                elseif ($is_company) {
+//                    $errors[] = 'Client pro: sélection du contact signataire obligatoire';
+//                } elseif ($id_contact_suivi && BimpObject::objectLoaded($client) && !$client->getData('email')) {
+//                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
+//                }
 
                 $commercial = $origine->getCommercial();
                 if (!BimpObject::objectLoaded($commercial)) {
                     $errors[] = 'Commercial absent';
                 }
 
-                $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', $contact_signature->getData('poste'));
+                $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('poste') : ''));
 
-                if (!$fonction_signataire && $is_company) {
-                    $errors[] = 'Client pro: la fonction du contact signataire doit obligatoirement être renseignée';
-                }
+//                if (!$fonction_signataire && $is_company) {
+//                    $errors[] = 'Client pro: la fonction du contact signataire doit obligatoirement être renseignée';
+//                }
 
                 $contacts_livraisons = array();
                 foreach (BimpTools::getArrayValueFromPath($data, 'contacts_livraisons', array()) as $id_contact_liv) {
@@ -936,8 +938,8 @@ class BimpCommDemandeFin extends BimpObject
                             'address'         => array(),
                             'contact'         => array(),
                             'signataire'      => array(
-                                'nom'      => $contact_signature->getData('lastname'),
-                                'prenom'   => $contact_signature->getData('firstname'),
+                                'nom'      => (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('lastname') : ''),
+                                'prenom'   => (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('firstname') : ''),
                                 'fonction' => $fonction_signataire
                             ),
                             'livraisons'      => array()

@@ -561,7 +561,7 @@ class BimpCommDemandeFin extends BimpObject
                     $content .= '<b>Durée totale :</b> ' . $data['duration'] . ' mois<br/>';
                 }
                 if (isset($data['periodicity_label']) && $data['periodicity_label']) {
-                    $content .= '<b>Périodicité :</b> ' . $data['periodicity_label'] . '<br/>';
+                    $content .= '<b>Périodicité des loyers :</b> ' . $data['periodicity_label'] . '<br/>';
                 }
                 if (isset($data['nb_loyers']) && $data['nb_loyers']) {
                     $content .= '<b>Nombre de loyers :</b> ' . $data['nb_loyers'] . '<br/>';
@@ -576,9 +576,9 @@ class BimpCommDemandeFin extends BimpObject
                     $content .= '<thead>';
                     $content .= '<tr>';
                     $content .= '<td></td>';
-                    $content .= '<th style="text-align: center">Loyer mensuel</th>';
+                    $content .= '<th style="text-align: center">Loyer mensuel HT</th>';
                     if ($periodicity > 1) {
-                        $content .= '<th style="text-align: center">Loyer ' . BFTools::$periodicities_masc[$periodicity] . ' </th>';
+                        $content .= '<th style="text-align: center">Loyer ' . BFTools::$periodicities_masc[$periodicity] . ' HT</th>';
                     }
                     $content .= '</tr>';
                     $content .= '</thead>';
@@ -587,9 +587,9 @@ class BimpCommDemandeFin extends BimpObject
                     if (isset($data['montants']['loyer_mensuel_evo_ht'])) {
                         $content .= '<tr>';
                         $content .= '<th>Formule évolutive</th>';
-                        $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_evo_ht']) . '</b></td>';
+                        $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_evo_ht']) . '*</b></td>';
                         if ($periodicity > 1) {
-                            $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_evo_ht'] * $periodicity) . '</b></td>';
+                            $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_evo_ht'] * $periodicity) . '*</b></td>';
                         }
                         $content .= '</tr>';
                     }
@@ -597,15 +597,15 @@ class BimpCommDemandeFin extends BimpObject
                     if (isset($data['montants']['loyer_mensuel_dyn_ht'])) {
                         $content .= '<tr>';
                         $content .= '<th>Formule dynamique</th>';
-                        $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht']) . '</b>';
+                        $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht']) . '*</b>';
                         if (isset($data['montants']['loyer_mensuel_suppl_ht'])) {
-                            $content .= '<br/>Puis : <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht']) . '</b>';
+                            $content .= '<br/>Puis : <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht']) . '*</b>';
                         }
                         $content .= '</td>';
                         if ($periodicity > 1) {
-                            $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht'] * $periodicity) . '</b>';
+                            $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht'] * $periodicity) . '*</b>';
                             if (isset($data['montants']['loyer_mensuel_suppl_ht'])) {
-                                $content .= '<br/>Puis ' . (12 / $periodicity) . ' x <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht'] * $periodicity) . '</b>';
+                                $content .= '<br/>Puis ' . (12 / $periodicity) . ' x <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht'] * $periodicity) . '*</b>';
                             }
                             $content .= '</td>';
                         }
@@ -614,19 +614,7 @@ class BimpCommDemandeFin extends BimpObject
 
                     $content .= '</tbody>';
                     $content .= '</table>';
-
-                    if (isset($data['montants']['loyer_ht'])) {
-                        $content .= '<b>Montant HT d\'un loyer :</b> ' . BimpTools::displayMoneyValue($data['montants']['loyer_ht'], 'EUR', false, false, false, 2, true) . '<br/>';
-                    }
-                    if (isset($data['montants']['total_loyers_ht'])) {
-                        $content .= '<b>Total loyers HT : </b> ' . BimpTools::displayMoneyValue($data['montants']['total_loyers_ht'], 'EUR', false, false, false, 2, true) . '<br/>';
-                    }
-                    if (isset($data['montants']['total_loyers_tva'])) {
-                        $content .= '<b>Total TVA loyers : </b> ' . BimpTools::displayMoneyValue($data['montants']['total_loyers_tva'], 'EUR', false, false, false, 2, true) . '<br/>';
-                    }
-                    if (isset($data['montants']['total_loyers_ttc'])) {
-                        $content .= '<b>Total loyers TTC : </b> ' . BimpTools::displayMoneyValue($data['montants']['total_loyers_ttc'], 'EUR', false, false, false, 2, true) . '<br/>';
-                    }
+                    $content .= '<p style="font-style: italic">* Loyers bruts en € HT, hors assurance.</p>';
                     $content .= '<br/>';
                 }
 
@@ -877,11 +865,12 @@ class BimpCommDemandeFin extends BimpObject
                     if (!BimpObject::objectLoaded($contact_suivi)) {
                         $errors[] = 'Le contact de suivi sélectionné n\'existe plus';
                     }
-                } elseif ($is_company) {
-                    $errors[] = 'Client pro : sélection du contact destinataire de l\'offre de location obligatoire';
-                } elseif (BimpObject::objectLoaded($client) && !$client->getData('email')) {
-                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
                 }
+//                elseif ($is_company) {
+//                    $errors[] = 'Client pro : sélection du contact destinataire de l\'offre de location obligatoire';
+//                } elseif (BimpObject::objectLoaded($client) && !$client->getData('email')) {
+//                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
+//                }
 
                 $contact_signature = null;
                 $id_contact_signature = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
@@ -891,22 +880,23 @@ class BimpCommDemandeFin extends BimpObject
                     if (!BimpObject::objectLoaded($contact_signature)) {
                         $errors[] = 'Le contact signataire sélectionné n\'existe plus';
                     }
-                } elseif ($is_company) {
-                    $errors[] = 'Client pro: sélection du contact signataire obligatoire';
-                } elseif ($id_contact_suivi && BimpObject::objectLoaded($client) && !$client->getData('email')) {
-                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
                 }
+//                elseif ($is_company) {
+//                    $errors[] = 'Client pro: sélection du contact signataire obligatoire';
+//                } elseif ($id_contact_suivi && BimpObject::objectLoaded($client) && !$client->getData('email')) {
+//                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
+//                }
 
                 $commercial = $origine->getCommercial();
                 if (!BimpObject::objectLoaded($commercial)) {
                     $errors[] = 'Commercial absent';
                 }
 
-                $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', $contact_signature->getData('poste'));
+                $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('poste') : ''));
 
-                if (!$fonction_signataire && $is_company) {
-                    $errors[] = 'Client pro: la fonction du contact signataire doit obligatoirement être renseignée';
-                }
+//                if (!$fonction_signataire && $is_company) {
+//                    $errors[] = 'Client pro: la fonction du contact signataire doit obligatoirement être renseignée';
+//                }
 
                 $contacts_livraisons = array();
                 foreach (BimpTools::getArrayValueFromPath($data, 'contacts_livraisons', array()) as $id_contact_liv) {
@@ -948,8 +938,8 @@ class BimpCommDemandeFin extends BimpObject
                             'address'         => array(),
                             'contact'         => array(),
                             'signataire'      => array(
-                                'nom'      => $contact_signature->getData('lastname'),
-                                'prenom'   => $contact_signature->getData('firstname'),
+                                'nom'      => (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('lastname') : ''),
+                                'prenom'   => (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('firstname') : ''),
                                 'fonction' => $fonction_signataire
                             ),
                             'livraisons'      => array()

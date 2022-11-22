@@ -556,6 +556,8 @@ forms:
                       
     generate_contrat: 
         title: Création du contrat de location
+        msgs: 
+            callback: getContratFormMsgs
         rows: 
             - custom: 1
               label: Nom Client
@@ -592,8 +594,16 @@ forms:
                   field_name: client_is_company
                   show_values: 1
             - custom: 1
+              label: Ville d'enregistrement au RCS
+              input_name: client_rcs
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1              
+            - custom: 1
               label: adresse / siège (si pro)
-              input_name: client_adress
+              input_name: client_address
               input: 
                   type: textarea
             - custom: 1

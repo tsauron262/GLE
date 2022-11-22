@@ -52,14 +52,14 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
             return array(
                 'buttons_groups' => array(
                     array(
-                        'label'   => 'Location',
-                        'icon'    => 'fas_hand-holding-usd',
-                        'buttons' => $df_buttons
-                    ),
-                    array(
                         'label'   => 'Actions',
                         'icon'    => 'fas_cogs',
                         'buttons' => $buttons
+                    ),
+                    array(
+                        'label'   => 'Location',
+                        'icon'    => 'fas_hand-holding-usd',
+                        'buttons' => $df_buttons
                     )
                 )
             );

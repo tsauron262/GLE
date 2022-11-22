@@ -125,6 +125,48 @@ class BF_DemandeSource extends BimpObject
         return $infos_contact;
     }
 
+    public function getSignataireName()
+    {
+        $client = $this->getData('client_data');
+
+        $name = BimpTools::ucfirst(strtolower(BimpTools::getArrayValueFromPath($client, 'signataire/prenom', '')));
+
+        $lastname = strtoupper(BimpTools::getArrayValueFromPath($client, 'signataire/nom', ''));
+        if ($lastname) {
+            $name .= ($name ? ' ' : '') . $lastname;
+        }
+
+        return $name;
+    }
+
+    public function getAdressesLivraisons()
+    {
+        $client_data = $this->getData('client_data');
+
+        $livraisons = BimpTools::getArrayValueFromPath($client_data, 'livraisons', array());
+        if (!empty($livraisons)) {
+            $return = '';
+            $fl = true;
+            foreach ($livraisons as $livraison) {
+                if (!$fl) {
+                    $return .= '<br/><br/>';
+                } else {
+                    $fl = false;
+                }
+
+                $address = BimpTools::getArrayValueFromPath($livraison, 'address', '');
+                $zip = BimpTools::getArrayValueFromPath($livraison, 'zip', '');
+                $town = BimpTools::getArrayValueFromPath($livraison, 'town', '');
+                $pays = BimpTools::getArrayValueFromPath($livraison, 'pays', '');
+                $return = BimpTools::displayAddress($address, $zip, $town, '', $pays, 0, 1);
+            }
+
+            return $return;
+        }
+
+        return $this->getClientFullAddress(0, 0);
+    }
+
     // Affichages: 
 
     public function displayName()
@@ -275,6 +317,10 @@ class BF_DemandeSource extends BimpObject
             $value = $data[$key];
         }
 
+        if (!(string) $value) {
+            return '';
+        }
+
         switch ($data_type) {
             case 'money':
                 $value = BimpTools::displayMoneyValue($value);
@@ -305,7 +351,7 @@ class BF_DemandeSource extends BimpObject
 
     // Rendus HTML: 
 
-    public function renderView()
+    public function renderView($view_name = 'default', $panel = false, $level = 1)
     {
         $html = '';
 
@@ -364,6 +410,12 @@ class BF_DemandeSource extends BimpObject
     {
         $html = '';
 
+        $client_data = $this->getData('client_data');
+
+//        $html .= '<pre>';
+//        $html .= print_r($client_data, 1);
+//        $html .= '</pre>';
+
         // Client: 
         $html .= '<table class="bimp_list_table">';
         $html .= '<thead>';
@@ -373,8 +425,6 @@ class BF_DemandeSource extends BimpObject
         $html .= '</thead>';
 
         $html .= '<tbody class="headers_col">';
-
-        $client_data = $this->getData('client_data');
 
         if (!empty($client_data)) {
             $is_company = (int) BimpTools::getArrayValueFromPath($client_data, 'is_company', 0);
@@ -425,7 +475,7 @@ class BF_DemandeSource extends BimpObject
 
             // Adresse: 
             $html .= '<tr>';
-            $html .= '<th>Adresse</th>';
+            $html .= '<th>Adresse' . ($is_company ? ' (siège)' : '') . '</th>';
             $html .= '<td>';
             $html .= $this->getClientFullAddress(true, false);
             $html .= '</td>';
@@ -433,11 +483,47 @@ class BF_DemandeSource extends BimpObject
 
             // Infos contact: 
             $html .= '<tr>';
-            $html .= '<th>Infos contact</th>';
+            $html .= '<th>Infos de contact</th>';
             $html .= '<td>';
             $html .= $this->getClientInfosContact(true, false);
             $html .= '</td>';
             $html .= '</tr>';
+
+            $html .= '<tr>';
+            $html .= '<th>Signataire</th>';
+            $html .= '<td>';
+            $prenom = BimpTools::getArrayValueFromPath($client_data, 'signataire/prenom', '');
+            $nom = BimpTools::getArrayValueFromPath($client_data, 'signataire/nom', '');
+            $fonction = BimpTools::getArrayValueFromPath($client_data, 'signataire/fonction', '');
+
+            $html .= $prenom;
+            if ($nom) {
+                $html .= ($prenom ? ' ' : '') . strtoupper($nom);
+            }
+            if ($fonction) {
+                $html .= ($prenom || $nom ? '<br/>' : '') . 'Fonction : ' . $fonction;
+            }
+            $html .= '</td>';
+            $html .= '</tr>';
+
+            $livraisons = BimpTools::getArrayValueFromPath($client_data, 'livraisons', array());
+
+            if (!empty($livraisons)) {
+                $html .= '<tr>';
+                $html .= '<th>Site(s) de livraison / installation</th>';
+                $html .= '<td>';
+                $html .= '<ul>';
+                foreach ($livraisons as $livraison) {
+                    $address = BimpTools::getArrayValueFromPath($livraison, 'address', '');
+                    $zip = BimpTools::getArrayValueFromPath($livraison, 'zip', '');
+                    $town = BimpTools::getArrayValueFromPath($livraison, 'town', '');
+                    $pays = BimpTools::getArrayValueFromPath($livraison, 'pays', '');
+                    $html .= '<li>' . BimpTools::displayAddress($address, $zip, $town, '', $pays, 0, 1) . '</li>';
+                }
+                $html .= '</ul>';
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
 
             if (isset($client_data['extra_data'])) {
                 foreach ($client_data['extra_data'] as $data_name => $data_def) {

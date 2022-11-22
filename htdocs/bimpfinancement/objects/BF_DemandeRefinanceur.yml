@@ -144,7 +144,7 @@ forms:
                   type: hidden
               value: 1
             - custom: 1
-              label: Sous-conditions
+              label: Sous conditions
               input_name: under_conditions
               input: 
                   type: toggle
@@ -158,12 +158,13 @@ forms:
                   auto_expand: 1
               display_if: 
                   field_name: under_conditions
-                  show_values: 1                      
-            - field: periodicity
-            - field: qty
-            - field: rate
-#            - field: amount_ht
-            - field: payment
+                  show_values: 1
+            - custom: 1
+              label: Sélectionner directement ce refinancement
+              input_name: demande_selected
+              input: 
+                  type: toggle
+              value: 1
             - field: comment
             
     refused: 

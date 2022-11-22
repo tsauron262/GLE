@@ -136,7 +136,7 @@ class BimpSignature extends BimpObject
         return 0;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isFieldEditable($field, $force_edit = false)
     {

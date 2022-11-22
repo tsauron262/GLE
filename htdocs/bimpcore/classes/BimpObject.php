@@ -1166,7 +1166,7 @@ class BimpObject extends BimpCache
         return $fields;
     }
 
-    // Getters boolééns: 
+    // Getters boolééns:
 
     public function isLoaded(&$errors = array())
     {

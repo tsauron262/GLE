@@ -1947,7 +1947,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $this->getFilesDir();
     }
 
-    public function getSignatureDocFileName($doc_type = 'propal', $signed = false)
+    public function getSignatureDocFileName($doc_type = 'devis', $signed = false)
     {
         switch ($doc_type) {
             case 'devis':

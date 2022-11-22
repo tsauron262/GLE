@@ -4648,7 +4648,7 @@ class Bimp_Facture extends BimpComm
                     $diff = (float) $this->dol_object->total_ttc - $remain_to_pay;
 
                     $diff = round($diff, 2);
-                    if ($diff > -0.01 && $diff < 0.01) {
+                    if ($diff >= -0.01 && $diff <= 0.01) {
                         $paiement_status = 0; // Aucun paiement
                     } else {
                         if ($this->dol_object->total_ttc > 0 && $remain_to_pay < 0) {

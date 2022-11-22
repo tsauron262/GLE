@@ -267,6 +267,29 @@ class API_Api extends BimpObject
         return 'API ' . $this->getData('title');
     }
 
+    // Getters Statiques: 
+
+    public static function getApiInstanceByID($id_api, &$errors = array(), $check_validity = false)
+    {
+        $api_obj = BimpCache::getBimpObjectInstance('bimpapi', 'API_Api', $id_api);
+        if (!BimpObject::objectLoaded($api_obj)) {
+            $errors[] = 'ID de l\'API invalide';
+        } else {
+            $api = $api_obj->getApiInstance();
+            if (is_a($api, 'BimpAPI')) {
+                if ($check_validity) {
+                    $api->isOk($errors);
+                }
+
+                return $api;
+            } else {
+                $errors[] = 'Erreur de configuration : API invalide (' . $api_obj->getName() . ')';
+            }
+        }
+
+        return null;
+    }
+
     // Affichages: 
 
     public function displayDefaultUserAccountLogged()

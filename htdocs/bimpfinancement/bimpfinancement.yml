@@ -1,0 +1,46 @@
+categories: 
+    defaults: 
+        label: Valeurs par défaut
+        
+params: 
+    use_frais_divers: 
+        label: Activer les frais divers
+        type: bool
+        def: 0
+        
+    use_loyers_inter: 
+        label: Activer les loyers intermédiaires
+        type: bool  
+        def: 0
+        
+    # Valeurs par défauts: 
+    def_duration: 
+        label: Durée par défaut
+        cat: defaults
+        def: 12
+        
+    def_periodicity:
+        label: Périodicité par défaut
+        cat: defaults
+        def: 1
+        
+    def_mode_calcul: 
+        label: Mode de calcul par défaut
+        cat: defaults
+        def: 2
+        
+    def_marge_souhaitee: 
+        label: Marge souhaitée par défaut (pourcentage)
+        cat: defaults
+        def: 10
+        
+    def_vr_achat: 
+        label: VR achat par défaut (pourcentage)
+        cat: defaults
+        def: 5
+        
+    def_vr_vente: 
+        label: VR vente par défaut (pourcentage du prix de cession)
+        cat: default
+        def: 6
+        

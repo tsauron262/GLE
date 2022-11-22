@@ -299,7 +299,7 @@ class BimpYml
 
         $instance = BimpObject::getInstance($module, $name);
         $full_params = $instance->config->getParams('');
-        
+
 //        $tabs[] = array(
 //            'id'      => 'full_params_formates',
 //            'title'   => 'Tous les paramètres (formaté)',
@@ -309,13 +309,13 @@ class BimpYml
 //                'open'     => 0
 //            )),
 //        );
-        
+
         $tabs[] = array(
             'id'      => 'full_params_bruts',
             'title'   => 'Tous les paramètres (brut)',
-            'content' => '<div><pre>' . print_r($full_params, 1) .  '</pre></div>'
+            'content' => '<div><pre>' . print_r($full_params, 1) . '</pre></div>'
         );
-        
+
         $html .= BimpRender::renderNavTabs($tabs, 'yml_analyser');
 
         return $html;
@@ -745,14 +745,15 @@ class BimpYml
                 $html .= '<h4>' . $section_title . ($section !== 'root' ? ' - <span class="section_name">' . $section . '</span>' : '') . '</h4>';
 
                 foreach ($section_params as $param_name => $param_data) {
+                    $param_title = ''; //BimpRender::renderCopyTextIcon($param_name);
                     if (isset($param_data['file_idx'])) {
-                        $param_title = '<span class="name idx_' . str_replace('_base', '', $param_data['file_idx']);
+                        $param_title .= '<span class="name idx_' . str_replace('_base', '', $param_data['file_idx']);
                         if (isset($param_data['unset_by'])) {
                             $param_title .= ' unset';
                         }
                         $param_title .= '">' . $param_name . '</span>';
                     } else {
-                        $param_title = $param_name;
+                        $param_title .= $param_name;
                     }
 
                     if (isset($param_data['unset_by'])) {

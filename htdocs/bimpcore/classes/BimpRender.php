@@ -493,6 +493,9 @@ class BimpRender
 
     public static function renderNavTabs($tabs, $tabs_id = 'maintabs', $params = array())
     {
+//        echo '<pre>';
+//        print_r($tabs);
+//        echo '</pre>';
         $params = BimpTools::overrideArray(array(
                     'content_only'        => false,
                     'nav_only'            => false,
@@ -786,6 +789,14 @@ class BimpRender
         $return .= ' data-viewport="' . htmlentities('{"selector": "window", "padding": 0}') . '"';
 
         return $return;
+    }
+
+    public static function renderCopyTextIcon($text)
+    {
+        $html = '<span class="copyTextIcon" data-text="' . $text . '">';
+        $html .= self::renderIcon('fas_copy');
+        $html .= '</span>';
+        return $html;
     }
 
     public static function rendercontentLoading($loading_text = '')

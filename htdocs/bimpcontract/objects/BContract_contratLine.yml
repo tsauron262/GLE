@@ -39,8 +39,8 @@ fields:
     description:
         label: Description de la ligne
         type: string
-#        input:
-#            help: Laisse vide pour mettre la description du service
+        input:
+            help: Laisse vide pour mettre la description du service
     statut:
         label: Etat du service
         type: int

@@ -24,12 +24,12 @@ class BimpMail extends BimpMailCore
 
         if ($this->title) {
             $html .= '<span style="font-size: 28px; font-weight: bold; color: #FFFFFF">';
-            $this->title;
+            $html .= $this->title;
             $html .= '</span>';
         }
 
         if ($this->subtitle) {
-            $html .= '  <span style="font-size: 16px; font-style: italic; color: #FFCF9A">';
+            $html .= '  <span style="font-size: 16px; font-style: italic; color: #FFFFFF">';
             $html .= $this->subtitle;
             $html .= '</span>';
         }

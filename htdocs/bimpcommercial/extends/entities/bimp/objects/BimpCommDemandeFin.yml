@@ -1,0 +1,6 @@
+
+# Entité : bimp
+
+fields: 
+    target: 
+        default_value: prolease

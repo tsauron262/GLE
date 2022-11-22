@@ -1183,7 +1183,7 @@ class BR_Reservation extends BimpObject
         return 0;
     }
 
-    public function setNewStatus($new_status, $extra_data = array(), &$warnings = array())
+    public function setNewStatus($new_status, $extra_data = array(), &$warnings = array(), $force_status = false)
     {
         $qty = BimpTools::getArrayValueFromPath($extra_data, 'qty', null);
         $id_equipment = BimpTools::getArrayValueFromPath($extra_data, 'id_equipment', null);

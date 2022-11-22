@@ -22,6 +22,7 @@ class BF_Line extends BimpObject
         self::SERVICE  => array('label' => 'Service', 'icon' => 'fas_hand-holding'),
         self::LOGICIEL => array('label' => 'Logiciel', 'icon' => 'fas_cogs')
     );
+    public $product = null;
 
     // Getters booléens: 
 
@@ -41,11 +42,11 @@ class BF_Line extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = [])
     {
-        if (!$force_delete) {
-            return (int) $this->isParentEditable($errors);
+        if ($force_delete) {
+            return 1;
         }
 
-        return 1;
+        return (int) $this->isParentEditable($errors);
     }
 
     public function isFieldEditable($field, $force_edit = false)
@@ -57,8 +58,16 @@ class BF_Line extends BimpObject
             }
         }
 
-        if (in_array($field, array('qty', 'pu_ht', 'tva_tx', 'pa_ht', 'remise'))) {
+        if (in_array($field, array('qty', 'pu_ht', 'tva_tx', 'pa_ht', 'remise', 'id_fourn_price', 'product_type'))) {
             return $this->isParentEditable();
+        }
+
+        switch ($field) {
+            case 'serialisable':
+                if (!$force_edit && (int) $this->getData('type') === self::TYPE_PRODUCT) {
+                    return 0;
+                }
+                return 1;
         }
 
         return 1;
@@ -70,7 +79,7 @@ class BF_Line extends BimpObject
 
         if (BimpObject::objectLoaded($parent)) {
             if (!(int) $parent->areLinesEditable()) {
-                $errors[] = 'La demande de financement ne peut plus être mmodifiée';
+                $errors[] = 'La demande de location ne peut plus être modifiée';
                 return 0;
             }
 
@@ -127,6 +136,16 @@ class BF_Line extends BimpObject
                     return 0;
                 }
                 break;
+
+            case 'serialisable':
+                $product = $this->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    return (int) $product->isSerialisable();
+                }
+                if (isset($this->data['serialisable'])) {
+                    return (int) $this->data['serialisable'];
+                }
+                return 0;
 
             case 'qty':
                 switch ($type) {
@@ -240,6 +259,8 @@ class BF_Line extends BimpObject
                 }
                 return 0;
         }
+
+        return $this->getData($field_name);
     }
 
     public function getListExtraButtons()
@@ -331,8 +352,18 @@ class BF_Line extends BimpObject
 
     public function getProduct()
     {
-        if ((int) $this->getData('id_product')) {
-            return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('id_product'));
+        $id_product = (int) $this->getData('id_product');
+
+        if (BimpObject::objectLoaded($this->product) && (!$id_product || $this->product->id !== $id_product)) {
+            $this->product = null;
+        }
+
+        if ($id_product) {
+            if (!BimpObject::objectLoaded($this->product)) {
+                $this->product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+            }
+
+            return $this->product;
         }
 
         return null;
@@ -395,7 +426,7 @@ class BF_Line extends BimpObject
 
     // Affichages: 
 
-    public function displayDesc($mode_light = false)
+    public function displayDesc($mode_light = false, $no_link = false)
     {
         $html = '';
 
@@ -403,14 +434,19 @@ class BF_Line extends BimpObject
             case self::TYPE_PRODUCT:
                 $product = $this->getProduct();
                 if (BimpObject::objectLoaded($product)) {
-                    $html .= $product->getLink() . '<br/>';
+                    if ($no_link) {
+                        $html .= '<b>' . $product->getRef() . '</b><br/>';
+                    } else {
+                        $html .= $product->getLink() . '<br/>';
+                    }
                     $html .= $product->getName();
                 }
                 break;
 
             case self::TYPE_FREE:
+                $html .= '<b>' . $this->getData('ref') . '</b>';
             case self::TYPE_TEXT:
-                $html .= $this->getData('label');
+                $html .= ($html ? '<br/>' : '') . $this->getData('label');
                 break;
         }
 
@@ -724,7 +760,7 @@ class BF_Line extends BimpObject
     public function onCommandeFournCancel($id_commande)
     {
         if (!$this->isLoaded()) {
-            return array('ID de la ligne de financement absent');
+            return array('ID de la ligne de location absent');
         }
         $errors = array();
         $commandesFourn = $this->getData('commandes_fourn');
@@ -739,6 +775,12 @@ class BF_Line extends BimpObject
 
     // Overrides: 
 
+    public function reset()
+    {
+        $this->product = null;
+        parent::reset();
+    }
+
     public function validate()
     {
         $use_pu_for_pa = (int) BimpTools::getValue('use_pu_for_pa', 0);
@@ -752,11 +794,9 @@ class BF_Line extends BimpObject
                     if (!BimpObject::objectLoaded($product)) {
                         $errors[] = 'Le produit #' . $this->getData('id_product') . ' n\'existe plus';
                     } else {
+                        $this->set('ref', $product->getRef());
                         $isSerialisable = (int) $product->isSerialisable();
                         $this->set('serialisable', $isSerialisable);
-                        if (!$isSerialisable) {
-                            $this->set('serials', '');
-                        }
                         if ($use_pu_for_pa) {
                             $this->set('id_fourn_price', 0);
                             $this->set('pa_ht', (float) $this->getData('pu_ht'));
@@ -804,6 +844,7 @@ class BF_Line extends BimpObject
 
                 $this->set('id_product', 0);
                 $this->set('id_fourn_price', 0);
+                $this->set('ref', '');
                 $this->set('label', '');
                 $this->set('qty', 0);
                 $this->set('pu_ht', 0);
@@ -836,21 +877,6 @@ class BF_Line extends BimpObject
                     $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la mise à jour des commandes fournisseur correspondantes');
                 }
             }
-        }
-
-        return $errors;
-    }
-
-    public function delete(&$warnings = array(), $force_delete = false)
-    {
-        $errors = array();
-
-        if (!$this->isDeletable()) {
-            $errors[] = 'Cette ligne n\'est pas supprimable';
-        } else {
-            $this->deleteCommandesFournLines(false);
-
-            $errors = parent::delete($warnings, $force_delete);
         }
 
         return $errors;

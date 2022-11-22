@@ -39,6 +39,7 @@ class BimpCore
             'bds_operations'    => '/bimpdatasync/views/js/operations.js'
         ),
         'css' => array(
+            'fonts'          => '/bimpcore/views/css/fonts.css',
             'jPicker'        => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
             'bimpcore'       => '/bimpcore/views/css/bimpcore.css',
             'userConfig'     => '/bimpuserconfig/views/css/userConfig.css',
@@ -80,9 +81,16 @@ class BimpCore
             }
 
             if (self::isContextPrivate()) {
+                if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_' . BIMP_EXTENDS_ENTITY . '.css')) {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_' . BIMP_EXTENDS_ENTITY . '.css';
+                }
                 self::$files['js'][] = '/bimpcore/views/js/notification.js';
             } else {
-                self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+                if (defined('BIMP_EXTENDS_ENTITY') && file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/views/css/bimpcore_public_' . BIMP_EXTENDS_ENTITY . '.css')) {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public_' . BIMP_EXTENDS_ENTITY . '.css';
+                } else {
+                    self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+                }
             }
 
             if (!self::isModuleActive('bimpdatasync')) {
@@ -291,7 +299,7 @@ class BimpCore
             }
 
             if (preg_match('/^[a-z]+$/', $subDir) && is_dir($dir . '/' . $subDir)) {
-                $current_version = (float) BimpCore::getVersion($subDir);
+                $current_version = (float) BimpCore::getBimpCoreSqlVersion($subDir);
                 foreach (scandir($dir . '/' . $subDir) as $f) {
                     if (in_array($f, array('.', '..'))) {
                         continue;
@@ -638,10 +646,11 @@ class BimpCore
         return $updates;
     }
 
-    public static function getVersion($dev = '')
+    public static function getBimpCoreSqlVersion($dev = '')
     {
         $versions = self::getConf('bimpcore_version');
 
+        $bdb = BimpCache::getBdb();
         if (!is_array($versions) || empty($versions)) {
             if ((string) $versions) {
                 $versions = json_decode($versions, 1);
@@ -651,7 +660,6 @@ class BimpCore
 
             if (empty($versions)) {
                 // On vérifie valeur en base:
-                $bdb = BimpCache::getBdb();
                 $value = $bdb->getValue('bimpcore_conf', 'value', '`name` = \'bimpcore_version\'');
 
                 if (!(string) $value) {
@@ -700,7 +708,7 @@ class BimpCore
 
     public static function setVersion($dev, $version)
     {
-        $versions = self::getVersion();
+        $versions = self::getBimpCoreSqlVersion();
 
         if (!isset($versions[$dev])) {
             $versions[$dev] = 0;
@@ -885,8 +893,17 @@ class BimpCore
 
     public static function getEntity()
     {
-        if (defined('BIMP_ENTITY')) {
-            return BIMP_ENTITY;
+        if (defined('BIMP_EXTENDS_ENTITY')) {
+            return BIMP_EXTENDS_ENTITY;
+        }
+
+        return '';
+    }
+
+    public static function getVersion()
+    {
+        if (defined('BIMP_EXTENDS_VERSION')) {
+            return BIMP_EXTENDS_VERSION;
         }
 
         return '';
@@ -1039,7 +1056,11 @@ class BimpCore
                         if (BimpDebug::isActive()) {
                             BimpDebug::incCacheInfosCount('logs', true);
                         }
-                    } else {
+                    } elseif (BimpCore::isModeDev()) {
+                        echo 'Echec création du log "' . $msg . '"<br/>';
+                        echo 'Extra data : <pre>';
+                        print_r($extra_data);
+                        echo '</pre>';
                         echo '<pre>';
                         print_r($errors);
                         exit;

@@ -1,18 +1,30 @@
 <?php
 
-// Entité: prolease
+// Entité: bimp
 
 require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/classes/BWSApi.php';
 
-BWSApi::$requests['addDemandeFinancement'] = array(
-    'desc'   => 'Ajout d\'une demande de fincancement',
+BWSApi::$requests['setDemandeFinancementStatus'] = array(
+    'desc'   => 'Enregistrer le nouveau statut d\'une demande de financement',
     'params' => array(
-        'propale'       => array('label' => 'Données devis', 'data_type' => 'json'),
-        'propale_lines' => array('label' => 'Lignes devis', 'data_type' => 'json'),
-        'client'        => array('label' => 'Données client', 'data_type' => 'json'),
-        'contact'       => array('label' => 'Données contact', 'data_type' => 'json'),
-        'commercial'    => array('label' => 'Données commercial', 'data_type' => 'json'),
-        'extra_data'    => array('label' => 'Données supplémentaires', 'data_type' => 'json')
+        'demande_target' => array('label' => 'Destinataire de la demande de financement', 'required' => 1),
+        'id_demande'     => array('label' => 'ID demande de financement', 'data_type' => 'id', 'required' => 1),
+        'type_origine'   => array('label' => 'Type de pièce d\'origine', 'required' => 1),
+        'id_origine'     => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
+        'status'         => array('label' => 'Nouveau statut', 'data_type' => 'int', 'required' => 1),
+        'note'           => array('label' => 'Note', 'data_type' => 'text', 'default' => '')
+    )
+);
+BWSApi::$requests['sendDocFinancement'] = array(
+    'desc'   => 'Envoi d\'un document PDF de financement',
+    'params' => array(
+        'demande_target'   => array('label' => 'Destinataire de la demande de financement', 'required' => 1),
+        'id_demande'       => array('label' => 'ID demande de financement', 'data_type' => 'id', 'required' => 1),
+        'type_origine'     => array('label' => 'Type de pièce d\'origine', 'required' => 1),
+        'id_origine'       => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
+        'doc_type'         => array('label' => 'Type de document'),
+        'doc_content'      => array('label' => 'Fichier', 'required' => 1),
+        'signature_params' => array('label' => 'Paramètres signature', 'data_type' => 'json', 'required' => 1)
     )
 );
 
@@ -21,31 +33,137 @@ class BWSApi_ExtEntity extends BWSApi
 
     // Requêtes: 
 
-    protected function wsRequest_addDemandeFinancement()
+    protected function wsRequest_setDemandeFinancementStatus()
     {
         $response = array();
 
         if (!count($this->errors)) {
-            $BF_Demande_class = '';
-            BimpObject::loadClass('bimpfinancement', 'BF_Demande', $BF_Demande_class);
+//            $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $this->getParam('id_propal', 0));
+//
+//            if (!BimpObject::objectLoaded($propal)) {
+//                $this->addError('UNFOUND', 'Devis #' . $this->getParam('id_propal', 0) . ' non trouvé');
+//            } else {
+//                if ((int) $propal->getData('id_df_prolease') !== (int) $this->getParam('id_demande', 0)) {
+//                    $this->addError('INVALID_PARAMETER', 'Le devis indiqué ne correspond pas à la demande de financement #' . $this->getParam('id_demande', 0));
+//                } else {
+//                    $errors = $propal->setDemandeFinancementStatus((int) $this->getParam('status', 0), $this->getParam('note', ''));
+//
+//                    if (count($errors)) {
+//                        $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+//                    }
+//                }
+//            }
 
-            $errors = array();
-            $warnings = array();
+            $bcdf_class = '';
+            BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
+            $origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
 
-            $demande = $BF_Demande_class::createFromBimpPropale($this->params, $errors, $warnings);
+            if (!BimpObject::objectLoaded($origine)) {
+                $this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
+            } else {
+                $bcdf = BimpCache::findBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', array(
+                            'obj_module' => $origine->module,
+                            'obj_name'   => $origine->object_name,
+                            'id_obj'     => $origine->id,
+                            'target'     => $this->getParam('demande_target', ''),
+                            'id_ext_df'  => (int) $this->getParam('id_demande', 0)
+                ));
 
-            if (BimpObject::objectLoaded($demande)) {
-                $demande->addObjectLog('Créé via webservice - compte utilisateur: ' . $this->ws_user->getLink());
+                if (!BimpObject::objectLoaded($bcdf)) {
+                    $this->addError('UNFOUND', 'Aucune demande de financement trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
+                } else {
+                    $errors = $bcdf->setNewStatusFromTarget($this->getParam('status', ''), $this->getParam('note', ''));
+
+                    if (count($errors)) {
+                        $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+                    }
+                }
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_sendDocFinancement()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $bcdf_class = '';
+            BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
+            $origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
+
+            if (!BimpObject::objectLoaded($origine)) {
+                $this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
+            } else {
+                $bcdf = BimpCache::findBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', array(
+                            'obj_module' => $origine->module,
+                            'obj_name'   => $origine->object_name,
+                            'id_obj'     => $origine->id,
+                            'target'     => $this->getParam('demande_target', ''),
+                            'id_ext_df'  => (int) $this->getParam('id_demande', 0)
+                ));
+
+                if (!BimpObject::objectLoaded($bcdf)) {
+                    $this->addError('UNFOUND', 'Aucune demande de financement trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
+                } else {
+                    $errors = $bcdf->onDocFinReceived($this->getParam('doc_type', '') . '_fin', $this->getParam('doc_content', ''), $this->getParam('signature_params', array()));
+
+                    if (count($errors)) {
+                        $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+                    }
+                }
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_getDemandeFinancementInfos()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $id_demande = (int) $this->getParam('id_demande', 0);
+            $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
+
+            if (!BimpObject::objectLoaded($demande)) {
+                $this->addError('UNFOUND', 'La demande de financement #' . $id_demande . ' n\'existe pas');
+            } else {
                 $response = array(
-                    'success'    => 1,
-                    'id_demande' => $demande->id
+                    'ref'       => $demande->getRef(),
+                    'status'    => $demande->displayData('status', 'default', false),
+                    'user_resp' => array(
+                        'name'  => '',
+                        'email' => '',
+                        'phone' => ''
+                    ),
+                    'logs'      => array(),
                 );
 
-                if (!empty($warnings)) {
-                    $response['warnings'] = $warnings;
+                $user_resp = $demande->getChildObject('user_resp');
+                if (BimpObject::objectLoaded($user_resp)) {
+                    $response['user_resp']['name'] = $user_resp->getName();
+                    $response['user_resp']['email'] = $user_resp->getData('email');
+                    $response['user_resp']['phone'] = $user_resp->getData('office_phone');
                 }
-            } else {
-                $this->addError('CREATION_FAIL', BimpTools::getMsgFromArray($errors, 'Echec de la création de la demande de financement', true));
+
+                $logs = $demande->getObjectLogs();
+
+                foreach ($logs as $log) {
+                    $user = $log->getChildObject('user');
+                    $date = $log->getData('date');
+
+                    $str = '<b>Le ' . date('d / m / Y à H:i', strtotime($date));
+
+                    if (BimpObject::objectLoaded($user)) {
+                        $str .= ' par ' . $user->getName();
+                    }
+
+                    $str .= ' : </b>' . strip_tags($log->getData('msg'));
+
+                    $response['logs'][] = $str;
+                }
             }
         }
 

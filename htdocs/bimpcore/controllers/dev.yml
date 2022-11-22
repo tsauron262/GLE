@@ -166,13 +166,6 @@ sections:
                                 type: list
                                 list: 
                                     object: api_user
-        menu: 
-            label: Menu BimpTheme
-            icon: fas_bars
-            sections: 
-                - type: custom
-                  custom: 
-                      callback: renderBimpThemeMenuList
                                     
         ws: 
             label: Webservice
@@ -205,13 +198,22 @@ sections:
                                 list: 
                                     object: bws_profile_right
         notification: 
-            label: Notification
+            label: Notifications
+            icon: fas_bell
             sections: 
                 - type: list
                   list: 
                       panel: 1
                       object: notification
                       name: default
+                                    
+        menu: 
+            label: Menu BimpTheme
+            icon: fas_bars
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderBimpThemeMenuList
                                     
                             
                       

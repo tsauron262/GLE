@@ -1,5 +1,8 @@
 bootstrap: 1
 
+js:
+    - /bimpfinancement/views/js/bimpfinancement.js
+    
 title: 
     callback: 
         object: demande
@@ -24,25 +27,72 @@ sections:
             struct: 
                 type: view
                 view: 
-                    panel: 1
+                    panel: 0
                     name: demande
                     object: demande
+          - id: sources
+            title: Sources
+            show: 
+                field_value: 
+                    object: demande
+                    field_name: id_main_source
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderSourcesView
+                        object: demande
           - id: elements
             title: Elements financés
             struct: 
-                type: list
-                list: 
-                    name: default
-                    object: demande
-                    children: lines
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: list
+                          list: 
+                              name: default
+                              object: demande
+                              children: lines
+                    - cols: 
+                        - type: list
+                          col_md: 6
+                          col_lg: 6
+                          show: 
+                              conf: 
+                                  module: bimpfinancement
+                                  name: use_frais_divers
+                          list: 
+                              name: default
+                              object: demande
+                              children: frais_divers
+                        - type: list
+                          col_md: 6
+                          col_lg: 6
+                          show: 
+                              conf: 
+                                  module: bimpfinancement
+                                  name: use_loyers_inter
+                          list: 
+                              name: default
+                              object: demande
+                              children: rents_except
+                              
           - id: refinanceurs
             title: Demandes refinanceurs
-            struct: 
-                type: list
-                list: 
-                    name: default
+            show: 
+                callback: 
+                    method: showDemandesRefinanceurs
                     object: demande
-                    children: demandes_refinanceurs
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: list
+                          list: 
+                              name: default
+                              object: demande
+                              children: demandes_refinanceurs
+                              
           - id: files
             title: Fichiers joints
             struct:
@@ -54,6 +104,11 @@ sections:
                     object: demande
                     children: files
                     
+    - type: view
+      view: 
+          name: montants
+          object: demande
+          
     - type: custom
       custom: 
           callback: 

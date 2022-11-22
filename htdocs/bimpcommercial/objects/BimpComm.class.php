@@ -1938,15 +1938,16 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         $html = '';
         $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
         $type_de_piece = ValidComm::getObjectClass($this);
 
         // Soumis à des validations et possède des demandes de validation en brouillon
-        if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0))
-            $html = '<span class="warning"><i class="fas fa5-exclamation-triangle iconLeft"></i>En cours de validation</span>';
+        if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0)) {
+            $html = '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'En cours de validation</span>';
+        }
 
         return $html;
     }
@@ -2371,8 +2372,8 @@ class BimpComm extends BimpDolObject
     public function renderContacts($type = 0, $code = '', $input_name = '')
     {
         $html = '';
-        if($input_name != ''){
-            $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \''.$input_name.'\');">';
+        if ($input_name != '') {
+            $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'' . $input_name . '\');">';
             $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
             $html .= '</span>';
         }
@@ -2381,17 +2382,17 @@ class BimpComm extends BimpDolObject
 
         $html .= '<thead>';
         $html .= '<tr>';
-        if($type == 0)
-        $html .= '<th>Nature</th>';
+        if ($type == 0)
+            $html .= '<th>Nature</th>';
         $html .= '<th>Tiers</th>';
         $html .= '<th>Utilisateur / Contact</th>';
-        if($code == '')
+        if ($code == '')
             $html .= '<th>Type de contact</th>';
         $html .= '<th></th>';
         $html .= '</tr>';
         $html .= '</thead>';
 
-        $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list'.$type.'_'.$code;
+        $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list' . $type . '_' . $code;
         $html .= '<tbody id="' . $list_id . '">';
         $html .= $this->renderContactsList($type, $code);
 
@@ -2400,11 +2401,10 @@ class BimpComm extends BimpDolObject
         $html .= '</table>';
 
         $filtre = array('id_client' => (int) $this->getData('fk_soc'));
-        if($type && $code != ''){
-            if($type == 'internal'){
+        if ($type && $code != '') {
+            if ($type == 'internal') {
                 $filtre['user_type_contact'] = $this->getIdTypeContact($type, $code);
-            }
-            elseif($type == 'external'){
+            } elseif ($type == 'external') {
                 $filtre['tiers_type_contact'] = $this->getIdTypeContact($type, $code);
             }
         }
@@ -2655,7 +2655,7 @@ class BimpComm extends BimpDolObject
         $lines_errors = $this->checkLines();
 
         if (count($lines_errors)) {
-            return BimpTools::getMsgFromArray($lines_errors, 'Copie impossible');
+            return array(BimpTools::getMsgFromArray($lines_errors, 'Copie impossible'));
         }
 
         if ($this->field_exists('replaced_ref')) {

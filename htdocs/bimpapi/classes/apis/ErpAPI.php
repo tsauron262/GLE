@@ -232,7 +232,7 @@ class ErpAPI extends BimpAPI
                 }
 
                 $this->saveToken('auth', $result['token'], $expire);
-            } else {
+            } elseif (!count($errors)) {
                 $errors[] = 'Echec de la connexion pour une raison inconnue';
             }
         }

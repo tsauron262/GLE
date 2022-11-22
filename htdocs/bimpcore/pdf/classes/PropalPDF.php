@@ -1,11 +1,11 @@
 <?php
 
-require_once __DIR__ . '/BimpDocumentPDF.php';
+require_once __DIR__ . '/BimpCommDocumentPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
 
 ini_set('display_errors', 1);
 
-class PropalPDF extends BimpDocumentPDF
+class PropalPDF extends BimpCommDocumentPDF
 {
 
     public static $type = 'propal';

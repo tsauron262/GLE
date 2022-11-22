@@ -23,6 +23,16 @@ class GSX_Reservation
 
         return self::$gsx_v2;
     }
+    
+    public static function getProductsCode(){
+        $gsx_v2 = self::getGsxV2();
+
+        if (!$gsx_v2->logged) {
+            $errors[] = 'Non connecté à GSX';
+            return array();
+        }
+        return $gsx_v2->attributeLookup("PRODUCT_FAMILY_CLASS");
+    }
 
     public static function fetchReservationsSummay($soldTo, $shipTo, $productCode, $from, $to, &$errors = array(), &$debug = '')
     {

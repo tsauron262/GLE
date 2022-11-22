@@ -203,10 +203,13 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         return $data;
     }
 
-    public function processFournPrices($lines, &$errors = array())
+    public function processFournPrices($lines, &$errors = array(), $processPV = false)
     {
         if (is_array($lines) && !empty($lines)) {
             $this->fetchProducts();
+            
+            global $db, $user;
+            $dol_prod = new Product($db);
 
             $default_tva_tx = (float) BimpTools::getTaxeRateByCode('TN');
             $fourn_prices = array();
@@ -279,6 +282,17 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
                     if (!empty($new_prod_data)) {
                         $this->db->update('product', $new_prod_data, 'rowid = ' . $id_product);
+                    }
+                    
+                    $tva = ($line['pu_ttc'] / $line['pu_ht'] * 100) - 100;
+                    if($tva < 21 && $tva > 19)
+                        $tva = 20;
+                    if($processPV && ((float)$prod_data['pu_ht'] != (float)$line['pu_ht'] || (float)$prod_data['tva_tx'] != (float)$tva)){
+                        $dol_prod->fetch($id_product);
+                        if($dol_prod->updatePrice($line['pu_ht'], 'HT', $user, $tva) < 0)
+                            $errors[] = 'Impossible de MAJ prix de vente '.$id_product;
+                        else
+                            $this->Success('Prix vente MAJ ancien : '.$prod_data['pu_ht'].' € nouveau : '.$line['pu_ht']. ' € '.$line['ref_fourn']);
                     }
 
                     // recherche d'un pfp existant et check de la ref fourn: 
@@ -557,7 +571,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
     public function fetchProducts()
     {
         if (empty($this->refProdToIdProd)) {
-            $result = $this->db->getRows('product', '1', null, 'array', array('ref', 'rowid', 'url', 'barcode'));
+            $result = $this->db->getRows('product', '1', null, 'array', array('ref', 'rowid', 'url', 'barcode', 'price', 'tva_tx'));
 
             if (!is_null($result)) {
                 foreach ($result as $res) {
@@ -566,6 +580,8 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                         'ref'          => $res['ref'],
                         'url'          => $res['url'],
                         'barcode'      => $res['barcode'],
+                        'pu_ht'      => $res['price'],
+                        'tva_tx'      => $res['tva_tx'],
                         'fourn_prices' => array()
                     );
                 }

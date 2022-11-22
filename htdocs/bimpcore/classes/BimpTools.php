@@ -2369,6 +2369,33 @@ class BimpTools
 
         return $current_value;
     }
+    
+    public static function setArrayValueFromPath(&$array, $path, $value)
+    {
+        if (is_null($path) || !$path) {
+            return false;
+        }
+
+        $path = explode('/', $path);
+
+        foreach ($path as $key) {
+            if ($key === '') {
+                continue;
+            }
+            if (isset($array[$key])) {
+                $array = &$array[$key];
+            } else {
+                return false;
+            }
+        }
+
+        if (isset($array)) {
+            $array = $value;
+            return true;
+        }
+
+        return false;
+    }
 
     public static function overrideArray($array, $override, $skip_null = false, $recursive = false)
     {

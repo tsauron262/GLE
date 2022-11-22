@@ -403,7 +403,7 @@ abstract class BimpAPI
                 // Initalisation:
                 $infos .= '<b>Initialisation: </b>' . $url . ': ';
                 $ch = curl_init($url);
-
+                
                 if (!$ch) {
                     $infos . '<span class="danger">[ECHEC]</span>';
                     $errors[] = 'Echec de connexion à l\'url "' . $url . '"';
@@ -510,7 +510,7 @@ abstract class BimpAPI
                         // Traitement de la réponse: 
                         $response_code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
                         $response_infos = curl_getinfo($ch);
-
+                        
                         if (isset($response_infos['request_header']) && !empty($response_infos['request_header'])) {
                             $infos .= "<h4>Header REQUEST: </h4><br/>" . str_replace("\n", "<br/>", $response_infos['request_header']);
                         }
@@ -524,7 +524,11 @@ abstract class BimpAPI
 
                         $infos .= '<b>Code réponse: </b>' . $response_code . '<br/><br/>';
                         if ($response.'x' == 'x') {
-                            $infos .= '<span class="danger">AUCUNE REPONSE</span><br/>';
+                            $infos .= '<span class="danger">AUCUNE REPONSE</span><br/><br/>';
+                            $infos .= 'INFOS CURL : <pre>';
+                            $infos .= print_r($response_infos, 1);
+                            $infos .= '</pre>';
+
                             $errors[] = 'Aucune réponse reçue - Code HTTP: ' . $response_code;
                         } else {
                             if ($params['header_out']) {

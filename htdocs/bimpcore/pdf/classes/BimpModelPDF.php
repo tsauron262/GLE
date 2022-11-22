@@ -9,35 +9,50 @@ require_once __DIR__ . '/BimpPDF_AmountsTable.php';
 
 Abstract class BimpModelPDF
 {
+    # Constantes: 
 
-    public $db;
-    protected $pdf = null;
+    public static $type = '';
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/';
     public static $use_cgv = false;
+
+    # Membres: 
+    public $langs;
+    public $db;
+    protected $pdf = null;
+    public static $html_purifier = null;
+
+    # Objets liés: 
+    public $object = null;
+    public $fromCompany = null; // En-tête
+    public $footerCompany = null; // Pied de page
+    public $object_conf = null;
+
+    # Contenu: 
+    public $text = '';
     public $result = array();
-    public static $type = '';
     public $header_vars = array();
     public $footer_vars = array();
     public $header = null;
     public $footer = null;
-    public $prefName = "";
-    public $object;
-    public $text = '';
-    public $fromCompany = null; // En-tête
-    public $footerCompany = null; // Pied de page
-    private $isInit = false;
-    public $errors = array();
-    public $langs;
+    public $watermark = '';
+
+    # Paramètres: 
     public $typeObject = '';
     public $primary = '000000';
-    public $watermark = '';
-    public static $html_purifier = null;
     public $maxLogoWidth = 120; // px
     public $maxLogoHeight = 60; // px
-    public $object_conf = null;
+    public $prefName = "";
+
+    # Données:
+    private $isInit = false;
+    public $errors = array();
 
     public function __construct($db, $orientation = 'P', $format = 'A4')
     {
+        if (!defined('BIMP_LIB')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+        }
+
         global $mysoc, $langs, $conf;
 
         $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...", "", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
@@ -60,10 +75,6 @@ Abstract class BimpModelPDF
 
         if (empty($this->fromCompany->country_code)) {
             $this->fromCompany->country_code = substr($langs->defaultlang, -2);
-        }
-
-        if (!defined('BIMP_LIB')) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         }
     }
 
@@ -98,8 +109,9 @@ Abstract class BimpModelPDF
 
     public function render($file_name, $display, $display_only = false)
     {
-        if (!$this->isInit)
+        if (!$this->isInit) {
             $this->init(null);
+        }
 
         if (is_null($this->header)) {
             if (file_exists(static::$tpl_dir . '/' . static::$type . '/header.html')) {
@@ -480,7 +492,7 @@ Abstract class BimpModelPDF
 
     // Tools:
 
-    public function calculeWidthHieghtLogo($width, $height, $maxWidth, $maxHeight)
+    public function calculeWidthHeightLogo($width, $height, $maxWidth, $maxHeight)
     {
         if ($width > $maxWidth) {
             $height = round(($maxWidth / $width) * $height);

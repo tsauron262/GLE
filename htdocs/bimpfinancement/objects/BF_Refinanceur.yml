@@ -24,14 +24,36 @@ fields:
     url_demande: 
         label: URL Demande financement
         
+    taux: 
+        label: Taux de cession annuels
+        type: json
+        displays: 
+            default: 
+                label: Affichage taux
+                type: callback
+                method: displayTaux
+                
+        input: 
+            type: custom
+            content: 
+                callback: renderTauxInputs
+                
+    active: 
+        label: Actif
+        type: bool
+        default_value: 1
+        
 fields_tables: 
     infos: 
         title: Infos
         icon: fas_info
         rows: 
+            - field: active
+              edit: 1
             - field: id_societe
               display: card
             - field: url_demande
+            - field: taux
               
 views: 
     default: 
@@ -63,4 +85,7 @@ lists:
         cols: 
             id_societe:
             url_demande: 
+            taux:
+            active: 
+                edit: 1
     

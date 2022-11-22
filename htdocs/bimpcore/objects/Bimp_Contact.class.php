@@ -170,7 +170,7 @@ class Bimp_Contact extends BimpObject
         return $buttons;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getName($withGeneric = true)
     {

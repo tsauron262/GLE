@@ -29,13 +29,16 @@ class BimpSignature extends BimpObject
      * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
      */
 
+    const REFUSED = -2;
+    const CANCELLED = -1;
     const TYPE_DIST = 1;
     const TYPE_PAPIER = 2;
     const TYPE_ELEC = 3;
     const TYPE_PAPIER_NO_SCAN = 4;
 
     public static $types = array(
-        -1                        => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
+        self::REFUSED             => array('label' => 'Refusée', 'icon' => 'fas_exclamation-cirlce', 'classes' => array('danger')),
+        self::CANCELLED           => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
         0                         => array('label' => 'En attente de signature', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::TYPE_DIST           => array('label' => 'Signature à distance', 'icon' => 'fas_sign-in-alt'),
         self::TYPE_PAPIER         => array('label' => 'Signature papier', 'icon' => 'fas_file-download'),
@@ -1139,7 +1142,7 @@ class BimpSignature extends BimpObject
         return $html;
     }
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         $html = '';
 
@@ -1184,6 +1187,8 @@ class BimpSignature extends BimpObject
             $html .= '<br/>' . $this->displayData('type', 'default', false);
         } elseif ((int) $this->getData('type') === -1) {
             $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Annulée</span>';
+        } elseif ((int) $this->getData('type') === -2) {
+            $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Refusée</span>';
         } else {
             $html .= '<span class="warning">' . BimpRender::renderIcon('fas_hourglass-start', 'iconLeft') . 'Signature en attente</span>';
         }
@@ -1686,7 +1691,7 @@ class BimpSignature extends BimpObject
                 $fileName = $this->getDocumentFileName();
 
                 $from = ($use_comm_email_as_from ? $commercial_email : '');
-                
+
                 $obj = $this->getObj();
                 if (is_a($obj, 'Bimp_Propal')) {
                     $sav = $obj->getSav();
@@ -1749,20 +1754,23 @@ class BimpSignature extends BimpObject
         $id_envelope = $this->getData('id_envelope_docu_sign');
 
         if (!$id_account)
-            $user = 'ID du compte utilisateur DocuSign absent';
+            $errors[] = 'ID du compte utilisateur DocuSign absent';
+
         if (!$id_envelope)
-            $user = 'ID de l\'envelope DocuSign absent';
+            $errors[] = 'ID de l\'envelope DocuSign absent';
 
         require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+
         $api = BimpAPI::getApiInstance('docusign');
-        if (!is_a($api, 'DocusignAPI'))
+
+        if (!is_a($api, 'DocusignAPI')) {
             $errors[] = 'ID de l\'API absent';
-        
+        }
+
         $obj = $this->getObj();
-        // remplie automatiquement $errors si non valide
         $this->isObjectValid($errors, $obj);
-        
-        if(!count($errors)) {
+
+        if (!count($errors)) {
             $params = array(
                 'id_account'  => $id_account,
                 'id_envelope' => $id_envelope,
@@ -1777,9 +1785,9 @@ class BimpSignature extends BimpObject
                     $this->set('date_signed', (string) $date_sign->format('Y-m-d H:i:s'));
                     $this->set('signed', 1);
                     $errors = $this->update();
-                    
+
                     if (method_exists($obj, 'onSigned')) {
-                        $warnings = array_merge($warnings, $obj->onSigned($this, $data));
+                        $warnings = array_merge($warnings, $obj->onSigned($this, array()));
                     }
                 } else
                     $warnings[] = 'L\'enveloppe n\'a pas encore été signée';
@@ -2027,19 +2035,19 @@ class BimpSignature extends BimpObject
         $obj = $this->getObj();
 
         if ($this->isObjectValid($errors, $obj)) {
-            
+
             require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
             $api = BimpAPI::getApiInstance('docusign');
             if (is_a($api, 'DocusignAPI')) {
-                
+
                 $params = array(
                     'id_account'  => $data['id_account'],
                     'id_envelope' => $data['id_envelope']
                 );
-                
+
                 $envelope = $api->getEnvelope($params, $errors, $warnings);
                 print_r($envelope);
-                
+
                 if (!count($errors)) {
                     $this->set('signed', 1);
                     $this->set('date_signed', date('Y-m-d H:i:s'));
@@ -2049,7 +2057,6 @@ class BimpSignature extends BimpObject
                         if (method_exists($obj, 'onSigned')) {
                             $warnings = array_merge($warnings, $obj->onSigned($this, $data));
                         }
-
                     }
                 }
             }
@@ -2061,7 +2068,6 @@ class BimpSignature extends BimpObject
             'success_callback' => $success_callback
         );
     }
-
 
     public function actionSignDist($data, &$success)
     {

@@ -492,48 +492,68 @@ forms:
                   field_name: open_public_access
                   show_values: 1
                   
-    validate: 
+    validate:
         title: Validation
         rows: 
-            - custom: 1 
-              label: Ouvrir l'accès à la signature distance
-              data_type: bool
-              input_name: open_public_access
-              value: 0
-              input: 
-                  type: toggle
-            - custom: 1
-              label: Contact signataire
-              data_type: id_object
-              input_name: id_contact_signature
-              object: contact
-              create_form: default
-              create_form_values: 
-                  callback: getSignatureContactCreateFormValues
-              input: 
-                  type: select
-                  help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
-                  options: 
-                      callback: 
-                          method: getSocieteContactsArray
-                          params: 
-                              - field_value: fk_soc
-              value: 
-                  callback: getDefaultSignatureContact
-              display_if: 
-                  field_name: open_public_access
-                  show_values: 1
-            - custom: 1
-              label: Contenu e-mail client pour la signature à distance
-              input_name: email_content
-              input: 
-                  type: html
-                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
-              value: 
-                  callback: getDefaultSignDistEmailContent
-              display_if: 
-                  field_name: open_public_access
-                  show_values: 1
+            create_signature: 
+                custom: 1
+                label: Demander la signature du client
+                data_type: bool
+                input_name: create_signature
+                input: 
+                    type: toggle
+                value: 1
+            open_public_access: 
+                custom: 1 
+                label: Ouvrir l'accès à la signature distance
+                data_type: bool
+                input_name: open_public_access
+                value: 0
+                input: 
+                    type: toggle
+                display_if: 
+                    field_name: create_signature
+                    show_values: 1
+            contact_signature: 
+                custom: 1
+                label: Contact signataire
+                data_type: id_object
+                input_name: id_contact_signature
+                object: contact
+                create_form: default
+                create_form_values: 
+                    callback: getSignatureContactCreateFormValues
+                input: 
+                    type: select
+                    help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+                    options: 
+                        callback: 
+                            method: getSocieteContactsArray
+                            params: 
+                                - field_value: fk_soc
+                value: 
+                    callback: getDefaultSignatureContact
+                display_if: 
+                    fields_names: create_signature,open_public_access
+                    create_signature: 
+                        show_values: 1
+                    open_public_access:
+                        show_values: 1
+            email_content: 
+                custom: 1
+                label: Contenu e-mail client pour la signature à distance
+                input_name: email_content
+                input: 
+                    type: html
+                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+                value: 
+                    callback: getDefaultSignDistEmailContent
+                display_if: 
+                    fields_names: create_signature,open_public_access
+                    create_signature: 
+                        show_values: 1
+                    open_public_access:
+                        show_values: 1
                   
     create_signature_docu_sign: 
         title: Signature DocuSign

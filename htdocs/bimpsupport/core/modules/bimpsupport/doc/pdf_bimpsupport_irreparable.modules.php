@@ -34,7 +34,7 @@ require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/classes/OrderPDF.php';
 /**
  *	Class to generate PDF proposal Azur
  */
-class pdf_bimpsupport_irreparable extends BimpDocumentPDF
+class pdf_bimpsupport_irreparable extends BimpCommDocumentPDF
 {
     public function initData() {
         parent::initData();

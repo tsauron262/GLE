@@ -56,11 +56,11 @@ class BContract_contrat extends BimpDolObject
     // Les renouvellements
     CONST CONTRAT_RENOUVELLEMENT_NON = 0; // 100
     CONST CONTRAT_RENOUVELLEMENT_1_FOIS = 1; // 101
-    CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 3; // 102
-    CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 6; // 103
+    CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 2; // 102
+    CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 3; // 103
     CONST CONTRAT_RENOUVELLEMENT_4_FOIS = 4; // 104
     CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5; // 105
-    CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 7; // 106
+    CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 6; // 106
     CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12; // 112
     CONST CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM = 666; 
     // Contrat dénoncé
@@ -397,19 +397,17 @@ class BContract_contrat extends BimpDolObject
 
         return $html;
     }
+    
+    public function getInitialRenouvellement()
+    {
+        return $this->getData('tacite')+$this->getData('current_renouvellement');
+    }
 
     public function renderInitialRenouvellement()
     {
-        //$this->updateRenouvellementInitial();
-        return self::$renouvellement[$this->getData('initial_renouvellement')];
+        return self::$renouvellement[$this->getInitialRenouvellement()];
     }
 
-    public function updateRenouvellementInitial()
-    {
-        if ($this->getData('initial_renouvellement') != $this->getData('tacite')) {
-            $this->updateField('initial_renouvellement', $this->getData('tacite'));
-        }
-    }
 
     public function renderFi()
     {
@@ -1756,8 +1754,8 @@ class BContract_contrat extends BimpDolObject
         $new_contrat->set('periodicity', $this->getData('periodicity'));
         $new_contrat->set('gti', $this->getData('gti'));
         $new_contrat->set('duree_mois', $this->getData('duree_mois'));
-        $new_contrat->set('tacite', $this->getData('initial_renouvellement'));
-        $new_contrat->set('initial_renouvellement', $this->getData('initial_renouvellement'));
+        $new_contrat->set('tacite', $this->getInitialRenouvellement());
+//        $new_contrat->set('initial_renouvellement', $this->getData('initial_renouvellement'));
         $new_contrat->set('moderegl', $this->getData('moderegl'));
         $new_contrat->set('note_public', $this->getData('note_public'));
         $new_contrat->set('note_private', $this->getData('note_private'));
@@ -1890,6 +1888,7 @@ class BContract_contrat extends BimpDolObject
                 $errors = [];
                 $success = "Contrat renouvellé avec succès";
             } else {
+                $errors[] = 'Probléme création ligne';
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this));
             }
         }
@@ -1971,7 +1970,6 @@ class BContract_contrat extends BimpDolObject
 
         $this->set("tacite", 0);
         $this->set("relance_renouvellement", 0);
-        $this->set('initial_renouvellement', 0);
         if ($this->update($warnings)) {
             $success = "La reconduction tacite a été annulée";
         }
@@ -2005,7 +2003,7 @@ class BContract_contrat extends BimpDolObject
         $errors = $this->updateField('end_date_contrat', $data['date_end_renouvellement']);
         $errors = $echeancier->updateField('next_facture_date', '0000-00-00 00:00:00');
         $errors = $this->updateField('current_renouvellement', $data['current_renouvellement']);
-        $errors = $this->updateField('initial_renouvellement', $data['initial_renouvellement']);
+//        $errors = $this->updateField('initial_renouvellement', $data['initial_renouvellement']);
         $errors = $this->updateField('tacite', $data['tacite']);
         return [
             'errors'   => $errors,
@@ -2100,6 +2098,14 @@ class BContract_contrat extends BimpDolObject
                     "label"   => 'Annuler la reconduction tacite',
                     'icon'    => "fas_hand-paper",
                     'onclick' => $this->getJsActionOnclick('stopTacite', array(), array(
+                        'confirm_msg' => "Etes-vous sûr ? Cette action est  irréversible"
+                    ))
+                );
+                if($user->admin)
+                $buttons[] = array(
+                    "label"   => 'Renouvellement tacite',
+                    'icon'    => "fas_hand-paper",
+                    'onclick' => $this->getJsActionOnclick('tacite', array(), array(
                         'confirm_msg' => "Etes-vous sûr ? Cette action est  irréversible"
                     ))
                 );
@@ -2796,7 +2802,6 @@ class BContract_contrat extends BimpDolObject
         switch ($field_name) {
             case 'current_renouvellement':
             case 'tacite':
-            case 'initial_renouvellement':
             case 'date_end_renouvellement':
                 if ($user->admin)
                     return 1;
@@ -3079,7 +3084,6 @@ class BContract_contrat extends BimpDolObject
             }
 
             $this->updateField('ref', $ref);
-            $this->updateField('initial_renouvellement', $this->getData('tacite'));
             $this->addLog('Contrat validé');
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
             $commercial = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));
@@ -3942,7 +3946,7 @@ class BContract_contrat extends BimpDolObject
                 self::CONTRAT_RENOUVELLEMENT_5_FOIS => "5",
                 self::CONTRAT_RENOUVELLEMENT_6_FOIS => "6",
             );
-            $extra .= "<br /><strong>Renouvellement N°</strong><strong>" . $this->getData('current_renouvellement') . "/" . $arrayTacite[$this->getData('initial_renouvellement')] . "</strong>";
+            $extra .= "<br /><strong>Renouvellement N°</strong><strong>" . $this->getData('current_renouvellement') . "/" . $arrayTacite[$this->getInitialRenouvellement()] . "</strong>";
         }
                 
         return $extra;
@@ -4419,7 +4423,7 @@ class BContract_contrat extends BimpDolObject
     }
     
     
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         
         $hmtl = '';

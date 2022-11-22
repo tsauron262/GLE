@@ -94,23 +94,27 @@ class BContract_echeancier extends BimpObject {
 
     public function isDejaFactured($date_start, $date_end) {
         $parent = $this->getParentInstance();
+        $correspondance = 0;
         $listeFactures = getElementElement("contrat", 'facture', $parent->id);
         if(count($listeFactures) > 0) {
             foreach($listeFactures as $index => $i) {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $i['d']);
-                if($facture->getData('type') == 0) {
+                if(1) {
                     $dateDebut = New DateTime();
                     $dateFin = New DateTime();
                     if(is_int($facture->dol_object->lines[0]->date_start) && is_int($facture->dol_object->lines[0]->date_end)){
                         $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
                         $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
                         if($dateDebut->format('Y-m-d') == $date_start && $dateFin->format('Y-m-d') == $date_end) {
-                            $parent->addLog("Facturation de la même periode stopée automatiquement");
-                            return true;
+                            $correspondance++;
                         }
                     }
                 }
             }
+        }
+        if($correspondance == 1){
+            $parent->addLog("Facturation de la même periode stopée automatiquement ");
+            return true;
         }
         return false;
     }

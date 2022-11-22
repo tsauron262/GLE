@@ -712,6 +712,45 @@ class BF_Demande extends BimpObject
         return array();
     }
 
+    public function getContratFormMsgs()
+    {
+        $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+        $msg .= '<b>Toutes les informations demandées ci-dessous sont obligatoires pour l\'établissement du contrat de location</b>';
+
+        $is_company = 0;
+        $siren = '';
+        if ((int) $this->getData('id_main_source')) {
+            $source = $this->getSource();
+            if (BimpObject::objectLoaded($source)) {
+                $client_data = $source->getData('client_data');
+                $is_company = (int) BimpTools::getArrayValueFromPath($client_data, 'is_company', 0);
+                $siren = BimpTools::getArrayValueFromPath($client_data, 'siren', '');
+            }
+        }
+
+        if ($is_company) {
+            $url = 'https://www.societe.com';
+
+            if ($siren) {
+                $url .= '/cgi-bin/search?champs=' . $siren;
+            }
+
+            $msg .= '<br/>';
+            $msg .= '<div style="text-align: right; margin-top: 10px">';
+            $msg .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+            $msg .= 'Obtenir des infos sur societe.com' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+            $msg .= '</span>';
+            $msg .= '</div>';
+        }
+
+        return array(
+            array(
+                'type'    => 'warning',
+                'content' => $msg
+            )
+        );
+    }
+
     // Getters array: 
 
     public function getClientContactsArray($include_empty = true, $active_only = true)
@@ -904,10 +943,9 @@ class BF_Demande extends BimpObject
             case 'client_name':
             case 'client_is_company':
             case 'client_forme_juridique':
-            case 'client_type_entrepise':
             case 'client_capital':
             case 'client_siren':
-            case 'client_adress':
+            case 'client_address':
             case 'client_representant':
             case 'client_repr_qualite':
             case 'client_sites':
@@ -931,14 +969,14 @@ class BF_Demande extends BimpObject
                             case 'client_siren':
                                 return BimpTools::getArrayValueFromPath($client_data, 'siren', 0);
 
-                            case 'client_adress':
-                                return BimpTools::replaceBr($source->getClientFullAddress(0, 0));
+                            case 'client_address':
+                                return BimpTools::replaceBr($source->getClientFullAddress(0, 1));
 
                             case 'client_representant':
                                 return $source->getSignataireName();
 
                             case 'client_repr_qualite':
-                                return BimpTools::getArrayValueFromPath($client_data, 'signataire/fonction', '');
+                                return strtolower(BimpTools::getArrayValueFromPath($client_data, 'signataire/fonction', ''));
 
                             case 'client_sites':
                                 return BimpTools::replaceBr($source->getAdressesLivraisons());
@@ -3130,6 +3168,18 @@ class BF_Demande extends BimpObject
         $warnings = array();
         $success = 'Création du fichier PDF effectué avec succès';
 
+        $client_data = array(
+            'is_company'      => (int) BimpTools::getArrayValueFromPath($data, 'client_is_company', 0),
+            'nom'             => BimpTools::getArrayValueFromPath($data, 'client_name', ''),
+            'address'         => BimpTools::getArrayValueFromPath($data, 'client_address', ''),
+            'forme_juridique' => BimpTools::getArrayValueFromPath($data, 'client_forme_juridique', ''),
+            'capital'         => BimpTools::getArrayValueFromPath($data, 'client_capital', ''),
+            'siren'           => BimpTools::getArrayValueFromPath($data, 'client_siren', ''),
+            'rcs'             => BimpTools::getArrayValueFromPath($data, 'client_rcs', ''),
+            'representant'    => BimpTools::getArrayValueFromPath($data, 'client_representant', ''),
+            'repr_qualite'    => BimpTools::getArrayValueFromPath($data, 'client_repr_qualite', '')
+        );
+
         if ($this->isDemandeValid($errors)) {
             global $db;
             $files_dir = $this->getFilesDir();
@@ -3145,24 +3195,27 @@ class BF_Demande extends BimpObject
 //            }
             // PDF contrat de location: 
             $file_name = $this->getSignatureDocFileName('contrat');
+            require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
+            $pdf = new ContratFinancementPDF($db, $this, $client_data);
 
-            if ((int) $this->getData('id_main_source')) {
-                require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/extends/entities/prolease/pdf/ContratFinancementProleasePDF.php';
-                $pdf = new ContratFinancementProleasePDF($db, $this);
-            } else {
-                require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
-                $pdf = new ContratFinancementPDF($db, $this);
-            }
+            $pdf->render($files_dir . $file_name, 'F');
 
-            if (!$pdf->render($files_dir . $file_name, 'F')) {
+            if (count($pdf->errors)) {
                 $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF du contrat de location');
+            } else {
+                if (file_exists($files_dir . $file_name)) {
+                    $url = $this->getFileUrl($file_name);
+                    if ($url) {
+                        $sc = 'window.open(\'' . $url . '\')';
+                    }
+                }
             }
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
-//            'success_callback' => $sc
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
         );
     }
 

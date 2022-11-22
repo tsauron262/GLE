@@ -561,7 +561,7 @@ class BimpCommDemandeFin extends BimpObject
                     $content .= '<b>Durée totale :</b> ' . $data['duration'] . ' mois<br/>';
                 }
                 if (isset($data['periodicity_label']) && $data['periodicity_label']) {
-                    $content .= '<b>Périodicité :</b> ' . $data['periodicity_label'] . '<br/>';
+                    $content .= '<b>Périodicité des loyers :</b> ' . $data['periodicity_label'] . '<br/>';
                 }
                 if (isset($data['nb_loyers']) && $data['nb_loyers']) {
                     $content .= '<b>Nombre de loyers :</b> ' . $data['nb_loyers'] . '<br/>';
@@ -576,9 +576,9 @@ class BimpCommDemandeFin extends BimpObject
                     $content .= '<thead>';
                     $content .= '<tr>';
                     $content .= '<td></td>';
-                    $content .= '<th style="text-align: center">Loyer mensuel</th>';
+                    $content .= '<th style="text-align: center">Loyer mensuel HT</th>';
                     if ($periodicity > 1) {
-                        $content .= '<th style="text-align: center">Loyer ' . BFTools::$periodicities_masc[$periodicity] . ' </th>';
+                        $content .= '<th style="text-align: center">Loyer ' . BFTools::$periodicities_masc[$periodicity] . ' HT</th>';
                     }
                     $content .= '</tr>';
                     $content .= '</thead>';
@@ -587,9 +587,9 @@ class BimpCommDemandeFin extends BimpObject
                     if (isset($data['montants']['loyer_mensuel_evo_ht'])) {
                         $content .= '<tr>';
                         $content .= '<th>Formule évolutive</th>';
-                        $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_evo_ht']) . '</b></td>';
+                        $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_evo_ht']) . '*</b></td>';
                         if ($periodicity > 1) {
-                            $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_evo_ht'] * $periodicity) . '</b></td>';
+                            $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_evo_ht'] * $periodicity) . '*</b></td>';
                         }
                         $content .= '</tr>';
                     }
@@ -597,15 +597,15 @@ class BimpCommDemandeFin extends BimpObject
                     if (isset($data['montants']['loyer_mensuel_dyn_ht'])) {
                         $content .= '<tr>';
                         $content .= '<th>Formule dynamique</th>';
-                        $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht']) . '</b>';
+                        $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht']) . '*</b>';
                         if (isset($data['montants']['loyer_mensuel_suppl_ht'])) {
-                            $content .= '<br/>Puis : <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht']) . '</b>';
+                            $content .= '<br/>Puis : <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht']) . '*</b>';
                         }
                         $content .= '</td>';
                         if ($periodicity > 1) {
-                            $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht'] * $periodicity) . '</b>';
+                            $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht'] * $periodicity) . '*</b>';
                             if (isset($data['montants']['loyer_mensuel_suppl_ht'])) {
-                                $content .= '<br/>Puis ' . (12 / $periodicity) . ' x <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht'] * $periodicity) . '</b>';
+                                $content .= '<br/>Puis ' . (12 / $periodicity) . ' x <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht'] * $periodicity) . '*</b>';
                             }
                             $content .= '</td>';
                         }
@@ -614,19 +614,7 @@ class BimpCommDemandeFin extends BimpObject
 
                     $content .= '</tbody>';
                     $content .= '</table>';
-
-                    if (isset($data['montants']['loyer_ht'])) {
-                        $content .= '<b>Montant HT d\'un loyer :</b> ' . BimpTools::displayMoneyValue($data['montants']['loyer_ht'], 'EUR', false, false, false, 2, true) . '<br/>';
-                    }
-                    if (isset($data['montants']['total_loyers_ht'])) {
-                        $content .= '<b>Total loyers HT : </b> ' . BimpTools::displayMoneyValue($data['montants']['total_loyers_ht'], 'EUR', false, false, false, 2, true) . '<br/>';
-                    }
-                    if (isset($data['montants']['total_loyers_tva'])) {
-                        $content .= '<b>Total TVA loyers : </b> ' . BimpTools::displayMoneyValue($data['montants']['total_loyers_tva'], 'EUR', false, false, false, 2, true) . '<br/>';
-                    }
-                    if (isset($data['montants']['total_loyers_ttc'])) {
-                        $content .= '<b>Total loyers TTC : </b> ' . BimpTools::displayMoneyValue($data['montants']['total_loyers_ttc'], 'EUR', false, false, false, 2, true) . '<br/>';
-                    }
+                    $content .= '<p style="font-style: italic">* Loyers bruts en € HT, hors assurance.</p>';
                     $content .= '<br/>';
                 }
 

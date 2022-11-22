@@ -309,9 +309,9 @@ class Bimp_Stat_Date extends BimpObject
             return array();
     }
 
-    public function getLabel($type = "")
+    public function getLabel($type = "", $ucfirst = false)
     {
-        $return = parent::getLabel($type);
+        $return = parent::getLabel($type, $ucfirst);
         if ($type == 'name' && !$this->isOk)
             return $return . " (Choisir une plage de date)";
         return $return;

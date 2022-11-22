@@ -2302,12 +2302,12 @@ class BContract_contrat extends BimpDolObject
             $file_dir = $this->getSignatureDocFileDir('contrat');
             if(file_exists($file_dir . $file_name)) {
                 $button_download = array(
-                    'label'   => 'Retélécharger contrat signé DocuSign',
+                    'label'   => 'Retélécharger devis signé DocuSign',
                     'icon'    => 'fas_file-download',
                     'onclick' => $this->getJsActionOnclick('downloadSignature', array(), array('confirm_msg' => "Le fichier existe déjà, remplacer ?")));
             } else {
                 $button_download = array(
-                    'label'   => 'Télécharger contrat signé DocuSign',
+                    'label'   => 'Télécharger devis signé DocuSign',
                     'icon'    => 'fas_file-download',
                     'onclick' => $this->getJsActionOnclick('downloadSignature'));
             }
@@ -5090,15 +5090,6 @@ class BContract_contrat extends BimpDolObject
                             $errors = $this->updateField('id_signature', (int) $signature->id);
                         }
                     }
-                    
-//                    if(!count($errors) and !count($warnings)) {
-//                        $this->set('nom_signataire', $prenom_client . ' ' . $nom_client);
-//                        $this->set('fonction_signataire', $fonction_client);
-//                        $this->set('email_signataire', $email_client);
-//                        $this->set('id_envelope_docu_sign', $envelope['envelopeId']);
-//                        $this->set('id_account_docu_sign', $comm->getData('id_docusign'));
-//                        $this->update($warnings);
-//                    }
                 }
 
             }

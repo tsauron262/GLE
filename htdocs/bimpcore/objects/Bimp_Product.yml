@@ -584,7 +584,7 @@ fields:
         has_total: 0
         
     alerteActive: 
-        label: Activer les alerte de stocks
+        label: Activer les alertes de stock
         type: bool
         default_value: 1
         

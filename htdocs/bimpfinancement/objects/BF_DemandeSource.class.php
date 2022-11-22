@@ -351,7 +351,7 @@ class BF_DemandeSource extends BimpObject
 
     // Rendus HTML: 
 
-    public function renderView()
+    public function renderView($view_name = 'default', $panel = false, $level = 1)
     {
         $html = '';
 

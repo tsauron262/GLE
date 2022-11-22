@@ -2079,36 +2079,18 @@ class Bimp_Facture extends BimpComm
     {
         $delay = 0;
 
-        if (is_null($default_delay)) {
-            $default_delay = (int) BimpCore::getConf('default_relance_paiements_delay_days', null, 'bimpcommercial');
-        }
-
         if ($this->isLoaded()) {
-            $isComptant = ($this->dol_object->cond_reglement_code == 'RECEP');
-
+//            $isComptant = ($this->dol_object->cond_reglement_code == 'RECEP');
             if ($nextRelanceIdx <= 5) {
-                if ($nextRelanceIdx > 1) {
-                    if ($isComptant) {
-                        $delays = array(
-                            2 => 4,
-                            3 => 3,
-                            4 => 4,
-                            5 => 5
-                        );
-                        $delay = $delays[$nextRelanceIdx];
-                    } else {
-                        if ($nextRelanceIdx == 2) {
-                            $delay = 8;
-                        } else {
-                            $delay = $default_delay;
-                        }
-                    }
+                if ($nextRelanceIdx <= 1) {
+                    $delay = 7;
+                } elseif ($nextRelanceIdx == 2) {
+                    $delay = 8;
                 } else {
-                    if ($isComptant) {
-                        $delay = 3;
-                    } else {
-                        $delay = 7;
+                    if (is_null($default_delay)) {
+                        $default_delay = (int) BimpCore::getConf('default_relance_paiements_delay_days', null, 'bimpcommercial');
                     }
+                    $delay = $default_delay;
                 }
             }
         }
@@ -4666,7 +4648,7 @@ class Bimp_Facture extends BimpComm
                     $diff = (float) $this->dol_object->total_ttc - $remain_to_pay;
 
                     $diff = round($diff, 2);
-                    if ($diff > -0.01 && $diff < 0.01) {
+                    if ($diff >= -0.01 && $diff <= 0.01) {
                         $paiement_status = 0; // Aucun paiement
                     } else {
                         if ($this->dol_object->total_ttc > 0 && $remain_to_pay < 0) {

@@ -1487,7 +1487,7 @@ function dol_banner_tab($object, $paramid, $morehtml='', $shownav=1, $fieldid='r
 						}
 					}
 				}
-				else if (! $phototoshow)
+				else if (! $phototoshow && is_object($form))
 				{
 					$phototoshow = $form->showphoto($modulepart,$object,0,0,0,'photoref','small',1,0,$maxvisiblephotos);
 				}

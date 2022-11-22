@@ -122,6 +122,7 @@ class BF_Demande extends BimpObject
                     return 0; // Car déternminé en auto dans un premier temps via refinanceur
                 }
 
+            case 'def_tx_cession':
             case 'duration':
             case 'periodicity':
             case 'mode_calcul':
@@ -867,26 +868,45 @@ class BF_Demande extends BimpObject
         return $marge_percent;
     }
 
+    public function getDefaultTxCession($total_demande_ht = null)
+    {
+        if (is_null($total_demande_ht)) {
+            $total_demande_ht = $this->getTotalDemandeHT();
+        }
+
+        $type_def = $this->getData('def_tx_cession');
+
+        switch ($type_def) {
+            case 'reel':
+                $id_refin = $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+                if ($id_refin) {
+                    $refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Refinanceur', $id_refin);
+                    if (BimpObject::objectLoaded($refin)) {
+                        return (float) $refin->getTaux($total_demande_ht);
+                    }
+                }
+                break;
+
+            case 'moyen':
+            default:
+                BimpObject::loadClass('bimpfinancement', 'BF_Refinanceur');
+                return BF_Refinanceur::getTauxMoyen($total_demande_ht);
+        }
+
+        return 0;
+    }
+
     public function getDefaultValues($recalculate = false)
     {
         if (is_null($this->default_values) || $recalculate) {
             $total_demande_ht = $this->getTotalDemandeHT();
-            $tx_cession = 0;
-            $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
-            if ($id_refin) {
-                $refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Refinanceur', $id_refin);
-                if (BimpObject::objectLoaded($refin)) {
-                    $tx_cession = $refin->getTaux($total_demande_ht);
-                }
-            }
-
             $calc_values = $this->getCalcValues();
 
             $this->default_values = array(
                 'vr_achat'               => (float) BimpCore::getConf('def_vr_achat', null, 'bimpfinancement'),
                 'vr_vente'               => (float) BimpCore::getConf('def_vr_vente', null, 'bimpfinancement'),
                 'marge_souhaitee'        => (float) $this->getDefaultMargePercent($total_demande_ht),
-                'tx_cession'             => $tx_cession,
+                'tx_cession'             => $this->getDefaultTxCession($total_demande_ht),
                 'loyer_mensuel_evo_ht'   => BimpTools::getArrayValueFromPath($calc_values, 'loyer_evo_mensuel', 0),
                 'loyer_mensuel_dyn_ht'   => BimpTools::getArrayValueFromPath($calc_values, 'loyer_dyn_mensuel', 0),
                 'loyer_mensuel_suppl_ht' => BimpTools::getArrayValueFromPath($calc_values, 'loyer_dyn_suppl_mensuel', 0)
@@ -2236,11 +2256,12 @@ class BF_Demande extends BimpObject
             $def_values = $this->getDefaultValues();
             if (isset($def_values[$field_name]) && (float) $def_values[$field_name]) {
                 $cur_value = (float) $this->getData($field_name);
-                if (round($cur_value, 2) != round($def_values[$field_name], 2)) {
+                $nb_decimals = (int) $this->getConf('fields/' . $field_name . '/decimals', 2);
+                if (round($cur_value, $nb_decimals) != round($def_values[$field_name], $nb_decimals)) {
                     $value_str = BimpTools::displayFloatValue($def_values[$field_name]);
                     $field_label = $this->getConf('fields/' . $field_name . '/label', $field_name);
 
-                    $onclick = 'var $c = $(this).findParentByClass(\'inputContainer\'); if ($.isOk($c)) {$c.find(\'input[name=' . $field_name . ']\').val(' . round($def_values[$field_name], 2) . ').change();}';
+                    $onclick = 'var $c = $(this).findParentByClass(\'inputContainer\'); if ($.isOk($c)) {$c.find(\'input[name=' . $field_name . ']\').val(' . round($def_values[$field_name], $nb_decimals) . ').change();}';
                     $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
                     $html .= BimpRender::renderIcon('fas_undo', 'iconLeft') . 'Par défaut : <b>' . $value_str . '</b>';
                     $html .= '</span>';
@@ -3167,6 +3188,11 @@ class BF_Demande extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Création du fichier PDF effectué avec succès';
+
+        $formule = BimpTools::getArrayValueFromPath($data, 'formule', $this->getData('formule'));
+        if ($formule != $this->getData('formule')) {
+            $this->updateField('formule', $formule);
+        }
 
         $client_data = array(
             'is_company'      => (int) BimpTools::getArrayValueFromPath($data, 'client_is_company', 0),

@@ -135,4 +135,29 @@ class BF_Refinanceur extends BimpObject
 
         return $errors;
     }
+
+    public static function getTauxMoyen($total_demande_ht)
+    {
+        $total_tx = 0;
+        $nb_refin = 0;
+
+        $filters = array();
+
+        foreach (BimpCache::getBimpObjectObjects('bimpfinancement', 'BF_Refinanceur', $filters) as $refin) {
+            if (BimpObject::objectLoaded($refin)) {
+                $tx = $refin->getTaux($total_demande_ht);
+
+                if ($tx) {
+                    $total_tx += $tx;
+                    $nb_refin++;
+                }
+            }
+        }
+
+        if ($nb_refin > 0) {
+            return $total_tx / $nb_refin;
+        }
+
+        return 0;
+    }
 }

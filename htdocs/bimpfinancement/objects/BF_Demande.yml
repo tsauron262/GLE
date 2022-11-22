@@ -254,7 +254,7 @@ fields:
         default_value: 0
         
     duration:
-        label: Durée
+        label: Durée totale
         type: int
         values: 
             array: durations
@@ -282,7 +282,7 @@ fields:
             conf: 
                 module: bimpfinancement
                 name: def_mode_calcul
-       
+            
     marge_souhaitee:
         label: Marge
         type: percent
@@ -298,10 +298,18 @@ fields:
                 module: bimpfinancement
                 name: def_marge_souhaitee
         
+    def_tx_cession:
+        label: Taux de cession par défaut
+        values: 
+            moyen: Taux moyen
+            reel: Taux réel
+        default_value: moyen
+            
     tx_cession:
         label: Taux de cession annuel
         type: percent
         default_value: 0
+        decimals: 3
         input: 
             extra_content: 
                 callback: 
@@ -465,6 +473,8 @@ forms:
                 field: periodicity
             mode_calcul: 
                 field: mode_calcul
+            def_tx_cession: 
+                field: def_tx_cession
             date_loyer: 
                 field: date_loyer
                 
@@ -559,6 +569,8 @@ forms:
         msgs: 
             callback: getContratFormMsgs
         rows: 
+            - field: formule
+              required: 1
             - custom: 1
               label: Nom Client
               input_name: client_name
@@ -729,6 +741,7 @@ fields_tables:
         icon: fas_check-square
         rows: 
             - field: duration
+              label: Durée<br/><span class="small">(hors loyers suppl.)</span>
               edit: 1
             - field: periodicity
               edit: 1
@@ -740,9 +753,12 @@ fields_tables:
               edit: 1
             - field: marge_souhaitee
               edit: 1
+            - field: def_tx_cession
+              edit: 1
             - field: tx_cession
               edit: 1
             - field: formule
+              label: Formule choisie par le client
               edit: 1
               
     montants: 

@@ -341,6 +341,19 @@ class BimpDb
         return 0;
     }
 
+    public function getAvg($table, $field, $where = '1')
+    {
+        $sql = 'SELECT AVG(`' . $field . '`) as avg FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
+
+        $result = $this->executeS($sql, 'array');
+
+        if (isset($result[0]['avg'])) {
+            return $result[0]['avg'];
+        }
+
+        return null;
+    }
+
     public function getValues($table, $field, $where, $limit = null)
     {
         $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;

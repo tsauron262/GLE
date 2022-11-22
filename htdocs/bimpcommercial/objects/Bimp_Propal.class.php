@@ -1951,6 +1951,7 @@ class Bimp_Propal extends Bimp_PropalTemp
     {
         switch ($doc_type) {
             case 'propal':
+            case 'devis': 
                 return dol_sanitizeFileName($this->getRef()) . ($signed ? '_signe' : '') . '.pdf';
         }
 

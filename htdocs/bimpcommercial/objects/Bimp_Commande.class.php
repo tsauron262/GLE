@@ -670,7 +670,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 if ($this->isActionAllowed('validate', $errors)) {
                     if ($this->canSetAction('validate')) {
 
-                        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))) {
+                        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial'))) && !$this->hasDemandsValidations()) {
                             $data['form_name'] = 'livraison';
                         } else {
                             $data['confirm_msg'] = 'Veuillez confirmer la validation de cette commande';
@@ -3297,6 +3297,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         $errors = array();
         $warnings = array();
+        /*pour enregistré les valeur du form*/
+        $errors = $this->updateFields($data);
+        $this->db->db->commit();
+        $this->db->db->begin();
+        
         $infos = array();
 
         $forced_by_dev = (int) BimpTools::getArrayValueFromPath($data, 'forced_by_dev', 0);

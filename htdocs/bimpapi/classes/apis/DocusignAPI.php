@@ -404,47 +404,79 @@ Signature",
     }
     
     public function getSignersPropal($params, $object = null) {
+       $client = $params['client'];
+       
+       $anchor = 'Signature + Cachet avec SIRET :';
+       $base_x = -110; // x du champ le plus à gauche (Nom)
+       $base_y = 14; // y du champ le plus haut (Nom)
+       $font_size = 'Size9';
+       
+        $signers = array(
+            
+            // Client
+            // Client
+            array (
+                'email'       => 'r.pelegrin@bimp.fr',// ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
+                'name'        =>  $client['prenom']  . ' ' . $client['nom'],
+                'signerEmail' => 'r.pelegrin@bimp.fr',//($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr', Todo
+                'recipientId' => '1',
+                'routingOrder'=> '1',
+                'emailNotification' => array(
+                    'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
+                    'emailBody' => $object->getPropalEmailContent()
+                ),
+                'tabs'        => array(
+                    'signHereTabs' => array(
+                        array(
+                            'name'          => "Signature",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => $base_x + 130,
+                            'anchorYOffset' => $base_y + 35,
+                        ),
+                    ),
+                    'textTabs' => array(
+                        array(
+                            'name'          => "Nom",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => $base_x,
+                            'anchorYOffset' => $base_y,
+                            'fontSize'      => $font_size,
+                            'value'         => $client['nom'],
 
-        return array(
-            'signHereTabs' => array(
-                array(
-                    'name'          => "Signez ici",
-                    'anchorString'  => "Signature + Cachet avec SIRET :",
-                    'anchorXOffset' => 30,
-                    'anchorYOffset' => 50
-                )
-            ),
-            'lastNameTabs' => array(
-                array(
-                    'anchorString'        => "Nom du signataire :",
-                    'anchorXOffset'       => 60,
-                    'anchorCaseSensitive' => true,
-                    'value'         => $params['nom_signataire']
-                )
-            ),
-            'firstNameTabs' => array(
-                array(
-                    'anchorString'  => "Prénom du signataire :",
-                    'anchorXOffset' => 72,
-                    'value'         => $params['prenom_signataire']
-                )
-            ),
-            'textTabs' => array(
-                array(
-                    'name'          => "Fonction",
-                    'anchorString'  => "Fonction du signataire :",
-                    'anchorXOffset' => 65,
-                    'value'         => $params['fonction_signataire'],
-                    'locked'        => false
-                )
-            ),
-            'dateSignedTabs' => array(
-                array(
-                    'anchorString'  => "Date de signature :",
-                    'anchorXOffset' => 60
+                        ),
+                        array(
+                            'name'          => "Prénom",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => $base_x + 10,
+                            'anchorYOffset' => $base_y + 14,
+                            'fontSize'      => $font_size,
+                            'value'         => $client['prenom'],
+
+                        ),
+                        array(
+                            'name'          => "Fonction",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => $base_x + 11,
+                            'anchorYOffset' => $base_y + 28,
+                            'fontSize'      => $font_size,
+                            'value'         => $client['fonction'],
+
+                        ),
+                    ),
+                    'dateSignedTabs' => array(
+                        array(
+                            'name'          => "Date signature",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => $base_x + 1,
+                            'anchorYOffset' => $base_y + 45,
+                            'fontSize'      => $font_size,
+                        ),
+                    )
                 )
             )
         );
+        
+        return $signers;
     }
     
     // Interface

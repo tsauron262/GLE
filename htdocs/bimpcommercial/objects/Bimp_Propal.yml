@@ -555,6 +555,24 @@ forms:
                     open_public_access:
                         show_values: 1
                   
+    create_signature_docu_sign: 
+        title: Signature DocuSign
+        icon: fas_file-signature
+        rows: 
+            - custom: 1
+              label: Contact
+              type: id_object
+              object: contact
+              input_name: id_contact
+              input:
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                            0: 
+                                field_value: fk_soc
+                  
 fields_tables: 
     infos: 
         rows: 

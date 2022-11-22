@@ -1853,7 +1853,7 @@ class BimpSignature extends BimpObject
                 $dir = $this->getDocumentFileDir();
 
                 if (!$dir || !$file_path || !$file_name) {
-                    $errors[] = 'Erreurs: chemin du fichier absent';
+                    $errors[] = 'Erreurs: chemin du fichier absent - ' . $file_name .' - ' . $file_path . ' - ' . $dir;
                 } else {
                     if (file_exists($file_path)) {
                         $errors[] = 'Le document signé existe déjà. Si vous souhaitez le remplacer, veuillez le supprimer manuellement (Nom: ' . $file_name . ')';

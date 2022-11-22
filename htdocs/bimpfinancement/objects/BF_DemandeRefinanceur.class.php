@@ -485,6 +485,52 @@ class BF_DemandeRefinanceur extends BimpObject
         ));
     }
 
+    // Traitements : 
+
+    public function setSelected(&$warings = array())
+    {
+        $errors = array();
+
+        $values = $this->getCalcValues(true, $errors);
+        $demande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($demande)) {
+            $errors[] = 'Demande de location liée absente';
+        }
+
+        if (!count($errors)) {
+            $errors = $this->setNewStatus(self::STATUS_SELECTIONNEE);
+
+            if (!count($errors)) {
+                $demande = $this->getParentInstance();
+
+                if (BimpObject::objectLoaded($demande)) {
+                    $values = $this->getCalcValues();
+                    $demande->set('periodicity', $values['periodicity']);
+                    $demande->set('duration', $values['nb_mois']);
+                    $demande->set('tx_cession', $this->getData('rate'));
+                    $demande->set('loyer_mensuel_evo_ht', round($values['loyer_evo_mensuel'], 2));
+                    $demande->set('loyer_mensuel_dyn_ht', round($values['loyer_dyn_mensuel'], 2));
+                    $demande->set('loyer_mensuel_suppl_ht', round($values['loyer_dyn_suppl_mensuel'], 2));
+
+                    $up_warnings = array();
+                    $up_errors = $demande->update($up_warnings, true);
+
+                    if (count($up_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des données de la demande de location');
+                    } else {
+                        // Par précaution : 
+                        $this->db->update($this->getTable(), array(
+                            'status' => self::STATUS_ACCEPTEE
+                                ), 'id_demande = ' . (int) $this->getData('id_demande') . ' AND id != ' . $this->id . ' AND status = ' . self::STATUS_SELECTIONNEE);
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions:
 
     public function actionRefused($data, &$success)
@@ -552,37 +598,7 @@ class BF_DemandeRefinanceur extends BimpObject
         $warnings = array();
         $success = 'Validation définitive effectuée avec succès';
 
-        $values = $this->getCalcValues(true, $errors);
-        $demande = $this->getParentInstance();
-
-        if (!BimpObject::objectLoaded($demande)) {
-            $errors[] = 'Demande de location liée absente';
-        }
-
-        if (!count($errors)) {
-            $errors = $this->setNewStatus(self::STATUS_SELECTIONNEE);
-
-            if (!count($errors)) {
-                $demande = $this->getParentInstance();
-
-                if (BimpObject::objectLoaded($demande)) {
-                    $values = $this->getCalcValues();
-                    $demande->set('periodicity', $values['periodicity']);
-                    $demande->set('duration', $values['nb_mois']);
-                    $demande->set('tx_cession', $this->getData('rate'));
-                    $demande->set('loyer_mensuel_evo_ht', round($values['loyer_evo_mensuel'], 2));
-                    $demande->set('loyer_mensuel_dyn_ht', round($values['loyer_dyn_mensuel'], 2));
-                    $demande->set('loyer_mensuel_suppl_ht', round($values['loyer_dyn_suppl_mensuel'], 2));
-
-                    $up_warnings = array();
-                    $up_errors = $demande->update($up_warnings, true);
-
-                    if (count($up_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des données de la demande de location');
-                    }
-                }
-            }
-        }
+        $errors = $this->setSelected($warnings);
 
         return array(
             'errors'   => $errors,
@@ -663,6 +679,14 @@ class BF_DemandeRefinanceur extends BimpObject
                     case self::STATUS_ACCEPTEE_CONDS:
                         $this->addObjectLog('Demande acceptée sous conditions.' . ($conds ? ' <br/><b>Conditions : </b>' . $conds : ''));
                         break;
+                }
+            }
+
+            if ((int) BimpTools::getPostFieldValue('demande_selected', 0)) {
+                $select_errors = $this->setSelected();
+
+                if (!empty($select_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($select_errors, 'Echec de la sélection de ce refinancement');
                 }
             }
         }

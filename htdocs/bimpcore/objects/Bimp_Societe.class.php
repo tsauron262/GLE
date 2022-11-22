@@ -1617,7 +1617,7 @@ class Bimp_Societe extends BimpDolObject
     {
         $fk_fj = (int) $this->getData('fk_forme_juridique');
         if ($fk_fj) {
-            $status = BimpCache::getJuridicalstatusArray((int) $this->getData('fk_pays'));
+            $status = BimpCache::getJuridicalstatusArray((int) $this->getData('fk_pays'), 'rowid');
             if (isset($status[$fk_fj])) {
                 return $status[$fk_fj];
             }

@@ -903,6 +903,7 @@ class BF_Demande extends BimpObject
             // Génération contrat: 
             case 'client_name':
             case 'client_is_company':
+            case 'client_forme_juridique':
             case 'client_type_entrepise':
             case 'client_capital':
             case 'client_siren':
@@ -917,30 +918,37 @@ class BF_Demande extends BimpObject
                         switch ($field_name) {
                             case 'client_name':
                                 return BimpTools::getArrayValueFromPath($client_data, 'nom', 0);
-                                
+
                             case 'client_is_company':
                                 return (int) BimpTools::getArrayValueFromPath($client_data, 'is_company', 0);
 
                             case 'client_forme_juridique':
-                                return BimpTools::getArrayValueFromPath($client_data, 'forme_juridique', 0);
+                                return BimpTools::getArrayValueFromPath($client_data, 'forme_juridique', '');
 
                             case 'client_capital':
-                                return BimpTools::getArrayValueFromPath($client_data, 'capital', 0);
+                                return str_replace('&euro;', '€', BimpTools::getArrayValueFromPath($client_data, 'capital', 0));
 
                             case 'client_siren':
                                 return BimpTools::getArrayValueFromPath($client_data, 'siren', 0);
 
                             case 'client_adress':
                                 return BimpTools::replaceBr($source->getClientFullAddress(0, 0));
-                                
+
                             case 'client_representant':
+                                return $source->getSignataireName();
+
                             case 'client_repr_qualite':
+                                return BimpTools::getArrayValueFromPath($client_data, 'signataire/fonction', '');
+
                             case 'client_sites':
+                                return BimpTools::replaceBr($source->getAdressesLivraisons());
                         }
                     }
                 } else {
                     switch ($field_name) {
+                        case 'client_name':
                         case 'client_is_company':
+                        case 'client_forme_juridique':
                         case 'client_type_entrepise':
                         case 'client_capital':
                         case 'client_siren':

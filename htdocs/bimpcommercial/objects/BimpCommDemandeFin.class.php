@@ -319,13 +319,29 @@ class BimpCommDemandeFin extends BimpObject
 
     public function getInputValue($input_name)
     {
+        if ($this->field_exists($input_name) && $this->isLoaded()) {
+            return $this->getData($input_name);
+        }
+
         switch ($input_name) {
             case 'target':
                 return static::$def_target;
 
             case 'id_contact_suivi':
+                return $this->getDefaultIdContact('suivi');
+
             case 'id_contact_signature':
-                return $this->getDefaultIdContact();
+                return $this->getDefaultIdContact('signature');
+
+            case 'fonction_signataire':
+                $id_contact = (int) BimpTools::getPostFieldValue('id_contact_signature', 0);
+                if ($id_contact) {
+                    return $this->db->getValue('socpeople', 'poste', 'rowid = ' . (int) $id_contact);
+                }
+                return '';
+
+            case 'contacts_livraisons':
+                return $this->getDefaultIdContact('livraison', true);
 
             case 'duration':
             case 'periodicity':
@@ -343,7 +359,7 @@ class BimpCommDemandeFin extends BimpObject
         return null;
     }
 
-    public function getDefaultIdContact()
+    public function getDefaultIdContact($type = 'suivi', $all = false)
     {
         $origine = null;
 
@@ -358,9 +374,12 @@ class BimpCommDemandeFin extends BimpObject
             $origine = $this->getParentInstance();
         }
 
-
         if (BimpObject::objectLoaded($origine)) {
-            return $origine->getDefaultIdContactForDF();
+            return $origine->getDefaultIdContactForDF($type, $all);
+        }
+
+        if ($all) {
+            return array();
         }
 
         return 0;
@@ -578,9 +597,9 @@ class BimpCommDemandeFin extends BimpObject
                     if (isset($data['montants']['loyer_mensuel_dyn_ht'])) {
                         $content .= '<tr>';
                         $content .= '<th>Formule dynamique</th>';
-                        $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht']) .'</b>';
+                        $content .= '<td><b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_dyn_ht']) . '</b>';
                         if (isset($data['montants']['loyer_mensuel_suppl_ht'])) {
-                            $content .= '<br/>Puis : <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht']).'</b>';
+                            $content .= '<br/>Puis : <b>' . BimpTools::displayMoneyValue($data['montants']['loyer_mensuel_suppl_ht']) . '</b>';
                         }
                         $content .= '</td>';
                         if ($periodicity > 1) {
@@ -841,9 +860,13 @@ class BimpCommDemandeFin extends BimpObject
             $api = $this->getExternalApi($errors);
 
             if (!count($errors)) {
+                $is_company = 0;
+
                 $client = $origine->getChildObject('client');
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
+                } else {
+                    $is_company = (int) $client->isCompany();
                 }
 
                 $contact_suivi = null;
@@ -854,18 +877,45 @@ class BimpCommDemandeFin extends BimpObject
                     if (!BimpObject::objectLoaded($contact_suivi)) {
                         $errors[] = 'Le contact de suivi sélectionné n\'existe plus';
                     }
+                } elseif ($is_company) {
+                    $errors[] = 'Client pro : sélection du contact destinataire de l\'offre de location obligatoire';
+                } elseif (BimpObject::objectLoaded($client) && !$client->getData('email')) {
+                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
                 }
 
-//                $nom_signataire = BimpTools::getArrayValueFromPath($data, 'nom_signataire', '', $errors, 1, 'Nom signataire absent');
-//                $prenom_signataire = BimpTools::getArrayValueFromPath($data, 'prenom_signataire', '', $errors, 1, 'Prénom signataire absent');
-//                $fonction_signataire = BimpTools::getArrayValueFromPath($data, 'fonction_signataire', '');
-//                if ($client->isCompany() && !$fonction_signataire) {
-//                    $errors[] = 'Fonction signataire obligatoire pour les clients pros';
-//                }
+                $contact_signature = null;
+                $id_contact_signature = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
+                if ($id_contact_signature) {
+                    $contact_signature = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact_signature);
+
+                    if (!BimpObject::objectLoaded($contact_signature)) {
+                        $errors[] = 'Le contact signataire sélectionné n\'existe plus';
+                    }
+                } elseif ($is_company) {
+                    $errors[] = 'Client pro: sélection du contact signataire obligatoire';
+                } elseif ($id_contact_suivi && BimpObject::objectLoaded($client) && !$client->getData('email')) {
+                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
+                }
 
                 $commercial = $origine->getCommercial();
                 if (!BimpObject::objectLoaded($commercial)) {
                     $errors[] = 'Commercial absent';
+                }
+
+                $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', $contact_signature->getData('poste'));
+
+                if (!$fonction_signataire && $is_company) {
+                    $errors[] = 'Client pro: la fonction du contact signataire doit obligatoirement être renseignée';
+                }
+
+                $contacts_livraisons = array();
+                foreach (BimpTools::getArrayValueFromPath($data, 'contacts_livraisons', array()) as $id_contact_liv) {
+                    $contact_liv = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact_liv);
+                    if (BimpObject::objectLoaded($contact_liv)) {
+                        $contacts_livraisons[] = $id_contact_liv;
+                    } else {
+                        $errors[] = 'Le contact de livraison #' . $id_contact_liv . ' n\'existe plus';
+                    }
                 }
 
                 if (!count($errors)) {
@@ -893,19 +943,15 @@ class BimpCommDemandeFin extends BimpObject
                             'siret'           => $client->getData('siret'),
                             'siren'           => $client->getData('siren'),
                             'forme_juridique' => $client->displayData('fk_forme_juridique', 'default', 0, 1),
-                            'extra_data'      => array(
-                                'alias'     => array('label' => 'Alias', 'value' => $client->getData('name_alias')),
-                                'type_ent'  => array('label' => 'Type', 'value' => $client->displayData('fk_typent', 'default', false, true)),
-                                'tva_assuj' => array('label' => 'Assujetti à la TVA', 'value' => $client->displayData('tva_assuj', 'default', false, true)),
-                                'tva_intra' => array('label' => 'N° TVA', 'value' => $client->getData('tva_intra'))
-                            ),
+                            'capital'         => $client->displayData('capital', 'default', 0, 1),
+                            'extra_data'      => array(),
                             'address'         => array(),
                             'contact'         => array(),
-//                            'signataire'      => array(
-//                                'nom'      => $nom_signataire,
-//                                'prenom'   => $prenom_signataire,
-//                                'fonction' => $fonction_signataire
-//                            ),
+                            'signataire'      => array(
+                                'nom'      => $contact_signature->getData('lastname'),
+                                'prenom'   => $contact_signature->getData('firstname'),
+                                'fonction' => $fonction_signataire
+                            ),
                             'livraisons'      => array()
                         ),
                         'commercial' => array(
@@ -916,19 +962,28 @@ class BimpCommDemandeFin extends BimpObject
                         )
                     );
 
+                    if ($is_company) {
+                        $demande_data['client']['extra_data'] = array(
+                            'alias'     => array('label' => 'Alias', 'value' => $client->getData('name_alias')),
+                            'type_ent'  => array('label' => 'Type entreprise', 'value' => $client->displayData('fk_typent', 'default', false, true)),
+                            'tva_assuj' => array('label' => 'Assujetti à la TVA', 'value' => $client->displayData('tva_assuj', 'default', false, true)),
+                            'tva_intra' => array('label' => 'N° TVA', 'value' => $client->getData('tva_intra'))
+                        );
+                    }
+
                     if ($client->getData('address') && $client->getData('zip') && $client->getData('town')) {
                         $demande_data['client']['address'] = array(
                             'address' => $client->getData('address'),
                             'zip'     => $client->getData('zip'),
                             'town'    => $client->getData('town'),
-                            'pays'    => $client->displayData('pays', 'default', 0, 1)
+                            'pays'    => $client->displayData('fk_pays', 'default', 0, 1)
                         );
                     } elseif (BimpObject::objectLoaded($contact_suivi)) {
                         $demande_data['client']['address'] = array(
                             'address' => $contact_suivi->getData('address'),
                             'zip'     => $contact_suivi->getData('zip'),
                             'town'    => $contact_suivi->getData('town'),
-                            'pays'    => $contact_suivi->displayData('pays', 'default', 0, 1)
+                            'pays'    => $contact_suivi->displayData('fk_pays', 'default', 0, 1)
                         );
                     }
 
@@ -947,14 +1002,14 @@ class BimpCommDemandeFin extends BimpObject
                         );
                     }
 
-                    foreach (BimpTools::getArrayValueFromPath($data, 'contacts_livraison', array()) as $id_contact_liv) {
+                    foreach ($contacts_livraisons as $id_contact_liv) {
                         $contact_liv = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact_liv);
                         if (BimpObject::objectLoaded($contact_liv)) {
                             $demande_data['client']['livraisons'][] = array(
                                 'address' => $contact_liv->getData('address'),
                                 'zip'     => $contact_liv->getData('zip'),
                                 'town'    => $contact_liv->getData('town'),
-                                'pays'    => $contact_liv->displayData('pays', 'default', 0, 1),
+                                'pays'    => $contact_liv->displayData('fk_pays', 'default', 0, 1),
                                 'email'   => $contact_liv->getData('email'),
                                 'tel'     => $contact_liv->getData('phone'),
                                 'mobile'  => $contact_liv->getData('phone_mobile')
@@ -1019,50 +1074,59 @@ class BimpCommDemandeFin extends BimpObject
                         }
                     }
 
-                    $req_errors = array();
-                    $result = $api->addDemandeFinancement($type_origine, $demande_data, $req_errors, $warnings);
+                    if (!count($errors)) {
+//                        echo '<pre>';
+//                        print_r($demande_data);
+//                        exit;
 
-                    if (isset($result['id_demande']) && (int) $result['id_demande']) {
-                        $origine->addObjectLog('Création de la demande de location sur ' . $this->displayTarget() . ' effectuée avec succès');
+                        $req_errors = array();
+                        $result = $api->addDemandeFinancement($type_origine, $demande_data, $req_errors, $warnings);
 
-                        $df_data = array(
-                            'obj_module' => $origine->module,
-                            'obj_name'   => $origine->object_name,
-                            'id_obj'     => $origine->id,
-                            'id_ext_df'  => (int) $result['id_demande'],
-                            'ref_ext_df' => $result['ref_demande'],
-                            'status'     => self::DOC_STATUS_ATTENTE
-                        );
+                        if (isset($result['id_demande']) && (int) $result['id_demande']) {
+                            $origine->addObjectLog('Création de la demande de location sur ' . $this->displayTarget() . ' effectuée avec succès');
 
-                        $this->validateArray($df_data);
+                            $df_data = array(
+                                'obj_module'           => $origine->module,
+                                'obj_name'             => $origine->object_name,
+                                'id_obj'               => $origine->id,
+                                'id_ext_df'            => (int) $result['id_demande'],
+                                'ref_ext_df'           => $result['ref_demande'],
+                                'status'               => self::DOC_STATUS_ATTENTE,
+                                'id_contact_suivi'     => $id_contact_suivi,
+                                'id_contact_signature' => $id_contact_signature,
+                                'contacts_livraisons'  => $contacts_livraisons
+                            );
 
-                        $create_errors = $this->create($warnings, true);
+                            $this->validateArray($df_data);
 
-                        if (count($create_errors)) {
-                            $msg = 'Création de la demande de location sur ' . $this->displayTarget() . ' ok';
-                            $msg .= ' mais échec de l\'enregistrement des données au niveau local.<br/>';
-                            $msg .= 'L\'équipe de développement est prévenue et va procéder à une correction manuelle';
-                            $warnings[] = BimpTools::getMsgFromArray($create_errors, $msg);
+                            $create_errors = $this->create($warnings, true);
 
-                            BimpCore::addlog('Echec création DF locale suite à DF ' . $this->displayTarget() . ' - CORRECTION MANUELLE NECESSAIRE', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $origine, array(
-                                'Données' => $df_data,
-                                'Erreurs' => $errors
-                                    ), true);
-                        } else {
-                            $up_errors = $origine->updateField('id_demande_fin', $this->id);
-                            if (count($up_errors)) {
-                                BimpCore::addlog('Echec enregistrement ID DF locale suite à DF ' . $this->displayTarget() . ' - CORRECTION MANUELLE NECESSAIRE', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $origine, array(
-                                    'ID'      => $this->id,
+                            if (count($create_errors)) {
+                                $msg = 'Création de la demande de location sur ' . $this->displayTarget() . ' ok';
+                                $msg .= ' mais échec de l\'enregistrement des données au niveau local.<br/>';
+                                $msg .= 'L\'équipe de développement est prévenue et va procéder à une correction manuelle';
+                                $warnings[] = BimpTools::getMsgFromArray($create_errors, $msg);
+
+                                BimpCore::addlog('Echec création DF locale suite à DF ' . $this->displayTarget() . ' - CORRECTION MANUELLE NECESSAIRE', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $origine, array(
+                                    'Données' => $df_data,
                                     'Erreurs' => $errors
                                         ), true);
+                            } else {
+                                $up_errors = $origine->updateField('id_demande_fin', $this->id);
+                                if (count($up_errors)) {
+                                    BimpCore::addlog('Echec enregistrement ID DF locale suite à DF ' . $this->displayTarget() . ' - CORRECTION MANUELLE NECESSAIRE', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $origine, array(
+                                        'ID'      => $this->id,
+                                        'Erreurs' => $errors
+                                            ), true);
+                                }
                             }
+                        } elseif (count($req_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la création de la demande de location sur ' . $this->displayTarget());
+                            $origine->addObjectLog(BimpTools::getMsgFromArray($req_errors, 'Echec de la création de la demande de location sur LDLC PRO LEASE'));
+                        } else {
+                            $errors[] = 'Echec de la requête (Aucune réponse reçue)';
+                            $origine->addObjectLog('Echec de la création de la demande de location sur ' . $this->displayTarget() . ' (Aucune réponse reçue suite à la requête)');
                         }
-                    } elseif (count($req_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la création de la demande de location sur ' . $this->displayTarget());
-                        $origine->addObjectLog(BimpTools::getMsgFromArray($req_errors, 'Echec de la création de la demande de location sur LDLC PRO LEASE'));
-                    } else {
-                        $errors[] = 'Echec de la requête (Aucune réponse reçue)';
-                        $origine->addObjectLog('Echec de la création de la demande de location sur ' . $this->displayTarget() . ' (Aucune réponse reçue suite à la requête)');
                     }
                 }
             }

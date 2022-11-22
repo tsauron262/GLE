@@ -23,7 +23,8 @@ sections:
     - type: nav_tabs
       nav_tabs: 
           - id: card
-            title: Fiche
+            title: Infos
+            icon: fas_info-circle
             struct: 
                 type: view
                 view: 
@@ -32,6 +33,7 @@ sections:
                     object: demande
           - id: sources
             title: Sources
+            icon: fas_hand-holding-medical
             show: 
                 field_value: 
                     object: demande
@@ -44,6 +46,7 @@ sections:
                         object: demande
           - id: elements
             title: Elements financés
+            icon: fas_list
             struct: 
                 type: rows
                 rows: 
@@ -79,6 +82,7 @@ sections:
                               
           - id: refinanceurs
             title: Demandes refinanceurs
+            icon: fas_university
             show: 
                 callback: 
                     method: showDemandesRefinanceurs
@@ -95,6 +99,7 @@ sections:
                               
           - id: files
             title: Fichiers joints
+            icon: fas_folder-open
             struct:
                 type: list
                 list: 

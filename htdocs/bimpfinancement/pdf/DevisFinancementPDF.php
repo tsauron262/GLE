@@ -139,7 +139,8 @@ class DevisFinancementPDF extends DocFinancementPDF
             $html .= 'de dernière génération pour bénéficier des progrès technologiques, ou de prolonger l\'exploitation ';
             $html .= 'de la configuration en profitant de loyers réduits. Dans le 1er cas, LDLC.PRO LEASE se chargera de ';
             $html .= 'commercialiser les configurations auprès d\'un second utilisateur. <br/><br/>';
-            $html .= 'Dans les 2 cas, la location permet d’afficher une meilleure présentation de votre bilan, en conservant votre ???';
+            $html .= 'Dans les 2 cas, la location permet d’afficher une meilleure présentation de votre bilan, en conservant ';
+            $html .= 'votre capacité d\'endettement, en préservant votre trésorerie et en diversifiant vos sources de financement.';
             $html .= '</li>';
             $html .= '</ul>';
         }

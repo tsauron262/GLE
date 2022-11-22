@@ -2923,7 +2923,7 @@ class BimpCache
             ));
             $sql .= BimpTools::getSqlWhere($filters);
             $sql .= BimpTools::getSqlOrderBy('c.code', 'asc');
-
+            
             $rows = self::getBdb()->executeS($sql, 'array');
 
             if (is_array($rows)) {

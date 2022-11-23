@@ -621,13 +621,13 @@ class BDS_RgpdProcess extends BDSProcess
             );
 
             if ((int) $this->getOption('null_only')) {
-//                $filters['date_last_activity'] = 'IS_NULL';
-                $filters['date_last_activity'] = array(
-                    'or_field' => array(
-                        'IS_NULL',
-                        '0000-00-00'
-                    )
-                );
+                $filters['date_last_activity'] = 'IS_NULL';
+//                $filters['date_last_activity'] = array(
+//                    'or_field' => array(
+//                        'IS_NULL',
+//                        '0000-00-00'
+//                    )
+//                );
             }
 
             $n = ((int) $this->getOption('test_one', 0) ? 1 : 100);

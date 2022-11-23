@@ -157,7 +157,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function isDeletable($force_delete = false, &$errors = [])
     {
-        if ($this->isOldFi()) {
+        if (!$force_delete && $this->isOldFi()) {
             $errors[] = 'Ancienne version des FI';
             return 0;
         }

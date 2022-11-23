@@ -621,13 +621,13 @@ class BDS_RgpdProcess extends BDSProcess
             );
 
             if ((int) $this->getOption('null_only')) {
-                $filters['date_last_activity'] = 'IS_NULL';
-//                $filters['date_last_activity'] = array(
-//                    'or_field' => array(
-//                        'IS_NULL',
-//                        '0000-00-00'
-//                    )
-//                );
+//                $filters['date_last_activity'] = 'IS_NULL';
+                $filters['date_last_activity'] = array(
+                    'or_field' => array(
+                        'IS_NULL',
+                        '0000-00-00'
+                    )
+                );
             }
 
             $n = ((int) $this->getOption('test_one', 0) ? 1 : 100);
@@ -965,7 +965,7 @@ class BDS_RgpdProcess extends BDSProcess
 
     public function saveFilesDates(&$errors = array())
     {
-        if ((int) $this->getOption('delete_files', 0)) {
+        if (!(int) $this->getOption('delete_files', 0)) {
             return;
         }
 
@@ -1435,6 +1435,20 @@ class BDS_RgpdProcess extends BDSProcess
 
             if (BimpObject::objectLoaded($opt)) {
                 $options['process_tickets'] = (int) $opt->id;
+            }
+            
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Traiter les Fiche Intervention',
+                        'name'          => 'process_fi',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => '1',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options['process_fi'] = (int) $opt->id;
             }
 
             $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(

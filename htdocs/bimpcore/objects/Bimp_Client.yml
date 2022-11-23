@@ -419,6 +419,13 @@ cards:
             code_compta_fournisseur: unset
             outstanding_limit: 
                 field: outstanding_limit
+            commercial: 
+                label: Commercial
+                value: 
+                    callback: 
+                        method: displayCommerciaux
+                        params: 
+                            - 0
 
 searches: 
     default:

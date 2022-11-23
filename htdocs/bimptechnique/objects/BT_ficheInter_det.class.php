@@ -207,6 +207,7 @@ class BT_ficheInter_det extends BimpDolObject
 
         $types = self::$types;
         unset($types[self::TYPE_INTERNE]);
+        unset($types[self::TYPE_PLUS]);
         
         if($fi->getData('fk_statut') < 1){
             unset($types[self::TYPE_OFFERT]);

@@ -329,10 +329,16 @@ class BF_DemandeRefinanceur extends BimpObject
                 case 'rate':
                     if (!$this->isLoaded() || !(float) $this->getData('rate') || ((int) $this->getData('id_refinanceur') !== (int) $this->getInitData('id_refinanceur'))) {
                         $demande = $this->getParentInstance();
-                        $refin = $this->getChildObject('refinanceur');
 
-                        if (BimpObject::objectLoaded($refin) && BimpObject::objectLoaded($demande)) {
-                            return $refin->getTaux($demande->getTotalDemandeHT());
+                        if ($demande->getData('def_tx_cession') == 'reel') {
+                            $refin = $this->getChildObject('refinanceur');
+
+                            if (BimpObject::objectLoaded($refin) && BimpObject::objectLoaded($demande)) {
+                                return $refin->getTaux($demande->getTotalDemandeHT());
+                            }
+                        } else {
+                            BimpObject::loadClass('bimpfinancement', 'BF_Refinanceur');
+                            return BF_Refinanceur::getTauxMoyen($demande->getTotalDemandeHT());
                         }
                     }
                     return (float) $this->getData('rate');

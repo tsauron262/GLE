@@ -22,14 +22,20 @@ class InterfaceClientController extends BimpPublicController
         if (BimpObject::objectLoaded($userClient)) {
             $base_url = BimpObject::getPublicBaseUrl();
             $this->sideTabs = array(
-                'home'     => array('url' => $base_url . 'tab=home', 'label' => 'Accueil', 'icon' => 'pe_home'),
-                'infos'    => array('url' => $base_url . 'tab=infos', 'label' => 'Mes informations', 'icon' => 'pe_id'),
-                'contrats' => array('url' => $base_url . 'tab=contrats', 'label' => 'Mes contrats', 'icon' => 'pe_news-paper'),
-                'contrats' => array('url' => $base_url . 'tab=signatures', 'label' => 'Mes signatures', 'icon' => 'pe_pen'),
-                'factures' => array('url' => $base_url . 'tab=factures', 'label' => 'Mes factures', 'icon' => 'pe_file'),
-                'tickets'  => array('url' => $base_url . 'tab=tickets', 'label' => 'Support téléphonique', 'icon' => 'pe_headphones'),
-                'sav'      => array('url' => $base_url . 'tab=sav', 'label' => 'SAV - Réparations', 'icon' => 'pe_tools')
+                'home'       => array('url' => $base_url . 'tab=home', 'label' => 'Accueil', 'icon' => 'pe_home'),
+                'infos'      => array('url' => $base_url . 'tab=infos', 'label' => 'Mes informations', 'icon' => 'pe_id'),
+                'contrats'   => array('url' => $base_url . 'tab=contrats', 'label' => 'Mes contrats', 'icon' => 'pe_news-paper'),
+                'signatures' => array('url' => $base_url . 'tab=signatures', 'label' => 'Mes signatures', 'icon' => 'pe_pen'),
+                'factures'   => array('url' => $base_url . 'tab=factures', 'label' => 'Mes factures', 'icon' => 'pe_file')
             );
+
+            if ((int) BimpCore::getConf('use_tickets', null, 'bimpsupport')) {
+                $this->sideTabs['tickets'] = array('url' => $base_url . 'tab=tickets', 'label' => 'Support téléphonique', 'icon' => 'pe_headphones');
+            }
+
+            if ((int) BimpCore::getConf('use_sav', null, 'bimpsupport')) {
+                $this->sideTabs['sav'] = array('url' => $base_url . 'tab=sav', 'label' => 'SAV - Réparations', 'icon' => 'pe_tools');
+            }
 
             if ($userClient->isAdmin()) {
                 $this->sideTabs['users'] = array('url' => $base_url . 'tab=users', 'label' => 'Utilisateurs', 'icon' => 'pe_users');
@@ -108,7 +114,7 @@ class InterfaceClientController extends BimpPublicController
         $html .= '<ul class="nav navbar-nav navbar-right">';
         if (BimpObject::objectLoaded($userClient)) {
             $html .= '<li><a href="">' . $langs->trans('loggedAs') . ' : <span class="user_login" style="color: #' . BimpCore::getParam('interface_client/primary', '000000') . ';">' . $userClient->getData('email') . '</span></a></li>';
-            $html .= '<li><a href="'.BimpObject::getPublicBaseUrl().'bic_logout=1">' . BimpRender::renderIcon('pe_power', 'iconLeft') . '<span class="icon">' . $langs->trans('deconnexion') . '</span></a></li>';
+            $html .= '<li><a href="' . BimpObject::getPublicBaseUrl() . 'bic_logout=1">' . BimpRender::renderIcon('pe_power', 'iconLeft') . '<span class="icon">' . $langs->trans('deconnexion') . '</span></a></li>';
         }
         $html .= '</ul>';
         $html .= '</div>';
@@ -158,7 +164,7 @@ class InterfaceClientController extends BimpPublicController
         if (!BimpObject::objectLoaded($userClient)) {
             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
         } else {
-            
+
             if ((int) BimpCore::getConf('sav_public_reservations', 0, 'bimpsupport')) {
                 $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
                 $html .= '<span class="btn btn-default" onclick="window.location = \'' . BimpObject::getPublicBaseUrl() . 'fc=savForm\'">';
@@ -166,7 +172,7 @@ class InterfaceClientController extends BimpPublicController
                 $html .= '</span>';
                 $html .= '</div>';
             }
-            
+
             // Signatures en attentes:
             $signatures = BimpCache::getBimpObjectObjects('bimpcore', 'BimpSignature', array(
                         'id_client'  => (int) $userClient->getData('id_client'),
@@ -229,170 +235,174 @@ class InterfaceClientController extends BimpPublicController
             $html .= '</div>';
 
             // Tickets support: 
-            $html .= '<div class="row" style="margin-bottom: 30px">';
-            $html .= '<div class="col-lg-12">';
-            $html .= '<h3>' . BimpRender::renderIcon('pe_headphones', 'iconLeft') . 'Mes tickets de support téléphonique en cours</h3>';
+            if ((int) BimpCore::getConf('use_tickets', null, 'bimpsupport')) {
+                $html .= '<div class="row" style="margin-bottom: 30px">';
+                $html .= '<div class="col-lg-12">';
+                $html .= '<h3>' . BimpRender::renderIcon('pe_headphones', 'iconLeft') . 'Mes tickets de support téléphonique en cours</h3>';
 
-            $filters = array(
-                'id_client' => (int) $userClient->getData('id_client'),
-                'status'    => array(
-                    'operator' => '<',
-                    'value'    => 999
-                )
-            );
-
-            if (!$userClient->isAdmin()) {
-                $filters['id_user_client'] = $userClient->id;
-            }
-
-            $tickets = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_Ticket', $filters, 'date_create', 'desc');
-
-            if (empty($tickets)) {
-                $html .= BimpRender::renderAlerts('Vous n\'avez aucun ticket de support téléphonique en cours', 'info');
-            }
-
-            $contact = null;
-
-            if (BimpObject::objectLoaded($userClient) && (int) $userClient->getData('id_contact')) {
-                $contact = $userClient->getChildObject('contact');
-            }
-
-            $ticket = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
-
-            if ($ticket->can('create')) {
-                $onclick = $ticket->getJsLoadModalForm('public_create', 'Nouveau ticket de support téléphonique', array(
-                    'fields' => array(
-                        'id_client'        => (int) $userClient->getData('id_client'),
-                        'id_user_client'   => (BimpObject::objectLoaded($userClient) ? (int) $userClient->id : 0),
-                        'contact_in_soc'   => (BimpObject::objectLoaded($contact) ? $contact->getName() : ''),
-                        'adresse_envois'   => (BimpObject::objectLoaded($contact) ? BimpTools::replaceBr($contact->displayFullAddress()) : ''),
-                        'email_bon_retour' => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : '')
+                $filters = array(
+                    'id_client' => (int) $userClient->getData('id_client'),
+                    'status'    => array(
+                        'operator' => '<',
+                        'value'    => 999
                     )
-                ));
-
-                $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau ticket';
-                $html .= '</span>';
-                $html .= '</div>';
-            }
-
-            if (!empty($tickets)) {
-                $headers = array(
-                    'ref'    => 'Ref.',
-                    'datec'  => 'Créé le',
-                    'user'   => 'Demandeur',
-                    'status' => 'Statut',
-                    'sujet'  => 'Description',
-                    'tools'  => array('label' => '', 'col_style' => 'text-align: right')
                 );
 
-                $rows = array();
-
-                foreach ($tickets as $ticket) {
-                    $url = $ticket->getPublicUrl();
-                    $button = '';
-                    if ($url) {
-                        $button .= '<a class="btn btn-default" href="' . $url . '">';
-                        $button .= BimpRender::renderIcon('fas_eye', 'iconLeft') . 'Détail';
-                        $button .= '</a>';
-                    }
-                    $rows[] = array(
-                        'ref'    => $ticket->getData('ticket_number'),
-                        'datec'  => $ticket->displayData('date_create', 'default', false),
-                        'user'   => $ticket->displayData('id_user_client', 'nom_url', false),
-                        'status' => $ticket->displayData('status', 'default', false),
-                        'sujet'  => $ticket->displayData('sujet', 'default', false),
-                        'tools'  => $button
-                    );
+                if (!$userClient->isAdmin()) {
+                    $filters['id_user_client'] = $userClient->id;
                 }
 
-                $html .= BimpRender::renderBimpListTable($rows, $headers, array());
-            }
+                $tickets = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_Ticket', $filters, 'date_create', 'desc');
 
-            $html .= '</div>';
-            $html .= '</div>';
+                if (empty($tickets)) {
+                    $html .= BimpRender::renderAlerts('Vous n\'avez aucun ticket de support téléphonique en cours', 'info');
+                }
 
-            // SAV: 
-            $savs = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SAV', array(
-                        'id_client' => (int) $userClient->getData('id_client'),
-                        'status'    => array(
-                            'and' => array(
-                                array(
-                                    'operator' => '>',
-                                    'value'    => -2
-                                ),
-                                array(
-                                    'operator' => '<',
-                                    'value'    => 999
-                                )
-                            )
+                $contact = null;
+
+                if (BimpObject::objectLoaded($userClient) && (int) $userClient->getData('id_contact')) {
+                    $contact = $userClient->getChildObject('contact');
+                }
+
+                $ticket = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
+
+                if ($ticket->can('create')) {
+                    $onclick = $ticket->getJsLoadModalForm('public_create', 'Nouveau ticket de support téléphonique', array(
+                        'fields' => array(
+                            'id_client'        => (int) $userClient->getData('id_client'),
+                            'id_user_client'   => (BimpObject::objectLoaded($userClient) ? (int) $userClient->id : 0),
+                            'contact_in_soc'   => (BimpObject::objectLoaded($contact) ? $contact->getName() : ''),
+                            'adresse_envois'   => (BimpObject::objectLoaded($contact) ? BimpTools::replaceBr($contact->displayFullAddress()) : ''),
+                            'email_bon_retour' => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : '')
                         )
-                            ), 'date_create', 'desc');
+                    ));
 
-            $html .= '<div class="row" style="margin-bottom: 30px">';
-            $html .= '<div class="col-lg-12">';
-            $html .= '<h3>' . BimpRender::renderIcon('pe_tools', 'iconLeft') . 'Mes réparations en cours</h3>';
+                    $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau ticket';
+                    $html .= '</span>';
+                    $html .= '</div>';
+                }
 
-            if (empty($savs)) {
-                $html .= BimpRender::renderAlerts('Vous n\'avez aucune réparation en cours', 'info');
-            }
+                if (!empty($tickets)) {
+                    $headers = array(
+                        'ref'    => 'Ref.',
+                        'datec'  => 'Créé le',
+                        'user'   => 'Demandeur',
+                        'status' => 'Statut',
+                        'sujet'  => 'Description',
+                        'tools'  => array('label' => '', 'col_style' => 'text-align: right')
+                    );
 
-            if ((int) BimpCore::getConf('sav_public_reservations', 0, 'bimpsupport')) {
-                $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-                $html .= '<span class="btn btn-default" onclick="window.location = \'' . BimpObject::getPublicBaseUrl() . 'fc=savForm\'">';
-                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
-                $html .= '</span>';
-                $html .= '</div>';
-            }
+                    $rows = array();
 
-            if (!empty($savs)) {
-                $headers = array(
-                    'ref'    => 'Ref.',
-                    'datec'  => 'Créé le',
-                    'status' => 'Statut',
-                    'centre' => 'Centre de prise en charge',
-                    'user'   => 'Technicien',
-                    'eq'     => 'N° de série',
-                    'tools'  => array('label' => '', 'col_style' => 'text-align: right')
-                );
-
-                $rows = array();
-
-                foreach ($savs as $sav) {
-                    $button = '';
-                    if ($sav->can('edit') && $sav->getData('resgsx') && $sav->getData('status') == -1) {
-                        $url = BimpObject::getPublicBaseUrl() . 'fc=savForm&cancel_rdv=1&sav=' . $sav->id . '&r=' . $sav->getRef() . '&res=' . $sav->getData('resgsx');
-                        $button .= '<a class="btn btn-default" href="' . $url . '">';
-                        $button .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Annuler';
-                        $button .= '</a>';
-                    }
-
-                    if ($sav->can('view')) {
-                        $url = $sav->getPublicUrl();
+                    foreach ($tickets as $ticket) {
+                        $url = $ticket->getPublicUrl();
+                        $button = '';
                         if ($url) {
                             $button .= '<a class="btn btn-default" href="' . $url . '">';
                             $button .= BimpRender::renderIcon('fas_eye', 'iconLeft') . 'Détail';
                             $button .= '</a>';
                         }
+                        $rows[] = array(
+                            'ref'    => $ticket->getData('ticket_number'),
+                            'datec'  => $ticket->displayData('date_create', 'default', false),
+                            'user'   => $ticket->displayData('id_user_client', 'nom_url', false),
+                            'status' => $ticket->displayData('status', 'default', false),
+                            'sujet'  => $ticket->displayData('sujet', 'default', false),
+                            'tools'  => $button
+                        );
                     }
 
-                    $rows[] = array(
-                        'ref'    => $sav->getData('ref'),
-                        'datec'  => $sav->displayData('date_create', 'default', false),
-                        'status' => $sav->displayData('status', 'default', false),
-                        'centre' => $sav->displayData('code_centre', 'default', false),
-                        'user'   => $sav->displayData('id_user_tech', 'nom_url', false),
-                        'eq'     => $sav->displayData('id_equipment', 'nom_url', false),
-                        'tools'  => $button
-                    );
+                    $html .= BimpRender::renderBimpListTable($rows, $headers, array());
                 }
 
-                $html .= BimpRender::renderBimpListTable($rows, $headers, array());
+                $html .= '</div>';
+                $html .= '</div>';
             }
 
-            $html .= '</div>';
-            $html .= '</div>';
+            // SAV: 
+            if ((int) BimpCore::getConf('use_sav', null, 'bimpsupport')) {
+                $savs = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SAV', array(
+                            'id_client' => (int) $userClient->getData('id_client'),
+                            'status'    => array(
+                                'and' => array(
+                                    array(
+                                        'operator' => '>',
+                                        'value'    => -2
+                                    ),
+                                    array(
+                                        'operator' => '<',
+                                        'value'    => 999
+                                    )
+                                )
+                            )
+                                ), 'date_create', 'desc');
+
+                $html .= '<div class="row" style="margin-bottom: 30px">';
+                $html .= '<div class="col-lg-12">';
+                $html .= '<h3>' . BimpRender::renderIcon('pe_tools', 'iconLeft') . 'Mes réparations en cours</h3>';
+
+                if (empty($savs)) {
+                    $html .= BimpRender::renderAlerts('Vous n\'avez aucune réparation en cours', 'info');
+                }
+
+                if ((int) BimpCore::getConf('sav_public_reservations', 0, 'bimpsupport')) {
+                    $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+                    $html .= '<span class="btn btn-default" onclick="window.location = \'' . BimpObject::getPublicBaseUrl() . 'fc=savForm\'">';
+                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
+                    $html .= '</span>';
+                    $html .= '</div>';
+                }
+
+                if (!empty($savs)) {
+                    $headers = array(
+                        'ref'    => 'Ref.',
+                        'datec'  => 'Créé le',
+                        'status' => 'Statut',
+                        'centre' => 'Centre de prise en charge',
+                        'user'   => 'Technicien',
+                        'eq'     => 'N° de série',
+                        'tools'  => array('label' => '', 'col_style' => 'text-align: right')
+                    );
+
+                    $rows = array();
+
+                    foreach ($savs as $sav) {
+                        $button = '';
+                        if ($sav->can('edit') && $sav->getData('resgsx') && $sav->getData('status') == -1) {
+                            $url = BimpObject::getPublicBaseUrl() . 'fc=savForm&cancel_rdv=1&sav=' . $sav->id . '&r=' . $sav->getRef() . '&res=' . $sav->getData('resgsx');
+                            $button .= '<a class="btn btn-default" href="' . $url . '">';
+                            $button .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Annuler';
+                            $button .= '</a>';
+                        }
+
+                        if ($sav->can('view')) {
+                            $url = $sav->getPublicUrl();
+                            if ($url) {
+                                $button .= '<a class="btn btn-default" href="' . $url . '">';
+                                $button .= BimpRender::renderIcon('fas_eye', 'iconLeft') . 'Détail';
+                                $button .= '</a>';
+                            }
+                        }
+
+                        $rows[] = array(
+                            'ref'    => $sav->getData('ref'),
+                            'datec'  => $sav->displayData('date_create', 'default', false),
+                            'status' => $sav->displayData('status', 'default', false),
+                            'centre' => $sav->displayData('code_centre', 'default', false),
+                            'user'   => $sav->displayData('id_user_tech', 'nom_url', false),
+                            'eq'     => $sav->displayData('id_equipment', 'nom_url', false),
+                            'tools'  => $button
+                        );
+                    }
+
+                    $html .= BimpRender::renderBimpListTable($rows, $headers, array());
+                }
+
+                $html .= '</div>';
+                $html .= '</div>';
+            }
         }
 
         return $html;
@@ -578,6 +588,9 @@ class InterfaceClientController extends BimpPublicController
 
     public function renderTabTickets()
     {
+        if (!(int) BimpCore::getConf('use_tickets', null, 'bimpsupport')) {
+            return BimpRender::renderAlerts('Le support téléphonique n\'est plus disponible sur cette espace');
+        }
         $html = '';
 
         global $userClient;
@@ -685,6 +698,10 @@ class InterfaceClientController extends BimpPublicController
     public function renderTabSav()
     {
         $html = '';
+
+        if (!(int) BimpCore::getConf('use_tickets', null, 'bimpsupport')) {
+            return BimpRender::renderAlerts('La gestion de vos dossier SAV n\'est plus disponible sur cette espace');
+        }
 
         global $userClient;
         $content = BimpTools::getValue('content', 'list');

@@ -468,7 +468,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     'fonction_y_offset' => 11,
                     'fonction_width'    => 30,
                     'date_x_offset'     => -32,
-                    'date_y_offset'     => 16,
+                    'date_y_offset'     => 16
                 );
             } else {
                 $html .= '<td style="text-align: right">Signature :<br/>Date :</td>';

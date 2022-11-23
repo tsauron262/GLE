@@ -3256,7 +3256,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
 
                     if (isset($mail) && $mail != "")
-                        mailSyn2("Status facturation", $mail, null, 'Bonjour le status facturation de votre commande ' . $this->getLink() . $infoClient . ' est  '.$this->displayData('invoice_status'));
+                        mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status'));
                 }
             }
 

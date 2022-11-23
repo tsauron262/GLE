@@ -6453,7 +6453,22 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function getNotes($withObject = true)
     {
-        return self::getObjectNotes($this, $withObject);
+        $list = self::getObjectNotes($this);
+
+        if ($withObject) {
+            $notes = array();
+
+            foreach ($list as $id_note) {
+                $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', $id_note);
+                if (BimpObject::objectLoaded($note)) {
+                    $notes[$id_note] = $note;
+                }
+            }
+
+            return $notes;
+        }
+
+        return $list;
     }
 
     public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false)

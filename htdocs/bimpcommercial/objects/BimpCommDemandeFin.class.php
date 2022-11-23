@@ -626,11 +626,23 @@ class BimpCommDemandeFin extends BimpObject
                         $content .= '<li>' . $log . '</li>';
                     }
                     $content .= '</ul>';
-
-                    $html .= BimpRender::renderPanel(BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Infos demande de location ' . $this->displayTarget(), $content, '', array(
-                                'type' => 'secondary'
-                    ));
                 }
+
+                if (isset($data['notes']) && !empty($data['notes'])) {
+                    $content .= '<br/><h4>' . BimpRender::renderIcon('fas_sticky-note', 'iconLeft') . 'Notes synchronisées</h4>';
+
+                    foreach ($data['notes'] as $note) {
+                        $content .= '<div style="margin: 12px 0;">';
+                        $content .= '<b>Le ' . $note['date'] . ' par ' . $note['author'] . ' : </b><br/>';
+                        $content .= '<div class="note_content">';
+                        $content .= $note['content'];
+                        $content .= '</div>';
+                        $content .= '</div>';
+                    }
+                }
+                $html .= BimpRender::renderPanel(BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Infos demande de location ' . $this->displayTarget(), $content, '', array(
+                            'type' => 'secondary'
+                ));
             }
         }
 
@@ -793,7 +805,7 @@ class BimpCommDemandeFin extends BimpObject
         return $errors;
     }
 
-    public function addParentNoteForCommercial($msg)
+    public function addParentNoteForCommercial($msg, $delete_on_view = 1)
     {
         $errors = array();
 
@@ -801,15 +813,29 @@ class BimpCommDemandeFin extends BimpObject
         if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpComm')) {
             $id_commercial = (int) $parent->getCommercialId();
             if ($id_commercial) {
-                $errors = $parent->addNote($msg, null, 0, 0, '', BimpNote::BN_AUTHOR_USER, BimpNote::BN_DEST_USER, 0, $id_commercial, 1);
+                $errors = $parent->addNote($msg, null, 0, 0, '', BimpNote::BN_AUTHOR_USER, BimpNote::BN_DEST_USER, 0, $id_commercial, $delete_on_view);
             } else {
                 $errors[] = 'Aucun commercial';
             }
         } else {
-            $errors[] = 'Pièce invalide';
+            $errors[] = 'Pièce d\'origine absente ou invalide';
         }
 
         return $errors;
+    }
+
+    public function onNewNoteFromTarget($note)
+    {
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent)) {
+            $msg = 'Nouvelle note reçue de la part de ' . $this->displayTarget() . ' pour la demande de location ' . $this->getData('ref_ext_df');
+            $msg .= '<br/><b>Message : ' . $note . '</b>';
+            $msg .= '<br/><br/>Rendez-vous dans l\'onglet "Demande de location" ' . $parent->getLabel('of_the') . ' pour voir toutes les notes synchronisées';
+            return $this->addParentNoteForCommercial($msg, 0);
+        }
+
+        return array('Pièce d\'origine absente');
     }
 
     // Actions: 

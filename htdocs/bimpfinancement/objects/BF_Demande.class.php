@@ -2900,6 +2900,27 @@ class BF_Demande extends BimpObject
         }
     }
 
+    public function afterCreateNote($note)
+    {
+        if ((int) $this->getData('id_main_source') && $note->getData('visibility') >= BimpNote::BN_PARTNERS) {
+            $errors = array();
+            $source = $this->getSource('main', $errors);
+
+            if (!count($errors)) {
+                $type_origine = $source->getData('type_origine');
+                $id_origine = (int) $source->getData('id_origine');
+
+                if ($type_origine && $id_origine) {
+                    $api = $this->getMainSourceAPI($errors);
+
+                    if (!count($errors)) {
+                        $api->newDemandeFinancementNote($this->id, $type_origine, $id_origine, $note->getData('content'));
+                    }
+                }
+            }
+        }
+    }
+
     // Gestion signatures : 
 
     public function createSignature($doc_type, $data, &$warnings = array())
@@ -3330,28 +3351,39 @@ class BF_Demande extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Soumission du refus auprès de ' . $this->displayData('ext_origine', 'default', false) . ' effectuée avec succès';
+        $success = 'Soumission du refus auprès de ' . $this->displaySourceName() . ' effectuée avec succès';
 
-        $id_ext_propal = (int) $this->getData('id_ext_propale');
+        $source = $this->getSource('main', $errors);
 
-        if (!$id_ext_propal) {
-            $errors[] = 'ID du devis externe absent';
-        } else {
-            $api = $this->getExtOrigineAPI($errors);
+        if (!count($errors)) {
+            $type_origine = $source->getData('type_origine');
+            $id_origine = (int) $source->getData('id_origine');
+
+            if (!$type_origine) {
+                $errors[] = 'Type de la pièce d\'origine absent';
+            }
+
+            if (!$id_origine) {
+                $errors[] = 'ID de la pièce d\'origine absent';
+            }
 
             if (!count($errors)) {
-                $req_errors = array();
-                $note = BimpTools::getArrayValueFromPath($data, 'note', '');
-                $api->setDemandeFinancementStatus($this->id, $id_ext_propal, 20, $note, $req_errors, $warnings);
+                $api = $this->getMainSourceAPI($errors);
 
-                if (count($req_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la requête');
-                } else {
-                    $up_errors = $this->updateField('closed', 1);
-                    if (count($up_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du statut "Fermé' . $this->e() . '"');
+                if (!count($errors)) {
+                    $req_errors = array();
+                    $note = BimpTools::getArrayValueFromPath($data, 'note', '');
+                    $api->setDemandeFinancementStatus($this->id, $type_origine, $id_origine, 20, $note, $req_errors, $warnings);
+
+                    if (count($req_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la requête');
                     } else {
-                        $this->addObjectLog('Refus définitif - Demande fermée' . ($note ? '<br/><b>Note : </b>' . $note : ''), 'CLOSED');
+                        $up_errors = $this->updateField('closed', 1);
+                        if (count($up_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du statut "Fermé' . $this->e() . '"');
+                        } else {
+                            $this->addObjectLog('Refus définitif - Demande fermée' . ($note ? '<br/><b>Note : </b>' . $note : ''), 'CLOSED');
+                        }
                     }
                 }
             }

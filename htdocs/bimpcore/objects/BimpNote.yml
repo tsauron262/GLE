@@ -110,9 +110,15 @@ fields:
             show_values: 2
         values:
             array: userGroups
+             
     auto:
         label: Note Auto
         type: bool
+        default_value: 0
+        
+    delete_on_view: 
+        label: Suppression après vue
+        type: boold
         default_value: 0
         
 forms: 

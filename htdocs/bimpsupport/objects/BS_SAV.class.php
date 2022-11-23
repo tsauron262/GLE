@@ -2833,7 +2833,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $errors[] = $error_msg . ' (Statut actuel invalide)';
                 } else {
                     if ($current_status === self::BS_SAV_ATT_PIECE) {
-                        $this->addNote('Pièce reçue le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+                        $this->addNote('Pièce reçue le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                         $msg_type = 'pieceOk';
                     }
                 }
@@ -4711,7 +4711,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $note .= "\n\n" . $data['infos'];
             }
 
-            $this->addNote($note, 4);
+            $this->addNote($note, BimpNote::BN_ALL);
         }
 
         return array(
@@ -4732,7 +4732,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             if (!count($errors)) {
                 global $user, $langs;
-                $this->addNote('Diagnostic commencé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+                $this->addNote('Diagnostic commencé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                 $this->updateField('id_user_tech', (int) $user->id, null, true);
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
@@ -4803,7 +4803,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $new_status = null;
 
             if ($this->allGarantie) { // Déterminé par $this->generatePropal()
-                $this->addNote('Devis garanti validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+                $this->addNote('Devis garanti validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                 // Si on vient de commander les pieces sous garentie (On ne change pas le statut)
                 if ((int) $this->getData('status') !== self::BS_SAV_ATT_PIECE) {
                     $new_status = self::BS_SAV_DEVIS_ACCEPTE;
@@ -4817,7 +4817,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
                 }
             } else {
-                $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+                $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                 $new_status = self::BS_SAV_ATT_CLIENT;
 
                 if ($propal->dol_object->cond_reglement_id == 20 && $propal->dol_object->mode_reglement_id != 2) {
@@ -4901,7 +4901,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!count($errors)) {
             global $user, $langs;
 
-            $this->addNote('Devis accepté le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+            $this->addNote('Devis accepté le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             $propal = $this->getChildObject('propal');
             $propal->dol_object->cloture($user, 2, "Auto via SAV");
 
@@ -4923,7 +4923,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         if (!count($errors)) {
             global $user, $langs;
-            $this->addNote('Devis refusé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+            $this->addNote('Devis refusé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             $propal = $this->getChildObject('propal');
             $propal->dol_object->cloture($user, 3, "Auto via SAV");
             $this->removeReservations();
@@ -4953,7 +4953,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!count($errors)) {
             global $user, $langs;
 
-            $this->addNote('Réparation en cours depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+            $this->addNote('Réparation en cours depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
         }
 
         return array(
@@ -5028,7 +5028,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $revision = new BimpRevisionPropal($propal->dol_object);
                     $new_id_propal = $revision->reviserPropal(array(null, null), true, self::$propal_model_pdf, $errors);
 
-                    $this->addNote('Devis fermé après refus par le client le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+                    $this->addNote('Devis fermé après refus par le client le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
 
                     if ($new_id_propal && !count($errors)) {
                         $client = $this->getChildObject('client');
@@ -5085,7 +5085,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if (!(string) $this->getData('resolution')) {
                         $errors[] = 'Le champ "résolution" doit être complété';
                     } else {
-                        $this->addNote('Réparation terminée le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+                        $this->addNote('Réparation terminée le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                         $propal->dol_object->cloture($user, 2, "Auto via SAV");
                         $msg_type = 'repOk';
 
@@ -5618,9 +5618,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         if (!count($errors)) {
             if (isset($data['restitute']) && (int) $data['restitute']) {
-                $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+                $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             } else {
-                $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+                $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             }
 
             $errors = $this->setNewStatus(self::BS_SAV_FERME);
@@ -5838,7 +5838,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!count($errors)) {
             global $user, $langs;
 
-            $this->addNote('Attente pièce depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+            $this->addNote('Attente pièce depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
 
             if (isset($data['send_msg']) && (int) $data['send_msg']) {
                 $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commOk'));
@@ -6112,7 +6112,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         if (!count($errors)) {
-            $this->addNote('Sav pris en charge par ' . $user->getFullName($langs), 4);
+            $this->addNote('Sav pris en charge par ' . $user->getFullName($langs), BimpNote::BN_ALL);
 
             // Création de la popale: 
             if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
@@ -6233,7 +6233,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         if (!count($errors)) {
             global $user, $langs;
-            $this->addNote('Rendez-vous annulé par ' . $user->getFullName($langs) . ' (Raison: ' . self::$rdv_cancel_reasons[BimpTools::getArrayValueFromPath($data, 'cancel_reason', 'CUSTOMER_CANCELLED')] . ')', 4);
+            $this->addNote('Rendez-vous annulé par ' . $user->getFullName($langs) . ' (Raison: ' . self::$rdv_cancel_reasons[BimpTools::getArrayValueFromPath($data, 'cancel_reason', 'CUSTOMER_CANCELLED')] . ')', BimpNote::BN_ALL);
 
             $signature = $this->getChildObject('signature_pc');
 
@@ -6747,7 +6747,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             'status' => BS_SAV::BS_SAV_RDV_EXPIRED
                                 ), 'id = ' . (int) $r['id']) > 0) {
                     $sav_instance->id = (int) $r['id'];
-                    $sav_instance->addNote('Rendez-vous annulé automatiquement le ' . date('d / m / Y à H:i'), 4);
+                    $sav_instance->addNote('Rendez-vous annulé automatiquement le ' . date('d / m / Y à H:i'), BimpNote::BN_ALL);
 
                     if ((string) $r['date_rdv']) {
                         $to = '';

@@ -3,6 +3,10 @@ categories:
         label: Valeurs par défaut
         
 params: 
+    new_external_demandes_notif_emails: 
+        label: Adresses e-mail pour la notification des nouvelles demandes de location externes
+        required: 1
+        
     use_frais_divers: 
         label: Activer les frais divers
         type: bool

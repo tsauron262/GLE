@@ -120,7 +120,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         $errors = BimpTools::merge_array($errors, $note->validateArray($tab));
         $errors = BimpTools::merge_array($errors, $note->create());
         
-//        $errors = BimpTools::merge_array($errors, $task->addNote($txt, 4, 0, 0, $src, 3));
+//        $errors = BimpTools::merge_array($errors, $task->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, 3));
     }
 
     if (count($errors) > 0) {

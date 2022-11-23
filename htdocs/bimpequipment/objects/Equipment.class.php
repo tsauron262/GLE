@@ -1442,7 +1442,7 @@ class Equipment extends BimpObject
     {
         if ($force == 1 and 0 < (int) $this->getData('id_package')) {
             $this->updateField('id_package', 0);
-            $this->addNote('Sortie du package pour déplacement automatique');
+            $this->addObjectLog('Sortie du package pour déplacement automatique');
             $stock_label .= ' - Sortie du package pour déplacement automatique';
         }
 

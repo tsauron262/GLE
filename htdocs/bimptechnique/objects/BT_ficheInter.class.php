@@ -146,6 +146,7 @@ class BT_ficheInter extends BimpDolObject
         if ($force_edit) {
             return 1;
         }
+        
         if ($this->getData('fk_statut') == self::STATUT_BROUILLON) {
             return 1;
         }

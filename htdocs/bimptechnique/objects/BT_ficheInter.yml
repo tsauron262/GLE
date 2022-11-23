@@ -529,6 +529,7 @@ forms:
             - field: tickets  
             
     forBilling:
+        force_edit: 1
         rows: 
             - field: ef_type
             

@@ -519,8 +519,8 @@ class ValidComm extends BimpObject
             return self::OBJ_COMMANDE;
         elseif(is_a($object, 'BContract_contrat'))
             return self::OBJ_CONTRAT;
-        elseif(is_a($object, 'Bimp_Facture'))
-            return self::OBJ_FACTURE;
+//        elseif(is_a($object, 'Bimp_Facture'))
+//            return self::OBJ_FACTURE;
 
         return -2;
     }

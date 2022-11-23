@@ -3,7 +3,6 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/BimpAPI.php';
 
 class DocusignAPI extends BimpAPI {
-
     // PW web (dev@bimp.fr): HLxmS57W3uz8
     
 // Auth fonction en prod:
@@ -303,8 +302,6 @@ class DocusignAPI extends BimpAPI {
 //       $comm = $params['comm'];
        
         $signers = array(
-            
-            // Client
             // Client
             array (
                 'email'       => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',

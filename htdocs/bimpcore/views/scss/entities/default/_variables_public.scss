@@ -22,3 +22,20 @@ $warning: $brand-warning;
 $danger: $brand-danger;
 $important: #963E96 !default;
 $selection: #5897FB !default;
+
+// En-têtes généraux: 
+$bimp_headers_color: $primary;
+$bimp_headers_bk_color: #E9EAED;
+
+// Listes: 
+$bimp_list_header_color: $primary;
+$bimp_list_header_bk_color: #E6E5E5;
+$bimp_list_header_border: 2px solid $primary;
+$bimp_list_header_icons_color: #333333;
+$bimp_list_header_icons_hover_color: $primary;
+$bimp_list_header_icons_hover_bk_color: transparent;
+
+// Panels: 
+$bimp_panel_padding: 8px;
+$bimp_panel_v_margin: 8px;
+$bimp_panel_h_margin: 8px;

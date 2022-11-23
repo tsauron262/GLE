@@ -1760,7 +1760,7 @@ class Bimp_Societe extends BimpDolObject
                     $html .= ($html ? '<br/>' : '') . $user->getLink() . ' ';
 
                     if ((int) $user->id !== $default_id_commercial) {
-                        if ($edit) {
+                        if ($edit && $with_button) {
                             $onclick = $this->getJsActionOnclick('removeCommercial', array(
                                 'id_commercial' => (int) $user->id
                                     ), array(

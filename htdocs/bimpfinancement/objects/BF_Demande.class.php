@@ -2653,6 +2653,62 @@ class BF_Demande extends BimpObject
         return $errors;
     }
 
+    public function onDocSignedFromSource($doc_type, $doc_content)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $file_name = $this->getSignatureDocFileName($doc_type, true);
+
+            if (!$file_name) {
+                $errors[] = 'Type de document invalide: ' . $doc_type;
+            } else {
+                $dir = $this->getFilesDir();
+
+                if ($dir && !is_dir($dir)) {
+                    $dir_err = BimpTools::makeDirectories($dir);
+                    if ($dir_err) {
+                        $errors[] = 'Echec de la création du dossier de destination du fichie signé';
+                    }
+                }
+
+                if (!count($errors)) {
+                    $file = $this->getFilesDir() . $file_name;
+
+                    if (!file_put_contents($file, base64_decode($doc_content))) {
+                        $errors[] = 'Echec de l\'enregistrement du fichier signé';
+                    } else {
+                        $field_name = $doc_type . '_status';
+                        if ($this->field_exists($field_name)) {
+                            $errors = $this->updateField($field_name, self::DOC_ACCEPTED);
+                        } else {
+                            $errors[] = 'Type de document signé invalide: "' . $doc_type . '"';
+                        }
+
+                        if (!count($errors)) {
+                            $this->addObjectLog(ucfirst($doc_type) . ' de location signé', strtoupper($doc_type) . '_SIGNE');
+                            $this->addNote(ucfirst($doc_type) . ' de location signé', null, 0, 0, '', BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, (int) $this->getData('id_user_resp'), 1);
+
+//                            $user_resp = $this->getChildObject('user_resp');
+//                            if (BimpObject::objectLoaded($user_resp)) {
+//                                $email = $user_resp->getData('email');
+//                                if ($email) {
+//                                    $doc_ref = $this->getSignatureDocRef($doc_type);
+//                                    $subject = ucfirst($doc_type) . ' de location ' . $doc_ref . ' signé par le client';
+//                                    $msg = 'Bonjour,<br/><br/>';
+//                                    $msg .= 'Le document signé est accessible sur la page de la demande de location ' . $this->getLink() . '<br/><br/>';
+//                                    mailSyn2($subject, $email, '', $msg);
+//                                }
+//                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     public function onDocRefused($doc_type, $note = '')
     {
         $errors = array();
@@ -2671,6 +2727,7 @@ class BF_Demande extends BimpObject
                 } else {
                     $msg = ucfirst($this->getDocTypeLabel($doc_type)) . ' refusé' . ($note ? '.<br/><b>Raisons : </b>' . $note : '');
                     $this->addObjectLog($msg, strtoupper($doc_type) . '_REFUSED');
+                    $this->addNote($msg, null, 0, 0, '', BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, (int) $this->getData('id_user_resp'), 1);
                 }
             }
         }
@@ -2710,6 +2767,7 @@ class BF_Demande extends BimpObject
                     $msg .= '<br/><b>Motif : </b>' . $note;
                 }
                 $this->addObjectLog($msg, 'CANCELLED_BY_SOURCE');
+                $this->addNote($msg, null, 0, 0, '', BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, (int) $this->getData('id_user_resp'), 1);
             }
         }
 
@@ -3017,61 +3075,6 @@ class BF_Demande extends BimpObject
     public function isSignatureReopenable($doc_type, &$errors = array())
     {
         return 0; // TODO
-    }
-
-    public function onDocSignedFromSource($doc_type, $doc_content)
-    {
-        $errors = array();
-
-        if ($this->isLoaded($errors)) {
-            $file_name = $this->getSignatureDocFileName($doc_type, true);
-
-            if (!$file_name) {
-                $errors[] = 'Type de document invalide: ' . $doc_type;
-            } else {
-                $dir = $this->getFilesDir();
-
-                if ($dir && !is_dir($dir)) {
-                    $dir_err = BimpTools::makeDirectories($dir);
-                    if ($dir_err) {
-                        $errors[] = 'Echec de la création du dossier de destination du fichie signé';
-                    }
-                }
-
-                if (!count($errors)) {
-                    $file = $this->getFilesDir() . $file_name;
-
-                    if (!file_put_contents($file, base64_decode($doc_content))) {
-                        $errors[] = 'Echec de l\'enregistrement du fichier signé';
-                    } else {
-                        $field_name = $doc_type . '_status';
-                        if ($this->field_exists($field_name)) {
-                            $errors = $this->updateField($field_name, self::DOC_ACCEPTED);
-                        } else {
-                            $errors[] = 'Type de document signé invalide: "' . $doc_type . '"';
-                        }
-
-                        if (!count($errors)) {
-                            $this->addObjectLog(ucfirst($doc_type) . ' de location signé', strtoupper($doc_type) . '_SIGNE');
-
-                            $user_resp = $this->getChildObject('user_resp');
-                            if (BimpObject::objectLoaded($user_resp)) {
-                                $email = $user_resp->getData('email');
-                                if ($email) {
-                                    $doc_ref = $this->getSignatureDocRef($doc_type);
-                                    $subject = ucfirst($doc_type) . ' de location ' . $doc_ref . ' signé par le client';
-                                    $msg = 'Bonjour,<br/><br/>';
-                                    $msg .= 'Le document signé est accessible sur la page de la demande de location ' . $this->getLink() . '<br/><br/>';
-                                    mailSyn2($subject, $email, '', $msg);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return $errors;
     }
 
     // Actions:
@@ -3744,6 +3747,13 @@ class BF_Demande extends BimpObject
 
         if (!count($errors)) {
             BimpCache::getBdb()->db->commit();
+
+            $email = BimpTools::cleanEmailsStr(BimpCore::getConf('new_external_demandes_notif_emails', null, 'bimpfinancement'));
+
+            if ($email) {
+                $msg = 'Nouvelle demande de location de la part de ' . $source_label;
+                $demande->addNote($msg, null, 0, 0, $email, BimpNote::BN_AUTHOR_USER, 0, 0, 0, 1);
+            }
         } else {
             BimpCache::getBdb()->db->rollback();
         }

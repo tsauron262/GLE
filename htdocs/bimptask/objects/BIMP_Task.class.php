@@ -342,7 +342,7 @@ class BIMP_Task extends BimpObject
         if (!mailSyn2($sujet, $to, $from, $msg))
             $errors[] = "Envoi email impossible";
         else {
-            $this->addNote($data['email'], 4, 1);
+            $this->addNote($data['email'], BimpNote::BN_ALL, 1);
         }
 
         return array(

@@ -1123,8 +1123,8 @@ class Bimp_Propal extends Bimp_PropalTemp
         $totHt = (float) $this->dol_object->total_ht;
 
         // Ajout des notes: 
-        $this->addNote('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
-        $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
+        $this->addObjectLog('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
+        $newPropal->addObjectLog('Révision de la proposition: ' . $this->getRef());
 
         // Copie des lignes: 
         $warnings = BimpTools::merge_array($warnings, $newPropal->createLinesFromOrigin($this, array(

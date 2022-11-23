@@ -419,7 +419,6 @@ cards:
             code_compta_fournisseur: unset
             outstanding_limit: 
                 field: outstanding_limit
-            
 
 searches: 
     default:

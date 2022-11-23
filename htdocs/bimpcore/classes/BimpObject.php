@@ -339,7 +339,7 @@ class BimpObject extends BimpCache
         $this->config = BimpConfig::getObjectConfigInstance($module, $object_name, $this);
 
         if ($this->config->isDefined('mode_archive')) {
-            $this->modeArchive = $this->getConf('mode_archive');
+            $this->modeArchive = (int) $this->getConf('mode_archive', 0, false, 'bool');
         }
 
         $this->initBdd();
@@ -377,7 +377,6 @@ class BimpObject extends BimpCache
             $this->config = BimpConfig::getObjectConfigInstance($this->module, $this->object_name, $this);
             $this->addCommonFieldsConfig();
             $this->addConfigExtraParams();
-//            mailSyn2('Config inexistant', BimpCore::getConf('devs_email'), null, 'Config inexistant dans ' . get_class($this));
         }
     }
 
@@ -1412,7 +1411,7 @@ class BimpObject extends BimpCache
             return $this->data[$field];
         }
 
-        if($default)
+        if ($default)
             return $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
     }
 
@@ -3609,28 +3608,28 @@ class BimpObject extends BimpCache
 //        if($this->cacheExists($cache_key))
 //            $rows = $this->getCache($cache_key);
 //        else{
-            $rows = $this->db->executeS($sql, $return);
+        $rows = $this->db->executeS($sql, $return);
 
-            if (is_null($rows)) {
-                if (BimpDebug::isActive()) {
-                    $content = BimpRender::renderSql($sql);
-                    $content .= BimpRender::renderDebugInfo($this->db->err(), 'ERREUR SQL', 'fas_exclamation-circle');
-                    $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));
-                    $content .= BimpRender::renderFoldableContainer('Joins', '<pre>' . print_r($joins, 1) . '</pre>', array('open' => false, 'offset_left' => true));
-                    $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
-                    BimpDebug::addDebug('list_sql', $title, $content);
-                }
-
-                $rows = array();
-            } else {
-                if (BimpDebug::isActive()) {
-                    $nRows = count($rows);
-                    $content = BimpRender::renderSql($sql);
-                    $content .= '<br/><span class="badge badge-' . ($nRows > 0 ? 'success' : 'danger') . '">' . $nRows . ' résultat' . ($nRows > 1 ? 's' : '') . '</span>';
-                    $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
-                    BimpDebug::addDebug('list_sql', $title, $content);
-                }
+        if (is_null($rows)) {
+            if (BimpDebug::isActive()) {
+                $content = BimpRender::renderSql($sql);
+                $content .= BimpRender::renderDebugInfo($this->db->err(), 'ERREUR SQL', 'fas_exclamation-circle');
+                $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));
+                $content .= BimpRender::renderFoldableContainer('Joins', '<pre>' . print_r($joins, 1) . '</pre>', array('open' => false, 'offset_left' => true));
+                $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                BimpDebug::addDebug('list_sql', $title, $content);
             }
+
+            $rows = array();
+        } else {
+            if (BimpDebug::isActive()) {
+                $nRows = count($rows);
+                $content = BimpRender::renderSql($sql);
+                $content .= '<br/><span class="badge badge-' . ($nRows > 0 ? 'success' : 'danger') . '">' . $nRows . ' résultat' . ($nRows > 1 ? 's' : '') . '</span>';
+                $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                BimpDebug::addDebug('list_sql', $title, $content);
+            }
+        }
 //            $this->setCache($cache_key, $rows);
 //        }
 
@@ -4797,19 +4796,18 @@ class BimpObject extends BimpCache
                             $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de l\'enregistrement des champs supplémentaires');
                         }
 
-                        // Notes nouvelles valeurs de champs: 
-                        $notes = array();
+                        // Logs nouvelles valeurs de champs: 
+                        $logs = array();
                         foreach ($this->fieldsWithAddNoteOnUpdate as $champAddNote) {
                             if ($this->getData($champAddNote) != $this->getInitData($champAddNote)) {
-                                $notes[] = html_entity_decode('Champ ' . $this->displayFieldName($champAddNote) . ' modifié. 
+                                $logs[] = html_entity_decode('Champ ' . $this->displayFieldName($champAddNote) . ' modifié. 
 Ancienne valeur : ' . $this->displayInitData($champAddNote, 'default', false, true) . '
 Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             }
                         }
 
-                        if (count($notes)) {
-                            $this->addNote(implode('
-', $notes));
+                        if (count($logs)) {
+                            $this->addObjectLog(implode("\n", $logs));
                         }
 
                         // Log changement de statut
@@ -6404,37 +6402,44 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0, $delete_on_view = 0)
     {
-        if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
         }
+
         $note = BimpObject::getInstance('bimpcore', 'BimpNote');
         $note->initBdd($this->getConf('no_transaction_db', 0, false, 'bool'));
 
-        if (is_string($fk_group_dest))
+        if (is_string($fk_group_dest) && $fk_group_dest) {
             eval('if(BimpNote::' . $fk_group_dest . ' != null) $fk_group_dest = BimpNote::' . $fk_group_dest . ';');
-        if (is_string($fk_user_dest))
+        }
+
+        if (is_string($fk_user_dest) && $fk_user_dest) {
             eval('if(BimpNote::' . $fk_user_dest . ' != null) $fk_user_dest = BimpNote::' . $fk_user_dest . ';');
+        }
 
         if (is_null($visibility)) {
-            $visibility = BimpNote::BIMP_NOTE_MEMBERS;
+            $visibility = BimpNote::BN_MEMBERS;
         }
 
         $errors = $note->validateArray(array(
-            'obj_type'      => 'bimp_object',
-            'obj_module'    => $this->module,
-            'obj_name'      => $this->object_name,
-            'id_obj'        => (int) $this->id,
-            'visibility'    => (int) $visibility,
-            'content'       => $content,
-            'viewed'        => $viewed,
-            'auto'          => $auto,
-            "email"         => $email,
-            "type_author"   => $type_author,
-            'type_dest'     => $type_dest,
-            'fk_group_dest' => $fk_group_dest,
-            'fk_user_dest'  => $fk_user_dest
+            'obj_type'       => 'bimp_object',
+            'obj_module'     => $this->module,
+            'obj_name'       => $this->object_name,
+            'id_obj'         => (int) $this->id,
+            'visibility'     => (int) $visibility,
+            'content'        => $content,
+            'viewed'         => $viewed,
+            'auto'           => $auto,
+            "email"          => $email,
+            "type_author"    => $type_author,
+            'type_dest'      => $type_dest,
+            'fk_group_dest'  => $fk_group_dest,
+            'fk_user_dest'   => $fk_user_dest,
+            'delete_on_view' => $delete_on_view
         ));
 
         if (!count($errors)) {
@@ -6454,10 +6459,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false)
     {
         if ($this->isLoaded()) {
-            if ($archive)
+            if ($archive) {
                 $note = BimpObject::getInstance('bimpcore', 'BimpNoteArchive');
-            else
+            } else {
                 $note = BimpObject::getInstance('bimpcore', 'BimpNote');
+            }
+
             $list = new BC_ListTable($note, $list_model);
             $list->addIdentifierSuffix($suffixe);
             $list->addFieldFilterValue('obj_type', 'bimp_object');
@@ -6474,8 +6481,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             if (BimpCore::getConf('date_archive', '') != '') {
-                $btnHisto = '<div id="lllm">';
-                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#lllm')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Charger historique</button>';
+                $btnHisto = '<div id="notes_archives_' . $this->object_name . '_container">';
+                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_' . $this->object_name . '_container')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
                 $btnHisto .= '</div>';
             }
 
@@ -10276,8 +10283,8 @@ var options = {
     public static function getListExtrafield($name, $type, $withVide = true)
     {
         $return = array();
-        $cash_key = 'extra_list_'.$name.'_'.$type.'_'. (int) $withVide;
-        if(!static::cacheServerExists($cash_key)){
+        $cash_key = 'extra_list_' . $name . '_' . $type . '_' . (int) $withVide;
+        if (!static::cacheServerExists($cash_key)) {
             $sql = self::getBdb()->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'");
             while ($ln = self::getBdb()->db->fetch_object($sql)) {
                 $param = unserialize($ln->param);

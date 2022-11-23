@@ -682,7 +682,14 @@ class BimpCommDemandeFin extends BimpObject
 
                         $parent = $this->getParentInstance();
                         if (BimpObject::objectLoaded($parent)) {
-                            $parent->addObjectLog(static::getDocTypeLabel($doc_type) . ' reçu', strtoupper($doc_type) . '_RECEIVED');
+                            $parent->addObjectLog(static::getDocTypeLabel($doc_type) . ' reçuuu', strtoupper($doc_type) . '_RECEIVED');
+                            $note_errors = $this->addParentNoteForCommercial('Document reçu : ' . str_replace('_fin', '', $doc_type) . ' de location');
+                            if (count($note_errors)) {
+                                die(json_encode(array('note_errors' => $note_errors)));
+                            } else {
+                                die(json_encode(array('note_ok' => 1)));
+                                $parent->addObjectLog('NOTE OK');
+                            }
                         }
                     }
                 }
@@ -754,6 +761,7 @@ class BimpCommDemandeFin extends BimpObject
                         $msg .= '.<br/><b>Note : </b>' . $note;
                     }
                     $parent->addObjectLog($msg, 'DF_NEW_STATUS_' . $new_status);
+                    $this->addParentNoteForCommercial($msg);
                 }
 
                 if (in_array($new_status, array(static::DOC_STATUS_CANCELED, static::DOC_STATUS_REFUSED))) {
@@ -786,6 +794,25 @@ class BimpCommDemandeFin extends BimpObject
                     }
                 }
             }
+        }
+
+        return $errors;
+    }
+
+    public function addParentNoteForCommercial($msg)
+    {
+        $errors = array();
+
+        $parent = $this->getParentInstance();
+        if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpComm')) {
+            $id_commercial = (int) $parent->getCommercialId();
+            if ($id_commercial) {
+                $errors = $parent->addNote($msg, null, 0, 0, '', BimpNote::BN_AUTHOR_USER, BimpNote::BN_DEST_USER, 0, $id_commercial, 1);
+            } else {
+                $errors[] = 'Aucun commercial';
+            }
+        } else {
+            $errors[] = 'Pièce invalide';
         }
 
         return $errors;

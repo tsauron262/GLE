@@ -3,7 +3,26 @@
 class BimpLink extends BimpObject
 {
 
-    // Getters: 
+    // Getters booléens: 
+
+    public function i_view()
+    {
+        if (!$this->getData("viewed") && $this->i_am_dest()) {
+            $this->set('viewed', 1);
+            $warn = array();
+            if (empty($this->update($warn, true)))
+                return 1;
+        }
+
+        return 0;
+    }
+
+    public function i_am_dest()
+    {
+        return 1;
+    }
+
+    // Getters:
 
     public function getSourceObject()
     {
@@ -95,6 +114,55 @@ class BimpLink extends BimpObject
         return '';
     }
 
+    public function getMyLink($id_user, $id_max, &$errors = array())
+    {
+        $demandes = array();
+
+        $filters = array(
+            'id'             => array(
+                'operator' => '>',
+                'value'    => (int) $id_max
+            ),
+            'linked_module'  => 'bimpcore',
+            'user_ou_groupe' => array('or' => array(
+                    'user'  => array('and_fields' => array(
+                            'linked_name' => 'Bimp_User',
+                            'linked_id'   => $id_user,
+                        )),
+                    'group' => array('and_fields' => array(
+                            'linked_name' => 'Bimp_UserGroup',
+                            'linked_id'   => self::getUserUserGroupsList($id_user),
+                        )),
+                ))
+        );
+
+        $links = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filters, 'a.viewed', 'DESC', array(), 15);
+
+        foreach ($links as $d) {
+
+            $bimp_object = $d->getSourceObject();
+
+            if ($bimp_object->isLoaded()) {
+                $new_demande = array(
+                    'obj'     => array('nom_url' => $bimp_object->getLink()),
+                    'content' => $d->getSourceFieldLabel() . '<br/>' . $d->displaySourceFieldContent()
+                );
+            } else
+                $new_demande = array();
+            $new_demande['id'] = $d->id;
+            $new_demande['is_viewed'] = $d->getData('viewed');
+
+            $demandes['content'][] = $new_demande;
+        }
+
+        if (!isset($demandes['content']))
+            $demandes['content'] = array();
+
+        $demandes['nb_demande'] = (int) sizeof($links);
+
+        return $demandes;
+    }
+
     // Getters statiques: 
 
     public static function getLinksForSource($src_object, $field_name = '', $linked_module = '', $linked_name = '')
@@ -109,11 +177,11 @@ class BimpLink extends BimpObject
             if ($field_name) {
                 $filters['src_field'] = $field_name;
             }
-            
+
             if ($linked_module) {
                 $filters['linked_module'] = $linked_module;
             }
-            
+
             if ($linked_name) {
                 $filters['linked_name'] = $linked_name;
             }
@@ -141,59 +209,7 @@ class BimpLink extends BimpObject
     }
 
     // Affichage: 
-    
-    public function getMyLink($id_user, $id_max, &$errors = array()){
-           $demandes = array();
-        
-        $filters = array(
-            'id' => array(
-                'operator' => '>',
-                'value'    => (int) $id_max
-            ),
-            'linked_module'=> 'bimpcore',
-            'user_ou_groupe' => array('or' => array(
-                'user' => array('and_fields' => array(
-                    'linked_name'  => 'Bimp_User',
-                    'linked_id'    => $id_user,
-                )),
-                'group' => array('and_fields' => array(
-                    'linked_name'  => 'Bimp_UserGroup',
-                    'linked_id'    => self::getUserUserGroupsList($id_user),
-                )),
-            ))
-            
-        );
-        
-        $links = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filters, 'a.viewed', 'DESC', array(), 15);
-        
-        
-        foreach($links as $d) {
-            
-            $bimp_object = $d->getSourceObject();
-            
-            if($bimp_object->isLoaded()) {
-                $new_demande = array(
-                    'obj'        => array('nom_url'  => $bimp_object->getLink()),
-                    'content'    => $d->getSourceFieldLabel().'<br/>'.$d->displaySourceFieldContent()
-                );
-                
-            } else
-                $new_demande = array();
-            $new_demande['id'] = $d->id;
-            $new_demande['is_viewed'] = $d->getData('viewed');
 
-            
-            $demandes['content'][] = $new_demande;
-        }
-        
-        if(!isset($demandes['content']))
-            $demandes['content'] = array();
-        
-        $demandes['nb_demande'] = (int) sizeof($links);
-        
-        return $demandes;
-    }
-    
     public function displayObj($object, $with_object_label = false)
     {
         $html = '';
@@ -220,7 +236,7 @@ class BimpLink extends BimpObject
                 } else {
                     $html .= 'L\'objet "' . get_class($object) . '"';
                 }
-                $html .= ' d\'ID ' . $this->getData('src_id').' n\'existe plus';
+                $html .= ' d\'ID ' . $this->getData('src_id') . ' n\'existe plus';
                 $html .= '</span>';
             }
         }
@@ -253,154 +269,6 @@ class BimpLink extends BimpObject
     {
         $content = $this->getSourceFieldContent();
         return $this->replaceHastags($content, $no_html);
-    }
-
-    // Traitements statiques: 
-
-    public static function deleteAllForSource($src_object, $field_name, &$warnings = array())
-    {
-        $errors = array();
-
-        $links = self::getLinksForSource($src_object, $field_name);
-
-        if (!empty($links)) {
-            foreach ($links as $link) {
-                $id_link = (int) $link->id;
-                $link_warnings = array();
-                $link_errors = $link->delete($link_warnings, true);
-
-                if (count($link_warnings)) {
-                    $warnings[] = BimpTools::getMsgFromArray($link_warnings, 'Lien #' . $id_link);
-                }
-
-                if (count($errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($link_errors, 'Lien #' . $id_link);
-                }
-            }
-        }
-
-        return $errors;
-    }
-
-    public static function setLinksForSource($src_object, $field_name, $links, &$warnings = array())
-    {
-        $errors = array();
-
-        if (is_a($src_object, 'BimpObject') && BimpObject::objectLoaded($src_object) && is_array($links)) {
-            if (empty($links)) {
-                // Suppr de tous les liens éventuels pour cet objet source:
-                $del_warnings = array();
-
-                $del_errors = self::deleteAllForSource($src_object, $field_name, $del_warnings);
-
-                if (count($del_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($del_errors, 'Erreurs lors de la suppression des hashtags du champ "' . $src_object->getConf('fields/' . $field_name . '/label', $field_name) . '"');
-                }
-            } else {
-                // Suppression des liens courants non présents dans les nouveaux liens:    
-                $cur_links = self::getLinksForSource($src_object, $field_name);
-                ObjectsDef::insertObjectsDefData($links);
-
-                foreach ($cur_links as $idx => $cur_link) {
-                    $cl_type = (string) $cur_link->getData('linked_type');
-                    $cl_module = (string) $cur_link->getData('linked_module');
-                    $cl_name = (string) $cur_link->getData('linked_name');
-                    $cl_file = (string) $cur_link->getData('linked_file');
-                    $cl_id = (int) $cur_link->getData('linked_id');
-
-                    foreach ($links as $link) {
-                        if ($cl_type == (string) BimpTools::getArrayValueFromPath($link, 'obj_type', '') &&
-                                $cl_module == (string) BimpTools::getArrayValueFromPath($link, 'obj_module', '') &&
-                                $cl_name == (string) BimpTools::getArrayValueFromPath($link, 'obj_name', '') &&
-                                $cl_file == (string) BimpTools::getArrayValueFromPath($link, 'obj_file', '') &&
-                                $cl_id == (int) BimpTools::getArrayValueFromPath($link, 'id', 0)) {
-                            continue 2;
-                        }
-                    }
-
-                    $del_warnings = array();
-                    $id_cur_link = $cur_link->id;
-                    $del_errors = $cur_link->delete($del_warnings, true);
-
-                    if (count($del_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($del_warnings, 'Echec de la suppression du lien #' . $id_cur_link);
-                    }
-
-                    unset($cur_links[$idx]);
-                }
-
-                // Création des nouveaux liens:
-                $data = array(
-                    'src_module' => $src_object->module,
-                    'src_name'   => $src_object->object_name,
-                    'src_id'     => $src_object->id,
-                    'src_field'  => $field_name
-                );
-
-                foreach ($links as $link) {
-                    foreach ($cur_links as $cur_link) {
-                        $cl_type = (string) $cur_link->getData('linked_type');
-                        $cl_module = (string) $cur_link->getData('linked_module');
-                        $cl_name = (string) $cur_link->getData('linked_name');
-                        $cl_file = (string) $cur_link->getData('linked_file');
-                        $cl_id = (int) $cur_link->getData('linked_id');
-
-                        if ($cl_type == (string) BimpTools::getArrayValueFromPath($link, 'obj_type', '') &&
-                                $cl_module == (string) BimpTools::getArrayValueFromPath($link, 'obj_module', '') &&
-                                $cl_name == (string) BimpTools::getArrayValueFromPath($link, 'obj_name', '') &&
-                                $cl_file == (string) BimpTools::getArrayValueFromPath($link, 'obj_file', '') &&
-                                $cl_id == (int) BimpTools::getArrayValueFromPath($link, 'id', 0)) {
-                            continue 2;
-                        }
-                    }
-
-                    $data['linked_type'] = (string) BimpTools::getArrayValueFromPath($link, 'obj_type', '');
-                    $data['linked_module'] = (string) BimpTools::getArrayValueFromPath($link, 'obj_module', '');
-                    $data['linked_name'] = (string) BimpTools::getArrayValueFromPath($link, 'obj_name', '');
-                    $data['linked_file'] = (string) BimpTools::getArrayValueFromPath($link, 'obj_file', '');
-                    $data['linked_id'] = (int) BimpTools::getArrayValueFromPath($link, 'id', 0);
-
-                    $newLink = BimpObject::createBimpObject('bimpcore', 'BimpLink', $data, true, $warnings);
-
-                    if (BimpObject::objectLoaded($newLink)) {
-                        $cur_links[] = $newLink;
-                    }
-                }
-            }
-        }
-
-        return $errors;
-    }
-    
-    public function actionSetAsViewed($data, &$success = '')
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Marquer comme vue';
-
-        if (!$this->i_view())
-            $errors[] = 'Impossible';
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-    
-    public function i_view()
-    {
-        if (!$this->getData("viewed") && $this->i_am_dest()) {
-            $this->set('viewed', 1);
-            $warn = array();
-            if (empty($this->update($warn, true)))
-                return 1;
-        }
-
-        return 0;
-    }
-    
-    public function i_am_dest(){
-        return 1;
     }
 
     // Rendus HTML: 
@@ -525,5 +393,140 @@ class BimpLink extends BimpObject
         $html .= '</div>';
 
         return $html;
+    }
+
+    // Actions: 
+
+    public function actionSetAsViewed($data, &$success = '')
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Marquer comme vue';
+
+        if (!$this->i_view()) {
+            $errors[] = 'Impossible';
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    // Traitements statiques: 
+
+    public static function deleteAllForSource($src_object, $field_name, &$warnings = array())
+    {
+        $errors = array();
+
+        $links = self::getLinksForSource($src_object, $field_name);
+
+        if (!empty($links)) {
+            foreach ($links as $link) {
+                $id_link = (int) $link->id;
+                $link_warnings = array();
+                $link_errors = $link->delete($link_warnings, true);
+
+                if (count($link_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($link_warnings, 'Lien #' . $id_link);
+                }
+
+                if (count($errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($link_errors, 'Lien #' . $id_link);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public static function setLinksForSource($src_object, $field_name, $links, &$warnings = array())
+    {
+        $errors = array();
+
+        if (is_a($src_object, 'BimpObject') && BimpObject::objectLoaded($src_object) && is_array($links)) {
+            if (empty($links)) {
+                // Suppr de tous les liens éventuels pour cet objet source:
+                $del_warnings = array();
+
+                $del_errors = self::deleteAllForSource($src_object, $field_name, $del_warnings);
+
+                if (count($del_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($del_errors, 'Erreurs lors de la suppression des hashtags du champ "' . $src_object->getConf('fields/' . $field_name . '/label', $field_name) . '"');
+                }
+            } else {
+                // Suppression des liens courants non présents dans les nouveaux liens:    
+                $cur_links = self::getLinksForSource($src_object, $field_name);
+                ObjectsDef::insertObjectsDefData($links);
+
+                foreach ($cur_links as $idx => $cur_link) {
+                    $cl_type = (string) $cur_link->getData('linked_type');
+                    $cl_module = (string) $cur_link->getData('linked_module');
+                    $cl_name = (string) $cur_link->getData('linked_name');
+                    $cl_file = (string) $cur_link->getData('linked_file');
+                    $cl_id = (int) $cur_link->getData('linked_id');
+
+                    foreach ($links as $link) {
+                        if ($cl_type == (string) BimpTools::getArrayValueFromPath($link, 'obj_type', '') &&
+                                $cl_module == (string) BimpTools::getArrayValueFromPath($link, 'obj_module', '') &&
+                                $cl_name == (string) BimpTools::getArrayValueFromPath($link, 'obj_name', '') &&
+                                $cl_file == (string) BimpTools::getArrayValueFromPath($link, 'obj_file', '') &&
+                                $cl_id == (int) BimpTools::getArrayValueFromPath($link, 'id', 0)) {
+                            continue 2;
+                        }
+                    }
+
+                    $del_warnings = array();
+                    $id_cur_link = $cur_link->id;
+                    $del_errors = $cur_link->delete($del_warnings, true);
+
+                    if (count($del_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($del_warnings, 'Echec de la suppression du lien #' . $id_cur_link);
+                    }
+
+                    unset($cur_links[$idx]);
+                }
+
+                // Création des nouveaux liens:
+                $data = array(
+                    'src_module' => $src_object->module,
+                    'src_name'   => $src_object->object_name,
+                    'src_id'     => $src_object->id,
+                    'src_field'  => $field_name
+                );
+
+                foreach ($links as $link) {
+                    foreach ($cur_links as $cur_link) {
+                        $cl_type = (string) $cur_link->getData('linked_type');
+                        $cl_module = (string) $cur_link->getData('linked_module');
+                        $cl_name = (string) $cur_link->getData('linked_name');
+                        $cl_file = (string) $cur_link->getData('linked_file');
+                        $cl_id = (int) $cur_link->getData('linked_id');
+
+                        if ($cl_type == (string) BimpTools::getArrayValueFromPath($link, 'obj_type', '') &&
+                                $cl_module == (string) BimpTools::getArrayValueFromPath($link, 'obj_module', '') &&
+                                $cl_name == (string) BimpTools::getArrayValueFromPath($link, 'obj_name', '') &&
+                                $cl_file == (string) BimpTools::getArrayValueFromPath($link, 'obj_file', '') &&
+                                $cl_id == (int) BimpTools::getArrayValueFromPath($link, 'id', 0)) {
+                            continue 2;
+                        }
+                    }
+
+                    $data['linked_type'] = (string) BimpTools::getArrayValueFromPath($link, 'obj_type', '');
+                    $data['linked_module'] = (string) BimpTools::getArrayValueFromPath($link, 'obj_module', '');
+                    $data['linked_name'] = (string) BimpTools::getArrayValueFromPath($link, 'obj_name', '');
+                    $data['linked_file'] = (string) BimpTools::getArrayValueFromPath($link, 'obj_file', '');
+                    $data['linked_id'] = (int) BimpTools::getArrayValueFromPath($link, 'id', 0);
+
+                    $newLink = BimpObject::createBimpObject('bimpcore', 'BimpLink', $data, true, $warnings);
+
+                    if (BimpObject::objectLoaded($newLink)) {
+                        $cur_links[] = $newLink;
+                    }
+                }
+            }
+        }
+
+        return $errors;
     }
 }

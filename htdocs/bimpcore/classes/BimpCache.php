@@ -35,7 +35,6 @@ class BimpCache
 
         if ($mode_archive == 1) {
             if (is_null(self::$bdb_archive)) {
-
                 $dolibarr_main_db_port = '3306';
                 $dolibarr_main_db_host = '10.192.20.11';
                 $dolibarr_main_db_pass = 'llkjfvklfdvgukfdvfppdz';

@@ -9,10 +9,8 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
-    
-    
-    public static $achat = 0;
 
+    public static $achat = 0;
     public static $dont_check_parent_on_update = false;
     public static $discount_lines_allowed = true;
     public static $use_zone_vente_for_tva = true;
@@ -42,7 +40,7 @@ class BimpComm extends BimpDolObject
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
     public static $expertise = [
-        ''   => "",
+        ''  => "",
         10  => "Arts graphiques",
         20  => "Constructions",
         30  => "Education et Administrations",
@@ -235,11 +233,10 @@ class BimpComm extends BimpDolObject
 
         if ($this->useEntrepot() && !(int) $this->getData('entrepot')) {
             $errors[] = 'Aucun entrepôt associé';
-        }
-        else{
+        } else {
             $entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $this->getData('entrepot'));
-            if($entrepot->getData('statut') == 0)
-                $errors[] = 'L\'entrepot '.$entrepot->getRef().' n\'est plus actif';
+            if ($entrepot->getData('statut') == 0)
+                $errors[] = 'L\'entrepot ' . $entrepot->getRef() . ' n\'est plus actif';
         }
 
         if (!count($errors)) {
@@ -488,7 +485,7 @@ class BimpComm extends BimpDolObject
             $result = $this->db->getRows('societe_rib', '`fk_soc` =' . $client->id, null, 'object', null, 'default_rib', 'DESC');
 
             foreach ($result as $row) {
-                if($row->default_rib)
+                if ($row->default_rib)
                     unset($return[0]);
                 $return[$row->rowid] = $row->label;
             }
@@ -612,7 +609,7 @@ class BimpComm extends BimpDolObject
 
         // Message facturation: 
         // SERV19-FPR
-        
+
         $msg = "Bonjour, merci de bien vouloir facturer cette commande*\\n\\n*si vous souhaitez une facturation partielle, veuillez modifier ce texte et indiquer précisément vos besoins\\n\\nIMPORTANT : toute facturation anticipée de produits ou services non livrés doit rester exceptionnelle, doit être justifiée par une demande écrite du client (déposer ce justificatif en pièce jointe) et doit être systématiquement signalée à notre comptabilité @Compta Fournisseurs Olys et à @David TEIXEIRA RODRIGUES";
         foreach ($this->getLines() as $line) {
             $prod = $line->getChildObject('product');
@@ -2855,13 +2852,13 @@ class BimpComm extends BimpDolObject
             if ($params['inverse_qty']) {
                 $qty *= -1;
             }
-            
-            if($line->id_product){
+
+            if ($line->id_product) {
                 $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->id_product);
-                if(!static::$achat && !$prod->getData('tosell'))
-                    $errors[] = 'Le produit '.$prod->getRef().' n\'est plus en vente';
-                elseif(static::$achat && !$prod->getData('tobuy'))
-                    $errors[] = 'Le produit '.$prod->getRef().' n\'est plus en achat';
+                if (!static::$achat && !$prod->getData('tosell'))
+                    $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est plus en vente';
+                elseif (static::$achat && !$prod->getData('tobuy'))
+                    $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est plus en achat';
             }
 
             $new_line->validateArray($data);
@@ -3476,10 +3473,11 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
-    
-    public function processOperationMasseLine($debut = true){
+
+    public function processOperationMasseLine($debut = true)
+    {
         $this->procededOperationMasseLine = $debut;
-        if(!$debut){
+        if (!$debut) {
             $this->dol_object->fetch_lines();
             $this->dol_object->update_price();
             $lines = $this->getLines();
@@ -4969,7 +4967,7 @@ class BimpComm extends BimpDolObject
                     $zone = $this->getZoneByCountry($soc);
                     if ($this->getData('zone_vente') != $zone) {
                         $this->set('zone_vente', $zone);
-                        $this->addNote('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true));
+                        $this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true));
                     }
                 }
             }

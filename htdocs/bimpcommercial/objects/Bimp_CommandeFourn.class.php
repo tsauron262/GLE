@@ -250,150 +250,6 @@ class Bimp_CommandeFourn extends BimpCommAchat
         return parent::isActionAllowed($action);
     }
 
-    public function getAdresseLivraison(&$warnings = array())
-    {
-        $result = array('name' => '', 'adress' => '', 'adress2' => '', 'adress3' => '', 'zip' => '', 'town' => '', 'contact' => '', 'country' => '');
-
-        switch ($this->getData('delivery_type')) {
-            case Bimp_CommandeFourn::DELIV_ENTREPOT:
-            default:
-                $entrepot = $this->getChildObject('entrepot');
-                if (BimpObject::objectLoaded($entrepot)) {
-                    if ($entrepot->address) {
-                        $name = 'AGENCE BIMP';
-                        $result['name'] = $name;
-                        $result['contact'] = $name;
-                        $tabAdd = explode("<br/>", $entrepot->address);
-                        $result['adress'] = $tabAdd[0];
-                        if (isset($tabAdd[1]))
-                            $result['adress2'] = $tabAdd[1];
-//                        if (isset($tabAdd[2]))
-//                            $result['adress3'] = $tabAdd[2];
-                        if ($entrepot->zip) {
-                            $result['zip'] = $entrepot->zip;
-                        } else {
-                            $warnings[] = 'Code postal non défini';
-                        }
-                        if ($entrepot->town) {
-                            $result['town'] = $entrepot->town;
-                        } else {
-                            $warnings[] = 'Ville non définie';
-                        }
-                    } else {
-                        $warnings[] = 'Erreur: adresse non définie pour l\'entrepôt "' . $entrepot->label . ' - ' . $entrepot->lieu . '"';
-                    }
-                } elseif ((int) $this->getData('entrepot')) {
-                    $warnings[] = 'Erreur: l\'entrepôt #' . $this->getData('entrepot') . ' n\'existe pas';
-                } else {
-                    $warnings[] = 'Entrepôt absent';
-                }
-                break;
-
-            case Bimp_CommandeFourn::DELIV_SIEGE:
-                global $mysoc;
-                if (is_object($mysoc)) {
-                    if ($mysoc->name) {
-                        $result['name'] = 'AGENCE '.$mysoc->name;
-                        $result['contact'] = 'AGENCE '.$mysoc->name;
-                    }
-                    if ($mysoc->address) {
-                        $result['adress'] = $mysoc->address;
-                    }
-                    if ($mysoc->zip) {
-                        $result['zip'] = $mysoc->zip . ' ';
-                    }
-                    if ($mysoc->town) {
-                        $result['town'] = $mysoc->town;
-                    }
-                } else {
-                    $warnings[] = 'Erreur: Siège social non configuré';
-                }
-                break;
-
-            case Bimp_CommandeFourn::DELIV_CUSTOM:
-                $address = $this->getData('custom_delivery');
-                if ($address) {
-                    $address = str_replace("\r", "", $address);
-                    $dataAdd = explode("\n", $address);
-
-                    $result['name'] = $dataAdd[0];
-                    $result['contact'] = $dataAdd[1];
-                    $result['adress'] = $dataAdd[2];
-
-                    if (count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) > 1) {
-                        $result['adress2'] = $dataAdd[3];
-//                        $result['adress3'] = $dataAdd[3];
-                        $tabZipTown = explode(" ", $dataAdd[4]);
-                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[4]);
-                        if (count($dataAdd) == 6)
-                            $result['country'] = $dataAdd[5];
-                    } elseif (count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) > 1) {
-//                        $result['adress2'] = $dataAdd[2];
-                        $tabZipTown = explode(" ", $dataAdd[3]);
-                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[3]);
-                        if (count($dataAdd) == 5)
-                            $result['country'] = $dataAdd[4];
-                    }
-                    elseif (count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1) {
-//                        $result['adress2'] = $dataAdd[2];
-                        $tabZipTown = explode(" ", $dataAdd[2]);
-                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
-                        $result['contact'] = $dataAdd[0];
-                        $result['adress'] = $dataAdd[1];
-                        if (count($dataAdd) == 5)
-                            $result['country'] = $dataAdd[4];
-                    }
-                    /*elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
-                        $tabZipTown = explode(" ", $dataAdd[2]);
-                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
-                        if (count($dataAdd) == 4)
-                            $result['country'] = $dataAdd[3];
-                    } */else
-                        $warnings[] = "Impossible de parser l'adresse personalisée";
-                    if(!is_array($tabZipTown)){
-                        $warnings[] = 'Consitution de l\'adresse incorrect';
-                    }
-                    else{
-                        if (count($tabZipTown) > 1) {
-                            $result['zip'] = $tabZipTown[0];
-                            $result['town'] = $town;
-                        }
-                        if (strlen($result['zip']) != 5)
-                            $warnings[] = "Code postal : " . $result['zip'] . ' incorrect';
-                    }
-                } else {
-                    $warnings[] = 'Adresse non renseignée';
-                }
-                break;
-
-            case Bimp_CommandeFourn::DELIV_DIRECT:
-                $id_contact = (int) $this->getIdContact();
-                if ($id_contact) {
-                    $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
-                    if (BimpObject::objectLoaded($contact)) {
-                        $soc = $contact->getParentInstance();
-                        if (BimpObject::objectLoaded($soc) && $soc->isCompany()) {
-                            $result['name'] = $soc->getData('nom');
-                        }
-                        else{
-                            $result['name'] = $contact->getData('firstname') . ' ' . $contact->getData('lastname');
-                        }
-                        $result['contact'] = $contact->getData('firstname') . ' ' . $contact->getData('lastname');
-                        $result['adress'] = $contact->getData('address');
-                        $result['zip'] = $contact->getData('zip') . ' ';
-                        $result['town'] = $contact->getData('town');
-                        $result['country'] = $contact->displayCountry();
-                    } else {
-                        $warnings[] = 'Le contact d\'ID ' . $id_contact . ' n\'existe pas';
-                    }
-                } else {
-                    $warnings[] = 'Contact livraison directe absent';
-                }
-                break;
-        }
-        return $result;
-    }
-
     public function isLogistiqueActive()
     {
         if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status)) {
@@ -1048,6 +904,149 @@ class Bimp_CommandeFourn extends BimpCommAchat
         return static::$types_entrepot;
     }
 
+    // Getters données: 
+
+    public function getAdresseLivraison(&$warnings = array())
+    {
+        $result = array('name' => '', 'adress' => '', 'adress2' => '', 'adress3' => '', 'zip' => '', 'town' => '', 'contact' => '', 'country' => '');
+
+        switch ($this->getData('delivery_type')) {
+            case Bimp_CommandeFourn::DELIV_ENTREPOT:
+            default:
+                $entrepot = $this->getChildObject('entrepot');
+                if (BimpObject::objectLoaded($entrepot)) {
+                    if ($entrepot->address) {
+                        $name = 'AGENCE BIMP';
+                        $result['name'] = $name;
+                        $result['contact'] = $name;
+                        $tabAdd = explode("<br/>", $entrepot->address);
+                        $result['adress'] = $tabAdd[0];
+                        if (isset($tabAdd[1]))
+                            $result['adress2'] = $tabAdd[1];
+//                        if (isset($tabAdd[2]))
+//                            $result['adress3'] = $tabAdd[2];
+                        if ($entrepot->zip) {
+                            $result['zip'] = $entrepot->zip;
+                        } else {
+                            $warnings[] = 'Code postal non défini';
+                        }
+                        if ($entrepot->town) {
+                            $result['town'] = $entrepot->town;
+                        } else {
+                            $warnings[] = 'Ville non définie';
+                        }
+                    } else {
+                        $warnings[] = 'Erreur: adresse non définie pour l\'entrepôt "' . $entrepot->label . ' - ' . $entrepot->lieu . '"';
+                    }
+                } elseif ((int) $this->getData('entrepot')) {
+                    $warnings[] = 'Erreur: l\'entrepôt #' . $this->getData('entrepot') . ' n\'existe pas';
+                } else {
+                    $warnings[] = 'Entrepôt absent';
+                }
+                break;
+
+            case Bimp_CommandeFourn::DELIV_SIEGE:
+                global $mysoc;
+                if (is_object($mysoc)) {
+                    if ($mysoc->name) {
+                        $result['name'] = 'AGENCE ' . $mysoc->name;
+                        $result['contact'] = 'AGENCE ' . $mysoc->name;
+                    }
+                    if ($mysoc->address) {
+                        $result['adress'] = $mysoc->address;
+                    }
+                    if ($mysoc->zip) {
+                        $result['zip'] = $mysoc->zip . ' ';
+                    }
+                    if ($mysoc->town) {
+                        $result['town'] = $mysoc->town;
+                    }
+                } else {
+                    $warnings[] = 'Erreur: Siège social non configuré';
+                }
+                break;
+
+            case Bimp_CommandeFourn::DELIV_CUSTOM:
+                $address = $this->getData('custom_delivery');
+                if ($address) {
+                    $address = str_replace("\r", "", $address);
+                    $dataAdd = explode("\n", $address);
+
+                    $result['name'] = $dataAdd[0];
+                    $result['contact'] = $dataAdd[1];
+                    $result['adress'] = $dataAdd[2];
+
+                    if (count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) > 1) {
+                        $result['adress2'] = $dataAdd[3];
+//                        $result['adress3'] = $dataAdd[3];
+                        $tabZipTown = explode(" ", $dataAdd[4]);
+                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[4]);
+                        if (count($dataAdd) == 6)
+                            $result['country'] = $dataAdd[5];
+                    } elseif (count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) > 1) {
+//                        $result['adress2'] = $dataAdd[2];
+                        $tabZipTown = explode(" ", $dataAdd[3]);
+                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[3]);
+                        if (count($dataAdd) == 5)
+                            $result['country'] = $dataAdd[4];
+                    } elseif (count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1) {
+//                        $result['adress2'] = $dataAdd[2];
+                        $tabZipTown = explode(" ", $dataAdd[2]);
+                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
+                        $result['contact'] = $dataAdd[0];
+                        $result['adress'] = $dataAdd[1];
+                        if (count($dataAdd) == 5)
+                            $result['country'] = $dataAdd[4];
+                    }
+                    /* elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
+                      $tabZipTown = explode(" ", $dataAdd[2]);
+                      $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
+                      if (count($dataAdd) == 4)
+                      $result['country'] = $dataAdd[3];
+                      } */ else
+                        $warnings[] = "Impossible de parser l'adresse personalisée";
+                    if (!is_array($tabZipTown)) {
+                        $warnings[] = 'Consitution de l\'adresse incorrect';
+                    } else {
+                        if (count($tabZipTown) > 1) {
+                            $result['zip'] = $tabZipTown[0];
+                            $result['town'] = $town;
+                        }
+                        if (strlen($result['zip']) != 5)
+                            $warnings[] = "Code postal : " . $result['zip'] . ' incorrect';
+                    }
+                } else {
+                    $warnings[] = 'Adresse non renseignée';
+                }
+                break;
+
+            case Bimp_CommandeFourn::DELIV_DIRECT:
+                $id_contact = (int) $this->getIdContact();
+                if ($id_contact) {
+                    $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                    if (BimpObject::objectLoaded($contact)) {
+                        $soc = $contact->getParentInstance();
+                        if (BimpObject::objectLoaded($soc) && $soc->isCompany()) {
+                            $result['name'] = $soc->getData('nom');
+                        } else {
+                            $result['name'] = $contact->getData('firstname') . ' ' . $contact->getData('lastname');
+                        }
+                        $result['contact'] = $contact->getData('firstname') . ' ' . $contact->getData('lastname');
+                        $result['adress'] = $contact->getData('address');
+                        $result['zip'] = $contact->getData('zip') . ' ';
+                        $result['town'] = $contact->getData('town');
+                        $result['country'] = $contact->displayCountry();
+                    } else {
+                        $warnings[] = 'Le contact d\'ID ' . $id_contact . ' n\'existe pas';
+                    }
+                } else {
+                    $warnings[] = 'Contact livraison directe absent';
+                }
+                break;
+        }
+        return $result;
+    }
+
     // Rendus HTML - overrides BimpObject:
 
     public function renderHeaderExtraLeft()
@@ -1443,7 +1442,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
             foreach ($tab as $fileEx) {
                 if (!$ok && stripos($fileEx, (string) $facNumber) !== false) {
                     ftp_get($conn, $this->getFilesDir() . "/" . $newName, $fileEx, FTP_BINARY);
-                    $this->addNote('Le fichier PDF fournisseur ' . $newName . ' à été ajouté.');
+                    $this->addObjectLog('Le fichier PDF fournisseur ' . $newName . ' à été ajouté.');
                     $ok = true;
                     if ($this->getData('entrepot') == 164) {
                         mailSyn2("Nouvelle facture LDLC", 'AchatsBimp@bimp.fr', null, "Bonjour la facture " . $facNumber . " de la commande : " . $this->getLink() . " en livraison direct a été téléchargé");
@@ -1461,24 +1460,23 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
     public function actionValidate($data, &$success)
     {
-        $result = array('errors'=> array());
-        if(!isset($data['confirm_stock']) || !$data['confirm_stock']){
+        $result = array('errors' => array());
+        if (!isset($data['confirm_stock']) || !$data['confirm_stock']) {
             $lines = $this->getLines('not_text');
             $prodstock = array();
             foreach ($lines as $line) {
                 $prod = $line->getChildObject('product');
-                if($prod && $prod->isLoaded() && $prod->getData('alerteActive')){
+                if ($prod && $prod->isLoaded() && $prod->getData('alerteActive')) {
                     $prod->fetchStocks();
-                    foreach($prod->stocks as $info){
-                        if($info['dispo'] > 0 || $info['virtuel'] > 0){
+                    foreach ($prod->stocks as $info) {
+                        if ($info['dispo'] > 0 || $info['virtuel'] > 0) {
                             $btnForce = true;
                             $prodstock[$prod->getRef()][] = $info;
                         }
                     }
-
                 }
             }
-            if(count($prodstock)){
+            if (count($prodstock)) {
                 $data['confirm_stock'] = 1;
                 $onclick = $this->getJsActionOnclick('validate', $data, array(
                 ));
@@ -1487,21 +1485,21 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
                 $msg .= '</span><br/>';
 
-                foreach($prodstock as $ref => $infos){
-                    $msg .= 'Attention le produit '.$ref.' semble étre en stock : <br/>';
-                    foreach($infos as $info){
-                        $msg .= $info['entrepot_label'].' dispo '.$info['dispo'].' virtuel '.$info['virtuel'].'<br/>';
+                foreach ($prodstock as $ref => $infos) {
+                    $msg .= 'Attention le produit ' . $ref . ' semble étre en stock : <br/>';
+                    foreach ($infos as $info) {
+                        $msg .= $info['entrepot_label'] . ' dispo ' . $info['dispo'] . ' virtuel ' . $info['virtuel'] . '<br/>';
                     }
                 }
 
                 $result['errors'][] = $msg;
             }
         }
-        
-        
-        
-        
-        if(!count($result['errors'])){
+
+
+
+
+        if (!count($result['errors'])) {
             $result = parent::actionValidate($data, $success);
 
             if (!count($result['errors'])) {
@@ -1512,21 +1510,19 @@ class Bimp_CommandeFourn extends BimpCommAchat
                     $success2 = '';
                     $result2 = $this->setObjectAction('approve', 0, array(), $success2);
                     if (count($result2['errors'])) {
-                        if((int) BimpCore::getConf('use_db_transactions')){
+                        if ((int) BimpCore::getConf('use_db_transactions')) {
                             $result['errors'][] = 'Echec de l\'approbation ' . $this->getLabel('of_the');
-                            $result['errors'] = BimpTools::merge_array($result['errors'], $result2['errors']);  
-                        }
-                        else
+                            $result['errors'] = BimpTools::merge_array($result['errors'], $result2['errors']);
+                        } else
                             $result['warnings'][] = BimpTools::getMsgFromArray($result2['errors'], 'Echec de l\'approbation ' . $this->getLabel('of_the'));
                     } else {
                         $success .= '<br/>' . $success2;
                     }
                     $result['warnings'] = BimpTools::merge_array($result['warnings'], $result2['warnings']);
                 }
-
             }
         }
-        
+
 
         return $result;
     }
@@ -1774,10 +1770,10 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
                                     if ($commFourn->getData('edi_status') != $statusCode) {
                                         $commFourn->updateField('edi_status', (int) $statusCode);
-                                        if(isset(static::$edi_status[(int) $statusCode]))
-                                            $commFourn->addNote('Changement de statut EDI : ' . static::$edi_status[(int) $statusCode]['label']);
+                                        if (isset(static::$edi_status[(int) $statusCode]))
+                                            $commFourn->addObjectLo('Changement de statut EDI : ' . static::$edi_status[(int) $statusCode]['label']);
                                         else
-                                            BimpCore::addlog ('Status commande LDLC inconue. Code : '.$statusCode);
+                                            BimpCore::addlog('Status commande LDLC inconue. Code : ' . $statusCode);
                                     }
 
 
@@ -1839,7 +1835,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                     $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
 
                     $ref = str_replace(' ', '', $ref);
-                    
+
                     if (strpos($ref, "AR") !== 0)
                         $errors[] = "La référence " . $ref . "ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
                     elseif ($diference > 0.08)
@@ -1855,7 +1851,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
             $adresseFact = array("tag"      => "Address", "attrs"    => array("type" => "billing"),
                 "children" => array(
                     "ContactName"  => $mysoc->name,
-                    "AddressLine1"  => $mysoc->name,
+                    "AddressLine1" => $mysoc->name,
                     "AddressLine2" => $arrayToXml->xmlentities($mysoc->address),
                     "AddressLine3" => "",
 //                    "AddressLine3" => "",
@@ -1866,7 +1862,6 @@ class Bimp_CommandeFourn extends BimpCommAchat
             );
             $dataLiv = $this->getAdresseLivraison($errors);
 //            echo "<pre>";print_r($dataLiv);
-
 //            $name = ($dataLiv['name'] != '' ? $dataLiv['name'] . ' ' : '') . $dataLiv['contact'];
             $name = str_replace('&', 'et', $dataLiv['name']);
             $contact = $dataLiv['contact'];
@@ -1875,7 +1870,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
             $adresseLiv = array("tag"      => "Address", "attrs"    => array("type" => "shipping"),
                 "children" => array(
                     "ContactName"  => substr($name, 0, 49),
-                    "AddressLine1"  => substr($contact, 0, 49),
+                    "AddressLine1" => substr($contact, 0, 49),
                     "AddressLine2" => $arrayToXml->xmlentities($dataLiv['adress']),
                     "AddressLine3" => $arrayToXml->xmlentities($dataLiv['adress2']),
 //                    "AddressLine3" => $arrayToXml->xmlentities($dataLiv['adress3']),
@@ -1887,9 +1882,9 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
             $portHt = $portTtc = 0;
             $shipping_mode = "CH6";
-            if($this->getData('methode_liv') == 1)
+            if ($this->getData('methode_liv') == 1)
                 $shipping_mode = 'PNS1';
-            if($this->getData('methode_liv') == 2)
+            if ($this->getData('methode_liv') == 2)
                 $shipping_mode = 'PNSSI';
 //            if (in_array($this->getData('delivery_type'), array(Bimp_CommandeFourn::DELIV_ENTREPOT, Bimp_CommandeFourn::DELIV_SIEGE)))
 //                $shipping_mode = "PNS6";
@@ -1921,7 +1916,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 )
             );
         }
-        
+
         if (!count($errors)) {
             $arrayToXml->writeNodes($tab);
 
@@ -1938,7 +1933,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                     $dom->Load($localFile);
                     libxml_use_internal_errors(true);
                     if (!$dom->schemaValidate(DOL_DOCUMENT_ROOT . '/bimpcommercial/ldlc.orders.valid.xsd')) {
-                        $errors[] = 'Ce document est invalide contactez l\'équipe dév : '.$localFile;
+                        $errors[] = 'Ce document est invalide contactez l\'équipe dév : ' . $localFile;
 
                         BimpCore::addlog('Probléme CML LDLC', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
                             'LIBXML Errors' => libxml_get_errors()
@@ -1956,7 +1951,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                         else {
                             //                        global $user;
                             //                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", $user->email, "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
-                            $this->addNote('Commande passée en EDI');
+                            $this->addObjectLog('Commande passée en EDI');
                         }
                     }
                 } else
@@ -2344,7 +2339,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
                                             if (count($equipments)) {
                                                 $eq_lines = $fac_line->getCurrentEquipmentsLinesData();
-                                                
+
                                                 foreach ($equipments as $id_equipment) {
                                                     $id_eq_line_to_attr = 0;
                                                     foreach ($eq_lines as $id_eq_line => $id_eq) {
@@ -2353,7 +2348,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                                                             break;
                                                         }
                                                     }
-                                                    
+
                                                     $eq_errors = $fac_line->attributeEquipment((int) $id_equipment, $id_eq_line_to_attr, false, false);
                                                     if (count($eq_errors)) {
                                                         $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);

@@ -683,13 +683,7 @@ class BimpCommDemandeFin extends BimpObject
                         $parent = $this->getParentInstance();
                         if (BimpObject::objectLoaded($parent)) {
                             $parent->addObjectLog(static::getDocTypeLabel($doc_type) . ' reçuuu', strtoupper($doc_type) . '_RECEIVED');
-                            $note_errors = $this->addParentNoteForCommercial('Document reçu : ' . str_replace('_fin', '', $doc_type) . ' de location');
-                            if (count($note_errors)) {
-                                die(json_encode(array('note_errors' => $note_errors)));
-                            } else {
-                                die(json_encode(array('note_ok' => 1)));
-                                $parent->addObjectLog('NOTE OK');
-                            }
+                            $this->addParentNoteForCommercial('Document reçu : ' . str_replace('_fin', '', $doc_type) . ' de location');
                         }
                     }
                 }

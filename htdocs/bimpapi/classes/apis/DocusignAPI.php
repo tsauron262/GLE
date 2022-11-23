@@ -281,19 +281,12 @@ class DocusignAPI extends BimpAPI {
     
     public function getSigners($params, $object, &$errors = array()) {
         $signers = array();
-        switch (get_class($object)) {
-            case 'BContract_contrat':
-                $signers = $this->getSignersContract($params, $object);
-                break;
-            
-            case 'Bimp_Propal':
-                $signers = $this->getSignersPropal($params, $object);
-                break;
-
-            default:
-                $errors[] = "Type d'object non prit en charge : " . get_class($object);
-                break;
-        }
+        if(is_a($object, 'BContract_contrat'))
+            $signers = $this->getSignersContract($params, $object);
+        elseif(is_a($object, 'Bimp_Propal'))
+            $signers = $this->getSignersPropal($params, $object);
+        else
+            $errors[] = "Type d'object non prit en charge : " . get_class($object);
         
         return $signers;
     }

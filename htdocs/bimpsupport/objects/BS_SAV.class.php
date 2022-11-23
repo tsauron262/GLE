@@ -223,6 +223,15 @@ class BS_SAV extends BimpObject
 
     // Getters booléens:
 
+    public function isCreatable($force_create = false, &$errors = [])
+    {
+        if (!(int) BimpCore::getConf('use_sav', null, 'bimpsupport')) {
+            $errors[] = 'Les SAV sont désactivés';
+            return 0;
+        }
+        return 1;
+    }
+
     public function isPropalEditable()
     {
         $propal = $this->getChildObject('propal');
@@ -6367,7 +6376,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     }
 
     public function create(&$warnings = array(), $force_create = false)
-    {        
+    {
         $errors = array();
 
         $client = $this->getChildObject('client');
@@ -6589,7 +6598,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 //            $this->uploadFile('file', $errors);
 //            $this->uploadFile('file2', $errors);
 //        }
-
 //        if ($this->getData("id_facture_acompte") > 0 && (int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
 //            $errors[] = 'Facture d\'acompte, impossible de changer de client';
 //            return $errors;

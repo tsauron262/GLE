@@ -25,15 +25,10 @@ class DevisFinancementPDF extends DocFinancementPDF
                 'bk'    => 'EBEBEB'
             ),
             array(
-                'label' => 'Nombre de loyers',
-                'value' => $this->demande->getNbLoyers(),
+                'label' => 'Terme des paiements',
+                'value' => $this->demande->displayData('mode_calcul', 'default', false, true),
                 'bk'    => 'F2F2F2'
             ),
-            array(
-                'label' => 'Durée totale',
-                'value' => $this->demande->displayDuration(),
-                'bk'    => 'EBEBEB'
-            )
         );
 
         $html .= '<table style="width: 100%" cellpadding="5">';
@@ -163,11 +158,14 @@ class DevisFinancementPDF extends DocFinancementPDF
         $periodicity = (int) $this->demande->getData('periodicity');
         $nb_loyers = $nb_mois / $periodicity;
         $duration_label = '';
+        $dyn_duration_label = '';
         if (in_array($nb_mois, array(12, 24, 36, 48, 60, 72))) {
             $nb_years = $nb_mois / 12;
             $duration_label = $nb_years . ' an' . ($nb_years > 1 ? 's' : '');
+            $dyn_duration_label = ($nb_years + 1) . ' ans';
         } else {
             $duration_label = $nb_mois . ' mois';
+            $dyn_duration_label = $nb_mois + 12 . ' mois';
         }
 
         $has_evo = (int) BimpTools::getArrayValueFromPath($this->options, 'formules/evo', 0);
@@ -245,16 +243,16 @@ class DevisFinancementPDF extends DocFinancementPDF
 
                 $html .= '<table cellpadding="3px" style="margin-left: 80px">';
                 $html .= '<tr>';
-                $html .= '<th style="background-color: #' . $this->primary . '; color: #fff; width: 100px">Période optimale</th>';
-                $html .= '<th style="background-color: #' . $this->primary . '; color: #fff; width: 200px">Loyer ' . BFTools::$periodicities_masc[$periodicity] . '*</th>';
-                $html .= '<th style="background-color: #' . $this->primary . '; color: #fff; width: 200px">Loyer si prolongation</th>';
+                $html .= '<th style="background-color: #' . $this->primary . '; color: #fff; width: 100px">Durée totale</th>';
+                $html .= '<th style="background-color: #' . $this->primary . '; color: #fff; width: 200px">Période optimale</th>';
+                $html .= '<th style="background-color: #' . $this->primary . '; color: #fff; width: 200px">Prolongation</th>';
                 $html .= '</tr>';
                 $html .= '<tr>';
-                $html .= '<td style="background-color: #F2F2F2"><b>' . $duration_label . '</b></td>';
+                $html .= '<td style="background-color: #F2F2F2"><b>' . $dyn_duration_label . '</b></td>';
                 $html .= '<td style="background-color: #F2F2F2">' . $nb_loyers . ' loyers ' . BFTools::$periodicities_masc[$periodicity] . 's* de ';
                 $html .= '<b>' . BimpTools::displayMoneyValue($loyer_dyn_ht) . '</b>';
                 $html .= '</td>';
-                $html .= '<td>+ ' . (12 / $periodicity) . ' loyers de <b>' . BimpTools::displayMoneyValue($loyer_dyn_suppl) . '</b></td>';
+                $html .= '<td>+ ' . (12 / $periodicity) . ' loyers ' . BFTools::$periodicities_masc[$periodicity] . 's* de <b>' . BimpTools::displayMoneyValue($loyer_dyn_suppl) . '</b></td>';
                 $html .= '</tr>';
                 $html .= '</table>';
                 $html .= '<p style="font-style: italic; font-size: 7px">';

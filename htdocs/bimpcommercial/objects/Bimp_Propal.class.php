@@ -618,8 +618,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     public function getActionsButtons()
     {
-        global $langs;
-        global $user;
+        global $langs, $user;
         $langs->load('propal');
 
         if ($this->isLoaded()) {
@@ -913,10 +912,13 @@ class Bimp_Propal extends Bimp_PropalTemp
                     );
                 }
 
-                if ($user->admin) {
+                if ($user->admin) { // Mettre ça dans canSetAction()
                     // Téléchargement des fichiers
-                    if ($this->getData('id_signature') and $signature->getData('dist_type') == BimpSignature::DIST_DOCUSIGN) {
+                    if (!BimpObject::objectLoaded($signature)) {
+                        $signature = $this->getChildObject('signature');
+                    }
 
+                    if (BimpObject::objectLoaded($signature) && $signature->getData('dist_type') == BimpSignature::DIST_DOCUSIGN) { // Mettre ça dans isActionAllowed()
                         $file_name = $this->getSignatureDocFileName('propal', true);
                         $file_dir = $this->getSignatureDocFileDir('propal');
                         if (file_exists($file_dir . $file_name)) {

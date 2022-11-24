@@ -2876,7 +2876,6 @@ class BContract_contrat extends BimpDolObject
                 $verif_contact_suivi = false;
                 $errors[] = "Le contrat ne compte pas de contact client de suivi du contrat";
             }
-
             if ($verif_contact_suivi) {
                 $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $this->db->getValue('element_contact', 'fk_socpeople', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat));
                 if (!$contact->getData('email') || (!$contact->getData('phone') && !$contact->getData('phone_mobile'))) {
@@ -2910,7 +2909,7 @@ class BContract_contrat extends BimpDolObject
                 $errors[] = "Il doit y avoir au moin un numéro de série dans une des lignes du contrat";
             if (!$this->getData('entrepot') && (int) BimpCore::getConf("USE_ENTREPOT"))
                 $errors[] = "Il doit y avoir un entrepot pour le contrat";
-            $errors = array();
+//            $errors = array();
             $modeReglementId = $this->db->getValue('c_paiement', 'id', 'code = "PRE"');
 
             if(!count($errors) && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE && $this->getData('moderegl') != $modeReglementId) {

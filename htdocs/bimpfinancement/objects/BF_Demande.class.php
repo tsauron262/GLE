@@ -918,6 +918,25 @@ class BF_Demande extends BimpObject
 
     // getters données: 
 
+    public function addNotificationNote($content, $type_author = BimpNote::BN_AUTHOR_USER, $email = '', $auto = 0, $visibility = BimpNote::BN_MEMBERS, $delete_on_view = 0)
+    {
+        $errors = array();
+
+        if ((int) $this->getData('id_user_resp')) {
+            $this->addNote($content, $visibility, 0, $auto, $email, $type_author, BimpNote::BN_DEST_USER, 0, (int) $this->getData('id_user_resp'), $delete_on_view);
+        } else {
+            $id_group = (int) BimpCore::getConf('id_group_commerciaux', null, 'bimpfinancement');
+
+            if ($id_group) {
+                $this->addNote($content, $visibility, 0, $auto, $email, $type_author, BimpNote::BN_DEST_GROUP, $id_group, 0, $delete_on_view);
+            } else {
+                $errors[] = 'Groupe commerciaux non défini';
+            }
+        }
+
+        return $errors;
+    }
+
     public function getNextRef()
     {
         $min_chars = 5;
@@ -3584,7 +3603,7 @@ class BF_Demande extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = [], $force_create = false)
     {
@@ -3779,13 +3798,8 @@ class BF_Demande extends BimpObject
 
         if (!count($errors)) {
             BimpCache::getBdb()->db->commit();
-
-            $email = BimpTools::cleanEmailsStr(BimpCore::getConf('new_external_demandes_notif_emails', null, 'bimpfinancement'));
-
-            if ($email) {
-                $msg = 'Nouvelle demande de location de la part de ' . $source_label;
-                $demande->addNote($msg, null, 0, 0, $email, BimpNote::BN_AUTHOR_USER, 0, 0, 0, 1);
-            }
+            $msg = 'Nouvelle demande de location de la part de ' . $source_label;
+            $this->addNotificationNote($msg, BimpNote::BN_AUTHOR_USER, '', 0, BimpNote::BN_MEMBERS, 1);
         } else {
             BimpCache::getBdb()->db->rollback();
         }

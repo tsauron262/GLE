@@ -39,8 +39,7 @@ class BimpNote extends BimpObject
         self::BN_DEST_NO    => 'Aucun',
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Group'
-            )
-    ;
+    );
     # ID GR:
 
     const BN_GROUPID_LOGISTIQUE = 108;
@@ -50,7 +49,6 @@ class BimpNote extends BimpObject
     const BN_GROUPID_ACHAT = 8;
 
     // Droits users: 
-
     public function canEdit()
     {
         global $user;
@@ -79,7 +77,6 @@ class BimpNote extends BimpObject
     }
 
     // Getters booléens:
-
     public function isFieldEditable($field, $force_edit = false)
     {
         if ($field == "viewed") {
@@ -117,6 +114,53 @@ class BimpNote extends BimpObject
         if ($this->modeArchive)
             return 0;
         return (int) $this->isEditable($force_delete, $errors);
+    }
+
+    public function isActionAllowed($action, &$errors = [])
+    {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+
+        if ($this->modeArchive) {
+            $errors[] = 'Mode archive';
+            return 0;
+        }
+
+        switch ($action) {
+            case 'repondre':
+                if ((int) $this->getData('type_author') !== self::BN_AUTHOR_USER) {
+                    $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu. 
+                    return 0;
+                }
+                global $user;
+                if ($this->getData('user_create') == $user->id) {
+                    $errors[] = 'L\'utilisateur connecté est l\'auteur';
+                    return 0;
+                }
+
+                return 1;
+
+            case 'setAsViewed':
+                if ((int) $this->getData('viewed')) {
+                    $errors[] = 'Déjà vue';
+                    return 0;
+                }
+
+                global $user;
+                if ($this->getData('user_create') == $user->id) {
+                    $errors[] = 'L\'utilisateur connecté est l\'auteur';
+                    return 0;
+                }
+
+                if (!$this->i_am_dest()) {
+                    $errors[] = 'Vous ne faites pas partie des destinataires';
+                    return 0;
+                }
+
+                return 1;
+        }
+        return parent::isActionAllowed($action, $errors);
     }
 
     public function i_am_dest()
@@ -208,7 +252,6 @@ class BimpNote extends BimpObject
     }
 
     // Getters:
-
     public static function getFiltersByUser($id_user = null)
     {
         $filters = array();
@@ -287,25 +330,31 @@ class BimpNote extends BimpObject
         return parent::getLink($params, $forced_context);
     }
 
+    public function getActionsButtons()
+    {
+        $buttons = array();
+        if ($this->isActionAllowed('repondre') && $this->canSetAction('repondre')) {
+            $buttons[] = array(
+                'label'   => 'Répondre',
+                'icon'    => 'far fa-paper-plane',
+                'onclick' => $this->getJsRepondre()
+            );
+        }
+
+        if ($this->isActionAllowed('setAsViewed') && $this->canSetAction('setAsViewed')) {
+            $buttons[] = array(
+                'label'   => 'Marquer comme vue',
+                'icon'    => 'fas_envelope-open',
+                'onclick' => $this->getJsActionOnclick('setAsViewed')
+            );
+        }
+
+        return $buttons;
+    }
+
     public function getListExtraBtn()
     {
-        global $user;
-        $buttons = array();
-        if ($this->isLoaded() && !$this->modeArchive) {
-            if ($this->getData('user_create') != $user->id)
-                $buttons[] = array(
-                    'label'   => 'Répondre',
-                    'icon'    => 'far fa-paper-plane',
-                    'onclick' => $this->getJsRepondre());
-
-            if ($this->i_am_dest() && $this->getData('viewed') == 0)
-                $buttons[] = array(
-                    'label'   => 'Marquer comme vue',
-                    'icon'    => 'fas_envelope-open',
-                    'onclick' => $this->getJsActionOnclick('setAsViewed')
-                );
-        }
-        return $buttons;
+        return $this->getActionsButtons();
     }
 
     public function getInitiale($str)
@@ -324,7 +373,15 @@ class BimpNote extends BimpObject
 
     public function getJsRepondre()
     {
-        return $this->getJsActionOnclick('repondre', array("type_dest" => 1, "fk_user_dest" => $this->getData("user_create"), "content" => "", "id" => ""), array('form_name' => 'rep'));
+        return $this->getJsActionOnclick('repondre', array(
+                    "type_dest"    => 1,
+                    "fk_user_dest" => $this->getData("user_create"),
+                    "content"      => "",
+                    "id"           => ""
+                        ), array(
+                    'form_name' => 'rep'
+                        )
+        );
     }
 
     public function getNoteForUser($id_user, $id_max, &$errors = array())
@@ -564,7 +621,7 @@ class BimpNote extends BimpObject
         if (in_array((int) $this->getData('visibilty'), array(3, 4))) {
             BimpCore::addlog('Visibilité note à modifier', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                 'visibilité' => $this->getData('visibilty'),
-                'Info'       => 'Les identifiants ont changé : remplacer dasn le code PHP 3 par 10 et 4 par 20.<br/>Toujours utliser les constantes de classes quand elles existent(ex : BimpNote::BN_ALL) et jamais les valeurs numériques directement.'
+                'Info'       => 'Les identifiants ont changé : remplacer dans le code PHP 3 par 10 et 4 par 20.<br/>Toujours utliser les constantes de classes quand elles existent(ex : BimpNote::BN_ALL) et jamais les valeurs numériques directement.'
                     ), true);
             switch ($this->getData('visiblity')) {
                 case 3:

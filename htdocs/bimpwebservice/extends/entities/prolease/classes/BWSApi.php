@@ -89,6 +89,15 @@ BWSApi::$requests['setDemandeFinancementDocRefused'] = array(
         'note'       => array('label' => 'Note', 'data_type' => 'text', 'default' => '')
     )
 );
+BWSApi::$requests['addDemandeFinancementNote'] = array(
+    'desc'   => 'Ajout d\'une note pour une demande de location',
+    'params' => array(
+        'id_demande'   => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1),
+        'author_email' => array('label' => 'Adresse e-mail auteur', 'required' => 1),
+        'author_name'  => array('label' => 'Nom auteur', 'required' => 1),
+        'note'         => array('label' => 'Note', 'data_type' => 'text', 'required' => 1)
+    )
+);
 
 class BWSApi_ExtEntity extends BWSApi
 {
@@ -260,6 +269,32 @@ class BWSApi_ExtEntity extends BWSApi
                 $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
             } else {
                 $errors = $demande->onDocRefused($this->getParam('doc_type', ''), $this->getParam('note', ''));
+
+                if (count($errors)) {
+                    $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+                } else {
+                    $response['success'] = 1;
+                }
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_addDemandeFinancementNote()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $id_demande = (int) $this->getParam('id_demande', 0);
+            $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
+
+            if (!BimpObject::objectLoaded($demande)) {
+                $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
+            } else {
+                $email = BimpTools::cleanEmailsStr($this->getParam('author_email', ''), $this->getParam('author_name', ''));
+                $note = $this->getParam('note', '');
+                $errors = $demande->addNotificationNote($note, BimpNote::BN_AUTHOR_FREE, $email, 0, BimpNote::BN_PARTNERS, 0);
 
                 if (count($errors)) {
                     $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));

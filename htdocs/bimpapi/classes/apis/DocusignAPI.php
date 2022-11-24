@@ -81,24 +81,29 @@ class DocusignAPI extends BimpAPI {
 //        $id_account = $this->userAccount->getData('login');
         $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
         
-        $result = $this->execCurlCustom('sendEnvelope', array(
-            'fields' => array(
-                'status' => 'sent',
-                'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
-                'documents' => array(
-                        array(
-                            'documentBase64' => base64_encode(file_get_contents($params['file'])),
-                            'documentId' => 1,
-                            'name' => $object->getSignatureDocFileName())
-                    ),
-                'recipients' => array('signers' => $this->getSigners($params, $object, $errors))
-            ),
-            'type' => 'FILE',
-            'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes'
-            ), $errors, $response_headers, $response_code, $warnings);
-        
-        
-        return $result;
+        if(is_file($params['file'])){
+            $result = $this->execCurlCustom('sendEnvelope', array(
+                'fields' => array(
+                    'status' => 'sent',
+                    'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
+                    'documents' => array(
+                            array(
+                                'documentBase64' => base64_encode(file_get_contents($params['file'])),
+                                'documentId' => 1,
+                                'name' => $object->getSignatureDocFileName())
+                        ),
+                    'recipients' => array('signers' => $this->getSigners($params, $object, $errors))
+                ),
+                'type' => 'FILE',
+                'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes'
+                ), $errors, $response_headers, $response_code, $warnings);
+
+
+            return $result;
+        }
+        else{
+            $errors[] = $params['file'].' introuvable';
+        }
     }
     
     public function getEnvelope($params, &$errors = array(), &$warnings = array()) {
@@ -413,7 +418,7 @@ Signature",
                 'routingOrder'=> '1',
                 'emailNotification' => array(
                     'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
-                    'emailBody' => $object->getPropalEmailContent()
+                    'emailBody' => $object->getDocuSignEmailContent()
                 ),
                 'tabs'        => array(
                     'signHereTabs' => array(

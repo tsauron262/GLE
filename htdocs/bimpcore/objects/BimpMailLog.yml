@@ -63,6 +63,7 @@ lists:
             mail_cc: 
             mail_subject:
             msg:
+                min_width: 500
             msg_id:
             old_trace:
             user_create:

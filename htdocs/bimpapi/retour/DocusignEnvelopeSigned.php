@@ -33,7 +33,7 @@ if(is_array($in)) {
                     'id_envelope' => $in['data']['envelopeId']
                 );
                 $success = '';
-                $return = $signature->actionSignDocuSign($data, $success);
+                $return = $signature->actionDownloadSignature($data, $success);
                 $errors = BimpTools::merge_array($errors, $return['errors']);
             } else {
                 $errors[] = "Il n'existe pas d'enveloppe avec pour id DocuSign " . $in['data']['envelopeId'];

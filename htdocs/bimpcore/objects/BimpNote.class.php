@@ -621,7 +621,7 @@ class BimpNote extends BimpObject
 
     public function fetch($id, $parent = null)
     {
-        parent::fetch($id, $parent);
+        $return = parent::fetch($id, $parent);
 
         // Par précaution + compat avec les notes archivées: 
         if (in_array($this->getData('visibility'), array(3, 4))) {
@@ -635,6 +635,7 @@ class BimpNote extends BimpObject
                     break;
             }
         }
+        return $return;
     }
 
     // Méthodes statiques:

@@ -68,7 +68,7 @@ fields:
         type: int
         values: 
             array: visibilities
-        default_value: 3
+        default_value: 10
     content: 
         label: Texte
         type: text

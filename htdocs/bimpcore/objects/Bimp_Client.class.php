@@ -3252,7 +3252,7 @@ class Bimp_Client extends Bimp_Societe
                                     if ((int) $cover['amount'] != $this->getData('outstanding_limit_credit_check')) {
                                         foreach ($this->getCommerciauxArray() as $id_commercial => $inut) {
                                             $this->addNote($success,
-                                                           BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                                           BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                                                            BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
                                             break;
                                         }
@@ -3269,7 +3269,7 @@ class Bimp_Client extends Bimp_Societe
                                     if ((int) $cover['amount'] != $this->getData('outstanding_limit_atradius')) {
                                         foreach ($this->getCommerciauxArray() as $id_commercial => $inut) {
                                             $this->addNote($success,
-                                                           BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                                           BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                                                            BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
                                             break;
                                         }
@@ -3468,7 +3468,7 @@ class Bimp_Client extends Bimp_Societe
                 BimpObject::loadClass('bimpcore', 'BimpNote');
 
                 $c->addNote($msg,
-                            BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                            BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                             BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_ATRADIUS);
 
                 $nb_update++;
@@ -3542,12 +3542,12 @@ class Bimp_Client extends Bimp_Societe
                         $syncro_avec_maj .= $c->getNomUrl() . " " . $msg . '<br/>';
 
                         $c->addNote($msg,
-                                    BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                    BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                                     BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_ATRADIUS);
 
                         foreach ($c->getCommerciauxArray() as $id_commercial => $inut) {
                             $c->addNote($msg,
-                                        BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                                         BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
                             break;
                         }

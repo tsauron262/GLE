@@ -157,7 +157,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function isDeletable($force_delete = false, &$errors = [])
     {
-        if ($this->isOldFi()) {
+        if (!$force_delete && $this->isOldFi()) {
             $errors[] = 'Ancienne version des FI';
             return 0;
         }
@@ -2317,7 +2317,7 @@ class BT_ficheInter extends BimpDolObject
         if ((int) $data['status'] == self::STATUT_BROUILLON) {
             $this->updateField('old_status', $this->getData('fk_statut'));
         }
-        $this->addNote('Repassé au statut brouillon par ' . $user->getNomUrl());
+        $this->addObjectLog('Remise au statut brouillon');
 
         $this->updateField('fk_statut', (int) $data['status']);
 

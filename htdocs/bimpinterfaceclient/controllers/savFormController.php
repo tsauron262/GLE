@@ -1983,7 +1983,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                                 $debug .= '<br/><br/>Ajout note SAV: ';
 
-                                $note_errors = $sav->addNote($msg, 4);
+                                $note_errors = $sav->addNote($msg, BimpNote::BN_ALL);
 
                                 if (count($note_errors)) {
                                     $debug .= BimpRender::renderAlerts($note_errors);
@@ -2374,7 +2374,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                         // Maj SAV: 
                         $sav->updateField('status', -2);
-                        $sav->addNote('Annulé par le client le ' . date('d / m / Y à H:i'), 4);
+                        $sav->addNote('Annulé par le client le ' . date('d / m / Y à H:i'), BImpNote::BN_ALL);
                     }
                 }
             }

@@ -421,7 +421,8 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
             if($modeLabel)
                 $filtre = array(
                     'id_product'  => 0,
-                    'product_label' => ''
+                    'product_label' => '',
+                    'status_gsx' => array('operator'=>'!=', 'value'=> 2)
                 );
             else
                 $filtre = array(
@@ -432,7 +433,8 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                         );
             if($nb > 5){//sinon c'est un test de reconnexion
 //                $filtre['status_gsx'] = array(0,3);
-                $filtre['custom'] = array('custom'=>'(status_gsx = 0 || (status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0))))');
+                if(!$modeLabel)
+                    $filtre['custom'] = array('custom'=>'(status_gsx = 0 || (status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0))))');
                 $rows = $equipment->getList($filtre, $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
             }
             else{

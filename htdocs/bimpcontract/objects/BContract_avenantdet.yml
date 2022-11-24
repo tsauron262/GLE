@@ -156,4 +156,4 @@ forms:
               input_name: new_serials
               input:
                   type: textarea
-                  help: Merci de séparer les numéros de série par un saut de ligne
+                  help: Merci d'effectuer un retour à la ligne entre chaque n° de série

@@ -2,115 +2,54 @@
 
 class BimpNote extends BimpObject
 {
+    # Visibilités:
+    # ATTENTION : ne pas utiliser 3 et 4 (anciennes valeurs)
 
-    // Visibilités:
-    const BIMP_NOTE_AUTHOR = 1;
-    const BIMP_NOTE_ADMIN = 2;
-    const BIMP_NOTE_MEMBERS = 3;
-    const BIMP_NOTE_ALL = 4;
-    // Types d'auteur:
+    const BN_AUTHOR = 1;
+    const BN_ADMIN = 2;
+    const BN_MEMBERS = 10;
+    const BN_PARTNERS = 11;
+    const BN_ALL = 20;
+
+    public static $visibilities = array(
+        self::BN_AUTHOR   => array('label' => 'Auteur seulement', 'classes' => array('danger')),
+        self::BN_ADMIN    => array('label' => 'Administrateurs seulement', 'classes' => array('important')),
+        self::BN_MEMBERS  => array('label' => 'Membres', 'classes' => array('warning')),
+        self::BN_PARTNERS => array('label' => 'Membres et partenaires', 'classes' => array('warning')),
+        self::BN_ALL      => array('label' => 'Membres, partenaires et clients', 'classes' => array('success')),
+    );
+    # Types d'auteur:
+
     const BN_AUTHOR_USER = 1;
     const BN_AUTHOR_SOC = 2;
     const BN_AUTHOR_FREE = 3;
-    // Types dest:
+
+    public static $types_author = array(
+        self::BN_AUTHOR_USER => 'Utilisateur',
+        self::BN_AUTHOR_SOC  => 'Tiers',
+        self::BN_AUTHOR_FREE => 'Libre'
+    );
+    # Types destinataire:
+
     const BN_DEST_NO = 0;
     const BN_DEST_USER = 1;
     const BN_DEST_GROUP = 2;
-    // ID GR:
+
+    public static $types_dest = array(
+        self::BN_DEST_NO    => 'Aucun',
+        self::BN_DEST_USER  => 'Utilisateur',
+        self::BN_DEST_GROUP => 'Group'
+            )
+    ;
+    # ID GR:
+
     const BN_GROUPID_LOGISTIQUE = 108;
     const BN_GROUPID_FACT = 408;
     const BN_GROUPID_ATRADIUS = 680;
     const BN_GROUPID_CONTRAT = 686;
     const BN_GROUPID_ACHAT = 8;
 
-    public static $visibilities = array(
-        self::BIMP_NOTE_AUTHOR  => array('label' => 'Auteur seulement', 'classes' => array('danger')),
-        self::BIMP_NOTE_ADMIN   => array('label' => 'Administrateurs seulement', 'classes' => array('important')),
-        self::BIMP_NOTE_MEMBERS => array('label' => 'Membres', 'classes' => array('warning')),
-        self::BIMP_NOTE_ALL     => array('label' => 'Membres et client', 'classes' => array('success')),
-    );
-    public static $types_author = array(
-        self::BN_AUTHOR_USER => 'Utilisateur',
-        self::BN_AUTHOR_SOC  => 'Tiers',
-        self::BN_AUTHOR_FREE => 'Libre'
-    );
-    public static $types_dest = array(
-        self::BN_DEST_NO    => 'Aucun',
-        self::BN_DEST_USER  => 'Utilisateur',
-        self::BN_DEST_GROUP => 'Group'
-    );
-
-    public static function cronNonLu()
-    {
-        $listUser = BimpObject::getBimpObjectList('bimpcore', 'Bimp_User', array('statut' => 1));
-
-        global $db, $langs;
-        $userT = new User($db);
-//        $listUser = array(242);
-        foreach ($listUser as $idUser) {
-            $html = '';
-            $notes = BimpNote::getMyNewConversations(0, true, 500, $idUser, true, false);
-            $maxForMail = 20;
-            $data = array();
-            foreach ($notes as $note)
-                if ($note['lu'] == 0 && count($data) < $maxForMail) {
-                    $noteObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $note['idNoteRef']);
-                    $data[] = 'Message de ' . $noteObj->displayData('user_create', 'nom') . ' concernant ' . $noteObj->getParentLink() . ': <br/><i>' . $noteObj->displayData('content') . '</i>';
-                }
-            if (count($data) > 0) {
-                $userT->fetch($idUser);
-                $html = '';
-//                $htmlTitre = '<h2>User : ' . $userT->getFullName($langs) . '</h3><br/>';
-                $html .= 'Bonjour vous avez ' . count($notes) . ' message(s) non lu : <br/>';
-                if (count($data) >= $maxForMail)
-                    $html .= 'Voici les ' . count($data) . ' dérniéres<br/>';
-                $html .= '<br/>Pour désactiver cette relance, vous pouvez : <br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.<br/><br/>';
-
-                $html .= implode('<br/><br/>', $data);
-                mailSyn2('Message dans l\'erp', $userT->email, null, $html);
-
-//                echo $htmlTitre . $html;
-            }
-        }
-
-        return '';
-    }
-
-    public function traiteContent()
-    {
-        $note = $this->getData('content');
-        $note = trim($note);
-        $tab = array(CHR(13) . CHR(10) => "[saut]", CHR(13) . CHR(10) . ' ' => "[saut]", CHR(10) => "[saut]");
-        $tab2 = array("[saut][saut][saut][saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut][saut][saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut][saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut]" => CHR(13) . CHR(10));
-        $note = strtr($note, $tab);
-        $note = strtr($note, $tab2);
-        $note = strtr($note, $tab);
-        $note = strtr($note, $tab2);
-        $note = strtr($note, $tab);
-        $note = strtr($note, $tab2);
-//        die('<textarea>'.$note.'</textarea>');
-        $this->set('content', $note);
-    }
-
-    public function create(&$warnings = array(), $force_create = false)
-    {
-        $this->traiteContent();
-        $return = parent::create($warnings, $force_create);
-
-        if (!count($return)) {
-            $obj = $this->getParentInstance();
-            if (is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote'))
-                $obj->afterCreateNote($this);
-        }
-        return $return;
-    }
-
-    public function update(&$warnings = array(), $force_update = false)
-    {
-        $this->traiteContent();
-        $return = parent::update($warnings, $force_update);
-        return $return;
-    }
+    // Droits users: 
 
     public function canEdit()
     {
@@ -128,7 +67,7 @@ class BimpNote extends BimpObject
 
         if (BimpObject::objectLoaded($userClient)) {
             if ($this->isLoaded()) {
-                if ($this->getData('visibility') < 4) {
+                if ($this->getData('visibility') < self::BN_ALL) {
                     return 0;
                 }
             }
@@ -154,16 +93,16 @@ class BimpNote extends BimpObject
 
     public function isCreatable($force_create = false, &$errors = array())
     {
-        if($this->modeArchive)
+        if ($this->modeArchive)
             return 0;
         return (int) $this->isEditable($force_create, $errors);
     }
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if($this->modeArchive)
+        if ($this->modeArchive)
             return 0;
-        
+
         $parent = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
@@ -175,7 +114,7 @@ class BimpNote extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
-        if($this->modeArchive)
+        if ($this->modeArchive)
             return 0;
         return (int) $this->isEditable($force_delete, $errors);
     }
@@ -203,13 +142,20 @@ class BimpNote extends BimpObject
         return 0;
     }
 
-    public function i_view()
+    public function i_view(&$errors = array(), &$warnings = array())
     {
-        if (!$this->getData("viewed") && $this->i_am_dest()) {
-            $this->set('viewed', 1);
-            $warn = array();
-            if (empty($this->update($warn, true)))
-                return 1;
+        if ((int) $this->getData('viewed')) {
+            $errors[] = 'Cette note est déjà marquée comme vue';
+        } elseif (!$this->i_am_dest()) {
+            $errors[] = 'Vous n\'êtes pas le destinataire de cette note';
+        } else {
+            if ((int) $this->getData('delete_on_view')) {
+                $errors = $this->delete($warnings, true);
+            } else {
+                $this->set('viewed', 1);
+                $errors = $this->update($warnings, true);
+            }
+            return (count($errors) ? 0 : 1);
         }
 
         return 0;
@@ -250,19 +196,18 @@ class BimpNote extends BimpObject
 
             if ($object_type && $module && $object_name && $id_object) {
                 if ($object_type === 'bimp_object') {
-                    $coll = new BimpCollection($module, $object_name);
+//                    $coll = new BimpCollection($module, $object_name);
                     $html = BimpCache::getBimpObjectLink($module, $object_name, $id_object);
                 }
             }
-        }
-        else{
+        } else {
             return $this->parent->getLink();
         }
 
         return $html;
     }
 
-    // Getters: 
+    // Getters:
 
     public static function getFiltersByUser($id_user = null)
     {
@@ -278,15 +223,15 @@ class BimpNote extends BimpObject
 
         if (!BimpObject::objectLoaded($user)) {
             $filters['visibility'] = array(
-                'operator' => '>',
-                'value'    => 3
+                'operator' => '>=',
+                'value'    => self::BN_ALL
             );
         } elseif (!$user->admin) {
             $filters['or_visibility'] = array(
                 'or' => array(
                     'visibility'  => array(
-                        'operator' => '>',
-                        'value'    => 2
+                        'operator' => '>=',
+                        'value'    => self::BN_MEMBERS
                     ),
                     'user_create' => $user->id
                 )
@@ -333,11 +278,12 @@ class BimpNote extends BimpObject
         }
         return $tabFils;
     }
-    
-    public function getLink($params = [], $forced_context = '') {
+
+    public function getLink($params = [], $forced_context = '')
+    {
         $parent = $this->getParentInstance();
-        if(is_object($parent) && method_exists($parent, 'getLink'))
-                return $parent->getLink($params, $forced_context);
+        if (is_object($parent) && method_exists($parent, 'getLink'))
+            return $parent->getLink($params, $forced_context);
         return parent::getLink($params, $forced_context);
     }
 
@@ -468,7 +414,7 @@ class BimpNote extends BimpObject
 //                    $dest = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('fk_user_dest'));
 //                    $msg['dest']['nom'] = $dest->getData('firstname') . ' ' . $dest->getData('lastname');
 //                } elseif ($msg['is_grp'])
-                    $msg['dest']['nom'] = $note->displayDestinataire(false, true);
+                $msg['dest']['nom'] = $note->displayDestinataire(false, true);
             }
             if (count($msg))
                 $messages['content'][] = $msg;
@@ -517,22 +463,6 @@ class BimpNote extends BimpObject
         return '';
     }
 
-    public function actionSetAsViewed($data, &$success = '')
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Marquer comme vue';
-
-        if (!$this->i_view())
-            $errors[] = 'Impossible';
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
-            'success_callback' => 'reloadNote();'
-        );
-    }
-
     public function displayChatmsg($style = '', $checkview = true)
     {
         global $user;
@@ -566,6 +496,24 @@ class BimpNote extends BimpObject
         return $html;
     }
 
+    // Traitements: 
+
+    public function traiteContent()
+    {
+        $note = $this->getData('content');
+        $note = trim($note);
+        $tab = array(CHR(13) . CHR(10) => "[saut]", CHR(13) . CHR(10) . ' ' => "[saut]", CHR(10) => "[saut]");
+        $tab2 = array("[saut][saut][saut][saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut][saut][saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut][saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut]" => CHR(13) . CHR(10));
+        $note = strtr($note, $tab);
+        $note = strtr($note, $tab2);
+        $note = strtr($note, $tab);
+        $note = strtr($note, $tab2);
+        $note = strtr($note, $tab);
+        $note = strtr($note, $tab2);
+//        die('<textarea>'.$note.'</textarea>');
+        $this->set('content', $note);
+    }
+
     // Actions: 
 
     public function actionRepondre($data, &$success = '')
@@ -586,8 +534,23 @@ class BimpNote extends BimpObject
         BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'reloadNote();'
+        );
+    }
+
+    public function actionSetAsViewed($data, &$success = '')
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Marquer comme vue';
+
+        $this->i_view($errors, $warnings);
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => 'reloadNote();'
         );
     }
@@ -596,16 +559,28 @@ class BimpNote extends BimpObject
 
     public function validate()
     {
+        $this->traiteContent();
+
+        if (in_array((int) $this->getData('visibilty'), array(3, 4))) {
+            BimpCore::addlog('Visibilité note à modifier', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                'visibilité' => $this->getData('visibilty'),
+                'Info'       => 'Les identifiants ont changé : remplacer dasn le code PHP 3 par 10 et 4 par 20.<br/>Toujours utliser les constantes de classes quand elles existent(ex : BimpNote::BN_ALL) et jamais les valeurs numériques directement.'
+                    ), true);
+            switch ($this->getData('visiblity')) {
+                case 3:
+                    $this->set('visiblity', self::BN_MEMBERS);
+                    break;
+                case 4:
+                    $this->set('visiblity', self::BN_ALL);
+                    break;
+            }
+        }
+
         $errors = parent::validate();
 
         if (!count($errors)) {
             switch ((int) $this->getData('type_author')) {
                 case self::BN_AUTHOR_USER:
-                    if ($this->isLoaded()) {
-//                        if (!(int) $this->getData('user_create')) {
-//                            $errors[] = 'ID de l\'utilisateur absent';
-//                        }
-                    }
                     break;
 
                 case self::BN_AUTHOR_SOC:
@@ -623,6 +598,44 @@ class BimpNote extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $return = parent::create($warnings, $force_create);
+
+        if (!count($return)) {
+            $obj = $this->getParentInstance();
+            if (is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote')) {
+                $obj->afterCreateNote($this);
+            }
+        }
+        return $return;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $return = parent::update($warnings, $force_update);
+        return $return;
+    }
+
+    public function fetch($id, $parent = null)
+    {
+        $return = parent::fetch($id, $parent);
+
+        // Par précaution + compat avec les notes archivées: 
+        if (in_array($this->getData('visibility'), array(3, 4))) {
+            switch ($this->getData('visibility')) {
+                case 3:
+                    $this->set('visibility', self::BN_MEMBERS);
+                    break;
+
+                case 4:
+                    $this->set('visibility', self::BN_ALL);
+                    break;
+            }
+        }
+        return $return;
     }
 
     // Méthodes statiques:
@@ -720,5 +733,41 @@ class BimpNote extends BimpObject
             }
         }
         return $tabFils;
+    }
+
+    public static function cronNonLu()
+    {
+        $listUser = BimpObject::getBimpObjectList('bimpcore', 'Bimp_User', array('statut' => 1));
+
+        global $db, $langs;
+        $userT = new User($db);
+//        $listUser = array(242);
+        foreach ($listUser as $idUser) {
+            $html = '';
+            $notes = BimpNote::getMyNewConversations(0, true, 500, $idUser, true, false);
+            $maxForMail = 20;
+            $data = array();
+            foreach ($notes as $note)
+                if ($note['lu'] == 0 && count($data) < $maxForMail) {
+                    $noteObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $note['idNoteRef']);
+                    $data[] = 'Message de ' . $noteObj->displayData('user_create', 'nom') . ' concernant ' . $noteObj->getParentLink() . ': <br/><i>' . $noteObj->displayData('content') . '</i>';
+                }
+            if (count($data) > 0) {
+                $userT->fetch($idUser);
+                $html = '';
+//                $htmlTitre = '<h2>User : ' . $userT->getFullName($langs) . '</h3><br/>';
+                $html .= 'Bonjour vous avez ' . count($notes) . ' message(s) non lu : <br/>';
+                if (count($data) >= $maxForMail)
+                    $html .= 'Voici les ' . count($data) . ' dérniéres<br/>';
+                $html .= '<br/>Pour désactiver cette relance, vous pouvez : <br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.<br/><br/>';
+
+                $html .= implode('<br/><br/>', $data);
+                mailSyn2('Message dans l\'erp', $userT->email, null, $html);
+
+//                echo $htmlTitre . $html;
+            }
+        }
+
+        return '';
     }
 }

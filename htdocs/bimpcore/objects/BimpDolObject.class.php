@@ -1289,7 +1289,7 @@ class BimpDolObject extends BimpObject
                                 $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
                             } else {
                                 global $user, $langs;
-                                $errors = array_merge($errors, $soc->addNote('Création ' . $this->getLabel() . ' forcé par ' . $user->getFullName($langs)));
+                                $errors = array_merge($errors, $soc->addObjectLog('Création ' . $this->getLabel() . ' forcée par ' . $user->getFullName($langs)));
                             }
                         }
                     } else {

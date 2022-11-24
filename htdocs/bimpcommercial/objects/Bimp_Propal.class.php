@@ -689,7 +689,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                         'form_name' => 'create_signature'
                                     ))
                                 );
-                                if (1) {//$user->rights->devis->creer and $status == 1) {
+                                if ($user->admin) {//$user->rights->devis->creer and $status == 1) {
                                     $buttons[] = array(
                                         'label'   => 'Envoyer via DocuSign',
                                         'icon'    => 'fas_signature',

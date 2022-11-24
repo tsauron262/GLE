@@ -182,7 +182,7 @@ class BT_ficheInter extends BimpDolObject
                 return 1;
 
             case 'generatePdf':
-                if ($user->admin)
+                if ($user->admin || $user->rights->bimptechnique->modif_apres_validation)
                     return 1;
                 if ($status !== self::STATUT_BROUILLON) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this') . 'n\'est plus au statut "brouilon"');

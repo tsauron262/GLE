@@ -544,8 +544,8 @@ fields_tables:
     signature: 
         title: Signature
         icon: fas_signature
-        show: 
-            field_value: id_signature
+#        show: 
+#            field_value: id_signature
         rows: 
             - field: id_signature
 #              display: card

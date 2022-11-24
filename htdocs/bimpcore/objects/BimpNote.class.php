@@ -564,7 +564,7 @@ class BimpNote extends BimpObject
         if (in_array((int) $this->getData('visibilty'), array(3, 4))) {
             BimpCore::addlog('Visibilité note à modifier', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                 'visibilité' => $this->getData('visibilty'),
-                'Info'       => 'Les identifiants ont changé : remplacer dasn le code PHP 3 par 10 et 4 par 20.<br/>Toujours utliser les constantes de classes quand elles existent(ex : BimpNote::BN_ALL) et jamais les valeurs numériques directement.'
+                'Info'       => 'Les identifiants ont changé : remplacer dans le code PHP 3 par 10 et 4 par 20.<br/>Toujours utliser les constantes de classes quand elles existent(ex : BimpNote::BN_ALL) et jamais les valeurs numériques directement.'
                     ), true);
             switch ($this->getData('visiblity')) {
                 case 3:

@@ -155,6 +155,11 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             case 'createSignature':
                 return 1;
+                
+            case 'downloadSignature':
+            case 'redownloadSignature':
+            case 'createSignatureDocuSign':
+                return $user->admin;
         }
         return 1;
     }
@@ -320,6 +325,65 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
                 }
                 return 1;
+                
+            case 'downloadSignature':
+                if ($status != 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                    return 0;
+                }
+                
+                $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
+                if (!BimpObject::objectLoaded($signature)) {
+                    $errors[] = 'La signature n\'existe pas';
+                    return 0;
+                }
+                
+                $file_name = $this->getSignatureDocFileName('devis', true);
+                $file_dir = $this->getSignatureDocFileDir('devis');
+                if (file_exists($file_dir . $file_name)) {
+                    return 0;
+                }
+                
+                return 1;
+                
+            case 'redownloadSignature':
+                if ($status != 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                    return 0;
+                }
+                
+                $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
+                if (!BimpObject::objectLoaded($signature)) {
+                    $errors[] = 'La signature n\'existe pas';
+                    return 0;
+                }
+                
+                $file_name = $this->getSignatureDocFileName('devis', true);
+                $file_dir = $this->getSignatureDocFileDir('devis');
+                if (!file_exists($file_dir . $file_name)) {
+                    return 0;
+                }
+                
+                return 1;
+
+            case 'createSignatureDocuSign':
+                if ($status != 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                    return 0;
+                }
+                
+                if ((int) $this->getData('id_signature')) {
+                    $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
+
+                    if (!BimpObject::objectLoaded($signature)) {
+                        $this->updateField('id_signature', 0);
+                    } else {
+                        $errors[] = 'La signature est déjà en place pour ' . $this->getLabel('this');
+                        return 0;
+                    }
+                }                
+                return 1;
+
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -912,38 +976,27 @@ class Bimp_Propal extends Bimp_PropalTemp
                     );
                 }
 
-                if ($user->admin) { // Mettre ça dans canSetAction()
-                    // Téléchargement des fichiers
-                    if (!BimpObject::objectLoaded($signature)) {
-                        $signature = $this->getChildObject('signature');
-                    }
-
-                    if (BimpObject::objectLoaded($signature) && $signature->getData('dist_type') == BimpSignature::DIST_DOCUSIGN) { // Mettre ça dans isActionAllowed()
-                        $file_name = $this->getSignatureDocFileName('propal', true);
-                        $file_dir = $this->getSignatureDocFileDir('propal');
-                        if (file_exists($file_dir . $file_name)) {
-                            $button_download = array(
-                                'label'   => 'Retélécharger devis signé DocuSign',
-                                'icon'    => 'fas_file-download',
-                                'onclick' => $this->getJsActionOnclick('downloadSignature', array(), array('confirm_msg' => "Le fichier existe déjà, remplacer ?")));
-                        } else {
-                            $button_download = array(
-                                'label'   => 'Télécharger devis signé DocuSign',
-                                'icon'    => 'fas_file-download',
-                                'onclick' => $this->getJsActionOnclick('downloadSignature'));
-                        }
-                        $buttons[] = $button_download;
-                    }
-
-                    // Création signature
-                    elseif (1) {//$user->rights->devis->creer and $status == 1) {
-                        $buttons[] = array(
-                            'label'   => 'Envoyer via DocuSign',
-                            'icon'    => 'fas_signature',
-                            'onclick' => $this->getJsActionOnclick('createSignatureDocuSign', array(), array(
-                                'form_name' => 'create_signature_docu_sign'
-                        )));
-                    }
+                if ($this->isActionAllowed('downloadSignature') && $this->canSetAction('downloadSignature')) {
+                    $buttons[] = array(
+                        'label'   => 'Télécharger devis signé DocuSign',
+                        'icon'    => 'fas_file-download',
+                        'onclick' => $this->getJsActionOnclick('downloadSignature'));
+                }
+                
+                if ($this->isActionAllowed('redownloadSignature') && $this->canSetAction('redownloadSignature')) {
+                    $buttons[] = array(
+                        'label'   => 'Retélécharger devis signé DocuSign',
+                        'icon'    => 'fas_file-download',
+                        'onclick' => $this->getJsActionOnclick('downloadSignature', array(), array('confirm_msg' => "Le fichier existe déjà, remplacer ?")));
+                }
+                
+                if ($this->isActionAllowed('createSignatureDocuSign') && $this->canSetAction('createSignatureDocuSign')) {
+                    $buttons[] = array(
+                        'label'   => 'Envoyer via DocuSign',
+                        'icon'    => 'fas_signature',
+                        'onclick' => $this->getJsActionOnclick('createSignatureDocuSign', array(), array(
+                            'form_name' => 'create_signature_docu_sign'
+                    )));
                 }
             }
         }
@@ -1271,8 +1324,8 @@ class Bimp_Propal extends Bimp_PropalTemp
             $api = BimpAPI::getApiInstance('docusign');
             if (is_a($api, 'DocusignAPI')) {
 
-                $dir = $this->getSignatureDocFileDir('propal');
-                $file_name = $this->getSignatureDocFileName('propal');
+                $dir = $this->getSignatureDocFileDir('devis');
+                $file_name = $this->getSignatureDocFileName('devis');
                 $file = $dir . $file_name;
 
                 $params = array(
@@ -1678,8 +1731,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $pdf_propal_signer = base64_decode($api->getEnvelopeFile($params, $errors));
 
                 if (!count($errors)) {
-                    $file_name = $this->getSignatureDocFileName('propal', true);
-                    $file_dir = $this->getSignatureDocFileDir('propal');
+                    $file_name = $this->getSignatureDocFileName('devis', true);
+                    $file_dir = $this->getSignatureDocFileDir('devis');
 
                     // Supression de l'ancien fichier si il existe
                     if (file_exists($file_dir . $file_name)) {

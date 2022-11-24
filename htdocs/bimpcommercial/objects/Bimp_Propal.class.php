@@ -455,7 +455,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             return 1;
         }
 
-        return 15;
+        return 7;
     }
 
     public function getHelpDateRenouvellementContrat()

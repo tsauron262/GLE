@@ -2852,7 +2852,10 @@ class BT_ficheInter extends BimpDolObject
                                         )
                         );
                         $new_factureLine->pu_ht = $product->getData('price');
-                        $new_factureLine->qty = $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
+                        if($child->getData('forfait'))
+                            $new_factureLine->qty = 1;
+                        else
+                            $new_factureLine->qty = $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
                         $new_factureLine->id_product = $product->id;
                         $new_factureLine->tva_tx = 20;
                         $new_factureLine->pa_ht = ($this->time_to_qty($this->timestamp_to_time($child->getData('duree')))) * (float) BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');

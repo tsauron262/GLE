@@ -241,7 +241,7 @@ forms:
                           - 1
               input:
                   type: textarea
-                  help: Merci de séparer les numéros de séries par un saut de ligne
+                  help: Merci d'effectuer un retour à la ligne entre chaque n° de série
     rebase_serial:
         rows:
             - custom: 1

@@ -6727,7 +6727,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             //Suivi mail
             $random = rand(11111111, 99999999);
             $htmlId = 'suivi_mail_' . $random;
-            $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails');
+            $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails', array(), 'large');
             $html .= '<span id="' . $htmlId . '" class="btn btn-default bs-popover"';
             $html .= ' onclick="' . $onclick . '"';
             $html .= BimpRender::renderPopoverData('Suivi des mails');

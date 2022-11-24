@@ -4455,7 +4455,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
                                 }
 
                                 $html .= '<br/><br/><h3>Commande ' . $commande->getLink() . ' (' . $nLines . ' ligne(s) de commande)</h3><br/><br/>';
-
+                                $cli = $commande->getChildObject('client');
+                                if (BimpObject::objectLoaded($cli)) {
+                                    $html .= '<h3>Commande ' . $cli->getLink() . '</h4><br/><br/>';
+                                }
+                                
                                 $html .= '<table>';
                                 $html .= '<thead>';
                                 $html .= '<tr>';

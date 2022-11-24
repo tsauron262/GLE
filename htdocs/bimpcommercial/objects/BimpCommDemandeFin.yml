@@ -230,6 +230,7 @@ forms:
     note: 
         rows: 
             - custom: 1
+              label: Note
               input_name: note
               input: 
                   type: textarea

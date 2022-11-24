@@ -3,6 +3,11 @@ categories:
         label: Valeurs par défaut
         
 params: 
+    id_group_commerciaux: 
+        label: ID du groupe des commerciaux pour les demandes de locations
+        def: 0
+        required: 1
+        
     new_external_demandes_notif_emails: 
         label: Adresses e-mail pour la notification des nouvelles demandes de location externes
         required: 1

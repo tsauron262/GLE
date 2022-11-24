@@ -125,6 +125,8 @@ class BimpCommDemandeFin extends BimpObject
                 }
                 return 1;
         }
+        
+        return parent::isActionAllowed($action, $errors);
     }
 
     public function isTargetOk(&$errors = array())
@@ -148,6 +150,15 @@ class BimpCommDemandeFin extends BimpObject
     {
         $buttons = array();
 
+        if ($this->isActionAllowed('sendNote') && $this->canSetAction('sendNote')) {
+            $buttons[] = array(
+                'label'   => 'Envoyer une note à ' . $this->displayTarget(),
+                'icon'    => 'fas_paper-plane',
+                'onclick' => $this->getJsActionOnclick('sendNote', array(), array(
+                    'form_name' => 'note'
+                ))
+            );
+        }
         if ($this->isActionAllowed('cancelDemandeFinancement') && $this->canSetAction('cancelDemandeFinancement')) {
             $buttons[] = array(
                 'label'   => 'Annuler la demande de location',
@@ -839,6 +850,36 @@ class BimpCommDemandeFin extends BimpObject
     }
 
     // Actions: 
+
+    public function actionSendNote($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Note envoyée avec succès';
+
+        if ($this->isLoaded($errors) && $this->isTargetOk($errors)) {
+            $api = $this->getExternalApi($errors);
+            $id_df = (int) $this->getData('id_ext_df');
+
+            if (!$id_df) {
+                $errors[] = 'ID de la demande de location ' . $this->displayTarget() . ' absent';
+            }
+
+            $note = BimpTools::getArrayValueFromPath($data, 'note', '');
+            if (!$note) {
+                $errors[] = 'Veuillez saisir la note';
+            }
+
+            if (!count($errors)) {
+                $api->addDemandeFinancementNote($id_df, $note, $errors, $warnings);
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     public function actionCreateDemandeFinancement($data, &$success)
     {

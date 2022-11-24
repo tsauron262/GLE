@@ -118,10 +118,6 @@ class BimpNote extends BimpObject
 
     public function isActionAllowed($action, &$errors = [])
     {
-        if (!$this->isLoaded($errors)) {
-            return 0;
-        }
-
         if ($this->modeArchive) {
             $errors[] = 'Mode archive';
             return 0;
@@ -129,19 +125,25 @@ class BimpNote extends BimpObject
 
         switch ($action) {
             case 'repondre':
-                if ((int) $this->getData('type_author') !== self::BN_AUTHOR_USER) {
-                    $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu. 
-                    return 0;
-                }
-                global $user;
-                if ($this->getData('user_create') == $user->id) {
-                    $errors[] = 'L\'utilisateur connecté est l\'auteur';
-                    return 0;
+                if ($this->isLoaded()) {
+                    if ((int) $this->getData('type_author') !== self::BN_AUTHOR_USER) {
+                        $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu. 
+                        return 0;
+                    }
+                    global $user;
+                    if ($this->getData('user_create') == $user->id) {
+                        $errors[] = 'L\'utilisateur connecté est l\'auteur';
+                        return 0;
+                    }
                 }
 
                 return 1;
 
             case 'setAsViewed':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
                 if ((int) $this->getData('viewed')) {
                     $errors[] = 'Déjà vue';
                     return 0;

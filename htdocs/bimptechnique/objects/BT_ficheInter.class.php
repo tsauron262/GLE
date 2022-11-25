@@ -399,10 +399,17 @@ class BT_ficheInter extends BimpDolObject
                 if ($this->getData('fk_statut') == self::STATUT_TERMINER || $this->getData('fk_statut') == self::STATUT_VALIDER) {
 
                     if (!$this->getData('fk_facture') && $this->isFacturable()) {
+//                        $buttons[] = array(
+//                            'label'   => 'Message facturation',
+//                            'icon'    => 'fas_paper-plane',
+//                            'onclick' => $this->getJsActionOnclick('messageFacturation', array(), array('form_name' => "messageFacturation"))
+//                        );
+                        $note = BimpObject::getInstance("bimpcore", "BimpNote");
+                        $msg = "Bonjour, merci de bien vouloir facturer cette fiche d\'intervention indépendante d\'une commande ou d\'un contrat en cours";
                         $buttons[] = array(
                             'label'   => 'Message facturation',
-                            'icon'    => 'fas_paper-plane',
-                            'onclick' => $this->getJsActionOnclick('messageFacturation', array(), array('form_name' => "messageFacturation"))
+                            'icon'    => 'far_paper-plane',
+                            'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_FACT, "content" => $msg), array('form_name' => 'rep'))
                         );
 
                         if ($user->rights->bimptechnique->billing && $this->isFacturable()) {

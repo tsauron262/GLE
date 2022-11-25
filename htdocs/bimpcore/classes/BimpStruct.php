@@ -495,7 +495,7 @@ class BimpStruct
                     $tabs[] = array(
                         'id'            => $tab_id,
                         'title'         => $config->get($path . '/' . $idx . '/title', '', true),
-                        'icon'          => $config->get($path . '/' . $idx . '/icon', '', true),
+                        'icon'          => $config->get($path . '/' . $idx . '/icon', '', false),
                         'ajax'          => 1,
                         'ajax_callback' => $object->getJsLoadCustomContent($method, '$(\'#' . $tab_id . ' .nav_tab_ajax_result\')', $method_params, array('button' => ''))
                     );

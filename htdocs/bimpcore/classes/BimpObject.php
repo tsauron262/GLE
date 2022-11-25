@@ -6500,8 +6500,29 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . "_container')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
                 $btnHisto .= '</div>';
             }
+            
+            $sup = '';
+            $linkedObjects = $this->getFullLinkedObjetsArray(false);
+            if(count($linkedObjects) > 0){
+                if(count($linkedObjects) > 60)
+                    BimpCore::addlog('Attention de trop nombreux objets liées pour l\affichage des notes '.$this->getLink());
+                $list2 = new BC_ListTable($note, 'bal', 1, null, 'Toutes les notes liées ('.count($linkedObjects).' objects)');
+                $list2->addIdentifierSuffix($suffixe.'_linked');
+                $list2->addFieldFilterValue('obj_type', 'bimp_object');
+                $filterLinked = array('linked' => array('or' => array()));
+                foreach($linkedObjects as $data_linked => $inut){
+                    $data_linked = json_decode($data_linked, true);
+                    $filterLinked['linked']['or'][$data_linked["object_name"].$data_linked['id_object']] = array('and_fields' => array(
+                        'obj_module'   =>  $data_linked['module'],
+                        'obj_name'   =>  $data_linked['object_name'],
+                        'id_obj'   =>  $data_linked['id_object']
+                    ));
+                }
+                $list2->addFieldFilterValue('custom', $filterLinked['linked']);
+                $sup = $list2->renderHtml();
+            }
 
-            return $list->renderHtml() . ($archive == false ? $btnHisto : '');
+            return $list->renderHtml(). $sup . ($archive == false ? $btnHisto : '');
         }
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');

@@ -2770,41 +2770,41 @@ class BT_ficheInter extends BimpDolObject
         );
     }
 
-    public function actionMessageFacturation($data, &$success)
-    {
-        global $user;
-        $warnings = [];
-        $errors = [];
-        $data = (object) $data;
-
-        if (!$data->message)
-            $errors[] = "Vous ne pouvez pas envoyer un message vide";
-
-        if (!count($errors)) {
-            $cc = ($data->copy) ? $user->email : '';
-            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
-            $message = $data->message . "<br />";
-            $message .= "Fiche d'intervention: " . $this->getNomUrl();
-            $message .= "<br /> Client: " . $client->getNomUrl() . ' ' . $client->getName();
-
-            $bimpMail = new BimpMail($this, "Demande de facturation FI - [" . $this->getRef() . "] - " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $message, null, $cc);
-            $bimpMail->send($errors);
-
-            if (!count($errors)) {
-                $log = "<br /><i><u>Message</u><br />" . $data->message . "<br />";
-                $log .= "<u>Liste de difusion:</u><br >facturationclients@bimp.fr";
-                $log .= (!empty($cc)) ? "<br />" . $cc : '';
-                $log .= "</i>";
-                $this->addLog($log);
-            }
-        }
-
-        return [
-            'success'  => $success,
-            'errors'   => $errors,
-            'warnings' => $warnings
-        ];
-    }
+//    public function actionMessageFacturation($data, &$success)
+//    {
+//        global $user;
+//        $warnings = [];
+//        $errors = [];
+//        $data = (object) $data;
+//
+//        if (!$data->message)
+//            $errors[] = "Vous ne pouvez pas envoyer un message vide";
+//
+//        if (!count($errors)) {
+//            $cc = ($data->copy) ? $user->email : '';
+//            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+//            $message = $data->message . "<br />";
+//            $message .= "Fiche d'intervention: " . $this->getNomUrl();
+//            $message .= "<br /> Client: " . $client->getNomUrl() . ' ' . $client->getName();
+//
+//            $bimpMail = new BimpMail($this, "Demande de facturation FI - [" . $this->getRef() . "] - " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $message, null, $cc);
+//            $bimpMail->send($errors);
+//
+//            if (!count($errors)) {
+//                $log = "<br /><i><u>Message</u><br />" . $data->message . "<br />";
+//                $log .= "<u>Liste de difusion:</u><br >facturationclients@bimp.fr";
+//                $log .= (!empty($cc)) ? "<br />" . $cc : '';
+//                $log .= "</i>";
+//                $this->addLog($log);
+//            }
+//        }
+//
+//        return [
+//            'success'  => $success,
+//            'errors'   => $errors,
+//            'warnings' => $warnings
+//        ];
+//    }
 
     public function actionBilling($data, &$success)
     {

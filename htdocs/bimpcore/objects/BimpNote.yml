@@ -25,6 +25,16 @@ objects:
                 class: UserGroup
             id_object:
                 field_value: fk_group_dest
+    author_group:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: user
+                file: usergroup
+                class: UserGroup
+            id_object:
+                field_value: fk_group_author
     
 fields:
     obj_type: 
@@ -107,7 +117,7 @@ fields:
             include_empty: 1
         display_if: 
             field_name: type_dest
-            show_values: 2
+            show_values: 4
         values:
             array: userGroups
              
@@ -121,6 +131,16 @@ fields:
         type: boold
         default_value: 0
         
+    fk_group_author:
+        label: Group
+        type: id_object
+        object: author_group
+        display_if: 
+            field_name: type_author
+            show_values: 4
+        values:
+            array: userUserGroups
+        
 forms: 
     default: 
         rows: 
@@ -129,6 +149,7 @@ forms:
             - field: obj_name
             - field: id_obj
             - field: type_author
+            - field: fk_group_author
             - field: id_societe
             - field: email
             - field: visibility
@@ -160,10 +181,26 @@ forms:
             - field: obj_module
             - field: obj_name
             - field: id_obj
-            - field: type_author
-              hidden: 1
             - field: type_dest
               hidden: 1
+#            - field: type_dest
+            - field: type_author
+              input:
+                type: select
+                options: 
+                    1: Utilisateur
+                    4: Group
+              value: 
+                callback:
+                    method: getInitData
+                    params:
+                        - type_dest
+            - field: fk_group_author
+              value: 
+                callback:
+                    method: getInitData
+                    params:
+                        - fk_group_dest
             - field: fk_group_dest
               edit: 0
             - field: fk_user_dest

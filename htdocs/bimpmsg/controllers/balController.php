@@ -32,7 +32,7 @@ class balController extends BimpController {
                 }
             }
             else{
-                $list->addFieldFilterValue('type_dest', 2);
+                $list->addFieldFilterValue('type_dest', BimpNote::BN_DEST_GROUP);
                 $list->addFieldFilterValue('fk_group_dest', $balValue);
             }
             

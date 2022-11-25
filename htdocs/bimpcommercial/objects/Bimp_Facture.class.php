@@ -6221,7 +6221,8 @@ class Bimp_Facture extends BimpComm
                 $userCreate->fetch((int) $obj->getData('fk_user_author'));
 
 
-            $mail = $userCreate->email;
+//            $mail = $userCreate->email;
+            $mail = BimpTools::getMailOrSuperiorMail($userCreate->id, 'f.pineri@bimp.fr');
             if ($mail == '')
                 $mail = "tommy@bimp.fr";
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");

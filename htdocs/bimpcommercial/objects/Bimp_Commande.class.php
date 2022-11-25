@@ -4313,13 +4313,13 @@ class Bimp_Commande extends Bimp_CommandeTemp
             else
                 $userCreate->fetch((int) $obj->getData('fk_user_author'));
 
-
-            $mail = $userCreate->email;
+            $mail = BimpTools::getMailOrSuperiorMail($userCreate->id, 'f.pineri@bimp.fr');
+//            $mail = $userCreate->email;
             if ($mail == '')
                 $mail = "tommy@bimp.fr";
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
             $this->output .= $mail.' : '.$obj->getNomUrl().' '.$nbDay.'<br/>';
-            if (mailSyn2('Commande brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une commande en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite. Nb: Un email envoyé précédemment comporte des erreurs de lien et d\'intitulée'))
+            if (mailSyn2('Commande brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une commande en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
                 $i++;
         }
         $this->resprints = "OK " . $i . ' mails';

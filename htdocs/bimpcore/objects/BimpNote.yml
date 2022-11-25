@@ -324,6 +324,11 @@ lists:
         extends: default
         cols:
             parent:
+    linked:
+        extends: default
+        cols:
+            parent:
+        add_form_name: unset
             
 searches: 
     default: 

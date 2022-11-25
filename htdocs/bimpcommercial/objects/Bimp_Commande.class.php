@@ -4319,7 +4319,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $mail = "tommy@bimp.fr";
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
             $this->output .= $mail.' : '.$obj->getNomUrl().' '.$nbDay.'<br/>';
-            if (mailSyn2('Facture brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une facture en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
+            if (mailSyn2('Commande brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une commande en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
                 $i++;
         }
         $this->resprints = "OK " . $i . ' mails';

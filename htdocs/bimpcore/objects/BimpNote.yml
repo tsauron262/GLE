@@ -181,8 +181,6 @@ forms:
             - field: obj_module
             - field: obj_name
             - field: id_obj
-            - field: type_dest
-              hidden: 1
 #            - field: type_dest
             - custom: 1
               label: Type autheur
@@ -203,8 +201,10 @@ forms:
                     method: getInitData
                     params:
                         - fk_group_dest
+            - field: type_dest
+#              hidden: 1
             - field: fk_group_dest
-              edit: 0
+#              edit: 0
             - field: fk_user_dest
               edit: 0
 #            - field: content

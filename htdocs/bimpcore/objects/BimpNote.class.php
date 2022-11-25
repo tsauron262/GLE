@@ -381,9 +381,9 @@ class BimpNote extends BimpObject
                     "content"      => "",
                     "id"           => ""
                         );
+        $filtre['fk_user_dest'] = $this->getData("user_create");
         if($this->getData('type_author') == self::BN_AUTHOR_USER){
             $filtre['type_dest'] = self::BN_DEST_USER;
-            $filtre['fk_user_dest'] = $this->getData("user_create");
         }
         elseif($this->getData('type_author') == self::BN_AUTHOR_GROUP){
             $filtre['type_dest'] = self::BN_DEST_GROUP;

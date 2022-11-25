@@ -6504,20 +6504,24 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $sup = '';
             $linkedObjects = $this->getFullLinkedObjetsArray(false);
             if(count($linkedObjects) > 0){
-                if(count($linkedObjects) > 60)
-                    BimpCore::addlog('Attention de trop nombreux objets liées pour l\affichage des notes '.$this->getLink());
-                $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées ('.count($linkedObjects).' objects)');
-                $list2->addIdentifierSuffix($suffixe.'_linked');
-                $list2->addFieldFilterValue('obj_type', 'bimp_object');
                 $filterLinked = array('linked' => array('or' => array()));
                 foreach($linkedObjects as $data_linked => $inut){
                     $data_linked = json_decode($data_linked, true);
-                    $filterLinked['linked']['or'][$data_linked["object_name"].$data_linked['id_object']] = array('and_fields' => array(
-                        'obj_module'   =>  $data_linked['module'],
-                        'obj_name'   =>  $data_linked['object_name'],
-                        'id_obj'   =>  $data_linked['id_object']
-                    ));
+                    if($data_linked['object_name'] != 'BS_SAV'){
+                        $filterLinked['linked']['or'][$data_linked["object_name"].$data_linked['id_object']] = array('and_fields' => array(
+                            'obj_module'   =>  $data_linked['module'],
+                            'obj_name'   =>  $data_linked['object_name'],
+                            'id_obj'   =>  $data_linked['id_object']
+                        ));
+                    }
                 }
+                $nb = count($filterLinked['linked']['or']);
+                if($nb > 60)
+                    BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes '.$this->getLink(). '('.$nb.')');
+                
+                $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées ('.$nb.' objects)');
+                $list2->addIdentifierSuffix($suffixe.'_linked');
+                $list2->addFieldFilterValue('obj_type', 'bimp_object');
                 $list2->addFieldFilterValue('custom', $filterLinked['linked']);
                 $sup = $list2->renderHtml();
             }

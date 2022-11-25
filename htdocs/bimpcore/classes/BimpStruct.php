@@ -511,7 +511,7 @@ class BimpStruct
                 $tabs[] = array(
                     'id'      => $config->get($path . '/' . $idx . '/id', '', true),
                     'title'   => $config->get($path . '/' . $idx . '/title', '', true),
-                    'icon'    => $config->get($path . '/' . $idx . '/icon', '', true),
+                    'icon'    => $config->get($path . '/' . $idx . '/icon', '', false),
                     'content' => $content
                 );
             }

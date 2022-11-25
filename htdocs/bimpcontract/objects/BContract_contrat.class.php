@@ -4096,7 +4096,7 @@ class BContract_contrat extends BimpDolObject
             foreach ($propal->dol_object->lines as $line) {
                 $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                 if ($produit->getData('fk_product_type') == 1 || !BimpCore::getConf('just_code_service', null, 'bimpcontract') || $line->pa_ht == 0) {
-                    $description = ($line->desc) ? $line->desc : $line->libelle;
+                    $description = ($line->desc && $line->desc != '<br>') ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
                     $end_date->add(new DateInterval("P" . $duree_mois . "M"));
                     $new_contrat->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR

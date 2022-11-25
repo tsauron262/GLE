@@ -184,7 +184,9 @@ forms:
             - field: type_dest
               hidden: 1
 #            - field: type_dest
-            - field: type_author
+            - custom: 1
+              label: Type autheur
+              input_name: type_author
               input:
                 type: select
                 options: 

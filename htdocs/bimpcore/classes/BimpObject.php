@@ -6497,7 +6497,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             if (BimpCore::getConf('date_archive', '') != '') {
                 $btnHisto = '<div id="notes_archives_' . $this->object_name . '_container">';
-                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_' . $this->object_name . '_container')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
+                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . "_container')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
                 $btnHisto .= '</div>';
             }
 

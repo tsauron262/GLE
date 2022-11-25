@@ -3199,7 +3199,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $hasOnlyPeriodicity = 1;
 
                     foreach ($lines as $line) {
-                        $line->fetch($line->id);//TODO trés bourin mais necessaire pour que quand on passe une ligne a zero $line soit a jour
+//                        $line->fetch($line->id);//TODO trés bourin mais necessaire pour que quand on passe une ligne a zero $line soit a jour
                         
                         $billed_qty = abs(round((float) $line->getBilledQty(null, false), 6));
                         $full_qty = abs(round((float) $line->getFullQty(), 6));

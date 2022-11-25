@@ -4295,6 +4295,36 @@ class Bimp_Commande extends Bimp_CommandeTemp
     }
 
     // Méthodes statiques: 
+    
+    public function sendDraftWhithMail()
+    {
+        $date = new DateTime();
+        $nbDay = 5;
+        $date->sub(new DateInterval('P' . $nbDay . 'D'));
+        $sql = $this->db->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "commande` WHERE `date_creation` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0");
+        $i = 0;
+        while ($ln = $this->db->db->fetch_object($sql)) {
+            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
+            $userCreate = new User($this->db->db);
+
+            $idComm = $obj->getIdContact($type = 'internal', $code = 'SALESREPSIGN');
+            if ($idComm > 0)
+                $userCreate->fetch((int) $idComm);
+            else
+                $userCreate->fetch((int) $obj->getData('fk_user_author'));
+
+
+            $mail = $userCreate->email;
+            if ($mail == '')
+                $mail = "tommy@bimp.fr";
+            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
+            $this->output .= $mail.' : '.$obj->getNomUrl().' '.$nbDay.'<br/>';
+            if (mailSyn2('Facture brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une facture en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
+                $i++;
+        }
+        $this->resprints = "OK " . $i . ' mails';
+        return "OK " . $i . ' mails';
+    }
 
     public static function checkStatusAll()
     {

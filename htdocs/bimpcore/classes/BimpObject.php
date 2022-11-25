@@ -6506,7 +6506,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if(count($linkedObjects) > 0){
                 if(count($linkedObjects) > 60)
                     BimpCore::addlog('Attention de trop nombreux objets liées pour l\affichage des notes '.$this->getLink());
-                $list2 = new BC_ListTable($note, 'bal', 1, null, 'Toutes les notes liées ('.count($linkedObjects).' objects)');
+                $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées ('.count($linkedObjects).' objects)');
                 $list2->addIdentifierSuffix($suffixe.'_linked');
                 $list2->addFieldFilterValue('obj_type', 'bimp_object');
                 $filterLinked = array('linked' => array('or' => array()));

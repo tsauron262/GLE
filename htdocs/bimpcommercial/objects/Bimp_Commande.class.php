@@ -1507,8 +1507,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         foreach ($lines as $id_line) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
-            if ($line->isLoaded()) {
-
+            if (BimpObject::objectLoaded($line)) {
                 if ($line->getData('type') === ObjectLine::LINE_TEXT) {
                     $body_html .= '<tr class="facture_line text_line" data-id_line="' . $line->id . '">';
                     $body_html .= '<td>';

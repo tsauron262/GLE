@@ -97,7 +97,7 @@ class balController extends BimpController {
                 $idsGroups[$ln->rowid] = $ln->nom;
         
         foreach($idsGroups as $idGroupe=>$name){
-            $filters = array('type_dest'=>2, 'fk_group_dest'=>$idGroupe, 'viewed'=>0);
+            $filters = array('type_dest'=>BimpNote::BN_DEST_GROUP, 'fk_group_dest'=>$idGroupe, 'viewed'=>0);
             $list = BimpCache::getBimpObjectList('bimpcore', 'BimpNote', $filters);
             $button = array(
                 'label'   => 'Boite '.$name.' '.BimpTools::getBadge(count($list)),

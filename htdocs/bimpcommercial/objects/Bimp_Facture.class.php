@@ -2732,7 +2732,7 @@ class Bimp_Facture extends BimpComm
 
                     if ($this->canSetAction('deactivateRelancesForAMonth')) {
                         $onclick = $this->getJsActionOnclick('deactivateRelancesForAMonth', array(), array(
-                            'confirm_msg' => 'Veuillez confirmer'
+                            'confirm_msg' => "Attention : cette action n\'est autorisée que si le règlement a été reçu par nos services et qu\'une copie en est déposée en pièce jointe de cette facture"
                         ));
 
                         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
@@ -5514,13 +5514,15 @@ class Bimp_Facture extends BimpComm
 
             if ($to) {
                 global $user, $langs;
+                
 
-                $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendues pendant un mois pas ' . $user->getFullName($langs);
+                $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendues pendant un mois';
                 $msg .= "\n\n";
 
                 $msg .= 'Date de prochaine relance pour cette facture : ' . $dt->format('d / m / Y');
 
-                mailSyn2('Relances suspendues - Facture ' . $this->getRef(), $to, '', $msg);
+                $this->addLog($msg);
+//                mailSyn2('Relances suspendues - Facture ' . $this->getRef(), $to, '', $msg);
             }
         }
 

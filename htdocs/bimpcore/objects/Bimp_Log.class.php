@@ -7,6 +7,7 @@ class Bimp_Log extends BimpObject
     const BIMP_LOG_ALERTE = 2;
     const BIMP_LOG_ERREUR = 3;
     const BIMP_LOG_URGENT = 4;
+    public $arrondirEnMinuteGraph = 60;
 
     public static $types = array(
         'php'           => 'PHP',
@@ -39,6 +40,33 @@ class Bimp_Log extends BimpObject
         'filesize()',
         'getimagesize(',
     );
+    
+       public function getInfoGraph()
+    {
+        $data = parent::getInfoGraph();
+        $data["data1"] = array("name"=>'Nb Logs', "type" => "column");
+        $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM, YYYY HH:mm');
+        $data["axeY"] = array("title" => 'Nb');
+        $data["title"] = 'Log par '.$this->arrondirEnMinuteGraph.' minute(s) ';
+
+        return $data;
+    }
+    
+    public function getGraphDatasPoints($numero_data = 1)
+    {
+        $result = array();
+        $dateStr = "FLOOR(UNIX_TIMESTAMP(date)/($this->arrondirEnMinuteGraph*60))*$this->arrondirEnMinuteGraph*60";
+        $sql = $this->db->db->query('SELECT count(*) as nb, '.$dateStr.' as timestamp FROM '.MAIN_DB_PREFIX.'bimpcore_log GROUP BY '.$dateStr);
+        while($ln = $this->db->db->fetch_object($sql)){
+            $tabDate = array($ln->annee, $ln->month, $ln->day, $ln->hour, $ln->minute);
+            $result[] = array("x" => "new Date(" . $ln->timestamp*1000 . ")", "y" => (int)$ln->nb);
+        }
+            
+
+        return $result;
+    }
+    
+
 
     // Droits user: 
 

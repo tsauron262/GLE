@@ -315,8 +315,6 @@ class BimpDocumentPDF extends BimpModelPDF
         global $langs;
 
         $html = "";
-        if(!isset($this->thirdparty) || !is_object($this->thirdparty))
-            $this->thirdparty = $this->object->thirdparty;
         $nomsoc = pdfBuildThirdpartyName($this->thirdparty, $this->langs);
         if (is_null($this->contact) || $this->contact->getFullName($langs) != $nomsoc) {
             $html .= $nomsoc . "<br/>";

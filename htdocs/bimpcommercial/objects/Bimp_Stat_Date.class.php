@@ -108,14 +108,27 @@ class Bimp_Stat_Date extends BimpObject
 
     public function getInfoGraph()
     {
+        if (static::$modeDateGraph == 'day')
+            $xValueFormatString = 'DD MMM, YYYY';
+        elseif (static::$modeDateGraph == 'hour')
+            $xValueFormatString = 'DD MMM, YYYY HH:mm';
+        elseif (static::$modeDateGraph == 'month')
+            $xValueFormatString = 'MMM, YYYY';
+        else
+            $xValueFormatString = 'YYYY';
+        
+        
+        
         $data = parent::getInfoGraph();
-        $data["data1"] = 'Facture HT';
-        $data["data2"] = 'Commande HT';
-        $data["data3"] = 'Devis HT';
+        $data["data1"] = array("name"=>'Facture HT');
+        $data["data2"] = array("name"=>'Commande HT', 'visible'=>0);
+        $data["data3"] = array("name"=>'Devis HT', 'visible'=>0);
         if (static::$modeDateGraph != 'year')
-            $data["data11"] = 'Facture HT a 1an';
-        $data["axeX"] = '';
-        $data["axeY"] = 'K €';
+            $data["data4"] = array("name"=>'Facture HT a 1an', 'color'=> "#F08080", 'lineDashType' =>"dash");
+        $data["axeX"] = array("title" => "Date", "valueFormatString" => $xValueFormatString);
+        $data["axeY"] = array("title" => 'K €', "suffix" => "", "minimum" => 30, "valueFormatString" => "#,##0 €");
+        
+        
         $data["title"] = 'Facture Commande et Devis par ';
         if (static::$modeDateGraph == 'day')
             $data["title"] .= 'Jour';
@@ -149,10 +162,11 @@ class Bimp_Stat_Date extends BimpObject
             $y = $this->getData('commande_total');
         elseif ($numero_data == 3)
             $y = $this->getData('devis_total');
-        elseif ($numero_data == 11)
+        elseif ($numero_data == 4)
             $y = str_replace(",", ".", $this->displayOldValue('facture_total', 12));
 
-        return '{ x: ' . $x . ', y: ' . $y . ' },';
+        $y = (float)$y;
+        return array("x"=> $x, "y" => $y);
     }
 
     public function traiteFilters(&$filters)

@@ -25,6 +25,16 @@ objects:
                 class: UserGroup
             id_object:
                 field_value: fk_group_dest
+    author_group:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: user
+                file: usergroup
+                class: UserGroup
+            id_object:
+                field_value: fk_group_author
     
 fields:
     obj_type: 
@@ -68,7 +78,7 @@ fields:
         type: int
         values: 
             array: visibilities
-        default_value: 3
+        default_value: 10
     content: 
         label: Texte
         type: text
@@ -107,13 +117,29 @@ fields:
             include_empty: 1
         display_if: 
             field_name: type_dest
-            show_values: 2
+            show_values: 4
         values:
             array: userGroups
+             
     auto:
         label: Note Auto
         type: bool
         default_value: 0
+        
+    delete_on_view: 
+        label: Suppression après vue
+        type: boold
+        default_value: 0
+        
+    fk_group_author:
+        label: Group
+        type: id_object
+        object: author_group
+        display_if: 
+            field_name: type_author
+            show_values: 4
+        values:
+            array: userUserGroups
         
 forms: 
     default: 
@@ -123,6 +149,7 @@ forms:
             - field: obj_name
             - field: id_obj
             - field: type_author
+            - field: fk_group_author
             - field: id_societe
             - field: email
             - field: visibility
@@ -154,12 +181,30 @@ forms:
             - field: obj_module
             - field: obj_name
             - field: id_obj
-            - field: type_author
-              hidden: 1
+#            - field: type_dest
+            - custom: 1
+              label: Type autheur
+              input_name: type_author
+              input:
+                type: select
+                options: 
+                    1: Utilisateur
+                    4: Group
+              value: 
+                callback:
+                    method: getInitData
+                    params:
+                        - type_dest
+            - field: fk_group_author
+              value: 
+                callback:
+                    method: getInitData
+                    params:
+                        - fk_group_dest
             - field: type_dest
-              hidden: 1
+#              hidden: 1
             - field: fk_group_dest
-              edit: 0
+#              edit: 0
             - field: fk_user_dest
               edit: 0
 #            - field: content
@@ -279,6 +324,11 @@ lists:
         extends: default
         cols:
             parent:
+    linked:
+        extends: default
+        cols:
+            parent:
+        add_form_name: unset
             
 searches: 
     default: 

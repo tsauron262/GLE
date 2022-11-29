@@ -5,32 +5,26 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/apis/ErpAPI.php';
 
 ErpApi::$requests['addDemandeFinancement'] = array(
-    'label' => 'Ajouter une demande de financement'
+    'label' => 'Ajouter une demande de location'
 );
 ErpApi::$requests['cancelDemandeFinancement'] = array(
-    'label' => 'Annuler une demande de financement'
+    'label' => 'Annuler une demande de location'
 );
 ErpApi::$requests['getDemandeFinancementInfos'] = array(
-    'label' => 'Obtenir les infos d\'une demande de financement'
+    'label' => 'Obtenir les infos d\'une demande de location'
 );
 ErpApi::$requests['setDemandeFinancementDocSigned'] = array(
-    'label' => 'Document d\'une demande de financement signé'
+    'label' => 'Document d\'une demande de location signé'
 );
 ErpApi::$requests['setDemandeFinancementDocRefused'] = array(
-    'label' => 'Document d\'une demande de financement refusé'
+    'label' => 'Document d\'une demande de location refusé'
+);
+ErpApi::$requests['addDemandeFinancementNote'] = array(
+    'label' => 'Ajout d\'une note pour une demande de location'
 );
 
 class ErpAPI_ExtEntity extends ErpAPI
 {
-
-    public function __construct($api_idx = 0, $id_user_account = 0, $debug_mode = false)
-    {
-        static::$requests['addDemandeFinancement'] = array(
-            'label' => 'Ajouter une demande de fincancement'
-        );
-
-        parent::__construct($api_idx, $id_user_account, $debug_mode);
-    }
 
     public function addDemandeFinancement($type_origine, $data = array(), &$errors = array(), &$warnings = array())
     {
@@ -140,6 +134,34 @@ class ErpAPI_ExtEntity extends ErpAPI
 
         if (!count($errors)) {
             return $response;
+        }
+
+        return null;
+    }
+
+    public function addDemandeFinancementNote($id_df, $note, &$errors = array(), &$warnings = array())
+    {
+        $user = BimpCore::getBimpUser();
+
+        if (!BimpObject::objectLoaded($user)) {
+            $errors[] = 'Aucun utilisateur connecté';
+        } else {
+            $response = $this->execCurl('addDemandeFinancementNote', array(
+                'fields' => array(
+                    'id_demande'   => $id_df,
+                    'author_email' => $user->getData('email'),
+                    'author_name'  => $user->getName(),
+                    'note'         => $note
+                )
+                    ), $errors);
+            if (isset($response['warnings'])) {
+                $warnings = BimpTools::merge_array($warnings, $response['warnings']);
+                unset($response['warnings']);
+            }
+
+            if (!count($errors)) {
+                return $response;
+            }
         }
 
         return null;

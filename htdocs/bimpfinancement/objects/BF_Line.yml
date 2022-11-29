@@ -339,6 +339,7 @@ lists:
             callback: getListExtraButtons
         cols: 
             desc: 
+            product_type: 
             qty:
             pu_ht: 
             tva:

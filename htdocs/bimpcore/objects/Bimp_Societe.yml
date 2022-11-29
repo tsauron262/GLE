@@ -399,6 +399,8 @@ fields:
             type: search_juridicalstatus
             country_code: 
                 callback: getCountryCode
+        values: 
+            array: 
         displays: 
             default: 
                 type: callback
@@ -1397,6 +1399,12 @@ filters:
                     params:
                         - marche
                         - societe
+                        
+    custom:
+        label: Custom
+#        type: text
+#        input: 
+#            type: text
             
 filters_panels: 
     default: 

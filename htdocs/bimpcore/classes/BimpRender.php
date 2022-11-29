@@ -528,6 +528,9 @@ class BimpRender
                     $html .= ' data-ajax_callback="' . htmlentities($tab['ajax_callback']) . '"';
                 }
                 $html .= '>';
+                if (isset($tab['icon']) && $tab['icon']) {
+                    $html .= BimpRender::renderIcon($tab['icon'], 'iconLeft');
+                }
                 $html .= $tab['title'];
                 $html .= '</a>';
                 $html .= '</li>';

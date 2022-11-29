@@ -35,7 +35,6 @@ class BimpCache
 
         if ($mode_archive == 1) {
             if (is_null(self::$bdb_archive)) {
-
                 $dolibarr_main_db_port = '3306';
                 $dolibarr_main_db_host = '10.192.20.11';
                 $dolibarr_main_db_pass = 'llkjfvklfdvgukfdvfppdz';
@@ -849,13 +848,13 @@ class BimpCache
         return array();
     }
 
-    public static function getObjectNotes(BimpObject $object, $withObject = true)
+    public static function getObjectNotes(BimpObject $object)
     {
         if (!BimpObject::objectLoaded($object)) {
             return array();
         }
 
-        $cache_key = 'object_note_' . $object->module . '_' . $object->object_name . '_' . $object->id . '_' . (int) $withObject;
+        $cache_key = 'object_note_' . $object->module . '_' . $object->object_name . '_' . $object->id;
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
@@ -875,10 +874,7 @@ class BimpCache
 
             if (!is_null($list)) {
                 foreach ($list as $item) {
-                    if($withObject)
-                        self::$cache[$cache_key][] = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $item['id']);
-                    else
-                        self::$cache[$cache_key][] = $item['id'];
+                    self::$cache[$cache_key][] = $item['id'];
                 }
             }
         }
@@ -1962,8 +1958,12 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    public static function getUserUserGroupsArray($id_user, $include_empty = 0, $nom_url = 0)
+    public static function getUserUserGroupsArray($id_user = null, $include_empty = 0, $nom_url = 0)
     {
+        if(is_null($id_user)){
+            global $user;
+            $id_user = $user->id;
+        }
         $cache_key = 'user_' . $id_user . '_usergroups';
 
         if ($nom_url) {

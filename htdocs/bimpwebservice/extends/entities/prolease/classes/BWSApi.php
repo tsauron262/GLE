@@ -5,7 +5,7 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/classes/BWSApi.php';
 
 BWSApi::$requests['addDemandeFinancement'] = array(
-    'desc'   => 'Ajout d\'une demande de financement',
+    'desc'   => 'Ajout d\'une demande de location',
     'params' => array(
         'data' => array('label'      => 'Données', 'data_type'  => 'json', 'sub_params' => array(
                 'type_source' => array('label' => 'Source', 'required' => 1),
@@ -61,20 +61,20 @@ BWSApi::$requests['addDemandeFinancement'] = array(
     )
 );
 BWSApi::$requests['cancelDemandeFinancement'] = array(
-    'desc'   => 'Annulation d\'une demande de financement',
+    'desc'   => 'Annulation d\'une demande de location',
     'params' => array(
         'id_demande' => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1),
         'note'       => array('label' => 'Note', 'data_type' => 'text', 'default' => '')
     )
 );
 BWSApi::$requests['getDemandeFinancementInfos'] = array(
-    'desc'   => 'Retourne les infos d\'une demande de financement',
+    'desc'   => 'Retourne les infos d\'une demande de location',
     'params' => array(
         'id_demande' => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1)
     )
 );
 BWSApi::$requests['setDemandeFinancementDocSigned'] = array(
-    'desc'   => 'Notifier la signature d\'un document d\'une demande de financement',
+    'desc'   => 'Notifier la signature d\'un document d\'une demande de location',
     'params' => array(
         'id_demande'  => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1),
         'doc_type'    => array('label' => 'Type de document', 'required' => 1),
@@ -82,11 +82,20 @@ BWSApi::$requests['setDemandeFinancementDocSigned'] = array(
     )
 );
 BWSApi::$requests['setDemandeFinancementDocRefused'] = array(
-    'desc'   => 'Refus d\'un document d\'une demande de financement',
+    'desc'   => 'Refus d\'un document d\'une demande de location',
     'params' => array(
         'id_demande' => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1),
         'doc_type'   => array('label' => 'Type de document', 'required' => 1),
         'note'       => array('label' => 'Note', 'data_type' => 'text', 'default' => '')
+    )
+);
+BWSApi::$requests['addDemandeFinancementNote'] = array(
+    'desc'   => 'Ajout d\'une note pour une demande de location',
+    'params' => array(
+        'id_demande'   => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1),
+        'author_email' => array('label' => 'Adresse e-mail auteur', 'required' => 1),
+        'author_name'  => array('label' => 'Nom auteur', 'required' => 1),
+        'note'         => array('label' => 'Note', 'data_type' => 'text', 'required' => 1)
     )
 );
 
@@ -120,7 +129,7 @@ class BWSApi_ExtEntity extends BWSApi
                     $response['warnings'] = $warnings;
                 }
             } else {
-                $this->addError('CREATION_FAIL', BimpTools::getMsgFromArray($errors, 'Echec de la création de la demande de financement', true));
+                $this->addError('CREATION_FAIL', BimpTools::getMsgFromArray($errors, 'Echec de la création de la demande de location', true));
             }
         }
 
@@ -136,7 +145,7 @@ class BWSApi_ExtEntity extends BWSApi
             $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
 
             if (!BimpObject::objectLoaded($demande)) {
-                $this->addError('UNFOUND', 'La demande de financement #' . $id_demande . ' n\'existe pas');
+                $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
             } else {
                 $errors = $demande->onDemandeCancelledBySource($this->getParam('note', ''));
 
@@ -160,7 +169,7 @@ class BWSApi_ExtEntity extends BWSApi
             $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
 
             if (!BimpObject::objectLoaded($demande)) {
-                $this->addError('UNFOUND', 'La demande de financement #' . $id_demande . ' n\'existe pas');
+                $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
             } else {
                 $status = (int) $demande->getData('status');
                 $response = array(
@@ -178,13 +187,13 @@ class BWSApi_ExtEntity extends BWSApi
                         'phone' => ''
                     ),
                     'logs'              => array(),
+                    'notes'             => array()
                 );
 
                 if ($status >= 10 && $status < 20) {
-                    $response['montants']['loyer_ht'] = $demande->getLoyerAmountHT();
-                    $response['montants']['total_loyers_ht'] = $demande->getTotalLoyersHT();
-                    $response['montants']['total_loyers_tva'] = $demande->getTotalLoyersTVA();
-                    $response['montants']['total_loyers_ttc'] = $demande->getTotalLoyersTTC();
+                    $response['montants']['loyer_mensuel_evo_ht'] = $demande->getData('loyer_mensuel_evo_ht');
+                    $response['montants']['loyer_mensuel_dyn_ht'] = $demande->getData('loyer_mensuel_dyn_ht');
+                    $response['montants']['loyer_mensuel_suppl_ht'] = $demande->getData('loyer_mensuel_suppl_ht');
                 }
 
                 $user_resp = $demande->getChildObject('user_resp');
@@ -210,6 +219,14 @@ class BWSApi_ExtEntity extends BWSApi
 
                     $response['logs'][] = $str;
                 }
+
+                foreach ($demande->getNotes() as $note) {
+                    $response['notes'][] = array(
+                        'author'  => $note->displayAuthor(false, true),
+                        'date'    => date('d / m / à H:i', strtotime($note->getData('date_create'))),
+                        'content' => $note->getData('content')
+                    );
+                }
             }
         }
 
@@ -225,7 +242,7 @@ class BWSApi_ExtEntity extends BWSApi
             $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
 
             if (!BimpObject::objectLoaded($demande)) {
-                $this->addError('UNFOUND', 'La demande de financement #' . $id_demande . ' n\'existe pas');
+                $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
             } else {
                 $errors = $demande->onDocSignedFromSource($this->getParam('doc_type', ''), $this->getParam('doc_content', ''));
 
@@ -249,9 +266,35 @@ class BWSApi_ExtEntity extends BWSApi
             $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
 
             if (!BimpObject::objectLoaded($demande)) {
-                $this->addError('UNFOUND', 'La demande de financement #' . $id_demande . ' n\'existe pas');
+                $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
             } else {
                 $errors = $demande->onDocRefused($this->getParam('doc_type', ''), $this->getParam('note', ''));
+
+                if (count($errors)) {
+                    $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+                } else {
+                    $response['success'] = 1;
+                }
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_addDemandeFinancementNote()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $id_demande = (int) $this->getParam('id_demande', 0);
+            $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
+
+            if (!BimpObject::objectLoaded($demande)) {
+                $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
+            } else {
+                $email = BimpTools::cleanEmailsStr($this->getParam('author_email', ''), $this->getParam('author_name', ''));
+                $note = $this->getParam('note', '');
+                $errors = $demande->addNotificationNote($note, BimpNote::BN_AUTHOR_FREE, $email, 0, BimpNote::BN_PARTNERS, 0);
 
                 if (count($errors)) {
                     $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));

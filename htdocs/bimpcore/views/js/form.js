@@ -1116,8 +1116,8 @@ function getInputValue($inputContainer) {
             field_name = $inputContainer.data('values_field');
             var $valuesContainer = $inputContainer.parent().find('.inputMultipleValuesContainer');
             if (!$valuesContainer.length) {
-                bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger', null, true);
-                return;
+//                bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger', null, true);
+                return [];
             } else {
                 $valuesContainer.find('[name="' + field_name + '[]"]').each(function () {
                     var val = $(this).val();

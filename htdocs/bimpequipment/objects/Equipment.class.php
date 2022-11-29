@@ -1442,7 +1442,7 @@ class Equipment extends BimpObject
     {
         if ($force == 1 and 0 < (int) $this->getData('id_package')) {
             $this->updateField('id_package', 0);
-            $this->addNote('Sortie du package pour déplacement automatique');
+            $this->addObjectLog('Sortie du package pour déplacement automatique');
             $stock_label .= ' - Sortie du package pour déplacement automatique';
         }
 
@@ -1642,10 +1642,11 @@ class Equipment extends BimpObject
     public function actionUpdateToNonSerilisable($data, &$success)
     {
         $success = 'Corrigé';
+        $warnings = array();
 
         define('DONT_CHECK_SERIAL', true);
         $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '', 1);
-        return $errors;
+        return array('warnings' => $warnings, 'errors' => $errors);;
     }
 
     public function actionUpdateInfosGsx($data, &$success)

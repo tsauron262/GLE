@@ -784,7 +784,7 @@ class Bimp_Facture extends BimpComm
                         $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
                     } elseif (!$this->field_exists('chorus_status')) {
                         $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
-                    } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0))) {
+                    } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0, 1))) {
                         $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus' . (int) $this->getData('chorus_status');
                     } else {
                         $client = $this->getChildObject('client');
@@ -2079,36 +2079,18 @@ class Bimp_Facture extends BimpComm
     {
         $delay = 0;
 
-        if (is_null($default_delay)) {
-            $default_delay = (int) BimpCore::getConf('default_relance_paiements_delay_days', null, 'bimpcommercial');
-        }
-
         if ($this->isLoaded()) {
-            $isComptant = ($this->dol_object->cond_reglement_code == 'RECEP');
-
+//            $isComptant = ($this->dol_object->cond_reglement_code == 'RECEP');
             if ($nextRelanceIdx <= 5) {
-                if ($nextRelanceIdx > 1) {
-                    if ($isComptant) {
-                        $delays = array(
-                            2 => 4,
-                            3 => 3,
-                            4 => 4,
-                            5 => 5
-                        );
-                        $delay = $delays[$nextRelanceIdx];
-                    } else {
-                        if ($nextRelanceIdx == 2) {
-                            $delay = 8;
-                        } else {
-                            $delay = $default_delay;
-                        }
-                    }
+                if ($nextRelanceIdx <= 1) {
+                    $delay = 7;
+                } elseif ($nextRelanceIdx == 2) {
+                    $delay = 8;
                 } else {
-                    if ($isComptant) {
-                        $delay = 3;
-                    } else {
-                        $delay = 7;
+                    if (is_null($default_delay)) {
+                        $default_delay = (int) BimpCore::getConf('default_relance_paiements_delay_days', null, 'bimpcommercial');
                     }
+                    $delay = $default_delay;
                 }
             }
         }
@@ -2750,7 +2732,7 @@ class Bimp_Facture extends BimpComm
 
                     if ($this->canSetAction('deactivateRelancesForAMonth')) {
                         $onclick = $this->getJsActionOnclick('deactivateRelancesForAMonth', array(), array(
-                            'confirm_msg' => 'Veuillez confirmer'
+                            'confirm_msg' => "Attention : cette action n\'est autorisée que si le règlement a été reçu par nos services et qu\'une copie en est déposée en pièce jointe de cette facture"
                         ));
 
                         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
@@ -4666,7 +4648,7 @@ class Bimp_Facture extends BimpComm
                     $diff = (float) $this->dol_object->total_ttc - $remain_to_pay;
 
                     $diff = round($diff, 2);
-                    if ($diff > -0.01 && $diff < 0.01) {
+                    if ($diff >= -0.01 && $diff <= 0.01) {
                         $paiement_status = 0; // Aucun paiement
                     } else {
                         if ($this->dol_object->total_ttc > 0 && $remain_to_pay < 0) {
@@ -5525,20 +5507,22 @@ class Bimp_Facture extends BimpComm
 
         $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
 
-        $this->addNote('Relance désactivée pour un mois');
+        $this->addObjectLog('Relance désactivée pour un mois');
 
         if (!count($errors)) {
             $to = BimpCore::getConf('email_for_relances_deactivated_notification', '', 'bimpcommercial');
 
             if ($to) {
                 global $user, $langs;
+                
 
-                $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendues pendant un mois pas ' . $user->getFullName($langs);
+                $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendues pendant un mois';
                 $msg .= "\n\n";
 
                 $msg .= 'Date de prochaine relance pour cette facture : ' . $dt->format('d / m / Y');
 
-                mailSyn2('Relances suspendues - Facture ' . $this->getRef(), $to, '', $msg);
+                $this->addLog($msg);
+//                mailSyn2('Relances suspendues - Facture ' . $this->getRef(), $to, '', $msg);
             }
         }
 
@@ -6203,7 +6187,7 @@ class Bimp_Facture extends BimpComm
         }
 
         if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance')) {
-            $this->addNote('Date prochaine relance modfifiée ' . $this->getData('date_next_relance'));
+            $this->addObjectLog('Date prochaine relance modfifiée ' . $this->getData('date_next_relance'));
         }
 
         $errors = parent::update($warnings, $force_update);
@@ -6237,7 +6221,8 @@ class Bimp_Facture extends BimpComm
                 $userCreate->fetch((int) $obj->getData('fk_user_author'));
 
 
-            $mail = $userCreate->email;
+//            $mail = $userCreate->email;
+            $mail = BimpTools::getMailOrSuperiorMail($userCreate->id, 'f.pineri@bimp.fr');
             if ($mail == '')
                 $mail = "tommy@bimp.fr";
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");

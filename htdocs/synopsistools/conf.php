@@ -7,7 +7,7 @@ define("NOLOGIN", 1);
 require_once('../main.inc.php');
 
 
-$constAGarder = array("ID_ERP", "CONSUL_SERVICES_PRIORITY_READ", "CONSUL_SERVERS", "CONSUL_SERVICES_PRIORITY_WRITE", "CONSUL_SERVICES_USE_FOR_WRITE", "CONSUL_SERVICES_USE_FOR_READ", "WEBHOOK_PATH_GIT_PULL", "WEBHOOK_PATH_REDIS_RESTART", "WEBHOOK_SERVER");
+$constAGarder = array("ID_ERP", "CONSUL_SERVICES_PRIORITY_READ", "CONSUL_SERVERS", "CONSUL_SERVICES_PRIORITY_WRITE", "CONSUL_SERVICES_USE_FOR_WRITE", "CONSUL_SERVICES_USE_FOR_READ", "WEBHOOK_PATH_GIT_PULL", "WEBHOOK_PATH_REDIS_RESTART", "WEBHOOK_SERVER", "WEBHOOK_SECRET_REDIS_RESTART", "WEBHOOK_SECRET_GIT_PULL", "WEBHOOK_SECRET_REDIS_RESTART");
 $varAGarder = array("dolibarr_main_auth_ldap_host");
 //non trouvée webhook_server_name   consul_cloud_name
 
@@ -29,8 +29,6 @@ $dolibarr_main_db_type="mysqlic";
 $dolibarr_main_db_character_set="";
 $dolibarr_main_db_collation="";
 
-define("WEBHOOK_SECRET_GIT_PULL", "Aizi2kaeNg8vaek5Aip0ieseFaey6ea3");
-define("WEBHOOK_SECRET_REDIS_RESTART", "siek4uzeethu3johzit6Yeith9aejish");
 
 
 

@@ -575,6 +575,7 @@ class BimpCore
         if (!defined('BIMP_EXTENDS_VERSION') && !defined('BIMP_EXTENDS_ENTITY')) {
             return array();
         }
+
         $updates = array();
 
         $cache = self::getConfCache();
@@ -614,6 +615,7 @@ class BimpCore
                     if (defined('BIMP_EXTENDS_ENTITY')) {
                         $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql';
                         if (file_exists($dir) && is_dir($dir)) {
+
                             $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, 0);
                             $files = scandir($dir);
 
@@ -640,8 +642,6 @@ class BimpCore
                 }
             }
         }
-
-
 
         return $updates;
     }
@@ -837,6 +837,26 @@ class BimpCore
         }
 
         return $default_value;
+    }
+
+    // Getters divers: 
+
+    public static function getBimpUser()
+    {
+        global $bimpUser;
+
+        if (!is_object($bimpUser)) {
+            global $user;
+            if (BimpObject::objectLoaded($user)) {
+                $bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
+            }
+        }
+
+        if (BimpObject::objectLoaded($bimpUser)) {
+            return $bimpUser;
+        }
+
+        return null;
     }
 
     // Getters booléens: 
@@ -1107,16 +1127,17 @@ class BimpCore
 
         return $errors;
     }
-    
-    public function addAutoTask($dst, $subject, $msg, $test_ferme = ''){
+
+    public function addAutoTask($dst, $subject, $msg, $test_ferme = '')
+    {
         global $conf;
         $errors = array();
-        if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
+        if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
             include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
             $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-            $tab = array("src"=>"GLE-AUTO", "dst"=>$dst, "subj"=>$subject, "txt"=>$msg, "prio"=>20, "test_ferme"=> $test_ferme, 'auto' => 1);
+            $tab = array("src" => "GLE-AUTO", "dst" => $dst, "subj" => $subject, "txt" => $msg, "prio" => 20, "test_ferme" => $test_ferme, 'auto' => 1);
             $errors = array_merge($errors, $task->validateArray($tab));
-            $errors = array_merge($errors, $task->createIfNotActif());        
+            $errors = array_merge($errors, $task->createIfNotActif());
         }
         return $errors;
     }

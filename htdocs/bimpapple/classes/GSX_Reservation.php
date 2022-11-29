@@ -23,6 +23,24 @@ class GSX_Reservation
 
         return self::$gsx_v2;
     }
+    
+    public static function getProductsCode(){
+        $gsx_v2 = self::getGsxV2();
+
+        if (!$gsx_v2->logged) {
+            $errors[] = 'Non connecté à GSX';
+            return array();
+        }
+        $type = 'PRODUCT_FAMILY_CLASS_PRODUCT_GROUP_MAP';
+        $return = array();
+        $result = $gsx_v2->attributeLookup($type);
+        if(isset($result[$type])){
+            foreach($result[$type] as $data){
+                $return[$data['key']] = $data['text'];
+            }
+        }
+        return $return;
+    }
 
     public static function fetchReservationsSummay($soldTo, $shipTo, $productCode, $from, $to, &$errors = array(), &$debug = '')
     {

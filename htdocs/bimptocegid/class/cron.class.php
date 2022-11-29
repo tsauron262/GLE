@@ -97,10 +97,10 @@
                     $this->checkFiles();
 
                     if(!$this->stopCompta && !$this->export_class->rollBack) {
-                        $this->FTP();
                         $this->menage();
-                        $db->commit();
                         $this->send_rapport();
+                        $db->commit();
+                        $this->FTP();
                     } else {
                         //if($this->export_class->rollBack) {
                             $db->rollback(); // Annule la transaction

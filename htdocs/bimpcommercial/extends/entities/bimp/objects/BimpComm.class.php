@@ -99,18 +99,45 @@ class BimpComm_ExtEntity extends BimpComm
         return 0;
     }
 
-    public function getDefaultIdContactForDF()
+    public function getDefaultIdContactForDF($type = 'suivi', $all = false)
     {
+        $return = 0;
+
+        if ($all) {
+            $return = array();
+        }
+
+        $types = array();
+
+        switch ($type) {
+            case 'suivi':
+            case 'signature':
+                $types = array('CUSTOMER', 'BILLING2', 'BILLING', 'SHIPPING', 'SITE');
+                break;
+
+            case 'livraison':
+                $types = array('SHIPPING', 'SITE');
+                break;
+        }
+
         if ($this->isLoaded()) {
-            foreach (array('CUSTOMER'/* , 'SHIPPING', 'BILLING2', 'BILLING' */) as $type_contact) {
+            foreach ($types as $type_contact) {
                 $contacts = $this->dol_object->getIdContact('external', $type_contact);
-                if (isset($contacts[0]) && $contacts[0]) {
-                    return (int) $contacts[0];
+                if (!empty($contacts)) {
+                    if ($all) {
+                        foreach ($contacts as $id_contact) {
+                            if (!in_array($id_contact, $return)) {
+                                $return[] = (int) $id_contact;
+                            }
+                        }
+                    } elseif (isset($contacts[0]) && $contacts[0]) {
+                        return (int) $contacts[0];
+                    }
                 }
             }
         }
 
-        return 0;
+        return $return;
     }
 
     // Rendus HTML
@@ -143,7 +170,7 @@ class BimpComm_ExtEntity extends BimpComm
         return $html;
     }
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         if ($this->field_exists('id_demande_fin') && (int) $this->getData('id_demande_fin')) {
             $df = $this->getChildObject('demande_fin');
@@ -152,7 +179,7 @@ class BimpComm_ExtEntity extends BimpComm
             }
         }
 
-        $html .= parent::renderHeaderExtraRight();
+        $html .= parent::renderHeaderExtraRight($no_div);
 
         return $html;
     }
@@ -183,6 +210,9 @@ class BimpComm_ExtEntity extends BimpComm
                     $html .= '</div>';
 
                     $html .= '<div class="col-xs-12 col-sm-6">';
+                    $fields_table = new BC_FieldsTable($df, 'contacts');
+                    $html .= $fields_table->renderHtml();
+
                     if ((int) $df->getData('id_signature_devis_fin') || (int) $df->getData('id_signature_contrat_fin')) {
                         $fields_table = new BC_FieldsTable($df, 'signatures_fin');
                         $html .= $fields_table->renderHtml();

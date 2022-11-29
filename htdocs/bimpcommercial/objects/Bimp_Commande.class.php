@@ -670,7 +670,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 if ($this->isActionAllowed('validate', $errors)) {
                     if ($this->canSetAction('validate')) {
 
-                        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial')))) {
+                        if (in_array($this->getData('entrepot'), json_decode(BimpCore::getConf('entrepots_ld', '[]', 'bimpcommercial'))) && !$this->hasDemandsValidations()) {
                             $data['form_name'] = 'livraison';
                         } else {
                             $data['confirm_msg'] = 'Veuillez confirmer la validation de cette commande';
@@ -1507,8 +1507,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         foreach ($lines as $id_line) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
-            if ($line->isLoaded()) {
-
+            if (BimpObject::objectLoaded($line)) {
                 if ($line->getData('type') === ObjectLine::LINE_TEXT) {
                     $body_html .= '<tr class="facture_line text_line" data-id_line="' . $line->id . '">';
                     $body_html .= '<td>';
@@ -3190,7 +3189,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
             } else {
                 $lines = $this->getLines('not_text');
-
                 $hasInvoice = 0;
                 $isFullyAddedToInvoice = 0;
                 $hasOnlyPeriodicity = 0;
@@ -3201,6 +3199,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $hasOnlyPeriodicity = 1;
 
                     foreach ($lines as $line) {
+//                        $line->fetch($line->id);//TODO trés bourin mais necessaire pour que quand on passe une ligne a zero $line soit a jour
+                        
                         $billed_qty = abs(round((float) $line->getBilledQty(null, false), 6));
                         $full_qty = abs(round((float) $line->getFullQty(), 6));
                         if ($billed_qty) {
@@ -3256,7 +3256,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
 
                     if (isset($mail) && $mail != "")
-                        mailSyn2("Status facturation", $mail, null, 'Bonjour le status facturation de votre commande ' . $this->getLink() . $infoClient . ' est  '.$this->displayData('invoice_status'));
+                        mailSyn2("Status facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  '.$this->displayData('invoice_status'));
+                        mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status'));
                 }
             }
 
@@ -3297,6 +3298,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         $errors = array();
         $warnings = array();
+        /*pour enregistré les valeur du form*/
+        $errors = $this->updateFields($data);
+        $this->db->db->commit();
+        $this->db->db->begin();
+        
         $infos = array();
 
         $forced_by_dev = (int) BimpTools::getArrayValueFromPath($data, 'forced_by_dev', 0);
@@ -4109,7 +4115,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 if ($demande)
                     $demande->delete($warnings, 1);
                 $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation de retard de paiement automatique, voir configuration client)";
-                mailSyn2("Validation impayé forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>Les retard de paiement de la commande " . $this->getNomUrl(1, true) . "ont été validée financièrement par la configuration du client.");
+                $this->addObjectLog("Les retard de paiement  ont été validée financièrement par la configuration du client.");
             }
         }
 
@@ -4290,6 +4296,36 @@ class Bimp_Commande extends Bimp_CommandeTemp
     }
 
     // Méthodes statiques: 
+    
+    public function sendDraftWhithMail()
+    {
+        $date = new DateTime();
+        $nbDay = 5;
+        $date->sub(new DateInterval('P' . $nbDay . 'D'));
+        $sql = $this->db->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "commande` WHERE `date_creation` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0");
+        $i = 0;
+        while ($ln = $this->db->db->fetch_object($sql)) {
+            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
+            $userCreate = new User($this->db->db);
+
+            $idComm = $obj->getIdContact($type = 'internal', $code = 'SALESREPSIGN');
+            if ($idComm > 0)
+                $userCreate->fetch((int) $idComm);
+            else
+                $userCreate->fetch((int) $obj->getData('fk_user_author'));
+
+            $mail = BimpTools::getMailOrSuperiorMail($userCreate->id, 'f.pineri@bimp.fr');
+//            $mail = $userCreate->email;
+            if ($mail == '')
+                $mail = "tommy@bimp.fr";
+            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
+            $this->output .= $mail.' : '.$obj->getNomUrl().' '.$nbDay.'<br/>';
+            if (mailSyn2('Commande brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une commande en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
+                $i++;
+        }
+        $this->resprints = "OK " . $i . ' mails';
+        return "OK " . $i . ' mails';
+    }
 
     public static function checkStatusAll()
     {
@@ -4450,7 +4486,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
                                 }
 
                                 $html .= '<br/><br/><h3>Commande ' . $commande->getLink() . ' (' . $nLines . ' ligne(s) de commande)</h3><br/><br/>';
-
+                                $cli = $commande->getChildObject('client');
+                                if (BimpObject::objectLoaded($cli)) {
+                                    $html .= '<h3>Commande ' . $cli->getLink() . '</h4><br/><br/>';
+                                }
+                                
                                 $html .= '<table>';
                                 $html .= '<thead>';
                                 $html .= '<tr>';

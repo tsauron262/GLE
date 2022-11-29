@@ -144,7 +144,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->SetTextColor(0, 0, 0);
         $pdf->setDrawColor(255, 255, 255);
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 13;
+        $i = 0;
         foreach ($lines as $line) {
+            $print = true;
             if ($line->id > $dernier_id) {
                 BimpTools::loadDolClass('product');
                 $p = new Product($db);
@@ -155,15 +157,33 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 if($p->ref == "OVH-SAUVEGARDEBIMP1TOANNUELLE" && !$this->have_save_annuelle) { $this->have_save_annuelle = true; }
                 
                 //echo '<pre>';print_r($p);
-                $pdf->Cell($W * 5, 6, (strlen($p->label) > 60) ? substr($p->label, 0, 60) . " ..." : $p->label, 1, null, 'L', true);
-                $pdf->Cell($W, 6, number_format($line->tva_tx, 0, '', '') . "%", 1, null, 'C', true);
-                $pdf->Cell($W * 2, 6, number_format($line->price_ht, 2, '.', '') . "€", 1, null, 'C', true);
-                $pdf->Cell($W, 6, $line->qty, 1, null, 'C', true);
-                $pdf->Cell($W * 2, 6, number_format($line->total_ht, 2, '.', '') . "€", 1, null, 'C', true);
-                $pdf->Cell($W * 2, 6, number_format($line->total_ttc, 2, '.', '') . '€', 1, null, 'C', true);
-                $dernier_id = $line->id;
+                $label = $p->label;
+                if($label == ''){
+                    $label = $line->desc;
+                }
+                $label = trim(strip_tags(html_entity_decode(htmlspecialchars_decode($label))));
+                if(strlen($label) > 48)
+                    $label = substr($label, 0, 44) . " ...";
+                $print = false;
+                if(strlen($label) > 2 || $line->total_ht != 0){
+                    $print = true;
+                    if($i > 9){
+                        $pdf->AddPage();
+                        $this->addLogo($pdf, 20);
+                        $i= 0;
+                    }
+                    $i++;
+                    $pdf->Cell($W * 5, 6, $label, 1, null, 'L', true);
+                    $pdf->Cell($W, 6, number_format($line->tva_tx, 0, '', '') . "%", 1, null, 'C', true);
+                    $pdf->Cell($W * 2, 6, number_format($line->price_ht, 2, '.', '') . "€", 1, null, 'C', true);
+                    $pdf->Cell($W, 6, $line->qty, 1, null, 'C', true);
+                    $pdf->Cell($W * 2, 6, number_format($line->total_ht, 2, '.', '') . "€", 1, null, 'C', true);
+                    $pdf->Cell($W * 2, 6, number_format($line->total_ttc, 2, '.', '') . '€', 1, null, 'C', true);
+                    $dernier_id = $line->id;
+                }
             }
-            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
+            if($print)
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
         }
         $pdf->SetTextColor(0, 0, 0);
         return $dernier_id;
@@ -348,6 +368,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         
 //        $nombre_lignes = (int) count($contrat->lines);
         foreach ($contrat->lines as $line) {
+            if($line->total_ht == 0)
+                continue;
             BimpTools::loadDolClass('product');
             $p = new Product($db);
             $p->fetch($line->fk_product);
@@ -655,8 +677,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "", "R", null, 'C', true);
                 $pdf1->Cell($W, 4, "", "R", null, 'C', true);
-                $pdf->Cell($W, 4, "Contact : " . $contact->lastname . " " . $contact->firstname, "L", null, 'C', true);
-                $pdf1->Cell($W, 4, "Contact : " . $contact->lastname . " " . $contact->firstname, "L", null, 'C', true);
+                $pdf->Cell($W, 4, "Contact : " .  $contact->firstname . " ". $contact->lastname , "L", null, 'C', true);
+                $pdf1->Cell($W, 4, "Contact : " . $contact->firstname . " ". $contact->lastname , "L", null, 'C', true);
                 
                 $pdf->SetFont('', '', 7);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');

@@ -3,7 +3,6 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/BimpAPI.php';
 
 class DocusignAPI extends BimpAPI {
-
     // PW web (dev@bimp.fr): HLxmS57W3uz8
     
 // Auth fonction en prod:
@@ -82,24 +81,29 @@ class DocusignAPI extends BimpAPI {
 //        $id_account = $this->userAccount->getData('login');
         $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
         
-        $result = $this->execCurlCustom('sendEnvelope', array(
-            'fields' => array(
-                'status' => 'sent',
-                'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
-                'documents' => array(
-                        array(
-                            'documentBase64' => base64_encode(file_get_contents($params['file'])),
-                            'documentId' => 1,
-                            'name' => $object->getSignatureDocFileName())
-                    ),
-                'recipients' => array('signers' => $this->getSigners($params, $object, $errors))
-            ),
-            'type' => 'FILE',
-            'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes'
-            ), $errors, $response_headers, $response_code, $warnings);
-        
-        
-        return $result;
+        if(is_file($params['file'])){
+            $result = $this->execCurlCustom('sendEnvelope', array(
+                'fields' => array(
+                    'status' => 'sent',
+                    'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
+                    'documents' => array(
+                            array(
+                                'documentBase64' => base64_encode(file_get_contents($params['file'])),
+                                'documentId' => 1,
+                                'name' => $object->getSignatureDocFileName())
+                        ),
+                    'recipients' => array('signers' => $this->getSigners($params, $object, $errors))
+                ),
+                'type' => 'FILE',
+                'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes'
+                ), $errors, $response_headers, $response_code, $warnings);
+
+
+            return $result;
+        }
+        else{
+            $errors[] = $params['file'].' introuvable';
+        }
     }
     
     public function getEnvelope($params, &$errors = array(), &$warnings = array()) {
@@ -281,19 +285,12 @@ class DocusignAPI extends BimpAPI {
     
     public function getSigners($params, $object, &$errors = array()) {
         $signers = array();
-        switch (get_class($object)) {
-            case 'BContract_contrat':
-                $signers = $this->getSignersContract($params, $object);
-                break;
-            
-            case 'Bimp_Propal':
-                $signers = $this->getSignersPropal($params, $object);
-                break;
-
-            default:
-                $errors[] = "Type d'object non prit en charge : " . get_class($object);
-                break;
-        }
+        if(is_a($object, 'BContract_contrat'))
+            $signers = $this->getSignersContract($params, $object);
+        elseif(is_a($object, 'Bimp_Propal'))
+            $signers = $this->getSignersPropal($params, $object);
+        else
+            $errors[] = "Type d'object non prit en charge : " . get_class($object);
         
         return $signers;
     }
@@ -303,8 +300,6 @@ class DocusignAPI extends BimpAPI {
 //       $comm = $params['comm'];
        
         $signers = array(
-            
-            // Client
             // Client
             array (
                 'email'       => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
@@ -404,47 +399,79 @@ Signature",
     }
     
     public function getSignersPropal($params, $object = null) {
+       $client = $params['client'];
+       
+       $anchor = 'Signature + Cachet avec SIRET :';
+       $base_x = -110; // x du champ le plus à gauche (Nom)
+       $base_y = 14; // y du champ le plus haut (Nom)
+       $font_size = 'Size9';
+       
+        $signers = array(
+            
+            // Client
+            // Client
+            array (
+                'email'       => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
+                'name'        =>  $client['prenom']  . ' ' . $client['nom'],
+                'signerEmail' => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr', 
+                'recipientId' => '1',
+                'routingOrder'=> '1',
+                'emailNotification' => array(
+                    'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
+                    'emailBody' => $object->getDocuSignEmailContent()
+                ),
+                'tabs'        => array(
+                    'signHereTabs' => array(
+                        array(
+                            'name'          => "Signature",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => $base_x + 130,
+                            'anchorYOffset' => $base_y + 35,
+                        ),
+                    ),
+                    'textTabs' => array(
+                        array(
+                            'name'          => "Nom",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => $base_x,
+                            'anchorYOffset' => $base_y,
+                            'fontSize'      => $font_size,
+                            'value'         => $client['nom'],
 
-        return array(
-            'signHereTabs' => array(
-                array(
-                    'name'          => "Signez ici",
-                    'anchorString'  => "Signature + Cachet avec SIRET :",
-                    'anchorXOffset' => 30,
-                    'anchorYOffset' => 50
-                )
-            ),
-            'lastNameTabs' => array(
-                array(
-                    'anchorString'        => "Nom du signataire :",
-                    'anchorXOffset'       => 60,
-                    'anchorCaseSensitive' => true,
-                    'value'         => $params['nom_signataire']
-                )
-            ),
-            'firstNameTabs' => array(
-                array(
-                    'anchorString'  => "Prénom du signataire :",
-                    'anchorXOffset' => 72,
-                    'value'         => $params['prenom_signataire']
-                )
-            ),
-            'textTabs' => array(
-                array(
-                    'name'          => "Fonction",
-                    'anchorString'  => "Fonction du signataire :",
-                    'anchorXOffset' => 65,
-                    'value'         => $params['fonction_signataire'],
-                    'locked'        => false
-                )
-            ),
-            'dateSignedTabs' => array(
-                array(
-                    'anchorString'  => "Date de signature :",
-                    'anchorXOffset' => 60
+                        ),
+                        array(
+                            'name'          => "Prénom",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => $base_x + 10,
+                            'anchorYOffset' => $base_y + 14,
+                            'fontSize'      => $font_size,
+                            'value'         => $client['prenom'],
+
+                        ),
+                        array(
+                            'name'          => "Fonction",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => $base_x + 11,
+                            'anchorYOffset' => $base_y + 28,
+                            'fontSize'      => $font_size,
+                            'value'         => $client['fonction'],
+
+                        ),
+                    ),
+                    'dateSignedTabs' => array(
+                        array(
+                            'name'          => "Date signature",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => $base_x + 1,
+                            'anchorYOffset' => $base_y + 45,
+                            'fontSize'      => $font_size,
+                        ),
+                    )
                 )
             )
         );
+        
+        return $signers;
     }
     
     // Interface

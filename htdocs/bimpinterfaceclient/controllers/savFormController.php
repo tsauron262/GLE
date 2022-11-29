@@ -7,7 +7,7 @@ class savFormController extends BimpPublicController
 
     public function renderHtml()
     {
-        if (!(int) BimpCore::getConf('sav_public_reservations', null, 'bimpsupport')) {
+        if (!(BimpCore::getConf('use_sav', null, 'bimpsupport')) || !(int) BimpCore::getConf('sav_public_reservations', null, 'bimpsupport')) {
             return BimpRender::renderAlerts('Les demandes de réparations en ligne ne sont actuellement pas disponibles');
         }
 
@@ -709,11 +709,12 @@ class savFormController extends BimpPublicController
 
         // Type matériel: 
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
-        $types = array('' => '');
+        $types = array();
 
         foreach (GSX_Reservation::$products_codes as $code) {
             $types[$code] = $code;
         }
+//        $types = GSX_Reservation::getProductsCode();
 
         $html .= '<div class="col-xs-6 col-md-3 col-lg-3">';
         $html .= '<label>Type de matériel</label><sup>*</sup><br/>';
@@ -1748,7 +1749,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         $client->updateField('status', 1);
                         $msg = 'Bonjour,' . "\n\n";
                         $msg .= 'Le client ' . $client->getLink(array(), 'private') . ' a été réactivé automatiquement suite à sa prise de rendez-vous SAV en ligne';
-                        mailSyn2('Client activé automatiquement', 'a.delauzun@bimp.fr,f.martinez@bimp.fr,t.sauron@bimp.fr', '', $msg);
+                        mailSyn2('Client activé automatiquement', 's.reynaud@bimp.fr', '', $msg);
                     }
 
                     if (BimpObject::objectLoaded($client)) {
@@ -1983,7 +1984,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                                 $debug .= '<br/><br/>Ajout note SAV: ';
 
-                                $note_errors = $sav->addNote($msg, 4);
+                                $note_errors = $sav->addNote($msg, BimpNote::BN_ALL);
 
                                 if (count($note_errors)) {
                                     $debug .= BimpRender::renderAlerts($note_errors);
@@ -2374,7 +2375,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                         // Maj SAV: 
                         $sav->updateField('status', -2);
-                        $sav->addNote('Annulé par le client le ' . date('d / m / Y à H:i'), 4);
+                        $sav->addNote('Annulé par le client le ' . date('d / m / Y à H:i'), BImpNote::BN_ALL);
                     }
                 }
             }

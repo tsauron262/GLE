@@ -465,7 +465,7 @@ class BimpStruct
             $nav_tabs = $config->getParams($path);
             $tabs_id = 'maintabs';
         }
-        
+
         foreach ($nav_tabs as $idx => $nav_tab) {
             if (!(int) $config->get($path . '/' . $idx . '/show', 1, false, 'bool')) {
                 continue;
@@ -495,6 +495,7 @@ class BimpStruct
                     $tabs[] = array(
                         'id'            => $tab_id,
                         'title'         => $config->get($path . '/' . $idx . '/title', '', true),
+                        'icon'          => $config->get($path . '/' . $idx . '/icon', '', false),
                         'ajax'          => 1,
                         'ajax_callback' => $object->getJsLoadCustomContent($method, '$(\'#' . $tab_id . ' .nav_tab_ajax_result\')', $method_params, array('button' => ''))
                     );
@@ -510,6 +511,7 @@ class BimpStruct
                 $tabs[] = array(
                     'id'      => $config->get($path . '/' . $idx . '/id', '', true),
                     'title'   => $config->get($path . '/' . $idx . '/title', '', true),
+                    'icon'    => $config->get($path . '/' . $idx . '/icon', '', false),
                     'content' => $content
                 );
             }

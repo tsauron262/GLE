@@ -111,6 +111,11 @@ class BS_Ticket extends BimpObject
 
     public function isCreatable($force_create = false, &$errors = array())
     {
+        if (!(int) BimpCore::getConf('use_tickets', null, 'bimpsupport')) {
+            $errors[] = 'La création des tickets hotline est désactivée';
+            return 0;
+        }
+
         if (BimpCore::isContextPublic()) {
 //            $id_contrat = (int) $this->getData('id_contrat');
 //
@@ -982,7 +987,7 @@ class BS_Ticket extends BimpObject
                 if (BimpObject::objectLoaded($client)) {
                     $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Ticket hotline:' . $this->id . '}}');
                 }
-                
+
                 if ($isPublic) {
                     $liste_destinataires = Array($userClient->getData('email'));
                     $liste_destinataires = BimpTools::merge_array($liste_destinataires, Array('hotline@bimp.fr'));

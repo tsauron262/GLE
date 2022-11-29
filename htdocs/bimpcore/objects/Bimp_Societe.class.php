@@ -668,6 +668,17 @@ class Bimp_Societe extends BimpDolObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'custom':
+                $tabSql = array();
+//                print_r($values);die;
+                foreach ($values as $value) {
+                    $tabSql[] = '('.$value['value'].')';
+                }
+
+                $filters[$main_alias . '___custom_custom'] = array(
+                    'custom' => '(' . implode(" || ", $tabSql) . ')'
+                );
+                break;
             case 'marche':
                 $tabSql = array();
                 foreach ($values as $value) {
@@ -1617,7 +1628,7 @@ class Bimp_Societe extends BimpDolObject
     {
         $fk_fj = (int) $this->getData('fk_forme_juridique');
         if ($fk_fj) {
-            $status = BimpCache::getJuridicalstatusArray((int) $this->getData('fk_pays'));
+            $status = BimpCache::getJuridicalstatusArray((int) $this->getData('fk_pays'), 'rowid');
             if (isset($status[$fk_fj])) {
                 return $status[$fk_fj];
             }
@@ -1760,7 +1771,7 @@ class Bimp_Societe extends BimpDolObject
                     $html .= ($html ? '<br/>' : '') . $user->getLink() . ' ';
 
                     if ((int) $user->id !== $default_id_commercial) {
-                        if ($edit) {
+                        if ($edit && $with_button) {
                             $onclick = $this->getJsActionOnclick('removeCommercial', array(
                                 'id_commercial' => (int) $user->id
                                     ), array(

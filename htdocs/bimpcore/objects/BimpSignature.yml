@@ -23,7 +23,7 @@ labels:
     is_female: 1
     
 objects: 
-    user_client: 
+    user_client:
         relation: hasOne
         delete: 0
         instance: 
@@ -33,7 +33,7 @@ objects:
             id_object: 
                 field_value: id_user_client_signataire
                 
-    users_client: 
+    users_client:
         relation: none
         instance: 
             bimp_object: 

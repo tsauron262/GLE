@@ -230,7 +230,7 @@ class BDS_RgpdProcess extends BDSProcess
                 $pages[] = $i;
             }
 
-            $data['steps'] = array(
+            $data['steps']['check_clients'] = array(
                 'check_clients' => array(
                     'label'                  => 'Vérification de la dernière activité des clients',
                     'on_error'               => 'continue',
@@ -666,7 +666,7 @@ class BDS_RgpdProcess extends BDSProcess
         $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity > \'0000-00-00\' AND date_last_activity <= \'' . $dt_5y . '\'';
 
         $rows = $this->db->getRows('societe', $where, ($limit ? $limit : null), 'array', array('rowid'), 'date_last_activity', 'ASC');
-        
+
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 $clients[] = (int) $r['rowid'];
@@ -965,7 +965,7 @@ class BDS_RgpdProcess extends BDSProcess
 
     public function saveFilesDates(&$errors = array())
     {
-        if ((int) $this->getOption('delete_files', 0)) {
+        if (!(int) $this->getOption('delete_files', 0)) {
             return;
         }
 
@@ -1435,6 +1435,20 @@ class BDS_RgpdProcess extends BDSProcess
 
             if (BimpObject::objectLoaded($opt)) {
                 $options['process_tickets'] = (int) $opt->id;
+            }
+            
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Traiter les Fiche Intervention',
+                        'name'          => 'process_fi',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => '1',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options['process_fi'] = (int) $opt->id;
             }
 
             $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(

@@ -155,6 +155,11 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             case 'createSignature':
                 return 1;
+                
+            case 'downloadSignature':
+            case 'redownloadSignature':
+            case 'createSignatureDocuSign':
+                return $user->admin;
         }
         return 1;
     }
@@ -320,6 +325,65 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
                 }
                 return 1;
+                
+            case 'downloadSignature':
+                if ($status != 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                    return 0;
+                }
+                
+                $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
+                if (!BimpObject::objectLoaded($signature)) {
+                    $errors[] = 'La signature n\'existe pas';
+                    return 0;
+                }
+                
+                $file_name = $this->getSignatureDocFileName('devis', true);
+                $file_dir = $this->getSignatureDocFileDir('devis');
+                if (file_exists($file_dir . $file_name)) {
+                    return 0;
+                }
+                
+                return 1;
+                
+            case 'redownloadSignature':
+                if ($status != 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                    return 0;
+                }
+                
+                $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
+                if (!BimpObject::objectLoaded($signature)) {
+                    $errors[] = 'La signature n\'existe pas';
+                    return 0;
+                }
+                
+                $file_name = $this->getSignatureDocFileName('devis', true);
+                $file_dir = $this->getSignatureDocFileDir('devis');
+                if (!file_exists($file_dir . $file_name)) {
+                    return 0;
+                }
+                
+                return 1;
+
+            case 'createSignatureDocuSign':
+                if ($status != 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                    return 0;
+                }
+                
+                if ((int) $this->getData('id_signature')) {
+                    $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
+
+                    if (!BimpObject::objectLoaded($signature)) {
+                        $this->updateField('id_signature', 0);
+                    } else {
+                        $errors[] = 'La signature est déjà en place pour ' . $this->getLabel('this');
+                        return 0;
+                    }
+                }                
+                return 1;
+
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -455,7 +519,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             return 1;
         }
 
-        return 15;
+        return 7;
     }
 
     public function getHelpDateRenouvellementContrat()
@@ -618,7 +682,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     public function getActionsButtons()
     {
-        global $langs;
+        global $langs, $user;
         $langs->load('propal');
 
         if ($this->isLoaded()) {
@@ -676,6 +740,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 if (!(int) $signature->getData('signed')) {
                                     $buttons = BimpTools::merge_array($buttons, $signature->getSignButtons());
                                 } else {
+                                    $buttons = BimpTools::merge_array($buttons, $signature->getSignedButtons());
                                     $signed = true;
                                 }
                             } elseif ($this->isActionAllowed('createSignature', $err) && $this->canSetAction('createSignature')) {
@@ -688,6 +753,14 @@ class Bimp_Propal extends Bimp_PropalTemp
                                         'form_name' => 'create_signature'
                                     ))
                                 );
+                                if ($user->admin) {//$user->rights->devis->creer and $status == 1) {
+                                    $buttons[] = array(
+                                        'label'   => 'Envoyer via DocuSign',
+                                        'icon'    => 'fas_signature',
+                                        'onclick' => $this->getJsActionOnclick('createSignatureDocuSign', array(), array(
+                                            'form_name' => 'create_signature_docu_sign'
+                                    )));
+                                }
                             }
                         }
 
@@ -727,6 +800,20 @@ class Bimp_Propal extends Bimp_PropalTemp
                                         'icon'    => 'fas_undo',
                                         'onclick' => $this->getJsActionOnclick('modify', array())
                                     );
+                                }
+                            }
+                        }
+                    }
+                    else{
+                        if ($use_signature) {
+                            // Boutons signature: 
+                            $err = array();
+                            $signature = $this->getChildObject('signature');
+                            if (BimpObject::objectLoaded($signature)) {
+                                if ((int) $signature->getData('signed')) {
+                                    $buttons = BimpTools::merge_array($buttons, $signature->getSignedButtons());
+                                } else {
+                                    BimpCore::addlog('Signée mais pas signée...');
                                 }
                             }
                         }
@@ -911,6 +998,14 @@ class Bimp_Propal extends Bimp_PropalTemp
                         ))
                     );
                 }
+
+                if ($user->admin) { // Mettre ça dans canSetAction()
+                    // Téléchargement des fichiers
+                    if (!BimpObject::objectLoaded($signature)) {
+                        $signature = $this->getChildObject('signature');
+                    }
+                    
+                }
             }
         }
 
@@ -1091,8 +1186,8 @@ class Bimp_Propal extends Bimp_PropalTemp
         $totHt = (float) $this->dol_object->total_ht;
 
         // Ajout des notes: 
-        $this->addNote('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
-        $newPropal->addNote('Révision de la proposition: ' . $this->getRef());
+        $this->addObjectLog('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
+        $newPropal->addObjectLog('Révision de la proposition: ' . $this->getRef());
 
         // Copie des lignes: 
         $warnings = BimpTools::merge_array($warnings, $newPropal->createLinesFromOrigin($this, array(
@@ -1176,7 +1271,112 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $errors;
     }
 
-    // Traitements - overrides BimpComm: 
+    public function createSignatureDocusign($id_contact)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if ((int) $this->getData('id_signature')) {
+                $errors[] = 'La signature a déjà été créée pour ' . $this->getLabel('this');
+                return $errors;
+            }
+        }
+
+        global $user;
+
+        // Vérification du contact
+        $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+        if (BimpObject::objectLoaded($contact)) {
+            $nom_client = $contact->getData('lastname');
+            $prenom_client = $contact->getData('firstname');
+            $fonction_client = $contact->getData('poste');
+            $email_client = $contact->getData('email');
+
+            if (!$nom_client) {
+                $errors[] = 'Nom du signataire absent';
+            }
+
+            if (!$prenom_client) {
+                $errors[] = 'Prénom du signataire absent';
+            }
+
+            if (!$email_client) {
+                $errors[] = 'Adresse e-mail du signataire absent' . $id_contact;
+            }
+
+            $client = $this->getChildObject('client');
+
+            if (BimpObject::objectLoaded($client)) {
+                if ($client->isCompany()) {
+                    if (!$fonction_client) {
+                        $errors[] = 'Fonction du signataire absent';
+                    }
+                }
+            } else {
+                $errors[] = 'ID du client absent';
+            }
+        } else {
+            $errors[] = "Contact d'id " . $id_contact . " inconnu";
+        }
+
+        // Commercial
+        $comm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
+        if (!BimpObject::objectLoaded($comm)) {
+            $errors[] = 'Utilisateur courant non renseigné';
+        }
+
+
+        if (!count($errors)) {
+
+            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+            $api = BimpAPI::getApiInstance('docusign');
+            if (is_a($api, 'DocusignAPI')) {
+
+                $dir = $this->getSignatureDocFileDir();
+                $file_name = $this->getSignatureDocFileName('propal');
+                $file = $dir . $file_name;
+
+                $params = array(
+                    'file'   => $file,
+                    'client' => array(
+                        'nom'      => $nom_client,
+                        'prenom'   => $prenom_client,
+                        'fonction' => $fonction_client,
+                        'email'    => $email_client
+                    )
+                );
+                $envelope = $api->createEnvelope($params, $this, $errors, $warnings);
+
+                if (!count($errors)) {
+                    BimpObject::loadClass('bimpcore', 'BimpSignature');
+
+                    $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
+                                'obj_module'            => 'bimpcommercial',
+                                'obj_name'              => 'Bimp_Propal',
+                                'id_obj'                => $this->id,
+                                'doc_type'              => 'propal',
+                                'id_client'             => $this->getData('fk_soc'),
+                                'id_contact'            => $id_contact,
+                                'dist_type'             => BimpSignature::DIST_DOCUSIGN,
+                                'type'                  => BimpSignature::TYPE_ELEC,
+                                'nom_signataire'        => $prenom_client . ' ' . $nom_client,
+                                'fonction_signataire'   => $fonction_client,
+                                'email_signataire'      => $email_client,
+                                'id_envelope_docu_sign' => $envelope['envelopeId'],
+                                'id_account_docu_sign'  => $comm->getData('id_docusign')
+                                    ), true, $errors);
+
+                    if (!count($errors) && BimpObject::objectLoaded($signature)) {
+                        $errors = $this->updateField('id_signature', (int) $signature->id);
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    // Traitements - overrides BimpComm:
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
@@ -1475,7 +1675,35 @@ class Bimp_Propal extends Bimp_PropalTemp
         );
     }
 
-    // Overrides BimpObject: 
+    public function actionCreateSignatureDocusign($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+
+        $success_callback = '';
+
+        $id_contact = BimpTools::getArrayValueFromPath($data, 'id_contact', '');
+        if (!$id_contact) {
+            $errors[] = 'Veuillez renseigner un contact';
+        }
+
+        $errors_signature = $this->createSignatureDocusign($id_contact);
+        $errors = BimpTools::merge_array($errors, $errors_signature);
+
+        if (!count($errors)) {
+            $signature = $this->getChildObject('signature');
+            $success = "Enveloppe envoyée avec succès<br/>";
+            $success .= $signature->getNomUrl() . ' créée avec succès';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    // Overrides BimpObject:
 
     public function validatePost()
     {
@@ -1685,14 +1913,14 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $errors;
     }
 
-    // Gestion Signature: 
+    // Gestion Signature:
 
-    public function getSignatureDocFileDir($doc_type)
+    public function getSignatureDocFileDir()
     {
         return $this->getFilesDir();
     }
 
-    public function getSignatureDocFileName($doc_type, $signed = false)
+    public function getSignatureDocFileName($doc_type = 'devis', $signed = false)
     {
         switch ($doc_type) {
             case 'devis':
@@ -1778,6 +2006,9 @@ class Bimp_Propal extends Bimp_PropalTemp
         $errors = array();
 
         if ($this->isLoaded($errors)) {
+
+            BimpObject::loadClass('bimpcore', 'BimpSignature');
+
             $sav = $this->getSav();
 
             if (BimpObject::objectLoaded($sav)) {
@@ -1802,5 +2033,15 @@ class Bimp_Propal extends Bimp_PropalTemp
     public function isSignatureReopenable($doc_type, &$errors = array())
     {
         return 0;
+    }
+
+    public function getDocuSignEmailContent()
+    {
+        $email = "Bonjour,<br/>";
+        $email .= "Veuillez trouver ci-joint notre devis pour validation<br/>";
+        $email .= "Merci de bien vouloir le signer électroniquement en suivant les instructions DocuSign<br/>";
+        $email .= "Vous en remerciant par avance, nous restons à votre disposition pour tout complément d'information. <br/>";
+        $email .= " Très courtoisement. BIMP Groupe Olys - 2 rue des Erables - CS 21055 - 69760 LIMONEST<br/>";
+        return $email;
     }
 }

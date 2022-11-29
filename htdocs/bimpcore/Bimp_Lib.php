@@ -67,8 +67,10 @@ if (!defined('BIMP_LIB')) {
     BimpCore::setMaxExecutionTime(600);
     BimpCore::setMemoryLimit(256);
 
+    BimpObject::loadClass('bimpcore', 'BimpNote');
     BimpObject::loadClass('bimpcore', 'Bimp_Log');
     BimpObject::loadClass('bimpcore', 'BimpObjectLog');
+    BimpObject::loadClass('bimpcore', 'Bimp_User');
 
     if (!defined('BIMP_EXTENDS_ENTITY') && defined('PATH_EXTENDS')) {
         if (preg_match('/^.*\/([a-zA-Z0-1\-_]+)\/?$/', PATH_EXTENDS, $matches)) {

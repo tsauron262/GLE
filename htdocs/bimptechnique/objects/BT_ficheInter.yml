@@ -529,23 +529,24 @@ forms:
             - field: tickets  
             
     forBilling:
+        force_edit: 1
         rows: 
             - field: ef_type
             
-    messageFacturation:
-        rows:
-            - custom: 1
-              label: Me mettre en copie
-              input_name: copy
-              value: 1
-              input:
-                type: toggle
-            - custom: 1
-              label: Message
-              input_name: message
-              value: Bonjour, merci de bien vouloir facturer cette fiche d'intervention indépendante d'une commande ou d'un contrat en cours
-              input:
-                  type: textarea
+#    messageFacturation:
+#        rows:
+#            - custom: 1
+#              label: Me mettre en copie
+#              input_name: copy
+#              value: 1
+#              input:
+#                type: toggle
+#            - custom: 1
+#              label: Message
+#              input_name: message
+#              value: Bonjour, merci de bien vouloir facturer cette fiche d'intervention indépendante d'une commande ou d'un contrat en cours
+#              input:
+#                  type: textarea
                   
     duplicate:
         extends: default

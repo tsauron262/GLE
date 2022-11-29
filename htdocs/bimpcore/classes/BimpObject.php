@@ -339,7 +339,7 @@ class BimpObject extends BimpCache
         $this->config = BimpConfig::getObjectConfigInstance($module, $object_name, $this);
 
         if ($this->config->isDefined('mode_archive')) {
-            $this->modeArchive = $this->getConf('mode_archive');
+            $this->modeArchive = (int) $this->getConf('mode_archive', 0, false, 'bool');
         }
 
         $this->initBdd();
@@ -377,7 +377,6 @@ class BimpObject extends BimpCache
             $this->config = BimpConfig::getObjectConfigInstance($this->module, $this->object_name, $this);
             $this->addCommonFieldsConfig();
             $this->addConfigExtraParams();
-//            mailSyn2('Config inexistant', BimpCore::getConf('devs_email'), null, 'Config inexistant dans ' . get_class($this));
         }
     }
 
@@ -1166,7 +1165,7 @@ class BimpObject extends BimpCache
         return $fields;
     }
 
-    // Getters boolééns: 
+    // Getters boolééns:
 
     public function isLoaded(&$errors = array())
     {
@@ -1412,7 +1411,7 @@ class BimpObject extends BimpCache
             return $this->data[$field];
         }
 
-        if($default)
+        if ($default)
             return $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
     }
 
@@ -1940,13 +1939,17 @@ class BimpObject extends BimpCache
     public function getInfoGraph()
     {
         return array(
-            array("data1" => "Donnée", "axeX" => "X", "axeY" => "Y", 'title' => $this->getLabel()));
+            array("data1" => array("title"=> "Nom Data1"),
+                  "axeX" => array("title" => "X", "valueFormatString" => 'value type'), 
+                  "axeY" => array("title" => "Y"), 
+                  'title' => $this->getLabel()
+        ));
     }
 
-    public function getGraphDataPoint()
-    {
-        return '';
-    }
+//    public function getGraphDataPoint()
+//    {
+//        return '';
+//    }
 
     public function getPdfNamePrincipal()
     {
@@ -2123,7 +2126,7 @@ class BimpObject extends BimpCache
             $instance = $this;
         }
 
-        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
+        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions') && !(int) $this->getConf('no_transaction_db', 0, false, 'bool');;
 
         if ($use_db_transactions) {
             $instance->db->db->begin();
@@ -3609,28 +3612,28 @@ class BimpObject extends BimpCache
 //        if($this->cacheExists($cache_key))
 //            $rows = $this->getCache($cache_key);
 //        else{
-            $rows = $this->db->executeS($sql, $return);
+        $rows = $this->db->executeS($sql, $return);
 
-            if (is_null($rows)) {
-                if (BimpDebug::isActive()) {
-                    $content = BimpRender::renderSql($sql);
-                    $content .= BimpRender::renderDebugInfo($this->db->err(), 'ERREUR SQL', 'fas_exclamation-circle');
-                    $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));
-                    $content .= BimpRender::renderFoldableContainer('Joins', '<pre>' . print_r($joins, 1) . '</pre>', array('open' => false, 'offset_left' => true));
-                    $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
-                    BimpDebug::addDebug('list_sql', $title, $content);
-                }
-
-                $rows = array();
-            } else {
-                if (BimpDebug::isActive()) {
-                    $nRows = count($rows);
-                    $content = BimpRender::renderSql($sql);
-                    $content .= '<br/><span class="badge badge-' . ($nRows > 0 ? 'success' : 'danger') . '">' . $nRows . ' résultat' . ($nRows > 1 ? 's' : '') . '</span>';
-                    $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
-                    BimpDebug::addDebug('list_sql', $title, $content);
-                }
+        if (is_null($rows)) {
+            if (BimpDebug::isActive()) {
+                $content = BimpRender::renderSql($sql);
+                $content .= BimpRender::renderDebugInfo($this->db->err(), 'ERREUR SQL', 'fas_exclamation-circle');
+                $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));
+                $content .= BimpRender::renderFoldableContainer('Joins', '<pre>' . print_r($joins, 1) . '</pre>', array('open' => false, 'offset_left' => true));
+                $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                BimpDebug::addDebug('list_sql', $title, $content);
             }
+
+            $rows = array();
+        } else {
+            if (BimpDebug::isActive()) {
+                $nRows = count($rows);
+                $content = BimpRender::renderSql($sql);
+                $content .= '<br/><span class="badge badge-' . ($nRows > 0 ? 'success' : 'danger') . '">' . $nRows . ' résultat' . ($nRows > 1 ? 's' : '') . '</span>';
+                $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                BimpDebug::addDebug('list_sql', $title, $content);
+            }
+        }
 //            $this->setCache($cache_key, $rows);
 //        }
 
@@ -4797,19 +4800,18 @@ class BimpObject extends BimpCache
                             $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de l\'enregistrement des champs supplémentaires');
                         }
 
-                        // Notes nouvelles valeurs de champs: 
-                        $notes = array();
+                        // Logs nouvelles valeurs de champs: 
+                        $logs = array();
                         foreach ($this->fieldsWithAddNoteOnUpdate as $champAddNote) {
                             if ($this->getData($champAddNote) != $this->getInitData($champAddNote)) {
-                                $notes[] = html_entity_decode('Champ ' . $this->displayFieldName($champAddNote) . ' modifié. 
+                                $logs[] = html_entity_decode('Champ ' . $this->displayFieldName($champAddNote) . ' modifié. 
 Ancienne valeur : ' . $this->displayInitData($champAddNote, 'default', false, true) . '
 Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             }
                         }
 
-                        if (count($notes)) {
-                            $this->addNote(implode('
-', $notes));
+                        if (count($logs)) {
+                            $this->addObjectLog(implode("\n", $logs));
                         }
 
                         // Log changement de statut
@@ -6404,37 +6406,44 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0, $delete_on_view = 0)
     {
-        if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
         }
+
         $note = BimpObject::getInstance('bimpcore', 'BimpNote');
         $note->initBdd($this->getConf('no_transaction_db', 0, false, 'bool'));
 
-        if (is_string($fk_group_dest))
+        if (is_string($fk_group_dest) && $fk_group_dest) {
             eval('if(BimpNote::' . $fk_group_dest . ' != null) $fk_group_dest = BimpNote::' . $fk_group_dest . ';');
-        if (is_string($fk_user_dest))
+        }
+
+        if (is_string($fk_user_dest) && $fk_user_dest) {
             eval('if(BimpNote::' . $fk_user_dest . ' != null) $fk_user_dest = BimpNote::' . $fk_user_dest . ';');
+        }
 
         if (is_null($visibility)) {
-            $visibility = BimpNote::BIMP_NOTE_MEMBERS;
+            $visibility = BimpNote::BN_MEMBERS;
         }
 
         $errors = $note->validateArray(array(
-            'obj_type'      => 'bimp_object',
-            'obj_module'    => $this->module,
-            'obj_name'      => $this->object_name,
-            'id_obj'        => (int) $this->id,
-            'visibility'    => (int) $visibility,
-            'content'       => $content,
-            'viewed'        => $viewed,
-            'auto'          => $auto,
-            "email"         => $email,
-            "type_author"   => $type_author,
-            'type_dest'     => $type_dest,
-            'fk_group_dest' => $fk_group_dest,
-            'fk_user_dest'  => $fk_user_dest
+            'obj_type'       => 'bimp_object',
+            'obj_module'     => $this->module,
+            'obj_name'       => $this->object_name,
+            'id_obj'         => (int) $this->id,
+            'visibility'     => (int) $visibility,
+            'content'        => $content,
+            'viewed'         => $viewed,
+            'auto'           => $auto,
+            "email"          => $email,
+            "type_author"    => $type_author,
+            'type_dest'      => $type_dest,
+            'fk_group_dest'  => $fk_group_dest,
+            'fk_user_dest'   => $fk_user_dest,
+            'delete_on_view' => $delete_on_view
         ));
 
         if (!count($errors)) {
@@ -6448,16 +6457,33 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function getNotes($withObject = true)
     {
-        return self::getObjectNotes($this, $withObject);
+        $list = self::getObjectNotes($this);
+
+        if ($withObject) {
+            $notes = array();
+
+            foreach ($list as $id_note) {
+                $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', $id_note);
+                if (BimpObject::objectLoaded($note)) {
+                    $notes[$id_note] = $note;
+                }
+            }
+
+            return $notes;
+        }
+
+        return $list;
     }
 
     public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false)
     {
         if ($this->isLoaded()) {
-            if ($archive)
+            if ($archive) {
                 $note = BimpObject::getInstance('bimpcore', 'BimpNoteArchive');
-            else
+            } else {
                 $note = BimpObject::getInstance('bimpcore', 'BimpNote');
+            }
+
             $list = new BC_ListTable($note, $list_model);
             $list->addIdentifierSuffix($suffixe);
             $list->addFieldFilterValue('obj_type', 'bimp_object');
@@ -6474,12 +6500,37 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             if (BimpCore::getConf('date_archive', '') != '') {
-                $btnHisto = '<div id="lllm">';
-                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#lllm')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Charger historique</button>';
+                $btnHisto = '<div id="notes_archives_' . $this->object_name . '_container">';
+                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . "_container')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
                 $btnHisto .= '</div>';
             }
+            
+            $sup = '';
+            $linkedObjects = $this->getFullLinkedObjetsArray(false);
+            if(count($linkedObjects) > 0){
+                $filterLinked = array('linked' => array('or' => array()));
+                foreach($linkedObjects as $data_linked => $inut){
+                    $data_linked = json_decode($data_linked, true);
+                    if($data_linked['object_name'] != 'BS_SAV'){
+                        $filterLinked['linked']['or'][$data_linked["object_name"].$data_linked['id_object']] = array('and_fields' => array(
+                            'obj_module'   =>  $data_linked['module'],
+                            'obj_name'   =>  $data_linked['object_name'],
+                            'id_obj'   =>  $data_linked['id_object']
+                        ));
+                    }
+                }
+                $nb = count($filterLinked['linked']['or']);
+                if($nb > 60)
+                    BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes '.$this->getLink(). '('.$nb.')');
+                
+                $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées ('.$nb.' objects)');
+                $list2->addIdentifierSuffix($suffixe.'_linked');
+                $list2->addFieldFilterValue('obj_type', 'bimp_object');
+                $list2->addFieldFilterValue('custom', $filterLinked['linked']);
+                $sup = $list2->renderHtml();
+            }
 
-            return $list->renderHtml() . ($archive == false ? $btnHisto : '');
+            return $list->renderHtml(). $sup . ($archive == false ? $btnHisto : '');
         }
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');
@@ -6705,7 +6756,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             //Suivi mail
             $random = rand(11111111, 99999999);
             $htmlId = 'suivi_mail_' . $random;
-            $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails');
+            $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails', array(), 'large');
             $html .= '<span id="' . $htmlId . '" class="btn btn-default bs-popover"';
             $html .= ' onclick="' . $onclick . '"';
             $html .= BimpRender::renderPopoverData('Suivi des mails');
@@ -6724,7 +6775,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             // Extra right: 
             if (method_exists($this, 'renderHeaderExtraRight')) {
                 $html .= '<div style="margin: 10px 0;">';
-                $html .= $this->renderHeaderExtraRight();
+                $html .= $this->renderHeaderExtraRight($no_div = false);
                 $html .= '</div>';
             }
 
@@ -9363,124 +9414,77 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $success = "Donnée Maj";
         $errors = array();
         $warnings = array();
-        $success_callback = '';
-        $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
-        $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
-        $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
-        $post_temp = $_POST;
-        $_POST = $list_data;
 
-        $list = new BC_ListTable($this, $list_name);
+        $data2 = $this->getInfoGraph();
+        
+        $options = array();
+        $options['animationEnabled'] = true;
+        $options['theme'] = "light2";
+        $options['title'] = array("text" => $data2['title']);
+        $options['axisX'] = $data2['axeX'];
+        $options['axisY'] = $data2['axeY'];
+        $options['toolTip'] = array("shared"=> true);
+        $options['legend'] = array(
+            "cursor" => "pointer",
+            "verticalAlign" => "top",
+            "horizontalAlign" => "left",
+            "dockInsidePlotArea" => false,
+            "itemclick" => "toogleDataSeries",
+        );
+        $i= 1;
+        while(isset($data2['data'.$i])){
+            $tmpData = array();
+            $tmpData["type"] = "line";
+            $tmpData["showInLegend"] = true;
+            $tmpData["markerType"] = "square";
+            
+            $tmpData = BimpTools::overrideArray($tmpData, $data2['data'.$i]);
 
-        $list->initForGraph();
 
-        $data = $this->getInfoGraph();
-        if (static::$modeDateGraph == 'day')
-            $xValueFormatString = 'DD MMM, YYYY';
-        elseif (static::$modeDateGraph == 'month')
-            $xValueFormatString = 'MMM, YYYY';
-        else
-            $xValueFormatString = 'YYYY';
-        if (method_exists($this, 'getGraphDataPoint')) {
-            $success_callback = '
-var options = {
-	animationEnabled: true,
-	theme: "light2",
-	title:{
-		text: "' . $data['title'] . '"
-	},
-	axisX:{
-		title: "' . $data['axeX'] . '",
-		valueFormatString: "' . $xValueFormatString . '"
-	},
-	axisY: {
-		title: "' . $data['axeY'] . '",
-		suffix: " €",
-		minimum: 30
-	},
-	toolTip:{
-		shared:true
-	},  
-	legend:{
-		cursor:"pointer",
-		verticalAlign: "top",
-		horizontalAlign: "left",
-		dockInsidePlotArea: false,
-		itemclick: toogleDataSeries
-	},
-	data: ';
-            $success_callback .= '[{
-		type: "line",
-		showInLegend: true,
-		name: "' . $data['data1'] . '",
-		markerType: "square",
-		xValueFormatString: "' . $xValueFormatString . '",
-		yValueFormatString: "#,##0 €",
-		dataPoints: [';
+            if(isset($data2['axeX']['valueFormatString']))
+                    $tmpData['xValueFormatString'] = $data2['axeX']['valueFormatString'];
+            if(isset($data2['axeY']['valueFormatString']))
+                    $tmpData['yValueFormatString'] = $data2['axeY']['valueFormatString'];
 
-            $success_callback .= $list->getPointsForGraph();
+            $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
+            if (method_exists($this, 'getGraphDataPoint')) {//il faut charger chaque objet pour avoir ca valeur
+                $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
+                $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
+                $post_temp = $_POST;
+                $_POST = $list_data;
 
-            $success_callback .= ']},';
-            if (isset($data['data2'])) {
-                $success_callback .= '{
-                        type: "line",
-                        showInLegend: true,
-                        name: "' . $data['data2'] . '",
-                        markerType: "square",
-                        xValueFormatString: "' . $xValueFormatString . '",
-                        color: "#F08080",
-                        yValueFormatString: "#,##0 €",
-                        visible: 0,
-                        dataPoints: [';
+                $list = new BC_ListTable($this, $list_name);
 
-                $success_callback .= $list->getPointsForGraph(2);
+                $list->initForGraph();
 
-                $success_callback .= ']},';
+                $tmpData['dataPoints'] = $list->getPointsForGraph($i);
             }
-            if (isset($data['data3'])) {
-                $success_callback .= '{
-                        type: "line",
-                        showInLegend: true,
-                        name: "' . $data['data3'] . '",
-                        markerType: "square",
-                        xValueFormatString: "' . $xValueFormatString . '",
-                        color: "#CC2080",
-                        visible: 0,
-                        yValueFormatString: "#,##0 €",
-                        dataPoints: [';
-
-                $success_callback .= $list->getPointsForGraph(3);
-
-                $success_callback .= ']},';
+            elseif(method_exists($this, 'getGraphDatasPoints')){//On apelle une seul methode pour tous les points
+                $tmpData['dataPoints'] = $this->getGraphDatasPoints($i);
             }
-            if (isset($data['data11'])) {
-                $success_callback .= '{
-                        type: "line",
-                        showInLegend: true,
-                        name: "' . $data['data11'] . '",
-                        lineDashType: "dash",
-                        markerType: "square",
-                        xValueFormatString: "' . $xValueFormatString . '",
-                        yValueFormatString: "#,##0 €",
-                        dataPoints: [';
-
-                $success_callback .= $list->getPointsForGraph(11);
-
-                $success_callback .= ']},';
+            else{
+                $errors[] = 'Aucune methode pour charger les points';
             }
-            $success_callback .= ']';
-            $success_callback .= '};';
-            $success_callback .= '$("#' . $list_id . '_chartContainer").CanvasJSChart(options);';
-
-            $success_callback .= 'function toogleDataSeries(e){
-                        if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
-                                e.dataSeries.visible = false;
-                        } else{
-                                e.dataSeries.visible = true;
-                        }
-                        e.chart.render();
-                }';
+            $options['data'][] = $tmpData;
+            $i++;
         }
+            
+            
+        $success_callback = 'var options = '.json_encode($options).';';
+        $success_callback = str_replace('"new Date', 'new Date', $success_callback);
+        $success_callback = str_replace('","y"', ',"y"', $success_callback);
+        $success_callback = str_replace('"toogleDataSeries"', 'toogleDataSeries', $success_callback);
+        
+        $success_callback .= '$("#' . $list_id . '_chartContainer").CanvasJSChart(options);';
+
+        $success_callback .= 'function toogleDataSeries(e){
+                    if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                            e.dataSeries.visible = false;
+                    } else{
+                            e.dataSeries.visible = true;
+                    }
+                    e.chart.render();
+            }';
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -10276,8 +10280,8 @@ var options = {
     public static function getListExtrafield($name, $type, $withVide = true)
     {
         $return = array();
-        $cash_key = 'extra_list_'.$name.'_'.$type.'_'. (int) $withVide;
-        if(!static::cacheServerExists($cash_key)){
+        $cash_key = 'extra_list_' . $name . '_' . $type . '_' . (int) $withVide;
+        if (!static::cacheServerExists($cash_key)) {
             $sql = self::getBdb()->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'");
             while ($ln = self::getBdb()->db->fetch_object($sql)) {
                 $param = unserialize($ln->param);

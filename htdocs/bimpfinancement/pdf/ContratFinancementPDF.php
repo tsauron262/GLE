@@ -6,13 +6,27 @@ class ContratFinancementPDF extends DocFinancementPDF
 {
 
     public static $doc_type = 'contrat';
-    public $data;
+    public $client_data;
 
-    public function __construct($db, $demande, $data = array())
+    public function __construct($db, $demande, $client_data = array())
     {
-        $this->data = $data;
+        $this->client_data = $client_data;
         parent::__construct($db, $demande);
         $this->doc_name = 'Contrat de location';
+    }
+
+    public function initData()
+    {
+        
+    }
+
+    public function isTargetCompany()
+    {
+        if (isset($this->client_data['is_company'])) {
+            return (int) $this->client_data['is_company'];
+        }
+
+        return 0;
     }
 
     public function renderTop()
@@ -21,6 +35,33 @@ class ContratFinancementPDF extends DocFinancementPDF
 
         $html .= '<div style="font-size: 9px">';
         $html .= '<p style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Le locataire</p>';
+
+        $html .= '<p>';
+
+        $is_company = (int) BimpTools::getArrayValueFromPath($this->client_data, 'is_company', 0);
+
+        if ($is_company) {
+            $errors = array();
+            $nom = BimpTools::getArrayValueFromPath($this->client_data, 'nom', '', $errors, true, 'Nom du client absent');
+            $address = BimpTools::getArrayValueFromPath($this->client_data, 'address', '', $errors, true, 'Adresse du siège du client absente');
+            $forme_jur = BimpTools::getArrayValueFromPath($this->client_data, 'forme_juridique', '', $errors, true, 'Forme juridique du client absente');
+            $capital = BimpTools::getArrayValueFromPath($this->client_data, 'capital', '', $errors, true, 'Capital social du client absent');
+            $siren = BimpTools::getArrayValueFromPath($this->client_data, 'siren', '', $errors, true, 'N° SIREN du client absent');
+            $rcs = BimpTools::getArrayValueFromPath($this->client_data, 'rcs', '', $errors, true, 'Ville d\'enregistrement au RCS du client absente');
+            $representant = BimpTools::getArrayValueFromPath($this->client_data, 'representant', '', $errors, true, 'Représentant du client absent');
+            $repr_qualité = BimpTools::getArrayValueFromPath($this->client_data, 'repr_qualite', '', $errors, true, 'Qualité du représentant du client absent');
+
+            if (!count($errors)) {
+                $html .= '"' . $nom . '", ' . $forme_jur . ' au capital de ' . $capital . '.<br/>';
+                $html .= 'Entreprise immatriculée sous le numéro ' . $siren . ' au RCS de ' . $rcs . ' ';
+                $html .= 'dont le siège social est situé : ' . $address . ' - ';
+                $html .= 'Représentée par ' . $representant . ' en qualité de ' . $repr_qualité . '.';
+            } else {
+                $this->errors = BimpTools::merge_array($this->errors, $errors);
+            }
+        }
+
+        $html .= '</p>';
 
         $html .= '<p style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Le loueur</p>';
         $html .= '<p>';
@@ -119,15 +160,15 @@ class ContratFinancementPDF extends DocFinancementPDF
                 $html .= '</table>';
                 break;
         }
-        
+
         $html .= '<p>';
         $html .= 'Le locataire déclare avoir été parfaitement informé de l’opération lors de la phase précontractuelle, avoir pris connaissance, reçu et accepter toutes les conditions particulières et générales. Il atteste que le contrat est en rapport direct avec son activité professionnelle et souscrit pour les besoins de cette dernière. Le signataire atteste être habilité à l’effet d’engager le locataire au titre du présent contrat. Le locataire reconnait avoir une copie des Conditions Générales, les avoir acceptées sans réserve y compris les clauses attribution de compétence et CNIL.';
         $html .= '</p>';
-        
+
         $html .= '<p>';
         $html .= 'Fait en autant d’exemplaires que de parties, un pour chacune des parties';
         $html .= '</p>';
-        
+
         $html .= '<p>';
         $html .= '<b>ANNEXES : </b>';
         $html .= '<ul>';
@@ -135,7 +176,7 @@ class ContratFinancementPDF extends DocFinancementPDF
         $html .= '</ul>';
         $html .= '</p>';
 
-        $html .= '<p>Fait à Limonest, le : </p>';
+        $html .= '<p>Fait à Limonest, le ' . date('d / m / Y') . ' </p>';
         $html .= '</div>';
 
         $this->writeContent($html);

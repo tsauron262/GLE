@@ -121,14 +121,14 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
             return array(
                 'buttons_groups' => array(
                     array(
-                        'label'   => 'Location',
-                        'icon'    => 'fas_hand-holding-usd',
-                        'buttons' => $df_buttons
-                    ),
-                    array(
                         'label'   => 'Actions',
                         'icon'    => 'fas_cogs',
                         'buttons' => $buttons
+                    ),
+                    array(
+                        'label'   => 'Location',
+                        'icon'    => 'fas_hand-holding-usd',
+                        'buttons' => $df_buttons
                     )
                 )
             );
@@ -139,10 +139,10 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
 
     // Rendus HTML:
 
-    public function renderHeaderExtraRight()
+    public function renderHeaderExtraRight($no_div = false)
     {
         $html = '<div class="buttonsContainer">';
-        $html .= BimpComm_ExtEntity::renderHeaderExtraRight();
+        $html .= BimpComm_ExtEntity::renderHeaderExtraRight($no_div);
         $html .= parent::renderHeaderExtraRight(true);
         $html .= '</div>';
 

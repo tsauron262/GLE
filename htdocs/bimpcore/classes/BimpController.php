@@ -3294,11 +3294,16 @@ class BimpController
     public static function bimp_shutdown()
     {//juste avant de coupé le script
         global $db;
-        if ($db->transaction_opened > 0)
-            BimpCore::addlog('Fin de script Transaction non fermée');
+        $lastError = error_get_last();
+        $asErrorFatal = (is_array($lastError) && $lastError['type'] == 1);
+        if ($db->transaction_opened > 0){
+            $db->transaction_opened = 0;
+            if(!$asErrorFatal)
+                BimpCore::addlog('Fin de script Transaction non fermée');
+        }
         $file = array();
         $nb = BimpTools::deloqueAll($file);
-        if ($nb > 0)
+        if ($nb > 0 && !$asErrorFatal)
             BimpCore::addlog('Fin de script fichier non debloqué ' . $nb.' '.print_r($file,1), Bimp_Log::BIMP_LOG_ALERTE);
     }
 }

@@ -184,5 +184,15 @@ sections:
 #                - type: views_list
 #                  views_list: 
 #                      object: users
+        droit:
+            label: Droits
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderRightsTab
+                            - droit
            
                             

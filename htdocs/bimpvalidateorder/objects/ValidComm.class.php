@@ -513,19 +513,14 @@ class ValidComm extends BimpObject
     public static function getObjectClass($object)
     {
 
-        switch (get_class($object)) {
-            case 'Bimp_Propal':
-                return self::OBJ_DEVIS;
-                break;
-//            case 'Bimp_Facture':
-//                return self::OBJ_FACTURE;             
-            case 'Bimp_Commande':
-                return self::OBJ_COMMANDE;
-                break;
-            case 'BContract_contrat':
-                return self::OBJ_CONTRAT;
-                break;
-        }
+        if(is_a($object, 'Bimp_Propal'))
+            return self::OBJ_DEVIS;
+        elseif(is_a($object, 'Bimp_Commande'))
+            return self::OBJ_COMMANDE;
+        elseif(is_a($object, 'BContract_contrat'))
+            return self::OBJ_CONTRAT;
+//        elseif(is_a($object, 'Bimp_Facture'))
+//            return self::OBJ_FACTURE;
 
         return -2;
     }

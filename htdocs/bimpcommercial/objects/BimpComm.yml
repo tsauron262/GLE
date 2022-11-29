@@ -726,7 +726,7 @@ fields_tables:
             - field: logs
     
 filters: 
-    id_commercial: 
+    id_commercial:
         label: Commercial
         data_type: id_object
         type: user

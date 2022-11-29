@@ -198,7 +198,8 @@ sections:
                                 list: 
                                     object: bws_profile_right
         notification: 
-            label: Notification
+            label: Notifications
+            icon: fas_bell
             sections: 
                 - type: list
                   list: 

@@ -1,1 +1,1 @@
-UPDATE bimp_2021.llx_societe SET id_atradius=73298729 WHERE rowid=217254;
+UPDATE llx_societe SET id_atradius=73298729 WHERE rowid=217254;

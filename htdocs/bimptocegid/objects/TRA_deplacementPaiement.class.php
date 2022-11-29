@@ -37,7 +37,7 @@
             $codeComptaFrom     = ($this->isVenteTicket($paiement->id)) ? $entrepotFrom->compte_aux : $this->TRA_tiers->getCodeComptable($clientFrom);
             $codeComptaTo       = ($this->isVenteTicket($paiement->id)) ? $entrepotTo->compte_aux : $this->TRA_tiers->getCodeComptable($clientTo);
             $compte_bancaire    = $this->db->getRow('bank_account', 'rowid = ' . $this->db->getValue('bank', 'fk_account', 'rowid = ' . $paiement->getData('fk_bank')));
-            $reglement          = $this->db->getRow('c_paiement', 'id = ' . $paiement->getData('type'));
+            $reglement          = $this->db->getRow('c_paiement', 'id = ' . $paiement->getData('fk_paiement'));
             
             if ($clientFrom->getData('is_subsidiary')) {
                 $this->compteGeneralFrom = $clientFrom->getData('accounting_account');

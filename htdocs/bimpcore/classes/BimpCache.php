@@ -1958,8 +1958,12 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    public static function getUserUserGroupsArray($id_user, $include_empty = 0, $nom_url = 0)
+    public static function getUserUserGroupsArray($id_user = null, $include_empty = 0, $nom_url = 0)
     {
+        if(is_null($id_user)){
+            global $user;
+            $id_user = $user->id;
+        }
         $cache_key = 'user_' . $id_user . '_usergroups';
 
         if ($nom_url) {

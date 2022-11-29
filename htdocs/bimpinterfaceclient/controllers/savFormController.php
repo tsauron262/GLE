@@ -709,11 +709,12 @@ class savFormController extends BimpPublicController
 
         // Type matériel: 
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
-        $types = array('' => '');
+        $types = array();
 
         foreach (GSX_Reservation::$products_codes as $code) {
             $types[$code] = $code;
         }
+//        $types = GSX_Reservation::getProductsCode();
 
         $html .= '<div class="col-xs-6 col-md-3 col-lg-3">';
         $html .= '<label>Type de matériel</label><sup>*</sup><br/>';

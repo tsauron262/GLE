@@ -2876,7 +2876,6 @@ class BContract_contrat extends BimpDolObject
                 $verif_contact_suivi = false;
                 $errors[] = "Le contrat ne compte pas de contact client de suivi du contrat";
             }
-
             if ($verif_contact_suivi) {
                 $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $this->db->getValue('element_contact', 'fk_socpeople', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat));
                 if (!$contact->getData('email') || (!$contact->getData('phone') && !$contact->getData('phone_mobile'))) {
@@ -2910,7 +2909,7 @@ class BContract_contrat extends BimpDolObject
                 $errors[] = "Il doit y avoir au moin un numéro de série dans une des lignes du contrat";
             if (!$this->getData('entrepot') && (int) BimpCore::getConf("USE_ENTREPOT"))
                 $errors[] = "Il doit y avoir un entrepot pour le contrat";
-            $errors = array();
+//            $errors = array();
             $modeReglementId = $this->db->getValue('c_paiement', 'id', 'code = "PRE"');
 
             if(!count($errors) && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE && $this->getData('moderegl') != $modeReglementId) {
@@ -4097,7 +4096,7 @@ class BContract_contrat extends BimpDolObject
             foreach ($propal->dol_object->lines as $line) {
                 $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                 if ($produit->getData('fk_product_type') == 1 || !BimpCore::getConf('just_code_service', null, 'bimpcontract') || $line->pa_ht == 0) {
-                    $description = ($line->desc) ? $line->desc : $line->libelle;
+                    $description = ($line->desc && $line->desc != '<br>') ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
                     $end_date->add(new DateInterval("P" . $duree_mois . "M"));
                     $new_contrat->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR

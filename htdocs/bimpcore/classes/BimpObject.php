@@ -6497,11 +6497,36 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             if (BimpCore::getConf('date_archive', '') != '') {
                 $btnHisto = '<div id="notes_archives_' . $this->object_name . '_container">';
-                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_' . $this->object_name . '_container')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
+                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . "_container')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
                 $btnHisto .= '</div>';
             }
+            
+            $sup = '';
+            $linkedObjects = $this->getFullLinkedObjetsArray(false);
+            if(count($linkedObjects) > 0){
+                $filterLinked = array('linked' => array('or' => array()));
+                foreach($linkedObjects as $data_linked => $inut){
+                    $data_linked = json_decode($data_linked, true);
+                    if($data_linked['object_name'] != 'BS_SAV'){
+                        $filterLinked['linked']['or'][$data_linked["object_name"].$data_linked['id_object']] = array('and_fields' => array(
+                            'obj_module'   =>  $data_linked['module'],
+                            'obj_name'   =>  $data_linked['object_name'],
+                            'id_obj'   =>  $data_linked['id_object']
+                        ));
+                    }
+                }
+                $nb = count($filterLinked['linked']['or']);
+                if($nb > 60)
+                    BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes '.$this->getLink(). '('.$nb.')');
+                
+                $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées ('.$nb.' objects)');
+                $list2->addIdentifierSuffix($suffixe.'_linked');
+                $list2->addFieldFilterValue('obj_type', 'bimp_object');
+                $list2->addFieldFilterValue('custom', $filterLinked['linked']);
+                $sup = $list2->renderHtml();
+            }
 
-            return $list->renderHtml() . ($archive == false ? $btnHisto : '');
+            return $list->renderHtml(). $sup . ($archive == false ? $btnHisto : '');
         }
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');
@@ -6727,7 +6752,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             //Suivi mail
             $random = rand(11111111, 99999999);
             $htmlId = 'suivi_mail_' . $random;
-            $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails');
+            $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails', array(), 'large');
             $html .= '<span id="' . $htmlId . '" class="btn btn-default bs-popover"';
             $html .= ' onclick="' . $onclick . '"';
             $html .= BimpRender::renderPopoverData('Suivi des mails');

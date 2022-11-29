@@ -71,8 +71,7 @@ class PropalSavPDF extends PropalPDF
                 if (!is_null($tech) && $tech->isLoaded()) {
                     $primary = BimpCore::getParam('pdf/primary', '000000');
                     $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">';
-                    $html .= 'Technicien en charge :</span><br/>';
-                    $html .= $tech->dol_object->firstname . '</div>';
+                    $html .= 'Technicien en charge :</span> ' . $tech->dol_object->firstname . '</div>';
                 }
             }
         }

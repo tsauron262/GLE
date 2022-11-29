@@ -642,7 +642,7 @@ class BimpCore
                 }
             }
         }
-        
+
         return $updates;
     }
 
@@ -837,6 +837,26 @@ class BimpCore
         }
 
         return $default_value;
+    }
+
+    // Getters divers: 
+
+    public static function getBimpUser()
+    {
+        global $bimpUser;
+
+        if (!is_object($bimpUser)) {
+            global $user;
+            if (BimpObject::objectLoaded($user)) {
+                $bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
+            }
+        }
+
+        if (BimpObject::objectLoaded($bimpUser)) {
+            return $bimpUser;
+        }
+
+        return null;
     }
 
     // Getters booléens: 

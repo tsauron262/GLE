@@ -164,6 +164,11 @@ forms:
                 display_if:
                   field_name: type
                   show_values: 5,3,6
+                value: 
+                    callback:
+                        method: getData
+                        params:
+                            - duree
                     
             commande_depl: 
                 custom: 1

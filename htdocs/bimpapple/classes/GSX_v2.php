@@ -1178,6 +1178,7 @@ class GSX_v2 extends GSX_Const
     public function attributeLookup($type)
     {
         return $this->exec('attributeLookup', array(
+                    'shipToCode' => $this->shipTo,
                     'attributes' => array(
                         array(
                             'type' => $type

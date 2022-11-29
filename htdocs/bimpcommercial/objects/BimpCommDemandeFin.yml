@@ -261,7 +261,7 @@ forms:
                     help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
                 value: 
                     callback: 
-                        method: getDefaultSignDistEmailContent
+                        method: getSignatureEmailContent
                         
     signature_devis_fin: 
         extends: signature_fin

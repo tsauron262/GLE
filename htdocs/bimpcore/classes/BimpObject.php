@@ -3834,6 +3834,35 @@ class BimpObject extends BimpCache
         return $rows;
     }
 
+    // Gestion des signatures: 
+
+    public function getSignatureInstance($doc_type)
+    {
+        if ($this->isLoaded()) {
+            return BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignature', array(
+                        'obj_module' => $this->module,
+                        'obj_name'   => $this->object_name,
+                        'id_obj'     => $this->id,
+                        'doc_type'   => $doc_type
+            ));
+        }
+
+        return null;
+    }
+
+    public function getSignatureDocFileExt($doc_type, $signed = false)
+    {
+        if ($signed) {
+            $signature = $this->getSignatureInstance($doc_type);
+
+            if (BimpObject::objectLoaded($signature) && $signature->getData('signed_doc_ext')) {
+                return $signature->getData('signed_doc_ext');
+            }
+        }
+
+        return 'pdf';
+    }
+
     // Affichage des données:
 
     public function display($display_name = 'ref_nom', $options = array())

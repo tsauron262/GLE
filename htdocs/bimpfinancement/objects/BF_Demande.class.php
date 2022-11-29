@@ -2968,20 +2968,31 @@ class BF_Demande extends BimpObject
                                 'obj_module' => 'bimpfinancement',
                                 'obj_name'   => 'BF_Demande',
                                 'id_obj'     => $this->id,
-                                'doc_type'   => $doc_type,
-                                'id_client'  => $id_client,
-                                'id_contact' => $id_contact
+                                'doc_type'   => $doc_type
                                     ), true, $errors, $warnings);
 
                     if (!count($errors) && BimpObject::objectLoaded($signature)) {
-                        $errors = $this->updateField($field_name, (int) $signature->id);
-                        $this->addObjectLog('Fiche signature du ' . $doc_type . ' de location créée', 'SIGNATURE_' . strtoupper($doc_type) . '_CREEE');
+                        $signataire_errors = array();
+                        $signataire = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
+                                    'id_signature' => $signature->id,
+                                    'id_client'    => $id_client,
+                                    'id_contact'   => $id_contact,
+                                    'allow_dist'   => 1,
+                                    'allow_refuse' => 1
+                                        ), true, $signataire_errors, $warnings);
 
-                        if ($open_public_acces) {
-                            $open_errors = $signature->openSignDistAccess($email_content, true);
+                        if (!BimpObject::objectLoaded($signataire)) {
+                            $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
+                        } else {
+                            $errors = $this->updateField($field_name, (int) $signature->id);
+                            $this->addObjectLog('Fiche signature du ' . $doc_type . ' de location créée', 'SIGNATURE_' . strtoupper($doc_type) . '_CREEE');
 
-                            if (count($open_errors)) {
-                                $warnings[] = BimpTools::getMsgFromArray($open_errors, 'Echec de l\'ouverture de l\'accès à la signature à distance');
+                            if ($open_public_acces) {
+                                $open_errors = $signataire->openSignDistAccess($email_content, true);
+
+                                if (count($open_errors)) {
+                                    $warnings[] = BimpTools::getMsgFromArray($open_errors, 'Echec de l\'ouverture de l\'accès à la signature à distance');
+                                }
                             }
                         }
                     }
@@ -3022,8 +3033,10 @@ class BF_Demande extends BimpObject
 
     public function getSignatureDocFileName($doc_type, $signed = false)
     {
+        $ext = $this->getSignatureDocFileExt($doc_type, $signed);
+
         if ($this->isLoaded()) {
-            return $this->getSignatureDocRef($doc_type) . ($signed ? '_signe' : '') . '.pdf';
+            return $this->getSignatureDocRef($doc_type) . ($signed ? '_signe' : '') . '.' . $ext;
         }
 
         return '';
@@ -3062,7 +3075,7 @@ class BF_Demande extends BimpObject
         return array();
     }
 
-    public function getSignatureCommercialEmail($doc_type, &$use_as_from = false)
+    public function getOnSignedNotificationEmail($doc_type, &$use_as_from = false)
     {
         $user_resp = $this->getChildObject('user_resp');
         if (BimpObject::objectLoaded($user_resp)) {
@@ -3084,7 +3097,7 @@ class BF_Demande extends BimpObject
         return '';
     }
 
-    public function onSigned($bimpSignature, $data)
+    public function onSigned($bimpSignature)
     {
         $errors = array();
 

@@ -13,6 +13,7 @@ class CepaPDF extends BimpCommDocumentPDF
     public $propal = null;
     public $rib = null;
     public $mode = "normal";
+    public $signature_bloc = true;
     public $signature_bloc_label = 'Bon pour commande';
     public $pdf2 = null;
 

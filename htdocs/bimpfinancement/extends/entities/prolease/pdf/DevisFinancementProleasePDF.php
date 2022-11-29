@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/DevisFinancementPDF.php';
 class DevisFinancementProleasePDF extends DevisFinancementPDF
 {
 
+    public $signature_bloc = true;
     public $client_data = array();
 
     public function __construct($db, $demande, $client_data = array(), $options = array())

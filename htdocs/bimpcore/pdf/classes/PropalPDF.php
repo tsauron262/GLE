@@ -11,6 +11,8 @@ class PropalPDF extends BimpCommDocumentPDF
     public static $type = 'propal';
     public $propal = null;
     public $mode = "normal";
+    public $signature_bloc = true;
+    public $use_docsign = true;
     public $signature_bloc_label = 'Bon pour commande';
 
     public function __construct($db)
@@ -255,7 +257,7 @@ class PropalPDF extends BimpCommDocumentPDF
 
             $html .= '<div style="font-size: 8px">';
             $html .= '<table cellspacing="10px">';
-            
+
             $html .= '<tr>';
             $html .= '<td style="width: 50%">';
 
@@ -281,12 +283,12 @@ class PropalPDF extends BimpCommDocumentPDF
                 $html .= '</td>';
                 $html .= '</tr>';
             }
-            
+
             $html .= '</table>';
-            
+
             $html .= '</td>';
             $html .= '</tr>';
-            
+
             $html .= '</table>';
             $html .= '</div>';
 

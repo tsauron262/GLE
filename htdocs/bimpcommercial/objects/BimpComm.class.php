@@ -720,7 +720,7 @@ class BimpComm extends BimpDolObject
             }
 
             if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
-                if ($this->object_name === 'Bimp_Commande' || (int) $this->getData('fk_statut') === 0) {
+                if ($this->object_name === 'Bimp_Commande' || $this->object_name === 'Bimp_Propal' || (int) $this->getData('fk_statut') === 0) {
                     $buttons[] = array(
                         'label'       => 'Déduire un crédit disponible',
                         'icon_before' => 'fas_file-import',

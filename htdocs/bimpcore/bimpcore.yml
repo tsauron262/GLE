@@ -11,6 +11,8 @@ categories:
         desc: Societés (Client / Fournisseurs) - Contacts / Comptes utilisateurs clients, etc.
     cache: 
         label: Cache
+    signatures: 
+        label: Signatures
         
 params: 
     # Principaux:
@@ -98,6 +100,11 @@ params:
         def: ''
     date_bilan:
         label: Date dernier bilan
+    signature_emails_client: 
+        label: Intitulé signature des e-mails envoyés aux clients
+        info: "Exemple : &quot;L'équipe XXX&quot;"
+        warning: Cette signature n'est pas incluse automatiquement à chaque e-mail
+        def: ''
     
     # Defaults: 
     default_id_entrepot: 
@@ -172,6 +179,11 @@ params:
         cat: products
         type: bool
         def: 1
+    not_decimal_product:
+        label: Pas de decimales pour les produit
+        cat: products
+        type: bool
+        def: 1
         
     # Tiers:
     check_solvabilite_client: 
@@ -235,8 +247,4 @@ params:
         cat: cache
         type: bool
         def: 0
-    not_decimal_product:
-        label: Pas de decimals pour les produit
-        type: bool
-        def: 1
         

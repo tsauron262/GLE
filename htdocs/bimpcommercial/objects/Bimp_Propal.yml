@@ -456,41 +456,71 @@ forms:
     create_signature: 
         title: Création de la signature
         rows: 
-            - custom: 1
-              label: Ouvrir l'accès à la signature électronique à distance
-              input_name: open_public_access
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 0
-            - custom: 1
-              label: Contact signataire
-              data_type: id_object
-              input_name: id_contact_signature
-              input: 
-                  type: select
-                  options: 
-                      callback: 
-                          method: getSocieteContactsArray
-                          params: 
-                              - field_value: fk_soc
-                  help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
-              value: 
-                  callback: getDefaultSignatureContact
-              display_if: 
-                  field_name: open_public_access
-                  show_values: 1
-            - custom: 1
-              label: Contenu e-mail client pour la signature à distance
-              input_name: email_content
-              input: 
-                  type: html
-                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
-              value: 
-                  callback: getDefaultSignDistEmailContent
-              display_if: 
-                  field_name: open_public_access
-                  show_values: 1
+            contact_signature: 
+                custom: 1
+                label: Contact signataire
+                data_type: id_object
+                input_name: id_contact_signature
+                object: contact
+                create_form: default
+                create_form_values: 
+                    callback: getSignatureContactCreateFormValues
+                input: 
+                    type: select
+                    help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+                    options: 
+                        callback: 
+                            method: getSocieteContactsArray
+                            params: 
+                                - field_value: fk_soc
+                value: 
+                    callback: getDefaultSignatureContact
+            init_docusign: 
+                custom: 1
+                label: Envoyer le document pour signature via DocuSign
+                data_type: bool
+                input_name: init_docusign
+                value: 
+                    conf: 
+                        module: bimpcommercial
+                        name: propal_signature_allow_docusign
+                input: 
+                    type: toggle
+                hidden: 
+                    conf: 
+                        module: bimpcommercial
+                        name: propal_signature_allow_docusign
+                        not: 1
+            open_public_access: 
+                custom: 1 
+                label: Ouvrir l'accès à la signature électronique à distance
+                data_type: bool
+                input_name: open_public_access
+                value: 
+                    conf: 
+                        module: bimpcommercial
+                        name: propal_signature_allow_dist
+                input: 
+                    type: toggle
+                hidden: 
+                    conf: 
+                        module: bimpcommercial
+                        name: propal_signature_allow_dist
+                        not: 1
+                display_if: 
+                    fields_names: init_docusign
+                    init_docusign: 
+                        hide_values: 1
+            email_content: 
+                custom: 1
+                label: Contenu e-mail client pour la signature à distance
+                input_name: email_content
+                input: 
+                    type: html
+                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+                value: 
+                    callback: getSignatureEmailContent
+                depends_on: init_docusign,open_public_access
                   
     validate:
         title: Validation
@@ -503,17 +533,6 @@ forms:
                 input: 
                     type: toggle
                 value: 1
-            open_public_access: 
-                custom: 1 
-                label: Ouvrir l'accès à la signature distance
-                data_type: bool
-                input_name: open_public_access
-                value: 0
-                input: 
-                    type: toggle
-                display_if: 
-                    field_name: create_signature
-                    show_values: 1
             contact_signature: 
                 custom: 1
                 label: Contact signataire
@@ -534,11 +553,41 @@ forms:
                 value: 
                     callback: getDefaultSignatureContact
                 display_if: 
-                    fields_names: create_signature,open_public_access
+                    fields_names: create_signature
                     create_signature: 
                         show_values: 1
-                    open_public_access:
+            init_docusign: 
+                custom: 1
+                label: Envoyer le document pour signature via DocuSign
+                data_type: bool
+                input_name: init_docusign
+                content: 
+                    callback: renderSignatureInitDocuSignInput
+                display_if: 
+                    field_name: create_signature
+                    show_values: 1
+            open_public_access: 
+                custom: 1 
+                label: Ouvrir l'accès à la signature électronique à distance
+                data_type: bool
+                input_name: open_public_access
+                value: 
+                    conf: 
+                        module: bimpcommercial
+                        name: propal_signature_allow_dist
+                input: 
+                    type: toggle
+                hidden: 
+                    conf: 
+                        module: bimpcommercial
+                        name: propal_signature_allow_dist
+                        not: 1
+                display_if: 
+                    fields_names: create_signature,init_docusign
+                    create_signature: 
                         show_values: 1
+                    init_docusign: 
+                        hide_values: 1
             email_content: 
                 custom: 1
                 label: Contenu e-mail client pour la signature à distance
@@ -547,13 +596,12 @@ forms:
                     type: html
                     help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
                 value: 
-                    callback: getDefaultSignDistEmailContent
+                    callback: getSignatureEmailContent
                 display_if: 
-                    fields_names: create_signature,open_public_access
+                    fields_names: create_signature
                     create_signature: 
                         show_values: 1
-                    open_public_access:
-                        show_values: 1
+                depends_on: init_docusign,open_public_access
                   
     create_signature_docu_sign: 
         title: Signature DocuSign

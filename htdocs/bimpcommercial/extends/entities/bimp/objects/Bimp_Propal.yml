@@ -23,5 +23,5 @@ forms:
         rows: 
             create_signature: 
                 input: 
-                    help: Si vous envisagez d'émettre une demande de location auprès de LDLC PRO LEASE, il est préférable d'attendre la mise en place du devis de financemnent pour demander la signature du client. 
+                    help: "ATTENTION : la signature du devis est obligatoire.<br/>Mettre NON uniquement si vous envisagez d'établir un devis de location et de ne faire signer que celui-ci."
 

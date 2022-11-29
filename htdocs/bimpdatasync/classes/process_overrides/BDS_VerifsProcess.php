@@ -851,7 +851,7 @@ class BDS_VerifsProcess extends BDSProcess
                         'label'         => 'Vérifier seulement les factures non classées payées',
                         'name'          => 'not_classified_only',
                         'info'          => '',
-                        'type'          => 'bool',
+                        'type'          => 'toggle',
                         'default_value' => '1',
                         'required'      => 0
                             ), true, $warnings, $warnings);
@@ -865,7 +865,7 @@ class BDS_VerifsProcess extends BDSProcess
                         'label'         => 'Restes à payer à 0 seulement',
                         'name'          => 'rtp_zero_only',
                         'info'          => '',
-                        'type'          => 'bool',
+                        'type'          => 'toggle',
                         'default_value' => '0',
                         'required'      => 0
                             ), true, $warnings, $warnings);

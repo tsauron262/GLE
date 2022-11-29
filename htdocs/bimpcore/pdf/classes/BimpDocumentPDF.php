@@ -22,10 +22,15 @@ class BimpDocumentPDF extends BimpModelPDF
     public $next_annexe_idx = 1;
     public $annexe_listings = array();
     public $file_logo = '';
+
+    # Paramètres signature: 
+    public $signature_bloc = false;
+    public $use_docsign = false;
     public $object_signature_params_field_name = 'signature_params';
     public $signature_params = array();
-    public $signature_bloc = true;
     public $signature_bloc_label = '';
+    public $signature_title = 'Signature';
+    public $signature_pro_title = 'Signature + Cachet avec SIRET';
 
     public function __construct($db)
     {
@@ -243,7 +248,7 @@ class BimpDocumentPDF extends BimpModelPDF
 //        if (is_object($this->thirdparty) || is_object($this->contact)) {
 //            $this->renderDocInfos($this->thirdparty, $this->contact);
 //        }
-        
+
         $this->renderDocInfos();
         $this->renderTop();
         $this->renderBeforeLines();
@@ -425,6 +430,7 @@ class BimpDocumentPDF extends BimpModelPDF
         // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique. 
 
         if ($this->signature_bloc) {
+            $this->signature_params['default'] = array();
             $yPosOffset = 0;
 
             $html = '<table style="width: 95%;font-size: 7px;" cellpadding="3">';
@@ -437,7 +443,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if ($this->isTargetCompany()) {
                 $html .= '<td style="text-align:center;"><i><b>' . $this->signature_bloc_label . '</b></i></td>';
 
-                $html .= '<td style="font-size: 6px">Signature + Cachet avec SIRET :</td>';
+                $html .= '<td style="font-size: 6px">' . $this->signature_pro_title . ' :</td>';
                 $html .= '</tr>';
 
                 $html .= '<tr>';
@@ -458,7 +464,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $html .= '<td>Date :</td>';
 
                 $yPosOffset = 7;
-                $this->signature_params = array(
+                $this->signature_params['default']['elec'] = array(
                     'x_pos'             => 146,
                     'width'             => 43,
                     'nom_x_offset'      => -32,
@@ -470,17 +476,71 @@ class BimpDocumentPDF extends BimpModelPDF
                     'date_x_offset'     => -32,
                     'date_y_offset'     => 16
                 );
+
+                if ($this->use_docsign) {
+                    $base_x = -110; // x du champ le plus à gauche (Nom)
+                    $base_y = 15; // y du champ le plus haut (Nom)
+
+                    $this->signature_params['default']['docusign'] = array(
+                        'anch'  => $this->signature_pro_title . ' :',
+                        'fs'    => 'Size8',
+                        'x'     => $base_x + 120,
+                        'y'     => $base_y + 30,
+                        'texts' => array(
+                            'nom'      => array(
+                                'label' => 'Nom',
+                                'x'     => $base_x,
+                                'y'     => $base_y,
+                            ),
+                            'fonction' => array(
+                                'label' => 'Fonction',
+                                'x'     => $base_x + 12,
+                                'y'     => $base_y + 30
+                            )
+                        ),
+                        'date'  => array(
+                            'x' => $base_x + 1,
+                            'y' => $base_y + 45
+                        )
+//                            'prenom_x_offset'   => $base_x + 10,
+//                            'prenom_y_offset'   => $base_y + 14,
+                    );
+                }
             } else {
-                $html .= '<td style="text-align: right">Signature :<br/>Date :</td>';
+                $html .= '<td style="text-align: right">' . $this->signature_title . ' :<br/>Date :</td>';
                 $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/><br/></td>';
 
                 $yPosOffset = 2;
-                $this->signature_params = array(
+                $this->signature_params['default']['elec'] = array(
                     'x_pos'         => 146,
                     'width'         => 43,
                     'date_x_offset' => -16,
                     'date_y_offset' => 7,
                 );
+
+                if ($this->use_docsign) {
+                    $base_x = -110; // x du champ le plus à gauche (Nom)
+                    $base_y = 14; // y du champ le plus haut (Nom)
+
+                    $this->signature_params['default']['docusign'] = array(
+                        'anch'  => $this->signature_pro_title . ' :',
+                        'x'     => $base_x + 130,
+                        'y'     => $base_y + 5,
+                        'texts' => array(
+                            'nom' => array(
+                                'label' => 'Nom',
+                                'x'     => $base_x,
+                                'y'     => $base_y,
+                            )
+                        ),
+                        'date'  => array(
+                            'x' => $base_x + 1,
+                            'y' => $base_y + 47
+                        )
+//                            'prenom_x_offset'   => $base_x + 10,
+//                            'prenom_y_offset'   => $base_y + 14,
+                    );
+                }
             }
 
             $html .= '</tr>';
@@ -495,8 +555,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
             $this->writeFullBlock($html, $page, $yPos);
 
-            $this->signature_params['y_pos'] = $yPos + $yPosOffset;
-            $this->signature_params['page'] = $page;
+            $this->signature_params['default']['elec']['y_pos'] = $yPos + $yPosOffset;
+            $this->signature_params['default']['elec']['page'] = $page;
 
             if (is_a($this->bimpObject, 'BimpObject')) {
                 if ($this->bimpObject->field_exists($this->object_signature_params_field_name)) {

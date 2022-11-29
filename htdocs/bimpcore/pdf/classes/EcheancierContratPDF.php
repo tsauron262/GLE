@@ -8,6 +8,7 @@
         public $contrat;
         public $echeancier;
         public $client;
+        public $signature_bloc = true;
 
         public function __construct($db)
         {

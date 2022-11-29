@@ -1,0 +1,525 @@
+
+table: bimpcore_signature_signataire
+icon: fas_user-edit
+common_fields: 0
+
+parent_module: bimpcore
+parent_object: BimpSignature
+parent_id_property: id_signature
+    
+header_edit_form: edit
+header_btn: 
+    callback: 
+        method: getActionsButtons
+        params: 
+            - 0
+
+labels:
+    name: signataire
+  
+objects: 
+    user_client:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+            id_object: 
+                field_value: id_user_client_signataire
+                
+    users_client:
+        relation: none
+        instance: 
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+                
+fields: 
+    id_signature:
+        label: Signature
+        type: id_parent
+        
+    type:
+        label: Type
+        type: int
+        values: 
+            array: types
+        default_value: 1
+        
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+        
+    type_signature: 
+        label: Type signature
+        type: int
+        values: 
+            array: types_signatures
+        input: 
+            type: select
+            options: 
+                callback: getTypeSignaturesInputOptions
+        default_value: 0     
+        
+    code: 
+        label: Code signataire
+        default_value: default
+        
+    label: 
+        label: Désignation
+        default_value: Signataire
+        
+    id_client: 
+        label: Client
+        type: id_object
+        object: client
+        
+    id_contact: 
+        label: Contact client
+        type: id_object
+        object: contact
+        values: 
+            array: contacts
+        default_value: 0
+        display_if: 
+            field_name: id_client
+            hide_values: 0
+        depends_on: id_client
+        
+    id_user_client_signataire:
+        label: Compte utilisateur signataire
+        type: id_object
+        object: user_client
+        default_value: 0
+        
+    id_user: 
+        label: Utilisateur signataire
+        type: id_object
+        object: user
+        default_value: 0
+        
+    email: 
+        label: Adresse e-mail signataire
+        
+    nom: 
+        label: Nom signataire
+        
+    fonction: 
+        label: Fonction signataire
+        
+    date_open: 
+        label: Date ouverture accès public
+        type: date
+        
+    allowed_users_client: 
+        label: Comptes utilisateurs du client autorisés pour cette signature
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: users_client
+        input: 
+            type: check_list
+            select_all_buttons: 1
+            search_input: 1
+            items: 
+                callback: getClientUsersArray
+        create_form: default
+        create_form_values: 
+            fields: 
+                id_client: 
+                    field_value: id_client
+                id_contact: 
+                    field_value: id_contact
+                status: 1
+                role: 0
+        
+    date_signed: 
+        label: Date signature
+        type: datetime
+        input: 
+            display_now: 1
+            
+    ip_signataire: 
+        label: Adresse IP signataire
+        
+    base_64_signature:
+        label: Image signature
+        
+    allow_elec: 
+        label: Signature électronique autorisée
+        type: bool
+        default_value: 1
+        
+    allow_dist: 
+        label: Signature à distance autorisée
+        type: bool
+        default_value: 0
+        
+    allow_docusign: 
+        label: Signature DocuSign autorisée
+        type: bool
+        default_value: 0
+        
+    allow_refuse: 
+        label: Refus autorisé
+        type: bool
+        default_value: 0
+        
+    need_sms_code: 
+        label: Certification signature à distance par code SMS
+        type: bool
+        default_value: 0
+        display_if: 
+            field_name: allow_dist
+            show_values: 1
+        
+    code_sms_infos: 
+        label: Données code SMS
+        type: json
+            
+forms:
+    edit: 
+        rows: 
+            - field: allow_elec
+            - field: allow_dist
+            - field: allow_docusign
+            - field: allow_refuse
+            - field: need_sms_code
+            
+    edit_signataire: 
+        rows: 
+            - field: type
+            - field: id_user
+            - field: id_client
+            - field: id_contact
+            - field: nom
+            - field: fonction
+            - field: email
+            
+    open_sign_dist:
+        title: Signature à distance
+        icon: fas_sign-in
+        values: 
+            fields: 
+                allowed_users_client: 
+                    callback: getDefaultAllowedUsersClient
+        rows: 
+            - custom: 1
+              label: Document
+              input_name: doc_title
+              content: 
+                  callback: 
+                      method: displayDocTitle
+                      object: parent
+            - custom: 1
+              label: Ouvrir automatiquement l'accès public
+              show: 
+                  callback: showAutoOpenPublicAccess
+              input_name: auto_open
+              value: 1
+              input: 
+                  type: toggle
+                  help: 
+                      callback: getAutoOpenPublicAccessInputHelp
+                      
+            - custom: 1
+              label: Adresse e-mail du compte utilisateur à créer
+              input_name: new_user_email
+              input: 
+                  type: text
+              show: 
+                  callback: showOpenPublicAccessNewUserEmailInput
+              value: 
+                  callback: getOpenPublicAccessNewUserDefaultEmail
+              display_if: 
+                  field_name: auto_open
+                  show_values: 1
+            - field: allowed_users_client
+              display_if: 
+                  field_name: auto_open
+                  hide_values: 1
+                  
+            - custom: 1
+              label: Contenu e-mail pour la signature à distance
+              input_name: email_content
+              input: 
+                  type: html
+                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le document à signer sera automatiquement joint à l'email"
+              value: 
+                  callback: 
+                      method: getDefaultSignDistEmailContent
+                      object: parent
+    
+    sign_elec: 
+        title: Signature électronique
+        icon: fas_file-signature
+        rows: 
+            - custom: 1
+              label: Récapitulatif
+              input_name: doc_infos
+              content: 
+                  callback: 
+                      method: displayDocInfos
+                      object: parent
+            - field: nom
+            - field: email
+            - field: fonction
+              show: 
+                  callback: isFonctionRequired
+            - custom: 1
+              label: Signature
+              input_name: signature
+              input: 
+                  type: signature_pad
+                  check_mentions: 
+                      callback: getCheckMentions
+              required: 1
+            
+    sign_dist: 
+        title: Signature à distance
+        icon: fas_file-signature
+        rows: 
+            - custom: 1
+              label: Document
+              input_name: doc_title
+              content: 
+                  callback: 
+                      method: displayDocTitle
+                      object: parent
+            - custom: 1
+              label: Code SMS
+              input_name: code_sms
+              content: 
+                  callback: renderSignDistCodeSmsInput
+              show: 
+                  field_value: need_sms_code
+              required: 1
+            - field: nom
+            - field: fonction
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Signature
+              input_name: signature
+              input: 
+                  type: signature_pad
+                  
+              required: 1
+                  
+    signature_params: 
+        title: Ajuster la position de la signature sur le document PDF
+        icon: fas_arrows-alt
+        values: 
+            callback: getSignatureParamsFormValues
+        rows: 
+            - custom: 1
+              label: N° de Page
+              input_name: page
+              input: 
+                  type: qty
+            - custom: 1
+              label: Largeur
+              input_name: width
+              input: 
+                  type: qty
+            - custom: 1
+              label: Position en X (mm)
+              input_name: x_pos
+              input: 
+                  type: qty
+            - custom: 1
+              label: Position en Y (mm)
+              input_name: y_pos
+              input: 
+                  type: qty
+            - custom: 1
+              label: Décalage en X du nom (mm)
+              input_name: nom_x_offset
+              input: 
+                  type: qty
+            - custom: 1
+              label: Décalage en Y du nom (mm)
+              input_name: nom_y_offset
+              input: 
+                  type: qty
+            - custom: 1
+              label: Décalage en X de la fonction (mm)
+              input_name: fonction_x_offset
+              input: 
+                  type: qty
+            - custom: 1
+              label: Décalage en Y de la fonction (mm)
+              input_name: fonction_y_offset
+              input: 
+                  type: qty
+            - custom: 1
+              label: Décalage en X de la date (mm)
+              input_name: date_x_offset
+              input: 
+                  type: qty
+            - custom: 1
+              label: Décalage en Y de la date (mm)
+              input_name: date_y_offset
+              input: 
+                  type: qty
+                  
+    sms_code: 
+        title: Envoi du code SMS
+        rows: 
+            - custom: 1
+              label: N° mobile sur lequel envoyer le code SMS
+              input_name: num_tel_selected
+              content: 
+                  callback: renderNumTelForSmsCodeInput
+            - custom: 1
+              label: Autre n° de téléphone mobile
+              input_name: other_num
+              input: 
+                  type: text
+              display_if: 
+                  field_name: num_tel_selected
+                  show_values: other
+                  
+    motif: 
+        rows: 
+            - custom: 1
+              label: Motif
+              input_name: motif
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+                  
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: type
+            - label: Signataire
+              value: 
+                  callback: displaySignataire
+            - field: nom
+            - field: email
+            - field: fonction
+            - field: ip_signataire
+              show: 
+                  callback: isSigned
+            - field: date_signed
+              show: 
+                  callback: isSigned
+            - label: Image signature
+              show: 
+                  callback: showSignatureImage
+              value: 
+                  callback: renderSignatureImage
+            
+    
+    options: 
+        title: Options
+        icon: fas_check-square
+        rows: 
+            - field: allow_elec
+            - field: allow_dist
+            - field: allow_docusign
+            - field: allow_refuse
+            - field: need_sms_code
+            - field: date_open
+              show: 
+                  field_value: allow_dist
+            - field: allowed_users_client
+              show: 
+                  field_value: allow_dist
+                  
+views: 
+    default: 
+        rows:
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: options
+                     
+lists_cols: 
+    signataire: 
+        label: Signataire
+        value: 
+            callback: displaySignataire
+            
+    public_sign: 
+        label: Signer
+        value: 
+            callback: dispayPublicSign
+        
+    public_document: 
+        label: Document
+        value: 
+            callback: displayPublicDocument
+            
+lists:
+    default: 
+        title: Signataires
+        icon: fas_user-edit
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les signataires sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: desc
+        n: 10
+        edit_btn: 1
+        edit_form: edit_signataire
+        delete_btn: 1
+        modal_view: default
+        extra_btn: 
+            callback: 
+                method: getActionsButtons
+                params: 
+                    - 0
+        cols: 
+            id_signature: 
+            label: 
+            signataire: 
+            status: 
+            type_signature: 
+            date_signed:
+            allowed_users_client: 
+                label: Accès signature à distance
+                
+    signature: 
+        extends: default
+        cols: 
+            id_signature: unset
+            
+    public_client: 
+        title: Liste de vos signatures
+        configurable: 0
+        checkboxes: 0
+        cols: 
+            parent:obj: 
+                label: Elément lié
+            parent:doc_type: 
+            parent:doc_ref: 
+            status: 
+            type:
+            date_signed: 
+            nom: 
+            public_document: 
+            public_sign:
+            

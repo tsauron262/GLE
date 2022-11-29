@@ -19,6 +19,7 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
     public $total_ttc = 0;
     public $total_rap = 0;
     public $discounts = 0;
+    public $signature_bloc = true;
 
     public function __construct($db)
     {

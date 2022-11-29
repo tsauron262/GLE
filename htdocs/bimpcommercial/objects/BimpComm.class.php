@@ -720,7 +720,7 @@ class BimpComm extends BimpDolObject
             }
 
             if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
-                if ($this->object_name === 'Bimp_Commande' || (int) $this->getData('fk_statut') === 0) {
+                if ($this->object_name === 'Bimp_Commande' || $this->object_name === 'Bimp_Propal' || (int) $this->getData('fk_statut') === 0) {
                     $buttons[] = array(
                         'label'       => 'Déduire un crédit disponible',
                         'icon_before' => 'fas_file-import',
@@ -4958,6 +4958,7 @@ class BimpComm extends BimpDolObject
 
     public function validate()
     {
+        $return = parent::validate();
         if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente') && $this->getData('fk_statut') == 0) {
             $zone = self::BC_ZONE_FR;
             if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) || $this->getData('entrepot') == '164' || $this->getInitData('entrepot') == '164'
@@ -4966,14 +4967,14 @@ class BimpComm extends BimpDolObject
                 if (BimpObject::objectLoaded($soc)) {
                     $zone = $this->getZoneByCountry($soc);
                     if ($this->getData('zone_vente') != $zone) {
-                        $this->set('zone_vente', $zone);
+                        $this->updateField('zone_vente', $zone);
                         $this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true));
                     }
                 }
             }
         }
 
-        return parent::validate();
+        return $return;
     }
 
     public function create(&$warnings = array(), $force_create = false)

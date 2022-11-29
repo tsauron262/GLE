@@ -52,11 +52,10 @@ fields:
         label: Message Id
         type: string
         
-        
-        
 lists:
     default:
         modal_view: default
+        modal_format: large
         cols:
             mail_to:
             mail_from:

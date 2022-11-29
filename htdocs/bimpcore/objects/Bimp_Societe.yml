@@ -1399,6 +1399,12 @@ filters:
                     params:
                         - marche
                         - societe
+                        
+    custom:
+        label: Custom
+#        type: text
+#        input: 
+#            type: text
             
 filters_panels: 
     default: 

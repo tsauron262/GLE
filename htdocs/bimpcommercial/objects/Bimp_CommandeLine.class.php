@@ -1538,6 +1538,8 @@ class Bimp_CommandeLine extends ObjectLine
                 if (BimpObject::objectLoaded($product) && $product->isTypeProduct()) {
                     $base_unit = $fullQty / $nb_total_periods;
                     $round_unit = round($base_unit);
+                    if($round_unit < 1)
+                        $round_unit = 1;
                     $nb_periods_shipped = $qty_shipped / $round_unit;
 
                     if ($nb_periods_shipped != round($nb_periods_shipped)) {

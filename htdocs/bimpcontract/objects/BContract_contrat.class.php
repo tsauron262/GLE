@@ -2988,9 +2988,9 @@ class BContract_contrat extends BimpDolObject
             $this->mail($commercial->getData('email'), self::MAIL_VALIDATION);
 
             $success = 'Le contrat ' . $ref . " a été validé avec succès";
-            if (!BimpTools::getValue('use_syntec')) {
-                $this->updateField('syntec', null);
-            }
+//            if (!BimpTools::getValue('use_syntec')) {//Il n'y pas de form a cette étape
+//                $this->updateField('syntec', null);
+//            }
 
             $this->fetch($this->id);
             $this->actionGeneratePdf([], $success);
@@ -4084,7 +4084,7 @@ class BContract_contrat extends BimpDolObject
             foreach ($propal->dol_object->lines as $line) {
                 $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                 if ($produit->getData('fk_product_type') == 1 || !BimpCore::getConf('just_code_service', null, 'bimpcontract') || $line->pa_ht == 0) {
-                    $description = ($line->desc) ? $line->desc : $line->libelle;
+                    $description = ($line->desc && $line->desc != '<br>') ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
                     $end_date->add(new DateInterval("P" . $duree_mois . "M"));
                     $new_contrat->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR
@@ -4605,7 +4605,7 @@ class BContract_contrat extends BimpDolObject
                 break;
             case self::MAIL_VALIDATION:
                 $sujet = "Contrat validé et signé par la direction";
-                $action = "Envoyer le contrat au client par le bouton <b>'Action'</b> puis <b>'Envoyer par e-mail'</b>";
+                $action = "Ce contrat a été validé par le service technique.<br/>Vous devez maintenant utiliser l'action <b>'Envoyer via DocuSign'</b> afin de le faire signer au client</b>";
                 break;
             case self::MAIL_SIGNED:
                 $sujet = "Contrat signé par le client";

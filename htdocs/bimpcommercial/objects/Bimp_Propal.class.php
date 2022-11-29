@@ -155,6 +155,11 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             case 'createSignature':
                 return 1;
+                
+            case 'downloadSignature':
+            case 'redownloadSignature':
+            case 'createSignatureDocuSign':
+                return $user->admin;
         }
         return 1;
     }
@@ -320,6 +325,65 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
                 }
                 return 1;
+                
+            case 'downloadSignature':
+                if ($status != 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                    return 0;
+                }
+                
+                $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
+                if (!BimpObject::objectLoaded($signature)) {
+                    $errors[] = 'La signature n\'existe pas';
+                    return 0;
+                }
+                
+                $file_name = $this->getSignatureDocFileName('devis', true);
+                $file_dir = $this->getSignatureDocFileDir('devis');
+                if (file_exists($file_dir . $file_name)) {
+                    return 0;
+                }
+                
+                return 1;
+                
+            case 'redownloadSignature':
+                if ($status != 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                    return 0;
+                }
+                
+                $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
+                if (!BimpObject::objectLoaded($signature)) {
+                    $errors[] = 'La signature n\'existe pas';
+                    return 0;
+                }
+                
+                $file_name = $this->getSignatureDocFileName('devis', true);
+                $file_dir = $this->getSignatureDocFileDir('devis');
+                if (!file_exists($file_dir . $file_name)) {
+                    return 0;
+                }
+                
+                return 1;
+
+            case 'createSignatureDocuSign':
+                if ($status != 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                    return 0;
+                }
+                
+                if ((int) $this->getData('id_signature')) {
+                    $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
+
+                    if (!BimpObject::objectLoaded($signature)) {
+                        $this->updateField('id_signature', 0);
+                    } else {
+                        $errors[] = 'La signature est déjà en place pour ' . $this->getLabel('this');
+                        return 0;
+                    }
+                }                
+                return 1;
+
         }
 
         return (int) parent::isActionAllowed($action, $errors);

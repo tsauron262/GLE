@@ -23,9 +23,11 @@ class BimpNote extends BimpObject
     const BN_AUTHOR_USER = 1;
     const BN_AUTHOR_SOC = 2;
     const BN_AUTHOR_FREE = 3;
+    const BN_AUTHOR_GROUP = 4;
 
     public static $types_author = array(
         self::BN_AUTHOR_USER => 'Utilisateur',
+        self::BN_AUTHOR_GROUP => 'Group',
         self::BN_AUTHOR_SOC  => 'Tiers',
         self::BN_AUTHOR_FREE => 'Libre'
     );
@@ -33,7 +35,7 @@ class BimpNote extends BimpObject
 
     const BN_DEST_NO = 0;
     const BN_DEST_USER = 1;
-    const BN_DEST_GROUP = 2;
+    const BN_DEST_GROUP = 4;
 
     public static $types_dest = array(
         self::BN_DEST_NO    => 'Aucun',
@@ -118,10 +120,6 @@ class BimpNote extends BimpObject
 
     public function isActionAllowed($action, &$errors = [])
     {
-        if (!$this->isLoaded($errors)) {
-            return 0;
-        }
-
         if ($this->modeArchive) {
             $errors[] = 'Mode archive';
             return 0;
@@ -129,19 +127,25 @@ class BimpNote extends BimpObject
 
         switch ($action) {
             case 'repondre':
-                if ((int) $this->getData('type_author') !== self::BN_AUTHOR_USER) {
-                    $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu. 
-                    return 0;
-                }
-                global $user;
-                if ($this->getData('user_create') == $user->id) {
-                    $errors[] = 'L\'utilisateur connecté est l\'auteur';
-                    return 0;
+                if ($this->isLoaded()) {
+                    if ((int) $this->getData('type_author') !== self::BN_AUTHOR_USER && (int) $this->getData('type_author') !== self::BN_AUTHOR_GROUP) {
+                        $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu. 
+                        return 0;
+                    }
+                    global $user;
+                    if ($this->getData('user_create') == $user->id) {
+                        $errors[] = 'L\'utilisateur connecté est l\'auteur';
+                        return 0;
+                    }
                 }
 
                 return 1;
 
             case 'setAsViewed':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
                 if ((int) $this->getData('viewed')) {
                     $errors[] = 'Déjà vue';
                     return 0;
@@ -291,7 +295,7 @@ class BimpNote extends BimpObject
         $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
                 . "WHERE auto = 0 AND ";
         $where = "(type_dest = 1 AND fk_user_dest = " . $user->id . ") "
-                . "         OR (type_dest = 2 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))"
+                . "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))"
                 . "         ";
         $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";
 //        if($notViewedInFirst)
@@ -373,12 +377,19 @@ class BimpNote extends BimpObject
 
     public function getJsRepondre()
     {
-        return $this->getJsActionOnclick('repondre', array(
-                    "type_dest"    => 1,
-                    "fk_user_dest" => $this->getData("user_create"),
+        $filtre = array(
                     "content"      => "",
                     "id"           => ""
-                        ), array(
+                        );
+        $filtre['fk_user_dest'] = $this->getData("user_create");
+        if($this->getData('type_author') == self::BN_AUTHOR_USER){
+            $filtre['type_dest'] = self::BN_DEST_USER;
+        }
+        elseif($this->getData('type_author') == self::BN_AUTHOR_GROUP){
+            $filtre['type_dest'] = self::BN_DEST_GROUP;
+            $filtre['fk_group_dest'] = $this->getData("fk_group_author");
+        }
+        return $this->getJsActionOnclick('repondre', $filtre, array(
                     'form_name' => 'rep'
                         )
         );
@@ -515,6 +526,8 @@ class BimpNote extends BimpObject
 
             case self::BN_AUTHOR_FREE:
                 return $this->displayData('email', 'default', $display_input_value, $no_html);
+            case self::BN_AUTHOR_GROUP:
+                return $this->displayData('fk_group_author', 'nom_url', $display_input_value, $no_html);
         }
 
         return '';
@@ -584,7 +597,7 @@ class BimpNote extends BimpObject
             $this->updateField('viewed', 1);
         }
 
-        $data["type_author"] = self::BN_AUTHOR_USER;
+//        $data["type_author"] = self::BN_AUTHOR_USER;
         $data["user_create"] = $user->id;
         $data["viewed"] = 0;
 
@@ -692,6 +705,13 @@ class BimpNote extends BimpObject
                     break;
             }
         }
+        if (in_array($this->getData('type_dest'), array(2))) {
+            switch ($this->getData('type_dest')) {
+                case 2:
+                    $this->updateField('type_dest', 4);
+                    break;
+            }
+        }
         return $return;
     }
 
@@ -749,7 +769,7 @@ class BimpNote extends BimpObject
                 . "WHERE auto = 0 AND id>" . $id_max . ' AND ';
         $where = "(type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
         if (count($listIdGr) > 0)
-            $where .= "         OR (type_dest = 2 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";
+            $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";
         $where .= "         ";
 
         $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";

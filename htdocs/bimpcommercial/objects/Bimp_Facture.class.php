@@ -784,7 +784,7 @@ class Bimp_Facture extends BimpComm
                         $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
                     } elseif (!$this->field_exists('chorus_status')) {
                         $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
-                    } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0))) {
+                    } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0, 1))) {
                         $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus' . (int) $this->getData('chorus_status');
                     } else {
                         $client = $this->getChildObject('client');
@@ -2732,7 +2732,7 @@ class Bimp_Facture extends BimpComm
 
                     if ($this->canSetAction('deactivateRelancesForAMonth')) {
                         $onclick = $this->getJsActionOnclick('deactivateRelancesForAMonth', array(), array(
-                            'confirm_msg' => 'Veuillez confirmer'
+                            'confirm_msg' => "Attention : cette action n\'est autorisée que si le règlement a été reçu par nos services et qu\'une copie en est déposée en pièce jointe de cette facture"
                         ));
 
                         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
@@ -5514,13 +5514,15 @@ class Bimp_Facture extends BimpComm
 
             if ($to) {
                 global $user, $langs;
+                
 
-                $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendues pendant un mois pas ' . $user->getFullName($langs);
+                $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendues pendant un mois';
                 $msg .= "\n\n";
 
                 $msg .= 'Date de prochaine relance pour cette facture : ' . $dt->format('d / m / Y');
 
-                mailSyn2('Relances suspendues - Facture ' . $this->getRef(), $to, '', $msg);
+                $this->addLog($msg);
+//                mailSyn2('Relances suspendues - Facture ' . $this->getRef(), $to, '', $msg);
             }
         }
 
@@ -6219,7 +6221,8 @@ class Bimp_Facture extends BimpComm
                 $userCreate->fetch((int) $obj->getData('fk_user_author'));
 
 
-            $mail = $userCreate->email;
+//            $mail = $userCreate->email;
+            $mail = BimpTools::getMailOrSuperiorMail($userCreate->id, 'f.pineri@bimp.fr');
             if ($mail == '')
                 $mail = "tommy@bimp.fr";
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");

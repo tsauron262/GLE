@@ -30,20 +30,23 @@ class Bimp_ApporteurFilter extends BimpObject{
     
     
     public function getLabel($param= '', $ucfirst = false) {
-        $libelle = $this->getData('libelle');
-        if($libelle != '') {
-            
-            // Contient un pourcentage
-            if(preg_match("/\d+\s?%/", $libelle) != 0)
-                $return = $libelle;
-            else// Ne contient pas de pourcentage => on le rajoute
-                $return = $libelle . " (" . $this->getData('commition') . "%)";
+        if($this->id > 0){
+            $libelle = $this->getData('libelle');
+            if($libelle != '') {
 
-        } else
-            $return = "Commissionnée à " . $this->getData('commition') .  "%";
-        if($ucfirst)
-            return ucfirst ($return);
-        return $return;
+                // Contient un pourcentage
+                if(preg_match("/\d+\s?%/", $libelle) != 0)
+                    $return = $libelle;
+                else// Ne contient pas de pourcentage => on le rajoute
+                    $return = $libelle . " (" . $this->getData('commition') . "%)";
+
+            } else
+                $return = "Commissionnée à " . $this->getData('commition') .  "%";
+            if($ucfirst)
+                return ucfirst ($return);
+            return $return;
+        }
+        return parent::getLabel($type, $ucfirst);
     }
     
     public function isFieldEditable($field, $force_edit = false) {

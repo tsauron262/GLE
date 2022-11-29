@@ -2999,9 +2999,9 @@ class BContract_contrat extends BimpDolObject
             $this->mail($commercial->getData('email'), self::MAIL_VALIDATION);
 
             $success = 'Le contrat ' . $ref . " a été validé avec succès";
-            if (!BimpTools::getValue('use_syntec')) {
-                $this->updateField('syntec', null);
-            }
+//            if (!BimpTools::getValue('use_syntec')) {//Il n'y pas de form a cette étape
+//                $this->updateField('syntec', null);
+//            }
 
             $this->fetch($this->id);
             $this->actionGeneratePdf([], $success);

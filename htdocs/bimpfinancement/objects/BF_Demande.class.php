@@ -3799,7 +3799,7 @@ class BF_Demande extends BimpObject
         if (!count($errors)) {
             BimpCache::getBdb()->db->commit();
             $msg = 'Nouvelle demande de location de la part de ' . $source_label;
-            $this->addNotificationNote($msg, BimpNote::BN_AUTHOR_USER, '', 0, BimpNote::BN_MEMBERS, 1);
+            $demande->addNotificationNote($msg, BimpNote::BN_AUTHOR_USER, '', 0, BimpNote::BN_MEMBERS, 1);
         } else {
             BimpCache::getBdb()->db->rollback();
         }

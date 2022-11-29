@@ -94,9 +94,9 @@ class BF_Demande extends BimpObject
             return 1;
         }
 
-        if ((int) $this->getData('id_main_source')) {
-            return 0;
-        }
+//        if ((int) $this->getData('id_main_source')) {
+//            return 0;
+//        }
 
         if ((int) $this->getData('status') <= 0) {
             return 1;

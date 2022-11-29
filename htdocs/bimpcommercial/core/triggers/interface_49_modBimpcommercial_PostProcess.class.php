@@ -18,9 +18,9 @@ class InterfacePostProcess extends BimpCommTriggers
 
         if (BimpObject::objectLoaded($bimpObject)) {
             $obj_errors = BimpTools::getDolEventsMsgs(array('errors'), false);
-//            BimpObject::loadClass('bimpalert', 'BimpAlerteCommercial');
-//            BimpAlerteCommercial::traiteAlerte($bimpObject, $action_name);
             if (empty($obj_errors)) {
+//                BimpObject::loadClass('bimpalert', 'BimpAlerteCommercial');
+//                BimpAlerteCommercial::traiteAlerte($bimpObject, $action_name);
                 switch ($action_name) {
                     case 'CREATE':
                         if (method_exists($bimpObject, 'onCreate')) {

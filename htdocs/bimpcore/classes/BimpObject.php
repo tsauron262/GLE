@@ -2730,6 +2730,8 @@ class BimpObject extends BimpCache
                 'id_user'    => (BimpObject::objectLoaded($user) ? $user->id : 0)
                     ), true, $errors);
         }
+        else
+            BimpCore::addlog ('Ajout historique objet non loadé');
 
         return $errors;
     }

@@ -927,10 +927,10 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                 $pdf->MultiCell($W, 16, '', 0, 'L');
                 $pdf->Cell($W, 8, "", 1, null, 'L', true);
                 $pdf->SetFont('', '', 7);
-                $pdf->Cell($W, 8, "Par la signature électronique de cette page, le signataire confirme avoir lu et approuvé le", 1, null, 'L', true);
-                $pdf->MultiCell($W, 6, '', 0, 'L');
+//                $pdf->Cell($W, 8, "Par la signature électronique de cette page, le signataire confirme avoir lu et approuvé le", 1, null, 'L', true);
+                $pdf->MultiCell($W, 6, 'Par la signature électronique de cette page, le signataire confirme avoir lu et approuvé le descriptif et la tarification de ce contrat et en accepter les Conditions Particulières et Générales', 0, 'L');
                 $pdf->Cell($W, 8, "", 1, null, 'L', true);
-                $pdf->Cell($W, 8, "descriptif et la tarification de ce contrat et en accepter les Conditions Particulières et Générales", 1, null, 'L', true);
+//                $pdf->Cell($W, 8, "descriptif et la tarification de ce contrat et en accepter les Conditions Particulières et Générales", 1, null, 'L', true);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
                 $pdf1->SetFont('', 'BU', 8);
                 $pdf1->setColor('fill', 255, 255, 255);

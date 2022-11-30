@@ -353,7 +353,7 @@ fields:
         
     fk_typent: 
         dol_prop: typent_id
-        label: Type du tiers
+        label: Type d'entreprise
         type: int
         user_edit: 1
         history: 1

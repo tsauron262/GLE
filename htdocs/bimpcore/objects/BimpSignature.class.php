@@ -130,6 +130,12 @@ class BimpSignature extends BimpObject
                             $errors[] = 'Scan du document signé obligatoire pour cette signature';
                             return 0;
                         }
+
+                    case 'signPapier':
+                        if ($this->getData('id_envelope_docu_sign')) {
+                            $errors[] = 'Signature via DocuSign en attente';
+                            return 0;
+                        }
                         break;
 
                     case 'initDocuSign':
@@ -788,10 +794,10 @@ class BimpSignature extends BimpObject
         return '';
     }
 
-    public function displayDocTitle()
+    public function displayDocTitle($no_html = false)
     {
         $ref = $this->displayDocRef();
-        return $this->displayDocType() . ($ref ? ' - <b>' . $ref . '</b>' : '');
+        return $this->displayDocType() . ($ref ? ($no_html ? ' - ' . $ref : ' - <b>' . $ref . '</b>') : '');
     }
 
     public function displayDocInfos()
@@ -872,7 +878,6 @@ class BimpSignature extends BimpObject
     {
         $html = '';
 
-        $dir = $this->getDocumentFileDir();
         $file = $this->getDocumentFilePath();
         $file_signed = $this->getDocumentFilePath(true);
         $file_url = '';
@@ -1345,6 +1350,31 @@ class BimpSignature extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function replaceEmailContentLabels($email_content)
+    {
+        $obj_label = '';
+        $obj_ref = '';
+
+        $obj = $this->getObj();
+        $errors = array();
+        if ($this->isObjectValid($errors, $obj)) {
+            $obj_label = $obj->getLabel('the');
+            $obj_ref = $obj->getRef();
+        }
+
+        return str_replace(array(
+            '{NOM_DOCUMENT}',
+            '{NOM_PIECE}',
+            '{REF_PIECE}',
+            '{LIEN_ESPACE_CLIENT}'
+                ), array(
+            $this->displayDocTitle(),
+            $obj->getLabel('the'),
+            $obj->getRef(),
+            '<a href="' . self::getPublicBaseUrl(false) . '">espace client</a>'
+                ), $email_content);
     }
 
     // Actions: 

@@ -1332,8 +1332,10 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $success .= '<br/>Fiche signature créée avec succès';
                     $signataire_errors = array();
                     $allow_dist = (int) BimpCore::getConf('propal_signature_allow_dist', null, 'bimpcommercial');
-                    $allow_docusign = (int) $this->isDocuSignAllowed();
-                    if ($allow_docusign) {
+                    $ds_required = false;
+                    $ds_errors = array();
+                    $allow_docusign = (int) $this->isDocuSignAllowed($ds_errors, $ds_required);
+                    if ($allow_docusign && $ds_required) {
                         $allow_dist = 0;
                     }
                     $allow_refuse = (int) BimpCore::getConf('propal_signature_allow_refuse', null, 'bimpcommercial');

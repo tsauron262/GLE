@@ -398,8 +398,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
 
                 if ((int) BimpCore::getConf('propal_signature_required', null, 'bimpcommercial')) {
-                    $errors[] = 'Signature du devis obligatoire';
-                    return 0;
+//                    $errors[] = 'Signature du devis obligatoire';
+//                    return 0;
                 }
 
                 if ((int) $this->getData('id_signature') && (int) BimpCore::getConf('propal_use_signatures', null, 'bimpcommercial')) {
@@ -491,6 +491,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     public function isDocuSignAllowed(&$errors = array())
     {
+        return 0;
         // Attention : pas de conditions spécifiques à une version de l'ERP ici. 
         // Utiliser une extension.  
         if (!(int) BimpCore::getConf('propal_signature_allow_docusign', null, 'bimpcommercial')) {

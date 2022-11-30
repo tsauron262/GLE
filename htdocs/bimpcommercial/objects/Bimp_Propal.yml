@@ -514,7 +514,7 @@ forms:
         rows: 
             create_signature: 
                 custom: 1
-                label: Demander la signature du client
+                label: Créer la fiche signature
                 data_type: bool
                 input_name: create_signature
                 input: 

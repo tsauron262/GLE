@@ -1025,7 +1025,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $html .= '<br/>Signature du devis : ' . $signature->displayData('status', 'default', false);
             }
         }
-        
+
         $html .= parent::renderHeaderStatusExtra();
 
         return $html;
@@ -1079,6 +1079,14 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $html .= '<div style="margin-top: 10px">';
                 $html .= '<strong>Client: </strong>';
                 $html .= $client->getLink();
+                $html .= '</div>';
+            }
+
+            if ((int) $this->getData('fk_statut') == 1 && !(int) $this->getData('id_signature')) {
+                $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                $msg .= 'Si vous souhaitez <b>déposer le devis signé</b> ou demander la <b>signature électronique</b> à distance au client, veuillez cliquer sur "<b>Créer la fiche signature</b>"';
+                $html .= '<div style="margin-top: 10px">';
+                $html .= BimpRender::renderAlerts($msg, 'warning');
                 $html .= '</div>';
             }
         }

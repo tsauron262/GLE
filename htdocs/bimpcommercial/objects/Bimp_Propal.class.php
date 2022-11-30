@@ -399,7 +399,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                 if ((int) BimpCore::getConf('propal_signature_required', null, 'bimpcommercial')) {
                     $errors[] = 'Signature du devis obligatoire';
-                    return 0;
+//                    return 0;
                 }
 
                 if ((int) $this->getData('id_signature') && (int) BimpCore::getConf('propal_use_signatures', null, 'bimpcommercial')) {

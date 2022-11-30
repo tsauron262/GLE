@@ -155,7 +155,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
             case 'createSignature':
                 return 1;
-                
+
             case 'downloadSignature':
             case 'redownloadSignature':
             case 'createSignatureDocuSign':
@@ -325,45 +325,45 @@ class Bimp_Propal extends Bimp_PropalTemp
                     }
                 }
                 return 1;
-                
+
             case 'downloadSignature':
                 if ($status != 1) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
                     return 0;
                 }
-                
+
                 $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
                 if (!BimpObject::objectLoaded($signature)) {
                     $errors[] = 'La signature n\'existe pas';
                     return 0;
                 }
-                
+
                 $file_name = $this->getSignatureDocFileName('devis', true);
                 $file_dir = $this->getSignatureDocFileDir('devis');
                 if (file_exists($file_dir . $file_name)) {
                     return 0;
                 }
-                
+
                 return 1;
-                
+
             case 'redownloadSignature':
                 if ($status != 1) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
                     return 0;
                 }
-                
+
                 $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
                 if (!BimpObject::objectLoaded($signature)) {
                     $errors[] = 'La signature n\'existe pas';
                     return 0;
                 }
-                
+
                 $file_name = $this->getSignatureDocFileName('devis', true);
                 $file_dir = $this->getSignatureDocFileDir('devis');
                 if (!file_exists($file_dir . $file_name)) {
                     return 0;
                 }
-                
+
                 return 1;
 
             case 'createSignatureDocuSign':
@@ -371,7 +371,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
                     return 0;
                 }
-                
+
                 if ((int) $this->getData('id_signature')) {
                     $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', (int) $this->getData('id_signature'));
 
@@ -381,9 +381,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                         $errors[] = 'La signature est déjà en place pour ' . $this->getLabel('this');
                         return 0;
                     }
-                }                
+                }
                 return 1;
-
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -481,7 +480,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             $signature = $this->getChildObject('signature');
 
             if (BimpObject::objectLoaded($signature)) {
-                if ((int) $signature->getData('signed')) {
+                if ((int) $signature->isSigned()) {
                     return 1;
                 }
             }
@@ -495,7 +494,24 @@ class Bimp_Propal extends Bimp_PropalTemp
         // Attention : pas de conditions spécifiques à une version de l'ERP ici. 
         // Utiliser une extension.  
         if (!(int) BimpCore::getConf('propal_signature_allow_docusign', null, 'bimpcommercial')) {
-            $errors[] = 'DocuSign non autorisé pour les devis';
+            $errors[] = 'Signature DocuSign non autorisée pour ce devis';
+            return 0;
+        }
+
+        return 1;
+    }
+
+    public function isSignDistAllowed(&$errors = array())
+    {
+        // Attention : pas de conditions spécifiques à une version de l'ERP ici. 
+        // Utiliser une extension.  
+        if ((int) $this->isDocuSignAllowed()) {
+            $errors[] = 'DocuSign requis pour la signature à distance de ce devis';
+            return 0;
+        }
+
+        if (!(int) BimpCore::getConf('propal_signature_allow_dist', null, 'bimpcommercial')) {
+            $errors[] = 'Signature éléctronique à distance non autorisée pour ce devis';
             return 0;
         }
 
@@ -1009,6 +1025,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $html .= '<br/>Signature du devis : ' . $signature->displayData('status', 'default', false);
             }
         }
+        
+        $html .= parent::renderHeaderStatusExtra();
 
         return $html;
     }
@@ -1142,11 +1160,11 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         return $html;
     }
-    
+
     public function renderSignatureInitDocuSignInput()
     {
         $html = '';
-        
+
         $errors = array();
         if (!$this->isDocuSignAllowed($errors)) {
             $html .= '<div class="danger">';
@@ -1156,7 +1174,24 @@ class Bimp_Propal extends Bimp_PropalTemp
         } else {
             $html .= BimpInput::renderInput('toggle', 'init_docusign', 1);
         }
-        
+
+        return $html;
+    }
+
+    public function renderSignatureOpenDistAccessInput()
+    {
+        $html = '';
+
+        $errors = array();
+        if (!$this->isSignDistAllowed($errors)) {
+            $html .= '<div class="danger">';
+            $html .= BimpTools::getMsgFromArray($errors, 'Il n\'est pas possible d\'utiliser la signature électronique à distance pour ce devis');
+            $html .= '</div>';
+            $html .= '<input type="hidden" value="0" name="open_public_access"/>';
+        } else {
+            $html .= BimpInput::renderInput('toggle', 'open_public_access', 1);
+        }
+
         return $html;
     }
 
@@ -1274,7 +1309,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         'obj_module' => 'bimpcommercial',
                         'obj_name'   => 'Bimp_Propal',
                         'id_obj'     => $this->id,
-                        'doc_type'   => 'devis',
+                        'doc_type'   => 'devis'
                             ), true, $errors, $warnings);
 
             if (!count($errors) && BimpObject::objectLoaded($signature)) {
@@ -1284,7 +1319,10 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $success .= '<br/>Fiche signature créée avec succès';
                     $signataire_errors = array();
                     $allow_dist = (int) BimpCore::getConf('propal_signature_allow_dist', null, 'bimpcommercial');
-                    $allow_docusign = (int) BimpCore::getConf('propal_signature_allow_docusign', null, 'bimpcommercial');
+                    $allow_docusign = (int) $this->isDocuSignAllowed();
+                    if ($allow_docusign) {
+                        $allow_dist = 0;
+                    }
                     $allow_refuse = (int) BimpCore::getConf('propal_signature_allow_refuse', null, 'bimpcommercial');
 
                     $signataire = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
@@ -1314,7 +1352,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 $warnings[] = BimpTools::getMsgFromArray($docusign_result['warnings'], 'Envoi de la demande de signature via DocuSign');
                             }
                         } elseif ($open_public_acces && $allow_dist) {
-                            $open_errors = $signataire->openSignDistAccess($email_content, true);
+                            $open_errors = $signataire->openSignDistAccess(true, $email_content, true);
 
                             if (count($open_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($open_errors, 'Echec de l\'ouverture de l\'accès à la signature à distance');
@@ -2119,20 +2157,12 @@ class Bimp_Propal extends Bimp_PropalTemp
             return $sav->getOnSignedNotificationEmail($doc_type, $use_as_from);
         }
 
+        $use_as_from = false;
         $email = '';
         $commercial = $this->getCommercial();
 
         if (BimpObject::objectLoaded($commercial)) {
             $email = $commercial->getData('email');
-        }
-
-        if (!$email) {
-            $client = $this->getChildObject('client');
-
-            if (BimpObject::objectLoaded($client)) {
-                $use_as_from = false;
-                $email = $client->getCommercialEmail(false);
-            }
         }
 
         return $email;

@@ -194,6 +194,16 @@ class BContract_contrat extends BimpDolObject
         return (substr($this->getRef(), 0, 3) == 'CDP') ? 1 : 0;
     }
 
+    public function isActionAllowed($action, &$errors = []): int
+    {
+        switch ($action) {
+            case 'createSignature': 
+            case 'createSignatureDocuSign': 
+                $errors[] = 'En cours de dev';
+                return 0;
+        }
+        return parent::isActionAllowed($action, $errors);
+    }
     public function getHeuresRestantesDelegation()
     {
 
@@ -1303,11 +1313,11 @@ class BContract_contrat extends BimpDolObject
             }
 
             // Maj de la signature si nécessaire: 
-            if ((int) $this->getData('id_signature')) {
-                $signature = $this->getChildObject('signature');
+//            if ((int) $this->getData('id_signature')) {
+//                $signature = $this->getChildObject('signature');
 
 //                if (BimpObject::objectLoaded($signature)) {
-//                    if (!(int) $signature->getData('signed')) {
+//                    if (!(int) $signature->isSigned()) {
 //                        $id_contact = $this->getcontact();
 //
 //                        if ($id_contact != (int) $signature->getData('id_contact')) {
@@ -1326,7 +1336,7 @@ class BContract_contrat extends BimpDolObject
 //                        }
 //                    }
 //                }
-            }
+//            }
 
             return parent::update($warnings, $force_update);
         }
@@ -2290,8 +2300,8 @@ class BContract_contrat extends BimpDolObject
         if ($user->admin) {
             $signature = $this->getChildObject('signature');
             if (BimpObject::objectLoaded($signature)) {
-                if (!(int) $signature->getData('signed')) {
-                    $buttons = BimpTools::merge_array($buttons, $signature->getSignButtons());
+                if (!(int) $signature->isSigned()) {
+                    $buttons = BimpTools::merge_array($buttons, $signature->getActionsButtons());
                 } else {
                     $buttons = BimpTools::merge_array($buttons, $signature->getSignedButtons());
                     $signed = true;
@@ -2315,28 +2325,30 @@ class BContract_contrat extends BimpDolObject
 
     public function actionCreateSignatureDocuSign($data, &$success)
     {
-
         // TODO Test des conditions de validation du contrat
 //        global $user;
         $errors = array();
         $warnings = array();
 
-        $success_callback = '';
-
-        $id_contact = BimpTools::getArrayValueFromPath($data, 'id_contact', '');
-        if (!$id_contact) {
-            $errors[] = 'Veuillez renseigner un contact';
-        }
-
-        $errors_signature = $this->createSignature($id_contact);
-        $errors = BimpTools::merge_array($errors, $errors_signature);
+        $errors[] = 'En cours de développement';
 
         if (!count($errors)) {
-            $signature = $this->getChildObject('signature');
-            $success = "Enveloppe envoyée avec succès<br/>";
-            $success .= $signature->getNomUrl() . ' créée avec succès';
-        }
+            $success_callback = '';
 
+            $id_contact = BimpTools::getArrayValueFromPath($data, 'id_contact', '');
+            if (!$id_contact) {
+                $errors[] = 'Veuillez renseigner un contact';
+            }
+
+            $errors_signature = $this->createSignature($id_contact);
+            $errors = BimpTools::merge_array($errors, $errors_signature);
+
+            if (!count($errors)) {
+                $signature = $this->getChildObject('signature');
+                $success = "Enveloppe envoyée avec succès<br/>";
+                $success .= $signature->getNomUrl() . ' créée avec succès';
+            }
+        }
 
         return array(
             'errors'           => $errors,
@@ -4904,36 +4916,35 @@ class BContract_contrat extends BimpDolObject
                     } else {
                         $dir = $this->getFilesDir();
                     }
-                    $file_name = $this->getSignatureDocFileName('contrat');
-                    $file = $dir . $file_name;
-                    
-                    $params = array(
-                        'file'   => $file,
-                        'client' => array(
-                            'nom'      => $nom_client,
-                            'prenom'   => $prenom_client,
-                            'fonction' => $fonction_client,
-                            'email'    => $email_client
-                        ),
-                        'comm'   => array(
-                            'nom'      => $nom_comm,
-                            'prenom'   => $prenom_comm,
-                            'fonction' => $fonction_comm,
-                            'email'    => $email_comm
-                        )
-                    );
-                    $envelope = $api->createEnvelope($params, $this, $errors, $warnings);
+//                    $file_name = $this->getSignatureDocFileName('contrat');
+//                    $file = $dir . $file_name;
+//                    $params = array(
+//                        'file'   => $file,
+//                        'client' => array(
+//                            'nom'      => $nom_client,
+//                            'prenom'   => $prenom_client,
+//                            'fonction' => $fonction_client,
+//                            'email'    => $email_client
+//                        ),
+//                        'comm'   => array(
+//                            'nom'      => $nom_comm,
+//                            'prenom'   => $prenom_comm,
+//                            'fonction' => $fonction_comm,
+//                            'email'    => $email_comm
+//                        )
+//                    );
+//                    $envelope = $api->createEnvelope($params, $this, $errors, $warnings);
 
                     if (!count($errors)) {
                         BimpObject::loadClass('bimpcore', 'BimpSignature');
 
                         $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
-                                    'obj_module'            => 'bimpcontract',
-                                    'obj_name'              => 'BContract_contrat',
-                                    'id_obj'                => $this->id,
-                                    'doc_type'              => 'contrat',
-                                    'id_envelope_docu_sign' => $envelope['envelopeId'],
-                                    'id_account_docu_sign'  => $comm->getData('id_docusign')
+                                    'obj_module' => 'bimpcontract',
+                                    'obj_name'   => 'BContract_contrat',
+                                    'id_obj'     => $this->id,
+                                    'doc_type'   => 'contrat',
+//                                    'id_envelope_docu_sign' => $envelope['envelopeId'],
+//                                    'id_account_docu_sign'  => $comm->getData('id_docusign')
                                         ), true, $errors);
 
                         if (!count($errors) && BimpObject::objectLoaded($signature)) {
@@ -4945,8 +4956,9 @@ class BContract_contrat extends BimpDolObject
                                         'nom'            => $prenom_client . ' ' . $nom_client,
                                         'fonction'       => $fonction_client,
                                         'email'          => $email_client,
-                                        'allow_docusign' => 1,
-                                        'allow_refuse'   => 1
+                                        'allow_dist'     => 0,
+                                        'allow_docusign' => 0,
+                                        'allow_refuse'   => 0
                                             ), true, $signataire_errors, $warnings);
 
                             if (!BimpObject::objectLoaded($signataire)) {
@@ -4981,27 +4993,29 @@ class BContract_contrat extends BimpDolObject
     {
         $html = '';
 
-        if ((int) $this->getData('id_signature') < 1) {
-            if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
-                $onclick = $this->getJsActionOnclick('createSignatureDocuSign', array(), array(
-                    'form_name' => 'create_signature_docu_sign'
-                ));
-
-                $html .= '<span class="warning">Non applicable</span>';
-                $html .= '&nbsp;&nbsp;';
-                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer signature';
-                $html .= '</span>';
-            }
-        }
-
-        if ((int) $this->getData('id_signature') > 0) {
-            $signature = $this->getChildObject('signature');
-
-            if (BimpObject::objectLoaded($signature)) {
-                $html .= $signature->getLink();
-            }
-        }
+        // Signatures non fonctionnelles sur les contrats pour le moments (remontées des params signature absente) 
+         
+//        if ((int) $this->getData('id_signature') < 1) {
+//            if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
+//                $onclick = $this->getJsActionOnclick('createSignatureDocuSign', array(), array(
+//                    'form_name' => 'create_signature_docu_sign'
+//                ));
+//
+//                $html .= '<span class="warning">Non applicable</span>';
+//                $html .= '&nbsp;&nbsp;';
+//                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+//                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer signature';
+//                $html .= '</span>';
+//            }
+//        }
+//
+//        if ((int) $this->getData('id_signature') > 0) {
+//            $signature = $this->getChildObject('signature');
+//
+//            if (BimpObject::objectLoaded($signature)) {
+//                $html .= $signature->getLink();
+//            }
+//        }
 
         return $html;
     }

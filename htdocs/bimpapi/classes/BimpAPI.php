@@ -615,7 +615,7 @@ abstract class BimpAPI
         }
 
         $this->addDebug($infos);
-
+        
         return $return;
     }
 

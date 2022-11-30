@@ -390,18 +390,26 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 
                 
                 //signature client
+                $sign = '';
                 if($sav->getData('id_signature_pc')){
                     $signatureObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', $sav->getData('id_signature_pc'));
-                    if($signatureObj->getData('signed')) {
-                        $sign = ($signatureObj->getData('base_64_signature'));
-                        $pdf->Image($sign, 12, 217, 45, 22);
-                        
-                    } else {
-                        $this->error = 'Pas de signature pour la prise en charge';
-                        return 0;
+                    
+                    if (BimpObject::objectLoaded($signatureObj) && $signatureObj->isSigned()) {
+                        $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
+                                    'id_signature' => $sav->getData('id_signature_pc'),
+                                    'code' => 'default'
+                            ), true);
+                        if (BimpObject::objectLoaded($signataire)) {
+                            $sign = $signataire->getData('base_64_signature');
+                            if ($sign) {
+                                $pdf->Image($sign, 12, 217, 45, 22);
+                            }
+                        }
                     }
                 }
-                else{
+                
+                
+                if (!$sign) {
                      $this->error = 'Pas de signature client';
                      return 0;
                 }

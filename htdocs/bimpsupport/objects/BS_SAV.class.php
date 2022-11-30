@@ -604,10 +604,13 @@ class BS_SAV extends BimpObject
             }
 
             if ((int) $this->getData('id_signature_pc')) {
-                $signature = $this->getChildObject('signature_pc');
+                $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
+                            'id_signature' => $this->getData('id_signature_pc'),
+                            'code'         => 'default'
+                                ), true);
 
-                if (BimpObject::objectLoaded($signature) && $signature->isActionAllowed('signElec')) {
-                    $js .= 'setTimeout(function() {' . $signature->getJsActionOnclick('signElec', array(), array(
+                if (BimpObject::objectLoaded($signataire) && $signataire->isActionAllowed('signElec')) {
+                    $js .= 'setTimeout(function() {' . $signataire->getJsActionOnclick('signElec', array(), array(
                                 'form_name'   => 'sign_elec',
                                 'no_button'   => true,
                                 'modal_title' => 'Signature électronique du bon de prise en charge "' . $ref . '"'
@@ -1906,7 +1909,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $signature_pc = $this->getChildObject('signature_pc');
 
             if (BimpObject::objectLoaded($signature_pc)) {
-                if (!$signature_pc->getData('signed')) {
+                if (!$signature_pc->isSigned()) {
                     $html .= '<div style="margin-top: 10px">';
                     $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                     $msg .= '<a href="' . $signature_pc->getUrl() . '" target="_blank">Signature du bon de prise en charge en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
@@ -1946,7 +1949,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $signature_propal = $propal->getChildObject('signature');
 
             if (BimpObject::objectLoaded($signature_propal)) {
-                if (!$signature_propal->getData('signed') && (int) $signature_propal->getData('type') >= 0) {
+                if (!$signature_propal->isSigned()) {
                     $html .= '<div style="margin-top: 10px">';
                     $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                     $msg .= '<a href="' . $signature_propal->getUrl() . '" target="_blank">Signature du devis en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
@@ -1969,7 +1972,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $signature_resti = $this->getChildObject('signature_resti');
 
             if (BimpObject::objectLoaded($signature_resti)) {
-                if (!$signature_resti->getData('signed')) {
+                if (!$signature_resti->isSigned()) {
                     $html .= '<div style="margin-top: 10px">';
                     $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                     $msg .= '<a href="' . $signature_resti->getUrl() . '" target="_blank">Signature du bon de restitution en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
@@ -3646,7 +3649,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if (!count($errors)) {
                 global $user;
 
-                $this->addNote('Devis signé le "' . date('d / m / Y H:i') . ' par ' . $bimpSignature->getData('nom_signataire'));
+                $this->addNote('Devis signé le "' . date('d / m / Y H:i'));
                 $propal = $this->getChildObject('propal');
                 $propal->dol_object->cloture($user, 2, "Auto via SAV");
                 $this->createReservations();
@@ -4565,17 +4568,31 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             }
 
             $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
-                        'obj_module' => 'bimpsupport',
-                        'obj_name'   => 'BS_SAV',
-                        'id_obj'     => $this->id,
-                        'doc_type'   => $doc_type,
-                        'id_client'  => (int) $this->getData('id_client'),
-                        'id_contact' => (int) $id_contact,
-                        'allow_dist' => 0
+                        'obj_module'    => 'bimpsupport',
+                        'obj_name'      => 'BS_SAV',
+                        'id_obj'        => $this->id,
+                        'doc_type'      => $doc_type,
+                        'id_client'     => (int) $this->getData('id_client'),
+                        'id_contact'    => (int) $id_contact,
+                        'allow_no_scan' => 1
                             ), true, $errors, $warnings);
 
             if (BimpObject::objectLoaded($signature)) {
                 $this->updateField($field_name, (int) $signature->id);
+
+                $signataire_errors = array();
+                BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
+                    'id_signature'   => $signature->id,
+                    'id_client'      => (int) $this->getData('id_client'),
+                    'id_contact'     => (int) $id_contact,
+                    'allow_dist'     => 0,
+                    'allow_docusign' => 0,
+                    'allow_refuse'   => 0
+                        ), true, $signataire_errors, $warnings);
+
+                if (count($signataire_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
+                }
             }
         }
 
@@ -4843,7 +4860,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $propal->dol_object->reopen($user, 0);
                     } elseif ($create_signature) {
                         $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
-                        $signature_errors = $propal->createSignature(true, (int) $this->getData('id_contact'), $email_content);
+                        $signature_errors = $propal->createSignature(false, true, (int) $this->getData('id_contact'), $email_content);
 
                         if (count($signature_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
@@ -5629,10 +5646,13 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if (count($signature_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');
                 } else {
-                    $signature = $this->getChildObject('signature_resti');
+                    $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
+                                'id_signature' => $this->getData('id_signature_resti'),
+                                'code'         => 'default'
+                                    ), true);
 
-                    if (BimpObject::objectLoaded($signature) && $signature->isActionAllowed('signElec')) {
-                        $success_callback .= 'setTimeout(function() {' . $signature->getJsActionOnclick('signElec', array(), array(
+                    if (BimpObject::objectLoaded($signataire) && $signataire->isActionAllowed('signElec')) {
+                        $success_callback .= 'setTimeout(function() {' . $signataire->getJsActionOnclick('signElec', array(), array(
                                     'form_name'   => 'sign_elec',
                                     'no_button'   => true,
                                     'modal_title' => 'Signature électronique du bon de restitution "BR-' . $this->getRef() . '"'
@@ -7077,8 +7097,13 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             return $errors;
         }
 
-        if ($signature->getData('type') == BimpSignature::TYPE_ELEC) {
-            if ($signature->getData('doc_type') == 'sav_pc') {
+        if ($signature->getData('doc_type') == 'sav_pc') {
+            $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
+                        'id_signature' => $signature->id,
+                        'code'         => 'default'
+                            ), true);
+
+            if (BimpObject::objectLoaded($signataire) && $signataire->getData('type_signature') == BimpSignataire::TYPE_ELEC) {
                 $fileName = $this->getSignatureDocFileName('sav_pc', true);
                 $filePath = $this->getSignatureDocFileDir('sav_pc') . $fileName;
 

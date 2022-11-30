@@ -1390,7 +1390,7 @@ class BF_Demande extends BimpObject
             // Messages signature devis: 
             $signature_devis = $this->getChildObject('signature_devis');
             if (BimpObject::objectLoaded($signature_devis)) {
-                if (!$signature_devis->getData('signed') && (int) $signature_devis->getData('type') >= 0) {
+                if (!$signature_devis->isSigned() && (int) $signature_devis->getData('type') >= 0) {
                     $html .= '<div style="margin-top: 10px">';
                     $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                     $msg .= '<a href="' . $signature_devis->getUrl() . '" target="_blank">Signature du devis de location en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
@@ -1410,7 +1410,7 @@ class BF_Demande extends BimpObject
             // Messages signature contrat: 
             $signature_contrat = $this->getChildObject('signature_contrat');
             if (BimpObject::objectLoaded($signature_contrat)) {
-                if (!$signature_contrat->getData('signed') && (int) $signature_contrat->getData('type') >= 0) {
+                if (!$signature_contrat->isSigned() && (int) $signature_contrat->getData('type') >= 0) {
                     $html .= '<div style="margin-top: 10px">';
                     $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                     $msg .= '<a href="' . $signature_contrat->getUrl() . '" target="_blank">Signature du devis de location en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';

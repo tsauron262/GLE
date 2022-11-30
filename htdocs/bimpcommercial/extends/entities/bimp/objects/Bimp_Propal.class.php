@@ -110,7 +110,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         return 1;
     }
 
-    public function isDocuSignAllowed(&$errors = array())
+    public function isDocuSignAllowed(&$errors = array(), $is_required = false)
     {
         if (!parent::isDocuSignAllowed($errors)) {
             return 0;
@@ -126,11 +126,12 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         // (ne pas oublier d'alimenter $errors)
 
         global $user;
-        if (!$user->admin) {
+        if (!$user->admin) { // Temporaire
             $errors[] = 'Réservé aux admin pour l\'instant';
             return 0;
         }
 
+        $is_required = false;
         return 1;
     }
 

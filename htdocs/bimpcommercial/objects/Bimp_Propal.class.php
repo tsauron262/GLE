@@ -489,9 +489,8 @@ class Bimp_Propal extends Bimp_PropalTemp
         return 0;
     }
 
-    public function isDocuSignAllowed(&$errors = array())
+    public function isDocuSignAllowed(&$errors = array(), $is_required = false)
     {
-        return 0;
         // Attention : pas de conditions spécifiques à une version de l'ERP ici. 
         // Utiliser une extension.  
         if (!(int) BimpCore::getConf('propal_signature_allow_docusign', null, 'bimpcommercial')) {
@@ -499,6 +498,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             return 0;
         }
 
+        $is_required = false;
         return 1;
     }
 
@@ -506,9 +506,13 @@ class Bimp_Propal extends Bimp_PropalTemp
     {
         // Attention : pas de conditions spécifiques à une version de l'ERP ici. 
         // Utiliser une extension.  
-        if ((int) $this->isDocuSignAllowed()) {
-            $errors[] = 'DocuSign requis pour la signature à distance de ce devis';
-            return 0;
+        $ds_errors = array();
+        $ds_required = false;
+        if ((int) $this->isDocuSignAllowed($ds_errors, $ds_required)) {
+            if ($ds_required) {
+                $errors[] = 'DocuSign requis pour la signature à distance de ce devis';
+                return 0;
+            }
         }
 
         if (!(int) BimpCore::getConf('propal_signature_allow_dist', null, 'bimpcommercial')) {

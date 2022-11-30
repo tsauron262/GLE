@@ -2123,7 +2123,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return $message;
             }
             BimpObject::loadClass('bimpcore', 'BimpSignature');
-            BimpSignature::getDefaultSignDistEmailContent($type);
+            BimpSignature::getDefaultSignDistEmailContent($signature_type);
         }
 
         return '';

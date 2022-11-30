@@ -523,7 +523,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $base_y = 14; // y du champ le plus haut (Nom)
 
                     $this->signature_params['default']['docusign'] = array(
-                        'anch'  => $this->signature_pro_title . ' :',
+                        'anch'  => $this->signature_title . ' :',
                         'x'     => $base_x + 130,
                         'y'     => $base_y + 5,
                         'texts' => array(

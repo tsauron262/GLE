@@ -491,6 +491,8 @@ forms:
                 
     create_signature: 
         rows: 
+            title: Création de la signature
+        rows: 
             contact_signature: 
                 custom: 1
                 label: Contact signataire
@@ -506,17 +508,25 @@ forms:
                     help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
                 value: 
                     callback: getDefaultSignatureContact
-                display_if: 
-                    field_name: create_signature
-                    show_values: 1
-            open_public_access: 
+            init_docusign: 
                 custom: 1
-                label: Ouvrir l'accès à la signature électronique à distance
-                input_name: open_public_access
+                label: Envoyer immédiatement le document pour signature via DocuSign
                 data_type: bool
-                input: 
-                    type: toggle
-                value: 1
+                input_name: init_docusign
+                content: 
+                    callback: 
+                        method: renderSignatureInitDocuSignInput
+            open_public_access: 
+                custom: 1 
+                label: Ouvrir immédiatement l'accès à la signature électronique à distance
+                data_type: bool
+                input_name: open_public_access
+                content: 
+                    callback: 
+                        method: renderSignatureOpenDistAccessInput
+                display_if: 
+                    field_name: init_docusign
+                    hide_values: 1
             email_content: 
                 custom: 1
                 label: Contenu e-mail client pour la signature à distance
@@ -526,15 +536,23 @@ forms:
                     help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
                 value: 
                     callback: 
-                        method: getDefaultSignDistEmailContent
-                display_if: 
-                    field_name: open_public_access
-                    show_values: 1
+                        method: getSignatureEmailContent
+                depends_on: init_docusign,open_public_access
     
     create_signature_devis: 
         extends: create_signature
         title: Création de la signature du devis
         rows: 
+            init_docusign: 
+                content: 
+                    callback: 
+                        params: 
+                            - devis
+            open_public_access: 
+                content: 
+                    callback: 
+                        params: 
+                            - devis
             email_content:
                 value: 
                     callback: 
@@ -545,6 +563,16 @@ forms:
         extends: create_signature
         title: Création de la signature du contrat
         rows: 
+            init_docusign: 
+                content: 
+                    callback: 
+                        params: 
+                            - contrat
+            open_public_access: 
+                content: 
+                    callback: 
+                        params: 
+                            - contrat
             email_content:
                 value: 
                     callback: 

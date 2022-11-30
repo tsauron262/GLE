@@ -1,15 +1,13 @@
 categories: 
     defaults: 
         label: Valeurs par défaut
+    signatures: 
+        label: Signatures
         
 params: 
     id_group_commerciaux: 
         label: ID du groupe des commerciaux pour les demandes de locations
         def: 0
-        required: 1
-        
-    new_external_demandes_notif_emails: 
-        label: Adresses e-mail pour la notification des nouvelles demandes de location externes
         required: 1
         
     use_frais_divers: 
@@ -50,6 +48,42 @@ params:
         
     def_vr_vente: 
         label: VR vente par défaut (pourcentage du prix de cession)
-        cat: default
+        cat: defaults
         def: 6
         
+    # Signatures: 
+    devis_loc_signature_allow_dist: 
+        label: Autoriser les signatures électroniques à distance pour les devis de location
+        type: bool
+        cat: signatures
+        def: 1
+        
+    devis_loc_signature_allow_docusign: 
+        label: Autoriser les signatures DocuSign pour les devis de location
+        type: bool
+        cat: signatures
+        def: 0
+        
+    devis_loc_signature_allow_refuse: 
+        label: Autoriser le refus des signatures pour les devis de location
+        type: bool
+        cat: signatures
+        def: 0
+                      
+    contrat_loc_signature_allow_dist: 
+        label: Autoriser les signatures électroniques à distance pour les contrats de location
+        type: bool
+        cat: signatures
+        def: 1
+        
+    contrat_loc_signature_allow_docusign: 
+        label: Autoriser les signatures DocuSign pour les contrats de location
+        type: bool
+        cat: signatures
+        def: 0
+        
+    contrat_loc_signature_allow_refuse: 
+        label: Autoriser le refus des signatures pour les contrats de location
+        type: bool
+        cat: signatures
+        def: 0

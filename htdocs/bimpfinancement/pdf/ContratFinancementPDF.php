@@ -6,6 +6,9 @@ class ContratFinancementPDF extends DocFinancementPDF
 {
 
     public static $doc_type = 'contrat';
+    public $signature_bloc = true;
+    public $use_docsign = true;
+    public $object_signature_params_field_name = 'signature_contrat_params';
     public $client_data;
 
     public function __construct($db, $demande, $client_data = array())

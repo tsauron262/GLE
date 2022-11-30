@@ -106,6 +106,7 @@ class BimpSignataire extends BimpObject
 
             case 'signDist':
             case 'sendSmsCode':
+                
                 global $userClient;
 
                 if (!BimpObject::objectLoaded($userClient)) {
@@ -664,7 +665,7 @@ class BimpSignataire extends BimpObject
         $signature = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($signature)) {
-            return $signature->getSignatureParamsFormValues($this->getData('code'));
+            return $signature->getSignatureParamsFormValues($this);
         }
 
         return array();
@@ -684,7 +685,7 @@ class BimpSignataire extends BimpObject
 
             if (BimpObject::objectLoaded($client)) {
                 $use_as_from = false;
-                $ermail = $client->getCommercialEmail(false);
+                $email = $client->getCommercialEmail(false);
             }
         }
 
@@ -885,25 +886,6 @@ class BimpSignataire extends BimpObject
         return $html;
     }
 
-    public function displayActionsButtons()
-    {
-        $html = '';
-
-        if ($this->isLoaded()) {
-            $buttons = $this->getSignButtons();
-
-            if (!empty($buttons)) {
-                $html .= '<div>';
-                foreach ($buttons as $btn) {
-                    $html .= BimpRender::renderRowButton($btn['label'], $btn['icon'], $btn['onclick']);
-                }
-                $html .= '</div>';
-            }
-        }
-
-        return $html;
-    }
-
     // Rendus HTML: 
 
     public function renderHeaderStatusExtra()
@@ -936,7 +918,7 @@ class BimpSignataire extends BimpObject
 
     public function renderSignButtonsGroup($label = 'Actions signature')
     {
-        $buttons = $this->getSignButtons();
+        $buttons = $this->getActionsButtons();
 
         if (!empty($buttons)) {
             return BimpRender::renderButtonsGroup($buttons, array(
@@ -1182,66 +1164,68 @@ class BimpSignataire extends BimpObject
                     }
 
                     // Envoi e-mails notification: 
-                    $emails = '';
+                    if ($send_email) {
+                        $emails = '';
 
-                    foreach ($new_users as $id_user) {
-                        if (!in_array($id_user, $cur_users)) {
-                            $bic_user = BimpCache::getBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', $id_user);
+                        foreach ($new_users as $id_user) {
+                            if (!in_array($id_user, $cur_users)) {
+                                $bic_user = BimpCache::getBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', $id_user);
 
-                            if (!BimpObject::objectLoaded($bic_user)) {
-                                $warnings[] = 'Le compte utilisateur client #' . $id_user . ' n\'existe pas';
-                            } else {
-                                $user_email = BimpTools::cleanEmailsStr($bic_user->getData('email'));
+                                if (!BimpObject::objectLoaded($bic_user)) {
+                                    $warnings[] = 'Le compte utilisateur client #' . $id_user . ' n\'existe pas';
+                                } else {
+                                    $user_email = BimpTools::cleanEmailsStr($bic_user->getData('email'));
 
-                                if ($user_email) {
-                                    $emails .= ($emails ? ',' : '') . $user_email;
-                                    $nOk++;
+                                    if ($user_email) {
+                                        $emails .= ($emails ? ',' : '') . $user_email;
+                                        $nOk++;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if ($emails) {
-                        $use_comm_email_as_from = false;
-                        $comm_email = BimpTools::cleanEmailsStr($this->getOnSignedNotificationEmail($use_comm_email_as_from));
-                        $doc_label = $signature->displayDocType() . ' ' . $signature->displayDocRef();
-                        $subject = 'Signature en attente - Document: ' . $doc_label;
+                        if ($emails) {
+                            $use_comm_email_as_from = false;
+                            $comm_email = BimpTools::cleanEmailsStr($this->getOnSignedNotificationEmail($use_comm_email_as_from));
+                            $doc_label = $signature->displayDocType() . ' ' . $signature->displayDocRef();
+                            $subject = 'Signature en attente - Document: ' . $doc_label;
 
-                        if (!$email_content) {
-                            $email_content = $signature->getDefaultSignDistEmailContent();
-                        }
+                            if (!$email_content) {
+                                $email_content = $signature->getDefaultSignDistEmailContent();
+                            }
 
-                        $url = self::getPublicBaseUrl(false);
+                            $url = self::getPublicBaseUrl(false);
 
-                        $email_content = str_replace(array(
-                            '{NOM_DOCUMENT}',
-                            '{NOM_PIECE}',
-                            '{REF_PIECE}',
-                            '{LIEN_ESPACE_CLIENT}'
-                                ), array(
-                            $doc_label,
-                            $obj->getLabel('the'),
-                            $obj->getRef(),
-                            '<a href="' . $url . '">espace client</a>'
-                                ), $email_content);
+                            $email_content = str_replace(array(
+                                '{NOM_DOCUMENT}',
+                                '{NOM_PIECE}',
+                                '{REF_PIECE}',
+                                '{LIEN_ESPACE_CLIENT}'
+                                    ), array(
+                                $doc_label,
+                                $obj->getLabel('the'),
+                                $obj->getRef(),
+                                '<a href="' . $url . '">espace client</a>'
+                                    ), $email_content);
 
-                        $from = ($use_comm_email_as_from ? $comm_email : '');
-                        $bimpMail = new BimpMail($obj, $subject, BimpTools::cleanEmailsStr($emails), $from, $email_content, $comm_email);
+                            $from = ($use_comm_email_as_from ? $comm_email : '');
+                            $bimpMail = new BimpMail($obj, $subject, BimpTools::cleanEmailsStr($emails), $from, $email_content, $comm_email);
 
-                        $filePath = $signature->getDocumentFilePath();
-                        $fileName = $signature->getDocumentFileName();
+                            $filePath = $signature->getDocumentFilePath();
+                            $fileName = $signature->getDocumentFileName();
 
-                        if (file_exists($filePath)) {
-                            $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
-                        }
+                            if (file_exists($filePath)) {
+                                $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
+                            }
 
-                        $mail_errors = array();
-                        $bimpMail->send($mail_errors);
+                            $mail_errors = array();
+                            $bimpMail->send($mail_errors);
 
-                        if (count($mail_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification (Adresse(s): ' . $email . ')');
-                        } else {
-                            $success .= '<br/>E-mail de notification envoyé avec succès pour ' . $nOk . ' utilisateur(s)';
+                            if (count($mail_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification (Adresse(s): ' . $email . ')');
+                            } else {
+                                $success .= '<br/>E-mail de notification envoyé avec succès pour ' . $nOk . ' utilisateur(s)';
+                            }
                         }
                     }
                 }
@@ -1881,16 +1865,17 @@ class BimpSignataire extends BimpObject
                     if (!$this->getData('fonction') && $this->isClientCompany()) {
                         $this->set('fonction', $contact->displayData('poste', 'default', false, true));
                     }
-                } elseif (!$client->isCompany()) {
+                } else/*if (!$client->isCompany())*/ {
                     if (!$this->getData('nom')) {
                         $this->set('nom', $client->getName());
                     }
                     if (!$this->getData('email')) {
                         $this->set('email', $client->getData('email'));
                     }
-                } else {
-                    $errors[] = 'Contact signataire obligatoire pour les clients pros';
-                }
+                } 
+//                else {
+//                    $errors[] = 'Contact signataire obligatoire pour les clients pros';
+//                }
                 break;
 
             case self::TYPE_USER:

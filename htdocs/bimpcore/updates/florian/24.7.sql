@@ -6,7 +6,7 @@ UPDATE `llx_bimpcore_signature` SET `status` = -1 WHERE `type` = -1;
 UPDATE `llx_bimpcore_signature` SET `status` = -2 WHERE `type` = -2;
 UPDATE `llx_bimpcore_signature` SET `type` = 0 WHERE `type` < 0;
 
-UPDATE `llx_bimpcore_signature` SET `obj_params_field` = 'signature_params' WHERE `obj_name` IN ('Bimp_Propal', 'BS_SavPropal', 'BContract_contrat', 'BL_CommandeShipment');
+UPDATE `llx_bimpcore_signature` SET `obj_params_field` = 'signature_params' WHERE `obj_name` IN ('Bimp_Propal','BS_SavPropal','BContract_contrat','BL_CommandeShipment');
 UPDATE `llx_bimpcore_signature` SET `obj_params_field` = 'signature_df_params' WHERE `obj_name` = 'BimpCommDemandeFin' AND `doc_type` = 'devis_fin';
 UPDATE `llx_bimpcore_signature` SET `obj_params_field` = 'signature_cf_params' WHERE `obj_name` = 'BimpCommDemandeFin' AND `doc_type` = 'contrat_fin';
 UPDATE `llx_bimpcore_signature` SET `obj_params_field` = 'signature_devis_params' WHERE `obj_name` = 'BF_Demande' AND `doc_type` = 'devis';

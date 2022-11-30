@@ -82,6 +82,17 @@ class BimpSignature extends BimpObject
         return 0;
     }
 
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'initDocuSign':
+                return (int) $user->admin;
+        }
+        return parent::canSetAction($action);
+    }
+
     // Getters booléens:
 
     public function isDeletable($force_delete = false, &$errors = [])
@@ -303,7 +314,7 @@ class BimpSignature extends BimpObject
 
     public function getListExtraBtn()
     {
-        return $this->getSignedButtons();
+        return $this->getActionsButtons();
     }
 
     // Getters arrays: 
@@ -419,7 +430,10 @@ class BimpSignature extends BimpObject
         $obj = $this->getObj();
 
         $errors = array();
-        if ($this->isObjectValid($errors, $obj)) {
+
+        if (!BimpObject::objectLoaded($signataire)) {
+            $errors[] = 'Signataire invalide';
+        } elseif ($this->isObjectValid($errors, $obj)) {
             $field_name = $this->getData('obj_params_field');
             if ($field_name && $obj->field_exists($field_name)) {
                 $params = $obj->getData($field_name);
@@ -479,7 +493,7 @@ class BimpSignature extends BimpObject
         return array();
     }
 
-    public function getSignatureParamsFormValues($signataire = 'default')
+    public function getSignatureParamsFormValues($signataire = null)
     {
         $params = $this->getSignatureParams($signataire);
 
@@ -609,7 +623,7 @@ class BimpSignature extends BimpObject
 
         $errors = array();
         if ($this->isObjectValid($errors, $obj)) {
-            if (method_exists($obj, 'getSignatureCommercialEmail')) {
+            if (method_exists($obj, 'getOnSignedNotificationEmail')) {
                 return $obj->getOnSignedNotificationEmail($this->getData('doc_type'), $use_as_from);
             }
         }
@@ -800,6 +814,25 @@ class BimpSignature extends BimpObject
         return $html;
     }
 
+    public function displayActionsButtons()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $buttons = $this->getActionsButtons();
+
+            if (!empty($buttons)) {
+                $html .= '<div>';
+                foreach ($buttons as $btn) {
+                    $html .= BimpRender::renderRowButton($btn['label'], $btn['icon'], $btn['onclick']);
+                }
+                $html .= '</div>';
+            }
+        }
+
+        return $html;
+    }
+
     // Rendus HTML:
 
     public function renderHeaderExtraLeft()
@@ -820,6 +853,7 @@ class BimpSignature extends BimpObject
     {
         $html = '';
 
+        $dir = $this->getDocumentFileDir();
         $file = $this->getDocumentFilePath();
         $file_signed = $this->getDocumentFilePath(true);
         $file_url = '';
@@ -833,7 +867,12 @@ class BimpSignature extends BimpObject
             $file_signed_url = $this->getDocumentUrl(true);
         }
 
-        if ($file_url || $file_signed_url) {
+        $ds_certif_name = $this->getData('doc_type') . '_certificat_docusign.pdf';
+        if (file_exists($this->getFilesDir() . $ds_certif_name)) {
+            $ds_certif_url = $this->getFileUrl($ds_certif_name);
+        }
+
+        if ($file_url || $file_signed_url || $ds_certif_url) {
             $html .= '<div class="buttonsContainer align-right">';
 
             if ($file_url) {
@@ -848,10 +887,31 @@ class BimpSignature extends BimpObject
                 $html .= '</span>';
             }
 
+            if ($ds_certif_url) {
+                $html .= '<span class="btn btn-default" onclick="window.open(\'' . $ds_certif_url . '\')">';
+                $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Certificat DocuSign';
+                $html .= '</span>';
+            }
+
             $html .= '</div>';
         }
 
         return $html;
+    }
+
+    public function renderSignButtonsGroup($label = 'Actions signature')
+    {
+        $buttons = $this->getActionsButtons();
+
+        if (!empty($buttons)) {
+            return BimpRender::renderButtonsGroup($buttons, array(
+                        'max'            => 1,
+                        'dropdown_icon'  => 'fas_signature',
+                        'dropdown_label' => $label
+            ));
+        }
+
+        return '';
     }
 
     public function renderRelancesReportsList()
@@ -964,7 +1024,7 @@ class BimpSignature extends BimpObject
         }
 
         if (!count($errors)) {
-            $params = $this->getSignatureParams($signataire->getData('code'));
+            $params = $this->getSignatureParams($signataire);
 
             if (!empty($params_overrides)) {
                 $params = BimpTools::overrideArray($params, $params_overrides, true);
@@ -1208,12 +1268,8 @@ class BimpSignature extends BimpObject
         $api = $this->getDocuSignApi($errors);
 
         if (!count($errors)) {
-            $params = array(
-                'id_envelope' => $id_envelope,
-            );
-
             $request_errors = array();
-            $result = $api->getEnvelopeFile($params, $request_errors);
+            $result = $api->getEnvelopeFile($id_envelope, 1, $request_errors);
 
             if (count($request_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($request_errors, 'Echec du téléchargement du fichier signé via DocuSign');
@@ -1222,10 +1278,9 @@ class BimpSignature extends BimpObject
                 $file_name = $this->getDocumentFileName(true);
                 $file_dir = $this->getDocumentFileDir();
 
-                // Supression de l'ancien fichier si il existe
-//                    if (file_exists($file_dir . $file_name)) {
-//                        unlink($file_dir . $file_name);
-//                    }
+                if (file_exists($file_dir . $file_name)) {
+                    unlink($file_dir . $file_name);
+                }
 
                 if (!file_put_contents($file_dir . $file_name, $file_content)) {
                     $errors[] = "Echec de l\'enregistrement du fichier signé via DocuSign";
@@ -1233,37 +1288,44 @@ class BimpSignature extends BimpObject
                     $success .= ($success ? '<br/>' : '') . 'Document DocuSign téléchargé avec succès';
 
                     // Certificat DocuSign
-                    $params = array(
-                        'id_envelope' => $id_envelope,
-                        'id_document' => 'certificate'
-                    );
-
                     $request_errors = array();
-                    $result = $api->getEnvelopeFile($params, $request_errors);
+                    $result = $api->getEnvelopeFile($id_envelope, 'certificate', $request_errors);
 
                     if (count($request_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($request_errors, 'Echec du téléchargement du certificat DocuSign');
                     } else {
                         $certificat_content = base64_decode($result);
                         $file_name = $this->getData('doc_type') . '_certificat_docusign.pdf';
-                        $file_dir = $this->getDocumentFileDir();
+                        $file_dir = $this->getFilesDir();
 
                         // Supression de l'ancien fichier si il existe
-//                    if (file_exists($file_dir . $file_name)) {
-//                        if (!unlink($file_dir . $file_name)) {
-//                            $warnings[] = "Echec de la suppression de l\'ancien certificat";
-//                        }
-//                    }
+                        if (file_exists($file_dir . $file_name)) {
+                            if (!unlink($file_dir . $file_name)) {
+                                $warnings[] = "Echec de la suppression de l\'ancien certificat";
+                            }
+                        }
 
-                        if (!file_put_contents($file_dir . $file_name, $certificat_content)) {
-                            $warnings[] = "Echec de l\'enregistrement du certificat DocuSign";
-                        } else {
-                            $success .= '<br/>Certificat DocuSign téléchargé avec succès';
+                        if (!is_dir($file_dir)) {
+                            $dir_err = BimpTools::makeDirectories($file_dir);
+
+                            if ($dir_err) {
+                                $errors[] = 'Impossible d\'enregistrer le certificat - Echec de la création du dossier - ' . $dir_err;
+                            }
+                        }
+
+                        if (!count($errors)) {
+                            if (!file_put_contents($file_dir . $file_name, $certificat_content)) {
+                                $warnings[] = "Echec de l\'enregistrement du certificat DocuSign";
+                            } else {
+                                $success .= '<br/>Certificat DocuSign téléchargé avec succès - ' . $file_dir . $file_name;
+                            }
                         }
                     }
                 }
             }
         }
+
+        return $errors;
     }
 
     // Actions: 
@@ -1457,6 +1519,15 @@ class BimpSignature extends BimpObject
         $errors = $warnings = array();
         $success = '';
         $callback = '';
+
+        $errors = $this->downloadDocuSignDocument($warnings, $success);
+
+        if (!count($errors)) {
+            $url = $this->getDocumentUrl(true);
+            if ($url) {
+                $callback = 'window.open(\'' . $url . '\');';
+            }
+        }
 
         return array(
             'errors'           => $errors,

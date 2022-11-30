@@ -307,9 +307,6 @@ Signature",
             return array();
         }
 
-        $response_headers = array();
-        $response_code = '';
-
         $id_account = $this->getParam($this->getOption('mode', 'test') . '_id_compte_api', '');
 
         return $this->execCurl('getEnvelopeFile', array(
@@ -317,7 +314,7 @@ Signature",
                     'headers' => array(
                         'Content-Transfer-Encoding' => 'base64'
                     )
-                        ), $errors, $response_headers, $response_code, $warnings);
+                        ), $errors);
     }
 
     public function setUserIdAccount($id_user, &$errors = array(), &$warnings = array())
@@ -567,11 +564,15 @@ Signature",
         if (!(string) $code) {
             // Code absent, on redirige l'utilisateur pour qu'il puisse se connecter
             $client_id = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_oauth_client_id', '');
-//            $url_redirect = 'https://' . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php';
-            $url_redirect = 'https://erp.bimp.fr/bimp8/bimpapi/retour/DocusignAuthentificationSuccess.php';
-            $_SESSION['id_user_docusign'] = $this->userAccount->id;
 
-            $url = $this->getBaseUrl('auth') . "/oauth/auth?response_type=code&scope=signature&client_id=" . $client_id . "&redirect_uri=" . $url_redirect;
+            if (BimpCore::isModeDev()) {
+                $url_redirect = 'https://erp2.bimp.fr/bimpinv01042020/bimpapi/retour/DocusignAuthentificationSuccess.php?mode_dev=1';
+            } else {
+                $url_redirect = 'https://' . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php';
+            }
+
+            $_SESSION['id_user_docusign'] = $this->userAccount->id;
+            $url = $this->getBaseUrl('auth') . "/oauth/auth?response_type=code&scope=signature&client_id=" . $client_id . "&redirect_uri=" . urlencode($url_redirect);
             $errors[] = $this->userAccount->getData('name') . " n'est pas connecté à DocuSign <a target='_blank' href='" . $url . "'>cliquez ici</a>";
         } else {
             // Authentification via refresh token

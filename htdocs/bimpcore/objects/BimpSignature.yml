@@ -242,6 +242,10 @@ lists:
             date_signed: 
             nom_signataire: 
             email_signataire:
+                
+cards: 
+    default: 
+        status: status
             
     
             

@@ -464,7 +464,7 @@ class BimpCommDemandeFin extends BimpObject
 
             $signature = $this->getChildObject('signature_' . $doc_type);
             if (BimpObject::objectLoaded($signature)) {
-                if ((int) $this->getData($doc_type . '_status') === self::DOC_STATUS_SEND && !$signature->getData('signed')) {
+                if ((int) $this->getData($doc_type . '_status') === self::DOC_STATUS_SEND && !$signature->isSigned()) {
                     $html .= '<div style="margin-top: 10px">';
                     $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                     $msg .= '<a href="' . $signature->getUrl() . '" target="_blank">';
@@ -480,7 +480,7 @@ class BimpCommDemandeFin extends BimpObject
 
                     $html .= BimpRender::renderAlerts($msg, 'warning');
                     $html .= '</div>';
-                } elseif ((int) $this->getData($doc_type . '_status') !== self::DOC_STATUS_ACCEPTED && $signature->getData('signed')) {
+                } elseif ((int) $this->getData($doc_type . '_status') !== self::DOC_STATUS_ACCEPTED && $signature->isSigned()) {
                     $html .= '<div style="margin-top: 10px">';
                     $msg = BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft');
                     $msg .= 'Le document signé "' . $this->getSignatureDocRef($doc_type) . '" semble ne pas avoir été envoyé à LDLC PRO LEASE';
@@ -787,7 +787,7 @@ class BimpCommDemandeFin extends BimpObject
                         if ((int) $this->getData('id_signature_devis_fin')) {
                             $signature = $this->getChildObject('signature_devis_fin');
                             if (BimpObject::objectLoaded($signature)) {
-                                if (!(int) $signature->getData('signed')) {
+                                if (!(int) $signature->isSigned()) {
                                     $signature->cancelAllSignatures();
                                 }
                             }
@@ -801,7 +801,7 @@ class BimpCommDemandeFin extends BimpObject
                         if ((int) $this->getData('id_signature_contrat_fin')) {
                             $signature = $this->getChildObject('signature_contrat_fin');
                             if (BimpObject::objectLoaded($signature)) {
-                                if (!(int) $signature->getData('signed')) {
+                                if (!(int) $signature->isSigned()) {
                                     $signature->cancelAllSignatures();
                                 }
                             }
@@ -1299,10 +1299,11 @@ class BimpCommDemandeFin extends BimpObject
 
             if (!count($errors)) {
                 $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
-                            'obj_module' => $this->module,
-                            'obj_name'   => $this->object_name,
-                            'id_obj'     => $this->id,
-                            'doc_type'   => 'devis_fin'
+                            'obj_module'       => $this->module,
+                            'obj_name'         => $this->object_name,
+                            'id_obj'           => $this->id,
+                            'doc_type'         => 'devis_fin',
+                            'obj_params_field' => 'signature_df_params'
                                 ), true, $errors, $warnings);
 
                 if (!count($errors) && BimpObject::objectLoaded($signature)) {
@@ -1319,14 +1320,14 @@ class BimpCommDemandeFin extends BimpObject
                                     'id_client'    => $id_client,
                                     'id_contact'   => $id_contact_signature,
                                     'allow_dist'   => 1,
-                                    'allow_refuse' => 1
+                                    'allow_refuse' => 0
                                         ), true, $signataire_errors, $warnings);
 
                         if (!BimpObject::objectLoaded($signataire)) {
                             $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
                         } else {
                             $open_warnings = array();
-                            $open_errors = $signataire->openSignDistAccess($email_content, true, array(), '', $open_warnings, $success);
+                            $open_errors = $signataire->openSignDistAccess(true, $email_content, true, array(), '', $open_warnings, $success);
 
                             if (count($open_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($open_errors, 'Echec de l\'ouverture de l\'accès à la signature à distance');
@@ -1401,7 +1402,7 @@ class BimpCommDemandeFin extends BimpObject
                             $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
                         } else {
                             $open_warnings = array();
-                            $open_errors = $signature->openSignDistAccess($email_content, true, array(), '', $open_warnings, $success);
+                            $open_errors = $signataire->openSignDistAccess(true, $email_content, true, array(), '', $open_warnings, $success);
 
                             if (count($open_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($open_errors, 'Echec de l\'ouverture de l\'accès à la signature à distance');
@@ -1437,7 +1438,7 @@ class BimpCommDemandeFin extends BimpObject
             $signature = $this->getChildObject('signature_' . $doc_type);
             if (!BimpObject::objectLoaded($signature)) {
                 $errors[] = 'La fiche signature du ' . $doc_label . ' de location n\'existe pas';
-            } elseif (!$signature->getData('signed')) {
+            } elseif (!$signature->isSigned()) {
                 $errors[] = 'Le' . $doc_label . ' de location n\'a pas encore été signé par le client';
             } elseif ((int) $this->getData($doc_type . '_status') === self::DOC_STATUS_ACCEPTED) {
                 $errors[] = 'Le' . $doc_label . ' de location signé a déjà été envoyé à LDLC PRO LEASE avec succès';

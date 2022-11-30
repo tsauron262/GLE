@@ -12,7 +12,9 @@ $user->fetch(1);
 
 $signature = null;
 
-if (BimpCore::isModeDev()) {
+$mode_dev = BimpCore::isUserDev();
+
+if ($mode_dev) {
     $body = file_get_contents(DOL_DATA_ROOT . '/docusign_webhook.txt');
 } else {
     $body = file_get_contents('php://input');
@@ -27,6 +29,12 @@ if (!$body) {
     if (!is_array($data) || empty($data)) {
         $errors[] = 'Données reçues invalides';
     } else {
+        if ($mode_dev) {
+            echo 'DATA :<pre>';
+            print_r($data);
+            echo '</pre>';
+        }
+        
         $envelopeId = BimpTools::getArrayValueFromPath($in, 'data/envelopeId', '');
 
         if (!$envelopeId) {

@@ -693,6 +693,11 @@ class BimpObject extends BimpCache
         return '';
     }
 
+    public function getSignatureDocFileDir($doc_type = '')
+    {
+        return $this->getFilesDir();
+    }
+
     public function getFileUrl($file_name, $page = 'document')
     {
         if (!$file_name) {
@@ -1939,10 +1944,10 @@ class BimpObject extends BimpCache
     public function getInfoGraph()
     {
         return array(
-            array("data1" => array("title"=> "Nom Data1"),
-                  "axeX" => array("title" => "X", "valueFormatString" => 'value type'), 
-                  "axeY" => array("title" => "Y"), 
-                  'title' => $this->getLabel()
+            array("data1" => array("title" => "Nom Data1"),
+                "axeX"  => array("title" => "X", "valueFormatString" => 'value type'),
+                "axeY"  => array("title" => "Y"),
+                'title' => $this->getLabel()
         ));
     }
 
@@ -2126,7 +2131,8 @@ class BimpObject extends BimpCache
             $instance = $this;
         }
 
-        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions') && !(int) $this->getConf('no_transaction_db', 0, false, 'bool');;
+        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions') && !(int) $this->getConf('no_transaction_db', 0, false, 'bool');
+        ;
 
         if ($use_db_transactions) {
             $instance->db->db->begin();
@@ -2729,9 +2735,8 @@ class BimpObject extends BimpCache
                 'date'       => date('Y-m-d H:i:s'),
                 'id_user'    => (BimpObject::objectLoaded($user) ? $user->id : 0)
                     ), true, $errors);
-        }
-        else
-            BimpCore::addlog ('Ajout historique objet non loadé');
+        } else
+            BimpCore::addlog('Ajout historique objet non loadé');
 
         return $errors;
     }
@@ -6535,33 +6540,33 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . "_container')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
                 $btnHisto .= '</div>';
             }
-            
+
             $sup = '';
             $linkedObjects = $this->getFullLinkedObjetsArray(false);
-            if(count($linkedObjects) > 0){
+            if (count($linkedObjects) > 0) {
                 $filterLinked = array('linked' => array('or' => array()));
-                foreach($linkedObjects as $data_linked => $inut){
+                foreach ($linkedObjects as $data_linked => $inut) {
                     $data_linked = json_decode($data_linked, true);
-                    if($data_linked['object_name'] != 'BS_SAV'){
-                        $filterLinked['linked']['or'][$data_linked["object_name"].$data_linked['id_object']] = array('and_fields' => array(
-                            'obj_module'   =>  $data_linked['module'],
-                            'obj_name'   =>  $data_linked['object_name'],
-                            'id_obj'   =>  $data_linked['id_object']
+                    if ($data_linked['object_name'] != 'BS_SAV') {
+                        $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
+                                'obj_module' => $data_linked['module'],
+                                'obj_name'   => $data_linked['object_name'],
+                                'id_obj'     => $data_linked['id_object']
                         ));
                     }
                 }
                 $nb = count($filterLinked['linked']['or']);
-                if($nb > 60)
-                    BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes '.$this->getLink(). '('.$nb.')');
-                
-                $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées ('.$nb.' objects)');
-                $list2->addIdentifierSuffix($suffixe.'_linked');
+                if ($nb > 60)
+                    BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')');
+
+                $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');
+                $list2->addIdentifierSuffix($suffixe . '_linked');
                 $list2->addFieldFilterValue('obj_type', 'bimp_object');
                 $list2->addFieldFilterValue('custom', $filterLinked['linked']);
                 $sup = $list2->renderHtml();
             }
 
-            return $list->renderHtml(). $sup . ($archive == false ? $btnHisto : '');
+            return $list->renderHtml() . $sup . ($archive == false ? $btnHisto : '');
         }
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');
@@ -9447,35 +9452,34 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $warnings = array();
 
         $data2 = $this->getInfoGraph();
-        
+
         $options = array();
         $options['animationEnabled'] = true;
         $options['theme'] = "light2";
         $options['title'] = array("text" => $data2['title']);
         $options['axisX'] = $data2['axeX'];
         $options['axisY'] = $data2['axeY'];
-        $options['toolTip'] = array("shared"=> true);
+        $options['toolTip'] = array("shared" => true);
         $options['legend'] = array(
-            "cursor" => "pointer",
-            "verticalAlign" => "top",
-            "horizontalAlign" => "left",
+            "cursor"             => "pointer",
+            "verticalAlign"      => "top",
+            "horizontalAlign"    => "left",
             "dockInsidePlotArea" => false,
-            "itemclick" => "toogleDataSeries",
+            "itemclick"          => "toogleDataSeries",
         );
-        $i= 1;
-        while(isset($data2['data'.$i])){
+        $i = 1;
+        while (isset($data2['data' . $i])) {
             $tmpData = array();
             $tmpData["type"] = "line";
             $tmpData["showInLegend"] = true;
             $tmpData["markerType"] = "square";
-            
-            $tmpData = BimpTools::overrideArray($tmpData, $data2['data'.$i]);
 
+            $tmpData = BimpTools::overrideArray($tmpData, $data2['data' . $i]);
 
-            if(isset($data2['axeX']['valueFormatString']))
-                    $tmpData['xValueFormatString'] = $data2['axeX']['valueFormatString'];
-            if(isset($data2['axeY']['valueFormatString']))
-                    $tmpData['yValueFormatString'] = $data2['axeY']['valueFormatString'];
+            if (isset($data2['axeX']['valueFormatString']))
+                $tmpData['xValueFormatString'] = $data2['axeX']['valueFormatString'];
+            if (isset($data2['axeY']['valueFormatString']))
+                $tmpData['yValueFormatString'] = $data2['axeY']['valueFormatString'];
 
             $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
             if (method_exists($this, 'getGraphDataPoint')) {//il faut charger chaque objet pour avoir ca valeur
@@ -9489,23 +9493,21 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $list->initForGraph();
 
                 $tmpData['dataPoints'] = $list->getPointsForGraph($i);
-            }
-            elseif(method_exists($this, 'getGraphDatasPoints')){//On apelle une seul methode pour tous les points
+            } elseif (method_exists($this, 'getGraphDatasPoints')) {//On apelle une seul methode pour tous les points
                 $tmpData['dataPoints'] = $this->getGraphDatasPoints($i);
-            }
-            else{
+            } else {
                 $errors[] = 'Aucune methode pour charger les points';
             }
             $options['data'][] = $tmpData;
             $i++;
         }
-            
-            
-        $success_callback = 'var options = '.json_encode($options).';';
+
+
+        $success_callback = 'var options = ' . json_encode($options) . ';';
         $success_callback = str_replace('"new Date', 'new Date', $success_callback);
         $success_callback = str_replace('","y"', ',"y"', $success_callback);
         $success_callback = str_replace('"toogleDataSeries"', 'toogleDataSeries', $success_callback);
-        
+
         $success_callback .= '$("#' . $list_id . '_chartContainer").CanvasJSChart(options);';
 
         $success_callback .= 'function toogleDataSeries(e){

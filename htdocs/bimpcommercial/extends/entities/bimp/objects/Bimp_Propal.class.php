@@ -115,7 +115,31 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         if (!parent::isDocuSignAllowed($errors)) {
             return 0;
         }
+
+        $sav = $this->getSav();
+        if (BimpObject::objectLoaded($sav)) {
+            $errors[] = 'Signature via DocuSign on autorisée pour les devis SAV';
+            return 0;
+        }
         
+        // Ajouter conditions spécifiques à BIMP ici
+        // (ne pas oublier d'alimenter $errors)
+
+        global $user;
+        if (!$user->admin) {
+            $errors[] = 'Réservé aux admin pour l\'instant';
+            return 0;
+        }
+
+        return 1;
+    }
+
+    public function isSignDistAllowed(&$errors = array())
+    {
+        if (!parent::isSignDistAllowed($errors)) {
+            return 0;
+        }
+
         // Ajouter conditions spécifiques à BIMP ici
         // (ne pas oublier d'alimenter $errors)
 

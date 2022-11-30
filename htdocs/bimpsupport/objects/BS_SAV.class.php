@@ -4811,6 +4811,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             $new_status = null;
 
+            $this->allGarantie = false;
             if ($this->allGarantie) { // Déterminé par $this->generatePropal()
                 $this->addNote('Devis garanti validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                 // Si on vient de commander les pieces sous garentie (On ne change pas le statut)

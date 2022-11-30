@@ -833,6 +833,24 @@ class BimpSignature extends BimpObject
         return $html;
     }
 
+    public function displayPublicDocument($label = 'Document PDF')
+    {
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            $signataires = $this->getChildrenObjects('signataires', array(
+                'type'      => BimpSignataire::TYPE_CLIENT,
+                'id_client' => (int) $userClient->getData('id_client'),
+            ));
+
+            foreach ($signataires as $signataire) {
+                return $signataire->displayPublicDocument($label);
+            }
+        }
+
+        return '';
+    }
+
     // Rendus HTML:
 
     public function renderHeaderExtraLeft()

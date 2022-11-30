@@ -10,21 +10,30 @@ BimpCore::displayHeaderFiles();
 
 $error = $warning = array();
 
-if (!isset($_SESSION['id_user_docusign'])) {
-    $errors[] = 'ID Utilisateur DocuSign absent - impossible de finaliser l\'authentification DocuSign';
+$code = BimpTools::getValue('code', '');
+if (!$code) {
+    $errors[] = 'Code absent';
 } else {
-    $userAcompte = BimpCache::getBimpObjectInstance('bimpapi', 'API_UserAccount', $_SESSION['id_user_docusign']);
-
-    if (!BimpObject::objectLoaded($userAcompte)) {
-        $errors[] = 'Aucun compte utilisateur trouvé pour l\'ID ' . $_SESSION['id_user_docusign'];
+    if (BimpTools::isSubmit('mode_dev')) {
+        echo 'Code : "' . $code . '"<br/><br/>';
     } else {
-        unset($_SESSION['id_user_docusign']);
-        $save_errors = $userAcompte->saveToken('code', $_GET['code']);
-
-        if (count($save_errors)) {
-            $errors[] = BimpTools::getMsgFromArray($save_errors, 'Echec de l\'enregistrement du token');
+        if (!isset($_SESSION['id_user_docusign'])) {
+            $errors[] = 'ID Utilisateur DocuSign absent - impossible de finaliser l\'authentification DocuSign';
         } else {
-            $userAcompte->connect($warning);
+            $userAcompte = BimpCache::getBimpObjectInstance('bimpapi', 'API_UserAccount', $_SESSION['id_user_docusign']);
+
+            if (!BimpObject::objectLoaded($userAcompte)) {
+                $errors[] = 'Aucun compte utilisateur trouvé pour l\'ID ' . $_SESSION['id_user_docusign'];
+            } else {
+                unset($_SESSION['id_user_docusign']);
+                $save_errors = $userAcompte->saveToken('code', $_GET['code']);
+
+                if (count($save_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($save_errors, 'Echec de l\'enregistrement du token');
+                } else {
+                    $userAcompte->connect($warning);
+                }
+            }
         }
     }
 }

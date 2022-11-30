@@ -838,6 +838,7 @@ class BimpSignature extends BimpObject
         global $userClient;
 
         if (BimpObject::objectLoaded($userClient)) {
+            BimpObject::loadClass('bimpcore', 'BimpSignataire');
             $signataires = $this->getChildrenObjects('signataires', array(
                 'type'      => BimpSignataire::TYPE_CLIENT,
                 'id_client' => (int) $userClient->getData('id_client'),

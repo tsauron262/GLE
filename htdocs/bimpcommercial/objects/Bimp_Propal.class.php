@@ -491,6 +491,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     public function isDocuSignAllowed(&$errors = array())
     {
+        return 0;
         // Attention : pas de conditions spécifiques à une version de l'ERP ici. 
         // Utiliser une extension.  
         if (!(int) BimpCore::getConf('propal_signature_allow_docusign', null, 'bimpcommercial')) {

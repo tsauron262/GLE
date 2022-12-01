@@ -2225,7 +2225,7 @@ class BContract_contrat extends BimpDolObject
             }
             if ($status == self::CONTRAT_STATUS_WAIT && $user->rights->bimpcontract->to_validate) {
                 $buttons[] = array(
-                    'label'   => 'Valider la conformitée du contrat',
+                    'label'   => 'Valider la conformité du contrat',
                     'icon'    => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('validation', array(), array())
                 );

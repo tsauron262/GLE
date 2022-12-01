@@ -4042,10 +4042,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $infoClient = " du client " . $client->getNomUrl(1, false);
         }
 
-        $contacts = $this->dol_object->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
-        foreach ($contacts as $contact) {
-            mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $this->getNomUrl(1, true) . $infoClient . " est validée.");
-        }
 
         foreach ($this->dol_object->lines as $line) {
             if (stripos($line->ref, "REMISECRT") !== false) {
@@ -4115,6 +4111,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $demande->delete($warnings, 1);
                 $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation de retard de paiement automatique, voir configuration client)";
                 $this->addObjectLog("Les retard de paiement  ont été validée financièrement par la configuration du client.");
+            }
+        }
+        if(empty($errors)){ 
+            $contacts = $this->dol_object->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
+            foreach ($contacts as $contact) {
+                mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $this->getNomUrl(1, true) . $infoClient . " est validée.");
             }
         }
 

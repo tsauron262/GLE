@@ -51,7 +51,7 @@ fields:
             help: Champ contenant les paramètres pour l'incrustation de la signature électronique et / ou la signature via DocuSign
         default_value: signature_params
             
-    doc_type: 
+    doc_type:
         label: Type de document
         displays: 
             name:
@@ -152,6 +152,16 @@ forms:
               input: 
                   type: toggle
               value: 1
+              
+    motif: 
+        rows: 
+            - custom: 1
+              label: Motif
+              input_name: motif
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
             
 fields_tables: 
     infos: 

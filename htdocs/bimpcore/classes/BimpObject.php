@@ -6743,7 +6743,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     ));
                 } else {
                     $html .= BimpRender::renderButtonsGroup($header_buttons, array(
-                                'max'                 => 6,
+                                'max'                 => 4,
                                 'dropdown_menu_right' => 1
                     ));
                 }

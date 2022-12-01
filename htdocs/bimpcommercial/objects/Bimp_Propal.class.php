@@ -1331,7 +1331,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 if (!count($errors)) {
                     $success .= '<br/>Fiche signature créée avec succès';
                     $signataire_errors = array();
-                    $allow_dist = (int) BimpCore::getConf('propal_signature_allow_dist', null, 'bimpcommercial');
+                    $allow_dist = $this->isSignDistAllowed();
                     $ds_required = false;
                     $ds_errors = array();
                     $allow_docusign = (int) $this->isDocuSignAllowed($ds_errors, $ds_required);
@@ -1346,7 +1346,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 'id_contact'     => $id_contact,
                                 'allow_dist'     => $allow_dist,
                                 'allow_docusign' => $allow_docusign,
-                                'allow_refuse'   => $allow_refuse
+                                'allow_refuse'   => $allow_refuse,
+                                'code'           => 'default'
                                     ), true, $signataire_errors, $warnings);
 
                     if (!BimpObject::objectLoaded($signataire)) {
@@ -1551,10 +1552,11 @@ class Bimp_Propal extends Bimp_PropalTemp
             if (!(int) BimpTools::getArrayValueFromPath($data, 'create_signature', 0)) {
                 $use_signature = false;
             } else {
-                if(BimpTools::getArrayValueFromPath($data, 'sign_dist', 0)){
+                if (BimpTools::getArrayValueFromPath($data, 'sign_dist', 0)) {
                     $id_contact_signature = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
                     $init_docusign = (int) BimpTools::getArrayValueFromPath($data, 'init_docusign', 0);
                     $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0);
+                    $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', '');
 
                     if ($init_docusign || $open_public_access) {
                         if (!$id_contact_signature) {
@@ -1563,13 +1565,17 @@ class Bimp_Propal extends Bimp_PropalTemp
                                 'warnings' => array()
                             );
                         }
-                    }
-                    else{
+                    } else {
                         return array(
                             'errors'   => array('Merci de choisir une méthode de signatre à distance'),
                             'warnings' => array()
                         );
                     }
+                } else {
+                    $id_contact_signature = 0;
+                    $init_docusign = 0;
+                    $open_public_access = 0;
+                    $email_content = '';
                 }
             }
         }
@@ -1578,7 +1584,6 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         if (!count($result['errors'])) {
             if ($use_signature) {
-                $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', '');
                 $signature_errors = $this->createSignature($init_docusign, $open_public_access, $id_contact_signature, $email_content, $result['warnings'], $success);
 
                 if (count($signature_errors)) {
@@ -1770,11 +1775,11 @@ class Bimp_Propal extends Bimp_PropalTemp
         $success = 'Signature créée avec succès';
         $url = '';
 
-        
-        if(BimpTools::getArrayValueFromPath($data, 'sign_dist', 0)){
+        if (BimpTools::getArrayValueFromPath($data, 'sign_dist', 0)) {
             $id_contact_signature = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
             $init_docusign = (int) BimpTools::getArrayValueFromPath($data, 'init_docusign', 0);
             $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0);
+            $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', '');
 
             if ($init_docusign || $open_public_access) {
                 if (!$id_contact_signature) {
@@ -1783,17 +1788,19 @@ class Bimp_Propal extends Bimp_PropalTemp
                         'warnings' => array()
                     );
                 }
-            }
-            else{
+            } else {
                 return array(
-                    'errors'   => array('Merci de choisir une méthode de signatre à distance'),
+                    'errors'   => array('Merci de choisir une méthode de signature à distance'),
                     'warnings' => array()
                 );
             }
+        } else {
+            $id_contact_signature = 0;
+            $init_docusign = 0;
+            $open_public_access = 0;
+            $email_content = '';
         }
-                
 
-        $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', '');
         $errors = $this->createSignature($init_docusign, $open_public_access, $id_contact_signature, $email_content, $warnings);
 
         if (!count($errors)) {
@@ -2230,14 +2237,32 @@ class Bimp_Propal extends Bimp_PropalTemp
             if (BimpObject::objectLoaded($sav)) {
                 $errors = $sav->onPropalSigned($bimpSignature);
             } else {
-                $this->updateField('fk_statut', Propal::STATUS_SIGNED);
+                $errors = $this->updateField('fk_statut', Propal::STATUS_SIGNED);
             }
         }
 
         return $errors;
     }
 
-    public function isSignatureCancellable()
+    public function onSignatureRefused($bimpSignature)
+    {
+        if ((int) $this->getData('fk_statut') === Propal::STATUS_VALIDATED) {
+            $errors = $this->updateField('fk_statut', Propal::STATUS_NOTSIGNED);
+        }
+
+        return $errors;
+    }
+
+    public function onSignatureReopen($bimpSignature)
+    {
+        if ((int) $this->getData('fk_statut') === Propal::STATUS_NOTSIGNED) {
+            $errors = $this->updateField('fk_statut', Propal::STATUS_VALIDATED);
+        }
+
+        return $errors;
+    }
+
+    public function isSignatureCancellable($doc_type, &$errors = array())
     {
         $sav = $this->getSav();
         if (!BimpObject::objectLoaded($sav)) {
@@ -2245,11 +2270,10 @@ class Bimp_Propal extends Bimp_PropalTemp
         }
 
         return 1;
-//        return 0;
     }
 
     public function isSignatureReopenable($doc_type, &$errors = array())
     {
-        return 0;
+        return 1;
     }
 }

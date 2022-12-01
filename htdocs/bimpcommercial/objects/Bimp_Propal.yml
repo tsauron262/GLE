@@ -459,10 +459,10 @@ forms:
         rows: 
             create_signature: unset
             
-#                  Attention cret signature étant ce form
+    # Attention create_signature étend ce form
     validate:
         title: Validation
-        rows: 
+        rows:
             create_signature: 
                 custom: 1
                 label: Créer la fiche signature
@@ -551,24 +551,6 @@ forms:
                     sign_dist:
                         hide_values: 0
                 depends_on: init_docusign,open_public_access
-                  
-    create_signature_docu_sign: 
-        title: Signature DocuSign
-        icon: fas_file-signature
-        rows: 
-            - custom: 1
-              label: Contact
-              type: id_object
-              object: contact
-              input_name: id_contact
-              input:
-                  type: select
-                  options: 
-                      callback: 
-                          method: getSocieteContactsArray
-                          params: 
-                            0: 
-                                field_value: fk_soc
                   
 fields_tables: 
     infos: 

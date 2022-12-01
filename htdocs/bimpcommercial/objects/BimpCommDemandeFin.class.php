@@ -814,6 +814,84 @@ class BimpCommDemandeFin extends BimpObject
         return $errors;
     }
 
+    public function reopenFromTarget($df_status, &$devis_fin_status, &$contrats_fin_status)
+    {
+        $errors = array();
+
+        if (!array_key_exists($df_status, static::$status_list)) {
+            $errors[] = 'Nouveau statut invalide: ' . $df_status;
+        } else {
+            $this->set('status', $df_status);
+
+            $parent = $this->getParentInstance();
+            if (BimpObject::objectLoaded($parent)) {
+                $msg = 'Demande de location réouverte par ' . $this->displayTarget();
+                $parent->addObjectLog($msg, 'DF_REOPEN');
+                $this->addParentNoteForCommercial($msg);
+            }
+
+            // Détermination des statuts du devis et du contrat: 
+            $contrats_fin_status = 0;
+            $devis_fin_status = 0;
+            $dir = $this->getSignatureDocFileDir();
+
+            if ((int) $this->getData('id_signature_contrat_fin')) {
+                $signature = $this->getChildObject('signature_contrat_fin');
+                if (BimpObject::objectLoaded($signature)) {
+                    if (!(int) $signature->isSigned()) {
+                        $contrats_fin_status = self::DOC_STATUS_SEND;
+                        $signature->reopenAllSignatures();
+                    } else {
+                        $contrats_fin_status = self::DOC_STATUS_ACCEPTED;
+                    }
+                }
+            }
+
+            if (!$contrats_fin_status) {
+                $file = $this->getSignatureDocFileName('contrat_fin');
+
+                if (file_exists($dir . $file)) {
+                    $contrats_fin_status = self::DOC_STATUS_ATTENTE;
+                }
+            }
+
+            if ((int) $this->getData('id_signature_devis_fin')) {
+                $signature = $this->getChildObject('signature_devis_fin');
+                if (BimpObject::objectLoaded($signature)) {
+                    if (!(int) $signature->isSigned()) {
+                        $devis_fin_status = self::DOC_STATUS_SEND;
+                        $signature->reopenAllSignatures();
+                    } else {
+                        $devis_fin_status = self::DOC_STATUS_ACCEPTED;
+                    }
+                }
+            }
+
+            if (!$devis_fin_status) {
+                $file = $this->getSignatureDocFileName('devis_fin');
+
+                if (file_exists($dir . $file)) {
+                    $devis_fin_status = self::DOC_STATUS_ATTENTE;
+                }
+            }
+
+            if ($contrats_fin_status > 0) {
+                $devis_fin_status = self::DOC_STATUS_ACCEPTED;
+            }
+
+            $this->set('devis_fin_status', $devis_fin_status);
+            $this->set('contrat_fin_status', $contrats_fin_status);
+
+            $warnings = array();
+            $up_errors = $this->update($warnings, true);
+            if (count($up_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la demande de location');
+            }
+        }
+
+        return $errors;
+    }
+
     public function addParentNoteForCommercial($msg, $delete_on_view = 1)
     {
         $errors = array();

@@ -415,7 +415,6 @@ class BF_DemandeSource extends BimpObject
 //        $html .= '<pre>';
 //        $html .= print_r($client_data, 1);
 //        $html .= '</pre>';
-
         // Client: 
         $html .= '<table class="bimp_list_table">';
         $html .= '<thead>';
@@ -588,5 +587,76 @@ class BF_DemandeSource extends BimpObject
         $html .= '</table>';
 
         return $html;
+    }
+
+    // Traitements: 
+
+    public function reopenDemande($df_status, &$warnings = array())
+    {
+        $errors = array();
+
+        $api = $this->getAPI($errors);
+        $demande = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($demande)) {
+            $errors[] = 'Demande de fincancement liée absente';
+        }
+
+        if (!count($errors)) {
+            $status = 1;
+            if ($df_status >= 20) {
+                $status = 20;
+            } elseif ($df_status >= 10) {
+                $status = 10;
+            }
+
+            $req_errors = array();
+            $result = $api->reopenDemandeFinancement($demande->id, $this->getData('type_origine'), $this->getData('id_origine'), $status, $req_errors, $warnings);
+
+            if (!count($req_errors)) {
+                if (!(int) BimpTools::getArrayValueFromPath($result, 'success', 0)) {
+                    $errors[] = 'Echec de la requête auprès de ' . $this->displayName() . ' pour une raison inconnue';
+                } else {
+                    $dir = $demande->getFilesDir();
+                    $devis_status = (int) $result['devis_status'];
+                    if ($devis_status >= 20) {
+                        $devis_status = BF_Demande::DOC_REFUSED;
+                    } elseif ($devis_status >= 10) {
+                        $devis_status = BF_Demande::DOC_ACCEPTED;
+                    } elseif ($devis_status > 0) {
+                        $devis_status = BF_Demande::DOC_SEND;
+                    } else {
+                        $file = $demande->getSignatureDocFileName('devis');
+                        if (file_exists($dir.$file)) {
+                            $devis_status = BF_Demande::DOC_GENERATED;
+                        } else {
+                            $devis_status = BF_Demande::DOC_NONE;
+                        }
+                    }
+                    $contrat_status = (int) $result['contrat'];
+                    if ($contrat_status >= 20) {
+                        $contrat_status = BF_Demande::DOC_REFUSED;
+                    } elseif ($contrat_status >= 10) {
+                        $contrat_status = BF_Demande::DOC_ACCEPTED;
+                    } elseif ($contrat_status > 0) {
+                        $contrat_status = BF_Demande::DOC_SEND;
+                    } else {
+                        $file = $demande->getSignatureDocFileName('contrat');
+                        if (file_exists($dir.$file)) {
+                            $contrat_status = BF_Demande::DOC_GENERATED;
+                        } else {
+                            $contrat_status = BF_Demande::DOC_NONE;
+                        }
+                    }
+                    $demande->updateField('devis_status', $devis_status);
+                    $demande->updateField('contrat_status', $contrat_status);
+                    $this->updateField('cancel_submitted', 0);
+                    $this->updateField('refuse_submitted', 0);
+                }
+            } else {
+                $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la requête auprès de ' . $this->displayName());
+            }
+        }
+
+        return $errors;
     }
 }

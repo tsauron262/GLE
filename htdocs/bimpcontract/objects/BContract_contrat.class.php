@@ -2055,7 +2055,7 @@ class BContract_contrat extends BimpDolObject
 
             if ($user->admin) {
                 $buttons[] = array(
-                    'label'   => 'Annulé renew(ADMIN)',
+                    'label'   => 'Annuler renew(ADMIN)',
                     'icon'    => 'fas_retweet',
                     'onclick' => $this->getJsActionOnclick('redefineEcheancier', array(), array(
                         'form_name' => 'redefineEcheancier'

@@ -1552,7 +1552,7 @@ class BContract_contrat extends BimpDolObject
             if (!count($errors)) {
                 $this->turnOffEcheancier();
                 $this->addLog("Contrat abandonné");
-                $success = "Le contrat à bien été abandoné";
+                $success = "Le contrat a bien été abandonné";
             }
 
             return [

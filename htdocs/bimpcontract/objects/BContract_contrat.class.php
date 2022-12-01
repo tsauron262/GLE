@@ -4368,7 +4368,10 @@ class BContract_contrat extends BimpDolObject
         if ($diff->invert) {
             $msgs[] = Array(
                 'type'    => 'danger',
-                'content' => "Le contrat dûment signé doit être obligatoirement présent dans les fichiers pour une activation maintenant"
+                'content' => "Le contrat dûment signé doit être obligatoirement présent dans les fichiers pour une activation définitive
+
+<br/><br/>Si ce n'est pas le cas, le contrat sera activé provisoirement pour une période de 15 jours
+<br/>Si le contrat signé ne nous ait pas parvenu durant cette période, l'activation sera suspendue"
             );
         }
 

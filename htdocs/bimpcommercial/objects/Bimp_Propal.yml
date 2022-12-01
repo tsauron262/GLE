@@ -453,59 +453,13 @@ forms:
               show:
                   callback: isServiceAutorisedInContrat
                   
-    create_signature: 
+    create_signature:
         title: Création de la signature
         extends: validate
         rows: 
             create_signature: unset
-#        rows: 
-#            contact_signature: 
-#                custom: 1
-#                label: Contact signataire
-#                data_type: id_object
-#                input_name: id_contact_signature
-#                object: contact
-#                create_form: default
-#                create_form_values: 
-#                    callback: getSignatureContactCreateFormValues
-#                input: 
-#                    type: select
-#                    help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
-#                    options: 
-#                        callback: 
-#                            method: getSocieteContactsArray
-#                            params: 
-#                                - field_value: fk_soc
-#                value: 
-#                    callback: getDefaultSignatureContact
-#            init_docusign: 
-#                custom: 1
-#                label: Envoyer immédiatement le document pour signature via DocuSign
-#                data_type: bool
-#                input_name: init_docusign
-#                content: 
-#                    callback: renderSignatureInitDocuSignInput
-#            open_public_access: 
-#                custom: 1 
-#                label: Ouvrir immédiatement l'accès à la signature électronique à distance
-#                data_type: bool
-#                input_name: open_public_access
-#                content: 
-#                    callback: renderSignatureOpenDistAccessInput
-#                display_if: 
-#                    field_name: init_docusign
-#                    hide_values: 1
-#            email_content: 
-#                custom: 1
-#                label: Contenu e-mail client pour la signature à distance
-#                input_name: email_content
-#                input: 
-#                    type: html
-#                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
-#                value: 
-#                    callback: getSignatureEmailContent
-#                depends_on: init_docusign,open_public_access
-                  
+            
+#                  Attention cret signature étant ce form
     validate:
         title: Validation
         rows: 

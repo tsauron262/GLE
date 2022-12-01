@@ -4418,7 +4418,7 @@ class BimpComm extends BimpDolObject
 
             if (isset($user_data['metiers']) && !empty($user_data['metiers'])) {
                 foreach ($user_data['metiers'] as $metier => &$metier_data) {
-                    if (isset($metier_data['ca_ht']) && (float) $user_data['ca_ht']) {
+                    if (isset($metier_data['ca_ht']) && (float) $metier_data['ca_ht']) {
                         $metier_data['tx_marque'] = ($metier_data['marges'] / $metier_data['ca_ht']) * 100;
                     } else {
                         $metier_data['tx_marque'] = 'Inf.';
@@ -4958,7 +4958,6 @@ class BimpComm extends BimpDolObject
 
     public function validate()
     {
-        $return = parent::validate();
         if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente') && $this->getData('fk_statut') == 0) {
             $zone = self::BC_ZONE_FR;
             if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) || $this->getData('entrepot') == '164' || $this->getInitData('entrepot') == '164'
@@ -4967,14 +4966,15 @@ class BimpComm extends BimpDolObject
                 if (BimpObject::objectLoaded($soc)) {
                     $zone = $this->getZoneByCountry($soc);
                     if ($this->getData('zone_vente') != $zone) {
-                        $this->updateField('zone_vente', $zone);
+                        $this->set('zone_vente', $zone);
                         $this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true));
+                        //TODO l'objet n'est pas encore loadé du coup addObjectLog ne fonctionne pas...
                     }
                 }
             }
         }
 
-        return $return;
+        return parent::validate();
     }
 
     public function create(&$warnings = array(), $force_create = false)

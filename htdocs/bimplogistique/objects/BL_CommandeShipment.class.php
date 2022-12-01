@@ -3232,7 +3232,7 @@ class BL_CommandeShipment extends BimpObject
 
     // Gestion Signature: 
 
-    public function getSignatureDocFileDir($doc_type)
+    public function getSignatureDocFileDir($doc_type = '')
     {
         return $this->getFilesDir();
     }

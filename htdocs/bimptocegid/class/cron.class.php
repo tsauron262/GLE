@@ -98,9 +98,10 @@
 
                     if(!$this->stopCompta && !$this->export_class->rollBack) {
                         $this->menage();
-                        $this->send_rapport();
+                        $this->send_rapport(1);
                         $db->commit();
                         $this->FTP();
+                        $this->send_rapport(2);
                     } else {
                         //if($this->export_class->rollBack) {
                             $db->rollback(); // Annule la transaction
@@ -223,227 +224,232 @@
             
         }
 
-        protected function send_rapport() {
+        protected function send_rapport($mode = 1) {
 
             $sujet = "Rapport export comptable du " . date('d/m/Y');
             $to = BimpCore::getConf('devs_email');
             $from = null;
             
-            // Message type de pièce automatique
-            if(array_key_exists('FILES_FTP', $this->rapport)) {
-                $logs .= $this->rapport['FILES_FTP'];
-            }
+            if($mode == 1){
+                // Message type de pièce automatique
+                if(array_key_exists('FILES_FTP', $this->rapport)) {
+                    $logs .= $this->rapport['FILES_FTP'];
+                }
+
+                $logs .= "\n";
+
+                // Message pour les fichiers
+                if(array_key_exists("FILES", $this->export_class->good)) {
+                    $logs .= "Fichiers (Succès)\n";
+                    foreach($this->export_class->good['FILES'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+                if(array_key_exists("FILES", $this->export_class->fails)) {
+                    $logs .= "Fichiers (Erreurs)\n";
+                    foreach($this->export_class->fails['FILES'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+                if(array_key_exists("FILES", $this->export_class->warn)) {
+                    $logs .= "Fichiers (Informations)\n";
+                    foreach($this->export_class->warn['FILES'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+
+                $logs .= "\n";
+
+                // message pour les payni
+                if(array_key_exists("PAYNI", $this->export_class->good)) {
+                    $logs .= "PAYNI (Succès)\n";
+                    foreach($this->export_class->good['PAYNI'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+                if(array_key_exists("PAYNI", $this->export_class->fails)) {
+                    $logs .= "PAYNI (Erreurs)\n";
+                    foreach($this->export_class->fails['PAYNI'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+                if(array_key_exists("PAYNI", $this->export_class->warn)) {
+                    $logs .= "PAYNI (Informations)\n";
+                    foreach($this->export_class->warn['PAYNI'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+
+                $logs .= "\n";
+
+                $saveArrayFacture = Array();
+                // message pour les ventes
+                if(array_key_exists("VENTES", $this->export_class->good)) {
+                    $logs .= "VENTES (Succès)\n";
+
+                    foreach($this->export_class->good['VENTES'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                        $saveArrayFacture[] = $name;
+                    }
+                }
+                if(array_key_exists("VENTES", $this->export_class->fails)) {
+                    $logs .= "\nVENTES (Erreurs)\n";
+                    foreach($this->export_class->fails['VENTES'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+                if(array_key_exists("VENTES", $this->export_class->warn)) {
+                    $logs .= "\nVENTES (Informations)\n";
+                    foreach($this->export_class->warn['VENTES'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+
+                $logs .= "\n";
+
+                $saveArrayFacture = Array();
+                // message pour les ventes
+                if(array_key_exists("ACHATS", $this->export_class->good)) {
+                    $logs .= "ACHATS (Succès)\n";
+
+                    foreach($this->export_class->good['ACHATS'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                        $saveArrayFacture[] = $name;
+                    }
+                }
+                if(array_key_exists("ACHATS", $this->export_class->fails)) {
+                    $logs .= "\ACHATS (Erreurs)\n";
+                    foreach($this->export_class->fails['ACHATS'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+                if(array_key_exists("ACHATS", $this->export_class->warn)) {
+                    $logs .= "\ACHATS (Informations)\n";
+                    foreach($this->export_class->warn['ACHATS'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+
+                $logs .= "\n";
+
+                $saveArrayPaiement = Array();
+                // message pour les paiements
+                if(array_key_exists("PAY", $this->export_class->good)) {
+                    $logs .= "PAY (Succès)\n";
+
+                    foreach($this->export_class->good['PAY'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                        $saveArrayPaiement[] = $name;
+                    }
+                }
+                if(array_key_exists("PAY", $this->export_class->fails)) {
+                    $logs .= "\nPAY (Erreurs)\n";
+                    foreach($this->export_class->fails['PAY'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+                if(array_key_exists("PAY", $this->export_class->warn)) {
+                    $logs .= "\nPAY (Informations)\n";
+                    foreach($this->export_class->warn['PAY'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+
+                $logs .= "\n";
+
+                $saveArrayPaiementDep = Array();
+                // message pour les paiements
+                if(array_key_exists("DP", $this->export_class->good)) {
+                    $logs .= "Déplacement paiements (Succès)\n";
+
+                    foreach($this->export_class->good['DP'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                        $saveArrayPaiementDep[] = $name;
+                    }
+                }
+                if(array_key_exists("DP", $this->export_class->fails)) {
+                    $logs .= "\nDéplacement paiements (Erreurs)\n";
+                    foreach($this->export_class->fails['DP'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+                if(array_key_exists("DP", $this->export_class->warn)) {
+                    $logs .= "\nDéplacement paiements (Informations)\n";
+                    foreach($this->export_class->warn['DP'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+
+                $log .= "\n";
+
+                $saveArrayPaiementImport = Array();
+                // message pour les paiements
+                if(array_key_exists("IP", $this->export_class->good)) {
+                    $logs .= "ImportPaiement (Succès)\n";
+
+                    foreach($this->export_class->good['IP'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                        $saveArrayPaiementImport[] = $name;
+                    }
+                }
+                if(array_key_exists("IP", $this->export_class->fails)) {
+                    $logs .= "\nImportPaiement (Erreurs)\n";
+                    foreach($this->export_class->fails['IP'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+                if(array_key_exists("IP", $this->export_class->warn)) {
+                    $logs .= "\nImportPaiement (Informations)\n";
+                    foreach($this->export_class->warn['IP'] as $name => $log) {
+                        $logs .= ''.$name.': ' . $log . "\n";
+                    }
+                }
+
+                $saveTiersArray = Array();
+                // Message pour les tiers
+                if(count($this->export_class->tiers) > 0) {
+                    $logs .= "\nTIERS (Création)\n";
+                    foreach($this->export_class->tiers as $aux => $log) {
+                        $logs .= '' . $aux . ': ' . $log . "\n";
+                        $saveTiersArray[] = $aux;
+                    }
+                } 
+
+                $logs .= "\n\n";
+
+                // Message pour le ménage
+                if(array_key_exists("MENAGE", $this->rapport)) {
+                    $logs .= 'Ménage (Process)' . "\n";
+                    $logs .= implode("\n", $this->rapport['MENAGE']);
+                }
+
+                $logs .= "\n\nListe des factures en cas d'erreurs: \n" . implode(',' , $saveArrayFacture) . "\n";
+                $logs .= "Liste des paiement en cas d'erreurs: \n" . implode(',' , $saveArrayPaiement) . "\n";
+                $logs .= "Liste des import paiement en cas d'erreurs: \n" . implode(',' , $saveArrayPaiementImport) . "\n";
+                $logs .= "Liste des tiers en cas d'erreurs: \n" . implode(',' , $saveTiersArray) . "\n";
             
-            $logs .= "\n";
+            }
+            else{
             
-            // Message pour les fichiers
-            if(array_key_exists("FILES", $this->export_class->good)) {
-                $logs .= "Fichiers (Succès)\n";
-                foreach($this->export_class->good['FILES'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
+                $logs .= "\n\n";
+
+                // Message FTP
+                if(array_key_exists("FTP", $this->rapport)) {
+                    $logs .= 'FTP (Process) ' . $this->ldlc_ftp_path . "\n";
+                    $logs .= implode("\n", $this->rapport['FTP']);
                 }
             }
-            if(array_key_exists("FILES", $this->export_class->fails)) {
-                $logs .= "Fichiers (Erreurs)\n";
-                foreach($this->export_class->fails['FILES'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            if(array_key_exists("FILES", $this->export_class->warn)) {
-                $logs .= "Fichiers (Informations)\n";
-                foreach($this->export_class->warn['FILES'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            
-            $logs .= "\n";
-            
-            // message pour les payni
-            if(array_key_exists("PAYNI", $this->export_class->good)) {
-                $logs .= "PAYNI (Succès)\n";
-                foreach($this->export_class->good['PAYNI'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            if(array_key_exists("PAYNI", $this->export_class->fails)) {
-                $logs .= "PAYNI (Erreurs)\n";
-                foreach($this->export_class->fails['PAYNI'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            if(array_key_exists("PAYNI", $this->export_class->warn)) {
-                $logs .= "PAYNI (Informations)\n";
-                foreach($this->export_class->warn['PAYNI'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            
-            $logs .= "\n";
-            
-            $saveArrayFacture = Array();
-            // message pour les ventes
-            if(array_key_exists("VENTES", $this->export_class->good)) {
-                $logs .= "VENTES (Succès)\n";
-                
-                foreach($this->export_class->good['VENTES'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                    $saveArrayFacture[] = $name;
-                }
-            }
-            if(array_key_exists("VENTES", $this->export_class->fails)) {
-                $logs .= "\nVENTES (Erreurs)\n";
-                foreach($this->export_class->fails['VENTES'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            if(array_key_exists("VENTES", $this->export_class->warn)) {
-                $logs .= "\nVENTES (Informations)\n";
-                foreach($this->export_class->warn['VENTES'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            
-            $logs .= "\n";
-            
-            $saveArrayFacture = Array();
-            // message pour les ventes
-            if(array_key_exists("ACHATS", $this->export_class->good)) {
-                $logs .= "ACHATS (Succès)\n";
-                
-                foreach($this->export_class->good['ACHATS'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                    $saveArrayFacture[] = $name;
-                }
-            }
-            if(array_key_exists("ACHATS", $this->export_class->fails)) {
-                $logs .= "\ACHATS (Erreurs)\n";
-                foreach($this->export_class->fails['ACHATS'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            if(array_key_exists("ACHATS", $this->export_class->warn)) {
-                $logs .= "\ACHATS (Informations)\n";
-                foreach($this->export_class->warn['ACHATS'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            
-            $logs .= "\n";
-            
-            $saveArrayPaiement = Array();
-            // message pour les paiements
-            if(array_key_exists("PAY", $this->export_class->good)) {
-                $logs .= "PAY (Succès)\n";
-                
-                foreach($this->export_class->good['PAY'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                    $saveArrayPaiement[] = $name;
-                }
-            }
-            if(array_key_exists("PAY", $this->export_class->fails)) {
-                $logs .= "\nPAY (Erreurs)\n";
-                foreach($this->export_class->fails['PAY'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            if(array_key_exists("PAY", $this->export_class->warn)) {
-                $logs .= "\nPAY (Informations)\n";
-                foreach($this->export_class->warn['PAY'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            
-            $logs .= "\n";
-            
-            $saveArrayPaiementDep = Array();
-            // message pour les paiements
-            if(array_key_exists("DP", $this->export_class->good)) {
-                $logs .= "Déplacement paiements (Succès)\n";
-                
-                foreach($this->export_class->good['DP'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                    $saveArrayPaiementDep[] = $name;
-                }
-            }
-            if(array_key_exists("DP", $this->export_class->fails)) {
-                $logs .= "\nDéplacement paiements (Erreurs)\n";
-                foreach($this->export_class->fails['DP'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            if(array_key_exists("DP", $this->export_class->warn)) {
-                $logs .= "\nDéplacement paiements (Informations)\n";
-                foreach($this->export_class->warn['DP'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            
-            $log .= "\n";
-            
-            $saveArrayPaiementImport = Array();
-            // message pour les paiements
-            if(array_key_exists("IP", $this->export_class->good)) {
-                $logs .= "ImportPaiement (Succès)\n";
-                
-                foreach($this->export_class->good['IP'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                    $saveArrayPaiementImport[] = $name;
-                }
-            }
-            if(array_key_exists("IP", $this->export_class->fails)) {
-                $logs .= "\nImportPaiement (Erreurs)\n";
-                foreach($this->export_class->fails['IP'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            if(array_key_exists("IP", $this->export_class->warn)) {
-                $logs .= "\nImportPaiement (Informations)\n";
-                foreach($this->export_class->warn['IP'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            
-            $saveTiersArray = Array();
-            // Message pour les tiers
-            if(count($this->export_class->tiers) > 0) {
-                $logs .= "\nTIERS (Création)\n";
-                foreach($this->export_class->tiers as $aux => $log) {
-                    $logs .= '' . $aux . ': ' . $log . "\n";
-                    $saveTiersArray[] = $aux;
-                }
-            } 
-            
-            $logs .= "\n\n";
-            
-            // Message FTP
-            if(array_key_exists("FTP", $this->rapport)) {
-                $logs .= 'FTP (Process) ' . $this->ldlc_ftp_path . "\n";
-                $logs .= implode("\n", $this->rapport['FTP']);
-            }
-            
-            $logs .= "\n\n";
-            
-            // Message pour le ménage
-            if(array_key_exists("MENAGE", $this->rapport)) {
-                $logs .= 'Ménage (Process)' . "\n";
-                $logs .= implode("\n", $this->rapport['MENAGE']);
-            }
-            
-            $logs .= "\n\nListe des factures en cas d'erreurs: \n" . implode(',' , $saveArrayFacture) . "\n";
-            $logs .= "Liste des paiement en cas d'erreurs: \n" . implode(',' , $saveArrayPaiement) . "\n";
-            $logs .= "Liste des import paiement en cas d'erreurs: \n" . implode(',' , $saveArrayPaiementImport) . "\n";
-            $logs .= "Liste des tiers en cas d'erreurs: \n" . implode(',' , $saveTiersArray) . "\n";
             
             $this->output .= $logs;
             
             $filePath = PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/';
             $fileName = date('d_m_Y') . '_'.$this->export_class->moment.'.log';
-            
             $log_file = fopen($filePath . $fileName, 'a');
-            fwrite($log_file, $logs . "\n\n");
+            if(!fwrite($log_file, $logs . "\n\n"))
+                 mailSyn2($sujet. ' impossible d\'écrire le fichier', $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable existant, et voici le nouveau : ".$logs, array($filePath . $fileName),array('text/plain'), array($fileName));
             fclose($log_file);
+            chmod($filePath . $fileName, 777);
 
-            //mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable", array($filePath . $fileName),array('text/plain'), array($fileName));
             
         }
         

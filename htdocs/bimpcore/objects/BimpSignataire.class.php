@@ -1874,6 +1874,7 @@ class BimpSignataire extends BimpObject
 
     public function validate()
     {
+        $errors = array();
         switch ($this->getData('type')) {
             case self::TYPE_CLIENT:
                 $client = $this->getChildObject('client');

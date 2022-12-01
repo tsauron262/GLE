@@ -11,20 +11,22 @@ class BDS_RelancesSignaturesProcess extends BDSProcess
 
     public function initRelances(&$data, &$errors = array())
     {
-        $data['steps'] = array();
-
-        $signatures_ids = $this->getSignaturesToRelance();
-
-        if (!empty($signatures_ids)) {
-            $data['steps']['send_relances'] = array(
-                'label'                  => 'Envoi des relances',
-                'on_error'               => 'continue',
-                'elements'               => $signatures_ids,
-                'nbElementsPerIteration' => 10
-            );
-        } else {
-            $errors[] = 'il n\'y a aucune signature à relancer';
-        }
+        $errors[] = 'Processus désactivé';
+        
+//        $data['steps'] = array();
+//
+//        $signatures_ids = $this->getSignaturesToRelance();
+//
+//        if (!empty($signatures_ids)) {
+//            $data['steps']['send_relances'] = array(
+//                'label'                  => 'Envoi des relances',
+//                'on_error'               => 'continue',
+//                'elements'               => $signatures_ids,
+//                'nbElementsPerIteration' => 10
+//            );
+//        } else {
+//            $errors[] = 'il n\'y a aucune signature à relancer';
+//        }
     }
 
     // Exec opérations:

@@ -1552,7 +1552,7 @@ class BContract_contrat extends BimpDolObject
             if (!count($errors)) {
                 $this->turnOffEcheancier();
                 $this->addLog("Contrat abandonné");
-                $success = "Le contrat à bien été abandoné";
+                $success = "Le contrat a bien été abandonné";
             }
 
             return [
@@ -2055,7 +2055,7 @@ class BContract_contrat extends BimpDolObject
 
             if ($user->admin) {
                 $buttons[] = array(
-                    'label'   => 'Annulé renew(ADMIN)',
+                    'label'   => 'Annuler renew(ADMIN)',
                     'icon'    => 'fas_retweet',
                     'onclick' => $this->getJsActionOnclick('redefineEcheancier', array(), array(
                         'form_name' => 'redefineEcheancier'
@@ -2225,7 +2225,7 @@ class BContract_contrat extends BimpDolObject
             }
             if ($status == self::CONTRAT_STATUS_WAIT && $user->rights->bimpcontract->to_validate) {
                 $buttons[] = array(
-                    'label'   => 'Valider la conformitée du contrat',
+                    'label'   => 'Valider la conformité du contrat',
                     'icon'    => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('validation', array(), array())
                 );
@@ -4368,7 +4368,10 @@ class BContract_contrat extends BimpDolObject
         if ($diff->invert) {
             $msgs[] = Array(
                 'type'    => 'danger',
-                'content' => "Le contrat dûment signé doit être obligatoirement présent dans les fichiers pour une activation maintenant"
+                'content' => "Le contrat dûment signé doit être obligatoirement présent dans les fichiers pour une activation définitive
+
+<br/><br/>Si ce n'est pas le cas, le contrat sera activé provisoirement pour une période de 15 jours
+<br/>Si le contrat signé ne nous ait pas parvenu durant cette période, l'activation sera suspendue"
             );
         }
 
@@ -4616,8 +4619,8 @@ class BContract_contrat extends BimpDolObject
                 $action = "Valider la conformité du contrat";
                 break;
             case self::MAIL_VALIDATION:
-                $sujet = "Contrat validé et signé par la direction";
-                $action = "Ce contrat a été validé par le service technique.<br/>Vous devez maintenant utiliser l'action <b>'Envoyer via DocuSign'</b> afin de le faire signer au client</b>";
+                $sujet = "Contrat validé par le service technique";
+                $action = "Ce contrat a été validé par le service technique.<br/>Vous devez maintenant utiliser l'action <b>'Envoyer via DocuSign'</b> afin de le faire signer par le client, puis par votre direction commerciale</b>";
                 break;
             case self::MAIL_SIGNED:
                 $sujet = "Contrat signé par le client";

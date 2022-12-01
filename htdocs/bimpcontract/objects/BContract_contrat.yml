@@ -632,11 +632,11 @@ lists_cols:
                 method: isSigned
                 params:
                     - display
-                          
-    date_fin:
-        label: Date de fin du contrat
-        value: 
-            callback: displayRealEndDate
+#                          
+#    date_fin:
+#        label: Date de fin du contrat
+#        value: 
+#            callback: displayRealEndDate
                 
     commercialclient:
         label: Commercial Client

@@ -4418,7 +4418,7 @@ class BimpComm extends BimpDolObject
 
             if (isset($user_data['metiers']) && !empty($user_data['metiers'])) {
                 foreach ($user_data['metiers'] as $metier => &$metier_data) {
-                    if (isset($metier_data['ca_ht']) && (float) $user_data['ca_ht']) {
+                    if (isset($metier_data['ca_ht']) && (float) $metier_data['ca_ht']) {
                         $metier_data['tx_marque'] = ($metier_data['marges'] / $metier_data['ca_ht']) * 100;
                     } else {
                         $metier_data['tx_marque'] = 'Inf.';

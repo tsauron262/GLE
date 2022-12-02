@@ -766,9 +766,9 @@ class InterfaceClientController extends BimpPublicController
                                     $ids[] = (int) $r['id'];
                                 }
 
-                                $signature = BimpObject::getInstance('bimpcore', 'BimpSignature');
-                                $list = new BC_ListTable($signature, 'public_client', 1, null, 'Signatures', 'fas_signature');
-                                $list->addFieldFilterValue('id', $ids);
+                                $signataire = BimpObject::getInstance('bimpcore', 'BimpSignataire');
+                                $list = new BC_ListTable($signataire, 'public_client', 1, null, 'Signatures', 'fas_signature');
+                                $list->addFieldFilterValue('id_signature', $ids);
                                 $html .= '<div style="margin-top: 30px">';
                                 $html .= $list->renderHtml();
                                 $html .= '</div>';

@@ -200,7 +200,7 @@ class BF_Demande extends BimpObject
             return 0;
         }
 
-        if (!in_array($action, array()) && $this->isClosed()) {
+        if (!in_array($action, array('reopen')) && $this->isClosed()) {
             $errors[] = 'Cette demande de location est fermée';
             return 0;
         }
@@ -2401,33 +2401,30 @@ class BF_Demande extends BimpObject
                     break;
             }
 
-            if ($cur_status >= self::STATUS_VALIDATED) {
+            $drs = $this->getChildrenObjects('demandes_refinanceurs');
+            if ($cur_status >= self::STATUS_VALIDATED || count($drs)) {
                 $new_status = self::STATUS_VALIDATED;
-                $drs = $this->getChildrenObjects('demandes_refinanceurs');
+                $has_attente = false;
+                $has_accepted = false;
+                $has_refused = false;
 
-                if (count($drs)) {
-                    $has_attente = false;
-                    $has_accepted = false;
-                    $has_refused = false;
-
-                    foreach ($drs as $dr) {
-                        $dr_status = (int) $dr->getData('status');
-                        if ($dr_status == BF_DemandeRefinanceur::STATUS_SELECTIONNEE) {
-                            $has_accepted = true;
-                        } elseif ($dr_status < 20 && $dr_status > 0) {
-                            $has_attente = true;
-                        } elseif ($dr_status == BF_DemandeRefinanceur::STATUS_REFUSEE) {
-                            $has_refused = true;
-                        }
+                foreach ($drs as $dr) {
+                    $dr_status = (int) $dr->getData('status');
+                    if ($dr_status == BF_DemandeRefinanceur::STATUS_SELECTIONNEE) {
+                        $has_accepted = true;
+                    } elseif ($dr_status < 20 && $dr_status > 0) {
+                        $has_attente = true;
+                    } elseif ($dr_status == BF_DemandeRefinanceur::STATUS_REFUSEE) {
+                        $has_refused = true;
                     }
+                }
 
-                    if ($has_accepted) {
-                        $new_status = self::STATUS_ACCEPTED;
-                    } elseif ($has_attente) {
-                        $new_status = self::STATUS_ATTENTE;
-                    } elseif ($has_refused) {
-                        $new_status = self::STATUS_REFUSED;
-                    }
+                if ($has_accepted) {
+                    $new_status = self::STATUS_ACCEPTED;
+                } elseif ($has_attente) {
+                    $new_status = self::STATUS_ATTENTE;
+                } elseif ($has_refused) {
+                    $new_status = self::STATUS_REFUSED;
                 }
 
                 if ($new_status !== $cur_status) {
@@ -3302,10 +3299,67 @@ class BF_Demande extends BimpObject
         $warnings = array();
         $success = 'Demande de location réouverte';
 
-        $errors = $this->updateField('status', self::STATUS_DRAFT);
+        if (!(int) $this->getData('id_user_resp')) {
+            $this->set('status', self::STATUS_NEW);
+        } else {
+            $this->set('status', self::STATUS_DRAFT);
 
-        if (!count($errors)) {
-            $this->addObjectLog('Demande de location réouverte', 'REOPEN');
+            if (!count($errors)) {
+                $this->addObjectLog('Demande de location réouverte', 'REOPEN');
+            }
+
+            $this->set('closed', 0);
+
+            $errors = $this->update($warnings, true);
+
+            if (!count($errors)) {
+                if (!count($errors)) {
+                    if ((int) $this->getData('id_main_source')) {
+                        $source = $this->getSource();
+                        $source->updateField('cancel_submitted', 0);
+                        $source->updateField('refuse_submitted', 0);
+
+                        $errors = $this->checkStatus($warnings);
+
+                        if (!count($errors)) {
+                            if (BimpObject::objectLoaded($source)) {
+                                $errors = $source->reopenDemande((int) $this->getData('status'), $warnings);
+                            }
+                        }
+                    } else {
+                        $errors = $this->checkStatus($warnings);
+
+                        $devis_status = 0;
+                        $dir = $this->getFilesDir();
+                        $signature = $this->getChildObject('signature_contrat');
+                        if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
+                            $this->set('contrat_status', self::DOC_ACCEPTED);
+                            $devis_status = self::DOC_ACCEPTED;
+                        } else {
+                            $file = $this->getSignatureDocFileName('contrat');
+                            if (file_exists($dir . $file)) {
+                                $this->set('contrat_status', self::DOC_GENERATED);
+                                $devis_status = self::DOC_ACCEPTED;
+                            }
+                        }
+
+                        if (!$devis_status) {
+                            $signature = $this->getChildObject('signature_devis');
+                            if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
+                                $devis_status = self::DOC_ACCEPTED;
+                            } else {
+                                $file = $this->getSignatureDocFileName('devis');
+                                if (file_exists($dir . $file)) {
+                                    $devis_status = self::DOC_GENERATED;
+                                }
+                            }
+                        }
+
+                        $this->set('devis_status', $devis_status);
+                        $errors = $this->update($warnings, true);
+                    }
+                }
+            }
         }
 
         return array(
@@ -3514,6 +3568,7 @@ class BF_Demande extends BimpObject
                     if (count($req_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la requête');
                     } else {
+                        $source->updateField('refuse_submitted', 1);
                         $up_errors = $this->updateField('closed', 1);
                         if (count($up_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du statut "Fermé' . $this->e() . '"');
@@ -3563,11 +3618,15 @@ class BF_Demande extends BimpObject
                         $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la requête');
                     } else {
                         $source->updateField('cancel_submitted', 1);
-                        $up_errors = $this->updateField('closed', 1);
+                        $this->set('closed', 1);
+                        $this->set('devis_status', self::DOC_CANCELLED);
+                        $this->set('contrat_status', self::DOC_CANCELLED);
+                        $up_errors = $this->update($warnings, true);
+
                         if (count($up_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du statut "Fermé' . $this->e() . '"');
                         } else {
-                            $this->addObjectLog('Abandon définitif - Demande fermée' . ($note ? '<br/><b>Note : </b>' . $note : ''), 'CLOSED');
+                            $this->addObjectLog('Annulation notifiée auprès de ' . $this->displaySourceName() . ' - Demande fermée' . ($note ? '<br/><b>Note : </b>' . $note : ''), 'CLOSED');
                         }
                     }
                 }

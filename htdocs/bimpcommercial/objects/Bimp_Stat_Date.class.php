@@ -106,7 +106,7 @@ class Bimp_Stat_Date extends BimpObject
         return parent::displayData('date');
     }
 
-    public function getInfoGraph()
+    public function getInfoGraph($idGraph)
     {
         if (static::$modeDateGraph == 'day')
             $xValueFormatString = 'DD MMM, YYYY';
@@ -119,7 +119,7 @@ class Bimp_Stat_Date extends BimpObject
         
         
         
-        $data = parent::getInfoGraph();
+        $data = parent::getInfoGraph($idGraph);
         $data["data1"] = array("name"=>'Facture HT');
         $data["data2"] = array("name"=>'Commande HT', 'visible'=>0);
         $data["data3"] = array("name"=>'Devis HT', 'visible'=>0);
@@ -129,7 +129,7 @@ class Bimp_Stat_Date extends BimpObject
         $data["axeY"] = array("title" => 'K €', "suffix" => "", "minimum" => 30, "valueFormatString" => "#,##0 €");
         
         
-        $data["title"] = 'Facture Commande et Devis par ';
+        $data["title"] = 'Factures Commandes et Devis par ';
         if (static::$modeDateGraph == 'day')
             $data["title"] .= 'Jour';
         elseif (static::$modeDateGraph == 'month')
@@ -140,7 +140,7 @@ class Bimp_Stat_Date extends BimpObject
         return $data;
     }
 
-    public function getGraphDataPoint($numero_data = 1)
+    public function getGraphDataPoint($params, $numero_data = 1)
     {
         $tabDate = explode("-", $this->getData('date'));
         if (static::$modeDateGraph == 'day')

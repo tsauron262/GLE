@@ -10,7 +10,6 @@ class BimpObject extends BimpCache
     public $config = null;
     public $id = null;
     public $alias = 'a';
-//    public $asGraph = false; => remplacé par param yml "has_graph" 
     public $ref = "";
     public static $status_list = array();
     public static $modeDateGraph = 'day';
@@ -56,7 +55,6 @@ class BimpObject extends BimpCache
         'force_extrafields_update' => array('data_type' => 'bool', 'default' => 0),
         'name_syntaxe'             => array('default' => ''),
         'nom_url'                  => array('type' => 'definitions', 'defs_type' => 'nom_url'),
-        'has_graph'                => array('data_type' => 'bool', 'default' => 0),
         'new_status_logs'          => array('data_type' => 'bool', 'default' => 0),
         'objects'                  => array('type' => 'keys'),
         'associations'             => array('type' => 'keys'),
@@ -1941,20 +1939,30 @@ class BimpObject extends BimpCache
             return 0;
     }
 
-    public function getInfoGraph()
+    public function getInfoGraph($nameGraph)
     {
         return array(
             array("data1" => array("title" => "Nom Data1"),
                 "axeX"  => array("title" => "X", "valueFormatString" => 'value type'),
                 "axeY"  => array("title" => "Y"),
-                'title' => $this->getLabel()
+                'title' => $this->getLabel(),
+                'params'=> array()//tous les paramétre qui seront transmis a getGraphDataPoint ou a getGraphDatasPoints
         ));
     }
 
-//    public function getGraphDataPoint()
-//    {
-//        return '';
-//    }
+    public function getGraphDataPoint_exemple($params, $numero_data = 1)//si c'est fonction est définit, on apelle en priorité elle charge chaque donnée via l'objet
+    {
+        return array("x"=> '2022/01/01', "y" => 40);
+    }
+    
+    public function getGraphDatasPoints_exemple($params, $numero_data = 1)//si c'est fonction est définit, elle charge toutes les donnée en un seul coup
+    {
+        $result = array();
+        $result[] = array("x" => "new Date(4545435)", "y" => (int)45);
+        $result[] = array("x" => "new Date(435353553)", "y" => (int)74);
+            
+        return $result;
+    }
 
     public function getPdfNamePrincipal()
     {
@@ -9450,15 +9458,23 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $success = "Donnée Maj";
         $errors = array();
         $warnings = array();
+        
+        
+        $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
+        $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
+        $post_temp = $_POST;
+        $_POST = $list_data;
 
-        $data2 = $this->getInfoGraph();
+        $list = new BC_ListTable($this, $list_name);
+        $nameGraph = $list->getParam('graph')[$data['idGraph']];
+        $dataGraphe = $this->getInfoGraph($nameGraph);
 
         $options = array();
         $options['animationEnabled'] = true;
         $options['theme'] = "light2";
-        $options['title'] = array("text" => $data2['title']);
-        $options['axisX'] = $data2['axeX'];
-        $options['axisY'] = $data2['axeY'];
+        $options['title'] = array("text" => $dataGraphe['title']);
+        $options['axisX'] = $dataGraphe['axeX'];
+        $options['axisY'] = $dataGraphe['axeY'];
         $options['toolTip'] = array("shared" => true);
         $options['legend'] = array(
             "cursor"             => "pointer",
@@ -9468,33 +9484,27 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             "itemclick"          => "toogleDataSeries",
         );
         $i = 1;
-        while (isset($data2['data' . $i])) {
+        while (isset($dataGraphe['data' . $i])) {
             $tmpData = array();
             $tmpData["type"] = "line";
             $tmpData["showInLegend"] = true;
             $tmpData["markerType"] = "square";
 
-            $tmpData = BimpTools::overrideArray($tmpData, $data2['data' . $i]);
+            $tmpData = BimpTools::overrideArray($tmpData, $dataGraphe['data' . $i]);
 
-            if (isset($data2['axeX']['valueFormatString']))
-                $tmpData['xValueFormatString'] = $data2['axeX']['valueFormatString'];
-            if (isset($data2['axeY']['valueFormatString']))
-                $tmpData['yValueFormatString'] = $data2['axeY']['valueFormatString'];
+            if (isset($dataGraphe['axeX']['valueFormatString']))
+                $tmpData['xValueFormatString'] = $dataGraphe['axeX']['valueFormatString'];
+            if (isset($dataGraphe['axeY']['valueFormatString']))
+                $tmpData['yValueFormatString'] = $dataGraphe['axeY']['valueFormatString'];
 
             $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
             if (method_exists($this, 'getGraphDataPoint')) {//il faut charger chaque objet pour avoir ca valeur
-                $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
-                $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
-                $post_temp = $_POST;
-                $_POST = $list_data;
-
-                $list = new BC_ListTable($this, $list_name);
 
                 $list->initForGraph();
 
-                $tmpData['dataPoints'] = $list->getPointsForGraph($i);
+                $tmpData['dataPoints'] = $list->getPointsForGraph($dataGraphe['params'], $i);
             } elseif (method_exists($this, 'getGraphDatasPoints')) {//On apelle une seul methode pour tous les points
-                $tmpData['dataPoints'] = $this->getGraphDatasPoints($i);
+                $tmpData['dataPoints'] = $this->getGraphDatasPoints($dataGraphe['params'], $i);
             } else {
                 $errors[] = 'Aucune methode pour charger les points';
             }
@@ -9508,7 +9518,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $success_callback = str_replace('","y"', ',"y"', $success_callback);
         $success_callback = str_replace('"toogleDataSeries"', 'toogleDataSeries', $success_callback);
 
-        $success_callback .= '$("#' . $list_id . '_chartContainer").CanvasJSChart(options);';
+        $success_callback .= '$("#' . $list_id . '_' . $data['idGraph'] . '_chartContainer").CanvasJSChart(options);';
 
         $success_callback .= 'function toogleDataSeries(e){
                     if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {

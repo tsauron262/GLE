@@ -41,21 +41,44 @@ class Bimp_Log extends BimpObject
         'getimagesize(',
     );
     
-       public function getInfoGraph()
+    
+    public function getInfoGraph($graphName)
     {
-        $data = parent::getInfoGraph();
+        $data = parent::getInfoGraph($graphName);
+        if($graphName == '15M')
+            $arrondirEnMinuteGraph = 15;
+        elseif($graphName == '3H')
+            $arrondirEnMinuteGraph = 60*3;
+        elseif($graphName == '6H')
+            $arrondirEnMinuteGraph = 60*6;
+        elseif($graphName == '12H')
+            $arrondirEnMinuteGraph = 60*12;
+        else
+            $arrondirEnMinuteGraph = 60;
         $data["data1"] = array("name"=>'Nb Logs', "type" => "column");
         $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM, YYYY HH:mm');
         $data["axeY"] = array("title" => 'Nb');
-        $data["title"] = 'Log par '.$this->arrondirEnMinuteGraph.' minute(s) ';
+        $data["params"] = array('minutes'=>$arrondirEnMinuteGraph);
+        $unite = 'minute';
+        if($arrondirEnMinuteGraph >= 60){
+            $unite = 'heure';
+            $arrondirEnMinuteGraph = $arrondirEnMinuteGraph/60;
+        }
+        if($arrondirEnMinuteGraph != 1)
+            $unite .='s';
+        else
+            $arrondirEnMinuteGraph = '';
+        $data["title"] = 'Log par '.$arrondirEnMinuteGraph.' '.$unite;
 
         return $data;
     }
     
-    public function getGraphDatasPoints($numero_data = 1)
+    public function getGraphDatasPoints($params, $numero_data = 1)
     {
         $result = array();
-        $dateStr = "FLOOR(UNIX_TIMESTAMP(date)/($this->arrondirEnMinuteGraph*60))*$this->arrondirEnMinuteGraph*60";
+        $dataGraph = $this->getInfoGraph($graphName);
+        $arrondirEnMinuteGraph = $params['minutes'];
+        $dateStr = "FLOOR(UNIX_TIMESTAMP(date)/($arrondirEnMinuteGraph*60))*$arrondirEnMinuteGraph*60";
         $sql = $this->db->db->query('SELECT count(*) as nb, '.$dateStr.' as timestamp FROM '.MAIN_DB_PREFIX.'bimpcore_log GROUP BY '.$dateStr);
         while($ln = $this->db->db->fetch_object($sql)){
             $tabDate = array($ln->annee, $ln->month, $ln->day, $ln->hour, $ln->minute);

@@ -24,4 +24,3 @@ forms:
             create_signature: 
                 input: 
                     help: 'ATTENTION : <b>la signature du devis est obligatoire</b>.<br/>Mettre NON uniquement si vous envisagez d&apos;établir <b>un contrat</b> ou <b>un devis de location</b> et de ne faire signer que celui-ci'
-

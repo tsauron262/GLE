@@ -273,6 +273,10 @@ lists:
 cards: 
     default: 
         status: status
+        fields: 
+            doc_type: 
+                field: doc_type
+                label: Type
             
     
             

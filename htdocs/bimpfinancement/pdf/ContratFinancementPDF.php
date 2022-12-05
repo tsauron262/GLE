@@ -8,12 +8,20 @@ class ContratFinancementPDF extends DocFinancementPDF
     public static $doc_type = 'contrat';
     public $signature_bloc = true;
     public $use_docsign = true;
+    public $signature_bloc_label = '';
     public $object_signature_params_field_name = 'signature_contrat_params';
+    public $signature_title = 'Signature';
+    public $signature_pro_title = 'Signature + Cachet avec SIRET';
     public $client_data;
+    public $loueur_data;
+    public $cessionnaire_data;
 
-    public function __construct($db, $demande, $client_data = array())
+    public function __construct($db, $demande, $client_data = array(), $loueur_data = array(), $cessionnaire_data = array())
     {
         $this->client_data = $client_data;
+        $this->loueur_data = $loueur_data;
+        $this->cessionnaire_data = $cessionnaire_data;
+
         parent::__construct($db, $demande);
         $this->doc_name = 'Contrat de location';
     }
@@ -61,6 +69,14 @@ class ContratFinancementPDF extends DocFinancementPDF
                 $html .= 'Représentée par ' . $representant . ' en qualité de ' . $repr_qualité . '.';
             } else {
                 $this->errors = BimpTools::merge_array($this->errors, $errors);
+            }
+        } else {
+            $nom = BimpTools::getArrayValueFromPath($this->client_data, 'nom', '', $errors, true, 'Nom du client absent');
+            $address = BimpTools::getArrayValueFromPath($this->client_data, 'address', '', $errors, true, 'Adresse du client absente');
+
+            $html .= '"' . $nom . '", particulier.<br/>';
+            if ($address) {
+                $html .= 'Domicilié à l\'adresse : ' . $address . '.';
             }
         }
 
@@ -164,6 +180,17 @@ class ContratFinancementPDF extends DocFinancementPDF
                 break;
         }
 
+        $livraisons = BimpTools::getArrayValueFromPath($this->client_data, 'livraisons', '');
+        if ($livraisons) {
+            $html .= '<div style="font-size: 9px">';
+            $html .= '<p style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Site(s) de livraison / installation</p>';
+            $html .= '<p style="font-weight: bold">';
+            $html .= $livraisons;
+            $html .= '</p>';
+            $html .= '</div>';
+        }
+
+        $html .= '<div style="font-size: 9px">';
         $html .= '<p>';
         $html .= 'Le locataire déclare avoir été parfaitement informé de l’opération lors de la phase précontractuelle, avoir pris connaissance, reçu et accepter toutes les conditions particulières et générales. Il atteste que le contrat est en rapport direct avec son activité professionnelle et souscrit pour les besoins de cette dernière. Le signataire atteste être habilité à l’effet d’engager le locataire au titre du présent contrat. Le locataire reconnait avoir une copie des Conditions Générales, les avoir acceptées sans réserve y compris les clauses attribution de compétence et CNIL.';
         $html .= '</p>';
@@ -183,5 +210,123 @@ class ContratFinancementPDF extends DocFinancementPDF
         $html .= '</div>';
 
         $this->writeContent($html);
+    }
+
+    public function renderSignatureBloc()
+    {
+        // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique. 
+
+        if ($this->signature_bloc) {
+            $errors = array();
+
+            $html = '<table style="width: 95%;font-size: 8px;" cellpadding="3">';
+            $html .= '<tr>';
+            // Signatue locataire: 
+            $html .= '<td style="width: 33%">';
+            $html .= '<span style="font-size: 9px; font-weight: bold">Pour le locataire :</span><br/>';
+            $is_company = (int) BimpTools::getArrayValueFromPath($this->client_data, 'is_company', 0);
+            $html .= BimpTools::getArrayValueFromPath($this->client_data, 'representant', '', $errors, true, 'Représentant du client absent') . '<br/>';
+            if ($is_company) {
+                $html .= BimpTools::ucfirst(BimpTools::getArrayValueFromPath($this->client_data, 'repr_qualite', '', $errors, true, 'Qualité du représentant du client absent')) . '<br/>';
+            }
+//            $html .= '<span style="font-style: italic; font-size: 7px">Signature' . ($is_company ? ' + cachet' : '') . '</span><br/>';
+            $html .= '<br/><span style="font-style: italic">"Lu et approuvé"</span>';
+            $html .= '</td>';
+
+            // Signature Loueur:
+            $html .= '<td style="width: 33%">';
+            $html .= '<span style="font-size: 9px; font-weight: bold">Pour le loueur :</span><br/>';
+            $html .= BimpTools::getArrayValueFromPath($this->loueur_data, 'nom', '', $errors, true, 'Nom du signataire loueur absent') . '<br/>';
+            $html .= BimpTools::getArrayValueFromPath($this->loueur_data, 'qualite', '', $errors, true, 'Qualité du signataire loueur absente');
+            $html .= '</td>';
+
+            // Signature cessionnaire:
+            $html .= '<td style="width: 33%">';
+            $html .= '<span style="font-size: 9px; font-weight: bold">Pour le cessionnaire :</span><br/>';
+            $html .= BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'raison_social', '', $errors, true, 'Raison sociale du signataire cessionnaire absent') . '<br/>';
+            $html .= 'SIREN : ' . BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'siren', '', $errors, true, 'N° SIREN du signataire cessionnaire absent') . '<br/>';
+            $html .= 'Représenté par : ' . BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'nom', '', $errors, true, 'Nom du signataire cessionnaire absent') . '<br/>';
+            $html .= 'En qualité de : ' . BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'qualite', '', $errors, true, 'Qualité du signataire cessionnaire absente');
+            $html .= '</td>';
+            $html .= '</tr>';
+            $html .= '<tr>';
+            $html .= '<td>Date : <br/>Signature :<br/><br/><br/><br/><br/></td>';
+            $html .= '<td>Date : <br/>Signature :<br/><br/><br/><br/><br/></td>';
+            $html .= '<td>Date : <br/>Signature :<br/><br/><br/><br/><br/></td>';
+            $html .= '</tr>';
+            $html .= '</table>';
+
+            $page = 0;
+            $yPos = 0;
+
+            $this->writeFullBlock($html, $page, $yPos);
+
+            $this->signature_params['locataire'] = array(
+                'elec'     => array(
+                    'x_pos'         => 12,
+                    'y_pos'         => $yPos + 30,
+                    'page'          => $page,
+                    'width'         => 40,
+                    'date_x_offset' => 7,
+                    'date_y_offset' => -8
+                ),
+                'docusign' => array(
+                    'anch' => 'Pour le locataire :',
+                    'fs'   => 'Size8',
+                    'x'    => 5,
+                    'y'    => 107,
+                    'date' => array(
+                        'x' => 22,
+                        'y' => 56
+                    )
+                )
+            );
+            $this->signature_params['cessionnaire'] = array(
+                'elec'     => array(
+                    'x_pos'         => 131,
+                    'y_pos'         => $yPos + 30,
+                    'page'          => $page,
+                    'width'         => 40,
+                    'date_x_offset' => 7,
+                    'date_y_offset' => -8
+                ),
+                'docusign' => array(
+                    'anch' => 'Pour le cessionnaire :',
+                    'fs'   => 'Size8',
+                    'x'    => 5,
+                    'y'    => 107,
+                    'date' => array(
+                        'x' => 22,
+                        'y' => 56
+                    )
+                )
+            );
+            $this->signature_params['loueur'] = array(
+                'elec'     => array(
+                    'x_pos'         => 71,
+                    'y_pos'         => $yPos + 30,
+                    'page'          => $page,
+                    'width'         => 40,
+                    'date_x_offset' => 7,
+                    'date_y_offset' => -8
+                ),
+                'docusign' => array(
+                    'anch' => 'Pour le loueur :',
+                    'fs'   => 'Size8',
+                    'x'    => 5,
+                    'y'    => 107,
+                    'date' => array(
+                        'x' => 22,
+                        'y' => 56
+                    )
+                )
+            );
+
+            if (is_a($this->bimpObject, 'BimpObject')) {
+                if ($this->bimpObject->field_exists($this->object_signature_params_field_name)) {
+                    $this->bimpObject->updateField($this->object_signature_params_field_name, $this->signature_params);
+                }
+            }
+        }
     }
 }

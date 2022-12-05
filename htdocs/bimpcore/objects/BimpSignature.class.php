@@ -302,7 +302,7 @@ class BimpSignature extends BimpObject
                 ))
             );
         }
-        
+
         if ($this->isActionAllowed('reopen') && $this->canSetAction('reopen')) {
             $buttons[] = array(
                 'label'   => 'Réouvrir la signature',
@@ -312,7 +312,7 @@ class BimpSignature extends BimpObject
                 ))
             );
         }
-        
+
         $buttons = BimpTools::merge_array($buttons, $this->getSignedButtons());
         return $buttons;
     }
@@ -388,6 +388,24 @@ class BimpSignature extends BimpObject
     }
 
     // Getters données: 
+
+    public function getInputValue($field_name)
+    {
+        switch ($field_name) {
+            case 'email_content':
+                $signature_type = BimpTools::getPostFieldValue('signature_type', 'elec');
+                $errors = array();
+                $obj = $this->getObj();
+                if ($this->isObjectValid($errors, $obj)) {
+                    if (method_exists($obj, 'getSignatureEmailContent', $signature_type)) {
+                        return $obj->getSignatureEmailContent($signature_type);
+                    }
+                }
+                return self::getDefaultSignDistEmailContent($signature_type);
+        }
+
+        return null;
+    }
 
     public function getObj()
     {
@@ -1083,7 +1101,21 @@ class BimpSignature extends BimpObject
     {
         $errors = array();
 
-        $srcFile = $this->getDocumentFilePath(false);
+        $docusign_file = $this->getFilesDir() . 'docusign.pdf';
+        if (file_exists($docusign_file)) {
+            $srcFile = $docusign_file;
+        } else {
+            $signed_file = $this->getDocumentFilePath(true);
+
+            if (file_exists($signed_file)) {
+                $srcFile = $signed_file;
+            }
+        }
+
+        if (!$srcFile) {
+            $srcFile = $this->getDocumentFilePath(false);
+        }
+
         $destFile = $this->getDocumentFilePath(true);
 
         $image = $signataire->getData('base_64_signature');
@@ -1202,6 +1234,36 @@ class BimpSignature extends BimpObject
                 }
 
                 $obj->addObjectLog($msg, 'SIGNATURE_' . strtoupper($this->getData('doc_type')) . '_REOPEN');
+            }
+        }
+
+        return $errors;
+    }
+
+    public function openAllSignDistAccess($email_content = '', &$warnings = array(), &$success = '')
+    {
+        $errors = array();
+
+        $signataires = $this->getChildrenObjects('signataires', array(
+            'status'     => 0,
+            'allow_dist' => 1
+        ));
+
+        if (empty($signataires)) {
+            $errors[] = 'Aucun signataire éligible pour l\'ouverture de la signature éléctronique à distance';
+        } else {
+            $nOK = 0;
+            foreach ($signataires as $signataire) {
+                $open_errors = $signataire->openSignDistAccess(true, $email_content);
+                if (count($open_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($open_errors, 'Echec de l\'ouverture de la signatire à distance pour le signataire "' . $signataire->getData('label') . '" ' . $signataire->getName());
+                } else {
+                    $nOK++;
+                }
+            }
+
+            if ($nOK > 0) {
+                $success .= ($success ? '<br/>' : '') . 'Ouverture de la signature à distance effectuée pour ' . $nOK . ' signataire' . ($nOK > 1 ? 's' : '');
             }
         }
 

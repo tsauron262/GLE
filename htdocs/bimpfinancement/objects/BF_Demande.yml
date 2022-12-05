@@ -152,7 +152,7 @@ fields:
         default_value: 0
             
     id_contact_client: 
-        label: Contact client
+        label: Contact client signataire
         type: id_object
         object: contact_client
         create_form: default
@@ -160,7 +160,6 @@ fields:
             fields: 
                 fk_soc: 
                     field_value: id_client
-        depends_on: id_client
         input: 
             type: select
             options: 
@@ -168,6 +167,23 @@ fields:
         search: 
             input: 
                 type: search_object
+        depends_on: id_client
+        display_if:
+            field_name: id_client
+            hide_values: 0,''
+            
+    contacts_livraisons: 
+        label: Contacts livraison(s) / installation(s)
+        type: items_list
+        items_data_type: id_object
+        object: contact
+        items_braces: 1
+        input: 
+            type: select
+            options: 
+                array: clientContacts
+            help: Laisser vide pour utiliser le contact signataire comme contact de livraison.
+        depends_on: id_client
         display_if:
             field_name: id_client
             hide_values: 0,''
@@ -445,6 +461,10 @@ fields:
         label: Paramètres signature du pvr
         type: json
         
+    contrat_signataires_data: 
+        label: Données signataires contrat
+        type: json
+        
     closed: 
         label: Demande Fermée
         type: bool
@@ -461,6 +481,8 @@ forms:
                 field: id_client
             contact: 
                 field: id_contact_client
+            contacts_livraisons: 
+                field: contacts_livraisons
             supplier: 
                 field: id_supplier
             contact_supplier: 
@@ -599,8 +621,11 @@ forms:
         rows: 
             - field: formule
               required: 1
+              
+            # LOCATAIRE: 
+            - title: Locataire
             - custom: 1
-              label: Nom Client
+              label: Nom Client locataire
               input_name: client_name
               input: 
                   type: text
@@ -647,15 +672,12 @@ forms:
               input: 
                   type: textarea
             - custom: 1
-              label: Représentant
+              label: Nom du représentant signataire
               input_name: client_representant
               input: 
-                  type: text
-              display_if: 
-                  field_name: client_is_company
-                  show_values: 1
+                  type: text          
             - custom: 1
-              label: Qualité du représentant
+              label: Qualité du représentant signataire
               input_name: client_repr_qualite
               input: 
                   type: text
@@ -666,11 +688,65 @@ forms:
               label: Site(s) d'installation
               input: 
                   type: textarea
-              input_name: client_sites
-              display_if: 
-                  field_name: client_is_company
-                  show_values: 1
+              input_name: client_livraisons
                   
+            # LOUEUR: 
+            - title: Loueur
+            - custom: 1
+              label: Nom loueur
+              input_name: loueur_nom
+              input: 
+                  type: text
+            - custom: 1
+              label: Qualité loueur
+              input_name: loueur_qualite
+              input: 
+                  type: text
+            - custom: 1
+              label: Adresse e-mail loueur
+              input_name: loueur_email
+              input: 
+                  type: text
+                  
+            # CESSIONNAIRE: 
+            - title: Cessionnaire
+            - custom: 1
+              label: Raison sociale
+              input_name: cessionnaire_saison_sociale
+              input: 
+                  type: text
+            - custom: 1
+              label: N° SIREN
+              input_name: cessionnaire_siren
+              input: 
+                  type: text
+            - custom: 1
+              label: Contact signataire du refinanceur
+              input_name: cessionnaire_id_contact_signataire
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      array: cessionnaireContacts
+            - custom: 1
+              label: Nom Cessionnaire
+              input_name: cessionnaire_nom
+              input: 
+                  type: text
+              depends_on: cessionnaire_id_contact_signataire
+            - custom: 1
+              label: Adresse e-mail cessionnaire
+              input_name: cessionnaire_email
+              input: 
+                  type: text
+              depends_on: cessionnaire_id_contact_signataire
+            - custom: 1
+              label: Qualité cessionnaire
+              input_name: cessionnaire_qualite
+              input: 
+                  type: text
+              depends_on: cessionnaire_id_contact_signataire
+              
     upload_document:
         rows: 
             file: 
@@ -755,6 +831,7 @@ fields_tables:
               display: card
               show: 
                   field_value: id_contact_client
+            - field: contacts_livraisons
             - field: id_supplier
               display: card
               show: 

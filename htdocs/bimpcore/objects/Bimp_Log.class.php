@@ -58,8 +58,17 @@ class Bimp_Log extends BimpObject
         $data["data1"] = array("name"=>'Nb Logs', "type" => "column");
         $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM, YYYY HH:mm');
         $data["axeY"] = array("title" => 'Nb');
-        $data["title"] = 'Log par '.$arrondirEnMinuteGraph.' minute(s) ';
         $data["params"] = array('minutes'=>$arrondirEnMinuteGraph);
+        $unite = 'minute';
+        if($arrondirEnMinuteGraph >= 60){
+            $unite = 'heure';
+            $arrondirEnMinuteGraph = $arrondirEnMinuteGraph/60;
+        }
+        if($arrondirEnMinuteGraph != 1)
+            $unite .='s';
+        else
+            $arrondirEnMinuteGraph = '';
+        $data["title"] = 'Log par '.$arrondirEnMinuteGraph.' '.$unite;
 
         return $data;
     }

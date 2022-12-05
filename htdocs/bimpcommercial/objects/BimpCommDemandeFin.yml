@@ -147,10 +147,6 @@ fields:
         label: Paramètres signature contrat de location
         type: json
         
-    contrat_signataire_data: 
-        label: Données signataires contrat
-        type: json
-        
     signataires_cf_data: 
         label: Données signataires contrat
         type: json
@@ -283,7 +279,7 @@ forms:
                 value: 
                     callback: 
                         params: 
-                            - devis_fin
+                            - elec
                             
     signature_contrat_fin: 
         title: Demander la signature du contrat de location

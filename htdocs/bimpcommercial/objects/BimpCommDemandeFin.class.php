@@ -248,7 +248,7 @@ class BimpCommDemandeFin extends BimpObject
         return null;
     }
 
-    public function getSignatureEmailContent($doc_type = 'devis', $signature_type = '')
+    public function getSignatureEmailContent($signature_type = '')
     {
         if (!$signature_type) {
             if (BimpTools::isPostFieldSubmit('init_docusign')) {
@@ -1517,7 +1517,8 @@ class BimpCommDemandeFin extends BimpObject
                 $errors[] = 'La fiche signature du contrat de location a déjà été créée pour ' . $this->getLabel('this');
             }
 
-            $signataires_data = $this->getData('contrat_signataire_data');
+            $signataires_data = $this->getData('signataires_cf_data');
+
             $loueur_nom = BimpTools::getArrayValueFromPath($signataires_data, 'loueur/nom', '', $errors, true, 'Nom du loueur absent');
             $loueur_email = BimpTools::getArrayValueFromPath($signataires_data, 'loueur/email', '', $errors, true, 'Adresse e-mail du loueur absente');
             $loueur_fonction = BimpTools::getArrayValueFromPath($signataires_data, 'loueur/fonction', '', $errors, true, 'Qualité du loueur absente');
@@ -1552,17 +1553,18 @@ class BimpCommDemandeFin extends BimpObject
                         $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregstrement de l\'ID de la fiche signature');
                     } else {
                         $signataire_errors = array();
+                        BimpObject::loadClass('bimpcore', 'BimpSignataire');
                         $signataire = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
-                                    'id_signature' => $signature->id,
-                                    'type'         => BimpSignataire::TYPE_CLIENT,
-                                    'code'         => 'locataire',
-                                    'label'        => 'Locataire',
-                                    'id_signature' => $signature->id,
-                                    'id_client'    => $id_client,
-                                    'id_contact'   => (int) $this->getData('id_contact_signature'),
-                                    'allow_dist'   => $allow_dist,
-                                    'allow_refuse' => $allow_docusign,
-                                    'allow_refuse' => $allow_refuse
+                                    'id_signature'   => $signature->id,
+                                    'type'           => BimpSignataire::TYPE_CLIENT,
+                                    'code'           => 'locataire',
+                                    'label'          => 'Locataire',
+                                    'id_signature'   => $signature->id,
+                                    'id_client'      => $id_client,
+                                    'id_contact'     => (int) $this->getData('id_contact_signature'),
+                                    'allow_dist'     => $allow_dist,
+                                    'allow_docusign' => $allow_docusign,
+                                    'allow_refuse'   => $allow_refuse
                                         ), true, $signataire_errors, $warnings);
 
                         if (!BimpObject::objectLoaded($signataire)) {
@@ -1571,16 +1573,16 @@ class BimpCommDemandeFin extends BimpObject
 
                         $signataire_errors = array();
                         $signataire = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
-                                    'id_signature' => $signature->id,
-                                    'type'         => BimpSignataire::TYPE_CUSTOM,
-                                    'code'         => 'loueur',
-                                    'label'        => 'Loueur',
-                                    'nom'          => $loueur_nom,
-                                    'email'        => $loueur_email,
-                                    'fonction'     => $loueur_fonction,
-                                    'allow_dist'   => $allow_dist,
-                                    'allow_refuse' => $allow_docusign,
-                                    'allow_refuse' => $allow_refuse
+                                    'id_signature'   => $signature->id,
+                                    'type'           => BimpSignataire::TYPE_CUSTOM,
+                                    'code'           => 'loueur',
+                                    'label'          => 'Loueur',
+                                    'nom'            => $loueur_nom,
+                                    'email'          => $loueur_email,
+                                    'fonction'       => $loueur_fonction,
+                                    'allow_dist'     => $allow_dist,
+                                    'allow_docusign' => $allow_docusign,
+                                    'allow_refuse'   => $allow_refuse
                                         ), true, $signataire_errors, $warnings);
 
                         if (!BimpObject::objectLoaded($signataire)) {
@@ -1589,16 +1591,16 @@ class BimpCommDemandeFin extends BimpObject
 
                         $signataire_errors = array();
                         $signataire = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
-                                    'id_signature' => $signature->id,
-                                    'type'         => BimpSignataire::TYPE_CUSTOM,
-                                    'code'         => 'cessionnaire',
-                                    'label'        => 'Cessionnaire',
-                                    'nom'          => $cessionnaire_nom,
-                                    'email'        => $cessionnaire_email,
-                                    'fonction'     => $cessionnaire_fonction,
-                                    'allow_dist'   => $allow_dist,
-                                    'allow_refuse' => $allow_docusign,
-                                    'allow_refuse' => $allow_refuse
+                                    'id_signature'   => $signature->id,
+                                    'type'           => BimpSignataire::TYPE_CUSTOM,
+                                    'code'           => 'cessionnaire',
+                                    'label'          => 'Cessionnaire',
+                                    'nom'            => $cessionnaire_nom,
+                                    'email'          => $cessionnaire_email,
+                                    'fonction'       => $cessionnaire_fonction,
+                                    'allow_dist'     => $allow_dist,
+                                    'allow_docusign' => $allow_docusign,
+                                    'allow_refuse'   => $allow_refuse
                                         ), true, $signataire_errors, $warnings);
 
                         if (!BimpObject::objectLoaded($signataire)) {

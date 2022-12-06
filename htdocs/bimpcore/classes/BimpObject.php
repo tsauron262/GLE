@@ -1941,13 +1941,15 @@ class BimpObject extends BimpCache
 
     public function getInfoGraph($nameGraph)
     {
-        return array(
+        return 
             array("data1" => array("title" => "Nom Data1"),
-                "axeX"  => array("title" => "X", "valueFormatString" => 'value type'),
-                "axeY"  => array("title" => "Y"),
-                'title' => $this->getLabel(),
-                'params'=> array()//tous les paramétre qui seront transmis a getGraphDataPoint ou a getGraphDatasPoints
-        ));
+                "data2" => array("title" => "Nom Data2"),
+                "axeX"      => array("title" => "X", "valueFormatString" => 'value type'),
+                "axeY"      => array("title" => "Y"),//Attention potentiellement plusiuers donné sur cette axe
+                'title'     => $this->getLabel(),
+                'params'    => array(),//tous les paramétre qui seront transmis a getGraphDataPoint ou a getGraphDatasPoints
+                'mode_data' => (method_exists($this, 'getGraphDataPoint'))? 'objects' : 'unique'
+        );
     }
 
     public function getGraphDataPoint_exemple($params, $numero_data = 1)//si c'est fonction est définit, on apelle en priorité elle charge chaque donnée via l'objet
@@ -1955,11 +1957,12 @@ class BimpObject extends BimpCache
         return array("x"=> '2022/01/01', "y" => 40);
     }
     
-    public function getGraphDatasPoints_exemple($params, $numero_data = 1)//si c'est fonction est définit, elle charge toutes les donnée en un seul coup
+    public function getGraphDatasPoints_exemple($params)//si c'est fonction est définit, elle charge toutes les donnée en un seul coup
     {
         $result = array();
-        $result[] = array("x" => "new Date(4545435)", "y" => (int)45);
-        $result[] = array("x" => "new Date(435353553)", "y" => (int)74);
+        $result[1][] = array("x" => "new Date(4545435)", "y" => (int)45);//donné 1
+        $result[1][] = array("x" => "new Date(454545635)", "y" => (int)65);//donné 1
+        $result[2][] = array("x" => "new Date(435353553)", "y" => (int)74);// donné 2
             
         return $result;
     }
@@ -9485,6 +9488,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             "itemclick"          => "toogleDataSeries",
         );
         $i = 1;
+        if ($dataGraphe['mode_data'] == 'unique' && method_exists($this, 'getGraphDatasPoints')) {//On apelle une seul methode pour tous les points
+            $tmpDatas = $this->getGraphDatasPoints($dataGraphe['params']);
+        }
         while (isset($dataGraphe['data' . $i])) {
             $tmpData = array();
             $tmpData["type"] = "line";
@@ -9499,15 +9505,16 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $tmpData['yValueFormatString'] = $dataGraphe['axeY']['valueFormatString'];
 
             $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
-            if (method_exists($this, 'getGraphDataPoint')) {//il faut charger chaque objet pour avoir ca valeur
+            if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint')) {//il faut charger chaque objet pour avoir ca valeur
 
                 $list->initForGraph();
 
                 $tmpData['dataPoints'] = $list->getPointsForGraph($dataGraphe['params'], $i);
-            } elseif (method_exists($this, 'getGraphDatasPoints')) {//On apelle une seul methode pour tous les points
-                $tmpData['dataPoints'] = $this->getGraphDatasPoints($dataGraphe['params'], $i);
+            } elseif ($dataGraphe['mode_data'] == 'unique' && isset($tmpDatas)) {//On apelle une seul methode pour tous les points
+                $tmpData['dataPoints'] = $tmpDatas[$i];
             } else {
-                $errors[] = 'Aucune methode pour charger les points';
+                echo '<pre>';print_r($dataGraphe);
+                $errors[] = 'Aucune methode pour charger les points '.$dataGraphe['mode_data'];
             }
             $options['data'][] = $tmpData;
             $i++;

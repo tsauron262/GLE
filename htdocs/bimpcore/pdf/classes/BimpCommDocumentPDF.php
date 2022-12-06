@@ -8,7 +8,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
     public static $label_prime = "Apport externe";
     public static $label_prime2 = "Apport externe2";
-    public static $use_cgv = false;
+    public static $use_cgv = true;
 
     # Objets: 
     public $bimpCommObject = null;

@@ -7,12 +7,12 @@ require_once("../../main.inc.php");
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 $errors = $warnings = array();
+$mode_dev = BimpCore::isUserDev();
 global $user;
 $user->fetch(1);
 
 $signature = null;
 
-$mode_dev = BimpCore::isUserDev();
 
 if ($mode_dev) {
     $body = file_get_contents(DOL_DATA_ROOT . '/docusign_webhook.txt');
@@ -35,7 +35,7 @@ if (!$body) {
             echo '</pre>';
         }
         
-        $envelopeId = BimpTools::getArrayValueFromPath($in, 'data/envelopeId', '');
+        $envelopeId = BimpTools::getArrayValueFromPath($data, 'data/envelopeId', '');
 
         if (!$envelopeId) {
             $errors[] = 'ID DocuSign absent';

@@ -890,6 +890,11 @@ lists:
             date_create: unset
             commercial: unset
             
+    client: 
+        extends: default
+        graph:
+            - client
+            
 views: 
     default: 
         objects_change_reload: BimpFile,BimpNote,RemiseGlobale

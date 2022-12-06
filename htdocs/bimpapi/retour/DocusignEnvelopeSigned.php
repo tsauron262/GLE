@@ -45,7 +45,7 @@ if (!$body) {
                             ), true);
 
             if (!BimpObject::objectLoaded($signature)) {
-                $errors[] = "Aucune signature existante pour l\'ID DocuSign " . $envelopeId;
+                $errors[] = "Aucune signature existante pour l'ID DocuSign " . $envelopeId;
             } else {
                 $data = array(
                     'send_notification_email' => true

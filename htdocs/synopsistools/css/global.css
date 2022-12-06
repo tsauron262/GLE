@@ -8,6 +8,10 @@
 }
 }
 
+.menu-collapsed .bimptheme_menu_extra_section{
+    display: none;
+}
+
 body.modal-open ul.ui-autocomplete{
     overflow: auto;
     max-height: 400px;

@@ -35,7 +35,7 @@ if (!$body) {
             echo '</pre>';
         }
         
-        $envelopeId = BimpTools::getArrayValueFromPath($in, 'data/envelopeId', '');
+        $envelopeId = BimpTools::getArrayValueFromPath($data, 'data/envelopeId', '');
 
         if (!$envelopeId) {
             $errors[] = 'ID DocuSign absent';

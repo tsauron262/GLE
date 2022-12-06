@@ -82,7 +82,7 @@ class Bimp_Log extends BimpObject
         $sql = $this->db->db->query('SELECT count(*) as nb, '.$dateStr.' as timestamp FROM '.MAIN_DB_PREFIX.'bimpcore_log GROUP BY '.$dateStr);
         while($ln = $this->db->db->fetch_object($sql)){
             $tabDate = array($ln->annee, $ln->month, $ln->day, $ln->hour, $ln->minute);
-            $result[] = array("x" => "new Date(" . $ln->timestamp*1000 . ")", "y" => (int)$ln->nb);
+            $result[1][] = array("x" => "new Date(" . $ln->timestamp*1000 . ")", "y" => (int)$ln->nb);
         }
             
 

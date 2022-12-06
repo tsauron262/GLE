@@ -372,7 +372,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $have_modif = false;
                         $line = $this->avenant->getChildObject('avenantdet', $id);
                         $current_ligne++;
-                        $need = 50; // En tete + Marge du bas + nombre de ligne contenu dans le service
+                        $need = 90; // En tete + Marge du bas + nombre de ligne contenu dans le service
 
                         $currentY = (int) $pdf->getY();
                         $currentY = (int) $pdf1->getY();

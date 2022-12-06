@@ -1125,11 +1125,6 @@ class Bimp_Client extends Bimp_Societe
 
     // Affichagges: 
 
-    public function displayOutstandingLimitTtc()
-    {
-        return '<div style="float:left">' . $this->displayData('outstanding_limit') . ' </div><div>. HT soit : ' . BimpTools::displayMoneyValue($this->getData('outstanding_limit') * 1.2) . ' TTC</div>';
-    }
-
     public function displayOutstanding()
     {
         $html = '';

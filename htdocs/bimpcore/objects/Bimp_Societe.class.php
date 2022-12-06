@@ -1452,6 +1452,11 @@ class Bimp_Societe extends BimpDolObject
         return $this->getData('code_client') . ' - ' . $this->getData('nom');
     }
 
+    public function displayOutstandingLimitTtc()
+    {
+        return '<div style="float:left">' . $this->displayData('outstanding_limit') . ' </div><div>. HT soit : ' . BimpTools::displayMoneyValue($this->getData('outstanding_limit') * 1.2) . ' TTC</div>';
+    }
+
     public static function getRegionCsvValue($needed_fields = array())
     {
         if (isset($needed_fields['fk_pays']) && (int) $needed_fields['fk_pays'] !== 1) {

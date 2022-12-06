@@ -8,6 +8,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
     public static $default_public_title = 'Imports FTP LDLC';
     public static $price_keys = array(
         'Reference'         => 'ref_fourn',
+        'Code'         => 'code',
         'EAN'               => 'ean',
         'ShortDesignation'  => 'lib',
         'Brand'             => 'brand',

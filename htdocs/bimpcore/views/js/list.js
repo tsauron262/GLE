@@ -1639,7 +1639,7 @@ function onListLoaded($list) {
 
             $list.data('object_change_event_init', 1);
         }
-
+        
         $('body').trigger($.Event('listLoaded', {
             $list: $list
         }));
@@ -1727,8 +1727,6 @@ function onListRefeshed($list) {
     $list.trigger('listRefresh');
 
     checkListWidth($list);
-
-    updateGraph(list_id, 0, $list.data('name'));
 }
 
 function setItemCheckboxEvents($checkbox) {

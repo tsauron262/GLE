@@ -634,7 +634,7 @@ class Bimp_Client extends Bimp_Societe
 
         if ($display_mode === 'notif_commerciaux') {
             $to_process_only = true;
-            $relance_idx_allowed = array(1);
+            $relance_idx_allowed = array(1, 4);
         }
 
         if ($this->isLoaded()) {
@@ -768,7 +768,7 @@ class Bimp_Client extends Bimp_Societe
                     $nb_relances = (int) $fac->getData('nb_relance');
                     $relance_idx = $nb_relances + 1;
 
-                    if ($display_mode === 'notif_commerciaux' && $relance_idx !== 1) {
+                    if ($display_mode === 'notif_commerciaux' && !in_array($relance_idx, array(1, 4))) {
                         continue;
                     }
 
@@ -836,7 +836,7 @@ class Bimp_Client extends Bimp_Societe
                         $id_cur_relance = (int) $this->db->getValue('bimp_relance_clients_line', 'id_relance', $where);
 
                         if ($display_mode === 'notif_commerciaux') {
-                            if ($id_cur_relance) {
+                            if ($relance_idx !== 4 && $id_cur_relance) {
                                 continue;
                             }
 
@@ -846,6 +846,7 @@ class Bimp_Client extends Bimp_Societe
                                 'date_lim'          => $dates['lim'],
                                 'date_next_relance' => $dates['next'],
                                 'retard'            => $dates['retard'],
+                                'relance_idx'       => $relance_idx
                             );
                         } else {
                             $clients[(int) $r['fk_soc']]['relances'][$relance_idx][(int) $r['rowid']] = array(

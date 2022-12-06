@@ -6,7 +6,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
 {
 
     public static $default_public_title = 'Relances des paiements clients';
-    
+
     // Init opérations:
 
     public function initRelances(&$data, &$errors = array())
@@ -148,7 +148,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
         $this->DebugData($clients, 'Clients');
 
-        // Trie par commerciaux: 
+        // Trie par commerciaux:
         $data = array();
 
         if (is_array($clients) && !empty($clients)) {
@@ -160,6 +160,12 @@ class BDS_RelancesClientsProcess extends BDSProcess
                 $email_comm_client = $client->getCommercialEmail(false, true);
 
                 foreach ($factures as $id_fac => $fac_data) {
+                    $relance_idx = (int) $fac_data['relance_idx'];
+
+                    if (!isset($data[$relance_idx])) {
+                        $data[$relance_idx] = array();
+                    }
+
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
 
                     if (BimpObject::objectLoaded($facture)) {
@@ -169,29 +175,29 @@ class BDS_RelancesClientsProcess extends BDSProcess
                             $email_comm_fac = $comm_fac->getData('email');
 
                             if ($email_comm_fac) {
-                                if (!isset($data[$email_comm_fac])) {
-                                    $data[$email_comm_fac] = array();
+                                if (!isset($data[$relance_idx][$email_comm_fac])) {
+                                    $data[$relance_idx][$email_comm_fac] = array();
                                 }
 
-                                if (!isset($data[$email_comm_fac][$id_client])) {
-                                    $data[$email_comm_fac][$id_client] = array();
+                                if (!isset($data[$relance_idx][$email_comm_fac][$id_client])) {
+                                    $data[$relance_idx][$email_comm_fac][$id_client] = array();
                                 }
 
-                                $data[$email_comm_fac][$id_client][$id_fac] = $fac_data;
+                                $data[$relance_idx][$email_comm_fac][$id_client][$id_fac] = $fac_data;
                                 continue;
                             }
                         }
 
                         if ($email_comm_client) {
-                            if (!isset($data[$email_comm_client])) {
-                                $data[$email_comm_client] = array();
+                            if (!isset($data[$relance_idx][$email_comm_client])) {
+                                $data[$relance_idx][$email_comm_client] = array();
                             }
 
-                            if (!isset($data[$email_comm_client][(int) $id_client])) {
-                                $data[$email_comm_client][(int) $id_client] = array();
+                            if (!isset($data[$relance_idx][$email_comm_client][(int) $id_client])) {
+                                $data[$relance_idx][$email_comm_client][(int) $id_client] = array();
                             }
 
-                            $data[$email_comm_client][$id_client][$id_fac] = $fac_data;
+                            $data[$relance_idx][$email_comm_client][$id_client][$id_fac] = $fac_data;
                         }
                     }
                 }
@@ -202,83 +208,93 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
         if (!empty($data)) {
             $dt_relance = new DateTime();
-            $dt_relance->add(new DateInterval('P2D'));
+            $dt_relance->add(new DateInterval('P5D'));
             $dt_relance = $dt_relance->format('d / m / Y');
 
-            foreach ($data as $email => $clients) {
-                $email = BimpTools::cleanEmailsStr($email);
+            foreach ($data as $relance_idx => $relance_data) {
+                foreach ($relance_data as $email => $clients) {
+                    $email = BimpTools::cleanEmailsStr($email);
 
-                foreach ($clients as $id_client => $factures) {
-                    $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+                    foreach ($clients as $id_client => $factures) {
+                        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
 
-                    if (BimpObject::objectLoaded($client)) {
-                        $subject = 'Lettre de rappel sous 5 jours au client ' . $client->getRef() . ' - ' . $client->getName();
+                        if (BimpObject::objectLoaded($client)) {
+                            $html = 'Bonjour,<br/><br/>';
 
-                        $html = 'Bonjour,<br/><br/>';
+                            $html .= 'le client ' . $client->getLink() . ' va recevoir sous 5 jours ';
 
-                        $html .= 'le client ' . $client->getLink() . ' va recevoir sous 5 jours une lettre de rappel concernant les retards de réglement ci-après.<br/><br/>';
-
-                        $html .= '<b>Si vous pensez que cette relance n\'a pas lieu d\'être, merci d\'en informer immédiatement ';
-                        $html .= '<a href="mailto:recouvrementolys@bimp.fr">Recouvrement Olys</a>';
-                        $html .= ' en justifiant votre demande (par exemple : règlement en notre possession, litige client, etc.)</b>';
-
-                        $html .= '<br/><br/>';
-                        $html .= '<table>';
-                        $html .= '<thead>';
-                        $html .= '<tr>';
-                        $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Date facture</th>';
-                        $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Facture</th>';
-                        $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Total TTC</th>';
-                        $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Reste à payer</th>';
-                        $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Echéance</th>';
-                        $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">JR</th>';
-                        $html .= '</tr>';
-                        $html .= '</thead>';
-
-                        $html .= '<tbody>';
-
-                        $facs_refs = '';
-                        foreach ($factures as $id_facture => $fac_data) {
-                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-
-                            if (BimpObject::objectLoaded($facture)) {
-                                $facs_refs .= ($facs_refs ? ' - ' : '') . $facture->getRef();
-                                $html .= '<tr>';
-                                $html .= '<td style="padding: 5px">';
-                                $html .= date('d / m / Y', strtotime($facture->getData('datef')));
-                                $html .= '</td>';
-
-                                $html .= '<td style="padding: 5px; width: 300px">';
-                                $html .= $facture->getLink() . '<br/>';
-                                $html .= $facture->getData('libelle');
-                                $html .= '</td>';
-
-                                $html .= '<td style="padding: 5px">';
-                                $html .= BimpTools::displayMoneyValue($fac_data['total_ttc']);
-                                $html .= '</td>';
-
-                                $html .= '<td style="padding: 5px">';
-                                $html .= BimpTools::displayMoneyValue($fac_data['remain_to_pay']);
-                                $html .= '</td>';
-
-                                $html .= '<td style="padding: 5px">';
-                                $html .= date('d / m / Y', strtotime($fac_data['date_lim']));
-                                $html .= '</td>';
-
-                                $html .= '<td style="padding: 5px">';
-                                $html .= $fac_data['retard'];
-                                $html .= '</td>';
-                                $html .= '</tr>';
+                            if ($relance_idx < 4) {
+                                $subject = 'Lettre de rappel sous 5 jours au client ' . $client->getRef() . ' - ' . $client->getName();
+                                $html .= 'une <b>lettre de rappel</b>';
+                            } else {
+                                $subject = 'ATTENTION : Mise en demeure sous 5 jours du client ' . $client->getRef() . ' - ' . $client->getName();
+                                $html .= 'une <b>mise en demeure</b>';
                             }
-                        }
 
-                        $html .= '</tbody>';
-                        $html .= '</table>';
+                            $html .= ' concernant les retards de réglement ci-après.<br/><br/>';
+                            $html .= '<b>Si vous pensez que cette ' . ($relance_idx < 4 ? 'relance' : 'mise en demeure');
+                            $html .= ' n\'a pas lieu d\'être, merci d\'en informer immédiatement ';
+                            $html .= '<a href="mailto:recouvrementolys@bimp.fr">Recouvrement Olys</a>';
+                            $html .= ' en justifiant votre demande (par exemple : règlement en notre possession, litige client, etc.)</b>';
 
-                        if (mailSyn2($subject, $email, '', $html)) {
-                            $this->Success('Envoi alerte au commercial OK (' . $email . ')', $client, $facs_refs);
-                        } else {
-                            $this->Error('Echec envoi alerte au commercial (' . $email . ')', $client, $facs_refs);
+                            $html .= '<br/><br/>';
+                            $html .= '<table>';
+                            $html .= '<thead>';
+                            $html .= '<tr>';
+                            $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Date facture</th>';
+                            $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Facture</th>';
+                            $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Total TTC</th>';
+                            $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Reste à payer</th>';
+                            $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Echéance</th>';
+                            $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">JR</th>';
+                            $html .= '</tr>';
+                            $html .= '</thead>';
+
+                            $html .= '<tbody>';
+
+                            $facs_refs = '';
+                            foreach ($factures as $id_facture => $fac_data) {
+                                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+                                if (BimpObject::objectLoaded($facture)) {
+                                    $facs_refs .= ($facs_refs ? ' - ' : '') . $facture->getRef();
+                                    $html .= '<tr>';
+                                    $html .= '<td style="padding: 5px">';
+                                    $html .= date('d / m / Y', strtotime($facture->getData('datef')));
+                                    $html .= '</td>';
+
+                                    $html .= '<td style="padding: 5px; width: 300px">';
+                                    $html .= $facture->getLink() . '<br/>';
+                                    $html .= $facture->getData('libelle');
+                                    $html .= '</td>';
+
+                                    $html .= '<td style="padding: 5px">';
+                                    $html .= BimpTools::displayMoneyValue($fac_data['total_ttc']);
+                                    $html .= '</td>';
+
+                                    $html .= '<td style="padding: 5px">';
+                                    $html .= BimpTools::displayMoneyValue($fac_data['remain_to_pay']);
+                                    $html .= '</td>';
+
+                                    $html .= '<td style="padding: 5px">';
+                                    $html .= date('d / m / Y', strtotime($fac_data['date_lim']));
+                                    $html .= '</td>';
+
+                                    $html .= '<td style="padding: 5px">';
+                                    $html .= $fac_data['retard'];
+                                    $html .= '</td>';
+                                    $html .= '</tr>';
+                                }
+                            }
+
+                            $html .= '</tbody>';
+                            $html .= '</table>';
+
+                            if (mailSyn2($subject, $email, '', $html)) {
+                                $this->Success('Envoi alerte au commercial OK (' . $email . ')', $client, $facs_refs);
+                            } else {
+                                $this->Error('Echec envoi alerte au commercial (' . $email . ')', $client, $facs_refs);
+                            }
                         }
                     }
                 }

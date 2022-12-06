@@ -12,6 +12,13 @@ list_page_url:
 labels:
     name: refinanceur
     
+objects: 
+    def_contact_signataire: 
+        extends: contact
+        instance: 
+            id_object: 
+                field_value: id_def_contact_signataire
+                
 fields: 
     id_societe: 
         label: Société
@@ -20,6 +27,29 @@ fields:
         input: 
             type: search_societe
         required: 1
+        
+    id_def_contact_signataire: 
+        label: Contact signataire par défaut
+        type: id_object
+        object: def_contact_signataire
+        default_value: 0
+        values: 
+            callback: 
+                method: getSocieteContactsArray
+                params: 
+                    - field_value: id_societe
+                    - 0
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getSocieteContactsArray
+                    params: 
+                        - field_value: id_societe
+                        - 1
+                        - ''
+                        - 1
+        depends_on: id_societe
         
     url_demande: 
         label: URL Demande financement
@@ -36,8 +66,8 @@ fields:
         input: 
             type: custom
             content: 
-                callback: renderTauxInputs
-                
+                callback: renderTauxInputs               
+    
     active: 
         label: Actif
         type: bool
@@ -84,6 +114,8 @@ lists:
         n: 10
         cols: 
             id_societe:
+            id_def_contact_signataire:
+                display: nom_url
             url_demande: 
             taux:
             active: 

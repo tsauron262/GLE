@@ -143,6 +143,23 @@ forms:
                   type: datetime
                   display_now: 1
                   
+    init_docu_sign: 
+        title: Initialiser la signature via DocuSign
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Type de signature
+              input_name: signature_type
+              input: 
+                  type: hidden
+              value: docusign            
+            - custom: 1
+              label: Contenu E-mail
+              input_name: email_content
+              input: 
+                  type: html
+              depends_on: signature_type
+                  
     refresh_docusign: 
         rows: 
             - custom: 1

@@ -34,7 +34,8 @@ BWSApi::$requests['sendDocFinancement'] = array(
         'id_origine'       => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
         'doc_type'         => array('label' => 'Type de document'),
         'doc_content'      => array('label' => 'Fichier', 'required' => 1),
-        'signature_params' => array('label' => 'Paramètres signature', 'data_type' => 'json', 'required' => 1)
+        'signature_params' => array('label' => 'Paramètres signature', 'data_type' => 'json', 'required' => 1),
+        'signataires_data' => array('label' => 'Données signataires', 'data_type' => 'json')
     )
 );
 
@@ -144,7 +145,7 @@ class BWSApi_ExtEntity extends BWSApi
                 if (!BimpObject::objectLoaded($bcdf)) {
                     $this->addError('UNFOUND', 'Aucune demande de location trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
                 } else {
-                    $errors = $bcdf->onDocFinReceived($this->getParam('doc_type', '') . '_fin', $this->getParam('doc_content', ''), $this->getParam('signature_params', array()));
+                    $errors = $bcdf->onDocFinReceived($this->getParam('doc_type', '') . '_fin', $this->getParam('doc_content', ''), $this->getParam('signature_params', array()), $this->getParam('signataires_data', array()));
 
                     if (count($errors)) {
                         $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
@@ -247,7 +248,7 @@ class BWSApi_ExtEntity extends BWSApi
                 }
             }
         }
-        
+
         return $response;
     }
 }

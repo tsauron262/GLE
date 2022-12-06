@@ -1027,7 +1027,7 @@ class BimpSignataire extends BimpObject
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function openSignDistAccess($send_email = true, $email_content = '', $auto_open = true, $new_users = array(), $new_user_email = '', &$warnings = array(), &$success = '')
     {

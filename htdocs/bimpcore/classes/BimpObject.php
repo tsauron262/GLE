@@ -3858,6 +3858,7 @@ class BimpObject extends BimpCache
 
     // Gestion des signatures: 
 
+    
     public function getSignatureInstance($doc_type)
     {
         if ($this->isLoaded()) {

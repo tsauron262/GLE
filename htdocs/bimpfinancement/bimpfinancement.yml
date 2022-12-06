@@ -5,6 +5,15 @@ categories:
         label: Signatures
         
 params: 
+    loueur_signataire_nom: 
+        label: Nom loueur signataire
+        
+    loueur_signataire_email: 
+        label: Adresse e-mail loueur signataire
+        
+    loueur_signataire_qualite: 
+        label: Qualité loueur signataire
+        
     id_group_commerciaux: 
         label: ID du groupe des commerciaux pour les demandes de locations
         def: 0

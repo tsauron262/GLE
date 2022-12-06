@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande` (
   `agreement_number` VARCHAR(255) NOT NULL DEFAULT '',
   `commission_apporteur` DECIMAL(24,6) NOT NULL DEFAULT '0',
   `marge_souhaitee` DECIMAL(24,6) NOT NULL DEFAULT '0',
+  `def_tx_cession` VARCHAR(10) NOT NULL DEFAULT 'moyen',
   `tx_cession` DECIMAL(24,6) NOT NULL DEFAULT '0',
   `loyer_mensuel_evo_ht` DECIMAL(24,6) NOT NULL DEFAULT '0',
   `loyer_mensuel_dyn_ht` DECIMAL(24,6) NOT NULL DEFAULT '0',

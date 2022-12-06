@@ -1,6 +1,12 @@
 # Entité: prolease
 
 params: 
+    loueur_signataire_nom: 
+        def: M. Olivier de la CLERGERIE
+        
+    loueur_signataire_qualite: 
+        def: Président
+        
     id_fourn_bimp: 
         label: ID Fournisseur BIMP
         def: 0

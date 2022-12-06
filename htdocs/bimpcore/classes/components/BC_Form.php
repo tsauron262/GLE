@@ -17,6 +17,7 @@ class BC_Form extends BC_Panel
         'field'              => array('default' => ''),
         'association'        => array('default' => ''),
         'object'             => array('default' => ''),
+        'title'              => array('default' => ''),
         'custom'             => array('data_type' => 'bool', 'default' => 0),
         'label'              => array('default' => ''),
         'create_form'        => array('default' => ''),
@@ -270,6 +271,7 @@ class BC_Form extends BC_Panel
         }
 
         if (is_array($this->params['rows'])) {
+            $end_div = 0;
             foreach ($this->params['rows'] as $row) {
                 $row_params = parent::fetchParams($this->config_path . '/rows/' . $row, self::$row_params);
 
@@ -294,7 +296,21 @@ class BC_Form extends BC_Panel
                     $html .= '<div>';
                     $html .= $this->renderObjectRow($row_params['object'], $row_params);
                     $html .= '</div>';
+                } elseif ($row_params['title']) {
+                    if ($end_div > 0) {
+                        $html .= '</div>';
+                        $end_div--;
+                    }
+                    $html .= $this->renderTitleRow($row_params);
+
+                    $html .= '<div class="formInputGroup">';
+                    $end_div++;
                 }
+            }
+
+            while ($end_div > 0) {
+                $html .= '</div>';
+                $end_div--;
             }
         }
 
@@ -743,6 +759,22 @@ class BC_Form extends BC_Panel
         }
 
         $current_bc = $prev_bc;
+        return $html;
+    }
+
+    public function renderTitleRow($params = array())
+    {
+        $html = '';
+
+        $html .= '<div class="formGroupTitle">';
+        $title = '';
+        if (isset($params['icon'])) {
+            $title .= BimpRender::renderIcon($params['icon'], 'iconLeft');
+        }
+        $title .= $params['title'];
+
+        $html .= '<h3>' . $title . '</h3>';
+        $html .= '</div>';
         return $html;
     }
 

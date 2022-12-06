@@ -14,7 +14,6 @@ class PropalPDF extends BimpCommDocumentPDF
     public $signature_bloc = true;
     public $use_docsign = true;
     public $signature_bloc_label = 'Bon pour commande';
-    public static $use_cgv = true;
 
     public function __construct($db)
     {

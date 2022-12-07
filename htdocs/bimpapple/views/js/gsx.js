@@ -397,7 +397,9 @@ function gsx_saveAppleParts($button, id_issue, modal_idx) {
             var $row = $(this).findParentByClass('partRow');
             var exchange_price = $row.data('exchange_price');
             if(exchange_price == 0 && $row.data('stock_price') == 0)
-                exchange_price = window.prompt('Pas de prix pour le '+$row.data('num')+ ' merci d\'indiquer le prix', 0);
+                exchange_price = window.prompt('Pas de prix pour le '+$row.data('num') + ' : ' + $row.data('name') + ' merci d\'indiquer le prix', 0);
+            if(exchange_price == null)
+                return;
             if ($.isOk($row)) {
                 parts.push({
                     part_number: $row.data('num'),

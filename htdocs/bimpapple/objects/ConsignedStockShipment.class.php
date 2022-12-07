@@ -634,11 +634,14 @@ class ConsignedStockShipment extends BimpObject
                         }
                     }
 
-//                    $result = $gsx->consignmentOrderSubmit($this->getData('order_id'), $orderParts);
-                    $result = false;
+                    $result = $gsx->consignmentOrderSubmit($this->getData('order_id'), $orderParts);
+                }
+                
+                if (isset($result[0])) {
+                    $result = $result[0];
                 }
 
-                if (!$result || !isset($result['parts']) || empty($result['parts'])) {
+                if (empty($result) || !isset($result['parts']) || empty($result['parts'])) {
                     if (!$gsx->logged) {
                         $errors[] = $gsx->displayNoLogged();
                     } else {

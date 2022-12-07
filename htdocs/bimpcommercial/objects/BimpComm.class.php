@@ -4457,7 +4457,7 @@ class BimpComm extends BimpDolObject
         $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM YYYY');
 //        $data["axeY"] = array("title" => 'Nb');
         $data["params"] = array('minutes'=>$arrondirEnMinuteGraph);
-        $data["title"] = $this->getLabel().' par jours';
+        $data["title"] = ucfirst($this->getLabel('name_plur')).' par jour';
 
         return $data;
     }

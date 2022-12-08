@@ -355,6 +355,9 @@ class BDS_RgpdProcess extends BDSProcess
     {
         $result = array();
 
+        global $rgpd_processing;
+        $rgpd_processing = true;
+
         if (preg_match('/^delete_drafts_(.+)$/', $step_name, $matches)) {
             $this->deleteDrafts($matches[1], $this->references, $errors);
         } elseif (preg_match('/^delete_files_(.+)$/', $step_name, $matches)) {
@@ -371,12 +374,17 @@ class BDS_RgpdProcess extends BDSProcess
             $this->anonymiseClients($this->references, $errors);
         }
 
+        $rgpd_processing = false;
+
         return $result;
     }
 
     public function executeFilesToDelete($step_name, &$errors = array(), $extra_data = array())
     {
         $result = array();
+
+        global $rgpd_processing;
+        $rgpd_processing = true;
 
         if (preg_match('/^find_files_to_delete_(.+)$/', $step_name, $matches)) {
             $elements = $this->findFilesToDelete($matches[1]);
@@ -398,12 +406,17 @@ class BDS_RgpdProcess extends BDSProcess
             $this->deleteFiles($matches[1], $this->references, $errors);
         }
 
+        $rgpd_processing = false;
+
         return $result;
     }
 
     public function executeCheckClientsActivity($step_name, &$errors = array(), $extra_data = array())
     {
         $result = array();
+
+        global $rgpd_processing;
+        $rgpd_processing = true;
 
         switch ($step_name) {
             case 'check_clients':
@@ -420,6 +433,8 @@ class BDS_RgpdProcess extends BDSProcess
                 }
                 break;
         }
+
+        $rgpd_processing = false;
 
         return $result;
     }
@@ -1436,7 +1451,7 @@ class BDS_RgpdProcess extends BDSProcess
             if (BimpObject::objectLoaded($opt)) {
                 $options['process_tickets'] = (int) $opt->id;
             }
-            
+
             $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
                         'id_process'    => (int) $process->id,
                         'label'         => 'Traiter les Fiche Intervention',

@@ -159,7 +159,7 @@ forms:
            
 lists_cols: 
     typeTache:
-        label: Type de tâche (auto)
+        label: Type de tâche
         value:
             callback: displayType
         search:
@@ -179,6 +179,7 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: id
         sort_way: desc
+        filters_panel: default
         n: 10
         add_form_name: add
         delete_btn: 1
@@ -253,3 +254,11 @@ searches:
             - table: user
               on: a.id_user_owner = u.rowid
               alias: u
+              
+filters_panels:
+    default:
+        filters: 
+            type_manuel:
+            subj:
+            status:
+        

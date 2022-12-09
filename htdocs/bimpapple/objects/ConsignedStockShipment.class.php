@@ -797,7 +797,7 @@ class ConsignedStockShipment extends BimpObject
                 } elseif (isset($part_data['qty'])) {
                     $shipment_parts[] = array(
                         'number' => $part_number,
-                        'qty'    => (int) $part_data['qty'],
+                        'quantity'    => (int) $part_data['qty'],
                     );
                 } else {
                     $errors[] = 'Quantités absentes pour le composant "' . $part_number . '"';

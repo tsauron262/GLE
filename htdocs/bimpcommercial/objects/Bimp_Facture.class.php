@@ -3620,7 +3620,7 @@ class Bimp_Facture extends BimpComm
 
             if ($remises_crt) {
                 $html .= '<tr>';
-                $html .= '<td>Remises CRT prévues</td>';
+                $html .= '<td>Remises arrière prévues</td>';
                 $html .= '<td></td>';
                 $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '', 0, 0, 0, 2, 1) . '</span></td>';
                 $html .= '<td></td>';
@@ -3629,6 +3629,17 @@ class Bimp_Facture extends BimpComm
                 $total_pa -= $remises_crt;
             }
         }
+            $lines = $this->getLines('not_text');
+
+//            foreach ($lines as $line) {
+//                $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+//                
+//                
+//                $prod = $line->getProduct();
+//                die($prod->);
+//            }
+            
+//            die('oooo');
 
         $revals = $this->getTotalRevalorisations();
 
@@ -4051,7 +4062,7 @@ class Bimp_Facture extends BimpComm
                             }
                         }
                     } elseif ($line->isArticleLine()) {
-                        // Création des revalorisations sur remise CRT: 
+                        // Création des revalorisations sur Remise arrière: 
                         if ((int) $line->getData('remise_crt')) {
                             $remise_pa = (float) $line->getRemiseCRT();
 

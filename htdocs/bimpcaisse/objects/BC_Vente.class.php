@@ -1381,16 +1381,16 @@ class BC_Vente extends BimpObject
         $html .= '<div class="article_options">';
         $html .= '<div class="article_qty">&nbsp;</div>';
 
-        // Champ remise CRT: 
+        // Champ Remise arrière: 
         $remise_crt = (float) $product->getRemiseCrt();
         if ($remise_crt) {
             $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
-            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise CRT: </span>';
+            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise arrière: </span>';
             $html .= BimpInput::renderInput('toggle', 'article_remise_crt', (int) $article->getData('remise_crt'));
             $html .= '</div>';
 
             $html .= '<div class="article_remise_crt_percent" style="margin: 10px 0;' . (!(int) $article->getData('remise_crt') ? 'display: none;' : '') . '">';
-            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Pourcentage Remise CRT: </span>';
+            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Pourcentage Remise arrière: </span>';
             $html .= BimpInput::renderInput('text', 'article_remise_crt_percent', (int) $article->getData('remise_crt_percent', array(
                                 'data'        => array(
                                     'data_type' => 'number',
@@ -1401,7 +1401,7 @@ class BC_Vente extends BimpObject
                                 'addon_right' => '<i class="fa fa-percent"></i>'
             )));
             $html .= '<p class="inputHelp">';
-            $html .= 'Ne modifiez cette valeur que pour les cas éligibles à une remise CRT exceptionnelle.<br/>Attention: toute remise CRT erronée pourra donner lieu à un refus.';
+            $html .= 'Ne modifiez cette valeur que pour les cas éligibles à une Remise arrière exceptionnelle.<br/>Attention: toute Remise arrière erronée pourra donner lieu à un refus.';
             $html .= '</p>';
             $html .= '</div>';
         }
@@ -1500,16 +1500,16 @@ class BC_Vente extends BimpObject
         $html .= '<i class="fa fa-plus-circle iconRight"></i></span>';
         $html .= '</div>';
 
-        // Champ remise CRT: 
+        // Champ Remise arrière: 
         $remise_crt = (float) $product->getRemiseCrt();
         if ($remise_crt) {
             $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
-            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise CRT: </span>';
+            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Remise arrière: </span>';
             $html .= BimpInput::renderInput('toggle', 'article_remise_crt', (int) $article->getData('remise_crt'));
             $html .= '</div>';
 
             $html .= '<div class="article_remise_crt_percent" style="margin: 10px 0;' . (!(int) $article->getData('remise_crt') ? 'display: none;' : '') . '">';
-            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Pourcentage Remise CRT: </span>';
+            $html .= '<span style="display: inline-block; font-weight: bold; margin-top: -11px; vertical-align: middle; margin-right: 10px;">Pourcentage Remise arrière: </span>';
             $html .= BimpInput::renderInput('text', 'article_remise_crt_percent', (int) $article->getData('remise_crt_percent', array(
                                 'data'        => array(
                                     'data_type' => 'number',
@@ -1520,7 +1520,7 @@ class BC_Vente extends BimpObject
                                 'addon_right' => '<i class="fa fa-percent"></i>'
             )));
             $html .= '<p class="inputHelp">';
-            $html .= 'Ne modifiez cette valeur que pour les cas éligibles à une remise CRT exceptionnelle.<br/>Attention: toute remise CRT erronée pourra donner lieu à un refus.';
+            $html .= 'Ne modifiez cette valeur que pour les cas éligibles à une Remise arrière exceptionnelle.<br/>Attention: toute Remise arrière erronée pourra donner lieu à un refus.';
             $html .= '</p>';
             $html .= '</div>';
         }

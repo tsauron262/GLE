@@ -10,10 +10,11 @@ class BimpRevalorisation extends BimpObject
         2  => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
     public static $types = array(
-        'crt'            => 'Remise CRT',
+        'crt'            => 'CRT',
         'correction_pa'  => 'Correction du prix d\'achat',
         'achat_sup'      => 'Achat complémentaire',
         'commission_app' => 'Commission Apporteur',
+        'applecare'      => 'Commission AppleCare',
         'oth'            => 'Autre'
     );
 
@@ -783,6 +784,8 @@ class BimpRevalorisation extends BimpObject
         if ($isGlobal) {
             if ($this->getData('type') == 'crt') {
                 $errors = array('Type CRT non valable pour les revalorisations globales');
+            }if ($this->getData('applecare') == 'crt') {
+                $errors = array('Type commition AppleCare non valable pour les revalorisations globales');
             } else {
                 $_POST['global'] = 0;
                 $amount = $this->getData('amount');

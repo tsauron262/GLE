@@ -150,7 +150,7 @@ fields:
             callback: isArticleLine
         
     remise_crt: 
-        label: Remise CRT 
+        label: Remise arrière 
         type: bool
         default_value: 0
         user_edit: 1
@@ -158,7 +158,7 @@ fields:
             callback: isArticleLine
         
     remise_crt_percent: 
-        label: Pourcentage remise CRT
+        label: Pourcentage Remise arrière
         type: percent
         default_value: 0
         user_edit: 1
@@ -385,7 +385,7 @@ forms:
                     show_values: 1,3
             remise_crt: 
                 custom: 1
-                label: Remise CRT
+                label: Remise arrière
                 input_name: remise_crt
                 content: 
                     callback: 
@@ -398,7 +398,7 @@ forms:
                     show_values: 1
             remise_crt_percent:
                 custom: 1
-                label: Pourcentage remise CRT
+                label: Pourcentage Remise arrière
                 input_name: remise_crt_percent
                 data_type: percent
                 content: 
@@ -756,7 +756,7 @@ lists_cols:
                 params:
                     - marge_prevue      
     remise_crt: 
-        label: Rem. CRT
+        label: Rem. arrière
         edit: 1
         min_width: 50
     remise_pa: 

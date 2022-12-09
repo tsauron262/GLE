@@ -650,7 +650,7 @@ class ConsignedStockShipment extends BimpObject
                 } else {
                     $success .= 'Soumission du renvoi à Apple effectuée avec succès';
 
-                    $this->useNoTransactionsDb();
+//                    $this->useNoTransactionsDb();//Pourquoi ? En plein millieu de script, ca fait un locktimeout.(l'instance transaction a deja bossé dessus.L'autre instance arrive pas a bossé. Au pire faire un commit juste avant.
                     $up_errors = $this->updateField('status', self::STATUT_ATTENTE_ENVOI);
                     $this->updateField('date_submitted', date('Y-m-d H:i:s'));
 

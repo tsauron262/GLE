@@ -6,6 +6,7 @@ class BimpRevalorisation extends BimpObject
     public static $status_list = array(
         0  => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         10 => array('label' => 'Déclarée', 'icon' => 'fas_pause-circle', 'classes' => array('success')),
+        20 => array('label' => 'Attente serial', 'icon' => 'fas_pause-circle', 'classes' => array('warning')),
         1  => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
         2  => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
@@ -109,7 +110,13 @@ class BimpRevalorisation extends BimpObject
                         $instance->updateField('status', $data['status']);
                     }
                 }
-            } else {
+            }
+            elseif ($data['status'] == 0 ) {
+                if ($instance->getData('type') == 'applecare' && $instance->getData('status') != 20) {
+                    $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
+                }
+            }
+            else {
                 $errors[] = 'Action non géré';
             }
         } else {
@@ -128,7 +135,7 @@ class BimpRevalorisation extends BimpObject
                     return 0;
                 }
 
-                if ((int) $this->getData('status') !== 0 && $this->getData('status') !== 10) {
+                if ((int) $this->getData('status') !== 0 && $this->getData('status') !== 10 && $this->getData('status') !== 20) {
                     $errors[] = 'Cette revalorisation n\'est plus en attente d\'acceptation';
                     return 0;
                 }
@@ -381,6 +388,21 @@ class BimpRevalorisation extends BimpObject
     }
 
     // Getters params: 
+    
+    public function isValidable(){
+        if($this->getData('type') == 'crt'){
+            if($this->getData('status') == 10)
+                return 1;
+        }
+        elseif($this->getData('type') == 'applecare'){
+            if($this->getData('status') == 0)
+                return 1;
+        }
+        else
+            return 1;
+        return 0;
+            
+    }
 
     public function getActionsButtons()
     {
@@ -396,7 +418,7 @@ class BimpRevalorisation extends BimpObject
                             'type' => 'declarer'
                                 ), array())
                     );
-                if ($this->getData('status') == 10 || $this->getData('type') != 'crt') {
+                if ($this->isValidable()) {
                     $buttons[] = array(
                         'label'   => 'Accepter',
                         'icon'    => 'fas_check',
@@ -418,6 +440,14 @@ class BimpRevalorisation extends BimpObject
                         ))
                     );
                 }
+                if ($this->getData('status') == 20 && $this->getData('type') == 'applecare')
+                    $buttons[] = array(
+                        'label'   => 'Enregistrer numéro de série',
+                        'icon'    => 'fas_pause-circle',
+                        'onclick' => $this->getJsActionOnclick('process', array(
+                            'type' => 'setSerial'
+                                ), array('form_name' => 'setSerial'))
+                    );
             } elseif ($this->isActionAllowed('cancelProcess') && $this->canSetAction('cancelProcess')) {
                 $label = 'Annuler ';
                 switch ((int) $this->getData('status')) {
@@ -579,7 +609,7 @@ class BimpRevalorisation extends BimpObject
         $success = '';
 
         $type = (isset($data['type']) ? $data['type'] : '');
-        if (!in_array($type, array('accept', 'refuse', 'declarer'))) {
+        if (!in_array($type, array('accept', 'refuse', 'declarer', 'setSerial'))) {
             $errors[] = 'Type de processus (acceptation ou refus) absent ou invalide';
         } else {
             global $user;
@@ -601,6 +631,11 @@ class BimpRevalorisation extends BimpObject
                 case 'refuse':
                     $success = 'Refus de la revalorisation effectué avec succès';
                     $this->set('status', 2);
+                    break;
+                case 'setSerial':
+                    $success = 'Saisie du serial OK';
+                    $this->set('status', 0);
+                    $this->set('serial', $data['serial']);
                     break;
             }
 
@@ -815,6 +850,10 @@ class BimpRevalorisation extends BimpObject
                 }
             }
         } else {
+            if($this->getData('type') == 'applecare' && $this->getData('serial') == ''){
+                $this->set('status', 20);
+            }
+            
             $errors = parent::create($warnings, $force_create);
         }
 

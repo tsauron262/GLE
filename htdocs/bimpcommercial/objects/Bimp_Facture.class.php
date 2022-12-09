@@ -1949,7 +1949,9 @@ class Bimp_Facture extends BimpComm
         $types = array(
             0 => 'attente',
             1 => 'accepted',
-            2 => 'refused'
+            2 => 'refused',
+            20 => 'attente',
+            11 => 'attente'
         );
 
         $totals = array(
@@ -3629,17 +3631,6 @@ class Bimp_Facture extends BimpComm
                 $total_pa -= $remises_crt;
             }
         }
-            $lines = $this->getLines('not_text');
-
-//            foreach ($lines as $line) {
-//                $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
-//                
-//                
-//                $prod = $line->getProduct();
-//                die($prod->);
-//            }
-            
-//            die('oooo');
 
         $revals = $this->getTotalRevalorisations();
 
@@ -4069,34 +4060,46 @@ class Bimp_Facture extends BimpComm
                             if (!$remise_pa) {
                                 continue;
                             }
-
-                            // On vérifie qu'une reval n'existe pas déjà: 
-                            $reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
-                                        'id_facture'      => (int) $this->id,
-                                        'id_facture_line' => (int) $line->id,
-                                        'type'            => 'crt'
-                            ));
-
-                            if (BimpObject::objectLoaded($reval)) {
-                                continue;
+                            $prod = $line->getProduct();
+                            $type = $prod->getData('type_remise_arr');
+                            $typeStr = null;
+                            if($type == 1)
+                                $typeStr = 'crt';
+                            elseif($type == 2)
+                                $typeStr = 'applecare';
+                            if(is_null($typeStr)){
+                                $warnings = 'Type de remise arriére inconnue';
+                                BimpCore::addlog('Type de remise arriére inconnue');
                             }
+                            else{
+                                // On vérifie qu'une reval n'existe pas déjà: 
+                                $reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
+                                            'id_facture'      => (int) $this->id,
+                                            'id_facture_line' => (int) $line->id,
+                                            'type'            => $typeStr
+                                ));
 
-                            $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+                                if (BimpObject::objectLoaded($reval)) {
+                                    continue;
+                                }
 
-                            $dt = new DateTime($this->getData('datec'));
+                                $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
 
-                            $reval_errors = $reval->validateArray(array(
-                                'id_facture'      => (int) $this->id,
-                                'id_facture_line' => (int) $line->id,
-                                'type'            => 'crt',
-                                'date'            => $dt->format('Y-m-d'),
-                                'amount'          => $remise_pa,
-                                'qty'             => (float) $line->qty
-                            ));
+                                $dt = new DateTime($this->getData('datec'));
 
-                            if (!count($reval_errors)) {
-                                $reval_warnings = array();
-                                $reval->create($reval_warnings, true);
+                                $reval_errors = $reval->validateArray(array(
+                                    'id_facture'      => (int) $this->id,
+                                    'id_facture_line' => (int) $line->id,
+                                    'type'            => $typeStr,
+                                    'date'            => $dt->format('Y-m-d'),
+                                    'amount'          => $remise_pa,
+                                    'qty'             => (float) $line->qty
+                                ));
+
+                                if (!count($reval_errors)) {
+                                    $reval_warnings = array();
+                                    $reval->create($reval_warnings, true);
+                                }
                             }
                         }
                     }

@@ -40,7 +40,7 @@ class BimpSignature extends BimpObject
         self::STATUS_NONE      => array('label' => 'En attente de signature', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::STATUS_SIGNED    => array('label' => 'Signée', 'icon' => 'fas_check', 'classes' => array('success'))
     );
-
+    
     // Droits users:
 
     public function canEditField($field_name)
@@ -469,7 +469,7 @@ class BimpSignature extends BimpObject
         return $api;
     }
 
-    public function getSignatureParams($signataire, $type_params = 'elec')
+    public function getSignatureParams($signataire, $type_params = 'docusign', &$errors = array())
     {
         $obj = $this->getObj();
 
@@ -533,7 +533,7 @@ class BimpSignature extends BimpObject
                 return $params[$code_signataire][$type_params];
             }
         }
-
+        
         return array();
     }
 

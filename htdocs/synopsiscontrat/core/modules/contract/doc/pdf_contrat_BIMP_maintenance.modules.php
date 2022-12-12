@@ -57,7 +57,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $logo = $testFile;
         if(is_file($logo)) {
              if(is_object($pdf1)){
-                $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+                //$pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
             } else {
                 $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
             }
@@ -503,6 +503,59 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $outputlangs->load("contrat");
         $outputlangs->load("products");
         
+        $this->signature_params = array();
+        
+        $this->signature_params['client'] = array(
+            'docusign' => array(
+                'anch' => 'Par la signature électronique',
+                'fs'   => 'Size8',
+                'x'    => 100,
+                'y'    => -20,
+                'date' => array(
+                    'x' => -5,
+                    'y' => -50
+                ),
+                'texts' => array(
+                    'nom' => array(
+                        'x' => 75,
+                        'y' => -81,
+                        'label' => "Nom"
+                    ),
+                    'fonction' => array(
+                        'x' => 75,
+                        'y' => -65  ,
+                        'label' => "Fonction"
+                    )
+                    
+                )
+            )
+        );
+        
+        $this->signature_params['user'] = array(
+            'docusign' => array(
+                'anch' => 'Par la signature électronique',
+                'fs'   => 'Size8',
+                'x'    => -140,
+                'y'    => -20,
+                'date' => array(
+                    'x' => -266,
+                    'y' => -50
+                ),
+                'texts' => array(
+                    'nom' => array(
+                        'x' => -204,
+                        'y' => -81,
+                        'label' => "Nom"
+                    ),
+                    'fonction' => array(
+                        'x' => -204,
+                        'y' => -65  ,
+                        'label' => "Fonction"
+                    )
+                    
+                )
+            )
+        );
         
         $bimp_contract = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->id);
                     
@@ -526,8 +579,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             } else {
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->contrat->dir_output . "/" . $contrat->ref;
-                $file = $dir . "/Contrat_" . $contrat->ref . '_Ex_Client.pdf';
-                $file1= $dir . "/Contrat_" . $contrat->ref . '_Ex_'.$mysoc->name.'.pdf';
+                $file = $dir . "/Contrat_" . $contrat->ref . '.pdf';
+                //$file1= $dir . "/Contrat_" . $contrat->ref . '_Ex_'.$mysoc->name.'.pdf';
             }
             $this->contrat = $contrat;
 
@@ -548,117 +601,117 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $produit = new Product($this->db);
                 $client->fetch($contrat->socid);
                 $pdf = "";
-                $pdf1 = "";
+//                $pdf1 = "";
 //                $nblignes = sizeof($contrat->lignes);
                 $pdf = pdf_getInstance($this->format);
-                $pdf1 = pdf_getInstance($this->format);
+//                $pdf1 = pdf_getInstance($this->format);
                 if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);
-                    $pdf1->setPrintHeader(false);
+                    //$pdf1->setPrintHeader(false);
                     $pdf->setPrintFooter(true);
-                    $pdf1->setPrintFooter(true);
+                    //$pdf1->setPrintFooter(true);
                 }
                 
                 $pdf->Open();
-                $pdf1->Open();
+                //$pdf1->Open();
                 while($current_exemplaire <= $nb_exemplaire){
                     
                     $pdf->AddPage();
-                    $pdf1->AddPage();
+                    //$pdf1->AddPage();
                     $pdf->SetTitle($contrat->ref);
-                    $pdf1->SetTitle($contrat->ref);
+                    //$pdf1->SetTitle($contrat->ref);
                     $pdf->SetSubject($outputlangs->transnoentities("Contract"));
-                    $pdf1->SetSubject($outputlangs->transnoentities("Contract"));
+                    //$pdf1->SetSubject($outputlangs->transnoentities("Contract"));
                     $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);
-                    $pdf1->SetCreator("BIMP-ERP " . DOL_VERSION);
+                    //$pdf1->SetCreator("BIMP-ERP " . DOL_VERSION);
                     $pdf->SetAuthor($user->getFullName($langs));
-                    $pdf1->SetAuthor($user->getFullName($langs));
+                    //$pdf1->SetAuthor($user->getFullName($langs));
                     $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
-                    $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
+                    //$pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
                     $pdf->SetAutoPageBreak(1, $this->margin_bottom);
-                    $pdf1->SetAutoPageBreak(1, $this->margin_bottom);
+                    //$pdf1->SetAutoPageBreak(1, $this->margin_bottom);
                     $pdf->SetFont('', 'B', 9);
-                    $pdf1->SetFont('', 'B', 9);
+                    //$pdf1->SetFont('', 'B', 9);
 
                 // Titre
                 $this->addLogo($pdf, 12);
                 $this->addLogo($pdf, 12, $pdf1);
                 $pdf->SetXY($this->marge_gauche, $this->marge_haute - 17); 
-                $pdf1->SetXY($this->marge_gauche, $this->marge_haute - 17);
+                //$pdf1->SetXY($this->marge_gauche, $this->marge_haute - 17);
                 $pdf->SetFont('', 'B', 14);
-                $pdf1->SetFont('', 'B', 14);
+                //$pdf1->SetFont('', 'B', 14);
                 $pdf->setXY(58,10);
-                $pdf1->setXY(58,10);
+                //$pdf1->setXY(58,10);
                 
                 if($contrat->statut == 0 || $contrat->statut == 10) {
                     $title = "BROUILLON n’ayant aucune valeur commerciale";
                     $ref = "";
                     $pdf->SetTextColor(255,0,0);
-                    $pdf1->SetTextColor(255,0,0);
+                    //$pdf1->SetTextColor(255,0,0);
                 } else {
                     $title = BimpCore::getConf('pdf_title', null, 'bimpcontract');
                     $ref = "N° " . $propref;
                 }
 
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $title, 0, 'L');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $title, 0, 'L');
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $title, 0, 'L');
                 $pdf->setX(58);
-                $pdf1->setX(58);
+                //$pdf1->setX(58);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $ref, 0, 'L');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $ref, 0, 'L');    
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $ref, 0, 'L');    
                 
                 $pdf->SetFont('', 'B', 8);
-                $pdf1->SetFont('', 'B', 8);
+                //$pdf1->SetFont('', 'B', 8);
                 $pdf->SetTextColor(0,50,255);
-                $pdf1->SetTextColor(255,140,115);
+                //$pdf1->SetTextColor(255,140,115);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à " . $mysoc->name, 0, 'R');
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à " . $mysoc->name, 0, 'R');
                 
                 
 //                $pdf->SetFont('', 'B', 8);
-//                $pdf1->SetFont('', 'B', 8);
+//                //$pdf1->SetFont('', 'B', 8);
 //                $pdf->SetTextColor(0,50,255);
-//                $pdf1->SetTextColor(255,140,115);
+//                //$pdf1->SetTextColor(255,140,115);
 //                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
-//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à " . $mysoc->name, 0, 'R');
+//                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à " . $mysoc->name, 0, 'R');
                     
                 $pdf->SetTextColor(0,0,0);
-                $pdf1->SetTextColor(0,0,0);
+                //$pdf1->SetTextColor(0,0,0);
                 $pdf->SetFont('', 'B', 11);
-                $pdf1->SetFont('', 'B', 11);
+                //$pdf1->SetFont('', 'B', 11);
 //                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'C');
-//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'C');
+//                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'C');
                 
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, $bimp_contract->getData('label'), 0, 'L');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, $bimp_contract->getData('label'), 0, 'L');
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, $bimp_contract->getData('label'), 0, 'L');
                 
                 $current_exemplaire++;
                 // Titre partie
                 $this->titre_partie($pdf, 'Entre les parties');
-                $this->titre_partie($pdf1, 'Entre les parties');
+//                $this->titre_partie($pdf1, 'Entre les parties');
 
                 // Entre les parties
                 $client->fetch($contrat->socid);
                 global $mysoc;
-                $pdf->setColor('fill', 255, 255, 255); $pdf1->setColor('fill', 255, 255, 255);
+                $pdf->setColor('fill', 255, 255, 255); //$pdf1->setColor('fill', 255, 255, 255);
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
-                $pdf->SetDrawColor(236, 147, 0); $pdf1->SetDrawColor(236, 147, 0);
+                $pdf->SetDrawColor(236, 147, 0); //$pdf1->SetDrawColor(236, 147, 0);
                 $pdf->Cell($W, 4, $mysoc->name, "R", null, 'C', true);
-                $pdf1->Cell($W, 4, $mysoc->name, "R", null, 'C', true);
+                //$pdf1->Cell($W, 4, $mysoc->name, "R", null, 'C', true);
                 if(strlen($client->nom) >= 30 && strlen($client->nom) <= 40) { 
                     $pdf->SetFont('', 'B', 9);
-                    $pdf1->SetFont('', 'B', 9);
+                    //$pdf1->SetFont('', 'B', 9);
                 } else {
                     $pdf->SetFont('', 'B', 7);
-                    $pdf1->SetFont('', 'B', 7);
+                    //$pdf1->SetFont('', 'B', 7);
                 }
                 $pdf->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
-                $pdf1->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
+                //$pdf1->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
                 $pdf->SetFont('', 'B', 11);
-                $pdf1->SetFont('', 'B', 11);
+                //$pdf1->SetFont('', 'B', 11);
                 
                 
-                $pdf->SetFont('', '', 9); $pdf1->SetFont('', '', 9);
+                $pdf->SetFont('', '', 9); //$pdf1->SetFont('', '', 9);
                 // Si il y a un contact 'Contact client suivi contrat';
                 $bimp = new BimpDb($this->db);
                 
@@ -674,11 +727,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 else $phone_contact = $instance_contact->getData('phone_mobile');
                 
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "", "R", null, 'C', true);
-                $pdf1->Cell($W, 4, "", "R", null, 'C', true);
+                //$pdf1->Cell($W, 4, "", "R", null, 'C', true);
                 $pdf->Cell($W, 4, "Contact : " .  $contact->firstname . " ". $contact->lastname , "L", null, 'C', true);
-                $pdf1->Cell($W, 4, "Contact : " . $contact->firstname . " ". $contact->lastname , "L", null, 'C', true);
+                //$pdf1->Cell($W, 4, "Contact : " . $contact->firstname . " ". $contact->lastname , "L", null, 'C', true);
                 
                 $pdf->SetFont('', '', 7);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
@@ -703,26 +756,26 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "Contact commercial : " . $commercial->getData('email'), "R", null, 'C', true);
                 $pdf->Cell($W, 4, "Code client : " . $client->code_client, "L", null, 'C', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->Cell($W, 4, $mysoc->address, "R", null, 'C', true);
-                $pdf1->Cell($W, 4, $client->address, "L", null, 'C', true);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->Cell($W, 4, $mysoc->zip . ' ' . $mysoc->town, "R", null, 'C', true);
-                $pdf1->Cell($W, 4, $client->zip . ' ' . $client->town, "L", null, 'C', true);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-//                $pdf1->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
-                $pdf1->Cell($W, 4, '', "R", null, 'C', true);
-                $pdf1->Cell($W, 4, "Tel contact: " . $phone_contact, "L", null, 'C', true);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->Cell($W, 4, "Email : " . $mysoc->email, "R", null, 'C', true);
-                $pdf1->Cell($W, 4, "Email contact: " . $instance_contact->getData('email'), "L", null, 'C', true);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->Cell($W, 4, "Commercial : " . $commercial->getData('lastname') . ' ' . $commercial->getData('firstname'), "R", null, 'C', true);
-                $pdf1->Cell($W, 4, "SIREN : " . $client->idprof1, "L", null, 'C', true);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->Cell($W, 4, "Contact commercial : " . $commercial->getData('email'), "R", null, 'C', true);
-                $pdf1->Cell($W, 4, "Code client : " . $client->code_client, "L", null, 'C', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                //$pdf1->Cell($W, 4, $mysoc->address, "R", null, 'C', true);
+                //$pdf1->Cell($W, 4, $client->address, "L", null, 'C', true);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                //$pdf1->Cell($W, 4, $mysoc->zip . ' ' . $mysoc->town, "R", null, 'C', true);
+                //$pdf1->Cell($W, 4, $client->zip . ' ' . $client->town, "L", null, 'C', true);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+//                //$pdf1->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
+                //$pdf1->Cell($W, 4, '', "R", null, 'C', true);
+                //$pdf1->Cell($W, 4, "Tel contact: " . $phone_contact, "L", null, 'C', true);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                //$pdf1->Cell($W, 4, "Email : " . $mysoc->email, "R", null, 'C', true);
+                //$pdf1->Cell($W, 4, "Email contact: " . $instance_contact->getData('email'), "L", null, 'C', true);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                //$pdf1->Cell($W, 4, "Commercial : " . $commercial->getData('lastname') . ' ' . $commercial->getData('firstname'), "R", null, 'C', true);
+                //$pdf1->Cell($W, 4, "SIREN : " . $client->idprof1, "L", null, 'C', true);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                //$pdf1->Cell($W, 4, "Contact commercial : " . $commercial->getData('email'), "R", null, 'C', true);
+                //$pdf1->Cell($W, 4, "Code client : " . $client->code_client, "L", null, 'C', true);
 
                 // Tableau des conditions du contrat
                 $pdf->SetFont('', 'BU', 13);
@@ -730,17 +783,17 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Descriptif et conditions du contrat', 0, 'C');
                 $pdf->SetFont('', '', 9);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->SetFont('', 'BU', 13);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, '', 0, 'C');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Descriptif et conditions du contrat', 0, 'C');
-                $pdf1->SetFont('', '', 9);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                //$pdf1->SetFont('', 'BU', 13);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, '', 0, 'C');
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Descriptif et conditions du contrat', 0, 'C');
+                //$pdf1->SetFont('', '', 9);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
 
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
                 $pdf->setColor('fill', 242, 242, 242);
                 $pdf->setDrawColor(255, 255, 255);
-                $pdf1->setColor('fill', 242, 242, 242);
-                $pdf1->setDrawColor(255, 255, 255);
+                //$pdf1->setColor('fill', 242, 242, 242);
+                //$pdf1->setDrawColor(255, 255, 255);
 
                 $extra = (object) $contrat->array_options;
                 // Ligne 1
@@ -757,19 +810,19 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', '', 7);
                 $pdf->Cell($W * 1.5, 8, self::$periode[$extra->options_periodicity], 1, null, 'L', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'L');
-                $pdf1->SetFont('', 'B', 7);
-                $pdf1->Cell($W * 2, 8, "Avenant au contrat N° :", 1, null, 'L', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W * 1.5, 8, "", 1, null, 'L', true);
-                $pdf1->SetFont('', 'B', 7);
-                $pdf1->Cell($W * 1.5, 8, "Date d'effet :", 1, null, 'L', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W, 8, date('d/m/Y', $extra->options_date_start), 1, null, 'L', true);
-                $pdf1->SetFont('', 'B', 7);
-                $pdf1->Cell($W * 2.5, 8, "Périodicité de facturation :", 1, null, 'L', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W * 1.5, 8, self::$periode[$extra->options_periodicity], 1, null, 'L', true);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'L');
+                //$pdf1->SetFont('', 'B', 7);
+                //$pdf1->Cell($W * 2, 8, "Avenant au contrat N° :", 1, null, 'L', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W * 1.5, 8, "", 1, null, 'L', true);
+                //$pdf1->SetFont('', 'B', 7);
+                //$pdf1->Cell($W * 1.5, 8, "Date d'effet :", 1, null, 'L', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W, 8, date('d/m/Y', $extra->options_date_start), 1, null, 'L', true);
+                //$pdf1->SetFont('', 'B', 7);
+                //$pdf1->Cell($W * 2.5, 8, "Périodicité de facturation :", 1, null, 'L', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W * 1.5, 8, self::$periode[$extra->options_periodicity], 1, null, 'L', true);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'L');
                 
                 // Ligne 2
                 $pdf->SetFont('', 'B', 7);
@@ -786,19 +839,19 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $syntec = ($extra->options_syntec > 0) ? $extra->options_syntec : "";
                 $pdf->Cell($W * 1.5, 8, $syntec, 1, null, 'L', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'L');
-                $pdf1->SetFont('', 'B', 7);
-                $pdf1->Cell($W * 2, 8, "Annule et remplace :", 1, null, 'L', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W * 1.5, 8, $bimp_contract->getData('ref_ext'), 1, null, 'L', true);
-                $pdf1->SetFont('', 'B', 7);
-                $pdf1->Cell($W * 1.5, 8, "Durée :", 1, null, 'L', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W, 8, $extra->options_duree_mois . " Mois", 1, null, 'L', true);
-                $pdf1->SetFont('', 'B', 7);
-                $pdf1->Cell($W * 2.5, 8, "Coef de révision des prix : (Syntec)", 1, null, 'L', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W * 1.5, 8, $syntec, 1, null, 'L', true);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'L');
+                //$pdf1->SetFont('', 'B', 7);
+                //$pdf1->Cell($W * 2, 8, "Annule et remplace :", 1, null, 'L', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W * 1.5, 8, $bimp_contract->getData('ref_ext'), 1, null, 'L', true);
+                //$pdf1->SetFont('', 'B', 7);
+                //$pdf1->Cell($W * 1.5, 8, "Durée :", 1, null, 'L', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W, 8, $extra->options_duree_mois . " Mois", 1, null, 'L', true);
+                //$pdf1->SetFont('', 'B', 7);
+                //$pdf1->Cell($W * 2.5, 8, "Coef de révision des prix : (Syntec)", 1, null, 'L', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W * 1.5, 8, $syntec, 1, null, 'L', true);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'L');
                 
                 // Ligne 3
                 $pdf->SetFont('', 'B', 7);
@@ -818,22 +871,22 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->Cell($W * 2.5, 8, "Reconduction : ", 1, null, 'L', true);
                 $pdf->SetFont('', '', 7);
                 $pdf->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "Non" : $bimp_contract::$renouvellement[$extra->options_tacite], 1, null, 'L', true);
-                $pdf1->SetFont('', 'B', 7);
-                $pdf1->Cell($W * 2, 8, "Délai d'intervention :", 1, null, 'L', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W * 1.5, 8, self::$gti[$extra->options_gti], 1, null, 'L', true);
-                $pdf1->SetFont('', 'B', 7);
-                $pdf1->Cell($W * 1.5, 8, "Date de fin : ", 1, null, 'L', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W, 8, $date->format('d/m/Y'), 1, null, 'L', true);
-                $pdf1->SetFont('', 'B', 7);
-                $pdf1->Cell($W * 2.5, 8, "Reconduction : ", 1, null, 'L', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "Non" : $bimp_contract::$renouvellement[$extra->options_tacite], 1, null, 'L', true);
+                //$pdf1->SetFont('', 'B', 7);
+                //$pdf1->Cell($W * 2, 8, "Délai d'intervention :", 1, null, 'L', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W * 1.5, 8, self::$gti[$extra->options_gti], 1, null, 'L', true);
+                //$pdf1->SetFont('', 'B', 7);
+                //$pdf1->Cell($W * 1.5, 8, "Date de fin : ", 1, null, 'L', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W, 8, $date->format('d/m/Y'), 1, null, 'L', true);
+                //$pdf1->SetFont('', 'B', 7);
+                //$pdf1->Cell($W * 2.5, 8, "Reconduction : ", 1, null, 'L', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "Non" : $bimp_contract::$renouvellement[$extra->options_tacite], 1, null, 'L', true);
                 
                 
 //                $pdf->SetFont('', '', 1);
-//                $pdf1->SetFont('', '', 1);
+//                //$pdf1->SetFont('', '', 1);
                 
                 
                 $pdf->SetXY($this->marge_gauche, $pdf->getY()+9);
@@ -844,34 +897,34 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                 $pdf->SetXY($this->marge_gauche, $pdf->getY()-8);
                 $pdf->setTextColor(0,0, 0);
                 
-                $pdf1->SetXY($this->marge_gauche, $pdf1->getY()+9);
-                $pdf1->setTextColor(236, 147, 0);
-                $pdf1->MultiCell(180, 15, "La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :
-E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client", 0, 'C');
+                //$pdf1->SetXY($this->marge_gauche, //$pdf1->getY()+9);
+                //$pdf1->setTextColor(236, 147, 0);
+                //$pdf1->MultiCell(180, 15, "La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :
+//E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client", 0, 'C');
 //                $pdf->writeHTML("<span style='color:red'>La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :</span><br/>e-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client");
-                $pdf1->SetXY($this->marge_gauche, $pdf1->getY()-8);
-                $pdf1->setTextColor(0,0, 0);
+                //$pdf1->SetXY($this->marge_gauche, //$pdf1->getY()-8);
+                //$pdf1->setTextColor(0,0, 0);
                 
                 $pdf->SetFont('', 'BU', 13);
 //                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Tarification', 0, 'C');
                 $pdf->SetFont('', '', 9);
 //                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->SetFont('', 'BU', 13);
-//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Tarification', 0, 'C');
-                $pdf1->SetFont('', '', 9);
-//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                //$pdf1->SetFont('', 'BU', 13);
+//                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Tarification', 0, 'C');
+                //$pdf1->SetFont('', '', 9);
+//                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 
                 
 
                 $pdf->SetDrawColor(255, 255, 255);
                 $pdf->setColor('fill', 255, 255, 255);
                 $this->headOfArray($pdf);
-                $pdf1->SetDrawColor(255, 255, 255);
-                $pdf1->setColor('fill', 255, 255, 255);
-                $this->headOfArray($pdf1);
-                $pdf1->setColor('fill', 255, 255, 255);
+                //$pdf1->SetDrawColor(255, 255, 255);
+                //$pdf1->setColor('fill', 255, 255, 255);
+                //$this->headOfArray($pdf1);
+                //$pdf1->setColor('fill', 255, 255, 255);
                 $count = count($contrat->lines);
                 $new_page = false;
                 if ($count > 12) {
@@ -885,93 +938,93 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                     $pdf->Cell($W, 8, "Liste des descriptions financière en ANNEXE 1", 1, null, 'C', true);
                     $pdf->SetTextColor(0, 0, 0);
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 50, '', 0, 'C');
-                    $pdf1->SetX($this->marge_gauche);
-                    $pdf1->SetFont(''/* 'Arial' */, '', 9);
-                    $pdf1->setDrawColor(255, 255, 255);
-                    $pdf1->setColor('fill', 242, 242, 242);
-                    $pdf1->SetTextColor(0, 0, 0);
-                    $pdf1->Cell($W, 8, "Liste des descriptions financière en ANNEXE 1", 1, null, 'C', true);
-                    $pdf1->SetTextColor(0, 0, 0);
-                    $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 50, '', 0, 'C');
+                    //$pdf1->SetX($this->marge_gauche);
+                    //$pdf1->SetFont(''/* 'Arial' */, '', 9);
+                    //$pdf1->setDrawColor(255, 255, 255);
+                    //$pdf1->setColor('fill', 242, 242, 242);
+                    //$pdf1->SetTextColor(0, 0, 0);
+                    //$pdf1->Cell($W, 8, "Liste des descriptions financière en ANNEXE 1", 1, null, 'C', true);
+                    //$pdf1->SetTextColor(0, 0, 0);
+                    //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 50, '', 0, 'C');
                 } else {
                     $this->display_lines($pdf, $contrat->lines);
                     $this->display_total($pdf, $contrat->lines, $contrat);
-                    $this->display_lines($pdf1, $contrat->lines);
-                    $this->display_total($pdf1, $contrat->lines, $contrat);
+//                    $this->display_lines($pdf1, $contrat->lines);
+//                    $this->display_total($pdf1, $contrat->lines, $contrat);
                 }
 
-                $pdf->setY(225); $pdf1->setY(225);
-                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
-                $pdf->SetFont('', 'BU', 8);
-                $pdf->setColor('fill', 255, 255, 255);
-                $pdf->Cell($W, 8, "POUR " . $mysoc->name, 1, null, 'L', true);
-                $pdf->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
-                $pdf->MultiCell($W, 6, '', 0, 'L');
-                $pdf->SetFont('', '', 7);
-                $pdf->Cell($W, 8, "Nom du signataire : " . BimpCore::getConf('pdf_signataire', '', 'bimpcontract'), 1, null, 'L', true);
-                $pdf->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
-                $pdf->MultiCell($W, 6, '', 0, 'L');
-                $pdf->Cell($W, 8, "Fonction du signataire: " . BimpCore::getConf('pdf_signataire_function', '', 'bimpcontract'), 1, null, 'L', true);
-                $pdf->Cell($W, 8, "Précédé de la mention 'Lu et approuvé'", 1, null, 'L', true);
-                $pdf->MultiCell($W, 6, '', 0, 'L');
-                $pdf->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
-                $pdf->Cell($W, 8, "+ Signature des conditions générales de contrat", 1, null, 'L', true);
-                $pdf->MultiCell($W, 6, '', 0, 'L');
-                $pdf->Cell($W, 8, "Signature", 1, null, 'L', true);
-                $pdf->Cell($W, 8, "Date :", 1, null, 'L', true);
-                $pdf->MultiCell($W, 6, '', 0, 'L');
-                $pdf->Cell($W, 8, "", 1, null, 'L', true);
-                $pdf->Cell($W, 8, "Signature", 1, null, 'L', true);
-                $pdf->setColor('text', 195, 0, 0);
-                $pdf->MultiCell($W, 16, '', 0, 'L');
-                $pdf->Cell($W, 8, "", 1, null, 'L', true);
-                $pdf->SetFont('', '', 7);
+//                $pdf->setY(225); //$pdf1->setY(225);
+//                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
+//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
+//                $pdf->SetFont('', 'BU', 8);
+//                $pdf->setColor('fill', 255, 255, 255);
+//                $pdf->Cell($W, 8, "POUR " . $mysoc->name, 1, null, 'L', true);
+//                $pdf->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
+//                $pdf->MultiCell($W, 6, '', 0, 'L');
+//                $pdf->SetFont('', '', 7);
+//                $pdf->Cell($W, 8, "Nom du signataire : " . BimpCore::getConf('pdf_signataire', '', 'bimpcontract'), 1, null, 'L', true);
+//                $pdf->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
+//                $pdf->MultiCell($W, 6, '', 0, 'L');
+//                $pdf->Cell($W, 8, "Fonction du signataire: " . BimpCore::getConf('pdf_signataire_function', '', 'bimpcontract'), 1, null, 'L', true);
+//                $pdf->Cell($W, 8, "Précédé de la mention 'Lu et approuvé'", 1, null, 'L', true);
+//                $pdf->MultiCell($W, 6, '', 0, 'L');
+//                $pdf->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
+//                $pdf->Cell($W, 8, "+ Signature des conditions générales de contrat", 1, null, 'L', true);
+//                $pdf->MultiCell($W, 6, '', 0, 'L');
+//                $pdf->Cell($W, 8, "Signature", 1, null, 'L', true);
+//                $pdf->Cell($W, 8, "Date :", 1, null, 'L', true);
+//                $pdf->MultiCell($W, 6, '', 0, 'L');
+//                $pdf->Cell($W, 8, "", 1, null, 'L', true);
+//                $pdf->Cell($W, 8, "Signature", 1, null, 'L', true);
+//                $pdf->setColor('text', 195, 0, 0);
+//                $pdf->MultiCell($W, 16, '', 0, 'L');
+//                $pdf->Cell($W, 8, "", 1, null, 'L', true);
+//                $pdf->SetFont('', '', 7);
 //                $pdf->Cell($W, 8, "Par la signature électronique de cette page, le signataire confirme avoir lu et approuvé le", 1, null, 'L', true);
-                $pdf->MultiCell($W, 6, 'Par la signature électronique de cette page, le signataire confirme avoir lu et approuvé le descriptif et la tarification de ce contrat et en accepter les Conditions Particulières et Générales', 0, 'L');
-                $pdf->Cell($W, 8, "", 1, null, 'L', true);
+//                $pdf->MultiCell($W, 6, 'Par la signature électronique de cette page, le signataire confirme avoir lu et approuvé le descriptif et la tarification de ce contrat et en accepter les Conditions Particulières et Générales', 0, 'L');
+//                $pdf->Cell($W, 8, "", 1, null, 'L', true);
 //                $pdf->Cell($W, 8, "descriptif et la tarification de ce contrat et en accepter les Conditions Particulières et Générales", 1, null, 'L', true);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
-                $pdf1->SetFont('', 'BU', 8);
-                $pdf1->setColor('fill', 255, 255, 255);
-                $pdf1->Cell($W, 8, "POUR " . $mysoc->name, 1, null, 'L', true);
-                $pdf1->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
-                $pdf1->MultiCell($W, 6, '', 0, 'L');
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W, 8, "Nom et fonction du signataire : " . BimpCore::getConf('pdf_signataire', '', 'bimpcontract'), 1, null, 'L', true);
-                $pdf1->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
-                $pdf1->MultiCell($W, 6, '', 0, 'L');
-                $pdf1->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
-                $pdf1->Cell($W, 8, "Précédé de la mention 'Lu et approuvé'", 1, null, 'L', true);
-                $pdf1->MultiCell($W, 6, '', 0, 'L');
-                $pdf1->Cell($W, 8, "", 1, null, 'L', true);
-                $pdf1->Cell($W, 8, "+ Signature des conditions générales de contrat", 1, null, 'L', true);
-                $pdf1->MultiCell($W, 6, '', 0, 'L');
-                $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
-                $pdf1->Cell($W, 8, "Date :", 1, null, 'L', true);
-                $pdf1->MultiCell($W, 6, '', 0, 'L');
-                $pdf1->Cell($W, 8, "", 1, null, 'L', true);
-                $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
-                $pdf1->setColor('text', 195, 0, 0);
-                $pdf1->MultiCell($W, 16, '', 0, 'L');
-                $pdf1->Cell($W, 8, "", 1, null, 'L', true);
-                $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W, 8, "Par la signature électronique de cette page, le signataire confirme avoir lu et approuvé le", 1, null, 'L', true);
-                $pdf1->MultiCell($W, 6, '', 0, 'L');
-                $pdf1->Cell($W, 8, "", 1, null, 'L', true);
-                $pdf1->Cell($W, 8, "descriptif et la tarification de ce contrat et en accepter les Conditions Particulières et Générales", 1, null, 'L', true);
+                //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
+                //$pdf1->SetFont('', 'BU', 8);
+                //$pdf1->setColor('fill', 255, 255, 255);
+                //$pdf1->Cell($W, 8, "POUR " . $mysoc->name, 1, null, 'L', true);
+                //$pdf1->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
+                //$pdf1->MultiCell($W, 6, '', 0, 'L');
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W, 8, "Nom et fonction du signataire : " . BimpCore::getConf('pdf_signataire', '', 'bimpcontract'), 1, null, 'L', true);
+                //$pdf1->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
+                //$pdf1->MultiCell($W, 6, '', 0, 'L');
+                //$pdf1->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
+                //$pdf1->Cell($W, 8, "Précédé de la mention 'Lu et approuvé'", 1, null, 'L', true);
+                //$pdf1->MultiCell($W, 6, '', 0, 'L');
+                //$pdf1->Cell($W, 8, "", 1, null, 'L', true);
+                //$pdf1->Cell($W, 8, "+ Signature des conditions générales de contrat", 1, null, 'L', true);
+                //$pdf1->MultiCell($W, 6, '', 0, 'L');
+                //$pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
+                //$pdf1->Cell($W, 8, "Date :", 1, null, 'L', true);
+                //$pdf1->MultiCell($W, 6, '', 0, 'L');
+                //$pdf1->Cell($W, 8, "", 1, null, 'L', true);
+                //$pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
+                //$pdf1->setColor('text', 195, 0, 0);
+                //$pdf1->MultiCell($W, 16, '', 0, 'L');
+                //$pdf1->Cell($W, 8, "", 1, null, 'L', true);
+                //$pdf1->SetFont('', '', 7);
+                //$pdf1->Cell($W, 8, "Par la signature électronique de cette page, le signataire confirme avoir lu et approuvé le", 1, null, 'L', true);
+                //$pdf1->MultiCell($W, 6, '', 0, 'L');
+                //$pdf1->Cell($W, 8, "", 1, null, 'L', true);
+                //$pdf1->Cell($W, 8, "descriptif et la tarification de ce contrat et en accepter les Conditions Particulières et Générales", 1, null, 'L', true);
                 $signed = (($contrat->statut == 1 || $contrat->statut == 11) && (int) BimpCore::getConf('pdf_use_signature', null, 'bimpcontract')) ? true : false;
                 
                 if($signed) {
                     $choosed_signature = ($bimp_contract->getData('secteur') == "CTE") ? "signed_education.png" : "signed_contrat.png";
                     
                     $logo = $conf->mycompany->dir_output . '/' . $choosed_signature;
-                    $pdf1->Image($logo, 30, 255, 50);
+                    //$pdf1->Image($logo, 30, 255, 50);
                     $pdf->Image($logo, 30, 255, 50);
                 }
                 
                 $this->_pagefoot($pdf, $outputlangs);
-                $this->_pagefoot($pdf1, $outputlangs);
+//                $this->_pagefoot($pdf1, $outputlangs);
                 if ($new_page) {
                     $pdf->AddPage();
                     $this->addLogo($pdf, 20);
@@ -985,27 +1038,27 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                     $this->headOfArray($pdf);
                     $this->display_lines($pdf, $contrat->lines);
                     $this->display_total($pdf, $contrat->lines);
-                    $pdf1->AddPage();
+                    //$pdf1->AddPage();
                     $this->addLogo($pdf, 20);
-                    $pdf1->SetXY($this->marge_gauche, $this->marge_haute - 6);
-                    $pdf1->SetFont('', 'B', 14);
-                    $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "ANNEXE 1 : Description financière", 0, 'C');
-                    $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "Contrat N° " . $propref, 0, 'C');
-                    $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
-                    $pdf1->SetFont('', 'B', 11);
-                    $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
-                    $this->headOfArray($pdf1);
+                    //$pdf1->SetXY($this->marge_gauche, $this->marge_haute - 6);
+                    //$pdf1->SetFont('', 'B', 14);
+                    //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "ANNEXE 1 : Description financière", 0, 'C');
+                    //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "Contrat N° " . $propref, 0, 'C');
+                    //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
+                    //$pdf1->SetFont('', 'B', 11);
+                    //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
+//                    $this->headOfArray($pdf1);
                     $pdf->setColor('fill', 255, 255, 255);
-                    $this->display_lines($pdf1, $contrat->lines);
+//                    $this->display_lines($pdf1, $contrat->lines);
                     $pdf->setColor('fill', 255, 255, 255);
-                    $this->display_total($pdf1, $contrat->lines);
+//                    $this->display_total($pdf1, $contrat->lines);
                     $pdf->setColor('fill', 255, 255, 255);
                 }
 
                 $this->display_cp($pdf, $contrat, $user, $outputlangs);
-                $this->display_cp($pdf1, $contrat, $user, $outputlangs);
+//                $this->display_cp($pdf1, $contrat, $user, $outputlangs);
                 $this->_pagefoot($pdf, $outputlangs);
-                $this->_pagefoot($pdf1, $outputlangs);
+//                $this->_pagefoot($pdf1, $outputlangs);
                 require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
                 $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page ? 1 : 0));
                 $classAnnexe->getAnnexeContrat($contrat);
@@ -1016,34 +1069,36 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                     if($this->have_ass) {
                         if($this->have_save_annuelle || $this->have_save_mensuelle) {
                             $this->display_cgv($pdf, 'services_hebergement_monitoring', 41);
-                            $this->display_cgv($pdf1, 'services_hebergement_monitoring', 41);
+//                            $this->display_cgv($pdf1, 'services_hebergement_monitoring', 41);
                             $cgv_print = true;
                         } else {
                             $this->display_cgv($pdf);
-                            $this->display_cgv($pdf1);
+//                            $this->display_cgv($pdf1);
                             $cgv_print = true;
                         }
                         
                     } elseif($this->have_save_annuelle || $this->have_save_mensuelle) {
                         $this->display_cgv($pdf, 'services_hebergement', 41);
-                        $this->display_cgv($pdf1, 'services_hebergement', 41);
+//                        $this->display_cgv($pdf1, 'services_hebergement', 41);
                         $cgv_print = true;
                     } else {
                         $this->display_cgv($pdf);
-                        $this->display_cgv($pdf1);
+//                        $this->display_cgv($pdf1);
                         $cgv_print = true;
                     }
 
                 }
+                
+                $bimp_contract->updateField('signature_params', $this->signature_params);
 
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
-                    //$pdf1->AliasNbPages();
+                    ////$pdf1->AliasNbPages();
                     $pdf->Close();
-                    $pdf1->Close();
+                    //$pdf1->Close();
                     $this->file = $file;
                     $pdf->Output($file, 'f');
-                    $pdf1->Output($file1, 'f');
+                    //$pdf1->Output($file1, 'f');
                     $this->result["fullpath"] = $file;
                     return 1;
             } else {

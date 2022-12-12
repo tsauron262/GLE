@@ -69,6 +69,13 @@ class modBimpbimp extends DolibarrModules {
     function init() {
         global $conf;
         $sql = array();
+        require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+        $name = 'module_version_'.strtolower($this->name);
+        // Se fais que lors de l'installation du module
+        if(BimpCore::getConf($name, '') == "") {
+            BimpCore::setConf($name, floatval($this->version));
+            $this->_load_tables('/'.strtolower($this->name).'/sql/');
+        }
         
         
             

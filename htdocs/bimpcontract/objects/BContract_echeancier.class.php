@@ -614,60 +614,60 @@ class BContract_echeancier extends BimpObject {
                 
                 if($facture->getData('type') != 3) {
                 
-                // Définition de si c'est une facture de l'échéancier ou non
-                $has_facture_of_echeancier = true;
-                if(!$facture->dol_object->lines[0]->date_start && $has_facture_of_echeancier) {
-                    $has_facture_of_echeancier = false;
-                }
-                //foreach ($facture->dol_object->lines as $line) {
-                //    if(!$line->date_start && $has_facture_of_echeancier) {
-                //        $has_facture_of_echeancier = false;
-                //    }
-                //}
-                 
-                if ($facture->getData('fk_statut') == 0) {
-                    $can_create_next_facture = false;
-                }
-                $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payée</b>' : '<b class="danger" >Impayé</b>';
-                $html .= '<tr class="objectListItemRow" >';
-                $dateDebut = New DateTime();
-                $dateFin = New DateTime();
-                $dateDebut->setTimestamp((int)$facture->dol_object->lines[0]->date_start);
-                $dateFin->setTimestamp((int)$facture->dol_object->lines[0]->date_end);
-                
-                if($this->getData('old_to_new'))
-                    $html .= '<td style="text-align:center" ><b>Ancienne facturation</b></td>';
-                else {
-                    if(!$has_facture_of_echeancier) {
-                        $html .= '<td style="text-align:center" class="important">Facturation supplémentaire</td>';
-                    } else {
-                        $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
+                    // Définition de si c'est une facture de l'échéancier ou non
+                    $has_facture_of_echeancier = true;
+                    if(!$facture->dol_object->lines[0]->date_start && $has_facture_of_echeancier) {
+                        $has_facture_of_echeancier = false;
                     }
-                }
-                
-                
-                
-                $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('total') - $facture->getData('marge_finale_ok')) . ' €</b></td>'
-                        . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
-                        . '<td style="text-align:center">' . $paye . '</td>'
-                        . '<td style="text-align:center">' . $displayAppatenance . '</td>'
-                        . '<td style="text-align:center; margin-right:10%">';
-                if ($facture->getData('fk_statut') == 0 && $user->rights->facture->validate && $this->canEdit()) {
-                    $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="' . $this->getJsActionOnclick("validateFacture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-check" ></i></span>';
-                } else {
-                    $html .= '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="top" data-content="Afficher la page dans un nouvel onglet" data-html="false" onclick="window.open(\'' . DOL_URL_ROOT . '/bimpcommercial/index.php?fc=facture&amp;id=' . $facture->id . '\');" data-original-title="" title=""><i class="fas fa5-external-link-alt"></i></span>';
-                }
-                if ($current_number_facture == count($data->factures_send) && $facture->getData('fk_statut') == 0 && $user->rights->facture->supprimer && $this->canEdit()) {
-                    $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Supprimer la facture" onclick="' . $this->getJsActionOnclick("deleteFacture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-times" ></i></span>';
-                }
+                    //foreach ($facture->dol_object->lines as $line) {
+                    //    if(!$line->date_start && $has_facture_of_echeancier) {
+                    //        $has_facture_of_echeancier = false;
+                    //    }
+                    //}
 
-                $html .= '</td>';
-                
-                $html .= '</tr>';
-                $current_number_facture++;
+                    if ($facture->getData('fk_statut') == 0) {
+                        $can_create_next_facture = false;
+                    }
+                    $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payée</b>' : '<b class="danger" >Impayé</b>';
+                    $html .= '<tr class="objectListItemRow" >';
+                    $dateDebut = New DateTime();
+                    $dateFin = New DateTime();
+                    $dateDebut->setTimestamp((int)$facture->dol_object->lines[0]->date_start);
+                    $dateFin->setTimestamp((int)$facture->dol_object->lines[0]->date_end);
+
+                    if($this->getData('old_to_new'))
+                        $html .= '<td style="text-align:center" ><b>Ancienne facturation</b></td>';
+                    else {
+                        if(!$has_facture_of_echeancier) {
+                            $html .= '<td style="text-align:center" class="important">Facturation supplémentaire</td>';
+                        } else {
+                            $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
+                        }
+                    }
+
+
+
+                    $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
+                            . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
+                            . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
+                            . '<td style="text-align:center"><b>' . price($facture->getData('total') - $facture->getData('marge_finale_ok')) . ' €</b></td>'
+                            . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
+                            . '<td style="text-align:center">' . $paye . '</td>'
+                            . '<td style="text-align:center">' . $displayAppatenance . '</td>'
+                            . '<td style="text-align:center; margin-right:10%">';
+                    if ($facture->getData('fk_statut') == 0 && $user->rights->facture->validate && $this->canEdit()) {
+                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="' . $this->getJsActionOnclick("validateFacture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-check" ></i></span>';
+                    } else {
+                        $html .= '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="top" data-content="Afficher la page dans un nouvel onglet" data-html="false" onclick="window.open(\'' . DOL_URL_ROOT . '/bimpcommercial/index.php?fc=facture&amp;id=' . $facture->id . '\');" data-original-title="" title=""><i class="fas fa5-external-link-alt"></i></span>';
+                    }
+                    if ($current_number_facture == count($data->factures_send) && $facture->getData('fk_statut') == 0 && $user->rights->facture->supprimer && $this->canEdit()) {
+                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Supprimer la facture" onclick="' . $this->getJsActionOnclick("deleteFacture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-times" ></i></span>';
+                    }
+
+                    $html .= '</td>';
+
+                    $html .= '</tr>';
+                    $current_number_facture++;
                 } else {
                    // $facture->getSumDiscountsUsed() . "<br />";
                     $acomptes_ht += $facture->getData('total');

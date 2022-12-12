@@ -1953,12 +1953,12 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $pa_ht) . ' €';
                         if ($remise_pa) {
-                            $html .= "\n" . '(- Remise CRT ' . price($remise_pa) . ' € = ' . price($pa_ht - $remise_pa) . ' €)';
+                            $html .= "\n" . '(- Remise arrière ' . price($remise_pa) . ' € = ' . price($pa_ht - $remise_pa) . ' €)';
                         }
                     } else {
                         $html .= BimpTools::displayMoneyValue((float) $pa_ht, 'EUR', 0, 0, 0, 2, 1);
                         if ($remise_pa) {
-                            $html .= '<br/>(- Remise CRT ' . BimpTools::displayMoneyValue($remise_pa) . ' = ' . BimpTools::displayMoneyValue($pa_ht - $remise_pa) . ')';
+                            $html .= '<br/>(- Remise arrière ' . BimpTools::displayMoneyValue($remise_pa) . ' = ' . BimpTools::displayMoneyValue($pa_ht - $remise_pa) . ')';
                         }
                     }
                     break;
@@ -4189,7 +4189,7 @@ class ObjectLine extends BimpObject
                                 'addon_right' => '<i class="fa fa-percent"></i>'
                     ));
                     $html .= '<p class="inputHelp">';
-                    $html .= 'Ne modifiez cette valeur que pour les cas éligibles à une remise CRT exceptionnelle.<br/>Attention: toute remise CRT erronée pourra donner lieu à un refus.';
+                    $html .= 'Ne modifiez cette valeur que pour les cas éligibles à une Remise arrière exceptionnelle.<br/>Attention: toute Remise arrière erronée pourra donner lieu à un refus.';
                     $html .= '</p>';
                 } else {
                     $html .= '<input type="hidden" name="' . $prefixe . 'remise_crt_percent" value="0"/>';

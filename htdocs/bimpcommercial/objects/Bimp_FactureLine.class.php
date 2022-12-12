@@ -264,6 +264,8 @@ class Bimp_FactureLine extends ObjectLine
             foreach ($revals as $reval) {
                 switch ((int) $reval->getData('status')) {
                     case 0:
+                    case 10:
+                    case 20:
                         $total_attente += (float) $reval->getTotal();
                         break;
 

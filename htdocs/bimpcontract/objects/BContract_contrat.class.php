@@ -3792,19 +3792,21 @@ class BContract_contrat extends BimpDolObject
         if (count($element_factures)) {
             foreach ($element_factures as $element) {
                 $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $element['d']);
-                if ($paye_distinct) {
-                    if ($instance->getData('paye')) {
-                        if ($field == 'total')
-                            $montant += $instance->getData('total');
-                        elseif ($field == 'pa')
-                            $montant += $instance->getData('total_achat_reval_ok');
-                    }
-                } else {
-                    if (/* $instance->getData('type') == 0 */1) {
-                        if ($field == 'total')
-                            $montant += $instance->getData('total');
-                        elseif ($field == 'pa')
-                            $montant += $instance->getData('total_achat_reval_ok');
+                if($instance->getData('type') != 3){
+                    if ($paye_distinct) {
+                        if ($instance->getData('paye')) {
+                            if ($field == 'total')
+                                $montant += $instance->getData('total');
+                            elseif ($field == 'pa')
+                                $montant += $instance->getData('total_achat_reval_ok');
+                        }
+                    } else {
+                        if (/* $instance->getData('type') == 0 */1) {
+                            if ($field == 'total')
+                                $montant += $instance->getData('total');
+                            elseif ($field == 'pa')
+                                $montant += $instance->getData('total_achat_reval_ok');
+                        }
                     }
                 }
             }

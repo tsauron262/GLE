@@ -6,6 +6,10 @@ define('NO_REDIRECT_LOGIN', 1);
 require_once("../../main.inc.php");
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
+
+//recipient-completed = {"event":"recipient-completed","apiVersion":"v2.1","uri":"/restapi/v2.1/accounts/8b411bfe-54f5-47fc-bbf2-55d9a71a200f/envelopes/71799c95-8417-4b16-90d5-86ff24a91d09","retryCount":0,"configurationId":10363315,"generatedDateTime":"2022-12-09T18:29:29.7360000Z","data":{"accountId":"8b411bfe-54f5-47fc-bbf2-55d9a71a200f","userId":"4214323f-c281-4a0e-80f7-37b3ea7d8665","envelopeId":"71799c95-8417-4b16-90d5-86ff24a91d09","recipientId":"1"}}
+//envelope-completed = {"event":"envelope-completed","apiVersion":"v2.1","uri":"/restapi/v2.1/accounts/8b411bfe-54f5-47fc-bbf2-55d9a71a200f/envelopes/71799c95-8417-4b16-90d5-86ff24a91d09","retryCount":0,"configurationId":10363315,"generatedDateTime":"2022-12-09T18:32:13.2990000Z","data":{"accountId":"8b411bfe-54f5-47fc-bbf2-55d9a71a200f","userId":"4214323f-c281-4a0e-80f7-37b3ea7d8665","envelopeId":"71799c95-8417-4b16-90d5-86ff24a91d09"}}
+
 $errors = $warnings = array();
 $mode_dev = BimpCore::isUserDev();
 global $user;

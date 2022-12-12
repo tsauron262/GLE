@@ -351,7 +351,7 @@ class Bimp_CommandeLine extends ObjectLine
                                 'icon'    => 'fas_cart-arrow-down',
                                 'onclick' => $this->getJsActionOnclick('addToCommandeFourn', array(
 //                                    'remise_pa'       => (float) $this->getData('remise_pa'),
-//                                    'remise_pa_label' => ((int) $this->getData('remise_crt') ? 'Remise CRT' : '')
+//                                    'remise_pa_label' => ((int) $this->getData('remise_crt') ? 'Remise arrière' : '')
                                         ), array(
                                     'form_name' => 'commande_fourn'
                                 ))

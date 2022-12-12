@@ -1816,13 +1816,13 @@ class BContract_contrat extends BimpDolObject
         $current_renouvellement = $this->getData('current_renouvellement');
         $next_renouvellement = ($current_renouvellement + 1);
         $syntec_for_use_this_renouvellement = ($current_renouvellement == 0) ? $this->getData('syntec') : $this->getData('syntec_renouvellement');
-        $duree_contrat = $this->getData('duree_mois');
+        $duree_contratIni = $this->getData('duree_mois') / ($this->getData('current_renouvellement')+1);
 
         $new_date_start = new DateTime($this->displayRealEndDate("Y-m-d"));
 
         $new_date_start->add(new DateInterval("P1D"));
         $new_date_end = new dateTime($new_date_start->format('Y-m-d'));
-        $new_date_end->add(new DateInterval("P" . $duree_contrat . "M"));
+        $new_date_end->add(new DateInterval("P" . $duree_contratIni . "M"));
         $new_date_end->sub(new DateInterval('P1D'));
 
         $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_NON;
@@ -1887,6 +1887,7 @@ class BContract_contrat extends BimpDolObject
 
         if (!count($errors)) {
             $this->updateField('tacite', $new_renouvellementTacite);
+            $this->updateField('duree_mois', $this->getData('duree_mois') + $duree_contratIni);
             $this->updateField('current_renouvellement', $next_renouvellement);
             $this->updateField('syntec_renouvellement', $new_indice_syntec);
             $this->updateField('relance_renouvellement', 1);

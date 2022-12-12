@@ -269,7 +269,7 @@ class BContract_avenant extends BContract_contrat {
     }
     
     
-    public function actionValidate() {
+    public function actionValidate($data, &$success) {
         
         $errors = [];
         $warnings = [];

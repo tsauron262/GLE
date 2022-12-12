@@ -151,6 +151,23 @@ class BimpTools
 
         return $default_value;
     }
+    
+    public static function getAjaxFileName($field_name){
+        return str_replace("C:fakepath", '', BimpTools::getPostFieldValue($field_name));
+    }
+    
+    public static function mouveAjaxFile(&$errors, $field_name, $dir_dest, $name_dest = null){//pas d'extension elle est géré en auto
+        global $user;
+        $dir = DOL_DATA_ROOT.'/bimpcore/tmpFile/';
+        $file = $user->id."_".$field_name."_".BimpTools::getAjaxFileName($field_name);
+        if($name_dest == null)
+            $name_dest = BimpTools::getAjaxFileName($field_name);
+        if(pathinfo($name_dest, PATHINFO_EXTENSION) == ''){
+            $extension = pathinfo($dir.$file, PATHINFO_EXTENSION);
+            $name_dest .= '.'.$extension;
+        }
+        rename($dir.$file, $dir_dest.'/'.$name_dest);
+    }
 
     // Gestion des objects Dolibarr:
 

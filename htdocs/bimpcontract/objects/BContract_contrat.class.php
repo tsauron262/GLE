@@ -3696,6 +3696,7 @@ class BContract_contrat extends BimpDolObject
                 //}
             }
             $montant += $this->getAddAmountAvenantProlongation();
+            $montant += $this->getAddAmountAvenantModification();
             $this->totalContrat = $montant;
             return $montant;
         }
@@ -3768,6 +3769,31 @@ class BContract_contrat extends BimpDolObject
             $dureePrlong += $av->getNbMois();
             if (!$idAvenant || $idAvenant == $id_child)
                 $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getDureeInitial());
+        }
+
+        return $total;
+    }
+    public function getAddAmountAvenantModification($idAvenant = 0)
+    {
+
+        $now = new DateTime();
+
+        $total = 0;
+
+        $filters = [
+            'type'          => 0,
+        ];
+        if ($idAvenant == 0)//veut le total des valide
+            $filters['statut'] = 2;
+
+        $children = $this->getChildrenList('avenant', $filters);
+
+        $dureePrlong = 0;
+
+        foreach ($children as $id_child) {
+            $av = $this->getChildObject('avenant', $id_child);
+            if (!$idAvenant || $idAvenant == $id_child)
+                $total += $av->getTotalCoup();
         }
 
         return $total;

@@ -842,7 +842,7 @@ class BContract_echeancier extends BimpObject {
             $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Dont acompte</th> <td style='text-align:center'><b class='success'> ".price($acomptes_ht)."€ </b></td><td style='text-align:center'><b class='success'>".price($acomptes_ttc)."€</b></td></tr>";
             
         }
-        $html .= "<tr></tr><tr></tr><";
+        $html .= "<tr></tr><tr></tr>";
             $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Coût prévisionelle</th> <td style='text-align:center'><b class='success'> ".price($acomptes_ht)."€ </b></td><td style='text-align:center'><b class='success'>".price($acomptes_ttc)."€</b></td></tr>";
         
         $html .= "</table>";

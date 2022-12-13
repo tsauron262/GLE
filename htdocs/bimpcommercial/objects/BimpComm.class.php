@@ -675,6 +675,15 @@ class BimpComm extends BimpDolObject
 
         return $buttons;
     }
+    
+    public function canSetAction($action): int {
+        global $user;
+        if($action == 'checkTotal' && !$user->admin)
+            return 0;
+        if($action == 'checkMarge' && !$user->admin)
+            return 0;
+        return parent::canSetAction($action);
+    }
 
     public function getDefaultListExtraButtons()
     {

@@ -725,7 +725,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
 
             // Edit
-            if ($status == Commande::STATUS_VALIDATED && $this->can("create")) {
+            if ($status == Commande::STATUS_VALIDATED && $this->can("create") && $user->admin) {
                 $buttons[] = array(
                     'label'   => 'Modifier',
                     'icon'    => 'undo',

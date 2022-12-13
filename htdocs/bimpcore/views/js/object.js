@@ -288,20 +288,24 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                         var nbFile = 0;
                         var nbFileOk = 0;
                         var button = $(this);
-                        $('input[type=file]').each(function(){
+                        $form.find('input[type=file]').each(function(){
                             var id = $(this).attr('id');
                             var name = $(this).attr('name');
                             if($('#'+id).val() != ''){
                                 nbFile++;
+                                button.addClass('disabled');
                                 $('#'+id).simpleUpload(DOL_URL_ROOT + "/bimpcore/ajax/upload.php?id="+name, {
                                         start: function(file){
+                                            $form.append('<div id="progressbar_'+id+'"></div>');
                                         },
                                         progress: function(progress){
                                                 console.log(progress);
+                                                $( "#progressbar_"+id).progressbar({value: progress});
                                         },
                                         success: function(data){
                                                 nbFileOk++;
                                                 if(nbFileOk == nbFile){
+                                                    button.removeClass('disabled');
                                                     setObjectAction(button, object_data, action, extra_data, null, $('#' + $form.attr('id') + '_result'), function (result) {
                                                         if (typeof (result.allow_reset_form) === 'undefined' || !result.allow_reset_form) {
                                                             if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {

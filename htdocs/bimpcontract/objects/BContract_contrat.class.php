@@ -3022,7 +3022,7 @@ class BContract_contrat extends BimpDolObject
     }
     
     public function actionValidate($data, &$success) {
-        
+        $result = array('errors' => array(), 'warnings' => array());
         $use_signature = (int) BimpCore::getConf('contrat_use_signatures', null, 'bimpcontract');
         $id_contact_signature = 0;
         $open_public_access = 0;
@@ -4953,7 +4953,7 @@ class BContract_contrat extends BimpDolObject
                     if ($allow_docusign && $ds_required) {
                         $allow_dist = 0;
                     }
-                    $allow_refuse = (int) BimpCore::getConf('contrat_signature_allow_refuse', null, 'bimpcommercial');
+                    $allow_refuse = (int) BimpCore::getConf('contrat_signature_allow_refuse', null, 'bimpcontract');
 
                     // Client
                     $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $id_contact);
@@ -5042,16 +5042,16 @@ class BContract_contrat extends BimpDolObject
         return $errors;
     }
 
-    public function getSignatureEmailContent($doc_type = '', $signature_type = 'elec')
+    public function getSignatureEmailContent($doc_type = '', $signature_type = null)
     {
         if (!$signature_type) {
-            if ((int) BimpTools::getPostFieldValue('init_docusign', BimpCore::getConf('contrat_signature_allow_docusign', null, 'bimpcommercial'))) {
+            if (BimpTools::getPostFieldValue('init_docusign') && BimpCore::getConf('contrat_signature_allow_docusign', null, 'bimpcontract')) {
                 $signature_type = 'docusign';
             } else {
                 $signature_type = 'elec';
             }
         }
-
+        
         BimpObject::loadClass('bimpcore', 'BimpSignature');
         return BimpSignature::getDefaultSignDistEmailContent($signature_type);
     }

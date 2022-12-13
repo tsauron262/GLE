@@ -725,7 +725,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
 
             // Edit
-            if ($status == Commande::STATUS_VALIDATED && $this->can("create")) {
+            if ($status == Commande::STATUS_VALIDATED && $this->can("create") && $user->admin) {
                 $buttons[] = array(
                     'label'   => 'Modifier',
                     'icon'    => 'undo',
@@ -740,24 +740,24 @@ class Bimp_Commande extends Bimp_CommandeTemp
             if ($conf->ficheinter->enabled) {
                 $langs->load("interventions");
 
-                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && $this->dol_object->getNbOfServicesLines() > 0) {
-                    if ($user->rights->ficheinter->creer) {
-                        $url = DOL_URL_ROOT . '/fichinter/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->id . '&amp;socid=' . $client->id;
-                        $buttons[] = array(
-                            'label'   => $langs->trans('AddIntervention'),
-                            'icon'    => 'plus-circle',
-                            'onclick' => 'window.location = \'' . $url . '\''
-                        );
-                    } else {
-                        $buttons[] = array(
-                            'label'    => $langs->trans('AddIntervention'),
-                            'icon'     => 'plus-circle',
-                            'onclick'  => '',
-                            'disabled' => 1,
-                            'popover'  => 'Vous n\'avez pas la permission'
-                        );
-                    }
-                }
+//                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && $this->dol_object->getNbOfServicesLines() > 0) {
+//                    if ($user->rights->ficheinter->creer) {
+//                        $url = DOL_URL_ROOT . '/fichinter/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->id . '&amp;socid=' . $client->id;
+//                        $buttons[] = array(
+//                            'label'   => $langs->trans('AddIntervention'),
+//                            'icon'    => 'plus-circle',
+//                            'onclick' => 'window.location = \'' . $url . '\''
+//                        );
+//                    } else {
+//                        $buttons[] = array(
+//                            'label'    => $langs->trans('AddIntervention'),
+//                            'icon'     => 'plus-circle',
+//                            'onclick'  => '',
+//                            'disabled' => 1,
+//                            'popover'  => 'Vous n\'avez pas la permission'
+//                        );
+//                    }
+//                }
             }
 //
 //            // Créer contrat
@@ -4107,10 +4107,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $demande->delete($warnings, 1);
                 $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée.";
                 $msg_mail = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true);
-                $msg_mail .= " a été validée financièrement par paiement comptant par ";
+                $msg_mail .= " a été validée financièrement par paiement comptant ou mandat SEPA par ";
                 $msg_mail .= ucfirst($user->firstname) . ' ' . strtoupper($user->lastname);
                 $msg_mail .= "<br/>Merci de vérifier le paiement ultérieurement.";
-                mailSyn2("Validation par paiement comptant", 'a.delauzun@bimp.fr', "gle@bimp.fr", $msg_mail);
+                mailSyn2("Validation par paiement comptant ou mandat SEPA", 'a.delauzun@bimp.fr, s.reynaud@bimp.fr', "gle@bimp.fr", $msg_mail);
             } else {
                 $client_facture = $this->getClientFacture();
                 if (!$client_facture->getData('validation_financiere')) {
@@ -4200,8 +4200,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $new_data['id_facture'] = 0;
-        $new_data['validFin'] = 0;
-        $new_data['validComm'] = 0;
+//        $new_data['validFin'] = 0;
+//        $new_data['validComm'] = 0;
         $new_data['date_creation'] = date('Y-m-d H:i:s');
         $new_data['date_valid'] = null;
         $new_data['date_cloture'] = null;

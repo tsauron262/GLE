@@ -40,6 +40,7 @@ if (!$body) {
         }
         
         $envelopeId = BimpTools::getArrayValueFromPath($data, 'data/envelopeId', '');
+        $event = BimpTools::getArrayValueFromPath($data, 'event', '');
 
         if (!$envelopeId) {
             $errors[] = 'ID DocuSign absent';
@@ -51,16 +52,30 @@ if (!$body) {
             if (!BimpObject::objectLoaded($signature)) {
                 $errors[] = "Aucune signature existante pour l'ID DocuSign " . $envelopeId;
             } else {
-                $data = array(
-                    'send_notification_email' => true
-                );
+                
+                if($event == 'envelope-completed'){
+                    $success = '';
+                    // $return = $signature->actionDownloadSignature($data, $success); => Eviter les appels directs aux méthodes actionXXX (nécessaire pour vérfis / transactions db / etc.) 
+                    $refresh_errors = $signature->refreshDocuSignDocument(true, $warnings, $success);
 
-                $success = '';
-                // $return = $signature->actionDownloadSignature($data, $success); => Eviter les appels directs aux méthodes actionXXX (nécessaire pour vérfis / transactions db / etc.) 
-                $refresh_errors = $signature->refreshDocuSignDocument(true, $warnings, $success);
-
-                if (count($refresh_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($refresh_errors, 'Echec de la mise à jour des données DocuSign');
+                    if (count($refresh_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($refresh_errors, 'Echec de la mise à jour des données DocuSign');
+                    }
+                }
+                elseif($event == 'recipient-completed'){
+                    $recipientId = BimpTools::getArrayValueFromPath($data, 'data/recipientId', '');
+                    $signataires = $signature->getChildrenObjects('signataires', array(), 'id', 'ASC');
+                    $i= 0;
+                    print_r($recipientId.'pp');
+                    foreach($signataires as $signataire){
+                        $i++;
+                        if($i == $recipientId){
+                            $signataire->set('status', BimpSignataire::STATUS_SIGNED);
+                            $signataire->set('date_signed', date('Y-m-d H:i:s'));
+                            $signataire->update();
+                            $success = 'Signataire mis a jour avec succes';
+                        }
+                    }
                 }
             }
         }

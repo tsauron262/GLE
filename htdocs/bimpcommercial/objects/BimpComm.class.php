@@ -602,9 +602,9 @@ class BimpComm extends BimpDolObject
         // Message logistique: 
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
-            'label'   => 'Message logistique',
+            'label'   => 'Message achat',
             'icon'    => 'far_paper-plane',
-            'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_LOGISTIQUE, "content" => ""), array('form_name' => 'rep'))
+            'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 120, "content" => ""), array('form_name' => 'rep'))
         );
 
         // Message facturation: 
@@ -674,6 +674,15 @@ class BimpComm extends BimpDolObject
         }
 
         return $buttons;
+    }
+    
+    public function canSetAction($action) {
+        global $user;
+        if($action == 'checkTotal' && !$user->admin)
+            return 0;
+        if($action == 'checkMarge' && !$user->admin)
+            return 0;
+        return parent::canSetAction($action);
     }
 
     public function getDefaultListExtraButtons()

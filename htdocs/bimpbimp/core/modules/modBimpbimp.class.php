@@ -36,7 +36,7 @@ class modBimpbimp extends DolibarrModules {
         $this->numero = 8567;
 
         $this->family = "BIMP";
-        $this->name = "Bimp module";
+        $this->name = "bimpbimp";
         $this->description = "Pour soc BIMP";
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_BIMPBIMP';

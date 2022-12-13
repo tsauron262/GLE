@@ -14,7 +14,7 @@ $code = BimpTools::getValue('code', '');
 if (!$code) {
     $errors[] = 'Code absent';
 } else {
-    if (BimpTools::isSubmit('mode_dev')) {
+    if (BimpTools::isSubmit('mode_dev') && 0 /*o peut pas test sinon*/) {
         echo 'Code : "' . $code . '"<br/><br/>';
     } else {
         if (!isset($_SESSION['id_user_docusign'])) {

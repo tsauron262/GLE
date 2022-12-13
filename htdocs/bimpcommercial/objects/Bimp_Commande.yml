@@ -90,15 +90,15 @@ fields:
     fk_mode_reglement: 
         depends_on: fk_soc,id_client_facture
         
-    validComm:
-        label: Validation Commerciale
-        type: bool
-        edit: 0
-            
-    validFin:
-        label: Validation Financiére
-        type: bool
-        edit: 0
+#    validComm:
+#        label: Validation Commerciale
+#        type: bool
+#        edit: 0
+#            
+#    validFin:
+#        label: Validation Financiére
+#        type: bool
+#        edit: 0
         
     id_facture: 
         label: Facture globale
@@ -304,8 +304,8 @@ fields_tables:
             - field: date_commande
               edit: 
                   callback: isEditable
-            - field: validComm
-            - field: validFin
+#            - field: validComm
+#            - field: validFin
             - field: zone_vente
               edit: 1
             - field: revalorisation
@@ -352,6 +352,13 @@ fields_tables:
             - field: date_prevue_facturation
               edit: 1
             - field: paiement_comptant
+            - custom: 1
+              label: Preuve de paiement
+              value:
+                  callback: 
+                    method: displayBool
+                    params:
+                        - asPreuvePaiment
                   
     client: 
         rows: 
@@ -815,14 +822,14 @@ filters_panels:
             invoice_status: 
             date_livraison: 
             revalorisation:
-            validComm:
-            validFin:
+#            validComm:
+#            validFin:
             
 lists_cols: 
-    validComm: 
-        label: Valid. comm.
-    validFin:
-        label: Valid. fin.
+#    validComm: 
+#        label: Valid. comm.
+#    validFin:
+#        label: Valid. fin.
 #    logistique_status:
 #        label: St. log.
 #        display: icon

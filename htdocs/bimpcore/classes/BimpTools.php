@@ -158,6 +158,8 @@ class BimpTools
     
     public static function mouveAjaxFile(&$errors, $field_name, $dir_dest, $name_dest = null){//pas d'extension elle est géré en auto
         global $user;
+        if(!is_dir($dir_dest))
+            mkdir($dir_dest);
         $dir = DOL_DATA_ROOT.'/bimpcore/tmpFile/';
         $file = $user->id."_".$field_name."_".BimpTools::getAjaxFileName($field_name);
         if($name_dest == null)

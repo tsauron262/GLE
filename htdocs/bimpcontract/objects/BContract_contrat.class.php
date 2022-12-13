@@ -2250,24 +2250,26 @@ class BContract_contrat extends BimpDolObject
                 );
             }
 
-            if (($status != self::CONTRAT_STATUS_BROUILLON || $status == self::CONTRAT_STATUS_WAIT ) && ($user->rights->bimpcontract->to_generate)) {
-
-                if ($status != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUS_ACTIVER_TMP && $status != self::CONTRAT_STATUS_ACTIVER_SUP) {
-                    $buttons[] = array(
-                        'label'   => 'Générer le PDF du contrat',
-                        'icon'    => 'fas_file-pdf',
-                        'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
-                    );
-                }
-
-                if ($status != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUS_ACTIVER_TMP && $status != self::CONTRAT_STATUS_ACTIVER_SUP) {
-                    $buttons[] = array(
-                        'label'   => 'Générer le PDF du courrier',
-                        'icon'    => 'fas_file-pdf',
-                        'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
-                    );
-                }
-            }
+            
+            //trop bizarre ces conditions....
+//            if (($status != self::CONTRAT_STATUS_BROUILLON || $status == self::CONTRAT_STATUS_WAIT ) && ($user->rights->bimpcontract->to_generate)) {
+//
+//                if ($status != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUS_ACTIVER_TMP && $status != self::CONTRAT_STATUS_ACTIVER_SUP) {
+//                    $buttons[] = array(
+//                        'label'   => 'Générer le PDF du contrat',
+//                        'icon'    => 'fas_file-pdf',
+//                        'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+//                    );
+//                }
+//
+//                if ($status != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUS_ACTIVER_TMP && $status != self::CONTRAT_STATUS_ACTIVER_SUP) {
+//                    $buttons[] = array(
+//                        'label'   => 'Générer le PDF du courrier',
+//                        'icon'    => 'fas_file-pdf',
+//                        'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
+//                    );
+//                }
+//            }
 
             if ($user->rights->contrat->creer && $status == self::CONTRAT_STATUS_BROUILLON) {
                 $buttons[] = array(

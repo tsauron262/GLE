@@ -172,6 +172,15 @@ class Bimp_Commande extends Bimp_CommandeTemp
     }
 
     // Getters booléens:
+    
+    public function asPreuvePaiment(){
+        $files = $this->getFilesArray();
+        foreach($files as $file){
+            if(stripos($file, 'Paiement') !== false)
+                return 1;
+        }
+        return 0;
+    }
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -444,7 +453,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 global $user;
 
                 $id_cond_a_la_commande = self::getBdb()->getValue('c_payment_term', 'rowid', '`active` > 0 and code = "RECEPCOM"');
-                if ($client_facture->getData('outstanding_limit') < 1 /*and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement')*/) {
+                if ($client_facture->getData('outstanding_limit') < 1 /*and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement')*/ && !$this->asPreuvePaiment()) {
                     if (!in_array($user->id, array(232, 97, 1566, 512))) {
                         $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
                         if ($available_discounts < $this->getData('total_ttc') && $this->getData('total_ttc') > 2)
@@ -663,6 +672,14 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     );
                 }
             }
+            if($status === 0 && !$this->asPreuvePaiment())
+                $buttons[] = array(
+                    'label'   => 'Télécharger la preuve de paiement',
+                    'icon'    => 'dollar',
+                    'onclick' => $this->getJsActionOnclick('preuvePaiment', array(), array(
+                        'form_name' => 'preuve_paiement'
+                    ))
+                );
 
 //            // Valider
             if ($status === 0) {
@@ -3878,6 +3895,19 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $line->checkQties();
         }
 
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function actionPreuvePaiment($data, &$success)
+    {
+        $errors = $warnings = array();
+        if(isset($data['file']) && $data['file'] != '')
+            BimpTools::mouveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
+        else
+            $errors[] = 'Aucun fichier uploadé';
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

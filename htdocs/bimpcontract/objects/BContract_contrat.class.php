@@ -4960,6 +4960,7 @@ class BContract_contrat extends BimpDolObject
                     if(!BimpObject::objectLoaded($contact) or $contact->getData('poste') != '') {
                         $errors[] = "Fonction du contact client absent, merci de le définir";
                     } else {
+                        BimpObject::loadClass('bimpcore', 'BimpSignataire');
                         $signataire_client = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
                                     'id_signature'   => $signature->id,
                                     'id_client'      => $id_client,
@@ -4967,6 +4968,8 @@ class BContract_contrat extends BimpDolObject
                                     'allow_dist'     => $allow_dist,
                                     'allow_docusign' => $allow_docusign,
                                     'allow_refuse'   => $allow_refuse,
+                                    'type'           => BimpSignataire::TYPE_CLIENT,
+                                    'nom'            => $contact->getData('firstname') . $contact->getData('lastname'),
                                     'code'           => 'client',
                                         ), true, $signataire_errors, $warnings);
                     }
@@ -4981,11 +4984,14 @@ class BContract_contrat extends BimpDolObject
                             $id_user = BimpCore::getConf('id_responsable_commercial', null, 'bimpcontract');
                         }
                         
+                        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+                        
                         if(0 < $id_user) {
                             $signataire_user = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
                                         'id_signature'   => $signature->id,
                                         'id_user'        => $id_user,
                                         'type'           => BimpSignataire::TYPE_USER,
+                                        'nom'            => $user->getData('firstname') . $user->getData('lastname'),
                                         'allow_dist'     => $allow_dist,
                                         'allow_docusign' => $allow_docusign,
                                         'allow_refuse'   => $allow_refuse,
@@ -5216,13 +5222,13 @@ class BContract_contrat extends BimpDolObject
         $ds_required = false;
         if ((int) $this->isDocuSignAllowed($ds_errors, $ds_required)) {
             if ($ds_required) {
-                $errors[] = 'DocuSign requis pour la signature à distance de ce devis';
+                $errors[] = 'DocuSign requis pour la signature à distance de ce contrat';
                 return 0;
             }
         }
 
-        if (!(int) BimpCore::getConf('propal_signature_allow_dist', null, 'bimpcommercial')) {
-            $errors[] = 'Signature éléctronique à distance non autorisée pour ce devis';
+        if (!(int) BimpCore::getConf('contrat_signature_allow_dist', null, 'bimpcontract')) {
+            $errors[] = 'Signature éléctronique à distance non autorisée pour ce contrat';
             return 0;
         }
 

@@ -4200,8 +4200,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $new_data['id_facture'] = 0;
-        $new_data['validFin'] = 0;
-        $new_data['validComm'] = 0;
+//        $new_data['validFin'] = 0;
+//        $new_data['validComm'] = 0;
         $new_data['date_creation'] = date('Y-m-d H:i:s');
         $new_data['date_valid'] = null;
         $new_data['date_cloture'] = null;

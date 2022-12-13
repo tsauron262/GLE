@@ -352,6 +352,13 @@ fields_tables:
             - field: date_prevue_facturation
               edit: 1
             - field: paiement_comptant
+            - custom: 1
+              label: Preuve de paiement
+              value:
+                  callback: 
+                    method: displayBool
+                    params:
+                        - asPreuvePaiment
                   
     client: 
         rows: 

@@ -188,8 +188,7 @@ class BContract_contrat extends BimpDolObject
         switch ($action) {
             case 'createSignature': 
             case 'createSignatureDocuSign': 
-                $errors[] = 'En cours de dev';
-                return 0;
+                return (int) $this->getData('id_signature') == 0 and (int) $this->getData('statut') == self::CONTRAT_STATUS_VALIDE;
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -2287,43 +2286,38 @@ class BContract_contrat extends BimpDolObject
             );
         }
 
-        if ($user->admin) {
-            $signature = $this->getChildObject('signature');
-            if (BimpObject::objectLoaded($signature)) {
-                if (!(int) $signature->isSigned()) {
-                    $buttons = BimpTools::merge_array($buttons, $signature->getActionsButtons());
-                } else {
-                    $buttons = BimpTools::merge_array($buttons, $signature->getSignedButtons());
-                    $signed = true;
-                }
+        $signature = $this->getChildObject('signature');
+        if (BimpObject::objectLoaded($signature)) {
+            if (!(int) $signature->isSigned()) {
+                $buttons = BimpTools::merge_array($buttons, $signature->getActionsButtons());
+            } else {
+                $buttons = BimpTools::merge_array($buttons, $signature->getSignedButtons());
+                $signed = true;
             }
-            
-            if($status == self::CONTRAT_STATUS_VALIDE) {
-                $errors = array();
-                $use_signature = (int) BimpCore::getConf('contrat_use_signatures', null, 'bimpcontract');
-
-                if ($this->isActionAllowed('validate', $errors)) {
-                    if ($this->canSetAction('validate')) {
-                        $params = array();
-                        if ($use_signature) {
-                            $params['form_name'] = 'create_signature';
-                        } else {
-                            $params['confirm_msg'] = 'Veuillez confirmer la validation ' . $this->getLabel('of_this');
-                        }
-
-                        $buttons[] = array(
-                            'label'   => 'Créer signature',
-                            'icon'    => 'fas_signature',
-                            'onclick' => $this->getJsActionOnclick('validate', array(), $params)
-                        );
-                    } else {
-                        $errors[] = 'Vous n\'avez pas la permission de valider cette proposition commerciale';
-                    }
-                }
-           
-            }
-            
         }
+            
+        $errors = array();
+        $use_signature = (int) BimpCore::getConf('contrat_use_signatures', null, 'bimpcontract');
+
+        if ($this->isActionAllowed('createSignature', $errors)) {
+            if ($this->canSetAction('createSignature')) {
+                $params = array();
+                if ($use_signature) {
+                    $params['form_name'] = 'create_signature';
+                } else {
+                    $params['confirm_msg'] = 'Veuillez confirmer la validation ' . $this->getLabel('of_this');
+                }
+
+                $buttons[] = array(
+                    'label'   => 'Créer signature',
+                    'icon'    => 'fas_signature',
+                    'onclick' => $this->getJsActionOnclick('validate', array(), $params)
+                );
+            } else {
+                $errors[] = 'Vous n\'avez pas la permission de valider ce contrat';
+            }
+        }
+
 
         return $buttons;
     }
@@ -3196,6 +3190,13 @@ class BContract_contrat extends BimpDolObject
             );
         }
         return $actions;
+    }
+    
+    public function canSetAction($action) {
+        
+        global $user;
+        
+        return parent::canSetAction($action);
     }
 
     public function getPdfNamePrincipal($signed = false, $ext = 'pdf')

@@ -676,7 +676,7 @@ class BimpComm extends BimpDolObject
         return $buttons;
     }
     
-    public function canSetAction($action): int {
+    public function canSetAction($action) {
         global $user;
         if($action == 'checkTotal' && !$user->admin)
             return 0;

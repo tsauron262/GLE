@@ -12,6 +12,7 @@ nom_url:
     syntaxe: <ref>
     external_link: 1
     modal_view: full
+    card: default
     
 objects:
     lines: 

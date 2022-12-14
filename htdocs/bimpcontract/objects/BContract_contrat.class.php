@@ -4973,7 +4973,7 @@ class BContract_contrat extends BimpDolObject
                                     'allow_docusign' => $allow_docusign,
                                     'allow_refuse'   => $allow_refuse,
                                     'type'           => BimpSignataire::TYPE_CLIENT,
-                                    'nom'            => $contact->getData('firstname') . $contact->getData('lastname'),
+                                    'nom'            => $contact->getData('firstname') . ' ' . $contact->getData('lastname'),
                                     'code'           => 'client',
                                         ), true, $signataire_errors, $warnings);
                     }
@@ -4996,7 +4996,7 @@ class BContract_contrat extends BimpDolObject
                                         'label'          => 'Responsable',
                                         'id_user'        => $id_user,
                                         'type'           => BimpSignataire::TYPE_USER,
-                                        'nom'            => $user->getData('firstname') . $user->getData('lastname'),
+                                        'nom'            => $user->getData('firstname') . ' ' . $user->getData('lastname'),
                                         'allow_dist'     => $allow_dist,
                                         'allow_docusign' => $allow_docusign,
                                         'allow_refuse'   => $allow_refuse,

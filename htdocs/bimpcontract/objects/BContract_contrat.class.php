@@ -4700,7 +4700,7 @@ class BContract_contrat extends BimpDolObject
                 break;
             case self::MAIL_VALIDATION:
                 $sujet = "Contrat validé par le service technique";
-                $action = "Ce contrat a été validé par le service technique.<br/>Vous devez maintenant utiliser l'action <b>'Envoyer via DocuSign'</b> afin de le faire signer par le client, puis par votre direction commerciale</b>";
+                $action = "Ce contrat a été validé par le service technique.<br/>Vous devez maintenant utiliser l'action <b>\"Créer signature\"</b> afin de le faire signer par le client, puis par votre direction commerciale</b>";
                 break;
             case self::MAIL_SIGNED:
                 $sujet = "Contrat signé par le client";

@@ -660,11 +660,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $ref, 0, 'L');
                 //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $ref, 0, 'L');    
                 
-                $pdf->SetFont('', 'B', 8);
+//                $pdf->SetFont('', 'B', 8);
                 //$pdf1->SetFont('', 'B', 8);
-                $pdf->SetTextColor(0,50,255);
+//                $pdf->SetTextColor(0,50,255);
                 //$pdf1->SetTextColor(255,140,115);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
+//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
                 //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à " . $mysoc->name, 0, 'R');
                 
                 
@@ -1013,15 +1013,15 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                 //$pdf1->MultiCell($W, 6, '', 0, 'L');
                 //$pdf1->Cell($W, 8, "", 1, null, 'L', true);
                 //$pdf1->Cell($W, 8, "descriptif et la tarification de ce contrat et en accepter les Conditions Particulières et Générales", 1, null, 'L', true);
-                $signed = (($contrat->statut == 1 || $contrat->statut == 11) && (int) BimpCore::getConf('pdf_use_signature', null, 'bimpcontract')) ? true : false;
-                
-                if($signed) {
-                    $choosed_signature = ($bimp_contract->getData('secteur') == "CTE") ? "signed_education.png" : "signed_contrat.png";
-                    
-                    $logo = $conf->mycompany->dir_output . '/' . $choosed_signature;
-                    //$pdf1->Image($logo, 30, 255, 50);
-                    $pdf->Image($logo, 30, 255, 50);
-                }
+//                $signed = (($contrat->statut == 1 || $contrat->statut == 11) && (int) BimpCore::getConf('pdf_use_signature', null, 'bimpcontract')) ? true : false;
+//                
+//                if($signed) {
+//                    $choosed_signature = ($bimp_contract->getData('secteur') == "CTE") ? "signed_education.png" : "signed_contrat.png";
+//                    
+//                    $logo = $conf->mycompany->dir_output . '/' . $choosed_signature;
+//                    //$pdf1->Image($logo, 30, 255, 50);
+//                    $pdf->Image($logo, 30, 255, 50);
+//                }
                 
                 $this->_pagefoot($pdf, $outputlangs);
 //                $this->_pagefoot($pdf1, $outputlangs);

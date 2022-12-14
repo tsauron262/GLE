@@ -4146,7 +4146,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
         if(empty($errors)){ 
             $contacts = $this->dol_object->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
             foreach ($contacts as $contact) {
-                mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $this->getNomUrl(1, true) . $infoClient . " est validée.");
+                $subject = 'Validation commande ' . $this->getRef() . ' client ' . $client->getData('code_client');
+                $msg  = 'Bonjour<br/>Votre commande ' . $this->getNomUrl(1, true);
+                $msg .= ' pour le client ' . $client->getData('code_client') . ' ' . $client->getData('nom') . ' a été validée.';
+                mailSyn2($subject, $contact['email'], "gle@bimp.fr", $msg);
             }
         }
 

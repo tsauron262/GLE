@@ -390,7 +390,7 @@ class DocusignAPI extends BimpAPI
             'tokens' => array()
         ));
 
-        if (!count($$create_errors)) {
+        if (!count($create_errors)) {
             $create_warnings = array();
             $create_errors = $user_account->create($create_warnings, true);
         }

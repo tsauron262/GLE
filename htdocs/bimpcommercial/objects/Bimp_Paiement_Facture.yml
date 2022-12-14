@@ -86,8 +86,8 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-        extra_btn: 
-            callback: getListsExtraButtons
+#        extra_btn: 
+#            callback: getListsExtraButtons
         filters_panel: default
         cols: 
             fk_paiement: 

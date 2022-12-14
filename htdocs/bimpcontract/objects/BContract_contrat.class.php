@@ -4966,6 +4966,7 @@ class BContract_contrat extends BimpDolObject
                         BimpObject::loadClass('bimpcore', 'BimpSignataire');
                         $signataire_client = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
                                     'id_signature'   => $signature->id,
+                                    'label'          => 'Client',
                                     'id_client'      => $id_client,
                                     'id_contact'     => $id_contact,
                                     'allow_dist'     => $allow_dist,
@@ -4992,6 +4993,7 @@ class BContract_contrat extends BimpDolObject
                         if(0 < $id_user) {
                             $signataire_user = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
                                         'id_signature'   => $signature->id,
+                                        'label'          => 'Responsable',
                                         'id_user'        => $id_user,
                                         'type'           => BimpSignataire::TYPE_USER,
                                         'nom'            => $user->getData('firstname') . $user->getData('lastname'),

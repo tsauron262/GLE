@@ -214,3 +214,23 @@ params:
                       type: bool
                       def: 0
                   
+    pvr_fin_use_signatures: 
+        label: Activer les signatures pour les PV de réception
+        type: bool
+        cat: signatures
+        def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  pvr_fin_signature_allow_dist: 
+                      label: Autoriser les signatures électroniques à distance pour les PV de réception
+                      type: bool
+                      def: 0
+                  pvr_fin_signature_allow_docusign: 
+                      label: Autoriser les signatures DocuSign pour les PV de réception
+                      type: bool
+                      def: 0
+                  pvr_fin_signature_allow_refuse: 
+                      label: Autoriser le refus des signatures pour les PV de réception
+                      type: bool
+                      def: 0

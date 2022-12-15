@@ -1010,8 +1010,18 @@ class BimpConfig
             }
         } elseif (is_array($field_value)) {
             $field_name = $this->get($path . '/field_name', null, true);
-            $object = $this->getObject($path . '/object');
+
+            if ($this->isDefined($path . '/object')) {
+                $object = $this->getObject($path . '/object');
+            } else {
+                $object = $this->instance;
+            }
+
+            $not = $this->get($path . '/not', 0);
             if (!is_null($field_name) && !is_null($object) && is_a($object, 'BimpObject')) {
+                if ($not) {
+                    return (!(int) $object->getData($field_name));
+                }
                 return $object->getData($field_name);
             }
         }

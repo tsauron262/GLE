@@ -8,15 +8,21 @@ class DocFinancementPDF extends BimpDocumentPDF
 
     public static $doc_type = '';
     public $demande = null;
+    public $client_data = array();
     public $sources = array();
     public $values = array();
+    public $extra_data = array();
+    public $options = array();
+    
     public $target_label = 'Destinataire';
 
-    public function __construct($db, $demande)
+    public function __construct($db, $demande, $extra_data = array(), $options = array())
     {
         parent::__construct($db);
         $this->demande = $demande;
         $this->bimpObject = $demande;
+        $this->extra_data = $extra_data;
+        $this->options = $options;
 
         if (!BimpObject::objectLoaded($this->demande)) {
             $this->errors[] = 'Demande invalide';
@@ -30,16 +36,23 @@ class DocFinancementPDF extends BimpDocumentPDF
     public function initData()
     {
         if (!count($this->errors)) {
-            $client = $this->demande->getChildObject('client');
-
-            if (BimpObject::objectLoaded($client)) {
-                $this->thirdparty = $client->dol_object;
+            if ((int) $this->demande->getData('id_main_source')) {
+                $source = $this->demande->getSource();
+                if (BimpObject::objectLoaded($source)) {
+                    $this->client_data = $source->getClientPdfData();
+                }
             } else {
-                $this->errors[] = 'Aucun client';
-            }
-            $contact = $this->demande->getChildObject('contact_client');
-            if (BimpObject::objectLoaded($contact)) {
-                $this->contact = $contact->dol_object;
+                $client = $this->demande->getChildObject('client');
+
+                if (BimpObject::objectLoaded($client)) {
+                    $this->thirdparty = $client->dol_object;
+                } else {
+                    $this->errors[] = 'Aucun client';
+                }
+                $contact = $this->demande->getChildObject('contact_client');
+                if (BimpObject::objectLoaded($contact)) {
+                    $this->contact = $contact->dol_object;
+                }
             }
 
             $this->sources = $this->demande->getChildrenObjects('sources');
@@ -60,6 +73,15 @@ class DocFinancementPDF extends BimpDocumentPDF
         $this->header_vars['doc_name'] = $this->doc_name;
     }
 
+    public function isTargetCompany()
+    {
+        if (isset($this->client_data['is_company'])) {
+            return (int) $this->client_data['is_company'];
+        }
+
+        return parent::isTargetCompany();
+    }
+
     public function getFromUsers()
     {
         $users = array();
@@ -76,21 +98,39 @@ class DocFinancementPDF extends BimpDocumentPDF
 
     public function getDocInfosHtml()
     {
-        $html = '';
-
-        $html .= '<div>';
+        $html = '<div>';
 
         // Réf. client: 
-        $client = $this->demande->getChildObject('client');
+        if (isset($this->client_data['ref']) && $this->client_data['ref']) {
+            $html .= '<span style="font-weight: bold;">Référence client : </span>' . $this->client_data['ref'] . '<br/>';
+        } else {
+            $client = $this->demande->getChildObject('client');
 
-        if (BimpObject::objectLoaded($client)) {
-            $html .= '<span style="font-weight: bold;">Référence client : </span>' . $client->getRef() . '<br/>';
+            if (BimpObject::objectLoaded($client)) {
+                $html .= '<span style="font-weight: bold;">Référence client : </span>' . $client->getRef() . '<br/>';
+            }
         }
-
-
         $html .= '</div>';
 
         $html .= parent::getDocInfosHtml();
+
+        return $html;
+    }
+
+    public function getTargetInfosHtml()
+    {
+        if (empty($this->client_data)) {
+            return parent::getTargetInfosHtml();
+        }
+
+        $html = '';
+
+        if ($this->client_data['is_company']) {
+            $html .= $this->client_data['nom'] . '<br/>';
+        }
+
+        $html .= $this->client_data['full_adress'];
+        $html = str_replace("\n", '<br/>', $html);
 
         return $html;
     }

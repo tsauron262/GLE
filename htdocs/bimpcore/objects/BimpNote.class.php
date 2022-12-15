@@ -26,10 +26,10 @@ class BimpNote extends BimpObject
     const BN_AUTHOR_GROUP = 4;
 
     public static $types_author = array(
-        self::BN_AUTHOR_USER => 'Utilisateur',
+        self::BN_AUTHOR_USER  => 'Utilisateur',
         self::BN_AUTHOR_GROUP => 'Group',
-        self::BN_AUTHOR_SOC  => 'Tiers',
-        self::BN_AUTHOR_FREE => 'Libre'
+        self::BN_AUTHOR_SOC   => 'Tiers',
+        self::BN_AUTHOR_FREE  => 'Libre'
     );
     # Types destinataire:
 
@@ -44,11 +44,12 @@ class BimpNote extends BimpObject
     );
     # ID GR:
 
-    const BN_GROUPID_LOGISTIQUE = 108;
-    const BN_GROUPID_FACT = 408;
-    const BN_GROUPID_ATRADIUS = 680;
-    const BN_GROUPID_CONTRAT = 686;
-    const BN_GROUPID_ACHAT = 8;
+    # Pas d'ID en dur dans le code : utiliser des variables de conf. 
+//    const BN_GROUPID_LOGISTIQUE = 108; => BimpCore::getUserGroupId('logistique')
+//    const BN_GROUPID_FACT = 408; => BimpCore::getUserGroupId('facturation')
+//    const BN_GROUPID_ATRADIUS = 680; => BimpCore::getUserGroupId('atradius')
+//    const BN_GROUPID_CONTRAT = 686; => BimpCore::getUserGroupId('contrat')
+//    const BN_GROUPID_ACHAT = 8; => BimpCore::getUserGroupId('achat')
 
     // Droits users: 
     public function canEdit()
@@ -378,14 +379,13 @@ class BimpNote extends BimpObject
     public function getJsRepondre()
     {
         $filtre = array(
-                    "content"      => "",
-                    "id"           => ""
-                        );
+            "content" => "",
+            "id"      => ""
+        );
         $filtre['fk_user_dest'] = $this->getData("user_create");
-        if($this->getData('type_author') == self::BN_AUTHOR_USER){
+        if ($this->getData('type_author') == self::BN_AUTHOR_USER) {
             $filtre['type_dest'] = self::BN_DEST_USER;
-        }
-        elseif($this->getData('type_author') == self::BN_AUTHOR_GROUP){
+        } elseif ($this->getData('type_author') == self::BN_AUTHOR_GROUP) {
             $filtre['type_dest'] = self::BN_DEST_GROUP;
             $filtre['fk_group_dest'] = $this->getData("fk_group_author");
         }

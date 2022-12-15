@@ -6,7 +6,7 @@ class ObjectLineRemise extends BimpObject
     const OL_REMISE_PERCENT = 1;
     const OL_REMISE_AMOUNT = 2;
 
-    // Getters - Ovveride BimpObject
+    // Getters - Override BimpObject
 
     public function canCreate()
     {

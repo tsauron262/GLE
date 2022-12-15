@@ -513,7 +513,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 'y'    => -20,
                 'date' => array(
                     'x' => -5,
-                    'y' => -50
+                    'y' => -20
                 ),
                 'texts' => array(
                     'nom' => array(

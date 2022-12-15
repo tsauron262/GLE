@@ -84,7 +84,7 @@ class BContract_contrat extends BimpDolObject
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT        => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_BROUILLON    => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
-        self::CONTRAT_STATUS_VALIDE       => Array('label' => 'Attente signature client', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
+        self::CONTRAT_STATUS_VALIDE       => Array('label' => 'À envoyer à la signature', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_CLOS         => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_REFUSE       => Array('label' => 'Refusé', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUT_WAIT_ACTIVER => Array('label' => 'Attente d\'activation', 'classes' => Array('important'), 'icon' => 'fas_retweet'),
@@ -4700,7 +4700,7 @@ class BContract_contrat extends BimpDolObject
                 break;
             case self::MAIL_VALIDATION:
                 $sujet = "Contrat validé par le service technique";
-                $action = "Ce contrat a été validé par le service technique.<br/>Vous devez maintenant utiliser l'action <b>'Envoyer via DocuSign'</b> afin de le faire signer par le client, puis par votre direction commerciale</b>";
+                $action = "Ce contrat a été validé par le service technique.<br/>Vous devez maintenant utiliser l'action <b>\"Créer signature\"</b> afin de le faire signer par le client, puis par votre direction commerciale</b>";
                 break;
             case self::MAIL_SIGNED:
                 $sujet = "Contrat signé par le client";
@@ -4966,13 +4966,14 @@ class BContract_contrat extends BimpDolObject
                         BimpObject::loadClass('bimpcore', 'BimpSignataire');
                         $signataire_client = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
                                     'id_signature'   => $signature->id,
+                                    'label'          => 'Client',
                                     'id_client'      => $id_client,
                                     'id_contact'     => $id_contact,
                                     'allow_dist'     => $allow_dist,
                                     'allow_docusign' => $allow_docusign,
                                     'allow_refuse'   => $allow_refuse,
                                     'type'           => BimpSignataire::TYPE_CLIENT,
-                                    'nom'            => $contact->getData('firstname') . $contact->getData('lastname'),
+                                    'nom'            => $contact->getData('firstname') . ' ' . $contact->getData('lastname'),
                                     'code'           => 'client',
                                         ), true, $signataire_errors, $warnings);
                     }
@@ -4992,9 +4993,10 @@ class BContract_contrat extends BimpDolObject
                         if(0 < $id_user) {
                             $signataire_user = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
                                         'id_signature'   => $signature->id,
+                                        'label'          => 'Responsable',
                                         'id_user'        => $id_user,
                                         'type'           => BimpSignataire::TYPE_USER,
-                                        'nom'            => $user->getData('firstname') . $user->getData('lastname'),
+                                        'nom'            => $user->getData('firstname') . ' ' . $user->getData('lastname'),
                                         'allow_dist'     => $allow_dist,
                                         'allow_docusign' => $allow_docusign,
                                         'allow_refuse'   => $allow_refuse,

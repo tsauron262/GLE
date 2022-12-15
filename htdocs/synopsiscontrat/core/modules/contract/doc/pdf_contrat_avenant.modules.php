@@ -360,8 +360,11 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     $pdf->Ln();
                     $pdf->Cell($W, 4, "Par cet avenant de prolongation, il est convenu ce qui suit", 0, null, 'L', true);
                 }
-                $pdf1->SetFont('', '', 9);
-                //$pdf1->Cell($W, 4, "Les parties ont conclu un ".$objet_contrat[$c->getData('objet_contrat')]['label']."  en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
+                if($this->avenant->getData('label') != ''){
+                    $pdf1->SetFont('', '', 9);
+                    $pdf1->Cell($W, 4, $this->avenant->getData('label'), "L", null, 'L', true);
+                }
+                $pdf1->setY($pdf1->getY() + 7);
                  $pdf1->Cell($W, 4, "Les parties ont conclu un Contrat d'assistance et de maintenance informatique en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
                 if($this->avenant->getData('type') == 1){
                     $pdf1->SetFont('', 'B', 9);

@@ -79,6 +79,13 @@ class BimpCache
     {
         return static::$cache[$key];
     }
+    
+    public static function eraseCacheServer($echo = false){
+        $version = (int) BimpCore::getConf('git_version', 1)+1;
+        if($echo)
+            echo 'version '.$version;
+        BimpCore::setConf('git_version', $version);
+    }
 
     public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
     {

@@ -40,6 +40,8 @@ objects:
                 field_value: user_create
 
 fields:
+    label:
+        label: Libellé
     id_contrat:
         label: Contrat
         type: id_object
@@ -197,6 +199,7 @@ forms:
     add:
         title: Création d'un avenant
         rows:
+            - field: label
             - field: type
             - field: date_effect
               display_if:
@@ -269,12 +272,27 @@ forms:
                   type: check_list
                   items: 
                       callback: getAllSerialsContrat
+                      
+                      
+fields_tables:
+    infos:
+        panel: 1
+        title: Informations sur l'avenant
+        rows:
+            - field: label
+              edit: 1
+            - field: type
+              edit: 1
 views:
     avenant:
         title: 
             callback: getRefAv
         rows:
-            - cols: 
+            - cols:      
+                - type: fields_table
+                  col_lg: 12
+                  fields_table: 
+                      name: infos
                 - type: rows
                   col_lg: 12
                   col_md: 12

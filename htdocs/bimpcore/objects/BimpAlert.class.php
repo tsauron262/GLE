@@ -120,7 +120,7 @@ class BimpAlert extends BimpObject
         $return = "bimpModal.loadAjaxContent($(this), 'loadAlertModal', {id: '$id'}, '".$titre."', 'Chargement', function (result, bimpAjax) {});bimpModal.show();";
         if($withBtn){
             $onclick = $this->getJsActionOnclick('isViewed', array('id' => $id));
-            $return .= "bimpModal.addButton('Ok', \"".$onclick."\", 'primary', 'is_viewed', modal_idx);";
+            $return .= "bimpModal.addButton('Lu', \"".$onclick."\", 'primary', 'is_viewed', modal_idx);";
         }
         return $return;
     }

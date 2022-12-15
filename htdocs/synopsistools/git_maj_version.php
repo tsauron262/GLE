@@ -7,5 +7,5 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 sleep(10);
 
-BimpCache::eraseCacheServer();
+BimpCache::eraseCacheServer(true);
 

@@ -9549,6 +9549,19 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             'success_callback' => $success_callback
         );
     }
+    
+    public function actionEraseCache($data, &$success){
+        $success = 'Cache vidé';
+        $errors = $warnings = array();
+        if(BimpCache::$cache_server)
+            BimpCache::eraseCacheServer();
+        else
+            $errors[] = 'Pas de cache serveur';
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings
+        ); 
+    }
 
     public function actionBulkDelete($data, &$success)
     {

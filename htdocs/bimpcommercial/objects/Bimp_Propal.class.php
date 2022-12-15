@@ -732,7 +732,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $signed = in_array($status, array(2, 4));
 
                     if (BimpObject::objectLoaded($signature)) {
-                        $signature_buttons = BimpTools::merge_array($signature_buttons, $signature->getActionsButtons());
+                        $signature_buttons = BimpTools::merge_array($signature_buttons, $signature->getActionsButtons(true));
                     } else {
                         if (!$signed && $use_signature) {
                             if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
@@ -1135,28 +1135,6 @@ class Bimp_Propal extends Bimp_PropalTemp
                         )
                             ), "a");
         }
-
-        if ((int) $this->getData('id_signature')) {
-            $signature = $this->getChildObject('signature');
-
-            if (BimpObject::objectLoaded($signature)) {
-                $url = $signature->getUrl();
-
-                if ($url) {
-                    $html .= BimpRender::renderButton(array(
-                                'classes'     => array('btn', 'btn-default'),
-                                'label'       => 'Signature',
-                                'icon_before' => 'fas_signature',
-                                'icon_after'  => 'fas_external-link-alt',
-                                'attr'        => array(
-                                    'href'   => $url,
-                                    'target' => '_blank',
-                                )
-                                    ), "a");
-                }
-            }
-        }
-
 
 //        $html .= BimpRender::renderButton(array(
 //                    'classes'     => array('btn', 'btn-default'),

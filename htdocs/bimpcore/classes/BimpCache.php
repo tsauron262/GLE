@@ -729,8 +729,7 @@ class BimpCache
                 }
 
                 // lists_col: 
-                $lists_cols = $object->config->getCompiledParams('lists_cols');
-
+                $lists_cols = $object->config->getCompiledParams('lists_cols');                
                 if (is_array($lists_cols)) {
                     foreach ($lists_cols as $col_name => $params) {
                         $label = BimpTools::getArrayValueFromPath($params, 'label', '');

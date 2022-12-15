@@ -863,6 +863,11 @@ class BimpCore
 
     public static function isModuleActive($module)
     {
+        global $conf;
+        $name = strtoupper('MAIN_MODULE_'.$module);
+        if(isset($conf->global->$name) && $conf->global->$name)
+            return 1;
+        
         return ((string) self::getConf('module_version_' . $module, '') ? 1 : 0);
     }
 

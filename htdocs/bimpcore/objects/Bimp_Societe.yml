@@ -1436,6 +1436,7 @@ lists_cols:
     solvabilite_status: 
         show: 
             callback: isClient
+            
     commercial:
         label: Commercial
         value: 
@@ -1449,8 +1450,7 @@ lists_cols:
             callback: displayCodeClientNom
         csv_needed_fields:
             - code_client
-            - name
-            
+            - name            
             
     full_address: 
         label: Adresse
@@ -1462,18 +1462,29 @@ lists_cols:
             - town
             - fk_dep
             - fk_pays
+            
     infos_contact: 
         label: Infos contact
         value: 
             callback: displayFullContactInfos
+            
     lettrecreditsafelettre:
         label: Lettre Credit Safe
         value: 
             callback: getCreditSafeLettre
+            
     region:
         label: Région  
         value: 
             callback: displayRegion
+        csv_needed_fields: 
+            - zip
+            - fk_pays
+            
+    secteur:
+        label: Secteur  
+        value: 
+            callback: displaySecteur
         csv_needed_fields: 
             - zip
             - fk_pays

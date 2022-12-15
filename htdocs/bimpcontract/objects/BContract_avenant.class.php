@@ -105,7 +105,7 @@ class BContract_avenant extends BContract_contrat {
         
         $errors = [];
         
-        if(BimpTools::getPostFieldValue("years")) {
+        if(BimpTools::getPostFieldValue("years", null)) {
             
             $nombre_months = BimpTools::getPostFieldValue('years') * 12;
             $end = new DateTime($this->getData('date_end'));
@@ -117,7 +117,7 @@ class BContract_avenant extends BContract_contrat {
             
         }
         
-        if(BimpTools::getPostFieldValue("month")) {
+        if(BimpTools::getPostFieldValue("month", null)) {
             
             $nombre_months = BimpTools::getPostFieldValue('month');
             $end = new DateTime($this->getData('date_end'));
@@ -128,6 +128,7 @@ class BContract_avenant extends BContract_contrat {
             BimpTools::merge_array($errors, $this->updateField('added_month', $nombre_months));
             
         }
+        $errors = BimpTools::merge_array($errors, parent::update($warnings, $force_update));
         
         return $errors;
         
@@ -174,9 +175,9 @@ class BContract_avenant extends BContract_contrat {
          
          $conserne_date_end_avp = false;
          
-         if(BimpTools::getPostFieldValue('type') && BimpTools::getPostFieldValue('type') == 1) $conserne_date_end_avp = true;
-         if(BimpTools::getPostFieldValue('years')) $conserne_date_end_avp = true;
-         if(BimpTools::getPostFieldValue('month')) $conserne_date_end_avp = true;
+//         if(BimpTools::getPostFieldValue('type') && BimpTools::getPostFieldValue('type') == 1) $conserne_date_end_avp = true;
+         if(BimpTools::getPostFieldValue('years', null)) $conserne_date_end_avp = true;
+         if(BimpTools::getPostFieldValue('month', null)) $conserne_date_end_avp = true;
          
          if($conserne_date_end_avp) {            
             if(!$this->getData('by_month'))

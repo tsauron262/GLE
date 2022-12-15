@@ -42,14 +42,14 @@ class BimpNote extends BimpObject
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Group'
     );
-    # ID GR:
 
     # Pas d'ID en dur dans le code : utiliser des variables de conf. 
+    # Les ID sont à mettre dans config module bimpcore onglet "Groupes" => /bimpcore/index.php?fc=dev&tab=modules_conf
 //    const BN_GROUPID_LOGISTIQUE = 108; => BimpCore::getUserGroupId('logistique')
 //    const BN_GROUPID_FACT = 408; => BimpCore::getUserGroupId('facturation')
 //    const BN_GROUPID_ATRADIUS = 680; => BimpCore::getUserGroupId('atradius')
 //    const BN_GROUPID_CONTRAT = 686; => BimpCore::getUserGroupId('contrat')
-//    const BN_GROUPID_ACHAT = 8; => BimpCore::getUserGroupId('achat')
+//    const BN_GROUPID_ACHAT = 8 (remplacé par 120); => BimpCore::getUserGroupId('achat')
 
     // Droits users: 
     public function canEdit()

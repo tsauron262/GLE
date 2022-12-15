@@ -1,6 +1,7 @@
 table: bimpapi_user_account
 common_fields: 0
 icon: fas_user-tag
+no_transaction_db: 1
 
 parent_object: API_Api
 parent_id_property: id_api

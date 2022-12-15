@@ -826,6 +826,8 @@ class BimpCore
 
     public static function getUserGroupId($group_code)
     {
+        // Codes groupes possibles: logistique / facturation / atradius / contrat / achat
+        
         return (int) self::getConf('id_user_group_' . $group_code);
     }
 

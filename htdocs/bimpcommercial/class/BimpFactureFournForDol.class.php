@@ -31,7 +31,7 @@ class BimpFactureFournForDol extends Bimp_FactureFourn{
         
         $nbMail = 0;
         foreach($sends as $idUser => $data){
-            $msg = 'Bonjour, voici les fctures qui nont pas d\'expertise Bimp<br/>';
+            $msg = 'Bonjour, voici les factures qui n\'ont pas d\'expertise Bimp<br/>';
             foreach($data as $link){
                 $msg .= '<br/>'.$link;
             }

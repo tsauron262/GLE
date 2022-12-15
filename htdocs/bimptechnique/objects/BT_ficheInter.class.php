@@ -2859,7 +2859,7 @@ class BT_ficheInter extends BimpDolObject
                                         )
                         );
                         $new_factureLine->pu_ht = $product->getData('price');
-                        if($child->getData('forfait'))
+                        if ($child->getData('forfait'))
                             $new_factureLine->qty = 1;
                         else
                             $new_factureLine->qty = $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
@@ -3286,32 +3286,36 @@ class BT_ficheInter extends BimpDolObject
                 $actionCommClass->delete();
             }
 
-            $message = "Bonjour,<br />La fiche d'intervention " . $refLink . " à été supprimé par " . $user->getNomUrl() . " ainsi que le ou les évènements dans l'agenda.<br/><br/>Infos:<br />"
-                    . "Client: " . $client->getName() . '<br /><br />'
-                    . "Commandes: ";
+            global $rgpd_processing;
 
-            if (count($ids_commande) > 0) {
-                foreach ($ids_commande as $id_commande) {
-                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
-                    $message .= $commande->getLink() . ',';
+            if (!$rgpd_processing) {
+                $message = "Bonjour,<br />La fiche d'intervention " . $refLink . " à été supprimé par " . $user->getNomUrl() . " ainsi que le ou les évènements dans l'agenda.<br/><br/>Infos:<br />"
+                        . "Client: " . $client->getName() . '<br /><br />'
+                        . "Commandes: ";
+
+                if (count($ids_commande) > 0) {
+                    foreach ($ids_commande as $id_commande) {
+                        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
+                        $message .= $commande->getLink() . ',';
+                    }
+                } else {
+                    $message .= 'Pas de commandes';
                 }
-            } else {
-                $message .= 'Pas de commandes';
+
+                $message .= '<br /><br />';
+
+                if ($id_contrat > 0) {
+                    $message .= 'Contrat<br />';
+                    $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $id_contrat);
+                    $message .= $contrat->getLink();
+                } else {
+                    $message .= 'pas de contrat';
+                }
+
+                $to = ($tech->getData('email') != $emailControl) ? $tech->getData('email') . ',' . $emailControl : $tech->getData('email');
+
+                mailSyn2("[FI] " . $ref . " supprimée - " . $client->getName(), $to, null, $message);
             }
-
-            $message .= '<br /><br />';
-
-            if ($id_contrat > 0) {
-                $message .= 'Contrat<br />';
-                $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $id_contrat);
-                $message .= $contrat->getLink();
-            } else {
-                $message .= 'pas de contrat';
-            }
-
-            $to = ($tech->getData('email') != $emailControl) ? $tech->getData('email') . ',' . $emailControl : $tech->getData('email');
-
-            mailSyn2("[FI] " . $ref . " supprimée - " . $client->getName(), $to, null, $message);
         }
 
         return $errors;

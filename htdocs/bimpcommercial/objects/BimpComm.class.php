@@ -599,12 +599,12 @@ class BimpComm extends BimpDolObject
             );
         }
 
-        // Message logistique: 
-        $id_group = BimpCore::getUserGroupId('logistique');
+        // Message Achat:
+        $id_group = BimpCore::getUserGroupId('achat');
         if ($id_group) {
             $note = BimpObject::getInstance("bimpcore", "BimpNote");
             $buttons[] = array(
-                'label'   => 'Message logistique',
+                'label'   => 'Message achat',
                 'icon'    => 'far_paper-plane',
                 'onclick' => $note->getJsActionOnclick('repondre', array(
                     "obj_type"      => "bimp_object",
@@ -614,7 +614,9 @@ class BimpComm extends BimpDolObject
                     "type_dest"     => $note::BN_DEST_GROUP,
                     "fk_group_dest" => $id_group,
                     "content"       => ""
-                        ), array('form_name' => 'rep'))
+                        ), array(
+                    'form_name' => 'rep'
+                ))
             );
         }
 
@@ -697,6 +699,16 @@ class BimpComm extends BimpDolObject
         }
 
         return $buttons;
+    }
+
+    public function canSetAction($action)
+    {
+        global $user;
+        if ($action == 'checkTotal' && !$user->admin)
+            return 0;
+        if ($action == 'checkMarge' && !$user->admin)
+            return 0;
+        return parent::canSetAction($action);
     }
 
     public function getDefaultListExtraButtons()
@@ -2085,7 +2097,7 @@ class BimpComm extends BimpDolObject
 
             if ($remises_crt) {
                 $html .= '<tr>';
-                $html .= '<td>Remises CRT prévues</td>';
+                $html .= '<td>Remises arrière prévues</td>';
                 $html .= '<td></td>';
                 $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '', 0, 0, 0, 2, 1) . '</span></td>';
                 $html .= '<td></td>';
@@ -4480,7 +4492,7 @@ class BimpComm extends BimpDolObject
         $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM YYYY');
 //        $data["axeY"] = array("title" => 'Nb');
         $data["params"] = array('minutes' => $arrondirEnMinuteGraph);
-        $data["title"] = $this->getLabel() . ' par jours';
+        $data["title"] = ucfirst($this->getLabel('name_plur')) . ' par jour';
 
         return $data;
     }

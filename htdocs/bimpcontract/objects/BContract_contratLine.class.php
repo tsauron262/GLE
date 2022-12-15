@@ -390,7 +390,7 @@ class BContract_contratLine extends BContract_contrat {
     public function actionSetSerial($data, &$success) {
         $to_insert = [];
         $all = explode("\n", $data['serials']);
-        $success = "Les numéros de séries ont bien été inscris dans la ligne de service";
+        $success = "Les numéros de séries ont bien été inscrits dans la ligne de service";
         foreach ($all as $serial) {
 
             if ($serial) {

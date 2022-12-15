@@ -3962,6 +3962,13 @@ class BimpObject extends BimpCache
 
         return $display;
     }
+    
+    public function displayBool($method){
+        if(method_exists($this, $method))
+                return ($this->$method()? '<span class="success">OUI</span>' : '<span class="error">NON</span>');
+        else
+            return $method . ' n\'existe pas';
+    }
 
     public function displayAssociate($association, $display_name, $id_associate)
     {

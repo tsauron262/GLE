@@ -269,7 +269,7 @@ class BContract_avenant extends BContract_contrat {
     }
     
     
-    public function actionValidate() {
+    public function actionValidate($data, &$success) {
         
         $errors = [];
         $warnings = [];
@@ -443,19 +443,19 @@ class BContract_avenant extends BContract_contrat {
                         $total_ttc = $coup_ligne_ttc + $ligne_du_contrat->getData('total_ttc');
 
 
-                        $dejaChange = false;
-                        if($coup_ligne_ht != 0) {
-                            $dejaChange = true;
-                            $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('qty', $ligne_du_contrat->getData('qty') + $added_qty));
-                            if(!count($errors))
-                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_ht', $total_ht));
-                            if(!count($errors))
-                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_tva', $total_tva));
-                            if(!count($errors))
-                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_ttc', $total_ttc));
-                            if(!count($errors))
-                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
-                        }
+//                        $dejaChange = false;
+//                        if($coup_ligne_ht != 0) {
+//                            $dejaChange = true;
+//                            $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('qty', $ligne_du_contrat->getData('qty') + $added_qty));
+//                            if(!count($errors))
+//                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_ht', $total_ht));
+//                            if(!count($errors))
+//                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_tva', $total_tva));
+//                            if(!count($errors))
+//                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_ttc', $total_ttc));
+//                            if(!count($errors))
+//                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
+//                        }
 
                         $serialsLigne = BimpTools::json_decode_array($ligne_du_contrat->getData('serials'));
                         $newSerials = BimpTools::json_decode_array($infos['serials_in']);

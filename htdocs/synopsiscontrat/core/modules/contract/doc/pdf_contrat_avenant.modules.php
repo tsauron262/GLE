@@ -355,15 +355,19 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', '', 9);
                 //$pdf->Cell($W, 4, "Les parties ont conclu un ".$objet_contrat[$c->getData('objet_contrat')]['label']."  en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
                 $pdf->Cell($W, 4, "Les parties ont conclu un Contrat d'assistance et de maintenance informatique en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
-                $pdf->SetFont('', 'B', 9);
-                $pdf->Ln();
-                $pdf->Cell($W, 4, "Par cet avenant de prolongation, il est convenu ce qui suit", 0, null, 'L', true);
+                if($this->avenant->getData('type') == 1){
+                    $pdf->SetFont('', 'B', 9);
+                    $pdf->Ln();
+                    $pdf->Cell($W, 4, "Par cet avenant de prolongation, il est convenu ce qui suit", 0, null, 'L', true);
+                }
                 $pdf1->SetFont('', '', 9);
                 //$pdf1->Cell($W, 4, "Les parties ont conclu un ".$objet_contrat[$c->getData('objet_contrat')]['label']."  en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
                  $pdf1->Cell($W, 4, "Les parties ont conclu un Contrat d'assistance et de maintenance informatique en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
-                $pdf1->SetFont('', 'B', 9);
-                $pdf1->Ln();
-                $pdf1->Cell($W, 4, "Par cet avenant de prolongation, il est convenu ce qui suit", 0, null, 'L', true);
+                if($this->avenant->getData('type') == 1){
+                    $pdf1->SetFont('', 'B', 9);
+                    $pdf1->Ln();
+                    $pdf1->Cell($W, 4, "Par cet avenant de prolongation, il est convenu ce qui suit", 0, null, 'L', true);
+                 }
                 $date = ($this->avenant->getData('type') == 0) ? new DateTime($this->avenant->getData('date_effect')) : new DateTime($this->avenant->getData('date_end'));
                 if($this->avenant->getData('type') == 0) {
                     foreach($lignes_avenant as $id => $infos) {

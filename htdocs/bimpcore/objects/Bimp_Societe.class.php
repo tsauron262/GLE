@@ -2511,7 +2511,7 @@ class Bimp_Societe extends BimpDolObject
     public function checkSiren($field, $value, &$data = array(), &$warnings = array())
     {
         if (BimpCore::isModeDev()) {
-            return array();
+//            return array();
         }
 
         if ($value == "356000000")
@@ -2581,7 +2581,7 @@ class Bimp_Societe extends BimpDolObject
 
                 $result = simplexml_load_string($returnData);
                 $bimpLogPhpWarnings = $prevLogWarnings;
-
+//echo '<pre>'; print_r($result);
                 if (!is_object($result)) {
                     $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
                 } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
@@ -2599,6 +2599,8 @@ class Bimp_Societe extends BimpDolObject
                     $branches = $base->branches->branch;
                     $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
 
+                    
+                    $rcs = $summary->courtregistrydescription;
                     if ($summary->status == 'Fermé') {
                         $note = 'Fermé';
                         $alert = 'Fermé';
@@ -2674,6 +2676,7 @@ class Bimp_Societe extends BimpDolObject
                         "zip"               => "" . $codeP,
                         "town"              => "" . $ville,
                         "outstanding_limit" => "" . intval($limit),
+                        "rcs"               => "" . $rcs,
                         "capital"           => "" . trim(str_replace(array(" Euros", '-'), "", $summary->sharecapital)));
                 }
 //                } elseif (!BimpCore::isModeDev()) {

@@ -107,7 +107,7 @@ Gamme->Autre->Nature->Opé Marketing;INUT1;INUT2
 Marque->Nature->Externe->Apple;INUT1;INUT2
 Gamme->Logiciel;INUT1;INUT2
 Gamme->Autre->Nature->Remise;INUT1;INUT2
-Gamme->Autre->Nature->Remise CRT;INUT1;INUT2
+Gamme->Autre->Nature->Remise arrière;INUT1;INUT2
 Gamme->Autre->Nature->IMMOBILISATION;INUT1;INUT2
 Obsolescence->Nature->Indisponible;INUT1;INUT2
 Gamme->Matériel;INUT1;INUT2

@@ -2194,7 +2194,7 @@ class Bimp_User extends BimpObject
             return 1;
 
         $boxObj->config['nbJ'] = array('type' => 'int', 'val_default' => 31, 'title' => 'Nb Jours');
-        $boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values' => array(0 => 'Tous le monde', 1 => 'N-1'));
+        $boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values' => array(0 => 'Tout le monde', 1 => 'N-1'));
         $nbJ = ((isset($boxObj->confUser['nbJ']) && $boxObj->confUser['nbJ'] > 0) ? $boxObj->confUser['nbJ'] : $boxObj->config['nbJ']['val_default']);
         $my = (isset($boxObj->confUser['my']) ? $boxObj->confUser['my'] : $boxObj->config['my']['val_default']);
 
@@ -2236,7 +2236,7 @@ class Bimp_User extends BimpObject
             return 1;
 
         $boxObj->config['nbJ'] = array('type' => 'int', 'val_default' => 31, 'title' => 'Nb Jours');
-        $boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values' => array(0 => 'Tous le monde', 1 => 'N-1 + N-2'));
+        $boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values' => array(0 => 'Tout le monde', 1 => 'N-1 + N-2'));
         $nbJ = ((isset($boxObj->confUser['nbJ']) && $boxObj->confUser['nbJ'] > 0) ? $boxObj->confUser['nbJ'] : $boxObj->config['nbJ']['val_default']);
         $my = (isset($boxObj->confUser['my']) ? $boxObj->confUser['my'] : $boxObj->config['my']['val_default']);
 

@@ -1639,7 +1639,7 @@ function onListLoaded($list) {
 
             $list.data('object_change_event_init', 1);
         }
-
+        
         $('body').trigger($.Event('listLoaded', {
             $list: $list
         }));
@@ -1727,8 +1727,6 @@ function onListRefeshed($list) {
     $list.trigger('listRefresh');
 
     checkListWidth($list);
-
-    updateGraph(list_id, $list.data('name'));
 }
 
 function setItemCheckboxEvents($checkbox) {
@@ -2048,16 +2046,19 @@ function onGenerateCsvFormSubmit($form, extra_data) {
     return extra_data;
 }
 
-function updateGraph(list_id, list_name) {
+function updateGraph(list_id, idGraph, list_name) {
     extra_data = {};
     extra_data['list_name'] = list_name;
     extra_data['list_id'] = list_id;
     var $list = null;
     if (typeof (list_id) !== 'undefined' && list_id) {
         var $list = $('#' + list_id);
-        var $conteneur = $('#' + list_id + '_chartContainer');
+        var $conteneur = $('#' + list_id + '_' + idGraph + '_chartContainer');
+        console.log('av');
         if ($.isOk($list) && $.isOk($conteneur)) {
+            console.log('apresddd');
             extra_data['list_data'] = getListData($list);
+            extra_data['idGraph'] = idGraph;
 
             setObjectAction(null, {
                 module: $list.data('module'),

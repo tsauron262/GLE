@@ -13,6 +13,9 @@ ErpApi::$requests['newDemandeFinancementNote'] = array(
 ErpApi::$requests['sendDocFinancement'] = array(
     'label' => 'Envoyer document de location'
 );
+ErpApi::$requests['reopenDemandeFinancement'] = array(
+    'label' => 'Réouvrir une demande de location'
+);
 
 class ErpAPI_ExtEntity extends ErpAPI
 {
@@ -32,6 +35,30 @@ class ErpAPI_ExtEntity extends ErpAPI
                 'type_origine'   => $type_origine,
                 'id_origine'     => $id_origine,
                 'note'           => $note
+            )
+                ), $errors);
+
+        if (isset($response['warnings'])) {
+            $warnings = BimpTools::merge_array($warnings, $response['warnings']);
+            unset($response['warnings']);
+        }
+
+        if (!count($errors)) {
+            return $response;
+        }
+
+        return null;
+    }
+
+    public function reopenDemandeFinancement($id_demande, $type_origine, $id_origine, $status, &$errors = array(), &$warnings = array())
+    {
+        $response = $this->execCurl('reopenDemandeFinancement', array(
+            'fields' => array(
+                'demande_target' => 'prolease',
+                'id_demande'     => $id_demande,
+                'status'         => $status,
+                'type_origine'   => $type_origine,
+                'id_origine'     => $id_origine
             )
                 ), $errors);
 
@@ -71,7 +98,7 @@ class ErpAPI_ExtEntity extends ErpAPI
         return null;
     }
 
-    public function sendDocFinancement($id_demande, $type_origine, $id_origine, $doc_type, $doc_content, $signature_params, &$errors = array(), &$warnings = array())
+    public function sendDocFinancement($id_demande, $type_origine, $id_origine, $doc_type, $doc_content, $signature_params, $signataires_data, &$errors = array(), &$warnings = array())
     {
         $response = $this->execCurl('sendDocFinancement', array(
             'fields' => array(
@@ -81,7 +108,8 @@ class ErpAPI_ExtEntity extends ErpAPI
                 'id_origine'       => $id_origine,
                 'doc_type'         => $doc_type,
                 'doc_content'      => $doc_content,
-                'signature_params' => $signature_params
+                'signature_params' => $signature_params,
+                'signataires_data' => $signataires_data
             )), $errors);
 
         if (isset($response['warnings'])) {

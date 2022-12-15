@@ -6,6 +6,9 @@ class DevisFinancementPDF extends DocFinancementPDF
 {
 
     public static $doc_type = 'devis';
+    public $signature_bloc = true;
+    public $use_docsign = true;
+    public $object_signature_params_field_name = 'signature_devis_params';
     public $options = array();
 
     public function __construct($db, $demande, $options = array())

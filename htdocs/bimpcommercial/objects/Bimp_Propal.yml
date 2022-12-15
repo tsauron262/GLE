@@ -453,64 +453,32 @@ forms:
               show:
                   callback: isServiceAutorisedInContrat
                   
-    create_signature: 
+    create_signature:
         title: Création de la signature
+        extends: validate
         rows: 
-            - custom: 1
-              label: Ouvrir l'accès à la signature électronique à distance
-              input_name: open_public_access
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 0
-            - custom: 1
-              label: Contact signataire
-              data_type: id_object
-              input_name: id_contact_signature
-              input: 
-                  type: select
-                  options: 
-                      callback: 
-                          method: getSocieteContactsArray
-                          params: 
-                              - field_value: fk_soc
-                  help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
-              value: 
-                  callback: getDefaultSignatureContact
-              display_if: 
-                  field_name: open_public_access
-                  show_values: 1
-            - custom: 1
-              label: Contenu e-mail client pour la signature à distance
-              input_name: email_content
-              input: 
-                  type: html
-                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
-              value: 
-                  callback: getDefaultSignDistEmailContent
-              display_if: 
-                  field_name: open_public_access
-                  show_values: 1
-                  
+            create_signature: unset
+            
+    # Attention create_signature étend ce form
     validate:
         title: Validation
-        rows: 
+        rows:
             create_signature: 
                 custom: 1
-                label: Demander la signature du client
+                label: Créer la fiche signature
                 data_type: bool
                 input_name: create_signature
                 input: 
                     type: toggle
                 value: 1
-            open_public_access: 
-                custom: 1 
-                label: Ouvrir l'accès à la signature distance
+            sign_dist:
+                custom: 1
+                label: Demander une signature à distance
                 data_type: bool
-                input_name: open_public_access
-                value: 0
+                input_name: sign_dist
                 input: 
                     type: toggle
+                value: 1
                 display_if: 
                     field_name: create_signature
                     show_values: 1
@@ -534,11 +502,39 @@ forms:
                 value: 
                     callback: getDefaultSignatureContact
                 display_if: 
-                    fields_names: create_signature,open_public_access
+                    fields_names: create_signature,sign_dist
                     create_signature: 
                         show_values: 1
-                    open_public_access:
+                    sign_dist:
+                        hide_values: 0
+            init_docusign: 
+                custom: 1
+                label: Envoyer immédiatement le document pour signature via DocuSign
+                data_type: bool
+                input_name: init_docusign
+                content: 
+                    callback: renderSignatureInitDocuSignInput
+                display_if: 
+                    fields_names: create_signature,sign_dist
+                    create_signature: 
                         show_values: 1
+                    sign_dist:
+                        hide_values: 0
+            open_public_access: 
+                custom: 1 
+                label: Ouvrir immédiatement l'accès à la signature électronique à distance
+                data_type: bool
+                input_name: open_public_access
+                content: 
+                    callback: renderSignatureOpenDistAccessInput
+                display_if: 
+                    fields_names: create_signature,init_docusign,sign_dist
+                    create_signature: 
+                        show_values: 1
+                    init_docusign: 
+                        hide_values: 1
+                    sign_dist:
+                        hide_values: 0
             email_content: 
                 custom: 1
                 label: Contenu e-mail client pour la signature à distance
@@ -547,31 +543,14 @@ forms:
                     type: html
                     help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
                 value: 
-                    callback: getDefaultSignDistEmailContent
+                    callback: getSignatureEmailContent
                 display_if: 
-                    fields_names: create_signature,open_public_access
+                    fields_names: create_signature,sign_dist
                     create_signature: 
                         show_values: 1
-                    open_public_access:
-                        show_values: 1
-                  
-    create_signature_docu_sign: 
-        title: Signature DocuSign
-        icon: fas_file-signature
-        rows: 
-            - custom: 1
-              label: Contact
-              type: id_object
-              object: contact
-              input_name: id_contact
-              input:
-                  type: select
-                  options: 
-                      callback: 
-                          method: getSocieteContactsArray
-                          params: 
-                            0: 
-                                field_value: fk_soc
+                    sign_dist:
+                        hide_values: 0
+                depends_on: init_docusign,open_public_access
                   
 fields_tables: 
     infos: 

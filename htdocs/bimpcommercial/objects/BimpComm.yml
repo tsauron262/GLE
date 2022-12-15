@@ -12,6 +12,7 @@ nom_url:
     syntaxe: <ref>
     external_link: 1
     modal_view: full
+    card: default
     
 objects:
     lines: 
@@ -889,6 +890,11 @@ lists:
             ef_type: unset
             date_create: unset
             commercial: unset
+            
+    client: 
+        extends: default
+        graph:
+            - client
             
 views: 
     default: 

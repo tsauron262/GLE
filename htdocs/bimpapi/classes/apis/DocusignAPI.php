@@ -2,567 +2,541 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/BimpAPI.php';
 
-class DocusignAPI extends BimpAPI {
+class DocusignAPI extends BimpAPI
+{
+
     // PW web (dev@bimp.fr): HLxmS57W3uz8
-    
-// Auth fonction en prod:
-// Code
-// https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature&client_id=3b602db6-78eb-47f2-8a61-454fcb21836e&redirect_uri=http://localhost/
-    
+    // Auth fonction en prod:
+    // Code
+    // https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature&client_id=3b602db6-78eb-47f2-8a61-454fcb21836e&redirect_uri=http://localhost/
+
     public static $name = 'Docusign';
     public static $title = 'DocuSign';
     public static $modeles = array(
         'BContract_contrat' => array(
             'id_template' => ''
-            )
-        );
-
-//    public static $include_debug_json = false;
+        )
+    );
     public static $urls_bases = array(
         'default' => array(
             'test' => 'https://demo.docusign.net',
             'prod' => 'https://eu.docusign.net'
         ),
-        'auth' => array(
+        'auth'    => array(
             'test' => 'https://account-d.docusign.com',
             'prod' => 'https://account.docusign.com'
         )
     );
-    
     public static $requests = array(
-        'getCode' => array(
+        'getCode'         => array(
             'label' => 'Obtenir le code pour le token',
-            'url' => '/oauth/auth'
+            'url'   => '/oauth/auth'
         ),
-        'authenticate' => array(
-            'label' => 'Authentification',
+        'authenticate'    => array(
+            'label'         => 'Authentification',
             'url_base_type' => 'auth',
-            'url' => '/oauth/token'
+            'url'           => '/oauth/token'
         ),
-        'sendEnvelope' => array(
+        'createEnvelope'  => array(
             'label' => 'Envoie signature'
         ),
-        'getEnvelope' => array(
+        'getEnvelope'     => array(
             'label' => 'Obtention signature'
         ),
         'getEnvelopeFile' => array(
             'label' => 'Obtention d\'un fichier de signature',
         ),
-        'getTemplates' => array(
+        'getTemplates'    => array(
             'label' => 'Obtention des modèles'
         ),
-        'getUser' => array(
+        'getUser'         => array(
             'label' => 'Obtention de l\'utilisateur'
         ),
-        'createHook' => array(
+        'createHook'      => array(
             'label' => 'Création du webhook'
         )
     );
-    
-    
-    // Liste des requêtes ou l'utilisateur doit utiliser SON compte et pas celui par défaut
-    public static $user_requests = array(/*'authenticate',*/ 'sendEnvelope', 'getEnvelope', 'getEnvelopeFile', 'getTemplates');
-    
+    // Liste des requêtes où l'utilisateur doit utiliser SON compte et pas celui par défaut
+    public static $user_requests = array('createEnvelope', 'getEnvelope', 'getEnvelopeFile', 'getTemplates');
     public static $tokens_types = array(
         'access'  => 'Token d\'accès',
         'code'    => 'Code pour obtenir les tokens',
         'refresh' => 'Token de rafraîchissement',
     );
 
-    // Requêtes
-    
-    public function createEnvelope($params, $object, &$errors = array(), &$warnings = array()) {
-        
-//        $signature = $object->getChildObject('signature');
-//        if (!BimpObject::objectLoaded($signature))
-//            $errors[] = ucfirst($object->getLabel('this')) . ' n\'est lié à aucune signature';
+    // Getters:
 
-
-//        $id_account = $this->userAccount->getData('login');
-        $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
-        
-        if(is_file($params['file'])){
-            $result = $this->execCurlCustom('sendEnvelope', array(
-                'fields' => array(
-                    'status' => 'sent',
-                    'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
-                    'documents' => array(
-                            array(
-                                'documentBase64' => base64_encode(file_get_contents($params['file'])),
-                                'documentId' => 1,
-                                'name' => $object->getSignatureDocFileName())
-                        ),
-                    'recipients' => array('signers' => $this->getSigners($params, $object, $errors))
-                ),
-                'type' => 'FILE',
-                'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes'
-                ), $errors, $response_headers, $response_code, $warnings);
-
-
-            return $result;
-        }
-        else{
-            $errors[] = $params['file'].' introuvable';
-        }
-    }
-    
-    public function getEnvelope($params, &$errors = array(), &$warnings = array()) {
-        
-        $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
-        $data = $this->execCurlCustom('getEnvelope', array(
-            'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes/' . $params['id_envelope'] // . '/consumer_disclosure/FR' // . '/comments/transcript'
-            ), $errors, $response_headers, $response_code, $warnings);
-        
-        
-        return $data;
-    }
-    
-    /**
-     * Pour télécharger le certificat $params['id_document'] = 'certificat'
-    */
-    public function getEnvelopeFile($params, &$errors = array(), &$warnings = array()) {
-        
-        if(!isset($params['id_document']))
-            $params['id_document'] = 1;
-        
-        if(!isset($params['id_account']))
-            $params['id_account'] = $this->userAccount->getData('login');
-        
-        $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
-        $data = $this->execCurlCustom('getEnvelopeFile', array(
-            'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes/' . $params['id_envelope'] . '/documents/' . $params['id_document'],
-//            'url_params' => array('outputFile' => 'test'),
-            'headers' => array(
-                'Content-Transfer-Encoding' => 'base64',
-                ''
-            )
-           ), $errors, $response_headers, $response_code, $warnings);
-        
-        return $data;
-    }
-    
-    
-    public function setUserIdAccount($id_user, &$errors = array(), &$warnings = array()) {
-        
-        // Tests
-        if((int) $id_user < 1) {
-            $errors[] = "Id de l'utilisateur non valide";
-            return '';
-        }
-        
-        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-        
-//        if(!$user->field_exists('id_docusign'))
-//            $errors[] = "Le champs id_docusign n'existe pas";
-        
-        if($user->getData('email') == '')
-            $errors[] = "L'utilisateur n'a pas d'email";
-        
-        if(!empty($errors))
-            return '';
-
-        // Requête
-        $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
-        
-        $data = $this->execCurlCustom('getUser', array(
-            'url_params' => array('email' => $user->getData('email'), 'additional_info' => 'true'),
-            'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/users/'
-            ), $errors, $response_headers, $response_code, $warnings);
-        
-
-        // Traitement
-        $remote_user = $data['users'][0];
-        
-        if(!is_array($remote_user)) {
-            $errors[] = "Utilisateur inconnu pour l'adresse email : " . $user->getData('email') . '. Cet utilisateur appartient-il à Bimp ?';
-            return '';
-        }
-        
-        
-        if(!$this->id)
-            $id_api = (int) BimpCache::getBdb()->getValue('bimpapi_api', 'id', 'name = "docusign"');
-        else
-            $id_api = (int) $this->id;
-        $user_account = BimpObject::getInstance("bimpapi", "API_UserAccount");
-        $values = array(
-            'id_api' => (int) $id_api,
-            'users' => array((int) $user->id),
-            'name' => $user->getData('firstname') . ' ' . $user->getData('lastname'),
-            'login' => $remote_user['userId'],
-            'pword' => '',
-            'tokens' => array()
-        );
-        $errors = BimpTools::merge_array($errors, $user_account->validateArray($values));
-        $errors = BimpTools::merge_array($errors, $user_account->create());
-        if(!count($errors)){
-            global $dont_rollback;
-            $dont_rollback = true;
-        }
-        
-//        $errors = BimpTools::merge_array($errors, $user->updateField('id_docusign', $remote_user['userId']));
-        
-        
-        return $remote_user['defaultAccountId'];
-    }
-    
-    public function createHook($params, &$errors) {
-
-        $id_account = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_id_compte_api', '');
-        
-        $params = array(
-            'allUsers' => 'true',
-            'allowEnvelopePublish' => 'true',
-            'enableLog' => 'true',
-            'requiresAcknowledgement' => 'true',
-            "eventData" => array('version' => "restv2.1"),
-            'deliveryMode' => 'SIM',
-            'envelopeEvents' => array('Completed'),
-            'connectId' => "1", // hook_enveloppe_signed
-            'configurationType' => 'custom',
-            'urlToPublishTo' => "https:/".DOL_URL_ROOT."/bimpapi/retour/DocusignEnvelopeSigned.php",
-            'name' => 'Hook enveloppe signée',
-            
-            
-        );
-        
-       
-        $result = $this->execCurlCustom('createHook', array(
-            'fields' => $params,
-            'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/connect'
-            ), $errors, $response_headers, $response_code, $warnings);
-//{
+//    public function getSignersContract($params, $object = null)
+//    {
+//        $client = $params['client'];
 //
-//  "connectId": "sample string 1",
-//
-//  "configurationType": "sample string 2",
-//
-//  "urlToPublishTo": "sample string 3",
-//
-//  "name": "sample string 4",
-//
-//  "allowEnvelopePublish": "sample string 5",
-//
-//  "enableLog": "sample string 6",
-//
-//  "includeDocuments": "sample string 7",
-//
-//  "includeCertificateOfCompletion": "sample string 8",
-//
-//  "requiresAcknowledgement": "sample string 9",
-//
-//  "signMessageWithX509Certificate": "sample string 10",
-//
-//  "useSoapInterface": "sample string 11",
-//
-//  "includeTimeZoneInformation": "sample string 12",
-//
-//  "includeHMAC": "sample string 13",
-//
-//  "includeEnvelopeVoidReason": "sample string 14",
-//
-//  "includeSenderAccountasCustomField": "sample string 15",
-//
-//  "envelopeEvents": "sample string 16",
-//
-//  "recipientEvents": "sample string 17",
-//
-//  "userIds": "sample string 18",
-//
-//  "soapNamespace": "sample string 19",
-//
-//  "allUsers": "sample string 20",
-//
-//  "includeCertSoapHeader": "sample string 21",
-//
-//  "includeDocumentFields": "sample string 22"
-//
-//}
-    
-    }
-    
-    
-    // Getters
-    
-    public function getSigners($params, $object, &$errors = array()) {
-        $signers = array();
-        if(is_a($object, 'BContract_contrat'))
-            $signers = $this->getSignersContract($params, $object);
-        elseif(is_a($object, 'Bimp_Propal'))
-            $signers = $this->getSignersPropal($params, $object);
-        else
-            $errors[] = "Type d'object non prit en charge : " . get_class($object);
-        
-        return $signers;
-    }
-    
-    public function getSignersContract($params, $object = null) {
-       $client = $params['client'];
-//       $comm = $params['comm'];
-       
-        $signers = array(
-            // Client
-            array (
-                'email'       => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
-                'name'        =>  $client['prenom']  . ' ' . $client['nom'],
-                'signerEmail' => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
-                'recipientId' => '2',
-                'routingOrder'=> '2',
-                'emailNotification' => array(
-                    'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
-                    'emailBody' => $object->getDefaultSignDistEmailContent()
-                ),
-                'tabs'        => array(
-                    'signHereTabs' => array(
-                        array(
-                            'name'          => "Signez ici",
-                            'anchorString'  => "Signature des conditions générales de contrat",
-                            'anchorXOffset' => 35,
-                            'anchorYOffset' => 55
-                        ),
-                        array(
-                            'anchorString'  => "Pour le CLIENT
-Signature",
-                            'anchorXOffset' => 130,
-                            'anchorYOffset' => 25,
-                            'fontSize'      => 'Size12'
-                        )
-                    ),
-//                    'initialHereTabs'  => array(
+//        $signers = array(
+//            // Client
+//            array(
+//                'email'             => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
+//                'name'              => $client['prenom'] . ' ' . $client['nom'],
+//                'signerEmail'       => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
+//                'recipientId'       => '2',
+//                'routingOrder'      => '2',
+//                'emailNotification' => array(
+//                    'emailSubject' => ucfirst($object->getLabel()) . ' ' . $object->getRef(),
+//                    'emailBody'    => $object->getDefaultSignDistEmailContent()
+//                ),
+//                'tabs'              => array(
+//                    'signHereTabs'   => array(
 //                        array(
-//                            'anchorString'  => "Paraphe :",
-//                            'anchorXOffset' => 37,
-//                            'anchorYOffset' => -3
+//                            'name'          => "Signez ici",
+//                            'anchorString'  => "Signature des conditions générales de contrat",
+//                            'anchorXOffset' => 35,
+//                            'anchorYOffset' => 55
+//                        ),
+//                        array(
+//                            'anchorString'  => "Pour le CLIENT
+//Signature",
+//                            'anchorXOffset' => 130,
+//                            'anchorYOffset' => 25,
+//                            'fontSize'      => 'Size12'
 //                        )
 //                    ),
-                    'textTabs' => array(
+////                    'initialHereTabs'  => array(
+////                        array(
+////                            'anchorString'  => "Paraphe :",
+////                            'anchorXOffset' => 37,
+////                            'anchorYOffset' => -3
+////                        )
+////                    ),
+//                    'textTabs'       => array(
+////                        array(
+////                            'name'          => "Paraphe",
+////                            'anchorString'  => "Paraphe :",
+////                            'anchorXOffset' => 37,
+////                            'anchorYOffset' => -3,
+////                            'value'         => ucfirst(substr($client['nom'], 0, 1)) . ucfirst(substr($client['prenom'], 0, 1)),
+////                        ),
 //                        array(
-//                            'name'          => "Paraphe",
-//                            'anchorString'  => "Paraphe :",
-//                            'anchorXOffset' => 37,
-//                            'anchorYOffset' => -3,
-//                            'value'         => ucfirst(substr($client['nom'], 0, 1)) . ucfirst(substr($client['prenom'], 0, 1)),
+//                            'name'          => "Nom + fonction",
+//                            'anchorString'  => "Pour le CLIENT
+//Signature",
+//                            'anchorXOffset' => 0,
+//                            'anchorYOffset' => 45,
+//                            'width'         => 120,
+//                            'value'         => $client['nom'] . ' ' . $client['prenom'] . '
+//' . (isset($client['fonction']) ? $client['fonction'] : '')
 //                        ),
-                        array(
-                            'name'          => "Nom + fonction",
-                            'anchorString'  => "Pour le CLIENT
-Signature",
-                            'anchorXOffset' => 0,
-                            'anchorYOffset' => 45,
-                            'width'         => 120,
-                            'value'         => $client['nom'] . ' ' . $client['prenom'] . '
-' . (isset($client['fonction']) ? $client['fonction'] : '')
-                        ),
-                        array(
-                            'name'          => "Lu et approuvé",
-                            'anchorString'  => "Nom, fonction et cachet du signataire :",
-                            'anchorXOffset' => 120,
-                            'anchorYOffset' => -18,
-                            'value'         => "Lu et approuvé"
-                        ),
-                        array(
-                            'name'          => "Nom",
-                            'anchorString'  => "Nom, fonction et cachet du signataire :",
-                            'anchorXOffset' => 120,
-                            'anchorYOffset' => -8,
-                            'value'         => $client['nom'] . ' ' . $client['prenom']
-                        ),
-                        array(
-                            'name'          => "Fonction",
-                            'anchorString'  => "Nom, fonction et cachet du signataire :",
-                            'anchorXOffset' => 120,
-                            'anchorYOffset' => 5,
-                            'value'         => (isset($client['fonction']) ? $client['fonction'] : '')
-                        )
-                    ),
-                    'dateSignedTabs' => array(
-                        array(
-                            'name'          => "Date signature 1",
-                            'anchorString'  => "Signature des conditions générales de contrat",
-                            'anchorXOffset' => 11,
-                            'anchorYOffset' => 15,
-                            'fontSize'      => 'Size12'
-                        ),
-                        array(
-                            'name'          => "Date signature 2",
-                            'anchorString'  => "Pour le CLIENT
-Signature",
-                            'anchorXOffset' => 0,
-                            'anchorYOffset' => 30,
-                            'fontSize'      => 'Size12'
-                        )
-                    )
-                )
-            )
-        );
-        
-        return $signers;
-    }
-    
-    public function getSignersPropal($params, $object = null) {
-       $client = $params['client'];
-       
-       $anchor = 'Signature + Cachet avec SIRET :';
-       $base_x = -110; // x du champ le plus à gauche (Nom)
-       $base_y = 14; // y du champ le plus haut (Nom)
-       $font_size = 'Size9';
-       
-        $signers = array(
-            
-            // Client
-            // Client
-            array (
-                'email'       => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
-                'name'        =>  $client['prenom']  . ' ' . $client['nom'],
-                'signerEmail' => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr', 
-                'recipientId' => '1',
-                'routingOrder'=> '1',
-                'emailNotification' => array(
-                    'emailSubject' => ucfirst($object->getLabel()).' '.$object->getRef(),
-                    'emailBody' => $object->getDocuSignEmailContent()
-                ),
-                'tabs'        => array(
-                    'signHereTabs' => array(
-                        array(
-                            'name'          => "Signature",
-                            'anchorString'  => $anchor,
-                            'anchorXOffset' => $base_x + 130,
-                            'anchorYOffset' => $base_y + 35,
-                        ),
-                    ),
-                    'textTabs' => array(
-                        array(
-                            'name'          => "Nom",
-                            'anchorString'  => $anchor,
-                            'anchorXOffset' => $base_x,
-                            'anchorYOffset' => $base_y,
-                            'fontSize'      => $font_size,
-                            'value'         => $client['nom'],
+//                        array(
+//                            'name'          => "Lu et approuvé",
+//                            'anchorString'  => "Nom, fonction et cachet du signataire :",
+//                            'anchorXOffset' => 120,
+//                            'anchorYOffset' => -18,
+//                            'value'         => "Lu et approuvé"
+//                        ),
+//                        array(
+//                            'name'          => "Nom",
+//                            'anchorString'  => "Nom, fonction et cachet du signataire :",
+//                            'anchorXOffset' => 120,
+//                            'anchorYOffset' => -8,
+//                            'value'         => $client['nom'] . ' ' . $client['prenom']
+//                        ),
+//                        array(
+//                            'name'          => "Fonction",
+//                            'anchorString'  => "Nom, fonction et cachet du signataire :",
+//                            'anchorXOffset' => 120,
+//                            'anchorYOffset' => 5,
+//                            'value'         => (isset($client['fonction']) ? $client['fonction'] : '')
+//                        )
+//                    ),
+//                    'dateSignedTabs' => array(
+//                        array(
+//                            'name'          => "Date signature 1",
+//                            'anchorString'  => "Signature des conditions générales de contrat",
+//                            'anchorXOffset' => 11,
+//                            'anchorYOffset' => 15,
+//                            'fontSize'      => 'Size12'
+//                        ),
+//                        array(
+//                            'name'          => "Date signature 2",
+//                            'anchorString'  => "Pour le CLIENT
+//Signature",
+//                            'anchorXOffset' => 0,
+//                            'anchorYOffset' => 30,
+//                            'fontSize'      => 'Size12'
+//                        )
+//                    )
+//                )
+//            )
+//        );
+//
+//        return $signers;
+//    }
+//
+//    public function getSignersPropal($params, $object = null)
+//    {
+//        $client = $params['client'];
+//
+//        $signers = array(
+//            // Client
+//            array(
+//                'email'             => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
+//                'name'              => $client['prenom'] . ' ' . $client['nom'],
+//                'signerEmail'       => ($this->options['mode'] == 'prod') ? $client['email'] : 'dev@bimp.fr',
+//                'recipientId'       => '1',
+//                'routingOrder'      => '1',
+//                'emailNotification' => array(
+//                    'emailSubject' => ucfirst($object->getLabel()) . ' ' . $object->getRef(),
+//                    'emailBody'    => $object->getDocuSignEmailContent()
+//                ),
+//                'tabs'              => array(
+//                    'signHereTabs'   => array(
+//                        array(
+//                            'name'          => "Signature",
+//                            'anchorString'  => $anchor,
+//                            'anchorXOffset' => $base_x + 130,
+//                            'anchorYOffset' => $base_y + 35,
+//                        ),
+//                    ),
+//                    'textTabs'       => array(
+//                        array(
+//                            'name'          => "Nom",
+//                            'anchorString'  => $anchor,
+//                            'anchorXOffset' => $base_x,
+//                            'anchorYOffset' => $base_y,
+//                            'fontSize'      => $font_size,
+//                            'value'         => $client['nom'],
+//                        ),
+//                        array(
+//                            'name'          => "Prénom",
+//                            'anchorString'  => $anchor,
+//                            'anchorXOffset' => $base_x + 10,
+//                            'anchorYOffset' => $base_y + 14,
+//                            'fontSize'      => $font_size,
+//                            'value'         => $client['prenom'],
+//                        ),
+//                        array(
+//                            'name'          => "Fonction",
+//                            'anchorString'  => $anchor,
+//                            'anchorXOffset' => $base_x + 11,
+//                            'anchorYOffset' => $base_y + 28,
+//                            'fontSize'      => $font_size,
+//                            'value'         => $client['fonction'],
+//                        ),
+//                    ),
+//                    'dateSignedTabs' => array(
+//                        array(
+//                            'name'          => "Date signature",
+//                            'anchorString'  => $anchor,
+//                            'anchorXOffset' => $base_x + 1,
+//                            'anchorYOffset' => $base_y + 45,
+//                            'fontSize'      => $font_size,
+//                        ),
+//                    )
+//                )
+//            )
+//        );
+//
+//        return $signers;
+//    }
 
-                        ),
-                        array(
-                            'name'          => "Prénom",
-                            'anchorString'  => $anchor,
-                            'anchorXOffset' => $base_x + 10,
-                            'anchorYOffset' => $base_y + 14,
-                            'fontSize'      => $font_size,
-                            'value'         => $client['prenom'],
-
-                        ),
-                        array(
-                            'name'          => "Fonction",
-                            'anchorString'  => $anchor,
-                            'anchorXOffset' => $base_x + 11,
-                            'anchorYOffset' => $base_y + 28,
-                            'fontSize'      => $font_size,
-                            'value'         => $client['fonction'],
-
-                        ),
-                    ),
-                    'dateSignedTabs' => array(
-                        array(
-                            'name'          => "Date signature",
-                            'anchorString'  => $anchor,
-                            'anchorXOffset' => $base_x + 1,
-                            'anchorYOffset' => $base_y + 45,
-                            'fontSize'      => $font_size,
-                        ),
-                    )
-                )
-            )
-        );
-        
-        return $signers;
-    }
-    
-    // Interface
-    
-
-    
-    // Traitement
-    
-    public function getBaseUrl($type = 'default') {
+    public function getBaseUrl($type = 'default')
+    {
         return BimpTools::getArrayValueFromPath(static::$urls_bases, $type . '/' . $this->options['mode'], '');
     }
 
-    
-    // Override
-    
-    private function execCurlCustom($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1, &$warnings = array()) {
-        
-//        $params['depth']++;
-//        if(isset($params['depth'])) {
-//            if(4 < $params['depth']) {
-//        $this->tentative_connexion++;
-        if(isset($this->tentative_connexion)) {
-            if(4 < $this->tentative_connexion) {
-                $errors[] = "execCurlCustom exécuté " . $this->tentative_connexion . " fois";
+    // Requêtes:
+
+    public function createEnvelope($file_dir, $file_name, $subject, $signers, &$errors = array(), &$warnings = array())
+    {
+        $id_account = $this->getParam($this->getOption('mode', 'test') . '_id_compte_api', '');
+
+        if (!$id_account) {
+            $errors[] = 'ID compte DocuSign non configuré pour le mode "' . $this->getOption('mode', 'test') . '"';
+        }
+
+        if (!is_file($file_dir . $file_name)) {
+            $errors[] = 'Fichier "' . $file_name . '" absent';
+        }
+
+        if (!count($errors)) {
+            $result = $this->execCurl('createEnvelope', array(
+                'fields'  => array(
+                    'status'       => 'sent',
+                    'emailSubject' => $subject,
+                    'documents'    => array(
+                        array(
+                            'documentBase64' => base64_encode(file_get_contents($file_dir . $file_name)),
+                            'documentId'     => 1,
+                            'name'           => $file_name
+                        ),
+                    ),
+                    'recipients'   => array('signers' => $signers)
+                ),
+                'type'    => 'FILE',
+                'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes'
+                    ), $errors);
+        }
+
+        return $result;
+    }
+
+    public function getEnvelope($id_envelope, &$errors = array(), &$warnings = array())
+    {
+        if (!$id_envelope) {
+            $errors[] = 'ID Enveloppe DocuSign absent';
+        }
+
+        $id_account = $this->getParam($this->getOption('mode', 'test') . '_id_compte_api', '');
+
+        if (!$id_account) {
+            $errors[] = 'ID compte DocuSign non configuré pour le mode "' . $this->getOption('mode', 'test') . '"';
+        }
+
+        if (!count($errors)) {
+            return $this->execCurl('getEnvelope', array(
+                        'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes/' . $id_envelope // . '/consumer_disclosure/FR' // . '/comments/transcript'
+                            ), $errors);
+        }
+
+        return array();
+    }
+
+    public function getEnvelopeFile($id_envelope, $id_document = 1, &$errors = array(), &$warnings = array())
+    {
+        // Pour télécharger le certificat : $id_document = 'certificat'
+
+        if (!$id_envelope) {
+            $errors[] = 'ID envelope DocuSign absent';
+            return array();
+        }
+
+        $id_account = $this->getParam($this->getOption('mode', 'test') . '_id_compte_api', '');
+
+        return $this->execCurl('getEnvelopeFile', array(
+                    'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/envelopes/' . $id_envelope . '/documents/' . $id_document,
+                    'headers' => array(
+                        'Content-Transfer-Encoding' => 'base64'
+                    )
+                        ), $errors);
+    }
+
+    public function setUserIdAccount($id_user, &$errors = array(), &$warnings = array())
+    {
+        if ((int) $id_user < 1) {
+            $errors[] = "Id de l'utilisateur non valide";
+            return '';
+        }
+
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+
+        if (!BimpObject::objectLoaded($user)) {
+            $errors[] = 'L\'utilisateur #' . $id_user . ' n\'existe pas';
+            return '';
+        } else {
+            $userAccount = BimpCache::findBimpObjectInstance('bimpapi', 'API_UserAccount', array(
+                        'id_api' => $this->apiObject->id,
+                        'users'  => array(
+                            'part_type' => 'middle',
+                            'part'      => '[' . $user->id . ']'
+                        )
+                            ), true, false);
+
+            if (BimpObject::objectLoaded($userAccount)) {
+                // Le compte utilisateur existe déjà. 
+                // On ne déclenche pas d'erreur
+                $this->userAccount = $userAccount;
+                return $userAccount->getData('login');
+            }
+        }
+
+        if (!$user->getData('email')) {
+            $errors[] = 'Adresse e-mail absente pour l\'utilisateur "' . $user->getName() . '"';
+        }
+
+        $id_account = $this->getParam($this->getOption('mode', 'test') . '_id_compte_api', '');
+        if (!$id_account) {
+            $errors[] = 'ID compte DocuSign non configuré pour le mode "' . $this->getOption('mode', 'test') . '"';
+        }
+
+        if (!empty($errors)) {
+            return '';
+        }
+
+        $data = $this->execCurl('getUser', array(
+            'url_params' => array(
+                'email'           => $user->getData('email'),
+                'additional_info' => 'true'
+            ),
+            'url_end'    => '/restapi/v2.1/accounts/' . $id_account . '/users/'
+                ), $errors);
+
+        if (!is_array($data['users'][0])) {
+            $errors[] = 'Utilisateur inconnu pour l\'adresse email : "' . $user->getData('email') . '"';
+            return '';
+        }
+
+        $remote_user = $data['users'][0];
+
+        if (!BimpObject::objectLoaded($this->apiObject)) {
+            $id_api = (int) BimpCache::getBdb()->getValue('bimpapi_api', 'id', 'name = "docusign"');
+        } else {
+            $id_api = (int) $this->apiObject->id;
+        }
+
+        $user_account = BimpObject::getInstance("bimpapi", "API_UserAccount");
+        $create_errors = $user_account->validateArray(array(
+            'id_api' => (int) $id_api,
+            'users'  => array((int) $user->id),
+            'name'   => $user->getData('firstname') . ' ' . $user->getData('lastname'),
+            'login'  => $remote_user['userId'],
+            'pword'  => '',
+            'tokens' => array()
+        ));
+
+        if (!count($create_errors)) {
+            $create_warnings = array();
+            $create_errors = $user_account->create($create_warnings, true);
+        }
+
+        if (count($create_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($create_errors, 'Echec de la création du compte utilisateur');
+        } else {
+            $this->userAccount = $user_account;
+        }
+
+        return BimpTools::getArrayValueFromPath($remote_user, 'userId', '');
+    }
+
+    public function createHook(&$errors = array(), &$warnings = array())
+    {
+        $id_account = $this->getParam($this->getOption('mode', 'test') . '_id_compte_api', '');
+
+        if (!$id_account) {
+            $errors[] = 'ID compte DocuSign non configuré pour le mode "' . $this->getOption('mode', 'test') . '"';
+        }
+
+        if (!empty($errors)) {
+            return array();
+        }
+
+        $params = array(
+            'allUsers'                => 'true',
+            'allowEnvelopePublish'    => 'true',
+            'enableLog'               => 'true',
+            'requiresAcknowledgement' => 'true',
+            "eventData"               => array('version' => "restv2.1"),
+            'deliveryMode'            => 'SIM',
+            'envelopeEvents'          => array('Completed'),
+            'connectId'               => "1", // hook_enveloppe_signed
+            'configurationType'       => 'custom',
+            'urlToPublishTo'          => "https:/" . DOL_URL_ROOT . "/bimpapi/retour/DocusignEnvelopeSigned.php",
+            'name'                    => 'Hook enveloppe signée',
+        );
+
+        return $this->execCurl('createHook', array(
+                    'fields'  => $params,
+                    'url_end' => '/restapi/v2.1/accounts/' . $id_account . '/connect'
+                        ), $errors);
+
+        //  "connectId": "sample string 1",
+        //  "configurationType": "sample string 2",
+        //  "urlToPublishTo": "sample string 3",
+        //  "name": "sample string 4",
+        //  "allowEnvelopePublish": "sample string 5",
+        //  "enableLog": "sample string 6",
+        //  "includeDocuments": "sample string 7",
+        //  "includeCertificateOfCompletion": "sample string 8",
+        //  "requiresAcknowledgement": "sample string 9",
+        //  "signMessageWithX509Certificate": "sample string 10",
+        //  "useSoapInterface": "sample string 11",
+        //  "includeTimeZoneInformation": "sample string 12",
+        //  "includeHMAC": "sample string 13",
+        //  "includeEnvelopeVoidReason": "sample string 14",
+        //  "includeSenderAccountasCustomField": "sample string 15",
+        //  "envelopeEvents": "sample string 16",
+        //  "recipientEvents": "sample string 17",
+        //  "userIds": "sample string 18",
+        //  "soapNamespace": "sample string 19",
+        //  "allUsers": "sample string 20",
+        //  "includeCertSoapHeader": "sample string 21",
+        //  "includeDocumentFields": "sample string 22"
+    }
+
+    // Overrides:
+
+    public function execCurl($request_name, $params = [], &$errors = [], &$response_headers = [], &$response_code = -1)
+    {
+        if (in_array($request_name, self::$user_requests) && BimpObject::objectLoaded($this->userAccount)) {
+            global $user;
+
+            if (!BimpObject::objectLoaded($user)) {
+                $errors[] = 'Aucun utilisateur ERP connecté';
                 return array();
             }
-        }
-        
-        // Il s'agit d'une requête suivit par un utilisateur.
-        // On empèche l'utilisation du compte par défaut
-        if(in_array($request_name, self::$user_requests) && $this->userAccount) {
-            global $user;
-//            $bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
-//            $id_docusign = $bimp_user->getData('id_docusign');
 
-            // Le compte connecté est différent de celui de l'utilisateur
-            if(!$this->userAccount->isUserIn($user->id)) {
-                // L'utilisateur a un compte DocuSign renseigné dans l'ERP
-                /*if($id_docusign) {
-                    $this->fetchUserAccount(0);
-                
-                // Le compte DocuSign de l'utilisateur n'est pas définit
-                } else {*/
-                    // On vérifie si le compte DocuSign de l'utilisateur existe
-                    $remote_id_user = $this->setUserIdAccount((int) $user->id, $errors);
-                    if(count($errors))
-                        return array();
-                    
-                    // Il existe, si le compte utilisateur de l'API n'existe pas on le créer
-                    // On connecte le compte utilisateur de l'API
-                    if($remote_id_user) {
-                        $this->fetchUserAccount(0);
-                        $connexion_ok = $this->connect($errors, $warnings);
-                        
-                        if($connexion_ok and !count($warnings)) {
-//                            $params['depth']++;
-//                            $this->tentative_connexion++;
-                            return $this->execCurlCustom($request_name, $params, $errors, $response_headers, $response_code, $warnings);
-                        } else {
-                            return array();
-                        }
-                        
-                    // Il n'existe pas
-                    } else {
-                        $errors[] = "Le compte utilisateur \"" . $id_docusign . "\" n'existe pas ou n'est pas renseigner comme appartenant à Bimp";
-                        return array();
-                    }
-//                }
+            if (!$this->userAccount->isUserIn($user->id)) {
+                $remote_id_user = $this->setUserIdAccount((int) $user->id, $errors);
+
+                if (!count($errors) && !$remote_id_user) {
+                    $errors[] = "Aucun compte DocuSign pour l\'utilisateur \"" . $user->getName() . "\" ou celui-ci n'est pas renseigné sur l\'interface DocuSign";
+                }
+
+                if (count($errors)) {
+                    return array();
+                }
             }
         }
-        
-//        if(isset($params['depth']))
-//            unset($params['depth']);
 
-        if(empty($errors) and empty($warnings))
-            $return = $this->execCurl($request_name, $params, $errors, $response_headers, $response_code);
-        
-        // Gestion des erreurs
-        if(is_array($return)) {
-            if(isset($return['errorCode']) or isset($return['message']))
-                $errors[] = $return['errorCode'] . ' : ' . $return['message'];
+        return parent::execCurl($request_name, $params, $errors, $response_headers, $response_code);
+    }
 
+    public function processRequestResponse($request_name, $response_code, $response_body, $response_headers = array(), &$infos = '', &$errors = array())
+    {
+        $return = $response_body;
+        switch ($response_code) {
+            case '400':
+                $errors[] = 'Requête incorrecte';
+                break;
+
+            case '401':
+                $errors[] = 'Non autentifié';
+                $return = 'unauthenticate';
+                break;
+
+            case '403':
+                $errors[] = 'Accès refusé';
+                break;
+
+            case '404':
+                $errors[] = 'API non trouvée';
+                break;
+
+            case '405':
+                $errors[] = 'Format de la requête non supoorté';
+                break;
+
+            case '500':
+                $errors[] = 'Erreur interne serveur';
+                break;
         }
-        
+
+        if (isset($return['errorCode']) || isset($return['message'])) {
+            $msg = '';
+            if (isset($return['errorCode'])) {
+                $msg .= $return['errorCode'];
+            }
+            if (isset($return['message'])) {
+                $msg .= ($msg ? ' : ' : '') . $return['message'];
+            }
+
+            if ($msg) {
+                $errors[] = $msg;
+            }
+        }
+
         return $return;
     }
 
-    public function testRequest(&$errors = array(), &$warnings = array()) {
+    public function testRequest(&$errors = array(), &$warnings = array())
+    {
 //        return $this->setUserIdAccount(242, $errors, $warnings);
-        
-        
 //        $id_account = $this->userAccount->getData('login');
 //        
 //        
@@ -579,100 +553,90 @@ Signature",
 ////        $this->reqCreateEnvelope($params, $errors);
 //        
         $this->createHook($params, $errors);
-
     }
-    
-    public function connect(&$errors = array(), &$warnings = array()) {
-        
-        $this->tentative_connexion++;
-        if($this->tentative_connexion > 4) {
-            $errors[] = 'Trop de tentative de connexion ' . $this->tentative_connexion;
-            return 0;
-        }
-        
-//        if($this->userAccount->isLogged())
-//            return count($errors);
-//        else {
-//            $this->addDebug($this->userAccount->getData('name') . ' nest pas connecté<br/>');
-//        }
-        
+
+    public function connect(&$errors = array(), &$warnings = array())
+    {
         $result = '';
-//        $url_redirect = DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php';
-        $url_redirect = 'https://'.$_SERVER['HTTP_HOST'].DOL_URL_ROOT.'/bimpapi/retour/DocusignAuthentificationSuccess.php';
-       $client_id = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_oauth_client_id', '');
-
-
-        
         $code = $this->userAccount->getToken('code');
         $refresh_token = $this->userAccount->getToken('refresh');
-        
-        // On redirige l'utilisateur pour qu'il puisse se connecter
-        if($code . 'x' == 'x' and $refresh_token . 'x' == 'x') {
-            $_SESSION['id_user_docusign'] = $this->userAccount->id;
-            
-            $link = $this->getBaseUrl('auth') . "/oauth/auth?response_type=code&scope=signature&client_id=" . $client_id . "&redirect_uri=" . $url_redirect;
-            $errors[] = $this->userAccount->getData('name') . " n'est pas connecté à DocuSign <a target='_blank' href='" . $link ."'>cliquez ici</a>";
-        
-            
-        // Il a déjà rentré ses identifiant
-        } else {
-            
-            // On utilise le token de raffraichissement si il existe
-            if($refresh_token . 'x' != 'x') {
-                $result = $this->execCurlCustom('authenticate', array(
-                    'fields' => array(
-                        'grant_type' => 'refresh_token',
-                        'refresh_token' => $refresh_token
-                        )), $errors, $response_headers, $response_code, $warnings);
+
+        if (!(string) $code) {
+            // Code absent, on redirige l'utilisateur pour qu'il puisse se connecter
+            $client_id = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_oauth_client_id', '');
+
+            if (BimpCore::isModeDev()) {
+                $url_redirect = 'https://erp2.bimp.fr/bimpinv01072020/bimpapi/retour/DocusignAuthentificationSuccess.php?mode_dev=1';
+            } else {
+                $url_redirect = 'https://' . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php';
             }
-            
-            // On utilise le token d'accès si il existe
+
+            $_SESSION['id_user_docusign'] = $this->userAccount->id;
+            $url = $this->getBaseUrl('auth') . "/oauth/auth?response_type=code&scope=signature&client_id=" . $client_id . "&redirect_uri=" . urlencode($url_redirect);
+            $errors[] = $this->userAccount->getData('name') . " n'est pas connecté à DocuSign <a target='_blank' href='" . $url . "'>cliquez ici</a>";
+        } else {
+            // Authentification via refresh token
+            if ((string) $refresh_token) {
+                $result = $this->execCurl('authenticate', array(
+                    'fields' => array(
+                        'grant_type'    => 'refresh_token',
+                        'refresh_token' => $refresh_token
+                    )), $errors);
+            }
+
+            // Si échec, test avec code: 
             $access_token = BimpTools::getArrayValueFromPath($result, 'access_token', '');
-            if(!$access_token) {
-                // Get token 
-                $result = $this->execCurlCustom('authenticate', array(
+            if (!$access_token) {
+                $result = $this->execCurl('authenticate', array(
                     'fields' => array(
                         'grant_type' => 'authorization_code',
-                        'code' => $code
-                        )), $errors, $response_headers, $response_code, $warnings);
-            }
-            
-            if (is_string($result)) {
-                $errors[] = $result;
-            } elseif (isset($result['access_token'])) {
-                
-                
-                $expires_in = (int) BimpTools::getArrayValueFromPath($result, 'expires_in', 3600);
+                        'code'       => $code
+                    )), $errors);
 
+                if (isset($result['refresh_token']) && $result['refresh_token']) {
+                    $refresh_token = $result['refresh_token'];
+                    $expires_in = (int) BimpTools::getArrayValueFromPath($result, 'expires_in', 3600);
+                    $dt_now = new DateTime();
+                    $dt_now->add(new DateInterval('PT' . $expires_in . 'S'));
+                    $this->saveToken('refresh', $refresh_token, $dt_now->format('Y-m-d H:i:s'));
+
+                    // Nouvelle tentative via refresh token :
+                    $result = $this->execCurl('authenticate', array(
+                        'fields' => array(
+                            'grant_type'    => 'refresh_token',
+                            'refresh_token' => $refresh_token
+                        )), $errors);
+                }
+            }
+
+            if ((isset($result['access_token']) && $result['access_token'])) {
+                $expires_in = (int) BimpTools::getArrayValueFromPath($result, 'expires_in', 3600);
                 $dt_now = new DateTime();
                 $dt_now->add(new DateInterval('PT' . $expires_in . 'S'));
-
                 $this->saveToken('access', $result['access_token'], $dt_now->format('Y-m-d H:i:s'));
-                $this->saveToken('refresh', $result['refresh_token'], $dt_now->format('Y-m-d H:i:s'));
-                
-            } elseif(isset($result['error_description'])){
-                $error = $result['error_description'];
-                        
-                if($error == 'expired_client_token'){
-//                    $this->saveToken('code', '');
-                    return $this->connect($errors, $warnings);
-                }
-                else        
-                    $errors[] = $result['error_description'];
-                
             } else {
-                $errors[] = 'Echec de la connexion pour une raison inconnue';
+                $error = 'Echec de la connexion';
+                if (is_string($result) && $result) {
+                    $error .= ' - ' . $result;
+                } elseif (isset($result['error']) && $result['error']) {
+                    $error .= ' - ' . $result['error'];
+                } elseif (isset($result['error_description']) && $result['error_description']) {
+                    $error .= ' - ' . $result['error_description'];
+                } else {
+                    $error .= ' pour une raison inconnue (Aucune réponse)';
+                }
+                $errors[] = $error;
             }
         }
-        
+
         return (!count($errors));
     }
-    
-    public function getDefaultRequestsHeaders($request_name, &$errors = array()) {
-        if ($this->isUserAccountOk($errors)) {
-            $client_id = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_oauth_client_id', '');
-            $client_secret = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_oauth_client_secret', '');
 
+    public function getDefaultRequestsHeaders($request_name, &$errors = array())
+    {
+        if ($this->isUserAccountOk($errors)) {
+            $client_id = $this->getParam($this->getOption('mode', 'test') . '_oauth_client_id', '');
+            $client_secret = $this->getParam($this->getOption('mode', 'test') . '_oauth_client_secret', '');
             if ($client_id && $client_secret) {
                 if ($request_name == 'authenticate') {
                     return array(
@@ -693,10 +657,14 @@ Signature",
     {
         return self::$title;
     }
-    // Install: 
 
-    public function install($title = '', &$warnings = array()) {
+    // Install:
+
+    public function install($title = '', &$warnings = array())
+    {
         $errors = array();
+
+        // Pas de valeurs en dur dans le code !! 
 
         $api = BimpObject::createBimpObject('bimpapi', 'API_Api', array(
                     'name'  => self::$name,
@@ -706,56 +674,47 @@ Signature",
         if (BimpObject::objectLoaded($api)) {
             $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
-                        'name' => 'test_oauth_client_secret',
-                        'title' => 'Secret client OAuth en mode test',
-                        'value' => 'd4a8e30b-7dff-433b-9c8d-4208e0f8cbc2'
+                        'name'   => 'test_oauth_client_secret',
+                        'title'  => 'Secret client OAuth en mode test',
+                        'value'  => ''
                             ), true, $warnings, $warnings);
 
             $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
-                        'name' => 'test_oauth_client_id',
-                        'title' => 'ID Client OAuth en mode test',
-                        'value' => '3b602db6-78eb-47f2-8a61-454fcb21836e'
+                        'name'   => 'test_oauth_client_id',
+                        'title'  => 'ID Client OAuth en mode test',
+                        'value'  => ''
                             ), true, $warnings, $warnings);
 
             $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
-                        'name' => 'test_id_compte_api',
-                        'title' => 'Identifiant de compte API mode test',
-                        'value' => '8b411bfe-54f5-47fc-bbf2-55d9a71a200f'
+                        'name'   => 'test_id_compte_api',
+                        'title'  => 'Identifiant de compte API mode test',
+                        'value'  => ''
                             ), true, $warnings, $warnings);
 
             $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
-                        'name' => 'prod_oauth_client_secret',
-                        'title' => 'Secret client OAuth en mode prod',
-                        'value' => 'fb0418e3-8213-43c0-a655-3c6c0bed91b2'
+                        'name'   => 'prod_oauth_client_secret',
+                        'title'  => 'Secret client OAuth en mode prod',
+                        'value'  => ''
                             ), true, $warnings, $warnings);
 
             $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
-                        'name' => 'prod_oauth_client_id',
-                        'title' => 'ID Client OAuth en mode prod',
-                        'value' => '3b602db6-78eb-47f2-8a61-454fcb21836e'
+                        'name'   => 'prod_oauth_client_id',
+                        'title'  => 'ID Client OAuth en mode prod',
+                        'value'  => ''
                             ), true, $warnings, $warnings);
 
             $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
-                        'name' => 'prod_id_compte_api',
-                        'title' => 'Identifiant de compte API mode prod',
-                        'value' => ''
+                        'name'   => 'prod_id_compte_api',
+                        'title'  => 'Identifiant de compte API mode prod',
+                        'value'  => ''
                             ), true, $warnings, $warnings);
-
-//                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-//                            'id_api' => $api->id,
-//                            'name' => 'url_redirect',
-//                            'title' => 'Lien vers la racine du projet',
-//                            'value' => DOL_URL_ROOT . '/'
-//                                ), true, $warnings, $warnings);
-
         }
 
         return $errors;
     }
-
 }

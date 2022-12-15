@@ -634,7 +634,7 @@ class Bimp_User extends BimpObject
                 'content' => $this->renderParamsView()
             );
 
-            if ($isAdmin) {
+            if ($isAdmin || $isUsersAdmin) {
                 $tabs[] = array(
                     'id'            => 'perms',
                     'title'         => BimpRender::renderIcon('fas_check', 'iconLeft') . 'Permissions',

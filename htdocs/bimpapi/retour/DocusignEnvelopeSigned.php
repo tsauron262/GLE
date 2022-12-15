@@ -4,86 +4,97 @@ define('NOREQUIREHTML', 1);
 define('NOCSRFCHECK', 1);
 define('NO_REDIRECT_LOGIN', 1);
 require_once("../../main.inc.php");
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-$errors = array();
+
+//recipient-completed = {"event":"recipient-completed","apiVersion":"v2.1","uri":"/restapi/v2.1/accounts/8b411bfe-54f5-47fc-bbf2-55d9a71a200f/envelopes/71799c95-8417-4b16-90d5-86ff24a91d09","retryCount":0,"configurationId":10363315,"generatedDateTime":"2022-12-09T18:29:29.7360000Z","data":{"accountId":"8b411bfe-54f5-47fc-bbf2-55d9a71a200f","userId":"4214323f-c281-4a0e-80f7-37b3ea7d8665","envelopeId":"71799c95-8417-4b16-90d5-86ff24a91d09","recipientId":"1"}}
+//envelope-completed = {"event":"envelope-completed","apiVersion":"v2.1","uri":"/restapi/v2.1/accounts/8b411bfe-54f5-47fc-bbf2-55d9a71a200f/envelopes/71799c95-8417-4b16-90d5-86ff24a91d09","retryCount":0,"configurationId":10363315,"generatedDateTime":"2022-12-09T18:32:13.2990000Z","data":{"accountId":"8b411bfe-54f5-47fc-bbf2-55d9a71a200f","userId":"4214323f-c281-4a0e-80f7-37b3ea7d8665","envelopeId":"71799c95-8417-4b16-90d5-86ff24a91d09"}}
+
+$errors = $warnings = array();
+$mode_dev = BimpCore::isUserDev();
 global $user;
 $user->fetch(1);
 
-$body = file_get_contents('php://input');
-file_put_contents(DOL_DATA_ROOT . '/docusign_webhook.txt', $body);
+$signature = null;
 
-$in = json_decode(file_get_contents(DOL_DATA_ROOT . '/docusign_webhook.txt'), 1);
-//$in = json_decode(file_get_contents('/var/www/html/bimp-erp/documents/docusign_webhook.txt'), 1);
 
-//print_r($in);
-//die();
-if(is_array($in)) {
-    
-    if(isset($in['data'])) {
-        
-        if(isset($in['data']['envelopeId'])) {
-            
-            $signatures = BimpCache::getBimpObjectObjects('bimpcore', 'BimpSignature', array('id_envelope_docu_sign' => $in['data']['envelopeId']));
-
-            $signature  = array_shift($signatures);
-            
-            if(BimpObject::objectLoaded($signature)) {
-                $data = array(
-                    'id_account'  => $in['data']['accountId'],
-                    'id_envelope' => $in['data']['envelopeId']
-                );
-                $success = '';
-                $return = $signature->actionDownloadSignature($data, $success);
-                $errors = BimpTools::merge_array($errors, $return['errors']);
-            } else {
-                $errors[] = "Il n'existe pas d'enveloppe avec pour id DocuSign " . $in['data']['envelopeId'];
-            }
-            
-        } else {
-            $errors[] = "La requête reçu ne contient pas le champs \"envelopeId\"";
-        }
-
-    } else {
-        $errors[] = "La requête reçu ne contient pas le champs \"data\"";
-    }
-    
+if ($mode_dev) {
+    $body = file_get_contents(DOL_DATA_ROOT . '/docusign_webhook.txt');
 } else {
-    $errors[] = "La requête reçu n'est pas de type array";
+    $body = file_get_contents('php://input');
+    file_put_contents(DOL_DATA_ROOT . '/docusign_webhook.txt', $body);
 }
 
-if(count($errors)) {
-    $output = "Erreurs lors du webhook DocusignEnvelopeSigned :<br/>";
-    foreach($errors as $e) {
-        $output .= '- ' . $e . '<br/>';
+if (!$body) {
+    $errors[] = 'Donnée absentes';
+} else {
+    $data = json_decode($body, 1);
+
+    if (!is_array($data) || empty($data)) {
+        $errors[] = 'Données reçues invalides';
+    } else {
+        if ($mode_dev) {
+            echo 'DATA :<pre>';
+            print_r($data);
+            echo '</pre>';
+        }
+        
+        $envelopeId = BimpTools::getArrayValueFromPath($data, 'data/envelopeId', '');
+        $event = BimpTools::getArrayValueFromPath($data, 'event', '');
+
+        if (!$envelopeId) {
+            $errors[] = 'ID DocuSign absent';
+        } else {
+            $signature = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignature', array(
+                        'id_envelope_docu_sign' => $envelopeId
+                            ), true);
+
+            if (!BimpObject::objectLoaded($signature)) {
+                $errors[] = "Aucune signature existante pour l'ID DocuSign " . $envelopeId;
+            } else {
+                
+                if($event == 'envelope-completed'){
+                    $success = '';
+                    // $return = $signature->actionDownloadSignature($data, $success); => Eviter les appels directs aux méthodes actionXXX (nécessaire pour vérfis / transactions db / etc.) 
+                    $refresh_errors = $signature->refreshDocuSignDocument(true, $warnings, $success);
+
+                    if (count($refresh_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($refresh_errors, 'Echec de la mise à jour des données DocuSign');
+                    }
+                }
+                elseif($event == 'recipient-completed'){
+                    $recipientId = BimpTools::getArrayValueFromPath($data, 'data/recipientId', '');
+                    $signataires = $signature->getChildrenObjects('signataires', array(), 'id', 'ASC');
+                    $i= 0;
+                    print_r($recipientId.'pp');
+                    foreach($signataires as $signataire){
+                        $i++;
+                        if($i == $recipientId){
+                            $signataire->set('status', BimpSignataire::STATUS_SIGNED);
+                            $signataire->set('date_signed', date('Y-m-d H:i:s'));
+                            $signataire->update();
+                            $success = 'Signataire mis a jour avec succes';
+                        }
+                    }
+                }
+            }
+        }
     }
-    $output .= "<br/><br/>Body en entrée :<br/>";
-    $output .= print_r($in, 1);
-    mailSyn2('Erreurs Webhook DocusignEnvelopeSigned', BimpCore::getConf('devs_email'), '', $output);   
 }
 
-echo $output;
+if (count($warnings)) {
+    echo 'ALERTES :<pre>';
+    print_r($warnings);
+    echo '</pre>';
+}
 
-
-
-//echo $a->apiVersion;
-
-//var_dump(a{'a' => 'b'});
-
-
-//var_dump($a);
-
-
-//foreach($a as $k => $v) {
-//    if(is_string($v))
-//        echo "k = $k  v = $v\n";
-//    else
-//        print_r($v);
-//}
-
-
-//curl -X POST -H 'Content-Type: application/json' -d '{  "event": "envelope-completed",  "apiVersion": "v2.1",  "uri": "/restapi/v2.1/accounts/8b411bfe-54f5-47fc-bbf2-55d9a71a200f/envelopes/f826722d-0cc8-4ad0-a4ef-bdb128502a61",  "retryCount": 0,  "configurationId": 10343415,  "generatedDateTime": "2022-09-21T13:58:43.9115721Z",  "data": {    "accountId": "8b411bfe-54f5-47fc-bbf2-55d9a71a200f",    "userId": "4214323f-c281-4a0e-80f7-37b3ea7d8665",    "envelopeId": "f826722d-0cc8-4ad0-a4ef-bdb128502a61"  }}' http://localhost/bimp-erp/htdocs/bimpapi/retour/DocusignEnvelopeSigned.php?test=GET_OK&var=OK | printf "\n\n\n"
-
-
-
-
-
+if (count($errors)) {
+    BimpCore::addlog('Erreurs lors du webhook DocusignEnvelopeSigned', Bimp_Log::BIMP_LOG_URGENT, 'api', $signature, array(
+        'Erreurs' => $errors
+    ));
+    echo 'ERREURS : <pre>';
+    print_r($errors);
+    echo '</pre>';
+} else {
+    echo 'OK : ' . $success . '<br/>';
+}

@@ -1180,14 +1180,18 @@ class BimpConfig
         $module = 'bimpcore';
         $default = null;
         $is_int = 1;
+        $not = 0;
 
         if (is_string($bimpcoreConf)) {
             $name = $bimpcoreConf;
         } elseif (is_array($bimpcoreConf)) {
-            $module = $this->get($path . '/module', 'bimpcore');
-            $name = $this->get($path . '/name', '', true);
-            $default = $this->get($path . '/def', null);
-            $is_int = $this->get($path . 'is_int', 1);
+            $params = $this->getCompiledParams($path);
+
+            $module = BimpTools::getArrayValueFromPath($params, 'module', 'bimpcore');
+            $name = BimpTools::getArrayValueFromPath($params, 'name', '');
+            $default = BimpTools::getArrayValueFromPath($params, 'def', null);
+            $is_int = (int) BimpTools::getArrayValueFromPath($params, 'is_int', 1);
+            $not = (int) BimpTools::getArrayValueFromPath($params, 'not', 0);
         }
 
         $val = null;
@@ -1197,6 +1201,10 @@ class BimpConfig
 
         if ($is_int) {
             $val = (int) $val;
+        }
+
+        if ($not) {
+            return !$val;
         }
 
         return $val;

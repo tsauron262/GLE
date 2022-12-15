@@ -355,15 +355,22 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', '', 9);
                 //$pdf->Cell($W, 4, "Les parties ont conclu un ".$objet_contrat[$c->getData('objet_contrat')]['label']."  en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
                 $pdf->Cell($W, 4, "Les parties ont conclu un Contrat d'assistance et de maintenance informatique en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
-                $pdf->SetFont('', 'B', 9);
-                $pdf->Ln();
-                $pdf->Cell($W, 4, "IL EST AINSI CONVENU CE QUI SUIT", 0, null, 'L', true);
-                $pdf1->SetFont('', '', 9);
-                //$pdf1->Cell($W, 4, "Les parties ont conclu un ".$objet_contrat[$c->getData('objet_contrat')]['label']."  en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
+                if($this->avenant->getData('type') == 1){
+                    $pdf->SetFont('', 'B', 9);
+                    $pdf->Ln();
+                    $pdf->Cell($W, 4, "Par cet avenant de prolongation, il est convenu ce qui suit", 0, null, 'L', true);
+                }
+                if($this->avenant->getData('label') != ''){
+                    $pdf1->SetFont('', '', 9);
+                    $pdf1->Cell($W, 4, $this->avenant->getData('label'), "L", null, 'L', true);
+                }
+                $pdf1->setY($pdf1->getY() + 7);
                  $pdf1->Cell($W, 4, "Les parties ont conclu un Contrat d'assistance et de maintenance informatique en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
-                $pdf1->SetFont('', 'B', 9);
-                $pdf1->Ln();
-                $pdf1->Cell($W, 4, "IL EST AINSI CONVENU CE QUI SUIT", 0, null, 'L', true);
+                if($this->avenant->getData('type') == 1){
+                    $pdf1->SetFont('', 'B', 9);
+                    $pdf1->Ln();
+                    $pdf1->Cell($W, 4, "Par cet avenant de prolongation, il est convenu ce qui suit", 0, null, 'L', true);
+                 }
                 $date = ($this->avenant->getData('type') == 0) ? new DateTime($this->avenant->getData('date_effect')) : new DateTime($this->avenant->getData('date_end'));
                 if($this->avenant->getData('type') == 0) {
                     foreach($lignes_avenant as $id => $infos) {
@@ -372,7 +379,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $have_modif = false;
                         $line = $this->avenant->getChildObject('avenantdet', $id);
                         $current_ligne++;
-                        $need = 50; // En tete + Marge du bas + nombre de ligne contenu dans le service
+                        $need = 90; // En tete + Marge du bas + nombre de ligne contenu dans le service
 
                         $currentY = (int) $pdf->getY();
                         $currentY = (int) $pdf1->getY();

@@ -360,7 +360,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     $ref_manuf = BimpTools::getArrayValueFromPath($line, 'ref_manuf', '');
                     $marque = BimpTools::getArrayValueFromPath($line, 'brand', '');
                     $lib = BimpTools::getArrayValueFromPath($line, 'lib', '');
-                    $code_fourn = ''; // ??
+                    $code_fourn = BimpTools::getArrayValueFromPath($line, 'code', '');; // ??
                     $pu_ht = (float) BimpTools::getArrayValueFromPath($line, 'pu_ht', 0);
 
                     $this->debug_content .= 'Ajout import prod "' . $ref_fourn . '"<br/>';

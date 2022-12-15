@@ -351,12 +351,20 @@ fields:
         default_value: 0
         
     crt: 
-        label: Remise CRT
+        label: Remise arrière
         type: percent
         decimals: 3
         dol_extra_field: 1
         default_value: 0
         user_edit: 1
+        display_if:
+            field_name: type_remise_arr
+            hide_values: 0
+    type_remise_arr:
+        label: Type de remise arriére
+        type: int
+        values: 
+            array: types_remise_arr
         
     accountancy_code_sell:
         label: Code comptable Vente (Spécifique)
@@ -609,6 +617,7 @@ forms:
             - field: tva_tx
             - field: deee
             - field: rpcp
+            - field: type_remise_arr
             - field: crt
             - field: gamme
             - field: categorie
@@ -894,6 +903,7 @@ fields_tables:
             - field: tva_tx
             - field: deee
             - field: rpcp
+            - field: type_remise_arr
             - field: crt
             
     prices_buy: 

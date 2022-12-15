@@ -3,6 +3,8 @@ categories:
         label: PDFs
     relances: 
         label: Relances clients
+    signatures: 
+        label: Signatures
         
 params: 
     date_debut_exercice: 
@@ -14,11 +16,6 @@ params:
         info: 'NON: Taux de marge utilisé'
         type: bool
         def: 1
-        
-    propal_use_signatures: 
-        label: Activer les signatures pour les propales
-        type: bool
-        def: 0
         
     typent_required: 
         label: Type du client obligatoire pour la validation des pièces
@@ -148,4 +145,72 @@ params:
         label: Entrepots en livraison direct
         info: Tableau json de type [1,2]
                     
+    # Signatures: 
+        
+    propal_use_signatures: 
+        label: Activer les signatures pour les propales
+        type: bool
+        cat: signatures
+        def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  propal_signature_required: 
+                      label: Signature des devis obligatoire
+                      type: bool
+                      def: 0
+                  propal_signature_allow_dist: 
+                      label: Autoriser les signatures électroniques à distance pour les devis
+                      type: bool
+                      def: 0
+                  propal_signature_allow_docusign: 
+                      label: Autoriser les signatures DocuSign pour les devis
+                      type: bool
+                      def: 0
+                  propal_signature_allow_refuse: 
+                      label: Autoriser le refus des signatures pour les devis
+                      type: bool
+                      def: 0
+        
+    devis_fin_use_signatures: 
+        label: Activer les signatures pour les devis de location
+        type: bool
+        cat: signatures
+        def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  devis_fin_signature_allow_dist: 
+                      label: Autoriser les signatures électroniques à distance pour les devis de location
+                      type: bool
+                      def: 0
+                  devis_fin_signature_allow_docusign: 
+                      label: Autoriser les signatures DocuSign pour les devis de location
+                      type: bool
+                      def: 0
+                  devis_fin_signature_allow_refuse: 
+                      label: Autoriser le refus des signatures pour les devis de location
+                      type: bool
+                      def: 0
+        
+    contrat_fin_use_signatures: 
+        label: Activer les signatures pour les contrats de location
+        type: bool
+        cat: signatures
+        def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  contrat_fin_signature_allow_dist: 
+                      label: Autoriser les signatures électroniques à distance pour les contrats de location
+                      type: bool
+                      def: 0
+                  contrat_fin_signature_allow_docusign: 
+                      label: Autoriser les signatures DocuSign pour les contrats de location
+                      type: bool
+                      def: 0
+                  contrat_fin_signature_allow_refuse: 
+                      label: Autoriser le refus des signatures pour les contrats de location
+                      type: bool
+                      def: 0
                   

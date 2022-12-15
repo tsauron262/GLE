@@ -174,14 +174,14 @@ class InterfaceClientController extends BimpPublicController
             }
 
             // Signatures en attentes:
-            $signatures = BimpCache::getBimpObjectObjects('bimpcore', 'BimpSignature', array(
+            $signataires = BimpCache::getBimpObjectObjects('bimpcore', 'BimpSignataire', array(
                         'id_client'  => (int) $userClient->getData('id_client'),
-                        'signed'     => 0,
-                        'type'       => 0,
+                        'status'     => 0,
+                        'type'       => 1,
                         'allow_dist' => 1
                             ), 'id', 'desc');
 
-            if (!empty($signatures)) {
+            if (!empty($signataires)) {
                 $html .= '<div class="row" style="margin-bottom: 30px">';
                 $html .= '<div class="col-lg-12">';
                 $html .= '<h3>' . BimpRender::renderIcon('pe_pen', 'iconLeft') . 'Mes signatures en attente</h3>';
@@ -196,15 +196,19 @@ class InterfaceClientController extends BimpPublicController
 
                 $rows = array();
 
-                foreach ($signatures as $signature) {
-                    if ($signature->can('view')) {
-                        $rows[] = array(
-                            'obj'             => $signature->displayObj(),
-                            'doc_type'        => $signature->displayDocType(),
-                            'doc_ref'         => $signature->displayDocRef(),
-                            'public_document' => $signature->displayPublicDocument(),
-                            'public_sign'     => $signature->dispayPublicSign(),
-                        );
+                foreach ($signataires as $signataire) {
+                    if ($signataire->can('view')) {
+                        $signature = $signataire->getParentInstance();
+
+                        if (BimpObject::objectLoaded($signature)) {
+                            $rows[] = array(
+                                'obj'             => $signature->displayObj(),
+                                'doc_type'        => $signature->displayDocType(),
+                                'doc_ref'         => $signature->displayDocRef(),
+                                'public_document' => $signataire->displayPublicDocument(),
+                                'public_sign'     => $signataire->dispayPublicSign(),
+                            );
+                        }
                     }
                 }
 
@@ -541,21 +545,14 @@ class InterfaceClientController extends BimpPublicController
 
         $html .= '<h3>' . BimpRender::renderIcon('pe_pen', 'iconLeft') . 'Mes signatures</h3>';
 
-        $signature = BimpObject::getInstance('bimpcore', 'BimpSignature');
+        $signataire = BimpObject::getInstance('bimpcore', 'BimpSignataire');
 
-        if (!BimpObject::objectLoaded($userClient) || !$signature->can('view')) {
+        if (!BimpObject::objectLoaded($userClient) || !$signataire->can('view')) {
             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
         } else {
-            $list = new BC_ListTable($signature, 'public_client');
+            $list = new BC_ListTable($signataire, 'public_client');
             $list->addFieldFilterValue('id_client', (int) $userClient->getData('id_client'));
-
-//            if (!$userClient->isAdmin()) {
-//                $list->addFieldFilterValue('allowed_users_client', array(
-//                    'part'      => '[' . $userClient->id . ']',
-//                    'part_type' => 'middle'
-//                ));
-//            }
-
+            
             $html .= $list->renderHtml();
         }
 
@@ -589,7 +586,7 @@ class InterfaceClientController extends BimpPublicController
     public function renderTabTickets()
     {
         if (!(int) BimpCore::getConf('use_tickets', null, 'bimpsupport')) {
-            return BimpRender::renderAlerts('Le support téléphonique n\'est plus disponible sur cette espace');
+            return BimpRender::renderAlerts('Le support téléphonique n\'est plus disponible sur cet espace');
         }
         $html = '';
 
@@ -699,8 +696,8 @@ class InterfaceClientController extends BimpPublicController
     {
         $html = '';
 
-        if (!(int) BimpCore::getConf('use_tickets', null, 'bimpsupport')) {
-            return BimpRender::renderAlerts('La gestion de vos dossier SAV n\'est plus disponible sur cette espace');
+        if (!(int) BimpCore::getConf('use_sav', null, 'bimpsupport')) {
+            return BimpRender::renderAlerts('La gestion de vos dossiers SAV n\'est plus disponible sur cet espace');
         }
 
         global $userClient;
@@ -769,9 +766,9 @@ class InterfaceClientController extends BimpPublicController
                                     $ids[] = (int) $r['id'];
                                 }
 
-                                $signature = BimpObject::getInstance('bimpcore', 'BimpSignature');
-                                $list = new BC_ListTable($signature, 'public_client', 1, null, 'Signatures', 'fas_signature');
-                                $list->addFieldFilterValue('id', $ids);
+                                $signataire = BimpObject::getInstance('bimpcore', 'BimpSignataire');
+                                $list = new BC_ListTable($signataire, 'public_client', 1, null, 'Signatures', 'fas_signature');
+                                $list->addFieldFilterValue('id_signature', $ids);
                                 $html .= '<div style="margin-top: 30px">';
                                 $html .= $list->renderHtml();
                                 $html .= '</div>';

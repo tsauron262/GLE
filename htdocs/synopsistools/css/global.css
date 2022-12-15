@@ -2,6 +2,16 @@
 /*
 *BIMP CORE
 */
+@media (max-width: 940px), (max-device-width: 940px){
+#BimpThemeWrapper #id-right{
+    position: relative!important;
+}
+}
+
+.menu-collapsed .bimptheme_menu_extra_section{
+    display: none;
+}
+
 body.modal-open ul.ui-autocomplete{
     overflow: auto;
     max-height: 400px;

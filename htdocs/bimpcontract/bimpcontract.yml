@@ -1,6 +1,8 @@
 categories: 
     pdf: 
         label: Fichiers PDF
+    signatures: 
+        label: Signatures
         
 params: 
     email_groupe: 
@@ -37,5 +39,25 @@ params:
         label: Fonction signataire
         cat: pdf
         def: ''
-    
         
+    # Signatures: 
+    contrat_use_signatures:
+        label: Activer les signatures pour les contrats
+        type: bool
+        cat: signatures
+        def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  contrat_signature_allow_dist: 
+                      label: Autoriser les signatures électroniques à distance pour les contrats
+                      type: bool
+                      def: 0
+                  contrat_signature_allow_docusign: 
+                      label: Autoriser les signatures DocuSign pour les contrats
+                      type: bool
+                      def: 0
+                  contrat_signature_allow_refuse: 
+                      label: Autoriser le refus des signatures pour les contrats
+                      type: bool
+                      def: 0

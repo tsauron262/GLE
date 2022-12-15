@@ -110,6 +110,43 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         return 1;
     }
 
+    public function isDocuSignAllowed(&$errors = array(), $is_required = false)
+    {
+        if (!parent::isDocuSignAllowed($errors)) {
+            return 0;
+        }
+
+        $sav = $this->getSav();
+        if (BimpObject::objectLoaded($sav)) {
+            $errors[] = 'Signature via DocuSign on autorisée pour les devis SAV';
+            return 0;
+        }
+        
+        // Ajouter conditions spécifiques à BIMP ici
+        // (ne pas oublier d'alimenter $errors)
+
+        global $user;
+        if (!$user->admin) { // Temporaire
+            $errors[] = 'Réservé aux admin pour l\'instant';
+            return 0;
+        }
+
+        $is_required = false;
+        return 1;
+    }
+
+    public function isSignDistAllowed(&$errors = array())
+    {
+        if (!parent::isSignDistAllowed($errors)) {
+            return 0;
+        }
+
+        // Ajouter conditions spécifiques à BIMP ici
+        // (ne pas oublier d'alimenter $errors)
+
+        return 1;
+    }
+
     // Getters params: 
 
     public function getActionsButtons()
@@ -118,20 +155,28 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         $df_buttons = parent::getDemandeFinButtons();
 
         if (!empty($df_buttons)) {
-            return array(
-                'buttons_groups' => array(
-                    array(
-                        'label'   => 'Actions',
-                        'icon'    => 'fas_cogs',
-                        'buttons' => $buttons
-                    ),
-                    array(
-                        'label'   => 'Location',
-                        'icon'    => 'fas_hand-holding-usd',
-                        'buttons' => $df_buttons
+            if (isset($buttons['buttons_groups'])) {
+                $buttons['buttons_groups'][] = array(
+                    'label'   => 'Location',
+                    'icon'    => 'fas_hand-holding-usd',
+                    'buttons' => $df_buttons
+                );
+            } else {
+                return array(
+                    'buttons_groups' => array(
+                        array(
+                            'label'   => 'Actions',
+                            'icon'    => 'fas_cogs',
+                            'buttons' => $buttons
+                        ),
+                        array(
+                            'label'   => 'Location',
+                            'icon'    => 'fas_hand-holding-usd',
+                            'buttons' => $df_buttons
+                        )
                     )
-                )
-            );
+                );
+            }
         }
 
         return $buttons;

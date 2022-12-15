@@ -76,6 +76,7 @@ class BC_ListTable extends BC_List
         $this->params_def['refresh_after_content'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['search_open'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['graph'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -1226,9 +1227,15 @@ class BC_ListTable extends BC_List
             $html .= '</div>';
         }
 
-        if ($this->object->params['has_graph']) {
-            $html .= '<div id="' . $this->identifier . '_chartContainer" style="height: 300px; width: 100%;"></div>';
-            $html .= '<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script><script>' . "updateGraph('" . $this->identifier . "', '" . $this->name . "');" . '</script>';
+        foreach($this->params['graph'] as $idGraph => $nomGraph){
+            $dataGraph = $this->object->getInfoGraph($idGraph);
+            $html .= '<div id="' . $this->identifier .'_'.$idGraph. '_chartContainer" style="height: 300px; width: 100%;"></div>';
+            $html .= '<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>';
+            $html .= '<script>';
+            $html .= '$("body").on("listLoaded", function(e){if(e.$list.attr("id") == \''.$this->identifier."')updateGraph('" . $this->identifier . "', ".$idGraph.", '" . $this->name . "');});";
+            if($dataGraph['mode_data'] == 'objects')
+                $html .= "$('#".$this->identifier."').on('listRefresh', function(){updateGraph('" . $this->identifier . "', ".$idGraph.", '" . $this->name . "');});";
+            $html .= '</script>';
         }
 
         $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
@@ -2085,14 +2092,14 @@ class BC_ListTable extends BC_List
                 $tools_html .= '</div>';
             }
 
-            if ($this->object->params['has_graph']) {
+            foreach($this->params['graph'] as $idGraph => $nameGraph){
                 $tools_html .= '<div style="text-align: center;">';
                 $tools_html .= BimpRender::renderButton(array(
                             'classes'     => array('btn', 'btn-default'),
-                            'label'       => 'Actualiser le graphique',
+                            'label'       => 'Actualiser le graphique '.$nameGraph,
                             'icon_before' => 'fas_chart-pie',
                             'attr'        => array(
-                                'onclick' => "updateGraph('" . $this->identifier . "', '" . $this->name . "');"
+                                'onclick' => "updateGraph('" . $this->identifier . "', ".$idGraph.", '" . $this->name . "');"
                             )
                 ));
                 $tools_html .= '</div>';

@@ -1,6 +1,7 @@
 table: bimpmail
 primary: id
 common_fields: 1
+no_transaction_db: 1
 
 
 controller: mail

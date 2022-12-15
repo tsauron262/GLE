@@ -251,11 +251,10 @@ class BimpMailCore
                 'id_obj'       => $this->parent->id,
             );
 
-            $create_errors = $instance->validateArray($data);
+            $errors = $instance->validateArray($data);
 
-            if (!count($create_errors)) {
-                $create_warnings = array();
-                $create_errors = $instance->create($create_warnings, true);
+            if (!count($errors)) {
+                $errors = $instance->create($warnings, true);
             }
         }
 

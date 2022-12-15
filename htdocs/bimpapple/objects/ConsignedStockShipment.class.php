@@ -634,11 +634,10 @@ class ConsignedStockShipment extends BimpObject
                         }
                     }
 
-//                    $result = $gsx->consignmentOrderSubmit($this->getData('order_id'), $orderParts);
-                    $result = false;
+                    $result = $gsx->consignmentOrderSubmit($this->getData('order_id'), $orderParts);
                 }
 
-                if (!$result || !isset($result['parts']) || empty($result['parts'])) {
+                if (empty($result) || !isset($result['parts']) || empty($result['parts'])) {
                     if (!$gsx->logged) {
                         $errors[] = $gsx->displayNoLogged();
                     } else {
@@ -651,7 +650,7 @@ class ConsignedStockShipment extends BimpObject
                 } else {
                     $success .= 'Soumission du renvoi à Apple effectuée avec succès';
 
-                    $this->useNoTransactionsDb();
+//                    $this->useNoTransactionsDb();//Pourquoi ? En plein millieu de script, ca fait un locktimeout.(l'instance transaction a deja bossé dessus.L'autre instance arrive pas a bossé. Au pire faire un commit juste avant.
                     $up_errors = $this->updateField('status', self::STATUT_ATTENTE_ENVOI);
                     $this->updateField('date_submitted', date('Y-m-d H:i:s'));
 
@@ -798,7 +797,7 @@ class ConsignedStockShipment extends BimpObject
                 } elseif (isset($part_data['qty'])) {
                     $shipment_parts[] = array(
                         'number' => $part_number,
-                        'qty'    => (int) $part_data['qty'],
+                        'quantity'    => (int) $part_data['qty'],
                     );
                 } else {
                     $errors[] = 'Quantités absentes pour le composant "' . $part_number . '"';

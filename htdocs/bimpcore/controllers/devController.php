@@ -51,19 +51,23 @@ class devController extends BimpController
             $html .= 'GIT PULL' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
 
-            switch ($entity) {
-                case 'bimp':
-                    $html .= '<a class="btn btn-info" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_bimp.php?mainmenu=home" target="_blank">';
-                    $html .= 'GIT PULL ALL (BIMP)' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
-                    $html .= '</a>';
-                    break;
-
-                case 'mymu':
-                    $html .= '<a class="btn btn-info" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_bimp.php?mainmenu=home" target="_blank">';
-                    $html .= 'GIT PULL ALL (MyMu)' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
-                    $html .= '</a>';
-                    break;
-            }
+            $html .= '<a class="btn btn-info" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_all.php" target="_blank">';
+            $html .= 'GIT PULL ALL' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+            $html .= '</a>';
+//                    
+//            switch ($entity) {
+//                case 'bimp':
+//                    $html .= '<a class="btn btn-info" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_bimp.php?mainmenu=home" target="_blank">';
+//                    $html .= 'GIT PULL ALL (BIMP)' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+//                    $html .= '</a>';
+//                    break;
+//
+//                case 'mymu':
+//                    $html .= '<a class="btn btn-info" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_bimp.php?mainmenu=home" target="_blank">';
+//                    $html .= 'GIT PULL ALL (MyMu)' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+//                    $html .= '</a>';
+//                    break;
+//            }
         }
         $html .= '</div>';
 
@@ -84,11 +88,9 @@ class devController extends BimpController
         }
         $html .= '</div>';
         $html .= '</div>';
-        
-        
-        
+
         $html .= '<div class="row">';
-        
+
         // Récap logs: 
         $html .= '<div class="col-sm-12 col-md-8">';
         $html .= Bimp_Log::renderBeforeListContent();
@@ -237,7 +239,7 @@ class devController extends BimpController
         if (!$this->can('view')) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu', 'danger');
         }
-        
+
         $files = scandir(DOL_DOCUMENT_ROOT . '/bimpcore/scripts/');
 
         $html = '';
@@ -262,7 +264,7 @@ class devController extends BimpController
         if (!$this->can('view')) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu', 'danger');
         }
-        
+
         $menu = BimpObject::getInstance('bimptheme', 'Bimp_Menu');
         return $menu->renderItemsList();
     }

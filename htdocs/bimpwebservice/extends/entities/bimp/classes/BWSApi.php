@@ -34,8 +34,17 @@ BWSApi::$requests['sendDocFinancement'] = array(
         'id_origine'       => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
         'doc_type'         => array('label' => 'Type de document'),
         'doc_content'      => array('label' => 'Fichier', 'required' => 1),
-        'signature_params' => array('label' => 'Paramètres signature', 'data_type' => 'json', 'required' => 1)
+        'signature_params' => array('label' => 'Paramètres signature', 'data_type' => 'json', 'required' => 1),
+        'signataires_data' => array('label' => 'Données signataires', 'data_type' => 'json')
     )
+);
+
+BWSApi::$requests['reopenDemandeFinancement'] = array(
+    'demande_target' => array('label' => 'Destinataire de la demande de location', 'required' => 1),
+    'id_demande'     => array('label' => 'ID demande de location', 'data_type' => 'id', 'required' => 1),
+    'type_origine'   => array('label' => 'Type de pièce d\'origine', 'required' => 1),
+    'id_origine'     => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
+    'status'         => array('label' => 'Statut de la demande de financement', 'data_type' => 'int', 'required' => 1)
 );
 
 class BWSApi_ExtEntity extends BWSApi
@@ -136,7 +145,7 @@ class BWSApi_ExtEntity extends BWSApi
                 if (!BimpObject::objectLoaded($bcdf)) {
                     $this->addError('UNFOUND', 'Aucune demande de location trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
                 } else {
-                    $errors = $bcdf->onDocFinReceived($this->getParam('doc_type', '') . '_fin', $this->getParam('doc_content', ''), $this->getParam('signature_params', array()));
+                    $errors = $bcdf->onDocFinReceived($this->getParam('doc_type', '') . '_fin', $this->getParam('doc_content', ''), $this->getParam('signature_params', array()), $this->getParam('signataires_data', array()));
 
                     if (count($errors)) {
                         $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
@@ -192,6 +201,50 @@ class BWSApi_ExtEntity extends BWSApi
                     $str .= ' : </b>' . strip_tags($log->getData('msg'));
 
                     $response['logs'][] = $str;
+                }
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_reopenDemandeFinancement()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $bcdf_class = '';
+            BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
+            $origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
+
+            if (!BimpObject::objectLoaded($origine)) {
+                $this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
+            } else {
+                $bcdf = BimpCache::findBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', array(
+                            'obj_module' => $origine->module,
+                            'obj_name'   => $origine->object_name,
+                            'id_obj'     => $origine->id,
+                            'target'     => $this->getParam('demande_target', ''),
+                            'id_ext_df'  => (int) $this->getParam('id_demande', 0)
+                ));
+
+                if (!BimpObject::objectLoaded($bcdf)) {
+                    $this->addError('UNFOUND', 'Aucune demande de location trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
+                } else {
+                    $devis_status = 0;
+                    $contrat_status = 0;
+
+                    $errors = $bcdf->reopenFromTarget($this->getParam('status', 0), $devis_status, $contrat_status);
+
+                    if (count($errors)) {
+                        $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+                    } else {
+                        $response = array(
+                            'success'        => 1,
+                            'devis_status'   => $devis_status,
+                            'contrat_status' => $contrat_status
+                        );
+                    }
                 }
             }
         }

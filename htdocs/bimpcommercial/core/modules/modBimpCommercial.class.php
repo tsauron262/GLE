@@ -575,7 +575,7 @@ class modBimpCommercial extends DolibarrModules
 		//$this->_load_tables('/bimpcommercial/sql/');
 //                
 //                $extrafields = new ExtraFields($this->db);
-//                $extrafields->addExtraField('crt', 'Remise CRT', 'varchar', 1, 10, 'product');
+//                $extrafields->addExtraField('crt', 'Remise arrière', 'varchar', 1, 10, 'product');
 //                $extrafields->addExtraField('ref_constructeur', 'Réf. constructeur', 'int', 1, 255, 'product');
 //                $extrafields->addExtraField('pa_prevu', 'Prix d\'achat HT prévu', 'decimal', 1, '24,8', 'product', 0, 0, 0);
 //                $extrafields->addExtraField('infos_pa', 'Informations prix d\'achat', 'text', 1, 2000, 'product');

@@ -1,0 +1,2 @@
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`, `module`) VALUES ('contrat_use_signatures', 1, 'bimpcontract');
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`, `module`) VALUES ('contrat_signature_allow_docusign', 1, 'bimpcontract');

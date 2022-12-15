@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpDocumentPDF.php';
 class DevisFinancementPDF extends BimpDocumentPDF
 {
 
+    public $signature_bloc = true;
     public $propal = null;
     public $target_label = 'Destinataire';
     public $demande_data = array();

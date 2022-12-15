@@ -172,6 +172,15 @@ class Bimp_Commande extends Bimp_CommandeTemp
     }
 
     // Getters booléens:
+    
+    public function asPreuvePaiment(){
+        $files = $this->getFilesArray();
+        foreach($files as $file){
+            if(stripos($file, 'Paiement') !== false)
+                return 1;
+        }
+        return 0;
+    }
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -444,10 +453,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 global $user;
 
                 $id_cond_a_la_commande = self::getBdb()->getValue('c_payment_term', 'rowid', '`active` > 0 and code = "RECEPCOM"');
-                if ($client_facture->getData('outstanding_limit') < 1 and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement')) {
-                    if (!in_array($user->id, array(232, 97))) {
+                if ($client_facture->getData('outstanding_limit') < 1 /*and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement')*/ && !$this->asPreuvePaiment()) {
+                    if (!in_array($user->id, array(232, 97, 1566, 512))) {
                         $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
-                        if ($available_discounts < $this->getData('total_ttc'))
+                        if ($available_discounts < $this->getData('total_ttc') && $this->getData('total_ttc') > 2)
                             $errors[] = "Les clients sans encours doivent régler à la commande";
                     }
                 }
@@ -663,6 +672,14 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     );
                 }
             }
+            if($status === 0 && !$this->asPreuvePaiment())
+                $buttons[] = array(
+                    'label'   => 'Télécharger la preuve de paiement',
+                    'icon'    => 'dollar',
+                    'onclick' => $this->getJsActionOnclick('preuvePaiment', array(), array(
+                        'form_name' => 'preuve_paiement'
+                    ))
+                );
 
 //            // Valider
             if ($status === 0) {
@@ -708,7 +725,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
 
             // Edit
-            if ($status == Commande::STATUS_VALIDATED && $this->can("create")) {
+            if ($status == Commande::STATUS_VALIDATED && $this->can("create") && $user->admin) {
                 $buttons[] = array(
                     'label'   => 'Modifier',
                     'icon'    => 'undo',
@@ -723,24 +740,24 @@ class Bimp_Commande extends Bimp_CommandeTemp
             if ($conf->ficheinter->enabled) {
                 $langs->load("interventions");
 
-                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && $this->dol_object->getNbOfServicesLines() > 0) {
-                    if ($user->rights->ficheinter->creer) {
-                        $url = DOL_URL_ROOT . '/fichinter/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->id . '&amp;socid=' . $client->id;
-                        $buttons[] = array(
-                            'label'   => $langs->trans('AddIntervention'),
-                            'icon'    => 'plus-circle',
-                            'onclick' => 'window.location = \'' . $url . '\''
-                        );
-                    } else {
-                        $buttons[] = array(
-                            'label'    => $langs->trans('AddIntervention'),
-                            'icon'     => 'plus-circle',
-                            'onclick'  => '',
-                            'disabled' => 1,
-                            'popover'  => 'Vous n\'avez pas la permission'
-                        );
-                    }
-                }
+//                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && $this->dol_object->getNbOfServicesLines() > 0) {
+//                    if ($user->rights->ficheinter->creer) {
+//                        $url = DOL_URL_ROOT . '/fichinter/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->id . '&amp;socid=' . $client->id;
+//                        $buttons[] = array(
+//                            'label'   => $langs->trans('AddIntervention'),
+//                            'icon'    => 'plus-circle',
+//                            'onclick' => 'window.location = \'' . $url . '\''
+//                        );
+//                    } else {
+//                        $buttons[] = array(
+//                            'label'    => $langs->trans('AddIntervention'),
+//                            'icon'     => 'plus-circle',
+//                            'onclick'  => '',
+//                            'disabled' => 1,
+//                            'popover'  => 'Vous n\'avez pas la permission'
+//                        );
+//                    }
+//                }
             }
 //
 //            // Créer contrat
@@ -3256,8 +3273,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
 
                     if (isset($mail) && $mail != "")
-                        mailSyn2("Status facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  '.$this->displayData('invoice_status'));
-                        mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status'));
+                        mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  '.$this->displayData('invoice_status'));
                 }
             }
 
@@ -3884,6 +3900,19 @@ class Bimp_Commande extends Bimp_CommandeTemp
             'warnings' => $warnings
         );
     }
+    
+    public function actionPreuvePaiment($data, &$success)
+    {
+        $errors = $warnings = array();
+        if(isset($data['file']) && $data['file'] != '')
+            BimpTools::mouveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
+        else
+            $errors[] = 'Aucun fichier uploadé';
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     public function actionForceFacturee($data, &$success)
     {
@@ -4043,10 +4072,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $infoClient = " du client " . $client->getNomUrl(1, false);
         }
 
-        $contacts = $this->dol_object->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
-        foreach ($contacts as $contact) {
-            mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $this->getNomUrl(1, true) . $infoClient . " est validée.");
-        }
 
         foreach ($this->dol_object->lines as $line) {
             if (stripos($line->ref, "REMISECRT") !== false) {
@@ -4082,10 +4107,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $demande->delete($warnings, 1);
                 $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée.";
                 $msg_mail = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true);
-                $msg_mail .= " a été validée financièrement par paiement comptant par ";
+                $msg_mail .= " a été validée financièrement par paiement comptant ou mandat SEPA par ";
                 $msg_mail .= ucfirst($user->firstname) . ' ' . strtoupper($user->lastname);
                 $msg_mail .= "<br/>Merci de vérifier le paiement ultérieurement.";
-                mailSyn2("Validation par paiement comptant", 'a.delauzun@bimp.fr', "gle@bimp.fr", $msg_mail);
+                mailSyn2("Validation par paiement comptant ou mandat SEPA", 'a.delauzun@bimp.fr, s.reynaud@bimp.fr', "gle@bimp.fr", $msg_mail);
             } else {
                 $client_facture = $this->getClientFacture();
                 if (!$client_facture->getData('validation_financiere')) {
@@ -4116,6 +4141,15 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $demande->delete($warnings, 1);
                 $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation de retard de paiement automatique, voir configuration client)";
                 $this->addObjectLog("Les retard de paiement  ont été validée financièrement par la configuration du client.");
+            }
+        }
+        if(empty($errors)){ 
+            $contacts = $this->dol_object->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
+            foreach ($contacts as $contact) {
+                $subject = 'Validation commande ' . $this->getRef() . ' client ' . $client->getData('code_client');
+                $msg  = 'Bonjour<br/>Votre commande ' . $this->getNomUrl(1, true);
+                $msg .= ' pour le client ' . $client->getData('code_client') . ' ' . $client->getData('nom') . ' a été validée.';
+                mailSyn2($subject, $contact['email'], "gle@bimp.fr", $msg);
             }
         }
 
@@ -4169,8 +4203,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $new_data['id_facture'] = 0;
-        $new_data['validFin'] = 0;
-        $new_data['validComm'] = 0;
+//        $new_data['validFin'] = 0;
+//        $new_data['validComm'] = 0;
         $new_data['date_creation'] = date('Y-m-d H:i:s');
         $new_data['date_valid'] = null;
         $new_data['date_cloture'] = null;

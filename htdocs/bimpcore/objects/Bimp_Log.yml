@@ -293,6 +293,12 @@ lists:
             send_to: 
             processed:
             nb_occurence:
+        graph:
+            - 15M
+            - 1H
+            - 3H
+            - 6H
+            - 12H
 
     object: 
         extends: default

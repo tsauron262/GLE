@@ -401,7 +401,7 @@ class BimpLink extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Marquer comme vue';
+        $success = 'Note marquée comme vue';
 
         if (!$this->i_view()) {
             $errors[] = 'Impossible';

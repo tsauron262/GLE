@@ -602,9 +602,9 @@ class BimpComm extends BimpDolObject
         // Message logistique: 
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
-            'label'   => 'Message logistique',
+            'label'   => 'Message achat',
             'icon'    => 'far_paper-plane',
-            'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_LOGISTIQUE, "content" => ""), array('form_name' => 'rep'))
+            'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 120, "content" => ""), array('form_name' => 'rep'))
         );
 
         // Message facturation: 
@@ -675,6 +675,15 @@ class BimpComm extends BimpDolObject
 
         return $buttons;
     }
+    
+    public function canSetAction($action) {
+        global $user;
+        if($action == 'checkTotal' && !$user->admin)
+            return 0;
+        if($action == 'checkMarge' && !$user->admin)
+            return 0;
+        return parent::canSetAction($action);
+    }
 
     public function getDefaultListExtraButtons()
     {
@@ -720,7 +729,7 @@ class BimpComm extends BimpDolObject
             }
 
             if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
-                if ($this->object_name === 'Bimp_Commande' || (int) $this->getData('fk_statut') === 0) {
+                if ($this->object_name === 'Bimp_Commande' || $this->object_name === 'Bimp_Propal' || (int) $this->getData('fk_statut') === 0) {
                     $buttons[] = array(
                         'label'       => 'Déduire un crédit disponible',
                         'icon_before' => 'fas_file-import',
@@ -2062,7 +2071,7 @@ class BimpComm extends BimpDolObject
 
             if ($remises_crt) {
                 $html .= '<tr>';
-                $html .= '<td>Remises CRT prévues</td>';
+                $html .= '<td>Remises arrière prévues</td>';
                 $html .= '<td></td>';
                 $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '', 0, 0, 0, 2, 1) . '</span></td>';
                 $html .= '<td></td>';
@@ -4418,7 +4427,7 @@ class BimpComm extends BimpDolObject
 
             if (isset($user_data['metiers']) && !empty($user_data['metiers'])) {
                 foreach ($user_data['metiers'] as $metier => &$metier_data) {
-                    if (isset($metier_data['ca_ht']) && (float) $user_data['ca_ht']) {
+                    if (isset($metier_data['ca_ht']) && (float) $metier_data['ca_ht']) {
                         $metier_data['tx_marque'] = ($metier_data['marges'] / $metier_data['ca_ht']) * 100;
                     } else {
                         $metier_data['tx_marque'] = 'Inf.';
@@ -4444,6 +4453,57 @@ class BimpComm extends BimpDolObject
         }
 
         return $data;
+    }
+    
+    //graph
+    
+    public function getInfoGraph($graphName)
+    {
+        $data = parent::getInfoGraph($graphName);
+        $arrondirEnMinuteGraph = 60*12;
+        $data["data1"] = array("name"=>'Nb', "type" => "column");
+        $data["data2"] = array("name"=>'Total HT', "type" => "column");
+        $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM YYYY');
+//        $data["axeY"] = array("title" => 'Nb');
+        $data["params"] = array('minutes'=>$arrondirEnMinuteGraph);
+        $data["title"] = ucfirst($this->getLabel('name_plur')).' par jour';
+
+        return $data;
+    }
+    
+    public function getGraphDatasPoints($params)
+    {
+        $result = array();
+        
+        $fieldTotal = 'total_ht';
+        if($this->object_name == 'Bimp_Propal')
+            $dateStr = "UNIX_TIMESTAMP(datep)";
+        elseif($this->object_name == 'Bimp_Facture'){
+            $dateStr = "UNIX_TIMESTAMP(datef)";
+            $fieldTotal = 'total';
+        }
+        else
+            $dateStr = "UNIX_TIMESTAMP(date_commande)";
+        
+        
+        $req = 'SELECT count(*) as nb, SUM('.$fieldTotal.') as total_ht, '.$dateStr.' as timestamp FROM '.MAIN_DB_PREFIX.$this->params['table'].' a ';
+        $filter = array();
+        foreach(json_decode(BimpTools::getPostFieldValue('param_list_filters'), true) as $filterT){
+            if(isset($filterT['filter']) && is_array($filterT['filter']))
+                $filter[] = $filterT['filter'];
+            elseif(isset($filterT['filter']) && isset($filterT['name']))
+                $filter[$filterT['name']] = $filterT['filter'];
+        }
+        $req .= BimpTools::getSqlWhere($filter);
+        $req .= ' GROUP BY '.$dateStr;
+        $sql = $this->db->db->query($req);
+        while($ln = $this->db->db->fetch_object($sql)){
+            $tabDate = array($ln->annee, $ln->month, $ln->day, $ln->hour, $ln->minute);
+            $result[1][] = array("x" => "new Date(" . $ln->timestamp*1000 . ")", "y" => (int)$ln->nb);
+            $result[2][] = array("x" => "new Date(" . $ln->timestamp*1000 . ")", "y" => (int)$ln->total_ht);
+        }
+
+        return $result;
     }
 
     // post process: 
@@ -4968,6 +5028,7 @@ class BimpComm extends BimpDolObject
                     if ($this->getData('zone_vente') != $zone) {
                         $this->set('zone_vente', $zone);
                         $this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true));
+                        //TODO l'objet n'est pas encore loadé du coup addObjectLog ne fonctionne pas...
                     }
                 }
             }

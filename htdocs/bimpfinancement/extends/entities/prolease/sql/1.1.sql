@@ -1,1 +1,0 @@
-ALTER TABLE `llx_bf_demande` ADD `def_tx_cession` VARCHAR(10) NOT NULL DEFAULT 'moyen';

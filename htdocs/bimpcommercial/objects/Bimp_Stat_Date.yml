@@ -4,8 +4,6 @@ primary: id
 labels: 
     name: Stats
     is_female: 1
-    
-has_graph: 1
                 
 fields: 
     date:
@@ -182,6 +180,8 @@ lists:
             commande_total:
             facture_qty: 
             facture_total:
+        graph: 
+            - stats
                 
     clientMonth: 
         extends: default

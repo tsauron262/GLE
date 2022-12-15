@@ -23,22 +23,13 @@ labels:
     is_female: 1
     
 objects: 
-    user_client:
-        relation: hasOne
-        delete: 0
+    signataires: 
+        relation: hasMany
+        delete: 1
         instance: 
             bimp_object: 
-                module: bimpinterfaceclient
-                name: BIC_UserClient
-            id_object: 
-                field_value: id_user_client_signataire
-                
-    users_client:
-        relation: none
-        instance: 
-            bimp_object: 
-                module: bimpinterfaceclient
-                name: BIC_UserClient
+                module: bimpcore
+                name: BimpSignataire
                 
 fields:     
     obj_module: 
@@ -54,132 +45,31 @@ fields:
         type: id
         required: 1
 
-    doc_type: 
+    obj_params_field: 
+        label: Champ paramètres
+        input: 
+            help: Champ contenant les paramètres pour l'incrustation de la signature électronique et / ou la signature via DocuSign
+        default_value: signature_params
+            
+    doc_type:
         label: Type de document
         displays: 
             name:
                 label: Nom document
                 type: callback
                 method: displayDocType
-        
-    type: 
-        label: Type signature
+                
+    status: 
+        label: Statut
         type: int
         values: 
-            array: types
-        input: 
-            type: select
-            options: 
-                callback: getTypeInputOptions
-        default_value: 0                
-        
-    signed: 
-        label: Signé
-        type: bool
-        default_value: 0
-        
-    date_open: 
-        label: Date ouverture accès public
-        type: date
-        
-    date_signed: 
-        label: Date signature
-        type: datetime
-        input: 
-            display_now: 1
-
-    id_client: 
-        label: Client
-        type: id_object
-        object: client
-        required: 1
-        
-    id_contact: 
-        label: Contact
-        type: id_object
-        object: contact
-        default_value: 0
-        input: 
-            type: select
-            options: 
-                array: contacts
-        
-    id_user_client_signataire:
-        label: Compte utilisateur signataire
-        type: id_object
-        object: user_client
-        default_value: 0
-        
-    allowed_users_client: 
-        label: Comptes utilisateurs du client autorisés pour cette signature
-        type: items_list
-        items_data_type: id_object
-        items_braces: 1
-        object: users_client
-        input: 
-            type: check_list
-            select_all_buttons: 1
-            search_input: 1
-            items: 
-                callback: getClientUsersArray
-        create_form: default
-        create_form_values: 
-            fields: 
-                id_client: 
-                    field_value: id_client
-                id_contact: 
-                    field_value: id_contact
-                status: 1
-                role: 0
-        
-    nom_signataire: 
-        label: Nom signataire
-        
-    email_signataire:
-        label: E-mail signataire
-        
-    fonction_signataire: 
-        label: Fonction signataire
-        
-    ip_signataire: 
-        label: Adresse IP signataire
-        
-    base_64_signature:
-        label: Image signature
-    
-    allow_elec: 
-        label: Signature électronique autorisée
-        type: bool
-        default_value: 1
-        
-    allow_dist: 
-        label: Signature à distance autorisée
-        type: bool
-        default_value: 1
-        
-    dist_type: 
-        label: Type de signature à distance
-        type: int
-        values: 
-            array: distTypes
+            array: status_list
         default_value: 0
         
     allow_no_scan: 
         label: Signature papier sans scan autorisée
         type: bool
         default_value: 0
-        
-    need_sms_code: 
-        label: Certification signature à distance par code SMS
-        type: bool
-        default_value: 0
-        display_if: 
-            field_name: allow_dist
-            show_values: 1
-        
-    code_sms_infos: 
-        label: Données code SMS
-        type: json
         
     signed_doc_ext: 
         label: Extension fichier signé
@@ -191,73 +81,10 @@ fields:
     id_account_docu_sign:
         label: Id du compte utilisateur DocuSign
         
-forms:
-    edit: 
-        rows: 
-            - field: id_contact
-            - field: allow_elec
-            - field: allow_dist
-            - field: allow_no_scan
-            - field: need_sms_code
-            
-    open_sign_dist:
-        title: Signature à distance
-        icon: fas_sign-in
-        values: 
-            fields: 
-                allowed_users_client: 
-                    callback: getDefaultAllowedUsersClient
-        rows: 
-            - custom: 1
-              label: Document
-              input_name: doc_title
-              content: 
-                  callback: displayDocTitle
-            - custom: 1
-              label: Ouvrir automatiquement l'accès public
-              show: 
-                  callback: showAutoOpenPublicAccess
-              input_name: auto_open
-              value: 1
-              input: 
-                  type: toggle
-                  help: 
-                      callback: getAutoOpenPublicAccessInputHelp
-                      
-            - custom: 1
-              label: Adresse e-mail du compte utilisateur à créer
-              input_name: new_user_email
-              input: 
-                  type: text
-              show: 
-                  callback: showOpenPublicAccessNewUserEmailInput
-              value: 
-                  callback: getOpenPublicAccessNewUserDefaultEmail
-              display_if: 
-                  field_name: auto_open
-                  show_values: 1
-                  
-            - field: allowed_users_client
-              display_if: 
-                  field_name: auto_open
-                  hide_values: 1
-                  
-            - custom: 1
-              label: Contenu e-mail pour la signature à distance
-              input_name: email_content
-              input: 
-                  type: html
-                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le document à signer sera automatiquement joint à l'email"
-              value: 
-                  callback: getDefaultSignDistEmailContent
-            
+forms: 
     sign_papier: 
         title: Dépôt document signé
         icon: fas_file-download
-        values: 
-            fields: 
-                nom_signataire: 
-                    callback: getDefaultNomSignataire
         rows: 
             - custom: 1
               label: Document
@@ -271,9 +98,27 @@ forms:
               input: 
                   type: hidden
               value: 1
-            - field: date_signed
-            - field: nom_signataire
-              required: 1
+            - custom: 1
+              label: Date Signature
+              input_name: date_signed
+              data_type: datetime
+              input: 
+                  type: datetime
+                  display_now: 1
+            - custom: 1
+              label: Signataires
+              input_name: signataires
+              input: 
+                  type: check_list
+                  items: 
+                      array: signataires
+                  help: veuillez sélectionner uniquement les signataires dont la signature est présente sur le document scanné
+                  select_all_buttons: 1
+              value: 
+                  callback:
+                      method: getChildrenList
+                      params: 
+                          - signataires
             - custom: 1
               label: Fichier
               input_name: file_signed
@@ -281,164 +126,59 @@ forms:
                   type: file_upload
               required: 1
             
-    sign_elec: 
-        title: Signature électronique
-        icon: fas_file-signature
-        values: 
-            fields: 
-                nom_signataire: 
-                    callback: getDefaultNomSignataire
-                email_signataire: 
-                    callback: getDefaultEmailSignataire
-                fonction_signataire: 
-                    callback: getDefaultFonctionSignataire
-                    
-        rows: 
-            - custom: 1
-              label: Récapitulatif
-              input_name: doc_infos
-              content: 
-                  callback: displayDocInfos
-            - field: nom_signataire
-            - field: email_signataire
-            - field: fonction_signataire
-              show: 
-                  callback: isClientCompany
-            - custom: 1
-              label: Signature
-              input_name: signature
-              input: 
-                  type: signature_pad
-                  check_mentions: 
-                      callback: getCheckMentions
-              required: 1
-            
-    sign_dist: 
-        title: Signature à distance
-        icon: fas_file-signature
-        values: 
-            fields: 
-                nom_signataire: 
-                    callback: getDefaultNomSignataire
-                fonction_signataire: 
-                    callback: getDefaultFonctionSignataire
-        rows: 
-            - custom: 1
-              label: Document
-              input_name: doc_title
-              content: 
-                  callback: displayDocTitle
-            - custom: 1
-              label: Code SMS
-              input_name: code_sms
-              content: 
-                  callback: renderSignDistCodeSmsInput
-              show: 
-                  field_value: need_sms_code
-              required: 1
-            - field: nom_signataire
-            - field: fonction_signataire
-              show: 
-                  callback: isClientCompany
-            - custom: 1
-              label: Signature
-              input_name: signature
-              input: 
-                  type: signature_pad
-                  
-              required: 1
-              
-                  
     sign_no_scan: 
         title: Marquer signé sans scan du document
         icon: fas_file-contract
-        values: 
-            fields: 
-                nom_signataire: 
-                    callback: getDefaultNomSignataire
         rows: 
             - custom: 1
               label: Document
               input_name: doc_title
               content: 
                   callback: displayDocTitle
-            - field: date_signed
-            - field: nom_signataire
-              required: 1
+            - custom: 1
+              label: Date Signature
+              input_name: date_signed
+              data_type: datetime
+              input: 
+                  type: datetime
+                  display_now: 1
                   
-    signature_params: 
-        title: Ajuster la position de la signature sur le document PDF
-        icon: fas_arrows-alt
-        values: 
-            callback: getSignatureParamsFormValues
+    init_docu_sign: 
+        title: Initialiser la signature via DocuSign
         rows: 
             - custom: 1
-              label: N° de Page
-              input_name: page
+              hidden: 1
+              label: Type de signature
+              input_name: signature_type
               input: 
-                  type: qty
+                  type: hidden
+              value: docusign            
             - custom: 1
-              label: Largeur
-              input_name: width
+              label: Contenu E-mail
+              input_name: email_content
               input: 
-                  type: qty
-            - custom: 1
-              label: Position en X (mm)
-              input_name: x_pos
-              input: 
-                  type: qty
-            - custom: 1
-              label: Position en Y (mm)
-              input_name: y_pos
-              input: 
-                  type: qty
-            - custom: 1
-              label: Décalage en X du nom (mm)
-              input_name: nom_x_offset
-              input: 
-                  type: qty
-            - custom: 1
-              label: Décalage en Y du nom (mm)
-              input_name: nom_y_offset
-              input: 
-                  type: qty
-            - custom: 1
-              label: Décalage en X de la fonction (mm)
-              input_name: fonction_x_offset
-              input: 
-                  type: qty
-            - custom: 1
-              label: Décalage en Y de la fonction (mm)
-              input_name: fonction_y_offset
-              input: 
-                  type: qty
-            - custom: 1
-              label: Décalage en X de la date (mm)
-              input_name: date_x_offset
-              input: 
-                  type: qty
-            - custom: 1
-              label: Décalage en Y de la date (mm)
-              input_name: date_y_offset
-              input: 
-                  type: qty
+                  type: html
+              depends_on: signature_type
                   
-    sms_code: 
-        title: Envoi du code SMS
+    refresh_docusign: 
         rows: 
             - custom: 1
-              label: N° mobile sur lequel envoyer le code SMS
-              input_name: num_tel_selected
-              content: 
-                  callback: renderNumTelForSmsCodeInput
-            - custom: 1
-              label: Autre n° de téléphone mobile
-              input_name: other_num
+              label: Notifier l'utilisateur en charge du suivi si la signature est complète
+              input_name: send_notification_email
+              data_type: bool
               input: 
-                  type: text
-              display_if: 
-                  field_name: num_tel_selected
-                  show_values: other
+                  type: toggle
+              value: 1
+              
+    motif: 
+        rows: 
+            - custom: 1
+              label: Motif
+              input_name: motif
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
             
 fields_tables: 
     infos: 
@@ -453,53 +193,12 @@ fields_tables:
             - label: Référence document
               value: 
                   callback: displayDocRef
-            - field: id_client
-            - field: id_contact
-            - field: allow_elec
-            - field: dist_type
-              show: 
-                  field_value: allow_elec
             - field: allow_no_scan
-            - field: signed
-            
-    signature:
-        icon: fas_signature
-        title: Infos signature
-        show: 
-            field_value: signed
-        rows: 
-            - field: date_signed
-            - field: type
-            - field: id_user_client_signataire
-              show: 
-                  field_value: id_user_client_signataire
-            - field: nom_signataire
-            - field: email_signataire
-            - field: fonction_signataire
-              show: 
-                  callback: isClientCompany
-            - field: ip_signataire
-            - label: Image signature
-              show: 
-                  callback: showSignatureImage
-              value: 
-                  callback: renderSignatureImage
-                        
-    public_access:
-        icon: fas_sign-in-alt
-        title: Signature à distance
-        rows: 
-            - field: allow_dist
-            - field: date_open
-              show: 
-                  field_value: allow_dist
-            - field: need_sms_code
-            - field: allowed_users_client
-              show: 
-                  field_value: allow_dist
+              edit: 1
             
 views:
     default: 
+        objects_change_reload: BimpSignataire
         rows: 
             - cols: 
                 - type: object_header
@@ -510,19 +209,11 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: infos
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: public_access
             - cols: 
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
+                - type: list
+                  list:
                       name: signature
+                      children: signataires
             - cols: 
                 - type: custom
                   custom: 
@@ -545,16 +236,6 @@ lists_cols:
         label: Référence document
         value: 
             callback: displayDocRef
-        
-    public_sign: 
-        label: Signer
-        value: 
-            callback: dispayPublicSign
-        
-    public_document: 
-        label: Document
-        value: 
-            callback: displayPublicDocument
             
     sign_buttons: 
         label: Actions signature
@@ -574,8 +255,6 @@ lists:
         sort_way: desc
         n: 10
         add_form_name: default
-#        edit_btn: 1
-#        edit_form: edit
         delete_btn: 1
         page_btn: 1
         modal_view: default
@@ -585,36 +264,21 @@ lists:
             obj: 
             doc_type: 
             doc_ref: 
-            signed: 
+            status: 
             type: 
             date_signed: 
             nom_signataire: 
             email_signataire:
-            
-    public_client: 
-        title: Liste de vos signatures
-        configurable: 0
-        checkboxes: 0
-        cols: 
-            obj: 
-                label: Elément lié
-            doc_type: 
-            doc_ref: 
-            type:
-            date_signed: 
-            nom_signataire: 
-            public_document: 
-            public_sign: 
                 
 cards: 
     default: 
-        view_btn: 1
-        status: type
+        status: status
         fields: 
-            - field: date_open
-            - field: signed
-            - field: date_signed
-            - field: nom_signataire
+            doc_type: 
+                field: doc_type
+                label: Type
+            
+    
             
               
             

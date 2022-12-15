@@ -367,8 +367,8 @@ abstract class BimpAPI
                         'headers'         => array(),
                         'fields'          => array(),
                         'curl_options'    => array(),
-                        'url_end'         => '',
                         'url_base_type'   => BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/url_base_type', 'default'),
+                        'url_end'         => BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/url_end', ''),
                         'type'            => BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/type', static::$default_requests_type),
                         'post_mode'       => BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/post_mode', static::$default_post_mode),
                         'header_out'      => BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/header_out', true),
@@ -403,7 +403,7 @@ abstract class BimpAPI
                 // Initalisation:
                 $infos .= '<b>Initialisation: </b>' . $url . ': ';
                 $ch = curl_init($url);
-                
+
                 if (!$ch) {
                     $infos . '<span class="danger">[ECHEC]</span>';
                     $errors[] = 'Echec de connexion à l\'url "' . $url . '"';
@@ -491,6 +491,7 @@ abstract class BimpAPI
                         case 'GET':
                             $curl_options[CURLOPT_HTTPGET] = true;
                             break;
+
                         case 'PUT':
                             $curl_options[CURLOPT_CUSTOMREQUEST] = 'PUT';
                             $curl_options[CURLOPT_HTTPHEADER][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
@@ -510,7 +511,7 @@ abstract class BimpAPI
                         // Traitement de la réponse: 
                         $response_code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
                         $response_infos = curl_getinfo($ch);
-                        
+
                         if (isset($response_infos['request_header']) && !empty($response_infos['request_header'])) {
                             $infos .= "<h4>Header REQUEST: </h4><br/>" . str_replace("\n", "<br/>", $response_infos['request_header']);
                         }
@@ -523,7 +524,7 @@ abstract class BimpAPI
                         }
 
                         $infos .= '<b>Code réponse: </b>' . $response_code . '<br/><br/>';
-                        if ($response.'x' == 'x') {
+                        if (!(string) $response) {
                             $infos .= '<span class="danger">AUCUNE REPONSE</span><br/><br/>';
                             $infos .= 'INFOS CURL : <pre>';
                             $infos .= print_r($response_infos, 1);
@@ -601,7 +602,9 @@ abstract class BimpAPI
             ));
         }
 
-        $infos .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Erreurs') . '<br/><br/>');
+        if (!empty($errors)) {
+            $infos .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Erreurs') . '<br/><br/>');
+        }
 
         if ($this->options['log_requests']) {
             dol_syslog($infos);
@@ -612,7 +615,7 @@ abstract class BimpAPI
         }
 
         $this->addDebug($infos);
-
+        
         return $return;
     }
 
@@ -658,7 +661,7 @@ abstract class BimpAPI
         return $msg;
     }
 
-    // Getters JS: 
+    // Getters JS:
 
     public function getJsApiRequestOnClick($request_name, $fields = array(), $params = array())
     {

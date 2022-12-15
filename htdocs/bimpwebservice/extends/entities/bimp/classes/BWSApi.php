@@ -49,7 +49,6 @@ BWSApi::$requests['reopenDemandeFinancement'] = array(
 
 class BWSApi_ExtEntity extends BWSApi
 {
-
     // Requêtes: 
 
     protected function wsRequest_setDemandeFinancementStatus()
@@ -250,5 +249,26 @@ class BWSApi_ExtEntity extends BWSApi
         }
 
         return $response;
+    }
+
+    protected function wsRequest_getPropositionLocation()
+    {
+        $errors = array();
+
+        $total_materiels = (float) $this->getParam('total_materiels_ht', 0);
+        $total_services = (float) $this->getParam('total_services_ht', 0);
+
+        if (($total_materiels + $total_services) == 0) {
+            $errors[] = 'Montant total invalide';
+        }
+        
+        if (count($errors)) {
+            $this->addError('INVALID_PARAMETER', BimpTools::getMsgFromArray($errors, '', true));
+        } else {
+            $duration = $this->getParam('duration', 0);
+            $periodicity = $this->getParam('periodicity', 0);
+            $mode_calcul = $this->getParam('mode_calcul', 0);
+            $file_content = BF_Demande::createPropositionPDF($total_materiels, $total_services, $duration, $periodicity, $mode_calcul, $errors);
+        }
     }
 }

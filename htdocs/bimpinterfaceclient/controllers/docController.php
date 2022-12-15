@@ -74,7 +74,7 @@ class docController extends BimpPublicController
                     $file_name = dol_sanitizeFileName($propal_ref) . ($doc == 'devis_signed' ? '_signe' : '') . '.pdf';
 
                     if (!file_exists($dir . $file_name)) {
-                        $this->errors[] = 'Ce document n\'existe pas (' . $dir . $file_name . ')';
+                        $this->errors[] = 'Ce document n\'existe pas (' . $file_name . ')';
                     } else {
                         $module_part = 'propal';
                         $file_name = dol_sanitizeFileName($propal_ref) . '/' . $file_name;
@@ -105,10 +105,40 @@ class docController extends BimpPublicController
                     }
 
                     if (!file_exists($dir . $file_name)) {
-                        $this->errors[] = 'Ce document n\'existe pas (' . $dir . $file_name . ')';
+                        $this->errors[] = 'Ce document n\'existe pas (' . $file_name . ')';
                     } else {
                         $module_part = 'bimpcore';
                         $file_name = 'sav/' . $sav->id . '/' . $file_name;
+                    }
+                    break;
+
+                case 'devis_financement':
+                case 'devis_financement_signed':
+                case 'contrat_financement':
+                case 'contrat_financement_signed':
+                case 'pvr_financement':
+                case 'pvr_financement_signed':
+                    $df = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id);
+                    $df_ref = $df->getRef();
+
+                    if (!BimpObject::objectLoaded($df)) {
+                        $this->errors[] = 'Identifiant du document invalide';
+                    } elseif ($df_ref != $ref) {
+                        $this->errors[] = 'Référence du document invalide';
+                    } elseif (!$df->can('view')) {
+                        $this->errors[] = 'Vous n\'avez pas la permission de voir ce document';
+                    }
+
+                    $dir = $df->getFilesDir();
+                    $doc = str_replace('_financement', '', $doc);
+                    $doc_type = str_replace('_signed', '', $doc);
+                    $file_name = $df->getSignatureDocFileName($doc_type, ($doc != $doc_type ? true : false));
+
+                    if (!file_exists($dir . $file_name)) {
+                        $this->errors[] = 'Ce document n\'existe pas (' . $file_name . ')';
+                    } else {
+                        $module_part = 'bimpcore';
+                        $file_name = 'bimpfinancement/BF_Demande/' . $df->id . '/' . $file_name;
                     }
                     break;
             }

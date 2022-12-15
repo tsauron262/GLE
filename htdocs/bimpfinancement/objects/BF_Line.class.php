@@ -104,6 +104,20 @@ class BF_Line extends BimpObject
         return (int) ((int) $this->getData('type') === self::TYPE_TEXT);
     }
 
+    public function isProductSerialisable()
+    {
+        if ((int) $this->getData('id_product')) {
+            $prod = $this->getChildObject('product');
+            if (BimpObject::objectLoaded($prod)) {
+                return $prod->isSerialisable();
+            }
+
+            return 0;
+        }
+
+        return (int) $this->getData('serialisable');
+    }
+
     public function areAllCommandesFournEditable()
     {
         $commandes_fourn = $this->getData('commandes_fourn');
@@ -424,9 +438,26 @@ class BF_Line extends BimpObject
         return $qty;
     }
 
+    public function getRefProduct()
+    {
+        switch ($this->getData('type')) {
+            case self::TYPE_PRODUCT:
+                $product = $this->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    return $product->getRef();
+                }
+                break;
+
+            case self::TYPE_FREE:
+                return $this->getData('ref');
+        }
+
+        return '';
+    }
+
     // Affichages: 
 
-    public function displayDesc($mode_light = false, $no_link = false)
+    public function displayDesc($mode_light = false, $no_link = false, $include_serials = false)
     {
         $html = '';
 
@@ -454,6 +485,16 @@ class BF_Line extends BimpObject
             $desc = $this->getData('description');
             if ($desc) {
                 $html .= ($html ? '<br/><br/>' : '') . $desc;
+            }
+        }
+
+        if ($include_serials && (int) $this->getData('serialisable')) {
+            $serials = $this->getData('serials');
+
+            if (count($serials)) {
+                $html .= '<div style="margin-top: 10px; font-style: italic">';
+                $html .= '<b>N° de série :</b> ' . implode(', ', $serials);
+                $html .= '</div>';
             }
         }
 
@@ -859,7 +900,16 @@ class BF_Line extends BimpObject
         $this->set('total_ht', $this->getTotalHT());
         $this->set('total_ttc', $this->getTotalTTC());
 
-        if (count($errors)) {
+        // Check des serials: 
+        if ($this->isProductSerialisable()) {
+            $serials = $this->getData('serials');
+            $diff = count($serials) - (int) $this->getData('qty');
+            if ($diff > 0) {
+                $errors[] = 'Le nombre de n° de série enregistrés est supérieur aux quantités de la ligne. Veuillez retirer ' . $diff . ' n° de série';
+            }
+        }
+
+        if (!count($errors)) {
             $errors = parent::validate();
         }
 

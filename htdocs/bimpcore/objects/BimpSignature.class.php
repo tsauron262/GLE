@@ -1244,7 +1244,10 @@ class BimpSignature extends BimpObject
     {
         $errors = array();
 
+        BimpObject::loadClass('bimpcore', 'BimpSignataire');
+        
         $signataires = $this->getChildrenObjects('signataires', array(
+            'type'       => BimpSignataire::TYPE_CLIENT,
             'status'     => 0,
             'allow_dist' => 1
         ));
@@ -1611,7 +1614,8 @@ class BimpSignature extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1659,7 +1663,8 @@ class BimpSignature extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1674,7 +1679,8 @@ class BimpSignature extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1689,9 +1695,13 @@ class BimpSignature extends BimpObject
         $errors = $this->refreshDocuSignDocument($send_notification_email, $warnings, $success);
 
         if (!count($errors)) {
-            $url = $this->getDocumentUrl(true);
-            if ($url) {
-                $sc = 'window.open(\'' . $url . '\');bimp_reloadPage();';
+            $file = $this->getDocumentFilePath(true);
+
+            if (file_exists($file)) {
+                $url = $this->getDocumentUrl(true);
+                if ($url) {
+                    $sc = 'window.open(\'' . $url . '\');bimp_reloadPage();';
+                }
             }
         }
 
@@ -1713,7 +1723,7 @@ class BimpSignature extends BimpObject
         if (!count($errors)) {
             $url = $this->getDocumentUrl(true);
             if ($url) {
-                $callback = 'window.open(\'' . $url . '\');';
+                $callback = 'window.open(\'' . $url . '\');bimp_reloadPage();';
             }
         }
 
@@ -1735,7 +1745,8 @@ class BimpSignature extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1753,7 +1764,8 @@ class BimpSignature extends BimpObject
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

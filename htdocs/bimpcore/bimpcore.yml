@@ -13,6 +13,9 @@ categories:
         label: Cache
     signatures: 
         label: Signatures
+    groups: 
+        label: Groupes
+        
         
 params: 
     # Principaux:
@@ -248,3 +251,28 @@ params:
         type: bool
         def: 0
         
+    # Groupes: 
+    id_user_group_logistique: 
+        label: ID Groupe Logistique
+        cat: groups
+        def: 0
+        
+    id_user_group_facturation: 
+        label: ID Groupe Faturation
+        cat: groups
+        def: 0
+        
+    id_user_group_contrat: 
+        label: ID Groupe Contrats
+        cat: groups
+        def: 0
+        
+    id_user_group_achat: 
+        label: ID Groupe Achat
+        cat: groups
+        def: 0
+        
+    id_user_group_atradius: 
+        label: ID Groupe Atradius
+        cat: groups
+        def: 0

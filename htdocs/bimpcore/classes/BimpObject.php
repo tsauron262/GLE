@@ -1941,29 +1941,29 @@ class BimpObject extends BimpCache
 
     public function getInfoGraph($nameGraph)
     {
-        return 
-            array("data1" => array("title" => "Nom Data1"),
-                "data2" => array("title" => "Nom Data2"),
-                "axeX"      => array("title" => "X", "valueFormatString" => 'value type'),
-                "axeY"      => array("title" => "Y"),//Attention potentiellement plusiuers donné sur cette axe
-                'title'     => $this->getLabel(),
-                'params'    => array(),//tous les paramétre qui seront transmis a getGraphDataPoint ou a getGraphDatasPoints
-                'mode_data' => (method_exists($this, 'getGraphDataPoint'))? 'objects' : 'unique'
+        return
+                array("data1"     => array("title" => "Nom Data1"),
+                    "data2"     => array("title" => "Nom Data2"),
+                    "axeX"      => array("title" => "X", "valueFormatString" => 'value type'),
+                    "axeY"      => array("title" => "Y"), //Attention potentiellement plusiuers donné sur cette axe
+                    'title'     => $this->getLabel(),
+                    'params'    => array(), //tous les paramétre qui seront transmis a getGraphDataPoint ou a getGraphDatasPoints
+                    'mode_data' => (method_exists($this, 'getGraphDataPoint')) ? 'objects' : 'unique'
         );
     }
 
     public function getGraphDataPoint_exemple($params, $numero_data = 1)//si c'est fonction est définit, on apelle en priorité elle charge chaque donnée via l'objet
     {
-        return array("x"=> '2022/01/01', "y" => 40);
+        return array("x" => '2022/01/01', "y" => 40);
     }
-    
+
     public function getGraphDatasPoints_exemple($params)//si c'est fonction est définit, elle charge toutes les donnée en un seul coup
     {
         $result = array();
-        $result[1][] = array("x" => "new Date(4545435)", "y" => (int)45);//donné 1
-        $result[1][] = array("x" => "new Date(454545635)", "y" => (int)65);//donné 1
-        $result[2][] = array("x" => "new Date(435353553)", "y" => (int)74);// donné 2
-            
+        $result[1][] = array("x" => "new Date(4545435)", "y" => (int) 45); //donné 1
+        $result[1][] = array("x" => "new Date(454545635)", "y" => (int) 65); //donné 1
+        $result[2][] = array("x" => "new Date(435353553)", "y" => (int) 74); // donné 2
+
         return $result;
     }
 
@@ -3858,7 +3858,7 @@ class BimpObject extends BimpCache
 
     // Gestion des signatures: 
 
-    
+
     public function getSignatureInstance($doc_type)
     {
         if ($this->isLoaded()) {
@@ -6473,11 +6473,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $note->initBdd($this->getConf('no_transaction_db', 0, false, 'bool'));
 
         if (is_string($fk_group_dest) && $fk_group_dest) {
-            eval('if(BimpNote::' . $fk_group_dest . ' != null) $fk_group_dest = BimpNote::' . $fk_group_dest . ';');
+            $fk_group_dest = BimpCore::getUserGroupId($fk_group_dest);
         }
 
         if (is_string($fk_user_dest) && $fk_user_dest) {
-            eval('if(BimpNote::' . $fk_user_dest . ' != null) $fk_user_dest = BimpNote::' . $fk_user_dest . ';');
+            eval('if (isset(BimpNote::' . $fk_user_dest . ')) $fk_user_dest = BimpNote::' . $fk_user_dest . ';');
         }
 
         if (is_null($visibility)) {
@@ -6510,9 +6510,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $errors;
     }
 
-    public function getNotes($withObject = true)
+    public function getNotes($withObject = true, $min_visibility = null)
     {
-        $list = self::getObjectNotes($this);
+        $list = self::getObjectNotes($this, $min_visibility);
 
         if ($withObject) {
             $notes = array();
@@ -6606,7 +6606,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
             $html .= '<div class="row">';
 
-            $html .= '<div class="col-lg-6 col-sm-8 col-xs-12">';
+            $html .= '<div class="col-lg-6 col-sm-7 col-xs-12">';
 
             // Menu objet:
             $html .= $this->renderObjectMenu();
@@ -6696,7 +6696,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</div>';
             $html .= '</div>';
 
-            $html .= '<div class="col-lg-6 col-sm-4 col-xs-12" style="text-align: right">';
+            $html .= '<div class="col-lg-6 col-sm-5 col-xs-12" style="text-align: right">';
 
             // Statut: 
             $status = '';
@@ -9469,8 +9469,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $success = "Donnée Maj";
         $errors = array();
         $warnings = array();
-        
-        
+
         $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
         $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
         $post_temp = $_POST;
@@ -9513,15 +9512,15 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
             if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint')) {//il faut charger chaque objet pour avoir ca valeur
-
                 $list->initForGraph();
 
                 $tmpData['dataPoints'] = $list->getPointsForGraph($dataGraphe['params'], $i);
             } elseif ($dataGraphe['mode_data'] == 'unique' && isset($tmpDatas)) {//On apelle une seul methode pour tous les points
                 $tmpData['dataPoints'] = $tmpDatas[$i];
             } else {
-                echo '<pre>';print_r($dataGraphe);
-                $errors[] = 'Aucune methode pour charger les points '.$dataGraphe['mode_data'];
+                echo '<pre>';
+                print_r($dataGraphe);
+                $errors[] = 'Aucune methode pour charger les points ' . $dataGraphe['mode_data'];
             }
             $options['data'][] = $tmpData;
             $i++;

@@ -22,6 +22,12 @@ ErpApi::$requests['setDemandeFinancementDocRefused'] = array(
 ErpApi::$requests['addDemandeFinancementNote'] = array(
     'label' => 'Ajout d\'une note pour une demande de location'
 );
+ErpApi::$requests['getPropositionLocation'] = array(
+    'label' => 'Obtenir une proposition de location'
+);
+ErpAPI::$requests['setDemandeFinancementSerialNumbers'] = array(
+    'label' => 'Transmettre les numéros de série pour une demande de location'
+);
 
 class ErpAPI_ExtEntity extends ErpAPI
 {
@@ -162,6 +168,40 @@ class ErpAPI_ExtEntity extends ErpAPI
             if (!count($errors)) {
                 return $response;
             }
+        }
+
+        return null;
+    }
+
+    public function getPropositionLocation($data, &$errors = array(), &$warnings = array())
+    {
+        $response = $this->execCurl('getPropositionLocation', array(
+            'fields' => $data
+                ), $errors);
+
+        if (isset($response['warnings'])) {
+            $warnings = BimpTools::merge_array($warnings, $response['warnings']);
+            unset($response['warnings']);
+        }
+
+        if (!count($errors)) {
+            return $response;
+        }
+
+        return null;
+    }
+
+    public function setDemandeFinancementSerialNumbers($id_df, $serials, &$errors = array())
+    {
+        $response = $this->execCurl('setDemandeFinancementSerialNumbers', array(
+            'fields' => array(
+                'id_demande' => $id_df,
+                'serials'    => json_encode($serials)
+            )
+                ), $errors);
+
+        if (!count($errors)) {
+            return $response;
         }
 
         return null;

@@ -194,11 +194,12 @@ fields:
         
     serials: 
         label: N° de série
-        type: text
+        type: items_list
+        items_braces: 1
         input: 
             rows: 3
             auto_expand: 1
-            help: Entrez une liste de numéros de série séparés par une virgule, un point-virgule, un espace ou un saut de ligne
+#            help: Entrez une liste de numéros de série séparés par une virgule, un point-virgule, un espace ou un saut de ligne
         display_if: 
             fields_names: type,serialisable
             type: 

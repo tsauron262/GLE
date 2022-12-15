@@ -39,7 +39,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                 }
                 break;
 
-            case 'createOrder':
+//            case 'createOrder':
             case 'createInvoice':
             case 'classifyBilled':
             case 'createContrat':
@@ -70,6 +70,27 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                     }
                 }
                 break;
+
+            case 'getPropositionLocation':
+                if (!$this->isLoaded()) {
+                    return 0;
+                }
+
+                if (!in_array((int) $this->getData('fk_statut'), array(1, 2))) {
+                    $errors[] = 'Statut invalide pour la génération d\'une proposition de location';
+                    return 0;
+                }
+
+                if ((int) $this->getData('id_demande_fin')) {
+                    $errors[] = 'Une demande de location a déjà été faite pour ce devis';
+                    return 0;
+                }
+
+                if (!$this->isDemandeFinAllowed($errors)) {
+                    return 0;
+                }
+
+                return 1;
         }
 
         return parent::isActionAllowed($action, $errors);
@@ -121,7 +142,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
             $errors[] = 'Signature via DocuSign on autorisée pour les devis SAV';
             return 0;
         }
-        
+
         // Ajouter conditions spécifiques à BIMP ici
         // (ne pas oublier d'alimenter $errors)
 
@@ -154,6 +175,17 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         $buttons = parent::getActionsButtons();
         $df_buttons = parent::getDemandeFinButtons();
 
+        $err = array();
+        if ($this->isActionAllowed('getPropositionLocation', $err) && $this->canSetAction('getPropositionLocation')) {
+            $df_buttons[] = array(
+                'label'   => 'Obtenir une simulation de location',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsActionOnclick('getPropositionLocation', array(), array(
+                    'form_name' => 'proposition_loc'
+                ))
+            );
+        }
+
         if (!empty($df_buttons)) {
             if (isset($buttons['buttons_groups'])) {
                 $buttons['buttons_groups'][] = array(
@@ -182,6 +214,58 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         return $buttons;
     }
 
+    // Getters array: 
+
+    public function getBcdfTargetsArray()
+    {
+        BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $className);
+        return $className::$targets;
+    }
+
+    public function getDFDurationsArray()
+    {
+        BimpObject::loadClass('bimpfinancement', 'BF_Demande');
+        return BF_Demande::$durations;
+    }
+
+    public function getDFPeriodicitiesArray()
+    {
+        BimpObject::loadClass('bimpfinancement', 'BF_Demande');
+        return BF_Demande::$periodicities;
+    }
+
+    public function getDFCalcModesArray()
+    {
+        BimpObject::loadClass('bimpfinancement', 'BF_Demande');
+        return BF_Demande::$calc_modes;
+    }
+
+    // Getters Données: 
+
+    public function getInputValue($input_name)
+    {
+        if ($this->field_exists($input_name) && $this->isLoaded()) {
+            return $this->getData($input_name);
+        }
+
+        switch ($input_name) {
+            case 'duration':
+            case 'periodicity':
+            case 'mode_calcul':
+                BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $className);
+                $target = BimpTools::getPostFieldValue('target', '');
+                if (!$target) {
+                    $target = $className::$def_target;
+                }
+                if (isset($className::$targets_defaults[$target][$input_name])) {
+                    return $className::$targets_defaults[$target][$input_name];
+                }
+                return $className::${'def_' . $input_name};
+        }
+
+        return null;
+    }
+
     // Rendus HTML:
 
     public function renderHeaderExtraRight($no_div = false)
@@ -199,7 +283,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
     public function onDocFinancementSigned($doc_type)
     {
         switch ($doc_type) {
-            case 'contrat_financement':
+            case 'devis_fin':
                 if ((int) $this->getData('fk_statut') !== Propal::STATUS_SIGNED) {
                     $this->updateField('fk_statut', Propal::STATUS_SIGNED);
 
@@ -225,5 +309,122 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                 }
                 break;
         }
+    }
+
+    // Actions: 
+
+    public function actionGetPropositionLocation($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = '';
+
+        $target = BimpTools::getArrayValueFromPath($data, 'target', '');
+
+        if (!$target) {
+            $errors[] = 'Veuillez sélectionner le financeur';
+        } else {
+            unset($data['target']);
+
+            $bcdf = BimpObject::getInstance('bimpcommercial', 'BimpCommDemandeFin');
+            $bcdf->set('target', $target);
+            $api = $bcdf->getExternalApi($errors);
+
+            if (!count($errors)) {
+                $montant_materiel = 0;
+                $montant_services = 0;
+                $lines = array();
+
+                foreach ($this->getLines('all') as $line) {
+                    if ((int) $line->id_remise_except) {
+                        continue; // On exclut les événtuels acomptes / avoirs. 
+                    }
+
+                    switch ($line->getData('type')) {
+                        case ObjectLine::LINE_PRODUCT:
+                            $product = $line->getProduct();
+                            if (BimpObject::objectLoaded($product)) {
+                                $product_type = 1; // Produit
+                                if ($product->field_exists('type2') && (int) $product->getData('type2') === 5) {
+                                    $product_type = 3; // Logiciel
+                                } elseif ($product->isTypeService()) {
+                                    $product_type = 2; // Service
+                                }
+                                $lines[] = array(
+                                    'label' => $product->getRef() . '<br/>' . $product->getName(),
+                                    'qty'   => $line->getFullQty()
+                                );
+                                if ($product_type == 1) {
+                                    $montant_materiel += $line->getTotalHT(true);
+                                } else {
+                                    $montant_services += $line->getTotalHT(true);
+                                }
+                            }
+                            break;
+
+                        case ObjectLine::LINE_FREE:
+                            $lines[] = array(
+                                'label' => $line->description,
+                                'qty'   => $line->getFullQty()
+                            );
+                            if ($line->isService()) {
+                                $montant_services += $line->getTotalHT(true);
+                            } else {
+                                $montant_materiel += $line->getTotalHT(true);
+                            }
+                            break;
+
+                        case ObjectLine::LINE_TEXT:
+                            $lines[] = array(
+                                'text'  => 1,
+                                'label' => $line->desc,
+                            );
+                            break;
+                    }
+                }
+
+                $data['lines'] = json_encode($lines);
+                $data['montant_materiels'] = $montant_materiel;
+                $data['montant_services'] = $montant_services;
+
+                $result = $api->getPropositionLocation($data, $errors, $warnings);
+
+                if ((int) BimpTools::getArrayValueFromPath($result, 'success', 0)) {
+                    $file_content = BimpTools::getArrayValueFromPath($result, 'file', '');
+                    if (!$file_content) {
+                        $errors[] = 'Contenu du fichier non reçu';
+                    } else {
+                        $dir = $this->getFilesDir();
+
+                        if (!is_dir($dir)) {
+                            $err = BimpTools::makeDirectories($dir);
+
+                            if ($err) {
+                                $errors[] = 'Echec de la création du dossier de destination - ' . $err;
+                            }
+                        } else {
+                            $file_name = 'Proposition_Location.pdf';
+                            $file_path = $dir . $file_name;
+
+                            if (!file_put_contents($file_path, base64_decode($file_content))) {
+                                $errors[] = 'Echec de l\'enregistrement du fichier';
+                            } else {
+                                $url = $this->getFileUrl($file_name);
+                                if ($url) {
+                                    $sc = 'window.open(\'' . $url . '\');';
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
     }
 }

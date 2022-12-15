@@ -824,6 +824,13 @@ class BimpCore
         return $errors;
     }
 
+    public static function getUserGroupId($group_code)
+    {
+        // Codes groupes possibles: logistique / facturation / atradius / contrat / achat
+        
+        return (int) self::getConf('id_user_group_' . $group_code);
+    }
+
     // Gestion params yml globaux: 
 
     public static function getParam($full_path, $default_value = '', $type = 'string')

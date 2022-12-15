@@ -167,6 +167,17 @@ class BF_DemandeSource extends BimpObject
         return $this->getClientFullAddress(0, 0);
     }
 
+    public function getClientPdfData()
+    {
+        $client = $this->getData('client_data');
+        return array(
+            'ref'         => BimpTools::getArrayValueFromPath($client, 'ref', ''),
+            'is_company'  => (int) BimpTools::getArrayValueFromPath($client, 'is_company', 0),
+            'nom'         => BimpTools::getArrayValueFromPath($client, 'nom', ''),
+            'full_adress' => $this->getClientFullAddress(false, false)
+        );
+    }
+
     // Affichages: 
 
     public function displayName()
@@ -626,7 +637,7 @@ class BF_DemandeSource extends BimpObject
                         $devis_status = BF_Demande::DOC_SEND;
                     } else {
                         $file = $demande->getSignatureDocFileName('devis');
-                        if (file_exists($dir.$file)) {
+                        if (file_exists($dir . $file)) {
                             $devis_status = BF_Demande::DOC_GENERATED;
                         } else {
                             $devis_status = BF_Demande::DOC_NONE;
@@ -641,7 +652,7 @@ class BF_DemandeSource extends BimpObject
                         $contrat_status = BF_Demande::DOC_SEND;
                     } else {
                         $file = $demande->getSignatureDocFileName('contrat');
-                        if (file_exists($dir.$file)) {
+                        if (file_exists($dir . $file)) {
                             $contrat_status = BF_Demande::DOC_GENERATED;
                         } else {
                             $contrat_status = BF_Demande::DOC_NONE;

@@ -98,6 +98,25 @@ BWSApi::$requests['addDemandeFinancementNote'] = array(
         'note'         => array('label' => 'Note', 'data_type' => 'text', 'required' => 1)
     )
 );
+BWSApi::$requests['getPropositionLocation'] = array(
+    'desc'   => 'Obtenir une proposition de location',
+    'params' => array(
+        'title'             => array('lable' => 'Titre du document', 'default' => ''),
+        'montant_materiels' => array('label' => 'Total matériels HT', 'data_type' => 'money', 'default' => 0),
+        'montant_services'  => array('label' => 'Total services HT', 'data_type' => 'money', 'default' => 0),
+        'duration'          => array('label' => 'Durée totale (en mois)', 'data_type' => 'int', 'required' => 1),
+        'periodicity'       => array('label' => 'Périodicité des loyers', 'data_type' => 'int', 'required' => 1),
+        'mode_calcul'       => array('label' => 'Terme de paiement des loyers', 'data_type' => 'int', 'default' => 1),
+        'lines'             => array('label' => 'Eléments à financer', 'data_type' => 'json', 'default' => '')
+    )
+);
+BWSApi::$requests['setDemandeFinancementSerialNumbers'] = array(
+    'desc'   => 'Renseigner les numéros de série',
+    'params' => array(
+        'id_demande' => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1),
+        'serials'    => array('label' => 'Numéros de série', 'data_type' => 'json', 'required' => 1)
+    )
+);
 
 class BWSApi_ExtEntity extends BWSApi
 {
@@ -220,12 +239,17 @@ class BWSApi_ExtEntity extends BWSApi
                     $response['logs'][] = $str;
                 }
 
-                foreach ($demande->getNotes() as $note) {
+                foreach ($demande->getNotes(true, BimpNote::BN_PARTNERS) as $note) {
                     $response['notes'][] = array(
                         'author'  => $note->displayAuthor(false, true),
                         'date'    => date('d / m / à H:i', strtotime($note->getData('date_create'))),
                         'content' => $note->getData('content')
                     );
+                }
+
+                $contrat_status = (int) $demande->getData('contrat_status');
+                if ($contrat_status >= 20 && $contrat_status < 30) {
+                    $response['missing_serials'] = $demande->getMissingSerials();
                 }
             }
         }
@@ -300,6 +324,59 @@ class BWSApi_ExtEntity extends BWSApi
                     $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
                 } else {
                     $response['success'] = 1;
+                }
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_getPropositionLocation()
+    {
+        $response = array();
+        $errors = array();
+
+        BimpObject::loadClass('bimpfinancement', 'BF_Demande');
+        $file_name = BF_Demande::createPropositionPDF($this->params, $errors);
+
+        if (count($errors)) {
+            $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+        } else {
+            $dir = DOL_DATA_ROOT . '/bimpfinancement/propositions/' . date('Y-m-d') . '/';
+
+            if (!file_exists($dir . $file_name)) {
+                $this->addError('FAIL', 'Echec de la création du fichier pour une raison inconnue');
+            } else {
+                $response = array(
+                    'success' => 1,
+                    'file'    => base64_encode(file_get_contents($dir . $file_name))
+                );
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_setDemandeFinancementSerialNumbers()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $id_demande = (int) $this->getParam('id_demande', 0);
+            $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
+
+            if (!BimpObject::objectLoaded($demande)) {
+                $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
+            } else {
+                $errors = $demande->setSerialsFromSource($this->getParam('serials', array()));
+
+                if (count($errors)) {
+                    $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+                } else {
+                    $response['success'] = 1;
+
+                    $missing_serials = $demande->getMissingSerials();
+                    $response['serials_ok'] = (int) (!$missing_serials['total']);
                 }
             }
         }

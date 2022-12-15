@@ -41,6 +41,33 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
         return 1;
     }
 
+    public function isActionAllowed($action, &$errors = [])
+    {
+        switch ($action) {
+            case 'setDemandeFinSerials':
+                if (!(int) $this->getData('id_demande_fin')) {
+                    $errors[] = 'Il n\'y as aucune demande de location pour cette commande';
+                    return 0;
+                }
+
+                $bcdf = $this->getChildObject('demande_fin');
+                if (!BimpObject::objectLoaded($bcdf)) {
+                    $errors[] = 'La demande de location associée n\'existe plus (ID ' . $this->getData('id_demande_fin') . ')';
+                    return 0;
+                } else {
+                    $data = $bcdf->fetchDemandeFinData(false);
+
+                    if (!isset($data['missing_serials']['total']) || !(int) $data['missing_serials']['total']) {
+                        $errors[] = 'Il ne reste aucun n° de série à transmettre';
+                        return 0;
+                    }
+                }
+                return 1;
+        }
+
+        return parent::isActionAllowed($action, $errors);
+    }
+
     // Getters params: 
 
     public function getActionsButtons()
@@ -86,5 +113,24 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
                 }
                 break;
         }
+    }
+
+    // Actions: 
+
+    public function actionSetDemandeFinSerials($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'N° de série transmis avec succès';
+        $sc = 'bimp_reloadPage();';
+
+        $bcdf = $this->getChildObject('demande_fin');
+        $errors = $bcdf->setSerialsToTarget($this->id);
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
     }
 }

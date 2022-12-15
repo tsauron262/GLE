@@ -28,7 +28,10 @@ class ContratFinancementPDF extends DocFinancementPDF
         $this->cessionnaire_data = $cessionnaire_data;
 
         parent::__construct($db, $demande);
+        
         $this->doc_name = 'Contrat de location';
+        $this->concat_files[] = DOL_DOCUMENT_ROOT . 'bimpfinancement/pdf/cg_contrat.pdf';
+        $this->concat_files[] = DOL_DOCUMENT_ROOT . 'bimpfinancement/pdf/mandat_sepa.pdf';
     }
 
     public function initData()

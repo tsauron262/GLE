@@ -10,6 +10,14 @@ class BimpDocumentPDF extends BimpModelPDF
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/document/';
     public static $use_cgv = false;
 
+    # Params: 
+    public static $full_blocs = array(
+        'renderAfterLines'  => 1,
+        'renderBottom'      => 1,
+        'renderAfterBottom' => 1,
+        'renderAnnexes'     => 1
+    );
+
     # Objets liés: 
     public $bimpObject = null;
     public $thirdparty = null;
@@ -253,11 +261,34 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->renderTop();
         $this->renderBeforeLines();
         $this->renderLines();
-        $this->renderFullBlock('renderAfterLines');
-        $this->renderFullBlock('renderBottom');
-        $this->renderFullBlock('renderAfterBottom');
+
+        if ((int) BimpTools::getArrayValueFromPath(static::$full_blocs, 'renderAfterLines', 0)) {
+            $this->renderFullBlock('renderAfterLines');
+        } else {
+            $this->renderAfterLines();
+        }
+
+        if ((int) BimpTools::getArrayValueFromPath(static::$full_blocs, 'renderBottom', 0)) {
+            $this->renderFullBlock('renderBottom');
+        } else {
+            $this->renderBottom();
+        }
+
+
+        if ((int) BimpTools::getArrayValueFromPath(static::$full_blocs, 'renderAfterBottom', 0)) {
+            $this->renderFullBlock('renderAfterBottom');
+        } else {
+            $this->renderAfterBottom();
+        }
+
         $this->renderSignatureBloc();
-        $this->renderFullBlock('renderAnnexes');
+
+        if ((int) BimpTools::getArrayValueFromPath(static::$full_blocs, 'renderAnnexes', 0)) {
+            $this->renderFullBlock('renderAnnexes');
+        } else {
+            $this->renderAnnexes();
+        }
+
         $this->renderAnnexeListings();
 
         $cur_page = (int) $this->pdf->getPage();

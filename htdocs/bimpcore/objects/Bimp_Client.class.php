@@ -3465,7 +3465,7 @@ class Bimp_Client extends Bimp_Societe
 
                 $c->addNote($msg,
                             BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                            BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_ATRADIUS);
+                            BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'));
 
                 $nb_update++;
             }
@@ -3539,7 +3539,7 @@ class Bimp_Client extends Bimp_Societe
 
                         $c->addNote($msg,
                                     BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                                    BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_ATRADIUS);
+                                    BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'));
 
                         foreach ($c->getCommerciauxArray() as $id_commercial => $inut) {
                             $c->addNote($msg,

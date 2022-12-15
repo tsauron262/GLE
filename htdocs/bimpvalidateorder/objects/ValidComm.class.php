@@ -223,7 +223,7 @@ class ValidComm extends BimpObject
         // Impayé
         if (!$valid_impaye)
             $errors[] = "Votre " . $bimp_object->getLabel() .
-                    " n'est pas encore validée car le compte client présente des retards de paiement " .
+                    " n'est pas encore validé".($bimp_object->isLabelFemale()?'e' : '')." car le compte client présente des retards de paiement " .
                     '. La demande de validation d\'impayé a été adressée à ' . $this->valideur[self::TYPE_IMPAYE] . '.<br/>';
         elseif (in_array(self::TYPE_IMPAYE, $validations))
             $success[] = "Validation d'impayé effectuée.";

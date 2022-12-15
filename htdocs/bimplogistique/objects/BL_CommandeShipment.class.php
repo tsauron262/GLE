@@ -2194,8 +2194,24 @@ class BL_CommandeShipment extends BimpObject
             }
         }
 
-        $commande->addNote('Bonjour, le BL : ' . $this->getSignatureDocRef('bl') . ' est expédié.', null, 0, 1, '', 1, 2, 'BN_GROUPID_ACHAT');
+        if (!count($errors)) {
+            $commande->addNote('Bonjour, le BL : ' . $this->getSignatureDocRef('bl') . ' est expédié.', null, 0, 1, '', 1, 2, 'achat');
 
+            if ($commande->field_exists('id_demande_fin')) {
+                $id_demande_fin = (int) $commande->getData('id_demande_fin');
+
+                if ($id_demande_fin) {
+                    $bcdf = BimpCache::getBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', $id_demande_fin);
+                    if (BimpObject::objectLoaded($bcdf)) {
+                        $req_errors = $bcdf->setSerialsToTarget($commande->id);
+
+                        if (count($req_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($req_errors, 'Erreurs lors de la transmission des n° de série à ' . $bcdf->displayTarget());
+                        }
+                    }
+                }
+            }
+        }
         return $errors;
     }
 
@@ -2287,7 +2303,6 @@ class BL_CommandeShipment extends BimpObject
         $this->onLinesChange();
 
         if (!count($errors)) {
-
             $signature = $this->getChildObject('signature');
 
             if (BimpObject::objectLoaded($signature)) {
@@ -2300,6 +2315,21 @@ class BL_CommandeShipment extends BimpObject
 
             $ref = $this->getData('ref');
             $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' annulée');
+
+            if ($commande->field_exists('id_demande_fin')) {
+                $id_demande_fin = (int) $commande->getData('id_demande_fin');
+
+                if ($id_demande_fin) {
+                    $bcdf = BimpCache::getBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', $id_demande_fin);
+                    if (BimpObject::objectLoaded($bcdf)) {
+                        $req_errors = $bcdf->setSerialsToTarget($commande->id);
+
+                        if (count($req_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($req_errors, 'Erreurs lors de la transmission des n° de série à ' . $bcdf->displayTarget());
+                        }
+                    }
+                }
+            }
         }
 
         return $errors;

@@ -84,7 +84,7 @@ class BContract_contrat extends BimpDolObject
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT        => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_BROUILLON    => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
-        self::CONTRAT_STATUS_VALIDE       => Array('label' => 'À envoyer à la signature', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
+        self::CONTRAT_STATUS_VALIDE       => Array('label' => 'Attente signature', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_CLOS         => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_REFUSE       => Array('label' => 'Refusé', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUT_WAIT_ACTIVER => Array('label' => 'Attente d\'activation', 'classes' => Array('important'), 'icon' => 'fas_retweet'),
@@ -4413,7 +4413,7 @@ class BContract_contrat extends BimpDolObject
     public function renderHeaderExtraRight($no_div = false)
     {
 
-        $hmtl = '';
+        $html = '';
 
         if ((int) $this->getData('id_signature')) {
             $signature = $this->getChildObject('signature');
@@ -4433,6 +4433,8 @@ class BContract_contrat extends BimpDolObject
                                 )
                                     ), "a");
                 }
+                else
+                    $html .= BimpRender::renderAlerts ('Signature en attente de création', 'danger', false);
             }
         }
 

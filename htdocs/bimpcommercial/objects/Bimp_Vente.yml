@@ -142,7 +142,7 @@ fields:
             array: users
             
     secteur:
-        label: Secteur
+        label: Canal de vente
         extra: 1
         values: 
             array: secteurs

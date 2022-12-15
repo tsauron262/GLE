@@ -117,17 +117,6 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
             return 0;
         }
 
-        if ((int) $this->getData('id_signature')) {
-            $signature = $this->getChildObject('signature');
-
-            if (BimpObject::objectLoaded($signature)) {
-                if (!(int) $signature->getData('type')) {
-                    $errors[] = ucfirst($this->getLabel('this')) . ' est en attente de signature.<br/>Vous devez attendre la signature du client (ou annuler la demande de signature) pour émettre une demande de location';
-                    return 0;
-                }
-            }
-        }
-
         return 1;
     }
 
@@ -410,6 +399,21 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                             if (!file_put_contents($file_path, base64_decode($file_content))) {
                                 $errors[] = 'Echec de l\'enregistrement du fichier';
                             } else {
+                                $file = BimpObject::getInstance('bimpcore', 'BimpFile');
+                                $file->checkObjectFiles($this->module, $this->object_name, $this->id);
+
+                                $file = BimpCache::findBimpObjectInstance('bimpcore', 'BimpFile', array(
+                                            'parent_module'      => $this->module,
+                                            'parent_object_name' => $this->object_name,
+                                            'id_parent'          => $this->id,
+                                            'file_name'          => 'Proposition_Location',
+                                            'file_ext'           => 'pdf'
+                                                ), true);
+                                
+                                if (BimpObject::objectLoaded($file)) {
+                                    $file->updateField('in_emails', 1);
+                                }
+                                
                                 $url = $this->getFileUrl($file_name);
                                 if ($url) {
                                     $sc = 'window.open(\'' . $url . '\');';

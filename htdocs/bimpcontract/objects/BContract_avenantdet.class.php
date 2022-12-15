@@ -129,10 +129,10 @@ class BContract_avenantdet extends BContract_avenant {
         
         if(is_object($contrat)) {
             if($contrat->isLoaded()) {
-                $total_days_contrat = ($contrat->getEndDate()->diff(new DateTime($contrat->getData('date_start')))->days) + 1;
+                $total_days_contrat = $contrat->getDureeInitial()/12*365;//TODO($contrat->getEndDate()->diff(new DateTime($contrat->getData('date_start')))->days) + 1;
                 $parent = $this->getParentInstance();
                 $reste_days_from_effect = $parent->getProataDays(false);
-                $price_per_one_day = ($price / $total_days_contrat);
+                $price_per_one_day = ($price / $total_days_contrat) * (100 - $this->getData('remise')) / 100;
                 
                 $price = ($price_per_one_day * $reste_days_from_effect);
                 

@@ -126,7 +126,7 @@ fields:
             array: entrepots
         
     id_user: 
-        label: Utilisateur
+        label: Emetteur de la facture
         extra: 1
         type: id_object
         object: user

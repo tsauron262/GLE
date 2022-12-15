@@ -825,7 +825,7 @@ filters_panels:
 #            validComm:
 #            validFin:
             
-lists_cols: 
+#lists_cols: 
 #    validComm: 
 #        label: Valid. comm.
 #    validFin:
@@ -890,8 +890,6 @@ lists:
             total_ttc:
     client: 
         extends: default
-#        cols: 
-#            fk_soc: unset
             
 cards: 
     default: 

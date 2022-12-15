@@ -829,7 +829,7 @@ lists_cols:
     ref: 
         object_link: 1
     commercial: 
-        label: Commercial
+        label: Commerciall
         value: 
             callback: displayCommercial
         search: 

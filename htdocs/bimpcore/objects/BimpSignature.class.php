@@ -363,11 +363,12 @@ class BimpSignature extends BimpObject
     public static function getDefaultSignDistEmailContent($type = 'elec')
     {
         $message = 'Bonjour, <br/><br/>';
-        $message .= 'La signature du document "{NOM_DOCUMENT}" pour {NOM_PIECE} {REF_PIECE}  est en attente.<br/><br/>';
+//        $message .= 'La signature du document "{NOM_DOCUMENT}" pour {NOM_PIECE} {REF_PIECE}  est en attente.<br/><br/>';
+        $message .= '{NOM_PIECE} {REF_PIECE} est en attente de validation.<br/><br/>';
 
         switch ($type) {
             case 'docusign':
-                $message .= 'Merci de bien vouloir effectuer la signature électronique de ce document en suivant les instructions DocuSign.<br/><br/>';
+                $message .= 'Merci de bien vouloir le signer électroniquement en suivant les instructions DocuSign.<br/><br/>';
                 break;
 
             case 'elec':
@@ -376,7 +377,7 @@ class BimpSignature extends BimpObject
                 break;
         }
 
-        $message .= 'Vous en remerciant par avance, nous restons à votre disposition pour tout complément d\'information.<br/><br/>';
+        $message .= 'Vous en remerciant par avance, nous restons à votre disposition pour tout complément d\'information..<br/><br/>';
         $message .= 'Cordialement';
 
         $signature = BimpCore::getConf('signature_emails_client');
@@ -594,7 +595,7 @@ class BimpSignature extends BimpObject
                         '{LIEN_ESPACE_CLIENT}'
                             ), array(
                         $doc_title,
-                        $nom_piece,
+                        ucfirst($nom_piece),
                         $ref_piece,
                         $lien_espace_client
                             ), $email_body);

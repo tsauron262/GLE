@@ -25,7 +25,7 @@ class hashtag extends AbstractNotification {
             html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id +'">';
             html += '<h4 class="header">';
             html += 'Objets liés' + this.getBoutonReload(this.dropdown_id);
-            html += '<a style="float:right" onclick="loadModalObjectCustomContent($(this), {module: \'bimpcore\', object_name: \'Bimp_User\', id_object: \'242\'}, \'renderLinkedObjectsLists\', {}, \'Objets liés par citation\', null, \'medium\');"><i class="fas fa5-comments iconLeft"></i>Mes objets liés</a>';
+            html += '<a style="float:right" onclick="loadModalObjectCustomContent($(this), {module: \'bimpcore\', object_name: \'Bimp_User\', id_object: id_user}, \'renderLinkedObjectsLists\', {}, \'Objets liés par citation\', null, \'medium\');"><i class="fas fa5-comments iconLeft"></i>Mes objets liés</a>';
             html += '</h4>';
             html += '<div class="notifications-wrap list_notification ' + this.nom + '">';
             html += '</div>';

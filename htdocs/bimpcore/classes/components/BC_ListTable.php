@@ -656,7 +656,7 @@ class BC_ListTable extends BC_List
         return $sqlKey;
     }
 
-    // Gestion des filtres: 
+    // Gestion des filtres:
 
     public function getSearchFilters(&$joins = array())
     {

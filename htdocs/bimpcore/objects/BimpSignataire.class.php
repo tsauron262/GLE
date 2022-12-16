@@ -1576,7 +1576,7 @@ class BimpSignataire extends BimpObject
                             $url = $signature->getDocumentUrl(true);
 
                             if ($url) {
-                                $success_callback = 'window.open(\'' . $url . '\');';
+                                $success_callback = 'window.open(\'' . $url . '\');bimp_reloadPage();';
                             }
                         }
 

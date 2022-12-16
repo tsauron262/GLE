@@ -79,6 +79,13 @@ class BimpCache
     {
         return static::$cache[$key];
     }
+    
+    public static function eraseCacheServer($echo = false){
+        $version = (int) BimpCore::getConf('git_version', 1)+1;
+        if($echo)
+            echo 'version '.$version;
+        BimpCore::setConf('git_version', $version);
+    }
 
     public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
     {
@@ -722,8 +729,7 @@ class BimpCache
                 }
 
                 // lists_col: 
-                $lists_cols = $object->config->getCompiledParams('lists_cols');
-
+                $lists_cols = $object->config->getCompiledParams('lists_cols');                
                 if (is_array($lists_cols)) {
                     foreach ($lists_cols as $col_name => $params) {
                         $label = BimpTools::getArrayValueFromPath($params, 'label', '');
@@ -848,13 +854,17 @@ class BimpCache
         return array();
     }
 
-    public static function getObjectNotes(BimpObject $object)
+    public static function getObjectNotes(BimpObject $object, $min_visibility = null)
     {
         if (!BimpObject::objectLoaded($object)) {
             return array();
         }
 
         $cache_key = 'object_note_' . $object->module . '_' . $object->object_name . '_' . $object->id;
+
+        if (!is_null($min_visibility)) {
+            $cache_key .= '_min_' . $min_visibility;
+        }
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
@@ -867,6 +877,13 @@ class BimpCache
                 'obj_name'   => $object->object_name,
                 'id_obj'     => $object->id
             );
+
+            if (!is_null($min_visibility)) {
+                $filters['visibility'] = array(
+                    'operator' => '>=',
+                    'value'    => $min_visibility
+                );
+            }
 
             $filters = BimpTools::merge_array($filters, BimpNote::getFiltersByUser());
 
@@ -1960,7 +1977,7 @@ class BimpCache
 
     public static function getUserUserGroupsArray($id_user = null, $include_empty = 0, $nom_url = 0)
     {
-        if(is_null($id_user)){
+        if (is_null($id_user)) {
             global $user;
             $id_user = $user->id;
         }

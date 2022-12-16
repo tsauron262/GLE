@@ -1188,7 +1188,7 @@ class Bimp_FactureFourn extends BimpCommAchat
             return $errors;
         }
 
-        if (!(int) $this->getData('entrepot')) {
+        if ((int) BimpCore::getConf('USE_ENTREPOT', null, 'bimpcore') && !(int) $this->getData('entrepot')) {
             $errors[] = 'Entrepôt absent. Veuillez sélectionner un entrepôt avant de valider';
         } else {
             BimpTools::resetDolObjectErrors($this->dol_object);

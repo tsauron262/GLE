@@ -851,6 +851,18 @@ class BC_List extends BC_Panel
                 $this->object->set($field_name, $value);
             }
         }
+        
+        if($this->object->getConf('in_cache_serveur') && BimpCache::$cache_server){
+                $buttons[] = array(
+                    'classes'     => array('btn', 'btn-default'),
+                    'label'       => 'Vider le cache',
+                    'icon_before' => 'eraser',
+                    'attr'        => array(
+                        'type'    => 'button',
+                        'onclick' => $this->object->getJsActionOnclick('eraseCache')
+                    )
+                );
+        }
 
         if ($this->object->isCreatable(false)) {
             if ((int) $this->params['add_btn'] && !is_null($this->params['add_form_name']) && $this->params['add_form_name']) {

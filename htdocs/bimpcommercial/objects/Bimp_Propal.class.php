@@ -1090,7 +1090,7 @@ class Bimp_Propal extends Bimp_PropalTemp
             if ((int) $this->getData('fk_statut') == 1) {
                 $signature = null;
                 if ((int) $this->getData('id_signature')) {
-                    $signature = $this->getChilObject('signature');
+                    $signature = $this->getChildObject('signature');
                 }
 
                 if (BimpObject::objectLoaded($signature)) {

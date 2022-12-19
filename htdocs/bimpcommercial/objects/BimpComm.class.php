@@ -704,8 +704,8 @@ class BimpComm extends BimpDolObject
     public function canSetAction($action)
     {
         global $user;
-        if ($action == 'checkTotal' && !$user->admin)
-            return 0;
+//        if ($action == 'checkTotal' && !$user->admin)
+//            return 0;
         if ($action == 'checkMarge' && !$user->admin)
             return 0;
         return parent::canSetAction($action);

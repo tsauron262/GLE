@@ -2650,7 +2650,7 @@ class Bimp_Societe extends BimpDolObject
                     $branches = $base->branches->branch;
                     $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
 
-                    $rcs = $summary->courtregistrydescription;
+                    $rcs = $summary->courtregistrydescription.' '.$siren;
                     if ($summary->status == 'Fermé') {
                         $note = 'Fermé';
                         $alert = 'Fermé';

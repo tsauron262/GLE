@@ -165,7 +165,7 @@ class BimpDolObject extends BimpObject
         if ($this->isLoaded()) {
             $contacts = $this->dol_object->liste_contact(-1, 'external');
             foreach ($contacts as $item) {
-                if (!isset($emails[(int) $item['id']]) && $item['statuscontact'] == 1) {
+                if ((!isset($emails[(int) $item['id']]) || $item['code'] == 'BILLING2') && $item['statuscontact'] == 1) {
                     $emails[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
                 }
             }
@@ -494,6 +494,13 @@ class BimpDolObject extends BimpObject
         return 0;
     }
 
+    public function getIdTypeContact($type = 0, $code = '')
+    {
+        $list = $this->dol_object->liste_type_contact($type, 'position', 0, 0, $code);
+        foreach ($list as $id => $inut)
+            return $id;
+    }
+
     // Affichages: 
 
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
@@ -571,14 +578,14 @@ class BimpDolObject extends BimpObject
                     $collection[$item['type']][] = $item['id_object'];
                 }
             }
-            
-            foreach($collection as $type => $ids){
+
+            foreach ($collection as $type => $ids) {
                 switch ($type) {
                     case 'fichinter':
                         $bcInter = BimpCollection::getInstance('bimptechnique', 'BT_ficheInter');
                         $bcInter->addFields(array('datec', 'fk_statut'));
                         $bcInter->addItems($ids);
-                        foreach($ids as $id){
+                        foreach ($ids as $id) {
                             $fi_instance = $bcInter->getObjectInstance((int) $id);
 
                             if (BimpObject::objectLoaded($fi_instance)) {
@@ -591,12 +598,12 @@ class BimpDolObject extends BimpObject
                                 );
                             }
                         }
-                    break;
+                        break;
                     case 'facture':
                         $bc = BimpCollection::getInstance('bimpcommercial', 'Bimp_Facture');
                         $bc->addFields(array('datef', 'total', 'fk_statut'));
                         $bc->addItems($ids);
-                        foreach($ids as $id){
+                        foreach ($ids as $id) {
                             $facture_instance = $bc->getObjectInstance((int) $id);
 //                            $facture_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id);
                             if ($facture_instance && $facture_instance->isLoaded()) {
@@ -610,12 +617,12 @@ class BimpDolObject extends BimpObject
                                 );
                             }
                         }
-                    break;
+                        break;
                     case 'propal':
                         $bc = BimpCollection::getInstance('bimpcommercial', 'Bimp_Propal');
                         $bc->addFields(array('datep', 'total_ht', 'fk_statut'));
                         $bc->addItems($ids);
-                        foreach($ids as $id){
+                        foreach ($ids as $id) {
                             $propal_instance = $bc->getObjectInstance((int) $id);
                             if ($propal_instance->isLoaded()) {
                                 $icon = $propal_instance->params['icon'];
@@ -630,7 +637,7 @@ class BimpDolObject extends BimpObject
                         }
                         break;
                     default:
-                        foreach($ids as $id){//TODO a traduire au dessus en collection
+                        foreach ($ids as $id) {//TODO a traduire au dessus en collection
                             $item['id_object'] = $id;
                             switch ($type) {
                                 case 'propal':
@@ -731,8 +738,7 @@ class BimpDolObject extends BimpObject
                                     break;
                             }
                         }
-                    break;
-                    
+                        break;
                 }
             }
 
@@ -862,12 +868,6 @@ class BimpDolObject extends BimpObject
 
         return $html;
     }
-    
-    public function getIdTypeContact($type = 0, $code = ''){
-        $list = $this->dol_object->liste_type_contact($type, 'position', 0, 0, $code);
-        foreach($list as $id => $inut)
-            return $id;
-    }
 
     public function renderContactsList($type = 0, $code = '', $list_id = '')
     {
@@ -877,9 +877,9 @@ class BimpDolObject extends BimpObject
 
         if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
             $list_int = $list_ext = array();
-            if($type == 0 || $type == 1)
+            if ($type == 0 || $type == 1)
                 $list_int = $this->dol_object->liste_contact(-1, 'internal', 0, $code);
-            if($type == 0 || $type == 2)
+            if ($type == 0 || $type == 2)
                 $list_ext = $this->dol_object->liste_contact(-1, 'external', 0, $code);
             $list = BimpTools::merge_array($list_int, $list_ext);
         }
@@ -889,15 +889,15 @@ class BimpDolObject extends BimpObject
             BimpTools::loadDolClass('societe');
             BimpTools::loadDolClass('contact');
 
-            if($list_id == '')
-                $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list_'.$type.'_'.$code;
+            if ($list_id == '')
+                $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list_' . $type . '_' . $code;
 
             foreach ($list as $item) {
                 $html .= '<tr>';
                 switch ($item['source']) {
                     case 'internal':
                         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $item['id']);
-                        if($type == 0)
+                        if ($type == 0)
                             $html .= '<td>Utilisateur</td>';
                         $html .= '<td>' . $conf->global->MAIN_INFO_SOCIETE_NOM . '</td>';
                         $html .= '<td>';
@@ -913,7 +913,7 @@ class BimpDolObject extends BimpObject
                         $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['socid']);
                         $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $item['id']);
 
-                        if($type == 0)
+                        if ($type == 0)
                             $html .= '<td>Contact tiers</td>';
                         $html .= '<td>';
                         if (BimpObject::objectLoaded($soc)) {
@@ -931,7 +931,7 @@ class BimpDolObject extends BimpObject
                         $html .= '</td>';
                         break;
                 }
-                if($code == '')
+                if ($code == '')
                     $html .= '<td>' . $item['libelle'] . '</td>';
                 $html .= '<td style="text-align: right">';
                 $html .= BimpRender::renderRowButton('Supprimer le contact', 'trash', $this->getJsActionOnclick('removeContact', array('id_contact' => (int) $item['rowid']), array(

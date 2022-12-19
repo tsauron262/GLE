@@ -3483,7 +3483,7 @@ class BF_Demande extends BimpObject
 
     // Gestion signatures : 
 
-    public function isDocuSignAllowed($doc_type, $errors = array(), $is_required = false)
+    public function isDocuSignAllowed($doc_type, $errors = array(), &$is_required = false)
     {
         if (!(int) BimpCore::getConf($doc_type . '_loc_signature_allow_docusign', null, 'bimpfinancement')) {
             $errors[] = 'Signature DocuSign non autorisée pour le document "' . $this->getDocTypeLabel($doc_type) . '"';

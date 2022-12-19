@@ -339,6 +339,7 @@ class DemandeValidComm extends BimpObject
             $soc = $bimp_obj->getChildObject('client');
 
             if (is_object($bimp_obj) && $bimp_obj->isLoaded()) {
+                $value = $this->getData('status');
                 $subject = ((int) $value == self::STATUS_VALIDATED) ? 'Validation' : 'Refus';
                 $subject .= ' ' . $bimp_obj->getRef();
 

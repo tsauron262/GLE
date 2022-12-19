@@ -937,17 +937,16 @@ class BimpSignature extends BimpObject
         }
 
         if (count($missings)) {
-            $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-            $msg .= 'Attention : aucune demande de signature à distance effectuée ';
+            $msg .= '<b>Attention : aucune demande de signature à distance effectuée ';
 
             if (count($missings) > 1) {
-                $msg .= 'pour les signataires : <br/>';
+                $msg .= 'pour les signataires :';
                 foreach ($missings as $missing) {
-                    $msg .= ' - ' . $missing->getName() . '<br/>';
+                    $msg .= '<br/> - ' . $missing->getName();
                 }
             }
 
-            $msg .= 'Si vous souhaitez envoyer une demande de signature à distance ' . ($has_docusign ? 'via DocuSign' : '') . ' veuillez cliquer sur ';
+            $msg .= '</b><br/>Si vous souhaitez envoyer une demande de signature à distance ' . ($has_docusign ? 'via DocuSign' : '') . ' veuillez cliquer sur ';
 
             if ($has_docusign) {
                 $msg .= '"Initialiser DocuSign"';
@@ -1094,6 +1093,8 @@ class BimpSignature extends BimpObject
 
             $html .= BimpRender::renderAlerts($msg, 'warning');
         }
+
+        return $html;
     }
 
     // Traitements:

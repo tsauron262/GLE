@@ -999,7 +999,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         'buttons' => $buttons
                     ),
                     array(
-                        'label'   => 'Signature',
+                        'label'   => 'Actions Signature',
                         'icon'    => 'fas_signature',
                         'buttons' => $signature_buttons
                     )
@@ -1094,7 +1094,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
 
                 if (BimpObject::objectLoaded($signature)) {
-                    $alertes = $signature->renderSignatureAlertes;
+                    $alertes = $signature->renderSignatureAlertes();
                     if ($alertes) {
                         $html .= '<div style="margin-top: 10px">';
                         $html .= $alertes;

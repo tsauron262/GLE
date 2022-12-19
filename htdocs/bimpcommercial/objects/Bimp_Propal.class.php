@@ -489,7 +489,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return 0;
     }
 
-    public function isDocuSignAllowed(&$errors = array(), $is_required = false)
+    public function isDocuSignAllowed(&$errors = array(), &$is_required = false)
     {
         // Attention : pas de conditions spécifiques à une version de l'ERP ici. 
         // Utiliser une extension.  
@@ -1171,13 +1171,14 @@ class Bimp_Propal extends Bimp_PropalTemp
         $html = '';
 
         $errors = array();
-        if (!$this->isDocuSignAllowed($errors)) {
+        $ds_required = 0;
+        if (!$this->isDocuSignAllowed($errors, $ds_required)) {
             $html .= '<div class="danger">';
             $html .= BimpTools::getMsgFromArray($errors, 'Il n\'est pas possible d\'utiliser DocuSign pour la signature de ce devis');
             $html .= '</div>';
             $html .= '<input type="hidden" value="0" name="init_docusign"/>';
         } else {
-            $html .= BimpInput::renderInput('toggle', 'init_docusign', 1);
+            $html .= BimpInput::renderInput('toggle', 'init_docusign', ($ds_required ? 1 : 0));
         }
 
         return $html;

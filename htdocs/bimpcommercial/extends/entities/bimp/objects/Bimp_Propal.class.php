@@ -120,7 +120,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         return 1;
     }
 
-    public function isDocuSignAllowed(&$errors = array(), $is_required = false)
+    public function isDocuSignAllowed(&$errors = array(), &$is_required = false)
     {
         if (!parent::isDocuSignAllowed($errors)) {
             return 0;

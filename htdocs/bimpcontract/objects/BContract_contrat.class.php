@@ -5212,7 +5212,7 @@ class BContract_contrat extends BimpDolObject
         return $html;
     }
     
-    public function isDocuSignAllowed(&$errors = array(), $is_required = false)
+    public function isDocuSignAllowed(&$errors = array(), &$is_required = false)
     {
         if (!(int) BimpCore::getConf('contrat_signature_allow_docusign', null, 'bimpcontract')) {
             $errors[] = 'Signature DocuSign non autorisée pour ce contrat';

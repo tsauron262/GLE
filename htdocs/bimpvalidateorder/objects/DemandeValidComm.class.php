@@ -348,7 +348,7 @@ class DemandeValidComm extends BimpObject
                     $message_mail .= $soc->getRef() . ' - ' . $soc->getName() . ' ';
                 else
                     $message_mail .= ', client inconnu ';;
-                $message_mail .= ' a été ' . lcfirst(self::$status_list[(int) $value]['label']);
+                $message_mail .= ' a été passé au statut ' . lcfirst(self::$status_list[(int) $value]['label']);
                 $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
 
                 switch ($this->getData('type')) {

@@ -1087,12 +1087,26 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $html .= '</div>';
             }
 
-            if ((int) $this->getData('fk_statut') == 1 && !(int) $this->getData('id_signature')) {
-                $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                $msg .= 'Si vous souhaitez <b>déposer le devis signé</b> ou demander la <b>signature électronique</b> à distance au client, veuillez cliquer sur "<b>Créer la fiche signature</b>"';
-                $html .= '<div style="margin-top: 10px">';
-                $html .= BimpRender::renderAlerts($msg, 'warning');
-                $html .= '</div>';
+            if ((int) $this->getData('fk_statut') == 1) {
+                $signature = null;
+                if ((int) $this->getData('id_signature')) {
+                    $signature = $this->getChilObject('signature');
+                }
+
+                if (BimpObject::objectLoaded($signature)) {
+                    $alertes = $signature->renderSignatureAlertes;
+                    if ($alertes) {
+                        $html .= '<div style="margin-top: 10px">';
+                        $html .= $alertes;
+                        $html .= '</div>';
+                    }
+                } else {
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                    $msg .= 'Si vous souhaitez <b>déposer le devis signé</b> ou demander la <b>signature électronique</b> à distance au client, veuillez cliquer sur "<b>Créer la fiche signature</b>"';
+                    $html .= '<div style="margin-top: 10px">';
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= '</div>';
+                }
             }
         }
 

@@ -802,7 +802,7 @@ class BimpSignature extends BimpObject
         return '';
     }
 
-    public function displayDocType()
+    public function displayDocType($of_the = false)
     {
         $type = $this->getData('doc_type');
 
@@ -810,7 +810,13 @@ class BimpSignature extends BimpObject
             $obj = $this->getObj();
 
             if (is_a($obj, 'BimpObject')) {
-                return $obj->getConf('signatures/' . $type . '/label', $type);
+                $label = $obj->getConf('signatures/' . $type . '/label', $type);
+
+                if ($of_the) {
+                    $label = BimpTools::getOfTheLabel($label, (int) $obj->getConf('signatures/' . $type . '/is_label_female', 0));
+                }
+
+                return $label;
             }
         }
 
@@ -906,18 +912,70 @@ class BimpSignature extends BimpObject
         return '';
     }
 
+    public function displayNoPublicAccessWarnings()
+    {
+        $html = '';
+
+        BimpObject::loadClass('bimpcore', 'BimpSignataire');
+        $signataires = $this->getChildrenObjects('signataires', array(
+            'type'       => BimpSignataire::TYPE_CLIENT,
+            'status'     => BimpSignataire::STATUS_NONE,
+            'allow_dist' => 1
+        ));
+
+        $missings = array();
+        $has_docusign = false;
+        foreach ($signataires as $signataire) {
+            $users = $signataire->getData('allowed_users_client');
+
+            if (empty($users)) {
+                $missings[] = $signataire;
+                if ((int) $signataire->getData('docusign_allowed')) {
+                    $has_docusign = true;
+                }
+            }
+        }
+
+        if (count($missings)) {
+            $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+            $msg .= 'Attention : aucune demande de signature à distance effectuée ';
+
+            if (count($missings) > 1) {
+                $msg .= 'pour les signataires : <br/>';
+                foreach ($missings as $missing) {
+                    $msg .= ' - ' . $missing->getName() . '<br/>';
+                }
+            }
+
+            $msg .= 'Si vous souhaitez envoyer une demande de signature à distance ' . ($has_docusign ? 'via DocuSign' : '') . ' veuillez cliquer sur ';
+
+            if ($has_docusign) {
+                $msg .= '"Initialiser DocuSign"';
+            } else {
+                $msg .= '"Ouvrir accès signature à distance"';
+            }
+
+            $html .= BimpRender::renderAlerts($msg, 'warning');
+        }
+
+        return $html;
+    }
+
     // Rendus HTML:
 
     public function renderHeaderExtraLeft()
     {
         $html = '';
 
-        // todo: gérer pour chaque signataire
-//        if ($this->isSigned()) {
-//            $html .= '<div class="object_header_infos">';
-//            $html .= 'Signature effectuée le ' . date('d / m / Y', strtotime($this->getData('date_signed'))) . ' par <b>' . $this->getData('nom_signataire') . '</b>';
-//            $html .= '</div>';
-//        }
+        if ($this->isLoaded() && !$this->isSigned()) {
+            $warning = $this->displayNoPublicAccessWarnings();
+
+            if ($warning) {
+                $html .= '<div style="margin-top: 10px">';
+                $html .= $warning;
+                $html .= '</div>';
+            }
+        }
 
         return $html;
     }
@@ -998,6 +1056,44 @@ class BimpSignature extends BimpObject
         }
 
         return '';
+    }
+
+    public function renderSignatureAlertes($include_link = true, $include_actions = true, $sign_dist_warning = true)
+    {
+        $html = '';
+
+        if ($this->isLoaded() && !$this->isSigned()) {
+            $att_docusign = $this->isAttenteDocuSign();
+            $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+
+            if ($include_link) {
+                $msg .= '<a href="' . $this->getUrl() . '" target="_blank">';
+            }
+
+            $msg .= 'Signature ' . $this->displayDocType(true) . ' en attente';
+            if ($att_docusign) {
+                $msg .= ' (Demande de signature via DocuSign effectuée)';
+            }
+
+            if ($include_link) {
+                $msg .= BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+            }
+
+            if ($sign_dist_warning) {
+                $msg .= $this->displayNoPublicAccessWarnings();
+            }
+
+            if ($include_actions) {
+                $btn_html = $this->renderSignButtonsGroup();
+                if ($btn_html) {
+                    $msg .= '<div style="margin-top: 8px; text-align: right">';
+                    $msg .= $btn_html;
+                    $msg .= '</div>';
+                }
+            }
+
+            $html .= BimpRender::renderAlerts($msg, 'warning');
+        }
     }
 
     // Traitements:

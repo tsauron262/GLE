@@ -293,6 +293,10 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 1;
 
             case 'createContrat':
+                if ($status !== Propal::STATUS_SIGNED) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
                 if ($status == 0) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' est au statut brouillon';
                     return 0;

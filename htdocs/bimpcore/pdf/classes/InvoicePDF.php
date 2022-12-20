@@ -46,7 +46,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                 $this->pdf->SetAuthor($this->langs->convToOutputCharset($user->getFullName($this->langs)));
                 $this->pdf->SetKeyWords($this->langs->convToOutputCharset($this->object->ref) . " " . $this->langs->transnoentities("Invoice") . " " . $this->langs->convToOutputCharset($this->object->thirdparty->name));
 
-                $contacts = $this->facture->getIdContact('external', 'BILLING');
+                
                 if (isset($contacts[0]) && $contacts[0]) {
                     BimpTools::loadDolClass('contact');
                     $contact = new Contact($this->db);
@@ -159,6 +159,42 @@ class InvoicePDF extends BimpCommDocumentPDF
                         }
                     }
                 }
+
+                $secteur = $this->bimpCommObject->getData('ef_type');
+                // SAV
+                if($secteur == 'S') {
+                    
+                    $code_centre = $this->bimpCommObject->getData('centre');
+                    if($code_centre == '') {
+                        $this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
+                    } else {
+                        
+                        $centres = BimpCache::getCentres();
+                        if(isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
+                            $centre = $centres[$code_centre];
+                            $this->fromCompany->address = $centre['address'];
+                            $this->fromCompany->zip     = $centre['zip'];
+                            $this->fromCompany->town    = $centre['town'];
+                            $this->fromCompany->phone   = $centre['tel'];
+                            $this->fromCompany->email   = $centre['mail'];
+
+                        } else {
+                            $this->errors[] = 'Centre ayant pour code' . $code_centre . ' absent de la liste des centres';
+                        }
+                    }
+                    
+                    $this->fromCompany->name = "LDLC";
+                    
+                // Éducation
+                } elseif($secteur == 'E') {
+                    $this->fromCompany->name = "BIMP.PRO";
+                    
+                // PRO
+                } elseif(!in_array($secteur, array('S', 'M')) ) {
+                    $this->fromCompany->name = "BIMP.PRO";
+                }
+                
+                
             } else {
                 $this->errors[] = 'Facture invalide (ID absent)';
             }
@@ -639,7 +675,7 @@ class InvoicePDF extends BimpCommDocumentPDF
 
         return $html;
     }
-
+    
     public function renderAnnexes()
     {
         $this->next_annexe_idx = 1;

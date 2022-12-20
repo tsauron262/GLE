@@ -172,7 +172,7 @@ class BDS_ConvertProcess extends BDSProcess
                     $this->incIgnored();
                     $this->Error('Echec création de la remise arrière CRT - ' . $this->db->err(), $product);
                 } else {
-//                    $this->Success('Création Remise CRT OK', $product);
+                    $this->Success('Création Remise CRT OK', $product);
                     $this->incCreated();
                 }
             }
@@ -229,7 +229,7 @@ class BDS_ConvertProcess extends BDSProcess
                     $this->incIgnored();
                     $this->Error('Echec création de la remise arrière CRT - ' . $this->db->err(), $line);
                 } else {
-//                    $this->Success('Création Remise CRT OK', $line);
+                    $this->Success('Création Remise CRT OK', $line);
                     $this->incCreated();
                 }
             }
@@ -286,7 +286,7 @@ class BDS_ConvertProcess extends BDSProcess
                     $this->incIgnored();
                     $this->Error('Echec création de la remise arrière CRT - ' . $this->db->err(), $line);
                 } else {
-//                    $this->Success('Création Remise CRT OK', $line);
+                    $this->Success('Création Remise CRT OK', $line);
                     $this->incCreated();
                 }
             }
@@ -343,7 +343,7 @@ class BDS_ConvertProcess extends BDSProcess
                     $this->incIgnored();
                     $this->Error('Echec création de la remise arrière CRT - ' . $this->db->err(), $line);
                 } else {
-//                    $this->Success('Création Remise CRT OK', $line);
+                    $this->Success('Création Remise CRT OK', $line);
                     $this->incCreated();
                 }
             }

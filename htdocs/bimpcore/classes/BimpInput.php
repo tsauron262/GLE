@@ -1708,6 +1708,9 @@ class BimpInput
             $item_value = isset($item['value']) ? $item['value'] : $idx;
             $item_label = isset($item['label']) ? $item['label'] : 'n°' . $idx;
             $item_children = isset($item['children']) ? $item['children'] : array();
+            $group_selectable = isset($item['selectable']) ? (int) $item['selectable'] : 1;
+            $group_open = isset($item['open']) ? (int) $item['open'] : 1;
+            $select_all_btn = isset($item['select_all_btn']) ? (int) $item['select_all_btn'] : 1;
         } else {
             $item_value = $idx;
             $item_label = (string) $item;
@@ -1727,23 +1730,29 @@ class BimpInput
                 $child_selected = true;
             }
 
-            $html .= '<div class="check_list_group ' . ($has_child_selected ? 'open' : 'closed') . '">';
+            $html .= '<div class="check_list_group ' . ($has_child_selected || $group_open ? 'open' : 'closed') . '">';
 
-            $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item_value . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
-            if (in_array($item_value, $values)) {
-                $child_selected = true;
-                $nb_selected++;
-                $html .= ' checked';
+            if ($group_selectable) {
+                $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item_value . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
+                if (in_array($item_value, $values)) {
+                    $child_selected = true;
+                    $nb_selected++;
+                    $html .= ' checked';
+                }
+                $html .= ' class="' . $field_name . '_check check_list_item_input check_list_group_input"/>';
             }
-            $html .= ' class="' . $field_name . '_check check_list_item_input check_list_group_input"/>';
 
-            $html .= '<div class="check_list_group_caption">';
+            $html .= '<div class="check_list_group_caption' . ($group_selectable ? ' selectable' : '') . '">';
             $html .= '<span class="check_list_group_title">';
             $html .= $item_label;
             $html .= '</span>';
             $html .= '</div>';
 
             $html .= '<div class="check_list_group_items">';
+
+            if ($select_all_btn && count($item_children) > 0) {
+                $html .= self::renderToggleAllCheckboxes('$(this).parent().parent()', '.' . $field_name . '_check');
+            }
 
             $html .= $children_html;
 

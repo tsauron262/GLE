@@ -624,6 +624,31 @@ class Bimp_Stat_Date extends BimpObject
                         }
                     }
 
+                    // Données par secteur: 
+                    $sheet = $excel->createSheet();
+                    $sheet->setTitle('Secteurs');
+
+                    $col = 0;
+                    $row = 1;
+                    $sheet->setCellValueByColumnAndRow($col, $row, 'Secteur');
+
+                    foreach ($data_types as $name => $label) {
+                        $col++;
+                        $sheet->setCellValueByColumnAndRow($col, $row, $label);
+                    }
+
+                    foreach ($data['secteurs'] as $secteur => $secteur_data) {
+                        $row++;
+                        $col = 0;
+
+                        $sheet->setCellValueByColumnAndRow($col, $row, $secteur);
+
+                        foreach ($data_types as $name => $label) {
+                            $col++;
+                            $sheet->setCellValueByColumnAndRow($col, $row, (isset($secteur_data[$name]) ? $secteur_data[$name] : ''));
+                        }
+                    }
+                    
                     $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
                     $writer->save($file_path);
 

@@ -4,7 +4,6 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 
 class BDS_ConvertProcess extends BDSProcess
 {
-
     public static $methods = array(
         'SignaturesToConvert'        => 'Conversion des signatures',
         'ProductRemisesCrtToConvert' => 'Conversion des remises CRT des produits',

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bds_process` ADD `version` int(11) NOT NULL DEFAULT 1;

@@ -31,16 +31,46 @@ class BDS_Process extends BimpObject
 
     public function canSetAction($action)
     {
-        global $user;
-
         switch ($action) {
             case 'installProcess':
-                if ($user->admin) {
+            case 'updateProcess':
+                if (BimpCore::isUserDev()) {
                     return 1;
                 }
                 return 0;
         }
         return parent::canSetAction($action);
+    }
+
+    public function isActionAllowed($action, &$errors = [])
+    {
+        switch ($action) {
+            case 'updateProcess':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
+                $process_class = $this->getProcessClassName();
+
+                if (!$process_class) {
+                    $errors[] = 'Classe absente';
+                    return 0;
+                }
+
+                if (!class_exists($process_class)) {
+                    $errors[] = 'Classe invalide';
+                    return 0;
+                }
+
+                if ((int) $this->getData('version') >= (int) $process_class::$current_version) {
+                    $errors[] = 'Process à jour';
+                    return 0;
+                }
+
+                return 1;
+        }
+
+        return parent::isActionAllowed($action, $errors);
     }
 
     // Getters booléens: 
@@ -74,6 +104,24 @@ class BDS_Process extends BimpObject
                         'form_name' => 'install'
                     ))
                 )
+            );
+        }
+
+        return $buttons;
+    }
+
+    public function getActionsButtons()
+    {
+        $buttons = array();
+
+        if ($this->isActionAllowed('updateProcess') && $this->canSetAction('updateProcess')) {
+            $process = $this->getProcessClassName();
+            $buttons[] = array(
+                'label'   => 'Mettre à jour à la version ' . $process::$current_version,
+                'icon'    => 'fas_cogs',
+                'onclick' => $this->getJsActionOnclick('updateProcess', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer'
+                ))
             );
         }
 
@@ -372,6 +420,27 @@ class BDS_Process extends BimpObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionUpdateProcess($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Processus mis à jour avec succès';
+
+        $process = $this->getProcessClassName();
+
+        $errors = $process::updateProcess($this->id, (int) $this->getData('version'));
+
+        if (!count($errors)) {
+            $this->updateField('version', (int) $process::$current_version);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

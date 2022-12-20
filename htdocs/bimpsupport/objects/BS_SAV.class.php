@@ -2896,6 +2896,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $factureA->modelpdf = self::$facture_model_pdf;
             $factureA->array_options['options_type'] = "S";
             $factureA->array_options['options_entrepot'] = $this->getData('id_entrepot');
+            $factureA->array_options['options_centre'] = $this->getData('code_centre');
 
             $user->rights->facture->creer = 1;
             if ($factureA->create($user) <= 0) {
@@ -5442,6 +5443,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 $facture->modelpdf = self::$facture_model_pdf;
                                 $facture->array_options['options_type'] = "S";
                                 $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
+                                $facture->array_options['options_centre'] = $this->getData('code_centre');
 
                                 $facture->linked_objects[$facture->origin] = $facture->origin_id;
                                 if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {

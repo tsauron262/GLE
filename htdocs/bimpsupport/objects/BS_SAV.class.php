@@ -7113,7 +7113,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $subject = 'LDLDC - Votre bon de prise en charge PC-' . $this->getRef();
 
                     $message = 'Bonjour, ' . "\n\n";
-                    $message .= 'Vous trouverez ci-joint votre bon de prise en charge PC-' . $this->getRef() . "\n\n";
+                    $message .= 'Vous trouverez ci-joint votre bon de prise en charge PC-' . $this->getLink() . "\n\n";
                     $message .= 'Merci d\'avoir choisi LDLC' . "\n\n";
                     $message .= 'Cordialement';
 

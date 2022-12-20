@@ -1428,16 +1428,10 @@ class ObjectLine extends BimpObject
             return array();
         }
 
-        $key = $this->object_name . '_' . $this->id . '_remises_arrieres_array';
-
-        if (!isset(self::$cache[$key])) {
-            self::$cache[$key] = BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineRemiseArriere', array(
-                        'id_object_line' => (int) $this->id,
-                        'object_type'    => static::$parent_comm_type
-            ));
-        }
-
-        return self::$cache[$key];
+        return BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineRemiseArriere', array(
+                    'id_object_line' => (int) $this->id,
+                    'object_type'    => static::$parent_comm_type
+        ));
     }
 
     public function getRemiseArriere($type = '')
@@ -1697,7 +1691,7 @@ class ObjectLine extends BimpObject
         $total = 0;
         $qty = ($full_qty ? $this->getFullQty() : (float) $this->qty);
 
-        $remises = $this->getChildrenObjects('remises_arrieres');
+        $remises = $this->getRemisesArrieres();
 
         foreach ($remises as $remise) {
             $total += $remise->getRemiseAmount() * $qty;
@@ -1991,7 +1985,7 @@ class ObjectLine extends BimpObject
                         $html .= BimpTools::displayMoneyValue((float) $pa_ht, 'EUR', 0, 0, 0, 2, 1);
                     }
 
-                    $remises_arrieres = $this->getChildrenObjects('remises_arrieres');
+                    $remises_arrieres = $this->getRemisesArrieres();
                     if (!empty($remises_arrieres)) {
                         foreach ($remises_arrieres as $remise_arriere) {
                             $remise_amount = (float) $remise_arriere->getRemiseAmount();
@@ -3735,7 +3729,7 @@ class ObjectLine extends BimpObject
 
         if ($this->isLoaded($errors)) {
             if (BimpObject::objectLoaded($origin) && is_a($origin, 'ObjectLine')) {
-                $remises = $origin->getChildrenObjects('remises_arrieres');
+                $remises = $origin->getRemisesArrieres();
 
                 if (!empty($remises)) {
                     foreach ($remises as $remise) {
@@ -3784,7 +3778,7 @@ class ObjectLine extends BimpObject
             $this->remises = null;
             $this->calcRemise();
         } elseif (is_a($child, 'ObjectLineRemiseArriere')) {
-            $remises = $this->getChildrenObjects('remises_arrieres');
+            $remises = $this->getRemisesArrieres();
             $remise_pa = 0;
 
             foreach ($remises as $remise) {
@@ -3823,7 +3817,7 @@ class ObjectLine extends BimpObject
                 $this->updateField('remise_crt', 0);
             }
 
-            $remises = $this->getChildrenObjects('remises_arrieres');
+            $remises = $this->getRemisesArrieres();
             $remise_pa = 0;
 
             foreach ($remises as $remise) {

@@ -4054,7 +4054,7 @@ class Bimp_Facture extends BimpComm
                         }
                     } elseif ($line->isArticleLine()) {
                         // Création des revalorisations sur Remise arrière: 
-                        $remises_arrieres = $line->getChildrenObjects('remises_arrieres');
+                        $remises_arrieres = $line->getRemisesArrieres();
                         if (!empty($remises_arrieres)) {
                             foreach ($remises_arrieres as $remise_arriere) {
                                 $remise_pa = $remise_arriere->getRemiseAmount();

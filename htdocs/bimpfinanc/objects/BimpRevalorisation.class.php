@@ -6,7 +6,7 @@ class BimpRevalorisation extends BimpObject
     public static $status_list = array(
         0  => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         10 => array('label' => 'Déclarée', 'icon' => 'fas_pause-circle', 'classes' => array('success')),
-        20 => array('label' => 'Attente serial', 'icon' => 'fas_pause-circle', 'classes' => array('warning')),
+        20 => array('label' => 'Attente équipements', 'icon' => 'fas_pause-circle', 'classes' => array('warning')),
         1  => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
         2  => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
@@ -110,13 +110,11 @@ class BimpRevalorisation extends BimpObject
                         $instance->updateField('status', $data['status']);
                     }
                 }
-            }
-            elseif ($data['status'] == 0 ) {
+            } elseif ($data['status'] == 0) {
                 if ($instance->getData('type') == 'applecare' && $instance->getData('status') != 20) {
                     $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
                 }
-            }
-            else {
+            } else {
                 $errors[] = 'Action non géré';
             }
         } else {
@@ -248,6 +246,19 @@ class BimpRevalorisation extends BimpObject
         return 1;
     }
 
+    public function isValidable()
+    {
+        if ($this->getData('type') == 'crt') {
+            if ($this->getData('status') == 10)
+                return 1;
+        } elseif ($this->getData('type') == 'applecare') {
+            if ($this->getData('status') == 0)
+                return 1;
+        } else
+            return 1;
+        return 0;
+    }
+
     // Getters array: 
 
     public function getDraftCommissionArray()
@@ -311,6 +322,140 @@ class BimpRevalorisation extends BimpObject
         }
 
         return $return;
+    }
+
+    public function getAvailableEquipmentsArray()
+    {
+        if (!$this->isLoaded()) {
+            return array();
+        }
+
+        $items = array();
+        $factures = array();
+        $facture = $this->getChildObject('facture');
+
+        if (BimpObject::objectLoaded($facture)) {
+            $factures[$facture->id] = array(
+                'ref'   => $facture->getRef(),
+                'prods' => array()
+            );
+            $id_client = (int) $facture->getData('fk_soc');
+            if ($id_client) {
+                $where = 'fk_soc = ' . $id_client . ' AND fk_statut IN (0,1,2) AND type IN (0,1,2)';
+                $facs = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'facnumber'));
+
+                if (is_array($facs)) {
+                    foreach ($facs as $f) {
+                        $factures[(int) $f['rowid']] = array(
+                            'ref'   => $f['facnumber'],
+                            'prods' => array()
+                        );
+                    }
+                }
+            }
+
+            $all_eqs = array();
+
+            foreach ($factures as $id_fac => $fac_data) {
+                $prods = array();
+                $sql = BimpTools::getSqlFullSelectQuery('object_line_equipment', array('e.id', 'e.id_product', 'e.serial', 'p.ref'), array(
+                            'f.rowid'        => $id_fac,
+                            'a.object_type'  => 'facture',
+                            'a.id_equipment' => array(
+                                'operator' => '>',
+                                'value'    => 0
+                            ),
+                            'e.id_product'   => array(
+                                'operator' => '>',
+                                'value'    => 0
+                            ),
+                                ), array(
+                            'l' => array(
+                                'alias' => 'l',
+                                'table' => 'bimp_facture_line',
+                                'on'    => 'l.id = a.id_object_line'
+                            ),
+                            'f' => array(
+                                'alias' => 'f',
+                                'table' => 'facture',
+                                'on'    => 'f.rowid = l.id_obj'
+                            ),
+                            'e' => array(
+                                'alias' => 'e',
+                                'table' => 'be_equipment',
+                                'on'    => 'e.id = a.id_equipment'
+                            ),
+                            'p' => array(
+                                'alias' => 'p',
+                                'table' => 'product',
+                                'on'    => 'p.rowid = e.id_product'
+                            )
+                ));
+
+                $rows = $this->db->executeS($sql, 'array');
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        if (in_array((int) $r['id'], $all_eqs)) {
+                            continue;
+                        }
+
+                        $id = $this->db->getValue('bimp_revalorisation', 'id', 'equipments LIKE \'[' . (int) $r['id'] . ']\' AND type = \'applecare\' AND id != ' . $this->id);
+                        if ($id) {
+                            continue;
+                        }
+
+                        if (!isset($prods[(int) $r['id_product']])) {
+                            $prods[(int) $r['id_product']] = array(
+                                'ref' => $r['ref'],
+                                'eqs' => array()
+                            );
+                        }
+
+                        $prods[(int) $r['id_product']]['eqs'][(int) $r['id']] = $r['serial'];
+                        $all_eqs[] = (int) $r['id'];
+                    }
+
+                    if (!empty($prods)) {
+                        $factures[$id_fac]['prods'] = $prods;
+                    }
+                }
+            }
+
+            foreach ($factures as $id_fac => $fac_data) {
+                if (!empty($fac_data['prods'])) {
+                    $fac_item = array(
+                        'label'      => 'Facture ' . $fac_data['ref'],
+                        'selectable' => 0,
+                        'open'       => ($id_fac == $facture->id ? 1 : 0),
+                        'children'   => array()
+                    );
+
+                    foreach ($fac_data['prods'] as $id_prod => $prod_data) {
+                        if (empty($prod_data['eqs'])) {
+                            continue;
+                        }
+
+                        $prod_item = array(
+                            'label'      => 'Produit ' . $prod_data['ref'],
+                            'selectable' => 0,
+                            'open'       => 1,
+                            'children'   => array()
+                        );
+
+                        foreach ($prod_data['eqs'] as $id_eq => $serial) {
+                            $prod_item['children'][$id_eq] = $serial;
+                        }
+
+                        $fac_item['children'][] = $prod_item;
+                    }
+
+                    $items[] = $fac_item;
+                }
+            }
+        }
+
+        return $items;
     }
 
     // Getters Données: 
@@ -388,21 +533,6 @@ class BimpRevalorisation extends BimpObject
     }
 
     // Getters params: 
-    
-    public function isValidable(){
-        if($this->getData('type') == 'crt'){
-            if($this->getData('status') == 10)
-                return 1;
-        }
-        elseif($this->getData('type') == 'applecare'){
-            if($this->getData('status') == 0)
-                return 1;
-        }
-        else
-            return 1;
-        return 0;
-            
-    }
 
     public function getActionsButtons()
     {
@@ -440,14 +570,13 @@ class BimpRevalorisation extends BimpObject
                         ))
                     );
                 }
-                if ($this->getData('status') == 20 && $this->getData('type') == 'applecare')
+                if (!in_array((int) $this->getData('status'), array(1, 2)) && $this->getData('type') == 'applecare') {
                     $buttons[] = array(
-                        'label'   => 'Enregistrer numéro de série',
-                        'icon'    => 'fas_pause-circle',
-                        'onclick' => $this->getJsActionOnclick('process', array(
-                            'type' => 'setSerial'
-                                ), array('form_name' => 'setSerial'))
+                        'label'   => 'Attribuer les équipements',
+                        'icon'    => 'fas_arrow-circle-down',
+                        'onclick' => $this->getJsLoadModalForm('set_equipments', 'Attribuer les équipements')
                     );
+                }
             } elseif ($this->isActionAllowed('cancelProcess') && $this->canSetAction('cancelProcess')) {
                 $label = 'Annuler ';
                 switch ((int) $this->getData('status')) {
@@ -800,6 +929,34 @@ class BimpRevalorisation extends BimpObject
 
     // Overrides: 
 
+    public function validate()
+    {
+        $errors = array();
+
+        $eqs = $this->getData('equipments');
+        if (count($eqs) > (int) $this->getData('qty')) {
+            $errors[] = 'Veuillez retirer ' . (count($eqs) - (int) $this->getData('qty')) . ' équipements';
+        }
+
+        if ($this->getData('type') === 'applecare') {
+            if (count($eqs) == (int) $this->getData('qty')) {
+                if ((int) $this->getData('status') == 20) {
+                    $this->set('status', 0);
+                }
+            } else {
+                if ((int) $this->getData('status') == 0) {
+                    $this->set('status', 20);
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            $errors = parent::validate();
+        }
+
+        return $errors;
+    }
+
     public function onSave(&$errors = array(), &$warnings = array())
     {
         parent::onSave($errors, $warnings);
@@ -850,10 +1007,6 @@ class BimpRevalorisation extends BimpObject
                 }
             }
         } else {
-            if($this->getData('type') == 'applecare' && $this->getData('serial') == ''){
-                $this->set('status', 20);
-            }
-            
             $errors = parent::create($warnings, $force_create);
         }
 

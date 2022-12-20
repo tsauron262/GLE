@@ -6530,7 +6530,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $list;
     }
 
-    public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false)
+    public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false, $withLinked = true)
     {
         if ($this->isLoaded()) {
             if ($archive) {
@@ -6555,34 +6555,36 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             if (BimpCore::getConf('date_archive', '') != '') {
-                $btnHisto = '<div id="notes_archives_' . $this->object_name . '_container">';
-                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . "_container')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
+                $btnHisto = '<div id="notes_archives_' . $this->object_name .'_'.$list->identifier. '_container">';
+                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name.'_'.$list->identifier . "_container')", array($filter_by_user, $list_model, $suffixe, true, $withLinked)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
                 $btnHisto .= '</div>';
             }
 
             $sup = '';
-            $linkedObjects = $this->getFullLinkedObjetsArray(false);
-            if (count($linkedObjects) > 0) {
-                $filterLinked = array('linked' => array('or' => array()));
-                foreach ($linkedObjects as $data_linked => $inut) {
-                    $data_linked = json_decode($data_linked, true);
-                    if ($data_linked['object_name'] != 'BS_SAV') {
-                        $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
-                                'obj_module' => $data_linked['module'],
-                                'obj_name'   => $data_linked['object_name'],
-                                'id_obj'     => $data_linked['id_object']
-                        ));
+            if($withLinked && $withLinked !== 'false'){
+                $linkedObjects = $this->getFullLinkedObjetsArray(false);
+                if (count($linkedObjects) > 0) {
+                    $filterLinked = array('linked' => array('or' => array()));
+                    foreach ($linkedObjects as $data_linked => $inut) {
+                        $data_linked = json_decode($data_linked, true);
+                        if ($data_linked['object_name'] != 'BS_SAV') {
+                            $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
+                                    'obj_module' => $data_linked['module'],
+                                    'obj_name'   => $data_linked['object_name'],
+                                    'id_obj'     => $data_linked['id_object']
+                            ));
+                        }
                     }
-                }
-                $nb = count($filterLinked['linked']['or']);
-                if ($nb > 60)
-                    BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')');
+                    $nb = count($filterLinked['linked']['or']);
+                    if ($nb > 60)
+                        BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')');
 
-                $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');
-                $list2->addIdentifierSuffix($suffixe . '_linked');
-                $list2->addFieldFilterValue('obj_type', 'bimp_object');
-                $list2->addFieldFilterValue('custom', $filterLinked['linked']);
-                $sup = $list2->renderHtml();
+                    $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');
+                    $list2->addIdentifierSuffix($suffixe . '_linked');
+                    $list2->addFieldFilterValue('obj_type', 'bimp_object');
+                    $list2->addFieldFilterValue('custom', $filterLinked['linked']);
+                    $sup .= $list2->renderHtml();
+                }
             }
 
             return $list->renderHtml() . $sup . ($archive == false ? $btnHisto : '');

@@ -54,7 +54,7 @@ lists:
             - label: supprimer les remises sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
-        enable_search: 0
+        enable_search: 1
         sort_field: id
         sort_way: desc
         n: 10
@@ -75,6 +75,7 @@ lists:
         extends: default
         add_btn: 1     
         add_form_name: default
+        enable_search: 0
         cols: 
             id_product: unset
             

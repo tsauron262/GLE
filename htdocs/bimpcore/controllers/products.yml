@@ -47,6 +47,10 @@ objects:
         instance: 
             bimp_object: Bimp_ProductFournisseurPrice 
             
+    remises_arrieres: 
+        instance: 
+            bimp_object: Bimp_ProductRA
+            
 sections:
     - type: tabs
       tabs: 
@@ -118,4 +122,12 @@ sections:
                   list: 
                       panel: 1
                       object: values8sens
+                      name: default
+        remises_arrieres: 
+            label: Remises arrières
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: remises_arrieres
                       name: default

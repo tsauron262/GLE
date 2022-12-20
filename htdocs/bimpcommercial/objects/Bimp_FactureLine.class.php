@@ -57,7 +57,6 @@ class Bimp_FactureLine extends ObjectLine
                 return 1;
 
             case 'remise_crt':
-            case 'remise_crt_percent':
                 if (!$this->isParentDraft()) {
                     return 0;
                 }

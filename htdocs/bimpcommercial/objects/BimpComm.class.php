@@ -675,12 +675,13 @@ class BimpComm extends BimpDolObject
 
         return $buttons;
     }
-    
-    public function canSetAction($action) {
+
+    public function canSetAction($action)
+    {
         global $user;
-        if($action == 'checkTotal' && !$user->admin)
+        if ($action == 'checkTotal' && !$user->admin)
             return 0;
-        if($action == 'checkMarge' && !$user->admin)
+        if ($action == 'checkMarge' && !$user->admin)
             return 0;
         return parent::canSetAction($action);
     }
@@ -2058,26 +2059,27 @@ class BimpComm extends BimpDolObject
     public function renderMarginTableExtra($marginInfo)
     {
         if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande'))) {
-            $remises_crt = 0;
+            $remises_arrieres = 0;
 
             $lines = $this->getLines('not_text');
 
             foreach ($lines as $line) {
-                $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+                $remises_arrieres += $line->getTotalRemisesArrieres(false);
+                ;
             }
 
             $total_pv = (float) $marginInfo['pv_total'];
             $total_pa = (float) $marginInfo['pa_total'];
 
-            if ($remises_crt) {
+            if ($remises_arrieres) {
                 $html .= '<tr>';
                 $html .= '<td>Remises arrière prévues</td>';
                 $html .= '<td></td>';
-                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '', 0, 0, 0, 2, 1) . '</span></td>';
+                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_arrieres, '', 0, 0, 0, 2, 1) . '</span></td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
-                $total_pa -= $remises_crt;
+                $total_pa -= $remises_arrieres;
             }
 
             if ((float) $total_pa !== (float) $marginInfo['pa_total']) {
@@ -2895,6 +2897,7 @@ class BimpComm extends BimpDolObject
                         ), '`' . $line::$dol_line_primary . '` = ' . (int) $line->getData('id_line'));
             }
 
+            $new_line->no_remises_arrieres_auto_create = true;
             $line_errors = $new_line->create($warnings, true);
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne n°' . $i);
@@ -2937,6 +2940,7 @@ class BimpComm extends BimpDolObject
 
             // Création des remises pour la ligne en cours:
             $errors = BimpTools::merge_array($errors, $new_line->copyRemisesFromOrigin($line, ((int) $params['inverse_prices'] || (int) $params['inverse_qty']), $params['copy_remises_globales']));
+            $errors = BimpTools::merge_array($errors, $new_line->copyRemisesArrieresFromOrigine($line));
         }
 
         // Attribution des lignes parentes: 
@@ -4454,53 +4458,52 @@ class BimpComm extends BimpDolObject
 
         return $data;
     }
-    
+
     //graph
-    
+
     public function getInfoGraph($graphName)
     {
         $data = parent::getInfoGraph($graphName);
-        $arrondirEnMinuteGraph = 60*12;
-        $data["data1"] = array("name"=>'Nb', "type" => "column");
-        $data["data2"] = array("name"=>'Total HT', "type" => "column");
+        $arrondirEnMinuteGraph = 60 * 12;
+        $data["data1"] = array("name" => 'Nb', "type" => "column");
+        $data["data2"] = array("name" => 'Total HT', "type" => "column");
         $data["axeX"] = array("title" => "Date", "valueFormatString" => 'DD MMM YYYY');
 //        $data["axeY"] = array("title" => 'Nb');
-        $data["params"] = array('minutes'=>$arrondirEnMinuteGraph);
-        $data["title"] = ucfirst($this->getLabel('name_plur')).' par jour';
+        $data["params"] = array('minutes' => $arrondirEnMinuteGraph);
+        $data["title"] = ucfirst($this->getLabel('name_plur')) . ' par jour';
 
         return $data;
     }
-    
+
     public function getGraphDatasPoints($params)
     {
         $result = array();
-        
+
         $fieldTotal = 'total_ht';
-        if($this->object_name == 'Bimp_Propal')
+        if ($this->object_name == 'Bimp_Propal')
             $dateStr = "UNIX_TIMESTAMP(datep)";
-        elseif($this->object_name == 'Bimp_Facture'){
+        elseif ($this->object_name == 'Bimp_Facture') {
             $dateStr = "UNIX_TIMESTAMP(datef)";
             $fieldTotal = 'total';
-        }
-        else
+        } else
             $dateStr = "UNIX_TIMESTAMP(date_commande)";
-        
-        
-        $req = 'SELECT count(*) as nb, SUM('.$fieldTotal.') as total_ht, '.$dateStr.' as timestamp FROM '.MAIN_DB_PREFIX.$this->params['table'].' a ';
+
+
+        $req = 'SELECT count(*) as nb, SUM(' . $fieldTotal . ') as total_ht, ' . $dateStr . ' as timestamp FROM ' . MAIN_DB_PREFIX . $this->params['table'] . ' a ';
         $filter = array();
-        foreach(json_decode(BimpTools::getPostFieldValue('param_list_filters'), true) as $filterT){
-            if(isset($filterT['filter']) && is_array($filterT['filter']))
+        foreach (json_decode(BimpTools::getPostFieldValue('param_list_filters'), true) as $filterT) {
+            if (isset($filterT['filter']) && is_array($filterT['filter']))
                 $filter[] = $filterT['filter'];
-            elseif(isset($filterT['filter']) && isset($filterT['name']))
+            elseif (isset($filterT['filter']) && isset($filterT['name']))
                 $filter[$filterT['name']] = $filterT['filter'];
         }
         $req .= BimpTools::getSqlWhere($filter);
-        $req .= ' GROUP BY '.$dateStr;
+        $req .= ' GROUP BY ' . $dateStr;
         $sql = $this->db->db->query($req);
-        while($ln = $this->db->db->fetch_object($sql)){
+        while ($ln = $this->db->db->fetch_object($sql)) {
             $tabDate = array($ln->annee, $ln->month, $ln->day, $ln->hour, $ln->minute);
-            $result[1][] = array("x" => "new Date(" . $ln->timestamp*1000 . ")", "y" => (int)$ln->nb);
-            $result[2][] = array("x" => "new Date(" . $ln->timestamp*1000 . ")", "y" => (int)$ln->total_ht);
+            $result[1][] = array("x" => "new Date(" . $ln->timestamp * 1000 . ")", "y" => (int) $ln->nb);
+            $result[2][] = array("x" => "new Date(" . $ln->timestamp * 1000 . ")", "y" => (int) $ln->total_ht);
         }
 
         return $result;

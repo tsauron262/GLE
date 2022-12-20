@@ -33,4 +33,4 @@ objects:
                 
 lists: 
     default: 
-        objects_change_reload: ObjectLineRemise,Bimp_Propal
+        objects_change_reload: ObjectLineRemise,RemiseGlobale,ObjectLineRemiseArriere,Bimp_Propal

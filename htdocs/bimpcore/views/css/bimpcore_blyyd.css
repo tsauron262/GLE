@@ -10415,9 +10415,10 @@ table.objectlistTable {
       table.objectlistTable > tbody > tr > td .qty_inputContainer {
         min-width: 160px; }
       /* line 84, ../scss/bimpcore/_list.scss */
-      table.bimp_list_table > tbody > tr > td .inputHelp, table.bimp_list_table > tbody > tr > td .inputInfo,
+      table.bimp_list_table > tbody > tr > td .inputHelp, table.bimp_list_table > tbody > tr > td .inputInfo, table.bimp_list_table > tbody > tr > td .texarea_values,
       table.objectlistTable > tbody > tr > td .inputHelp,
-      table.objectlistTable > tbody > tr > td .inputInfo {
+      table.objectlistTable > tbody > tr > td .inputInfo,
+      table.objectlistTable > tbody > tr > td .texarea_values {
         display: none; }
       /* line 88, ../scss/bimpcore/_list.scss */
       table.bimp_list_table > tbody > tr > td .inputGroupContainer,

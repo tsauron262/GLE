@@ -1,0 +1,86 @@
+
+table: object_line_remise_arriere
+common_fields: 0
+icon: fas_percent
+
+labels: 
+    name: remise arrière sur PA
+    name_plur: remises arrières sur PA
+    is_female: 1
+    
+parent_module: bimpcommercial
+parent_object: ObjectLine
+parent_id_property: id_object_line
+                
+fields: 
+    id_object_line: 
+        label: Ligne
+        type: id_parent
+        
+    object_type: 
+        label: Type objet lié
+        input:
+            type: hidden
+        required: 1
+        
+    type: 
+        label: Type
+        values: 
+            array: types
+        default_value: oth
+            
+    label: 
+        label: Libellé
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+    
+    value: 
+        label: Valeur
+        type: percent
+        default_value: 0
+        decimals: 8
+        min: 0
+        max: 100
+            
+forms: 
+    default: 
+        rows: 
+            - field: object_type
+            - field: label
+            - field: value
+            
+lists: 
+    default: 
+        title: Remises arrières sur le PA
+        icon: percent
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les remises arrières sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
+        enable_search: 0
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_btn: 1
+        add_form_name: default
+        add_form_values: 
+            fields: 
+                object_type: 
+                    callback: getParentObjectType
+        edit_btn:
+            callback: isParentEditable
+        delete_btn:
+            callback: isParentEditable
+        header_buttons:
+            callback: getListExtraHeaderButtons
+        cols:
+            label: 
+            type: 
+            value: 
+            
+            

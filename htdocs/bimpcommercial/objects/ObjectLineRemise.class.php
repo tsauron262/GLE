@@ -19,7 +19,6 @@ class ObjectLineRemise extends BimpObject
         if (BimpObject::objectLoaded($parent)) {
             return (int) $parent->isRemiseEditable();
         }
-
         return 0;
     }
 
@@ -63,6 +62,13 @@ class ObjectLineRemise extends BimpObject
                 array(
                     'name'   => 'object_type',
                     'filter' => BimpTools::getValue('extra_data/parent_object_type', '')
+                )
+            );
+        } elseif ((string) $this->getData('object_type')) {
+            return array(
+                array(
+                    'name'   => 'object_type',
+                    'filter' => $this->getData('object_type')
                 )
             );
         }

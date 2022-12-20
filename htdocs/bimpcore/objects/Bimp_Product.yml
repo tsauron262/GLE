@@ -26,14 +26,7 @@ nom_url:
 labels: 
     name: produit
     
-objects: 
-    prices: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_ProductPrice
+objects:
     fourn_price: 
         relation: hasOne
         delete: 0
@@ -92,6 +85,24 @@ objects:
                 module: bimpcore
                 name: BimpProductCurPa
         
+    prices: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductPrice
+        list: 
+            title: Historique des prix de vente
+            
+    remises_arrieres: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductRA
+            
 fields: 
     ref: 
         label: Réf.
@@ -350,22 +361,6 @@ fields:
         dol_extra_field: 1
         default_value: 0
         
-    crt: 
-        label: Remise arrière
-        type: percent
-        decimals: 3
-        dol_extra_field: 1
-        default_value: 0
-        user_edit: 1
-        display_if:
-            field_name: type_remise_arr
-            hide_values: 0
-    type_remise_arr:
-        label: Type de remise arriére
-        type: int
-        values: 
-            array: types_remise_arr
-        
     accountancy_code_sell:
         label: Code comptable Vente (Spécifique)
         type: string
@@ -617,8 +612,6 @@ forms:
             - field: tva_tx
             - field: deee
             - field: rpcp
-            - field: type_remise_arr
-            - field: crt
             - field: gamme
             - field: categorie
             - field: collection
@@ -904,7 +897,6 @@ fields_tables:
             - field: deee
             - field: rpcp
             - field: type_remise_arr
-            - field: crt
             
     prices_buy: 
         title: Prix d'achat
@@ -992,15 +984,7 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: prices
-                
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: prices_buy
-                     
-            - cols: 
+                      
                 - type: list
                   col_lg: 6
                   col_md: 6
@@ -1008,6 +992,15 @@ views:
                   list: 
                       children: prices
                       name: product
+                     
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: prices_buy
+                      
                 - type: list
                   col_lg: 6
                   col_md: 6
@@ -1017,6 +1010,15 @@ views:
                   list: 
                       children: cur_prix_achats
                       name: product
+                      
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  list: 
+                      children: remises_arrieres
+                      name: product
+                      
             - cols: 
                 - type: list
                   list: 
@@ -1025,11 +1027,6 @@ views:
                 - type: custom
                   custom: 
                       callback: renderFournPricesReports
-#                - type: custom
-#                  col_lg: 12
-#                  col_md: 12
-#                  custom:
-#                      callback: renderListeVente
                       
     product_note:
         rows:

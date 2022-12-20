@@ -468,17 +468,17 @@ class ValidComm extends BimpObject
         // Percent prix de vente %
         $percent_pv = (float) $infos_remises['remise_total_percent'];
 
-        // CRT
+        // Remises arrières : 
         if (!is_a($object, 'BContract_contrat')) {
             $lines = $object->getLines('not_text');
-            $remises_crt = 0;
+            $remises_arrieres = 0;
             foreach ($lines as $line) {
-                $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+                $remises_arrieres += (float) $line->getTotalRemisesArrieres(false);
             }
 
             // Percent de marge
             $margin_infos = $object->getMarginInfosArray();
-            $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['margin_on_products'] + $remises_crt;
+            $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['margin_on_products'] + $remises_arrieres;
             if ($infos_remises['remise_total_amount_ht'] == 0)
                 $percent_marge = 0;
             else
@@ -494,7 +494,7 @@ class ValidComm extends BimpObject
             $client = $object->getChildObject('client');
 
         if (is_null($client)) {
-            $errors[] = "Le client de cette pièce a mal été chargé, merci de réitéré la requête";
+            $errors[] = "Le client de cette pièce a mal été chargé, merci de réitérer la requête";
             return;
         }
 

@@ -387,6 +387,12 @@ class BContract_contratLine extends BContract_contrat {
         return BimpTools::json_decode_array($this->getData('serials'));
     }
     
+    public function getLink($params = [], $forced_context = '') {
+        $prod = $this->getChildObject('produit');
+        $parent = $this->getParentInstance();
+        return $parent->getLink($params, $forced_context) .' : '.(is_object($prod) && $prod->isLoaded() ? $prod->getLink($params, $forced_context) : 'pas de ligne liée');
+    }
+    
     public function actionSetSerial($data, &$success) {
         $to_insert = [];
         $all = explode("\n", $data['serials']);

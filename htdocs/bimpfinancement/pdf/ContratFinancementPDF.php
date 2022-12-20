@@ -16,6 +16,11 @@ class ContratFinancementPDF extends DocFinancementPDF
     public $loueur_data;
     public $cessionnaire_data;
 
+    # Params:
+    public static $full_blocs = array(
+        'renderAfterLines' => 0
+    );
+
     public function __construct($db, $demande, $client_data = array(), $loueur_data = array(), $cessionnaire_data = array())
     {
         $this->client_data = $client_data;
@@ -23,12 +28,23 @@ class ContratFinancementPDF extends DocFinancementPDF
         $this->cessionnaire_data = $cessionnaire_data;
 
         parent::__construct($db, $demande);
+        
         $this->doc_name = 'Contrat de location';
+        $this->concat_files[] = DOL_DOCUMENT_ROOT . 'bimpfinancement/pdf/cg_contrat.pdf';
+        $this->concat_files[] = DOL_DOCUMENT_ROOT . 'bimpfinancement/pdf/mandat_sepa.pdf';
     }
 
     public function initData()
     {
         
+    }
+
+    public function initHeader()
+    {
+        parent::initHeader();
+        $this->header_vars['doc_ref'] = '';
+        $this->header_vars['doc_name'] = '';
+        $this->pdf->topMargin = 30;
     }
 
     public function isTargetCompany()
@@ -43,6 +59,13 @@ class ContratFinancementPDF extends DocFinancementPDF
     public function renderTop()
     {
         $html = '';
+
+        $html .= '<div style="font-size: 12px; font-weight: bold; text-align: center; color: #' . $this->primary . '">';
+        $html .= 'CONTRAT DE LOCATION <br/>';
+        $html .= '<span style="font-size: 10px; font-weight: normal; text-align: center; color: #000000">';
+        $html .= 'N° ' . str_replace('DF', '', $this->demande->getRef());
+        $html .= '</span>';
+        $html .= '</div>';
 
         $html .= '<div style="font-size: 9px">';
         $html .= '<p style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Le locataire</p>';
@@ -180,6 +203,9 @@ class ContratFinancementPDF extends DocFinancementPDF
                 break;
         }
 
+        $this->writeFullBlock($html);
+        $html = '';
+
         $livraisons = BimpTools::getArrayValueFromPath($this->client_data, 'livraisons', '');
         if ($livraisons) {
             $html .= '<div style="font-size: 9px">';
@@ -189,6 +215,9 @@ class ContratFinancementPDF extends DocFinancementPDF
             $html .= '</p>';
             $html .= '</div>';
         }
+
+        $this->writeFullBlock($html);
+        $html = '';
 
         $html .= '<div style="font-size: 9px">';
         $html .= '<p>';
@@ -209,7 +238,7 @@ class ContratFinancementPDF extends DocFinancementPDF
         $html .= '<p>Fait à Limonest, le ' . date('d / m / Y') . ' </p>';
         $html .= '</div>';
 
-        $this->writeContent($html);
+        $this->writeFullBlock($html);
     }
 
     public function renderSignatureBloc()
@@ -263,12 +292,14 @@ class ContratFinancementPDF extends DocFinancementPDF
 
             $this->signature_params['locataire'] = array(
                 'elec'     => array(
-                    'x_pos'         => 12,
-                    'y_pos'         => $yPos + 30,
-                    'page'          => $page,
-                    'width'         => 40,
-                    'date_x_offset' => 7,
-                    'date_y_offset' => -8
+                    'x_pos'            => 12,
+                    'y_pos'            => $yPos + 30,
+                    'page'             => $page,
+                    'width'            => 40,
+                    'date_x_offset'    => 7,
+                    'date_y_offset'    => -8,
+                    'display_nom'      => 0,
+                    'display_fonction' => 0
                 ),
                 'docusign' => array(
                     'anch' => 'Pour le locataire :',
@@ -283,12 +314,14 @@ class ContratFinancementPDF extends DocFinancementPDF
             );
             $this->signature_params['cessionnaire'] = array(
                 'elec'     => array(
-                    'x_pos'         => 131,
-                    'y_pos'         => $yPos + 30,
-                    'page'          => $page,
-                    'width'         => 40,
-                    'date_x_offset' => 7,
-                    'date_y_offset' => -8
+                    'x_pos'            => 131,
+                    'y_pos'            => $yPos + 30,
+                    'page'             => $page,
+                    'width'            => 40,
+                    'date_x_offset'    => 7,
+                    'date_y_offset'    => -8,
+                    'display_nom'      => 0,
+                    'display_fonction' => 0
                 ),
                 'docusign' => array(
                     'anch' => 'Pour le cessionnaire :',
@@ -303,12 +336,14 @@ class ContratFinancementPDF extends DocFinancementPDF
             );
             $this->signature_params['loueur'] = array(
                 'elec'     => array(
-                    'x_pos'         => 71,
-                    'y_pos'         => $yPos + 30,
-                    'page'          => $page,
-                    'width'         => 40,
-                    'date_x_offset' => 7,
-                    'date_y_offset' => -8
+                    'x_pos'            => 71,
+                    'y_pos'            => $yPos + 30,
+                    'page'             => $page,
+                    'width'            => 40,
+                    'date_x_offset'    => 7,
+                    'date_y_offset'    => -8,
+                    'display_nom'      => 0,
+                    'display_fonction' => 0
                 ),
                 'docusign' => array(
                     'anch' => 'Pour le loueur :',

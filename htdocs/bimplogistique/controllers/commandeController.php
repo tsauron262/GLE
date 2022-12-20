@@ -81,28 +81,42 @@ class commandeController extends BimpController
             $tabs_header .= '</div>';
         }
 
-        $html .= BimpRender::renderNavTabs(array(
-                    array(
-                        'id'      => 'reservations',
-                        'title'   => 'Logistique produits / services',
-                        'content' => $tabs_header . $this->renderCommandesLinesLogisticTab($commande)
-                    ),
-                    array(
-                        'id'      => 'shipments',
-                        'title'   => 'Expéditions',
-                        'content' => $tabs_header . $this->renderShipmentsTab($commande)
-                    ),
-                    array(
-                        'id'      => 'supplier_orders',
-                        'title'   => 'Commandes fournisseurs',
-                        'content' => $tabs_header . $this->renderSupplierOrdersTab($commande)
-                    ),
-                    array(
-                        'id'      => 'invoices',
-                        'title'   => 'Factures / Avoirs',
-                        'content' => $tabs_header . $this->renderFacturesTab($commande)
-                    ),
-        ));
+        $tabs = array(
+            array(
+                'id'      => 'reservations',
+                'title'   => 'Logistique produits / services',
+                'content' => $tabs_header . $this->renderCommandesLinesLogisticTab($commande)
+            ),
+            array(
+                'id'      => 'shipments',
+                'title'   => 'Expéditions',
+                'content' => $tabs_header . $this->renderShipmentsTab($commande)
+            ),
+            array(
+                'id'      => 'supplier_orders',
+                'title'   => 'Commandes fournisseurs',
+                'content' => $tabs_header . $this->renderSupplierOrdersTab($commande)
+            ),
+            array(
+                'id'      => 'invoices',
+                'title'   => 'Factures / Avoirs',
+                'content' => $tabs_header . $this->renderFacturesTab($commande)
+            )
+        );
+
+        if ($commande->field_exists('id_demande_fin') && (int) $commande->getData('id_demande_fin')) {
+            $df = $commande->getChildObject('demande_fin');
+            if (BimpObject::objectLoaded($df)) {
+                $tabs[] = array(
+                    'id'            => 'demande_financement_tab',
+                    'title'         => 'Demande de location',
+                    'ajax'          => 1,
+                    'ajax_callback' => $commande->getJsLoadCustomContent('renderDemandeFinancementView', '$(\'#demande_financement_tab .nav_tab_ajax_result\')', array('demande_financement_tab'), array('button' => ''))
+                );
+            }
+        }
+
+        $html .= BimpRender::renderNavTabs($tabs);
 
         $html .= $commande->renderNotesList(true);
 

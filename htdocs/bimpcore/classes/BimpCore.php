@@ -824,6 +824,13 @@ class BimpCore
         return $errors;
     }
 
+    public static function getUserGroupId($group_code)
+    {
+        // Codes groupes possibles: logistique / facturation / atradius / contrat / achat
+        
+        return (int) self::getConf('id_user_group_' . $group_code);
+    }
+
     // Gestion params yml globaux: 
 
     public static function getParam($full_path, $default_value = '', $type = 'string')
@@ -863,6 +870,11 @@ class BimpCore
 
     public static function isModuleActive($module)
     {
+        global $conf;
+        $name = strtoupper('MAIN_MODULE_'.$module);
+        if(isset($conf->global->$name) && $conf->global->$name)
+            return 1;
+        
         return ((string) self::getConf('module_version_' . $module, '') ? 1 : 0);
     }
 

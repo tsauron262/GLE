@@ -40,7 +40,7 @@ class BimpSignature extends BimpObject
         self::STATUS_NONE      => array('label' => 'En attente de signature', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::STATUS_SIGNED    => array('label' => 'Signée', 'icon' => 'fas_check', 'classes' => array('success'))
     );
-    
+
     // Droits users:
 
     public function canEditField($field_name)
@@ -245,7 +245,7 @@ class BimpSignature extends BimpObject
 
     // Getters params: 
 
-    public function getActionsButtons()
+    public function getActionsButtons($include_link = false)
     {
         $buttons = array();
 
@@ -314,6 +314,15 @@ class BimpSignature extends BimpObject
         }
 
         $buttons = BimpTools::merge_array($buttons, $this->getSignedButtons());
+
+        if ($include_link && $this->isLoaded()) {
+            $url = $this->getUrl();
+            $buttons[] = array(
+                'label'   => 'Accéder à la fiche signature',
+                'icon'    => 'far_file',
+                'onclick' => 'window.open(\'' . $url . '\');'
+            );
+        }
         return $buttons;
     }
 
@@ -363,11 +372,12 @@ class BimpSignature extends BimpObject
     public static function getDefaultSignDistEmailContent($type = 'elec')
     {
         $message = 'Bonjour, <br/><br/>';
-        $message .= 'La signature du document "{NOM_DOCUMENT}" pour {NOM_PIECE} {REF_PIECE}  est en attente.<br/><br/>';
+//        $message .= 'La signature du document "{NOM_DOCUMENT}" pour {NOM_PIECE} {REF_PIECE}  est en attente.<br/><br/>';
+        $message .= '{NOM_PIECE} {REF_PIECE} est en attente de validation.<br/><br/>';
 
         switch ($type) {
             case 'docusign':
-                $message .= 'Merci de bien vouloir effectuer la signature électronique de ce document en suivant les instructions DocuSign.<br/><br/>';
+                $message .= 'Merci de bien vouloir le signer électroniquement en suivant les instructions DocuSign.<br/><br/>';
                 break;
 
             case 'elec':
@@ -376,7 +386,7 @@ class BimpSignature extends BimpObject
                 break;
         }
 
-        $message .= 'Vous en remerciant par avance, nous restons à votre disposition pour tout complément d\'information.<br/><br/>';
+        $message .= 'Vous en remerciant par avance, nous restons à votre disposition pour tout complément d\'information..<br/><br/>';
         $message .= 'Cordialement';
 
         $signature = BimpCore::getConf('signature_emails_client');
@@ -533,7 +543,7 @@ class BimpSignature extends BimpObject
                 return $params[$code_signataire][$type_params];
             }
         }
-        
+
         return array();
     }
 
@@ -594,7 +604,7 @@ class BimpSignature extends BimpObject
                         '{LIEN_ESPACE_CLIENT}'
                             ), array(
                         $doc_title,
-                        $nom_piece,
+                        ucfirst($nom_piece),
                         $ref_piece,
                         $lien_espace_client
                             ), $email_body);
@@ -792,7 +802,7 @@ class BimpSignature extends BimpObject
         return '';
     }
 
-    public function displayDocType()
+    public function displayDocType($of_the = false)
     {
         $type = $this->getData('doc_type');
 
@@ -800,7 +810,13 @@ class BimpSignature extends BimpObject
             $obj = $this->getObj();
 
             if (is_a($obj, 'BimpObject')) {
-                return $obj->getConf('signatures/' . $type . '/label', $type);
+                $label = $obj->getConf('signatures/' . $type . '/label', $type);
+
+                if ($of_the) {
+                    $label = BimpTools::getOfTheLabel($label, (int) $obj->getConf('signatures/' . $type . '/is_label_female', 0));
+                }
+
+                return $label;
             }
         }
 
@@ -896,18 +912,69 @@ class BimpSignature extends BimpObject
         return '';
     }
 
+    public function displayNoPublicAccessWarnings()
+    {
+        $html = '';
+
+        BimpObject::loadClass('bimpcore', 'BimpSignataire');
+        $signataires = $this->getChildrenObjects('signataires', array(
+            'type'       => BimpSignataire::TYPE_CLIENT,
+            'status'     => BimpSignataire::STATUS_NONE,
+            'allow_dist' => 1
+        ));
+
+        $missings = array();
+        $has_docusign = false;
+        foreach ($signataires as $signataire) {
+            $users = $signataire->getData('allowed_users_client');
+
+            if (empty($users)) {
+                $missings[] = $signataire;
+                if ((int) $signataire->getData('docusign_allowed')) {
+                    $has_docusign = true;
+                }
+            }
+        }
+
+        if (count($missings)) {
+            $msg .= '<b>Attention : aucune demande de signature à distance effectuée ';
+
+            if (count($missings) > 1) {
+                $msg .= 'pour les signataires :';
+                foreach ($missings as $missing) {
+                    $msg .= '<br/> - ' . $missing->getName();
+                }
+            }
+
+            $msg .= '</b><br/>Si vous souhaitez envoyer une demande de signature à distance ' . ($has_docusign ? 'via DocuSign' : '') . ' veuillez cliquer sur ';
+
+            if ($has_docusign) {
+                $msg .= '"Initialiser DocuSign"';
+            } else {
+                $msg .= '"Ouvrir accès signature à distance"';
+            }
+
+            $html .= BimpRender::renderAlerts($msg, 'warning');
+        }
+
+        return $html;
+    }
+
     // Rendus HTML:
 
     public function renderHeaderExtraLeft()
     {
         $html = '';
 
-        // todo: gérer pour chaque signataire
-//        if ($this->isSigned()) {
-//            $html .= '<div class="object_header_infos">';
-//            $html .= 'Signature effectuée le ' . date('d / m / Y', strtotime($this->getData('date_signed'))) . ' par <b>' . $this->getData('nom_signataire') . '</b>';
-//            $html .= '</div>';
-//        }
+        if ($this->isLoaded() && !$this->isSigned()) {
+            $warning = $this->displayNoPublicAccessWarnings();
+
+            if ($warning) {
+                $html .= '<div style="margin-top: 10px">';
+                $html .= $warning;
+                $html .= '</div>';
+            }
+        }
 
         return $html;
     }
@@ -988,6 +1055,46 @@ class BimpSignature extends BimpObject
         }
 
         return '';
+    }
+
+    public function renderSignatureAlertes($include_link = true, $include_actions = true, $sign_dist_warning = true)
+    {
+        $html = '';
+
+        if ($this->isLoaded() && !$this->isSigned()) {
+            $att_docusign = $this->isAttenteDocuSign();
+            $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+
+            if ($include_link) {
+                $msg .= '<a href="' . $this->getUrl() . '" target="_blank">';
+            }
+
+            $msg .= 'Signature ' . $this->displayDocType(true) . ' en attente';
+            if ($att_docusign) {
+                $msg .= ' (Demande de signature via DocuSign effectuée)';
+            }
+
+            if ($include_link) {
+                $msg .= BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+            }
+
+            if ($sign_dist_warning) {
+                $msg .= $this->displayNoPublicAccessWarnings();
+            }
+
+            if ($include_actions) {
+                $btn_html = $this->renderSignButtonsGroup();
+                if ($btn_html) {
+                    $msg .= '<div style="margin-top: 8px; text-align: right">';
+                    $msg .= $btn_html;
+                    $msg .= '</div>';
+                }
+            }
+
+            $html .= BimpRender::renderAlerts($msg, 'warning');
+        }
+
+        return $html;
     }
 
     // Traitements:
@@ -1244,7 +1351,10 @@ class BimpSignature extends BimpObject
     {
         $errors = array();
 
+        BimpObject::loadClass('bimpcore', 'BimpSignataire');
+
         $signataires = $this->getChildrenObjects('signataires', array(
+            'type'       => BimpSignataire::TYPE_CLIENT,
             'status'     => 0,
             'allow_dist' => 1
         ));
@@ -1610,8 +1720,9 @@ class BimpSignature extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1658,8 +1769,9 @@ class BimpSignature extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1673,8 +1785,9 @@ class BimpSignature extends BimpObject
         $errors = $this->initDocuSign($email_content, $warnings);
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1689,9 +1802,13 @@ class BimpSignature extends BimpObject
         $errors = $this->refreshDocuSignDocument($send_notification_email, $warnings, $success);
 
         if (!count($errors)) {
-            $url = $this->getDocumentUrl(true);
-            if ($url) {
-                $sc = 'window.open(\'' . $url . '\');bimp_reloadPage();';
+            $file = $this->getDocumentFilePath(true);
+
+            if (file_exists($file)) {
+                $url = $this->getDocumentUrl(true);
+                if ($url) {
+                    $sc = 'window.open(\'' . $url . '\');bimp_reloadPage();';
+                }
             }
         }
 
@@ -1713,7 +1830,7 @@ class BimpSignature extends BimpObject
         if (!count($errors)) {
             $url = $this->getDocumentUrl(true);
             if ($url) {
-                $callback = 'window.open(\'' . $url . '\');';
+                $callback = 'window.open(\'' . $url . '\');bimp_reloadPage();';
             }
         }
 
@@ -1734,8 +1851,9 @@ class BimpSignature extends BimpObject
         $errors = $this->cancelAllSignatures($warnings, $motif);
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1752,8 +1870,9 @@ class BimpSignature extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

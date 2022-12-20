@@ -599,29 +599,54 @@ class BimpComm extends BimpDolObject
             );
         }
 
-        // Message logistique: 
-        $note = BimpObject::getInstance("bimpcore", "BimpNote");
-        $buttons[] = array(
-            'label'   => 'Message achat',
-            'icon'    => 'far_paper-plane',
-            'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 120, "content" => ""), array('form_name' => 'rep'))
-        );
+        // Message Achat:
+        $id_group = BimpCore::getUserGroupId('achat');
+        if ($id_group) {
+            $note = BimpObject::getInstance("bimpcore", "BimpNote");
+            $buttons[] = array(
+                'label'   => 'Message achat',
+                'icon'    => 'far_paper-plane',
+                'onclick' => $note->getJsActionOnclick('repondre', array(
+                    "obj_type"      => "bimp_object",
+                    "obj_module"    => $this->module,
+                    "obj_name"      => $this->object_name,
+                    "id_obj"        => $this->id,
+                    "type_dest"     => $note::BN_DEST_GROUP,
+                    "fk_group_dest" => $id_group,
+                    "content"       => ""
+                        ), array(
+                    'form_name' => 'rep'
+                ))
+            );
+        }
 
         // Message facturation: 
-        // SERV19-FPR
-
-        $msg = "Bonjour, merci de bien vouloir facturer cette commande*\\n\\n*si vous souhaitez une facturation partielle, veuillez modifier ce texte et indiquer précisément vos besoins\\n\\nIMPORTANT : toute facturation anticipée de produits ou services non livrés doit rester exceptionnelle, doit être justifiée par une demande écrite du client (déposer ce justificatif en pièce jointe) et doit être systématiquement signalée à notre comptabilité @Compta Fournisseurs Olys et à @David TEIXEIRA RODRIGUES";
-        foreach ($this->getLines() as $line) {
-            $prod = $line->getChildObject('product');
-            if (stripos($prod->getData('ref'), 'SERV19-FPR') !== false) {
-                $msg .= '\n' . $prod->getData('ref') . ' en quantités ' . $line->qty;
+        $id_group = BimpCore::getUserGroupId('facturation');
+        if ($id_group) {
+            // SERV19-FPR
+            $msg = "Bonjour, merci de bien vouloir facturer cette commande*\\n\\n*si vous souhaitez une facturation partielle, veuillez modifier ce texte et indiquer précisément vos besoins\\n\\nIMPORTANT : toute facturation anticipée de produits ou services non livrés doit rester exceptionnelle, doit être justifiée par une demande écrite du client (déposer ce justificatif en pièce jointe) et doit être systématiquement signalée à notre comptabilité @Compta Fournisseurs Olys et à @David TEIXEIRA RODRIGUES";
+            foreach ($this->getLines() as $line) {
+                $prod = $line->getChildObject('product');
+                if (stripos($prod->getData('ref'), 'SERV19-FPR') !== false) {
+                    $msg .= '\n' . $prod->getData('ref') . ' en quantités ' . $line->qty;
+                }
             }
+            $buttons[] = array(
+                'label'   => 'Message facturation',
+                'icon'    => 'far_paper-plane',
+                'onclick' => $note->getJsActionOnclick('repondre', array(
+                    "obj_type"      => "bimp_object",
+                    "obj_module"    => $this->module,
+                    "obj_name"      => $this->object_name,
+                    "id_obj"        => $this->id,
+                    "type_dest"     => $note::BN_DEST_GROUP,
+                    "fk_group_dest" => $id_group,
+                    "content"       => $msg
+                        ), array(
+                    'form_name' => 'rep'
+                ))
+            );
         }
-        $buttons[] = array(
-            'label'   => 'Message facturation',
-            'icon'    => 'far_paper-plane',
-            'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_FACT, "content" => $msg), array('form_name' => 'rep'))
-        );
 
         // Relevé facturation: 
         if ((int) $this->getData('fk_soc')) {
@@ -679,8 +704,8 @@ class BimpComm extends BimpDolObject
     public function canSetAction($action)
     {
         global $user;
-        if ($action == 'checkTotal' && !$user->admin)
-            return 0;
+//        if ($action == 'checkTotal' && !$user->admin)
+//            return 0;
         if ($action == 'checkMarge' && !$user->admin)
             return 0;
         return parent::canSetAction($action);

@@ -1061,7 +1061,7 @@ function getFormSubmitButton($form) {
     return null;
 }
 
-// Traitements des inputs: 
+// Traitements des inputs:
 
 function getInputsValues($container) {
     var values = {};

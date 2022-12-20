@@ -85,6 +85,12 @@ objects:
                 name: BimpSignature
             id_object: 
                 field_value: id_signature_pvr
+                
+    facture_fin: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: id_facture_fin
     
     sources: 
         relation: hasMany
@@ -264,6 +270,13 @@ fields:
         
     contrat_status: 
         label: Statut Contrat
+        type: int
+        values: 
+            array: doc_status_list
+        default_value: 0
+        
+    pvr_status: 
+        label: Statut PVR
         type: int
         values: 
             array: doc_status_list
@@ -452,6 +465,10 @@ fields:
         label: Paramètres signature du contrat
         type: json
       
+    contrat_signataires_data: 
+        label: Données signataires contrat
+        type: json
+        
     id_signature_pvr: 
         label: Signature du PV de réception
         type: id_object
@@ -461,14 +478,26 @@ fields:
         label: Paramètres signature du pvr
         type: json
         
-    contrat_signataires_data: 
-        label: Données signataires contrat
+    pvr_signataires_data: 
+        label: Données signataires PVR
         type: json
         
     closed: 
-        label: Demande Fermée
+        label: Terminée
         type: bool
         default_value: 0
+        
+    id_facture_fourn:
+        label: Facture Fournisseur
+        type: id_object
+        object: facture_fourn
+        default_value: 0
+        
+    id_facture_fin: 
+        label: Facture financeur
+        type: id_object
+        object: facture_fin
+        default_value: 0        
         
 forms: 
     default: 
@@ -499,7 +528,21 @@ forms:
                 field: def_tx_cession
             date_loyer: 
                 field: date_loyer
-                
+        
+    proposition:
+        rows: 
+            - custom: 1
+              label: Titre du document
+              input_name: title
+              value: Proposition de location de vos équipements informatiques
+              input: 
+                      type: text
+            - field: montant_materiels
+            - field: montant_services
+            - field: duration
+            - field: periodicity
+            - field: mode_calcul
+              
     cancel: 
         rows: 
             - custom: 1
@@ -512,12 +555,11 @@ forms:
                   auto_expand: 1
                 
     create_signature: 
-        rows: 
-            title: Création de la signature
+        title: Création de la signature
         rows: 
             contact_signature: 
                 custom: 1
-                label: Contact signataire
+                label: Contact signataire du client
                 data_type: id_object
                 input_name: id_contact_signature
                 input: 
@@ -601,6 +643,26 @@ forms:
                         params: 
                             - contrat
             
+    create_signature_pvr: 
+        extends: create_signature
+        title: Création de la signature du PV de réception
+        rows: 
+            init_docusign: 
+                content: 
+                    callback: 
+                        params: 
+                            - pvr
+            open_public_access: 
+                content: 
+                    callback: 
+                        params: 
+                            - pvr
+            email_content:
+                value: 
+                    callback: 
+                        params: 
+                            - pvr
+        
     generate_devis: 
         title: Création du devis de location
         rows: 
@@ -747,6 +809,47 @@ forms:
                   type: text
               depends_on: cessionnaire_id_contact_signataire
               
+    generate_pvr: 
+        rows: 
+            # LOCATAIRE: 
+            - title: Locataire
+            - custom: 1
+              label: Entreprise
+              input_name: client_is_company
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Nom du représentant signataire
+              input_name: client_representant
+              input: 
+                  type: text          
+            - custom: 1
+              label: Qualité du représentant signataire
+              input_name: client_repr_qualite
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+                  
+            # LOUEUR: 
+            - title: Loueur
+            - custom: 1
+              label: Nom loueur
+              input_name: loueur_nom
+              input: 
+                  type: text
+            - custom: 1
+              label: Qualité loueur
+              input_name: loueur_qualite
+              input: 
+                  type: text
+            - custom: 1
+              label: Adresse e-mail loueur
+              input_name: loueur_email
+              input: 
+                  type: text
+                  
     upload_document:
         rows: 
             file: 
@@ -814,6 +917,136 @@ forms:
                   options: 
                       array: demandesSources
                   help: Sélectionnez la source qui sera en charge de transmettre au client les documents à signer.<br/>Ce sera la demande de location correspondant à cette source qui sera conservée.
+                
+    factures:
+        title: Facturation
+        msgs: 
+            callback: getFacturesFormMsgs
+        rows:
+          - title: Facture Fournisseur
+          - custom: 1
+            label: Créer la facture fournisseur
+            input_name: create_fac_fourn
+            data_type: bool
+            content: 
+                callback: renderCreateFacFournToggleInput
+          - custom: 1
+            show: 
+                field_value: 
+                    field_name: id_main_source
+                    not: 1
+            label: Fournisseur
+            input_name: fac_fourn_id_fourn
+            data_type: id_object
+            object: fournisseur
+            input: 
+                type: search_object
+            display_if: 
+                field_name: create_fac_fourn
+                show_values: 1
+          - custom: 1
+            label: Libellé
+            input_name: fac_fourn_libelle
+            input: 
+                type: text
+            display_if: 
+                field_name: create_fac_fourn
+                show_values: 1
+          - custom: 1
+            label: Ref. fournisseur
+            input_name: fac_fourn_ref_supplier
+            input: 
+                type: text
+            display_if: 
+                field_name: create_fac_fourn
+                show_values: 1
+          - custom: 1
+            label: Mode de réglement
+            input_name: fac_fourn_id_mode_reglement
+            data_type: id
+            value: 
+                conf: 
+                    name: fac_fourn_def_id_mode_reglement
+                    module: bimpfinancement
+                    is_int: 1
+            input: 
+                type: select
+                options: 
+                    callback: 
+                        method: getModeReglementsArray
+                        params: 
+                            - id
+                            - 1
+            display_if: 
+                field_name: create_fac_fourn
+                show_values: 1
+          - custom: 1
+            label: Conditions de réglement
+            input_name: fac_fourn_id_cond_reglement
+            data_type: id
+            value: 
+                conf: 
+                    name: fac_fourn_def_id_cond_reglement
+                    module: bimpfinancement
+                    is_int: 1
+            input: 
+                type: select
+                options: 
+                    callback: getCondReglementsArray
+            display_if: 
+                field_name: create_fac_fourn
+                show_values: 1
+          - title: Facture client (financeur)
+          - custom: 1
+            label: Créer la facture client
+            input_name: create_fac_fin
+            data_type: bool
+            content: 
+                callback: renderCreateFacFinToggleInput
+          - custom: 1
+            label: Libellé
+            input_name: fac_fin_libelle
+            input: 
+                type: text
+            display_if: 
+                field_name: create_fac_fin
+                show_values: 1
+          - custom: 1
+            label: Mode de réglement
+            input_name: fac_fin_id_mode_reglement
+            data_type: id
+            value: 
+                conf: 
+                    name: fac_fin_def_id_mode_reglement
+                    module: bimpfinancement
+                    is_int: 1
+            input: 
+                type: select
+                options: 
+                    callback: 
+                        method: getModeReglementsArray
+                        params: 
+                            - id
+                            - 1
+            display_if: 
+                field_name: create_fac_fin
+                show_values: 1
+          - custom: 1
+            label: Conditions de réglement
+            input_name: fac_fin_id_cond_reglement
+            data_type: id
+            value: 
+                conf: 
+                    name: fac_fin_def_id_cond_reglement
+                    module: bimpfinancement
+                    is_int: 1
+            input: 
+                type: select
+                options: 
+                    callback: getCondReglementsArray
+            display_if: 
+                field_name: create_fac_fin
+                show_values: 1
                 
 fields_tables:
     infos: 
@@ -901,6 +1134,19 @@ fields_tables:
               display: card
               show: 
                   field_value: id_signature_contrat
+            - field: id_signature_pvr
+              display: card
+              show: 
+                  field_value: id_signature_pvr
+                  
+    factures: 
+        title: Factures
+        icon: fas_file-invoice-dollar
+        rows: 
+            - field: id_facture_fourn
+              display: card
+            - field: id_facture_fin
+              display: card
         
 views:
     default: 
@@ -920,10 +1166,18 @@ views:
                           name: infos
                           
                     - type: fields_table
-                      show: 
-                          callback: hasSignature
                       col_lg: 6
                       col_md: 6
+                      show: 
+                          callback: hasFacture
+                      fields_table:
+                          name: factures
+                          
+                    - type: fields_table
+                      col_lg: 6
+                      col_md: 6
+                      show: 
+                          callback: hasSignature
                       fields_table:
                           name: signatures
     
@@ -987,6 +1241,8 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this))
         extra_bulk_actions: 
             callback: getListExtraBulkActions
+        header_buttons: 
+            callback: getDefaultListHeaderButton
         sort_field: date_create
         sort_way: desc
         n: 10
@@ -1008,3 +1264,11 @@ lists:
             status:
             devis_status: 
             contrat_status: 
+
+signatures: 
+    devis: 
+        label: Devis de location
+    contrat: 
+        label: Contrat de location
+    pvr: 
+        label: PV de réception

@@ -41,11 +41,35 @@ class Bimp_Societe extends BimpDolObject
         1  => array('D', 'warning', 'Risque très Elevé'),
         0  => array('E', 'danger', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
     );
+//    public static $regions = array(
+//        'Alpes-Drôme'      => array(73, 74, 38, 7, 26),
+//        'Rhône-Auvergne'   => array(3, 15, 43, 63, 42, 1, 69),
+//        'PACA-Occitanie'   => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64, 65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30, 4, 5, 6, 13, 83, 84, '2A', '2B'),
+//        'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
+//    );
+
     public static $regions = array(
-        'Alpes-Drôme'      => array(73, 74, 38, 7, 26),
-        'Rhône-Auvergne'   => array(3, 15, 43, 63, 42, 1, 69),
-        'PACA-Occitanie'   => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64, 65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30, 4, 5, 6, 13, 83, 84, '2A', '2B'),
-        'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
+        1 => array(
+            'A' => array(1, 69),
+            'B' => array(7, 26, 38, 73, 74),
+            'C' => array(63, 3, 15, 42, 43),
+            'D' => array(70, 21, 25, 39, 58, 71, 89, 90)
+        ),
+        2 => array(
+            'A' => array(9, 11, 12, 30, 31, 32, 34, 46, 48, 65, 66, 81, 82),
+            'B' => array(4, 5, 6, 13, 83, 84, '2A', '2B'),
+            'C' => array(16, 17, 19, 23, 24, 33, 40, 47, 64, 79, 86, 87)
+        ),
+        3 => array(
+            'A' => array(75, 77, 78, 91, 92, 93, 94, 95),
+            'B' => array(2, 59, 60, 62, 80),
+            'C' => array(8, 10, 51, 52, 54, 55, 57, 67, 68, 88)
+        ),
+        4 => array(
+            'A' => array(18, 28, 36, 37, 41, 44, 45, 49, 53, 72, 85),
+            'B' => array(22, 29, 35, 56),
+            'C' => array(14, 27, 50, 61, 76)
+        ),
     );
     public static $anonymization_fields = array('nom', 'name_alias', 'address', 'zip', 'town', 'email', 'skype', 'url', 'phone', 'fax', 'siren', 'siret', 'ape', 'idprof4', 'idprof5', 'idprof6', 'tva_intra');
     private $debug = array();
@@ -672,7 +696,7 @@ class Bimp_Societe extends BimpDolObject
                 $tabSql = array();
 //                print_r($values);die;
                 foreach ($values as $value) {
-                    $tabSql[] = '('.$value['value'].')';
+                    $tabSql[] = '(' . $value['value'] . ')';
                 }
 
                 $filters[$main_alias . '___custom_custom'] = array(
@@ -1865,9 +1889,36 @@ class Bimp_Societe extends BimpDolObject
             $dpt = substr($zip, 0, 2);
 
             if ($dpt) {
-                foreach (self::$regions as $region => $codes) {
-                    if (in_array($dpt, $codes)) {
-                        return $region;
+                foreach (self::$regions as $region => $secteurs) {
+                    foreach ($secteurs as $secteur => $codes) {
+                        if (in_array($dpt, $codes)) {
+                            return 'Région ' . $region;
+                        }
+                    }
+                }
+            }
+        }
+
+        return 'nc';
+    }
+
+    public function displaySecteur()
+    {
+        if ((int) $this->getData('fk_pays') !== 1) {
+            return 'Hors France';
+        }
+
+        $zip = $this->getData('zip');
+
+        if ($zip) {
+            $dpt = substr($zip, 0, 2);
+
+            if ($dpt) {
+                foreach (self::$regions as $region => $secteurs) {
+                    foreach ($secteurs as $secteur => $codes) {
+                        if (in_array($dpt, $codes)) {
+                            return 'R' . $region . $secteur;
+                        }
                     }
                 }
             }
@@ -2484,13 +2535,13 @@ class Bimp_Societe extends BimpDolObject
         if (isset($data[''])) {
             $this->set('notecreditsafe', $data['notecreditsafe']);
         }
-        
+
         if ($majOutstandingLimit && isset($data['outstanding_limit'])) {
             if ($data['outstanding_limit'] > $maxOutstandingLimit)
                 $data['outstanding_limit'] = $maxOutstandingLimit;
             $this->set('outstanding_limit', $data['outstanding_limit']);
         }
-        
+
         if (isset($data['capital'])) {
             $this->set('capital', $data['capital']);
         }
@@ -2503,7 +2554,7 @@ class Bimp_Societe extends BimpDolObject
         if (isset($data['siren'])) {
             $this->set('siren', $data['siren']);
         }
-        
+
         $errors = BimpTools::merge_array($errors, $this->update($w, true));
         return $errors;
     }
@@ -2599,8 +2650,7 @@ class Bimp_Societe extends BimpDolObject
                     $branches = $base->branches->branch;
                     $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
 
-                    
-                    $rcs = $summary->courtregistrydescription;
+                    $rcs = $summary->courtregistrydescription.' '.$siren;
                     if ($summary->status == 'Fermé') {
                         $note = 'Fermé';
                         $alert = 'Fermé';

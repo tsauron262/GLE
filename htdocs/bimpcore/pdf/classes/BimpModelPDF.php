@@ -35,6 +35,7 @@ Abstract class BimpModelPDF
     public $header = null;
     public $footer = null;
     public $watermark = '';
+    public $concat_files = array();
 
     # Paramètres: 
     public $typeObject = '';
@@ -139,6 +140,10 @@ Abstract class BimpModelPDF
         $this->pdf->newPage();
         $this->renderContent();
 
+        if (!empty($this->concat_files)) {
+            $this->pdf->extra_concat_files = $this->concat_files;
+        }
+        
         return $this->pdf->render($file_name, $display, $display_only, $this->watermark, $this->errors);
     }
 

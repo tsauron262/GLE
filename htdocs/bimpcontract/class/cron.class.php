@@ -146,7 +146,7 @@
                     BimpObject::loadClass('bimpcore', 'BimpNote');
                     $contrat->addNote("Contrat en attente de validation".$contrat->getNomUrl() . " => date d'activation prévu: <b>" . $date->format('d/m/Y'),
                         BimpNote::BN_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
-                        BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_CONTRAT); 
+                        BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('contrat')); 
                 } 
             }
             if($to_send) {
@@ -298,7 +298,7 @@
                         $note->set('id_obj', $c->id);
                         $note->set('type_author', $note::BN_AUTHOR_USER);
                         $note->set('type_dest', $note::BN_DEST_GROUP);
-                        $note->set('fk_group_dest', $note::BN_GROUPID_FACT);
+                        $note->set('fk_group_dest', BimpCore::getUserGroupId('facturation'));
                         $note->set('content', $msg);
             
                         $errors = $note->create();

@@ -151,24 +151,26 @@ class BimpTools
 
         return $default_value;
     }
-    
-    public static function getAjaxFileName($field_name){
+
+    public static function getAjaxFileName($field_name)
+    {
         return str_replace("C:fakepath", '', BimpTools::getPostFieldValue($field_name));
     }
-    
-    public static function mouveAjaxFile(&$errors, $field_name, $dir_dest, $name_dest = null){//pas d'extension elle est géré en auto
+
+    public static function mouveAjaxFile(&$errors, $field_name, $dir_dest, $name_dest = null)
+    {//pas d'extension elle est géré en auto
         global $user;
-        if(!is_dir($dir_dest))
+        if (!is_dir($dir_dest))
             mkdir($dir_dest);
-        $dir = DOL_DATA_ROOT.'/bimpcore/tmpFile/';
-        $file = $user->id."_".$field_name."_".BimpTools::getAjaxFileName($field_name);
-        if($name_dest == null)
+        $dir = DOL_DATA_ROOT . '/bimpcore/tmpFile/';
+        $file = $user->id . "_" . $field_name . "_" . BimpTools::getAjaxFileName($field_name);
+        if ($name_dest == null)
             $name_dest = BimpTools::getAjaxFileName($field_name);
-        if(pathinfo($name_dest, PATHINFO_EXTENSION) == ''){
-            $extension = pathinfo($dir.$file, PATHINFO_EXTENSION);
-            $name_dest .= '.'.$extension;
+        if (pathinfo($name_dest, PATHINFO_EXTENSION) == '') {
+            $extension = pathinfo($dir . $file, PATHINFO_EXTENSION);
+            $name_dest .= '.' . $extension;
         }
-        rename($dir.$file, $dir_dest.'/'.$name_dest);
+        rename($dir . $file, $dir_dest . '/' . $name_dest);
     }
 
     // Gestion des objects Dolibarr:
@@ -2286,6 +2288,26 @@ class BimpTools
         return $string;
     }
 
+    public static function isVowelFirst($string)
+    {
+        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', strtolower($string))) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public static function getOfTheLabel($label, $is_female = false)
+    {
+        if (self::isVowelFirst($label)) {
+            return 'de l\'' . $label;
+        } elseif ($is_female) {
+            return 'de la ' . $label;
+        }
+
+        return 'du ' . $label;
+    }
+
     // Traitements sur des array: 
 
     public static function getMsgFromArray($msgs, $title = '', $no_html = false)
@@ -2388,7 +2410,7 @@ class BimpTools
 
         return $current_value;
     }
-    
+
     public static function setArrayValueFromPath(&$array, $path, $value)
     {
         if (is_null($path) || !$path) {

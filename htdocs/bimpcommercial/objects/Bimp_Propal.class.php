@@ -293,6 +293,10 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 1;
 
             case 'createContrat':
+                if ($status !== Propal::STATUS_SIGNED) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
                 if ($status == 0) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' est au statut brouillon';
                     return 0;
@@ -489,7 +493,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         return 0;
     }
 
-    public function isDocuSignAllowed(&$errors = array(), $is_required = false)
+    public function isDocuSignAllowed(&$errors = array(), &$is_required = false)
     {
         // Attention : pas de conditions spécifiques à une version de l'ERP ici. 
         // Utiliser une extension.  
@@ -732,7 +736,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $signed = in_array($status, array(2, 4));
 
                     if (BimpObject::objectLoaded($signature)) {
-                        $signature_buttons = BimpTools::merge_array($signature_buttons, $signature->getActionsButtons());
+                        $signature_buttons = BimpTools::merge_array($signature_buttons, $signature->getActionsButtons(true));
                     } else {
                         if (!$signed && $use_signature) {
                             if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
@@ -999,7 +1003,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         'buttons' => $buttons
                     ),
                     array(
-                        'label'   => 'Signature',
+                        'label'   => 'Actions Signature',
                         'icon'    => 'fas_signature',
                         'buttons' => $signature_buttons
                     )
@@ -1087,12 +1091,26 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $html .= '</div>';
             }
 
-            if ((int) $this->getData('fk_statut') == 1 && !(int) $this->getData('id_signature')) {
-                $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                $msg .= 'Si vous souhaitez <b>déposer le devis signé</b> ou demander la <b>signature électronique</b> à distance au client, veuillez cliquer sur "<b>Créer la fiche signature</b>"';
-                $html .= '<div style="margin-top: 10px">';
-                $html .= BimpRender::renderAlerts($msg, 'warning');
-                $html .= '</div>';
+            if ((int) $this->getData('fk_statut') == 1) {
+                $signature = null;
+                if ((int) $this->getData('id_signature')) {
+                    $signature = $this->getChildObject('signature');
+                }
+
+                if (BimpObject::objectLoaded($signature)) {
+                    $alertes = $signature->renderSignatureAlertes();
+                    if ($alertes) {
+                        $html .= '<div style="margin-top: 10px">';
+                        $html .= $alertes;
+                        $html .= '</div>';
+                    }
+                } else {
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                    $msg .= 'Si vous souhaitez <b>déposer le devis signé</b> ou demander la <b>signature électronique</b> à distance au client, veuillez cliquer sur "<b>Créer la fiche signature</b>"';
+                    $html .= '<div style="margin-top: 10px">';
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= '</div>';
+                }
             }
         }
 
@@ -1136,28 +1154,6 @@ class Bimp_Propal extends Bimp_PropalTemp
                             ), "a");
         }
 
-        if ((int) $this->getData('id_signature')) {
-            $signature = $this->getChildObject('signature');
-
-            if (BimpObject::objectLoaded($signature)) {
-                $url = $signature->getUrl();
-
-                if ($url) {
-                    $html .= BimpRender::renderButton(array(
-                                'classes'     => array('btn', 'btn-default'),
-                                'label'       => 'Signature',
-                                'icon_before' => 'fas_signature',
-                                'icon_after'  => 'fas_external-link-alt',
-                                'attr'        => array(
-                                    'href'   => $url,
-                                    'target' => '_blank',
-                                )
-                                    ), "a");
-                }
-            }
-        }
-
-
 //        $html .= BimpRender::renderButton(array(
 //                    'classes'     => array('btn', 'btn-default'),
 //                    'label'       => 'Ancienne version',
@@ -1179,13 +1175,14 @@ class Bimp_Propal extends Bimp_PropalTemp
         $html = '';
 
         $errors = array();
-        if (!$this->isDocuSignAllowed($errors)) {
+        $ds_required = 0;
+        if (!$this->isDocuSignAllowed($errors, $ds_required)) {
             $html .= '<div class="danger">';
             $html .= BimpTools::getMsgFromArray($errors, 'Il n\'est pas possible d\'utiliser DocuSign pour la signature de ce devis');
             $html .= '</div>';
             $html .= '<input type="hidden" value="0" name="init_docusign"/>';
         } else {
-            $html .= BimpInput::renderInput('toggle', 'init_docusign', 1);
+            $html .= BimpInput::renderInput('toggle', 'init_docusign', ($ds_required ? 1 : 0));
         }
 
         return $html;

@@ -165,6 +165,26 @@ class BimpComm_ExtEntity extends BimpComm
             if (BimpObject::objectLoaded($df)) {
                 $html .= $df->renderSignaturesAlertes();
             }
+
+            if (is_a($this, 'Bimp_Commande') && !(int) $df->getData('serials_ok') && (int) $this->getData('shipment_status') === 2) {
+                    $data = $df->fetchDemandeFinData();
+
+                    if (isset($data['missing_serials']['total']) && (int) $data['missing_serials']['total'] > 0) {
+                        if ((int) $data['missing_serials']['total'] > 1) {
+                            $msg = $data['missing_serials']['total'] . ' numéros de série sont manquants sur ' . $df->displayTarget() . '<br/>';
+                        } else {
+                            $msg = $data['missing_serials']['total'] . ' numéro de série est manquant sur ' . $df->displayTarget() . '<br/>';
+                        }
+
+                        $onclick = $this->getJsActionOnclick('setDemandeFinSerials');
+                        $msg .= '<div style="text-align: right">';
+                        $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $msg .= 'Transmettre les n° de série' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+                        $msg .= '</span>';
+                        $msg .= '</div>';
+                        $html .= BimpRender::renderAlerts($msg, 'warning');
+                    }
+            }
         }
 
         return $html;

@@ -6514,7 +6514,7 @@ class Bimp_Facture extends BimpComm
 
     public static function dataGraphPayeAn($boxObj, $context)
     {
-        $boxObj->boxlabel = 'Facture pas statut paiement';
+        $boxObj->boxlabel = 'Facture par statut paiement';
         if ($context == 'init')
             return 1;
 
@@ -6563,7 +6563,7 @@ class Bimp_Facture extends BimpComm
 
     public function dataGraphSecteur($boxObj, $context)
     {
-        $boxObj->boxlabel = 'Facture pas secteur';
+        $boxObj->boxlabel = 'Facture par secteur';
         if ($context == 'init')
             return 1;
 

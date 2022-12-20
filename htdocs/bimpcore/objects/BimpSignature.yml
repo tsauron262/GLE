@@ -275,8 +275,10 @@ cards:
         status: status
         fields: 
             doc_type: 
-                field: doc_type
-                label: Type
+                label: Ref. document
+                value: 
+                    callback: displayDocRef
+            
             
     
             

@@ -17,6 +17,7 @@ class BimpPDF extends TCPDF
     public static $pxPerMm = 2.835;
     public $addCgvPages = true;
     public static $addCgvPagesType = '';
+    public $extra_concat_files = array();
 
     public function __construct($orientation = 'P', $format = 'A4')
     {
@@ -54,6 +55,8 @@ class BimpPDF extends TCPDF
 
     public function render($filename, $display = true, $display_only = false, $watermark = '', &$errors = array())
     {
+        $extra_concat_files = $this->extra_concat_files;
+        
         $this->lastPage();
 
         if (stripos($filename, ".pdf") === false)
@@ -71,7 +74,7 @@ class BimpPDF extends TCPDF
             $output = 'F';
 
             $folder = str_replace($nomPure, "", $filename);
-            
+
             if (!is_dir($folder))
                 if (!mkdir($folder)) {
                     if (!BimpTools::isSubmit('ajax')) {
@@ -116,6 +119,11 @@ class BimpPDF extends TCPDF
         if ($watermark) {
             $fpdfi = new BimpConcatPdf();
             $fpdfi->addWatermark($filename, $watermark, $output);
+        }
+        
+        if ($extra_concat_files) {
+            $fpdfi = new BimpConcatPdf();
+            $fpdfi->addFiles($filename, $extra_concat_files, $output);
         }
 
         if ($afficher) {
@@ -166,6 +174,27 @@ class BimpConcatPdf extends Fpdi
             $this->useTemplate($tplidx);
         }
         $this->Output($fileOrig, $output);
+    }
+
+    public function addFiles($file, $files_to_add, $output)
+    {
+        $pagecount = $this->setSourceFile($file);
+        for ($i = 0; $i < $pagecount; $i++) {
+            $this->AddPage();
+            $tplidx = $this->importPage($i + 1, '/MediaBox');
+            $this->useTemplate($tplidx);
+        }
+
+        foreach ($files_to_add as $file_to_add) {
+            $pagecount = $this->setSourceFile($file_to_add);
+            for ($i = 0; $i < $pagecount; $i++) {
+                $this->AddPage();
+                $tplidx = $this->importPage($i + 1, '/MediaBox');
+                $this->useTemplate($tplidx);
+            }
+        }
+
+        $this->Output($file, $output);
     }
 
     public function concatFiles($fileName, $files, $output = 'F')

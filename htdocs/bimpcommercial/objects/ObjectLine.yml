@@ -166,7 +166,7 @@ fields:
             callback: isArticleLine
         
     hide_product_label: 
-        label: Ne pas afficher l'intitulé du produit
+        label: Masquer l'intitulé du produit
         type: bool
         user_edit: 1
         default_value: 0

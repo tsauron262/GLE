@@ -104,7 +104,7 @@ class BIC_UserClient extends BimpObject
     {
         if ($this->isLoaded()) {
             $client = $this->getParentInstance();
-            
+
             if (BimpObject::objectLoaded($client)) {
                 if ($client->isAnonymised()) {
                     if (in_array($field_name, self::$anonymization_fields)) {
@@ -114,7 +114,7 @@ class BIC_UserClient extends BimpObject
                 }
             }
         }
-        
+
         if (BimpCore::isContextPublic()) {
             global $userClient;
             switch ($field_name) {
@@ -586,26 +586,31 @@ class BIC_UserClient extends BimpObject
 
         if (count($err)) {
             $errors[] = 'Echec de la mise à jour de votre mot de passe';
-        }
-
-        $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
-        $msg = 'Bonjour, ' . "\n\n";
-        $msg .= 'Le mot de passe de votre <a href="' . $url . '">espace client LDLC Apple</a> a été changé.' . "\n";
-        $msg .= 'Si vous n\'êtes pas à l\'origine de cette action veuillez contacter votre ';
-
-        if ($this->isAdmin()) {
-            $msg .= 'interlocuteur BIMP.';
         } else {
-            $msg .= 'l\'administrateur de votre compte client BIMP.';
-        }
+            $nom_espace = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
 
-        $subject = 'Espace client LDLC Apple - Changement de votre mot de passe';
+            $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
+            $msg = 'Bonjour, ' . "\n\n";
+            $msg .= 'Le mot de passe de votre <a href="' . $url . '">espace client ' . $nom_espace . '</a> a été changé.' . "\n";
+            $msg .= 'Si vous n\'êtes pas à l\'origine de cette action veuillez contacter votre ';
 
-        $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
-        $bimpMail->setFromType('ldlc');
+            if ($this->isAdmin()) {
+                $msg .= 'interlocuteur BIMP.';
+            } else {
+                $msg .= 'l\'administrateur de votre compte client BIMP.';
+            }
 
-        if ($bimpMail->send($errors)) {
-            $this->updateField('renew_required', 0);
+            $subject = 'Espace client ' . $nom_espace . ' - Changement de votre mot de passe';
+
+            $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
+
+            if (BimpCore::isEntity('bimp')) {
+                $bimpMail->setFromType('ldlc');
+            }
+
+            if ($bimpMail->send($errors)) {
+                $this->updateField('renew_required', 0);
+            }
         }
 
         return $errors;
@@ -620,21 +625,21 @@ class BIC_UserClient extends BimpObject
         $this->set('renew_required', 1);
 
         $errors = $this->update($warnings, true);
+        $nom_escace_client = (string) BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
 
         if (!count($errors)) {
             $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
-            $subject = 'Espace client LDLC Apple - Nouveau mot de passe';
-            $msg = 'Bonjour,<br/><br/>Le mot de passe pour votre accès à votre <a href="' . $url . '">espace client LDLC Apple</a> a été réinitialisé.<br/><br/>';
+            $subject = 'Espace client ' . $nom_escace_client . ' - Nouveau mot de passe';
+            $msg = 'Bonjour,<br/><br/>Le mot de passe pour votre accès à votre <a href="' . $url . '">espace client ' . $nom_escace_client . '</a> a été réinitialisé.<br/><br/>';
             $msg .= '<b>Nouveau mot de passe : </b>' . $mdp_clear;
         }
 
-//        if (!mailSyn2($subject, BimpTools::cleanEmailsStr($this->getData('email')), '', $msg)) {
-//            $warnings[] = 'Echec de l\'envoi du mot de passe par e-mail';
-//        }
-
         $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
-        $bimpMail->setFromType('ldlc');
-        
+
+        if (BimpCore::isEntity('bimp')) {
+            $bimpMail->setFromType('ldlc');
+        }
+
         $bimpMail->send($errors, $warnings);
         return $errors;
     }
@@ -779,8 +784,11 @@ class BIC_UserClient extends BimpObject
 //            }
 
             $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
-            $bimpMail->setFromType('ldlc');
-            
+
+            if (BimpCore::isEntity('bimp')) {
+                $bimpMail->setFromType('ldlc');
+            }
+
             $bimpMail->send($errors, $warnings);
         }
 
@@ -874,8 +882,11 @@ class BIC_UserClient extends BimpObject
 
 //                    mailSyn2($sujet, BimpTools::cleanEmailsStr($email), '', $message);
                     $bimpMail = new BimpMail($this->getChildObject('client'), $sujet, $this->getData('email'), '', $message);
-                    $bimpMail->setFromType('ldlc');
-                    
+
+                    if (BimpCore::isEntity('bimp')) {
+                        $bimpMail->setFromType('ldlc');
+                    }
+
                     $mail_errors = array();
                     $bimpMail->send($mail_errors);
 

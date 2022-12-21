@@ -355,7 +355,11 @@ class BWS_User extends BimpObject
             $msg .= '<b>Nouveau mot de passe : </b>' . $pword_clear;
         }
         $bimpMail = new BimpMail($this, $subject, $this->getData('email'), '', $msg);
-        $bimpMail->setFromType('ldlc');
+
+        if (BimpCore::isEntity('bimp')) {
+            $bimpMail->setFromType('ldlc');
+        }
+        
         $bimpMail->send($errors, $warnings);
         return $errors;
     }

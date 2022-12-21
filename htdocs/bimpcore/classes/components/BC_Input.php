@@ -433,7 +433,7 @@ class BC_Input extends BimpComponent
                 $options['search_input'] = isset($this->params['search_input']) ? (int) $this->params['search_input'] : 0;
                 $options['max_input_name'] = isset($this->params['max_input_name']) ? (int) $this->params['max_input_name'] : '';
                 $options['max_input_abs'] = isset($this->params['max_input_abs']) ? (int) $this->params['max_input_abs'] : 0;
-                $options['max'] = isset($this->params['max']) ? (int) $this->params['max'] : 'none';
+                $options['max'] = (isset($this->params['max']) && $this->params['max'] !== 'none') ? (int) $this->params['max'] : 'none';
                 break;
 
             case 'items_list':

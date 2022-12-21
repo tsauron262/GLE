@@ -9999,12 +9999,12 @@ input[type=text].large_input {
 
 /* line 713, ../scss/bimpcore/_form.scss */
 .check_list_item > label,
-.check_list_group_caption {
+.check_list_group_caption.selectable {
   margin: 0 0 5px 0;
   padding: 0 6px 0 24px; }
   /* line 718, ../scss/bimpcore/_form.scss */
   .check_list_item > label:before,
-  .check_list_group_caption:before {
+  .check_list_group_caption.selectable:before {
     font-family: 'FontAwesome';
     margin-left: -24px;
     margin-right: 16px;
@@ -10015,11 +10015,11 @@ input[type=text].large_input {
 
 /* line 729, ../scss/bimpcore/_form.scss */
 .check_list_item > input[type=checkbox]:checked + label,
-.check_list_group > input[type=checkbox]:checked + .check_list_group_caption {
+.check_list_group > input[type=checkbox]:checked + .check_list_group_caption.selectable {
   color: #282828; }
   /* line 733, ../scss/bimpcore/_form.scss */
   .check_list_item > input[type=checkbox]:checked + label:before,
-  .check_list_group > input[type=checkbox]:checked + .check_list_group_caption:before {
+  .check_list_group > input[type=checkbox]:checked + .check_list_group_caption.selectable:before {
     font-size: 16px;
     content: '\f046';
     color: #4195C8; }
@@ -10406,9 +10406,10 @@ table.objectlistTable {
       table.objectlistTable > tbody > tr > td .qty_inputContainer {
         min-width: 160px; }
       /* line 84, ../scss/bimpcore/_list.scss */
-      table.bimp_list_table > tbody > tr > td .inputHelp, table.bimp_list_table > tbody > tr > td .inputInfo,
+      table.bimp_list_table > tbody > tr > td .inputHelp, table.bimp_list_table > tbody > tr > td .inputInfo, table.bimp_list_table > tbody > tr > td .texarea_values,
       table.objectlistTable > tbody > tr > td .inputHelp,
-      table.objectlistTable > tbody > tr > td .inputInfo {
+      table.objectlistTable > tbody > tr > td .inputInfo,
+      table.objectlistTable > tbody > tr > td .texarea_values {
         display: none; }
       /* line 88, ../scss/bimpcore/_list.scss */
       table.bimp_list_table > tbody > tr > td .inputGroupContainer,

@@ -183,6 +183,7 @@ class BimpCommDemandeFin extends BimpObject
                 ))
             );
         }
+
         if ($this->isActionAllowed('cancelDemandeFinancement') && $this->canSetAction('cancelDemandeFinancement')) {
             $buttons[] = array(
                 'label'   => 'Annuler la demande de location',
@@ -717,6 +718,17 @@ class BimpCommDemandeFin extends BimpObject
 
                 if (isset($data['notes']) && !empty($data['notes'])) {
                     $content .= '<br/><h4>' . BimpRender::renderIcon('fas_sticky-note', 'iconLeft') . 'Notes synchronisées</h4>';
+
+                    if ($this->isActionAllowed('sendNote') && $this->canSetAction('sendNote')) {
+                        $content .= '<div class="buttonsContainer align-right">';
+                        $onclick = $this->getJsActionOnclick('sendNote', array(), array(
+                            'form_name' => 'note'
+                        ));
+                        $content .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $content .= BimpRender::renderIcon('fas_paper-plane', 'iconLeft') . 'Nouveau message à ' . $this->displayTarget();
+                        $content .= '</span>';
+                        $content .= '</div>';
+                    }
 
                     foreach ($data['notes'] as $note) {
                         $content .= '<div style="margin: 12px 0;">';
@@ -1288,8 +1300,9 @@ class BimpCommDemandeFin extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

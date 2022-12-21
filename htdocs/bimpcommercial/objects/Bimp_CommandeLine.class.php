@@ -349,10 +349,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $buttons[] = array(
                                 'label'   => 'Commander',
                                 'icon'    => 'fas_cart-arrow-down',
-                                'onclick' => $this->getJsActionOnclick('addToCommandeFourn', array(
-//                                    'remise_pa'       => (float) $this->getData('remise_pa'),
-//                                    'remise_pa_label' => ((int) $this->getData('remise_crt') ? 'Remise arrière' : '')
-                                        ), array(
+                                'onclick' => $this->getJsActionOnclick('addToCommandeFourn', array(), array(
                                     'form_name' => 'commande_fourn'
                                 ))
                             );
@@ -7199,10 +7196,6 @@ class Bimp_CommandeLine extends ObjectLine
                 $commande->addLog('Ajout en logistique de la ligne n° ' . $this->getData('position') . ' (' . $this->getData('qty_modif') . ' unité(s))');
             }
 
-            if ((int) $this->getData('remise_crt')) {
-                $commande->setRevalorisation();
-            }
-
             $this->checkQties();
         }
 
@@ -7221,8 +7214,6 @@ class Bimp_CommandeLine extends ObjectLine
                 $commande->dol_object->brouillon = 1;
             }
         }
-
-        $init_remise_crt = (int) $this->getInitData('remise_crt');
 
         // Forçage si on est dans le cas d'une ligne ajouté en logistique: 
         if ((int) $this->qty === 0 && (int) $this->getData('qty_modif')) {
@@ -7244,32 +7235,7 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         if (!count($errors)) {
-            if (!$init_remise_crt && (int) $this->getData('remise_crt')) {
-                $commande->setRevalorisation();
-            }
-
             $this->checkQties();
-        }
-
-        return $errors;
-    }
-
-    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
-    {
-        $init_remise_crt = (int) $this->getInitData('remise_crt');
-
-        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
-
-        if (!count($errors)) {
-            if ($field === 'remise_crt') {
-                if (!$init_remise_crt && (int) $this->getData('remise_crt')) {
-                    $commande = $this->getParentInstance();
-
-                    if (BimpObject::objectLoaded($commande)) {
-                        $commande->setRevalorisation();
-                    }
-                }
-            }
         }
 
         return $errors;

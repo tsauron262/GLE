@@ -618,7 +618,7 @@ class BimpCore
 
                             $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, 0);
                             $files = scandir($dir);
-
+                            
                             foreach ($files as $f) {
                                 if (in_array($f, array('.', '..'))) {
                                     continue;

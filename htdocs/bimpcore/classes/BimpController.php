@@ -2777,6 +2777,7 @@ class BimpController
                 }
 
                 if (!count($errors)) {
+                    BimpCache::setBimpObjectInstance($object);
                     $errors = $object->setObjectAction($object_action, $id_object, $extra_data, $success);
                     BimpCore::unlockObject($module, $object_name, $id_object);
                 }

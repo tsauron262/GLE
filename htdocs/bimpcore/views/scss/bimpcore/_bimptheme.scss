@@ -1,6 +1,3 @@
-@import "../../../bimpcore/views/scss/bootstrap/mixins";
-@import "../../../bimpcore/views/scss/bootstrap/variables";
-
 #BimpThemeWrapper {
     // Thème: 
     .header-top { background-color: #ffffff; z-index: 9951; position: relative; padding: 15px 0; position: fixed; top: 0; width: 100%; left: 0; padding-left: 240px; -webkit-box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2), 0 1px 6px rgba(0, 0, 0, 0.04); -moz-box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2), 0 1px 6px rgba(0, 0, 0, 0.04); box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2), 0 1px 6px rgba(0, 0, 0, 0.04); }
@@ -176,6 +173,8 @@
     &.right-sidebar-expand .right-sidebar { -moz-transform: translateX(0); -o-transform: translateX(0); -ms-transform: translateX(0); -webkit-transform: translateX(0); transform: translateX(0); }
     &.right-sidebar-expand .chat-panel { -moz-transform: translateY(-100%) translateX(0); -o-transform: translateY(-100%) translateX(0); -ms-transform: translateY(-100%) translateX(0); -webkit-transform: translateY(-100%) translateX(0); transform: translateY(-100%) translateX(0); }   
 
+    .menu-collapsed .bimptheme_menu_extra_section { display: none; }
+    
     // Custom: 
     #id-container {
         width: 100%!important;
@@ -410,5 +409,11 @@
         .login_block_other {
             display: none;
         }
+    }
+}
+
+@media (max-width: 940px), (max-device-width: 940px){
+    #BimpThemeWrapper #id-right{
+        position: relative!important;
     }
 }

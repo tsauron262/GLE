@@ -27,11 +27,6 @@ class Bimp_Product extends BimpObject
         0 => array('label' => 'Non validé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Validé', 'icon' => 'fas_check', 'classes' => array('success'))
     );
-    public static $types_remise_arr = array(
-        0 => 'Pas de remise arrière',
-        1 => 'CRT',
-        2 => 'Remise AppleCare'
-    );
     public static $bimp_stock_origins = array('vente_caisse', 'transfert', 'sav', 'package', 'inventory', 'pret');
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
@@ -804,10 +799,32 @@ class Bimp_Product extends BimpObject
 
     // Getters données: 
 
-    public function getRemiseCrt()
+    public function getRemiseArriere($type = '')
     {
-        if ($this->dol_field_exists('crt')) {
-            return (float) $this->getData('crt');
+        if ($type) {
+            $ra = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductRA', array(
+                        'id_product' => $this->id,
+                        'type'       => $type
+                            ), true);
+
+            if (BimpObject::objectLoaded($ra)) {
+                return $ra;
+            }
+        }
+
+        return null;
+    }
+
+    public function getRemiseCrt($check_active = true)
+    {
+        $ra = $this->getRemiseArriere('crt');
+
+        if (BimpObject::objectLoaded($ra)) {
+            if ($check_active && !(int) $ra->getData('active')) {
+                return 0;
+            }
+
+            return (float) $ra->getData('value');
         }
 
         return 0;
@@ -1776,7 +1793,7 @@ class Bimp_Product extends BimpObject
             $html .= BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . $stocks['commandes'];
             $html .= '</span>';
             $html .= '</div>';
-            
+
             $html .= '<div style="display: inline-block; margin-right: 8px" class="bs-popover"';
             $html .= BimpRender::renderPopoverData('Stock virtuel');
             $html .= '>';
@@ -1864,9 +1881,8 @@ class Bimp_Product extends BimpObject
         if (isset($barcode) and strlen($barcode) > 5) {
             $this->dol_object->fetch_barcode();
             $html .= '<img src="';
-            $html .= DOL_URL_ROOT.'/viewimage.php?modulepart=barcode&generator='.urlencode($this->dol_object->barcode_type_coder).'&code='.urlencode($barcode).'&encoding='.urlencode($this->dol_object->barcode_type_code);
+            $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&generator=' . urlencode($this->dol_object->barcode_type_coder) . '&code=' . urlencode($barcode) . '&encoding=' . urlencode($this->dol_object->barcode_type_code);
             $html .= '">';
-            
         }
 
 

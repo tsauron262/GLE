@@ -172,15 +172,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
     }
 
     // Getters booléens:
-    
-    public function asPreuvePaiment(){
-        $files = $this->getFilesArray();
-        foreach($files as $file){
-            if(stripos($file, 'Paiement') !== false)
-                return 1;
-        }
-        return 0;
-    }
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -453,7 +444,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 global $user;
 
                 $id_cond_a_la_commande = self::getBdb()->getValue('c_payment_term', 'rowid', '`active` > 0 and code = "RECEPCOM"');
-                if ($client_facture->getData('outstanding_limit') < 1 /*and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement')*/ && !$this->asPreuvePaiment()) {
+                if ($client_facture->getData('outstanding_limit') < 1 /* and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement') */ && !$this->asPreuvePaiment()) {
                     if (!in_array($user->id, array(232, 97, 1566, 512))) {
                         $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
                         if ($available_discounts < $this->getData('total_ttc') && $this->getData('total_ttc') > 2)
@@ -589,6 +580,16 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return 0;
     }
 
+    public function asPreuvePaiment()
+    {
+        $files = $this->getFilesArray();
+        foreach ($files as $file) {
+            if (stripos($file, 'Paiement') !== false)
+                return 1;
+        }
+        return 0;
+    }
+
     // Getters:
 
     public function getData($field, $withDefault = true)
@@ -672,7 +673,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     );
                 }
             }
-            if($status === 0 && !$this->asPreuvePaiment())
+            if ($status === 0 && !$this->asPreuvePaiment())
                 $buttons[] = array(
                     'label'   => 'Télécharger la preuve de paiement',
                     'icon'    => 'dollar',
@@ -2754,7 +2755,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         'linked_id_object'   => (int) $line->id,
                         'linked_object_name' => 'commande_line',
                         'remise_crt'         => (int) $line->getData('remise_crt'),
-                        'remise_crt_percent' => (float) $line->getData('remise_crt_percent'),
                         'remise_pa'          => (float) $line->getData('remise_pa'),
                         'pa_editable'        => (isset($line_data['pa_editable']) ? (int) $line_data['pa_editable'] : 1)
                     ));
@@ -2772,6 +2772,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
                     $fac_line_warnings = array();
 
+                    $fac_line->no_remises_arrieres_auto_create = true;
                     $fac_line_errors = $fac_line->create($fac_line_warnings, true);
 
                     $fac_line_errors = BimpTools::merge_array($fac_line_errors, $fac_line_warnings);
@@ -2785,6 +2786,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
                         if (count($remises_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($remises_errors, 'Erreurs lors de la copie des remises pour la ligne n°' . $line->getData('position'));
+                        }
+
+                        $remises_arr_errors = $fac_line->copyRemisesArrieresFromOrigine($line);
+
+                        if (count($remises_arr_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($remises_arr_errors, 'Erreurs lors de la copie des remises arrières pour la ligne n°' . $line->getData('position'));
                         }
 
                         $fac_line->set('deletable', 0);
@@ -3217,7 +3224,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
                     foreach ($lines as $line) {
 //                        $line->fetch($line->id);//TODO trés bourin mais necessaire pour que quand on passe une ligne a zero $line soit a jour
-                        
+
                         $billed_qty = abs(round((float) $line->getBilledQty(null, false), 6));
                         $full_qty = abs(round((float) $line->getFullQty(), 6));
                         if ($billed_qty) {
@@ -3261,7 +3268,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         ));
                     }
                     $this->updateField('invoice_status', $new_status);
-                    
+
                     $idComm = $this->getIdCommercial();
                     $mail = BimpTools::getMailOrSuperiorMail($idComm);
 
@@ -3273,7 +3280,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
 
                     if (isset($mail) && $mail != "")
-                        mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  '.$this->displayData('invoice_status'));
+                        mailSyn2("Statut facturation", $mail, null, 'Bonjour le statut facturation de votre commande ' . $this->getLink() . $infoClient . ' est  ' . $this->displayData('invoice_status'));
                 }
             }
 
@@ -3314,11 +3321,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         $errors = array();
         $warnings = array();
-        /*pour enregistré les valeur du form*/
+        /* pour enregistré les valeur du form */
         $errors = $this->updateFields($data);
         $this->db->db->commit();
         $this->db->db->begin();
-        
+
         $infos = array();
 
         $forced_by_dev = (int) BimpTools::getArrayValueFromPath($data, 'forced_by_dev', 0);
@@ -3900,11 +3907,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
             'warnings' => $warnings
         );
     }
-    
+
     public function actionPreuvePaiment($data, &$success)
     {
         $errors = $warnings = array();
-        if(isset($data['file']) && $data['file'] != '')
+        if (isset($data['file']) && $data['file'] != '')
             BimpTools::mouveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
         else
             $errors[] = 'Aucun fichier uploadé';
@@ -4074,14 +4081,15 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
 
         foreach ($this->dol_object->lines as $line) {
-            if (stripos($line->ref, "REMISECRT") !== false) {
-                $this->dol_object->array_options['options_crt'] = 2;
-                $this->dol_object->updateExtraField('crt', '', $user);
-            }
-            if (stripos($line->desc, "Applecare") !== false) {
-                $this->dol_object->array_options['options_apple_care'] = 2;
-                $this->dol_object->updateExtraField('apple_care', '', $user);
-            }
+            // Obsolète: 
+//            if (stripos($line->ref, "REMISECRT") !== false) {
+//                $this->dol_object->array_options['options_crt'] = 2;
+//                $this->dol_object->updateExtraField('crt', '', $user);
+//            }
+//            if (stripos($line->desc, "Applecare") !== false) {
+//                $this->dol_object->array_options['options_apple_care'] = 2;
+//                $this->dol_object->updateExtraField('apple_care', '', $user);
+//            }
         }
 
         $res_errors = $this->createReservations();
@@ -4143,11 +4151,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $this->addObjectLog("Les retard de paiement  ont été validée financièrement par la configuration du client.");
             }
         }
-        if(empty($errors)){ 
+        if (empty($errors)) {
             $contacts = $this->dol_object->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
             foreach ($contacts as $contact) {
                 $subject = 'Validation commande ' . $this->getRef() . ' client ' . $client->getData('code_client');
-                $msg  = 'Bonjour<br/>Votre commande ' . $this->getNomUrl(1, true);
+                $msg = 'Bonjour<br/>Votre commande ' . $this->getNomUrl(1, true);
                 $msg .= ' pour le client ' . $client->getData('code_client') . ' ' . $client->getData('nom') . ' a été validée.';
                 mailSyn2($subject, $contact['email'], "gle@bimp.fr", $msg);
             }
@@ -4330,7 +4338,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
     }
 
     // Méthodes statiques: 
-    
+
     public function sendDraftWhithMail()
     {
         $date = new DateTime();
@@ -4353,7 +4361,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             if ($mail == '')
                 $mail = "tommy@bimp.fr";
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
-            $this->output .= $mail.' : '.$obj->getNomUrl().' '.$nbDay.'<br/>';
+            $this->output .= $mail . ' : ' . $obj->getNomUrl() . ' ' . $nbDay . '<br/>';
             if (mailSyn2('Commande brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une commande en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
                 $i++;
         }
@@ -4524,7 +4532,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                                 if (BimpObject::objectLoaded($cli)) {
                                     $html .= '<h3>Commande ' . $cli->getLink() . '</h4><br/><br/>';
                                 }
-                                
+
                                 $html .= '<table>';
                                 $html .= '<thead>';
                                 $html .= '<tr>';

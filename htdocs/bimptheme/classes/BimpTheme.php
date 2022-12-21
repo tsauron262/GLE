@@ -5,8 +5,7 @@ class BimpTheme
 
     public static $files = array(
         'css' => array(
-            'iconkit'   => '/bimpcore/views/css/iconkit.min.css',
-            'bimptheme' => '/bimptheme/views/css/bimptheme.css'
+            'iconkit'   => '/bimpcore/views/css/iconkit.min.css'
         ),
         'js'  => array(
             'theme'      => '/bimptheme/views/js/theme.js',

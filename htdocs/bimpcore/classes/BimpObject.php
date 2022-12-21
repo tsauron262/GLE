@@ -7861,11 +7861,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return 'fonction : ' . $fonction . " inexistante";
     }
 
-    public function renderLinkedObjectsLists()
+    public function renderLinkedObjectsLists($type = 'both')
     {
         if ($this->isLoaded()) {
             self::loadClass('bimpcore', 'BimpLink');
-            return BimpLink::renderObjectLinkedObjectsLists($this);
+            return BimpLink::renderObjectLinkedObjectsLists($this, $type);
         }
 
         return '';

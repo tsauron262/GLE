@@ -1947,9 +1947,9 @@ class Bimp_Facture extends BimpComm
         }
 
         $types = array(
-            0 => 'attente',
-            1 => 'accepted',
-            2 => 'refused',
+            0  => 'attente',
+            1  => 'accepted',
+            2  => 'refused',
             20 => 'attente',
             11 => 'attente'
         );
@@ -3612,23 +3612,23 @@ class Bimp_Facture extends BimpComm
         $total_pa = (float) $marginInfo['pa_total'];
 
         if (!(int) $this->getData('fk_statut')) {
-            $remises_crt = 0;
+            $remises_arrieres = 0;
 
             $lines = $this->getLines('not_text');
 
             foreach ($lines as $line) {
-                $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+                $remises_arrieres += (float) $line->getTotalRemisesArrieres(false);
             }
 
-            if ($remises_crt) {
+            if ($remises_arrieres) {
                 $html .= '<tr>';
                 $html .= '<td>Remises arrière prévues</td>';
                 $html .= '<td></td>';
-                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '', 0, 0, 0, 2, 1) . '</span></td>';
+                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_arrieres, '', 0, 0, 0, 2, 1) . '</span></td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
-                $total_pa -= $remises_crt;
+                $total_pa -= $remises_arrieres;
             }
         }
 
@@ -4054,33 +4054,27 @@ class Bimp_Facture extends BimpComm
                         }
                     } elseif ($line->isArticleLine()) {
                         // Création des revalorisations sur Remise arrière: 
-                        if ((int) $line->getData('remise_crt')) {
-                            $remise_pa = (float) $line->getRemiseCRT();
-
-                            if (!$remise_pa) {
-                                continue;
-                            }
-                            $prod = $line->getProduct();
-                            $type = $prod->getData('type_remise_arr');
-                            $typeStr = null;
-                            if($type == 1)
-                                $typeStr = 'crt';
-                            elseif($type == 2)
-                                $typeStr = 'applecare';
-                            if(is_null($typeStr)){
-                                $warnings = 'Type de remise arriére inconnue';
-                                BimpCore::addlog('Type de remise arriére inconnue');
-                            }
-                            else{
-                                // On vérifie qu'une reval n'existe pas déjà: 
-                                $reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
-                                            'id_facture'      => (int) $this->id,
-                                            'id_facture_line' => (int) $line->id,
-                                            'type'            => $typeStr
-                                ));
-
-                                if (BimpObject::objectLoaded($reval)) {
+                        $remises_arrieres = $line->getRemisesArrieres();
+                        if (!empty($remises_arrieres)) {
+                            foreach ($remises_arrieres as $remise_arriere) {
+                                $remise_pa = $remise_arriere->getRemiseAmount();
+                                if (!$remise_pa) {
                                     continue;
+                                }
+
+                                $ra_type = $remise_arriere->getData('type');
+
+                                // On vérifie qu'une reval n'existe pas déjà: 
+                                if ($ra_type != 'oth') {
+                                    $reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
+                                                'id_facture'      => (int) $this->id,
+                                                'id_facture_line' => (int) $line->id,
+                                                'type'            => $ra_type
+                                    ));
+
+                                    if (BimpObject::objectLoaded($reval)) {
+                                        continue;
+                                    }
                                 }
 
                                 $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
@@ -4090,15 +4084,23 @@ class Bimp_Facture extends BimpComm
                                 $reval_errors = $reval->validateArray(array(
                                     'id_facture'      => (int) $this->id,
                                     'id_facture_line' => (int) $line->id,
-                                    'type'            => $typeStr,
+                                    'type'            => $ra_type,
                                     'date'            => $dt->format('Y-m-d'),
                                     'amount'          => $remise_pa,
                                     'qty'             => (float) $line->qty
                                 ));
 
+                                if ($remise_arriere->getData('type') == 'oth') {
+                                    $reval->set('note', $remise_arriere->getData('label'));
+                                }
+
                                 if (!count($reval_errors)) {
                                     $reval_warnings = array();
-                                    $reval->create($reval_warnings, true);
+                                    $reval_errors = $reval->create($reval_warnings, true);
+                                }
+
+                                if (count($reval_errors)) {
+                                    $warnings[] = BimpTools::getMsgFromArray($reval_errors, 'Echec création de la revalorisation pour la remise arrière "' . $remise_arriere->getData('label') . '"');
                                 }
                             }
                         }
@@ -5528,7 +5530,6 @@ class Bimp_Facture extends BimpComm
 
             if ($to) {
                 global $user, $langs;
-                
 
                 $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendues pendant un mois';
                 $msg .= "\n\n";

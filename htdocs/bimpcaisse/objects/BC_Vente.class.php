@@ -1381,7 +1381,7 @@ class BC_Vente extends BimpObject
         $html .= '<div class="article_options">';
         $html .= '<div class="article_qty">&nbsp;</div>';
 
-        // Champ Remise arrière: 
+        // Champ Remise CRT: 
         $remise_crt = (float) $product->getRemiseCrt();
         if ($remise_crt) {
             $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';
@@ -1500,7 +1500,7 @@ class BC_Vente extends BimpObject
         $html .= '<i class="fa fa-plus-circle iconRight"></i></span>';
         $html .= '</div>';
 
-        // Champ Remise arrière: 
+        // Champ Remise CRT: 
         $remise_crt = (float) $product->getRemiseCrt();
         if ($remise_crt) {
             $html .= '<div class="article_remise_crt" style="margin: 10px 0;">';

@@ -161,9 +161,9 @@ lists_cols:
         
 lists: 
     default: 
-        objects_change_reload: ObjectLineRemise,RemiseGlobale,Bimp_Facture,BimpRevalorisation
+        objects_change_reload: ObjectLineRemise,RemiseGlobale,ObjectLineRemiseArriere,Bimp_Facture,BimpRevalorisation
     global: 
-        objects_change_reload: ObjectLineRemise,RemiseGlobale,Bimp_Facture,BimpRevalorisation
+        objects_change_reload: ObjectLineRemise,RemiseGlobale,ObjectLineRemiseArriere,Bimp_Facture,BimpRevalorisation
         list_actions: 
             - label: Revaloriser
               icon: fas_search-dollar

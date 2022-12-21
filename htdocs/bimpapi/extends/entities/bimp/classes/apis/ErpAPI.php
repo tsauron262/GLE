@@ -7,6 +7,9 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/apis/ErpAPI.php';
 ErpApi::$requests['addDemandeFinancement'] = array(
     'label' => 'Ajouter une demande de location'
 );
+ErpApi::$requests['editDemandeFinancementClientData'] = array(
+    'label' => 'Mise à jour des données du client d\'une demande de location'
+);
 ErpApi::$requests['cancelDemandeFinancement'] = array(
     'label' => 'Annuler une demande de location'
 );
@@ -58,6 +61,31 @@ class ErpAPI_ExtEntity extends ErpAPI
                 if (!count($errors)) {
                     return $response;
                 }
+            }
+        }
+
+        return null;
+    }
+
+    public function editDemandeFinancementClientData($id_df, $cient_data = array(), &$errors = array(), &$warnings = array())
+    {
+        $params = array(
+            'fields' => array(
+                'id_demande'  => $id_df,
+                'client_data' => json_encode($cient_data)
+            )
+        );
+
+        if (!count($errors)) {
+            $response = $this->execCurl('editDemandeFinancementClientData', $params, $errors);
+
+            if (isset($response['warnings'])) {
+                $warnings = BimpTools::merge_array($warnings, $response['warnings']);
+                unset($response['warnings']);
+            }
+
+            if (!count($errors)) {
+                return $response;
             }
         }
 

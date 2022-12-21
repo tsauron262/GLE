@@ -12,8 +12,7 @@ abstract class BDSProcess
     public static $files_dir_name = '';
     public static $memory_limit = '1000M';
     public static $max_execution_time = 3600;
-    
-    
+    public static $current_version = 1;
     public static $objects = array();
     public $db = null;
     public $user = null;
@@ -1211,7 +1210,7 @@ abstract class BDSProcess
         return null;
     }
 
-    // Installation:
+    // Installation // updates:
 
     public function addProcessParameters($parameters)
     {
@@ -1270,6 +1269,11 @@ abstract class BDSProcess
         }
 
         return $errors;
+    }
+
+    public static function updateProcess($id_process, $cur_version)
+    {
+        return array();
     }
 
     // Outils divers

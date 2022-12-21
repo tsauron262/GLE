@@ -195,4 +195,36 @@ class BDS_ProcessOperation extends BimpObject
 
         return $html;
     }
+
+    // Traitements: 
+
+    public function addOptions($options_names)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        $options = array();
+
+        foreach ($options_names as $opt_name) {
+            $option = BimpCache::findBimpObjectInstance('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process' => (int) $this->getData('id_process'),
+                        'name'       => $opt_name
+            ));
+
+            if (BimpObject::objectLoaded($option)) {
+                $options[] = $option;
+            } else {
+                $errors[] = 'L\'option "' . $opt_name . '" n\'existe pas';
+            }
+        }
+
+        if (!count($errors)) {
+            $errors = $this->addAssociates('options', $options);
+        }
+
+        return $errors;
+    }
 }

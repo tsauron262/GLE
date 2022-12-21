@@ -2084,26 +2084,27 @@ class BimpComm extends BimpDolObject
     public function renderMarginTableExtra($marginInfo)
     {
         if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande'))) {
-            $remises_crt = 0;
+            $remises_arrieres = 0;
 
             $lines = $this->getLines('not_text');
 
             foreach ($lines as $line) {
-                $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+                $remises_arrieres += $line->getTotalRemisesArrieres(false);
+                ;
             }
 
             $total_pv = (float) $marginInfo['pv_total'];
             $total_pa = (float) $marginInfo['pa_total'];
 
-            if ($remises_crt) {
+            if ($remises_arrieres) {
                 $html .= '<tr>';
                 $html .= '<td>Remises arrière prévues</td>';
                 $html .= '<td></td>';
-                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '', 0, 0, 0, 2, 1) . '</span></td>';
+                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_arrieres, '', 0, 0, 0, 2, 1) . '</span></td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
-                $total_pa -= $remises_crt;
+                $total_pa -= $remises_arrieres;
             }
 
             if ((float) $total_pa !== (float) $marginInfo['pa_total']) {
@@ -2921,6 +2922,7 @@ class BimpComm extends BimpDolObject
                         ), '`' . $line::$dol_line_primary . '` = ' . (int) $line->getData('id_line'));
             }
 
+            $new_line->no_remises_arrieres_auto_create = true;
             $line_errors = $new_line->create($warnings, true);
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne n°' . $i);
@@ -2963,6 +2965,7 @@ class BimpComm extends BimpDolObject
 
             // Création des remises pour la ligne en cours:
             $errors = BimpTools::merge_array($errors, $new_line->copyRemisesFromOrigin($line, ((int) $params['inverse_prices'] || (int) $params['inverse_qty']), $params['copy_remises_globales']));
+            $errors = BimpTools::merge_array($errors, $new_line->copyRemisesArrieresFromOrigine($line));
         }
 
         // Attribution des lignes parentes: 
@@ -4001,7 +4004,7 @@ class BimpComm extends BimpDolObject
                     'include_ca_details_by_users' => false
                         ), $options);
         $data = array(
-            'total'   => array(
+            'total'    => array(
                 'nb_new_clients'                   => 0,
                 'nb_new_clients_by_commerciaux'    => 0,
                 'nb_new_propales'                  => 0,
@@ -4013,9 +4016,10 @@ class BimpComm extends BimpDolObject
                 'achats'                           => 0,
                 'tx_marque'                        => ''
             ),
-            'users'   => array(),
-            'metiers' => array(),
-            'regions' => array()
+            'users'    => array(),
+            'metiers'  => array(),
+            'regions'  => array(),
+            'secteurs' => array()
         );
 
         if (count($errors)) {
@@ -4408,6 +4412,23 @@ class BimpComm extends BimpDolObject
             $data['regions'][$region]['marges'] += (float) $r['marge_finale_ok'];
             $data['regions'][$region]['achats'] += (float) $r['total_achat_reval_ok'];
 
+            // CA par secteur:
+            $secteur = Bimp_Societe::getSecteurCsvValue($r);
+            if (!isset($data['secteurs'][$secteur])) {
+                $data['secteurs'][$secteur] = array(
+                    'ca_ttc'    => 0,
+                    'ca_ht'     => 0,
+                    'marges'    => 0,
+                    'achats'    => 0,
+                    'tx_marque' => ''
+                );
+            }
+
+            $data['secteurs'][$secteur]['ca_ttc'] += (float) $r['total_ttc'];
+            $data['secteurs'][$secteur]['ca_ht'] += (float) $r['total_ht'];
+            $data['secteurs'][$secteur]['marges'] += (float) $r['marge_finale_ok'];
+            $data['secteurs'][$secteur]['achats'] += (float) $r['total_achat_reval_ok'];
+
             // CA par métier: 
             $exp = (int) $r['expertise'];
             if (!isset($data['metiers'][$exp])) {
@@ -4467,6 +4488,14 @@ class BimpComm extends BimpDolObject
                 $region_data['tx_marque'] = ($region_data['marges'] / $region_data['ca_ht']) * 100;
             } else {
                 $region_data['tx_marque'] = 'Inf.';
+            }
+        }
+        
+        foreach ($data['secteurs'] as $secteur => &$secteur_data) {
+            if (isset($secteur_data['ca_ht']) && (float) $secteur_data['ca_ht']) {
+                $secteur_data['tx_marque'] = ($secteur_data['marges'] / $secteur_data['ca_ht']) * 100;
+            } else {
+                $secteur_data['tx_marque'] = 'Inf.';
             }
         }
 

@@ -1,0 +1,84 @@
+table: product_remise_arriere
+common_fields: 0
+icon: fas_percent
+    
+labels: 
+    name: remise arrière sur PA
+    name_plur: remises arrières sur PA
+    is_female: 1
+    
+parent_module: bimpcore
+parent_object: Bimp_Product
+parent_id_property: id_product
+
+fields: 
+    id_product: 
+        label: Produit
+        type: id_parent
+        
+    type: 
+        label: Type
+        values: 
+            array: types
+        default_value: oth
+            
+    nom: 
+        label: Nom
+        required: 1
+        depends_on: type
+        
+    value: 
+        label: Valeur
+        type: percent
+        default_value: 0
+        
+    active: 
+        label: Activée
+        type: bool
+        default_value: 1
+        
+form: 
+    default: 
+        rows: 
+            - field: type
+            - field: nom
+            - field: value
+            - field: active
+        
+lists: 
+    default: 
+        title: Remises arrières sur prix d'achat
+        icon: fas_percent
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les remises sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        enable_search: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_btn: 0
+        delete_btn: 1
+        cols:
+            id_product:
+            type: 
+                edit: 1
+            nom: 
+                edit: 1
+            value: 
+                edit: 1
+            active: 
+                edit: 1
+                
+    product: 
+        extends: default
+        add_btn: 1     
+        add_form_name: default
+        enable_search: 0
+        cols: 
+            id_product: unset
+            
+     
+        
+    

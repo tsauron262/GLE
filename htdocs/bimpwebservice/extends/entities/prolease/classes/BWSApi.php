@@ -43,11 +43,11 @@ BWSApi::$requests['addDemandeFinancement'] = array(
                                 'tel'    => array('label' => 'Tel.'),
                                 'mobile' => array('label' => 'Tel. (mobile)')
                             )),
-//                        'signataire'      => array('label'      => 'Signataire', 'data_type'  => array(), 'sub_params' => array(
-//                                'nom'      => array('label' => 'Nom', 'required' => 1),
-//                                'prenom'   => array('label' => 'Nom', 'required' => 1),
-//                                'fonction' => array('label' => 'Fonction', 'required_if' => 'data/client/is_company'),
-//                            )),
+                        'signataire'      => array('label'      => 'Signataire', 'data_type'  => array(), 'sub_params' => array(
+                                'nom'      => array('label' => 'Nom', 'required' => 1),
+                                'prenom'   => array('label' => 'Nom', 'required' => 1),
+                                'fonction' => array('label' => 'Fonction'),
+                            )),
                         'livraisons'      => array('label' => 'Adresses de livraison', 'data_type' => 'array')
                     )),
                 'commercial'  => array('label'      => 'Données commercial', 'data_type'  => 'array', 'sub_params' => array(
@@ -57,6 +57,41 @@ BWSApi::$requests['addDemandeFinancement'] = array(
                         'tel'   => array('label' => 'Tel.'),
                     )),
                 'demande'     => array('label' => 'Données supplémentaires', 'data_type' => 'json')
+            )),
+    )
+);
+BWSApi::$requests['editDemandeFinancementClientData'] = array(
+    'desc'   => 'Mise à jour des données client d\'une demande de location',
+    'params' => array(
+        'id_demande'  => array('label' => 'ID Demande', 'data_type' => 'id', 'required' => 1),
+        'client_data' => array('label'      => 'Données', 'data_type'  => 'json', 'sub_params' => array(
+                'id'              => array('label' => 'ID', 'data_type' => 'id', 'required' => 1),
+                'ref'             => array('label' => 'Reférence', 'required' => 1),
+                'nom'             => array('label' => 'Nom', 'required' => 1),
+                'is_company'      => array('label' => 'Entreprise', 'data_type' => 'bool', 'default' => 0),
+                'siret'           => array('label' => 'N° SIRET', 'required_if' => 'data/client/is_company'),
+                'siren'           => array('label' => 'N° SIREN', 'required_if' => 'data/client/is_company'),
+                'forme_juridique' => array('label' => 'Forme juridique', 'required_if' => 'data/client/is_company'),
+                'capital'         => array('label' => 'Capital social'),
+                'address'         => array('label'      => 'Adresse client (siège si pro)', 'data_type'  => 'array', 'sub_params' => array(
+                        'address' => array('label' => 'Lignes adresse', 'required' => 1),
+                        'zip'     => array('label' => 'Code postal', 'required' => 1),
+                        'town'    => array('label' => 'Ville', 'required' => 1),
+                        'pays'    => array('label' => 'Pays', 'default' => 'France')
+                    )),
+                'contact'         => array('label'      => 'Infos contact', 'data_type'  => 'array', 'sub_params' => array(
+                        'nom'    => array('label' => 'Nom'),
+                        'prenom' => array('label' => 'Prénom'),
+                        'email'  => array('label' => 'Adresse e-mail'),
+                        'tel'    => array('label' => 'Tel.'),
+                        'mobile' => array('label' => 'Tel. (mobile)')
+                    )),
+                'signataire'      => array('label'      => 'Signataire', 'data_type'  => array(), 'sub_params' => array(
+                        'nom'      => array('label' => 'Nom', 'required' => 1),
+                        'prenom'   => array('label' => 'Nom', 'required' => 1),
+                        'fonction' => array('label' => 'Fonction'),
+                    )),
+                'livraisons'      => array('label' => 'Adresses de livraison', 'data_type' => 'array')
             )),
     )
 );
@@ -149,6 +184,32 @@ class BWSApi_ExtEntity extends BWSApi
                 }
             } else {
                 $this->addError('CREATION_FAIL', BimpTools::getMsgFromArray($errors, 'Echec de la création de la demande de location', true));
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_editDemandeFinancementClientData()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $id_demande = (int) $this->getParam('id_demande', 0);
+            $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
+
+            if (!BimpObject::objectLoaded($demande)) {
+                $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
+            } else {
+                $errors = $demande->editClientDataFromSource($this->getParam('client_data', array()));
+
+                if (!count($errors)) {
+                    $response = array(
+                        'success' => 1
+                    );
+                } else {
+                    $this->addError('UPDATE_FAIL', BimpTools::getMsgFromArray($errors, 'Echec de la mise à jour de la demande de location', true));
+                }
             }
         }
 

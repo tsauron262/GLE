@@ -293,6 +293,10 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 1;
 
             case 'createContrat':
+                if ($status !== Propal::STATUS_SIGNED) {
+                    $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
+                    return 0;
+                }
                 if ($status == 0) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' est au statut brouillon';
                     return 0;
@@ -999,7 +1003,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                         'buttons' => $buttons
                     ),
                     array(
-                        'label'   => 'Signature',
+                        'label'   => 'Actions Signature',
                         'icon'    => 'fas_signature',
                         'buttons' => $signature_buttons
                     )
@@ -1087,12 +1091,26 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $html .= '</div>';
             }
 
-            if ((int) $this->getData('fk_statut') == 1 && !(int) $this->getData('id_signature')) {
-                $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                $msg .= 'Si vous souhaitez <b>déposer le devis signé</b> ou demander la <b>signature électronique</b> à distance au client, veuillez cliquer sur "<b>Créer la fiche signature</b>"';
-                $html .= '<div style="margin-top: 10px">';
-                $html .= BimpRender::renderAlerts($msg, 'warning');
-                $html .= '</div>';
+            if ((int) $this->getData('fk_statut') == 1) {
+                $signature = null;
+                if ((int) $this->getData('id_signature')) {
+                    $signature = $this->getChildObject('signature');
+                }
+
+                if (BimpObject::objectLoaded($signature)) {
+                    $alertes = $signature->renderSignatureAlertes();
+                    if ($alertes) {
+                        $html .= '<div style="margin-top: 10px">';
+                        $html .= $alertes;
+                        $html .= '</div>';
+                    }
+                } elseif (!$this->field_exists('id_demande_fin') || !(int) $this->getData('id_demande_fin')) {
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                    $msg .= 'Si vous souhaitez <b>déposer le devis signé</b> ou demander la <b>signature électronique</b> à distance au client, veuillez cliquer sur "<b>Créer la fiche signature</b>"';
+                    $html .= '<div style="margin-top: 10px">';
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= '</div>';
+                }
             }
         }
 

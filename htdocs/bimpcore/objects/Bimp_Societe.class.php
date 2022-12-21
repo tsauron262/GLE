@@ -1491,10 +1491,33 @@ class Bimp_Societe extends BimpDolObject
             $dpt = substr($needed_fields['zip'], 0, 2);
 
             if ($dpt) {
-                foreach (self::$regions as $region => $codes) {
-                    if (in_array($dpt, $codes)) {
-                        return $region;
-                    }
+                foreach (self::$regions as $region => $secteurs) {
+                    foreach ($secteurs as $secteur => $codes)
+                        if (in_array($dpt, $codes)) {
+                            return 'Région ' . $region;
+                        }
+                }
+            }
+        }
+
+        return 'nc';
+    }
+
+    public static function getSecteurCsvValue($needed_fields = array())
+    {
+        if (isset($needed_fields['fk_pays']) && (int) $needed_fields['fk_pays'] !== 1) {
+            return 'Hors France';
+        }
+
+        if (isset($needed_fields['zip'])) {
+            $dpt = substr($needed_fields['zip'], 0, 2);
+
+            if ($dpt) {
+                foreach (self::$regions as $region => $secteurs) {
+                    foreach ($secteurs as $secteur => $codes)
+                        if (in_array($dpt, $codes)) {
+                            return 'R' . $region . $secteur;
+                        }
                 }
             }
         }
@@ -2650,7 +2673,7 @@ class Bimp_Societe extends BimpDolObject
                     $branches = $base->branches->branch;
                     $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
 
-                    $rcs = $summary->courtregistrydescription;
+                    $rcs = $summary->courtregistrydescription . ' ' . $siren;
                     if ($summary->status == 'Fermé') {
                         $note = 'Fermé';
                         $alert = 'Fermé';

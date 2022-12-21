@@ -339,6 +339,7 @@ class DemandeValidComm extends BimpObject
             $soc = $bimp_obj->getChildObject('client');
 
             if (is_object($bimp_obj) && $bimp_obj->isLoaded()) {
+                $value = $this->getData('status');
                 $subject = ((int) $value == self::STATUS_VALIDATED) ? 'Validation' : 'Refus';
                 $subject .= ' ' . $bimp_obj->getRef();
 
@@ -348,7 +349,7 @@ class DemandeValidComm extends BimpObject
                     $message_mail .= $soc->getRef() . ' - ' . $soc->getName() . ' ';
                 else
                     $message_mail .= ', client inconnu ';;
-                $message_mail .= ' a été ' . lcfirst(self::$status_list[(int) $value]['label']);
+                $message_mail .= ' a été passé au statut ' . lcfirst(self::$status_list[(int) $value]['label']);
                 $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
 
                 switch ($this->getData('type')) {

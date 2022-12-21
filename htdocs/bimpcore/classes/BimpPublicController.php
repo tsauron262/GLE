@@ -68,14 +68,14 @@ class BimpPublicController extends BimpController
                 if (BimpTools::isSubmit('ajax')) {
                     die(json_encode(Array("request_id" => $_REQUEST['request_id'], 'nologged' => 1)));
                 } elseif ($this->login_file) {
-                    // Chargement du formulaire de connexion: 
+// Chargement du formulaire de connexion: 
                     $this->displayLoginForm();
                 } else {
                     accessforbidden();
                     exit;
                 }
             } elseif ($this->new_pw_file && ((int) BimpTools::getPostFieldValue('bic_change_pw', 0) || (int) $userClient->getData('renew_required'))) {
-                // Formulaire changement de MDP: 
+// Formulaire changement de MDP: 
                 $this->displayChangePwForm(array(), (int) $userClient->getData('renew_required'));
                 exit;
             }
@@ -92,7 +92,7 @@ class BimpPublicController extends BimpController
 
         if (isset($_SESSION['userClient']) && (string) $_SESSION['userClient']) {
             if (!BimpObject::objectLoaded($userClient)) {
-                // Vérif user client session:
+// Vérif user client session:
                 $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                             'email' => $_SESSION['userClient']
                 ));
@@ -106,7 +106,7 @@ class BimpPublicController extends BimpController
         }
 
         if (!static::$user_client_required || BimpObject::objectLoaded($userClient)) {
-            // Si connexion ok: 
+// Si connexion ok: 
             global $user, $langs, $db;
             if (BimpObject::objectLoaded($userClient)) {
                 $langs->setDefaultLang(BIC_UserClient::$langs_list[$userClient->getData('lang')]);
@@ -123,8 +123,7 @@ class BimpPublicController extends BimpController
             $user->fetch(null, static::$client_user_login);
             $user->getrights();
             if (!BimpObject::objectLoaded($user)) {
-                BimpCore::addlog('Login utilisateur client par défaut invalide', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
-                ));
+                BimpCore::addlog('Login utilisateur client par défaut invalide', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array());
                 $this->errors[] = 'Votre espace client n\'est pas accessible pour le moment.<br/>Veuillez nous excuser pour le désagrement occasionné et réessayer ultérieurement.';
             }
         }
@@ -144,13 +143,13 @@ class BimpPublicController extends BimpController
         return BimpObject::getPublicBaseUrl() . 'bic_logout=1';
     }
 
-    // Affichage standards: 
+// Affichage standards: 
 
     public function displayHeader()
     {
         global $hookmanager;
 
-        // Création et initialisation du BimpLayout: 
+// Création et initialisation du BimpLayout: 
         $layout = BimpLayout::getInstance();
         $layout->page_title = $this->getPageTitle();
 
@@ -178,14 +177,15 @@ class BimpPublicController extends BimpController
         parent::display();
     }
 
-    // Affichages forms publics: 
+// Affichages forms publics: 
 
     public function displayPublicForm($form_name, $params = array(), $form_errors = array())
     {
+        $nom_espace_client = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
         $params = BimpTools::overrideArray(array(
-                    'page_title'     => 'LDLC Apple - Espace client',
+                    'page_title'     => $nom_espace_client . ' - Espace client',
                     'main_title'     => 'Espace client',
-                    'sub_title'      => 'Votre identifiant et mot de passe sont différents de votre compte client LDLC.',
+                    'sub_title'      => 'Votre identifiant et mot de passe sont différents de votre compte client ' . $nom_espace_client,
                     'submit_label'   => 'Valider',
                     'submit_enabled' => true,
                     'js_files'       => array(),
@@ -198,13 +198,13 @@ class BimpPublicController extends BimpController
         $html = '<!DOCTYPE html>';
         $html .= '<head>';
         $html .= '<title>' . $params['page_title'] . '</title>';
-        $html .= '<meta charset="UTF-8">';
-        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
+        $html .= '<meta charset = "UTF-8">';
+        $html .= '<meta name = "viewport" content = "width=device-width, initial-scale=1">';
 
         foreach ($params['js_files'] as $jsFile) {
             $url = BimpCore::getFileUrl($jsFile);
             if ($url) {
-                $html .= '<script type="text/javascript" src="' . $url . '"></script>';
+                $html .= '<script type = "text/javascript" src = "' . $url . '"></script>';
             }
         }
 
@@ -307,7 +307,7 @@ class BimpPublicController extends BimpController
                 ), $errors);
     }
 
-    // Rendus HTML: 
+// Rendus HTML: 
 
     public function renderLoginFormInputsHtml()
     {
@@ -322,7 +322,7 @@ class BimpPublicController extends BimpController
 
         $html .= '<p style="text-align: center">';
         $html .= 'Si vous souhaitez prendre un rendez-vous en ligne dans un de nos centres SAV pour la réparation de votre matériel et que ';
-        $html .= 'vous ne disposez pas de compte client LDLC Apple, veuillez <a href="' . BimpObject::getPublicBaseUrl() . 'fc=savForm" style="color: #00BEE5">cliquer ici</a>';
+        $html .= 'vous ne disposez pas de compte client ' . BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient') . ', veuillez <a href="' . BimpObject::getPublicBaseUrl() . 'fc=savForm" style="color: #00BEE5">cliquer ici</a>';
         $html .= '</p>';
 
         return $html;
@@ -344,16 +344,16 @@ class BimpPublicController extends BimpController
 
         $html .= '<script ype="text/javascript">
     function verif_for_active_button() {
-        var cur_pw = document.getElementById(\'cur_pw\').value;
-        var new_pw = document.getElementById(\'new_pw\').value;
-        var confirm_pw = document.getElementById(\'confirm_pw\').value;
-        var btn = document.getElementById(\'public_form_submit\');
-        if (cur_pw && new_pw && confirm_pw && new_pw == confirm_pw) {
-            btn.disabled = false;
-        } else {
-            btn.disabled = true;
-        }
-    }</script>';
+    var cur_pw = document.getElementById(\'cur_pw\').value;
+            var new_pw = document.getElementById(\'new_pw\').value;
+                    var confirm_pw = document.getElementById(\'confirm_pw\').value;
+                            var btn = document.getElementById(\'public_form_submit\');
+                                    if (cur_pw && new_pw && confirm_pw && new_pw == confirm_pw) {
+                            btn.disabled = false;
+                            } else {
+                            btn.disabled = true;
+                            }
+                            }</script>';
 
         $html .= '<label for="cur_pw">Mot de passe actuel</label><br/>';
         $html .= '<input id="cur_pw" type="password" name="bic_cur_pw" onkeyup="verif_for_active_button()" placeholder="Mot de passe actuel">';
@@ -367,7 +367,7 @@ class BimpPublicController extends BimpController
         return $html;
     }
 
-    // Traitements forms publics: 
+// Traitements forms publics: 
 
     public function processPublicForm()
     {

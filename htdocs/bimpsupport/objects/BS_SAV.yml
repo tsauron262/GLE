@@ -991,6 +991,46 @@ forms:
               input_name: parts
               content: 
                   callback: renderPartsConsignedStockDataForm
+                  
+    europe:
+        rows: 
+            date_purchase:
+              custom: 1
+              label: Date d'achat
+              data_type: date
+              input: date_purchase
+              input_name: date_purchase
+              type: date
+              value:
+                 callback:
+                    method: getEquipmentData
+                    params:
+                        - date_purchase
+                        
+            name_reseller:
+              custom: 1
+              label: Nom du revendeur
+              data_type: string
+              type: string
+              input: name_reseller
+              input_name: name_reseller
+              values: 
+                LDLC: LDLC
+                BIMP: BIMP
+                AUTRE: Autre
+                
+            other_name_reseller:
+              custom: 1
+              label: Autre revendeur
+              data_type: string
+              type: string
+              input: other_name_reseller
+              input_name: other_name_reseller
+#              hidden: 1
+              display_if: 
+                  field_name: name_reseller
+                  show_values: AUTRE
+
         
 fields_tables: 
     infos: 

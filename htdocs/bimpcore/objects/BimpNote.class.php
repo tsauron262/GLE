@@ -62,9 +62,10 @@ class BimpNote extends BimpObject
     }
     
     public function getHisto(){
-        return $this->getParentInstance()->renderNotesList(false, 'chat', '', false, false);
-//        $list = new BC_ListTable($this->getParentInstance(), 'chat');
-//        return $list->renderHtml();
+        $parent = $this->getParentInstance();
+        if($parent && is_object($parent)){
+            return $parent->renderNotesList(false, 'chat', '', false, false);
+        }
     }
 
     public function canClientView()

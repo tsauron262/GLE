@@ -5,6 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
+    public static $current_version = 2;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 
@@ -691,7 +692,7 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
-    // Correcetions positions: 
+    // Corrections positions: 
 
     public function initCorrectPositions(&$data, &$errors = array())
     {
@@ -783,6 +784,66 @@ class BDS_VerifsProcess extends BDSProcess
                     $this->incIgnored();
                 }
             }
+        }
+    }
+
+    // Corrections doc signés: 
+
+    public function initCorrectSignedDoc(&$data, &$errors = array())
+    {
+        $date = $this->getOption('date_from');
+
+        if (!$date) {
+            $errors[] = 'Veuillez saisir une date';
+        } else {
+            $sql = 'SELECT a.id FROM ' . MAIN_DB_PREFIX . 'bimpcore_signature a ';
+            $sql .= 'WHERE (';
+            $sql .= 'SELECT COUNT(s.id) FROM ' . MAIN_DB_PREFIX . 'bimpcore_signature_signataire s ';
+            $sql .= 'WHERE s.id_signature = a.id AND s.status = 10 AND s.type_signature IN (1,3) ';
+            $sql .= 'AND date_signed >= \'' . $date . ' 00:00:00\')';
+            $sql .= ' = 1;';
+
+            $rows = $this->db->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                $signatures = array();
+
+                foreach ($rows as $r) {
+                    $signatures[] = (int) $r['id'];
+                }
+
+                $data['steps']['correction'] = array(
+                    'label'                  => 'Reconstruction des docs signés',
+                    'on_error'               => 'continue',
+                    'elements'               => $signatures,
+                    'nbElementsPerIteration' => 25
+                );
+            } else {
+                $errors[] = 'ERR SQL - ' . $this->db->err();
+            }
+        }
+    }
+
+    public function executeCorrectSignedDoc($step_name, &$errors = array(), $extra_data = array())
+    {
+        $this->setCurrentObjectData('bimpcore', 'Bimp_Signature');
+        foreach ($this->references as $id_signature) {
+            $this->incProcessed();
+            $signature = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignature', $id_signature);
+
+            if (BimpObject::objectLoaded($signature)) {
+                $err = $signature->rebuildSignedDoc();
+
+                if (count($err)) {
+                    $this->Error(BimpTools::getMsgFromArray($err, 'Echec reconstruction doc signé'), $signature);
+                } else {
+                    $this->Success('Reconstruction doc signé OK', $signature);
+                    $this->incUpdated();
+                    continue;
+                }
+            }
+
+            $this->incIgnored();
         }
     }
 
@@ -935,5 +996,30 @@ class BDS_VerifsProcess extends BDSProcess
                 $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
             }
         }
+    }
+
+    public static function updateProcess($id_process, $cur_version, &$warnings = array())
+    {
+        $errors = array();
+
+        if ($cur_version < 2) {
+            // Opération "Reconstruction des docs signés": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Reconstruction des docs signés',
+                        'name'          => 'correctSignedDoc',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 15
+                            ), true, $errors, $warnings);
+
+            if (BimpObject::objectLoaded($op)) {
+                $errors = array_merge($errors, $op->addOptions(array('date_from')));
+            }
+        }
+
+        return $errors;
     }
 }

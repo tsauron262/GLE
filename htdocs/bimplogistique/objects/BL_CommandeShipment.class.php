@@ -706,7 +706,7 @@ class BL_CommandeShipment extends BimpObject
                     if ($id_comm_contact) {
                         $id_contact = $id_comm_contact;
                     }
-                }
+                }                
                 return $id_contact;
 
             case 'id_entrepot':
@@ -773,7 +773,11 @@ class BL_CommandeShipment extends BimpObject
 
     public function getBulkFactureClientContactsArray()
     {
-        $id_client = $this->getBulkFactureValue('id_client');
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
+        
+        if (!$id_client) {
+            $id_client = $this->getBulkFactureValue('id_client');
+        }
 
         if ($id_client) {
             return self::getSocieteContactsArray($id_client, false);

@@ -350,6 +350,8 @@ class BContract_avenant extends BContract_contrat {
         
         if(!count($errors)) {
             if($haveSignature) {
+                $this->updateField('signed', 1);
+                $this->updateField('date_signed', $data->dateSignature);
                 if($this->getData('type') == 1) {
                     $this->actionSignedProlongation(Array('date_signed' => $data->dateSignature), $success);
                 } else {
@@ -389,7 +391,7 @@ class BContract_avenant extends BContract_contrat {
         if(!count($errors)) {
             $errors = $this->updateField('signed', 1);
             if(!count($errors)) {
-                $errors = $this->updateField('statut', 2);
+                $errors = $this->updateField('statut', self::AVENANT_STATUT_ACTIF);
                 $child = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet');
                 $list = $child->getList(['id_line_contrat' => 0, 'id_avenant' => $this->id]);
                 $have_new_lines = (count($list) > 0 ? true : false);

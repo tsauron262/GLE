@@ -122,10 +122,10 @@ lists:
                 label: Coût de l'avenant au prorata
                 value:
                     callback: displayTotalCoup
-            adding:
-                label: Adding Amount
-                value:
-                    callback: getThisAddingAmountForTypeProlongation
+#            adding:
+#                label: Adding Amount
+#                value:
+#                    callback: getThisAddingAmountForTypeProlongation
             user_create:
             date_create:
     all:

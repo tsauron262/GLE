@@ -1403,7 +1403,7 @@ class BimpSignature extends BimpObject
         $file_name = $this->getDocumentFileName(false);
 
         if (!count($errors)) {
-            $subject = $this->displayDocTitle();
+            $subject = $this->displayDocTitle(true);
             $result = $api->createEnvelope($dir, $file_name, $subject, $signers, $errors, $warnings);
 
             if (!count($errors)) {

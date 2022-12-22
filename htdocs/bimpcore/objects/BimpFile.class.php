@@ -13,6 +13,11 @@ class BimpFile extends BimpObject
     );
     
     public $htmlName = 'file';
+    
+    
+    public function getDateModif(){
+        return BimpTools::printDate(filemtime($this->getFilePath()));
+    }
 
     // Droits users: 
 

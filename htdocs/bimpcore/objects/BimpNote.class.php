@@ -60,6 +60,13 @@ class BimpNote extends BimpObject
             return 1;
         return 0;
     }
+    
+    public function getHisto(){
+        $parent = $this->getParentInstance();
+        if($parent && is_object($parent)){
+            return $parent->renderNotesList(false, 'chat', '', false, false);
+        }
+    }
 
     public function canClientView()
     {
@@ -370,7 +377,7 @@ class BimpNote extends BimpObject
             foreach ($tabT as $part) {
                 $return .= substr($part, 0, 1);
             }
-            $return = strtoupper(substr($return, 0, 2));
+            $return = strtoupper(substr($return, 0, 3));
         }
         return $return;
     }
@@ -538,10 +545,8 @@ class BimpNote extends BimpObject
         $html = "";
 
         $author = $this->displayAuthor(false, true);
-        $html .= '<div class="d-flex justify-content-' . ($this->i_am_dest() ? "start" : ($this->i_am_author() ? "end" : "")) . ($style == "petit" ? ' petit' : '') . ' mb-4">
-            <span data-toggle="tooltip" data-placement="top" title="' . $author . '" class="chat-img pull-left">
-                <img src="' . BimpTools::getAvatarImgSrc($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? '55C1E7' : '5500E7')) . '" alt="User Avatar" class="img-circle">
-            </span>';
+        $html .= '<div class="d-flex justify-content-' . ($this->i_am_dest() ? "start" : ($this->i_am_author() ? "end" : "")) . ($style == "petit" ? ' petit' : '') . ' mb-4">';
+        $html .= BimpTools::getBadge($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? '55C1E7' : '5500E7'), $author);
         $html .= '<div class="msg_cotainer">' . $this->displayData("content");
         if ($style != "petit" && $this->getData('user_create') != $user->id)
             $html .= '<span class="rowButton bs-popover"><i class="fas fa-share link" onclick="' . $this->getJsRepondre() . '"></i></span>';
@@ -551,9 +556,7 @@ class BimpNote extends BimpObject
         if ($this->getData('type_dest') != self::BN_DEST_NO) {
             $dest = $this->displayDestinataire(false, true);
             if ($dest != "")
-                $html .= '    <span data-toggle="tooltip" data-placement="top" title="' . $dest . '" class="chat-img pull-left ' . ($this->getData("viewed") ? "" : "nonLu") . ($this->i_am_dest() ? " my" : "") . '">
-                                    <img src="' . BimpTools::getAvatarImgSrc($this->getInitiale($author), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? '55C1E7' : '5500E7')) . '" alt="User Avatar" class="img-circle">
-                                </span>';
+                $html .= BimpTools::getBadge($this->getInitiale($dest), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? '55C1E7' : '5500E7'), $dest);
         }
         $html .= "";
 

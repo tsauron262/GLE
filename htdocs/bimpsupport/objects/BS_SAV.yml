@@ -992,6 +992,127 @@ forms:
               content: 
                   callback: renderPartsConsignedStockDataForm
                   
+    acompte: 
+        title: Ajouter un acompte
+        icon: fas_hand-holding-usd
+        rows: 
+            - custom: 1
+              hidden: 1
+              input_name: caisse_active
+              input: 
+                  type: hidden
+              value: 
+                  conf: 
+                      module: bimpcore
+                      name: use_caisse_for_payments
+            - custom: 1
+              label: Payée
+              input_name: payee
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Paiement en caisse
+              input_name: use_caisse
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 
+                  conf: use_caisse_for_payments
+              display_if:
+                    fields_names: caisse_active,payee
+                    caisse_active:
+                        hide_values: 0
+                    payee:
+                        show_values: 1
+            - custom: 1
+              label: Caisse
+              input_name: id_caisse
+              data_type: id
+              content: 
+                  callback: renderCaisseInput
+              display_if:
+                    fields_names: use_caisse,payee
+                    use_caisse:
+                        hide_values: 0
+                    payee:
+                        show_values: 1
+            - custom: 1
+              label: Compte bancaire
+              input_name: bank_account
+              data_type: int
+              value: 
+                  callback: getDefaultBankAccount
+              input: 
+                    type: select_mysoc_account
+              depends_on: id_caisse
+            - custom: 1
+              label: Mode de paiement
+              input_name: id_mode_paiement
+              required: 0
+              input: 
+                  type: select_payment
+                  value_type: code
+                  include_empty: 1
+              display_if: 
+                  field_name: payee
+                  hide_values: 0
+#            - custom: 1
+#              label: RIB Client
+#              input_name: id_rib
+#              input: 
+#                  type: select
+#                  options: 
+#                      callback: getRibArray
+#              display_if: 
+#                  field_name: id_mode_paiement
+#                  show_values: PRE
+            - custom: 1
+              label: N° (chèque ou virement)
+              input_name: num_paiement
+              input: 
+                  type: text
+              display_if: 
+                    field_name: id_mode_paiement
+                    show_values: CHQ,VIR
+            - custom: 1
+              label: Emetteur (Chèque ou virement)
+              data_type: string
+              input_name: nom_emetteur
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: CHQ,VIR
+            - custom: 1
+              label: Banque émetteur (chèque)
+              data_type: string
+              input_name: banque_emetteur
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: CHQ
+            - custom: 1
+              label: Date de paiement de l'acompte
+              data_type: date
+              input_name: date
+              input:
+                  type: date
+                  display_now: 1
+              display_if: 
+                  field_name: payee
+                  hide_values: 0
+            - custom: 1
+              label: Montant
+              input_name: amount
+              data_type: money
+              required: 1
+              input: 
+                  type: text
+                  
+              
     europe:
         rows: 
             date_purchase:
@@ -1030,7 +1151,6 @@ forms:
               display_if: 
                   field_name: name_reseller
                   show_values: AUTRE
-
         
 fields_tables: 
     infos: 

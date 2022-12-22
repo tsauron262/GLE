@@ -1089,7 +1089,7 @@ class BS_SAV extends BimpObject
                         $id_mode_paiement = $client->dol_object->mode_reglement_id;
                     }
 
-                    $onclick = $propal->getJsActionOnclick('addAcompte', array(
+                    $onclick = $this->getJsActionOnclick('addAcompte', array(
                         'id_mode_paiement' => $id_mode_paiement
                             ), array(
                         'form_name' => 'acompte'
@@ -5916,6 +5916,16 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $success = "Acompte créer avec succés.";
             }
         }
+        else{
+            $propal = $this->getChildObject('propal');
+            $client = $this->getChildObject('client');
+            $centre = $this->getCentreData();
+            $return = $propal->actionAddAcompte($data, $success);
+            if(!count($return['errors'])){
+                mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
+                return $return;
+            }
+        }
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -6125,7 +6135,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $client = $this->getChildObject('client');
                         $centre = $this->getCentreData();
                         $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
-                        mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
+//                        mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                         $success = "Acompte créer avec succés.";
                     }
                 }

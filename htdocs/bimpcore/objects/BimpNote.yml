@@ -216,6 +216,14 @@ forms:
                   hashtags: 1
                   type: textarea
                   rows: 3
+        after_content:
+                  callback: getHisto
+            
+#            - custom: 1
+#              label: Historique
+#              value: 
+#                  callback: getHisto
+
                   
 lists_cols: 
     date_create:

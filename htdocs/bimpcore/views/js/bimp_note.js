@@ -80,9 +80,10 @@ class bimp_note extends AbstractNotification {
         html += 'onclick=\'loadModalObjectNotes($(this), "' + element.obj_module +'", "' + element.obj_name +'", "' + element.id_obj + '", "chat", true);\' data-original-title="" title="Voir toute la conversation"><i class="far fa5-eye"></i></span>'
         
         // Marquer comme lu
-        html += '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Vue rapide" data-html="false" data-viewport="{&quot;selector&quot;: &quot;body&quot;, &quot;padding&quot;: 0}" '
-        html += 'onclick=\'' + callback_set_as_viewed + ';\' data-original-title="" title="Marquer comme lu"><i class="far fa5-envelope-open"></i></span>'
-               
+        if(!i_am_author && !element.is_viewed){
+            html += '<span class="rowButton bs-popover" data-toggle="popover" data-trigger="hover" data-placement="top" data-content="Vue rapide" data-html="false" data-viewport="{&quot;selector&quot;: &quot;body&quot;, &quot;padding&quot;: 0}" '
+            html += 'onclick=\'' + callback_set_as_viewed + ';\' data-original-title="" title="Marquer comme lu"><i class="far fa5-envelope-open"></i></span>'
+        }
         
         html += '<div class="d-flex justify-content-' + (element.i_am_dest ? "start" : (i_am_author ? "end" : "")) + (style == "petit" ? ' petit' : '') + ' mb-4">';
         

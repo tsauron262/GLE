@@ -117,7 +117,7 @@ class BimpAlert extends BimpObject
     }
     
     public function getPopup($id, $titre, $withBtn = true){
-        $return = "bimpModal.loadAjaxContent($(this), 'loadAlertModal', {id: '$id'}, '".$titre."', 'Chargement', function (result, bimpAjax) {});bimpModal.show();";
+        $return = "bimpModal.loadAjaxContent($(this), 'loadAlertModal', {id: '$id'}, '".addslashes($titre)."', 'Chargement', function (result, bimpAjax) {});bimpModal.show();";
         if($withBtn){
             $onclick = $this->getJsActionOnclick('isViewed', array('id' => $id));
             $return .= "bimpModal.addButton('Lu', \"".$onclick."\", 'primary', 'is_viewed', modal_idx);";

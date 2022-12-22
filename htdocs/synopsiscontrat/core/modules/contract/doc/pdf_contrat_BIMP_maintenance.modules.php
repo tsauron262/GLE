@@ -892,7 +892,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetXY($this->marge_gauche, $pdf->getY()+9);
                 $pdf->setTextColor(236, 147, 0);
                 $pdf->MultiCell(180, 15, "La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :
-E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client", 0, 'C');
+E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://bimppro.freshdesk.com", 0, 'C');
 //                $pdf->writeHTML("<span style='color:red'>La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :</span><br/>e-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client");
                 $pdf->SetXY($this->marge_gauche, $pdf->getY()-8);
                 $pdf->setTextColor(0,0, 0);

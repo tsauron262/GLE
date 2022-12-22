@@ -1139,8 +1139,9 @@ class BContract_contrat extends BimpDolObject
     {
         $errors = [];
         $warnings = [];
-
-        $this->tryToValidate($errors);
+        global $user;
+        if($user->id == 330)
+            $errors[] = $this->getData('id_signature');
 
         return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
     }

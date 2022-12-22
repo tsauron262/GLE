@@ -623,18 +623,18 @@ forms:
               display_if: 
                   field_name: id_facture
                   show_values: 0
-            - custom: 1
-              label: Contact
-              input_name: id_contact
-              data_type: id
-              input: 
-                  type: select
-                  options: 
-                      array: clientFactureContacts
-              display_if: 
-                  field_name: id_facture
-                  show_values: 0
-              depends_on: id_client_facture
+#            - custom: 1
+#              label: Contact
+#              input_name: id_contact
+#              data_type: id
+#              input: 
+#                  type: select
+#                  options: 
+#                      array: clientFactureContacts
+#              display_if: 
+#                  field_name: id_facture
+#                  show_values: 0
+#              depends_on: id_client_facture
             - custom: 1
               label: Conditions de règlement
               input_name: id_cond_reglement

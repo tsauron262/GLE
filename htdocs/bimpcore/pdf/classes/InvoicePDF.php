@@ -46,7 +46,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                 $this->pdf->SetAuthor($this->langs->convToOutputCharset($user->getFullName($this->langs)));
                 $this->pdf->SetKeyWords($this->langs->convToOutputCharset($this->object->ref) . " " . $this->langs->transnoentities("Invoice") . " " . $this->langs->convToOutputCharset($this->object->thirdparty->name));
 
-                
+                $contacts = $this->facture->getIdContact('external', 'BILLING');
                 if (isset($contacts[0]) && $contacts[0]) {
                     BimpTools::loadDolClass('contact');
                     $contact = new Contact($this->db);

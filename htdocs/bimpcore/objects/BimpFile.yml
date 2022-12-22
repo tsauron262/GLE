@@ -195,7 +195,11 @@ lists_cols:
         value: 
             callback: displayType
     date_create:
-        label: Date
+        label: Date Creation
+    date_modif:
+        label: Date Modif
+        value:
+            callback: getDateModif
     description:
         field: description
         
@@ -229,6 +233,7 @@ lists:
             file_name:
             file_size: 
             date_create:
+            date_modif:
             description:
             visibility:      
             in_emails: 

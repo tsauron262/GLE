@@ -28,8 +28,30 @@ class PropalSavPDF extends PropalPDF
     protected function initData()
     {
         parent::initData();
-        if (isset($this->object) && is_a($this->object, 'Propal'))
+        if (isset($this->object) && is_a($this->object, 'Propal')) {
             $this->bimpCommObject = BimpObject::getInstance('bimpsupport', 'BS_SavPropal', (int) $this->object->id);
+                
+            $secteur = $this->bimpCommObject->getData('ef_type');
+            
+            // SAV
+            if($secteur == 'S') {
+
+                $code_centre = $this->sav->getData('code_centre');
+
+                if($code_centre == '') {
+                    $this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
+                } else {
+
+                    $centres = BimpCache::getCentres();
+                    if(isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
+                        $centre = $centres[$code_centre];
+                        $this->fromCompany->phone   = $centre['tel'];
+                        $this->fromCompany->email   = $centre['mail'];
+                    }
+                }
+            }
+        }
+
     }
 
     protected function initHeader()

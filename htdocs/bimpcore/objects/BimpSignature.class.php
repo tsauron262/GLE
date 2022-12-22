@@ -89,6 +89,12 @@ class BimpSignature extends BimpObject
         switch ($action) {
             case 'initDocuSign':
                 return (int) $user->admin;
+
+            case 'rebuildSignedDoc':
+                if (in_array($user->login, array('admin', 'f.martinez'))) {
+                    return 1;
+                }
+                return 0;
         }
         return parent::canSetAction($action);
     }
@@ -203,6 +209,9 @@ class BimpSignature extends BimpObject
                     }
                 }
                 return (count($errors) ? 0 : 1);
+
+            case 'rebuildSignedDoc':
+                return 1;
         }
 
         return parent::isActionAllowed($action, $errors);
@@ -313,6 +322,15 @@ class BimpSignature extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('rebuildSignedDoc') && $this->canSetAction('rebuildSignedDoc')) {
+            $buttons[] = array(
+                'label'   => 'Recontruire le doc signé',
+                'icon'    => 'fas_redo',
+                'onclick' => $this->getJsActionOnclick('rebuildSignedDoc', array(), array(
+                    'confirm_msg' => 'Confirm'
+                ))
+            );
+        }
         $buttons = BimpTools::merge_array($buttons, $this->getSignedButtons());
 
         if ($include_link && $this->isLoaded()) {
@@ -1236,7 +1254,7 @@ class BimpSignature extends BimpObject
         }
 
         if (!count($errors)) {
-            $params = $this->getSignatureParams($signataire);
+            $params = $this->getSignatureParams($signataire, 'elec');
 
             if (!empty($params_overrides)) {
                 $params = BimpTools::overrideArray($params, $params_overrides, true);
@@ -1403,7 +1421,7 @@ class BimpSignature extends BimpObject
         $file_name = $this->getDocumentFileName(false);
 
         if (!count($errors)) {
-            $subject = $this->displayDocTitle();
+            $subject = $this->displayDocTitle(true);
             $result = $api->createEnvelope($dir, $file_name, $subject, $signers, $errors, $warnings);
 
             if (!count($errors)) {
@@ -1624,6 +1642,29 @@ class BimpSignature extends BimpObject
             $obj->getRef(),
             '<a href="' . self::getPublicBaseUrl(false) . '">espace client</a>'
                 ), $email_content);
+    }
+
+    public function rebuildSignedDoc()
+    {
+        $errors = array();
+
+        $file = $this->getDocumentFilePath(true);
+
+        if (file_exists($file)) {
+            unlink($file);
+        }
+
+        $signataires = $this->getChildrenObjects('signataires');
+
+        foreach ($signataires as $signataire) {
+            $err = $this->writeSignatureOnDoc($signataire);
+
+            if (count($err)) {
+                $errors[] = 'Echec incrustation de la sigature du signataire "' . $signataire->getName() . '"';
+            }
+        }
+
+        return $errors;
     }
 
     // Actions: 
@@ -1873,6 +1914,20 @@ class BimpSignature extends BimpObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
+        );
+    }
+
+    public function actionRebuildSignedDoc($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'OK';
+
+        $errors = $this->rebuildSignedDoc();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

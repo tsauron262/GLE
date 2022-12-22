@@ -2744,6 +2744,44 @@ class BF_Demande extends BimpObject
 
     // Traitements: 
 
+    public function editClientDataFromSource($client_data)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $contrat_status = (int) $this->getData('contrat_status');
+
+            if ($contrat_status >= 20 && $contrat_status < 30) {
+                $errors[] = 'Il n\'est pas possible de mettre à jour les données du client car le contrat de location a été signé';
+            } else {
+                $source = $this->getSource();
+
+                if (!BimpObject::objectLoaded($source)) {
+                    $errors[] = 'Source absente';
+                }
+
+                $id_client = BimpTools::getArrayValueFromPath($client_data, 'id', 0);
+                $ref_client = BimpTools::getArrayValueFromPath($client_data, 'ref', '');
+                if (!$id_client && !$ref_client) {
+                    $errors[] = 'ID ou référence du client absent';
+                }
+
+                if (!count($errors)) {
+                    $source->validateArray(array(
+                        'id_client'   => $id_client,
+                        'ref_client'  => $ref_client,
+                        'client_data' => $client_data
+                    ));
+
+                    $warnings = array();
+                    $errors = $source->update($warnings, true);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     public function calcLinesMontants()
     {
         $errors = array();
@@ -4633,7 +4671,7 @@ class BF_Demande extends BimpObject
         }
 
         $this->checkIsClosed();
-        
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,

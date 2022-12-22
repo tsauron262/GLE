@@ -684,9 +684,10 @@ class BS_SAV extends BimpObject
                 'label'   => 'Générer Doc Loi Européenne',
                 'icon'    => 'fas_file-pdf',
                 'onclick' => $this->getJsActionOnclick('generatePDF', array(
-                    'file_type' => 'europe'
+                    'file_type' => 'europe',
                         ), array(
-                    'success_callback' => $callback
+                    'success_callback' => $callback,
+                    'form_name' => 'europe'
                 ))
             );
 
@@ -1611,6 +1612,14 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             }
         }
         return $code;
+    }
+    
+    public function getEquipmentData($data) {
+        $equipment = $this->getChildObject('equipment');
+        if (!BimpObject::objectLoaded($equipement))
+            return $equipment->getData($data);
+        
+        return '';
     }
 
     // Affichage:
@@ -7123,7 +7132,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $subject = 'LDLDC - Votre bon de prise en charge PC-' . $this->getRef();
 
                     $message = 'Bonjour, ' . "\n\n";
-                    $message .= 'Vous trouverez ci-joint votre bon de prise en charge PC-' . $this->getRef() . "\n\n";
+                    $message .= 'Vous trouverez ci-joint votre bon de prise en charge ' . $this->getLink(array(), 'public') . " \n\n";
                     $message .= 'Merci d\'avoir choisi LDLC' . "\n\n";
                     $message .= 'Cordialement';
 

@@ -367,13 +367,26 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 //              // Date d’achat 
                 $pdf->SetXY('34', '147.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                $date_purchase = new DateTime($equipment->getData("date_purchase"));
-                $pdf->MultiCell(300, 6, str_replace("\n", " ", $date_purchase->format('d-m-Y')), 0, 'L');
+                
+                if(!is_null(BimpTools::getPostFieldValue('date_purchase')))
+                    $date_purchase = new DateTime(BimpTools::getPostFieldValue('date_purchase'));
+                else
+                    $date_purchase = new DateTime($equipment->getData("date_purchase"));
+                $pdf->MultiCell(300, 6, $date_purchase->format('d-m-Y'), 0, 'L');
                 
                 // Nom du revendeur
                 $pdf->SetXY('134', '146.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-                $pdf->MultiCell(100, 6, $sav->getData('name_reseller'), 0, 'L');
+                $name_reseller = BimpTools::getPostFieldValue('name_reseller');
+                if(!is_null($name_reseller)) {
+                    if($name_reseller == 'AUTRE') {
+                        $name_reseller = BimpTools::getPostFieldValue('other_name_reseller');
+                        if($name_reseller == '')
+                           $name_reseller = $sav->getData('name_reseller');
+                    }
+                } else
+                    $name_reseller = $sav->getData('name_reseller');
+                $pdf->MultiCell(100, 6, $name_reseller, 0, 'L');
                 
                 
                 // Description du problème
@@ -425,7 +438,16 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 $this->addCheck($pdf, 180, 56.3);
 
                 //Frais d’inspection facturés
-                $this->addCheck($pdf, 80.5, 66);
+                $name_reseller = BimpTools::getPostFieldValue('name_reseller');
+                if(!is_null($name_reseller)) {
+                    if($name_reseller == 'LDLC' or $name_reseller == 'BIMP')
+                        $this->addCheck($pdf, 80.5, 66); // Checkbox à "Non"
+                    else
+                        $this->addCheck($pdf, 65.4, 66); // Checkbox à "Oui"
+                    
+                } else {
+                    $this->addCheck($pdf, 70.5, 66); // Checkbox à "Non"
+                }
                 
                 //Le produit présente-t-il des signes visibles de dommage accidentel ?
                 $this->addCheck($pdf, 149.2, 75.8);

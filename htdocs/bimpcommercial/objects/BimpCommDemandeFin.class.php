@@ -79,6 +79,7 @@ class BimpCommDemandeFin extends BimpObject
                 return 1;
 
             case 'cancelDemandeFinancement':
+            case 'editClientData':
                 if ((int) $this->getData('status') >= 20) {
                     $errors[] = 'Cette demande de location est déjà au statut annulée ou refusée';
                     return 0;
@@ -182,6 +183,7 @@ class BimpCommDemandeFin extends BimpObject
                 ))
             );
         }
+
         if ($this->isActionAllowed('cancelDemandeFinancement') && $this->canSetAction('cancelDemandeFinancement')) {
             $buttons[] = array(
                 'label'   => 'Annuler la demande de location',
@@ -211,7 +213,7 @@ class BimpCommDemandeFin extends BimpObject
                 ))
             );
         }
-        
+
         if ($this->isActionAllowed('createPvrFinSignature') && $this->canSetAction('createPvrFinSignature')) {
             $buttons[] = array(
                 'label'   => 'Envoyer le PV de réception pour signature',
@@ -716,6 +718,17 @@ class BimpCommDemandeFin extends BimpObject
 
                 if (isset($data['notes']) && !empty($data['notes'])) {
                     $content .= '<br/><h4>' . BimpRender::renderIcon('fas_sticky-note', 'iconLeft') . 'Notes synchronisées</h4>';
+
+                    if ($this->isActionAllowed('sendNote') && $this->canSetAction('sendNote')) {
+                        $content .= '<div class="buttonsContainer align-right">';
+                        $onclick = $this->getJsActionOnclick('sendNote', array(), array(
+                            'form_name' => 'note'
+                        ));
+                        $content .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $content .= BimpRender::renderIcon('fas_paper-plane', 'iconLeft') . 'Nouveau message à ' . $this->displayTarget();
+                        $content .= '</span>';
+                        $content .= '</div>';
+                    }
 
                     foreach ($data['notes'] as $note) {
                         $content .= '<div style="margin: 12px 0;">';
@@ -1287,8 +1300,9 @@ class BimpCommDemandeFin extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1365,11 +1379,6 @@ class BimpCommDemandeFin extends BimpObject
                         $errors[] = 'Le contact de suivi sélectionné n\'existe plus';
                     }
                 }
-//                elseif ($is_company) {
-//                    $errors[] = 'Client pro : sélection du contact destinataire de l\'offre de location obligatoire';
-//                } elseif (BimpObject::objectLoaded($client) && !$client->getData('email')) {
-//                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
-//                }
 
                 $contact_signature = null;
                 $id_contact_signature = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
@@ -1380,11 +1389,6 @@ class BimpCommDemandeFin extends BimpObject
                         $errors[] = 'Le contact signataire sélectionné n\'existe plus';
                     }
                 }
-//                elseif ($is_company) {
-//                    $errors[] = 'Client pro: sélection du contact signataire obligatoire';
-//                } elseif ($id_contact_suivi && BimpObject::objectLoaded($client) && !$client->getData('email')) {
-//                    $errors[] = 'Aucune adresse e-mail renseignée dans la fiche client';
-//                }
 
                 $commercial = $origine->getCommercial();
                 if (!BimpObject::objectLoaded($commercial)) {
@@ -1392,10 +1396,6 @@ class BimpCommDemandeFin extends BimpObject
                 }
 
                 $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('poste') : ''));
-
-//                if (!$fonction_signataire && $is_company) {
-//                    $errors[] = 'Client pro: la fonction du contact signataire doit obligatoirement être renseignée';
-//                }
 
                 $contacts_livraisons = array();
                 foreach (BimpTools::getArrayValueFromPath($data, 'contacts_livraisons', array()) as $id_contact_liv) {
@@ -1564,10 +1564,6 @@ class BimpCommDemandeFin extends BimpObject
                     }
 
                     if (!count($errors)) {
-//                        echo '<pre>';
-//                        print_r($demande_data);
-//                        exit;
-
                         $req_errors = array();
                         $result = $api->addDemandeFinancement($type_origine, $demande_data, $req_errors, $warnings);
 
@@ -1625,6 +1621,170 @@ class BimpCommDemandeFin extends BimpObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
+        );
+    }
+
+    public function actionEditClientData($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Mise à jour des données du client effectuée avec succès';
+
+        $api = $this->getExternalApi($errors);
+        $parent = $this->getParentInstance();
+        $client = null;
+        $is_company = 0;
+
+        if (!BimpObject::objectLoaded($parent) || !is_a($parent, 'BimpComm')) {
+            $errors[] = 'Pièce commerciale liée invalide';
+        } else {
+            $client = $parent->getChildObject('client');
+
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client absent';
+            } else {
+                $is_company = (int) $client->isCompany();
+            }
+        }
+
+        $contact_suivi = null;
+        $id_contact_suivi = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_suivi', (int) $this->getData('id_contact_suivi'));
+        if ($id_contact_suivi) {
+            $contact_suivi = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact_suivi);
+
+            if (!BimpObject::objectLoaded($contact_suivi)) {
+                $errors[] = 'Le contact de suivi sélectionné n\'existe plus';
+            }
+        }
+
+        $contact_signature = null;
+        $id_contact_signature = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', (int) $this->getData('id_contact_signature'));
+        if ($id_contact_signature) {
+            $contact_signature = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact_signature);
+
+            if (!BimpObject::objectLoaded($contact_signature)) {
+                $errors[] = 'Le contact signataire sélectionné n\'existe plus';
+            }
+        }
+
+        $fonction_signataire = BimpTools::getPostFieldValue('fonction_signataire', (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('poste') : ''));
+
+        $contacts_livraisons = array();
+        foreach (BimpTools::getArrayValueFromPath($data, 'contacts_livraisons', $this->getData('contacts_livraisons')) as $id_contact_liv) {
+            $contact_liv = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact_liv);
+            if (BimpObject::objectLoaded($contact_liv)) {
+                $contacts_livraisons[] = $id_contact_liv;
+            } else {
+                $errors[] = 'Le contact de livraison #' . $id_contact_liv . ' n\'existe plus';
+            }
+        }
+
+        if (!count($errors)) {
+            $client_data = array(
+                'id'              => $client->id,
+                'ref'             => $client->getRef(),
+                'nom'             => $client->getName(),
+                'is_company'      => (int) $client->isCompany(),
+                'siret'           => $client->getData('siret'),
+                'siren'           => $client->getData('siren'),
+                'forme_juridique' => $client->displayData('fk_forme_juridique', 'default', 0, 1),
+                'capital'         => $client->displayData('capital', 'default', 0, 1),
+                'extra_data'      => array(),
+                'address'         => array(),
+                'contact'         => array(),
+                'signataire'      => array(
+                    'nom'      => (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('lastname') : ''),
+                    'prenom'   => (BimpObject::objectLoaded($contact_signature) ? $contact_signature->getData('firstname') : ''),
+                    'fonction' => $fonction_signataire
+                ),
+                'livraisons'      => array()
+            );
+
+            if ($is_company) {
+                $client_data['extra_data'] = array(
+                    'alias'     => array('label' => 'Alias', 'value' => $client->getData('name_alias')),
+                    'type_ent'  => array('label' => 'Type entreprise', 'value' => $client->displayData('fk_typent', 'default', false, true)),
+                    'tva_assuj' => array('label' => 'Assujetti à la TVA', 'value' => $client->displayData('tva_assuj', 'default', false, true)),
+                    'tva_intra' => array('label' => 'N° TVA', 'value' => $client->getData('tva_intra'))
+                );
+            }
+
+            if ($client->getData('address') && $client->getData('zip') && $client->getData('town')) {
+                $client_data['address'] = array(
+                    'address' => $client->getData('address'),
+                    'zip'     => $client->getData('zip'),
+                    'town'    => $client->getData('town'),
+                    'pays'    => $client->displayData('fk_pays', 'default', 0, 1)
+                );
+            } elseif (BimpObject::objectLoaded($contact_suivi)) {
+                $client_data['address'] = array(
+                    'address' => $contact_suivi->getData('address'),
+                    'zip'     => $contact_suivi->getData('zip'),
+                    'town'    => $contact_suivi->getData('town'),
+                    'pays'    => $contact_suivi->displayData('fk_pays', 'default', 0, 1)
+                );
+            }
+
+            if (BimpObject::objectLoaded($contact_suivi)) {
+                $client_data['contact'] = array(
+                    'nom'    => $contact_suivi->getData('lastname'),
+                    'prenom' => $contact_suivi->getData('firstname'),
+                    'email'  => $contact_suivi->getData('email'),
+                    'tel'    => $contact_suivi->getData('phone'),
+                    'mobile' => $contact_suivi->getData('phone_mobile')
+                );
+            } else {
+                $client_data['contact'] = array(
+                    'email' => $client->getData('email'),
+                    'tel'   => $client->getData('phone'),
+                );
+            }
+
+            foreach ($contacts_livraisons as $id_contact_liv) {
+                $contact_liv = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact_liv);
+                if (BimpObject::objectLoaded($contact_liv)) {
+                    $client_data['livraisons'][] = array(
+                        'address' => $contact_liv->getData('address'),
+                        'zip'     => $contact_liv->getData('zip'),
+                        'town'    => $contact_liv->getData('town'),
+                        'pays'    => $contact_liv->displayData('fk_pays', 'default', 0, 1),
+                        'email'   => $contact_liv->getData('email'),
+                        'tel'     => $contact_liv->getData('phone'),
+                        'mobile'  => $contact_liv->getData('phone_mobile')
+                    );
+                }
+            }
+
+            if (!count($errors)) {
+                $req_errors = array();
+                $result = $api->editDemandeFinancementClientData((int) $this->getData('id_ext_df'), $client_data, $req_errors, $warnings);
+
+                if (isset($result['success']) && (int) $result['success']) {
+                    $this->validateArray(array(
+                        'id_contact_suivi'     => $id_contact_suivi,
+                        'id_contact_signature' => $id_contact_signature,
+                        'contacts_livraisons'  => $contacts_livraisons
+                    ));
+
+                    $up_errors = $this->update($warnings, true);
+
+                    if (count($up_errors)) {
+                        $msg = 'Mise à jour des données du client sur' . $this->displayTarget() . ' ok';
+                        $msg .= ' mais échec de l\'enregistrement des données au niveau local';
+                        $warnings[] = BimpTools::getMsgFromArray($up_errors, $msg);
+                    }
+                } elseif (count($req_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la mise à jour des données client sur ' . $this->displayTarget());
+                } else {
+                    $errors[] = 'Echec de la requête (Aucune réponse reçue)';
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => (empty($warnings) ? 'bimp_reloadPage();' : '')
         );
     }
 

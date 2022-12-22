@@ -1,31 +1,3 @@
-
-/*
-*BIMP CORE
-*/
-@media (max-width: 940px), (max-device-width: 940px){
-#BimpThemeWrapper #id-right{
-    position: relative!important;
-}
-}
-
-.menu-collapsed .bimptheme_menu_extra_section{
-    display: none;
-}
-
-body.modal-open ul.ui-autocomplete{
-    overflow: auto;
-    max-height: 400px;
-}
-
-
-div.tabsElem div{
-    z-index:1000;
-}
-
-
-
-
-
 div.clear{
     clear: both;
 }
@@ -520,6 +492,9 @@ input, input.flat, textarea, textarea.flat, form.flat select, select, select.fla
 /* z-index modal au dessus du reste*/
 /*Note Flo: z-index corrigés pour fullscreen bimpcaisse - ne pas mettre de valeurs inféreieures*/
 
+div.tabsElem div{
+    z-index:1000;
+}
 
 .ui-widget-overlay{
     z-index: 11250!important;

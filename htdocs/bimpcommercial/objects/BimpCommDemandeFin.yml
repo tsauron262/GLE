@@ -263,6 +263,21 @@ forms:
                   options: 
                       callback: getDFCalcModesArray
               depends_on: target
+              
+    edit_client: 
+        rows: 
+            - field: id_contact_suivi
+              label: Contact client destinataire de l'offre de location              
+            - field: id_contact_signature
+              label: Contact client signataire du devis et du contrat de location
+            - custom: 1
+              label: Fonction Signataire
+              input_name: fonction_signataire
+              input: 
+                  type: text
+                  help: Champ "Poste / fonction" du contact signataire. Information obligatoire pour les clients pro pour l'établissement du contrat de location.
+              depends_on: id_contact_signature
+            - field: contacts_livraisons
     
     note: 
         rows: 
@@ -403,8 +418,7 @@ forms:
                     callback: 
                         params: 
                             - pvr_fin
-                        
-            
+       
 signatures: 
     devis_fin: 
         label: Devis de location

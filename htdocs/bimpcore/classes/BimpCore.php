@@ -618,7 +618,7 @@ class BimpCore
 
                             $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, 0);
                             $files = scandir($dir);
-                            
+
                             foreach ($files as $f) {
                                 if (in_array($f, array('.', '..'))) {
                                     continue;
@@ -827,7 +827,7 @@ class BimpCore
     public static function getUserGroupId($group_code)
     {
         // Codes groupes possibles: logistique / facturation / atradius / contrat / achat
-        
+
         return (int) self::getConf('id_user_group_' . $group_code);
     }
 
@@ -871,10 +871,10 @@ class BimpCore
     public static function isModuleActive($module)
     {
         global $conf;
-        $name = strtoupper('MAIN_MODULE_'.$module);
-        if(isset($conf->global->$name) && $conf->global->$name)
+        $name = strtoupper('MAIN_MODULE_' . $module);
+        if (isset($conf->global->$name) && $conf->global->$name)
             return 1;
-        
+
         return ((string) self::getConf('module_version_' . $module, '') ? 1 : 0);
     }
 
@@ -939,6 +939,24 @@ class BimpCore
         }
 
         return '';
+    }
+
+    public static function isEntity($entity)
+    {
+        if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY == $entity) {
+            return 1;
+        }
+
+        return 0;
+    }
+    
+    public static function isVersion($version)
+    {
+        if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION == $version) {
+            return 1;
+        }
+
+        return 0;
     }
 
     // Gestion du contexte:

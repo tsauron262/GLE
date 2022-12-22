@@ -167,23 +167,23 @@ class BimpComm_ExtEntity extends BimpComm
             }
 
             if (is_a($this, 'Bimp_Commande') && !(int) $df->getData('serials_ok') && (int) $this->getData('shipment_status') === 2) {
-                    $data = $df->fetchDemandeFinData();
+                $data = $df->fetchDemandeFinData();
 
-                    if (isset($data['missing_serials']['total']) && (int) $data['missing_serials']['total'] > 0) {
-                        if ((int) $data['missing_serials']['total'] > 1) {
-                            $msg = $data['missing_serials']['total'] . ' numéros de série sont manquants sur ' . $df->displayTarget() . '<br/>';
-                        } else {
-                            $msg = $data['missing_serials']['total'] . ' numéro de série est manquant sur ' . $df->displayTarget() . '<br/>';
-                        }
-
-                        $onclick = $this->getJsActionOnclick('setDemandeFinSerials');
-                        $msg .= '<div style="text-align: right">';
-                        $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                        $msg .= 'Transmettre les n° de série' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
-                        $msg .= '</span>';
-                        $msg .= '</div>';
-                        $html .= BimpRender::renderAlerts($msg, 'warning');
+                if (isset($data['missing_serials']['total']) && (int) $data['missing_serials']['total'] > 0) {
+                    if ((int) $data['missing_serials']['total'] > 1) {
+                        $msg = $data['missing_serials']['total'] . ' numéros de série sont manquants sur ' . $df->displayTarget() . '<br/>';
+                    } else {
+                        $msg = $data['missing_serials']['total'] . ' numéro de série est manquant sur ' . $df->displayTarget() . '<br/>';
                     }
+
+                    $onclick = $this->getJsActionOnclick('setDemandeFinSerials');
+                    $msg .= '<div style="text-align: right">';
+                    $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= 'Transmettre les n° de série' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+                    $msg .= '</span>';
+                    $msg .= '</div>';
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                }
             }
         }
 
@@ -212,7 +212,21 @@ class BimpComm_ExtEntity extends BimpComm
         if (!$this->field_exists('id_demande_fin')) {
             $errors[] = 'Demande de location non disponibles depuis les ' . $this->getLabel('name_plur');
         } elseif ($this->isDemandeFinAllowed($errors)) {
+            $id_df = (int) $this->getData('id_demande_fin');
+            $df = $this->getChildObject('demande_fin');
+
             $html .= '<div class="buttonsContainer align-right" style="margin: 0">';
+            if (BimpObject::objectLoaded($df)) {
+                if ($df->isActionAllowed('editClientData') && $df->canSetAction('editClientData')) {
+                    $onclick = $df->getJsActionOnclick('editClientData', array(), array(
+                        'form_name' => 'edit_client'
+                    ));
+                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $html .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Mettre à jour les données client';
+                    $html .= '</span>';
+                }
+            }
+
             $onclick = $this->getJsLoadCustomContent('renderDemandeFinancementView', '$(this).findParentByClass(\'nav_tab_ajax_result\')');
             $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
             $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
@@ -221,9 +235,7 @@ class BimpComm_ExtEntity extends BimpComm
 
             $html .= '<div class="row">';
 
-            $id_df = (int) $this->getData('id_demande_fin');
             if ($id_df) {
-                $df = $this->getChildObject('demande_fin');
                 if (BimpObject::objectLoaded($df)) {
                     $html .= '<div class="col-xs-12 col-sm-6">';
                     $html .= $df->renderDemandeInfos();

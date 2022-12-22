@@ -306,21 +306,21 @@ forms:
                 display_if: 
                     field_name: id_facture
                     show_values: 0,
-            contact: 
-                custom: 1
-                label: Contact
-                input_name: id_contact
-                data_type: id
-                input: 
-                    type: select
-                    options: 
-                        callback: 
-                            method: getClientContactsArray
-                            object: commande
-                depends_on: id_client
-                display_if: 
-                    field_name: id_facture
-                    show_values: 0,
+#            contact: 
+#                custom: 1
+#                label: Contact
+#                input_name: id_contact
+#                data_type: id
+#                input: 
+#                    type: select
+#                    options: 
+#                        callback: 
+#                            method: getClientContactsArray
+#                            object: commande
+#                depends_on: id_client
+#                display_if: 
+#                    field_name: id_facture
+#                    show_values: 0,
             libelle: 
                 custom: 1
                 show: 1
@@ -429,15 +429,15 @@ forms:
                         params: 
                             - id_client
                 required: 1
-            contact: 
-                value: 
-                    callback: 
-                        method: getBulkFactureValue
-                        params: 
-                            - id_contact
-                input: 
-                    options: 
-                        callback: getBulkFactureClientContactsArray
+#            contact: 
+#                value: 
+#                    callback: 
+#                        method: getBulkFactureValue
+#                        params: 
+#                            - id_contact
+#                input: 
+#                    options: 
+#                        callback: getBulkFactureClientContactsArray
             libelle: 
                 value: 
                     callback:

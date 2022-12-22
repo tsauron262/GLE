@@ -163,7 +163,7 @@ class savFormController extends BimpPublicController
                 $html .= '</div>';
 
 //                $html .= '<p class="inputHelp">';
-//                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client LDLC Apple, veuillez vous ';
+//                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client '.BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient').', veuillez vous ';
 //                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm">authentifier</a>';
 //                $html .= ' pour simplifier la prise de rendez-vous.';
 //                $html .= '</p>';
@@ -311,7 +311,7 @@ class savFormController extends BimpPublicController
                             $html .= ' (Contact: ' . $contact->getName() . ')';
                         }
                         $html .= '.<br/>';
-                        $html .= 'Nous vous avons ouvert un accès à votre espace client personnalisé LDLC Apple.<br/>';
+                        $html .= 'Nous vous avons ouvert un accès à votre espace client personnalisé ' . BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient') . '.<br/>';
                         $html .= 'Un e-mail contenant votre mot de passe vous a été envoyé.<br/>';
                         $html .= 'Veuillez consulter votre messagerie, puis ';
                         $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm';

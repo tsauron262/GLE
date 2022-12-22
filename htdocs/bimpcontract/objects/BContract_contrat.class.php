@@ -4962,7 +4962,7 @@ class BContract_contrat extends BimpDolObject
 
                     // Client
                     $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $id_contact);
-                    if(!BimpObject::objectLoaded($contact) or $contact->getData('poste') != '') {
+                    if(!BimpObject::objectLoaded($contact) or $contact->getData('poste') == '') {
                         $errors[] = "Fonction du contact client absent, merci de le définir";
                     } else {
                         BimpObject::loadClass('bimpcore', 'BimpSignataire');

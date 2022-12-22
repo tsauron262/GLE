@@ -42,7 +42,6 @@ class BimpNote extends BimpObject
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Group'
     );
-
     # Pas d'ID en dur dans le code : utiliser des variables de conf. 
     # Les ID sont à mettre dans config module bimpcore onglet "Groupes" => /bimpcore/index.php?fc=dev&tab=modules_conf
 //    const BN_GROUPID_LOGISTIQUE = 108; => BimpCore::getUserGroupId('logistique')
@@ -135,10 +134,10 @@ class BimpNote extends BimpObject
         switch ($action) {
             case 'repondre':
                 if ($this->isLoaded()) {
-                    if ((int) $this->getData('type_author') !== self::BN_AUTHOR_USER && (int) $this->getData('type_author') !== self::BN_AUTHOR_GROUP) {
-                        $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu. 
-                        return 0;
-                    }
+//                    if ((int) $this->getData('type_author') !== self::BN_AUTHOR_USER && (int) $this->getData('type_author') !== self::BN_AUTHOR_GROUP) {
+//                        $errors[] = 'L\'auteur n\'est pas un utilisateur'; // Nécessaire dans l'immédiat (pour prolease) mais le système sera revu. 
+//                        return 0;
+//                    }
                     global $user;
                     if ($this->getData('user_create') == $user->id) {
                         $errors[] = 'L\'utilisateur connecté est l\'auteur';
@@ -602,6 +601,11 @@ class BimpNote extends BimpObject
 //        $data["type_author"] = self::BN_AUTHOR_USER;
         $data["user_create"] = $user->id;
         $data["viewed"] = 0;
+
+        if ((int) $this->getData('visibility') === self::BN_PARTNERS) {
+            $data['visibility'] = self::BN_PARTNERS;
+            $data['type_author'] = self::BN_AUTHOR_USER;
+        }
 
         BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
 

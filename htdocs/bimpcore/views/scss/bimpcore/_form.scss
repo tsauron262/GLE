@@ -711,7 +711,7 @@ input[type=text].large_input {
 }
 
 .check_list_item > label,
-.check_list_group_caption {
+.check_list_group_caption.selectable {
     margin: 0 0 5px 0;
     padding: 0 6px 0 24px;
 
@@ -727,7 +727,7 @@ input[type=text].large_input {
 }
 
 .check_list_item > input[type=checkbox]:checked + label,
-.check_list_group > input[type=checkbox]:checked + .check_list_group_caption {
+.check_list_group > input[type=checkbox]:checked + .check_list_group_caption.selectable {
     color: $gray-darker;
 
     &:before {

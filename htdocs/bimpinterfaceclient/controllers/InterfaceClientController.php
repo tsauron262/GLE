@@ -159,7 +159,7 @@ class InterfaceClientController extends BimpPublicController
     {
         global $userClient;
 
-        $html = '<h2>Bienvenue dans votre espace client LDLC Apple</h2><br/>';
+        $html = '<h2>Bienvenue dans votre espace client ' . BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient') . '</h2><br/>';
 
         if (!BimpObject::objectLoaded($userClient)) {
             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
@@ -552,7 +552,7 @@ class InterfaceClientController extends BimpPublicController
         } else {
             $list = new BC_ListTable($signataire, 'public_client');
             $list->addFieldFilterValue('id_client', (int) $userClient->getData('id_client'));
-            
+
             $html .= $list->renderHtml();
         }
 

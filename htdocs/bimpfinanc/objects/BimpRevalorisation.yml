@@ -149,6 +149,21 @@ fields:
         label: Serial
         type: text
         
+    equipments: 
+        label: Equipements
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: equipment        
+        input: 
+            type: check_list
+            select_all_buttons: 1
+            search_input: 1
+            max: 
+                field_value: qty
+            items: 
+                callback: getAvailableEquipmentsArray
+                
 forms: 
     default: 
         rows: 
@@ -210,6 +225,11 @@ forms:
               input: 
                   type: text
                   
+    set_equipments: 
+        title: Attribution des équipments
+        rows: 
+            - field: equipments
+                  
 fields_tables: 
     infos: 
         title: Informations
@@ -247,6 +267,7 @@ fields_tables:
             - label: Ligne de facture
               value: 
                   callback: displayDesc
+            - field: equipments
               
 views: 
     default: 
@@ -355,6 +376,7 @@ lists:
             total:
             status: 
             commissions: 
+            equipments: 
         
     commission: 
         configurable: 1
@@ -418,3 +440,4 @@ lists:
             total: 
             status:  
             commissions:
+            equipments: 

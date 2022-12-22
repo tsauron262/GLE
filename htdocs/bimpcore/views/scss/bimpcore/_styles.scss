@@ -1444,3 +1444,9 @@ i.iconRight {
         padding-left: 10px;
     }
 }
+
+
+body.modal-open ul.ui-autocomplete{
+    overflow: auto;
+    max-height: 400px;
+}

@@ -248,7 +248,7 @@ class BS_Note extends BimpObject
                     $url = $ticket->getPublicUrl(false);
                 }
                 if ($url) {
-                    $msg .= '<br/>------------------<br/><a href="' . $url . '">Cliquez ici</a> pour accéder au détail de votre ticket support depuis votre espace client LDLC Apple';
+                    $msg .= '<br/>------------------<br/><a href="' . $url . '">Cliquez ici</a> pour accéder au détail de votre ticket support depuis votre espace client ' . BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
                 }
 
                 $bimpMail = new BimpMail($ticket, $subject, $to, '', $msg, '', $cc);
@@ -268,7 +268,7 @@ class BS_Note extends BimpObject
                 $errors[] = 'Compte utilisateur client absent';
             } else {
                 $this->set('id_user_client', $userClient->id);
-                $this->set('visibility', 1);
+                $this->set('visibility ', 1);
             }
         }
 

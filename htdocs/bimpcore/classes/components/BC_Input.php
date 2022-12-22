@@ -78,7 +78,10 @@ class BC_Input extends BimpComponent
         'check_list'                  => array(
             'items'              => array('data_type' => 'array', 'default' => array(), 'compile' => true),
             'select_all_buttons' => array('data_type' => 'bool', 'default' => 1),
-            'search_input'       => array('data_type' => 'bool', 'default' => 0)
+            'search_input'       => array('data_type' => 'bool', 'default' => 0),
+            'max_input_name'     => array('default' => ''),
+            'max_input_abs'      => array('data_type' => 'bool', 'default' => 0),
+            'max'                => array('data_type' => 'any', 'default' => 'none')
         ),
         'custom'                      => array(
             'content' => array('default' => '')
@@ -149,7 +152,7 @@ class BC_Input extends BimpComponent
             'card'            => array('default', ''),
             'max_results'     => array('data_type' => 'int', 'default' => 200),
             'display_results' => array('data_type' => 'bool', 'default' => 1),
-            'scanner'        => array('data_type' => 'bool', 'default' => 0),
+            'scanner'         => array('data_type' => 'bool', 'default' => 0),
         ),
         'object_filters'              => array(
             'obj_input_name' => array('default' => ''),
@@ -428,6 +431,9 @@ class BC_Input extends BimpComponent
                 $options['items'] = isset($this->params['items']) ? $this->params['items'] : array();
                 $options['select_all_buttons'] = isset($this->params['select_all_buttons']) ? $this->params['select_all_buttons'] : 1;
                 $options['search_input'] = isset($this->params['search_input']) ? (int) $this->params['search_input'] : 0;
+                $options['max_input_name'] = isset($this->params['max_input_name']) ? (int) $this->params['max_input_name'] : '';
+                $options['max_input_abs'] = isset($this->params['max_input_abs']) ? (int) $this->params['max_input_abs'] : 0;
+                $options['max'] = (isset($this->params['max']) && $this->params['max'] !== 'none') ? (int) $this->params['max'] : 'none';
                 break;
 
             case 'items_list':

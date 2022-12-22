@@ -982,7 +982,7 @@ function checkAll($container, filter, max_elements) {
     if (typeof (max_elements) === 'undefined') {
         max_elements = 0;
     }
-
+    
     if ($.isOk($container)) {
         var nDone = 0;
         $container.find('input[type="checkbox"]' + filter).each(function () {

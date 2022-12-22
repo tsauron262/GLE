@@ -242,7 +242,7 @@ lists_cols:
         value: 
             callback: displayActionsButtons
         min_width: 90
-       
+        
 lists: 
     default: 
         configurable: 1
@@ -264,11 +264,7 @@ lists:
             obj: 
             doc_type: 
             doc_ref: 
-            status: 
-            type: 
-            date_signed: 
-            nom_signataire: 
-            email_signataire:
+            status:
                 
 cards: 
     default: 

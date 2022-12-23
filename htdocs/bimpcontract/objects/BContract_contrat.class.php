@@ -2942,7 +2942,7 @@ class BContract_contrat extends BimpDolObject
     {
         global $user, $langs, $conf;
         if (preg_match('/^[\(]?PROV/i', $this->getData('ref'))) {
-            $ref = BimpTools::getNextRef('contrat', 'ref', $this->getData('objet_contrat') . '{AA}{MM}-00');
+            $ref = BimpTools::getNextRef('contrat', 'ref', $this->getData('objet_contrat') . '{AA}{MM}-', 4);
         } else {
             $ref = $this->getData('ref');
         }

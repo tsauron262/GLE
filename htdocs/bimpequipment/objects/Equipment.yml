@@ -554,7 +554,7 @@ filters_panel:
             places:type:
             places:id_entrepot:
             places:id_user:
-            places:id_client
+            places:id_client:
             places:infos: 
             places:date:
             place_date_end:

@@ -382,6 +382,9 @@ fields_tables:
                   field_value: origin_id_element
             - association: contrats
               edit: 1
+            - label: Contrats liées
+              value:
+                callback: displayContrats
             - association: achatsCommFourn_Equipments
               edit: 1
               show:

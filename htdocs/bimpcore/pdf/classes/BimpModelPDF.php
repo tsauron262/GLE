@@ -121,8 +121,9 @@ Abstract class BimpModelPDF
                 $this->header = $this->renderTemplate(static::$tpl_dir . '/header.html', $this->header_vars);
             }
         }
-
+        
         if (count($this->errors)) {
+            setEventMessages('Probléme génération PDF', $this->errors, 'errors');
             return 0;
         }
 

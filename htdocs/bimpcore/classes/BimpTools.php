@@ -779,8 +779,12 @@ class BimpTools
         }
 
 
+        $nbCaractTotal = strlen($prefix)+$numCaractere;
 //        $max = BimpCache::getBdb()->getMax($table, $field, $where);
-        $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
+        if($numCaractere > 0)
+            $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = ".$nbCaractTotal);
+        else
+            $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
 
         if ((string) $max) {
             if (preg_match('/^' . $prefix . '([0-9]+)$/', $max, $matches)) {

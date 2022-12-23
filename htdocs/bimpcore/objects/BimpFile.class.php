@@ -347,6 +347,10 @@ class BimpFile extends BimpObject
         }
         return $errors;
     }
+    
+    public function getUrl($forced_context = '') {
+        return $this->getFileUrl();
+    }
 
     public function checkObjectFiles($module, $object_name, $id_object)
     {

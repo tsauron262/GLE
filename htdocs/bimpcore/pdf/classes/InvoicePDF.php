@@ -166,7 +166,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                     
                     $code_centre = $this->bimpCommObject->getData('centre');
                     if($code_centre == '') {
-                        $this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
+//                        $this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
                     } else {
                         
                         $centres = BimpCache::getCentres();

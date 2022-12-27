@@ -211,11 +211,14 @@ class BContract_contratLine extends BContract_contrat {
         global $user;
         $rights = $user->rights->bimpcontract;
         $parent = $this->getParentInstance();
-        
+//        echo $field_name;
         switch($field_name) {
             case 'buy_price_ht': return ($rights->can_change_pa) ? 1 : 0; break;
             case 'description': return ($rights->can_change_desc) ? 1 : 0; break;
-            case 'qty' : return ($parent->getData('statut') == 0) ? 1 : 0; break;
+            case 'qty' :
+            case 'remise_percent':
+            case 'subprice':
+                return ($parent->getData('statut') == 0) ? 1 : 0; break;
             case 'renouvellement': 
             case 'statut': 
                 return $user->admin; 

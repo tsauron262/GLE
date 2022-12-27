@@ -133,8 +133,9 @@ class bimp_note extends AbstractNotification {
         if (window.Notification && Notification.permission === "granted") {
             
             var titre = "Nouveau message de " + element.author.nom;
+            var content = element.content.replace(/(<([^>]+)>)/gi, "");
             var n = new Notification(titre, {
-                body: element.content,
+                body: content,
                 icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
             });
             

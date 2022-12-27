@@ -74,7 +74,7 @@
                 $this->ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/';
             }
                         
-            if(((defined('ID_ERP') && ID_ERP == 2) || $this->modeTest)) {
+            if(((defined('ID_ERP') && ID_ERP == 1) || $this->modeTest)) {
                 $this->export_class = new export($db);
                 if(!count(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire))) {
                     $db->begin(); //Ouvre la transaction

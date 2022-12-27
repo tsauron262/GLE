@@ -250,9 +250,9 @@ class notif_task extends AbstractNotification {
         var bn = this;
 
         if (window.Notification && Notification.permission === "granted") {
-
-            var n = new Notification(titre, {
-                body: element.subj,
+            var content = element.txt.replace(/(<([^>]+)>)/gi, "");
+            var n = new Notification(element.subj, {
+                body: content,
                 icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
             });
 

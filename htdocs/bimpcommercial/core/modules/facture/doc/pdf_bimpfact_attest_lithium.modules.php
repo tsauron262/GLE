@@ -14,7 +14,7 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
 
     function write_file($facture, $outputlangs = '', $modele = 'attest_lithium') {
         
-        global $mysoc;
+        global $mysoc, $conf;
 
         $dir = $facture->getFilesDir();
         $file = $facture->getFilesDir() . 'attest_lithium.pdf';
@@ -128,6 +128,9 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
             $pdf->SetXY(118, 243);
             $dt = new DateTime();
             $pdf->MultiCell(300, 6, $dt->format('d/m/Y'), 0, 'L');
+            
+            $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
+            $pdf->Image($logo, 38, 248, 40);
 
             // PDF Close
             $pdf->Close();

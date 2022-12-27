@@ -1588,7 +1588,7 @@ class Bimp_Facture extends BimpComm
                 $buttons[] = array(
                     'label'   => 'Générer attest lithium arérien',
                     'icon'    => 'fas_file-pdf',
-                    'onclick' => $this->getJsActionOnclick('generatePDF', array(
+                    'onclick' => $this->getJsActionOnclick('generatePdfAttestLithium', array(
                         'file_type' => 'attest_lithium'))
                 );
             }
@@ -5935,10 +5935,13 @@ class Bimp_Facture extends BimpComm
     {
         $errors = $warnings = array();
         $this->generatePDF($data['file_type'], $errors);
+        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
+        $success_callback = 'window.open(\'' . $url . '\');';
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

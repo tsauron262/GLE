@@ -177,7 +177,6 @@ class BWSApi_ExtEntity extends BWSApi
                     ),
                     'logs'      => array(),
                 );
-                $response['missing_serials'] = $demande->getMissingSerials();
 
                 $user_resp = $demande->getChildObject('user_resp');
                 if (BimpObject::objectLoaded($user_resp)) {

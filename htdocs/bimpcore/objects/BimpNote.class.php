@@ -430,7 +430,7 @@ class BimpNote extends BimpObject
             if ($note) {
                 // Note
                 //            $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
-                $msg['content'] = $note->displayData('content');
+                $msg['content'] = $note->getData('content');
                 $msg['id'] = (int) $c['idNoteRef'];
                 $msg['user_create'] = (int) $note->getData('user_create');
                 $msg['date_create'] = $note->getData('date_create');

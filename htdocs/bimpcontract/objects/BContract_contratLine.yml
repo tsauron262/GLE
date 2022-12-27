@@ -215,6 +215,7 @@ forms:
               input_name: desc
             - field: fk_product
               edit: 0
+            - field: subprice
             - field: tva_tx
             - field: qty
             - field: remise_percent

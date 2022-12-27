@@ -309,9 +309,9 @@ class BWSApi_ExtEntity extends BWSApi
                 }
 
                 $contrat_status = (int) $demande->getData('contrat_status');
-                if ($contrat_status >= 20 && $contrat_status < 30) {
+//                if ($contrat_status >= 20 && $contrat_status < 30) {
                     $response['missing_serials'] = $demande->getMissingSerials();
-                }
+//                }
             }
         }
 

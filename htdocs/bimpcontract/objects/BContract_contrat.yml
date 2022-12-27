@@ -443,6 +443,9 @@ fields_tables:
               edit: 0
             - field: gti
               edit: 0
+#            - label: Total actuelle
+#              value:
+#                  callback: getCurrentTotal
     options_pdf:
         panel: 1
         title: Options PDF

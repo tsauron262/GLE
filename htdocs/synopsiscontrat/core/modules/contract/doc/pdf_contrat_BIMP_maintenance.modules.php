@@ -505,25 +505,38 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         
         $this->signature_params = array();
         
+        // Coord y
+        $ligne1_y = -118;
+        $ligne2_y = -103;
+        $ligne3_y = -60;
+        
+        // Coord x
+        $col1_x = -95;
+        $col2_x = -30;
+        $col3_x = 167.5;
+        $col4_x = 250;
+        
+        $diff_x_signature = 10;
+        
         $this->signature_params['client'] = array(
             'docusign' => array(
-                'anch' => 'Par la signature électronique',
+                'anch' => 'Les signataires confirment',
                 'fs'   => 'Size8',
-                'x'    => 100,
-                'y'    => -20,
+                'x'    => $col4_x + $diff_x_signature,
+                'y'    => $ligne3_y,
                 'date' => array(
-                    'x' => -5,
-                    'y' => -20
+                    'x' => $col3_x,
+                    'y' => $ligne3_y
                 ),
                 'texts' => array(
                     'nom' => array(
-                        'x' => 75,
-                        'y' => -81,
+                        'x' => $col4_x,
+                        'y' => $ligne1_y,
                         'label' => "Nom"
                     ),
                     'fonction' => array(
-                        'x' => 75,
-                        'y' => -65  ,
+                        'x' => $col4_x,
+                        'y' => $ligne2_y,
                         'label' => "Fonction"
                     )
                     
@@ -533,23 +546,23 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         
         $this->signature_params['user'] = array(
             'docusign' => array(
-                'anch' => 'Par la signature électronique',
+                'anch' => 'Les signataires confirment',
                 'fs'   => 'Size8',
-                'x'    => -140,
-                'y'    => -20,
+                'x'    => $col2_x + $diff_x_signature,
+                'y'    => $ligne3_y,
                 'date' => array(
-                    'x' => -266,
-                    'y' => -50
+                    'x' => $col1_x,
+                    'y' => $ligne3_y
                 ),
                 'texts' => array(
                     'nom' => array(
-                        'x' => -204,
-                        'y' => -81,
+                        'x' => $col2_x,
+                        'y' => $ligne1_y,
                         'label' => "Nom"
                     ),
                     'fonction' => array(
-                        'x' => -204,
-                        'y' => -65  ,
+                        'x' => $col2_x,
+                        'y' => $ligne2_y,
                         'label' => "Fonction"
                     )
                     

@@ -405,16 +405,16 @@ class BContract_avenant extends BContract_contrat {
                         $service = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $i['id_serv']);
                         $qty = count(BimpTools::json_decode_array($i['serials_in']));
                         $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet', $i['id']);
-                        $id_line = $parent->dol_object->addLine(
-                                    $service->getData('description'),
-                                    $ligne_de_l_avenant->getCoup(false) / $qty, $qty, 20, 0, 0,
-                                    $service->id, $i['remise'], 
-                                    $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
-                                );
-                        $l = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $id_line);
-                        $l->updateField('serials', $i['serials_in']);
-                        $l->updateField('statut', 4);
-                        $l->updateField('renouvellement', $parent->getData('current_renouvellement'));
+//                        $id_line = $parent->dol_object->addLine(
+//                                    $service->getData('description'),
+//                                    $ligne_de_l_avenant->getCoup(false) / $qty, $qty, 20, 0, 0,
+//                                    $service->id, $i['remise'], 
+//                                    $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
+//                                );
+//                        $l = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $id_line);
+//                        $l->updateField('serials', $i['serials_in']);
+//                        $l->updateField('statut', 4);
+//                        $l->updateField('renouvellement', $parent->getData('current_renouvellement'));
                     }
                 }
 

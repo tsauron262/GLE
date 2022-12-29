@@ -630,10 +630,12 @@ class BContract_echeancier extends BimpObject {
                     }
                     $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payée</b>' : '<b class="danger" >Impayé</b>';
                     $html .= '<tr class="objectListItemRow" >';
-                    $dateDebut = New DateTime();
-                    $dateFin = New DateTime();
-                    $dateDebut->setTimestamp((int)$facture->dol_object->lines[0]->date_start);
-                    $dateFin->setTimestamp((int)$facture->dol_object->lines[0]->date_end);
+                    if($has_facture_of_echeancier){
+                        $dateDebut = New DateTime();
+                        $dateFin = New DateTime();
+                        $dateDebut->setTimestamp((int)$facture->dol_object->lines[0]->date_start);
+                        $dateFin->setTimestamp((int)$facture->dol_object->lines[0]->date_end);
+                    }
 
                     if($this->getData('old_to_new'))
                         $html .= '<td style="text-align:center" ><b>Ancienne facturation</b></td>';
@@ -675,9 +677,11 @@ class BContract_echeancier extends BimpObject {
                 }
             }
         }
+        if($this->getData('next_facture_date') < "2000-01-01")
+            $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
         if ($this->getData('next_facture_date') == 0 && (intval($parent->getTotalContrat()) - intval($parent->getTotalDejaPayer())) > 0) {
             $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
-//            die('Echéancier corrigé, rafraichir la page');
+            die('Echéancier corrigé, rafraichir la page');
         }
         if ($this->getData('next_facture_date') != 0) {
             $startedDate = new DateTime($this->getData('next_facture_date'));

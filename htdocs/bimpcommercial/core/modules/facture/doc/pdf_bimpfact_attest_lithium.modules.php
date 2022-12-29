@@ -24,118 +24,164 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                 $this->errors[] = "Impossible de créer le répertoire" . $dir;
                 return 0;
             }
-        } else {
-            
-            // PDF Initialization
-            $pdf = pdf_getInstance($this->format);
-            
-            // Get commande
-            $comm_list = getElementElement('commande', 'facture', null, $facture->id);
-            foreach ($comm_list as $data) {
-                $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $data['s']);
-                if ((int) $comm->getData('fk_soc') == (int) $facture->getData('fk_soc')) {
-                    $commande = $comm;
-                    break;
-                }
-            }
-            
-            if(!BimpObject::objectLoaded($commande)) {
-                $this->errors[] = "Aucune commande pour ce client n'est associé à " . $facture->getLabel('this');
-                return !count($this->errors);
-            }
-            
-            // Get client
-            $id_soc = $commande->getData('fk_soc');
-            if((int) $id_soc == 0) {
-                $this->errors[] = "Aucune client pour la commande n'est associé à  " . $facture->getLabel('this');
-                return !count($this->errors);
-            }
-            
-            // Get commerciaux
-            $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
-            if(!BimpObject::objectLoaded($soc)) {
-                $this->errors[] = "Clien d'id " . $id_soc . " inconnu";
-                return !count($this->errors);
-            } else  {
-                $id_commercial = (int) key($soc->getCommerciauxArray());
-                if(0 < $id_commercial)
-                    $commercial = BimpCache::getBimpObjectInstance ('bimpcore', 'Bimp_User', $id_commercial);
-                if(!BimpObject::objectLoaded($commercial)) {
-                    $this->errors[] = "Il n'y a aucun commercial pour le client " . $soc->getName();
-                    return !count($this->errors);
-                }
-            }
-            
-            // PDF template
-            $pdf->Open();
-            $pdf->AddPage();
-            $pdf->AddFont('Helvetica');
-
-            $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpcommercial/core/modules/facture/doc/' . $modele .'.pdf');
-            $tplidx1 = $pdf->importPage(1, "/MediaBox");
-            $pdf->useTemplate($tplidx1, 0, 0, 0, 0, true);
-            
-            $pdf->SetFont('Helvetica', 'B', 9);
-            $pdf->setColor('text', 255, 36, 36);
-            
-            // Data settings
-            $ref = $commande->getRef() . ' - ' . $commande->getData('libelle');
-            $pdf->SetXY(119, 48.8);
-            $pdf->MultiCell(300, 6, $ref, 0, 'L');
-            
-            $pdf->SetFont('Helvetica', 'B', 7);
-            
-            // Checkbox battery position in equipment
-            $this->addCheck($pdf, 28, 182.4, 1.5, 0.25);
-            
-            // Phone number
-            $pdf->SetXY(32, 216.2);
-            $pdf->MultiCell(300, 6, '+44 (0) 207 858 0111', 0, 'L');
-            
-            // Name
-            $nom = $commercial->getName();
-                
-            $pdf->SetXY(39, 229.3);
-            $pdf->MultiCell(300, 6, $nom, 0, 'L');
-                
-            // Address
-            if(isset($mysoc->address) and $mysoc->address != '')
-                $address = $mysoc->address . ' - CS 21055';
-            else
-                $address = '2 rue des Erables' . ' - CS 21055';
-            $pdf->SetXY(39, 232.95);
-            $pdf->MultiCell(300, 6, $address, 0, 'L');
-            
-            // Zip
-            if(isset($mysoc->zip) and 0 < (int) $mysoc->zip)
-                $zip = $mysoc->zip;
-            else
-                $zip = 69760;
-                 
-            // Town
-            if(isset($mysoc->town) and $mysoc->town != '')
-                $town = $mysoc->town;
-            else
-                $town = '2 rue des Erables';
-            $pdf->SetXY(39, 236.60);
-            $pdf->MultiCell(300, 6, $zip . ' ' . $town, 0, 'L');
-            
-            // Signer
-            $pdf->SetXY(39, 243);
-            $pdf->MultiCell(300, 6, $nom, 0, 'L');
-            
-            // Date 
-            $pdf->SetXY(118, 243);
-            $dt = new DateTime();
-            $pdf->MultiCell(300, 6, $dt->format('d/m/Y'), 0, 'L');
-            
-            $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
-            $pdf->Image($logo, 38, 248, 40);
-
-            // PDF Close
-            $pdf->Close();
-            $pdf->Output($file, 'F');
         }
+            
+        // PDF Initialization
+        $pdf = pdf_getInstance($this->format);
+
+        // Get commande
+        $comm_list = getElementElement('commande', 'facture', null, $facture->id);
+        foreach ($comm_list as $data) {
+            $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $data['s']);
+            if ((int) $comm->getData('fk_soc') == (int) $facture->getData('fk_soc')) {
+                $commande = $comm;
+                break;
+            }
+        }
+
+        if(!BimpObject::objectLoaded($commande)) {
+            $this->errors[] = "Aucune commande pour ce client n'est associé à " . $facture->getLabel('this');
+            return !count($this->errors);
+        }
+
+        // Get commande fournisseur
+        $line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+        $lines_list = $line_instance->getList(array(
+            'id_obj' => (int) $commande->id
+                ), null, null, 'id', 'asc', 'array', array('id'));
+        $lines = array();
+
+        foreach ($lines_list as $item) {
+            $lines[] = (int) $item['id'];
+        }
+
+        $fourn_line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+        $fourn_lines_list = $fourn_line_instance->getList(array(
+            'linked_object_name' => 'commande_line',
+            'linked_id_object'   => array(
+                'in' => $lines
+            )
+        ), null, null, 'id', 'asc', 'array', array('id'));
+
+        $cfs = array();
+        if (!is_null($fourn_lines_list)) {
+            foreach ($fourn_lines_list as $item) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $item['id']);
+                if (BimpObject::objectLoaded($line)) {
+                    $commande_fourn = $line->getParentInstance();
+                    if (BimpObject::objectLoaded($commande_fourn)) {
+                        $cfs[$commande_fourn->id] = $commande_fourn;
+                    }
+                }
+            }
+        } else {
+            $this->errors[] = "Aucune ligne de commande fournisseur n'est associé à cette commande client";
+            return !count($this->errors);
+        }
+        
+        if (count($cfs) == 0) {
+            $this->errors[] = "Aucune ligne de commande fournisseur n'est associé à cette commande client";
+            return !count($this->errors);
+        }
+            
+
+        // PDF template
+        $pdf->Open();
+        $pdf->AddPage();
+        $pdf->AddFont('Helvetica');
+
+        $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpcommercial/core/modules/facture/doc/' . $modele .'.pdf');
+        $tplidx1 = $pdf->importPage(1, "/MediaBox");
+        $pdf->useTemplate($tplidx1, 0, 0, 0, 0, true);
+
+        $pdf->SetFont('Helvetica', 'B', 9);
+        $pdf->setColor('text', 255, 36, 36);
+
+        // Data settings
+        
+        $i = 0 ;
+        $max_row = 5;
+        $max_col = 3;
+        $init_x = 119;
+        $init_y = 48.8;
+        $dy = -3;
+        $dx = 26;
+        $label_commande_fait = 0;
+        $i_label_commande = $max_row * 1;
+        foreach($cfs as $cf) {
+            if($i == $i_label_commande and !$label_commande_fait) {
+                $pdf->SetXY($init_x + $dx , $init_y);
+                $pdf->MultiCell(300, 4, $commande->getData('libelle'), 0, 'L');
+                $label_commande_fait = 1;
+                $i++;
+            }
+ 
+            if($i == 0 or $i % $max_row != 0) {
+                $x = $init_x + ((int) ($i / $max_row)) * $dx;
+                $y = $init_y + (($i % $max_row) * $dy);
+                $pdf->SetXY($x, $y);
+                $pdf->MultiCell(300, 4, $cf->getData('ref'), 0, 'L');
+            }
+            $i++;
+        }
+        
+        if (!$label_commande_fait) {
+            $pdf->SetXY($init_x + $dx , $init_y);
+            $pdf->MultiCell(300, 4, $commande->getData('libelle'), 0, 'L');
+        }
+
+        $pdf->SetFont('Helvetica', 'B', 7);
+
+        // Checkbox battery position in equipment
+        $this->addCheck($pdf, 28, 182.4, 1.5, 0.25);
+
+        // Phone number
+        $pdf->SetXY(32, 216.2);
+        $pdf->MultiCell(300, 6, '+44 (0) 207 858 0111', 0, 'L');
+
+        // Name
+        $nom = 'Franck PINERI';
+
+        $pdf->SetXY(39, 229.3);
+        $pdf->MultiCell(300, 6, $nom, 0, 'L');
+
+        // Address
+        if(isset($mysoc->address) and $mysoc->address != '')
+            $address = $mysoc->address . ' - CS 21055';
+        else
+            $address = '2 rue des Erables' . ' - CS 21055';
+        $pdf->SetXY(39, 232.95);
+        $pdf->MultiCell(300, 6, $address, 0, 'L');
+
+        // Zip
+        if(isset($mysoc->zip) and 0 < (int) $mysoc->zip)
+            $zip = $mysoc->zip;
+        else
+            $zip = 69760;
+
+        // Town
+        if(isset($mysoc->town) and $mysoc->town != '')
+            $town = $mysoc->town;
+        else
+            $town = '2 rue des Erables';
+        $pdf->SetXY(39, 236.60);
+        $pdf->MultiCell(300, 6, $zip . ' ' . $town, 0, 'L');
+
+        // Signer
+        $pdf->SetXY(39, 243);
+        $pdf->MultiCell(300, 6, $nom, 0, 'L');
+
+        // Date 
+        $pdf->SetXY(118, 243);
+        $dt = new DateTime();
+        $pdf->MultiCell(300, 6, $dt->format('d/m/Y'), 0, 'L');
+
+        $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
+        $pdf->Image($logo, 38, 248, 40);
+
+        // PDF Close
+        $pdf->Close();
+        $pdf->Output($file, 'F');
         
         return !count($this->errors);
     }

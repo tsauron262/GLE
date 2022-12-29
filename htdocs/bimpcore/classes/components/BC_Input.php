@@ -273,7 +273,7 @@ class BC_Input extends BimpComponent
         $this->input_id .= '_' . $input_name;
 
         if (is_a($this->object, 'BimpObject') &&
-                method_exists($this->object, 'getInputValue')) {
+                method_exists($this->object, 'getInputValue') && is_null($this->value)) {//TODO && is_null($this->value) a verifier, mais sinon la valeur envoyé ce fait écraser
             $input_value = $this->object->getInputValue($this->input_name);
             if (!is_null($input_value)) {
                 $this->value = $input_value;

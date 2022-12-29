@@ -479,6 +479,9 @@ fields_tables:
                   callback: displayRealEndDate
             - field: duree_mois
               edit: 0
+            - label: Durée initial en mois
+              value: 
+                  callback: getDureeInitial
     infos:
         panel: 1
         title: Informations commercial du contrat

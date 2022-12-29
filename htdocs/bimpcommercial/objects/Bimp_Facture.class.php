@@ -168,6 +168,9 @@ class Bimp_Facture extends BimpComm
             case 'forceChorusExported':
             case 'markSendNoChorusExport':
                 return ($user->admin || !empty($user->rights->bimpcommercial->chorus_exports));
+                
+            case 'generatePdfAttestLithium':
+                return $user->admin or $user->id == 7;
         }
 
         return parent::canSetAction($action);
@@ -334,7 +337,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid', 'setCommandeLinesNotBilled', 'linesToFacture', 'exportToChorus', 'confirmChorusExport', 'forceChorusExported'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid', 'setCommandeLinesNotBilled', 'linesToFacture', 'exportToChorus', 'confirmChorusExport', 'forceChorusExported', 'generatePdfAttestLithium'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -831,6 +834,9 @@ class Bimp_Facture extends BimpComm
                 }
 
                 return (count($errors) ? 0 : 1);
+                
+            case 'generatePdfAttestLithium':
+                return $status == 1;
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -1372,7 +1378,7 @@ class Bimp_Facture extends BimpComm
                 'onclick' => $this->getJsActionOnclick('checkMargin')
             );
         }
-
+        
         return $buttons;
     }
 
@@ -1570,6 +1576,25 @@ class Bimp_Facture extends BimpComm
         }
 
         return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
+    }
+    
+    public function getInfosExtraBtn()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            // Générer attestation lithium aérien
+            if ($this->isActionAllowed('generatePdfAttestLithium') && $this->canSetAction('generatePdfAttestLithium')) {
+                $buttons[] = array(
+                    'label'   => 'Générer attest lithium arérien',
+                    'icon'    => 'fas_file-pdf',
+                    'onclick' => $this->getJsActionOnclick('generatePdfAttestLithium', array(
+                        'file_type' => 'attest_lithium'))
+                );
+            }
+        }
+        
+        return $buttons;
     }
 
     // Getters Array: 
@@ -3592,7 +3617,7 @@ class Bimp_Facture extends BimpComm
     public function renderRevalorisationsList()
     {
         $html = '';
-
+        
         if ($this->isLoaded()) {
             $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
             $bc_list = new BC_ListTable($reval, 'facture');
@@ -4880,6 +4905,12 @@ class Bimp_Facture extends BimpComm
             $this->updateField('date_relance', $prev_relance_date);
         }
     }
+    
+    public function generatePdf($file_type, &$errors = array()) {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/core/modules/facture/modules_bimpfacture.php';
+
+        $errors = BimpTools::merge_array($errors, createFactureAttachment($this->db->db, $this, 'facture', $file_type));
+    }
 
     // Actions - Overrides BimpComm:
 
@@ -5896,6 +5927,20 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+    
+    public function actionGeneratePdfAttestLithium($data, &$success = '')
+    {
+        $errors = $warnings = array();
+        $this->generatePDF($data['file_type'], $errors);
+        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
+        $success_callback = 'window.open(\'' . $url . '\');';
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
             'success_callback' => $success_callback
         );
     }

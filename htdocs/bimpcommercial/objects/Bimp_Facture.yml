@@ -698,7 +698,9 @@ forms:
                         - files_compl
                   
 fields_tables: 
-    infos: 
+    infos:
+        footer_extra_btn: 
+            callback: getInfosExtraBtn
         rows: 
             - field: replaced_ref
               show: 

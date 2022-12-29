@@ -1002,7 +1002,7 @@ class Equipment extends BimpObject
     
     public function displayContrats(){
         $return = array();
-        $sql = $this->db->db->query("SELECT fk_contrat FROM `".MAIN_DB_PREFIX."contratdet` WHERE `serials` LIKE '%C02RF0TKGG7L%' ORDER BY fk_contrat DESC ;");
+        $sql = $this->db->db->query("SELECT fk_contrat FROM `".MAIN_DB_PREFIX."contratdet` WHERE `serials` LIKE '%".$this->getData('serial')."%' ORDER BY fk_contrat DESC ;");
         while($ln = $this->db->db->fetch_object($sql)){
             $obj = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $ln->fk_contrat);
             $return[] = $obj->getLink();

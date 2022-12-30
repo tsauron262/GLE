@@ -61,3 +61,7 @@ params:
                       label: Autoriser le refus des signatures pour les contrats
                       type: bool
                       def: 0
+                  id_responsable_general: 
+                      label: Identifiant du responsable général
+                      type: int
+                      def: 1414

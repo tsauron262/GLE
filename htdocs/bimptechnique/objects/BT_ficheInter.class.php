@@ -2859,7 +2859,7 @@ class BT_ficheInter extends BimpDolObject
                                         )
                         );
                         $new_factureLine->pu_ht = $product->getData('price');
-                        if ($child->getData('forfait'))
+                        if ($child->getData('forfait') == BT_ficheInter_det::MODE_FACT_FORFAIT)
                             $new_factureLine->qty = 1;
                         else
                             $new_factureLine->qty = $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));

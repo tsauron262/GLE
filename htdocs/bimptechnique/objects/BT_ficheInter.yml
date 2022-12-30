@@ -392,7 +392,14 @@ forms:
                   type: select
                   options:
                       array: typeOfReattachmentObject
-            - field: fk_facture
+            - custom: 1
+              label: Contrat
+              input_name: fk_facture
+              input:
+                  help: Ici apparaissent les contrat de l'année et de l'année N-1
+                  type: select
+                  options: 
+                      array: factures
               display_if:
                   field_name: type_of_object
                   show_values: 1

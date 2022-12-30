@@ -815,6 +815,23 @@ class BT_ficheInter extends BimpDolObject
 
         return $reattachment;
     }
+    
+    public function getFacturesArray()
+    {
+
+        $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+
+
+        $filters['fk_soc'] = Array('operator' => '=', 'value' => $this->getData('fk_soc'));
+
+        $factures = $instance->getList($filters);
+
+        foreach ($factures as $object) {
+                $return[$object[0]] = ($object['statut'] == 2) ? '<span class=\'danger\'>' . $object['facnumber'] . '</span>' : $object['facnumber'];
+        }
+
+        return $return;
+    }
 
     public function getContratNNmoins1Array()
     {

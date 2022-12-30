@@ -2882,7 +2882,8 @@ class BT_ficheInter extends BimpDolObject
                             $new_factureLine->qty = $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
                         $new_factureLine->id_product = $product->id;
                         $new_factureLine->tva_tx = 20;
-                        $new_factureLine->pa_ht = ($this->time_to_qty($this->timestamp_to_time($child->getData('duree')))) * (float) BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique') / $new_factureLine->qty;
+                        $paBase = BimpCore::getConf('cout_horaire_technicien', $product->getData('cur_pa_ht'), 'bimptechnique');
+                        $new_factureLine->pa_ht = ($this->time_to_qty($this->timestamp_to_time($child->getData('duree')))) * (float) $paBase / $new_factureLine->qty;
 
                         $line_errors = $new_factureLine->create($warnings, true);
                         if (count($line_errors)) {
@@ -2918,7 +2919,7 @@ class BT_ficheInter extends BimpDolObject
                     $new_factureLine->qty = $qty;
                     $new_factureLine->id_product = $dep_de_reference->id;
                     $new_factureLine->tva_tx = 20;
-                    $new_factureLine->pa_ht = $qty * (float) BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
+                    $new_factureLine->pa_ht = $qty * (float) BimpCore::getConf('cout_horaire_technicien', $dep_de_reference->getData('cur_pa_ht'), 'bimptechnique');
                     $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));
                 }
             }

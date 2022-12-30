@@ -396,7 +396,7 @@ forms:
               label: Contrat
               input_name: fk_facture
               input:
-                  help: Ici apparaissent les contrat de l'année et de l'année N-1
+                  help: Ici apparaissent les factures du client
                   type: select
                   options: 
                       array: factures

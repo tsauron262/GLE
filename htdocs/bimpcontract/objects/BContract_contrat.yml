@@ -479,7 +479,7 @@ fields_tables:
                   callback: displayRealEndDate
             - field: duree_mois
               edit: 0
-            - label: Durée initial en mois
+            - label: Durée initiale en mois
               value: 
                   callback: getDureeInitial
     infos:

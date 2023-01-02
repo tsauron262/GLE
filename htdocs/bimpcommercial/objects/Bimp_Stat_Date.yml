@@ -104,7 +104,7 @@ forms:
             3: 
                 custom: 1
                 label: Année
-                input_name: Year
+                input_name: year
                 input: 
                     type: select
                     options: 

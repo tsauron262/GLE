@@ -182,7 +182,7 @@ class BimpCoreCronExec
 
                 foreach ($result['files'] as $fileName) {
                     if (!ftp_put($ftp, $ftp_dir . $fileName, $local_dir . $fileName)) {
-                        $errors[] = 'Echec de l\'envoi du fichier "' . $fileName . '"';
+                        $errors[] = 'Echec de l\'envoi du fichier "' . $local_dir . $fileName . '"';
                     }
                 }
             }

@@ -84,7 +84,7 @@ class BContract_contrat extends BimpDolObject
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT        => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_BROUILLON    => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
-        self::CONTRAT_STATUS_VALIDE       => Array('label' => 'Attente signature', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
+        self::CONTRAT_STATUS_VALIDE       => Array('label' => 'Attente signature (ou envoie signature)', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_CLOS         => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_REFUSE       => Array('label' => 'Refusé', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUT_WAIT_ACTIVER => Array('label' => 'Attente d\'activation', 'classes' => Array('important'), 'icon' => 'fas_retweet'),
@@ -4358,7 +4358,7 @@ class BContract_contrat extends BimpDolObject
 
                 if ($tms_start > $tms_today && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
                     $html .= '<div class="object_header_infos">';
-                    $html .= BimpRender::renderAlerts("<h3><b>Ce contrat a été activé par avance mais sa date de prise d'effet n'est pas encore atteinte</b><br />Date visible ci-dessous dans \"Information sur la durée de validité du contrat\"</h3>", 'danger', false);
+                    $html .= BimpRender::renderAlerts("<h4><b>Ce contrat a été activé par avance mais sa date de prise d'effet n'est pas encore atteinte</b><br />Date visible ci-dessous dans \"Information sur la durée de validité du contrat\"</h4>", 'danger', false);
 
                     $html .= '</div>';
                 }

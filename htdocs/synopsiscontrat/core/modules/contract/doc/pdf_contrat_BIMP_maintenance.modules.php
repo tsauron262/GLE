@@ -940,31 +940,31 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                 //$pdf1->setColor('fill', 255, 255, 255);
                 $count = count($contrat->lines);
                 $new_page = false;
-                if ($count > 12) {
-                    $new_page = true;
-                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
-                    $pdf->SetX($this->marge_gauche);
-                    $pdf->SetFont(''/* 'Arial' */, '', 9);
-                    $pdf->setDrawColor(255, 255, 255);
-                    $pdf->setColor('fill', 242, 242, 242);
-                    $pdf->SetTextColor(0, 0, 0);
-                    $pdf->Cell($W, 8, "Liste des descriptions financière en ANNEXE 1", 1, null, 'C', true);
-                    $pdf->SetTextColor(0, 0, 0);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 50, '', 0, 'C');
-                    //$pdf1->SetX($this->marge_gauche);
-                    //$pdf1->SetFont(''/* 'Arial' */, '', 9);
-                    //$pdf1->setDrawColor(255, 255, 255);
-                    //$pdf1->setColor('fill', 242, 242, 242);
-                    //$pdf1->SetTextColor(0, 0, 0);
-                    //$pdf1->Cell($W, 8, "Liste des descriptions financière en ANNEXE 1", 1, null, 'C', true);
-                    //$pdf1->SetTextColor(0, 0, 0);
-                    //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 50, '', 0, 'C');
-                } else {
+//                if ($count > 12) {
+//                    $new_page = true;
+//                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
+//                    $pdf->SetX($this->marge_gauche);
+//                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+//                    $pdf->setDrawColor(255, 255, 255);
+//                    $pdf->setColor('fill', 242, 242, 242);
+//                    $pdf->SetTextColor(0, 0, 0);
+//                    $pdf->Cell($W, 8, "Liste des descriptions financières en ANNEXE 1", 1, null, 'C', true);
+//                    $pdf->SetTextColor(0, 0, 0);
+//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 50, '', 0, 'C');
+//                    //$pdf1->SetX($this->marge_gauche);
+//                    //$pdf1->SetFont(''/* 'Arial' */, '', 9);
+//                    //$pdf1->setDrawColor(255, 255, 255);
+//                    //$pdf1->setColor('fill', 242, 242, 242);
+//                    //$pdf1->SetTextColor(0, 0, 0);
+//                    //$pdf1->Cell($W, 8, "Liste des descriptions financière en ANNEXE 1", 1, null, 'C', true);
+//                    //$pdf1->SetTextColor(0, 0, 0);
+//                    //$pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 50, '', 0, 'C');
+//                } else {
                     $this->display_lines($pdf, $contrat->lines);
                     $this->display_total($pdf, $contrat->lines, $contrat);
 //                    $this->display_lines($pdf1, $contrat->lines);
 //                    $this->display_total($pdf1, $contrat->lines, $contrat);
-                }
+//                }
 
 //                $pdf->setY(225); //$pdf1->setY(225);
 //                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;

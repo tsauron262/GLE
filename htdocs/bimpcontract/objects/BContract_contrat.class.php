@@ -4985,7 +4985,7 @@ class BContract_contrat extends BimpDolObject
                         $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
                     } else {
                         // Responsable
-                        if(800 < $this->getTotalContrat()) {
+                        if($this->getTotalContrat() < 8000) {
                             if($this->getData('secteur') == 'CTE') {
                                 $id_user = BimpCore::getConf('id_responsable_education', null, 'bimpcontract');
                             } else {

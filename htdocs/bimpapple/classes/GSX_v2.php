@@ -923,8 +923,6 @@ class GSX_v2 extends GSX_Const
         );
     }
     
-    
-    
 
     // Requêtes - Réservations: 
 

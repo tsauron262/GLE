@@ -27,4 +27,20 @@ class indexController extends BimpController
 
         return $html;
     }
+
+    public function renderPartsPendingList()
+    {
+        $html = '';
+
+        $shipment = BimpObject::getInstance('bimpapple', 'AppleShipment');
+        $onclick = $shipment->getJsLoadCustomContent('renderPartsPendingList', '$(\'#partsPendingListContainer\')');
+
+        $html .= '<div style="margin: 30px 0" id="partsPendingListContainer">';
+        $html .= '<span class="btn btn-primary btn-large" onclick="' . $onclick . '">';
+        $html .= BimpRender::renderIcon('fas_download', 'iconLeft') . 'Charger la liste des pièces en attente de retour';
+        $html .= '</span>';
+        $html .= '</div>';
+
+        return $html;
+    }
 }

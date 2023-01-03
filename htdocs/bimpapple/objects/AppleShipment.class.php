@@ -662,6 +662,7 @@ class AppleShipment extends BimpObject
                                     $nToAttribute++;
                                 }
 
+                                $return_date = BimpTools::getArrayValueFromPath($part, 'expectedReturnDate', '');
                                 $row = array(
                                     'partNumber'          => $part_number,
                                     'partDescription'     => BimpTools::getArrayValueFromPath($part, 'partDescription', ''),
@@ -671,7 +672,7 @@ class AppleShipment extends BimpObject
                                     'returnOrderNumber'   => $order_number,
                                     'repairId'            => $repair_id,
                                     'repairStatusCode'    => BimpTools::getArrayValueFromPath($part, 'repairStatusCode', ''),
-                                    'expectedReturnDate'  => BimpTools::printDate(BimpTools::getArrayValueFromPath($part, 'expectedReturnDate', '')),
+                                    'expectedReturnDate'  => array('value' => $return_date, 'content' => BimpTools::printDate($return_date)),
                                     'return'              => $return_str
                                 );
 
@@ -682,7 +683,26 @@ class AppleShipment extends BimpObject
                                 $rows[] = $row;
                             }
 
+                            function sortRowsByExpectedReturnDate($a, $b)
+                            {
+                                $date_a = BimpTools::getArrayValueFromPath($a, 'expectedReturnDate/value', '');
+                                $date_b = BimpTools::getArrayValueFromPath($b, 'expectedReturnDate/value', '');
+                                
+                                if (!$date_a) {
+                                    return 1;
+                                }
+                                
+                                if (!$date_b) {
+                                    return -1;
+                                }
+                                
+                                return ($date_a == $date_b ? 0 : ($date_a < $date_b ? -1 : 1));
+                            }
+                            
+                            usort($rows, 'sortRowsByExpectedReturnDate');
+                            
                             $headers = array(
+                                'expectedReturnDate'  => array('label' => 'Date de retour attendue', 'align' => 'center'),
                                 'partNumber'          => array(
                                     'label'     => 'N° composant',
                                     'align'     => 'center',
@@ -695,7 +715,6 @@ class AppleShipment extends BimpObject
                                 'returnOrderNumber'   => array('label' => 'N° de retour', 'align' => 'center'),
                                 'repairId'            => array('label' => 'N° réparation', 'align' => 'center'),
                                 'repairStatusCode'    => array('label' => 'Statut réparation', 'align' => 'center'),
-                                'expectedReturnDate'  => array('label' => 'Date de retour attendue', 'align' => 'center'),
                                 'return'              => 'Retour'
                             );
 

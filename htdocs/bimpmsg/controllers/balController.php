@@ -89,9 +89,9 @@ class balController extends BimpController {
         
         $idsGroups = array();
                 
-//        if($user->admin)
-//            $orOrAnd = 'OR';
-//        else
+        if($user->admin)
+            $orOrAnd = 'OR';
+        else
             $orOrAnd = 'AND';
             
             $sql = $db->query('SELECT rowid, nom FROM llx_usergroup WHERE rowid IN (SELECT DISTINCT(fk_group_dest) FROM `llx_bimpcore_note`) '.$orOrAnd.' rowid IN (SELECT fk_usergroup FROM llx_usergroup_user WHERE fk_user = '.$user->id.');');

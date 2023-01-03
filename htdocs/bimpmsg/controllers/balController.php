@@ -89,10 +89,14 @@ class balController extends BimpController {
         
         $idsGroups = array();
                 
-        if($user->admin)
-            $sql = $db->query('SELECT rowid, nom FROM llx_usergroup WHERE rowid IN (SELECT DISTINCT(fk_group_dest) FROM `llx_bimpcore_note` WHERE viewed = 0);');
-        else
-            $sql = $db->query('SELECT rowid, nom FROM llx_usergroup WHERE rowid IN (SELECT fk_usergroup FROM llx_usergroup_user WHERE fk_user = '.$user->id.' AND fk_usergroup IN (SELECT DISTINCT(fk_group_dest) FROM `llx_bimpcore_note` WHERE viewed = 0));');
+//        if($user->admin)
+//            $orOrAnd = 'OR';
+//        else
+            $orOrAnd = 'AND';
+            
+            $sql = $db->query('SELECT rowid, nom FROM llx_usergroup WHERE rowid IN (SELECT DISTINCT(fk_group_dest) FROM `llx_bimpcore_note`) '.$orOrAnd.' rowid IN (SELECT fk_usergroup FROM llx_usergroup_user WHERE fk_user = '.$user->id.');');
+//        else
+//            $sql = $db->query('SELECT rowid, nom FROM llx_usergroup WHERE rowid IN (SELECT fk_usergroup FROM llx_usergroup_user WHERE fk_user = '.$user->id.' AND fk_usergroup IN (SELECT DISTINCT(fk_group_dest) FROM `llx_bimpcore_note` WHERE viewed = 0));');
         while ($ln = $db->fetch_object($sql))
                 $idsGroups[$ln->rowid] = $ln->nom;
         

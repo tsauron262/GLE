@@ -4358,7 +4358,7 @@ class BContract_contrat extends BimpDolObject
 
                 if ($tms_start > $tms_today && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
                     $html .= '<div class="object_header_infos">';
-                    $html .= BimpRender::renderAlerts("<h3><b>Ce contrat a été activé par avance mais sa date de prise d'effet n'est pas encore atteinte</b><br />Date visible ci-dessous dans \"Information sur la durée de validité du contrat\"</h3>", 'danger', false);
+                    $html .= BimpRender::renderAlerts("<h4><b>Ce contrat a été activé par avance mais sa date de prise d'effet n'est pas encore atteinte</b><br />Date visible ci-dessous dans \"Information sur la durée de validité du contrat\"</h4>", 'danger', false);
 
                     $html .= '</div>';
                 }

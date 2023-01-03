@@ -727,7 +727,7 @@ class AppleShipment extends BimpObject
                                         'search_mode' => 'show'
                             ));
 
-                            $title = BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Liste des composants en attente de retour (Shipt-To: ' . $shiptTo . ')  ';
+                            $title = BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Liste des composants en attente de retour (Ship-To: ' . $shiptTo . ')  ';
                             $title .= '<span class="badge badge-' . ($nToAttribute > 0 ? 'warning' : 'success') . '">' . $nToAttribute . ' non attribué' . ($nToAttribute > 1 ? 's' : '') . '</span>';
                             $title .= (!$nToAttribute > 0 ? ' <span class="smallInfo"> Cliquer pour afficher</span>' : '');
 

@@ -32,13 +32,31 @@ class indexController extends BimpController
     {
         $html = '';
 
+        $shipTo = '';
+        $user = BimpCore::getBimpUser();
+        if (BimpObject::objectLoaded($user)) {
+            $shipTo = $user->getData('apple_shipto');
+        }
         $shipment = BimpObject::getInstance('bimpapple', 'AppleShipment');
-        $onclick = $shipment->getJsLoadCustomContent('renderPartsPendingList', '$(\'#partsPendingListContainer\')');
+//        $onclick = $shipment->getJsLoadCustomContent('renderPartsPendingList', '$(\'#partsPendingListContainer\')');
+        $onclick = 'loadObjectCustomContent($(this), $(\'#partsPendingListContainer\'), ';
+        $onclick .= $shipment->getJsObjectData() . ', \'renderPartsPendingList\', ';
+        $onclick .= '{shipto: $(\'select[name=shipto_select]\').val()});';
 
-        $html .= '<div style="margin: 30px 0" id="partsPendingListContainer">';
-        $html .= '<span class="btn btn-primary btn-large" onclick="' . $onclick . '">';
+        $shiptos = $shipment->getShiptosArray(false);
+
+        $html .= '<div class="shipto_select_container">';
+        $html .= '<div style="display: inline-block; vertical-align: middle">';
+        $html .= '<b>N° Ship-To : </b>';
+        $html .= BimpInput::renderInput('select', 'shipto_select', $shipTo, array(
+                    'options' => $shiptos
+        ));
+        $html .= '<span class="btn btn-primary" onclick="' . htmlentities($onclick) . '" style="display: inline-block; margin-left: 30px">';
         $html .= BimpRender::renderIcon('fas_download', 'iconLeft') . 'Charger la liste des pièces en attente de retour';
         $html .= '</span>';
+        $html .= '</div>';
+
+        $html .= '<div style="margin: 30px 0" id="partsPendingListContainer">';
         $html .= '</div>';
 
         return $html;

@@ -564,7 +564,7 @@ class AppleShipment extends BimpObject
 
     // Rendus HTML: 
 
-    public function renderPartsPendingList()
+    public function renderPartsPendingList($shipTo = null)
     {
         $html = '';
         $errors = array();
@@ -574,16 +574,18 @@ class AppleShipment extends BimpObject
         if (!BimpObject::objectLoaded($user)) {
             $errors[] = 'Aucun utilisateur connecé';
         } else {
-            $shiptTo = $user->getData('apple_shipto');
+            if (is_null($shipTo)) {
+                $shipTo = $user->getData('apple_shipto');
+            }
 
-            if (!$shiptTo) {
-                $errors[] = 'Vous n\'êtes associé à aucun numéro ShipTo';
+            if (!$shipTo) {
+                $errors[] = 'Aucun n° ShipTo sélectionné';
             } else {
                 $gsx = GSX_v2::getInstance(true);
                 if (!$gsx->logged) {
                     $errors[] = $gsx->displayNoLogged();
                 } else {
-                    $response = $gsx->getPartsPendingReturnsForShipTo($shiptTo);
+                    $response = $gsx->getPartsPendingReturnsForShipTo($shipTo);
 
                     if (is_array($response)) {
                         if (isset($response['parts']) && !empty($response['parts'])) {
@@ -687,20 +689,19 @@ class AppleShipment extends BimpObject
                             {
                                 $date_a = BimpTools::getArrayValueFromPath($a, 'expectedReturnDate/value', '');
                                 $date_b = BimpTools::getArrayValueFromPath($b, 'expectedReturnDate/value', '');
-                                
+
                                 if (!$date_a) {
                                     return 1;
                                 }
-                                
+
                                 if (!$date_b) {
                                     return -1;
                                 }
-                                
+
                                 return ($date_a == $date_b ? 0 : ($date_a < $date_b ? -1 : 1));
                             }
-                            
                             usort($rows, 'sortRowsByExpectedReturnDate');
-                            
+
                             $headers = array(
                                 'expectedReturnDate'  => array('label' => 'Date de retour attendue', 'align' => 'center'),
                                 'partNumber'          => array(
@@ -727,7 +728,7 @@ class AppleShipment extends BimpObject
                                         'search_mode' => 'show'
                             ));
 
-                            $title = BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Liste des composants en attente de retour (Ship-To: ' . $shiptTo . ')  ';
+                            $title = BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Liste des composants en attente de retour (Ship-To: ' . $shipTo . ')  ';
                             $title .= '<span class="badge badge-' . ($nToAttribute > 0 ? 'warning' : 'success') . '">' . $nToAttribute . ' non attribué' . ($nToAttribute > 1 ? 's' : '') . '</span>';
                             $title .= (!$nToAttribute > 0 ? ' <span class="smallInfo"> Cliquer pour afficher</span>' : '');
 

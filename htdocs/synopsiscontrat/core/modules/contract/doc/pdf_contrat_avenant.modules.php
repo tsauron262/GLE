@@ -372,6 +372,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     $pdf1->Cell($W, 4, "Par cet avenant de prolongation, il est convenu ce qui suit", 0, null, 'L', true);
                  }
                 $date = ($this->avenant->getData('type') == 0) ? new DateTime($this->avenant->getData('date_effect')) : new DateTime($this->avenant->getData('date_end'));
+                    $date->sub(new DateInterval("P1D"));
                 if($this->avenant->getData('type') == 0) {
                     foreach($lignes_avenant as $id => $infos) {
                         $new_qty = 0;

@@ -94,9 +94,24 @@ sections:
             label: Retours groupés
             icon: fas_shipping-fast
             sections:
-                - type: list
-                  list: 
-                      object: shipments
+                - type: nav_tabs
+                  nav_tabs: 
+                      tabs_id: shipments
+                      tabs: 
+                          - id: shipments_list
+                            title: Liste des retours groupés
+                            struct: 
+                                type: list
+                                list: 
+                                    object: shipments
+                          - id: parts_pending_list
+                            title: Pièces en attente de retour
+                            struct: 
+                                type: custom
+                                custom: 
+                                    callback: renderPartsPendingList
+                                            
+                            
         sac: 
             label: Sacs
             icon: fas_shopping-bag

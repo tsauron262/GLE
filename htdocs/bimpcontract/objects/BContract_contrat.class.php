@@ -4964,8 +4964,8 @@ class BContract_contrat extends BimpDolObject
 
                     // Client
                     $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $id_contact);
-                    if(!BimpObject::objectLoaded($contact) or $contact->getData('poste') == '') {
-                        $errors[] = "Fonction du contact client absent, merci de le définir";
+                    if(!BimpObject::objectLoaded($contact)) {
+                        $errors[] = "Contact client absent, merci de le définir";
                     } else {
                         BimpObject::loadClass('bimpcore', 'BimpSignataire');
                         $signataire_client = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
@@ -4986,7 +4986,7 @@ class BContract_contrat extends BimpDolObject
                         $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
                     } else {
                         // Responsable
-                        if(800 < $this->getTotalContrat()) {
+                        if($this->getTotalContrat() < 8000) {
                             if($this->getData('secteur') == 'CTE') {
                                 $id_user = BimpCore::getConf('id_responsable_education', null, 'bimpcontract');
                             } else {

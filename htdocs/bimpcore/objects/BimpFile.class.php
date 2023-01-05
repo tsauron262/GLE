@@ -11,13 +11,7 @@ class BimpFile extends BimpObject
         1 => 'Membres Bimp et client',
         2 => 'Membres BIMP',
     );
-    
     public $htmlName = 'file';
-    
-    
-    public function getDateModif(){
-        return BimpTools::printDate(filemtime($this->getFilePath()));
-    }
 
     // Droits users: 
 
@@ -231,6 +225,26 @@ class BimpFile extends BimpObject
         return 1;
     }
 
+    public function getDateModif()
+    {
+        return BimpTools::printDate(filemtime($this->getFilePath()));
+    }
+
+    public function getCreateJsCallback()
+    {
+//        return '$("#openForm").trigger("click");';
+
+        if (BimpTools::getValue('taskFact', 0) == 1) {
+            $note = BimpObject::getInstance("bimpcore", "BimpNote");
+            $parent = $this->getParentInstance();
+            $onclick = '';
+            $onclick .= 'setTimeout(function(){';
+            $onclick .= $note->getJsActionOnclick('repondre', array('obj_type' => 'bimp_object', 'obj_module' => $parent->module, 'obj_name' => $parent->object_name, 'id_obj' => $parent->id, 'type_dest' => $note::BN_DEST_GROUP, 'fk_group_dest' => BimpCore::getUserGroupId('facturation'), 'content' => 'Bonjour, vous trouverez pour ce/cette ' . $parent->getLabel() . ' : ' . $parent->getRef() . ' le document signé suivant : ' . $this->getData('file_name') . '.' . $this->getData('file_ext')), array('form_name' => 'rep', 'no_button' => 1));
+            $onclick .= '},500);';
+            return $onclick; //"<a onclick=\"".$onclick."\">Cliquer ici pour envopyé un mail au service facturation.</a>";
+        }
+    }
+
     // Getters - Overrides BimpObject: 
 
     public function getParentObjectName()
@@ -347,8 +361,9 @@ class BimpFile extends BimpObject
         }
         return $errors;
     }
-    
-    public function getUrl($forced_context = '') {
+
+    public function getUrl($forced_context = '')
+    {
         return $this->getFileUrl();
     }
 
@@ -693,21 +708,6 @@ class BimpFile extends BimpObject
         }
 
         return $errors;
-    }
-
-    public function getCreateJsCallback()
-    {
-//        return '$("#openForm").trigger("click");';
-
-        if (BimpTools::getValue('taskFact', 0) == 1) {
-            $note = BimpObject::getInstance("bimpcore", "BimpNote");
-            $parent = $this->getParentInstance();
-            $onclick = '';
-            $onclick .= 'setTimeout(function(){';
-            $onclick .= $note->getJsActionOnclick('repondre', array('obj_type' => 'bimp_object', 'obj_module' => $parent->module, 'obj_name' => $parent->object_name, 'id_obj' => $parent->id, 'type_dest' => $note::BN_DEST_GROUP, 'fk_group_dest' => BimpCore::getUserGroupId('facturation'), 'content' => 'Bonjour, vous trouverez pour ce/cette ' . $parent->getLabel() . ' : ' . $parent->getRef() . ' le document signé suivant : ' . $this->getData('file_name') . '.' . $this->getData('file_ext')), array('form_name' => 'rep', 'no_button' => 1));
-            $onclick .= '},500);';
-            return $onclick; //"<a onclick=\"".$onclick."\">Cliquer ici pour envopyé un mail au service facturation.</a>";
-        }
     }
 
     public function update(&$warnings = array(), $force_update = false)

@@ -562,6 +562,199 @@ class AppleShipment extends BimpObject
         return array();
     }
 
+    // Rendus HTML: 
+
+    public function renderPartsPendingList($shipTo = null)
+    {
+        $html = '';
+        $errors = array();
+
+        $user = BimpCore::getBimpUser();
+
+        if (!BimpObject::objectLoaded($user)) {
+            $errors[] = 'Aucun utilisateur connecé';
+        } else {
+            if (is_null($shipTo)) {
+                $shipTo = $user->getData('apple_shipto');
+            }
+
+            if (!$shipTo) {
+                $errors[] = 'Aucun n° ShipTo sélectionné';
+            } else {
+                $gsx = GSX_v2::getInstance(true);
+                if (!$gsx->logged) {
+                    $errors[] = $gsx->displayNoLogged();
+                } else {
+                    $response = $gsx->getPartsPendingReturnsForShipTo($shipTo);
+
+                    if (is_array($response)) {
+                        if (isset($response['parts']) && !empty($response['parts'])) {
+                            $parts = $response['parts'];
+                            $nToAttribute = 0;
+
+                            foreach ($parts as $part) {
+                                $eq_str = '';
+                                $sav_str = '';
+                                $return_str = '';
+                                $part_number = BimpTools::getArrayValueFromPath($part, 'partNumber', '');
+                                $repair_id = BimpTools::getArrayValueFromPath($part, 'repairId', '');
+                                $order_number = BimpTools::getArrayValueFromPath($part, 'returnOrderNumber', '');
+
+                                if (isset($part['repairDevice']['identifiers'])) {
+                                    $ids = $part['repairDevice']['identifiers'];
+
+                                    $eq = null;
+                                    $eq_str = '';
+
+                                    if (isset($ids['serial'])) {
+                                        $eq = BimpCache::findBimpObjectInstance('bimpequipment', 'Equipment', array(
+                                                    'serial' => array(
+                                                        'or_field' => array(
+                                                            $ids['serial'],
+                                                            'S' . $ids['serial']
+                                                        )
+                                                    )
+                                        ));
+                                    }
+
+                                    if (BimpObject::objectLoaded($eq)) {
+                                        $eq_str = $eq->getLink();
+                                    } else {
+                                        if (isset($ids['serial']) && $ids['serial']) {
+                                            $eq_str .= 'n/s: ' . $ids['serial'] . '<br/>';
+                                        }
+                                        if (isset($ids['imei']) && $ids['imei']) {
+                                            $eq_str .= 'IMEI: ' . $ids['imei'] . '<br/>';
+                                        }
+                                        if (isset($ids['imei2']) && $ids['imei2']) {
+                                            $eq_str .= 'IMEI2: ' . $ids['imei2'] . '<br/>';
+                                        }
+                                        if (isset($ids['meid']) && $ids['meid']) {
+                                            $eq_str .= 'MEID: ' . $ids['meid'] . '<br/>';
+                                        }
+                                    }
+                                }
+                                $sav_str = '';
+
+                                if (isset($part['purchaseOrderNumber'])) {
+                                    if (preg_match('/^SAV.+$/', $part['purchaseOrderNumber'])) {
+                                        $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array(
+                                                    'ref' => $part['purchaseOrderNumber']
+                                        ));
+
+                                        if (BimpObject::objectLoaded($sav)) {
+                                            $sav_str = $sav->getLink();
+                                        }
+                                    }
+
+                                    if (!$sav_str) {
+                                        $sav_str = $part['purchaseOrderNumber'];
+                                    }
+                                }
+
+                                $id_part_shipment = (int) AppleShipment::getPartAppleIdShipment($part_number, $repair_id, $order_number);
+                                if ($id_part_shipment) {
+                                    $part_shipment = BimpCache::getBimpObjectInstance('bimpapple', 'AppleShipment', (int) $part['id_shipment']);
+                                    if (BimpObject::objectLoaded($part_shipment)) {
+                                        $return_str = $part_shipment->getLink();
+                                    }
+                                }
+
+                                if (!$return_str) {
+                                    $nToAttribute++;
+                                }
+
+                                $return_date = BimpTools::getArrayValueFromPath($part, 'expectedReturnDate', '');
+                                $row = array(
+                                    'partNumber'          => $part_number,
+                                    'partDescription'     => BimpTools::getArrayValueFromPath($part, 'partDescription', ''),
+                                    'productDescription'  => BimpTools::getArrayValueFromPath($part, 'productDescription', ''),
+                                    'equipement'          => $eq_str,
+                                    'purchaseOrderNumber' => $sav_str,
+                                    'returnOrderNumber'   => $order_number,
+                                    'repairId'            => $repair_id,
+                                    'repairStatusCode'    => BimpTools::getArrayValueFromPath($part, 'repairStatusCode', ''),
+                                    'expectedReturnDate'  => array('value' => $return_date, 'content' => BimpTools::printDate($return_date)),
+                                    'return'              => $return_str
+                                );
+
+                                if ($return_str) {
+                                    $row['row_style'] = 'background-color: #D7FEDD!important';
+                                }
+
+                                $rows[] = $row;
+                            }
+
+                            function sortRowsByExpectedReturnDate($a, $b)
+                            {
+                                $date_a = BimpTools::getArrayValueFromPath($a, 'expectedReturnDate/value', '');
+                                $date_b = BimpTools::getArrayValueFromPath($b, 'expectedReturnDate/value', '');
+
+                                if (!$date_a) {
+                                    return 1;
+                                }
+
+                                if (!$date_b) {
+                                    return -1;
+                                }
+
+                                return ($date_a == $date_b ? 0 : ($date_a < $date_b ? -1 : 1));
+                            }
+                            usort($rows, 'sortRowsByExpectedReturnDate');
+
+                            $headers = array(
+                                'expectedReturnDate'  => array('label' => 'Date de retour attendue', 'align' => 'center'),
+                                'partNumber'          => array(
+                                    'label'     => 'N° composant',
+                                    'align'     => 'center',
+                                    'col_style' => 'font-weight: bold'
+                                ),
+                                'partDescription'     => 'Désignation',
+                                'productDescription'  => 'Produit',
+                                'equipement'          => 'Equipement',
+                                'purchaseOrderNumber' => 'N° commande (SAV)',
+                                'returnOrderNumber'   => array('label' => 'N° de retour', 'align' => 'center'),
+                                'repairId'            => array('label' => 'N° réparation', 'align' => 'center'),
+                                'repairStatusCode'    => array('label' => 'Statut réparation', 'align' => 'center'),
+                                'return'              => 'Retour'
+                            );
+
+                            $parts_html = BimpRender::renderBimpListTable($rows, $headers, array(
+                                        'main_id'     => 'parts_pending_return_list',
+                                        'searchable'  => true,
+                                        'sortable'    => true,
+                                        'checkboxes'  => false,
+                                        'positions'   => true,
+                                        'search_mode' => 'show'
+                            ));
+
+                            $title = BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Liste des composants en attente de retour (Ship-To: ' . $shipTo . ')  ';
+                            $title .= '<span class="badge badge-' . ($nToAttribute > 0 ? 'warning' : 'success') . '">' . $nToAttribute . ' non attribué' . ($nToAttribute > 1 ? 's' : '') . '</span>';
+                            $title .= (!$nToAttribute > 0 ? ' <span class="smallInfo"> Cliquer pour afficher</span>' : '');
+
+                            $html .= BimpRender::renderPanel($title, $parts_html, '', array(
+                                        'type'     => 'secondary',
+                                        'foldable' => true,
+                                        'open'     => 1
+                            ));
+                        } else {
+                            $html .= BimpRender::renderAlerts('Aucun composant en attente de retour', 'warning');
+                        }
+                    } else {
+                        $html .= $gsx->displayErrors();
+                    }
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+
+        return $html;
+    }
+
     // Traitements:
 
     public function createGsxReturn(&$warnings = array())

@@ -45,46 +45,8 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
         }
 
         // Get commande fournisseur
-        $line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-        $lines_list = $line_instance->getList(array(
-            'id_obj' => (int) $commande->id
-                ), null, null, 'id', 'asc', 'array', array('id'));
-        $lines = array();
-
-        foreach ($lines_list as $item) {
-            $lines[] = (int) $item['id'];
-        }
-
-        $fourn_line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
-        $fourn_lines_list = $fourn_line_instance->getList(array(
-            'linked_object_name' => 'commande_line',
-            'linked_id_object'   => array(
-                'in' => $lines
-            )
-        ), null, null, 'id', 'asc', 'array', array('id'));
-
-        $cfs = array();
-        if (!is_null($fourn_lines_list)) {
-            foreach ($fourn_lines_list as $item) {
-                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $item['id']);
-                if (BimpObject::objectLoaded($line)) {
-                    $commande_fourn = $line->getParentInstance();
-                    if (BimpObject::objectLoaded($commande_fourn)) {
-                        $cfs[$commande_fourn->id] = $commande_fourn;
-                    }
-                }
-            }
-        } else {
-            $this->errors[] = "Aucune ligne de commande fournisseur n'est associé à cette commande client";
-            return !count($this->errors);
-        }
-        
-        if (count($cfs) == 0) {
-            $this->errors[] = "Aucune ligne de commande fournisseur n'est associé à cette commande client";
-            return !count($this->errors);
-        }
+        $cfs = $this->getCommandesFournisseur($commande);
             
-
         // PDF template
         $pdf->Open();
         $pdf->AddPage();
@@ -186,7 +148,50 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
         return !count($this->errors);
     }
 
+    public function getCommandesFournisseur($commande) {
+        
+        // Obtention ligne de la commande
+        $line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+        $lines_list = $line_instance->getList(array(
+            'id_obj' => (int) $commande->id
+                ), null, null, 'id', 'asc', 'array', array('id'));
+        $lines = array();
 
+        foreach ($lines_list as $item)
+            $lines[] = (int) $item['id'];
+
+        // Obtention ligne de la commande fournisseur associée à cette ligne de commande
+        $fourn_line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+        $fourn_lines_list = $fourn_line_instance->getList(array(
+            'linked_object_name' => 'commande_line',
+            'linked_id_object'   => array(
+                'in' => $lines
+            )
+        ), null, null, 'id', 'asc', 'array', array('id'));
+
+        $cfs = array();
+        if (!is_null($fourn_lines_list)) {
+            foreach ($fourn_lines_list as $item) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $item['id']);
+                if (BimpObject::objectLoaded($line)) {
+                    $commande_fourn = $line->getParentInstance();
+                    if (BimpObject::objectLoaded($commande_fourn)) {
+                        $cfs[$commande_fourn->id] = $commande_fourn;
+                    }
+                }
+            }
+        } else {
+            $this->errors[] = "Aucune ligne de commande fournisseur n'est associé à cette commande client";
+            return !count($this->errors);
+        }
+        
+        if (count($cfs) == 0) {
+            $this->errors[] = "Aucune ligne de commande fournisseur n'est associé à cette commande client";
+            return !count($this->errors);
+        }
+        
+        return $cfs;
+    }
     
     function addCheck($pdf, $x, $y, $t = 4, $width = 0.7) {
         $style = array(

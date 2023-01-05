@@ -1160,6 +1160,8 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
         $pdf->SetFont('', '', 9);
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 20;
         $pdf->Cell($W * 4, 3, 'Page ' . $pdf->PageNo() . '/{:ptp:}', 1, null, 'L', true);
+        $pdf->setY(275.8);
+        $pdf->Cell($W * 4, 3, 'Contrat ' . $this->contrat->ref, 1, null, 'L', true);
 //        if($paraphe){
 //            $pdf->Cell($W * 15, 3, 'Paraphe :', 1, null, 'R', true);
 //            $pdf->setDrawColor(236, 147, 0);
@@ -1173,7 +1175,7 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
         $pdf->SetTextColor(150, 150, 150);
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $mysoc->name . " - SAS au capital de " . $mysoc->capital . ' - ' . $mysoc->address . ' - ' . $mysoc->zip . ' ' . $mysoc->town . ' - SIRET: ' . $conf->global->MAIN_INFO_SIRET  , 0, 'C');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'APE : '.$conf->global->MAIN_INFO_APE.' - RCS/RM : '.$conf->global->MAIN_INFO_RCS.' - Num. TVA : FR 34 320387483'  , 0, 'C');
-    }
+        }
 
     function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') {
         $hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string

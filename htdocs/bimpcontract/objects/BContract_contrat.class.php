@@ -1508,11 +1508,12 @@ class BContract_contrat extends BimpDolObject
         $errors = Array();
         if (!count($errors)) {
             $success = "Contrat ré-ouvert avec succès";
-            $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
+            $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
             $this->addLog('Contrat ré-ouvert');
             foreach ($this->dol_object->lines as $line) {
                 $the_line = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $line->id);
-                $the_line->updateField('statut', $the_line->LINE_STATUT_INIT);
+                if($the_line->getData('renouvellement') == $this->getData('current_renouvellement'))
+                    $the_line->updateField('statut', $the_line->LINE_STATUT_OPEN);
             }
             $this->db->delete('bcontract_prelevement', 'id_contrat = ' . $this->id);
         }

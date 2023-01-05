@@ -49,13 +49,10 @@ echo "<script>function testCookie(){"
     . "if(document.cookie.match('DOLSESSID_')){ "
     . "}else{ "
             . "window.open('".$url."', '_blank'); "
-            . "cells = document.getElementsByTagName('form');"
-            . "for (var i = 0; i < cells.length; i++) {"
-                . "cells[i].innerHTML = '<h1>Votre navigateur n\'est pas compatible.</h1><h2> <a href=\"".$url."\" target=\"popup\">Merci de cliquer ici</a></h2>';"
-            . "}"
+        . "window.location.href = window.location.href + '&not_compatible=true'"
     . "}"
 . "}, 500)}; "
-. "document.onload=\"testCookie()\";testCookie();"
+. "testCookie();"
 . "</script>";
 
 

@@ -1,3 +1,4 @@
+.gitignore
 /allscreens*
 /ancot*
 /bootstrap*
@@ -22,4 +23,3 @@
 /nomenclature*
 /of/
 /workstation/
-/cabinetmed/core/modules/modCabinetMed.class.php

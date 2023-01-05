@@ -168,6 +168,8 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
         foreach($fact_lines as $fact_line) {
             if ((int) $fact_line->id_product) {
                 $product = $fact_line->getProduct();
+                if($product->isTypeService())
+                    continue;
                 if (BimpObject::objectLoaded($product)) {
                     if ($product->isSerialisable() and $fact_line->equipment_required) {
                         $fact_lines_equipment = $fact_line->getChildrenObjects('equipment_lines');
@@ -181,12 +183,14 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                                     $this->errors[] = 'L\'équipement ' . $equipment->getNomUrl() . ' n\'a pas de commande fournisseur associé';
                                 } else {
                                     foreach($places_cf as $place_cf){
-                                        if(0 < $place_cf->getData('id_origin') and !isset($cfs_eq[$place_cf->getData('id_origin')])) {
+                                        if(0 < (int) $place_cf->getData('id_origin') and !isset($cfs_eq[$place_cf->getData('id_origin')])) {
                                             $cfs_eq[$place_cf->getData('id_origin')] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $place_cf->getData('id_origin'));
                                         } else 
                                             $this->errors[] = 'ID de la commande fournisseur associé à ' . $equipment->getNomUrl() . ' inconnu.';
                                     }
                                 }
+                            } else {
+                               $this->errors[] = 'Équipement inconnu ' . $line_equipment->getData('id_equipment');
                             }
                         }
                     }
@@ -225,8 +229,11 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
         foreach($fact_lines as $fact_line) {
             if ((int) $fact_line->id_product) {
                 $product = $fact_line->getProduct();
+                if($product->isTypeService())
+                    continue;
                 if (BimpObject::objectLoaded($product)) {
-//                    if (!$product->isSerialisable()) {
+                    if (!$product->isSerialisable()) {
+                        
                         // Recherche si une ligne de la commande fournisseur contient le produit de la ligne de facture
                         foreach($cfs_eq as $cf) {
                             $cf_lines = $cf->getChildrenObjects('lines');
@@ -237,17 +244,17 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                             }
                         }
                         
-                        // On n'a pas trouvé de commandes fournisseur avec ce produit les commandes fournisseur avec équipement
+                        // On n'a pas trouvé de commandes fournisseur avec ce produit dans les commandes fournisseur avec équipement
                         foreach($all_fourn_lines as $cf_line) {
-                            if(0 < (int) $cf_line->getData('id_product')){
-                                if((int) $cf_line->getData('id_product') == (int) $fact_line->getData('id_product')) {
-                                    $cf = $cf_line->getParentInstance();
-                                    $cfs_prod[$cf->id] = $cf;
-                                    $this->errors[] = $cf_line->getData('id_product') . ' == ' . $fact_line->getData('id_product');
-                                    continue;
-                                }
+                            if(0 < (int) $cf_line->getProduct()->id and (int) $cf_line->getProduct()->id == (int) $fact_line->getProduct()->id) {
+                                $cf = $cf_line->getParentInstance();
+                                $cfs_prod[$cf->id] = $cf;
+//                                $this->errors[] = $cf_line->getData('id_product') . ' == ' . $fact_line->getData('id_product');
+                                continue;
                             }
                         }
+                        $this->errors[] = 'Origine du produit inconnue ' . $product->getNomUrl();
+                    }
                 } else {
                     $this->errors[] = 'ID du produit inconnu.';
                 }
@@ -255,16 +262,16 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
         }
         
         $cfs = array();
-        foreach ($cfs_eq as $cf) {
-            if(!isset($cfs[$cf->id]))
-                $cfs[$cf->id] = $cf;
+        foreach ($cfs_eq as $id_cf => $cf) {
+            if(!isset($cfs[$id_cf]))
+                $cfs[$id_cf] = $cf;
         }
         
-        foreach ($cfs_prod as $cf) {
-            if(!isset($cfs[$cf->id]))
-                $cfs[$cf->id] = $cf;
+        foreach ($cfs_prod as $id_cf => $cf) {
+            if(!isset($cfs[$id_cf]))
+                $cfs[$id_cf] = $cf;
         }
-       
+
         return $cfs;
     }
     

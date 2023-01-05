@@ -45,6 +45,7 @@ class DolQueryCollector extends DataCollector implements Renderable, AssetProvid
 			$queries[] = array(
 				'sql' => $query['sql'],
 				'duration' => $query['duration'],
+				'duration_str' => round($query['duration'] * 1000, 2),
 				'memory' => $query['memory_usage'],
 				'is_success' => $query['is_success'],
 				'error_code' => $query['error_code'],
@@ -52,7 +53,7 @@ class DolQueryCollector extends DataCollector implements Renderable, AssetProvid
 			);
 			$totalExecTime += $query['duration'];
 			$totalMemoryUsage += $query['memory_usage'];
-			if (! $query['is_success']) {
+			if (!$query['is_success']) {
 				$totalFailed += 1;
 			}
 		}

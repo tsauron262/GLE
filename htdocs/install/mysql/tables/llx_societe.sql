@@ -17,7 +17,7 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program. If not, see <http://www.gnu.org/licenses/>.
+-- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- ========================================================================
 
@@ -34,12 +34,12 @@ create table llx_societe
   statut                   tinyint        DEFAULT 0,            		-- statut
   parent                   integer,
 
-  status            	   tinyint 		  DEFAULT 1,			        -- cessation d'activité ( 1 -- en activité, 0 -- cessation d'activité)						
+  status            	   tinyint 		  DEFAULT 1,			        -- cessation d'activité ( 1 -- en activité, 0 -- cessation d'activité)
 
   code_client              varchar(24),                         		-- code client
-  code_fournisseur         varchar(24),                         		-- code founisseur
-  code_compta              varchar(24),                         		-- code compta client
-  code_compta_fournisseur  varchar(24),                         		-- code compta founisseur
+  code_fournisseur         varchar(24),                         		-- code fournisseur
+  code_compta              varchar(24),                         		-- customer accountancy auxiliary account
+  code_compta_fournisseur  varchar(24),                         		-- supplier accountancy auxiliary account
   address                  varchar(255),                        		-- company address
   zip                      varchar(25),                         		-- zipcode
   town                     varchar(50),                         		-- town
@@ -50,19 +50,11 @@ create table llx_societe
   fax                      varchar(20),                         		-- fax number
   url                      varchar(255),                        		--
   email                    varchar(128),                        		--
-  
-  skype                    varchar(255),                        		--
-  twitter                  varchar(255),                        		--
-  facebook                 varchar(255),                        		--
-  linkedin                 varchar(255),                        		--
-  instagram                varchar(255),                        		--
-  snapchat                 varchar(255),                        		--
-  googleplus               varchar(255),                        		--
-  youtube                  varchar(255),                        		--
-  whatsapp                 varchar(255),                        		--
-  
+
+  socialnetworks           text DEFAULT NULL,                           -- json with socialnetworks
+
   fk_effectif              integer        DEFAULT 0,            		--
-  fk_typent                integer        DEFAULT 0,            		--
+  fk_typent                integer        DEFAULT NULL,                 -- type ent
   fk_forme_juridique       integer        DEFAULT 0,            		-- juridical status
   fk_currency			   varchar(3),									-- default currency
   siren	                   varchar(128),                         		-- IDProf1: depends on country (example: siren or RCS for france, ...)
@@ -76,7 +68,8 @@ create table llx_societe
   fk_stcomm                integer        DEFAULT 0 NOT NULL,      		-- commercial status
   note_private             text,                                		--
   note_public              text,                                        --
-  model_pdf				   varchar(255),
+  model_pdf				         varchar(255),
+  last_main_doc			       varchar(255),					-- relative filepath+filename of last main generated document
   prefix_comm              varchar(5),                          		-- prefix commercial (deprecated)
   client                   tinyint        DEFAULT 0,            		-- client 0/1/2
   fournisseur              tinyint        DEFAULT 0,            		-- fournisseur 0/1
@@ -91,14 +84,17 @@ create table llx_societe
   remise_supplier          real           DEFAULT 0,            		-- discount by default granted by this supplier
   mode_reglement           tinyint,                             		-- payment mode customer
   cond_reglement           tinyint,                             		-- payment term customer
+  deposit_percent          varchar(63) DEFAULT NULL,                    -- default deposit % if payment term needs it
+  transport_mode           tinyint,                             		-- transport mode customer (Intracomm report)
   mode_reglement_supplier  tinyint,                             		-- payment mode supplier
   cond_reglement_supplier  tinyint,                             		-- payment term supplier
+  transport_mode_supplier  tinyint,                             		-- transport mode supplier (Intracomm report)
   fk_shipping_method       integer,                                     -- preferred shipping method id
   tva_assuj                tinyint        DEFAULT 1,	        		-- assujeti ou non a la TVA
   localtax1_assuj          tinyint        DEFAULT 0,	        		-- assujeti ou non a local tax 1
-  localtax1_value 		   double(6,3),
+  localtax1_value 		   double(7,4),
   localtax2_assuj          tinyint        DEFAULT 0,	        		-- assujeti ou non a local tax 2
-  localtax2_value 		   double(6,3),
+  localtax2_value 		   double(7,4),
   barcode                  varchar(180),                        		-- barcode
   fk_barcode_type          integer NULL   DEFAULT 0,                    -- barcode type
   price_level              integer NULL,                        		-- level of price for multiprices
@@ -107,18 +103,22 @@ create table llx_societe
   supplier_order_min_amount	       double(24,8)   DEFAULT NULL,			-- min amount for supplier orders
   default_lang             varchar(6),									-- default language
   logo                     varchar(255)   DEFAULT NULL,
+  logo_squarred            varchar(255)   DEFAULT NULL,
   canvas				   varchar(32)    DEFAULT NULL,	                -- type of canvas if used (null by default)
-  fk_entrepot 			   integer DEFAULT 0,							-- if we need a link between third party and warehouse
+  fk_warehouse			   integer 		  DEFAULT NULL,					-- if we need a link between third party and warehouse
   webservices_url          varchar(255),                            	-- supplier webservice url
   webservices_key          varchar(128),                            	-- supplier webservice key
-  
-  tms                      timestamp,									-- last modification date
+
+  accountancy_code_sell         varchar(32),                            -- Selling accountancy code
+  accountancy_code_buy          varchar(32),                            -- Buying accountancy code
+
+  tms                      timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,									-- last modification date
   datec	                   datetime,                            		-- creation date
   fk_user_creat            integer NULL,                        		-- utilisateur qui a cree l'info
   fk_user_modif            integer,                             		-- utilisateur qui a modifie l'info
 
   fk_multicurrency		   integer,
-  multicurrency_code	   varchar(255),
+  multicurrency_code	   varchar(3),
 
   import_key               varchar(14)                          		-- import key
 )ENGINE=innodb;

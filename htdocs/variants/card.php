@@ -1,6 +1,7 @@
 <?php
 /* Copyright (C) 2016   Marcos García   <marcosgdf@gmail.com>
  * Copyright (C) 2018   Frédéric France <frederic.france@netlogic.fr>
+ * Copyright (C) 2022   Open-Dsi		<support@open-dsi.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,113 +14,136 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ * \file 	htdocs/variants/card.php
+ * \ingroup variants
+ * \brief 	Page to show product attribute
  */
 
 require '../main.inc.php';
 require 'class/ProductAttribute.class.php';
 require 'class/ProductAttributeValue.class.php';
+require 'lib/variants.lib.php';
+
+// Load translation files required by the page
+$langs->loadLangs(array('products'));
 
 $id = GETPOST('id', 'int');
-$valueid = GETPOST('valueid', 'alpha');
-$action = GETPOST('action', 'alpha');
-$label = GETPOST('label', 'alpha');
 $ref = GETPOST('ref', 'alpha');
+$action = GETPOST('action', 'aZ09');
 $confirm = GETPOST('confirm', 'alpha');
 $cancel = GETPOST('cancel', 'alpha');
+$contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'productattribute'; // To manage different context of search
+$backtopage = GETPOST('backtopage', 'alpha');
+$backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
+$lineid = GETPOST('lineid', 'alpha');
+
+// Security check
+if (empty($conf->variants->enabled)) {
+	accessforbidden('Module not enabled');
+}
+if ($user->socid > 0) { // Protection if external user
+	accessforbidden();
+}
+$result = restrictedArea($user, 'variants');
 
 $object = new ProductAttribute($db);
-$objectval = new ProductAttributeValue($db);
 
-if ($object->fetch($id) < 1) {
-	dol_print_error($db, $langs->trans('ErrorRecordNotFound'));
-	exit();
-}
+// Load object
+include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be include, not include_once
+
+// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
+$hookmanager->initHooks(array('productattributecard', 'globalcard'));
+
+$permissiontoread = $user->rights->variants->read;
+$permissiontoadd = $user->rights->variants->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontoedit = $user->rights->variants->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->rights->variants->delete;
+
+$error = 0;
 
 
 /*
  * Actions
  */
 
-if ($cancel) $action='';
 
-if ($_POST) {
-
-	if ($action == 'edit') {
-
-		$object->ref = $ref;
-		$object->label = $label;
-
-		if ($object->update($user) < 1) {
-			setEventMessages($langs->trans('CoreErrorMessage'), $object->errors, 'errors');
-		} else {
-			setEventMessages($langs->trans('RecordSaved'), null, 'mesgs');
-			header('Location: '.dol_buildpath('/variants/card.php?id='.$id, 2));
-			exit();
-		}
-	} elseif ($action == 'update') {
-
-		if ($objectval->fetch($valueid) > 0) {
-
-			$objectval->ref = $ref;
-			$objectval->value = GETPOST('value', 'alpha');
-
-			if (empty($objectval->ref))
-			{
-				$error++;
-				setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Ref")), null, 'errors');
-			}
-			if (empty($objectval->value))
-			{
-				$error++;
-				setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Label")), null, 'errors');
-			}
-
-			if (! $error)
-			{
-				if ($objectval->update($user) > 0) {
-					setEventMessages($langs->trans('RecordSaved'), null, 'mesgs');
-				} else {
-					setEventMessage($langs->trans('CoreErrorMessage'), $objectval->errors, 'errors');
-				}
-			}
-		}
-
-		header('Location: '.dol_buildpath('/variants/card.php?id='.$object->id, 2));
-		exit();
-	}
+$parameters = array();
+// Note that $action and $object may be modified by some hooks
+$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action);
+if ($reshook < 0) {
+	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
-if ($confirm == 'yes') {
-	if ($action == 'confirm_delete') {
+if (empty($reshook)) {
+	$error = 0;
 
-		$db->begin();
+	$backurlforlist = dol_buildpath('/variants/list.php', 1);
 
-		$res = $objectval->deleteByFkAttribute($object->id);
-
-		if ($res < 1 || ($object->delete() < 1)) {
-			$db->rollback();
-			setEventMessages($langs->trans('CoreErrorMessage'), $object->errors, 'errors');
-			header('Location: '.dol_buildpath('/variants/card.php?id='.$object->id, 2));
-		} else {
-			$db->commit();
-			setEventMessages($langs->trans('RecordSaved'), null, 'mesgs');
-			header('Location: '.dol_buildpath('/variants/list.php', 2));
+	if (empty($backtopage) || ($cancel && empty($id))) {
+		if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
+			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) {
+				$backtopage = $backurlforlist;
+			} else {
+				$backtopage = dol_buildpath('/variants/card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
+			}
 		}
+	}
+
+	// Action to move up and down lines of object
+	include DOL_DOCUMENT_ROOT.'/core/actions_lineupdown.inc.php';
+	if ($cancel) {
+		if (!empty($backtopage)) {
+			header("Location: " . $backtopage);
+			exit;
+		}
+		$action = '';
+	}
+
+	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
+	include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
+
+	// Action to move up and down lines of object
+	if ($action == 'up' && $permissiontoedit) {
+		$object->line_up(GETPOST('rowid'), false);
+
+		header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id.'#'.GETPOST('rowid'));
+		exit();
+	} elseif ($action == 'down' && $permissiontoedit) {
+		$object->line_down(GETPOST('rowid'), false);
+
+		header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id.'#'.GETPOST('rowid'));
 		exit();
 	}
-	elseif ($action == 'confirm_deletevalue')
-	{
-		if ($objectval->fetch($valueid) > 0) {
 
-			if ($objectval->delete() < 1) {
-				setEventMessages($langs->trans('CoreErrorMessage'), $objectval->errors, 'errors');
-			} else {
-				setEventMessages($langs->trans('RecordSaved'), null, 'mesgs');
-			}
+	if ($action == 'addline' && $permissiontoedit) {
+		$line_ref = GETPOST('line_ref', 'alpha');
+		$line_value = GETPOST('line_value', 'alpha');
 
-			header('Location: '.dol_buildpath('/variants/card.php?id='.$object->id, 2));
+		$result = $object->addLine($line_ref, $line_value);
+		if ($result > 0) {
+			setEventMessages($langs->trans('RecordSaved'), null, 'mesgs');
+			header("Location: " . $_SERVER['PHP_SELF'] . '?id=' . $object->id);
 			exit();
+		} else {
+			setEventMessages($object->error, $object->errors, 'errors');
+			$action = '';
+		}
+	} elseif ($action == 'updateline' && $permissiontoedit) {
+		$line_ref = GETPOST('line_ref', 'alpha');
+		$line_value = GETPOST('line_value', 'alpha');
+
+		$result = $object->updateLine($lineid, $line_ref, $line_value);
+		if ($result > 0) {
+			setEventMessages($langs->trans('RecordSaved'), null, 'mesgs');
+			header("Location: " . $_SERVER['PHP_SELF'] . '?id=' . $object->id);
+			exit();
+		} else {
+			setEventMessages($object->error, $object->errors, 'errors');
+			$action = 'editline';
 		}
 	}
 }
@@ -129,173 +153,203 @@ if ($confirm == 'yes') {
  * View
  */
 
-$langs->load('products');
-
 $title = $langs->trans('ProductAttributeName', dol_htmlentities($object->label));
+$help_url = 'EN:Module_Products#Variants';
+llxHeader('', $title, $help_url);
 
-llxHeader('', $title);
+// Part to create
+if ($action == 'create') {
+	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("ProductAttribute")), '', 'object_' . $object->picto);
 
-//print load_fiche_titre($title);
+	print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
+	print '<input type="hidden" name="token" value="' . newToken() . '">';
+	print '<input type="hidden" name="action" value="add">';
+	if ($backtopage) {
+		print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
+	}
+	if ($backtopageforcancel) {
+		print '<input type="hidden" name="backtopageforcancel" value="' . $backtopageforcancel . '">';
+	}
 
-$h=0;
-$head[$h][0] = DOL_URL_ROOT.'/variants/card.php?id='.$object->id;
-$head[$h][1] = $langs->trans("Card");
-$head[$h][2] = 'variant';
-$h++;
+	print dol_get_fiche_head(array(), '');
 
-dol_fiche_head($head, 'variant', $langs->trans('ProductAttributeName'), -1, 'generic');
+	print '<table class="border centpercent tableforfieldcreate">' . "\n";
 
-if ($action == 'edit') {
-    print '<form method="POST">';
-}
+	// Common attributes
+	include DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_add.tpl.php';
 
+	print '</table>' . "\n";
 
-if ($action != 'edit')
-{
-    print '<div class="fichecenter">';
-    print '<div class="underbanner clearboth"></div>';
-}
-?>
-	<table class="border" style="width: 100%">
-		<tr>
-			<td class="titlefield fieldrequired"><?php echo $langs->trans('Ref') ?></td>
-			<td>
-				<?php if ($action == 'edit') {
-					print '<input type="text" name="ref" value="'.$object->ref.'">';
-				} else {
-					print dol_htmlentities($object->ref);
-				} ?>
-			</td>
-		</tr>
-		<tr>
-			<td class="fieldrequired"><?php echo $langs->trans('Label') ?></td>
-			<td>
-				<?php if ($action == 'edit') {
-					print '<input type="text" name="label" value="'.$object->label.'">';
-				} else {
-					print dol_htmlentities($object->label);
-				} ?>
-			</td>
-		</tr>
+	print dol_get_fiche_end();
 
-	</table>
+	print '<div class="center">';
+	print '<input type="submit" class="button" name="add" value="' . dol_escape_htmltag($langs->trans("Create")) . '">';
+	print '&nbsp; ';
+	print '<input type="' . ($backtopage ? "submit" : "button") . '" class="button button-cancel" name="cancel" value="' . dol_escape_htmltag($langs->trans("Cancel")) . '"' . ($backtopage ? '' : ' onclick="javascript:history.go(-1)"') . '>'; // Cancel for create does not post form if we don't know the backtopage
+	print '</div>';
 
-<?php
+	print '</form>';
 
-if ($action != 'edit')
-{
-    print '</div>';
-}
+	dol_set_focus('input[name="label"]');
+} elseif (($id || $ref) && $action == 'edit') {
+	// Part to edit record
+	print load_fiche_titre($langs->trans("ProductAttribute"), '', 'object_' . $object->picto);
 
-dol_fiche_end();
+	print '<form method="POST" action="' . $_SERVER["PHP_SELF"] . '">';
+	print '<input type="hidden" name="token" value="' . newToken() . '">';
+	print '<input type="hidden" name="action" value="update">';
+	print '<input type="hidden" name="id" value="' . $object->id . '">';
+	if ($backtopage) {
+		print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
+	}
+	if ($backtopageforcancel) {
+		print '<input type="hidden" name="backtopageforcancel" value="' . $backtopageforcancel . '">';
+	}
 
-if ($action == 'edit') { ?>
-	<div style="text-align: center;">
-		<div class="inline-block divButAction">
-			<input type="submit" class="button" value="<?php echo $langs->trans('Save') ?>">
-			&nbsp; &nbsp;
-			<input type="submit" class="button" name="cancel" value="<?php echo $langs->trans('Cancel') ?>">
-		</div>
-	</div></form>
-<?php } else {
+	print dol_get_fiche_head();
 
+	print '<table class="border centpercent tableforfieldedit">' . "\n";
+
+	// Common attributes
+	include DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_edit.tpl.php';
+
+	print '</table>';
+
+	print dol_get_fiche_end();
+
+	print '<div class="center"><input type="submit" class="button button-save" name="save" value="' . $langs->trans("Save") . '">';
+	print ' &nbsp; <input type="submit" class="button button-cancel" name="cancel" value="' . $langs->trans("Cancel") . '">';
+	print '</div>';
+
+	print '</form>';
+} elseif ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
+	// Part to show record
+	$res = $object->fetch_optionals();
+
+	$head = productAttributePrepareHead($object);
+	print dol_get_fiche_head($head, 'card', $langs->trans("ProductAttribute"), -1, $object->picto);
+
+	$formconfirm = '';
+
+	// Confirmation to delete
 	if ($action == 'delete') {
-		$form = new Form($db);
-
-print $form->formconfirm(
-			"card.php?id=".$object->id,
-			$langs->trans('Delete'),
-			$langs->trans('ProductAttributeDeleteDialog'),
-			"confirm_delete",
-			'',
-			0,
-			1
-		);
-	} elseif ($action == 'delete_value') {
-
-		if ($objectval->fetch($valueid) > 0) {
-
-			$form = new Form($db);
-
-print $form->formconfirm(
-				"card.php?id=".$object->id."&valueid=".$objectval->id,
-				$langs->trans('Delete'),
-				$langs->trans('ProductAttributeValueDeleteDialog', dol_htmlentities($objectval->value), dol_htmlentities($objectval->ref)),
-				"confirm_deletevalue",
-				'',
-				0,
-				1
-			);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('DeleteMyObject'), $langs->trans('ProductAttributeDeleteDialog'), 'confirm_delete', '', 0, 1);
+	} elseif ($action == 'ask_deleteline') {
+		// Confirmation to delete line
+		$object_value = new ProductAttributeValue($db);
+		if ($object_value->fetch($lineid) > 0) {
+			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&lineid=' . $lineid, $langs->trans('DeleteLine'), $langs->trans('ProductAttributeValueDeleteDialog', dol_htmlentities($object_value->value), dol_htmlentities($object_value->ref)), 'confirm_deleteline', '', 0, 1);
 		}
 	}
 
-	?>
+	// Call Hook formConfirm
+	$parameters = array('formConfirm' => $formconfirm, 'lineid' => $lineid);
+	$reshook = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+	if (empty($reshook)) {
+		$formconfirm .= $hookmanager->resPrint;
+	} elseif ($reshook > 0) {
+		$formconfirm = $hookmanager->resPrint;
+	}
 
-	<div class="tabsAction">
-		<div class="inline-block divButAction">
-			<a href="card.php?id=<?php echo $object->id ?>&action=edit" class="butAction"><?php echo $langs->trans('Modify') ?></a>
-			<a href="card.php?id=<?php echo $object->id ?>&action=delete" class="butAction"><?php echo $langs->trans('Delete') ?></a>
-		</div>
-	</div>
+	// Print form confirm
+	print $formconfirm;
 
+	// Object card
+	// ------------------------------------------------------------
+	$backtolist = (GETPOST('backtolist') ? GETPOST('backtolist') : DOL_URL_ROOT . '/variants/list.php?leftmenu=?restore_lastsearch_values=1');
+	$linkback = '<a href="' . dol_sanitizeUrl($backtolist) . '">' . $langs->trans("BackToList") . '</a>';
 
-	<?php
+	dol_banner_tab($object, 'id', $linkback);
 
-	print load_fiche_titre($langs->trans("PossibleValues"));
+	print '<div class="fichecenter">';
+	print '<div class="fichehalfleft">';
+	print '<div class="underbanner clearboth"></div>';
+	print '<table class="border centpercent tableforfield">' . "\n";
 
-	if ($action == 'edit_value') {
-		print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
-		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-		print '<input type="hidden" name="action" value="update">';
-		print '<input type="hidden" name="id" value="'.$id.'">';
-		print '<input type="hidden" name="valueid" value="'.$valueid.'">';
-		print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
-	} ?>
+	// Common attributes
+	include DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_view.tpl.php';
 
-	<table class="liste">
-		<tr class="liste_titre">
-			<th class="liste_titre titlefield"><?php echo $langs->trans('Ref') ?></th>
-			<th class="liste_titre"><?php echo $langs->trans('Value') ?></th>
-			<th class="liste_titre"></th>
-		</tr>
+	print '</table>';
+	print '</div>';
+	print '</div>';
 
-		<?php
-		foreach ($objectval->fetchAllByProductAttribute($object->id) as $attrval) {
-		?>
-		<tr class="oddeven">
-			<?php if ($action == 'edit_value' && ($valueid == $attrval->id)): ?>
-				<td><input type="text" name="ref" value="<?php echo $attrval->ref ?>"></td>
-				<td><input type="text" name="value" value="<?php echo $attrval->value ?>"></td>
-				<td class="right">
-					<input type="submit" value="<?php echo $langs->trans('Save') ?>" class="button">
-					&nbsp; &nbsp;
-					<input type="submit" name="cancel" value="<?php echo $langs->trans('Cancel') ?>" class="button">
-				</td>
-			<?php else: ?>
-				<td><?php echo dol_htmlentities($attrval->ref) ?></td>
-				<td><?php echo dol_htmlentities($attrval->value) ?></td>
-				<td class="right">
-					<a href="card.php?id=<?php echo $object->id ?>&action=edit_value&valueid=<?php echo $attrval->id ?>"><?php echo img_edit() ?></a>
-					<a href="card.php?id=<?php echo $object->id ?>&action=delete_value&valueid=<?php echo $attrval->id ?>"><?php echo img_delete() ?></a>
-				</td>
-			<?php endif; ?>
-		</tr>
-		<?php
+	print '<div class="clearboth"></div>';
+
+	print dol_get_fiche_end();
+
+	// Buttons for actions
+	if ($action != 'editline') {
+		print '<div class="tabsAction">' . "\n";
+		$parameters = array();
+		$reshook = $hookmanager->executeHooks('addMoreActionsButtons', $parameters, $object, $action);    // Note that $action and $object may have been modified by hook
+		if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+
+		if (empty($reshook)) {
+			// Modify
+			print dolGetButtonAction($langs->trans('Modify'), '', 'default', $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=edit', '', $permissiontoedit);
+
+			// Delete (need delete permission, or if draft, just need create/modify permission)
+			print dolGetButtonAction($langs->trans('Delete'), '', 'delete', $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=delete', '', $permissiontodelete);
 		}
-		?>
-	</table>
+		print '</div>' . "\n";
+	}
 
-	<?php if ($action == 'edit_value'): ?>
-	</form>
-	<?php endif ?>
+	/*
+	 * Lines
+	 */
+	if (!empty($object->table_element_line)) {
+		// Show object lines
+		$result = $object->getLinesArray();
 
-	<div class="tabsAction">
-		<div class="inline-block divButAction">
-			<a href="create_val.php?id=<?php echo $object->id ?>" class="butAction"><?php echo $langs->trans('Create') ?></a>
-		</div>
-	</div>
+		print load_fiche_titre($langs->trans("PossibleValues") . (!empty($object->lines) ? ' (' . count($object->lines) . ')' : ''));
 
-	<?php
+		print '	<form name="addproduct" id="addproduct" action="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . (($action != 'editline') ? '' : '#line_' . GETPOST('lineid', 'int')) . '" method="POST">
+		<input type="hidden" name="token" value="' . newToken() . '">
+		<input type="hidden" name="action" value="' . (($action != 'editline') ? 'addline' : 'updateline') . '">
+		<input type="hidden" name="mode" value="">
+		<input type="hidden" name="page_y" value="">
+		<input type="hidden" name="id" value="' . $object->id . '">
+		';
+		if ($backtopage) {
+			print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
+		}
+		if ($backtopageforcancel) {
+			print '<input type="hidden" name="backtopageforcancel" value="' . $backtopageforcancel . '">';
+		}
+
+		if (!empty($conf->use_javascript_ajax)) {
+			include DOL_DOCUMENT_ROOT . '/core/tpl/ajaxrow.tpl.php';
+		}
+
+		print '<div class="div-table-responsive-no-min">';
+		if (!empty($object->lines) || ($permissiontoedit && $action != 'selectlines' && $action != 'editline')) {
+			print '<table id="tablelines" class="noborder noshadow" width="100%">';
+		}
+
+		// Form to add new line
+		if ($permissiontoedit && $action != 'selectlines') {
+			if ($action != 'editline') {
+				// Add products/services form
+
+				$parameters = array();
+				$reshook = $hookmanager->executeHooks('formAddObjectLine', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+				if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+				if (empty($reshook))
+					$object->formAddObjectLine(1, $mysoc, $soc);
+			}
+		}
+
+		if (!empty($object->lines)) {
+			$object->printObjectLines($action, $mysoc, null, GETPOST('lineid', 'int'), 1);
+		}
+
+		if (!empty($object->lines) || ($permissiontoedit && $action != 'selectlines' && $action != 'editline')) {
+			print '</table>';
+		}
+		print '</div>';
+
+		print "</form>\n";
+	}
 }
 
 // End of page

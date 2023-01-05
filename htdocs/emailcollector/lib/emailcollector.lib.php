@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /**
@@ -26,7 +26,7 @@
  * Prepare array of tabs for EmailCollector
  *
  * @param	EmailCollector	$object		EmailCollector
- * @return 	array					Array of tabs
+ * @return 	array						Array of tabs
  */
 function emailcollectorPrepareHead($object)
 {
@@ -38,7 +38,7 @@ function emailcollectorPrepareHead($object)
 	$head = array();
 
 	$head[$h][0] = dol_buildpath("/admin/emailcollector_card.php", 1).'?id='.$object->id;
-	$head[$h][1] = $langs->trans("Card");
+	$head[$h][1] = $langs->trans("EmailCollector");
 	$head[$h][2] = 'card';
 	$h++;
 
@@ -49,7 +49,7 @@ function emailcollectorPrepareHead($object)
 		if (!empty($object->note_public)) $nbNote++;
 		$head[$h][0] = dol_buildpath('/emailcollector/emailcollector_note.php', 1).'?id='.$object->id;
 		$head[$h][1] = $langs->trans('Notes');
-		if ($nbNote > 0) $head[$h][1].= ' <span class="badge">'.$nbNote.'</span>';
+		if ($nbNote > 0) $head[$h][1].= '<span class="badge marginleftonlyshort">'.$nbNote.'</span>';
 		$head[$h][2] = 'note';
 		$h++;
 	}*/
@@ -61,7 +61,7 @@ function emailcollectorPrepareHead($object)
 	$nbLinks=Link::count($db, $object->element, $object->id);
 	$head[$h][0] = dol_buildpath("/emailcollector/emailcollector_document.php", 1).'?id='.$object->id;
 	$head[$h][1] = $langs->trans('Documents');
-	if (($nbFiles+$nbLinks) > 0) $head[$h][1].= ' <span class="badge">'.($nbFiles+$nbLinks).'</span>';
+	if (($nbFiles+$nbLinks) > 0) $head[$h][1].= '<span class="badge marginleftonlyshort">'.($nbFiles+$nbLinks).'</span>';
 	$head[$h][2] = 'document';
 	$h++;
 
@@ -81,5 +81,142 @@ function emailcollectorPrepareHead($object)
 	//); // to remove a tab
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'emailcollector');
 
+	complete_head_from_modules($conf, $langs, $object, $head, $h, 'emailcollector', 'remove');
+
 	return $head;
+}
+
+/**
+ * Get parts of a message
+ *
+ * @param 	object 			$structure 		Structure of message
+ * @return 	object|boolean 					Parties du message|false en cas d'erreur
+ */
+function getParts($structure)
+{
+	return isset($structure->parts) ? $structure->parts : false;
+}
+
+/**
+ * Array with joined files
+ *
+ * @param 	object 			$part 		Part of message
+ * @return 	object|boolean 				Definition of message|false en cas d'erreur
+ */
+function getDParameters($part)
+{
+	return $part->ifdparameters ? $part->dparameters : false;
+}
+
+/**
+ * Get attachments of a given mail
+ *
+ * @param 	integer $jk 	Number of email
+ * @param 	object 	$mbox 	object connection imaap
+ * @return 	array 			type, filename, pos
+ */
+function getAttachments($jk, $mbox)
+{
+	$structure = imap_fetchstructure($mbox, $jk);
+	$parts = getParts($structure);
+	$fpos = 2;
+	$attachments = array();
+	$nb = count($parts);
+	if ($parts && $nb) {
+		for ($i = 1; $i < $nb; $i++) {
+			$part = $parts[$i];
+
+			if ($part->ifdisposition && strtolower($part->disposition) == "attachment") {
+				$ext = $part->subtype;
+				$params = getDParameters($part);
+
+				if ($params) {
+					$filename = $part->dparameters[0]->value;
+					$filename = imap_utf8($filename);
+					$attachments[] = array('type' => $part->type, 'filename' => $filename, 'pos' => $fpos);
+				}
+			}
+			$fpos++;
+		}
+	}
+	return $attachments;
+}
+
+/**
+ * Get content of a joined file from its position into a given email
+ *
+ * @param integer $jk numéro du mail
+ * @param integer $fpos position de la pièce jointe
+ * @param integer $type type de la pièce jointe
+ * @param object $mbox object connection imaap
+ * @return mixed data
+ */
+function getFileData($jk, $fpos, $type, $mbox)
+{
+	$mege = imap_fetchbody($mbox, $jk, $fpos);
+	$data = getDecodeValue($mege, $type);
+
+	return $data;
+}
+
+/**
+ * Save joined file into a directory with a given name
+ *
+ * @param 	string 		$path 		Path to file
+ * @param 	string 		$filename 	Name of file
+ * @param 	mixed 		$data 		contenu à sauvegarder
+ * @return 	string 					emplacement du fichier
+ **/
+function saveAttachment($path, $filename, $data)
+{
+	global $lang;
+	$tmp = explode('.', $filename);
+	$ext = array_pop($tmp);
+	$filename = implode('.', $tmp);
+	if (!file_exists($path)) {
+		if (dol_mkdir($path) < 0) {
+			return -1;
+		}
+	}
+
+	$i = 1;
+	$filepath = $path . $filename . '.' . $ext;
+
+	while (file_exists($filepath)) {
+		$filepath = $path . $filename . '(' . $i . ').' . $ext;
+		$i++;
+	}
+	file_put_contents($filepath, $data);
+	return $filepath;
+}
+
+/**
+ * Decode content of a message
+ *
+ * @param 	string 		$message 	Message
+ * @param 	integer 	$coding 	Type of content
+ * @return 	string					Decoded message
+ **/
+function getDecodeValue($message, $coding)
+{
+	switch ($coding) {
+		case 0: //text
+		case 1: //multipart
+			$message = imap_8bit($message);
+			break;
+		case 2: //message
+			$message = imap_binary($message);
+			break;
+		case 3: //application
+		case 5: //image
+		case 6: //video
+		case 7: //other
+			$message = imap_base64($message);
+			break;
+		case 4: //audio
+			$message = imap_qprint($message);
+			break;
+	}
+
+	return $message;
 }

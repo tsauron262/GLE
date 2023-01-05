@@ -23,6 +23,9 @@ AddLoan=Create loan
 FinancialCommitment=Financial commitment
 InterestAmount=Interesse
 CapitalRemain=Capital remain
+TermPaidAllreadyPaid = Questo termine è già pagato
+CantUseScheduleWithLoanStartedToPaid = Can't generate a timeline for a loan with a payment started
+CantModifyInterestIfScheduleIsUsed = Non è possibile modificare l'interesse se si utilizza la pianificazione
 # Admin
 ConfigLoan=Configurazione del modulo prestiti
 LOAN_ACCOUNTING_ACCOUNT_CAPITAL=Accounting account capital by default

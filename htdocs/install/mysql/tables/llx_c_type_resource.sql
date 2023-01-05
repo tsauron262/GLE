@@ -1,5 +1,6 @@
 -- ========================================================================
 -- Copyright (C) 2014     Jean-François Ferry <jfefe@aternatik.fr>
+-- Copyright (C) 2022 	  Juanjo Menent        <jmenent@2byte.es>
 -- 
 --
 -- This program is free software; you can redistribute it and/or modify
@@ -13,7 +14,7 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program. If not, see <http://www.gnu.org/licenses/>.
+-- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- Defini les types de contact d'un element sert de reference pour
 -- la table llx_element_contact
@@ -29,6 +30,6 @@ create table llx_c_type_resource
 (
   rowid      	integer AUTO_INCREMENT PRIMARY KEY,
   code          varchar(32) NOT NULL,
-  label 	    varchar(64)	NOT NULL,
+  label 	    varchar(128)	NOT NULL,
   active  	    tinyint DEFAULT 1  NOT NULL
 )ENGINE=innodb;

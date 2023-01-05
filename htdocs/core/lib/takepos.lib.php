@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2009 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2009       Laurent Destailleur <eldy@users.sourceforge.net>
+ * Copyright (C) 2022       Alexandre Spangaro  <aspangaro@open-dsi.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,8 +13,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- * or see http://www.gnu.org/
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * or see https://www.gnu.org/
  */
 
 /**
@@ -26,7 +27,7 @@
  *
  * @return 	array				Array of tabs
  */
-function takepos_prepare_head()
+function takepos_admin_prepare_head()
 {
 	global $langs, $conf;
 
@@ -38,16 +39,37 @@ function takepos_prepare_head()
 	$head[$h][2] = 'setup';
 	$h++;
 
-	$numterminals = max(1, $conf->global->TAKEPOS_NUM_TERMINALS);
-	for ($i = 1; $i <= $numterminals; $i++)
-	{
+	$head[$h][0] = DOL_URL_ROOT.'/takepos/admin/appearance.php';
+	$head[$h][1] = $langs->trans("Appearance");
+	$head[$h][2] = 'appearance';
+	$h++;
+
+	$head[$h][0] = DOL_URL_ROOT.'/takepos/admin/receipt.php';
+	$head[$h][1] = $langs->trans("Printers").' / '.$langs->trans("Receipt");
+	$head[$h][2] = 'receipt';
+	$h++;
+
+	$head[$h][0] = DOL_URL_ROOT.'/takepos/admin/bar.php';
+	$head[$h][1] = $langs->trans("BarRestaurant");
+	$head[$h][2] = 'bar';
+	$h++;
+
+	$numterminals = max(1, getDolGlobalInt('TAKEPOS_NUM_TERMINALS', 1));
+	for ($i = 1; $i <= $numterminals; $i++) {
 		$head[$h][0] = DOL_URL_ROOT.'/takepos/admin/terminal.php?terminal='.$i;
-		$head[$h][1] = $langs->trans("Terminal"). " ".$i;
+		$head[$h][1] = $langs->trans("Terminal")." ".$i;
 		$head[$h][2] = 'terminal'.$i;
 		$h++;
 	}
 
-    complete_head_from_modules($conf, $langs, null, $head, $h, 'takepos');
+	$head[$h][0] = DOL_URL_ROOT.'/takepos/admin/other.php';
+	$head[$h][1] = $langs->trans("About");
+	$head[$h][2] = 'other';
+	$h++;
 
-    return $head;
+	complete_head_from_modules($conf, $langs, null, $head, $h, 'takepos_admin');
+
+	complete_head_from_modules($conf, $langs, null, $head, $h, 'takepos_admin', 'remove');
+
+	return $head;
 }

@@ -12,8 +12,11 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program. If not, see <http://www.gnu.org/licenses/>.
+-- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- ===========================================================================
+
+-- Table used only when PRODUIT_MULTIPRICES is set (prices per level) + PRODUIT_MULTIPRICES_ALLOW_AUTOCALC_PRICELEVEL is set
+-- A checkbox become available on product to allow to set price rules
 
 ALTER TABLE llx_product_pricerules ADD CONSTRAINT unique_level UNIQUE (level);

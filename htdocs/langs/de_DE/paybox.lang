@@ -1,35 +1,25 @@
 # Dolibarr language file - Source file is en_US - paybox
 PayBoxSetup=PayBox-Moduleinstellungen
-PayBoxDesc=Dieses Modul erlaubt die Annahme von Zahlungen über <a href="http://www.paybox.com" target="_blank">Paybox</a>. Sie können damit Zahlungen zu Objekten innerhalb des Systems (Rechnungen, Bestellungen, ...) erfassen.
+PayBoxDesc=Dieses Modul bietet Online-Zahlungsseiten, um Kunden die Bezahlung mittels <a href="https://www.paybox.com" target="_blank" rel="noopener noreferrer external">Paybox</a> zu ermöglichen. Dies kann sowohl für eine allgemeine Zahlung als auch für eine Zahlung bezogen auf ein bestimmtes Dolibarr-Objekt (Rechnung, Bestellung, ...) verwendet werden.
 FollowingUrlAreAvailableToMakePayments=Für Kundenzahlungen stehen Ihnen die folgenden URLs zur Verfügung:
 PaymentForm=Zahlungsformular
 WelcomeOnPaymentPage=Willkommen auf unserer Online-Bezahlseite
-ThisScreenAllowsYouToPay=Über dieses Fenster können Sie Online-Zahlungen an %s vornehmen.
+ThisScreenAllowsYouToPay=Über diese Seite können Sie Online-Zahlungen vornehmen an: %s
 ThisIsInformationOnPayment=Informationen zu der vorzunehmenden Zahlung
 ToComplete=Vervollständigen
 YourEMail=E-Mail-Adresse für die Zahlungsbestätigung
 Creditor=Zahlungsempfänger
 PaymentCode=Zahlungscode
-PayBoxDoPayment=Pay with Paybox
-ToPay=Zahlung tätigen
+PayBoxDoPayment=Zahlen Sie mit Paybox
 YouWillBeRedirectedOnPayBox=Zur Eingabe Ihrer Kreditkartendaten werden Sie an eine sichere Bezahlseite weitergeleitet.
 Continue=Fortfahren
-ToOfferALinkForOnlinePayment=URL für %s Zahlung
-ToOfferALinkForOnlinePaymentOnOrder=URL to offer a %s online payment user interface for a sales order
-ToOfferALinkForOnlinePaymentOnInvoice=URL um Ihren Kunden eine %s Online-Bezahlseite für Rechnungen anzubieten
-ToOfferALinkForOnlinePaymentOnContractLine=URL um Ihren Kunden eine %s Online-Bezahlseite für Vertragspositionen anzubieten
-ToOfferALinkForOnlinePaymentOnFreeAmount=URL um Ihren Kunden eine %s Online-Bezahlseite für frei wählbare Beträge anzubieten
-ToOfferALinkForOnlinePaymentOnMemberSubscription=URL um Ihren Mitgliedern eine %s Online-Bezahlseite für Mitgliedsbeiträge
-ToOfferALinkForOnlinePaymentOnDonation=URL to offer a %s online payment, user interface for payment of donation
-YouCanAddTagOnUrl=Sie können auch den URL-Parameter <b>&tag=<i>value</i></b> an eine beliebige dieser URLs anhängen (erforderlich nur bei der freien Zahlung) um einen eigenen Zahlungskommentar hinzuzufügen.
-SetupPayBoxToHavePaymentCreatedAutomatically=Setup your Paybox with url <b>%s</b> to have payment created automatically when validated by Paybox.
-YourPaymentHasBeenRecorded=Hiermit Bestätigen wir, dass die Zahlung ausgeführt wurde. Vielen Dank.
-YourPaymentHasNotBeenRecorded=Your payment has NOT been recorded and the transaction has been canceled. Thank you.
+SetupPayBoxToHavePaymentCreatedAutomatically=Richten Sie Ihre Paybox mit der URL <b> %s </b> ein, damit die Zahlung bei der Validierung durch Paybox automatisch erstellt wird.
+YourPaymentHasBeenRecorded=Ihre Zahlung wurde erfasst, vielen Dank!
+YourPaymentHasNotBeenRecorded=Ihre Zahlung wurde NICHT erfasst und die Transaktion wurde abgebrochen. Vielen Dank.
 AccountParameter=Konto Parameter
 UsageParameter=Einsatzparameter
 InformationToFindParameters=Hilfe für das Finden der %s Kontoinformationen
 PAYBOX_CGI_URL_V2=URL für das Paybox Zahlungsmodul "CGI Modul"
-VendorName=Name des Lieferanten
 CSSUrlForPaymentForm=CSS-Datei für das Zahlungsmodul
 NewPayboxPaymentReceived=Neue Paybox-Zahlung erhalten
 NewPayboxPaymentFailed=Neue Paybox-Zahlungen probiert, aber fehlgeschlagen
@@ -37,4 +27,4 @@ PAYBOX_PAYONLINE_SENDEMAIL=E-Mail Benachrichtigung nach Zahlungsversuch (erfolgr
 PAYBOX_PBX_SITE=Wert für PayBox Seite
 PAYBOX_PBX_RANG=Wert für PBX Rang
 PAYBOX_PBX_IDENTIFIANT=Wert für PBX ID
-PAYBOX_HMAC_KEY=HMAC key
+PAYBOX_HMAC_KEY=HMAC-Schlüssel

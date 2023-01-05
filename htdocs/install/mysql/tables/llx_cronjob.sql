@@ -13,7 +13,7 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program. If not, see <http://www.gnu.org/licenses/>.
+-- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- ===================================================================
 
@@ -21,14 +21,14 @@
 CREATE TABLE llx_cronjob 
 (
 	rowid 			integer AUTO_INCREMENT PRIMARY KEY,
-	tms 			timestamp,
+	tms 			timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	datec 			datetime,
-	jobtype			varchar(10) NOT NULL,
-  	label 			text NOT NULL,
+	jobtype			varchar(10) NOT NULL,		-- 'method', 'function' or 'command'
+  	label 			varchar(255) NOT NULL,
 	command			varchar(255),
-  	classesname 	varchar(255),
+  	classesname 	varchar(255),				-- when jobtype is 'method', name of the class file containing the method.
   	objectname		varchar(255),
-  	methodename		varchar(255),
+  	methodename		varchar(255),				-- name of method or function
   	params 			text,
 	md5params 		varchar(32),
   	module_name 	varchar(255),
@@ -52,7 +52,8 @@ CREATE TABLE llx_cronjob
   	fk_user_mod 	integer DEFAULT NULL,
     fk_mailing      integer DEFAULT NULL,		-- id of emailing if job was queued to send mass emailing
 	note 			text,
-	libname			varchar(255),
+	libname			varchar(255),				-- when jobtype is 'function', name of the library file containing the function.
+	email_alert		varchar(128),				-- email for alert
 	entity			integer DEFAULT 0
 )ENGINE=innodb;
 

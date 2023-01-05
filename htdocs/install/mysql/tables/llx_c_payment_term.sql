@@ -14,7 +14,7 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program. If not, see <http://www.gnu.org/licenses/>.
+-- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- ============================================================================
 
@@ -30,6 +30,7 @@ create table llx_c_payment_term
   type_cdr			tinyint,    			-- Type of change date reckoning. 1=Payment at end of current month, 2=the Nth of next month
   nbjour				smallint,
   decalage			smallint,
+  deposit_percent		varchar(63) DEFAULT NULL,
   module				varchar(32) NULL,
   position			integer NOT NULL DEFAULT 0
 )ENGINE=innodb;

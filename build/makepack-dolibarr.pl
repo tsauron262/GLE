@@ -2,7 +2,7 @@
 #----------------------------------------------------------------------------
 # \file         build/makepack-dolibarr.pl
 # \brief        Dolibarr package builder (tgz, zip, rpm, deb, exe, aps)
-# \author       (c)2004-2015 Laurent Destailleur  <eldy@users.sourceforge.net>
+# \author       (c)2004-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
 #
 # This is list of constant you can set to have generated packages moved into a specific dir: 
 #DESTIBETARC='/media/HDDATA1_LD/Mes Sites/Web/Dolibarr/dolibarr.org/files/lastbuild'
@@ -19,7 +19,7 @@ use Term::ANSIColor;
 # Change this to defined target for option 98 and 99
 $PROJECT="dolibarr";
 $PUBLISHSTABLE="eldy,dolibarr\@frs.sourceforge.net:/home/frs/project/dolibarr";
-$PUBLISHBETARC="dolibarr\@vmprod1.dolibarr.org:/home/dolibarr/dolibarr.org/httpdocs/files";
+$PUBLISHBETARC="dolibarr\@vmprod1.dolibarr.org:/home/dolibarr/asso.dolibarr.org/dolibarr_documents/website/www.dolibarr.org/files";
 
 
 #@LISTETARGET=("TGZ","ZIP","RPM_GENERIC","RPM_FEDORA","RPM_MANDRIVA","RPM_OPENSUSE","DEB","EXEDOLIWAMP","SNAPSHOT");   # Possible packages
@@ -65,7 +65,7 @@ $DIR||='.'; $DIR =~ s/([^\/\\])[\\\/]+$/$1/;
 
 $SOURCE="$DIR/..";
 $DESTI="$SOURCE/build";
-if ($SOURCE !~ /^\//)
+if ($SOURCE !~ /^\// && $SOURCE !~ /^[a-z]:/i)
 {
 	print "Error: Launch the script $PROG.$Extension with its full path from /.\n";
 	print "$PROG.$Extension aborted.\n";
@@ -76,15 +76,23 @@ if (! $ENV{"DESTIBETARC"} || ! $ENV{"DESTISTABLE"})
 {
 	print "Error: Missing environment variables.\n";
 	print "You must define the environment variable DESTIBETARC and DESTISTABLE to point to the\ndirectories where you want to save the generated packages.\n";
+	print "$PROG.$Extension aborted.\n";
+	print "\n";
+	print "You can set them with\n";
+	print "On Linux:\n";
+	print "export DESTIBETARC='/tmp'; export DESTISTABLE='/tmp';\n";
+	print "On Windows:\n";
+	print "set DESTIBETARC=c:/tmp\n";
+	print "set DESTISTABLE=c:/tmp\n";
+	print "\n";
 	print "Example: DESTIBETARC='/media/HDDATA1_LD/Mes Sites/Web/Dolibarr/dolibarr.org/files/lastbuild'\n";
 	print "Example: DESTISTABLE='/media/HDDATA1_LD/Mes Sites/Web/Dolibarr/dolibarr.org/files/stable'\n";
-	print "$PROG.$Extension aborted.\n";
 	sleep 2;
 	exit 1;
 }
 if (! -d $ENV{"DESTIBETARC"} || ! -d $ENV{"DESTISTABLE"})
 {
-	print "Error: Directory of environment variable DESTIBETARC or DESTISTABLE does not exist.\n";
+	print "Error: Directory of environment variable DESTIBETARC ($ENV{'DESTIBETARC'}) or DESTISTABLE ($ENV{'DESTISTABLE'}) does not exist.\n";
 	print "$PROG.$Extension aborted.\n";
 	sleep 2;
 	exit 1;
@@ -94,7 +102,7 @@ if (! -d $ENV{"DESTIBETARC"} || ! -d $ENV{"DESTISTABLE"})
 # --------------
 if ("$^O" =~ /linux/i || (-d "/etc" && -d "/var" && "$^O" !~ /cygwin/i)) { $OS='linux'; $CR=''; }
 elsif (-d "/etc" && -d "/Users") { $OS='macosx'; $CR=''; }
-elsif ("$^O" =~ /cygwin/i || "$^O" =~ /win32/i) { $OS='windows'; $CR="\r"; }
+elsif ("$^O" =~ /cygwin/i || "$^O" =~ /win32/i || "$^O" =~ /msys/i) { $OS='windows'; $CR="\r"; }
 if (! $OS) {
 	print "Error: Can't detect your OS.\n";
 	print "Can't continue.\n";
@@ -390,6 +398,9 @@ if ($nboftargetok) {
 		$olddir=getcwd();
 		chdir("$SOURCE");
 		
+		print "Clean $SOURCE/htdocs/includes/autoload.php\n";
+		$ret=`rm -f  $SOURCE/htdocs/includes/autoload.php`;
+		
 		$ret=`git ls-files . --exclude-standard --others`;
 		if ($ret)
 		{
@@ -430,12 +441,14 @@ if ($nboftargetok) {
 				$ret=`git tag -a -f -m "$MAJOR.$MINOR.$BUILD" "$MAJOR.$MINOR.$BUILD"`;
 				print 'Run git push -f --tags'."\n";
 				$ret=`git push -f --tags`;
+				#$ret=`git push -f origin "$MAJOR.$MINOR.$BUILD"`;
 			}
 		}
 		else
 		{
 			print 'Run git push --tags'."\n";
 			$ret=`git push --tags`;
+			#$ret=`git push origin "$MAJOR.$MINOR.$BUILD"`;
 		}
 		chdir("$olddir");
 	}
@@ -474,6 +487,7 @@ if ($nboftargetok) {
 		$ret=`rm -f  $BUILDROOT/$PROJECT/build.xml`;
 		$ret=`rm -f  $BUILDROOT/$PROJECT/phpstan.neon`;
 		$ret=`rm -f  $BUILDROOT/$PROJECT/pom.xml`;
+		$ret=`rm -f  $BUILDROOT/$PROJECT/README-*.md`;
 		
 		$ret=`rm -fr $BUILDROOT/$PROJECT/build/html`;
 		$ret=`rm -f  $BUILDROOT/$PROJECT/build/Doli*-*`;
@@ -493,15 +507,19 @@ if ($nboftargetok) {
 		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/cache.manifest`;
 		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/conf/conf.php`;
 		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/conf/conf.php.mysql`;
+		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/conf/conf.php.nova*`;
 		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/conf/conf.php.old`;
-		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/conf/conf.php.postgres`;
+		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/conf/conf.php.pgsql`;
 		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/conf/conf*sav*`;
 
 		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/install/mssql/README`;
 		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/install/mysql/README`;
 		$ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/install/pgsql/README`;
 
-		$ret=`rm -fr  $BUILDROOT/$PROJECT/htdocs/install/mssql`;
+		$ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/install/mssql`;
+		$ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/install/sqlite3`;
+
+		$ret=`rm -fr $BUILDROOT/$PROJECT/node_modules`;
 
 		$ret=`rm -fr $BUILDROOT/$PROJECT/dev/ansible`;
 		$ret=`rm -fr $BUILDROOT/$PROJECT/dev/codesniffer`;
@@ -573,52 +591,50 @@ if ($nboftargetok) {
 		$ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/teclib*`;
 		$ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/timesheet*`;
 		$ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/webmail*`;
-		$ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/workstation*`;
-		$ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/themes/oblyon*`;
-		$ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/themes/allscreen*`;
+		$ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/theme/common/fontawesome-5/svgs`;
+		
 		# Removed other test files
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/public/test`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/test`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/Thumbs.db $BUILDROOT/$PROJECT/*/Thumbs.db $BUILDROOT/$PROJECT/*/*/Thumbs.db $BUILDROOT/$PROJECT/*/*/*/Thumbs.db $BUILDROOT/$PROJECT/*/*/*/*/Thumbs.db`;
 	    $ret=`rm -f  $BUILDROOT/$PROJECT/.cvsignore $BUILDROOT/$PROJECT/*/.cvsignore $BUILDROOT/$PROJECT/*/*/.cvsignore $BUILDROOT/$PROJECT/*/*/*/.cvsignore $BUILDROOT/$PROJECT/*/*/*/*/.cvsignore $BUILDROOT/$PROJECT/*/*/*/*/*/.cvsignore $BUILDROOT/$PROJECT/*/*/*/*/*/*/.cvsignore`;
 	    $ret=`rm -f  $BUILDROOT/$PROJECT/.gitignore $BUILDROOT/$PROJECT/*/.gitignore $BUILDROOT/$PROJECT/*/*/.gitignore $BUILDROOT/$PROJECT/*/*/*/.gitignore $BUILDROOT/$PROJECT/*/*/*/*/.gitignore $BUILDROOT/$PROJECT/*/*/*/*/*/.gitignore $BUILDROOT/$PROJECT/*/*/*/*/*/*/.gitignore`;
+		
+		# Removed files installed by the awful composer   	    
    	    $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/geoip/sample*.*`;
+        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/bin`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/ckeditor/ckeditor/adapters`;		# Keep this removal in case we embed libraries
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/ckeditor/ckeditor/samples`;		# Keep this removal in case we embed libraries
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/ckeditor/_source`;					# _source must be kept into tarball for official debian, not for the rest
-   	    
+        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/composer`;
+        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/doctrine`;
         $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/jquery/plugins/multiselect/MIT-LICENSE.txt`;
         $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/jquery/plugins/select2/release.sh`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/mike42/escpos-php/doc`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/mike42/escpos-php/example`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/mike42/escpos-php/test`;
+        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/mike42/escpos-php/example`;
+        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/mike42/escpos-php/test`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/mobiledetect/mobiledetectlib/.gitmodules`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/nusoap/lib/Mail`;
+        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/mobiledetect/mobiledetectlib/docs`;
+        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/nnnick/chartjs/.github`;
+        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/nnnick/chartjs/docs`;
+        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/nnnick/chartjs/samples`;
+        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/nnnick/chartjs/scripts`;
+        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/nnnick/chartjs/src`;
+        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/nnnick/chartjs/test`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/nusoap/samples`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/parsedown/LICENSE.txt`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/php-iban/docs`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpoffice/phpexcel/.gitattributes`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpoffice/phpexcel/Classes/license.md`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpoffice/phpexcel/Classes/PHPExcel/Shared/PDF`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpoffice/phpexcel/Classes/PHPExcel/Shared/PCLZip`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpoffice/phpexcel/Examples`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpoffice/phpexcel/unitTests`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpoffice/phpexcel/license.md`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/sabre/sabre/*/tests`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/stripe/tests`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/stripe/LICENSE`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/tcpdf/fonts/dejavu-fonts-ttf-*`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/tcpdf/fonts/freefont-*`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/tcpdf/fonts/ae_fonts_*`;
-        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/tcpdf/fonts/utils`;
-        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/tcpdf/LICENSE.TXT`;
+        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/tecnickcom/examples`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-*`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/tecnickcom/tcpdf/fonts/freefont-*`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/tecnickcom/tcpdf/fonts/ae_fonts_*`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/tecnickcom/tcpdf/fonts/utils`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/tecnickcom/tcpdf/tools`;
-        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/tecnickcom/tcpdf/LICENSE.TXT`;
-        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/theme/common/octicons/LICENSE`;
+        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/vendor`;
+        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/webmozart`;
+        $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/autoload.php`;
 	}
 
 	# Build package for each target
@@ -662,7 +678,7 @@ if ($nboftargetok) {
 				mkdir($DESTI.'/standard');
 				if (-d $DESTI.'/standard') { $NEWDESTI=$DESTI.'/standard'; } 
 			}
-			
+
 			print "Remove target $FILENAMETGZ.tgz...\n";
 			unlink("$NEWDESTI/$FILENAMETGZ.tgz");
 
@@ -1048,7 +1064,8 @@ if ($nboftargetok) {
 			$ret=`mv $BUILDROOT/*_all.deb "$NEWDESTI/"`;
 			$ret=`mv $BUILDROOT/*.dsc "$NEWDESTI/"`;
 			$ret=`mv $BUILDROOT/*.orig.tar.gz "$NEWDESTI/"`;
-			$ret=`mv $BUILDROOT/*.debian.tar.xz "$NEWDESTI/"`;
+			#$ret=`mv $BUILDROOT/*.debian.tar.xz "$NEWDESTI/"`;		# xz file is generated when build/debian/sources/option 
+			$ret=`mv $BUILDROOT/*.debian.tar.gz "$NEWDESTI/"`;
 			$ret=`mv $BUILDROOT/*.changes "$NEWDESTI/"`;
 			next;
 		}
@@ -1065,28 +1082,52 @@ if ($nboftargetok) {
      		print "Remove target $NEWDESTI/$FILENAMEEXEDOLIWAMP.exe...\n";
     		unlink "$NEWDESTI/$FILENAMEEXEDOLIWAMP.exe";
  
- 			print "Check that in your Wine setup, you create a Z: drive that point to your / directory.\n";
-
+ 			if ($OS eq 'windows') {
+ 				print "Check that ISCC.exe is in your PATH.\n";
+			} else {
+ 				print "Check that in your Wine setup, you have created a Z: drive that point to your / directory.\n";
+			}
+			
  			$SOURCEBACK=$SOURCE;
  			$SOURCEBACK =~ s/\//\\/g;
 
-    		print "Prepare file \"$SOURCEBACK\\build\\exe\\doliwamp\\doliwamp.tmp.iss from \"$SOURCEBACK\\build\\exe\\doliwamp\\doliwamp.iss\"\n";
-    		$ret=`cat "$SOURCE/build/exe/doliwamp/doliwamp.iss" | sed -e 's/__FILENAMEEXEDOLIWAMP__/$FILENAMEEXEDOLIWAMP/g' > "$SOURCE/build/exe/doliwamp/doliwamp.tmp.iss"`;
+    		print "Prepare file \"$SOURCEBACK\\build\\exe\\doliwamp\\doliwamp.tmp.iss\" from \"$SOURCEBACK\\build\\exe\\doliwamp\\doliwamp.iss\"\n";
+    		
+    		#$ret=`cat "$SOURCE/build/exe/doliwamp/doliwamp.iss" | sed -e 's/__FILENAMEEXEDOLIWAMP__/$FILENAMEEXEDOLIWAMP/g' > "$SOURCE/build/exe/doliwamp/doliwamp.tmp.iss"`;
+    		open(IN, '<' . $SOURCE."/build/exe/doliwamp/doliwamp.iss") or die $!;
+			open(OUT, '>' . "$SOURCE/build/exe/doliwamp/doliwamp.tmp.iss") or die $!;
+			while(<IN>)
+			{
+			    $_ =~ s/__FILENAMEEXEDOLIWAMP__/$FILENAMEEXEDOLIWAMP/g;
+			    print OUT $_;
+			}
+			close(IN);
+			close(OUT);
 
-    		print "Compil exe $FILENAMEEXEDOLIWAMP.exe file from iss file \"$SOURCEBACK\\build\\exe\\doliwamp\\doliwamp.tmp.iss\"\n";
-    		$cmd= "wine ISCC.exe \"Z:$SOURCEBACK\\build\\exe\\doliwamp\\doliwamp.tmp.iss\"";
+    		print "Compil exe $FILENAMEEXEDOLIWAMP.exe file from iss file \"$SOURCEBACK\\build\\exe\\doliwamp\\doliwamp.tmp.iss\" on OS $OS\n";
+    		
+ 			if ($OS eq 'windows') {
+	    		$cmd= "ISCC.exe \"$SOURCEBACK\\build\\exe\\doliwamp\\doliwamp.tmp.iss\"";
+	    	} else {
+	    		#$cmd= "wine ISCC.exe \"Z:$SOURCEBACK\\build\\exe\\doliwamp\\doliwamp.tmp.iss\"";
+	    	}
 			print "$cmd\n";
 			$ret= `$cmd`;
-			#print "$ret\n";
+			print "ret=$ret\n";
 
 			# Move to final dir
 			print "Move \"$SOURCE\\build\\$FILENAMEEXEDOLIWAMP.exe\" to $NEWDESTI/$FILENAMEEXEDOLIWAMP.exe\n";
     		rename("$SOURCE/build/$FILENAMEEXEDOLIWAMP.exe","$NEWDESTI/$FILENAMEEXEDOLIWAMP.exe");
             print "Move $SOURCE/build/$FILENAMEEXEDOLIWAMP.exe to $NEWDESTI/$FILENAMEEXEDOLIWAMP.exe\n";
-            $ret=`mv "$SOURCE/build/$FILENAMEEXEDOLIWAMP.exe" "$NEWDESTI/$FILENAMEEXEDOLIWAMP.exe"`;
+            
+            use File::Copy;
+
+            #$ret=`mv "$SOURCE/build/$FILENAMEEXEDOLIWAMP.exe" "$NEWDESTI/$FILENAMEEXEDOLIWAMP.exe"`;
+            $ret=move("$SOURCE/build/$FILENAMEEXEDOLIWAMP.exe", "$NEWDESTI/$FILENAMEEXEDOLIWAMP.exe");
             
             print "Remove tmp file $SOURCE/build/exe/doliwamp/doliwamp.tmp.iss\n";
-            $ret=`rm "$SOURCE/build/exe/doliwamp/doliwamp.tmp.iss"`;
+            #$ret=`rm "$SOURCE/build/exe/doliwamp/doliwamp.tmp.iss"`;
+            $ret=unlink("$SOURCE/build/exe/doliwamp/doliwamp.tmp.iss");
             
     		next;
     	}
@@ -1106,7 +1147,8 @@ if ($nboftargetok) {
 			"$DESTI/package_debian-ubuntu/${FILENAMEDEB}_all.deb"=>'Dolibarr installer for Debian-Ubuntu (DoliDeb)',
 			"$DESTI/package_debian-ubuntu/${FILENAMEDEB}_amd64.changes"=>'none',		# none means it won't be published on SF
 			"$DESTI/package_debian-ubuntu/${FILENAMEDEB}.dsc"=>'none',					# none means it won't be published on SF
-			"$DESTI/package_debian-ubuntu/${FILENAMEDEB}.debian.tar.xz"=>'none',		# none means it won't be published on SF
+			#"$DESTI/package_debian-ubuntu/${FILENAMEDEB}.debian.tar.xz"=>'none',		# none means it won't be published on SF
+			"$DESTI/package_debian-ubuntu/${FILENAMEDEB}.debian.tar.gz"=>'none',		# none means it won't be published on SF
 			"$DESTI/package_debian-ubuntu/${FILENAMEDEBSHORT}.orig.tar.gz"=>'none',		# none means it won't be published on SF
 			"$DESTI/package_windows/$FILENAMEEXEDOLIWAMP.exe"=>'Dolibarr installer for Windows (DoliWamp)',
 			"$DESTI/standard/$FILENAMETGZ.tgz"=>'Dolibarr ERP-CRM',
@@ -1233,7 +1275,7 @@ if ($nboftargetok) {
 
 print "\n----- Summary -----\n";
 foreach my $target (sort keys %CHOOSEDTARGET) {
-	if ($target eq '-CHKSUM') { print "Checksum was generated"; next; }
+	if ($target eq '-CHKSUM') { print "Checksum was generated\n"; next; }
 	if ($CHOOSEDTARGET{$target} < 0) {
 		print "Package $target not built (bad requirement).\n";
 	} else {

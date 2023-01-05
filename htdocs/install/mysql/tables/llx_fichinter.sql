@@ -13,7 +13,7 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program. If not, see <http://www.gnu.org/licenses/>.
+-- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- ===================================================================
 
@@ -25,8 +25,9 @@ create table llx_fichinter
   fk_contrat		integer DEFAULT 0,          -- contrat auquel est rattache la fiche
   ref				varchar(30) NOT NULL,       -- number
   ref_ext			varchar(255),
+  ref_client		varchar(255),				-- customer intervention number
   entity			integer DEFAULT 1 NOT NULL, -- multi company id
-  tms				timestamp,
+  tms				timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   datec				datetime,                   -- date de creation 
   date_valid		datetime,                   -- date de validation
   datei				date,						-- date de livraison du bon d'intervention

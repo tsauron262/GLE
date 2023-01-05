@@ -14,14 +14,14 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program. If not, see <http://www.gnu.org/licenses/>.
+-- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- ===========================================================================
 
 
 ALTER TABLE llx_user ADD UNIQUE INDEX uk_user_login (login, entity);
 
-ALTER TABLE llx_user ADD INDEX idx_user_fk_societe  (fk_soc);
+ALTER TABLE llx_user ADD INDEX idx_user_fk_societe (fk_soc);
 
 ALTER TABLE llx_user ADD UNIQUE INDEX uk_user_fk_socpeople (fk_socpeople);
 ALTER TABLE llx_user ADD UNIQUE INDEX uk_user_fk_member    (fk_member);

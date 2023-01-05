@@ -18,7 +18,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * Need to have following variables defined:
  * $object (invoice, order, ...)
@@ -35,20 +35,29 @@
  */
 
 // Protection to avoid direct call of template
-if (empty($object) || ! is_object($object))
-{
+if (empty($object) || !is_object($object)) {
 	print "Error, template page can't be called as URL";
 	exit;
 }
 
 
-global $forceall, $senderissupplier, $inputalsopricewithtax, $outputalsopricetotalwithtax;
+global $forceall, $senderissupplier, $inputalsopricewithtax, $outputalsopricetotalwithtax, $langs;
 
-if (empty($dateSelector)) $dateSelector=0;
-if (empty($forceall)) $forceall=0;
-if (empty($senderissupplier)) $senderissupplier=0;
-if (empty($inputalsopricewithtax)) $inputalsopricewithtax=0;
-if (empty($outputalsopricetotalwithtax)) $outputalsopricetotalwithtax=0;
+if (empty($dateSelector)) {
+	$dateSelector = 0;
+}
+if (empty($forceall)) {
+	$forceall = 0;
+}
+if (empty($senderissupplier)) {
+	$senderissupplier = 0;
+}
+if (empty($inputalsopricewithtax)) {
+	$inputalsopricewithtax = 0;
+}
+if (empty($outputalsopricetotalwithtax)) {
+	$outputalsopricetotalwithtax = 0;
+}
 
 // add html5 elements
 $domData  = ' data-element="'.$line->element.'"';
@@ -59,100 +68,219 @@ $domData .= ' data-product_type="'.$line->product_type.'"';
 // Lines for extrafield
 $objectline = new BOMLine($object->db);
 
-?>
-<?php $coldisplay=0; ?>
-<!-- BEGIN PHP TEMPLATE objectline_view.tpl.php -->
-<tr  id="row-<?php echo $line->id?>" class="drag drop oddeven" <?php echo $domData; ?> >
-	<?php if (! empty($conf->global->MAIN_VIEW_LINE_NUMBER)) { ?>
-	<td class="linecolnum center"><?php $coldisplay++; ?><?php echo ($i+1); ?></td>
-	<?php } ?>
-	<td class="linecoldescription minwidth300imp"><?php $coldisplay++; ?><div id="line_<?php echo $line->id; ?>"></div>
-	<?php
-	$tmpproduct = new Product($object->db);
-	$tmpproduct->fetch($line->fk_product);
+$coldisplay = 0;
+print "<!-- BEGIN PHP TEMPLATE objectline_view.tpl.php -->\n";
+print '<tr id="row-'.$line->id.'" class="drag drop oddeven" '.$domData.' >';
+if (!empty($conf->global->MAIN_VIEW_LINE_NUMBER)) {
+	print '<td class="linecolnum center">'.($i + 1).'</td>';
+	$coldisplay++;
+}
+print '<td class="linecoldescription minwidth300imp">';
+print '<div id="line_'.$line->id.'"></div>';
+$coldisplay++;
+$tmpproduct = new Product($object->db);
+$tmpproduct->fetch($line->fk_product);
+$tmpbom = new BOM($object->db);
+$res = $tmpbom->fetch($line->fk_bom_child);
+if ($tmpbom->id > 0) {
 	print $tmpproduct->getNomUrl(1);
-	?>
-	</td>
-	<td class="linecolqty nowrap right"><?php $coldisplay++; ?>
-    <?php
-	echo price($line->qty, 0, '', 0, 0);  // Yes, it is a quantity, not a price, but we just want the formating role of function price
-    ?>
-	</td>
+	print ' '.$langs->trans("or").' ';
+	print $tmpbom->getNomUrl(1);
+	print ' <a class="collapse_bom" id="collapse-'.$line->id.'" href="#">';
+	print (empty($conf->global->BOM_SHOW_ALL_BOM_BY_DEFAULT) ? img_picto('', 'folder') : img_picto('', 'folder-open'));
+	print '</a>';
+} else {
+	print $tmpproduct->getNomUrl(1);
+	print ' - '.$tmpproduct->label;
+}
+print '</td>';
 
-	<?php
-	if($conf->global->PRODUCT_USE_UNITS)
-	{
-		print '<td class="linecoluseunit nowrap left">';
-		$label = $line->getLabelOfUnit('short');
-		if ($label !== '') {
-			print $langs->trans($label);
+print '<td class="linecolqty nowrap right">';
+$coldisplay++;
+echo price($line->qty, 0, '', 0, 0); // Yes, it is a quantity, not a price, but we just want the formating role of function price
+print '</td>';
+
+if (!empty($conf->global->PRODUCT_USE_UNITS)) {
+	print '<td class="linecoluseunit nowrap left">';
+	$label = $tmpproduct->getLabelOfUnit('long');
+	if ($label !== '') {
+		print $langs->trans($label);
+	}
+	print '</td>';
+}
+
+print '<td class="linecolqtyfrozen nowrap right">';
+$coldisplay++;
+echo $line->qty_frozen ? yn($line->qty_frozen) : '';
+print '</td>';
+print '<td class="linecoldisablestockchange nowrap right">';
+$coldisplay++;
+echo $line->disable_stock_change ? yn($line->disable_stock_change) : ''; // Yes, it is a quantity, not a price, but we just want the formating role of function price
+print '</td>';
+
+print '<td class="linecolefficiency nowrap right">';
+$coldisplay++;
+echo $line->efficiency;
+print '</td>';
+
+$total_cost = 0;
+print '<td id="costline_'.$line->id.'" class="linecolcost nowrap right">';
+$coldisplay++;
+echo '<span class="amount">'.price($line->total_cost).'</span>';
+print '</td>';
+
+if ($this->status == 0 && ($object_rights->write) && $action != 'selectlines') {
+	print '<td class="linecoledit center">';
+	$coldisplay++;
+	if (($line->info_bits & 2) == 2 || !empty($disableedit)) {
+	} else {
+		print '<a class="editfielda reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$this->id.'&action=editline&token='.newToken().'&lineid='.$line->id.'">'.img_edit().'</a>';
+	}
+	print '</td>';
+
+	print '<td class="linecoldelete center">';
+	$coldisplay++;
+	if (($line->fk_prev_id == null) && empty($disableremove)) {
+		//La suppression n'est autorisée que si il n'y a pas de ligne dans une précédente situation
+		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$this->id.'&action=deleteline&token='.newToken().'&lineid='.$line->id.'">';
+		print img_delete();
+		print '</a>';
+	}
+	print '</td>';
+
+	if ($num > 1 && $conf->browser->layout != 'phone' && empty($disablemove)) {
+		print '<td class="linecolmove tdlineupdown center">';
+		$coldisplay++;
+		if ($i > 0) {
+			print '<a class="lineupdown" href="'.$_SERVER["PHP_SELF"].'?id='.$this->id.'&action=up&token='.newToken().'&rowid='.$line->id.'">';
+			echo img_up('default', 0, 'imgupforline');
+			print '</a>';
+		}
+		if ($i < $num - 1) {
+			print '<a class="lineupdown" href="'.$_SERVER["PHP_SELF"].'?id='.$this->id.'&action=down&token='.newToken().'&rowid='.$line->id.'">';
+			echo img_down('default', 0, 'imgdownforline');
+			print '</a>';
 		}
 		print '</td>';
+	} else {
+		print '<td '.(($conf->browser->layout != 'phone' && empty($disablemove)) ? ' class="linecolmove tdlineupdown center"' : ' class="linecolmove center"').'></td>';
+		$coldisplay++;
 	}
-	?>
-	<td class="linecolqty nowrap right"><?php $coldisplay++; ?>
-    <?php
-	echo $line->efficiency;
-    ?>
-	</td>
-	<?php
-
-	if ($this->statut == 0  && ($object_rights->write) && $action != 'selectlines' ) { ?>
-		<td class="linecoledit center"><?php $coldisplay++; ?>
-			<?php if (($line->info_bits & 2) == 2 || ! empty($disableedit)) { ?>
-			<?php } else { ?>
-			<a href="<?php echo $_SERVER["PHP_SELF"].'?id='.$this->id.'&amp;action=editline&amp;lineid='.$line->id.'#line_'.$line->id; ?>">
-			<?php echo img_edit(); ?>
-			</a>
-			<?php } ?>
-		</td>
-
-		<td class="linecoldelete center"><?php $coldisplay++; ?>
-			<?php
-			if (($line->fk_prev_id == null ) && empty($disableremove)) { //La suppression n'est autorisée que si il n'y a pas de ligne dans une précédente situation
-				print '<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $this->id . '&amp;action=deleteline&amp;lineid=' . $line->id . '">';
-				print img_delete();
-				print '</a>';
-			}
-			?>
-		</td>
-
-		<?php
-		if ($num > 1 && $conf->browser->layout != 'phone' && empty($disablemove)) { ?>
-		<td class="linecolmove tdlineupdown center"><?php $coldisplay++; ?>
-			<?php if ($i > 0) { ?>
-			<a class="lineupdown" href="<?php echo $_SERVER["PHP_SELF"].'?id='.$this->id.'&amp;action=up&amp;rowid='.$line->id; ?>">
-			<?php echo img_up('default', 0, 'imgupforline'); ?>
-			</a>
-			<?php } ?>
-			<?php if ($i < $num-1) { ?>
-			<a class="lineupdown" href="<?php echo $_SERVER["PHP_SELF"].'?id='.$this->id.'&amp;action=down&amp;rowid='.$line->id; ?>">
-			<?php echo img_down('default', 0, 'imgdownforline'); ?>
-			</a>
-			<?php } ?>
-		</td>
-	    <?php } else { ?>
-	    <td <?php echo (($conf->browser->layout != 'phone' && empty($disablemove)) ?' class="linecolmove tdlineupdown center"':' class="linecolmove center"'); ?>><?php $coldisplay++; ?></td>
-		<?php } ?>
-	<?php
-    } else {
-	?>
-		<td colspan="3"><?php $coldisplay=$coldisplay+3; ?></td>
-	<?php
-    }
-
-    if($action == 'selectlines'){ ?>
-		<td class="linecolcheck center"><input type="checkbox" class="linecheckbox" name="line_checkbox[<?php echo $i+1; ?>]" value="<?php echo $line->id; ?>" ></td>
-	<?php } ?>
-
-</tr>
-
-<?php
-//Line extrafield
-if (!empty($extrafieldsline))
-{
-	print $line->showOptionals($extrafieldsline, 'view', array('style'=>'class="drag drop oddeven"','colspan'=>$coldisplay), '', '', empty($conf->global->MAIN_EXTRAFIELDS_IN_ONE_TD)?0:1);
+} else {
+	print '<td colspan="3"></td>';
+	$coldisplay = $coldisplay + 3;
 }
-?>
 
-<!-- END PHP TEMPLATE objectline_view.tpl.php -->
+if ($action == 'selectlines') {
+	print '<td class="linecolcheck center">';
+	print '<input type="checkbox" class="linecheckbox" name="line_checkbox['.($i + 1).']" value="'.$line->id.'" >';
+	print '</td>';
+}
+
+print '</tr>';
+
+// Select of all the sub-BOM lines
+// From this pont to the end of the file, we only take care of sub-BOM lines
+$sql = 'SELECT rowid, fk_bom_child, fk_product, qty FROM '.MAIN_DB_PREFIX.'bom_bomline AS bl';
+$sql.= ' WHERE fk_bom ='. (int) $tmpbom->id;
+$resql = $object->db->query($sql);
+
+if ($resql) {
+	// Loop on all the sub-BOM lines if they exist
+	while ($obj = $object->db->fetch_object($resql)) {
+		$sub_bom_product = new Product($object->db);
+		$sub_bom_product->fetch($obj->fk_product);
+
+		$sub_bom = new BOM($object->db);
+		if (!empty($obj->fk_bom_child)) {
+			$sub_bom->fetch($obj->fk_bom_child);
+		}
+
+		$sub_bom_line = new BOMLine($object->db);
+		$sub_bom_line->fetch($obj->rowid);
+
+		//If hidden conf is set, we show directly all the sub-BOM lines
+		if (empty($conf->global->BOM_SHOW_ALL_BOM_BY_DEFAULT)) {
+			print '<tr style="display:none" class="sub_bom_lines" parentid="'.$line->id.'">';
+		} else {
+			print '<tr class="sub_bom_lines" parentid="'.$line->id.'">';
+		}
+
+		// Product OR BOM
+		print '<td style="padding-left: 5%" id="sub_bom_product_'.$sub_bom_line->id.'">';
+		if (!empty($obj->fk_bom_child)) {
+			print $sub_bom_product->getNomUrl(1);
+			print ' '.$langs->trans('or').' ';
+			print $sub_bom->getNomUrl(1);
+		} else {
+			print $sub_bom_product->getNomUrl(1);
+			print '</td>';
+		}
+
+		// Qty
+		if ($sub_bom_line->qty_frozen > 0) {
+			print '<td class="linecolqty nowrap right" id="sub_bom_qty_'.$sub_bom_line->id.'">'.price($sub_bom_line->qty, 0, '', 0, 0).'</td>';
+			print '<td class="linecolqtyfrozen nowrap right" id="sub_bom_qty_frozen_'.$sub_bom_line->id.'">'.$langs->trans('Yes').'</td>';
+		} else {
+			print '<td class="linecolqty nowrap right" id="sub_bom_qty_'.$sub_bom_line->id.'">'.price($sub_bom_line->qty * $line->qty, 0, '', 0, 0).'</td>';
+			print '<td class="linecolqtyfrozen nowrap right" id="sub_bom_qty_frozen_'.$sub_bom_line->id.'">&nbsp;</td>';
+		}
+
+		// Disable stock change
+		if ($sub_bom_line->disable_stock_change > 0) {
+			print '<td class="linecoldisablestockchange nowrap right" id="sub_bom_stock_change_'.$sub_bom_line->id.'">'.$sub_bom_line->disable_stock_change.'</td>';
+		} else {
+			print '<td class="linecoldisablestockchange nowrap right" id="sub_bom_stock_change_'.$sub_bom_line->id.'">&nbsp;</td>';
+		}
+
+		// Efficiency
+		print '<td class="linecolefficiency nowrap right" id="sub_bom_efficiency_'.$sub_bom_line->id.'">'.$sub_bom_line->efficiency.'</td>';
+
+		// Cost
+		if (!empty($sub_bom->id)) {
+			$sub_bom->calculateCosts();
+			print '<td class="linecolcost nowrap right" id="sub_bom_cost_'.$sub_bom_line->id.'"><span class="amount">'.price($sub_bom->total_cost * $sub_bom_line->qty * $line->qty).'</span></td>';
+			$total_cost+= $sub_bom->total_cost * $sub_bom_line->qty * $line->qty;
+		} elseif ($sub_bom_product->cost_price > 0) {
+			print '<td class="linecolcost nowrap right" id="sub_bom_cost_'.$sub_bom_line->id.'"><span class="amount">'.price($sub_bom_product->cost_price * $sub_bom_line->qty * $line->qty).'</span></td>';
+			$total_cost+= $sub_bom_product->cost_price * $sub_bom_line->qty * $line->qty;
+		} elseif ($sub_bom_product->pmp > 0) {	// PMP if cost price isn't defined
+			print '<td class="linecolcost nowrap right" id="sub_bom_cost_'.$sub_bom_line->id.'"><span class="amount">'.price($sub_bom_product->pmp * $sub_bom_line->qty * $line->qty).'</span></td>';
+			$total_cost.= $sub_bom_product->pmp * $sub_bom_line->qty * $line->qty;
+		} else {	// Minimum purchase price if cost price and PMP aren't defined
+			$sql_supplier_price = 'SELECT MIN(price) AS min_price, quantity AS qty FROM '.MAIN_DB_PREFIX.'product_fournisseur_price';
+			$sql_supplier_price.= ' WHERE fk_product = '. (int) $sub_bom_product->id;
+			$resql_supplier_price = $object->db->query($sql_supplier_price);
+			if ($resql_supplier_price) {
+				$obj = $object->db->fetch_object($resql_supplier_price);
+				$line_cost = $obj->min_price/$obj->qty * $sub_bom_line->qty * $line->qty;
+
+				print '<td class="linecolcost nowrap right" id="sub_bom_cost_'.$sub_bom_line->id.'"><span class="amount">'.price($line_cost).'</span></td>';
+				$total_cost+= $line_cost;
+			}
+		}
+
+		print '<td></td>';
+		print '<td></td>';
+		print '<td></td>';
+	}
+}
+
+// Replace of the total_cost value by the sum of all sub-BOM lines total_cost
+// TODO Remove this bad practice. We should not replace content of ouput using javascript but value should be good during generation of output.
+if ($total_cost > 0) {
+	$line->total_cost = price($total_cost);
+	?>
+	<script>
+		$('#costline_<?php echo $line->id?>').html('<?php echo "<span class=\"amount\">".price($total_cost)."</span>"; ?>');
+	</script>
+	<?php
+}
+
+
+//Line extrafield
+if (!empty($extrafields)) {
+	print $line->showOptionals($extrafields, 'view', array('style'=>'class="drag drop oddeven"', 'colspan'=>$coldisplay), '', '', 1, 'line');
+}
+
+print "<!-- END PHP TEMPLATE objectline_view.tpl.php -->\n";

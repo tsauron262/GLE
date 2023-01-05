@@ -9,10 +9,10 @@
  * choice:
  *
  *  - GNU General Public License Version 2 or later (the "GPL")
- *    http://www.gnu.org/licenses/gpl.html
+ *    https://www.gnu.org/licenses/gpl.html
  *
  *  - GNU Lesser General Public License Version 2.1 or later (the "LGPL")
- *    http://www.gnu.org/licenses/lgpl.html
+ *    https://www.gnu.org/licenses/lgpl.html
  *
  *  - Mozilla Public License Version 1.1 or later (the "MPL")
  *    http://www.mozilla.org/MPL/MPL-1.1.html
@@ -22,10 +22,11 @@
  * This is the "File Uploader" for PHP.
  */
 
-require 'config.php';
+require 'config.php';	// This include the main.inc.php
 require 'util.php';
 require 'io.php';
 require 'commands.php';
+
 
 /**
  * SendError
@@ -41,23 +42,27 @@ function SendError($number, $text)
 
 
 // Check if this uploader has been enabled.
-if ( !$Config['Enabled'] )
+if (empty($Config['Enabled'])) {
 	SendUploadResults('1', '', '', 'This file uploader is disabled. Please check the "filemanagerdol/connectors/php/config.php" file');
+}
 
-$sCommand = 'QuickUpload' ;
+$sCommand = 'QuickUpload';
 
-// The file type (from the QueryString, by default 'File').
-$sType = isset($_GET['Type']) ? $_GET['Type'] : 'File' ;
+// The file type (from the QueryString, by default 'File', can be 'Image' or 'Media').
+$sType = GETPOSTISSET('Type') ? GETPOST('Type') : 'File';
 
-$sCurrentFolder	= "/" ;
+$sCurrentFolder = "/";
 
 // Is enabled the upload?
-if (! IsAllowedCommand($sCommand))
-	SendUploadResults('1', '', '', 'The ""' . $sCommand . '"" command isn\'t allowed');
+if (!IsAllowedCommand($sCommand)) {
+	SendUploadResults('1', '', '', 'The ""'.$sCommand.'"" command isn\'t allowed');
+}
 
 // Check if it is an allowed type.
-if (! IsAllowedType($sType))
-    SendUploadResults(1, '', '', 'Invalid type specified');
+if (!IsAllowedType($sType)) {
+	SendUploadResults(1, '', '', 'Invalid type specified');
+}
+
 
 
 // @CHANGE
@@ -66,5 +71,5 @@ if (! IsAllowedType($sType))
 // Get the CKEditor Callback
 $CKEcallback = $_GET['CKEditorFuncNum'];
 
-//modify the next line adding in the new param
+// Get uploaded filr and move it at correct place. Note: Some tests on file name are also included into this function
 FileUpload($sType, $sCurrentFolder, $sCommand, $CKEcallback);

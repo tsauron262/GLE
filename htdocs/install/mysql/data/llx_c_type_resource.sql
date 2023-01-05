@@ -17,7 +17,7 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program. If not, see <http://www.gnu.org/licenses/>.
+-- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 --
 
@@ -30,6 +30,6 @@
 -- Type resources
 --
 
-insert into llx_c_type_resource (code,label,active) values ('RES_ROOMS', 'Rooms',  1);
-insert into llx_c_type_resource (code,label,active) values ('RES_CARS',  'Cars',  1);
+insert into llx_c_type_resource (code, label, active) values ('RES_ROOMS', 'Rooms',  1);
+insert into llx_c_type_resource (code, label, active) values ('RES_CARS',  'Cars',  1);
 

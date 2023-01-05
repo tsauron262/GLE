@@ -1,19 +1,9 @@
 # Dolibarr language file - Source file is en_US - assets
-Assets =Middelen
-AccountancyCodeAsset =Boekhoudcode (activum)
-AccountancyCodeDepreciationAsset =Boekhoudcode (afschrijvingsrekening)
-AccountancyCodeDepreciationExpense =Boekhoudcode (afschrijvingskostenrekening)
-NewAssetType=Nieuw activumtype
 AssetType=Activa type
 AssetsLines=Middelen
-ModuleAssetsName =Middelen
-ModuleAssetsDesc =Activabeschrijving
-AssetsSetup =Activa instellen
-AssetsSetupPage =Activa-instellingenpagina
+DeleteAnAssetType=Verwijder een bestandstype
+ConfirmDeleteAssetType=Weet u zeker dat u dit bestandstype wilt verwijderen?
 AssetsType=Activa type
 AssetsTypeId=Activa type id
 AssetsTypeLabel=Label van het activatype
 AssetsTypes=Activa types
-MenuAssets =Middelen
-MenuTypeAssets =Type activa
-MenuListAssets =Lijst

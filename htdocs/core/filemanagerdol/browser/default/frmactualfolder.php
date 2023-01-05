@@ -3,7 +3,7 @@
  * Copyright (C) 2003-2010 Frederico Caldeira Knabben
  *
  * Source modified from part of fckeditor (http://www.fckeditor.net)
- * retreived as GPL v2 or later
+ * retrieved as GPL v2 or later
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 define('NOTOKENRENEWAL', 1); // Disables token renewal
 
 require '../../../../main.inc.php';
+
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <!--
@@ -34,10 +35,10 @@ require '../../../../main.inc.php';
  * choice:
  *
  *  - GNU General Public License Version 2 or later (the "GPL")
- *    http://www.gnu.org/licenses/gpl.html
+ *    https://www.gnu.org/licenses/gpl.html
  *
  *  - GNU Lesser General Public License Version 2.1 or later (the "LGPL")
- *    http://www.gnu.org/licenses/lgpl.html
+ *    https://www.gnu.org/licenses/lgpl.html
  *
  *  - Mozilla Public License Version 1.1 or later (the "MPL")
  *    http://www.mozilla.org/MPL/MPL-1.1.html
@@ -50,6 +51,24 @@ require '../../../../main.inc.php';
 	<head>
 		<title>Folder path</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<?php
+print '<!-- Includes CSS for Dolibarr theme -->'."\n";
+// Output style sheets (optioncss='print' or ''). Note: $conf->css looks like '/theme/eldy/style.css.php'
+$themepath = dol_buildpath($conf->css, 1);
+$themesubdir = '';
+if (!empty($conf->modules_parts['theme'])) {	// This slow down
+	foreach ($conf->modules_parts['theme'] as $reldir) {
+		if (file_exists(dol_buildpath($reldir.$conf->css, 0))) {
+			$themepath = dol_buildpath($reldir.$conf->css, 1);
+			$themesubdir = $reldir;
+			break;
+		}
+	}
+}
+
+//print 'themepath='.$themepath.' themeparam='.$themeparam;exit;
+print '<link rel="stylesheet" type="text/css" href="'.$themepath.'">'."\n";
+?>
 		<link href="browser.css" type="text/css" rel="stylesheet">
 		<script type="text/javascript">
 // Automatically detect the correct document.domain (#1919).

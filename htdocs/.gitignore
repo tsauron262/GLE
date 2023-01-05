@@ -18,9 +18,9 @@
 /ecommerce/
 /webmail*
 /conf/conf.php
-/subtotal/
-/TODO_romain.txt
-/.gitignore
-/htdocs/theme/eldy/style.css.php
-/*/views/js/*_tms_*.js
-/*/views/css/*_tms_*.css
+/subtotal*
+/abricot*
+/nomenclature*
+/of/
+/workstation/
+/oblyon*

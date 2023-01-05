@@ -13,8 +13,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program. If not, see <http://www.gnu.org/licenses/>.
-// or see http://www.gnu.org/
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+// or see https://www.gnu.org/
 //
 
 //
@@ -26,7 +26,8 @@
 $(document).ready(function () {
 
     var timezone = jstz.determine();
-
+	console.log("Timezone detected for user: "+timezone.name());
+	
     // Detect and save TZ and DST
 	var rightNow = new Date();
 	var jan1 = new Date(rightNow.getFullYear(), 0, 1, 0, 0, 0, 0);

@@ -12,7 +12,7 @@
 -- GNU General Public License for more details.
 --
 -- You should have received a copy of the GNU General Public License
--- along with this program. If not, see <http://www.gnu.org/licenses/>.
+-- along with this program. If not, see <https://www.gnu.org/licenses/>.
 --
 -- ===================================================================
 
@@ -21,3 +21,5 @@ ALTER TABLE llx_cronjob ADD INDEX idx_cronjob_datelastrun (datelastrun);
 ALTER TABLE llx_cronjob ADD INDEX idx_cronjob_datenextrun (datenextrun);
 ALTER TABLE llx_cronjob ADD INDEX idx_cronjob_datestart (datestart);
 ALTER TABLE llx_cronjob ADD INDEX idx_cronjob_dateend (dateend);
+
+ALTER TABLE llx_cronjob ADD UNIQUE INDEX uk_cronjob (label, entity);

@@ -239,14 +239,14 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                         
                         // On n'a pas trouvé de commandes fournisseur avec ce produit les commandes fournisseur avec équipement
                         foreach($all_fourn_lines as $cf_line) {
-//                            $this->errors[] = 'AAAA' . $cf_line;
-                            if((int) $cf_line->getData('id_product') == (int) $fact_line->getData('id_product')) {
-                                $cf = $cf_line->getParentInstance();
-                                $cfs_prod[$cf->id] = $cf;
-                                continue;
+                            if(0 < (int) $cf_line->getData('id_product')){
+                                if((int) $cf_line->getData('id_product') == (int) $fact_line->getData('id_product')) {
+                                    $cf = $cf_line->getParentInstance();
+                                    $cfs_prod[$cf->id] = $cf;
+                                    $this->errors[] = $cf_line->getData('id_product') . ' == ' . $fact_line->getData('id_product');
+                                    continue;
+                                }
                             }
-                            
-                            $this->errors[] = $cf_line->getData('id_product') . ' != ' . $fact_line->getData('id_product');
                         }
                 } else {
                     $this->errors[] = 'ID du produit inconnu.';

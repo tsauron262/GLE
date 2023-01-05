@@ -4137,7 +4137,7 @@ class Bimp_Product extends BimpObject
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] += $ln->total_ht;
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] += $ln->total_ttc;
 
-            if ($with_factures) {
+            if ($with_factures && $ln->qty != 0) {
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['factures'][$ln->fk_facture][$ln->id_line] = array(
                     'position' => $ln->rang,
                     'qty'      => $ln->qty,

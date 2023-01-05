@@ -3465,6 +3465,10 @@ class BContract_contrat extends BimpDolObject
 
             $data = $this->action_line_echeancier();
             //echo "<pre>" . print_r($data, 1);
+            if (!$instance || !$instance->isLoaded()){
+                $this->createEcheancier();
+                $instance = BimpCache::findBimpObjectInstance('bimpcontract', 'BContract_echeancier', ['id_contrat' => $this->id]);
+            }
             if ($instance && $instance->isLoaded()) {
                 $html .= $instance->displayEcheancier($data, $display);
             }

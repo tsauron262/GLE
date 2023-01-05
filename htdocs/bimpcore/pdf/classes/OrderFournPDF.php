@@ -1,14 +1,15 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once __DIR__ . '/BimpDocumentPDF.php';
+require_once __DIR__ . '/BimpCommDocumentPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 
-class OrderFournPDF extends BimpDocumentPDF
+class OrderFournPDF extends BimpCommDocumentPDF
 {
 
     public static $type = 'order_supplier';
     public $commande = null;
+    public $signature_bloc = false;
 
     public function __construct($db)
     {
@@ -31,6 +32,19 @@ class OrderFournPDF extends BimpDocumentPDF
         $this->hideReduc = true;
     }
 
+    public function getLineDesc($line, \Product $product = null, $hide_product_label = false)
+    {
+
+        $BProd = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $product->id);
+        $ref = $line->ref_supplier;
+        if (!$ref) {
+            $ref = $BProd->findRefFournForPaHtPlusProche($line->subprice, $this->object->thirdparty->id);
+        }
+        if ($ref != '')
+            $sup = $ref . " ";
+        return $sup . parent::getLineDesc($line, $product, $hide_product_label);
+    }
+
     protected function initData()
     {
         if (isset($this->object) && is_a($this->object, 'CommandeFournisseur')) {
@@ -49,6 +63,10 @@ class OrderFournPDF extends BimpDocumentPDF
                 $this->pdf->SetCreator("Dolibarr " . DOL_VERSION);
                 $this->pdf->SetAuthor($this->langs->convToOutputCharset($user->getFullName($this->langs)));
                 $this->pdf->SetKeyWords($this->langs->convToOutputCharset($this->object->ref) . " " . $this->langs->transnoentities("Invoice") . " " . $this->langs->convToOutputCharset($this->object->thirdparty->name));
+
+                if (isset($this->object->statut) && !(int) $this->object->statut) {
+                    $this->watermark = 'BROUILLON';
+                }
             }
         } else {
             $this->errors[] = 'Aucune commande fournisseur spécifiée';
@@ -83,7 +101,7 @@ class OrderFournPDF extends BimpDocumentPDF
                     $entrepot = $this->bimpCommObject->getChildObject('entrepot');
                     if (BimpObject::objectLoaded($entrepot)) {
                         if ($entrepot->address) {
-                            $html .= $entrepot->address . '<br/>';
+                            $html .= 'BIMP<br/>'.$entrepot->address . '<br/>';
                             if ($entrepot->zip) {
                                 $html .= $entrepot->zip . ' ';
                             } else {

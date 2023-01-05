@@ -1,20 +1,3 @@
-
-ALTER TABLE `llx_bf_demande` CHANGE `date_create` `date_create` datetime DEFAULT NULL;
-
-ALTER TABLE `llx_bf_demande` CHANGE `date_update` `date_update` datetime DEFAULT NULL;
-
-ALTER TABLE `llx_bf_refinanceur` CHANGE `date_create` `date_create` datetime DEFAULT NULL;
-ALTER TABLE `llx_bf_refinanceur` CHANGE `date_update` `date_update` datetime DEFAULT NULL;
-
-ALTER TABLE `llx_bf_rent` CHANGE `date_create` `date_create` datetime DEFAULT NULL;
-ALTER TABLE `llx_bf_rent` CHANGE `date_update` `date_update` datetime DEFAULT NULL;
-
-ALTER TABLE `llx_bf_frais_divers` CHANGE `date_create` `date_create` datetime DEFAULT NULL;
-ALTER TABLE `llx_bf_frais_divers` CHANGE `date_update` `date_update` datetime DEFAULT NULL;
-
-ALTER TABLE `llx_bf_frais_fournisseur` CHANGE `date_create` `date_create` datetime DEFAULT NULL;
-ALTER TABLE `llx_bf_frais_fournisseur` CHANGE `date_update` `date_update` datetime DEFAULT NULL;
-
 ALTER TABLE `llx_bh_equipment` CHANGE `date_create` `date_create` datetime DEFAULT NULL;
 ALTER TABLE `llx_bh_equipment` CHANGE `date_update` `date_update` datetime DEFAULT NULL;
 

@@ -159,7 +159,7 @@ class Paiement extends CommonObject
 	 */
 	public function fetch($id, $ref = '', $fk_bank = '')
 	{
-		$sql = 'SELECT p.rowid, p.ref, p.datep as dp, p.amount, p.statut, p.ext_payment_id, p.ext_payment_site, p.fk_bank,';
+		$sql = 'SELECT p.rowid, p.fk_paiement, p.ref, p.datep as dp, p.amount, p.statut, p.fk_bank,';
 		$sql.= ' c.code as type_code, c.libelle as type_libelle,';
 		$sql.= ' p.num_paiement as num_payment, p.note,';
 		$sql.= ' b.fk_account';
@@ -190,6 +190,7 @@ class Paiement extends CommonObject
 				$this->amount         = $obj->amount;
 				$this->note           = $obj->note;
 				$this->type_libelle   = $obj->type_libelle;
+				$this->fk_paiement   = $obj->fk_paiement;
 				$this->type_code      = $obj->type_code;
 				$this->statut         = $obj->statut;
                 $this->ext_payment_id = $obj->ext_payment_id;
@@ -275,7 +276,13 @@ class Paiement extends CommonObject
 
 		$this->db->begin();
 
-		$this->ref = $this->getNextNumRef(is_object($thirdparty)?$thirdparty:'');
+                
+                /* mod drsi*/
+                if($this->ref == ''){
+                    BimpTools::lockNum("numPay");
+                    $this->ref = $this->getNextNumRef('');
+                }
+                /*fmoddrsi*/
 
 		if ($way == 'dolibarr')
 		{

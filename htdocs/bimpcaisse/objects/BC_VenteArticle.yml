@@ -46,15 +46,21 @@ fields:
         type: percent
         
     remise_crt: 
-        label: Remise CRT
+        label: Remise arrière
         type: bool
         default_value: 0
         
     remise_crt_percent:
-        label: Pourcentage remise CRT
+        label: Pourcentage Remise arrière
         type: percent
         default_value: 0
     
+lists_cols: 
+    total_ttc: 
+        label: Total TTC
+        value: 
+            callback: displayTotal
+            
 lists: 
     default: 
         title: Articles
@@ -65,20 +71,11 @@ lists:
         n: 10
         cols:
             id_product: 
-                field: id_product
-                display: nom_url
             id_equipment: 
-                field: id_equipment
-                display: nom_url
             qty: 
-                field: qty
-            crt: 
+            remise_crt: 
                 field: remise_crt
-            crt_percent: 
-                field: remise_crt_percent
-            pu: 
-                field: unit_price_tax_in
-            total:
-                label: Total TTC
-                value: 
-                    callback: displayTotal
+            remise_crt_percent: 
+            unit_price_tax_in: 
+            total_ttc:
+                

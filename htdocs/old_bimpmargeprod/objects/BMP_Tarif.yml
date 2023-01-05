@@ -21,17 +21,17 @@ fields:
         label: Montant TTC
         type: money
         
-    previsionnel: 
-        label: Ventes prévisionnelles
-        type: int
-        
-    droits_loc: 
-        label: Droits de location (Le Fil)
-        type: money
-        
-    droits_loc_coprods:
-        label: Droits de location (Partenaires)
-        type: money
+#    previsionnel: 
+#        label: Ventes prévisionnelles
+#        type: int
+#        
+#    droits_loc: 
+#        label: Droits de location (Le Fil)
+#        type: money
+#        
+#    droits_loc_coprods:
+#        label: Droits de location (Partenaires)
+#        type: money
     
 list:
     title: Tarifs

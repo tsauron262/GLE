@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_list_config` ADD `cols_options` TEXT NOT NULL DEFAULT ''; 

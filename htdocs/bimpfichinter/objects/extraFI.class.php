@@ -11,10 +11,10 @@ abstract class extraFI extends BimpDolObject{
      * Gestion des droits
      */
 
-    protected function canView() {
+    public function canView() {
         return $this->getDolRights("lire");
     }
-    protected function canEdit() {
+    public function canEdit() {
         $parent = $this->getParentInstance();
         if(is_object($parent) && $parent->isLoaded())
             return $parent->can("edit");
@@ -142,7 +142,7 @@ abstract class extraFI extends BimpDolObject{
         return $this->getInitData($field);
     }
 
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '')
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
         // Retourner la clé de filtre SQl sous la forme alias_table.nom_champ_db 
         // Implémenter la jointure dans $joins en utilisant l'alias comme clé du tableau (pour éviter que la même jointure soit ajouté plusieurs fois à $joins). 

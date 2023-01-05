@@ -1,7 +1,9 @@
 extends: 
     module: bimpcommercial
     object_name: FournObjectLine
-    
+
+abstract: 0
+
 table: bimp_commande_fourn_line
 
 parent_module: bimpcommercial
@@ -44,10 +46,14 @@ fields:
     receptions: 
         label: Réception
         type: json
+        viewable: 0
+        filterable: 0
         
     qty_modif: 
         label: Qté modifiée
         type: qty
+        viewable: 0
+        filterable: 0
         min: none
         max: none
         decimals: 3
@@ -62,7 +68,7 @@ fields:
         label: Qté Totale
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQty
@@ -73,7 +79,7 @@ fields:
         label: Qté reçue
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQty
@@ -84,7 +90,7 @@ fields:
         label: Qté à réceptionner
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQty
@@ -95,7 +101,7 @@ fields:
         label: Qté facturé
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQty
@@ -106,12 +112,23 @@ fields:
         label: Qté à facturé
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQty
                 params: 
                     - to_billed
+        
+    qty_received_not_billed: 
+        label: Qté recu à facturé
+        type: qty
+        default_value: 0
+        displays: 
+            badge: 
+                type: callback
+                method: displayQty
+                params: 
+                    - received_not_billed
         
 forms: 
     qty_modified: 
@@ -135,33 +152,21 @@ views:
 filters_panels: 
     default: 
         filters: 
-            parent: 
-                label: Commande Fournisseur
-            fk_user_resp:
-                field: fk_user_resp
-                child: parent
-            date: 
-                field: date_commande
-                child: parent
-            entrepot: 
-                field: entrepot
-                child: parent
-            commande_status:
-                field: fk_statut
-                child: parent
-            invoice_status:
-                field: invoice_status
-                child: parent
+            parent:ref: 
+                label: Ref. Commande
+            parent:date_commande: 
+                label: Date commande
+            parent:fk_statut:
+                label: Statut commande
+            parent:invoice_status:
+                label: Statut facturation commande
+            parent:ref_supplier:
             qty_total: 
-                field: qty_total
             qty_to_receive:
-                field: qty_to_receive
             qty_received:
-                field: qty_received
             qty_billed:
-                field: qty_billed
             qty_to_billed:
-                field: qty_to_billed
+            qty_received_not_billed:
                 
 lists_cols: 
     qties: 
@@ -173,36 +178,27 @@ lists_cols:
         value: 
             callback: displayCommandeClient
     qty_total: 
-        field: qty_total
         display: badge
-        min_width: 60px
-        max_width: 60px
+        min_width: 60
     qty_received: 
-        field: qty_received
         display: badge
-        min_width: 60px
-        max_width: 60px
+        min_width: 60p
     qty_to_receive: 
-        label: Qté à récep. 
-        field: qty_to_receive
+        label: Qté à récep.
         display: badge
-        min_width: 60px
-        max_width: 60px
+        min_width: 60
     qty_billed: 
-        label: Qté fact. 
-        field: qty_billed
+        label: Qté fact.
         display: badge
-        min_width: 60px
-        max_width: 60px
+        min_width: 60
     qty_to_billed: 
         label: Qté à fact. 
-        field: qty_to_billed
         display: badge
-        min_width: 60px
-        max_width: 60px
-    date: 
-        field: date_commande
-        child: parent
+        min_width: 60
+    qty_received_not_billed:
+        label: Qté recu à fact.
+        display: badge
+        min_width: 60
     desc_light_url: 
         extends: desc
         info: Version courte avec lien commande client d'origine
@@ -210,16 +206,11 @@ lists_cols:
             callback: 
                 params:
                     - desc_light_url
-    fk_user_resp:
-        field: fk_user_resp
-        child: parent
                         
 lists: 
     default:
         extends: default
         objects_change_reload: Bimp_CommandeFourn,ObjectLineRemise,BR_Reservation,BL_CommandeFournReception,BL_FactureFourn
-        cols: 
-            commande_client:
                 
     logistique:
         extends: default
@@ -228,7 +219,7 @@ lists:
         icon: fas_truck-loading
         configurable: 1
         item_checkbox: 1
-        after_list_content: unset
+        after_list_callback: unset
         header_buttons: unset
         bulk_actions: 
             callback: getLogistiqueBulkActions
@@ -239,8 +230,13 @@ lists:
             desc_light:
             commande_client:
             total_ttc:
-            qties: 
-            
+            qties:     
+                
+    global: 
+        cols: 
+            qty_total:
+            qty_to_receive:
+            qty_to_billed:   
                 
     general:
         list_filters: 
@@ -256,35 +252,19 @@ lists:
         extra_btn: 
             callback: getGeneralListExtraButtons
         cols: 
-            entrepot: 
-                label: Entrepot
-                field: entrepot
-                child: parent
+            parent:entrepot: 
                 display: ref
-                min_width: 60px
-                max_width: 60px
-            commande_status: 
+            parent:fk_statut: 
                 label: St Cmd
-                field: fk_statut
-                child: parent
                 display: icon
-                min_width: 45px
-                max_width: 45px
-            invoice_status:
+                min_width: 45
+            parent:invoice_status:
                 label: Fac. Cmd
-                field: invoice_status
-                child: parent
                 display: icon
-                min_width: 45px
-                max_width: 45px
-            commande_fourn: 
-                label: Commande
-                field: id_obj
-                display: nom_url
+                min_width: 45
+            id_obj:
             desc_light:
-            dl_pu_ht: 
-                field: subprice
-                child: dol_line
+            dol_line:subprice:
             qty_total:
             qty_to_receive:
             qty_to_billed:

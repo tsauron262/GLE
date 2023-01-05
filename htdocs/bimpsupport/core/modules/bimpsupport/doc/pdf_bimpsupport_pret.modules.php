@@ -27,7 +27,11 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 if (!defined('EURO'))
     define('EURO', chr(128));
 
-ini_set('max_execution_time', 600);
+if (defined('BIMP_LIB')) {
+    BimpCore::setMaxExecutionTime(600);
+} else {
+    ini_set('max_execution_time', 600);
+}
 
 class pdf_bimpsupport_pret extends ModeleBimpSupport
 {
@@ -371,12 +375,12 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
             $user_create = $pret->getChildObject('user_create');
 
-            if (!is_null($user_create) && (int) $user_create->id) {
+            if (BimpObject::objectLoaded($user_create)) {
                 $pdf->SetXY('57', '55.7');
-                $pdf->MultiCell(100, 6, $user_create->getFullName($langs), 0, 'L');
+                $pdf->MultiCell(100, 6, $user_create->getName(), 0, 'L');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
                 $pdf->SetXY('168', '64');
-                $pdf->MultiCell(100, 6, $user_create->getFullName($langs), 0, 'L');
+                $pdf->MultiCell(100, 6, $user_create->getName(), 0, 'L');
             }
 
 //            if ((string) $sav->getData('prestataire_number')) {
@@ -391,6 +395,9 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                 $pdf->SetXY(25, 188.8);
                 $pdf->MultiCell(45, 4, $client->dol_object->getFullName($outputlangs), 0, 'C');
             }
+            
+            $pdf->SetXY(4, 259);
+            $pdf->MultiCell(200, 30, $pret->getData('note'), 0, 'L');
 
             if (method_exists($pdf, 'AliasNbPages'))
                 $pdf->AliasNbPages();

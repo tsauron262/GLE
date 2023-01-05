@@ -315,7 +315,7 @@ print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
 
 
 // Latest modified customer invoices
-if (! empty($conf->facture->enabled) && $user->rights->facture->lire)
+if (0 && ! empty($conf->facture->enabled) && $user->rights->facture->lire)
 {
 	$langs->load("boxes");
 	$facstatic=new Facture($db);

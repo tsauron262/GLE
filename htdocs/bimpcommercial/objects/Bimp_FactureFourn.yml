@@ -1,7 +1,8 @@
-
 extends: 
     module: bimpcommercial
     object_name: BimpComm
+
+abstract: 0
 
 dol_object: 
     instance: 
@@ -14,9 +15,17 @@ table: facture_fourn
 controller: factureFourn
 icon: fas_file-invoice-dollar
 list_page_url: 
-    controller: facturesFourn
+    controller: achats
 
 force_extrafields_update: 1
+
+associations: 
+    achatsFourn_Equipments:
+        object: equipment
+        label: Equipements concerné
+        input:
+            type: search_object
+            object: equipment
 
 labels: 
     name: facture fournisseur
@@ -131,7 +140,7 @@ fields:
         type: id_object
         object: account
         values: 
-            array: comptes
+            array: bankAccounts
     exported:
         label: Etat comptable
         type: int
@@ -144,6 +153,13 @@ fields:
     total: unset
     tx_marge: unset
     tx_marque: unset
+    expertise: unset
+    fk_mode_reglement: 
+        values: 
+            callback:
+                method: getModeReglements
+                params:
+                    - 1
     
 forms:
     default: 
@@ -169,7 +185,7 @@ forms:
               value: 
                   request_field: origin_id
               hidden: 1
-              
+            - field: replaced_ref
             - field: libelle
             - field: entrepot
             - field: ef_type
@@ -185,10 +201,35 @@ forms:
                   callback: isLoaded
             - field: note_public
             - field: note_private
+            - association: achatsFourn_Equipments
+              edit: 1
+              show:
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
+                  
+    duplicate_factfourn:
+        title: Création d'une facture fournisseur standard
+        msgs: 
+            callback: getCreateFromOriginCheckMsg
+        rows: 
+            - field: fk_soc
+            - field: ref_supplier
+            - field: datef
+            - custom: 1
+              label: Avoir
+              input_name: inverse_qty
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
             
 fields_tables: 
     infos: 
         rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - field: entrepot
               display: nom_url
             - field: ef_type
@@ -203,7 +244,15 @@ fields_tables:
                   field_value: fk_facture_source
             - field: zone_vente
               edit: 1
-            - field: exported
+            - label: Etat comptable
+              value:
+                  callback: renderExportedField
+            - association: achatsFourn_Equipments
+              edit: 1
+              show:
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
                   
     client: 
         title: Fournisseur
@@ -248,78 +297,41 @@ views:
 filters_panels: 
     default: 
         filters: 
-            total_ttc: 
-                field: total_ttc
-            ref_supplier: 
-                field: ref_supplier
-            type: 
-                field: type
-            paye: 
-                field: paye
-                
-            availability: unset
+            total: unset
             ref_client: unset
-            
-lists_cols: 
-    ref_supplier: 
-        field: ref_supplier
-    type: 
-        field: type
-    paye: 
-        field: paye
-    amount: 
-        field: amount
-    datec: 
-        field: datec
-    datef: 
-        field: datef
-    date_lim: 
-        field: date_lim_reglement
-    user_author: 
-        field: fk_user_author
-        display: nom_url
-    user_valid: 
-        field: fk_user_valid
-        display: nom_url
-    total_tva: 
-        field: total_tva
-    total_ttc: 
-        field: total_ttc
-    libelle: 
-        field: libelle
-    paye: 
-        field: paye
-    facture_src: 
-        field: fk_facture_source
-        display: nom_url
-    account: 
-        field: fk_account
-        display: nom_url
-        
+            client:status: unset
+            datec: unset
+            datef:
+            ref_supplier: 
+            paye: 
+                
+lists_cols:         
     total_pa: unset
-    ref_client: unset
-    availability: unset
-    input_reason: unset
+    client_facturation: unset
+    tx_marge: unset
+    tx_marque: unset
     
 lists: 
     default: 
         title: Factures fournisseurs
         icon: fas_file-invoice-dollar
         bulk_actions:
-            - label: supprimer les factures fournisseurs sélectionnées
+            delete: 
+                label: supprimer les factures fournisseurs sélectionnées
         sort_field: datec
         sort_way: desc
         cols: 
             ref: 
-            statut: 
+            fk_statut: 
             datec:
-            user_author:
-            soc: 
+            fk_user_author:
+            fk_soc: 
             total_ttc:
+                
     fourn:
         extends: default
         cols:
-            soc: unset
+            fk_soc: unset
     
 cards: 
     default: 
@@ -328,22 +340,9 @@ cards:
         status: fk_statut
         view_btn: 1
         fields: 
+            - field: replaced_ref
             - field: total_ttc
-            - label: Payé
-              value: 
-                  callback: displayPaid
-#            - label: Fichier PDF
-#              value: 
-#                  callback: displayPDFButton
-                  
-#    light: 
-#        title: 
-#            field_value: ref
-#        view_btn: 0
-#        fields: 
-#            - field: total_ttc
-#            - field: fk_statut
-#            - label: Payé
+#            - label: Payé (TROP LOURD...) 
 #              value: 
 #                  callback: displayPaid
 

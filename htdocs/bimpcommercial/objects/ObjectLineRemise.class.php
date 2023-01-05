@@ -6,7 +6,7 @@ class ObjectLineRemise extends BimpObject
     const OL_REMISE_PERCENT = 1;
     const OL_REMISE_AMOUNT = 2;
 
-    // Getters - Ovveride BimpObject
+    // Getters - Override BimpObject
 
     public function canCreate()
     {
@@ -19,7 +19,6 @@ class ObjectLineRemise extends BimpObject
         if (BimpObject::objectLoaded($parent)) {
             return (int) $parent->isRemiseEditable();
         }
-
         return 0;
     }
 
@@ -65,6 +64,13 @@ class ObjectLineRemise extends BimpObject
                     'filter' => BimpTools::getValue('extra_data/parent_object_type', '')
                 )
             );
+        } elseif ((string) $this->getData('object_type')) {
+            return array(
+                array(
+                    'name'   => 'object_type',
+                    'filter' => $this->getData('object_type')
+                )
+            );
         }
 
         // Erreur: (parent_object_type est obligatoire) on bloque la liste par précaution
@@ -100,7 +106,7 @@ class ObjectLineRemise extends BimpObject
             return $this->displayData('per_unit');
         }
 
-        return '';
+        return '<span class="warning">Non Applicable</span>';
     }
 
     // Rendus HTML: 
@@ -144,7 +150,7 @@ class ObjectLineRemise extends BimpObject
         return parent::create($warnings, $force_create);
     }
 
-    public function update(&$warnings, $force_update = false)
+    public function update(&$warnings = array(), $force_update = false)
     {
         $parent = $this->getParentInstance();
         if (!BimpObject::objectLoaded($parent)) {

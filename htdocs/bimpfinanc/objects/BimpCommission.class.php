@@ -37,6 +37,15 @@ class BimpCommission extends BimpObject
     public function canView()
     {
         global $user;
+        if (!$this->isLoaded() || $user->id == $this->getData('id_user'))
+            return 1;
+
+        return $this->canViewAll();
+    }
+
+    public function canViewAll()
+    {
+        global $user;
         return ($user->admin || $user->rights->bimpcommercial->commission->read);
     }
 
@@ -49,7 +58,7 @@ class BimpCommission extends BimpObject
                 return (int) $this->can('create');
 
             case 'reopen':
-                return (int) $user->admin;//$this->can('delete');
+                return (int) $user->admin; //$this->can('delete');
         }
 
         return (int) parent::canSetAction($action);
@@ -241,7 +250,7 @@ class BimpCommission extends BimpObject
                         $sql .= ' AND e.has_users_commissions = 1';
 
                         if ($paid_only) {
-                            $sql .= ' AND f.paye = 1';
+                            $sql .= ' AND (f.paye = 1 OR f.remain_to_pay < 0)';
                         }
                     }
                     break;
@@ -260,7 +269,7 @@ class BimpCommission extends BimpObject
                         $sql .= ' AND e.rowid = ' . $id_entrepot;
 
                         if ($paid_only) {
-                            $sql .= ' AND f.paye = 1';
+                            $sql .= ' AND (f.paye = 1 OR f.remain_to_pay < 0)';
                         }
                         if ($secteur) {
                             $sql .= ' AND fef.type = \'' . $secteur . '\'';
@@ -322,7 +331,7 @@ class BimpCommission extends BimpObject
         return array();
     }
 
-    public function getAvailableRevalorisationsList($secteur = '')
+    public function getAvailableRevalorisationsList($paid_only = false, $secteur = '')
     {
         if ($this->isLoaded()) {
             $type = (int) $this->getData('type');
@@ -346,6 +355,9 @@ class BimpCommission extends BimpObject
                         $sql .= ' AND ec.fk_socpeople = ' . $id_user;
                         $sql .= ' AND e.has_users_commissions = 1';
                         $sql .= ' AND f.fk_statut IN (1,2)';
+                        if ($paid_only) {
+                            $sql .= ' AND f.paye = 1';
+                        }
                     }
                     break;
 
@@ -355,9 +367,15 @@ class BimpCommission extends BimpObject
                     if ($id_entrepot) {
                         $sql = 'SELECT r.id FROM ' . MAIN_DB_PREFIX . 'bimp_revalorisation r ';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fef ON fef.fk_object = r.id_facture';
+                        if ($paid_only) {
+                            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture f ON f.rowid = r.id_facture';
+                        }
                         $sql .= ' WHERE r.id_entrepot_commission = 0';
                         $sql .= ' AND r.status = 1';
                         $sql .= ' AND fef.entrepot = ' . $id_entrepot;
+                        if ($paid_only) {
+                            $sql .= ' AND f.paye = 1';
+                        }
 
                         if ($secteur) {
                             $sql .= ' AND fef.type = \'' . $secteur . '\'';
@@ -388,12 +406,20 @@ class BimpCommission extends BimpObject
     public function getAmountsCacheData($recalculate = false)
     {
         $data = array(
-            'total_ca'     => 0,
-            'total_pa'     => 0,
-            'total_reval'  => 0,
-            'total_marges' => 0,
-            'tx_marge'     => 0,
-            'tx_marque'    => 0
+            'total_ca'          => 0,
+            'total_ca_serv'     => 0,
+            'total_ca_prod'     => 0,
+            'total_pa'          => 0,
+            'total_pa_serv'     => 0,
+            'total_pa_prod'     => 0,
+            'total_reval'       => 0,
+            'total_reval_serv'  => 0,
+            'total_reval_prod'  => 0,
+            'total_marges'      => 0,
+            'total_marges_serv' => 0,
+            'total_marges_prod' => 0,
+            'tx_marge'          => 0,
+            'tx_marque'         => 0
         );
 
         if (!$this->isLoaded()) {
@@ -412,14 +438,31 @@ class BimpCommission extends BimpObject
                 if (BimpObject::objectLoaded($facture)) {
                     $lines = $facture->getLines('not_text');
 
+                    $tot1 = 0;
                     foreach ($lines as $line) {
                         $data['total_ca'] += (float) $line->getTotalHTWithRemises();
+                        if ($line->isService())
+                            $data['total_ca_serv'] += (float) $line->getTotalHTWithRemises();
+                        else
+                            $data['total_ca_prod'] += (float) $line->getTotalHTWithRemises();
                         $data['total_pa'] += ((float) $line->pa_ht * (float) $line->qty);
+                        if ($line->isService())
+                            $data['total_pa_serv'] += ((float) $line->pa_ht * (float) $line->qty);
+                        else
+                            $data['total_pa_prod'] += ((float) $line->pa_ht * (float) $line->qty);
+                        $tot1 += (((float) $line->getTotalHTWithRemises() - ((float) $line->pa_ht * (float) $line->qty)));
                     }
+
+                    if (((float) $tot1 - (float) $facture->getData('marge')) > 0.01 ||
+                            ((float) $tot1 - (float) $facture->getData('marge')) < -0.01)
+                        echo "<br/>Probléme de Marge : " . $tot1 . " " . $facture->getNomUrl() . " " . (float) $facture->getData('marge') . "<br/>";
+//                    }
                 }
             }
 
             $data['total_marges'] = $data['total_ca'] - $data['total_pa'];
+            $data['total_marges_serv'] = $data['total_ca_serv'] - $data['total_pa_serv'];
+            $data['total_marges_prod'] = $data['total_ca_prod'] - $data['total_pa_prod'];
 
             // Revalorisations: 
             $revals_list = $this->getRevalorisationsList(true);
@@ -429,10 +472,18 @@ class BimpCommission extends BimpObject
 
                 if (BimpObject::objectLoaded($reval)) {
                     $data['total_reval'] += (float) $reval->getTotal();
+
+                    $lineReval = $reval->getChildObject('facture_line');
+                    if ($lineReval->isService())
+                        $data['total_reval_serv'] += (float) $reval->getTotal();
+                    else
+                        $data['total_reval_prod'] += (float) $reval->getTotal();
                 }
             }
 
             $data['total_marges'] += $data['total_reval'];
+            $data['total_marges_serv'] += $data['total_reval_serv'];
+            $data['total_marges_prod'] += $data['total_reval_prod'];
 
             if ($data['total_pa']) {
                 $data['tx_marge'] = ($data['total_marges'] / $data['total_pa']) * 100;
@@ -451,36 +502,67 @@ class BimpCommission extends BimpObject
 
     public function displayTaux($type = "marque")
     {
-        $totM = $this->getData('total_marges');
-
-        if ($totM == 0)
+        if ($this->can('view')) {
+            $totM = (float) $this->getData('total_marges');
             $val = 0;
-        elseif ($type == "marque") {
-            $val = ($totM / $this->getData('total_ca')) * 100;
-        } else {
-            $val = ($totM / $this->getData('total_pa')) * 100;
+
+            if ($totM) {
+                if ($type == "marque") {
+                    if ((float) $this->getData('total_ca')) {
+                        $val = ($totM / $this->getData('total_ca')) * 100;
+                    }
+                } elseif ($totM && (float) $this->getData('total_pa')) {
+                    $val = ($totM / $this->getData('total_pa')) * 100;
+                }
+            }
+
+            return BimpTools::displayFloatValue((float) $val, 4, ',', true) . ' %';
         }
-        return BimpTools::displayFloatValue((float) $val, 4, ',', true) . ' %';
+        return '';
+    }
+
+    public function getListFilters()
+    {
+        global $user;
+        $return = array();
+        if (!$this->canViewAll()) {
+            $return[] = array(
+                'name'   => 'id_user',
+                'filter' => $user->id
+            );
+        }
+
+        return $return;
     }
 
     public function displayAmount($amount_type)
     {
-        $data = $this->getAmountsCacheData();
+        if ($this->can('view')) {
+            $data = $this->getAmountsCacheData();
 
-        if (isset($data[$amount_type])) {
-            switch ($amount_type) {
-                case 'total_ca':
-                case 'total_pa':
-                case 'total_marges':
-                case 'total_reval':
-                    return BimpTools::displayMoneyValue((float) $data[$amount_type], 'EUR', true);
+            if (isset($data[$amount_type])) {
+                switch ($amount_type) {
+                    case 'total_ca':
+                    case 'total_ca_prod':
+                    case 'total_ca_serv':
+                    case 'total_pa':
+                    case 'total_pa_prod':
+                    case 'total_pa_serv':
+                    case 'total_marges':
+                    case 'total_marges_prod':
+                    case 'total_marges_serv':
+                    case 'total_reval':
+                    case 'total_reval_prod':
+                    case 'total_reval_serv':
+                        return BimpTools::displayMoneyValue((float) $data[$amount_type], 'EUR', true);
 
-                case 'tx_marge':
-                case 'tx_marque':
-                    return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true) . ' %';
+                    case 'tx_marge':
+                    case 'tx_marque':
+                        return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true) . ' %';
 
-                default:
-                    return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true);
+                    default:
+                        return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true);
+                }
             }
         }
 
@@ -741,7 +823,7 @@ class BimpCommission extends BimpObject
             }
 
             // Ajout des reval dispos: 
-            $revals = $this->getAvailableRevalorisationsList($this->getData('secteur'));
+            $revals = $this->getAvailableRevalorisationsList((int) BimpTools::getPostFieldValue('paid_only', 0), $this->getData('secteur'));
             foreach ($revals as $id_reval) {
                 $reval = BimpCache::getBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', (int) $id_reval);
                 if (BimpObject::objectLoaded($reval)) {

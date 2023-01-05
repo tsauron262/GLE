@@ -75,7 +75,7 @@ class Synopsisdemandeinterv extends CommonObject {
      *    \param      DB            Handler acces base de donnees
      *    \param      socid            Id societe
      */
-    function Synopsisdemandeinterv($DB, $socid = "") {
+    function __construct($DB, $socid = "") {
         global $langs;
 
         $this->db = $DB;
@@ -1365,7 +1365,7 @@ class synopsisdemandeintervLigne {
      *      \brief     Constructeur d'objets ligne d'intervention
      *      \param     DB      handler d'acces base de donnee
      */
-    function synopsisdemandeintervLigne($DB) {
+    function __construct($DB) {
         $this->db = $DB;
     }
 

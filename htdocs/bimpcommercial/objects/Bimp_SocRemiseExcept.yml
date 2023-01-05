@@ -1,0 +1,234 @@
+table: societe_remise_except
+common_fields: 0
+primary: rowid
+
+icon: fas_money-check-alt
+
+parent_module: bimpcore
+parent_object: Bimp_Societe
+parent_id_property: fk_soc
+
+labels: 
+    name: Avoir client
+    name_plur: Avoirs client
+    is_female: 1
+    
+list_page_url:
+    module: bimpcore
+    controller: clients
+    url_params: 
+        tab: remises
+    
+nom_url: 
+    syntaxe: <description> #<rowid>
+    card: default
+    modal_view: client_default
+        
+objects: 
+    facture_source: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: fk_facture_source
+                
+    facture: 
+        instance: 
+            id_object: 
+                field_value: fk_facture
+                
+    facture_line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommmercial
+                name: FactureDolLine
+            id_object: 
+                field_value: fk_facture_line
+                
+    user: 
+        instance: 
+            id_object: 
+                field_value: fk_user
+    
+fields: 
+    fk_soc: 
+        label: Societe
+        type: id_parent
+        
+    fk_facture_source: 
+        label: Facture source
+        type: id_object
+        object: facture_source
+    
+    fk_facture_line: 
+        label: Consommé dans fac. (ligne)
+        type: id_object
+        object: facture_line
+        displays: 
+            default: 
+                type: value
+        
+    fk_facture: 
+        label: Consommé dans fac. (paiement)
+        type: id_object
+        object: facture
+        
+    fk_user:
+        label: Créé par
+        type: id_object
+        object: user
+        
+    discount_type: 
+        label: Type
+        type: int
+        values: 
+            array: types
+        default_value: 0
+            
+    description: 
+        label: Libellé
+        displays: 
+            default: 
+                type: callback
+                method: displayDesciption
+        
+    datec: 
+        label: Créé le
+        type: datetime
+        
+    amount_ht: 
+        label: Montant HT
+        type: money
+        default_value: 0
+        
+    amount_tva: 
+        label: Montant TVA
+        type: money
+        default_value: 0
+        
+    amount_ttc: 
+        label: Montant TTC
+        type: money
+        default_value: 0
+        
+    tva_tx: 
+        label: Taux TVA
+        type: percent
+        default_value: 0
+                  
+fields_tables: 
+    client_default: 
+        panel_header: 0
+        rows: 
+            - field: description
+            - field: fk_soc
+              label: Client
+            - field: fk_facture_source
+            - field: amount_ht
+            - field: tva_tx
+            - field: amount_tva
+            - field: amount_ttc
+            - label: Consommé dans fac.
+              value: 
+                  callback: displayFacDest
+                  
+views: 
+    client_default: 
+        modal_format: small
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: client_default
+            
+filters: 
+    facture_dest: 
+        label: Consommé dans fac. (ligne ou paiement)
+        type: value
+        input: 
+            type: search_object
+            object: facture
+            
+filters_panels: 
+    clients: 
+        filters: 
+            fk_soc: 
+            fk_facture_source: 
+            facture_dest: 
+            datec: 
+            amount_ttc:             
+        
+lists_cols: 
+    facture_dest: 
+        label: Consommé dans fac. (ligne ou paiement)
+        value: 
+            callback: displayFacDest
+        
+lists: 
+    clients: 
+        title: Avoirs clients
+        filters_panel: clients
+        checkboxes: 0
+        configurable: 1
+        sort_field: datec
+        sort_way: desc
+        n: 25
+        delete_btn: 0
+        modal_view: client_default
+        list_filters: 
+            type: 
+                name: discount_type
+                filter: 0
+        cols: 
+            fk_soc: 
+                label: Client
+            description: 
+            datec: 
+            fk_user:
+            amount_ttc: 
+            fk_facture_source: 
+            facture_dest: 
+                
+    client: 
+        extends: clients
+        title: Avoir client
+        cols: 
+            fk_soc: unset
+                
+cards: 
+    default: 
+        fields: 
+            - field: description
+            - field: fk_soc
+            - field: fk_facture_source
+            - field: amount_ttc
+            
+searches:
+    client: 
+        fields_search: 
+            - a.rowid
+            - fs.facnumber
+            - s.nom
+            - s.name_alias
+            - s.code_client
+        joins:
+            fs: 
+                table: facture
+                on: a.fk_facture_source = fs.rowid
+                alias: fs
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
+        fields_return:
+            - a.rowid
+            - a.description as desc
+            - REPLACE(ROUND(a.amount_ttc,2),'.',',') as price
+            - fs.facnumber as ref
+            - s.code_client as ref_cli
+            - s.nom as nom_cli
+        label_syntaxe: '<desc> #<rowid> - <ref> - <price> € TTC - Client: <ref_cli> <nom_cli>'
+            

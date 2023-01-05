@@ -1,0 +1,1 @@
+ALTER TABLE `llx_contrat` ADD `logs` TEXT NOT NULL DEFAULT '';

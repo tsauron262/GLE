@@ -194,6 +194,7 @@ class CMailFile {
                     $this->addr_from = 'robot@mydomain.com';
                 @ini_set('sendmail_from', getValidAddress($this->addr_from, 2));
             }
+            die($this->addr_from);
 
             // Forcage parametres
             if (!empty($conf->global->MAIN_MAIL_SMTP_SERVER))
@@ -499,7 +500,7 @@ function getValidAddress($adresses, $format) {
                 $newemail = $email;
             }
             if ($format == 1) {
-                $neweamil = '<' . $email . '>';
+                $newemail = '<' . $email . '>';
             }
             if ($format == 0) {
                 if ($conf->global->MAIN_MAIL_NO_FULL_EMAIL)

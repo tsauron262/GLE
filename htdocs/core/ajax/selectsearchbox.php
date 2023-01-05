@@ -171,6 +171,8 @@ $arrayresult = dol_sort_array($arrayresult, 'position' );
 
 
 /*mod drsi pour le trie*/
+//print_r($arrayresult);
+
 if(strlen($search_boxvalue) > 10 && strlen($search_boxvalue) < 16 && stripos($search_boxvalue, " ") === false && isset($arrayresult["searchintosn"]))
 	$arrayresult=array_merge(array($arrayresult["searchintosn"]), $arrayresult);
 if((strlen($search_boxvalue) > 10) && strlen($search_boxvalue) < 14 && is_numeric($search_boxvalue) && isset($arrayresult["searchintoproduct"]))
@@ -189,6 +191,12 @@ if(stripos($search_boxvalue, "co") === 0 && isset($arrayresult["searchintoorder"
 	$arrayresult=array_merge(array($arrayresult["searchintoorder"]), $arrayresult);
 if(stripos($search_boxvalue, "cf") === 0 && isset($arrayresult["searchintosupplierorder"]))
 	$arrayresult=array_merge(array($arrayresult["searchintosupplierorder"]), $arrayresult);
+if(stripos($search_boxvalue, "ct") === 0 && isset($arrayresult["searchintocontract"]))
+        $arrayresult=array_merge(array($arrayresult['searchintocontract']), $arrayresult);
+if(stripos($search_boxvalue, "fi") === 0 && isset($arrayresult["searchintointervention"]))
+        $arrayresult=array_merge(array($arrayresult['searchintointervention']), $arrayresult);
+if(stripos($search_boxvalue, "sac") === 0 && isset($arrayresult["searchintosac"]))
+        $arrayresult=array_merge(array($arrayresult['searchintosac']), $arrayresult);
 /*fmod drsi*/
 
 

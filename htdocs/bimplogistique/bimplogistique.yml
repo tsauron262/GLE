@@ -1,0 +1,21 @@
+params: 
+    bl_use_signatures: 
+        label: Activer les signatures pour les bons de livraison
+        type: bool
+        cat: signatures
+        def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  bl_signature_allow_dist: 
+                      label: Autoriser les signatures électroniques à distance pour les BL
+                      type: bool
+                      def: 0
+                  bl_signature_allow_docusign: 
+                      label: Autoriser les signatures DocuSign pour les BL
+                      type: bool
+                      def: 0
+                  bl_signature_allow_refuse: 
+                      label: Autoriser le refus des signatures pour les BL
+                      type: bool
+                      def: 0

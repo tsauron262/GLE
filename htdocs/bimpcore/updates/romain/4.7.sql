@@ -1,0 +1,1 @@
+ALTER TABLE `llx_societe` ADD `status_atradius` INT NOT NULL DEFAULT '0'

@@ -33,16 +33,20 @@ class DolEditor
     // If using fckeditor
     public $editor;
 
-    // If not using fckeditor
-    public $content;
-    public $htmlname;
-    public $toolbarname;
-    public $toolbarstartexpanded;
-    public $rows;
-    public $cols;
-    public $height;
-    public $width;
-    public $readonly;
+	// If not using fckeditor
+	var $content;
+	var $htmlname;
+	var $toolbarname;
+	var $toolbarstartexpanded;
+	var $rows;
+	var $cols;
+	var $height;
+	var $width;
+	var $readonly;
+        
+        /*moddrsi*/
+        var $extra_class = '';
+        /*fmoddrsi*/
 
 
     /**
@@ -173,8 +177,8 @@ class DolEditor
             $found=1;
             //$out.= '<textarea id="'.$this->htmlname.'" name="'.$this->htmlname.'" '.($this->readonly?' disabled':'').' rows="'.$this->rows.'"'.(preg_match('/%/',$this->cols)?' style="margin-top: 5px; width: '.$this->cols.'"':' cols="'.$this->cols.'"').' class="flat">';
             // TODO We do not put the disabled tag because on a read form, it change style with grey.
-            $out.= '<textarea id="'.$this->htmlname.'" name="'.$this->htmlname.'" rows="'.$this->rows.'"'.(preg_match('/%/', $this->cols)?' style="margin-top: 5px; width: '.$this->cols.'"':' cols="'.$this->cols.'"').' class="flat">';
-            $out.= htmlspecialchars($this->content);
+            $out.= '<textarea id="'.$this->htmlname.'" name="'.$this->htmlname.'" rows="'.$this->rows.'"'.(preg_match('/%/',$this->cols)?' style="margin-top: 5px; width: '.$this->cols.'"':' cols="'.$this->cols.'"').' class="flat'./*moddrsi*/($this->extra_class ? ' ' . $this->extra_class . (strpos($this->extra_class, 'allow_hashtags') !== false ? ' html_editor_hashtags' : ''): '')/*fmoddrsi*/.'">';
+            $out.= $this->content;
             $out.= '</textarea>';
 
             if ($this->tool == 'ckeditor' && ! empty($conf->use_javascript_ajax) && ! empty($conf->fckeditor->enabled))

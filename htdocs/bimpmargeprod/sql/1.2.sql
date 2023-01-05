@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bmp_event_billets` ADD `previsionnel` INT(11) NOT NULL DEFAULT '0'; 

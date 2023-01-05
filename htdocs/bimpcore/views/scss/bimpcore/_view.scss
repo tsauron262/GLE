@@ -37,8 +37,8 @@
 
     & > thead > tr.col_headers > th {
         padding: 5px 8px;
-        background-color: $primary;
-        color: #fff;
+        background-color: $bimp_headers_bk_color;
+        color: $bimp_headers_color;
         font-size: 13px;
         font-weight: bold;
     }
@@ -58,8 +58,8 @@
             & > th {
                 width: 20%;
                 min-width: 90px;
-                background-color: $primary;
-                color: #fff;
+                background-color: $bimp_headers_bk_color;
+                color: $bimp_headers_color;
                 font-weight: bold;
                 vertical-align: top;
                 text-align: right;
@@ -139,18 +139,39 @@
         margin-top: 0;
     }
 
+    .object_header_logo {
+        width: 80px;
+        float: left;
+        margin-right: 20px;
+
+        img {
+            width: 100%;
+            height: auto;
+        }
+    }
+    
+    .object_header_title {
+        display: inline-block;
+    }
+
     .object_header_infos {
         margin: 3px 0 0 0;
         font-style: italic;
         color: #787878;
         font-size: 11px;
+        
+        .hashtag {
+            display: inline-block;
+            margin-right: 12px;
+            font-size: 12px;
+        }
     }
 
     .header_status {
         display: inline-block;
         font-size: 15px;
         margin: 5px 10px;
-        
+
         span {
             display: inline-block;
             margin-left: 15px;
@@ -160,6 +181,7 @@
     .header_tools {
         display: inline-block;
         margin-left: 15px;
+        vertical-align: top;
     }
 
     .headerIconButton {
@@ -167,6 +189,7 @@
         color: #C8C8C8;
         cursor: pointer;
         font-size: 18px;
+        margin-left: 5px;
 
         &:hover {
             color: $primary;
@@ -253,17 +276,18 @@
         margin-left: 15px;
     }
 }
+
 .object_card_table {    
     width: 100%;
     margin-top: 5px;
 
-    tbody tr {
-        th, td {
+    & > tbody > tr {
+       & > th, & > td {
             padding: 0 5px;
             border-bottom: 1px solid #fff;
         }
 
-        th {
+        & > th {
             width: 20%;
             min-width: 120px;
             font-weight: bold;
@@ -273,7 +297,7 @@
             color: $gray-darker;
         }
 
-        td {
+        & > td {
             color: $gray-darker;
             background-color: #fff;
         }
@@ -320,5 +344,11 @@
         margin: 5px 0;
         border: 1px solid $gray;
         padding: 10px;
+    }
+}
+
+table.objectFieldHistoryTable {
+    & > tbody > tr > td {
+        padding: 2px 3px;
     }
 }

@@ -4,8 +4,29 @@ parent_module: bimplogistique
 parent_object: Inventory
 parent_id_property: fk_inventory
 
-object:
+labels: 
+    name: ligne d'inventaire
+    name_plur: lignes d'inventaire
+    is_female: 1
     
+objects: 
+    inventory: 
+        relation: hasOne
+        instance: 
+            bimp_object: Inventory
+            id_object: 
+                field_value: fk_inventory
+                
+    product: 
+        instance: 
+            id_object: 
+                field_value: fk_product
+                
+    product: 
+        instance: 
+            id_object: 
+                field_value: fk_equipment
+                
 fields: 
     qty:
         label: Quantité
@@ -35,17 +56,10 @@ lists:
        n: 50
        cols:
            fk_product: 
-               field: fk_product
-               display: nom_url
            fk_equipment: 
-               field: fk_equipment
-               display: nom_url
            qty: 
-               field: qty
            date_create:
-               field: date_create
            user_create:
-               field: user_create
                
     equipment:
         extends: default
@@ -53,5 +67,3 @@ lists:
             qty: unset
             fk_warehouse:
                 field: fk_warehouse
-                child: parent
-                display: nom_url

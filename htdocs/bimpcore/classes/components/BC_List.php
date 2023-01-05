@@ -5,7 +5,7 @@ class BC_List extends BC_Panel
 
     public $component_name = 'Liste';
     public static $type = 'list';
-    protected $item_params = array();
+    public static $item_params = array();
     public $id_parent;
     public $parent = null;
     protected $filters = array();
@@ -14,12 +14,17 @@ class BC_List extends BC_Panel
     protected $items = null;
     public $nbTotalPages = 1;
     protected $nbItems = null;
-    public $userConfig = null;
     public $default_modal_format = 'large';
+    public $initial_filters = array();
+    public $initial_joins = array();
     public $final_filters = array();
     public $final_joins = array();
+    public $final_order_by = '';
+    public $final_order_way = '';
+    public $final_extra_order_by = '';
+    public $final_extra_order_way = '';
 
-    public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
+    public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null, $id_config = null)
     {
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -28,7 +33,6 @@ class BC_List extends BC_Panel
         $prev_bc = $current_bc;
         $current_bc = $this;
 
-        $this->params_def['configurable'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['pagination'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['n'] = array('data_type' => 'int', 'default' => 10, 'request' => true);
         $this->params_def['p'] = array('data_type' => 'int', 'default' => 1, 'request' => true);
@@ -51,7 +55,7 @@ class BC_List extends BC_Panel
         $this->params_def['filters_panel'] = array();
         $this->params_def['filters_panel_values'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
         $this->params_def['filters_panel_open'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['id_default_filters'] = array('data_type' => 'id', 'default' => 0);
+        $this->params_def['display_active_filters'] = array('data_type' => 'bool', 'default' => 1);
 
         $full_reload = BimpTools::getValue('full_reload', 0);
 
@@ -79,96 +83,119 @@ class BC_List extends BC_Panel
 
         $this->id_parent = $id_parent;
 
-        parent::__construct($object, $list_name, $path, false, $level, $title, $icon);
+        parent::__construct($object, $list_name, $path, false, $level, $title, $icon, $id_config);
 
         if ($this->isOk()) {
             if (is_null($this->params['title']) || !$this->params['title']) {
                 $this->params['title'] = 'Liste des ' . $this->object->getLabel('name_plur');
             }
             if (is_null($this->params['icon']) || !$this->params['icon']) {
-                $this->params['icon'] = 'fas_list';
+                if (is_null($object->params['icon']) || !$object->params['icon']) {
+                    $this->params['icon'] = 'fas_list';
+                } else {
+                    $this->params['icon'] = $object->params['icon'];
+                }
             }
 
             if (!$this->object->can("create")) {
                 $this->params['add_btn'] = 0;
                 $this->params['add_form_name'] = null;
             }
-
-            if ($this->params['configurable']) {
-                global $user;
-
-                $id_config = BimpTools::getValue('param_id_config', 0);
-                if ((int) $id_config) {
-                    $this->userConfig = BimpCache::getBimpObjectInstance('bimpcore', 'ListConfig', (int) $id_config);
-                    if (BimpObject::objectLoaded($this->userConfig)) {
-                        $this->userConfig->setAsCurrent();
-                    }
-                }
-
-                if (!BimpObject::objectLoaded($this->userConfig)) {
-                    BimpObject::loadClass('bimpcore', 'ListConfig');
-                    $this->userConfig = ListConfig::getUserCurrentConfig($user->id, $this->object, static::$type, $this->name);
-                }
-
-                if (BimpObject::objectLoaded($this->userConfig)) {
-                    if (!BimpTools::isSubmit('param_sort_field') || $full_reload) {
-                        $sort_field = $this->userConfig->getData('sort_field');
-                        if (!is_null($sort_field)) {
-                            $this->params['sort_field'] = $sort_field;
-                        }
-                    }
-                    if (!BimpTools::isSubmit('param_sort_way') || $full_reload) {
-                        $sort_way = $this->userConfig->getData('sort_way');
-                        if (!is_null($sort_way)) {
-                            $this->params['sort_way'] = $sort_way;
-                        }
-                    }
-                    if (!BimpTools::isSubmit('param_sort_option') || $full_reload) {
-                        $sort_option = $this->userConfig->getData('sort_option');
-                        if (!is_null($sort_option)) {
-                            $this->params['sort_option'] = $sort_option;
-                        }
-                    }
-                    if (!BimpTools::isSubmit('param_n') || $full_reload) {
-                        $n = $this->userConfig->getData('nb_items');
-                        if (!is_null($n)) {
-                            $this->params['n'] = $n;
-                        }
-                    }
-
-                    $filters_open = $this->userConfig->getData('filters_open');
-                    if (!is_null($filters_open)) {
-                        $this->params['filters_panel_open'] = (int) $filters_open;
-                    }
-
-                    if (array_key_exists('search_open', $this->params)) {
-                        $search_open = $this->userConfig->getData('search_open');
-                        if (!is_null($search_open)) {
-                            $this->params['search_open'] = (int) $search_open;
-                        }
-                    }
-
-                    $id_default_filters = (int) $this->userConfig->getData('id_default_filters');
-                    if ($id_default_filters) {
-                        $this->params['id_default_filters'] = $id_default_filters;
-                    }
-
-                    $this->params['total_row'] = (int) $this->userConfig->getData('total_row');
-                }
-            }
         }
 
         $this->setConfPath();
 
-        $this->filters = $this->object->getSearchFilters($this->params['joins']);
+        if (!empty($this->params['list_filters'])) {
+            foreach ($this->params['list_filters'] as $filter) {
+                $this->initial_filters = BimpTools::mergeSqlFilter($this->initial_filters, $filter['name'], $filter['filter']);
+            }
+        }
+
+        if (!is_null($this->id_parent) && $this->id_parent != 0) {
+            if (is_a($this->object, 'BimpObject')) {
+                $parent_id_property = $this->object->getParentIdProperty();
+                if ($parent_id_property) {
+                    $this->initial_filters[$parent_id_property] = $this->id_parent;
+                }
+            }
+        }
+
+        $this->initial_joins = $this->params['joins'];
 
         $current_bc = $prev_bc;
     }
 
+    // Gestion des configurations utilisateur: 
+
+    public function fetchUserConfig($id_config)
+    {
+        parent::fetchUserConfig($id_config);
+
+        if (BimpObject::objectLoaded($this->userConfig)) {
+            if ($this->userConfig->isListSortable()) {
+                if (!BimpTools::isSubmit('param_sort_field') || $this->newUserConfigSet) {
+                    $sort_field = $this->userConfig->getData('sort_field');
+                    if (!is_null($sort_field)) {
+                        $this->params['sort_field'] = $sort_field;
+                    }
+                }
+                if (!BimpTools::isSubmit('param_sort_way') || $this->newUserConfigSet) {
+                    $sort_way = $this->userConfig->getData('sort_way');
+                    if (!is_null($sort_way)) {
+                        $this->params['sort_way'] = $sort_way;
+                    }
+                }
+                if (!BimpTools::isSubmit('param_sort_option') || $this->newUserConfigSet) {
+                    $sort_option = $this->userConfig->getData('sort_option');
+                    if (!is_null($sort_option)) {
+                        $this->params['sort_option'] = $sort_option;
+                    }
+                }
+            }
+
+            if ($this->userConfig->hasPagination()) {
+                if (!BimpTools::isSubmit('param_n') || $this->newUserConfigSet) {
+                    $n = $this->userConfig->getData('nb_items');
+                    if (!is_null($n)) {
+                        $this->params['n'] = $n;
+                    }
+                }
+            }
+
+            if ($this->userConfig->hasFiltersPanel()) {
+                $filters_open = $this->userConfig->getData('filters_open');
+                if (!is_null($filters_open)) {
+                    $this->params['filters_panel_open'] = (int) $filters_open;
+                }
+
+                $this->params['display_active_filters'] = (int) $this->userConfig->getData('active_filters');
+            }
+
+            if ($this->userConfig->isListSearchable()) {
+                if (array_key_exists('search_open', $this->params)) {
+                    $search_open = $this->userConfig->getData('search_open');
+                    if (!is_null($search_open)) {
+                        $this->params['search_open'] = (int) $search_open;
+                    }
+                }
+            }
+
+            if ($this->userConfig->hasTotalRow()) {
+                if (isset($this->params['enable_total_row']) && isset($this->params['total_row']) && (int) $this->params['enable_total_row']) {
+                    $this->params['total_row'] = (int) $this->userConfig->getData('total_row');
+                }
+            }
+        }
+    }
+
     // Gestion des filtres: 
 
-    protected function mergeFilter($name, $filter)
+    protected function mergeFilter($name, $filter, $no_alias = false)
     {
+        if (!$no_alias && !preg_match('/^.+\..+$/', $name) && stripos($name, ".") === false) {
+            $name = 'a.' . $name;
+        }
+
         if (isset($this->filters[$name])) {
             if (isset($this->filters[$name]['and'])) {
                 $this->filters[$name]['and'][] = $filter;
@@ -193,6 +220,8 @@ class BC_List extends BC_Panel
         if ($this->object->field_exists($field_name)) {
             $this->params['add_form_values']['fields'][$field_name] = $value;
         }
+
+        $this->initial_filters = BimpTools::mergeSqlFilter($this->initial_filters, $field_name, $value);
     }
 
     public function addJoin($table, $on, $alias)
@@ -203,12 +232,19 @@ class BC_List extends BC_Panel
                 'on'    => $on,
                 'alias' => $alias
             );
+
+            $this->initial_joins = $this->params['joins'];
         }
     }
 
     public function getFilters()
     {
         return $this->filters;
+    }
+
+    public function getSearchFilters(&$joins = array())
+    {
+        return array();
     }
 
     // Gestion des filtres associatifs:
@@ -227,11 +263,12 @@ class BC_List extends BC_Panel
                     'id_object'     => $id_object,
                     'association'   => $association
                 );
+                $this->params['add_form_values']['associations'][$association] = array($id_object);
             } else {
                 $this->addError('Filtre invalide pour l\'association "' . $association . '"');
             }
         } else {
-            $this->errors = array_merge($this->errors, $bimpAsso->errors);
+            $this->errors = BimpTools::merge_array($this->errors, $bimpAsso->errors);
         }
     }
 
@@ -245,8 +282,9 @@ class BC_List extends BC_Panel
                 'association'  => $association,
                 'id_associate' => (int) $id_associate
             );
+            $this->params['add_form_values']['associations'][$association] = array($id_associate);
         } else {
-            $this->errors = array_merge($this->errors, $bimpAsso->errors);
+            $this->errors = BimpTools::merge_array($this->errors, $bimpAsso->errors);
         }
     }
 
@@ -276,7 +314,12 @@ class BC_List extends BC_Panel
                     if (is_null($label)) {
                         $label = 'Associer ' . BimpObject::getInstanceLabel($associate, 'to') . ' ' . $id_associate;
                     }
-                    $this->bulk_actions[] = array(
+
+                    if (!is_array($this->params['extra_bulk_actions'])) {
+                        $this->params['extra_bulk_actions'] = array();
+                    }
+                    
+                    $this->params['extra_bulk_actions'][] = array(
                         'label'   => $label,
                         'onclick' => 'toggleSelectedItemsAssociation(\'' . $this->identifier . '\', \'add\', \'' . $association . '\', ' . $id_associate . ')',
                         'icon'    => 'link'
@@ -299,7 +342,12 @@ class BC_List extends BC_Panel
                     $this->params['add_form'] = null;
                     $this->params['title'] = BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' associés ';
                     $this->params['title'] .= BimpObject::getInstanceLabel($associate, 'to') . ' "' . BimpObject::getInstanceNom($associate) . '"';
-                    $this->bulk_actions[] = array(
+
+                    if (!is_array($this->params['extra_bulk_actions'])) {
+                        $this->params['extra_bulk_actions'] = array();
+                    }
+
+                    $this->params['extra_bulk_actions'][] = array(
                         'label'   => $label,
                         'onclick' => 'toggleSelectedItemsAssociation(\'' . $this->identifier . '\', \'delete\', \'' . $association . '\', ' . $id_associate . ')',
                         'icon'    => 'unlink'
@@ -372,62 +420,67 @@ class BC_List extends BC_Panel
         $prev_bc = $current_bc;
         $current_bc = $this;
 
-        $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel']);
+        $id_config = 0;
+        $use_default_filters = false;
 
-        if (BimpTools::isSubmit('filters_panel_values') && !BimpTools::getValue('full_reload', 0)) {
-            $values = array(
-                'fields'   => array(),
-                'children' => array()
-            );
+        // Si une nouvelle config de liste est démandée, on utilise en prio la config de filtres associée: 
+//        if ($this->newUserConfigSet && BimpObject::objectLoaded($this->userConfig) && (int) $this->userConfig::$has_filters) {
+//            $id_config = (int) $this->userConfig->getData('id_default_filters_config');
+//        }
 
-            foreach (BimpTools::getValue('filters_panel_values/fields', array()) as $field_name => $filter) {
-                foreach ($this->bc_filtersPanel->params['filters'] as $key => $params) {
-                    if (isset($params['field']) && $params['field'] === $field_name && !$params['child']) {
-                        if (isset($filter['open'])) {
-                            $this->bc_filtersPanel->params['filters'][$key]['open'] = (int) $filter['open'];
-                        }
-                        if (isset($filter['values'])) {
-                            $values['fields'][$field_name] = $filter['values'];
-                        }
-                        continue 2;
-                    }
-                }
+        if (!$this->newUserConfigSet && BimpTools::isSubmit('id_current_filters_panel_config')) {
+            $id_config = (int) BimpTools::getValue('id_current_filters_panel_config');
+        }
+
+        if (!$id_config && BimpObject::objectLoaded($this->userConfig) && (int) $this->userConfig::$has_filters) {
+            $id_config = (int) $this->userConfig->getData('id_default_filters_config');
+        }
+
+        $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel'], $id_config);
+
+        $id_default_filters = 0;
+        if (BimpObject::objectLoaded($this->userConfig) && $this->userConfig->field_exists('id_default_filters')) {
+            $id_default_filters = (int) $this->userConfig->getData('id_default_filters');
+
+            if ($id_default_filters && $this->newUserConfigSet) {
+                $use_default_filters = true;
             }
+        }
 
-            foreach (BimpTools::getValue('filters_panel_values/children', array()) as $child => $fields) {
-                if (!isset($values['children'][$child])) {
-                    $values['children'][$child] = array();
-                }
-                foreach ($fields as $field_name => $filter) {
-                    foreach ($this->bc_filtersPanel->params['filters'] as $key => $params) {
-                        if (isset($params['field']) && $params['field'] === $field_name && $params['child'] === $child) {
-                            if (isset($filter['open'])) {
-                                $this->bc_filtersPanel->params['filters'][$key]['open'] = (int) $filter['open'];
-                            }
-                            if (isset($filter['values'])) {
-                                $values['children'][$child][$field_name] = $filter['values'];
-                            }
-                            continue 2;
-                        }
-                    }
-                }
-            }
-
-            $this->bc_filtersPanel->setFiltersValues($values);
-        } elseif ((int) $this->params['id_default_filters']) {
-            $this->bc_filtersPanel->loadSavedValues((int) $this->params['id_default_filters']);
+        if (BimpTools::isSubmit('filters_panel_values') && !$use_default_filters) {
+            $this->bc_filtersPanel->setFilters(BimpTools::getValue('filters_panel_values', array()));
+        } elseif ($id_default_filters) {
+            $this->bc_filtersPanel->loadSavedValues($id_default_filters);
         } elseif (!empty($this->params['filters_panel_values'])) {
-            $this->bc_filtersPanel->setFiltersValues($this->params['filters_panel_values']);
+            $this->bc_filtersPanel->setFilters($this->params['filters_panel_values']);
         }
 
         $current_bc = $prev_bc;
     }
 
+    public function getPointsForGraph($idGraph, $numero_data = 1)
+    {
+        $return = array();
+        foreach ($this->items as $item) {
+            $obj = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, $item['id']);
+            $return[] = $obj->getGraphDataPoint($idGraph, $numero_data);
+        }
+        return $return;
+    }
+
+    public function initForGraph()
+    {
+        $this->params['n'] = 1000;
+        $this->fetchItems();
+    }
+
     protected function fetchItems()
     {
-        if (method_exists($this->object, "beforeListFetchItems"))
-            $this->object->beforeListFetchItems($this);
+        $this->filters = $this->getSearchFilters($this->params['joins']);
 
+        if (method_exists($this->object, "beforeListFetchItems")) {
+            $this->object->beforeListFetchItems($this);
+        }
 
         $this->fetchFiltersPanelValues();
 
@@ -467,6 +520,8 @@ class BC_List extends BC_Panel
             foreach ($panelFilters as $name => $filter) {
                 $this->mergeFilter($name, $filter);
             }
+            if (method_exists($this->object, 'traiteFilters'))
+                $this->object->traiteFilters($this->filters);
         }
 
         // Filtres selon objets associés:
@@ -501,7 +556,7 @@ class BC_List extends BC_Panel
                         $sql .= BimpTools::getSqlWhere($bimp_asso->getSqlFilters($id_object, $id_associate, $alias));
                         $this->mergeFilter($this->object->getPrimary(), array($asso_filter['type'] => $sql));
                     } else {
-                        $this->errors[] = array_merge($this->errors, $bimp_asso->errors);
+                        $this->errors[] = BimpTools::merge_array($this->errors, $bimp_asso->errors);
                         $this->filters[$this->object->getPrimary()] = 0;
                     }
                 }
@@ -517,64 +572,19 @@ class BC_List extends BC_Panel
         }
 
         // Trie: 
-        $order_by = $primary;
-        $order_by_next_field = null;
+        $order_by = '';
         $extra_order_by = null;
         $extra_order_way = null;
 
-        if (!is_null($this->params['sort_field'])) {
-            if ($this->params['sort_field'] === 'position') {
-                $order_by = 'position';
-            } else {
-                $order_by = '';
-                if (!is_null($this->params['sort_option']) && $this->params['sort_option']) {
-                    $sort_option_path = 'fields/' . $this->params['sort_field'] . '/sort_options/' . $this->params['sort_option'];
-                    if ($this->object->config->isDefined($sort_option_path)) {
-                        $join_field = $this->object->getConf($sort_option_path . '/join_field', '');
-                        if ($join_field && $this->object->config->isDefined('fields/' . $this->params['sort_field'] . '/object')) {
-                            $object = $this->object->config->getObject('fields/' . $this->params['sort_field'] . '/object');
-                            if (!is_null($object)) {
-                                $table = BimpTools::getObjectTable($this->object, $this->params['sort_field'], $object);
-                                $field_on = BimpTools::getObjectPrimary($this->object, $this->params['sort_field'], $object);
-                                if (!is_null($table) && !is_null($field_on)) {
-                                    $order_by = $table . '.' . $join_field;
-                                    $joins[$table] = array(
-                                        'alias' => $table,
-                                        'table' => $table,
-                                        'on'    => $table . '.' . $field_on . ' = a.' . $this->params['sort_field']
-                                    );
-                                }
-                            }
-                        }
-                    } elseif ($this->object->getConf('fields/' . $this->params['sort_field'] . '/type', 'string') === 'id_object') {
-                        $sort_obj = $this->object->config->getObject('fields/' . $this->params['sort_field'] . '/object');
-                        if (!is_null($sort_obj) && is_a($sort_obj, 'BimpObject')) {
-                            if (in_array($this->params['sort_option'], $sort_obj->params['fields'])) {
-                                if ((int) $sort_obj->getConf('fields/' . $this->params['sort_option'] . '/sortable', 1, false, 'bool')) {
-                                    $table = $sort_obj->getTable();
-                                    $field_on = $sort_obj->getPrimary();
-                                    if (!is_null($table) && !is_null($field_on)) {
-                                        $order_by = $table . '.' . $this->params['sort_option'];
-                                        $joins[$table] = array(
-                                            'alias' => $table,
-                                            'table' => $table,
-                                            'on'    => $table . '.' . $field_on . ' = a.' . $this->params['sort_field']
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        if (!is_null($this->params['sort_field']) && (string) $this->params['sort_field']) {
+            $order_by = $this->getOrderBySqlKey($this->params['sort_field'], $this->getParam('sort_option', ''), $filters, $joins);
 
-                if (!$order_by) {
-                    $order_by = $this->params['sort_field'];
-                }
-                $extra_order_by = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_field');
-                $extra_order_way = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_way');
-            }
+//            $extra_order_by = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_field');
+//            $extra_order_way = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_way');
+        }
 
-            $this->setConfPath();
+        if (!$order_by) {
+            $order_by = 'a.' . $primary;
         }
 
         $this->nbItems = $this->object->getListCount($filters, $joins);
@@ -591,6 +601,12 @@ class BC_List extends BC_Panel
 
         $this->final_filters = $filters;
         $this->final_joins = $joins;
+        $this->final_order_by = $order_by;
+        $this->final_order_way = $this->params['sort_way'];
+        $this->final_extra_order_by = $extra_order_by;
+        $this->final_order_way = $extra_order_way;
+
+        BimpCore::addLogs_extra_data(array('filtre' => $filters, 'joins' => $joins));
 
         $this->items = $this->object->getList($filters, $this->params['n'], $this->params['p'], $order_by, $this->params['sort_way'], 'array', array(
             'DISTINCT (a.' . $primary . ')'
@@ -617,7 +633,86 @@ class BC_List extends BC_Panel
         }
     }
 
-// rendus HTML:
+    public function getItems()
+    {
+        if (is_null($this->items)) {
+            $this->fetchItems();
+        }
+
+        return $this->items;
+    }
+
+    public function getCsvColOptionsInputs()
+    {
+        return array();
+    }
+
+    public function getOrderBySqlKey($sort_field = '', $sort_option = '', &$filters = array(), &$joins = array())
+    {
+        // Attention: fonction surchargée par BC_ListTable
+        if ($sort_field == 'position') {
+            return 'a.position';
+        }
+
+        if ($this->object->getConf('fields/' . $sort_field . '/type', 'string') === 'id_object') {
+            $sort_obj = $this->object->config->getObject('fields/' . $sort_field . '/object');
+            if (!is_null($sort_obj) && is_a($sort_obj, 'BimpObject')) {
+                if ($sort_option && $sort_option === $sort_obj->getPrimary()) {
+                    $sort_option = '';
+                }
+                if ($sort_obj->field_exists($sort_option)) {
+                    if ((int) $sort_obj->getConf('fields/' . $this->params['sort_option'] . '/sortable', 1, false, 'bool')) {
+                        $sqlKey = $sort_obj->getFieldSqlKey($sort_option, 'a', null, $filters, $joins);
+
+                        if ($sqlKey) {
+                            return $sqlKey;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($this->object->field_exists($sort_field)) {
+            $sqlKey = $this->object->getFieldSqlKey($sort_field, 'a', null, $filters, $joins);
+
+            if ($sqlKey) {
+                return $sqlKey;
+            }
+        }
+
+        return 'a.' . $this->object->getPrimary();
+    }
+
+    // rendus HTML:
+
+    public function renderRowButton($btn_params, $popover_position = 'top')
+    {
+        $html = '';
+        $tag = isset($btn_params['tag']) ? $btn_params['tag'] : 'span';
+        $html .= '<' . $tag . ' class="rowButton' . (isset($btn_params['class']) ? ' ' . $btn_params['class'] : '');
+
+        if (isset($btn_params['label'])) {
+            $html .= ' bs-popover"';
+            $html .= BimpRender::renderPopoverData($btn_params['label'], $popover_position, 'false', '#' . $this->identifier);
+        } else {
+            $html .= '"';
+        }
+        if (isset($btn_params['onclick'])) {
+            $html .= ' onclick="' . str_replace('<list_id>', $this->identifier, $btn_params['onclick']) . '"';
+        }
+
+        if (isset($btn_params['attrs'])) {
+            $html .= BimpRender::displayTagAttrs($btn_params['attrs']);
+        }
+
+        $html .= '>';
+        if (isset($btn_params['icon'])) {
+            $html .= '<i class="' . BimpRender::renderIconClass($btn_params['icon']) . '"></i>';
+        }
+        $html .= '</' . $tag . '>';
+
+        return $html;
+    }
 
     public function renderListParamsInputs()
     {
@@ -628,7 +723,7 @@ class BC_List extends BC_Panel
 //        if (count($this->params['association_filters'])) {
 //            $html .= '<input type="hidden" name="param_associations_filters" value="' . htmlentities(json_encode($this->params['association_filters'])) . '"/>';
 //        }
-        if (isset($this->params['add_form_values'])) {
+        if (isset($this->params['add_form_values']) && !empty($this->params['add_form_values'])) {
             $name = isset($this->params['add_form_name']) ? $this->params['add_form_name'] : '';
             $name .= '_add_form_values';
             $html .= '<input type="hidden" name="' . $name . '" value="' . htmlentities(json_encode($this->params['add_form_values'])) . '">';
@@ -718,6 +813,28 @@ class BC_List extends BC_Panel
         return $this->bc_filtersPanel->renderHtml();
     }
 
+    public function renderActiveFilters($content_only = false)
+    {
+        $html = '';
+        $filters_html = '';
+
+        if ((int) $this->params['display_active_filters']) {
+            if (is_object($this->bc_filtersPanel)) {
+                $filters_html = $this->bc_filtersPanel->renderActiveFilters();
+            }
+        }
+
+        if (!$content_only) {
+            $html .= '<div class="list_active_filters"' . ($filters_html ? '' : ' style="display: none"') . '>';
+            $html .= $filters_html;
+            $html .= '</div>';
+        } else {
+            return $filters_html;
+        }
+
+        return $html;
+    }
+
     public function getHeaderButtons()
     {
         global $current_bc;
@@ -733,6 +850,18 @@ class BC_List extends BC_Panel
             foreach ($this->params['add_form_values']['fields'] as $field_name => $value) {
                 $this->object->set($field_name, $value);
             }
+        }
+        
+        if($this->object->getConf('in_cache_serveur') && BimpCache::$cache_server){
+                $buttons[] = array(
+                    'classes'     => array('btn', 'btn-default'),
+                    'label'       => 'Vider le cache',
+                    'icon_before' => 'eraser',
+                    'attr'        => array(
+                        'type'    => 'button',
+                        'onclick' => $this->object->getJsActionOnclick('eraseCache')
+                    )
+                );
         }
 
         if ($this->object->isCreatable(false)) {

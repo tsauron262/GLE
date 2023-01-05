@@ -1,0 +1,1 @@
+ALTER TABLE `llx_Bimp_ApporteurFilter` ADD `libelle` VARCHAR(100) DEFAULT '';

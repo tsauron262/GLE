@@ -1,0 +1,81 @@
+
+bootstrap: 1
+title: Achats / Factures fourn.
+
+objects: 
+    facture_fourn: 
+        instance:
+            module: bimpcommercial
+            bimp_object: Bimp_FactureFourn
+            
+    achat: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Achat
+                
+    prod_achats: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_ProductAchats
+                
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Factures fournisseurs
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderFacturesTab
+                            - default
+        prods: 
+            label: Produits en factures
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderProdsTabs
+                            - prods
+        paiements: 
+            label: Paiements
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: 
+                        method: renderTabs
+                        params: 
+                            - renderPaiementsTab
+                            - paiements
+                            
+        stats_achats: 
+            label: Stats achats
+            sections: 
+                - type: stats_list
+                  stats_list: 
+                      panel: 1
+                      object: achat
+                      name: default
+                      
+        achats:
+              label: Détails achats
+              sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: achat
+                        
+        prod_achats: 
+            label: Achats par produits
+            sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: prod_achats
+                        name: achats

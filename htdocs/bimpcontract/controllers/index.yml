@@ -5,12 +5,21 @@ objects:
     contrat:
         instance:
             bimp_object: BContract_contrat
+    line:
+        instance:
+            bimp_object: BContract_contratLine
     assistance_contrat:
         instance:
             bimp_object: BContract_Productservices
     echeancier:
         instance: 
             bimp_object: BContract_echeancier
+    avenant:
+        instance:
+            bimp_object: BContract_avenant
+    facturation:
+        instance:
+            bimp_object: FactureContrat
     
 sections:
     - type: tabs
@@ -25,6 +34,14 @@ sections:
                         params: 
                             - renderContractsTab
                             - default
+        line:
+            label: Ligne Contrats
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: line
+                      name: global
         recap_contrat_echeancier:
             label: Récapitulatif des échéanciers contrat
             sections:
@@ -35,6 +52,21 @@ sections:
                           params:
                               - renderTimeTableTab
                               - recap_contrat_echeancier
+        avenants:
+            label: Avenants
+            sections:
+                - type: list
+                  list:
+                      panel: 1
+                      object: avenant
+                      name: all
+        facturation:
+            label: Facturation
+            sections:
+                - type: list
+                  list:
+                      panel: 1
+                      object: facturation
 #        deux:
 #    - type: nav_tabs
 #      nav_tabs: 

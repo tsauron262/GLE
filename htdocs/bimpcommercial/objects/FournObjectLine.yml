@@ -1,3 +1,5 @@
+abstract: 1
+
 extends: 
     module: bimpcommercial
     object_name: ObjectLine
@@ -5,7 +7,6 @@ extends:
 fields: 
     remise_pa: unset
     remise_crt: unset
-    remise_crt_percent: unset
     hide_in_pdf: unset
     
 forms: 
@@ -219,6 +220,15 @@ forms:
         extends: fournline
         force_edit: 1
         rows: 
+            pa_except: 
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - pa_except
+                            - 0
+                            - ''
+                            - 1  
             product: 
                 content: 
                     callback: 
@@ -312,11 +322,14 @@ lists_cols:
     remise_crt: unset
     remise_pa: unset
     hide_in_pdf: unset
+    pa_ht: unset
     
 filters_panels: 
     default: 
         filters: 
+            pa_ht_ln: unset
             remise_crt: unset
+            acomptes: unset
                     
 lists: 
     default: 
@@ -329,6 +342,6 @@ lists:
             pu_ht: 
             tva:
             qty: 
-            remise: 
+            remise_full: 
             total_ttc: 
             margin: 

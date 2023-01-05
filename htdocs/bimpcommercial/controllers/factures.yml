@@ -15,26 +15,41 @@ objects:
                 module: bimpcommercial
                 name: Bimp_FactureLine
                 
+    facture_line_equipment: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_FactureLineEquipment
+                
     paiement:
         instance: 
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_Paiement  
+                
+    paiement_facture:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Paiement_Facture
+                
     PaiementInc: 
         instance: 
             bimp_object:  
                 module: bimpfinanc
                 name: Bimp_PaiementInc 
+                
     commission:
         instance:
             bimp_object:  
                 module: bimpfinanc
                 name: BimpCommission
+                
     revalorisation: 
         instance:
             bimp_object:  
                 module: bimpfinanc
-                name: BimpRevalorisation     
+                name: BimpRevalorisation
             
 sections: 
     - type: tabs
@@ -49,6 +64,7 @@ sections:
                         params: 
                             - renderFacturesTab
                             - default
+                            
         prods: 
             label: Produits en factures
             sections: 
@@ -59,6 +75,14 @@ sections:
                         params: 
                             - renderProdsTabs
                             - prods
+        equipments: 
+            label: Equipements en facture
+            sections: 
+                - type: list
+                  list: 
+                      object: facture_line_equipment
+                      name: globale
+        
         paiements: 
             label: Paiements
             sections: 
@@ -69,20 +93,12 @@ sections:
                         params: 
                             - renderPaiementsTab
                             - paiements
-        comm:
-            label: Commissions
-            icon: fas_comment-dollar
-            sections:
+        paiements_facture: 
+            label: Paiements Facture
+            sections: 
                 - type: list
                   list: 
-                      object: commission
-        sav:
-            label: Revalorisations
-            icon: fas_search-dollar
-            sections:
-                - type: list
-                  list: 
-                      object: revalorisation
+                      object: paiement_facture
         paiements_inc:
             label: Paiements non identifiés
             icon: fas_ambulance
@@ -91,4 +107,19 @@ sections:
                   list: 
                       panel: 1
                       object: PaiementInc
+        comm:
+            label: Commissions
+            icon: fas_comment-dollar
+            sections:
+                - type: list
+                  list: 
+                      object: commission
+        revals:
+            label: Revalorisations
+            icon: fas_search-dollar
+            sections:
+                - type: list
+                  list: 
+                      object: revalorisation
+        
             

@@ -144,8 +144,26 @@ class BimpStruct
                     // logError
                 }
                 break;
+
+            case 'card':
+                $html = self::renderCard($config, $path . '/card', $parent_component);
+                break;
         }
         $config->setCurrentPath($prev_path);
+        return $html;
+    }
+
+    public static function renderCard(BimpConfig $config, $path, &$parent_component = null)
+    {
+        if ($config->isDefined($path . '/object')) {
+            $object = $config->getObject($path . '/object');
+        } else {
+            $object = $config->instance;
+        }
+
+
+        $card = new BC_Card($object, $config->get($path . '/child', null), $config->get($path . '/name', 'default'));
+        $html = $card->renderHtml();
         return $html;
     }
 
@@ -227,7 +245,7 @@ class BimpStruct
             }
         }
 
-        if (!is_null($object)) {
+        if (is_a($object, 'BimpObject')) {
             $name = $config->getFromCurrentPath('name', 'default');
             $panel = $config->getFromCurrentPath('panel', 1, false, 'bool');
             $title = $config->getFromCurrentPath('title', null);
@@ -238,11 +256,13 @@ class BimpStruct
             if (!is_null($children)) {
                 $html = $object->renderChildrenList($children, $name, $panel, $title, $icon);
             } elseif (!is_null($association)) {
-                $html = $object->renderAssociatesList($association, $name, $panel, $title, $icon);
+                $html = $object->renderAssociatesList($association, $name, $title, $icon);
             } else {
                 $filters = $config->getFromCurrentPath('filters', array(), false, 'array');
                 $html = $object->renderList($name, $panel, $title, $icon, $filters);
             }
+        } else {
+            $html = BimpRender::renderAlerts('Instance invalide - Chemin: ' . $path . '/object');
         }
 
         $config->setCurrentPath($prev_path);
@@ -329,7 +349,7 @@ class BimpStruct
 
         if (!is_null($object)) {
             $name = $config->getFromCurrentPath('name', 'default');
-            $panel = $config->getFromCurrentPath('panel', 0, false, 'bool');
+            $panel = $config->getFromCurrentPath('panel', 1, false, 'bool');
             $html = $object->renderViewsList($name, $panel);
         }
 
@@ -350,12 +370,13 @@ class BimpStruct
         }
 
         $panel = (int) $config->getFromCurrentPath('panel', 1, false, 'bool');
+        $name = $config->getFromCurrentPath('name', 'default');
 
-        $table = new BC_FieldsTable($object, $path, !$panel);
+        $table = new BC_FieldsTable($object, $name, !$panel);
 
         if (!is_null($parent_component)) {
             if (is_a($parent_component, 'BC_View')) {
-                if (count($parent_component->new_values)) {
+                if (is_array($parent_component->new_values) && !empty($parent_component->new_values)) {
                     $table->setNewValues($parent_component->new_values);
                 }
             }
@@ -363,7 +384,6 @@ class BimpStruct
 
         $html .= $table->renderHtml();
         unset($table);
-
 
         $config->setCurrentPath($prev_path);
 
@@ -440,25 +460,61 @@ class BimpStruct
         if ($config->isDefined($path . '/tabs')) {
             $tabs_id = $config->get($path . '/tabs_id', 'maintabs');
             $nav_tabs = $config->getParams($path . '/tabs');
+            $path .= '/tabs';
         } else {
             $nav_tabs = $config->getParams($path);
             $tabs_id = 'maintabs';
         }
+
         foreach ($nav_tabs as $idx => $nav_tab) {
             if (!(int) $config->get($path . '/' . $idx . '/show', 1, false, 'bool')) {
                 continue;
             }
-            $content = '';
-            if ($config->isDefined($path . '/' . $idx . '/struct')) {
-                $content = self::renderStruct($config, $path . '/' . $idx . '/struct');
-            } elseif ($config->isDefined($path . '/' . $idx . '/content')) {
-                $content = $config->get($path . '/' . $idx . '/content');
+
+            if (isset($nav_tab['ajax_render_method']) && !empty($nav_tab['ajax_render_method'])) {
+                $params = $config->getCompiledParams($path . '/' . $idx . '/ajax_render_method');
+                $object = '';
+                $method = '';
+                $method_params = array();
+                if (is_array($params)) {
+                    if (isset($params['object']) && is_object($params['object'])) {
+                        $object = $params['object'];
+                    }
+                    if (isset($params['method'])) {
+                        $method = $params['method'];
+                    }
+                    if (isset($params['params'])) {
+                        $method_params = $params['params'];
+                    }
+                } else {
+                    $method = $params;
+                    $object = $config->instance;
+                }
+                if ($method && is_a($object, 'BimpObject') && method_exists($object, $method)) {
+                    $tab_id = $config->get($path . '/' . $idx . '/id', '', true);
+                    $tabs[] = array(
+                        'id'            => $tab_id,
+                        'title'         => $config->get($path . '/' . $idx . '/title', '', true),
+                        'icon'          => $config->get($path . '/' . $idx . '/icon', '', false),
+                        'ajax'          => 1,
+                        'ajax_callback' => $object->getJsLoadCustomContent($method, '$(\'#' . $tab_id . ' .nav_tab_ajax_result\')', $method_params, array('button' => ''))
+                    );
+                }
+            } else {
+                $content = '';
+                if ($config->isDefined($path . '/' . $idx . '/struct')) {
+                    $content = self::renderStruct($config, $path . '/' . $idx . '/struct');
+                } elseif ($config->isDefined($path . '/' . $idx . '/content')) {
+                    $content = $config->get($path . '/' . $idx . '/content');
+                }
+
+                $tabs[] = array(
+                    'id'      => $config->get($path . '/' . $idx . '/id', '', true),
+                    'title'   => $config->get($path . '/' . $idx . '/title', '', true),
+                    'icon'    => $config->get($path . '/' . $idx . '/icon', '', false),
+                    'content' => $content
+                );
             }
-            $tabs[] = array(
-                'id'      => $config->get($path . '/' . $idx . '/id', '', true),
-                'title'   => $config->get($path . '/' . $idx . '/title', '', true),
-                'content' => $content
-            );
         }
         return BimpRender::renderNavTabs($tabs, $tabs_id);
     }
@@ -497,8 +553,6 @@ class BimpStruct
         $html = '';
         $prev_path = $config->current_path;
         $config->setCurrentPath($path);
-
-
 
         $config->setCurrentPath($prev_path);
         return $html;

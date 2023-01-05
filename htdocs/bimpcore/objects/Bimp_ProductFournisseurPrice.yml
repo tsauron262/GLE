@@ -1,12 +1,15 @@
 table: product_fournisseur_price
 common_fields: 0
-
 primary: rowid
+icon: fas_euro-sign
 
 parent_module: bimpcore
 parent_object: Bimp_Product
 parent_id_property: fk_product
 
+nom_url: 
+    syntaxe: <name>
+    
 labels: 
     name: prix d'achat fournisseur
     name_plur: prix d'achat fournisseur
@@ -55,11 +58,14 @@ fields:
         label: Prix HT (sans remise)
         type: money
         required: 1
+        decimals: 4
+        history: 1
         
     tva_tx: 
         label: Taux de TVA
         type: percent
-        default_value: 20
+        default_value: 
+            callback: getDefaultTva
         decimals: 4
         min: 0
         max: 100
@@ -85,6 +91,10 @@ fields:
     datec: 
         label: Créé le
         type: detetime
+        
+    stockFourn:
+        label: Stock chez le fournisseur
+        type: int
     
 forms: 
     default: 
@@ -101,6 +111,16 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - custom: 1
+              label: Mettre à jour les prix d'achats des commandes fournisseurs pour les unités non réceptionnées
+              input_name: update_comm_fourn
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              display_if: 
+                  field_name: is_cur_pa
+                  show_values: 1
               
 fields_table: 
     default: 
@@ -113,6 +133,7 @@ fields_table:
               display: nom_url
             - field: price
             - field: tva_tx
+            - field: stockFourn
             
 views: 
     default: 
@@ -125,22 +146,30 @@ views:
         
 lists: 
     default: 
+        filters_panel: default
+        configurable: 1
         title: Liste des prix d'achat fournisseur
         sort_field: id
         sort_way: desc
         n: 50
         page_btn: 1
         edit_btn: 1
+        delete_btn: 1
         edit_form: default
         add_form_name: default
         cols: 
-            - field: fk_soc
-              display: nom_url
-            - field: ref_fourn
-            - field: quantity
-            - field: tva_tx
-            - field: price
-            - field: remise_percent           
+            fk_soc:
+            ref_fourn:
+            quantity:
+            tva_tx:
+            price:
+            remise_percent:
+            stockFourn:
+            
+    fourn:
+        extends: default
+        cols:
+            fk_soc: unset
             
 cards: 
     default: 
@@ -151,3 +180,15 @@ cards:
               display: nom_url
             - field: price
             - field: tva_tx
+            
+            
+filters_panels:
+    default: 
+        filters: 
+            fk_soc:
+            ref_fourn:
+            quantity:
+            tva_tx:
+            price:
+            remise_percent:
+            stockFourn:

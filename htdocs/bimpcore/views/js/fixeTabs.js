@@ -25,6 +25,7 @@ function BimpFixeTabs() {
                 display_success: false,
                 display_errors: false,
                 display_warnings: false,
+                display_debug_content: false,
                 success: function (result, bimpAjax) {
                     ft.processing = false;
                     ft.$loading.hide();

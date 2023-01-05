@@ -1,14 +1,30 @@
 table: bic_user
 icon: fas_user
-controller: pageUser
-common_fields: 0
+common_fields: 1
 
+parent_module: bimpcore
+parent_object: Bimp_Client
+parent_id_property: id_client
+
+public_header_edit_form: public_edit
+public_header_btn: 
+    callback: getPublicActionsButtons
+       
+labels:
+    name: compte utilisateur
+    name_plur: comptes utilisateurs
+    
+nom_url: 
+    syntaxe: <email>
+                
 objects:
-    user_client_contrat:
+    user_client_contrats:
         relation: hasMany
-        delete: 0
+        delete: 1
         instance:
-            bimp_object: BIC_UserClientContrats
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClientContrat
     
     societe:
         instance:
@@ -16,235 +32,226 @@ objects:
             dol_object:
                 module: societe
                 file: societe
-                id_object:
-                    field_value: attached_societe
-                    
-    tickets:
-        instance:
-            bimp_object: BIC_UserTickets
-
-header_btn: 
-    callback: getActionsButtons
-
-labels:
-    name:
-        callback:
-            method: lang
-            params:
-                - labelUserSing
-    name_plur:
-        callback:
-            method: lang
-            params:
-                - labelUserPlur
+            id_object:
+                field_value: id_client
+                
+#    tickets:
+#        relation: hasMany
+#        delete: 0
+#        instance:
+#            bimp_object: BIC_UserClientTicket
 
 fields:
+    id_client: 
+        label: Client
+        type: id_parent
+        required: 1
+        default_value: 0
+        input: 
+            card: default
+        
+    id_contact: 
+        label: Contact client associé
+        type: id_object
+        object: contact
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getSocieteContactsArray
+                    params: 
+                        - field_value: id_client
+                        - 1
+        depends_on: id_client
+        
     email:
-        label:
-            callback:
-                method: lang
-                params:
-                    - labelFieldEmail
-        type: string
+        label: E-mail
+        required: 1
+        default_value: 
+            callback: getDefaultEmail
+        depends_on: id_contact
+        
     password:
         label: Mot de passe 
         type: password
-    attached_societe:
-        label: 
-            callback:
-                method: lang
-                params:
-                    - societeOfAccount
-        type: id_object
-        object: client
-        required: 1
-        input: 
-            type: search_societe
-            societe_type: customer
-            help: 
-                callback:
-                    method: lang
-                    params:
-                        - helpSearchSociete
-            card: default
-        search:
-            input: 
-                type: search_societe
-                societe_type: customer 
-    role:
-        label: 
-            callback:
-                method: lang
-                params:
-                    - labelFieldRole
+        
+    role: 
+        label: Rôle
         type: int
-        values:
-            array: role
-        default_value: 
-            callback: what_is_the_context
+        default_value: 1
+        values: 
+            array: roles
+    
     status:
-        label:
-            callback:
-                method: lang
-                params:
-                    - labelFieldStatus
+        label: Statut
         type: int
         values:
             array: status
+        default_value: 1
+            
     renew_required:
-        label: 
-            callback:
-                method: lang
-                params:
-                    - mustChangePassword
+        label: Doit changer son mot de passe
         type: bool
+        default_value: 0
+        
     lang:
         label: Langue par défaut
         type: int
         values: 
             array: langs_list
+        default_value: 0
         
+forms:
+    default:
+        rows:
+            id_client: 
+                field: id_client
+            contact: 
+                field: id_contact
+            email: 
+                field: email
+            role: 
+                field: role
+            status: 
+                field: status
+            renew: 
+                field: renew_required
+            send_pw: 
+                custom: 1
+                label: Envoyer le mot de passe par Email
+                input_name: send_mail
+                input:
+                    type: toggle
+                value: 1
+            contrat: 
+                object: user_client_contrats
+                multiple: 1
+              
+    public: 
+        extends: default
+        rows: 
+            id_client: 
+                edit: 0
+            renew: unset
+            contrat: unset
+            
+    public_edit: 
+        extends: public
+        rows: 
+            send_pw: unset
+        
+fields_tables:
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: email
+            - field: role
+              edit: 1
+            - field: status
+              edit: 1
+              
+    client: 
+        title: Client associé
+        icon: fas_user-circle
+        rows: 
+            - field: id_client
+              display: card
+            - field: id_contact
+              display: card
+        
+              
+    public:
+        panel: 0
+        rows: 
+            - field: email
+            - field: id_contact
+            - field: role
+            - field: status
 
+views:
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: client
+            
+    public: 
+        title: Mon compte utilisateur
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: public
+                - type: list
+                  show: 
+                      callback: isNotAdmin
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  list: 
+                      name: public_user_client
+                      children: user_client_contrats
+                                
 lists:
     default:
-        checkboxes: 0
-        sort_field: date_create
-        extra_btn:
-            callback: getListExtraButtons
+        checkboxes: 1
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les utilisateurs sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
         sort_way: desc
         n: 10
         delete_btn: 1
+        filters_panel: default
         page_btn: 1
-        edit_form: edit
-        add_object_row: 0
-        add_btn: 1
-        add_form_name: edit
-        update_btn: 1
-        edit_btn: 1
-        cols:
-            email:
-                field: email
-            role:
-                field: role
-            status:
-                field: status
-            lang:
-                field: lang
-                show:
-                    callback: showLang
-    full:
-        extends: default
-        edit_form: editFull
-        add_form_name: editFull
-        add_form_values:
-            fields:
-                role: 1
-        cols:
-            attached_societe:
-                field: attached_societe
-                display: nom_url
-            renew_required:
-                field: renew_required
-            lang:
-                field: lang
-                
-fields_table:
-    default:
-        title: Status
-        icon: fas_file-signature
-        rows: 
-            - field: email
-              edit: 0
-            - field: password
-              edit: 0
-            - field: role
-              edit: 0
-            - field: status
-              edit: 0
-
-views:
-    pageUser: 
-        title: 
-            callback: displayEmail
         edit_form: default
-        delete_btn: 1
-        rows:
-            - cols: 
-                - type: list
-                  show:
-                      callback: it_is_not_admin
-                  list:
-                        children: user_client_contrat
-    
-    for_controller:
-        rows:
-            title: infos
-            - cols:
-                - type: nav_tabs
-                  nav_tabs:
-                      - id: attached_contrat
-                        title: Contrats associés
-                        show:
-                            callback: it_is_not_admin
-                        struct:
-                            type: list
-                            list:
-                                children: user_client_contrat
-                      - id: attached_tickets
-                        title: Tickets support
-                        struct: 
-                            type: list
-                            list:
-                                name: pageUser
-                                object: tickets
-                            
-                            
-                        
+        add_btn: 1
+        add_form_name: default
+        edit_btn: 1
+        extra_btn: 
+            callback: getListExtraButtons
+        cols:
+            id_client:
+            email:
+            id_contact:
+            role:
+            status:
                 
-forms:
-    edit:
-        objects_change_reload: BIC_UserClient, BIC_UserClientContrats
-        rows:
-            - field: email
-            - field: role
-            - field: status
-            - field: lang
-              show:
-                  callback: showLang
-            - field: attached_societe
-              hidden: 1
-            - custom: 1
-              label: 
-                  callback:
-                      method: lang
-                      params:
-                          - sendEmail
-              input_name: send_mail
-              input:
-                  type: toggle
-              value: 1
-            - object: user_client_contrat
-              multiple: 1
-    editFull:
-        rows:
-            - field: email
-            - field: role
-            - field: status
-            - field: lang
-              show:
-                  callback: showLang
-            - field: attached_societe
-            - field: renew_required
-            - custom: 1
-              label: 
-                  callback:
-                      mathod: lang
-                      params:
-                          - sendEmail
-              input_name: send_mail
-              input:
-                  type: toggle
-              value: 1
+    client: 
+        extends: default
+        cols: 
+            client: unset
+            
+    public_client: 
+        icon: fas_users
+        extends: client
+        configurable: 0
+        checkboxes: 0
+        bulk_actions: unset
+        page_btn: 0
+        edit_form: public_edit
+        add_form_name: public
         
 cards:
     default:
@@ -253,5 +260,14 @@ cards:
             - label: Email
               field: email
             - label: Societe
-              field: attached_societe
+              field: id_client
         view_btn: 1
+        
+
+filters_panel: 
+    default: 
+        filters: 
+            email:
+            id_contact:
+            role:
+            status:

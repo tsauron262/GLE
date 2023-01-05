@@ -14,7 +14,7 @@ class Bimp_Paiement extends BimpObject
     const STATUS_COMMENCER = 1;
 
     public static $status_list = [
-        self::STATUS_COMMENCER => ['label' => 'Commencer', 'classes' => ['warning'], 'icon' => 'hourglass-start']
+        self::STATUS_COMMENCER => ['label' => 'Commencé', 'classes' => ['warning'], 'icon' => 'hourglass-start']
     ];
 
     public function __construct($module, $object_name)
@@ -26,11 +26,20 @@ class Bimp_Paiement extends BimpObject
 
     // Droits user: 
 
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'moveAmount':
+                return ($user->admin || $user->rights->bimpcommercial->adminPaiement ? 1 : 0);
+        }
+
+        return (int) parent::canSetAction($action);
+    }
+
     public function canEdit()
     {
-//        if($this->getData('exported') == 1) { // CanXXX : seulement les droits user!
-//            return 0;
-//        }
         return 1;
     }
 
@@ -39,9 +48,21 @@ class Bimp_Paiement extends BimpObject
         return $this->canEdit();
     }
 
+    public static function canCreateVirement()
+    {
+        global $user;
+        return ($user->rights->bimpcommercial->adminPaiement ? 1 : 0);
+    }
+
+    public static function canCreateCheque()
+    {
+        global $user;
+        return ($user->rights->bimpcommercial->paiement_cheque ? 1 : 0);
+    }
+
     // Getters booléens: 
 
-    public function isEditable($force_edit = false, &$errors = array())
+    public function isNormalementEditable($force_edit = false, &$errors = array())
     {
         if ($this->isLoaded()) {
             if ($this->getData('exported') == 1) {
@@ -62,6 +83,18 @@ class Bimp_Paiement extends BimpObject
                 }
             }
         }
+        return 1;
+    }
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        if ($this->isLoaded()) {
+            global $user;
+            if ($user->rights->bimpcommercial->adminPaiement)
+                return 1;
+
+            return $this->isNormalementEditable($force_edit, $errors);
+        }
 
         return 1;
     }
@@ -69,6 +102,17 @@ class Bimp_Paiement extends BimpObject
     public function isDeletable($force_delete = false, &$errors = array())
     {
         return $this->isEditable($force_delete, $errors);
+    }
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        if (in_array($action, array('moveAmount'))) {
+            if (!$this->isLoaded($errors)) {
+                return 0;
+            }
+        }
+
+        return parent::isActionAllowed($action, $errors);
     }
 
     // Getters: 
@@ -80,7 +124,7 @@ class Bimp_Paiement extends BimpObject
         if ($id_facture) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
             if (BimpObject::objectLoaded($facture)) {
-                return (float) round($facture->getRemainToPay(), 2);
+                return $facture->getRemainToPay();
             }
         }
 
@@ -118,6 +162,16 @@ class Bimp_Paiement extends BimpObject
     {
         $buttons = array();
         if ($this->isLoaded()) {
+            if ($this->object_name === 'Bimp_Paiement' && $this->isActionAllowed('moveAmount') && $this->canSetAction('moveAmount')) {
+                $buttons[] = array(
+                    'label'   => 'Déplacer un montant d\'une facture à une autre',
+                    'icon'    => 'fas_sign-out-alt',
+                    'onclick' => $this->getJsActionOnclick('moveAmount', array(), array(
+                        'form_name' => 'move_amount'
+                    ))
+                );
+            }
+
             $buttons[] = array(
                 'label'   => 'Afficher dans un nouvel onglet',
                 'icon'    => 'fas_external-link-alt',
@@ -160,44 +214,48 @@ class Bimp_Paiement extends BimpObject
         $filters['facture.fk_soc'] = $value;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_facture':
-                if (!isset($joins['pf'])) {
-                    $joins['pf'] = array(
-                        'alias' => 'pf',
+                $pf_alias = $main_alias . '___pf';
+                if (!isset($joins[$pf_alias])) {
+                    $joins[$pf_alias] = array(
+                        'alias' => $pf_alias,
                         'table' => 'paiement_facture',
-                        'on'    => 'pf.fk_paiement = a.rowid'
+                        'on'    => $pf_alias . '.fk_paiement = ' . $main_alias . '.rowid'
                     );
                 }
-                $filters['pf.fk_facture'] = array(
-                    'in' => $values
+                $filters[$pf_alias . '.fk_facture'] = array(
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
 
             case 'id_client';
-                if (!isset($joins['pf'])) {
-                    $joins['pf'] = array(
-                        'alias' => 'pf',
+                $pf_alias = $main_alias . '___pf';
+                if (!isset($joins[$pf_alias])) {
+                    $joins[$pf_alias] = array(
+                        'alias' => $pf_alias,
                         'table' => 'paiement_facture',
-                        'on'    => 'pf.fk_paiement = a.rowid'
+                        'on'    => $pf_alias . '.fk_paiement = ' . $main_alias . '.rowid'
                     );
                 }
-                if (!isset($joins['facture'])) {
-                    $joins['facture'] = array(
-                        'alias' => 'facture',
+
+                $fac_alias = $pf_alias . '___facture';
+                if (!isset($joins[$fac_alias])) {
+                    $joins[$fac_alias] = array(
+                        'alias' => $fac_alias,
                         'table' => 'facture',
-                        'on'    => 'facture.rowid = pf.fk_facture'
+                        'on'    => $fac_alias . '.rowid = ' . $pf_alias . '.fk_facture'
                     );
                 }
-                $filters['facture.fk_soc'] = array(
-                    'in' => $values
+                $filters[$fac_alias . '.fk_soc'] = array(
+                    ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getCustomFilterValueLabel($field_name, $value)
@@ -219,6 +277,36 @@ class Bimp_Paiement extends BimpObject
         }
 
         return parent::getCustomFilterValueLabel($field_name, $value);
+    }
+
+    public function getFacturesArray($include_empty = false)
+    {
+        if (!$this->isLoaded()) {
+            return array();
+        }
+
+        $cache_key = 'bimp_paiement_' . $this->id . '_facures_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $amounts = $this->getFacsAmounts();
+
+            foreach ($amounts as $id_fac => $amount) {
+                $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                $fac_label = '';
+
+                if (BimpObject::objectLoaded($fac)) {
+                    $fac_label = $fac->getRef();
+                } else {
+                    $fac_label = 'Facture #' . $id_fac . ' (n\'existe plus)';
+                }
+
+                self::$cache[$cache_key][(int) $id_fac] = $fac_label . ' (' . BimpTools::displayMoneyValue((float) $amount) . ')';
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
     }
 
     // Affichages: 
@@ -279,7 +367,7 @@ class Bimp_Paiement extends BimpObject
                     }
                     $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture']);
                     if (BimpObject::objectLoaded($fac)) {
-                        $html .= $fac->getNomUrl(1, 1, 1, 'full');
+                        $html .= $fac->getLink();
                     } else {
                         $html .= '<span class="danger">';
                         $html .= 'La facture d\'ID ' . $r['fk_facture'] . ' n\'existe plus';
@@ -319,7 +407,7 @@ class Bimp_Paiement extends BimpObject
                             if ($html) {
                                 $html .= '<br/>';
                             }
-                            $html .= BimpObject::getInstanceNomUrlWithIcons($soc->dol_object);
+                            $html .= $soc->getLink();
                         }
                     }
                 }
@@ -467,7 +555,7 @@ class Bimp_Paiement extends BimpObject
 
                 $at_least_one = true;
 
-                $options['data']['min'] = 0;
+                $options['data']['min'] = -999999999999;
                 $options['data']['to_pay'] = $to_pay;
                 $options['data']['total_amount'] = $montant_ttc;
 
@@ -571,59 +659,95 @@ class Bimp_Paiement extends BimpObject
         return $html;
     }
 
+    public function renderAmountToMoveInput()
+    {
+        $id_fac = (int) BimpTools::getPostFieldValue('id_facture_from', 0);
+
+        if ($id_fac) {
+            $facs = $this->getFacsAmounts();
+
+            if (isset($facs[$id_fac])) {
+                $amount = (float) $facs[$id_fac];
+
+                if ($amount) {
+                    $min = 0;
+                    $max = 0;
+
+                    if ($amount > 0) {
+                        $max = $amount;
+                    } else {
+                        $min = $amount;
+                    }
+
+                    return BimpInput::renderInput('text', 'amount_to_move', $amount, array(
+                                'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
+                                'data'        => array(
+                                    'data_type' => 'number',
+                                    'decimals'  => 2,
+                                    'min'       => $min,
+                                    'max'       => $max
+                                )
+                    ));
+                }
+            }
+        }
+
+        return BimpRender::renderAlerts('Aucun montant déplaçable disponible');
+    }
+
     // Gestion extra fields: 
 
-    public function fetchExtraFields()
-    {
-        $fields = array(
-            'type' => ''
-        );
-
-        if ($this->isLoaded()) {
-            $fields['type'] = (int) $this->db->getValue($this->getTable(), 'fk_paiement', 'rowid = ' . (int) $this->id);
-        }
-
-        return $fields;
-    }
-
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '')
-    {
-        switch ($field) {
-            case 'type':
-                return $main_alias . '.fk_paiement';
-        }
-        return '';
-    }
-
-    public function insertExtraFields()
-    {
-        return array();
-    }
-
-    public function updateExtraFields()
-    {
-        return array();
-    }
-
-    public function updateExtraField($field_name, $value, $id_object)
-    {
-        return array();
-    }
-
-    public function deleteExtraFields()
-    {
-        return array();
-    }
-
-    public function getExtraFieldSavedValue($field, $id_object)
-    {
-        switch ($field) {
-            case 'type':
-                return (int) $this->db->getValue($this->getTable(), 'fk_paiement', 'rowid = ' . (int) $id_object);
-        }
-
-        return null;
-    }
+//    public function fetchExtraFields()
+//    {
+//        $fields = array(
+//            'type' => ''
+//        );
+//
+//        if ($this->isLoaded()) {
+////            $fields['type'] = (int) $this->db->getValue($this->getTable(), 'fk_paiement', 'rowid = ' . (int) $this->id);
+//        }
+//
+//        return $fields;
+//    }
+//
+//    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
+//    {
+//        switch ($field) {
+//            case 'type':
+//                return ($main_alias ? $main_alias : 'a') . '.fk_paiement';
+//        }
+//        return '';
+//    }
+//
+//    public function insertExtraFields()
+//    {
+//        return array();
+//    }
+//
+//    public function updateExtraFields()
+//    {
+//        return array();
+//    }
+//
+//    public function updateExtraField($field_name, $value, $id_object)
+//    {
+//        return array();
+//    }
+//
+//    public function deleteExtraFields()
+//    {
+//        return array();
+//    }
+//
+//    public function getExtraFieldSavedValue($field, $id_object)
+//    {
+//        switch ($field) {
+//            case 'type':
+//                return (int) $this->db->getValue($this->getTable(), 'fk_paiement', 'rowid = ' . (int) $id_object);
+//        }
+//
+//        return null;
+//    }
 
     // Traitements: 
 
@@ -634,11 +758,209 @@ class Bimp_Paiement extends BimpObject
         if ($this->isDeletable(false, $errors)) {
             if ($this->useCaisse) {
                 BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
-                $errors = array_merge($errors, BC_Caisse::onPaiementDelete($this->id, $this->dol_object->type_code, (float) $this->getData('amount')));
+                $errors = BimpTools::merge_array($errors, BC_Caisse::onPaiementDelete($this->id, $this->dol_object->type_code, (float) $this->getData('amount')));
+            }
+
+            $facs = $this->getFacsAmounts();
+            foreach ($facs as $id_fac => $fac_amount) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                if (BimpObject::objectLoaded($facture)) {
+                    $facture->checkIsPaid(false, $fac_amount);
+                    $facture->addObjectLog('Paiement ' . $this->getRef() . " supprimée");
+                }
+            }
+            if (!$this->isNormalementEditable()) {//mode forcage
+                global $user;
+                mailSyn2('Suppression paiement forcée', 'tommy@bimp.fr, comptamaugio@bimp.fr', null, 'Bonjour un paiement ' . $this->getData('ref') . ' a été supprimé par ' . $user->getNomUrl(1) . ($this->getData('exported') ? ' Attention ce paiement été exporté' : ''));
             }
         }
 
         return $errors;
+    }
+
+    // Actions: 
+
+    public function actionMoveAmount($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Paiement transféré avec succès';
+        
+        
+        
+        
+        $id_facture_from = isset($data['id_facture_from']) ? (int) $data['id_facture_from'] : 0;
+        $id_facture_to = isset($data['id_facture_to']) ? (int) $data['id_facture_to'] : 0;
+        $amount = isset($data['amount_to_move']) ? $data['amount_to_move'] : 0;
+        $id_discount = 0;
+        
+        $for_mvt = new stdClass();
+        $for_mvt->id_paiement = $this->id;
+        $for_mvt->id_facture_from = $id_facture_from;
+        $for_mvt->id_facture_to = $id_facture_to;
+        $for_mvt->montant = $amount;
+        
+        if (!$id_facture_from) {
+            $errors[] = 'Veuillez sélectionner la facture d\'origine';
+        } else {
+            $facFrom = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture_from);
+
+            if (BimpObject::objectLoaded($facFrom)) {
+                if ($facFrom->getData('type') == Facture::TYPE_DEPOSIT) {
+                    $id_discount = (int) $this->db->getValue('societe_remise_except', 'rowid', '`fk_facture_source` = ' . (int) $id_facture_from);
+                    if ($id_discount) {
+                        BimpObject::loadClass('bimpcore', 'Bimp_Societe');
+                        $use_label = Bimp_Societe::getDiscountUsedLabel($id_discount, true);
+                        if ($use_label) {
+                            $errors[] = 'Il n\'est pas possible de modifier le montant payé de ' . $facFrom->getLabel('the') . ' ' . $facFrom->getRef() . ' car la remise client générée a été ' . str_replace('Ajouté', 'ajoutée', $use_label);
+                        }
+                    }
+                } elseif (!in_array($facFrom->getData('type'), array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
+                    $errors[] = 'Modification du paiement de la facture d\'origine impossible (type non elligible)';
+                }
+            }
+        }
+
+        if (!$id_facture_to) {
+            $errors[] = 'Veuillez sélectionner la facture de destination';
+        } else {
+            $facTo = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture_to);
+            if (!BimpObject::objectLoaded($facTo)) {
+                $errors[] = 'La facture de destination d\'ID ' . $id_facture_to . ' n\'existe pas';
+            } elseif (!(int) $facTo->getData('fk_statut')) {
+                $errors[] = 'La facture de destination n\'est pas validée';
+            }
+        }
+
+        if (!$amount) {
+            $errors[] = 'Veuillez saisir une montant valide';
+        }
+
+        if (!count($errors)) {
+            $facs = $this->getFacsAmounts();
+
+            if (!isset($facs[$id_facture_from])) {
+                $errors[] = 'Facture d\'origine invalide';
+            } else {
+                $init_amount = (float) $facs[$id_facture_from];
+
+                if ($init_amount >= 0) {
+                    if ($amount < 0) {
+                        $errors[] = 'Le montant à déplacer ne peut pas être négatif';
+                    } elseif ($amount > $init_amount) {
+                        $errors[] = 'Le montant à déplacer ne peut pas dépasser ' . BimpTools::displayMoneyValue($init_amount);
+                    }
+                } elseif ($init_amount < 0) {
+                    if ($amount > 0) {
+                        $errors[] = 'Le montant à déplacer ne peut pas être supérieur à 0';
+                    } elseif ($amount < $init_amount) {
+                        $errors[] = 'Le montant à déplacer ne peut pas être inférieur à ' . BimpTools::displayMoneyValue($init_amount);
+                    }
+                }
+
+                if (!count($errors)) {
+                    if ($id_discount) {
+                        BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                        $discount = new DiscountAbsolute($this->db->db);
+                        $discount->fetch($id_discount);
+                        if (BimpObject::objectLoaded($discount)) {
+                            global $user;
+                            if ($discount->delete($user) < 0) {
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Echec de la suppression de la remise client ' . $facFrom->getLabel('of_the') . ' ' . $facFrom->getRef());
+                            }
+                        }
+                    }
+
+                    if (!count($errors)) {
+                        $where = '`fk_paiement` = ' . (int) $this->id . ' AND `fk_facture` = ' . (int) $id_facture_from;
+
+                        $diff = $init_amount - $amount;
+                        $paiement_exported = (int) $this->db->getValue('paiement_facture', 'exported', $where);
+                        $mail = 'Référence du paiement: ' . $this->getRef() . "\n\n";
+
+                        if ($diff) {
+                            if ($this->db->update('paiement_facture', array(
+                                        'amount' => $diff
+                                            ), $where) <= 0) {
+                                $errors[] = 'Echec de la mise à jour du montant payé pour la facture d\'origine - ' . $this->db->db->lasterror();
+                            }
+                        } else {
+                            if ($this->db->delete('paiement_facture', $where) <= 0) {
+                                $errors[] = 'Echec de la suppression du montant payé pour la facture d\'origine - ' . $this->db->db->lasterror();
+                            }
+                        }
+
+                        if (!count($errors)) {
+                            if (BimpObject::objectLoaded($facFrom)) {
+                                $mail .= 'Facture ' . $facFrom->getRef() . ': ';
+                                $facFrom->checkIsPaid();
+                            } else {
+                                $mail .= 'Facture #' . $id_facture_from . ' (supprimée dans l\'ERP): ';
+                            }
+                            $mail .= "\n";
+                            $mail .= "\t" . 'Montant initial du paiement: ' . BimpTools::displayFloatValue($init_amount) . ' €' . "\n";
+                            $mail .= "\t" . 'Nouveau montant du paiement: ' . BimpTools::displayFloatValue($diff) . ' €' . "\n\n";
+
+                            $where = '`fk_paiement` = ' . (int) $this->id . ' AND `fk_facture` = ' . $id_facture_to;
+                            $row = $this->db->getRow('paiement_facture', $where, null, 'array');
+                            $init_dest_amount = 0;
+                            $new_dest_amount = $amount;
+
+                            if (!is_null($row)) {
+                                $init_dest_amount = (float) $row['amount'];
+                                $new_dest_amount += $init_dest_amount;
+                                if ($this->db->update('paiement_facture', array(
+                                            'amount' => $new_dest_amount
+                                                ), $where) <= 0) {
+                                    $errors[] = 'Echec de la mise à jour du montant payé pour la facture de destination - ' . $this->db->db->lasterror();
+                                }
+                            } else {
+                                if ($this->db->insert('paiement_facture', array(
+                                            'fk_paiement' => (int) $this->id,
+                                            'fk_facture'  => (int) $id_facture_to,
+                                            'amount'      => $new_dest_amount
+                                        )) <= 0) {
+                                    $errors[] = 'Echec de l\'ajout du montant payé pour la facture de destination - ' . $this->db->db->lasterror();
+                                }
+                            }
+
+                            if (!count($errors)) {
+                                $facTo->checkIsPaid();
+                                $facFrom->addObjectLog('Paiement ' . $this->getRef() . ' déplacé de ' . $amount . ' €  vers ' . $facTo->getRef());
+                                $facTo->addObjectLog('Paiement ' . $this->getRef() . ' déplacé de ' . $amount . ' €  depuis ' . $facFrom->getRef());
+
+                                $mail .= 'Facture ' . $facTo->getRef() . ': ' . "\n";
+                                $mail .= "\t" . 'Montant initial du paiement: ' . BimpTools::displayFloatValue($init_dest_amount) . ' €' . "\n";
+                                $mail .= "\t" . 'Nouveau montant du paiement: ' . BimpTools::displayFloatValue($new_dest_amount) . ' €' . "\n\n";
+
+                                if ($this->getData('exported')) {
+
+                                    if($facFrom->getData('fk_soc') != $facTo->getData('fk_soc')) {
+                                        if($this->db->insert('mvt_paiement', ['datas' => json_encode($for_mvt), 'date' => date('Y-m-d')]) <= 0) {
+                                            $errors[] = 'Echec de l\'enregistrement du changement de facture du paiement dans la table d\'export';
+                                        }
+                                    }
+                                    if(!count($errors)) {
+                                        $mail_to = BimpCore::getConf('email_compta', '');
+                                        if ($mail_to) {
+                                            mailSyn2('Modification d\'un paiement exporté en compta, l\'écriture correspondante sera importée dans cégid lors du prochain export.', $mail_to, '', $mail);
+                                        }
+                                    } else {
+                                        mailSyn2('COMPTA URGENT', BimpCore::getConf('devs_email'), null, 'PB enregistrement déplacement paiements ' . $this->getNomUrl());
+                                    }
+                                    
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides: 
@@ -691,6 +1013,12 @@ class Bimp_Paiement extends BimpObject
         $account = null;
         $use_caisse = false;
 
+        $date_debut_ex = BimpCore::getConf('date_debut_exercice', '', 'bimpcommercial');
+        if ($date_debut_ex) {
+            if ($this->getData('datep') < $date_debut_ex)
+                $errors[] = 'Date antérieure au début d\'exercice';
+        }
+
         if ($this->useCaisse && (int) BimpTools::getValue('use_caisse', 0)) {
             $use_caisse = true;
             $id_caisse = (int) BimpTools::getValue('id_caisse', 0);
@@ -738,6 +1066,10 @@ class Bimp_Paiement extends BimpObject
             $errors[] = 'Mode paiement invalide';
         } elseif (!$use_caisse && $type_paiement === 'LIQ') {
             $errors[] = 'Le réglement en espèce n\'est possible que pour un paiement en caisse';
+        } elseif ($type_paiement === 'VIR' && !$this->canCreateVirement()) {
+            $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
+        } elseif ($type_paiement === 'CHQ' && !$this->canCreateCheque()) {
+            $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par chèque';
         }
 
         if (count($errors)) {
@@ -773,7 +1105,7 @@ class Bimp_Paiement extends BimpObject
             $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', ''), true);
             $total_factures_versements = 0;
 
-            if ((is_null($total_paid) || !$total_paid) && (is_null($avoirs) || !count($avoirs))) {
+            if ((is_null($total_paid) || !$total_paid) && (is_null($avoirs) || !is_array($avoirs) || !count($avoirs))) {
                 $errors[] = 'Montant total payé absent';
             }
 
@@ -786,7 +1118,6 @@ class Bimp_Paiement extends BimpObject
             $total_to_return = 0;
             $to_return_amounts = array();
             $facs_to_convert = array();
-
 
             // Calcul du total payé par facture. 
             while (BimpTools::isSubmit('amount_' . $i)) {
@@ -808,13 +1139,15 @@ class Bimp_Paiement extends BimpObject
                         $factures[$id_facture] = $facture;
 
                         $avoir_used = 0;
-                        $to_pay = round((float) $facture->getRemainToPay(), 2);
+                        $to_pay = $facture->getRemainToPay();
                         $mult = 1;
 
                         if (!$is_rbt) {
-                            foreach ($avoirs as $avoir) {
-                                if ($avoir['input_name'] === 'amount_' . $i) {
-                                    $avoir_used += (float) $avoir['amount'];
+                            if (is_array($avoirs)) {
+                                foreach ($avoirs as $avoir) {
+                                    if ($avoir['input_name'] === 'amount_' . $i) {
+                                        $avoir_used += (float) $avoir['amount'];
+                                    }
                                 }
                             }
                         } else {
@@ -823,7 +1156,7 @@ class Bimp_Paiement extends BimpObject
 
                         $diff = $to_pay - $avoir_used - ($amount * $mult);
 
-                        if ($diff < 0.01 && $diff > -0.01) {
+                        if ($diff < 0.012 && $diff > -0.012) {
                             $diff = 0;
                         }
 
@@ -835,7 +1168,7 @@ class Bimp_Paiement extends BimpObject
                         } else {
                             if ($diff < 0) {
                                 if (!$to_return_option) {
-                                    $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu';
+                                    $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu (' . $diff . ")";
                                     break;
                                 }
 
@@ -882,6 +1215,7 @@ class Bimp_Paiement extends BimpObject
                 // Check paiements factures: 
                 foreach ($this->dol_object->amounts as $id_facture => $amount) {
                     if (BimpObject::objectLoaded($factures[(int) $id_facture])) {
+                        $factures[(int) $id_facture]->fetch((int) $id_facture);
                         $factures[(int) $id_facture]->checkIsPaid();
                     }
                 }
@@ -917,6 +1251,8 @@ class Bimp_Paiement extends BimpObject
                             }
                         }
                         $i++;
+
+                        BimpCore::setMaxExecutionTime(1200);
                     }
                 }
 
@@ -971,6 +1307,7 @@ class Bimp_Paiement extends BimpObject
                 $errors[] = 'Veuillez indiquer un montant pour ce paiement';
             }
 
+            $facture = null;
             $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0);
             if (!$id_facture) {
                 $errors[] = 'ID de la facture concernée absent';
@@ -979,13 +1316,18 @@ class Bimp_Paiement extends BimpObject
                 if (!BimpObject::objectLoaded($facture)) {
                     $errors[] = 'La facture d\'ID ' . $id_facture . ' n\'existe pas';
                 } else {
-                    $errors = $facture->checkSingleAmoutPaiement($single_amount);
+                    $errors = $facture->checkSingleAmoutPaiement($single_amount, (int) BimpTools::getPostFieldValue('force_extra_paiement', 0));
                 }
             }
 
             if (!count($errors) && $single_amount) {
                 $this->dol_object->amounts[$id_facture] = $single_amount;
                 $errors = parent::create($warnings, $force_create);
+
+                if (!count($errors) && BimpObject::objectLoaded($facture)) {
+                    $facture->fetch($facture->id);
+                    $facture->checkIsPaid();
+                }
             }
         }
 
@@ -1021,7 +1363,7 @@ class Bimp_Paiement extends BimpObject
         return $errors;
     }
 
-    public function updateDolObject(&$errors = array())
+    public function updateDolObject(&$errors = array(), &$warnings = array())
     {
         // Màj du n°:
         if (!$this->isLoaded()) {

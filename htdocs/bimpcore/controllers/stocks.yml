@@ -1,0 +1,43 @@
+bootstrap: 1
+title: Stocks
+
+js: 
+    - /bimplogistique/views/js/create_inventory2.js
+    
+objects: 
+    BimpProductMouvement:
+        instance:
+            bimp_object: BimpProductMouvement
+            
+    inventory: 
+        instance: 
+            bimp_object: 
+                module: bimplogistique
+                name: Inventory2   
+                
+sections: 
+    - type: tabs
+      tabs: 
+          default:
+              label: Stock Entrepots
+              sections: 
+                  - type: custom
+                    custom: 
+                        callback: renderProductEntrepot
+
+          mouvement:
+              label: Mouvements de stock
+              sections:
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: BimpProductMouvement  
+                        
+          inventory:
+              label: Inventaires
+              sections:
+                  - type: list
+                    list: 
+                        object: inventory
+                        
+          

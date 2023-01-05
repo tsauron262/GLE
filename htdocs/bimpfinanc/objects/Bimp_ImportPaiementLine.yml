@@ -1,0 +1,266 @@
+table: Bimp_ImportPaiementLine
+primary: id
+
+labels: 
+    name: ligne d'import
+    name_plur: lignes d'import
+    
+export_light: 0
+    
+    
+parent_module: bimpfinanc
+parent_object: Bimp_ImportPaiement
+parent_id_property: id_import
+
+common_fields: 0
+
+objects:
+    factures:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Facture
+     
+                
+fields: 
+    id_import:
+        label: Import
+        type: id_parent
+    factures:
+        label: Facture(s) liée(s)
+        type: items_list
+        items_data_type: id_object
+        object: factures
+        items_braces: 1
+    data:
+        label: Data
+        type: text
+    type:
+        label: Type
+        values: 
+            array: types
+    price:
+        label: Montant
+        type: money
+    name:
+        label: Nom du client
+        type: text
+    traite:
+        label: Traité
+        type: bool
+    id_user_traite:
+        label: Traité manuellement par
+        type: id_object
+        object: user
+        input:
+            type: search_user
+    date: 
+        label: Date
+        type: date
+        
+    infos:
+        label: Infos
+        type: text
+    num:
+        label: Numéro
+        type: text
+    exported:
+        label: Exporté en compta
+        type: bool
+        
+    
+forms:
+    default: 
+        rows:
+            - field: factures
+            - field: data
+            - field: commition
+    lettrage_man:
+        rows:
+            - custom: 1
+              label: Raison
+              input_name: raison
+              data_type: text
+              input: 
+                  type: select
+              values:
+                  array: raisonManu
+            - custom: 1
+              label: Raison détail
+              input_name: raison_detail
+              data_type: text
+              input: 
+                  type: textarea
+              display_if: 
+                  field_name: raison
+                  show_values: 99
+    acompte:
+        rows:
+            - custom: 1
+              label: Type d'objet
+              input_name: object_type
+              data_type: text
+              input: 
+                  type: select
+              values:
+#                  0: Client
+                  1: Devis
+                  2: Commande
+            - custom: 1
+              label: Client
+              input_name: id_client
+              input:
+                  type: search_object
+                  object: client
+                  card: default
+              display_if: 
+                field_name: object_type
+                show_values: 0
+            - custom: 1
+              label: Devis
+              input_name: id_propal
+              input:
+                  type: search_object
+                  object: propal
+                  card: default
+                  search_name: light
+              display_if: 
+                field_name: object_type
+                show_values: 1
+                
+            - custom: 1
+              label: Commande
+              input_name: id_commande
+              input:
+                  type: search_object
+                  object: commande
+                  card: default
+                  search_name: light
+              display_if: 
+                field_name: object_type
+                show_values: 2
+            
+    
+filters_panels: 
+    default: 
+        filters: 
+            type:
+            traite:
+                
+lists:
+    default: 
+        objects_change_reload: Bimp_ImportPaiement
+        checkboxes: 1
+        modal_view: default
+        row_style:
+            callback: getRowStyle
+        configurable: 1
+        n: 25
+        filters_panel: default
+        extra_btn: 
+            callback: getListExtraButtons
+        update_btn: 1
+        sort_field: id
+        sort_way: asc
+        cols:
+            type:
+            factures:
+            dataLight:
+            name:
+                edit: 1
+            priceDet:
+            fact_reconnue:
+            fact_possible:
+            fact_client:
+            id_user_traite:
+            date: 
+            infos:
+            num:
+                
+    global:
+        extends: default
+        header_buttons:
+            callback: getGlobalBtn
+                      
+lists_cols: 
+    dataLight:
+        label: Data light
+        value: 
+            callback: getDataInfo
+    fact_reconnue: 
+        label: Facture(s) reconnue
+        value: 
+            callback: displayFactReconnue
+    fact_possible: 
+        label: Facture(s) par montants
+        value: 
+            callback: getFactPossible
+    fact_client: 
+        label: Facture(s) par client
+        value: 
+            callback: getFactClient
+    priceDet: 
+        label: Montant
+        value: 
+            callback: getPrice
+        min_width: 220px
+        
+views: 
+    default: 
+        objects_change_reload: Bimp_ImportPaiementLine
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: infos
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: data
+                  - type: fields_table
+                    col_lg: 12
+                    col_md: 12
+                    fields_table: 
+                        name: search
+        
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+            - field: name
+              edit: 1
+            - field: type
+            - field: factures
+            - label: Montant
+              value: 
+                callback: getPrice
+            - field: traite
+    data: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+            - field: data
+    search: 
+        title: Possibilitée
+        icon: fas_info-circle
+        rows: 
+            - label: Facture(s) reconnue
+              value: 
+                callback: displayFactReconnue
+            - label: Facture(s) par montants
+              value: 
+                callback: getFactPossible
+            - label: Facture(s) par client
+              value: 
+                callback: 
+                    method: getFactClient
+                    params:
+                        - 1000

@@ -1,0 +1,762 @@
+<?php
+
+require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
+require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
+require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
+require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+
+if (!defined('EURO'))
+    define('EURO', chr(128));
+
+class pdf_fi
+{
+
+    public $emetteur;
+    var $contrat;
+    var $pdf;
+    public $db;
+    var $margin_bottom = 2;
+
+    function __construct($db)
+    {
+        global $conf, $langs, $mysoc;
+        $langs->load("main");
+        $langs->load("bills");
+        $this->debug = "";
+        $this->db = $db;
+        $this->name = "babel";
+        $this->description = $langs->trans('PDFContratSynopsisDescription');
+        $this->type = 'pdf';
+        $this->page_largeur = 210;
+        $this->page_hauteur = 297;
+        $this->format = array($this->page_largeur, $this->page_hauteur);
+        $this->marge_gauche = 15;
+        $this->marge_droite = 15;
+        $this->marge_haute = 10;
+        $this->marge_basse = 0;
+        $this->option_logo = 1;
+        $this->emetteur = $mysoc;
+        if (!$this->emetteur->pays_code)
+            $this->emetteur->pays_code = substr($langs->defaultlang, -2);
+    }
+
+    public static $text_head_table = Array(1 => 'Désignation (Détail en page suivante)', 2 => 'TVA', 3 => 'P.U HT', 4 => 'Qté', 5 => 'Total HT', 6 => 'Total TTC');
+
+    public function addLogo(&$pdf, $size, $pdf1 = null)
+    {
+        global $conf;
+        $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
+
+        if (1) {//isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO'))) {
+            $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);
+            if (is_file($testFile))
+                $logo = $testFile;
+        }
+        if (is_file($logo)) {
+            if (is_object($pdf1)) {
+                $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+            } else {
+                $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
+            }
+        }
+    }
+
+    public function ChapterTitle($num, $title)
+    {
+        $this->pdf->SetFont('helvetica', '', 11);
+        $this->pdf->SetFillColor(255, 255, 255);
+        $this->pdf->Cell($this->page_largeur - $this->marge_droite - $this->marge_gauche, 6, $title . $num, 0, 1, 'C', 0);
+        $this->pdf->Ln(4);
+    }
+
+    public function ChapterBody($file, $mode = false)
+    {
+        $this->pdf->selectColumn();
+        $content = file_get_contents($file, false);
+        $tabContent = explode("\n", $content);
+        $this->pdf->SetFont('', '', 7);
+        $this->pdf->SetTextColor(50, 50, 50);
+        if ($mode) {
+            $this->pdf->writeHTML($content, true, false, true, false, 'J');
+        } else {
+            foreach ($tabContent as $id => $ligne) {
+                if ($this->pdf->getY() < 500 && $this->pdf->getX() < 60 && (count($tabContent) - $id) < 17)
+                    $this->pdf->SetAutoPageBreak(1, 55);
+                $style = "";
+                if (stripos($ligne, "<g>") > -1) {
+                    $ligne = str_replace("<g>", "", $ligne);
+                    $titre = true;
+                    $style .= 'B';
+                }
+                if (stripos($ligne, "<i>") > -1) {
+                    $ligne = str_replace("<i>", "", $ligne);
+                    $style .= 'I';
+                }
+                if (stripos($ligne, "<s>") > -1) {
+                    $ligne = str_replace("<s>", "", $ligne);
+                    $style .= 'U';
+                }
+                $this->pdf->SetFont('', $style, 6.86);
+                $this->pdf->Write(0, $ligne . "\n", '', 0, 'J', true, 0, false, true, 0);
+            }
+        }
+        $this->pdf->Ln();
+    }
+
+    public function headOfArray($pdf)
+    {
+        $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+        $pdf->setColor('fill', 236, 147, 0);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->setDrawColor(255, 255, 255);
+        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 13;
+        $pdf->Cell($W * 5, 8, self::$text_head_table[1], 1, null, 'L', true);
+        $pdf->Cell($W, 8, self::$text_head_table[2], 1, null, 'C', true);
+        $pdf->Cell($W * 2, 8, self::$text_head_table[3], 1, null, 'C', true);
+        $pdf->Cell($W, 8, self::$text_head_table[4], 1, null, 'C', true);
+        $pdf->Cell($W * 2, 8, self::$text_head_table[5], 1, null, 'C', true);
+        $pdf->Cell($W * 2, 8, self::$text_head_table[6], 1, null, 'C', true);
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'C');
+        $pdf->setColor('fill', 255, 255, 255);
+        $pdf->SetFont(''/* 'Arial' */, '', 9);
+        $pdf->setColor('fill', 255, 255, 255);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->setDrawColor(0, 0, 0);
+    }
+
+    public function titre_partie($pdf, $titre)
+    {
+        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
+        $pdf->setTextColor(255, 255, 255);
+        $pdf->setDrawColor(255, 255, 255);
+        $pdf->setColor('fill', 236, 147, 0);
+        $pdf->Cell($W, 8, $titre, 1, null, 'C', true);
+        $pdf->setColor('fill', 255, 255, 255);
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
+        $pdf->setTextColor(0, 0, 0);
+        $pdf->setDrawColor(0, 0, 0);
+    }
+
+    function write_file($fi, $outputlangs = '')
+    {
+        global $user, $langs, $conf, $mysoc;
+
+        $bdb = BimpCache::getBdb();
+
+        if (!is_object($outputlangs))
+            $outputlangs = $langs;
+        $outputlangs->load("main");
+        $outputlangs->load("dict");
+        $outputlangs->load("companies");
+        $outputlangs->load("bills");
+        $outputlangs->load("contrat");
+        $outputlangs->load("products");
+        //$outputlangs->setPhpLang();
+
+        if ($conf->ficheinter->dir_output) {
+
+            if (!is_object($fi)) {
+                BimpTools::loadDolClass('fichinter');
+                $fi = new Fichinter($this->db);
+                $fi->fetch($fi);
+            }
+
+            $this->fi = $fi;
+            $fiche = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $fi->id);
+
+            if ($fi->specimen) {
+                $dir = $conf->ficheinter->dir_output;
+                $file = $dir . "/SPECIMEN.pdf";
+            } else {
+                $propref = $fi->ref;
+                $dir = $conf->ficheinter->dir_output . "/" . $fi->ref;
+                $file = $dir . '/' . $fi->ref . '.pdf';
+            }
+
+
+            if (!file_exists($dir)) {
+                if (dol_mkdir($dir) < 0) {
+                    $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
+                    return 0;
+                }
+            }
+
+            if (file_exists($dir)) {
+                $pdf = "";
+//                $nblignes = sizeof($fi->lignes);
+                $pdf = pdf_getInstance($this->format);
+                if (class_exists('TCPDF')) {
+                    $pdf->setPrintHeader(false);
+                    $pdf->setPrintFooter(false);
+                }
+                $pdf->Open();
+                $pdf->AddPage();
+
+                $pdf->SetTitle($fi->ref);
+                $pdf->SetSubject($outputlangs->transnoentities("Fiche d'interventions"));
+                $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);
+                $pdf->SetAuthor($user->getFullName($langs));
+                $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
+                $pdf->SetAutoPageBreak(1, 10);
+                $pdf->SetFont('', 'B', 9);
+
+                // Titre
+                $this->addLogo($pdf, 12);
+                $pdf->SetXY($this->marge_gauche, $this->marge_haute - 17);
+                $pdf->SetFont('', 'B', 14);
+                $pdf->setXY(58, 10);
+
+                $title = "Rapport d'interventions";
+                $ref = "N° " . $propref;
+
+                $tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $fiche->getData('fk_user_tech'));
+
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $title, 0, 'L');
+                $pdf->setX(58);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $ref, 0, 'L');
+
+                $pdf->SetFont('', 'B', 8);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Technicien: " . $tech->getName(), 0, 'R');
+
+                $emisStr = "";
+                if ($fiche->getData('date_signed')) {
+                    $dateEmission = new DateTime($fiche->getData('date_signed'));
+                    $emisStr = "Rapport émis le " . $dateEmission->format('d/m/Y') . " à " . $dateEmission->format('H:i');
+                } else {
+                    if ($fiche->getData('fk_statut') == 0) {
+                        $emisStr = "Le rapport n'est pas généré de façon officielle et définitive";
+                    }
+                }
+
+
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, $emisStr, 0, 'R');
+                $commercial = $fiche->getCommercialClient();
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Votre contact commercial: " . $commercial->getName() . ' (' . $commercial->getData('email') . ')', 0, 'R');
+
+                // définition couleur et statut intervention
+                // Terminée: 135, 213, 0
+                // En cours: 249, 188, 0
+                // Attente client: 108, 0, 193
+
+                if ($fiche->getData('attente_client')) {
+                    $pdf->SetTextColor(108, 0, 193);
+                    $text = "Intervention non terminée suite à une attente chez le client";
+                } else {
+                    if ($fiche->getData('no_finish_reason')) {
+                        $pdf->SetTextColor(249, 188, 0);
+                        $text = "Intervention non terminée";
+                    } else {
+                        $pdf->SetTextColor(135, 213, 0);
+                        $text = "Intervention terminée";
+                    }
+                }
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, $text, 0, 'R');
+                $pdf->SetTextColor(0, 0, 0);
+                if ($fiche->getData('client_want_contact')) {
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Le client souhaite être recontacté par son commercial", 0, 'R');
+                } else {
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Le client ne souhaite pas être recontacté par son commercial", 0, 'R');
+                }
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->SetFont('', 'B', 11);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'C');
+
+                $this->titre_partie($pdf, 'Entre les parties');
+
+                // Entre les parties
+                $client = new Societe($this->db);
+                $client->fetch($fi->socid);
+                global $mysoc;
+                $pdf->setColor('fill', 255, 255, 255);
+                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
+                $pdf->SetDrawColor(236, 147, 0);
+                $pdf->Cell($W, 4, $mysoc->name, "R", null, 'C', true);
+                if (strlen($client->nom) >= 30 && strlen($client->nom) <= 40) {
+                    $pdf->SetFont('', 'B', 9);
+                } else {
+                    $pdf->SetFont('', 'B', 7);
+                }
+                $pdf->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
+                $pdf->SetFont('', 'B', 11);
+
+                $pdf->SetFont('', '', 9);
+                // Si il y a un contact 'Contact client suivi contrat';
+
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                $pdf->Cell($W, 4, "", "R", null, 'C', true);
+
+                $pdf->SetFont('', '', 7);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                $pdf->Cell($W, 4, $mysoc->address, "R", null, 'C', true);
+                $pdf->Cell($W, 4, $client->address, "L", null, 'C', true);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                $pdf->Cell($W, 4, $mysoc->zip . ' ' . $mysoc->town, "R", null, 'C', true);
+                $pdf->Cell($W, 4, $client->zip . ' ' . $client->town, "L", null, 'C', true);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                $pdf->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
+                $pdf->Cell($W, 4, "", "L", null, 'C', true);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                $pdf->Cell($W, 4, "Email: " . $mysoc->email, "R", null, 'C', true);
+                $pdf->Cell($W, 4, "Code client : " . $client->code_client, "L", null, 'C', true);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                $pdf->Ln();
+                $pdf->Ln();
+
+                $children = $fiche->getChildrenList('inters');
+                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
+                if (count($children) > 1) {
+                    $text = "Détails des interventions";
+                } else {
+                    $text = "Détails de l'intervention";
+                }
+
+                $commandes = $fiche->getData('commandes');
+                $contrat = $fiche->getData('fk_contrat');
+                $tickets = $fiche->getData('tickets');
+
+                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 3;
+                $pdf->SetFont('', 'B', 9);
+                $comm = Array();
+                $tick = Array();
+                if (is_array($commandes) && count($commandes) > 0) {
+                    foreach ($commandes as $id) {
+                        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id);
+                        $comm[] = $commande->getRef();
+                    }
+                }
+                if (is_array($tickets) && count($tickets) > 0) {
+                    foreach ($tickets as $id) {
+                        $ticket = BimpObject::getInstance('bimpsupport', "BS_Ticket", $id);
+                        $tick[] = $ticket->getRef();
+                    }
+                }
+
+                if (count($tick) > 0 || count($comm) > 0 || $fiche->getData('fk_contrat')) {
+                    $pdf->ln();
+
+                    $dir_output = DOL_DOCUMENT_ROOT . '/bimptechnique/views/images/';
+                    if (count($comm) > 0) {
+                        $fileName = 'commande_fi.png';
+                        $pdf->Image($dir_output . $fileName, /* x */ 38, /* y */ 80, 0, 15, '', '', '', false, 250, '');
+                    }
+                    if ($fiche->getData('fk_contrat')) {
+                        $fileName = 'contrat_fi.png';
+                        $pdf->Image($dir_output . $fileName, /* x */ 100, /* y */ 80, 0, 15, '', '', '', false, 250, '');
+                    }
+                    if (is_array($tickets) && count($tickets) > 0) {
+                        $fileName = 'ticket_fi.png';
+                        $pdf->Image($dir_output . $fileName, /* x */ 158, /* y */ 80, 0, 15, '', '', '', false, 250, '');
+                    }
+                    $title = '';
+                    if (count($comm) > 0) {
+                        $title = (count($commandes) > 1) ? "Références commandes" : "Référence commande";
+                    }
+                    $pdf->Cell($W, 4, $title, 0, null, 'C', true);
+                    $title = '';
+                    if ($fiche->getData('fk_contrat'))
+                        $title = "Référence contrat";
+                    $pdf->Cell($W, 4, $title, 0, null, 'C', true);
+                    $title = '';
+                    if (is_array($tickets) && count($tickets) > 0) {
+                        $title = (count($tickets) > 1) ? "Références tickets" : "Référence ticket";
+                    }
+                    $pdf->Cell($W, 4, $title, 0, null, 'C', true);
+                    $pdf->ln();
+                    $pdf->SetFont('', '', 9);
+                    $refY = $pdf->getY();
+
+                    $pdf->SetFont('', '', 7);
+                    $text = '';
+                    if (count($comm) > 0) {
+                        $text = implode(',', $comm);
+                    } else {
+                        //                    $pdf->Cell($W, 4, "Il n'y a pas de commandes liées à ce rapport", 0, null, 'C', 0);
+                    }
+                    $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
+                    $text = '';
+                    if ($fiche->getData('fk_contrat')) {
+                        $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $fiche->getData('fk_contrat'));
+                        $text = $contrat->getRef();
+                    } else {
+                        //                    $pdf->Cell($W, 4, "Il n'y a pas de contrat lié à ce rapport", 0, null, 'C', 0);
+                    }
+                    $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
+                    $text = '';
+                    if (is_array($tickets) && count($tickets) > 0) {
+                        $text = implode(',', $tick);
+                    } else {
+                        //                    $pdf->Cell($W, 4, "Il n'y a pas de tickets support liés à ce rapport", 0, null, 'C', 0);
+                    }
+                    $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
+                    $pdf->Ln();
+
+//                    // Tableau des conditions du contrat
+//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, '', 0, 'C');
+//                    $pdf->SetFont('', 'BU', 13);
+//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $text, 0, 'C');
+//                    $pdf->SetFont('', '', 9);
+                    $pdf->Ln();
+                }
+
+                $nb = 0;
+                foreach ($children as $id) {
+                    $service = null;
+                    $nb++;
+                    $child = $fiche->getChildObject("inters", $id);
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 4;
+                    $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Intervention #" . $nb, 0, 'L');
+                    $pdf->SetFont(''/* 'Arial' */, 'B', 8);
+
+                    $date = new DateTime($child->getData('date'));
+                    $add = "";
+                    if ($child->getData('arrived')) {
+                        $arrived = new DateTime($child->getData('arrived'));
+                        $departure = new DateTime($child->getData('departure'));
+                        if ($child->getData('type') == 2 || $child->getData('forfait') == 1) {
+                            $add = "";
+                        } else {
+                            $add = "de " . $arrived->format('H:i') . ' à ' . $departure->format('H:i');
+                        }
+                    } elseif ($child->getData('arriverd_am')) {
+                        $arrived_am = new DateTime($child->getData('arriverd_am'));
+                        $departure_am = new DateTime($child->getData('departure_am'));
+                        $arrived_pm = new DateTime($child->getData('arriverd_pm'));
+                        $departure_pm = new DateTime($child->getData('departure_pm'));
+                        if ($child->getData('type') == 2 || $child->getData('forfait') == 1) {
+                            $add = "";
+                        } else {
+                            $add = "de " . $arrived_am->format('H:i') . ' à ' . $departure_am->format('H:i') . " et de ";
+                            $add .= $arrived_pm->format('H:i') . " à " . $departure_pm->format('H:i');
+                        }
+                    }
+
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Le " . $date->format('d/m/Y') . " " . $add, 0, 'L');
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                    $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                    $pdf->setColor('fill', 236, 147, 0);
+                    $pdf->SetTextColor(255, 255, 255);
+                    $pdf->setDrawColor(255, 255, 255);
+
+                    $pdf->Cell($W, 8, "Type", 1, null, 'C', true);
+                    $pdf->Cell($W, 8, "Durée", 1, null, 'C', true);
+                    $pdf->Cell($W, 8, "Référence", 1, null, 'C', true);
+
+                    if ($child->getData('type') == 3 || $child->getData('type') == 4) {
+                        $pdf->Cell($W, 8, "Total HT en €", 1, null, 'C', true);
+                    } else {
+                        if($child->getData('forfait') == 1 || $child->getData('type') == 0)
+                            $pdf->Cell($W, 8, "", 1, null, 'C', true);
+                        else
+                            $pdf->Cell($W, 8, "Service", 1, null, 'C', true);
+                    }
+
+                    $pdf->Ln();
+                    $pdf->setColor('fill', 255, 255, 255);
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                    $pdf->setColor('fill', 255, 255, 255);
+                    $pdf->SetTextColor(0, 0, 0);
+                    $pdf->setDrawColor(0, 0, 0);
+
+                    $pdf->setColor('fill', 242, 242, 242);
+                    $pdf->setDrawColor(255, 255, 255);
+
+                    switch ($child->getData('type')) {
+                        case 0:
+                            $type = "Intervention vendue";
+                            break;
+                        case 1:
+                            $type = "Impondérable";
+                            break;
+                        case 2:
+                            $type = "Explications";
+                            break;
+                        case 3:
+                            $type = "Déplacement à facturer";
+                            break;
+                        case 4:
+                            $type = "Intervention à facturer";
+                            break;
+                        case 5:
+                            $type = "Déplacement sous contrat";
+                            break;
+                        case 6:
+                            $type = "Déplacement vendu";
+                            break;
+                        case 12:
+                            $type = "Intervention en atelier à facturer";
+                            break;
+                        case 13:
+                            $type = "Télémaintenance à facturer";
+                            break;
+                        case 14:
+                            $type = "Intervention sur site à facturer";
+                            break;
+                        default:
+                            $type = "Service en interne";
+                            break;
+                    }
+
+                    $pdf->Cell($W, 6, "$type", 1, 0, 'C', 1);
+                    if ($child->getData('type') == 2) {
+                        $pdf->Cell($W, 6, "Pas de durée", 1, 0, 'C', 1);
+                    } elseif ($child->getData('type') == 3) {
+                        $pdf->Cell($W, 6, "Forfait", 1, 0, 'C', 1);
+                    } else {
+                        if($child->getData('forfait') == 1) {
+                            $pdf->Cell($W, 6, "Forfait", 1, 0, 'C', 1);
+                        } else {
+                            $pdf->Cell($W, 6, $child->displayDuree(), 1, 0, 'C', 1);
+                        }
+                        
+                    }
+                    $ref_service = '';
+                    $have_pdf_ref = false;
+                    if ($child->getData('id_line_commande')) {
+                        $ref_commande = '';
+                        
+                        $have_pdf_ref = true;
+                        $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $child->getData('id_line_commande'));
+                        if (BimpObject::objectLoaded($line)) {
+                            if ((int) $line->getData('id_obj')) {
+                                $ref_commande = $bdb->getValue('commande', 'ref', 'rowid = ' . (int) $line->getData('id_obj'));
+                            }
+                            if ((int) $line->id_product) {
+                                $service = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
+                            }
+                        }
+                        $ref_service = $service->getRef();
+                        $pdf->Cell($W, 6, $ref_commande, 1, 0, 'C', 1);
+                        $pdf->Cell($W, 6, (BimpObject::objectLoaded($service) ? $service->getRef() : ''), 1, 0, 'C', 1);
+                    }
+
+                    if ($child->getData('id_line_contrat')) {
+                        $have_pdf_ref = true;
+                        $obj = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $child->getData('id_line_contrat'));
+                        $obj_parent = $obj->getParentInstance();
+                        $pdf->Cell($W, 6, (BimpObject::objectLoaded($obj_parent) ? $obj_parent->getData('ref') : 'inconnu'), 1, 0, 'C', 1);
+                        $ref_service = '';
+                        if ((int) $obj->getData('fk_product')) {
+                            $service = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $obj->getData('fk_product'));
+                            $ref_service = $service->getRef();
+                        }
+                        $pdf->Cell($W, 6, (BimpObject::objectLoaded($service) ? $service->getRef() : 'inconnu'), 1, 0, 'C', 1);
+                    }
+
+                    if (!$have_pdf_ref || $child->getData('type') == 5) {
+                        $pdf->SetFont(''/* 'Arial' */, '', 7.5);
+                        if ($child->getData('type') == 5) {
+                            if (BimpObject::objectLoaded($contrat)) {
+                                $pdf->Cell($W, 6, $contrat->getRef(), 1, 0, 'C', 1);
+                            } else {
+                                $pdf->Cell($W, 6, "Contrat", 1, 0, 'C', 1);
+                            }
+                        } else {
+                            $pdf->Cell($W, 6, "Ni commande, ni contrat, ni ticket", 1, 0, 'C', 1);
+                        }
+
+                        $pdf->SetFont(''/* 'Arial' */, '', 9);
+                        // Tarif
+                        $id_service = ($child->getData('type') == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique');
+                        $servicePlus = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $id_service);
+
+                        $time = $fiche->timestamp_to_time($child->getData('duree'));
+                        $qty = $fiche->time_to_qty($time);
+
+                        $pareteze = "";
+                        $price = $servicePlus->getData('price') . "€";
+
+                        if (!$servicePlus->isDep()) {
+                            $pareteze = "(" . $servicePlus->getData('price') . "€HT/H)";
+                            $price = ($servicePlus->getData('price') * $qty) . "€";
+                        }
+
+                        if ($child->getData('type') == 5) {
+                            $pareteze = "";
+                            $price = "Sous contrat";
+                        }
+                        
+                        $arrayAutre = Array(12,13,14);
+                        
+                        if(in_array($child->getData('type'), $arrayAutre)) {
+                            $servicePlus = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product");
+                            $arrayCode = $child->getArrayServiceForBilling();
+                            if($servicePlus->find(array('ref' => $arrayCode[$child->getData('type')]))) {
+                                $pareteze = "(" . $servicePlus->getData('price') . "€HT/H)";
+                                $price = ($servicePlus->getData('price') * $qty) . "€";
+                            }
+                        }
+                        
+                        if($child->getData('forfait') == 1 || $child->getData('type') == 0)
+                            $pdf->Cell($W, 6, "", 1, 0, 'C', 1);
+                        else {
+                            $pdf->Cell($W, 6, $price . " $pareteze", 1, 0, 'C', 1);
+                        }
+                            
+
+                    }
+
+                    $excludeDescriptionService = Array(4, 5, 1, 2, 3);
+                    $pdf->Ln();
+                    $pdf->setColor('fill', 255, 255, 255);
+                    $pdf->setDrawColor(255, 255, 255);
+                    $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                    if (BimpObject::objectLoaded($service) && $child->getData('forfait') == 0) {
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Description du service " . $service->getRef(), 0, 'L');
+                    } else {
+                        if (!in_array($child->getData('type'), $excludeDescriptionService)) {
+                            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Description du service ", 0, 'L');
+                        }
+                    }
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                    if($child->getData('forfait') == 1) {
+                        $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4,'Prestation au forfait', 0, 'L');
+                    } else {
+                        if (BimpObject::objectLoaded($service)) {
+                            $pdf->writeHTML($service->getData('description'));
+                        } else {
+                            if (!in_array($child->getData('type'), $excludeDescriptionService)) {
+                                $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, $type, 0, 'L');
+                            }
+                        }
+
+                        
+                    }
+                    
+                    if ($child->getData('description') != "<br>" && $child->getData('description') != "") {
+                            $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Notes de " . $tech->getName(), 0, 'L');
+                            $pdf->SetFont(''/* 'Arial' */, '', 9);
+                            $pdf->setX(16);
+                            $pdf->writeHTML($child->getData('description'));
+                        }
+                    $pdf->Ln();
+                }
+                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
+                $pdf->setTextColor(255, 255, 255);
+                $pdf->setDrawColor(255, 255, 255);
+                $pdf->setColor('fill', 236, 147, 0);
+                $pdf->Cell($W, 8, "Informations", 1, null, 'C', true);
+                $pdf->setColor('fill', 255, 255, 255);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, "", 0, 'C');
+                $pdf->setTextColor(0, 0, 0);
+                $pdf->setDrawColor(0, 0, 0);
+                if ($fiche->getData('note_public')) {
+                    $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Préconisation du technicien", 0, 'L');
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                    $pdf->setX(16);
+                    $pdf->writeHTML($fiche->getData('note_public'));
+                    $pdf->Ln();
+                }
+                if ($fiche->getData('attente_client')) {
+                    $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Intervention non terminée suite à une attente chez le client", 0, 'L');
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                    $pdf->setX(16);
+                    $pdf->writeHTML($fiche->getData('attente_client'));
+                    $pdf->Ln();
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                }
+                if ($fiche->getData('no_finish_reason')) {
+                    $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Intervention non terminée", 0, 'L');
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                    $pdf->setX(16);
+                    $pdf->writeHTML($fiche->getData('no_finish_reason'));
+                    $pdf->Ln();
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                }
+                $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Mentions", 0, 'L');
+                $pdf->SetFont(''/* 'Arial' */, 'I', 8);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "La société Bimp/OLYS ne peut en aucun cas être tenue pour responsable de la perte éventuelle de données informatiques. Il appartient au client d'effectuer des sauvegardes régulières de ses informations et de vérifier la conformité de celles-ci", 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Veuillez noter que conformément à nos devis en coût horaire, la première heure est indivisible et que toute demi-heure entamée est due", 0, 'L');
+
+                // 297 / 4 = 74.25
+                if ($fiche->getData('signed') && $fiche->getData('base_64_signature')) {
+                    if ($pdf->GetY() > 222) {
+                        $pdf->addPage();
+                    }
+                    $pdf->ln();
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Nom du signataire: " . $fiche->getData('signataire'), 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Email du signataire: " . $fiche->getData('email_signature'), 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "", 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "SIGNATURE CLIENT", 0, 'L');
+                    $img_base64_encoded = $fiche->getData('base_64_signature');
+                    $img = '<img src="@' . preg_replace('#^data:image/[^;]+;base64,#', '', $img_base64_encoded) . '" width="300px">';
+                    $pdf->writeHTML($img, true, false, true, false, '');
+                } elseif ($fiche->getData('fk_statut') != 0) {
+                    if ($pdf->GetY() > 250) {
+                        $pdf->addPage();
+                    }
+                    $pdf->ln();
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Nom du signataire: " . $fiche->getData('signataire'), 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Email du signataire: " . $fiche->getData('email_signature'), 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "", 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "SIGNATURE CLIENT (Date et signature)", 0, 'L');
+                }
+                $this->_pagefoot($pdf, $langs);
+                if (method_exists($pdf, 'AliasNbPages'))
+                    $pdf->AliasNbPages();
+                //$pdf1->AliasNbPages();
+                $pdf->Close();
+                $this->file = $file;
+                $pdf->Output($file, 'f');
+                $this->result["fullpath"] = $file;
+                return 1;
+            } else {
+                $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
+                return 0;
+            }
+        } else {
+            $this->error = $langs->trans("ErrorConstantNotDefined", "CONTRACT_OUTPUTDIR");
+            return 0;
+        }
+
+        $this->error = $langs->trans("ErrorUnknown");
+        return 0;
+    }
+
+    function _pagehead(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage = 0)
+    {
+        global $conf, $langs;
+        if ($currentPage > 1) {
+            $showadress = 0;
+        }
+    }
+
+    function _pagefoot(&$pdf, $outputlangs, $paraphe = true)
+    {
+        global $mysoc, $conf;
+        $pdf->setY(275);
+        $pdf->SetFont('', '', 8);
+        $pdf->SetTextColor(150, 150, 150);
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $mysoc->name . " - SAS au capital de " . $mysoc->capital . ' - ' . $mysoc->address . ' - ' . $mysoc->zip . ' ' . $mysoc->town . ' - Tél ' . $mysoc->phone . ' - SIRET: ' . $conf->global->MAIN_INFO_SIRET, 0, 'C');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'APE : ' . $conf->global->MAIN_INFO_APE . ' - RCS/RM : ' . $conf->global->MAIN_INFO_RCS . ' - Num. TVA : FR 34 320387483', 0, 'C');
+    }
+
+    function hex2RGB($hexStr, $returnAsString = false, $seperator = ',')
+    {
+        $hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
+        $rgbArray = array();
+        if (strlen($hexStr) == 6) { //If a proper hex code, convert using bitwise operation. No overhead... faster
+            $colorVal = hexdec($hexStr);
+            $rgbArray['red'] = 0xFF & ($colorVal >> 0x10);
+            $rgbArray['green'] = 0xFF & ($colorVal >> 0x8);
+            $rgbArray['blue'] = 0xFF & $colorVal;
+        } elseif (strlen($hexStr) == 3) { //if shorthand notation, need some string manipulations
+            $rgbArray['red'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
+            $rgbArray['green'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
+            $rgbArray['blue'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
+        } else {
+            return false; //Invalid hex color code
+        }
+        return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
+    }
+}
+
+?>

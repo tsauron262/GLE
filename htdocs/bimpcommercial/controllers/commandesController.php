@@ -23,8 +23,9 @@ class commandesController extends BimpController
         }
     }
 
-    public function getSocid(){
-        if($this->socid < 1){
+    public function getSocid()
+    {
+        if ($this->socid < 1) {
             if (BimpTools::getValue("socid") > 0) {
                 $this->socid = BimpTools::getValue("socid");
                 $this->soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
@@ -36,10 +37,11 @@ class commandesController extends BimpController
     {
 //        BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeLine');
 //        Bimp_CommandeLine::checkAllQties();
-        
+
         $this->getSocid();
         $list = 'default';
         $titre = 'Commandes';
+        $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
         if ($this->socid) {
 
             if (!BimpObject::objectLoaded($this->soc)) {
@@ -49,13 +51,28 @@ class commandesController extends BimpController
             $titre .= ' du client ' . $this->soc->getData('code_client') . ' - ' . $this->soc->getData('nom');
         }
 
-        $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+        if (isset($_REQUEST['fk_statut'])) {
+            $filtres = explode(",", $_REQUEST['fk_statut']);
+            foreach ($filtres as $val) {
+                if (isset($propal::$status_list[$val]))
+                    $labels[] = $propal::$status_list[$val]['label'];
+            }
+
+            if (!empty($labels)) {
+                $titre .= ' au statut ' . implode(' ou ', $labels);
+            }
+        }
+
 
         $list = new BC_ListTable($propal, $list, 1, null, $titre);
 
         if ($this->socid) {
             $list->addFieldFilterValue('fk_soc', (int) $this->soc->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
+        }
+        if (isset($_REQUEST['fk_statut'])) {
+            $filtres = explode(",", $_REQUEST['fk_statut']);
+            $list->addFieldFilterValue('fk_statut', $filtres);
         }
 
         return $list->renderHtml();
@@ -64,7 +81,7 @@ class commandesController extends BimpController
     public function renderShipmentsTab()
     {
         $this->getSocid();
-        
+
         $titre = 'Liste des expéditions';
         if ($this->socid) {
             if (!BimpObject::objectLoaded($this->soc)) {
@@ -75,7 +92,7 @@ class commandesController extends BimpController
         }
         $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
         $list = new BC_ListTable($shipment, 'default', 1, null, $titre, 'fas_shipping-fast');
-        
+
         if ($this->socid) {
             $list->addJoin('commande', 'a.id_commande_client = parent.rowid', 'parent');
             $list->addFieldFilterValue('parent.fk_soc', (int) $this->socid);
@@ -90,13 +107,12 @@ class commandesController extends BimpController
 //        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-        
+
         $titre = 'Liste des produits en commande';
         if ($this->socid) {
             if (!BimpObject::objectLoaded($this->soc)) {
                 return BimpRender::renderAlerts('ID du client invalide');
             }
-            //$list = 'client';
             $titre .= ' du client ' . $this->soc->getData('code_client') . ' - ' . $this->soc->getData('nom');
         }
 
@@ -106,18 +122,69 @@ class commandesController extends BimpController
             'operator' => '>',
             'value'    => 0
         ));
-        
-        
+
+
         if ($this->socid) {
             $bc_list->addFieldFilterValue('parent.fk_soc', (int) $this->socid);
-            //$list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
         }
-        
-//        if ($id_entrepot) {
-//            $bc_list->addJoin('commande_extrafields', 'a.id_obj = cef.fk_object', 'cef');
-//            $bc_list->addFieldFilterValue('cef.entrepot', $id_entrepot);
-//        }
 
         return $bc_list->renderHtml();
+    }
+
+    public function renderPeriodsTab()
+    {
+        $tabs = array();
+
+        $this->getSocid();
+
+        $line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+
+        // Overview: 
+        $content = '<div class="periods_overview_content">';
+        $content .= $line_instance->renderPeriodsToProcessOverview();
+        $content .= '</div>';
+
+        $html .= '<div class="row">';
+        $html .= '<div class="col-sm-12 col-md-4">';
+        $title = BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'A traiter aujourd\'hui';
+        $onclick = $line_instance->getJsLoadCustomContent('renderPeriodsToProcessOverview', '$(this).findParentByClass(\'panel\').find(\'.periods_overview_content\')');
+        $footer = '<div style="text-align: right">';
+        $footer .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $footer .= 'Actualiser' . BimpRender::renderIcon('fas_redo', 'iconRight');
+        $footer .= '</span>';
+        $footer .= '</div>';
+        $html .= BimpRender::renderPanel($title, $content, $footer, array(
+                    'type' => 'secondary'
+        ));
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // Livraisons: 
+        $tabs[] = array(
+            'id'            => 'exp_periods_tab',
+            'title'         => BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons périodiques',
+            'ajax'          => 1,
+            'ajax_callback' => $line_instance->getJsLoadCustomContent('renderPeriodsList', '$(\'#exp_periods_tab .nav_tab_ajax_result\')', array('exp', $this->socid), array('button' => ''))
+        );
+
+        // Facturations: 
+        $tabs[] = array(
+            'id'            => 'fac_periods_tab',
+            'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Facturations périodiques',
+            'ajax'          => 1,
+            'ajax_callback' => $line_instance->getJsLoadCustomContent('renderPeriodsList', '$(\'#fac_periods_tab .nav_tab_ajax_result\')', array('fac', $this->socid), array('button' => ''))
+        );
+
+        // Achats: 
+        $tabs[] = array(
+            'id'            => 'achat_periods_tab',
+            'title'         => BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . 'Achats périodiques',
+            'ajax'          => 1,
+            'ajax_callback' => $line_instance->getJsLoadCustomContent('renderPeriodsList', '$(\'#achat_periods_tab .nav_tab_ajax_result\')', array('achat', $this->socid), array('button' => ''))
+        );
+
+        $html .= BimpRender::renderNavTabs($tabs);
+
+        return $html;
     }
 }

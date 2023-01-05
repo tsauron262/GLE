@@ -39,7 +39,7 @@ foreach ($rows as $r) {
 //        if (BimpObject::objectLoaded($reservation)) {
 //            if ((int) $reservation->getData('id_commande_client_line') === (int) $id_comm_line) {
 //                $reservation->updateField('id_equipment', 0);
-//                $err = $reservation->setNewStatus(100, 1, 0);
+//                $err = $reservation->setNewStatus(100, array('qty' => 1, 'id_equipment' => 0));
 //                if (count($err)) {
 //                    echo 'Echec maj résa<pre>';
 //                    print_r($err);

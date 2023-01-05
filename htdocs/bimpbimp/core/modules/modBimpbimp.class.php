@@ -36,7 +36,7 @@ class modBimpbimp extends DolibarrModules {
         $this->numero = 8567;
 
         $this->family = "BIMP";
-        $this->name = "Bimp module";
+        $this->name = "bimpbimp";
         $this->description = "Pour soc BIMP";
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_BIMPBIMP';
@@ -57,7 +57,7 @@ class modBimpbimp extends DolibarrModules {
         
         
         $this->module_parts = array(
-            'hooks' => array('contactcard'),
+            'hooks' => array('contactcard', 'mail'),
             'triggers' => 1
         );
     }
@@ -69,6 +69,13 @@ class modBimpbimp extends DolibarrModules {
     function init() {
         global $conf;
         $sql = array();
+        require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+        $name = 'module_version_'.strtolower($this->name);
+        // Se fais que lors de l'installation du module
+        if(BimpCore::getConf($name, '') == "") {
+            BimpCore::setConf($name, floatval($this->version));
+            $this->_load_tables('/'.strtolower($this->name).'/sql/');
+        }
         
         
             

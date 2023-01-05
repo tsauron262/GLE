@@ -30,6 +30,7 @@ $(function () {
             code3.val(pasted[2]);
             code4.val(pasted[3]);
             disabled('all', pasted);
+            $('#valide').click();
         } else {
             if (pasted.length != 1) {
                 $('#error_js').slideDown();
@@ -89,10 +90,29 @@ $(function () {
             for_iphone();
         }
     });
+    $('input[name="sms_code_1"]').on("change", function () {
+        if ($(this).val().length == 4) {
+            for_iphone();
+        }
+    });
     body.on("submit", function () {
         onSubmit();
     });
 
     body.on("keyup", "input", Input);
     body.on("paste", code1, Pasted);
+    
+    
+    
+    function testCode(){
+        code = code1.val();
+        if(code.length == 4){
+            for_iphone();
+        }
+        else{
+            setTimeout(function(){testCode()}, 1000);
+        }
+    }
+    testCode();
 });
+

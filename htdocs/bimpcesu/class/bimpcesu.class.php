@@ -577,7 +577,7 @@ class Fichinter extends CommonObject
 			$classname = "mod_".$conf->global->FICHEINTER_ADDON;
 
 			// Include file with class
-			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
+			$dirmodels = BimpTools::merge_array(array('/'), (array) $conf->modules_parts['models']);
 
 			foreach ($dirmodels as $reldir) {
 

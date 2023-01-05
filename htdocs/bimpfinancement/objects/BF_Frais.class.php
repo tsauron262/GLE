@@ -4,7 +4,7 @@ class BF_Frais extends BimpObject
 {
 
     // Getters:
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         if ((int) $this->getData('id_facture')) {
             $facture = $this->getChildObject('facture');
@@ -18,9 +18,9 @@ class BF_Frais extends BimpObject
         return 1;
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
-        return $this->isEditable($force_delete);
+        return $this->isEditable($force_delete, $errors);
     }
 
     public function getListExtraButtons()

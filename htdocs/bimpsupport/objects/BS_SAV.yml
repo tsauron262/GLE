@@ -1,8 +1,7 @@
 table: bs_sav
 controller: sav
-icon: wrench
-
-header_list_name: default
+icon: fas_wrench
+public_icon: pe_tools
 
 list_page_url: 
     controller: index
@@ -10,10 +9,20 @@ list_page_url:
         tab: sav
         id_entrepot: 
             field_value: id_entrepot
+            
+header_list_name: default
+header_edit_form: edit
+
+public_header_edit_form: public_edit
 
 header_btn: 
     callback: getViewExtraBtn
         
+nom_url: 
+    with_status: 1
+    syntaxe: <ref>
+    card: default
+    
 labels:
     name: sav
     name_plur: sav
@@ -32,16 +41,20 @@ objects:
                 field_value: id_user_tech
         
     notes:
-        relation: hasMany
-        delete: 0
         instance:
-            bimp_object: BS_Note
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Note
+        list: 
+            filters: unset
                 
     propal: 
         instance: 
             bimp_object: 
                 module: bimpsupport
                 name: BS_SavPropal
+            id_object: 
+                field_value: id_propal
                 
     facture_acompte: 
         extends: facture
@@ -83,23 +96,78 @@ objects:
         instance: 
             bimp_object: BS_Issue
             
-#    diagnostics: 
-#        relation: hasMany
-#        delete: 1
-#        instance: 
-#            bimp_object: 
-#                module: bimpapple
-#                name: GSX_Diagnostic
+    ticket: 
+        relation: hasOne
+        instance: 
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Ticket
+            id_object: 
+                field_value: id_ticket
+            
+    user_client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+            id_object: 
+                field_value: id_user_client
+                
+    signature_pc: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_pc
+                
+    signature_resti: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_resti
+                
+    sac: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: BS_Sac
+            
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpsupport
+                name: BS_SavFile
+        list: 
+            filters:
+                parent_module: bimpsupport
+                parent_object_name: BS_SAV
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpsupport
+                    parent_object_name: BS_SAV
             
 associations: 
     propales:
         object: propal
         label: Devis
         
-fields: 
+fields:
     ref:
         label: Référence
-        type: string
         required: 0
         search:
             input: 
@@ -114,20 +182,39 @@ fields:
         values: 
             array: status_list
         default_value: 0
-        display: 
+        displays: 
             actions: 
                 type: callback
                 method: displayStatusWithActions
     code_centre: 
-        label: Centre
+        label: Centre de prise en charge
         values: 
             array: centres
         input: 
             options: 
-                array: userCentres
+                callback: 
+                    method: getListCentre
+                    params:
+                        - code_centre
+                        - 1
         required: 1
         default_value: 
             callback: getDefaultCodeCentre
+    code_centre_repa: 
+        label: Centre de réparation
+        values: 
+            array: centres
+        input: 
+            help: Laisser vide si identique au centre de prise en charge
+            options: 
+                callback: 
+                    method: getListCentre
+                    params:
+                        - code_centre_repa
+                        - 1
+        default_value: 
+            callback: getDefaultCodeCentreRepa
+        depends_on: code_centre
     id_equipment: 
         label: Equipement
         type: id_object
@@ -136,10 +223,20 @@ fields:
         input: 
             card: default
         create_form: light
+        edit_form: light
+        displays: 
+            custom: 
+                label: Affichage étendu
+                type: callback
+                method: displayEquipment
+    id_ticket:
+        label: Ticket Hotline
+        type: id_object
+        object: ticket        
     id_entrepot:
         label: Entrepot (stock)
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         input: 
             type: search_entrepot    
         default_value: 
@@ -150,9 +247,11 @@ fields:
         object: user_tech
         input: 
             type: search_user
+            include_empty: 1
         search:
             input: 
                 type: search_user
+                include_empty: 1
     id_client:
         label: Client
         type: id_object
@@ -165,12 +264,18 @@ fields:
                 type: search_societe
                 societe_type: customer    
         create_form: light
+        edit_form: default
     id_contact:
         label: Contact
         type: id_object
         object: contact
         values: 
             array: client_contacts
+        input: 
+            type: custom 
+            content: 
+                callback: renderContactsSelect
+            help: Obligatoire si client pro
         depends_on: id_client
         display_if:
             field_name: id_client
@@ -185,10 +290,15 @@ fields:
                     fields_search: lastname,firstname
                     label_syntaxe: <label_1> <label_2>    
         create_form: default
+        edit_form: default
         create_form_values:
             fields: 
                 fk_soc: 
                     field_value: id_client
+    id_user_client: 
+        label: Utilisateur client
+        type: id_object
+        object: user_client
     id_contrat:
         label: Contrat
         type: id_object
@@ -200,12 +310,12 @@ fields:
             field_name: id_client
             hide_values: 0,
     id_propal: 
-        label: Proposition commerciale
+        label: Devis
         type: id_object
         object: propal
         values: 
             array: propals
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayPropal
@@ -222,24 +332,26 @@ fields:
         type: id_object
         object: facture_avoir
     id_discount:
-        label: Id reduction
-        type: int
+        label: Réduction
+        type: id
     id_facture: 
         label: Facture
         type: id_object
         object: facture
-#    date_problem: 
-#        label: Date problème
-#        type: datetime
     date_close: 
         label: Date / Heure Fin
         type: datetime
+    date_pc: 
+        label: Date de prise en charge
+        type: datetime
     prestataire_number: 
         label: N° de dossier prestataire
+        user_edit: 1
     sav_pro: 
         label: SAV Pro
         type: bool
         default_value: 0
+        user_edit: 1
     accident: 
         label: Accident
         type: bool
@@ -253,16 +365,20 @@ fields:
         type: int
         values: 
             array: save_options
+        user_edit: 1
+        default_value: 1
     contact_pref: 
         label: Préférence de contact retour
         type: int
         values: 
             array: contact_prefs
+        user_edit: 1
     etat_materiel: 
         label: Etat matériel
         type: int
         values: 
             array: etats_materiel
+        user_edit: 1
     etat_materiel_desc: 
         label: Description état matériel
         type: text
@@ -271,6 +387,7 @@ fields:
             rows: 1
             values: 
                 array: list_etats_materiel
+        user_edit: 1
     accessoires: 
         label: Accessoires
         type: text
@@ -279,43 +396,59 @@ fields:
             rows: 2
             values: 
                 array: list_accessoires
+        user_edit: 1
     symptomes: 
         label: Symptômes
         type: text
         input:
+            hashtags: 1
             auto_expand: 1
             rows: 4
             values: 
                 array: list_symptomes
         required: 1
+        user_edit: 1
     diagnostic: 
         label: Diagnostic
         type: text
         input:
             auto_expand: 1
             rows: 4
+        user_edit: 1
     resolution: 
         label: Résolution
         type: text
         input:
             auto_expand: 1
             rows: 4
+        user_edit: 1
+        hashtags: 1
     extra_infos:
         label: Informations supplémentaires devis
         type: text
         input:
             auto_expand: 1
             rows: 4
+        user_edit: 1
+        hashtags: 1
     system: 
         label: Système
         type: int
         values: 
             array: systems
+        user_edit: 1
+        required: 1
     login_admin: 
         label: Login admin
+        user_edit: 1
+        input:
+            no_autocorrect: 1
     pword_admin: 
         label: Mot de passe admin
         required: 1
+        user_edit: 1
+        input:
+            no_autocorrect: 1
     acompte: 
         label: Acompte
         type: money
@@ -326,11 +459,95 @@ fields:
         input: 
             type: hidden
         default_value: 0
-    
+    date_terminer:
+        label: Date fin
+        type: datetime
+    replaced_ref: 
+        label: Référence remplacée
+        input: 
+            help: Utiliser ce champ si perte des données de la pièce remplacée
+    resgsx: 
+        label: ID réservation GSX
+    date_rdv: 
+        label: Date de rendez-vous
+        type: datetime
+        displays: 
+            default: 
+                type: datetime
+                show_hour: 1
+    bon_resti_raison:
+        label: Raison de la non facturation
+        type: int
+        values: 
+            array: bon_restit_raison
+    id_signature_pc: 
+        label: Signature prise en charge
+        type: id_object
+        object: signature_pc
+    signature_pc_params: 
+        label: Paramètres signature PC
+        type: json
+    id_signature_resti: 
+        label: Signature restitution
+        type: id_object
+        object: signature_resti
+    signature_resti_params: 
+        label: Paramètres signature restitution
+        type: json
+    sacs:
+        label: Sac d'emballage
+        type: items_list
+        items_braces: 1
+        items_data_type: id_object
+        object: sac
+        input:
+            scanner: 1
+    j_date_create:
+        label: Jour de la création
+        extra: 1
+        type: int
+        values:
+            array: j_semaine
+    h_date_create:
+        label: Heure de la création
+        extra: 1
+        type: int
+    j_date_pc:
+        label: Jour de la prise en charge
+        extra: 1
+        type: int
+        values:
+            array: j_semaine
+    h_date_pc:
+        label: Heure de la prise en charge
+        extra: 1
+        type: int
+    j_date_close:
+        label: Jour de la restitution
+        extra: 1
+        type: int
+        values:
+            array: j_semaine
+    h_date_close:
+        label: Heure de la restitution
+        extra: 1
+        type: int
+    in_fac_emails_files: 
+        label: Fichier à joindre à l'e-mail de facturation
+        type: items_list
+        items_braces: 1
+        items_data_type: id_object
+        object: file
+    name_reseller:
+        label: Nom du revendeur
+        type: string
+        
 forms: 
     default:
         rows: 
+            - field: replaced_ref
             - field: code_centre
+            - field: code_centre_repa
             - field: id_client
             - field: id_contact
             - field: id_equipment
@@ -376,26 +593,109 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - field: id_ticket
+              hidden: 1
+            - field: sacs
+            - object: files
+              multiple: 1
+#            - custom: 1
+#              label: Fichier
+#              input_name: file
+#              input: 
+#                  type: file_upload
+#            - custom: 1
+#              label: Fichier 2
+#              input_name: file2
+#              input: 
+#                  type: file_upload
               
-#              NE PAS DECOMMENTER: les prêts ne sont plus des objets enfant de SAV
-#            - object: prets 
-#              multiple: 1
-#              depends_on: code_centre
-            
-    edit: 
+    prise_en_charge: 
         rows: 
             - field: code_centre
+              edit: 0
+            - field: code_centre_repa
+            - field: id_client
+            - field: id_contact
+            - field: id_equipment
+            - custom: 1
+              label: Conserver l'équipement dans son emplacement actuel
+              input_name: keep_equipment_current_place
+              data_type: bool
+              content: 
+                  callback: renderEquipmentPlaceOptionInput
+              display_if: 
+                  field_name: id_equipment
+                  hide_values: 0,
+              depends_on: id_equipment
+            - field: symptomes
+            - field: id_contrat
+            - field: prioritaire
+            - field: acompte
+            - label: Mode de paiement de l'acompte
+              custom: 1
+              data_type: int
+              input_name: mode_paiement_acompte
+              input: 
+                  type: select_payment
+                  include_empty: 1
+              display_if: 
+                  field_name: acompte
+                  hide_values: 0,
+              value: 6
+            - field: system
+            - field: login_admin
+            - field: pword_admin
+            - field: contact_pref
+            - field: accessoires
+            - field: etat_materiel
+            - field: etat_materiel_desc
+            - field: save_option
+            - field: sav_pro
+            - field: prestataire_number
+            - field: sacs
+              
+    edit: 
+        rows: 
+            - field: replaced_ref
+            - field: code_centre
+            - field: code_centre_repa
             - field: id_client
             - field: id_contact
             - field: id_equipment
             - field: prioritaire
             - field: id_contrat
             - field: prestataire_number
-#            - field: id_propal
             - field: id_user_tech
             - field: system
             - field: login_admin
             - field: pword_admin
+            - field: sacs
+            - field: in_fac_emails_files
+#            - custom: 1 => Pourquoi mettre ça dans le form d'édition du SAV alors qu'il suffit d'aller dans l'onglet "Fichiers" > Ajouter un fichier ?
+#              label: Fichier
+#              input_name: file
+#              input: 
+#                  type: file_upload
+#            - custom: 1
+#              label: Fichier 2
+#              input_name: file2
+#              input: 
+#                  type: file_upload
+            - field: name_reseller
+            
+    public_edit: 
+        rows: 
+            - field: system
+            - field: contact_pref
+            - field: etat_materiel
+            - field: symptomes
+#            - object: client
+#              on_edit: 1
+#              form_name: public
+#            - object: contact
+#              on_edit: 1
+#              form_name: public_edit
+            
             
     send_msg: 
         title: Envoi de notification
@@ -411,6 +711,11 @@ forms:
     restitute:
         title: Restituer
         rows: 
+            # Pour plus tard: 
+#            - field: id_client
+#              label: Client facturation
+#            - field: id_contact
+#              label: Contact facturation
             - custom: 1
               label: Mode de paiement
               input_name: mode_paiement
@@ -426,6 +731,20 @@ forms:
                   type: text
               value: 
                   callback: getFactureAmountToPay
+            - custom: 1
+              label: Mode de deuxième paiement
+              input_name: mode_paiement2
+              input: 
+                  type: select_payment
+                  include_empty: 1
+              value: 4
+            - custom: 1
+              label: Montant payé deuxième paiement
+              input_name: paid2
+              data_type: money
+              input: 
+                  type: text
+              value: 0
             - custom: 1
               label: Notifier le client
               input_name: send_msg
@@ -467,6 +786,19 @@ forms:
               input: 
                   type: toggle
               value: 0
+            - field: bon_resti_raison
+              display_if: 
+                  field_name: frais
+                  show_values: 0
+            - custom: 1
+              label: Raison détail
+              input_name: bon_resti_raison_detail
+              data_type: text
+              input: 
+                  type: textarea
+              display_if: 
+                  field_name: bon_resti_raison
+                  show_values: 99
               
     contact: 
         title: Recontacter
@@ -485,6 +817,7 @@ forms:
                       repOk: Réparation terminée
                       revPropRefu: Devis refusé
                       pieceOk: Piéce reçue
+                      localise: Localisé
                       
     validate_propal: 
         rows: 
@@ -501,9 +834,38 @@ forms:
               content: 
                   callback: displayFactureAmountToPay
               input_name: inut
+            - custom: 1
+              label: Créer la fiche signature
+              input_name: create_signature
+              input: 
+                  type: toggle
+              value: 
+                  callback: needSignaturePropal
+            - field: id_contact
+              label: Contact signataire
+              value: 
+                  callback: getIdContactSignataire
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
+            - custom: 1
+              label: Contenu e-mail pour la signature à distance du devis
+              input_name: email_content
+              input: 
+                  type: html
+                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+              value: 
+                  callback: getDefaultSignDistEmailContent
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
             
     resolution: 
         rows: 
+            - custom: 1
+              input_name: inut2
+              content:
+                   callback: renderAlertDiago
             - field: resolution
             - custom: 1
               label: Dispo sous
@@ -526,6 +888,20 @@ forms:
               input_name: inut
               content: 
                   callback: displayFactureAmountToPay
+            - field: bon_resti_raison
+              show:
+                  callback: isGratuit
+            - custom: 1
+              label: Raison détail
+              input_name: bon_resti_raison_detail
+              data_type: text
+              input: 
+                  type: textarea
+              display_if: 
+                  field_name: bon_resti_raison
+                  show_values: 99
+              show:
+                  callback: isGratuit
               
     equipment: 
         rows: 
@@ -574,9 +950,9 @@ forms:
               input: 
                   type: select_payment
                   include_empty: 1
-              display_if: 
-                  field_name: acompte
-                  hide_values: 0,
+#              display_if: 
+#                  field_name: acompte
+#                  hide_values: 0,
               value: 6
               
     gsx_token: 
@@ -590,8 +966,192 @@ forms:
                   help: Veuillez vous athentifier sur le site Apple GSX puis copier-coller le token obtenu. 
                   extra_content: 
                       callback: renderGsxTokenInputExtraContent
-              required: 1          
+              required: 1  
               
+    cancel_rdv: 
+        title: Annulation du RDV
+        rows: 
+            - custom: 1
+              label: Raison
+              input_name: cancel_reason
+              input: 
+                  type: select
+                  options: 
+                      array: rdv_cancel_reasons
+                      
+    signature: 
+        rows: 
+            - field: id_contact
+              label: Contact signataire
+              
+    parts_consigned_stock: 
+        rows: 
+            - custom: 1
+              label: Composants
+              input_name: parts
+              content: 
+                  callback: renderPartsConsignedStockDataForm
+                  
+    acompte: 
+        title: Ajouter un acompte
+        icon: fas_hand-holding-usd
+        rows: 
+            - custom: 1
+              hidden: 1
+              input_name: caisse_active
+              input: 
+                  type: hidden
+              value: 
+                  conf: 
+                      module: bimpcore
+                      name: use_caisse_for_payments
+            - custom: 1
+              label: Payée
+              input_name: payee
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Paiement en caisse
+              input_name: use_caisse
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 
+                  conf: use_caisse_for_payments
+              display_if:
+                    fields_names: caisse_active,payee
+                    caisse_active:
+                        hide_values: 0
+                    payee:
+                        show_values: 1
+            - custom: 1
+              label: Caisse
+              input_name: id_caisse
+              data_type: id
+              content: 
+                  callback: renderCaisseInput
+              display_if:
+                    fields_names: use_caisse,payee
+                    use_caisse:
+                        hide_values: 0
+                    payee:
+                        show_values: 1
+            - custom: 1
+              label: Compte bancaire
+              input_name: bank_account
+              data_type: int
+              value: 
+                  callback: getDefaultBankAccount
+              input: 
+                    type: select_mysoc_account
+              depends_on: id_caisse
+            - custom: 1
+              label: Mode de paiement
+              input_name: id_mode_paiement
+              required: 0
+              input: 
+                  type: select_payment
+                  value_type: code
+                  include_empty: 1
+              display_if: 
+                  field_name: payee
+                  hide_values: 0
+#            - custom: 1
+#              label: RIB Client
+#              input_name: id_rib
+#              input: 
+#                  type: select
+#                  options: 
+#                      callback: getRibArray
+#              display_if: 
+#                  field_name: id_mode_paiement
+#                  show_values: PRE
+            - custom: 1
+              label: N° (chèque ou virement)
+              input_name: num_paiement
+              input: 
+                  type: text
+              display_if: 
+                    field_name: id_mode_paiement
+                    show_values: CHQ,VIR
+            - custom: 1
+              label: Emetteur (Chèque ou virement)
+              data_type: string
+              input_name: nom_emetteur
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: CHQ,VIR
+            - custom: 1
+              label: Banque émetteur (chèque)
+              data_type: string
+              input_name: banque_emetteur
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: CHQ
+            - custom: 1
+              label: Date de paiement de l'acompte
+              data_type: date
+              input_name: date
+              input:
+                  type: date
+                  display_now: 1
+              display_if: 
+                  field_name: payee
+                  hide_values: 0
+            - custom: 1
+              label: Montant
+              input_name: amount
+              data_type: money
+              required: 1
+              input: 
+                  type: text
+                  
+              
+    europe:
+        rows: 
+            date_purchase:
+              custom: 1
+              label: Date d'achat
+              data_type: date
+              input: date_purchase
+              input_name: date_purchase
+              type: date
+              value:
+                 callback:
+                    method: getEquipmentData
+                    params:
+                        - date_purchase
+                        
+            name_reseller:
+              custom: 1
+              label: Nom du revendeur
+              data_type: string
+              type: string
+              input: name_reseller
+              input_name: name_reseller
+              values: 
+                LDLC: LDLC
+                BIMP: BIMP
+                AUTRE: Autre
+                
+            other_name_reseller:
+              custom: 1
+              label: Autre revendeur
+              data_type: string
+              type: string
+              input: other_name_reseller
+              input_name: other_name_reseller
+#              hidden: 1
+              display_if: 
+                  field_name: name_reseller
+                  show_values: AUTRE
+        
 fields_tables: 
     infos: 
         title: Informations
@@ -599,22 +1159,44 @@ fields_tables:
         footer_extra_btn: 
             callback: getInfosExtraBtn
         rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - field: ref
+            - field: date_rdv
+            - field: resgsx
             - field: status
               display: actions
             - field: code_centre
+            - field: code_centre_repa
             - field: id_entrepot
               display: nom_url
             - field: id_user_tech
               display: nom_url
             - field: id_equipment
               display: card
+            - field: id_ticket
+              display: card
             - field: prioritaire
             - field: sav_pro
               edit: 1
             - field: prestataire_number
-#            - field: id_propal
-#              display: card
+            - label: Autre
+              value:
+                 callback: displayExtraSav
+            - field: date_terminer
+            - label: Lien publique
+              value:
+                 callback: displayPublicLink
+            - field: bon_resti_raison
+              show: 
+                  callback: isGratuit
+            - field: name_reseller
+                 
+    facturation:
+        title: Facturation
+        icon: fas_euro-sign
+        rows: 
             - field: id_facture_acompte
               display: card
               show: 
@@ -627,9 +1209,13 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture
-            - label: Autre
-              value:
-                 callback: displayExtraSav
+            - field: in_fac_emails_files
+                  
+    sac:
+        title: Emballage
+        icon: fas_shopping-bag
+        rows: 
+            - field: sacs
               
     client: 
         title: Client
@@ -648,6 +1234,7 @@ fields_tables:
               display: card
               show: 
                   field_value: id_contact
+            - field: id_user_client
             - field: contact_pref
               edit: 1
               
@@ -683,11 +1270,65 @@ fields_tables:
             - field: extra_infos
               edit: 1
               
+    public_infos: 
+        panel: 0
+        rows: 
+            - field: code_centre
+            - field: id_user_tech
+            - field: id_equipment
+              label: Matériel
+              display: custom
+            - field: accessoires
+            - field: id_ticket
+              label: Ticket support
+              display: nom_url
+              show: 
+                  field_value: id_ticket
+            - field: id_contrat
+              display: card
+              show: 
+                  field_value: id_contrat
+            - field: id_contact
+              display: card
+              show: 
+                  field_value: id_contact
+            - field: contact_pref
+              
+    public_suivi: 
+        panel: 0
+        rows: 
+            - field: system
+            - field: etat_materiel
+            - field: etat_materiel_desc
+            - field: symptomes
+            - field: diagnostic
+            - field: resolution
+            - field: extra_infos
+              label: Informations supplémentaires
+              
+    signatures: 
+        title: Signatures
+        icon: fas_signature
+        rows: 
+            - field: id_signature_pc
+              display: card
+              show: 
+                  field_value: id_signature_pc
+            - field: 'propal:id_signature'
+              label: Signature Devis
+              display: card
+              show: 
+                  callback: showPropalSignature
+            - field: id_signature_resti
+              display: card
+              show: 
+                  field_value: id_signature_resti
+              
 views: 
     default: 
         title: 
             callback: getRef
-        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement,BimpSignature,BimpSignataire
         rows:
             - cols: 
                   - type: object_header
@@ -702,7 +1343,24 @@ views:
                     col_lg: 6
                     col_md: 6
                     fields_table:
+                        name: signatures
+                        
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
                         name: client
+                        
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: facturation
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: sac
             - cols: 
                   - type: fields_table
                     col_lg: 6
@@ -726,9 +1384,9 @@ views:
             callback: getRef
         delete_btn: 1
         edit_form: edit
-        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement,BimpSignature,BimpSignataire
         rows:
-            - cols: 
+            - cols:                       
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
@@ -739,7 +1397,25 @@ views:
                   col_lg: 6
                   col_md: 6
                   fields_table:
+                      name: signatures
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
                       name: client
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: facturation
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                        name: sac
             - cols: 
                 - type: custom
                   col_lg: 6
@@ -778,79 +1454,53 @@ views:
                     col_md: 6
                     fields_table: 
                         name: suivi
-                        
-lists_cols: 
-    ref:
-        field: ref
-    centre: 
-        field: code_centre
-    status: 
-        field: status
-    prioritaire:
-        field: prioritaire
-    date_create:
-        label: Créé le
-        field: date_create
-    tech:
-        field: id_user_tech
-        display: nom_url
-    client: 
-        field: id_client
-        display: nom_url
-    equipment: 
-        label: Materiel
-        value:
-            callback: displayEquipment
-        search: 
-            type: value_part
-    contrat: 
-        field: id_contrat
-        display: nom_url
-    contact: 
-        field: id_contact
-        display: nom_url
-    propal_total_ht: 
-        field: total_ht
-        child: propal
-        label: Total HT Devis
-    propal_total_ttc: 
-        field: total
-        child: propal
-        label: Total TTC Devis
-    symptomes:
-        field: symptomes
-    diagnostic:
-        field: diagnostic
-    resolution:
-        field: resolution
-    propal:
-        field: id_propal
-        display: nom_url
-    id_facture_acompte:
-        field: id_facture_acompte
-        display: nom_url
-    id_facture_avoir:
-        field: id_facture_avoir
-        display: nom_url
-    id_facture:
-        field: id_facture
-        display: nom_url
-                        
+    
+    public_client: 
+        panel: 0
+        rows:
+            - cols: 
+                  - type: object_header
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: public_infos
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: public_suivi
+    
 filters_panels: 
     default: 
         filters: 
-            - field: ref
-            - field: status
-            - field: date_create
-            - field: id_equipment
-            - field: code_centre
-            - field: id_user_tech
-            - field: id_client
-            - field: id_facture_acompte
-            - field: id_facture_avoir
-            - field: id_facture
-            - field: prestataire_number
-            - field: sav_pro
+            ref:
+            status:
+            date_create:
+            id_equipment:
+            code_centre:
+            code_centre_repa: 
+            id_user_tech:
+            id_client:
+            id_facture:
+            id_facture_avoir:
+            id_facture_acompte:
+            prestataire_number:
+            sav_pro:
+            facture:facnumber:
+        
+lists_cols: 
+    code_centre: 
+        label: Centre (PeC)
+    code_centre_repa: 
+        label: Centre (Rép.)
+    id_equipment: 
+        display: custom
+    repairs_numbers: 
+        label: Commande Apple
+        value: 
+            callback: dispayRepairsNumbers
             
 lists: 
     default: 
@@ -882,18 +1532,36 @@ lists:
             callback: getListExtraBtn
         cols: 
             ref:
-            centre: 
+            code_centre: 
             status: 
-            prioritaire:
             date_create:
-            tech:
-            client: 
-            equipment: 
+            id_user_tech:
+            id_client: 
+            id_equipment:
                 
     client: 
         extends: default
         cols:
             client: unset
+    
+    public_client: 
+        title: Liste des SAV
+        configurable: 0
+        checkboxes: 0
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        edit_btn: 1
+        edit_form: public_edit
+        extra_btn: 
+            callback: getPublicListExtraButtons
+        cols: 
+            ref:
+            date_create:
+            code_centre: 
+            status: 
+            id_user_tech:
+            id_equipment:
     
 cards:
     default:
@@ -901,6 +1569,7 @@ cards:
             field_value: ref
         status: status
         fields: 
+            - field: replaced_ref
             - label: Technicien
               field: id_user_tech
               display: nom_url
@@ -936,6 +1605,14 @@ searches:
               alias: r
               on: a.id = r.id_sav
                       
+signatures: 
+    sav_pc: 
+        label: Bon de prise en charge SAV
+    sav_resti: 
+        label: Bon de restitution SAV
+    sav_facture: 
+        label: Facture SAV
+        
 pages: 
     default: 
         nav_tabs: 

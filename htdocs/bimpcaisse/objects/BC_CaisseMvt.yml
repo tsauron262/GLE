@@ -10,12 +10,9 @@ fields:
     id_entrepot: 
         label: Centre
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         input: 
             type: search_entrepot
-        display: 
-            nom: 
-                type: nom
         required: 1
     id_caisse:
         label: Caisse
@@ -59,6 +56,18 @@ forms:
             - field: type
             - field: montant
             - field: note
+            
+lists_cols: 
+    id_entrepot: 
+        display: nom
+    id_caisse: 
+        display: nom
+    date_create: 
+        label: Date
+    user_create: 
+        label: Utilisateur
+        display: nom_url
+        
 lists: 
     default: 
         title: Mouvements de fonds
@@ -69,25 +78,13 @@ lists:
         add_btn: 1
         add_form_name: default
         cols:
-            centre: 
-                field: id_entrepot
-                display: nom
-            caisse: 
-                field: id_caisse
-                display: nom
-            date: 
-                label: Date
-                field: date_create
-            user: 
-                label: Utilisateur
-                field: user_create
-                display: nom_url
+            id_entrepot: 
+            id_caisse: 
+            date_create: 
+            user_create: 
             type: 
-                field: type
             montant: 
-                field: montant
             note: 
-                field: note
                 
     caisse: 
         sort_field: id
@@ -96,19 +93,11 @@ lists:
         add_btn: 1
         add_form_name: light
         cols:
-            date: 
-                label: Date
-                field: date_create
-            user: 
-                label: Utilisateur
-                field: user_create
-                display: nom_url
+            date_create: 
+            user_create: 
             type: 
-                field: type
             montant: 
-                field: montant
             note: 
-                field: note
         
     full_session: 
         extends: caisse
@@ -121,6 +110,6 @@ lists:
         add_form_name: unset
         add_btn: 0
         cols: 
-            user:
+            user_create:
                 display: nom
                 

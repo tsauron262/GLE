@@ -34,14 +34,14 @@ class BimpProductCurPa extends BimpObject
                 // On fait en sorte que si $date est inférieur au plus petit date_from trouvé, ce soit ce dernier qui soit retourné
                 foreach ($res as $r) {
                     $id_pa = (int) $r['id'];
-                    if ($r['date_from'] < $date && (!(string) $r['date_to'] || $r['date_to']) > $date) {
+                    if ($r['date_from'] < $date && (!(string) $r['date_to'] || $r['date_to'] > $date)) {
                         break;
                     }
                 }
             }
 
             if ($id_pa) {
-                $pa = BimpCache::getBimpObjectInstance('bimpcore', 'BimpProductCurPa', (int) $res[0]['id']);
+                $pa = BimpCache::getBimpObjectInstance('bimpcore', 'BimpProductCurPa', $id_pa);
                 if (BimpObject::objectLoaded($pa)) {
                     return $pa;
                 }
@@ -51,7 +51,7 @@ class BimpProductCurPa extends BimpObject
         return null;
     }
 
-    public static function getProductCurPaAmount($id_product, $date = '')
+    public static function getProductCurPaAmount($id_product, $date = '', $with_default = true)
     {
         $pa = null;
 
@@ -79,6 +79,39 @@ class BimpProductCurPa extends BimpObject
                     }
                 }
             }
+
+            if (is_null($pa) && $with_default) {
+                $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price';
+                $sql .= ' WHERE fk_product = ' . (int) $id_product;
+                $sql .= ' ORDER BY `datec` DESC';
+
+                if (!$date) {
+                    $sql .= ' LIMIT 1';
+                }
+
+                $res = self::getBdb()->executeS($sql, 'array');
+
+                if (!(string) $date) {
+                    if (isset($res[0]['price'])) {
+                        $pa = (float) $res[0]['price'];
+                    }
+                } elseif (is_array($res)) {
+                    foreach ($res as $r) {
+                        $pa = (float) $r['price'];
+                        if ($r['datec'] < $date) {
+                            break;
+                        }
+                    }
+                }
+
+                if (is_null($pa)) {
+                    $pa = (float) self::getBdb()->getValue('product', 'cur_pa_ht', 'rowid = ' . $id_product);
+
+                    if (!$pa) {
+                        $pa = (float) self::getBdb()->getValue('product', 'pmp', 'rowid = ' . $id_product);
+                    }
+                }
+            }
         }
 
         return $pa;
@@ -100,7 +133,6 @@ class BimpProductCurPa extends BimpObject
                         } else {
                             return '<span class="danger">ID de la commande fournisseur absent</span>';
                         }
-                        break;
 
                     case 'facture_fourn':
                         $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $this->getData('id_origin'));
@@ -111,7 +143,6 @@ class BimpProductCurPa extends BimpObject
                         } else {
                             return '<span class="danger">ID de la facture fournisseur absent</span>';
                         }
-                        break;
 
                     case 'fourn_price':
                         $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->getData('id_origin'));
@@ -122,7 +153,6 @@ class BimpProductCurPa extends BimpObject
                         } else {
                             return '<span class="danger">ID du prix d\'achat fournisseur absent</span>';
                         }
-                        break;
 
                     case 'pmp':
                         return self::$origin_types['pmp'];
@@ -159,6 +189,10 @@ class BimpProductCurPa extends BimpObject
                 if (count($err)) {
                     $warnings[] = BimpTools::getMsgFromArray($err, 'Echec de la mise à jour de la date de fin du Prix d\'achat précédant');
                 }
+                
+                $this->db->update('product', array(
+                    'cur_pa_ht' => (float) $this->getData('amount')
+                        ), 'rowid = ' . (int) $this->getData('id_product'));
             }
         }
 

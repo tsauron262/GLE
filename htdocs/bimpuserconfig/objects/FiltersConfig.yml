@@ -1,0 +1,38 @@
+extends: 
+    module: bimpuserconfig
+    object_name: BCUserConfig
+    
+table: buc_filters_config
+
+labels: 
+    name: configuration de filtres
+    name_plur: configurations de filtres
+    is_female: 1
+    
+fields: 
+    filters: 
+        label: Filtres
+        type: json
+    
+    component_name: unset
+        
+forms: 
+    default: 
+        rows: 
+            component_name: unset
+            filters: 
+                 custom: 1
+                 label: Filtres
+                 input_name: filters
+                 content: 
+                     callback: renderFiltersInput
+                     
+    edit_filters: 
+        rows: 
+            filters: 
+                 custom: 1
+                 label: Filtres
+                 input_name: filters
+                 content: 
+                    callback: renderFiltersInput
+        

@@ -6,6 +6,9 @@ parent_module: bimpcommercial
 parent_object: Bimp_Commande
 parent_id_property: id_commande_client
 
+header_btn: 
+    callback: getActionsButtons
+    
 labels: 
     name: expédition
     is_female: 1
@@ -27,7 +30,36 @@ objects:
         extends: facture
         instance: 
             id_object: 
-                field_value: id_avoir
+                field_value: id_avoir            
+                
+    signature: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
+                
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimplogistique
+                parent_object_name: BL_CommandeShipment
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimplogistique
+                    parent_object_name: BL_CommandeShipment
                 
 fields: 
     id_commande_client: 
@@ -49,7 +81,7 @@ fields:
     id_entrepot: 
         label: Entrepôt de départ
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         input: 
 #            type: search_entrepot
              type: hidden
@@ -99,7 +131,7 @@ fields:
         type: id_object
         object: facture
         default_value: 0
-        display: 
+        displays: 
             card_light: 
                 type: card
                 card: light
@@ -109,7 +141,7 @@ fields:
         type: id_object
         object: avoir
         default_value: 0
-        display: 
+        displays: 
             card_light: 
                 type: card
                 card: light
@@ -128,6 +160,7 @@ fields:
             note: 1
             auto_expand: 1
             rows: 3
+        hashtags: 1
             
     total_ht: 
         label: Total HT
@@ -151,6 +184,20 @@ fields:
                 name: id
                 object: 
                     global: user
+                    
+    id_signature: 
+        label: Signature
+        type: id_object
+        object: signature
+        displays: 
+            default: 
+                label: Lien signature
+                type: callback
+                method: displaySignature
+                
+    signature_params: 
+        label: Paramètres incrustation signature
+        type: json
         
 forms: 
     default: 
@@ -182,6 +229,7 @@ forms:
             - field: id_contact
             - field: signed
             - field: info
+            - field: id_facture
             
     validation: 
         rows: 
@@ -193,13 +241,58 @@ forms:
               value: 1
             - field: date_shipped
             - custom: 1
+              label: Signature par le client
+              input_name: create_signature
+              data_type: bool
+              value: 0
+              input: 
+                  type: toggle
+                  help: En choisissant "NON", aucune signature ne sera demandée au client.<br/>Le statut "Signé" sera mis à "Non applicable" pour cette expédition
+            - custom: 1
+              label: PDF BL Chiffré
+              data_type: bool
+              input_name: pdf_chiffre
+              input: 
+                  type: toggle
+              value: 1
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
+            - custom: 1
+              label: PDF BL Detail
+              data_type: bool
+              input_name: pdf_detail
+              input: 
+                  type: toggle
+              value: 1
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
+            - custom: 1
               label: Produits / Services inclus
               input_name: lines
               content: 
                   callback: renderLinesQties
                   
     facture: 
+        modal_format: large
         rows: 
+            id_facture: 
+                custom: 1
+                label: Facture
+                input_name: id_facture
+                content: 
+                    callback: renderFactureSelectInput
+            replaced_ref: 
+                custom: 1
+                label: Ref facture remplacée
+                input_name: replaced_ref
+                input: 
+                    type: text
+                    help: Utiliser ce champ si perte des données de la facture remplacée
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             client:
                 custom: 1
                 label: Client
@@ -210,18 +303,24 @@ forms:
                 input: 
                     type: search_societe
                     societe_type: customer
-            contact: 
-                custom: 1
-                label: Contact
-                input_name: id_contact
-                data_type: id
-                input: 
-                    type: select
-                    options: 
-                        callback: 
-                            method: getClientContactsArray
-                            object: commande
-                depends_on: id_client
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
+#            contact: 
+#                custom: 1
+#                label: Contact
+#                input_name: id_contact
+#                data_type: id
+#                input: 
+#                    type: select
+#                    options: 
+#                        callback: 
+#                            method: getClientContactsArray
+#                            object: commande
+#                depends_on: id_client
+#                display_if: 
+#                    field_name: id_facture
+#                    show_values: 0,
             libelle: 
                 custom: 1
                 show: 1
@@ -229,6 +328,9 @@ forms:
                 input_name: libelle
                 input: 
                     type: text
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             id_entrepot: 
                 custom: 1
                 show: 0
@@ -239,6 +341,9 @@ forms:
                     type: search_entrepot
                 value: 
                     field_value: id_entrepot
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             ef_type: 
                 custom: 1
                 show: 0
@@ -248,6 +353,9 @@ forms:
                     type: select
                     options: 
                         array: secteurs
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             cond_reglement: 
                 custom: 1
                 label: Conditions de réglement
@@ -256,14 +364,21 @@ forms:
                     callback: getCommandeCondReglement
                 input: 
                     type: select_cond_reglement
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             account:
                 custom: 1
-                label: Compte financier
+                label: Compte bancaire
                 input_name: id_account
                 data_type: id_object
                 input: 
                     type: select_mysoc_account
-                required: 1
+                value: 
+                    conf: id_default_bank_account
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             remises:
                 custom: 1
                 label: Avoirs client à utiliser
@@ -274,6 +389,9 @@ forms:
                     id_client:
                         request_field: id_client
                 depends_on: id_client
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             public_note: 
                 custom: 1
                 label: Note publique
@@ -281,6 +399,9 @@ forms:
                 data_type: html
                 input: 
                     type: html
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             private_note: 
                 custom: 1
                 label: Note privée
@@ -288,6 +409,9 @@ forms:
                 data_type: html
                 input: 
                     type: html
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             lines: 
                 custom: 1
                 label: Quantités et équipements
@@ -305,6 +429,15 @@ forms:
                         params: 
                             - id_client
                 required: 1
+#            contact: 
+#                value: 
+#                    callback: 
+#                        method: getBulkFactureValue
+#                        params: 
+#                            - id_contact
+#                input: 
+#                    options: 
+#                        callback: getBulkFactureClientContactsArray
             libelle: 
                 value: 
                     callback:
@@ -380,6 +513,14 @@ forms:
     pdf: 
         rows: 
             - custom: 1
+              label: Ecraser le PDF enregistré
+              input_name: overwrite_pdf_file
+              data_type: bool
+              show: 
+                  callback: showOverwritePdfFileInput
+              content: 
+                  callback: renderOverwritePdfFileInput
+            - custom: 1
               label: Chiffré
               data_type: bool
               input_name: chiffre
@@ -393,11 +534,30 @@ forms:
               input: 
                   type: toggle
               value: 1
+              
+    create_signature: 
+        rows: 
+            - custom: 1
+              label: 'PDF BL: Chiffré'
+              data_type: bool
+              input_name: pdf_chiffre
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: 'PDF BL: Detail'
+              data_type: bool
+              input_name: pdf_detail
+              input: 
+                  type: toggle
+              value: 1
                   
 fields_tables: 
     data: 
-        panel_header: 0
+        title: Infos
+        icon: fas_info-circle
         rows: 
+            - field: id_commande_client
             - field: num_livraison
             - field: status
             - field: id_entrepot
@@ -421,18 +581,40 @@ fields_tables:
             - field: total_ht
             - field: total_ttc
             
+    signature: 
+        title: Signature
+        icon: fas_signature
+        show: 
+            field_value: id_signature
+        rows: 
+            - field: id_signature
+              display: card
+            
 views: 
     default: 
+        objects_change_reload: BimpSignature
         rows: 
             - cols: 
                 - type: object_header
             - cols: 
                 - type: fields_table
-                  col_lg: 8
-                  col_md: 7
+                  col_lg: 6
+                  col_md: 6
                   col_sm: 12
                   fields_table: 
                       name: data
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: signature
+            - cols: 
+                - type: list
+                  list: 
+                      title: Fichier joints
+                      name: default
+                      children: files   
                       
     lines: 
         title: Produits / services inclus dans l'expédition
@@ -441,33 +623,60 @@ views:
                 - type: custom
                   custom: 
                       callback: renderShipmentLines
-                      
+             
+filters: 
+    id_commercial:
+        label: Commercial
+        data_type: id_object
+        type: value
+        input: 
+          type: search_user
+          
+    id_product:
+        label: Produit
+        data_type: id_object
+        type: value
+        input: 
+              type: search_product
+          
+    billed: 
+        label: Facturée
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+        exclude_btn: 0
+        
+filters_panels: 
+    default: 
+        filters: 
+            parent:fk_soc:
+            id_entrepot:
+            parent:ef_type:
+            id_commercial:
+            user_create:
+            id_product:
+            num_livraison:
+            ref:
+            id_commande_client:
+            status:
+            date_shipped:
+            parent:id_user_resp:
+            total_ht:
+            total_ttc:
+            info:
+            parent:fk_statut:
+            parent:logistique_status:
+            parent:shipment_status:
+            parent:invoice_status:
+            parent:date_commande:
+            id_facture:
+            billed:
+              
 lists_cols: 
-    ref: 
-        field: ref
-    user_resp: 
-        field: id_user_resp
-        display: nom_url
-    commande: 
-        field: id_commande_client
-        display: nom_url
-    client: 
-        label: Client
-        field: fk_soc
-        child: parent
-        display: nom_url
-    entrepot: 
-        field: id_entrepot
-        display: nom_url
-    secteur: 
-        field: ef_type
-        child: parent
     num_livraison:
         label: N°
-        field: num_livraison
-        max_width: 30px
-    status: 
-        field: status
+        min_width: 30
     contact: 
         label: Destinataire
         value: 
@@ -476,13 +685,11 @@ lists_cols:
         label: Commercial
         value: 
             callback: displayCommercial
-    date: 
+    date_shipped: 
         label: Expédiée le
-        field: date_shipped
     signed: 
-        field: signed
         edit: 1
-        max_width: 45px
+        min_width: 45px
     pdf:
         label: Fichiers PDF
         value: 
@@ -490,103 +697,28 @@ lists_cols:
                 method: displayPdfButtons
                 params: 
                     - 1
-    facture: 
-        field: id_facture
-        display: nom_url
-    avoir: 
-        field: id_avoir
-        display: nom_url
-    total_ht: 
-        field: total_ht
-    total_ttc: 
-        field: total_ttc
-    commande_status: 
+    parent:fk_statut: 
         label: St. Cmd
-        field: fk_statut
-        child: parent
         display: icon
-        min_width: 45px
-        max_width: 45px
-    commande_logistique_status: 
+        min_width: 45
+    parent:logistique_status: 
         label: Log. Cmd
-        field: logistique_status
-        child: parent
         display: icon
-        min_width: 45px
-        max_width: 45px
-    commande_shipment_status: 
+        min_width: 45
+    parent:shipment_status: 
         label: Exp. Cmd
-        field: shipment_status
-        child: parent
         display: icon
-        min_width: 45px
-        max_width: 45px
-    commande_invoice_status: 
+        min_width: 45
+    parent:invoice_status: 
         label: Fac. Cmd
-        field: invoice_status
-        child: parent
         display: icon
-        min_width: 45px
-        max_width: 45px
-    user_create:
-        field: user_create
-    info:
-        field: info
-                    
-filters_panels: 
-    default: 
-        filters: 
-            - field: fk_soc
-              child: parent
-            - field: id_entrepot
-            - field: ef_type
-              child: parent
-            - field: id_commercial
-              custom: 1
-              field: id_commercial
-              label: Commercial
-              data_type: id_object
-              type: value
-              input: 
-                type: search_user
-            - field: user_create
-            - field: line_product
-              custom: 1
-              field: id_product
-              label: Produit
-              data_type: id_object
-              type: value
-              input: 
-                    type: search_product
-            - field: num_livraison
-            - field: ref
-            - field: id_commande_client
-            - field: status
-            - field: date_shipped
-            - field: id_user_resp
-              child: parent
-            - field: total_ht
-            - field: total_ttc
-            - field: info
-            - field: fk_statut
-              child: parent
-            - field: logistique_status
-              child: parent
-            - field: shipment_status
-              child: parent
-            - field: invoice_status
-              child: parent
-            - field: date_commande
-              child: parent
-            - field: id_facture
-            - custom: 1
-              label: Facturée
-              field: billed
-              type: check_list
-              items: 
-                  1: OUI
-                  0: NON
-            
+        min_width: 45
+    signature_buttons: 
+        label: Actions signature
+        value: 
+            callback: displaySignatureActions
+        min_width: 90
+    
 lists: 
     default: 
         configurable: 1
@@ -602,22 +734,27 @@ lists:
         update_btn: 1
         edit_form: edit
         modal_view: default
-        objects_change_reload: BR_Reservation,BR_ReservationShipment,BR_Service,BR_ServiceShipment
+        objects_change_reload: BR_Reservation,BimpSignature
         extra_btn: 
             callback: getExtraBtn
         cols:
             ref:
-            commande: 
+            id_commande_client: 
             num_livraison:
-            entrepot:
+            id_entrepot:
             status: 
             contact: 
             commercial: 
             total_ht: 
-            date: 
+            date_shipped: 
             signed: 
             pdf:
             user_create:
+            id_signature: 
+            signature_buttons:
+        
+    client: 
+        extends: default
                     
     commandes: 
         configurable: 1
@@ -636,20 +773,22 @@ lists:
         add_form_name: default
         edit_form: default
         modal_view: default
-        objects_change_reload: BR_Reservation,Bimp_CommandeLine,Bimp_Commande
+        objects_change_reload: BR_Reservation,Bimp_CommandeLine,Bimp_Commande,BimpSignature
         extra_btn: 
             callback: getExtraBtn
         cols:
             ref:
             num_livraison:
-            entrepot:
+            id_entrepot:
             status: 
             contact: 
-            date: 
+            date_shipped: 
             total_ht: 
-            signed: 
-            facture: 
+            id_facture: 
             pdf:
+            signed:
+            id_signature:            
+            signature_buttons:
                     
 cards: 
     default: 
@@ -671,6 +810,7 @@ searches:
             - a.ref
             - c.ref
             - s.nom
+        label_syntaxe: 'BL n°<a.ref> - Commande: <c.ref> - Client: <s.nom>'
         joins:
             commande: 
                 table: commande
@@ -680,3 +820,7 @@ searches:
                 table: societe
                 on: c.fk_soc = s.rowid
                 alias: s
+
+signatures: 
+    bl: 
+        label: Bon de livraison

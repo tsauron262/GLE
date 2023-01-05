@@ -63,8 +63,8 @@ class modBimpmargeprod extends DolibarrModules
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
 		$this->description = "BIMP Marge de production";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or 'dolibarr_deprecated' or version
-		$this->version = '1.0';
-		// Key used in ".MAIN_DB_PREFIX."const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
+		$this->version = '1.1';
+		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
 		$this->special = 0;
@@ -116,9 +116,9 @@ class modBimpmargeprod extends DolibarrModules
 		//                             1=>array('MYMODULE_MYNEWCONST2','chaine','myvalue','This is another constant to add',0, 'current', 1)
 		// );
 		$this->const = array();
-       
+
 //                $this->tabs = array('user:+formSimple:Mes infos:bimpcore@bimpcore:1:/bimpcore/tabs/user.php?id=__ID__');
-                
+
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
         //                              'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@mymodule:$user->rights->othermodule->read:/mymodule/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
@@ -200,7 +200,7 @@ class modBimpmargeprod extends DolibarrModules
 		// Example to declare a new Top Menu entry and its Left menu entry:
 		 $this->menu[$r]=array(	'fk_menu'=>'',			                // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 									'type'=>'top',			                // This is a Top menu entry
-									'titre'=>'Diff ',
+									'titre'=>'Budgets',
 									'mainmenu'=>'margeprod',
 									'leftmenu'=>'margeprod',
 									'url'=>'/bimpmargeprod/',
@@ -260,25 +260,24 @@ class modBimpmargeprod extends DolibarrModules
 	public function init($options='')
 	{
 		$sql = array();
-                
-                require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-                $name = 'module_version_'.strtolower($this->name);
-                if(BimpCore::getConf($name) == "") {
+
+                require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
+                $name = 'module_version_bimpmargeprod';
+                if(BimpCore::getConf($name) == ""){
                     BimpCore::setConf($name, floatval($this->version));
-                    $this->_load_tables('/'.strtolower($this->name).'/sql/');
+                    $this->_load_tables('/bimpmargeprod/sql/');
                 }
-                
-                
+
                 $tabTva = array(2462 => 20, 14 => 5.5, 15 => 0, 16 => 2.1, 17 => 7);
-                
+
                 foreach($tabTva as $oldId => $taux){
-                    $sql2 = $this->db->query("SELECT rowid  FROM `".MAIN_DB_PREFIX."c_tva` WHERE `taux` = ".$taux." AND fk_pays = 1");
+                    $sql2 = $this->db->query("SELECT rowid  FROM `llx_c_tva` WHERE `taux` = ".$taux." AND fk_pays = 1");
                     if($this->db->num_rows($sql2)> 0){
                         $ln = $this->db->fetch_object($sql2);
-                        $sql[] = "UPDATE ".MAIN_DB_PREFIX."bmp_type_montant SET id_taxe = ".$ln->rowid." WHERE id_taxe =".$oldId;
+                        $sql[] = "UPDATE llx_bmp_type_montant SET id_taxe = ".$ln->rowid." WHERE id_taxe =".$oldId;
                     }
                 }
-                
+
 
 
 		return $this->_init($sql, $options);
@@ -295,11 +294,9 @@ class modBimpmargeprod extends DolibarrModules
 	public function remove($options = '')
 	{
 		$sql = array();
-                
+
 
 		return $this->_remove($sql, $options);
 	}
 
 }
-
-

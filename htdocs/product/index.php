@@ -4,7 +4,7 @@
 
 
 
-header("Location: ../bimpcore?fc=products");
+header("Location: ../bimpcore?fc=products&mainmenu=products");
 
 
 

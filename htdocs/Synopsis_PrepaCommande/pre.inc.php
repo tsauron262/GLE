@@ -22,31 +22,31 @@ require("../main.inc.php");
 
 $user->getrights('babelprospe');
 
-function llxHeader($head = "", $title = "",$noscript = "")
-{
-  global $user, $conf, $langs;
-
-  $langs->load("companies");
-  $langs->load("commercial");
-
-  top_menu($head, $title,"",$noscript);
-
-  $menu = new Menu();
-
-  // Clients
-//  $menu->add(DOL_URL_ROOT."/BabelProspect/nouvelleProspection.php", $langs->trans("Campagne de prospection"));
-////  if ($user->rights->societe->creer)
-////    {
-//      $menu->add_submenu(DOL_URL_ROOT."/BabelProspect/nouvelleProspection.php?action=add", $langs->trans("Nouvelle campagne"));
-////    }
+//function llxHeader($head = "", $title = "",$noscript = "")
+//{
+//  global $user, $conf, $langs;
 //
-//  $menu->add_submenu(DOL_URL_ROOT."/BabelProspect/nouvelleProspection.php?action=list", $langs->trans("Liste"));
+//  $langs->load("companies");
+//  $langs->load("commercial");
 //
-//var_dump($menu);
-//var_dump($user->rights);
-
-  left_menu($menu->liste);
-}
+//  top_menu($head, $title,"",$noscript);
+//
+//  $menu = new Menu();
+//
+//  // Clients
+////  $menu->add(DOL_URL_ROOT."/BabelProspect/nouvelleProspection.php", $langs->trans("Campagne de prospection"));
+//////  if ($user->rights->societe->creer)
+//////    {
+////      $menu->add_submenu(DOL_URL_ROOT."/BabelProspect/nouvelleProspection.php?action=add", $langs->trans("Nouvelle campagne"));
+//////    }
+////
+////  $menu->add_submenu(DOL_URL_ROOT."/BabelProspect/nouvelleProspection.php?action=list", $langs->trans("Liste"));
+////
+////var_dump($menu);
+////var_dump($user->rights);
+//
+//  left_menu($menu->liste);
+//}
 function llxHeaderNoMenu($head = "", $title = "",$noscript = "")
 {
   global $user, $conf, $langs;

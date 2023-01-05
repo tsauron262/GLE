@@ -21,8 +21,8 @@ class Bimp_PaiementFourn extends Bimp_Paiement
     {
         return BimpTools::getPostFieldValue('id_fourn', 0);
     }
-    
-        public function getListsExtraButtons()
+
+    public function getListsExtraButtons()
     {
         $buttons = array();
         if ($this->isLoaded()) {
@@ -75,7 +75,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         if ($id_facture) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture);
             if (BimpObject::objectLoaded($facture)) {
-                return (float) round($facture->getRemainToPay(), 2);
+                return $facture->getRemainToPay();
             }
         }
 
@@ -206,7 +206,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
                 $DT = new DateTime($this->db->db->iDate($facture->dol_object->date));
 
                 $html .= '<tr class="facture_payment_row">';
-                $html .= '<td>' . $facture->dol_object->getNomUrl(1) . '</td>';
+                $html .= '<td>' . $facture->getLink() . '</td>';
                 $html .= '<td>' . $DT->format('d / m / Y') . '</td>';
                 $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($montant_ttc, 'EUR') . '</td>';
                 $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($paid, 'EUR') . '</td>';
@@ -283,7 +283,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         if ($id_account) {
             BimpTools::loadDolClass('compta/bank', 'account');
             $account = new Account($db);
-            $account->fetch((int) BimpCore::getConf('bimpcaisse_id_default_account'));
+            $account->fetch((int) BimpCore::getConf('id_default_bank_account', 0));
 
             if (!BimpObject::objectLoaded($account)) {
                 $errors[] = 'Compte bancaire invalide';
@@ -421,7 +421,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         return $errors;
     }
 
-    public function updateDolObject(&$errors = array())
+    public function updateDolObject(&$errors = array(), &$warnings = array())
     {
         return 1;
     }

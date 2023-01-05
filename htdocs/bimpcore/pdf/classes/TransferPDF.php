@@ -19,10 +19,10 @@ class TransferPDF extends BimpModelPDF
 
     public function getFilePath()
     {
-        if (!file_exists(DOL_DATA_ROOT.'/bimptransfer') || !is_dir(DOL_DATA_ROOT.'/bimptransfer')) {
+        if (!file_exists(DOL_DATA_ROOT . '/bimptransfer') || !is_dir(DOL_DATA_ROOT . '/bimptransfer')) {
             BimpTools::makeDirectories('bimptransfer', DOL_DATA_ROOT);
         }
-        
+
         return DOL_DATA_ROOT . '/bimptransfer/';
     }
 
@@ -59,7 +59,6 @@ class TransferPDF extends BimpModelPDF
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
 
-
         if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO'))) {
             $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
             if (is_file($testFile))
@@ -81,7 +80,7 @@ class TransferPDF extends BimpModelPDF
             $logo_file = '';
         } else {
             $sizes = dol_getImageSize($logo_file, false);
-            $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
+            $tabTaille = $this->calculeWidthHeightLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
 
             $logo_width = $tabTaille[0];
             $logo_height = $tabTaille[1];
@@ -96,7 +95,7 @@ class TransferPDF extends BimpModelPDF
                     $sizes = dol_getImageSize($soc_logo_file, false);
                     if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
 
-                        $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'] / 3, $sizes['height'] / 3, 200, 100);
+                        $tabTaille = $this->calculeWidthHeightLogo($sizes['width'] / 3, $sizes['height'] / 3, 200, 100);
 
                         $header_right = '<img src="' . $soc_logo_file . '" width="' . $tabTaille[0] . 'px" height="' . $tabTaille[1] . 'px"/>';
                     }
@@ -119,7 +118,8 @@ class TransferPDF extends BimpModelPDF
             'header_right'  => $header_right,
             'primary_color' => $this->primary,
             'doc_name'      => 'Bon de transfert',
-            'doc_ref'       => $doc_ref
+            'doc_ref'       => $doc_ref,
+            'ref_extra'     => ''
         );
     }
 
@@ -298,7 +298,7 @@ class TransferPDF extends BimpModelPDF
                     }
 
                     $row = array(
-                        'desc' => $desc,
+                        'desc' => $this->cleanHtml($desc),
                         'qty'  => (int) $line->getData('quantity_sent')
                     );
 

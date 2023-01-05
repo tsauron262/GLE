@@ -1,3 +1,5 @@
+abstract: 1
+
 primary: rowid
 
 header_btn: 
@@ -6,6 +8,12 @@ header_btn:
 header_list_name: default
 header_edit_form: default
 
+nom_url: 
+    syntaxe: <ref>
+    external_link: 1
+    modal_view: full
+    card: default
+    
 objects:
     lines: 
         relation: hasMany
@@ -55,12 +63,30 @@ objects:
             id_object: 
                 field_value: fk_user_valid
                 
+    entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+    
+    bimp_entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+        
+    rib_client: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_SocBankAccount
+            id_object:
+                field_value: rib_client
+                
 fields:
     entrepot: 
         label: Entrepôt
         dol_extra_field: 1
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         required: 
             callback: useEntrepot
         input: 
@@ -70,7 +96,7 @@ fields:
     libelle: 
         label: Libellé
         dol_extra_field: 1
-#        required: 1 (Vraiment requis?)
+#        required: 1
     ef_type: 
         label: Secteur (Canal de Vente)
         dol_extra_field: 1
@@ -78,7 +104,8 @@ fields:
             array: secteurs
         default_value: 
             callback: getDefaultSecteur
-        required: 1
+        required: 
+            callback: useEntrepot
     ref: 
         label: Référence
     fk_statut: 
@@ -87,9 +114,10 @@ fields:
         dol_prop: statut
         values: 
             array: status_list
-        display: 
+        displays: 
             icon: 
                 icon_only: 1
+                label: Statut
     fk_soc: 
         label: Client
         dol_prop: socid
@@ -99,8 +127,10 @@ fields:
             card: default
         required: 1
         create_form: light
+        edit_form: default
     ref_client: 
         label: Référence client
+        user_edit: 1
     fk_cond_reglement: 
         label: Conditions de règlement
         dol_prop: cond_reglement_id
@@ -113,16 +143,20 @@ fields:
             callback: getCondReglementBySociete
         depends_on: fk_soc
         required: 1
+        history: 1
     fk_mode_reglement: 
         label: Mode de règlement
         dol_prop: mode_reglement_id
         required : 1
-        type: int
+        type: id
         values: 
-            array: modeReglements
-        input: 
-            type: select_payment
-            include_empty: 1
+            callback:
+                method: getModeReglements
+                params:
+                    - 0
+#        input: 
+#            type: select_payment
+#            include_empty: 1
         default_value: 
             callback: getModeReglementBySociete
         depends_on: fk_soc
@@ -194,10 +228,14 @@ fields:
         label: Note privée
         type: html
         sortable: 0
+        user_edit: 1
+        hashtags: 1
     note_public: 
         label: Note publique
         type: html  
         sortable: 0
+        user_edit: 1
+        hashtags: 1
     zone_vente: 
         label: Zone de vente
         type: int
@@ -207,6 +245,46 @@ fields:
         default_value: 1
         input: 
             help: Si vous indiquez "Hors-UE" ou "Union Européenne", tous les taux de TVA des lignes actuelles seront mis à 0 de manière irréversible.
+    logs: 
+        label: Historique
+        type: html
+        default_value: ''
+    prime:
+        label: Prime
+        type: money
+        dol_extra_field: 1
+    prime2:
+        label: Prime2
+        type: money
+        dol_extra_field: 1
+    replaced_ref: 
+        label: Référence remplacée
+        input: 
+            help: Utiliser ce champ si perte des données de la pièce remplacée
+    rib_client:
+        label: Rib Client
+        dol_extra_field: 1
+        type: id_object
+        object: rib_client 
+        edit_form: default
+        create_form: add
+        create_form_label: Ajouter
+        create_form_values:
+            fields:
+                fk_soc:
+                    field_value: fk_soc
+        depends_on: fk_soc
+        input:
+            type: select
+            options:
+                callback: getRibArray
+        default_value: 0
+    expertise:
+        label: Expertise Bimp
+        dol_extra_field: 1
+        type: int
+        values: 
+            array: expertise
     
 forms: 
     contact:
@@ -225,7 +303,7 @@ forms:
               input_name: id_client
               input: 
                   type: search_societe
-                  societe_type: customer
+#                  societe_type: customer
               value: 
                   field_value: fk_soc
               display_if: 
@@ -236,6 +314,7 @@ forms:
               input_name: id_contact
               data_type: id_object
               object: contact
+              edit_form: default
               create_form: default
               create_form_values:
                   fields: 
@@ -288,8 +367,50 @@ forms:
     duplicate:
         force_edit: 1
         rows: 
-            - field: entrepot
-            - field: fk_soc
+            is_clone_form: 
+                custom: 1
+                hidden: 1
+                label: Clone
+                input_name: is_clone_form
+                input: 
+                    type: hidden
+                value: 1                    
+            entrepot: 
+                field: entrepot
+            client: 
+                field: fk_soc
+            libelle: 
+                field: libelle
+            secteur: 
+                field: ef_type
+            cond_reglement: 
+                custom: 1
+                label: Conditions de réglement
+                input: 
+                    type: select
+                    options: 
+                        array: condReglements
+                input_name: fk_cond_reglement
+                value: 
+                    callback: getCondReglementBySociete
+                depends_on: fk_soc,is_clone_form
+            mode_reglement: 
+                custom: 1
+                label: Mode de réglement
+                input: 
+                    type: select
+                    options: 
+                        callback:
+                            method: getModeReglements
+                            params:
+                                - 0
+                input_name: fk_mode_reglement
+                value: 
+                    callback: getModeReglementBySociete
+                depends_on: fk_soc,is_clone_form
+            expertise:
+                field: expertise
+                required: 1
     
     releverFacturation:
         rows:
@@ -300,7 +421,6 @@ forms:
               data_type: date
               input:
                   type: date
-                  display_now: 1
             - custom: 1
               label: Date fin du relevé
               input_name: date_fin
@@ -308,7 +428,6 @@ forms:
               data_type: date
               input:
                   type: date
-                  display_now: 1
 
     use_remise:
         rows: 
@@ -330,6 +449,11 @@ forms:
                   type: select
                   options: 
                       array: emailUsersFrom
+              value: 
+                  prop: 
+                      name: email
+                      object: 
+                          global: user
                       
             - custom: 1
               label: Destinataires
@@ -394,7 +518,6 @@ forms:
               value: 
                   callback: getEmailContentByModel
               depends_on: id_model
-              
             - custom: 1
               label: Fichiers joints
               input_name: join_files
@@ -402,10 +525,13 @@ forms:
               input: 
                   type: check_list
                   items: 
-                      callback: getAllFiles
-#                      array: files
+                      callback: 
+                          method: getAllFiles
+                          params: 
+                              - 0
               value: 
                   callback: getJoinFilesValues
+              depends_on: id_model
               object: files
               create_form: upload
               create_form_label: Ajouter
@@ -417,6 +543,16 @@ forms:
                           prop: object_name
                       id_parent: 
                           prop: id
+            - custom: 1
+              label: Fichiers des objets liés à joindre
+              input_name: extra_joins_files
+              data_type: id_object
+              object: files
+              content: 
+                  callback: 
+                      method: renderMailExtraFilesInput
+                      params: 
+                          - extra_joins_files
                           
     acompte: 
         title: Ajouter un acompte
@@ -428,7 +564,16 @@ forms:
               input: 
                   type: hidden
               value: 
-                  conf: use_caisse_for_payments
+                  conf: 
+                      module: bimpcore
+                      name: use_caisse_for_payments
+            - custom: 1
+              label: Payée
+              input_name: payee
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
             - custom: 1
               label: Paiement en caisse
               input_name: use_caisse
@@ -437,18 +582,24 @@ forms:
                   type: toggle
               value: 
                   conf: use_caisse_for_payments
-              display_if: 
-                  field_name: caisse_active
-                  hide_values: 0
+              display_if:
+                    fields_names: caisse_active,payee
+                    caisse_active:
+                        hide_values: 0
+                    payee:
+                        show_values: 1
             - custom: 1
               label: Caisse
               input_name: id_caisse
               data_type: id
               content: 
                   callback: renderCaisseInput
-              display_if: 
-                  field_name: use_caisse
-                  hide_values: 0
+              display_if:
+                    fields_names: use_caisse,payee
+                    use_caisse:
+                        hide_values: 0
+                    payee:
+                        show_values: 1
             - custom: 1
               label: Compte bancaire
               input_name: bank_account
@@ -461,11 +612,24 @@ forms:
             - custom: 1
               label: Mode de paiement
               input_name: id_mode_paiement
-              required: 1
+              required: 0
               input: 
                   type: select_payment
                   value_type: code
                   include_empty: 1
+              display_if: 
+                  field_name: payee
+                  hide_values: 0
+            - custom: 1
+              label: RIB Client
+              input_name: id_rib
+              input: 
+                  type: select
+                  options: 
+                      callback: getRibArray
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: PRE
             - custom: 1
               label: N° (chèque ou virement)
               input_name: num_paiement
@@ -499,6 +663,9 @@ forms:
               input:
                   type: date
                   display_now: 1
+              display_if: 
+                  field_name: payee
+                  hide_values: 0
             - custom: 1
               label: Montant
               input_name: amount
@@ -506,7 +673,26 @@ forms:
               required: 1
               input: 
                   type: text
-
+                  
+    logs: 
+        rows: 
+            - field: logs
+            
+    import_lines_csv: 
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: tag
+              input_name: import_lines_csv
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Fichier
+              input_name: csv_file
+              input: 
+                  type: file_upload
+                  help: "Le fichier doit être au format CSV (séparateur: ;)<br/>Colonne 1: Ref produit<br/>Colonne 2: Qté<br/>Colonne 3: PU HT<br/>NE PAS METTRE D'EN-TETE"
+                  
 fields_tables: 
     infos: 
         title: Informations
@@ -538,75 +724,110 @@ fields_tables:
         rows: 
             - field: note_public
             - field: note_private
+            - field: logs
     
+filters: 
+    id_commercial:
+        label: Commercial
+        data_type: id_object
+        type: user
+        input: 
+            type: search_user
+            include_empty: 1
+            include_current: 1
+            empty_label: Aucun
+                    
+    id_product:
+        label: Produit
+        data_type: id_object
+        type: value
+        input: 
+            type: search_product
+            
+    collection:
+        label: Collection produit
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - collection
+                        
+    nature:
+        label: Nature produit
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - nature
+                        
+    categorie:
+        label: Catégorie produit
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - categorie
+                        
+    famille:
+        label: Famille produit
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - famille
+                        
+    gamme:
+        label: Gamme produit
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - gamme
+                        
 filters_panels: 
     default: 
         filters: 
-            type: 
-                field: type
-            statut: 
-                field: fk_statut
-            paye: 
-                show: 0
-            secteur: 
-                field: ef_type
-            entrepot: 
-                field: entrepot
-            soc: 
-                field: fk_soc
-            ref_client: 
-                field: ref_client
             ref: 
-                field: ref
+            type: 
+            fk_statut: 
+            paiement_status: 
+                show: 0
+            ef_type: 
+            entrepot: 
+            fk_soc: 
+            ref_client: 
+            client:status: 
+                label: Statut client
             libelle: 
-                field: libelle
-            line_product:
-                custom: 1
-                field: id_product
-                label: Produit
-                data_type: id_object
-                type: value
-                input: 
-                    type: search_product
-            commercial: 
-                custom: 1
-                field: id_commercial
-                label: Commercial
-                data_type: id_object
-                type: user
-                input: 
-                    type: search_user
-                    include_empty: 1
-                    empty_label: Aucun
-            user_create: 
-                field: fk_user_author
-            user_valid: 
-                field: fk_user_valid
-            date_create: 
-                field: datec
+            id_product:
+            id_commercial: 
+            fk_user_author: 
+            fk_user_valid: 
+            datec: 
             date_valid: 
-                field: date_valid
-            availability:
-                field: fk_availability
-            cond_reglement: 
-                field: fk_cond_reglement
-            mode_reglement: 
-                field: fk_mode_reglement
             total_ht: 
-                field: total_ht
+            total:
             total_ttc: 
-                field: total
             zone_vente:
-                field: zone_vente
-            note_private: 
-                field: note_private
-            note_public: 
-                field: note_public
-            origine:
-                child: client
-                field: origine
                     
 lists_cols: 
+    ref: 
+        object_link: 1
     commercial: 
         label: Commercial
         value: 
@@ -614,52 +835,15 @@ lists_cols:
         search: 
             input: 
                 type: search_user
-    libelle: 
-        field: libelle
-    secteur:
-        field: ef_type
-    entrepot: 
-        field: entrepot
-        display: nom_url
-    ref: 
-        label: Réf. 
-        field: ref
-    soc: 
-        field: fk_soc
-        display: nom_url
-    ref_client: 
-        field: ref_client
-    statut: 
-        field: fk_statut
-    total_ht: 
-        field: total_ht
-    total_ttc: 
-        field: total
-    total_tva: 
-        field: tva
+    nbNotes:
+        label: Nombre de notes
+        value:
+            callback: displayCountNotes
     total_pa: 
-        label: Total achats
+        label: Total achats (hors reval)
         value: 
             callback: displayTotalPA
         has_total: 1
-    cond_reglement: 
-        field: fk_cond_reglement
-    mode_reglement: 
-        field: fk_mode_reglement
-    availability: 
-        field: fk_availability
-    input_reason: 
-        field: fk_input_reason
-    user_create:
-        field: fk_user_author
-        display: nom_url
-    user_valid: 
-        field: fk_user_valid
-        display: nom_url
-    zone_vente:
-        field: zone_vente
-    date_valid: 
-        field: date_valid
     client_facturation: 
         label: Client Fact.
         value: 
@@ -672,18 +856,17 @@ lists_cols:
         label: Tx marque
         value: 
             callback: displayTxMarque
-    origine:
-        child: client
-        field: origine
         
 lists: 
     default: 
         configurable: 1
+        total_row: 1
         checkboxes: 1
         filters_panel: default
         bulk_actions:
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
+            delete: 
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this))
         n: 10
         sort_field: rowid
         sort_way: desc
@@ -697,15 +880,21 @@ lists:
             callback: getDefaultListExtraButtons
         list_filters: 
             callback: getListFilters
+            
     mini_user_create:
         extends: default
         n: 5
         cols: 
-            user_author: unset
+            fk_user_author: unset
             entrepot: unset
-            secteur: unset
+            ef_type: unset
             date_create: unset
             commercial: unset
+            
+    client: 
+        extends: default
+        graph:
+            - client
             
 views: 
     default: 
@@ -843,3 +1032,59 @@ views:
                           method: renderNotesList
                           params:
                               - 1
+
+stats_lists_cols: 
+    tot_ht: 
+        label: Total HT
+        type: sum
+        data_type: money
+        decimals: 2
+        field: total_ht
+    tot_ttc: 
+        label: Total TTC
+        type: sum
+        data_type: money
+        decimals: 2
+        field: total_ttc
+    nb: 
+        label: Nb pièces
+        type: count
+                    
+stats_lists: 
+    default: 
+        n: 10
+        configurable: 1
+        filters_panel: default
+        group_by_options: 
+            - entrepot
+            - ef_type
+            - fk_statut
+            - fk_soc
+            - fk_cond_reglement
+            - fk_mode_reglement
+            - fk_availability
+            - fk_user_author
+            - fk_user_valid
+            - zone_vente
+        cols: 
+            tot_ht:
+            tot_ttc:
+            nb: 
+               
+views_lists: 
+    default:
+        objects_change_reload: BS_Ticket
+#        title: Tickets Hotline
+        component_name: default
+        component_type: card
+        view_btn: 0
+        add_btn: 0
+        edit_btn: 0
+#        edit_form: default
+        item_col_lg: 12
+        item_col_md: 12
+        item_modal_view: default
+        n: 5
+        pagination: 1
+        sort_field: datec
+        sort_way: desc

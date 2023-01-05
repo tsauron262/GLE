@@ -1,0 +1,140 @@
+.bds_operation_steps_table {
+    width: 100%; 
+
+    tr td {
+        padding: 12px 10px; 
+    }
+
+    td.stepLabel {
+        width: 20%;
+        font-size: 12px;
+        font-weight: bold; 
+    }
+
+    td.stepCount {
+        width: 10%;
+        color: #787878;
+        font-size: 13px; 
+    }
+
+    td.stepProgession {
+        width: 50%; 
+
+        .progessionBar {
+            background-color: #f5f5f5;
+            height: 18px;
+            width: 100%; 
+        }
+
+        .progressionDone {
+            -webkit-transition: all 0.3s ease;
+            transition: all 0.3s ease;
+            background-color: #00aff0;
+            height: 100%; 
+        }
+
+        .stepExtraInfo {
+            font-size: 11px;
+            color: #787878;
+            font-style: italic;
+            margin: 4px 0; 
+        }
+    }
+
+    td.stepStatus {
+        width: 10%;
+        vertical-align: top; 
+
+        span {
+            margin: 0 5px;
+            -webkit-transition: all 0.3s ease;
+            transition: all 0.3s ease;
+
+            &::before {
+                font-size: 16px;
+                font-family: 'FA5S'; 
+            }
+        }
+    }
+
+    tr.operationStepRow  {
+        &.waiting {
+            .stepLabel {
+                color: #B4B4B4; 
+            }
+
+            .stepStatus span:before {
+                content: '\f251';
+                color: #B4B4B4;
+            }
+        }
+
+        &.processing {
+            .stepLabel {
+                color: #00aff0; 
+            }
+
+            .stepProgession .progressionDone {
+                background-color: #00aff0; 
+            }
+
+            .stepStatus span:before {
+                content: '\f085';
+                color: #00aff0;
+            }
+        }
+
+        &.hold {
+            .stepProgession .progressionDone {
+                background-color: #DD6000;
+            }
+
+            .stepStatus span:before {
+                content: '\f04c';
+                color: #DD6000; 
+            }
+
+        }
+
+        &.cancelled {
+            .stepProgession .progressionDone {
+                background-color: #8C8C8C; 
+            }
+
+            .stepStatus span:before {
+                content: '\f00d';
+                color: #8C8C8C; 
+            }
+        }
+
+        &.success {
+            .stepLabel {
+                color: #505050; 
+            }
+
+            .stepProgession .progressionDone {
+                background-color: #7FDA73; 
+            }
+
+            .stepStatus span:before {
+                content: '\f00c';
+                color: #5DDC52;
+            }
+        }
+
+        &.error {
+            .stepLabel {
+                color: #505050; 
+            }
+
+            .stepProgession .progressionDone {
+                background-color: #C85252; 
+            }
+
+            .stepStatus span:before {
+                content: '\f06a';
+                color: #DC0000;
+            }
+        }
+    }
+}

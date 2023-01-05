@@ -1,12 +1,16 @@
 <?php
 
+//global $noConflictBoostrap;
+//$noConflictBoostrap = true;
+
 require_once('../../main.inc.php');
 require_once("libAgenda.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
 
 global $isMobile;
-if ($isMobile)
+//if ($isMobile)
     $conf->global->MAIN_HIDE_LEFT_MENU = true;
+    $conf->global->MAIN_HIDE_TOP_MENU = true;
 
 $tabUserId = array();
 $tabUser = getTabUser();
@@ -26,15 +30,23 @@ foreach ($tabUser as $userId => $nom) {
 $userStr = "'" . implode("','", $tabUser) . "'";
 
 $js = ' <script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js"  async=false defer=true></script>';
+
+/*****************************************************
+* Correction du conflit de l'agenda dans le BimpThème
+******************************************************/
+$js .= '<script type="text/javascript" src="' . DOL_URL_ROOT .'/theme/BimpTheme/views/js/fixBootStrapConflict.js"></script>';
+
 $js .= <<<EOF
+        <!--<script type="text/javascript" src="../jquery/chosen/chosen.jquery.min.js"></script>-->
+        <!--<link rel="stylesheet" type="text/css" href="../jquery/chosen/chosen.css" />-->
         <script type="text/javascript" src="../agenda/agenda.js"></script>
-        <script type="text/javascript" src="../jquery/chosen/chosen.jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="../jquery/chosen/chosen.css" />
-    <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />
- <link rel='stylesheet' type='text/css' href='./calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
-  <link rel="stylesheet" type="text/css" href="./calendar/jquery.weekcalendar.css" />
-  <link rel="stylesheet" type="text/css" href="./calendar/skins/default.css" />
-  <link rel="stylesheet" type="text/css" href="./calendar/skins/gcalendar.css" />
+    
+        <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />
+        <link rel='stylesheet' type='text/css' href='./calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
+        <link rel="stylesheet" type="text/css" href="./calendar/jquery.weekcalendar.css" />
+        <link rel="stylesheet" type="text/css" href="./calendar/skins/default.css" />
+        <link rel="stylesheet" type="text/css" href="./calendar/skins/gcalendar.css" />
+        
   <style type="text/css">
     body {
       font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
@@ -133,7 +145,9 @@ $js .= '<script type="text/javascript" src="./calendar/jquery.weekcalendar.js"><
 $js .= '<script type="text/javascript">';
 $js .= $tabJsIdUser;
 $js .= <<<EOF
+        
   (function($) {
+                
     var d = new Date();
     d.setDate(d.getDate() - d.getDay());
     var year = d.getFullYear();
@@ -223,7 +237,7 @@ $js .= <<<EOF
                 back = document.location.href;
                 back = escape(back);
                 back = back.replace(/\//g, "%2F");
-                newUrl = "../../comm/action/card.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&assignedtouser="+tabUserId[parseInt(calEvent.userId)]+"&optioncss=print&backtopage="+back;
+                newUrl = "../../comm/action/card.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&assignedtouser="+tabUserId[parseInt(calEvent.userId)]+"&optioncss=print&backtopage="+back+"&dol_hide_topmenu=1&dol_hide_leftmenu=1";
                 dispatchePopIFrame(newUrl, function(){ $('#calendar').weekCalendar('refresh'); }, 'New Action', 100);
     //            window.location.href = newUrl;
             }
@@ -438,11 +452,11 @@ function printMenu($tabUser) {
 
     echo '<br/><br/><div>';
     echo '<form action="" method="post" class="form" id="customForm" >';
-    echo '<select id="group" class="dropdown" data-placeholder="Indiquez le groupe">';
+    echo '<select id="group" class="dropdown_chosen" data-placeholder="Indiquez le groupe">';
     echo "<option value='0'>Groupes</option><option value='-1'>Moi</option>" . $select . "</select>";
     echo "<div class='contentListUser'><text><span class='nbGroup'></span></text><br/><br/>";
     echo '<label for="customSelectFor" class="screen-reader-text">Ajouter/supprimer des utilisateurs  </label>';
-    echo '<select id="chosenSelectId" name="customSelect[]" class="dropdown" form="customForm" multiple data-placeholder="Indiquez au moins un nom ou un prénom">';
+    echo '<select id="chosenSelectId" name="customSelect[]" class="dropdown_chosen" form="customForm" multiple data-placeholder="Indiquez au moins un nom ou un prénom">';
     while ($result = $db->fetch_object($sql)) {
         if (isset($tabUser[$result->rowid])) {
             echo "<option id='user" . $result->rowid . "' name='" . $result->rowid . "' value='" . $result->rowid . "' selected='selected'>" . $result->firstname . " " . $result->lastname . "</option>";
@@ -460,8 +474,6 @@ function printMenu($tabUser) {
     echo "</form>";
     echo "<br/></div>";
 
-    //que pour 2016
-    echo "<br/>ATTENTION sur l'année 2016 les numéros de semaines sont décalés de 1. (Il faut enlever 1 au numéro affiché)";
 }
 
 llxFooter();

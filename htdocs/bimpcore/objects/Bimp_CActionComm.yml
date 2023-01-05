@@ -1,0 +1,44 @@
+table: c_actioncomm
+primary: id
+common_fields: 0
+
+nom_url: 
+    syntaxe: <id>
+    
+labels: 
+    name: type d'événement
+                
+fields: 
+    
+    code: 
+        label: Code
+    
+    type: 
+        label: Type
+        
+    libelle: 
+        label: Libellé
+        
+    module: 
+        label: module
+        
+    active: 
+        label: Actif
+        type: bool
+
+    todo:
+        labebl: A faire
+        
+    position: 
+        label: Position
+        type: int
+        
+    color: 
+        label: Couleur
+        type: int        
+        
+    picto: 
+        label: Pictogramme        
+        
+    icon: 
+        label: Icône

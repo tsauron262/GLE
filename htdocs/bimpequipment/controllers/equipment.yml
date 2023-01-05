@@ -59,6 +59,10 @@ sections:
                           view: 
                               name: reservations
                               object: equipment
+            show:
+                callback:
+                    method: useReservations
+                    object: equipment
                               
           - id: prets
             title: Prêts
@@ -66,6 +70,10 @@ sections:
                 type: custom
                 custom: 
                     callback: renderPretsList
+            show:
+                callback:
+                    method: useReservations
+                    object: equipment
                     
           - id: sav
             title: SAV
@@ -73,6 +81,16 @@ sections:
                 type: custom
                 custom: 
                     callback: renderSavList
+            show:
+                callback:
+                    method: useSav
+                    object: equipment
+          - id: hotline
+            title: Hotline
+            struct: 
+                type: custom
+                custom: 
+                    callback: renderHotlineList
                     
           - id: inventory
             title: Inventaires
@@ -80,6 +98,34 @@ sections:
                 type: custom
                 custom: 
                     callback: renderInventory
+            show:
+                callback:
+                    method: useReservations
+                    object: equipment
+                    
+          - id: achat
+            title: Achat
+            struct:
+                type: custom
+                custom:
+                    callback: renderAchats
+            show:
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
+                    
+          - id: divers
+            title: Divers (admin)
+            show: 
+                callback:
+                    method: iAmAdmin
+                    object: client
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderBimpOjectDivers
+                        object: equipment
            
     - type: buttons
       buttons:

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_entrepot` ADD `id_entrepot_pro` VARCHAR(40) NOT NULL;

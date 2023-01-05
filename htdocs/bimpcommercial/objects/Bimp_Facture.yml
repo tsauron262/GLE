@@ -1,7 +1,9 @@
 extends: 
     module: bimpcommercial
     object_name: BimpComm
-    
+
+abstract: 0
+
 dol_object: 
     instance: 
         dol_object: 
@@ -14,6 +16,10 @@ table: facture
 controller: facture
 icon: fas_file-invoice-dollar
 
+nom_url: 
+    with_status: 0
+    card: light
+
 list_page_url: 
     controller: factures
 
@@ -25,11 +31,6 @@ objects:
     lines: 
         instance: 
             bimp_object: Bimp_FactureLine
-            
-    entrepot: 
-        instance: 
-            id_object:
-                field_value: entrepot
                 
     account: 
         instance:
@@ -57,6 +58,15 @@ objects:
             id_object: 
                 field_value: id_entrepot_commission
                     
+    user_irrecouvrable: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_irrecouvrable
+                
+    facture_source:
+        extends: facture
+        
 fields: 
     exported:
         label: Etat comptable
@@ -98,6 +108,8 @@ fields:
         object: account
         input: 
             type: select_mysoc_account
+        default_value:
+            conf: id_default_bank_account
     centre: 
         label: Centre
         dol_extra_field: 1
@@ -120,33 +132,33 @@ fields:
         dol_prop: unset
         no_dol_prop: 1
     paye: 
-        label: Paye
+        label: Entièrement payé(e)
         type: bool
         default_value: 0
+        display: 
+            short: 
+                type: callback
+                method: displayPaidStatus
+                params: 
+                    - 0
+                    - 1
     pdf_hide_pu: 
         label: Masquer les prix unitaires dans le PDF
         dol_extra_field: 1
         type: bool
         default_value: 0
         sortable: 0
-#    pdf_hide_reduc: 
-#        label: Masquer les remises dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0
-#        sortable: 0
-#    pdf_hide_total: 
-#        label: Masquer les totaux dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0 
-#        sortable: 0
-#    pdf_hide_ttc:
-#        label: Masquer le TTC dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0
-#        sortable: 0
+    pdf_nb_decimal: 
+        label: Nombre de décimals dans le PDF
+        dol_extra_field: 1
+        type: int
+        sortable: 0
+    pdf_hide_ref:
+        label: Masquer les références des produits dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
     marge: 
         label: Marge
         type: money
@@ -172,16 +184,115 @@ fields:
         type: money
     fk_facture_source:
         label: Facture source
-        type: id
+        type: id_object
+        object: facture_source
     statut_export:
         label: Statut export
         type: int
+        user_edit: 1
         values: 
             array: statut_export
     douane_number:
         label: N° Douane
+        user_edit: 1
+    relance_active:
+        label: Relances paiements autorisées
+        type: bool
+        default_value: 1
+        history: 1
+    nb_relance:
+        label: Nombre de relances
+        type: int
+        default_value: 0
+        displays: 
+            badge: 
+                label: Badge
+                type: callback
+                method: displayNbRelanceBadge
+    date_relance: 
+        label: Date de dernière relance
+        type: date
+    date_next_relance: 
+        label: Date de prochaine relance
+        type: date
+    paiement_status: 
+        label: Statut paiement
+        type: int
+        values: 
+            array: paiement_status
+        default_value: 0
+    remain_to_pay: 
+        label: Reste à payer
+        type: money
+        default_value: 0
+    close_code: 
+        label: Code abandon
+    close_note: 
+        label: Motif abandon
+        type: text
+    date_irrecouvrable: 
+        label: Déclarée irrécouvrable le
+        type: datetime
+    id_user_irrecouvrable: 
+        label: Déclarée irrécouvrable par
+        type: id_object
+        object: user_irrecouvrable
+        default_value: 0
+    prelevement: 
+        label: Prélèvement mis en place
+        type: bool
+        default_value: 0
+    marge_finale_ok: 
+        label: Marge + reval OK
+        type: money
+        default_value: 0
+    total_achat_reval_ok: 
+        label: Total achat (reval OK)
+        type: money
+        default_value: 0        
+    litige: 
+        label: Litige
+        dol_extra_field: 1
+        type: bool
+    chorus_status: 
+        label: Statut export chorus
+        dol_extra_field: 1
+        type: int
+        default_value: -1
+        values: 
+            array: chorus_status
+    chorus_data:
+        label: Données Chorus
+        dol_extra_field: 1
+        type: json
+    date_cfr:
+        label: Date de dépot CFR
+        dol_extra_field: 1
+        type: datetime
+    fk_mode_reglement: 
+        history: 1
+#    rib_client:
+#        label: Rib Client
+#        dol_extra_field: 1
+#        type: id_object
+#        object: rib_client 
+#        create_form: default
+#        create_form_label: Ajouter
+#        create_form_values:
+#            fields:
+#                fk_soc:
+#                    field_value: fk_soc
+#        depends_on: fk_soc
+#        input:
+#            type: select
+#            options:
+#                callback: getRibArray
+#        default_value: 0
+        
+    ref: unset
     fk_availability: unset
     fk_input_reason: unset
+    total_ht: unset
        
 forms: 
     default: 
@@ -207,6 +318,8 @@ forms:
                 value: 
                     request_field: origin_id
                 hidden: 1
+            replaced_ref: 
+                field: replaced_ref
             soc: 
                 field: fk_soc
             ref_client: 
@@ -265,43 +378,43 @@ forms:
                 depends_on: fk_soc
                 show: 
                     callback: isNotLoaded
-            avoir_same_lines: 
-                custom: 1
-                label: Créer l'avoir avec les même lignes que la factures dont il est issu
-                data_type: bool
-                input: 
-                    type: toggle
-                value: 1
-                input_name: avoir_same_lines
-                display_if: 
-                    fields_names: type,id_facture_to_correct
-                    type: 
-                        show_values: 2
-                    id_facture_to_correct:
-                        hide_values: 0
-                show: 
-                    callback: isNotLoaded
-            avoir_remain_to_pay: 
-                custom: 1
-                label: Créer l'avoir avec le montant restant à payer de la facture dont il est issu.
-                data_type: bool
-                input: 
-                    type: toggle
-                value: 0
-                input_name: avoir_remain_to_pay
-                display_if: 
-                    fields_names: type,id_facture_to_correct
-                    type: 
-                        show_values: 2
-                    id_facture_to_correct:
-                        hide_values: 0
-                show: 
-                    callback: isNotLoaded
+#            avoir_same_lines: 
+#                custom: 1
+#                label: Créer l'avoir avec les même lignes que la factures dont il est issu
+#                data_type: bool
+#                input: 
+#                    type: toggle
+#                value: 1
+#                input_name: avoir_same_lines
+#                display_if: 
+#                    fields_names: type,id_facture_to_correct
+#                    type: 
+#                        show_values: 2
+#                    id_facture_to_correct:
+#                        hide_values: 0
+#                show: 
+#                    callback: isNotLoaded
+#            avoir_remain_to_pay: 
+#                custom: 1
+#                label: Créer l'avoir avec le montant restant à payer de la facture dont il est issu.
+#                data_type: bool
+#                input: 
+#                    type: toggle
+#                value: 0
+#                input_name: avoir_remain_to_pay
+#                display_if: 
+#                    fields_names: type,id_facture_to_correct
+#                    type: 
+#                        show_values: 2
+#                    id_facture_to_correct:
+#                        hide_values: 0
+#                show: 
+#                    callback: isNotLoaded
             ef_type: 
                 field: ef_type
-            entrepot: 
+            entrepot:
                 field: entrepot
-                show: 
+                show:
                     callback: isEditable
             centre: 
                 field: centre
@@ -309,6 +422,9 @@ forms:
                     callback: isEditable
             libelle: 
                 field: libelle
+            expertise:
+                field: expertise
+                edit: 1
             datef: 
                 field: datef
                 show: 
@@ -321,6 +437,8 @@ forms:
                 field: fk_mode_reglement
                 show: 
                     callback: isEditable
+            rib_client:
+                field: rib_client
 #            date_lim_reglement: 
 #                field: date_lim_reglement
             account: 
@@ -349,6 +467,12 @@ forms:
                 field: statut_export
             douane_number:
                 field: douane_number
+            prime:
+                field: prime
+            prime2:
+                field: prime2
+            relance_active: 
+                field: relance_active
             
     refacture: 
         extends: default
@@ -378,14 +502,14 @@ forms:
             typedeposit: unset
             id_facture_replaced: unset
             id_facture_to_correct: unset
-            avoir_same_lines: unset
-            avoir_remain_to_pay: unset
+#            avoir_same_lines: unset
+#            avoir_remain_to_pay: unset
             typedeposit: unset
             typedeposit: unset
             
     paid_partially:
         msgs: 
-            - content: Cette facture n'a pas été payée à hauteur du montant initial. Pour quelle raison voulez-vous la classer malgré tout?
+            - content: Cette facture n'a pas été payée à hauteur du montant initial. Pour quelle raison voulez-vous la classer payée malgré tout?
               type: warning
         rows: 
             - custom: 1
@@ -425,16 +549,10 @@ forms:
                   
     duplicate:
         rows: 
-            2: 
-                field: libelle
-            3: 
-                field: ef_type
-            4: 
+            date_fac: 
                 field: datef
-            5:
+            account: 
                 field: fk_account
-            6:
-                field: fk_cond_reglement
                 
     validate: 
         title: Validation
@@ -450,7 +568,7 @@ forms:
               data_type: bool
               input: 
                   type: toggle
-              value: 1
+              value: 0
               display_if: 
                   field_name: validation_type
                   show_values: 2
@@ -532,25 +650,75 @@ forms:
               content: 
                   callback: renderCheckPaForm
 #              depends_on: type_check
-                                  
-fields_tables: 
-    infos: 
+
+    date_next_relance: 
         rows: 
+            - field: date_next_relance
+            
+    irrecouvrable: 
+        rows: 
+            - field: close_note
+              label: Motif
+              required: 1
+              
+    lines_to_facture: 
+        rows: 
+            - custom: 1
+              label: Facture
+              input_name: id_facture
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      array: draftFacturesForRefacture
+                      
+    export_to_chorus: 
+        rows: 
+            - custom: 1
+              label: Structure
+              input_name: id_structure
+              content: 
+                  callback: renderClientSelectChorusStructuresInput
+            - custom: 1
+              label: Code Service
+              input_name: code_service
+              content: 
+                  callback: renderClientSelectChorusServicesInput
+              depends_on: id_structure
+            - custom: 1
+              label: Fichier a joindre
+              input_name: files_compl
+              content:
+                  callback: 
+                    method: renderMailExtraFilesInput
+                    params:
+                        - files_compl
+                  
+fields_tables: 
+    infos:
+        footer_extra_btn: 
+            callback: getInfosExtraBtn
+        rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - label: Type
               value: 
                   callback: displayType
             - field: libelle
               edit: 1
+            - field: expertise
+              edit: 1
             - field: fk_statut
+            - field: paye
+            - field: paiement_status
             - field: centre
             - field: entrepot
               display: nom_url
             - field: ef_type
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: datef
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: zone_vente
               edit: 1
             - label: Commercial
@@ -567,12 +735,21 @@ fields_tables:
 #            - label: Zone de vente
 #              value:
 #                  callback: displayZoneVenteField
-            - field: exported
+            - label: Etat comptable
+              value:
+                  callback: renderExportedField
+            - field: ignore_compta
             - field: statut_export
               edit: 1
             - field: douane_number
               edit: 1
-    
+            - field: litige
+              edit: 1
+            - field: chorus_status
+            - label: Infos export Chorus
+              value: 
+                  callback: displayChorusData
+                  
     client: 
         rows: 
             - field: fk_soc
@@ -588,16 +765,43 @@ fields_tables:
             - field: fk_account    
               edit: 1
             - field: fk_cond_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: fk_mode_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
+            - field: rib_client
+              edit: 1
+            - field: prelevement
+              edit: 1
+              show: 
+                  callback: showPrelevement
             - field: date_lim_reglement
+            - field: relance_active
+              edit: 1
+            - field: nb_relance
+            - field: date_relance
+              show: 
+                  field_value: nb_relance
+            - label: Date de prochaine relance
+              value: 
+                  callback: displayDateNextRelance
+            - label: Facture irrécouvrable
+              value: 
+                  callback: displayIrrecouvrableInfos
+              show: 
+                  callback: isIrrecouvrable
+            - label: Avoir potentiel
+              value: 
+                  callback: displayPotentielRemise
+            - field: date_cfr
+              edit: 1
                 
     pdf: 
         rows: 
             - field: pdf_hide_pu
+              edit: 1
+            - field: pdf_hide_ref
+              edit: 1
+            - field: pdf_nb_decimal
               edit: 1
 #            - field: pdf_hide_reduc
 #              edit: 1
@@ -617,6 +821,15 @@ fields_tables:
             - field: total
             - field: tva
             - field: total_ttc
+            - field: prime
+            - field: prime2
+            
+    notes:
+        rows:
+            - field: close_note
+            - field: note_public
+            - field: note_private
+            - field: logs
             
 views: 
     default: 
@@ -626,74 +839,42 @@ views:
     full: 
         objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale
         
+filters: 
+    revals_prevues: 
+        label: Revalorisations prévues
+        type: range
+        data_type: money
+    revals_brouillons: 
+        label: Revalorisations en attente
+        type: range
+        data_type: money
+    revals_ok: 
+        label: Revalorisations acceptées
+        type: range
+        data_type: money
+    tech_sav: 
+        label: Technicien SAV
+        type: value
+        input: 
+            type: search_user
+            
 filters_panels: 
     default: 
         filters: 
-            paye: 
-                field: paye
-                show: 1
-            date_lim_reglement:
-                field: date_lim_reglement
-            datef:
-                field: datef
-            revals_prevues: 
-                custom: 1
-                field: revals_prevues
-                label: Revalorisations prévues
-                type: range
-                data_type: money
-            revals_brouillons: 
-                custom: 1
-                field: revals_brouillons
-                label: Revalorisations en attente
-                type: range
-                data_type: money
-            revals_ok: 
-                custom: 1
-                field: revals_ok
-                label: Revalorisations acceptées
-                type: range
-                data_type: money
-            total_ht:
-                field: total
-            total_ttc: 
-                field: total_ttc
-            ignore_compta:
-                field: ignore_compta
-            tech_sav: 
-                custom: 1
-                field: tech_sav
-                label: Technicien SAV
-                type: value
-                input: 
-                    type: search_user
-            availability: unset
-            statut_export:
-                field: statut_export
-            douane_number:
-                field: douane_number
+            ref: unset
+            total_ht: unset
+            fk_availability: unset
             
-lists_cols: 
-    type: 
-        field: type
-    centre: 
-        field: centre
-    paid: 
-        label: Payée
-        value: 
-            callback: 
-                method: displayPaidStatus
-                params: 
-                    - 0
-                    - 1
-    date_lim_reglement:
-        field: date_lim_reglement
-    total_ht: 
-        field: total
-        has_total: 1
-    total_ttc: 
-        has_total: 1
-        field: total_ttc
+            facnumber: 
+            paiement_status: 
+            date_lim_reglement:
+            datef: 
+                
+lists_cols:
+    total_ht: unset
+    facnumber: 
+        object_link: 1
+    ref: unset
     pdf: 
         label: Fichier PDF
         value: 
@@ -702,13 +883,6 @@ lists_cols:
                 params: 
                     - false
         available_csv: 0
-    datec: 
-        field: datec
-    availability: unset
-    input_reason: unset
-    marge:
-        field: marge
-        has_total: 1
     revalOk:
         label: Reval. OK
         value: 
@@ -716,13 +890,10 @@ lists_cols:
                 method: displayReval
                 params: 
                     - ok
-    revalOkPlusMarge:
-        label: Marge + Reval. OK
-        value: 
-            callback: 
-                method: displayReval
-                params: 
-                    - ok+marge
+    #remplacée par field marge_finale_ok
+    revalOkPlusMarge: 
+        label: Marge + Reval. OK (obsolète)
+        value: <span class="danger">Cette colonne est obsolète veuillez la supprimer de votre configuration et ajouter la nouvelle colonne portant le même nom</span>
     revalPrevuPlusMarge:
         label: Marge + Reval. prévues
         value: 
@@ -730,21 +901,83 @@ lists_cols:
                 method: displayReval
                 params: 
                     - prevu+marge
+    tx_marge: 
+        label: Tx marge
+        total_type: percent
+        value: 
+            callback: 
+                method: displayTxMarge
+    tx_marque: 
+        label: Tx marque
+        total_type: percent
+        value: 
+            callback: 
+                method: displayTxMarque
+        
     secteur_comm_check: 
         label: Secteur
         value: 
-            callback: displaySecteurWithCommercialCheck     
-    remain_to_pay: 
-        label: Reste à payer
+            callback: displaySecteurWithCommercialCheck
+    sav_equipment: 
+        label: Equipement SAV
         value: 
-            callback: displayRemainToPay
-    statut_export:
-        field: statut_export
-        edit: 1
-    douane_number:
-        field: douane_number
-        edit: 1
-    
+            callback: 
+                method: displayInfoSav
+                params:
+                    - equipment
+    sav_product: 
+        label: Produit SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - product
+    sav_product_info: 
+        label: Produit label
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - productInfo
+    sav_equipment_waranty: 
+        label: Garantie SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - waranty
+    sav_sav: 
+        label: SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - sav
+    sav_gsx_number: 
+        label: SAV commande Apple
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - apple_number
+    duplicata: 
+        label: Duplicata
+        value: 
+            callback: diplayDuplicataButton 
+    retard_paiment:
+        label: Retard paiement
+        value:
+            callback: displayRetard
+    paiements: 
+        label: Paiements
+        value:
+            callback: displayPaiements
+    clients_commandes:
+        label: Client(s) Commande(s)
+        value:
+            callback: displayClientsCommandes
+        
+                   
 lists: 
     default: 
         total_row: 1
@@ -755,9 +988,12 @@ lists:
         sort_way: desc
         add_btn_label: Créer une nouvelle facture
         bulk_actions:
-            - label: supprimer les factures sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
+            delete: 
+                label: supprimer les factures sélectionnées
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+        list_actions: 
+            callback: getListExtraListActions
         add_form_values: 
             fields: 
                 entrepot: 
@@ -766,24 +1002,27 @@ lists:
                     request: id_client
         delete_btn: 0
         cols: 
-            ref: 
+            facnumber: 
             type: 
-            statut: 
-            paid: 
-            soc: 
+            fk_statut: 
+            paiement_status: 
+            fk_soc:
             commercial:
             total_ttc: 
             pdf:
         
+    logistique: 
+        extends: default
+        configurable: 0
+        filters_panel: unset
+        extra_btn: 
+            callback: getLogistiqueListExtraButtons
+            
     client: 
         extends: default
+        n: 10
         cols: 
             soc: unset
-        bulk_actions:
-            - label: supprimer les commandes sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        n: 500
             
     commission: 
         total_row: 1
@@ -805,8 +1044,8 @@ lists:
             commercial:
             secteur_comm_check:
             statut: 
-            paid: 
-            total_ht: 
+            paiement_status: 
+            total: 
             total_pa:
             marge: 
             
@@ -824,6 +1063,23 @@ lists:
                 params: 
                     - 2
             
+    public_client: 
+        total_row: 1
+        configurable: 0
+        sort_field: datef
+        sort_way: desc
+        delete_btn: 0
+        cols: 
+            facnumber: 
+                display: default
+            type: 
+            datef: 
+            paiement_status:
+            commercial:
+                display: nom
+            total_ttc: 
+            duplicata:
+        
 cards: 
     default: 
         title: 
@@ -831,10 +1087,9 @@ cards:
         status: fk_statut
         view_btn: 1
         fields: 
+            - field: replaced_ref
             - field: total_ttc
-            - label: Payé
-              value: 
-                  callback: displayPaid
+            - field: paiement_status
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
@@ -845,15 +1100,25 @@ cards:
         status: fk_statut
         view_btn: 0
         fields: 
-            - field: total_ttc
-            - label: Payé
-              value: 
-                  callback: displayPaid
+            replaced_ref: 
+                field: replaced_ref
+            total: 
+                field: total_ttc
+            paiement_status: 
+                field: paiement_status
+                  
+    detail: 
+        extends: light
+        fields: 
+            client: 
+                field: fk_soc
+                display: nom_url
         
 searches:
     default: 
         fields_search: 
-            - a.ref
+            - a.rowid
+            - a.facnumber
             - ef.libelle
             - s.nom
         joins:
@@ -868,4 +1133,51 @@ searches:
         fields_return: 
             - a.ref
             - s.nom
-        label_syntaxe: '<a.ref> (Client: <s.nom>)'
+            - ef.libelle
+        label_syntaxe: '<a.facnumber> - <ef.libelle> (Client: <s.nom>)'
+        
+stats_lists_cols: 
+    marge:
+        field: marge
+        data_type: money
+    tot_ht: 
+        field: total
+    tot_brouillon: 
+        label: Tot. Fac. brouillons
+        type: sum
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        field: total_ttc
+        filters: 
+            fk_statut: 0
+    tot_valide: 
+        label: Tot. Fac. validées
+        type: sum
+        field: total_ttc
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        filters: 
+            fk_statut: 
+                in: 
+                    - 1
+                    - 2
+    tot_abandon: 
+        label: Tot. Fac. abandonnées
+        type: sum
+        field: total_ttc
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        filters: 
+            fk_statut: 3
+                   
+stats_lists: 
+    default: 
+        cols: 
+            marge:
+            nb:
+            tot_brouillon:
+            tot_valide:
+            tot_abandon: 

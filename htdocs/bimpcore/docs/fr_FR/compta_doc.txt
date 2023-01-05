@@ -1,0 +1,12 @@
+==Interface
+Dans cette partie, vous trouverez la présentation de l'interface du module '''''BimpToCegid'''''
+===Onglet '''Export'''
+Dans cet onglet ce trouve:
+La liste des fichiers présents dans le dossier export du serveur (dossier de stockage des fichiers TRA qui seront envoyés dans le répertoir de cégid)
+===Onglets '''TIERS''', '''FACTURES''', '''ACHATS''', '''PAIEMENTS'''
+====TIERS
+====FACTURES
+====ACHATS
+====PAIEMENTS
+===Onglet '''Recherche'''
+===Onglet '''Configurations'''

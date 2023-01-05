@@ -2,10 +2,13 @@ extends:
     module: bimpcommercial
     object_name: DolLine
     
+abstract: 1
+    
 table: commandedet
 
 labels: 
     name: ligne de commande
+    name_plur: lignes de commande
     
 objects: 
     commande: 

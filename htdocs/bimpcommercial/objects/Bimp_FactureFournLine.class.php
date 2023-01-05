@@ -40,9 +40,10 @@ class Bimp_FactureFournLine extends FournObjectLine
                 $eq_lines = $this->getEquipmentLines();
 
                 foreach ($eq_lines as $eq_line) {
-                    $equipment = $eq_line->getChildObject('equipment');
 
-                    if (BimpObject::ObjectLoaded($equipment)) {
+                    $id_equipment = $eq_line->getData('id_equipment');
+
+                    if ($id_equipment) {
                         $pa_ht = $eq_line->getData('pu_ht');
                         $tva_tx = $eq_line->getData('tva_tx');
 
@@ -58,18 +59,17 @@ class Bimp_FactureFournLine extends FournObjectLine
                             $pa_ht -= ($pa_ht * ((float) $this->remise / 100));
                         }
 
-                        $equipment->set('prix_achat', $pa_ht);
-                        $equipment->set('achat_tva_tx', $tva_tx);
-
-                        $warnings = array();
-                        $equipment->update($warnings, true);
+                        $this->db->update('be_equipment', array(
+                            'prix_achat'   => $pa_ht,
+                            'achat_tva_tx' => $tva_tx
+                                ), 'id = ' . (int) $id_equipment);
                     }
                 }
             }
         }
     }
-    
-    public function updatePrixAchat()
+
+    public function updatePrixAchat($new_pa_ht)
     {
         return array();
     }

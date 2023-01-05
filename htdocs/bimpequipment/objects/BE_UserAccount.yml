@@ -35,7 +35,7 @@ fields:
         input: 
             type: search_societe
             societe_type: customer
-        display: 
+        displays: 
             default:
                 type: nom_url
             
@@ -45,7 +45,7 @@ fields:
         object: client_contact
         values: 
             array: client_contacts
-        display: 
+        displays: 
             default:
                 type: nom_url
         display_if:
@@ -81,15 +81,11 @@ lists:
         sort_way: desc
         cols: 
             name: 
-                field: name
                 edit: 1
-            client: 
-                field: id_client
+            id_client: 
             login: 
-                field: login
                 edit: 1
             pword: 
-                field: pword
                 edit: 1
                 
 cards:

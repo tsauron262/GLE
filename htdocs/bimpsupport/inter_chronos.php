@@ -140,5 +140,5 @@ function displayTimers($timer, $timers)
         }
     }
 
-    $bimp_fixe_tabs->errors = array_merge($bimp_fixe_tabs->errors, $errors);
+    $bimp_fixe_tabs->errors = BimpTools::merge_array($bimp_fixe_tabs->errors, $errors);
 }

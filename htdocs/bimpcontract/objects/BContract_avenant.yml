@@ -1,0 +1,304 @@
+bootstrap: 1
+table: bcontract_avenant
+icon: fas_file-medical
+
+labels:
+    name: Avenant
+    name_plur: Avenants
+
+parent_module: bimpcontract
+parent_object: BContract_contrat
+parent_id_property: id_contrat
+
+objects:
+    avenantdet:
+        relation: hasMany
+        instance:
+            bimp_object: BContract_avenantdet
+            
+    service:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Product
+            id_object:
+                field_value: id_serv
+                
+    contrat:
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+            id_object:
+                request: id
+    user_avenant:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: user_create
+
+fields:
+    label:
+        label: Libellé
+    id_contrat:
+        label: Contrat
+        type: id_object
+        object: contrat
+    lieu:
+        label: Lieu d'intervention ajouté au contrat
+        type: text
+    date_effect:
+        label: Date d'effet de l'avenant
+        type: date
+    date_end:
+        label: Date de fin du contrat au moment de l'avenant
+        type: date
+    date_signed:
+        label: Date de signature de l'avenant
+        type: date
+    statut:
+        label: Statut
+        values:
+            array: statut_list
+    number_in_contrat:
+        label: Numéro de l'avenant
+        type: int
+    signed:
+        label: Avenant signé
+        type: bool
+    user_create:
+        label: Créé par
+        type: id_object
+        object: user_avenant
+    date_create:
+        label: Créé le
+        type: datetime
+    date_activate:
+        label: Activé le
+        type: date
+    private_close_note:
+        label: Private
+        type: text
+    type:
+        label: Type de l'avenant
+        type: int
+        values:
+            array: typeAvenant
+    want_end_date:
+        label: Date de fin souhaitée
+        type: date
+    added_month:
+        label: Nombre de mois ajoutés au contrat
+        type: int
+    by_month:
+        label: Prolongtion par mois ?
+        type: int
+
+lists:
+    default:
+        object_change_reload: BContract_contrat
+        title: Liste des avenant du contrat
+        add_form_name: add
+        delete_btn: 1
+        modal_view: avenant
+        extra_btn:
+            callback: getExtraBtn
+        cols:
+            ref:
+                label: Référence
+                value:
+                    callback: getRefAv
+            date_effect:
+            nb_jours_reste:
+                label: Prorata jours
+                value:
+                    callback: getProataDays
+            signed:
+            date_signed:
+            statut:
+            coup:
+                label: Coût de l'avenant au prorata
+                value:
+                    callback: displayTotalCoup
+#            adding:
+#                label: Adding Amount
+#                value:
+#                    callback: getThisAddingAmountForTypeProlongation
+            user_create:
+            date_create:
+    all:
+        extends: default
+        add_form_name: unset
+        delete_btn: 0
+        inline_view: unset
+        modal_view: avenant
+        extra_btn: unset
+        page_btn: 1
+        cols:
+            id_contrat:
+            coup: unset
+                
+forms:
+    activate:
+        title: Activation de l'avenant
+        rows:
+            - custom: 1
+              label: Avenant signé
+              input:
+                  type: toggle
+              input_name: haveSignature
+            - custom: 1
+              label: Date de signature
+              input:
+                  type: date
+                  display_now: 1
+              input_name: dateSignature
+              display_if:
+                  field_name: haveSignature
+                  show_values: 1
+        
+    delete_avenant:
+        title: Supprimer l'avenant
+        rows:
+            - custom: 1
+              label: Modifications dû à la suppression de l'avenant
+              input:
+                type: custom
+                content: EN ATTENTE
+                    #callback: displayModifSuppAvenant
+    avenantProlongationEdit:
+        title: Edition du nombre d'année de prolongation
+        rows:
+            - custom: 1
+              label: Nombre d'année de prolongation
+              input_name: years
+              value: 
+                  callback: getNbYears
+              input:
+                  type: qty
+              show:
+                  callback: 
+                      method: by
+                      params:
+                          - a
+            - custom: 1
+              label: Nombre de mois de prolongation
+              input_name: month
+              value: 
+                  callback: getNbMois
+              input:
+                  type: qty
+              show:
+                  callback: 
+                      method: by
+                      params:
+                          - m
+              
+    add:
+        title: Création d'un avenant
+        rows:
+            - field: label
+            - field: type
+            - field: date_effect
+              display_if:
+                  field_name: type
+                  show_values: 0
+            - custom: 1
+              label: Ajout en nombre de mois ?
+              input_name: enMois
+              input:
+                  type: toggle
+              display_if:
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Quantitée
+              input_name: years
+              value: 1
+              input:
+                  type: qty
+              display_if:
+                  field_name: type
+                  show_values: 1
+    signed:
+        title: Signer l'avenant
+        rows:
+            - custom: 1
+              input:
+                  type: date
+              input_name: date_signed
+              label: Date de signature de l'avenant
+              required: 1
+              
+    addLine:
+        title: Ajouter une ligne à l'avenant
+        rows:
+            - custom: 1
+              label: Service
+              input_name: id_serv
+              type: id_object
+              object: service
+              input:
+                  type: search_product
+                  card: default
+            - custom: 1
+              input_name: ht
+              label: Prix HT
+              input:
+                  type: text
+                  help: Si vide -> Prix hors taxes du produit
+              value:
+                  callback: getProductPrice
+              depends_on: id_serv
+            - custom: 1
+              input_name: remise
+              label: Remise en %
+              required: 1
+              input:
+                  type: text
+              value: 0
+            - custom: 1
+              label: Nouveaux numéros de série
+              input_name: serials
+              input:
+                  type: textarea
+                  help: Séparer les numéros de série par un saut de ligne - Ils définissent la quantitée de la ligne
+            - custom: 1
+              label: Ajouter des numéros de série déjà présents dans le contrat
+              input_name: old_serials
+              input:
+                  type: check_list
+                  items: 
+                      callback: getAllSerialsContrat
+                      
+                      
+fields_tables:
+    infos:
+        panel: 1
+        title: Informations sur l'avenant
+        rows:
+            - field: label
+              edit: 1
+            - field: type
+              edit: 1
+views:
+    avenant:
+        title: 
+            callback: getRefAv
+        rows:
+            - cols:      
+                - type: fields_table
+                  col_lg: 12
+                  fields_table: 
+                      name: infos
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:                        
+                      - cols: 
+                          - type: custom
+                            col_lg: 12
+                            custom: 
+                                callback: displayDet

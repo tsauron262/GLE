@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` ADD `remain_to_pay` DECIMAL(24,8) NOT NULL DEFAULT '0';

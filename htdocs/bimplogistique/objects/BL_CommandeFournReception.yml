@@ -10,7 +10,7 @@ labels:
     name: réception
     is_female: 1
         
-objects:     
+objects: 
     user_resp: 
         extends: user
         instance: 
@@ -42,12 +42,15 @@ fields:
     id_entrepot: 
         label: Entrepôt d'arrivée
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         input: 
-#            type: search_entrepot
            type: hidden
+        search: 
+            input: 
+                type: search_entrepot
+                
         required: 1
-        display: 
+        displays: 
             default: 
                 type: nom_url
                 
@@ -62,6 +65,13 @@ fields:
             array: status_list
         default_value: 0
             
+    validation_status: 
+        label: Etat validation
+        typel: int
+        values: 
+            array: validation_status_list
+        default_value: 0
+        
     num_reception:
         label: Numéro de réception
         type: int
@@ -81,6 +91,7 @@ fields:
         input: 
             auto_expand: 1
             rows: 1
+        hashtags: 1
             
     assign_lines_to_commandes_client:
         label: Assigner les équipements reçus aux commandes client d'origine
@@ -114,6 +125,11 @@ fields:
         label: Facture
         type: id_object
         object: facture_fourn
+        default_value: 0
+        
+    stock_out: 
+        label: Stock boutique
+        type: bool
         default_value: 0
         
 forms: 
@@ -153,10 +169,24 @@ forms:
             - field: date_received
             
 #           *** Temporaire: 
+#            - custom: 1
+#              label: S'agit-il d'une réception de DECEMBRE ? 
+#              input_type: string
+#              input_name: is_sept
+#              input: 
+#                  type: select
+#                  options:
+#                      '': ''
+#                      oui: OUI
+#                      non: NON
+#              required: 1
+#          ****************
+
             - custom: 1
-              label: S'agit-il d'une réception de Décembre? 
-              input_type: string
-              input_name: is_sept
+              show: 
+                  callback: canEditStockOut
+              label: Stocks boutiques
+              input_name: stock_out
               input: 
                   type: select
                   options:
@@ -164,8 +194,28 @@ forms:
                       oui: OUI
                       non: NON
               required: 1
-#          ****************
+              value: ''
 
+            - custom: 1
+              show: 
+                  callback: isUserAdmin
+              label: Forcer l'attribution des équipements
+              data_type: bool
+              input_name: force_equipments_attribution
+              input: 
+                  type: toggle
+                  help: POUR ADMIN SEULEMENT.<br/>Les équipement doivent déjà exister pour être attribués à cette réception
+              value: 0
+            - custom: 1
+              show: 
+                  callback: isUserAdmin
+              label: Ne pas changer l'emplacement actuel des équipements
+              data_type: bool
+              input_name: skip_equipments_place
+              input: 
+                  type: toggle
+                  help: POUR ADMIN SEULEMENT.<br/>A utiliser lorsque les équipements existent déjà et doivent êre conservés dans leur emplacement actuel. 
+              value: 0
             - custom: 1
               label: Unités réceptionnées
               input_name: lines
@@ -181,6 +231,7 @@ fields_tables:
               display: card
             - field: ref
             - field: status
+            - field: validation_status
             - field: id_user_resp
               edit: 1
             - field: num_reception
@@ -213,79 +264,51 @@ views:
                 - type: custom
                   custom: 
                       callback: renderDetailsView
-                      
+              
+filters: 
+    billed:
+        label: Facturée
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+        exclude_btn: 0
+        
+    id_facture:
+        label: Facture fournisseur
+        
 filters_panel: 
     default: 
         filters: 
-            - field: fk_soc
-              child: parent
-            - field: ref
-            - field: num_reception
-            - field: id_entrepot
-            - field: id_commande_fourn
-            - field: status
-            - field: date_received
-            - custom: 1
-              label: Facturée
-              field: billed
-              type: check_list
-              items: 
-                  1: OUI
-                  0: NON
-            - field: id_facture
-              label: Facture fournisseur
-            - field: total_ht
-            - field: total_ttc
-            - field: info
-            - field: fk_statut
-              child: parent
-            - field: invoice_status
-              child: parent
+            parent:fk_soc:
+            ref:
+            num_reception:
+            id_entrepot:
+            id_commande_fourn:
+            status:
+            date_received:
+            billed:
+            id_facture:
+            total_ht:
+            total_ttc:
+            info:
+            parent:fk_statut:
+            parent:invoice_status:
             
 lists_cols: 
-    user_resp: 
-        field: id_user_resp
-        display: nom_url
-    commande: 
-        field: id_commande_fourn
-        display: nom_url
     num_reception:
         label: N°
-        field: num_reception
-        max_width: 30px
-    ref: 
-        field: ref
-    entrepot: 
-        field: id_entrepot
-        display: nom_url
-    status: 
-        field: status
-    date: 
+        min_width: 30
+    date_received: 
         label: Reçue le
-        field: date_received
     info: 
-        field: info
         edit: 1
-    total_ht: 
-        field: total_ht
-    total_ttc: 
-        field: total_ttc
-    fk_soc: 
+    parent:fk_soc: 
         label: Fournisseur
-        field: fk_soc
-        child: parent
-        display: nom_url
-    commande_status: 
+    parent:fk_statut:
         label: Statut commande
-        field: fk_statut
-        child: parent
-    commande_invoice_status: 
+    parent:invoice_status: 
         label: Statut facturation commande
-        field: invoice_status
-        child: parent
-    facture: 
-        field: id_facture
-        display: nom_url
                     
 lists: 
     default: 
@@ -311,15 +334,20 @@ lists:
               icon: fas_file-invoice-dollar
               onclick: selectedReceptionsFactureFourn($(this), 'list_id') 
         cols:
-            commande: 
+            id_commande_fourn: 
             num_reception:
-            fk_soc:
+            parent:fk_soc:
             ref:
-            date: 
+            date_received: 
             total_ht: 
-            entrepot:
-            facture:
+            id_entrepot:
+            id_facture:
                     
+    fourn: 
+        extends: default
+        cols: 
+            parent:fk_soc: unset
+            
     commandes_fourn: 
         checkboxes: 1
         item_checkbox: 
@@ -349,11 +377,16 @@ lists:
             num_reception:
             ref:
             status:
-            date: 
+            validation_status:
+                show: 
+                    conf: 
+                        module: bimpcommercial
+                        name: use_bds_for_receptions
+            date_received: 
             total_ht: 
-            entrepot:
+            id_entrepot:
             info: 
-            facture:
+            id_facture:
                     
 cards: 
     default: 
@@ -369,13 +402,13 @@ cards:
             - label: Infos
               field: info
 
-       
 searches:
     default: 
         fields_search: 
             - a.ref
             - cf.ref
             - s.nom
+        label_syntaxe: 'BR n°<a.ref> - Commande: <cf.ref> - Fournisseur: <s.nom>'
         joins:
             commande_fourn: 
                 table: commande_fournisseur

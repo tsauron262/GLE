@@ -184,7 +184,7 @@ $(document).ready(function () {
         });
     });
 
-    $('body').on('controllerTabLoaded', function (e) {
+    $('body').on('contentLoaded', function (e) {
         if (e.$container.length) {
             e.$container.find('.object_page').each(function () {
                 onObjectPageLoaded($(this));

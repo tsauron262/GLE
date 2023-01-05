@@ -10,10 +10,12 @@ menuLang-fr_FR= Français
 menuLang-en_US= Anglais
 menuLang-de_DE= Allemand
 menuLang-es_ES= Espagnol
+
 changePassword= Changer mon mot de passe
+loggedAs= Connecté en tant que
 deconnexion= Déconnexion
 quatre_zero_quatre= Nous sommes désolés, mais la page %s n'existe pas
-bonjour= Bienvenue dans votre espace client BIMP
+bonjour= Bienvenue dans votre espace client
 labelConstActif= Actif
 labelConstInactif= Inactif
 labelUserPlur= Utilisateurs

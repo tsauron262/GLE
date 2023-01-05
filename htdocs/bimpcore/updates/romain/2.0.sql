@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bl_inventory_2` DROP `date_closing_partially`;

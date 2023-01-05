@@ -1,6 +1,6 @@
 /*!
- * Font Awesome Free 5.1.1 by @fontawesome - https://fontawesome.com
- * License - https://fontawesome.com/license (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
+ * Font Awesome Free 5.10.0 by @fontawesome - https://fontawesome.com
+ * License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
  */
 /* line 1, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-glass:before {
@@ -968,7 +968,7 @@
 
 /* line 629, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-sort-alpha-desc:before {
-  content: "\f15e"; }
+  content: "\f881"; }
 
 /* line 631, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-sort-amount-asc:before {
@@ -976,7 +976,7 @@
 
 /* line 633, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-sort-amount-desc:before {
-  content: "\f161"; }
+  content: "\f884"; }
 
 /* line 635, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-sort-numeric-asc:before {
@@ -984,7 +984,7 @@
 
 /* line 637, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-sort-numeric-desc:before {
-  content: "\f163"; }
+  content: "\f886"; }
 
 /* line 639, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-youtube-square {
@@ -2282,501 +2282,496 @@
   content: "\f279"; }
 
 /* line 1670, ../../scss/fontawesome5_old/_shims.scss */
-.fa5.fa5-commenting {
-  font-family: 'Font Awesome 5 Free';
-  font-weight: 400; }
-
-/* line 1674, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-commenting:before {
   content: "\f4ad"; }
 
-/* line 1676, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1672, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-commenting-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1680, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1676, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-commenting-o:before {
   content: "\f4ad"; }
 
-/* line 1682, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1678, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-houzz {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1687, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1683, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-vimeo {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1691, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1687, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-vimeo:before {
   content: "\f27d"; }
 
-/* line 1693, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1689, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-black-tie {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1698, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1694, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-fonticons {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1703, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1699, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-reddit-alien {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1708, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1704, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-edge {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1713, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1709, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-credit-card-alt:before {
   content: "\f09d"; }
 
-/* line 1715, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1711, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-codiepie {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1720, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1716, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-modx {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1725, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1721, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-fort-awesome {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1730, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1726, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-usb {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1735, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1731, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-product-hunt {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1740, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1736, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-mixcloud {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1745, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1741, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-scribd {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1750, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1746, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-pause-circle-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1754, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1750, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-pause-circle-o:before {
   content: "\f28b"; }
 
-/* line 1756, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1752, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-stop-circle-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1760, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1756, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-stop-circle-o:before {
   content: "\f28d"; }
 
-/* line 1762, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1758, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-bluetooth {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1767, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1763, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-bluetooth-b {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1772, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1768, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-gitlab {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1777, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1773, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-wpbeginner {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1782, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1778, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-wpforms {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1787, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1783, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-envira {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1792, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1788, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-wheelchair-alt {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1796, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1792, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-wheelchair-alt:before {
   content: "\f368"; }
 
-/* line 1798, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1794, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-question-circle-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1802, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1798, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-question-circle-o:before {
   content: "\f059"; }
 
-/* line 1804, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1800, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-volume-control-phone:before {
   content: "\f2a0"; }
 
-/* line 1806, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1802, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-asl-interpreting:before {
   content: "\f2a3"; }
 
-/* line 1808, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1804, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-deafness:before {
   content: "\f2a4"; }
 
-/* line 1810, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1806, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-hard-of-hearing:before {
   content: "\f2a4"; }
 
-/* line 1812, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1808, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-glide {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1817, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1813, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-glide-g {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1822, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1818, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-signing:before {
   content: "\f2a7"; }
 
-/* line 1824, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1820, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-viadeo {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1829, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1825, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-viadeo-square {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1834, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1830, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-snapchat {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1839, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1835, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-snapchat-ghost {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1844, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1840, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-snapchat-square {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1849, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1845, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-pied-piper {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1854, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1850, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-first-order {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1859, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1855, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-yoast {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1864, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1860, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-themeisle {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1869, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1865, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-google-plus-official {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1873, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1869, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-google-plus-official:before {
   content: "\f2b3"; }
 
-/* line 1875, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1871, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-google-plus-circle {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1879, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1875, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-google-plus-circle:before {
   content: "\f2b3"; }
 
-/* line 1881, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1877, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-font-awesome {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1886, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1882, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-fa {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1890, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1886, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-fa:before {
   content: "\f2b4"; }
 
-/* line 1892, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1888, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-handshake-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1896, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1892, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-handshake-o:before {
   content: "\f2b5"; }
 
-/* line 1898, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1894, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-envelope-open-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1902, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1898, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-envelope-open-o:before {
   content: "\f2b6"; }
 
-/* line 1904, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1900, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-linode {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1909, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1905, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-address-book-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1913, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1909, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-address-book-o:before {
   content: "\f2b9"; }
 
-/* line 1915, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1911, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-vcard:before {
   content: "\f2bb"; }
 
-/* line 1917, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1913, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-address-card-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1921, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1917, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-address-card-o:before {
   content: "\f2bb"; }
 
-/* line 1923, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1919, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-vcard-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1927, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1923, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-vcard-o:before {
   content: "\f2bb"; }
 
-/* line 1929, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1925, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-user-circle-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1933, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1929, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-user-circle-o:before {
   content: "\f2bd"; }
 
-/* line 1935, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1931, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-user-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1939, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1935, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-user-o:before {
   content: "\f007"; }
 
-/* line 1941, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1937, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-id-badge {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1946, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1942, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-drivers-license:before {
   content: "\f2c2"; }
 
-/* line 1948, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1944, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-id-card-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1952, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1948, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-id-card-o:before {
   content: "\f2c2"; }
 
-/* line 1954, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1950, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-drivers-license-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1958, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1954, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-drivers-license-o:before {
   content: "\f2c2"; }
 
-/* line 1960, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1956, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-quora {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1965, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1961, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-free-code-camp {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1970, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1966, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-telegram {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 1975, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1971, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-thermometer-4:before {
   content: "\f2c7"; }
 
-/* line 1977, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1973, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-thermometer:before {
   content: "\f2c7"; }
 
-/* line 1979, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1975, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-thermometer-3:before {
   content: "\f2c8"; }
 
-/* line 1981, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1977, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-thermometer-2:before {
   content: "\f2c9"; }
 
-/* line 1983, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1979, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-thermometer-1:before {
   content: "\f2ca"; }
 
-/* line 1985, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1981, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-thermometer-0:before {
   content: "\f2cb"; }
 
-/* line 1987, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1983, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-bathtub:before {
   content: "\f2cd"; }
 
-/* line 1989, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1985, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-s15:before {
   content: "\f2cd"; }
 
-/* line 1991, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1987, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-window-maximize {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 1996, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1992, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-window-restore {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 2001, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1997, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-times-rectangle:before {
   content: "\f410"; }
 
-/* line 2003, ../../scss/fontawesome5_old/_shims.scss */
+/* line 1999, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-window-close-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 2007, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2003, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-window-close-o:before {
   content: "\f410"; }
 
-/* line 2009, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2005, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-times-rectangle-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 2013, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2009, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-times-rectangle-o:before {
   content: "\f410"; }
 
-/* line 2015, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2011, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-bandcamp {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 2020, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2016, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-grav {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 2025, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2021, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-etsy {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 2030, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2026, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-imdb {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 2035, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2031, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-ravelry {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 2040, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2036, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-eercast {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 2044, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2040, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-eercast:before {
   content: "\f2da"; }
 
-/* line 2046, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2042, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-snowflake-o {
   font-family: 'Font Awesome 5 Free';
   font-weight: 400; }
 
-/* line 2050, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2046, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-snowflake-o:before {
   content: "\f2dc"; }
 
-/* line 2052, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2048, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-superpowers {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 2057, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2053, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-wpexplorer {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }
 
-/* line 2062, ../../scss/fontawesome5_old/_shims.scss */
+/* line 2058, ../../scss/fontawesome5_old/_shims.scss */
 .fa5.fa5-spotify {
   font-family: 'Font Awesome 5 Brands';
   font-weight: 400; }

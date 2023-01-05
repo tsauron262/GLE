@@ -1,11 +1,13 @@
 extends: 
     module: bimpcommercial
     object_name: DolLine
+
+abstract: 0
     
 table: facturedet
 
 labels: 
-    name: ligne de facture
+    name: ligne de facture doli
     
 objects: 
     facture: 

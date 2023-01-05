@@ -1,0 +1,1 @@
+ALTER TABLE `llx_contrat` ADD `replaced_ref` VARCHAR(255) NOT NULL DEFAULT '';

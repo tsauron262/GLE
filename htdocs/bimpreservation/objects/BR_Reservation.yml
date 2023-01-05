@@ -7,17 +7,7 @@ labels:
     name: réservation
     is_female: 1
 
-objects:
-    entrepot: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
-            id_object: 
-                field_value: id_entrepot
-        
+objects: 
     commercial: 
         extends: user
         instance: 
@@ -30,9 +20,6 @@ objects:
         instance: 
             id_object: 
                 field_value: id_commande_client
-        cards: 
-            default: 
-                type: commande_client_card
                 
     commande_client_line: 
         relation: hasOne
@@ -53,9 +40,6 @@ objects:
                 class: CommandeFournisseur
             id_object: 
                 field_value: id_commande_fournisseur
-        cards: 
-            default: 
-                type: commande_fournisseur_card
          
     sav_product:
         relation: hasOne
@@ -102,7 +86,7 @@ fields:
     id_entrepot:
         label: Centre
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         required: 1
         input: 
             type: search_entrepot
@@ -133,10 +117,6 @@ fields:
         default_value: 0
         input: 
             type: search_user
-        display: 
-            nom_url: 
-                type: nom_url
-                modal_view: default
     
     id_client: 
         label: Client
@@ -166,7 +146,7 @@ fields:
         display_if: 
             field_name: status
             hide_values: 100
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayEquipment
@@ -181,10 +161,6 @@ fields:
         display_if: 
             field_name: id_equipment
             show_values: 0,
-        display: 
-            card: 
-                type: card
-                card: default
                 
     id_commande_client:
         label: Commande Client
@@ -304,6 +280,8 @@ fields:
         input: 
             note: 1
             auto_expand: 1
+        hashtags: 1
+        user_edit: 1
             
 forms: 
     equipment:
@@ -523,56 +501,26 @@ views:
 filters_panels: 
     default: 
         filters: 
-            - field: type
-            - field: id_entrepot
-            - field: status
-            - field: id_product
-            - field: id_equipment
-            - field: id_commande_client
-            - field: id_transfert
-            - field: id_sav
-            - field: date_from
-            - field: date_to
+            type:
+            id_entrepot:
+            status:
+            id_product:
+            id_equipment:
+            id_commande_client:
+            id_transfert:
+            id_sav:
+            date_from:
+            date_to:
     
 lists_cols: 
-    ref: 
-        field: ref
-    type: 
-        field: type
     date_from:
         label: Date de début
-        field: date_from
     date_to: 
         label: Date de fin
-        field: date_to
-    product: 
-        field: id_product
-        display: nom_url
     stocks: 
         label: Qté dispo
         value: 
             callback: displayProductAvailableQty
-    equipment: 
-        field: id_equipment
-    commande: 
-        field: id_commande_client
-        display: nom_url
-    commercial: 
-        field: id_commercial
-        display: nom_url
-    qty: 
-        field: qty
-    status:
-        field: status
-    commande: 
-        field: id_commande_client
-        display: nom_url
-    commercial: 
-        field: id_commercial
-        display: nom_url
-    transfert: 
-        field: id_transfert
-        display: nom_url
     linked_object: 
         label: Objet lié
         value: 
@@ -603,9 +551,9 @@ lists:
             ref:
             type: 
             status:
-            entrepot: 
-            product: 
-            equipment: 
+            id_entrepot: 
+            id_product: 
+            id_equipment: 
             linked_object:
             date_from:
             date_to: 
@@ -628,9 +576,9 @@ lists:
             callback: getListExtraBtn
         cols:
             ref: 
-            product: 
+            id_product: 
             stocks: 
-            equipment: 
+            id_equipment: 
             qty: 
             status:
                 
@@ -656,10 +604,10 @@ lists:
         cols:
             ref: 
             date_from:
-            product: 
+            id_product: 
             stocks: 
-            equipment: 
-            commande: 
-            commercial: 
+            id_equipment: 
+            id_commande_client: 
+            id_commercial: 
             qty: 
             status:

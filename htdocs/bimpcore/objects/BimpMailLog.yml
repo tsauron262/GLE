@@ -1,0 +1,111 @@
+table: bimpmail
+primary: id
+common_fields: 1
+no_transaction_db: 1
+
+
+controller: mail
+labels: 
+    name: mail
+    is_female: 0
+    
+objects:
+
+                
+fields:
+    obj_type: 
+        label: Type objet
+        input: 
+            type: hidden
+    obj_module: 
+        label: Module
+        input: 
+            type: hidden
+    obj_name: 
+        label: Nom objet
+        input: 
+            type: hidden
+    id_obj: 
+        label: ID objet
+        input: 
+            type: hidden
+    
+    mail_to:
+        label: To
+        type: string
+    mail_from:
+        label: From
+        type: string
+    mail_cc:
+        label: CC
+        type: string
+    mail_subject:
+        label: Sujet
+        type: string
+    msg:
+        label: Message
+        type: string
+    old_trace:
+        label: Dernière info
+        type: string
+    
+    msg_id:
+        label: Message Id
+        type: string
+        
+lists:
+    default:
+        modal_view: default
+        modal_format: large
+        cols:
+            mail_to:
+            mail_from:
+            mail_cc: 
+            mail_subject:
+            msg:
+                min_width: 500
+            msg_id:
+            old_trace:
+            user_create:
+            date_create:
+                
+fields_tables: 
+    default: 
+        panel: 0
+        rows: 
+            - label: Lien
+              value: 
+                  callback: getObjectUrl
+            - field: mail_to
+            - field: mail_from
+            - field: mail_cc
+            - field: mail_subject
+            - field: msg
+            - field: msg_id
+            - field: old_trace
+                
+views:
+    default:
+        rows: 
+            - cols: 
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  rows: 
+                      - cols: 
+                            - type: fields_table
+                              fields_table:
+                                  name: default
+                      
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  custom: 
+                    callback: 
+                        method: renderNotesList
+                        params:
+                            - 1
+        
+    

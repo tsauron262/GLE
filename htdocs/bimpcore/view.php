@@ -21,6 +21,10 @@ if (!$id_object) {
     $errors[] = 'Module absent';
 }
 
+$object = null;
+if(!isset($title))
+    $title = 'Vue '.$object_name;
+
 if (!count($errors)) {
     $object = BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
 
@@ -63,7 +67,7 @@ BimpCore::displayHeaderFiles();
 if (count($errors)) {
     echo BimpRender::renderAlerts($errors);
 } else {
-    $html .= '<div class="buttonsContainer no_print" style="margin: 30px 0;text-align: center">';
+    $html = '<div class="buttonsContainer no_print" style="margin: 30px 0;text-align: center">';
     $html .= '<button class="btn btn-primary btn-large" onclick="window.print();">';
     $html .= BimpRender::renderIcon('fas_print', 'iconLeft') . 'Imprimer';
     $html .= '</button>';

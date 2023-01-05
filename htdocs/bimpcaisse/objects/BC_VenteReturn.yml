@@ -37,6 +37,12 @@ fields:
             field_name: show_equipment
             show_values: 1
         
+    type: 
+        label: Type
+        type: id
+        values: 
+            array: types
+            
     qty: 
         label: Quantité
         type: qty
@@ -74,6 +80,8 @@ fields:
 forms: 
     default: 
         rows: 
+            - field: type
+              required: 1
             - field: id_product
             - custom: 1
               label: Afficher équipement
@@ -104,6 +112,19 @@ forms:
             - field: defective
             - field: infos
     
+lists_cols: 
+    product: 
+        label: Produit
+        value: 
+            callback: 
+                method: displayProduct
+                params: 
+                    - nom_url
+    total:
+        label: Total TTC
+        value: 
+            callback: displayTotal
+            
 lists: 
     default: 
         title: Produits retournés
@@ -113,23 +134,10 @@ lists:
         sort_way: desc
         n: 10
         cols:
+            type: 
             product: 
-                label: Produit
-                value: 
-                    callback: 
-                        method: displayProduct
-                        params: 
-                            - nom_url
             id_equipment: 
-                field: id_equipment
-                display: nom_url
             qty: 
-                field: qty
-            pu: 
-                field: unit_price_tax_in
+            unit_price_tax_in: 
             total:
-                label: Total TTC
-                value: 
-                    callback: displayTotal
             infos: 
-                field: infos

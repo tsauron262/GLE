@@ -1,3 +1,5 @@
+abstract: 1
+
 parent_object: BF_Demande
 parent_id_property: id_demande
 

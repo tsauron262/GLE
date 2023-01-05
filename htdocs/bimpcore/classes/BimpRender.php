@@ -5,15 +5,18 @@ class BimpRender
 
     public static function displayTagData($data)
     {
-        // Obsolète / A suppr... 
+        // Obsolète ne pas utilliser 
         return self::renderTagData($data);
     }
 
     public static function renderTagData($data)
     {
         $html = '';
-        foreach ($data as $name => $value) {
-            $html .= ' data-' . $name . '="' . $value . '"';
+
+        if (is_array($data) && !empty($data)) {
+            foreach ($data as $name => $value) {
+                $html .= ' data-' . $name . '="' . $value . '"';
+            }
         }
 
         return $html;
@@ -22,6 +25,19 @@ class BimpRender
     public static function renderIcon($icon, $class = '')
     {
         return '<i class="' . self::renderIconClass($icon) . ($class ? ' ' . $class : '') . '"></i>';
+    }
+
+    public static function renderInfoIcon($info, $icon = 'fas_question-circle', $placement = 'bottom')
+    {
+        $html = '';
+
+        $html .= '<span class="infoIcon bs-popover"';
+        $html .= self::renderPopoverData($info, $placement, 'true');
+        $html .= '>';
+        $html .= self::renderIcon($icon);
+        $html .= '</span>';
+
+        return $html;
     }
 
     public static function displayTagAttrs($params)
@@ -77,7 +93,47 @@ class BimpRender
 
     public static function renderButton($params, $tag = 'span')
     {
-        $html = '<' . $tag . self::displayTagAttrs($params) . '>';
+        if (isset($params['icon'])) {
+            $params['icon_before'] = $params['icon'];
+            unset($params['icon']);
+        }
+
+        if (isset($params['onclick'])) {
+            if (!isset($params['attr'])) {
+                $params['attr'] = array();
+            }
+
+            $params['attr']['onclick'] = $params['onclick'];
+            unset($params['onclick']);
+        }
+
+        if (!isset($params['classes'])) {
+            $params['classes'] = array();
+        }
+
+        if (!in_array('btn', $params['classes'])) {
+            $params['classes'][] = 'btn';
+
+            if (isset($params['type'])) {
+                $params['classes'][] = 'btn-' . $params['type'];
+            } else {
+                $params['classes'][] = 'btn-default';
+            }
+        }
+
+        if (isset($params['disabled']) && (int) $params['disabled']) {
+            $params['classes'][] = 'disabled';
+        }
+
+        if (isset($params['popover']) && $params['popover']) {
+            $params['classes'][] = 'bs-popover';
+        }
+
+        $html = '<' . $tag . self::displayTagAttrs($params);
+        if (isset($params['popover']) && $params['popover']) {
+            $html .= BimpRender::renderPopoverData($params['popover']);
+        }
+        $html .= '>';
         $html .= (isset($params['icon_before']) ? self::renderIcon($params['icon_before'], isset($params['label']) ? 'iconLeft' : '') : '');
         $html .= (isset($params['label']) ? $params['label'] : '');
         $html .= (isset($params['icon_after']) ? self::renderIcon($params['icon_after'], isset($params['label']) ? 'iconRight' : '') : '');
@@ -85,7 +141,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params, $tag = 'span')
+    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params = array(), $tag = 'span')
     {
         $label = $config->get($path . '/label', '');
         $icon_before = $config->get($path . '/icon_before', '');
@@ -113,7 +169,7 @@ class BimpRender
         $classes = $config->get($path . '/classes', array(), false, 'array');
         if (count($classes)) {
             if (isset($params['classes'])) {
-                $params['classes'] = array_merge($params['classes'], $classes);
+                $params['classes'] = BimpTools::merge_array($params['classes'], $classes);
             } else {
                 $params['classes'] = $classes;
             }
@@ -121,7 +177,7 @@ class BimpRender
         $data = $config->get($path . '/data', array(), false, 'array');
         if (count($data)) {
             if (isset($params['data'])) {
-                $params['data'] = array_merge($params['data'], $data);
+                $params['data'] = BimpTools::merge_array($params['data'], $data);
             } else {
                 $params['data'] = $data;
             }
@@ -129,7 +185,7 @@ class BimpRender
         $attr = $config->get($path . '/attr', array(), false, 'array');
         if (count($attr)) {
             if (isset($params['attr'])) {
-                $params['attr'] = array_merge($params['attr'], $attr);
+                $params['attr'] = BimpTools::merge_array($params['attr'], $attr);
             } else {
                 $params['attr'] = $attr;
             }
@@ -137,7 +193,7 @@ class BimpRender
         $styles = $config->get($path . '/styles', array(), false, 'array');
         if (count($styles)) {
             if (isset($params['styles'])) {
-                $params['styles'] = array_merge($params['styles'], $styles);
+                $params['styles'] = BimpTools::merge_array($params['styles'], $styles);
             } else {
                 $params['styles'] = $styles;
             }
@@ -209,57 +265,99 @@ class BimpRender
         return $html;
     }
 
+    public static function renderDropDownContent($id, $label_html, $content_html, $params = array())
+    {
+        $params = BimpTools::overrideArray(array(
+                    'extra_class' => '',
+                    'type'        => 'a',
+                    'side'        => 'right'
+                        ), $params);
+        $html = '';
+
+        $html .= '<div class="dropdown' . ($params['extra_class'] ? ' ' . $params['extra_class'] : '') . '">';
+
+        switch ($params['type']) {
+            case 'button':
+                $html .= '<span class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $html .= $label_html;
+                $html .= '</span>';
+                break;
+
+            case 'span':
+                $html .= '<span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $html .= $label_html;
+                $html .= '</span>';
+                break;
+
+            case 'a':
+                $html .= '<a class="dropdown-toggle" href="#" id="' . $id . '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $html .= $label_html;
+                $html .= '</a>';
+                break;
+        }
+
+        $html .= '<div class="dropdown-menu dropdown-menu-' . $params['side'] . '" aria-labelledby="' . $id . '">';
+        $html .= $content_html;
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
     public static function renderButtonsGroup($buttons, $params)
     {
         $html = '';
         $max = (isset($params['max']) ? (int) $params['max'] : 0);
 
         $buttons_html = array();
-        foreach ($buttons as $btn) {
-            $label = isset($btn['label']) ? $btn['label'] : '';
-            $icon = isset($btn['icon']) ? $btn['icon'] : '';
 
-            if ($label || $icon) {
-                $onclick = isset($btn['onclick']) ? $btn['onclick'] : '';
-                $disabled = isset($btn['disabled']) ? (int) $btn['disabled'] : 0;
-                $popover = isset($btn['popover']) ? (string) $btn['popover'] : '';
-                $classes = array('btn');
+        if (is_array($buttons) && !empty($buttons)) {
+            foreach ($buttons as $btn) {
+                $label = isset($btn['label']) ? $btn['label'] : '';
+                $icon = isset($btn['icon']) ? $btn['icon'] : '';
 
-                if ($max && count($buttons) > $max) {
-                    $classes[] = 'btn-light-default';
-                } else {
-                    $classes[] = (isset($btn['type']) ? 'btn-' . $btn['type'] : 'btn-default');
+                if ($label || $icon) {
+                    $onclick = isset($btn['onclick']) ? $btn['onclick'] : '';
+                    $disabled = isset($btn['disabled']) ? (int) $btn['disabled'] : 0;
+                    $popover = isset($btn['popover']) ? (string) $btn['popover'] : '';
+                    $classes = array('btn');
+
+                    if ($max && count($buttons) > $max) {
+                        $classes[] = 'btn-light-' . (isset($btn['type']) ? $btn['type'] : 'default');
+                    } else {
+                        $classes[] = (isset($btn['type']) ? 'btn-' . $btn['type'] : 'btn-default');
+                    }
+
+                    if ($disabled) {
+                        $classes[] = 'disabled';
+                    }
+
+                    if ($popover) {
+                        $classes[] = 'bs-popover';
+                    }
+
+                    $button = array(
+                        'classes' => $classes,
+                        'label'   => $label,
+                        'attr'    => array(
+                            'type'    => 'button',
+                            'onclick' => $onclick
+                        )
+                    );
+                    if ($icon) {
+                        $button['icon_before'] = $icon;
+                    }
+                    if ($popover) {
+                        $button['data']['toggle'] = 'popover';
+                        $button['data']['trigger'] = 'hover';
+                        $button['data']['container'] = 'body';
+                        $button['data']['placement'] = 'top';
+                        $button['data']['html'] = 'true';
+                        $button['data']['content'] = htmlentities($popover);
+                    }
+
+                    $buttons_html[] = BimpRender::renderButton($button, 'button');
                 }
-
-                if ($disabled) {
-                    $classes[] = 'disabled';
-                }
-
-                if ($popover) {
-                    $classes[] = 'bs-popover';
-                }
-
-                $button = array(
-                    'classes' => $classes,
-                    'label'   => $label,
-                    'attr'    => array(
-                        'type'    => 'button',
-                        'onclick' => $onclick
-                    )
-                );
-                if ($icon) {
-                    $button['icon_before'] = $icon;
-                }
-                if ($popover) {
-                    $button['data']['toggle'] = 'popover';
-                    $button['data']['trigger'] = 'hover';
-                    $button['data']['container'] = 'body';
-                    $button['data']['placement'] = 'top';
-                    $button['data']['html'] = 'true';
-                    $button['data']['content'] = $popover;
-                }
-
-                $buttons_html[] = BimpRender::renderButton($button, 'button');
             }
         }
 
@@ -281,29 +379,42 @@ class BimpRender
         return $html;
     }
 
+    public static function renderButtonsGroups($groups, $params)
+    {
+        $html = '';
+
+        $params = BimpTools::overrideArray(array(
+                    'max'                 => 0,
+                    'dropdown_menu_right' => 0
+                        ), $params);
+
+        foreach ($groups as $group) {
+            $buttons = BimpTools::getArrayValueFromPath($group, 'buttons', array());
+
+            if (!empty($buttons)) {
+                $html .= self::renderButtonsGroup($buttons, array(
+                            'max'                 => $params['max'],
+                            'dropdown_menu_right' => $params['dropdown_menu_right'],
+                            'dropdown_label'      => BimpTools::getArrayValueFromPath($group, 'label', 'Actions'),
+                            'dropdown_icon'       => BimpTools::getArrayValueFromPath($group, 'icon', 'fas_cogs')
+                ));
+            }
+        }
+
+        return $html;
+    }
+
     public static function renderPanel($title, $body_content, $footer_content = '', $params = array())
     {
         $html = '';
 
-        if (!isset($params['type']) || !$params['type']) {
-            $params['type'] = 'default';
-        }
-
-        if (!isset($params['open'])) {
-            $params['open'] = true;
-        }
-
-        if (!isset($params['foldable'])) {
-            $params['foldable'] = true;
-        }
-
-        if (!isset($params['panel_class'])) {
-            $params['panel_class'] = '';
-        }
-
-        if (!isset($params['no_borders'])) {
-            $params['no_borders'] = 0;
-        }
+        $params = BimpTools::overrideArray(array(
+                    'type'        => 'default',
+                    'foldable'    => true,
+                    'open'        => true,
+                    'panel_class' => '',
+                    'no_borders'  => 0
+                        ), $params);
 
         $html .= '<div class="panel panel-' . $params['type'];
         $html .= ($params['foldable'] ? ' foldable ' . ($params['open'] ? 'open' : 'closed') : '');
@@ -380,59 +491,18 @@ class BimpRender
         return $html;
     }
 
-    public static function renderFreeForm($rows, $buttons = array(), $title = '', $icon = '', $infos = array())
-    {
-        $html = '<div class="freeForm">';
-        if ($title) {
-            $html .= '<div class="freeFormTitle">';
-            if ($icon) {
-                $html .= BimpRender::renderIcon($icon, 'iconLeft');
-            }
-            $html .= $title;
-            $html .= '</div>';
-        }
-        $html .= '<div class="freeFormContent">';
-
-        if (count($infos)) {
-            foreach ($infos as $info) {
-                $html .= '<p class="alert alert-info">';
-                $html .= $info;
-                $html .= '</p>';
-            }
-        }
-
-        foreach ($rows as $row) {
-            $html .= '<div class="freeFormRow">';
-            if (isset($row['label'])) {
-                $html .= '<div class="freeFormLabel">' . $row['label'] . ': </div>';
-            }
-            if (isset($row['input'])) {
-                $html .= '<div class="freeFormInput">';
-                $html .= $row['input'];
-                $html .= '</div>';
-            }
-            $html .= '</div>';
-        }
-
-        $html .= '<div class="freeFormAjaxResult">';
-        $html .= '</div>';
-
-        if (!empty($buttons)) {
-            $html .= '<div class="freeFormSubmit rightAlign">';
-            foreach ($buttons as $button) {
-                $html .= $button;
-            }
-            $html .= '</div>';
-        }
-
-        $html .= '</div>';
-        $html .= '</div>';
-
-        return $html;
-    }
-
     public static function renderNavTabs($tabs, $tabs_id = 'maintabs', $params = array())
     {
+//        echo '<pre>';
+//        print_r($tabs);
+//        echo '</pre>';
+        $params = BimpTools::overrideArray(array(
+                    'content_only'        => false,
+                    'nav_only'            => false,
+                    'ul_extra_class'      => '',
+                    'li_extra_class'      => '',
+                    'content_extra_class' => ''
+                        ), $params);
         $html = '';
 
         if (is_array($tabs) && count($tabs)) {
@@ -443,12 +513,24 @@ class BimpRender
             }
         }
 
-        if (!isset($params['content_only']) || !(int) $params['content_only']) {
-            $html .= '<ul id="navtabs_' . $tabs_id . '" class="nav nav-tabs" role="tablist" data-navtabs_id="' . $tabs_id . '">';
+        if (!(int) $params['content_only']) {
+            $html .= '<ul id="navtabs_' . $tabs_id . '" class="nav nav-tabs' . ($params['ul_extra_class'] ? ' ' . $params['ul_extra_class'] : '') . '" role="tablist" data-navtabs_id="' . $tabs_id . '">';
 
             foreach ($tabs as $tab) {
-                $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . ' data-navtab_id="' . $tab['id'] . '">';
-                $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab">';
+                $html .= '<li role="presentation" class="' . ($tab['id'] === $active ? ' active' : '');
+                $html .= ($params['li_extra_class'] ? ' ' . $params['li_extra_class'] : '');
+                $html .= '" data-navtab_id="' . $tab['id'] . '">';
+                $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
+                if (isset($tab['ajax']) && (int) $tab['ajax']) {
+                    $html .= ' data-ajax="1"';
+                }
+                if (isset($tab['ajax_callback']) && $tab['ajax_callback']) {
+                    $html .= ' data-ajax_callback="' . htmlentities($tab['ajax_callback']) . '"';
+                }
+                $html .= '>';
+                if (isset($tab['icon']) && $tab['icon']) {
+                    $html .= BimpRender::renderIcon($tab['icon'], 'iconLeft');
+                }
                 $html .= $tab['title'];
                 $html .= '</a>';
                 $html .= '</li>';
@@ -456,11 +538,20 @@ class BimpRender
             $html .= '</ul>';
         }
 
-        if (!isset($params['nav_only']) || !(int) $params['nav_only']) {
+        if (!(int) $params['nav_only']) {
             $html .= '<div id="navtabs_content_' . $tabs_id . '" class="tab-content">';
             foreach ($tabs as $tab) {
-                $html .= '<div class="tab-pane fade' . ($tab['id'] === $active ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
-                $html .= $tab['content'];
+                $html .= '<div class="tab-pane fade' . ($tab['id'] === $active ? ' in active' : '');
+                $html .= ($params['content_extra_class'] ? ' ' . $params['content_extra_class'] : '') . '"';
+                $html .= ' role="tabpanel" id="' . $tab['id'] . '">';
+                if (!isset($tab['ajax']) || !(int) $tab['ajax']) {
+                    if (isset($tab['content'])) {
+                        $html .= $tab['content'];
+                    }
+                } else {
+                    $html .= '<div class="nav_tab_ajax_result">';
+                    $html .= '</div>';
+                }
                 $html .= '</div>';
             }
             $html .= '</div>';
@@ -604,18 +695,18 @@ class BimpRender
         return $html;
     }
 
-    public static function renderAjaxModal($modal_id)
+    public static function renderAjaxModal($modal_id, $modal_js_var_name, $full_width = false)
     {
         $html = '';
-        $html .= '<div class="modal ajax-modal fade" tabindex="-1" role="dialog" id="' . $modal_id . '">';
+        $html .= '<div class="modal ajax-modal fade' . ($full_width ? ' full-window-modal' : '') . '" tabindex="-1" role="dialog" id="' . $modal_id . '">';
         $html .= '<div class="modal-dialog modal-lg" role="document">';
         $html .= '<div class="modal-content">';
 
         $html .= '<div class="modal-header">';
         $html .= '<div class="modal-nav-buttons">';
 
-        $html .= '<div class="modal-nav-prev disabled" onclick="bimpModal.displayPrev();"><i class="fa fa-arrow-left"></i></div>';
-        $html .= '<div class="modal-nav-next disabled" onclick="bimpModal.displayNext();"><i class="fa fa-arrow-right"></i></div>';
+        $html .= '<div class="modal-nav-prev disabled" onclick="' . $modal_js_var_name . '.displayPrev();"><i class="fa fa-arrow-left"></i></div>';
+        $html .= '<div class="modal-nav-next disabled" onclick="' . $modal_js_var_name . '.displayNext();"><i class="fa fa-arrow-right"></i></div>';
 
         $html .= '<div class="modal-nav-history btn-group">';
         $html .= '<div class="dropdown-toggle disabled"';
@@ -627,7 +718,7 @@ class BimpRender
         $html .= '</div>';
 
         $html .= '<h4 class="modal-titles_container"></h4>';
-        $html .= '<button type="button" class="close" onclick="bimpModal.clearCurrentContent();" aria-label="Close">';
+        $html .= '<button type="button" class="close" onclick="' . $modal_js_var_name . '.clearCurrentContent();" aria-label="Close">';
         $html .= '<span aria-hidden="true">&times;</span>';
         $html .= '</button>';
         $html .= '</div>';
@@ -636,28 +727,24 @@ class BimpRender
 
         $html .= self::rendercontentLoading();
 
-        $html .= '<div class="modal-contents_container"></div>';
+        $html .= '<div class="modal-contents_container">';
+
+        $html .= '</div>';
 
         $html .= '</div>';
 
         $html .= '<div class="modal-footer">';
-        $html .= '<button type="button" class="btn btn-secondary" onclick="bimpModal.clearCurrentContent();">';
+        $html .= '<button type="button" class="btn btn-secondary closeModalButton" onclick="' . $modal_js_var_name . '.clearCurrentContent();">';
         $html .= '<i class="fa fa-times iconLeft"></i>Fermer</button>';
         $html .= '</div>';
 
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
-
-        $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
-        $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
-        $html .= '>';
-        $html .= BimpRender::renderIcon('far_window-restore');
-        $html .= '</div>';
         return $html;
     }
 
-    public static function renderObjectFieldHistoryPopoverButton(BimpObject $object, $field)
+    public static function renderObjectFieldHistoryPopoverButton(BimpObject $object, $field, $display_user = false)
     {
         $bimpHistory = BimpObject::getInstance('bimpcore', 'BimpHistory');
 
@@ -666,7 +753,7 @@ class BimpRender
         $html .= ' data-trigger="hover"';
         $html .= ' data-placement="bottom"';
         $html .= ' data-html="true"';
-        $html .= ' data-content="' . htmlentities($bimpHistory->renderCard($object, $field, 10, false, false)) . '"';
+        $html .= ' data-content="' . htmlentities($bimpHistory->renderCard($object, $field, 15, $display_user, false)) . '"';
         $html .= '></span>';
 
         unset($bimpHistory);
@@ -707,6 +794,14 @@ class BimpRender
         return $return;
     }
 
+    public static function renderCopyTextIcon($text)
+    {
+        $html = '<span class="copyTextIcon" data-text="' . $text . '">';
+        $html .= self::renderIcon('fas_copy');
+        $html .= '</span>';
+        return $html;
+    }
+
     public static function rendercontentLoading($loading_text = '')
     {
         $html = '<div class="content-loading">';
@@ -718,18 +813,27 @@ class BimpRender
 
     public static function renderIconClass($icon)
     {
-        if (preg_match('/^(.+)_(.+)$/', $icon, $matches)) {
-            return $matches[1] . ' fa5-' . $matches[2];
-        } else {
-            return 'fa fa-' . $icon;
+        if (strpos($icon, 'fa') === 0) {
+            if (preg_match('/^(.+)_(.+)$/', $icon, $matches)) {
+                return $matches[1] . ' fa5-' . $matches[2];
+            }
+        } elseif (strpos($icon, 'pe') === 0) {
+            return 'pe-7s-' . str_replace('pe_', '', $icon);
         }
+
+        return 'fa fa-' . $icon;
     }
 
     public static function renderObjectIcons($object, $page_link = true, $modal_view = null, $url = null)
     {
+        if (!BimpObject::objectLoaded($object)) {
+            return '';
+        }
+
         if (is_null($modal_view)) {
             $modal_view = '';
         }
+
         $html = '';
         if ($page_link) {
             if (is_null($url)) {
@@ -740,17 +844,18 @@ class BimpRender
                 $html .= '<i class="fas fa5-external-link-alt"></i>';
                 $html .= '</span>';
                 if (!$modal_view) {
-//                    $title = str_replace('"', '\\\'\\\'', (BimpObject::getInstanceNom($object)));
-                    $title = '';
-                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . $title . '\')';
+                    $title = BimpObject::getInstanceNom($object);
+                    $title = str_replace('\'', '\\\'', $title);
+                    $title = str_replace('"', '\\\'\\\'', $title);
+                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . htmlentities($title) . '\')';
                     $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
                     $html .= '<i class="far fa5-eye"></i>';
                     $html .= '</span>';
                 }
             }
         }
-        if ($modal_view && is_a($object, 'BimpObject')) {
 
+        if ($modal_view && is_a($object, 'BimpObject') && $object->config->isDefined('views/' . $modal_view)) {
             $title = $object->getInstanceName();
             $title = str_replace('\'', '\\\'', $title);
             $title = str_replace('"', '\\\'\\\'', $title);
@@ -771,11 +876,12 @@ class BimpRender
     {
         $html = '';
 
-        if (!empty($info) && $title) {
+        if (!empty($info)) {
             $html .= '<div class="debug_info">';
             if ($icon) {
                 $html .= '<i class="' . BimpRender::renderIconClass($icon) . ' debug_icon"></i>';
             }
+
             if ($title) {
                 $html .= '<div class="debug_info_title">';
                 $html .= $title;
@@ -835,7 +941,7 @@ class BimpRender
             )
         );
 
-        $html .= '<div class="compteur_caisse">';
+        $html = '<div class="compteur_caisse">';
         $html .= '<p class="small">';
         $html .= 'Appuyez sur "Entrée" pour passer au champ suivant';
         $html .= '</p>';
@@ -891,50 +997,459 @@ class BimpRender
         return $html;
     }
 
-    public static function renderRecursiveArrayContent($array, $params)
+    public static function renderRecursiveArrayContent($array, $params = array())
     {
         $html = '';
 
-        $foldable = (isset($params['foldable']) && (int) $params['foldable']);
-        $title = (isset($params['title']) ? (string) $params['title'] : '');
-        $open = (isset($params['open']) ? (int) $params['open'] : 1);
+        $params = BimpTools::overrideArray(array(
+                    'no_html'   => false,
+                    'title'     => '',
+                    'foldable'  => 0,
+                    'open'      => 1,
+                    'nTabs'     => 0,
+                    'max_depth' => 100
+                        ), $params);
 
-        $html .= '<div class="array_content_container' . (($foldable && $title) ? ' foldable ' . ($open ? 'open' : 'closed') : '') . '">';
+        $no_html = $params['no_html'];
+        $title = $params['title'];
+        $max_depth = (int) $params['max_depth'];
 
-        if ($foldable && $title) {
-            $html .= '<div class="folding_buttons">';
-            $html .= '<span class="open_all">' . BimpRender::renderIcon('fas_plus', 'iconLeft') . 'tout déplier</span>';
-            $html .= '<span class="close_all">' . BimpRender::renderIcon('fas_minus', 'iconLeft') . 'tout replier</span>';
-            $html .= '</div>';
+        if ($max_depth <= 0) {
+            return '';
         }
 
-        if ($title) {
-            $html .= '<div class="array_content_caption">';
-            $html .= '<span class="title">' . $title . '</span>';
-            $html .= '</div>';
-        }
+        if (!$no_html) {
+            $foldable = (int) $params['foldable'];
+            $open = (int) $params['open'];
 
-        $html .= '<div class="array_content">';
-        if (is_array($array)) {
-            foreach ($array as $label => $value) {
-                if (is_array($value)) {
-                    $html .= self::renderRecursiveArrayContent($value, array(
-                                'foldable' => $foldable,
-                                'title'    => $label,
-                                'open'     => $open
-                    ));
-                } else {
-                    $html .= '<div class="array_content_row">';
-                    $html .= '<span class="array_content_label">' . $label . ': </span>';
-                    $html .= '<span class="array_content_value">' . $value . '</span>';
-                    $html .= '</div>';
-                }
+            $html .= '<div class="array_content_container' . (($foldable && $title) ? ' foldable ' . ($open ? 'open' : 'closed') : '') . '">';
+
+            if ($foldable && $title) {
+                $html .= '<div class="folding_buttons">';
+                $html .= '<span class="open_all">' . BimpRender::renderIcon('fas_plus', 'iconLeft') . 'tout déplier</span>';
+                $html .= '<span class="close_all">' . BimpRender::renderIcon('fas_minus', 'iconLeft') . 'tout replier</span>';
+                $html .= '</div>';
             }
-        } elseif (is_string($array)) {
-            $html .= $array;
+
+            if ($title) {
+                $html .= '<div class="array_content_caption">';
+                $html .= '<span class="title">' . $title . '</span>';
+                $html .= '</div>';
+            }
+
+            $html .= '<div class="array_content">';
+            if (is_array($array)) {
+                foreach ($array as $label => $value) {
+                    if (is_array($value)) {
+                        $html .= self::renderRecursiveArrayContent($value, array(
+                                    'foldable'  => $foldable,
+                                    'title'     => $label,
+                                    'open'      => $open,
+                                    'max_depth' => ($max_depth - 1)
+                        ));
+                    } else {
+                        $html .= '<div class="array_content_row">';
+                        $html .= '<span class="array_content_label">' . $label . ': </span>';
+                        $html .= '<span class="array_content_value">' . $value . '</span>';
+                        $html .= '</div>';
+                    }
+                }
+            } elseif (is_string($array)) {
+                $html .= $array;
+            }
+
+            $html .= '</div>';
+            $html .= '</div>';
+        } else {
+            $nTabs = (int) $params['nTabs'];
+            if ($title) {
+                if ($nTabs) {
+                    for ($i = 0; $i < $nTabs; $i++) {
+                        $html .= "\t";
+                    }
+                }
+                $html .= $title . "\n";
+                $nTabs++;
+            }
+
+            if (is_array($array)) {
+                foreach ($array as $label => $value) {
+                    if ($nTabs) {
+                        for ($i = 0; $i < $nTabs; $i++) {
+                            $html .= "\t";
+                        }
+                    }
+                    if (is_array($value)) {
+                        $html .= self::renderRecursiveArrayContent($value, array(
+                                    'no_html'   => true,
+                                    'title'     => $label,
+                                    'nTabs'     => $nTabs,
+                                    'max_depth' => ($max_depth - 1)
+                        ));
+                    } else {
+                        $html .= $label . ': ' . $value . "\n";
+                    }
+                }
+            } else {
+                if ($nTabs) {
+                    for ($i = 0; $i < $nTabs; $i++) {
+                        $html .= "\t";
+                    }
+                }
+                $html .= (string) $array;
+            }
         }
+
+        return $html;
+    }
+
+    public static function renderImage($module_part, $file_name, $max_width = 'none', $max_height = 'none', $with_preview = true)
+    {
+        
+    }
+
+    public static function renderInfoCard($title, $value, $params)
+    {
+        $params = BimpTools::overrideArray(array(
+                    'icon'      => '',
+                    'class'     => 'default',
+                    'color'     => '',
+                    'data_type' => 'string',
+                    'format'    => 'medium'
+                        ), $params);
+
+        if (!$params['color']) {
+            $params['color'] = (string) BimpCore::getParam('colors/' . $params['class'], BimpCore::getParam('colors/default', '000000'));
+        }
+
+        $html = '<div class="bimp_info_card" style="border-color: #' . $params['color'] . '">';
+
+        if ($params['icon']) {
+            $html .= '<div class="bimp_info_card_icon" style="color: #' . $params['color'] . '">';
+            $html .= BimpRender::renderIcon($params['icon']);
+            $html .= '</div>';
+        }
+        $html .= '<div class="bimp_info_card_content">';
+        $html .= '<div class="bimp_info_card_title" style="color: #' . $params['color'] . '">';
+        $html .= $title;
+        $html .= '</div>';
+
+        $html .= '<div class="bimp_info_card_value">';
+        switch ($params['data_type']) {
+            case 'money':
+                $html .= BimpTools::displayMoneyValue($value);
+                break;
+
+            case 'percent':
+                $html .= BimpTools::displayFloatValue($value, (isset($params['decimals']) ? (int) $params['decimals'] : 2)) . '%';
+                // todo: ajouter une barre de progression.
+                break;
+
+            case 'string':
+            default:
+                $html .= $value;
+                break;
+        }
+        $html .= '</div>';
+        $html .= '</div>';
 
         $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderFoldableContainer($title, $content, $params = array())
+    {
+        $params = BimpTools::overrideArray(array(
+                    'id'          => '',
+                    'open'        => true,
+                    'offset_left' => false,
+                    'grey_bk'     => 1
+                        ), $params);
+
+        $html = '';
+
+        $html .= '<div' . ($params['id'] ? ' id="' . $params['id'] . '"' : '');
+        $html .= ' class="foldable_container ' . ($params['open'] ? 'open' : 'closed');
+        $html .= ($params['offset_left'] ? ' offset_left' : '');
+        $html .= ((int) $params['grey_bk'] ? ' grey_bk' : '');
+        $html .= '">';
+        $html .= '<div class="foldable_caption">';
+        $html .= $title;
+        $html .= '<span class="foldable-caret"></span>';
+        $html .= '</div>';
+        $html .= '<div class="foldable_content"' . ($params['open'] ? '' : ' style="display: none"') . '>';
+        $html .= $content;
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderBacktrace($bt_files)
+    {
+        $html = '';
+
+        if (!empty($bt_files)) {
+            $html .= '<div class="BimpBacktraceContainer">';
+
+            foreach ($bt_files as $file) {
+                if (isset($file['file'])) {
+                    $html .= '<div class="bt_file">';
+                    $html .= $file['file'];
+                    $html .= '</div>';
+                }
+
+                if (isset($file['lines']) && !empty($file['lines'])) {
+                    $html .= '<ul class="bt_file_lines">';
+                    foreach ($file['lines'] as $line) {
+                        $html .= '<li>';
+                        if (preg_match('/^(\d+:)(.+)$/', $line, $matches)) {
+                            $html .= '<b>' . $matches[1] . '</b>' . $matches[2];
+                        } else {
+                            $html .= $line;
+                        }
+
+                        $html .= '</li>';
+                    }
+                    $html .= '</ul>';
+                }
+            }
+
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
+    public static function renderBimpListTable($rows, $headers = array(), $params = array())
+    {
+        // Paramètres par défaut:
+        $params = BimpTools::overrideArray(array(
+                    'main_id'     => '',
+                    'main_class'  => '',
+                    'data'        => array(),
+                    'searchable'  => false,
+                    'search_mode' => 'show', // lighten (surbrillance des éléments trouvés) / show (affichage uniquement des élements trouvés)  
+                    'sortable'    => false,
+                    'sort_col'    => '',
+                    'sort_way'    => 'asc', // asc / desc
+                    'checkboxes'  => false
+                        ), $params);
+
+        $params['data']['searchable'] = (int) $params['searchable'];
+        $params['data']['sortable'] = (int) $params['sortable'];
+        $params['data']['checkboxes'] = (int) $params['checkboxes'];
+        $params['data']['search_mode'] = $params['search_mode'];
+
+        // Params par défaut des headers:
+        $headers_temp = $headers;
+        $headers = array();
+
+        foreach ($headers_temp as $col_name => $header_params) {
+            if (!is_array($header_params)) {
+                $header_params = array(
+                    'label' => $header_params
+                );
+            }
+
+            $headers[$col_name] = BimpTools::overrideArray(array(
+                        'label'      => '',
+                        'cel_tag'    => 'td', // td / th
+                        'align'      => 'left', // left / right / center
+                        'col_style'  => '',
+                        'searchable' => true,
+                        'sortable'   => true,
+                            ), $header_params);
+        }
+
+        $empty_first_col = ($params['checkboxes'] || $params['searchable']);
+        $html = '';
+
+        $html .= '<table' . ($params['main_id'] ? ' id="' . $params['main_id'] . '"' : '');
+        $html .= ' class="bimp_list_table' . ($params['main_class'] ? ' ' . $params['main_class'] : '') . '"';
+        $html .= BimpRender::renderTagData($params['data']);
+        $html .= '>';
+
+        if (!empty($headers)) {
+            $html .= '<thead>';
+
+            // En-têtes: 
+            $html .= '<tr class="header_row">';
+
+            if ($empty_first_col) {
+                $html .= '<th class="th_checkboxes">';
+                if ($params['checkboxes']) {
+                    $html .= '<input type="checkbox" name="check_all" class="bimp_list_table_check_all"/>';
+                }
+                $html .= '</th>';
+            }
+
+            foreach ($headers as $col_name => $header) {
+                $html .= '<th class="col_header" data-col_name="' . $col_name . '">';
+                if ($params['sortable'] && $header['sortable']) {
+                    $html .= '<span id="' . $col_name . '_sortTitle" class="sortTitle sorted-';
+                    if ($params['sort_col'] && $params['sort_col'] === $col_name) {
+                        $html .= strtolower($params['sort_way']) . ' active';
+                    } else {
+                        $html .= 'desc';
+                    }
+                    $html .= '">';
+                    $html .= $header['label'] . '</span>';
+                } else {
+                    $html .= $header['label'];
+                }
+                $html .= '</th>';
+            }
+            $html .= '</tr>';
+
+            // Ligne de recherche: 
+            if ($params['searchable']) {
+                $html .= '<tr class="listSearchRow">';
+                $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
+
+                foreach ($headers as $col_name => $header) {
+                    $html .= '<td class="col_search">';
+                    $html .= '<div class="searchInputContainer">';
+                    if ($header['searchable']) {
+                        if (isset($header['search_values'])) {
+                            $html .= BimpInput::renderInput('select', 'search_col_' . $col_name, '', array(
+                                        'options'     => array_merge(array('' => ''), $header['search_values']),
+                                        'extra_class' => 'bimp_list_table_search_input',
+                                        'data'        => array('col' => $col_name)
+                            ));
+                        } else {
+                            $html .= '<input type="text" class="bimp_list_table_search_input" value="" name="search_col_' . $col_name . '" data-col="' . $col_name . '"/>';
+                        }
+                    }
+                    $html .= '</div>';
+                    $html .= '</td>';
+                }
+                $html .= '</tr>';
+            }
+
+            $html .= '</thead>';
+        }
+
+        $html .= '<tbody class="headers_col">';
+
+        // Lignes: 
+        foreach ($rows as $row) {
+            $html .= '<tr class="bimp_list_table_row"';
+            $html .= (isset($row['row_data']) ? BimpRender::renderTagData($row['row_data']) : '');
+            $html .= '>';
+
+            if ($empty_first_col) {
+                $html .= '<td' . (isset($row['row_style']) ? ' style="' . $row['row_style'] . '"' : '') . '>';
+                if ($params['checkboxes'] && (!isset($row['item_checkbox']) || (int) $row['item_checkbox'])) {
+                    $html .= '<input type="checkbox" class="bimp_list_table_row_check" name="row_check"/>';
+                }
+                $html .= '</td>';
+            }
+
+            if (isset($row['full_row_content'])) {
+                $html .= '<td colspan="' . count($headers) . '"';
+                if (isset($row['row_style'])) {
+                    $html .= ' style="' . $row['row_style'] . '"';
+                }
+                $html .= '>';
+                $html .= $row['full_row_content'];
+                $html .= '</td>';
+            } else {
+                foreach ($headers as $col_name => $header) {
+                    $html .= '<' . $header['cel_tag'];
+                    $html .= ' class="col_' . $col_name . '"';
+                    $html .= ' data-col="' . $col_name . '"';
+                    if (is_array($row[$col_name]) && isset($row[$col_name]['value'])) {
+                        $html .= ' data-value="' . htmlentities($row[$col_name]['value']) . '"';
+                    }
+                    $html .= ' style="' . ($header['align'] !== 'left' ? 'text-align: ' . $header['align'] . ';' : '');
+                    if ($header['col_style']) {
+                        $html .= ' ' . $header['col_style'] . ';';
+                    }
+                    if (isset($row['row_style'])) {
+                        $html .= ' ' . $row['row_style'];
+                    }
+                    $html .= '">';
+                    if (isset($row[$col_name])) {
+                        if (is_array($row[$col_name])) {
+                            if (isset($row[$col_name]['content'])) {
+                                $html .= $row[$col_name]['content'];
+                            } elseif (isset($row[$col_name]['value'])) {
+                                $html .= $row[$col_name]['value'];
+                            }
+                        } else {
+                            $html .= $row[$col_name];
+                        }
+                    }
+                    $html .= '</' . $header['cel_tag'] . '>';
+                }
+            }
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        return $html;
+    }
+
+    public static function renderSql($sql)
+    {
+        $main_kw = array('SELECT ', 'UPDATE ', 'INSERT INTO ', 'DELETE ');
+        $sec_kw = array(' FROM ', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', ' WHERE ', ' HAVING ', ' ORDER BY ', ' GROUP BY ', ' LIMIT ');
+        $kw = array(' AND ', ' OR ', ' ON ', ' AS ');
+
+        foreach ($main_kw as $word) {
+            $sql = str_replace($word, '<span class="danger">' . $word . '</span>', $sql);
+            $sql = str_replace(strtolower($word), '<span class="danger">' . strtolower($word) . '</span>', $sql);
+        }
+
+        foreach ($sec_kw as $word) {
+            $sql = str_replace($word, '<br/><span class="info">' . $word . '</span>', $sql);
+            $sql = str_replace(strtolower($word), '<br/><span class="info">' . strtolower($word) . '</span>', $sql);
+        }
+
+        foreach ($kw as $word) {
+            $sql = str_replace($word, '<b>' . $word . '</b>', $sql);
+            $sql = str_replace(strtolower($word), '<b>' . strtolower($word) . '</b>', $sql);
+        }
+
+        return $sql;
+    }
+
+    public static function renderSideBar($items, $params = array())
+    {
+        $params = BimpTools::overrideArray(array(
+                    'active' => 'default'
+                        ), $params);
+        $html = '';
+
+        $html .= '<div class="sidebar" data-color="bimp">';
+        $html .= '<div class="sidebar-wrapper">';
+
+        $html .= '<ul class="nav">';
+
+        foreach ($items as $item) {
+            $html .= '<li' . ($item['id'] == $params['active'] ? ' class="active"' : '') . '>';
+            $html .= $item['content'];
+            $html .= '</li>';
+        }
+
+        $html .= '</ul>';
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderStatusSequence($statusList, $sequence, $current)
+    {
+        $html = '';
+
+        $html .= '<div class="bimp_status_sequence">';
+
         $html .= '</div>';
 
         return $html;
@@ -944,113 +1459,11 @@ class BimpRender
 
     public static function renderFormGroupMultiple($items_contents, $inputName, $title, $params = array())
     {
-        // params: 
-        // item_label (string, fac.)
-        // max_items (int, fac.)
-        // required (bool, fac.)
-        // display_if (array, fac.) 
-
-        $html = '';
-
-        $html .= '<div class="formInputGroup' . (isset($params['display_if']) ? ' display_if' : '') . '" data-field_name="' . $inputName . '" data-multiple="1"';
-        if (isset($params['max_items'])) {
-            $html .= ' data-max_items="' . $params['max_items'] . '"';
-        }
-        if (isset($params['display_if'])) {
-            $html .= BC_Field::renderDisplayifDataStatic($params['display_if']);
-        }
-        $html .= '>';
-
-        // En-tête: 
-        $html .= '<div class="formGroupHeading">';
-        $html .= '<div class="formGroupTitle">';
-        $html .= '<h3>' . $title . ((isset($params['required']) && (int) $params['required']) ? '<sup>*</sup>' : '') . '</h3>';
-        if (isset($params['max_items'])) {
-            $html .= '<span class="small">&nbsp;&nbsp;' . $params['max_items'] . ' élément(s) max</span>';
-        }
-        $html .= '</div>';
-        $html .= '</div>';
-
-        // Template: 
-        if (isset($items_contents['tpl'])) {
-            $html .= '<div class="dataInputTemplate">';
-            $html .= '<div class="formGroupMultipleItem">';
-            $html .= '<div class="formGroupHeading">';
-            $html .= '<div class="formGroupTitle">';
-            $html .= '<h4>' . (isset($params['item_label']) ? $params['item_label'] . ' ' : '') . '#idx</h4>';
-            $html .= '</div>';
-            $html .= '<div class="formGroupButtons">';
-            $html .= '<button class="btn btn-danger" onclick="removeFormGroupMultipleItem($(this))">';
-            $html .= BimpRender::renderIcon('fas_trash-alt');
-            $html .= '</button>';
-            $html .= '</div>';
-            $html .= '</div>';
-            $html .= $items_contents['tpl'];
-            $html .= '</div>';
-            $html .= '</div>';
-        }
-
-        // Liste des items: 
-        $html .= '<div class="formGroupMultipleItems">';
-        $i = 0;
-        foreach ($items_contents as $idx => $item_content) {
-            if ($idx === 'tpl') {
-                continue;
-            }
-
-            $i++;
-            $html .= '<div class="formGroupMultipleItem">';
-            $html .= '<div class="formGroupHeading">';
-            $html .= '<div class="formGroupTitle">';
-            $html .= '<h4>' . (isset($params['item_label']) ? $params['item_label'] . ' ' : '') . '#' . $i . '</h4>';
-            $html .= '</div>';
-            $html .= '<div class="formGroupButtons">';
-            $html .= '<button class="btn btn-danger" onclick="removeFormGroupMultipleItem($(this))">';
-            $html .= BimpRender::renderIcon('fas_trash-alt');
-            $html .= '</button>';
-            $html .= '</div>';
-            $html .= '</div>';
-
-            $html .= str_replace('idx', $i, $item_content);
-
-            $html .= '</div>';
-        }
-
-        // Bouton ajout: 
-        $html .= '</div>';
-        $html .= '<div class="buttonsContainer align-right">';
-        $html .= '<span class="btn btn-default" onclick="addFormGroupMultipleItem($(this), \'' . $inputName . '\')"><i class="fa fa-plus-circle iconLeft"></i>Ajouter</span>';
-        $html .= '</div>';
-
-        $html .= '<input type="hidden" name="' . $inputName . '_nextIdx" value="' . ($i + 1) . '"/>';
-
-        $html .= '</div>';
-        return $html;
+        return BimpForm::renderFormGroupMultiple($items_contents, $inputName, $title, $params);
     }
 
     public static function renderFormInputsGroup($title, $inputName, $inputs_content, $params = array())
     {
-        // params: 
-        // required (bool, fac.)
-        // display_if (array, fac.) 
-
-        $html = '';
-
-        $html .= '<div class="formInputGroup' . (isset($params['display_if']) ? ' display_if' : '') . '" data-multiple="0" data-field_name="' . $inputName . '"';
-        if (isset($params['display_if'])) {
-            $html .= BC_Field::renderDisplayifDataStatic($params['display_if']);
-        }
-        $html .= '>';
-
-        $html .= '<div class="formGroupHeading">';
-        $html .= '<div class="formGroupTitle"><h3>' . $title . (isset($params['required']) && (int) $params['required'] ? '<sup>*</sup>' : '') . '</h3></div>';
-        $html .= '</div>';
-
-        $html .= $inputs_content;
-
-        $html .= '</div>';
-
-
-        return $html;
+        return BimpForm::renderFormInputsGroup($title, $inputName, $inputs_content, $params);
     }
 }

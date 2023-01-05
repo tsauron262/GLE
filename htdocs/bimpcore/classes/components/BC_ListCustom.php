@@ -89,6 +89,7 @@ class BC_ListCustom extends BC_List
         if (!is_object($current_bc)) {
             $current_bc = null;
         }
+        
         $prev_bc = $current_bc;
         $current_bc = $this;
 

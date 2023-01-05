@@ -1,0 +1,263 @@
+
+table: bimpapi_api
+common_fields: 0
+icon: fas_project-diagram
+
+controller: api
+list_page_url: 
+    controller: admin
+            
+header_list_name: default
+header_edit_form: edit
+header_btn: 
+    callback: getActionsButtons
+
+labels:
+    name: API
+    name_plur: APIs
+    is_female: 1
+
+nom_url: 
+    syntaxe: <title>
+    
+objects: 
+    users_accounts: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpapi
+                name: API_UserAccount
+                
+    default_user_account: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpapi
+                name: API_UserAccount
+                
+    default_user_account_test:
+        extends: default_user_account
+        id_object: 
+            field_value: id_default_user_account_test
+            
+    default_user_account_prod:
+        extends: default_user_account
+        id_object: 
+            field_value: id_default_user_account_prod
+                
+    processes: 
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpdatasync
+                name: BDS_Process
+                
+    params: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpapi
+                name: API_ApiParam
+                
+fields: 
+    name: 
+        label: Nom API
+        
+    title: 
+        label: Intitulé
+        
+    api_idx: 
+        label: Index API
+        type: int
+        default: 0
+        unsigned: 1
+    
+    id_default_user_account_test: 
+        label: Compte utilisateur par défaut (Test)
+        type: id_object
+        object: default_user_account_test
+        default_value: 0
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getUsersAccountsArray
+                    params: 
+                        - 1
+                        
+    id_default_user_account_prod: 
+        label: Compte utilisateur par défaut (Prod)
+        type: id_object
+        object: default_user_account_prod
+        default_value: 0
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getUsersAccountsArray
+                    params: 
+                        - 1
+        
+    processes: 
+        label: Processus liés
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: processes
+      
+    active: 
+        label: Active
+        type: bool
+        default_value: 0
+        
+    mode: 
+        label: Mode
+        values: 
+            array: modes
+        default_value: test
+        
+    connect_timeout: 
+        label: Timeout connexion
+        type: int
+        default_value: 10
+        
+    exec_timeout: 
+        label: Timeout exécution
+        type: int
+        default_value: 30
+        
+    log_errors: 
+        label: Loguer les erreurs
+        type: bool
+        default_value: 1
+        
+    log_requests: 
+        label: Loguer toutes les requêtes
+        type: bool
+        default_value: 0
+        
+    notify_defuser_unauth: 
+        label: Alerter lorsque le compte utilisateur par défaut est déconnecté
+        type: bool
+        default_value: 0
+        
+forms: 
+    install: 
+        title: Installer une nouvelle API
+        rows: 
+            - custom: 1
+              label: API à installer
+              input_name: api_name
+              input: 
+                  type: select
+                  options: 
+                      array: apisToInstall
+            - custom: 1
+              label: Nom public
+              input_name: api_title
+              input: 
+                  type: text
+              value: 
+                  callback: getApiToInstallDefaultTitle
+              depends_on: api_name
+              diplsya_if: 
+                  field_name: api_name
+                  hide_values: ''
+                      
+    edit: 
+        rows: 
+            - field: title
+            - field: mode
+            - field: active
+            - field: id_default_user_account_test
+            - field: id_default_user_account_prod
+            - field: processes
+            - field: connect_timeout
+            - field: exec_timeout
+            - field: log_errors
+            - field: log_requests
+            - field: notify_defuser_unauth
+            
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: name
+            - field: title
+            - field: api_idx
+            - field: id_default_user_account_test
+            - field: id_default_user_account_prod
+            - field: processes
+            
+    options: 
+        title: Options
+        icon: far_check-square
+        rows: 
+            - field: mode
+              edit: 1
+            - field: active
+              edit: 1
+            - field: connect_timeout
+              edit: 1
+            - field: exec_timeout
+              edit: 1
+            - field: log_errors
+              edit: 1
+            - field: log_requests
+              edit: 1
+            - field: notify_defuser_unauth
+              edit: 1
+    
+views: 
+    default: 
+#        objects_change_reload: API_UserAccount (trop lourd pour pas grand chose) 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: options
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderDefaultViewNavtabs
+    
+lists_cols: 
+    defuser_logged: 
+        label: Compte par défaut connecté
+        value: 
+            callback: displayDefaultUserAccountLogged
+            
+lists: 
+    default: 
+        header_buttons: 
+            callback: getListExtraHeadersButtons
+        sort_field: id
+        sort_way: desc
+        n: 10
+        page_btn: 1
+        modal_view: default
+        extra_btn: 
+            callback: getActionsButtons
+        cols: 
+            name: 
+            title: 
+            api_idx: 
+            mode: 
+                edit: 1
+            active:
+                edit: 1
+            defuser_logged: 

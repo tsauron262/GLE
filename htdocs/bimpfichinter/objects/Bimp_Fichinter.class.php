@@ -4,7 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpfichinter/objects/objectInter.class.php';
 
 class Bimp_Fichinter extends ObjectInter {
 
-    public $force_update_date_ln = true;
+    public $force_update_date_ln = false;
     public static $dol_module = 'fichinter';
     public $extraFetch = false;
     public static $nature_list = array(
@@ -27,6 +27,13 @@ class Bimp_Fichinter extends ObjectInter {
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info'))
     );
+    
+//    function __construct($module, $object_name) {
+//        global $user, $db;
+//
+//        $this->redirectMode = 4;
+//        return parent::__construct($module, $object_name);
+//    }
 
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
@@ -95,7 +102,7 @@ class Bimp_Fichinter extends ObjectInter {
     public function update(&$warnings = array(), $force_update = false) {
         $this->traiteDate();
 
-        parent::update($warnings, $force_update);
+        return parent::update($warnings, $force_update);
     }
 
     public function getActionsButtons() {
@@ -193,7 +200,7 @@ class Bimp_Fichinter extends ObjectInter {
                     $url = DOL_URL_ROOT . '/compta/facture/card.php?facid=' . $new_facture->id;
                     $success_callback = 'window.open(\'' . $url . '\', \'_blank\');';
                 } else {
-                    $errors = array_merge($errors, $new_facture->errors);
+                    $errors = BimpTools::merge_array($errors, $new_facture->errors);
                 }
             }
         }
@@ -217,6 +224,21 @@ class Bimp_Fichinter extends ObjectInter {
         foreach($tab as $fact)
             $return[] = $fact->getNomUrl(1);
         return implode("<br/>", $return);
+    }
+        
+    public function createFromContrat($contrat, $data) {
+        global $user;
+        
+        $fi = $this->getInstance('bimpfichinter', 'Bimp_Fichinter');
+        
+        $fi->set('fk_contrat', $contrat->id);
+        $fi->set('fk_statut', 0);
+        $fi->set('fk_user_author', $user->id);
+        $fi->set('note_private', $data['private']);
+        $fi->set('note_public', $data['public']);
+        $fi->set('fk_soc', $contrat->getData('fk_soc'));
+        
+        return $fi->create();
     }
   
 

@@ -17,9 +17,10 @@ objects:
         instance:
             id_object:
                 fiels_value: fk_author
-    notes:
-        extends: note
-        label: Mesg
+                
+#    notes: // ??? (note existe pas) + attention : "notes" est réservé (cf BimpObject.yml) 
+#        extends: note
+#        label: Mesg
                     
 fields:            
     fk_author:
@@ -49,10 +50,7 @@ lists:
         update_btn: 1
         cols:
             id:
-                label: ID
-                field: id
             fk_author:
-                field: fk_author
                 
                 
                 

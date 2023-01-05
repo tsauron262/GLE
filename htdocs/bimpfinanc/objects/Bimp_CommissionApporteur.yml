@@ -1,0 +1,135 @@
+table: Bimp_CommissionApporteur
+primary: id
+controller: commission_apporteur
+
+
+
+list_page_url:
+    controller: index
+    url_params: 
+        tab: comm_apporteur
+        
+header_list_name: default
+header_btn: 
+    callback: getActionsButtons
+
+labels: 
+    name: Commission Apporteur
+    name_plur: Commissions Apporteur
+    is_female: 1
+    
+parent_module: bimpfinanc
+parent_object: Bimp_Apporteur
+parent_id_property: id_apporteur
+
+
+#nom_url: 
+#    syntaxe: Apporteur <id_apporteur>
+#    external_link: 1
+
+objects: 
+    facture_fourn: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_FactureFourn
+            id_object: 
+                field_value: id_facture_fourn
+     
+                
+fields: 
+    id_apporteur:
+        label: Apporteur
+        type: id_parent
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+    total:
+        label: Total
+        type: money
+    id_facture_fourn:
+        label: Facture Apporteur
+        type: id_object
+        object: facture_fourn
+    
+forms:
+    default: 
+        rows:
+            - field: id_apporteur
+    change:
+        rows: 
+            - custom: 1
+              label: Inclure dans
+              input_name: filtre
+              data_type: int
+              input: 
+                  type: select
+                  options:
+                     callback: getFiltres
+    
+filters_panels: 
+    default: 
+        filters: 
+            1:
+                field: id_apporteur
+            2: 
+                field: status
+                
+lists:
+    default: 
+        checkboxes: 1
+        configurable: 1
+        sort_field: id
+        sort_way: desc
+        n: 25
+        delete_btn: 1
+        modal_view: default
+        add_form_name: default
+        filters_panel: default
+        edit_btn: 1
+        page_btn: 1
+        cols:
+            id_apporteur: 
+            status:
+            total:
+    
+
+                      
+                     
+        
+        
+    
+views: 
+    default: 
+        objects_change_reload: BimpFile,BimpNote,RemiseGlobale
+        delete_btn: 1
+        edit_form: default
+        footer_extra_btn: 
+            callback: getActionsButtons
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderDetailsView
+
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        panel: 0
+        rows: 
+            - field: id_apporteur
+            - field: total
+            - field: id_facture_fourn

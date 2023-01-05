@@ -1,0 +1,455 @@
+bootstrap: 1
+dol_object: 
+    instance: 
+        dol_object: 
+            module: fichinter
+            file: fichinter
+            class: fichinterLigne
+            
+table: fichinterdet
+primary: rowid
+dol_create_method: insert
+dol_delete_method: deleteline
+
+#controller: di
+# Quand qty forcé à 1 = forfait
+
+icon: fas_ambulance
+    
+parent_module: bimptechnique
+parent_id_property: fk_fichinter
+parent_object: BT_ficheInter
+
+labels:
+    name: ligne
+    is_female: 1
+
+objects:
+    commande_line:
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_CommandeLine
+            id_object: 
+                field_value: id_line_commande
+                
+    contrat_line:
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contratLine
+            id_object: 
+                field_value: id_line_contrat
+                
+    set_facturable: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_set_facturable
+
+fields:
+    # Champs Dol object: 
+        
+    fk_fichinter:
+        label: Fiche d'intervention
+        type: id_parent
+    
+    description:
+        label: Description de l'intervention
+        type: html
+        dol_prop: desc        
+            
+    duree:
+        label: Durée de l'intervention
+        type: int
+        dol_prop: duration
+        input:
+            with_secondes: 0
+        displays:
+            default:
+                type: timer
+                with_day: 0
+            
+    date:
+        label: Date
+        type: date
+        dol_prop: datei
+        required: 1
+    
+    # Champ Bimp Object:
+    type:
+        label: Type de l'intervention
+        type: int
+        values:
+            array: types
+        input: 
+            type: select
+            options: 
+                array: inputTypes
+            
+    facturable:
+        label: Facturé
+        type: bool
+        input:
+            type: toggle
+    id_dol_line_commande:
+        label: Ligne de la commande
+        type: int
+    id_line_commande:
+        label: Ligne de la commande
+        type: id_object
+        object: commande_line
+        
+    id_line_contrat:
+        label: Ligne du contrat
+        type: id_object
+        object: contrat_line
+        
+    id_set_facturable:
+        label: Mise facturable par
+        type: id_object
+        object: set_facturable
+        
+    forfait:
+        label: Mode de facturation
+        type: int
+        values:
+            array: modes_facturation
+        
+    total_ht:
+        label: PU HT
+        type: int
+        
+    arrived:
+        label: Heure d'arrivée
+        type: datetime
+        
+    departure:
+        label: Heure de départ
+        type: datetime
+        
+    arriverd_am:
+        label: Heure d'arrivée (Matin)
+        type: datetime
+        
+    departure_am:
+        label: Heure de départ (Matin)
+        type: datetime
+        
+    arriverd_pm:
+        label: Heure d'arrivée (Après-Midi)
+        type: datetime
+        
+    departure_pm:
+        label: Heure de départ (Après-Midi)
+        type: datetime
+    actioncomm:
+        label: IDs des events
+        type: text
+        
+forms:
+    default: 
+        rows: 
+            type: 
+                field: type
+                
+            trajet: 
+                custom: 1
+                label: Temps de trajet
+                input_name: temps_trajet
+                input: 
+                    type: timer
+                    with_secondes: 0
+                    help: Mettre le temps de trajet total sur la journée (Aller/Retour)
+                display_if:
+                  field_name: type
+                  show_values: 5,3,6
+                value: 
+                    callback:
+                        method: getData
+                        params:
+                            - duree
+                    
+            commande_depl: 
+                custom: 1
+                label: Déplacement figurant sur la commande
+                input_name: id_commande_depl
+                input:
+                    type: select
+                    options:
+                          array: commandesWithDeplacement
+                display_if:
+                  field_name: type
+                  show_values: 6
+                  
+            service: 
+                custom: 1
+                label: Service
+                input_name: service
+                value:
+                    callback: getIdLineInput
+                input:
+                    type: select
+                    options:
+                        array: services
+                display_if:
+                    field_name: type
+                    show_values: 0
+                    
+            date: 
+                field: date
+                
+            am_pm: 
+                custom: 1
+                label: Matin et Après-midi ?
+                input_name: am_pm
+                input:
+                    type: toggle
+                value: 
+                    callback: isAmPm
+                display_if:
+                    field_name: type
+                    hide_values: 5,3,6,2
+                    
+            arrived:
+                custom: 1
+                label: Heure d'arrivée
+                input_name: arrived_time
+                value: 
+                    callback: 
+                        method: getTimeInputValue
+                        params: 
+                            - arrived
+                input: 
+                    type: time
+                    with_secondes: 0                    
+                display_if:
+                    fields_names: am_pm,type
+                    am_pm:
+                        hide_values: 1
+                    type:
+                        hide_values: 5,3,6,2
+                        
+            departure:
+                custom: 1
+                label: Heure de départ
+                input_name: departure_time
+                value: 
+                    callback: 
+                        method: getTimeInputValue
+                        params: 
+                            - departure
+                input: 
+                    type: time
+                    with_secondes: 0
+                display_if:
+                    fields_names: am_pm,type
+                    am_pm:
+                        hide_values: 1
+                    type:
+                        hide_values: 5,3,6,2
+                        
+            arrived_am:
+                custom: 1
+                label: Heure d'arrivée (Matin)
+                input_name: arrived_am_time
+                value: 
+                    callback: 
+                        method: getTimeInputValue
+                        params: 
+                            - arriverd_am
+                input: 
+                    type: time
+                    with_secondes: 0
+                display_if:
+                    fields_names: am_pm,type
+                    am_pm:
+                        hide_values: 0
+                    type:
+                        hide_values: 5,3,6,2
+                        
+            departure_am:
+                custom: 1
+                label: Départ (Matin)
+                input_name: departure_am_time
+                value: 
+                    callback: 
+                        method: getTimeInputValue
+                        params: 
+                            - departure_am
+                input: 
+                    type: time
+                    with_secondes: 0
+                display_if:
+                    fields_names: am_pm,type
+                    am_pm:
+                        hide_values: 0
+                    type:
+                        hide_values: 5,3,6,2
+                        
+            arrived_pm:
+                custom: 1
+                label: Heure d'arrivée (Après-midi) 
+                input_name: arrived_pm_time
+                value: 
+                    callback: 
+                        method: getTimeInputValue
+                        params: 
+                            - arriverd_pm
+                input: 
+                    type: time
+                    with_secondes: 0
+                display_if:
+                    fields_names: am_pm,type
+                    am_pm:
+                        hide_values: 0
+                    type:
+                        hide_values: 5,3,6,2
+                        
+            departure_pm:
+                custom: 1
+                label: Heure de départ (Après-midi)
+                input_name: departure_pm_time
+                value: 
+                    callback: 
+                        method: getTimeInputValue
+                        params: 
+                            - departure_pm
+                input: 
+                    type: time
+                    with_secondes: 0
+                display_if:
+                    fields_names: am_pm,type
+                    am_pm:
+                        hide_values: 0
+                    type:
+                        hide_values: 5,3,6,2
+                        
+            desc: 
+                field: description
+
+    edit:
+        extends: default
+        rows:
+            forfait:
+                field: forfait
+            
+lists_cols: 
+    service:
+        label: Service
+        value:
+            callback: display_service_ref
+    show_date:
+        label: Date
+        value:
+            callback: displayDateWithDetails
+        has_total: 1
+    forfait:
+        field: forfait
+    type_intervention:
+        field: type
+    plus_plus:
+        label: Description rapide
+        value:
+            callback: displayDescLight
+filters_panels: 
+    default: 
+        filters:
+          parent:ref:
+          parent:datei:
+          parent:fk_user_tech:
+          parent:fk_soc:
+          type_intervention:
+          facturable:
+lists:
+    all:
+        title: Listes des interventions
+        filters_panel: default
+        total_row: 1
+        sort_field: fk_fichinter
+        configurable: 1
+        n: 20
+        cols:
+            type_of:
+                label: Type d'intervention
+                value:
+                    callback: displayTypeInList
+            fk_fichinter:
+            parent:fk_soc:
+            parent:fk_user_tech:
+            parent:datei:
+            duree:
+                has_total: 1
+                total_type: timer
+            total_ht:
+    in_fiche:
+        title: Liste des interventions
+        objects_change_reload: BT_ficheInter
+        sort_field: rowid
+        sort_way: asc
+        n: 0
+        add_btn: 1
+        add_form_name: default
+        delete_btn: 1
+        edit_btn: 1
+        edit_form: edit
+        modal_view: default
+        extra_btn:
+            callback: getListExtraButtons
+        cols:
+            service:
+            show_date:
+            duree:
+#            forfait:
+            type:
+            plus_plus:
+            description_in_commande:
+                label: Prestation demandée (Descriptif de la commande)
+                value:
+                    callback: displayDescriptifPrestationDemande
+            forfait:
+fields_tables:
+    default:
+        title: Infos de l'intervention
+        rows:
+            - label: Date
+              value: 
+                  callback: displayDateWithDetails
+            - label: Service
+              value:
+                    callback: display_service_ref
+            - label: Durée de l'intervention
+              value:
+                  callback: displayDuree
+            - field: forfait
+                  
+    client:
+        title: Infos client
+        rows:
+            - label: Client
+              value:
+                  callback: displayClient
+    desc: 
+        title: Description
+        rows: 
+            - field: description
+        
+views:
+    default:
+        rows:
+            - cols:
+                - type: rows
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 6
+                            fields_table: 
+                                name: default
+                          - type: fields_table
+                            col_lg: 6
+                            fields_table: 
+                                name: client
+                      - cols: 
+                          - type: fields_table
+                            fields_table: 
+                                name: desc

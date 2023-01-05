@@ -4,6 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
 
 class BS_Pret extends BimpObject
 {
+    public $module = 'sav';
 
     // Getters: 
 
@@ -20,6 +21,40 @@ class BS_Pret extends BimpObject
         }
 
         return '';
+    }
+    
+    public function getListExtraBulkActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('sendEmail')) {
+            $actions[] = array(
+                'label'   => 'Fichiers PDF',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsBulkActionOnclick('generateBulkPdf', array(), array('single_action' => true))
+            );
+            $actions[] = array(
+                'label'   => 'Fichiers Zip des PDF',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsBulkActionOnclick('generateZipPdf', array(), array('single_action' => true))
+            );
+        }
+
+
+        return $actions;
+    }
+    
+    public function getPdfNamePrincipal(){
+        $sav = null;
+        if($this->getData('id_sav')){
+            $sav = $this->getChildObject('sav');
+            $id = $sav->id;
+        }
+        else {
+            $sav = $this;
+            $id = "no";
+        }
+        return 'Pret-' . $sav->getData('ref') . '-' . $this->getData('ref') . '.pdf';
     }
 
     public function getEquipmentsArray()
@@ -182,6 +217,24 @@ class BS_Pret extends BimpObject
     }
 
     // Actions: 
+    
+    
+    public function getFilesDir()
+    {
+        if ($this->isLoaded()) {
+            if($this->getData('id_sav')){
+                $sav = $this->getChildObject('sav');
+                $id = $sav->id;
+            }
+            else {
+                $sav = $this;
+                $id = "no";
+            }
+            return DOL_DATA_ROOT . '/bimpcore/sav/' . $id . '/';
+        }
+
+        return '';
+    }
 
     public function actionGeneratePDF($data, &$success)
     {
@@ -195,18 +248,18 @@ class BS_Pret extends BimpObject
         $errors = bimpsupport_pdf_create($this->db->db, $this, 'sav', 'pret');
 
         if (!count($errors)) {
-            $sav = null;
-            if($this->getData('id_sav')){
-                $sav = $this->getChildObject('sav');
-                $id = $sav->id;
-            }
-            else {
-                $sav = $this;
-                $id = "no";
-            }
+//            $ref = 'Pret-' . $sav->getData('ref') . '-' . $this->getData('ref');
             
-            $ref = 'Pret-' . $sav->getData('ref') . '-' . $this->getData('ref');
-            $file_url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $id . '/' . $ref . '.pdf');
+        if($this->getData('id_sav')){
+            $sav = $this->getChildObject('sav');
+            $id = $sav->id;
+        }
+        else {
+            $sav = $this;
+            $id = "no";
+        }
+            $ref = $this->getPdfNamePrincipal();
+            $file_url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $id . '/' .$this->getPdfNamePrincipal());
             
         }
 

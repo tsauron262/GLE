@@ -15,6 +15,16 @@ objects:
             dol_object: societe
         card: societe_card
         
+    bimp_client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Client
+            id_object: 
+                field_value: id_client
+        
     contact:
         instance: 
             bimp_object: unset
@@ -38,18 +48,13 @@ fields:
     id_client:
         label: Client
         type: id_object
-        object: client
+        object: bimp_client
         input: 
             type: search_societe
             societe_type: customer
         display_if:
             field_name: type
             show_values: 1
-        display: 
-            nom_url: 
-                type: nom_url
-            card: 
-                type: card
         
     id_contact:
         label: Contact
@@ -60,25 +65,17 @@ fields:
         display_if:
             field_name: type
             show_values: 1
-        display: 
-            nom_url: 
-                type: nom_url
-            card: 
-                type: card
         depends_on: id_client
     
     id_entrepot:
         label: Entrepôt
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         input: 
             type: search_entrepot
         display_if:
             field_name: type
             show_values: 2,5,6,7,8,9,90
-        display: 
-            nom_url: 
-                type: nom_url
                 
     code_centre:
         label: Centre
@@ -101,9 +98,7 @@ fields:
                 name: id
                 object: 
                     global: user
-        display: 
-            nom_url: 
-                type: nom_url
+        displays: 
             card:
                 type: card
                 card: user_card
@@ -121,6 +116,7 @@ fields:
             rows: 1
             auto_expand: 1
             note: 1
+        hashtags: 1
         sortable: 0
         searchable: 0
             
@@ -135,11 +131,35 @@ fields:
     code_mvt: 
         label: Code Mouvement de stock
         
+    origin: 
+        label: Origine
+        values: 
+            array: origins
+        input: 
+            type: hidden
+                
+    id_origin: 
+        label: ID origine
+        type: id
+        default_values: 0
+        input: 
+            type: hidden
+        
+lists_cols: 
+    name: 
+        label: Emplacement
+        value: 
+            callback: displayPlace
+    origin_html: 
+        label: Origine
+        value: 
+            callback: displayOrigin
+                    
 lists:
     default: 
         title: Emplacements
         icon: map-marker
-        objects_change_reload: BE_Place,BS_SAV
+        objects_change_reload: BE_Place,BS_SAV,BE_Package
         add_form_name: default
         add_btn_label: Nouvel emplacement
         sort_field: id
@@ -150,13 +170,7 @@ lists:
             callback: getTdStyle
         cols:
             type: 
-                field: type
             name: 
-                label: Emplacement
-                value: 
-                    callback: displayPlace 
             date: 
-                field: date
             infos: 
-                field: infos
-                edit: 1
+            origin_html:

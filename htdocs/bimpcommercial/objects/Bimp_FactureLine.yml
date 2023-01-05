@@ -2,6 +2,8 @@ extends:
     module: bimpcommercial
     object_name: ObjectLine
     
+abstract: 0
+    
 table: bimp_facture_line
 
 parent_module: bimpcommercial
@@ -59,42 +61,133 @@ fields:
         type: bool
         default_value: 1
         
+    commission_apporteur:
+        label: Commission Apporteur
+        value:
+            callback: displayCommissionApporteur
+        
 forms: 
     default: 
         rows: 
             pa_editable: 
                 label: Activer la correction automatique du prix d'achat
                 field: pa_editable
-                
+                display_if: 
+                    field_name: type
+                    show_values: 1
+                    
+    bulk_revalorisations: 
+        rows: 
+            type: 
+                custom: 1
+                label: Type
+                input_name: type
+                input: 
+                    type: select
+                    options: 
+                        callback: getRevalTypesArray
+                value: correction_pa
+            date: 
+                custom: 1
+                label: Date
+                input_name: date
+                data_type: date
+                input: 
+                    type: date
+                    display_now: 1
+            amout_type: 
+                custom: 1
+                label: Type de montant
+                input_name: amount_type
+                input: 
+                    type: select
+                    options: 
+                        new_pa: Nouveau Prix d'achat attendu
+                        reval: 
+                            label: Différence unitaire à corriger
+                            help: Indiquez ci-dessous le montant unitaire à soustraire du prix d'achat actuel.</br>(Valeur négative si le prix d'achat doit être augmenté).
+            amount: 
+                custom: 1
+                label: Montant
+                input_name: amount
+                data_type: money
+                decimals: 7
+                input: 
+                    type: text
+            note: 
+                custom: 1
+                label: Note
+                input_name: note
+                data_type: text
+                input: 
+                    type: textarea
+          
+filters: 
+    type_soc: 
+        label: Type du client
+        type: check_list
+        items: 
+            array: typesSocietes
+            
 filters_panels: 
     default: 
         filters: 
-            parent: 
-                label: Facture
-            date_valid: 
-                field: date_valid
-                child: parent
-            paye: 
-                field: paye
-                child: parent
-            pa_editable: 
-                label: Correction auto du PA
-                field: pa_editable
+            parent:ref: unset
+            parent:facnumber:
+                label: Ref. Facture
+            parent:fk_statut: 
+                label: Statut facture
+            parent:datef: 
+                label: Date facturation
+            parent:paiement_status: 
+                label: Statut paiement facture
+            type_soc:
                 
 lists_cols: 
     reval: 
         label: Revalorisations
         value: 
             callback: displayRevalorisations
-    date_valid: 
-        field: date_valid
-        child: parent
-    pa_editable: 
-        label: Corr. auto PA
-        field: pa_editable
+    commission_apporteur_link: 
+        label: Lien Commission Apporteur
+        value: 
+            callback: displayCommissionApporteur
+    vide:
+        label: Vide
+        value: ''
+    vide2:
+        label: Vide
+        value: ''
         
 lists: 
     default: 
-        objects_change_reload: ObjectLineRemise,RemiseGlobale,Bimp_Facture,BimpRevalorisation
+        objects_change_reload: ObjectLineRemise,RemiseGlobale,ObjectLineRemiseArriere,Bimp_Facture,BimpRevalorisation
     global: 
-        objects_change_reload: ObjectLineRemise,RemiseGlobale,Bimp_Facture,BimpRevalorisation
+        objects_change_reload: ObjectLineRemise,RemiseGlobale,ObjectLineRemiseArriere,Bimp_Facture,BimpRevalorisation
+        list_actions: 
+            - label: Revaloriser
+              icon: fas_search-dollar
+              action: bulkCreateRevalorisation
+              form_name: bulk_revalorisations
+    commission_apporteur:
+        extends: global
+        filters_panel_open: 0
+        list_actions: 
+            callback: getListExtraBtnApporteur
+        extra_btn: 
+            callback: getListExtraBtnApporteur
+            
+    forExport:
+#        extends: global
+        cols:
+            parent:datef:
+            parent:ref_client:
+            parent:facnumber:
+            parent:client:nom:
+            dol_line:product:ref_short:
+            desc:
+            dol_line:qty:
+            vide:
+            vide2:
+            pu_ht_remise:
+        

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` ADD `marge_finale_ok` DECIMAL(24,8) NOT NULL DEFAULT '0'; 

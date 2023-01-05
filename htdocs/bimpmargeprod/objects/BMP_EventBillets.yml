@@ -82,6 +82,9 @@ fields:
         default_value: 0
         min: 0
         
+    previsionnel: 
+        label: Ventes prévisionnelles
+        type: qty        
 list:
     title: Vente de billets
     checkboxes: 
@@ -116,6 +119,14 @@ list:
             edit: 
                 callback: isEventEditable
             history: 1
+        previsionnel: 
+            field: previsionnel
+            show: 
+                callback: 
+                    method: isInPrevisionnelMode
+                    object: 
+                        callback: getParentInstance
+            edit: 1
         total_ht: 
             label: Total HT
             value:

@@ -366,6 +366,11 @@ abstract class CommonInvoice extends CommonObject
     {
         // phpcs:enable
 		global $conf;
+                
+                /*moddrsi*/
+                global $rgpd_delete;
+                if ($rgpd_delete) return 1;
+                /*fmoddrsi*/
 
 		// We check if invoice is a temporary number (PROVxxxx)
 		$tmppart = substr($this->ref, 1, 4);

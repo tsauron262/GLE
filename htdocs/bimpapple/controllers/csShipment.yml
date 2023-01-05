@@ -1,0 +1,26 @@
+bootstrap: 1
+
+title: 
+    callback: 
+        object: shipment
+        method: getPageTitle
+        
+js:
+    - /bimpapple/views/js/gsx.js
+    - /bimpapple/views/js/consigned_stocks.js
+    
+    
+objects:
+    shipment: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: ConsignedStockShipment
+            id_object:
+                request: id
+        
+sections:
+    - type: view
+      view:
+          object: shipment
+          name: default

@@ -183,7 +183,7 @@ class modBimptask extends DolibarrModules {
 //
                     require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         require_once(DOL_DOCUMENT_ROOT."/bimptask/objects/BIMP_Task.class.php");
-        foreach(BIMP_Task::$valSrc as $typeTask => $nom){
+        foreach(BIMP_Task::getTypeArray() as $typeTask => $nom){
             $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
             $this->rights[$r][1] = 'Read '.$nom; // Permission label
             $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
@@ -304,7 +304,7 @@ class modBimptask extends DolibarrModules {
         
         
         
-        $sql[] = 'CREATE TABLE `'.MAIN_DB_PREFIX.'bimp_task` (
+        $sql[] = 'CREATE TABLE if not exists `'.MAIN_DB_PREFIX.'bimp_task` (
   `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `src` varchar(127) NOT NULL,
   `dst` varchar(127) NOT NULL,

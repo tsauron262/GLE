@@ -5,6 +5,7 @@ require_once __DIR__ . '/GSX_Const.php';
 class GSX_v2 extends GSX_Const
 {
 
+    public static $oldShipTos = array(1111748, 1000566, 462140, 1139941, 1000565, 1000483, 494685, 466183, 484926, 1040727, 1046076, 1046075, 1187559, 1187562, 1187561, 1187560, 1199659, 897316);
     protected static $instance = null;
     protected $ch;
     public $baseUrl = '';
@@ -24,7 +25,7 @@ class GSX_v2 extends GSX_Const
     );
     public $n = 0;
 
-    public function __construct()
+    public function __construct($shipTo = '')
     {
         global $user;
 
@@ -34,8 +35,9 @@ class GSX_v2 extends GSX_Const
             case 'test':
                 $this->appleId = self::$test_ids['apple_id'];
                 $this->applePword = self::$test_ids['apple_pword'];
-                $this->shipTo = BimpTools::addZeros(self::$test_ids['ship_to'], self::$numbersNumChars);
-                $this->soldTo = BimpTools::addZeros(self::$test_ids['sold_to'], self::$numbersNumChars);
+//                $this->shipTo = BimpTools::addZeros(self::$test_ids['ship_to'], self::$numbersNumChars);
+//                $this->soldTo = BimpTools::addZeros(self::$test_ids['sold_to'], self::$numbersNumChars);
+                $this->setShipTo(self::$test_ids['ship_to']);
                 break;
 
             case 'prod':
@@ -49,21 +51,25 @@ class GSX_v2 extends GSX_Const
                 } else {
                     $this->applePword = self::$default_ids['apple_pword'];
                 }
-                if (isset($user->array_options['options_apple_shipto']) && (string) $user->array_options['options_apple_shipto']) {
-                    $this->shipTo = BimpTools::addZeros($user->array_options['options_apple_shipto'], self::$numbersNumChars);
-                } else {
-                    $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to'], self::$numbersNumChars);
-                }
 
-                $this->soldTo = BimpTools::addZeros(self::$default_ids['sold_to'], self::$numbersNumChars);
+                if ($shipTo) {
+//                    $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
+                    $this->setShipTo($shipTo);
+                } elseif (isset($user->array_options['options_apple_shipto']) && (string) $user->array_options['options_apple_shipto']) {
+//                    $this->shipTo = BimpTools::addZeros($user->array_options['options_apple_shipto'], self::$numbersNumChars);
+                    $this->setShipTo($user->array_options['options_apple_shipto']);
+                } else {
+//                    $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to'], self::$numbersNumChars);
+                    $this->setShipTo(self::$default_ids['ship_to']);
+                }
                 break;
         }
 
-        $certInfo = self::getCertifInfo($this->soldTo);
+        $errors = $this->setSoldTo($this->soldTo);
 
-        $this->certPath = $certInfo['path'];
-        $this->certPathKey = $certInfo['pathKey'];
-        $this->certPword = $certInfo['pass'];
+        if (count($errors)) {
+            $this->errors[] = BimpTools::getMsgFromArray($errors);
+        }
 
         if (isset($user->array_options['options_gsx_acti_token']) && (string) $user->array_options['options_gsx_acti_token']) {
             $this->acti_token = $user->array_options['options_gsx_acti_token'];
@@ -88,31 +94,62 @@ class GSX_v2 extends GSX_Const
     {
         if ($this->ch) {
             curl_close($this->ch);
+            $this->ch = false;
         }
     }
 
-    public static function getInstance($force_new = false)
+    public static function getInstance($force_new = false, $shipTo = '')
     {
         if (is_null(self::$instance) || $force_new) {
-            self::$instance = new GSX_v2();
+            self::$instance = new GSX_v2($shipTo);
         }
 
         return self::$instance;
     }
 
-    // Gestion du login: 
+    public function setSoldTo($soldTo)
+    {
+        $errors = array();
 
-    public function setActivationToken($token)
+        $this->soldTo = BimpTools::addZeros($soldTo, self::$numbersNumChars);
+
+        $certInfo = self::getCertifInfo($this->soldTo, $errors);
+
+        if (!count($errors)) {
+            $this->certPath = $certInfo['path'];
+            $this->certPathKey = $certInfo['pathKey'];
+            $this->certPword = $certInfo['pass'];
+        }
+
+        return $errors;
+    }
+
+    public function setShipTo($shipTo)
+    {
+        $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
+        if (in_array(intval($this->shipTo), self::$oldShipTos)) {
+            $this->setSoldTo('897316');
+        } else {
+            $this->setSoldTo('1442050');
+        }
+    }
+
+    // Gestion du login:
+
+    public function setActivationToken($token, $login = '')
     {
         if (!(string) $token) {
             return array(
                 'Token absent'
             );
         }
+        if($login != '')
+            $this->appleId = $login;
+        
         $this->acti_token = $token;
 
         if ($this->reauthenticate()) {
-            $this->saveToken('acti', $token);
+//            $this->saveToken('acti', $token);
             return array();
         }
 
@@ -131,6 +168,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $this->displayDebug('Tentative d\'authentification (token ' . $this->acti_token . ') : ');
+        static::debug($this->appleId, 'Tentative d\'authentification (token ' . $this->acti_token . ') : ');
 
         $result = $this->exec('authenticate', array(
             'userAppleId' => $this->appleId,
@@ -140,6 +178,9 @@ class GSX_v2 extends GSX_Const
         if (isset($result['authToken'])) {
             $this->displayDebug('OK (Auth token ' . $result['authToken'] . ')');
             $this->saveToken('auth', $result['authToken']);
+            $this->saveToken('acti', $result['authToken']);
+//            global $user, $langs;
+//            mailSyn2('auth GSX', 'tommy@bimp.fr', null, $user->getFullName($langs).' id : '.$this->appleId.' auth OK' . date('l jS \of F Y h:i:s A'));
             $this->logged = true;
             return 1;
         }
@@ -147,14 +188,87 @@ class GSX_v2 extends GSX_Const
         $this->displayDebug('échec');
         $this->initError('Echec authentification (token ' . $this->acti_token . ')');
 
+        if ($this->appleId == self::$default_ids['apple_id']) {
+//            global $gsx_logout_mail_send, $phantomAuthTest;
+//            if($phantomAuthTest < 10 || !$phantomAuthTest){
+//                $oldDate = new DateTime(BimpCore::getConf('old_date_reco_apple', '2020-01-01'));
+//                $oldDate->add(new DateInterval('PT4M'));
+//                $now = new DateTime (date ('Y-m-d H:i:s', time()));
+//                if($oldDate < $now || $phantomAuthTest){
+//                    BimpCore::setConf('old_date_reco_apple',date ('Y-m-d H:i:s', time()));
+//                    $phantomAuthTest = true;
+//                    static::phantomAuth(self::$default_ids['apple_id'], self::$default_ids['apple_pword']);
+//                }
+//                else{
+//                    sleep(10);
+//                }
+//                $phantomAuthTest++;
+//                global $user;
+//                $user->fetch_optionals();
+//                $this->__construct($this->shipTo);
+//                return 1;
+//            }
+
+            if (!$gsx_logout_mail_send) {
+                global $user, $langs;
+                mailSyn2('auth GSX bad', 'tommy@bimp.fr, f.martinez@bimp.fr', null, $user->getFullName($langs) . ' id : ' . $this->appleId . ' auth bad' . date('l jS \of F Y h:i:s A'));
+                BimpTools::sendSmsAdmin('Attention Compte admin.gle déconnecté de GSX');
+                $gsx_logout_mail_send = true;
+            }
+        }
+        else
+            static::debug($this->appleId, 'deconnexion GSX de '.$this->appleId.' sans reconnexion possible');
+
         $this->logged = false;
         $this->saveToken('acti', '');
 
         return 0;
     }
+    
+    public static function debug($appleId, $msg){
+        if($appleId == self::$default_ids['apple_id']){
+            BimpCore::addlog ($msg);
+        }
+        
+    }
+    
+    public static function phantomAuth($login, $mdp){
+        if(function_exists('ssh2_connect')){
+            BimpCore::addlog('Tentative de connexion Apple en auto.');
+            $connection = ssh2_connect('10.192.20.152', 22);
+            $key1 = DOL_DOCUMENT_ROOT.'bimpapple/phantom/cert/phantomjs.pub';
+            $key2 = DOL_DOCUMENT_ROOT.'bimpapple/phantom/cert/phantomjs';
+            
+//            $key1 = '/usr/local/data2/bimp8/keys/phantomjs.pub';
+//            $key2 = '/usr/local/data2/bimp8/keys/phantomjs';
+            
+
+//            $commande = '/usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://google.com';
+            $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js '.$login.' '.$mdp;
+            
+            if(!ssh2_auth_pubkey_file($connection,'phantomjs', $key1, $key2))
+                    die('Pas dauth<br/>ssh -i '.$key2.' phantomjs@10.192.20.152 '.$commande);
+            
+//            die('<br/>ssh -i '.$key2.' phantomjs@10.192.20.152 '.$commande);
+            $stream = ssh2_exec($connection, $commande);
+
+
+            $retour = '';
+            $stderr_stream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+            stream_set_blocking($stream, true);
+            while($line = fgets($stream)) {
+                    flush();
+                    $retour .= $line."<br />";
+            }
+            return $retour;
+        }
+        else
+            mailSyn2 ('Pas de fonction ssh2_connect', 'debugerp@bimp.fr', null, 'Attention la fonction ssh2_connect n\'existe pas '.(defined('ID_ERP') ? 'sur erp'.ID_ERP : ''));
+    }
 
     public function reauthenticate()
     {
+        static::debug($this->appleId, 'reauthentification');
         if ($this->auth_token) {
             $this->saveToken('auth', '');
         }
@@ -166,6 +280,7 @@ class GSX_v2 extends GSX_Const
 
     public function saveToken($type, $token)
     {
+        static::debug($this->appleId, 'enregistrement token '.$type. ' : '.$token);
         $field = '';
         switch ($type) {
             case 'acti':
@@ -174,6 +289,7 @@ class GSX_v2 extends GSX_Const
                 break;
 
             case 'auth':
+//                $this->saveToken('acti', $token);
                 $this->auth_token = $token;
                 $field = 'gsx_auth_token';
                 break;
@@ -193,9 +309,9 @@ class GSX_v2 extends GSX_Const
         }
     }
 
-    // Traitements des requêtes CURL: 
+    // Traitements des requêtes CURL:
 
-    protected function init($request_name, &$error = '', $url_params = array())
+    protected function init($request_name, &$error = '', $url_params = array(), $extra = array())
     {
         if ($this->ch) {
             curl_close($this->ch);
@@ -228,6 +344,12 @@ class GSX_v2 extends GSX_Const
 
         $url = $this->baseUrl . self::$urls['req'][$request_name];
 
+        if (isset($extra['url_params']) && is_array($extra['url_params'])) {
+            foreach ($extra['url_params'] as $name => $value) {
+                $url_params[$name] = $value;
+            }
+        }
+
         if (!empty($url_params)) {
             $url .= '?';
             $fl = true;
@@ -241,41 +363,50 @@ class GSX_v2 extends GSX_Const
             }
         }
 
+        $this->displayDebug($url);
+
         $this->ch = curl_init($url);
 
         if (!$this->ch) {
             return 0;
         }
 
-
-
         $headers = array(
-            'Accept: application/json',
+            'Accept: application/json' . (in_array($request_name, self::$fileContentRequests) ? ',application/octet-stream' : ''),
             'Content-Type: application/json',
-            'Accept-Language: fr_FR',
+//            'Accept-Language: fr_FR', // OLD
+            'X-Apple-Client-Locale: fr-FR',
             'X-Apple-SoldTo: ' . $this->soldTo,
             'X-Apple-ShipTo: ' . $this->shipTo
         );
 
         if ($request_name !== 'authenticate') {
             $headers[] = 'X-Apple-Auth-Token: ' . $this->auth_token;
+            $headers[] = 'X-Apple-Service-Version: v4';
+        }
+
+        if (isset($extra['headers']) && is_array($extra['headers'])) {
+            foreach ($extra['headers'] as $extra_header) {
+                $headers[] = $extra_header;
+            }
         }
 
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
+
         curl_setopt($this->ch, CURLOPT_SSLCERT, $this->certPath);
         curl_setopt($this->ch, CURLOPT_SSLKEY, $this->certPathKey);
-
         curl_setopt($this->ch, CURLOPT_SSLCERTPASSWD, $this->certPword);
+
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($this->ch, CURLOPT_HEADER, true);
-
+        
         return 1;
     }
 
-    public function exec($request_name, $params, &$response_headers = array())
+    public function exec($request_name, $params, &$response_headers = array(), $extra = array())
     {
         if (!(string) $request_name) {
             $this->curlError('(inconnue)', 'Nom de la requête absent', '', true);
@@ -297,7 +428,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $error = '';
-        if (!$this->init($request_name, $error, $url_params)) {
+        if (!$this->init($request_name, $error, $url_params, $extra)) {
             $this->curlError($request_name, 'Echec de l\'initialisation de CURL' . ($error ? ' - ' . $error : ''));
             return false;
         }
@@ -312,19 +443,35 @@ class GSX_v2 extends GSX_Const
 
         $data = curl_exec($this->ch);
 
-        if ($data === false) {
-            $this->curlError($request_name, 'Aucune réponse reçue');
-            if (self::$log_requests) {
+        $response_code = (int) curl_getinfo($this->ch, CURLINFO_RESPONSE_CODE);
+
+        if (!$data) {
+            $this->curlError($request_name, 'Aucune réponse reçue - Code HTTP: ' . $response_code);
+            if (self::$log_requests || self::$debug_mode || BimpDebug::isActive()) {
                 $information = curl_getinfo($this->ch);
 
-                $infos = "Header REQUEST : <br/>" . str_replace("\n", "<br/>", $information['request_header']);
-                $infos .= "Body REQUEST : <br/>" . str_replace("\n", "<br/>", print_r($params, 1)) . "<br/><br/>";
-                $infos .= 'AUCUNE REPONSE';
-                dol_syslog(str_replace('<br/>', "\n", str_replace('Array', "", $infos)), 3);
+                $infos = "<h4>Header REQUEST: </h4><br/>" . str_replace("\n", "<br/>", $information['request_header']);
+                $infos .= "<h4>Body REQUEST:  </h4><br/>" . str_replace("\n", "<br/>", '<pre>' . print_r($params, 1)) . "</pre><br/><br/>";
+                $infos .= '<b>JSON: </b></h4><br/><pre>' . json_encode($params) . '</pre><br/><br/>';
+                $infos .= '<span class="danger">AUCUNE REPONSE</span><br/>';
+                $infos .= '<b>Code réponse: </b>' . $response_code . '<br/><br/>';
+
+                if (self::$log_requests) {
+                    dol_syslog(str_replace('<br/>', "\n", str_replace('Array', "", $infos)), 3);
+                }
+
+                if (self::$debug_mode) {
+                    echo '<br/><br/>' . $infos;
+                }
+
+                if (BimpDebug::isActive()) {
+                    BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
+                }
             }
             return false;
         }
 
+//        die($data);
         $header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
         $headers = substr($data, 0, $header_size);
         $data = substr($data, $header_size);
@@ -335,29 +482,50 @@ class GSX_v2 extends GSX_Const
             }
         }
 
-        $data = json_decode($data, 1);
-
-        if (self::$log_requests) {
-            $information = curl_getinfo($this->ch);
-
-            $infos = "Header REQUEST : <br/>" . str_replace("\n", "<br/>", $information['request_header']);
-            $infos .= "Body REQUEST : <br/>" . str_replace("\n", "<br/>", print_r($params, 1)) . "<br/><br/>";
-            $infos .= "Header RESPONSE : <br/>" . str_replace("\n", "<br/>", print_r($response_headers, 1)) . "<br/><br/>";
-            $infos .= "Body RESPONSE : <br/>" . str_replace("\n", "<br/>", print_r($data, 1));
-            dol_syslog(str_replace('<br/>', "\n", str_replace('Array', "", $infos)), 3);
+        if (!in_array($request_name, self::$fileContentRequests) || $response_code != 200) {
+            $data = json_decode($data, 1);
         }
 
-        if (isset($data['errors']) && count($data['errors'])) {
+        if (self::$log_requests || self::$debug_mode || BimpDebug::isActive()) {
+            $information = curl_getinfo($this->ch);
+
+            $infos = "<h4>Header REQUEST:</h4><br/>" . str_replace("\n", "<br/>", $information['request_header']);
+            $infos .= "<h4>Body REQUEST:</h4><br/>" . str_replace("\n", "<br/>", '<pre>' . print_r($params, 1)) . '</pre><br/><br/>';
+            $infos .= '<b>JSON: </b></h4><br/><pre>' . json_encode($params) . '</pre><br/><br/>';
+            $infos .= "<h4>Header RESPONSE:</h4><br/>" . str_replace("\n", "<br/>", '<pre>' . print_r($response_headers, 1)) . '</pre><br/>';
+            $infos .= '<b>Code réponse: </b>' . $response_code . '<br/><br/>';
+
+            if (is_array($data)) {
+                $infos .= "<h4>Body RESPONSE:</h4><br/>" . str_replace("\n", "<br/>", '<pre>' . print_r($data, 1)) . '</pre>';
+                $infos .= '<b>JSON: </b></h4><br/><pre>' . json_encode($data) . '</pre><br/><br/>';
+            } elseif (is_string($data)) {
+                $infos .= '<b>Réponse: </b>' . $data . '<br/><br/>';
+            }
+
+            if (self::$log_requests) {
+                dol_syslog(str_replace('<br/>', "\n", str_replace('Array', "", $infos)), 3);
+            }
+
+            if (self::$debug_mode) {
+                echo '<br/><br/>' . $infos;
+            }
+
+            if (BimpDebug::isActive()) {
+                BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
+            }
+        }
+
+        if (is_array($data) && isset($data['errors']) && count($data['errors'])) {
             $curl_errors = array();
             foreach ($data['errors'] as $error) {
                 $msg = '';
                 switch ($error['code']) {
-                    case 'UNAUTHORIZED':
+                    case 'SESSION_IDLE_TIMEOUT':
                         // On tente une nouvelle authentification: 
                         if ($request_name !== 'authenticate') {
                             $this->displayDebug('Non authentifié');
                             if ($this->reauthenticate()) {
-                                return $this->exec($request_name, $params);
+                                return $this->exec($request_name, $params, $response_headers, $extra_headers);
                             }
                             return false;
                         } else {
@@ -368,26 +536,38 @@ class GSX_v2 extends GSX_Const
                     default:
                         $msg = $error['message'];
                         $curl_errors[] = $msg . ($error['code'] ? ' (Code: ' . $error['code'] . ')' : '');
+                        $this->curlError($request_name, BimpTools::getArrayValueFromPath($error, 'message', 'Erreur inconnue'), BimpTools::getArrayValueFromPath($error, 'code', ''));
                         break;
                 }
             }
-            $this->curlError($request_name, BimpTools::getMsgFromArray($curl_errors));
             $data = false;
         }
-
+//print_r($infos);
         return $data;
     }
 
-    // Requêtes spécifiques 
+    // Requêtes - Equipements: 
 
-    public function productDetailsBySerial($serial)
+    public function productDetailsBySerial($serial, $requestType = 'repair')
     {
         return $this->exec('productDetails', array(
+                    'requestType' => 'REPAIR',
+                    'device'      => array(
+                        'id' => $this->traiteSerialApple($serial)
+                    )
+        ));
+    }
+
+    public function serialEligibility($serial)
+    {
+        return $this->exec('repairEligibility', array(
                     'device' => array(
                         'id' => $this->traiteSerialApple($serial)
                     )
         ));
     }
+
+    // Requêtes - Parts: 
 
     public function partsSummaryBySerial($serial)
     {
@@ -400,7 +580,7 @@ class GSX_v2 extends GSX_Const
         ));
     }
 
-    public function partsSummaryBySerialAndIssue($serial, BS_Issue $issue = null)
+    public function partsSummaryBySerialAndIssue($serial, BS_Issue $issue = null, $desc = '')
     {
         $params = array(
             'devices' => array(
@@ -409,6 +589,10 @@ class GSX_v2 extends GSX_Const
                 )
             )
         );
+        if(is_array($desc))
+            $params['partDescriptions'] = $desc;
+        elseif($desc != '')
+            $params['partDescriptions'] = array($desc);
 
         if (BimpObject::objectLoaded($issue) && (string) $issue->getData('category_code')) {
             $params['componentIssues'] = array(
@@ -425,6 +609,17 @@ class GSX_v2 extends GSX_Const
 
         return $this->exec('partsSummary', $params);
     }
+
+    public function getIssueCodesBySerial($serial)
+    {
+        return $this->exec('componentIssue', array(
+                    'device' => array(
+                        'id' => $this->traiteSerialApple($serial)
+                    )
+        ));
+    }
+
+    // Requêtes - Repairs: 
 
     public function repairSummaryByIdentifier($identifier, $identifier_type)
     {
@@ -460,7 +655,7 @@ class GSX_v2 extends GSX_Const
         ));
     }
 
-    public function repairQestions($serial, $repairType, $issues, $parts)
+    public function repairQestions($serial, $repairType, $issues, $parts, $coverageOption = '', $consumerLaw = '')
     {
         $params = array(
             'device'     => array(
@@ -468,6 +663,14 @@ class GSX_v2 extends GSX_Const
             ),
             'repairType' => $repairType
         );
+
+        if ($coverageOption) {
+            $params['coverageOption'] = $coverageOption;
+        }
+
+        if ($consumerLaw) {
+            $params['consumerLaw'] = $consumerLaw;
+        }
 
         if (isset($issues) && !empty($issues)) {
             $params['componentIssues'] = $issues;
@@ -480,16 +683,426 @@ class GSX_v2 extends GSX_Const
         return $this->exec('repairQuestions', $params);
     }
 
-    public function getIssueCodesBySerial($serial)
+    // Reqêtes - Diagnostiques: 
+
+    public function diagnosticSuites($serial)
     {
-        return $this->exec('componentIssue', array(
+        return $this->exec('diagnosticSuites', array(
+                    'deviceId' => $this->traiteSerialApple($serial)
+        ));
+    }
+
+    public function runDiagnostic($serial, $suiteId)
+    {
+        return $this->exec('diagnosticTest', array(
+                    'diagnostics' => array(
+                        'suiteId' => (string) $suiteId
+                    ),
+                    'device'      => array(
+                        'id' => $this->traiteSerialApple($serial)
+                    )
+        ));
+    }
+
+    public function diagnosticStatus($serial)
+    {
+        return $this->exec('diagnosticStatus', array(
                     'device' => array(
                         'id' => $this->traiteSerialApple($serial)
                     )
         ));
     }
 
-    public function filesUpload($serial, $files)
+    public function diagnosticsLookup($serial)
+    {
+        return $this->exec('diagnosticsLookup', array(
+                    'device' => array(
+                        'id' => $this->traiteSerialApple($serial)
+                    )
+        ));
+    }
+
+    // Requêtes - Retours groupés:
+
+    public function getPartsPendingReturnsForShipTo($shipto = '')
+    {
+        if (self::$mode === 'test') {
+            $shipto = BimpTools::addZeros('897316', 10);
+        }
+
+        if (!$shipto) {
+            return array();
+        }
+
+        $shipto = BimpTools::addZeros($shipto, 10);
+        $this->setShipTo($shipto);
+        return $this->exec('returnsLookup', array(
+                    'returnStatusType' => 'PENDING',
+                    'shipTo'           => $shipto
+        ));
+    }
+
+    public function createReturn($shipTo, $shipmentDetails, $parts)
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        $params = array(
+            'shipTo'          => BimpTools::addZeros($shipTo, 10),
+            'shipmentDetails' => array(
+                'packageMeasurements' => array(
+                    'length' => BimpTools::getArrayValueFromPath($shipmentDetails, 'length', 0),
+                    'width'  => BimpTools::getArrayValueFromPath($shipmentDetails, 'width', 0),
+                    'height' => BimpTools::getArrayValueFromPath($shipmentDetails, 'height', 0),
+                    'weight' => BimpTools::getArrayValueFromPath($shipmentDetails, 'weight', 0)
+                )
+            ),
+            'parts'           => $parts
+        );
+
+        if (isset($shipmentDetails['notes']) && (string) $shipmentDetails['notes']) {
+            $params['shipmentDetails']['notes'] = (string) $shipmentDetails['notes'];
+        }
+
+        if (isset($shipmentDetails['carrierCode']) && (string) $shipmentDetails['carrierCode']) {
+            $params['shipmentDetails']['carrierCode'] = (string) $shipmentDetails['carrierCode'];
+        }
+
+        if (isset($shipmentDetails['trackingNumber']) && (string) $shipmentDetails['trackingNumber']) {
+            $params['shipmentDetails']['trackingNumber'] = (string) $shipmentDetails['trackingNumber'];
+        }
+
+        return $this->exec('returnsManage', $params);
+    }
+
+    public function updateReturn($shipTo, $bulkReturId, $parts = array(), $shipmentDetails = array())
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        $params = array(
+            'bulkReturn' => $bulkReturId,
+            'shipTo'     => BimpTools::addZeros($shipTo, 10)
+        );
+
+        if (!empty($shipmentDetails)) {
+            $params['shipmentDetails'] = array();
+
+            if (isset($shipmentDetails['length'])) {
+                $params['shipmentDetails']['packageMeasurements']['length'] = $shipmentDetails['length'];
+            }
+            if (isset($shipmentDetails['width'])) {
+                $params['shipmentDetails']['packageMeasurements']['width'] = $shipmentDetails['width'];
+            }
+            if (isset($shipmentDetails['height'])) {
+                $params['shipmentDetails']['packageMeasurements']['height'] = $shipmentDetails['height'];
+            }
+            if (isset($shipmentDetails['weight'])) {
+                $params['shipmentDetails']['packageMeasurements']['weight'] = $shipmentDetails['weight'];
+            }
+
+            if (isset($shipmentDetails['notes']) && (string) $shipmentDetails['notes']) {
+                $params['shipmentDetails']['notes'] = (string) $shipmentDetails['notes'];
+            }
+
+            if (isset($shipmentDetails['carrierCode']) && (string) $shipmentDetails['carrierCode']) {
+                $params['shipmentDetails']['carrierCode'] = (string) $shipmentDetails['carrierCode'];
+            }
+
+            if (isset($shipmentDetails['trackingNumber']) && (string) $shipmentDetails['trackingNumber']) {
+                $params['shipmentDetails']['trackingNumber'] = (string) $shipmentDetails['trackingNumber'];
+            }
+        }
+
+        if (!empty($parts)) {
+            $params['parts'] = $parts;
+        }
+
+        return $this->exec('returnsManage', $params);
+    }
+
+    public function getBulkReturnReport($shipTo, $returnId)
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', 10);
+        }
+
+        if (!$shipTo) {
+            return array();
+        }
+
+        $shipTo = BimpTools::addZeros($shipTo, 10);
+        $this->setShipTo($shipto);
+        return $this->exec('returnsLookup', array(
+                    'returnStatusType' => 'RETURN_REPORT',
+                    'shipTo'           => $shipTo,
+                    'bulkReturnId'     => $returnId
+        ));
+    }
+
+    public function getPartReturnLabel($shipTo, $parts)
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        if ($shipTo) {
+            $shipTo = BimpTools::addZeros($shipTo, 10);
+
+            foreach ($parts as $key => $part) {
+                $parts[$key]['shipTo'] = $shipTo;
+            }
+        }
+
+        $response_headers = array();
+
+        return $this->exec('getFile', array(
+                    'identifiers' => $parts
+                        ), $response_headers, array('url_params' => array('documentType' => 'returnLabel'))
+        );
+    }
+
+    public function getBulkReturnLabel($shipTo, $bulkReturnId)
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        $shipTo = BimpTools::addZeros($shipTo, 10);
+
+        $response_headers = array();
+
+        return $this->exec('getFile', array(
+                    'identifiers' => array(
+                        array(
+                            'bulkReturnId' => $bulkReturnId,
+                            'shipTo'       => $shipTo
+                        )
+                    )), $response_headers, array('url_params' => array('documentType' => 'bulkReturnLabel'))
+        );
+    }
+
+    public function getReturnPackingList($shipTo, $bulkReturnId)
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        $shipTo = BimpTools::addZeros($shipTo, 10);
+
+        $response_headers = array();
+
+        return $this->exec('getFile', array(
+                    'identifiers' => array(
+                        array(
+                            'bulkReturnId' => $bulkReturnId,
+                            'shipTo'       => $shipTo
+                        )
+                    )), $response_headers, array('url_params' => array('documentType' => 'returnsPackingList'))
+        );
+    }
+
+    public function getDocRepa($shipTo, $g)
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        $shipTo = BimpTools::addZeros($shipTo, 10);
+
+        $this->setShipTo($shipTo);
+        $response_headers = array();
+
+        return $this->exec('getFile', array(
+            "identifiers" => array(
+                array('repairId' => $g)
+              )   
+            ), $response_headers, array('url_params' => array('documentType' => 'depotShipper'))
+        );
+    }
+    
+
+    // Requêtes - Réservations: 
+
+    public function fetchReservationsSummary($shipTo, $from, $to, $productCode = '')
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', self::$numbersNumChars);
+        } else {
+            $shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
+        }
+
+        $dt_from = new DateTime($from);
+        $dt_to = new DateTime($to);
+
+        $params = array(
+            'shipToCode'      => $shipTo,
+            'toDate'          => $dt_to->format(DateTime::ATOM),
+            'fromDate'        => $dt_from->format(DateTime::ATOM),
+            'currentStatus'   => 'RESERVED',
+            'reservationType' => 'CIN'
+        );
+
+        if ($productCode) {
+            $params['product'] = array(
+                'productCode' => $productCode
+            );
+        }
+
+        return $this->exec('fetchReservationsSummary', $params);
+    }
+
+    public function fetchReservation($shipTo, $reservation_id)
+    {
+        if (self::$mode === 'test') {
+//            $this->shipTo = BimpTools::addZeros('897316', 10);
+            $this->setShipTo('897316');
+        } else {
+//            $this->shipTo = BimpTools::addZeros($shipTo, 10);
+            $this->setShipTo($shipTo);
+        }
+
+        return $this->exec('fetchReservation', array(
+                    'reservationId' => $reservation_id
+        ));
+    }
+
+    public function fetchAvailableSlots($shipTo, $product_code)
+    {
+        if (self::$mode === 'test') {
+//            $this->shipTo = BimpTools::addZeros('897316', 10);
+            $this->setShipTo('897316');
+        } else {
+//            $this->shipTo = BimpTools::addZeros($shipTo, 10);
+            $this->setShipTo($shipTo);
+        }
+
+        return $this->exec('fetchAvailableSlots', array(
+                    'productCode' => $product_code
+        ));
+    }
+
+    public function createReservation($shipTo, $params)
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        $params['shipToCode'] = BimpTools::addZeros($shipTo, 10);
+
+        if (!isset($params['emailLanguageCode'])) {
+            $params['emailLanguageCode'] = 'fr_fr';
+        }
+
+        return $this->exec('createReservation', $params);
+    }
+
+    public function cancelReservation($shipTo, $reservationId)
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        $params = BimpTools::overrideArray(array(
+                    'cancelReason' => 'CUSTOMER_CANCELLED'
+                        ), $params);
+
+        $params['reservationId'] = $reservationId;
+        $params['modifiedStatus'] = 'CANCELLED';
+        $params['shipToCode'] = BimpTools::addZeros($shipTo, 10);
+
+        return $this->exec('updateReservation', $params);
+    }
+
+    // Stocks consignés: 
+
+    public function consignmentOrdersLookup($type, $status = 'OPEN', $from = '', $to = '', $page = 0)
+    {
+        $params = array(
+            'orderStatusGroupCode' => $status,
+            'typeCode'             => $type
+        );
+
+        if ($from && $to) {
+            $params['createdFromDate'] = $from;
+            $params['createdToDate'] = $to;
+        }
+        
+        $head = array();
+        $return = $this->exec('consignmentOrderLookup', $params, $head, array('url_params'=>array('pageNumber'=>$page)));
+        $total = $head['X-Apple-Total-Count'];
+        while(count($return) < $total && $page < 10){
+            $page++;
+            $return = BimpTools::merge_array($return, $this->exec('consignmentOrderLookup', $params, $head, array('url_params'=>array('pageNumber'=>$page))));
+        }
+        return $return;
+    }
+
+    public function consignmentOrderLookup($orderId, $type = 'DECREASE', $status = 'OPEN')
+    {
+        $params = array(
+            'orderId'              => $orderId,
+            'orderStatusGroupCode' => $status,
+            'typeCode'             => $type
+        );
+
+        return $this->exec('consignmentOrderLookup', $params);
+    }
+
+    public function consignmentDeliveryLookup($deliveryNumber, $status = 'ALL', $from = '', $to = '')
+    {
+        $params = array(
+            'deliveryNumber'          => $deliveryNumber,
+            'deliveryStatusGroupCode' => $status
+        );
+
+        if ($from && $to) {
+            $params['createdFromDate'] = $from;
+            $params['createdToDate'] = $to;
+        }
+
+        return $this->exec('consignmentDeliveryLookup', $params);
+    }
+
+    public function consignmentDeliveryAcknowledge($deliveryNumber, $parts)
+    {
+        return $this->exec('consignmentDeliveryAcknowledge', array(
+                    'deliveryNumber' => $deliveryNumber,
+                    'parts'          => $parts
+        ));
+    }
+
+    public function consignmentOrderSubmit($orderId, $parts)
+    {
+        $params = array(
+            'orderId' => $orderId,
+            'parts'   => $parts
+        );
+
+        return $this->exec('consignmentOrderSubmit', $params);
+    }
+
+    public function consignmentOrderShipment($orderId, $carrier_code, $tracking_number, $parts)
+    {
+        $params = array(
+            'orderId'        => $orderId,
+            'carrierCode'    => $carrier_code,
+            'trackingNumber' => $tracking_number,
+            'parts'          => $parts
+        );
+
+        return $this->exec('consignmentOrderShipment', $params);
+    }
+
+    // Requêtes - Divers:
+
+    public function filesUpload($serial, $files, $module = '')
     {
         $params = array(
             'attachments' => array(),
@@ -505,8 +1118,15 @@ class GSX_v2 extends GSX_Const
             );
         }
 
+        $extra = array();
+
+        if ($module) {
+            $extra['url_params'] = array(
+                'module' => $module
+            );
+        }
         $headers = array();
-        $data = $this->exec('filesUpload', $params, $headers);
+        $data = $this->exec('filesUpload', $params, $headers, $extra);
 
         if (!is_array($data) || empty($data) || !isset($data['attachments'])) {
             return false;
@@ -553,60 +1173,19 @@ class GSX_v2 extends GSX_Const
         return $result;
     }
 
-    public function diagnosticSuites($serial)
+    public function attributeLookup($type)
     {
-        return $this->exec('diagnosticSuites', array(
-                    'deviceId' => $this->traiteSerialApple($serial)
-        ));
-    }
-
-    public function runDiagnostic($serial, $suiteId)
-    {
-        return $this->exec('diagnosticTest', array(
-                    'diagnostics' => array(
-                        'suiteId' => (string) $suiteId
-                    ),
-                    'device'      => array(
-                        'id' => $this->traiteSerialApple($serial)
+        return $this->exec('attributeLookup', array(
+                    'shipToCode' => $this->shipTo,
+                    'attributes' => array(
+                        array(
+                            'type' => $type
+                        )
                     )
         ));
     }
 
-    public function diagnosticStatus($serial)
-    {
-        return $this->exec('diagnosticStatus', array(
-                    'device' => array(
-                        'id' => $this->traiteSerialApple($serial)
-                    )
-        ));
-    }
-
-    public function diagnosticsLookup($serial)
-    {
-        return $this->exec('diagnosticsLookup', array(
-                    'device' => array(
-                        'id' => $this->traiteSerialApple($serial)
-                    )
-        ));
-    }
-    
-    public function traiteSerialApple($serial){
-        if(stripos($serial, 'S') === 0){
-            return substr($serial,1);
-        }
-        return $serial;
-    }
-
-    public function serialEligibility($serial)
-    {
-        return $this->exec('repairEligibility', array(
-                    'device' => array(
-                        'id' => $this->traiteSerialApple($serial)
-                    )
-        ));
-    }
-
-    // Gestion des erreurs: 
+    // Gestion des erreurs:
 
     public function initError($msg, $log_error = false)
     {
@@ -617,7 +1196,13 @@ class GSX_v2 extends GSX_Const
         }
 
         if ($log_error && self::$log_errors) {
-            dol_syslog('[ERREUR INIT GSX]', LOG_ERR);
+            BimpCore::addlog('Erreur init GSX', Bimp_Log::BIMP_LOG_ERREUR, 'gsx', null, array(
+                'msg' => $msg
+            ));
+        }
+
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebug('gsx', '<span class="danger">ERREUR init GSX</span>', BimpRender::renderAlerts($msg));
         }
     }
 
@@ -637,7 +1222,15 @@ class GSX_v2 extends GSX_Const
         }
 
         if ($log_error && self::$log_errors) {
-            dol_syslog('[ERREUR INIT GSX]', LOG_ERR);
+            BimpCore::addlog('Erreur CURL GSX', Bimp_Log::BIMP_LOG_ERREUR, 'gsx', null, array(
+                'request' => $request_name,
+                'msg'     => $msg,
+                'code'    => $code
+            ));
+        }
+
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebug('gsx', '<span class="danger">ERREUR requête "' . $request_name . '"</span>', BimpRender::renderAlerts($msg . ' (CODE: ' . $code . ')'));
         }
     }
 
@@ -670,6 +1263,10 @@ class GSX_v2 extends GSX_Const
                 }
 
                 $errors[] = $msg;
+                if (isset($error['code']) && $error['code'] == 'UNAUTHORIZED') {
+                    $onclick = 'gsxLogOut();';
+                    $errors[] = '<a onclick="' . $onclick . '">Cliquez ici pour vous déconnecté de GSX.</a>';
+                }
             }
         }
 
@@ -693,5 +1290,28 @@ class GSX_v2 extends GSX_Const
             'init' => array(),
             'curl' => array()
         );
+    }
+
+    public function displayNoLogged($msg = '', $callback = '')
+    {
+        if (!$msg) {
+            $msg = 'Non connecté à GSX. Veuillez vous connecter et réitérer l\'opération';
+        }
+
+        $msg .= '<script type="text/javascript">';
+        $msg .= 'gsx_open_login_modal($(\'\')' . ($callback ? ', ' . $callback : '') . ');';
+        $msg .= '</script>';
+
+        return $msg;
+    }
+
+    // Divers: 
+
+    public function traiteSerialApple($serial)
+    {
+        if (stripos($serial, 'S') === 0) {
+            return substr($serial, 1);
+        }
+        return $serial;
     }
 }

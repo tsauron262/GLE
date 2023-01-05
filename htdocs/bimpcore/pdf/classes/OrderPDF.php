@@ -1,10 +1,10 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once __DIR__ . '/BimpDocumentPDF.php';
+require_once __DIR__ . '/BimpCommDocumentPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
 
-class OrderPDF extends BimpDocumentPDF
+class OrderPDF extends BimpCommDocumentPDF
 {
 
     public static $type = 'order';
@@ -20,11 +20,16 @@ class OrderPDF extends BimpDocumentPDF
     public $user_commercial = null;
     public $user_suivi = null;
     public $entrepot = null;
+    public $signature_bloc = false;
 
     public function __construct($db, $doc_type = 'commande')
     {
         if (!array_key_exists($doc_type, self::$doc_types)) {
             $doc_type = 'commande';
+        }
+        
+        if ($doc_type === 'bl') {
+            $this->signature_bloc = true;
         }
 
         $this->doc_type = $doc_type;
@@ -151,17 +156,16 @@ class OrderPDF extends BimpDocumentPDF
         // Titre commande:
         $docName = self::$doc_types[$this->doc_type];
 
-        if ($this->sitationinvoice) {
-            $docName = self::$doc_types[$this->doc_type];
-        }
+//        if ($this->sitationinvoice) {
+//            $docName = self::$doc_types[$this->doc_type];
+//        }
 
         // Réf commande: 
         switch ($this->doc_type) {
             case 'commande':
+                $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->commande->ref);
                 if ($this->commande->statut == Commande::STATUS_DRAFT) {
                     $docRef = '<span style="color: #800000"> ' . $docRef . ' - ' . $this->langs->transnoentities("NotValidated") . '</span>';
-                } else {
-                    $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->commande->ref);
                 }
                 break;
 
@@ -194,7 +198,7 @@ class OrderPDF extends BimpDocumentPDF
         if ($this->commande->ref_client) {
             $html .= '<tr>';
             $html .= '<td colspan="2" style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">' . $this->langs->transnoentities('RefCustomer') . ' : </span>';
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">' . $this->langs->transnoentities('RefCustomer') . ' : </span>';
             $html .= $this->langs->convToOutputCharset($this->commande->ref_client);
             $html .= '</td>';
             $html .= '</tr>';
@@ -204,13 +208,13 @@ class OrderPDF extends BimpDocumentPDF
         if (!is_null($this->user_suivi)) {
             $html .= '<tr>';
             $html .= '<td colspan="2" style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Dossier suivi par : </span>';
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Dossier suivi par : </span>';
             $html .= $this->user_suivi->firstname . ' ' . strtoupper($this->user_suivi->lastname);
             $html .= '</td>';
 
 //            if ($this->user_suivi->office_phone) {
 //                $html .= '<td  style="font-size: 8px">';
-//                $html .= '<span style="font-weight: bold; color: #EF7D00">Tél. : </span>';
+//                $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Tél. : </span>';
 //                $html .= $this->user_suivi->office_phone;
 //                $html .= '</td>';
 //            }
@@ -220,13 +224,13 @@ class OrderPDF extends BimpDocumentPDF
         if (!is_null($this->user_commercial)) {
             $html .= '<tr>';
             $html .= '<td' . (!$this->user_commercial->office_phone ? ' colspan="2"' : '') . ' style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Commercial : </span>';
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Commercial : </span>';
             $html .= $this->user_commercial->firstname . ' ' . strtoupper($this->user_commercial->lastname);
             $html .= '</td>';
 
             if ($this->user_commercial->office_phone) {
                 $html .= '<td style="font-size: 7px">';
-                $html .= '<span style="font-weight: bold; color: #EF7D00">Tél. : </span>';
+                $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Tél. : </span>';
                 $html .= $this->user_commercial->office_phone;
                 $html .= '</td>';
             }
@@ -239,7 +243,7 @@ class OrderPDF extends BimpDocumentPDF
         if (!is_null($this->contact)) {
             $html .= '<tr>';
             $html .= '<td colspan="2" style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Interlocuteur : </span>';
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Interlocuteur : </span>';
             $html .= $this->contact->firstname . ' ' . strtoupper($this->contact->lastname);
             $html .= '</td>';
             $html .= '</tr>';
@@ -253,15 +257,15 @@ class OrderPDF extends BimpDocumentPDF
             $email = (isset($this->contact->email) && $this->contact->email ? $this->contact->email : '');
 
             $html .= '<tr><td style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Tél. : </span>' . $phone;
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Tél. : </span>' . $phone;
             $html .= '</td><td style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Mobile : </span>' . $mobile;
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Mobile : </span>' . $mobile;
             $html .= '</td></tr>';
 
             $html .= '<tr><td style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">Fax : </span>' . $fax;
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Fax : </span>' . $fax;
             $html .= '</td><td style="font-size: 7px">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">E-mail : </span>' . $email;
+            $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">E-mail : </span>' . $email;
             $html .= '</td></tr>';
 
             $html .= '<tr><td></td><td></td></tr>';
@@ -275,21 +279,21 @@ class OrderPDF extends BimpDocumentPDF
 
         $html .= '<tr>';
         $html .= '<td colspan="2" style="font-size: 7px">';
-        $html .= '<span style="font-weight: bold; color: #EF7D00">Code client : </span>';
+        $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Code client : </span>';
         $html .= isset($this->commande->thirdparty->code_client) ? $this->commande->thirdparty->code_client : '';
         $html .= '</td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
         $html .= '<td colspan="2" style="font-size: 7px">';
-        $html .= '<span style="font-weight: bold; color: #EF7D00">Ref. commande : </span>';
+        $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Ref. commande : </span>';
         $html .= $this->commande->ref;
         $html .= '</td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
         $html .= '<td colspan="2" style="font-size: 7px">';
-        $html .= '<span style="font-weight: bold; color: #EF7D00">Date commande : </span>';
+        $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Date commande : </span>';
         $html .= dol_print_date($this->commande->date);
         $html .= '</td>';
         $html .= '</tr>';
@@ -375,6 +379,33 @@ class OrderPDF extends BimpDocumentPDF
                 }
 
                 $address = str_replace("\n", '<br/>', $address);
+
+//                if (!is_null($this->contact_shipment)) {
+//                    if ($this->contact_shipment->phone_mobile || $this->contact_shipment->phone_perso) {
+//                        $address .= '<br/>';
+//
+//                        if ($this->contact_shipment->phone_mobile) {
+//                            $address .= 'Mobile: ' . $this->contact_shipment->phone_mobile;
+//                        }
+//                        if ($this->contact_shipment->phone_perso) {
+//                            $address .= ($this->contact_shipment->phone_mobile ? ' - ' : '') . 'Tel.: ' . $this->contact_shipment->phone_perso;
+//                        }
+//                    }
+//
+//                    if ($this->contact_shipment->phone_pro) {
+//                        $address .= '<br/>Tél. pro: ' . $this->contact_shipment->phone_pro;
+//                    }
+//                    if ($this->contact_shipment->email) {
+//                        $address .= '<br/>' . $this->contact_shipment->email;
+//                    }
+//                } elseif (!is_null($this->thirdparty)) {
+//                    if ($this->thirdparty->phone) {
+//                        $address .= '<br/>Tel.: ' . $this->thirdparty->phone;
+//                    }
+//                    if ($this->thirdparty->email) {
+//                        $address .= '<br/>' . $this->thirdparty->email;
+//                    }
+//                }
                 break;
         }
 
@@ -427,7 +458,7 @@ class OrderPDF extends BimpDocumentPDF
             if (empty($this->object->mode_reglement_code) && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($conf->global->FACTURE_RIB_NUMBER)) {
                 $error = $this->langs->transnoentities("ErrorNoPaiementModeConfigured");
             } elseif (($this->object->mode_reglement_code == 'CHQ' && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank)) || ($this->object->mode_reglement_code == 'VIR' && empty($conf->global->FACTURE_RIB_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank))) {
-                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $object->mode_reglement_code);
+                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $this->object->mode_reglement_code);
             }
 
             if ($error) {
@@ -504,6 +535,9 @@ class BLPDF extends OrderPDF
     public $total_ht = 0;
     public $total_ttc = 0;
     public $num_bl = '';
+    public $chiffre = 1;
+    public $detail = 1;
+    public $signature_bloc = false;
 
     public function __construct($db, $shipment = null)
     {
@@ -545,6 +579,13 @@ class BLPDF extends OrderPDF
         }
     }
 
+    public function getTargetInfosHtml()
+    {
+        $html = parent::getTargetInfosHtml();
+
+        return $html;
+    }
+
     public function renderLines()
     {
         global $conf;
@@ -559,7 +600,7 @@ class BLPDF extends OrderPDF
         $table->cols_def['qte']['style'] = 'text-align: center;';
         $table->cols_def['qte']['head_style'] = 'text-align: center;';
 
-        if (!isset($_GET['chiffre']) || $_GET['chiffre'] == 1)
+        if ($this->chiffre)
             $table->setCols(array('code_article', 'desc', 'pu_ht', 'tva', 'total_ht', 'qte', 'dl', 'ral'));
         else {
             $table->setCols(array('code_article', 'desc', 'qte', 'dl', 'ral'));
@@ -589,12 +630,15 @@ class BLPDF extends OrderPDF
 //                $acompteHt = $line->subprice * (float) $line->qty;
 //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
 
+
+                $ht = $line->subprice * $qties[$line->id]['qty'];
+                $ttc = $ht * (100 + $line->tva_tx) / 100;
+                
+                
                 $total_ht_without_remises += $line->total_ht;
                 $total_ttc_without_remises += $line->total_ttc;
-
-                $this->acompteHt -= $line->total_ht;
-                $this->acompteTtc -= $line->total_ttc;
-                $this->acompteTva20 -= $line->total_tva;
+                $this->acompteHt -= $ht;
+                $this->acompteTtc -= $ttc;
                 continue;
             }
 
@@ -629,7 +673,7 @@ class BLPDF extends OrderPDF
                 } else {
                     $row['desc'] = array(
                         'colspan' => 99,
-                        'content' => $desc,
+                        'content' => $this->cleanHtml($desc),
                         'style'   => 'font-weight: bold; background-color: #F5F5F5;'
                     );
                 }
@@ -653,10 +697,9 @@ class BLPDF extends OrderPDF
                 }
                 $row = array(
 //                    'code_article' => (!is_null($product) ? $product->ref : ''),
-                    'desc'  => $desc,
+                    'desc'  => $this->cleanHtml($desc),
                     'pu_ht' => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
-
 
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
@@ -675,7 +718,7 @@ class BLPDF extends OrderPDF
                 $row['dl'] = isset($qties[(int) $line->id]['shipped_qty']) ? $qties[(int) $line->id]['shipped_qty'] : 0;
                 $row['ral'] = isset($qties[(int) $line->id]['to_ship_qty']) ? $qties[(int) $line->id]['to_ship_qty'] : 0;
 
-                if ($qty > 0)
+                if ($qty != 0)
                     $row['row_style'] = "font-weight: bold;";
 
                 $total_ht = (float) $qty * (float) $pu_ht;
@@ -748,8 +791,9 @@ class BLPDF extends OrderPDF
                 }
             }
 
-            if (!isset($_GET['detail']) || $_GET['detail'] == 1 || $row['qte'] > 0)
+            if ($this->detail || $row['qte'] != 0) {
                 $table->rows[] = $row;
+            }
 
             unset($product);
             $product = null;
@@ -916,6 +960,19 @@ class BLPDF extends OrderPDF
                 $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
                 $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($this->total_ttc, 0, $this->langs) . '</td>';
                 $html .= '</tr>';
+                
+                
+                if ($this->acompteHt > 0) {
+                    $html .= '<tr>';
+                    $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("Acompte") . '</td>';
+                    $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($this->acompteTtc, '', 0, 0, 1) . '</td>';
+                    $html .= '</tr>';
+                    $resteapayer = $this->total_ttc - $this->acompteTtc;
+                    $html .= '<tr>';
+                    $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';
+                    $html .= '<td style="text-align: right; background-color: #DCDCDC;">' . BimpTools::displayMoneyValue($resteapayer, '', 0, 0, 1) . '</td>';
+                    $html .= '</tr>';
+                }
             }
         }
 

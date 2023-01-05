@@ -21,7 +21,7 @@ class inventory_srController extends BimpController {
             else
                 $tab = $inventory->createLinesProduct($id_product, $quantity_input);
             $id_inventory_det = $tab['id_inventory_det'];
-            $errors = array_merge($errors, $tab['errors']);
+            $errors = BimpTools::merge_array($errors, $tab['errors']);
             $msg = $tab['msg'];
         }
 

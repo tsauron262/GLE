@@ -1,0 +1,21 @@
+bootstrap: 1
+
+title: 
+    callback: 
+        object: comm_apporteur
+        method: getPageTitle
+        
+objects: 
+    comm_apporteur: 
+        instance: 
+            bimp_object: Bimp_CommissionApporteur
+            id_object: 
+                request: id
+                
+sections: 
+    - type: view
+      view: 
+          panel: 0
+          name: default
+          object: comm_apporteur
+          

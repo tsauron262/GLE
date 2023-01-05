@@ -16,12 +16,21 @@ labels:
 
 objects:
     lines: 
+        relation: hasMany
+        label: Lignes de transfert
+        delete: 1
         instance: 
             bimp_object: TransferLine
-        delete: 1
+        
         
     entrepot_src: 
         extends: entrepot
+        instance: 
+            id_object: 
+                field_value: id_warehouse_source
+                
+    bimp_entrepot_src: 
+        extends: bimp_entrepot
         instance: 
             id_object: 
                 field_value: id_warehouse_source
@@ -32,11 +41,22 @@ objects:
             id_object: 
                 field_value: id_warehouse_dest
                 
+    bimp_entrepot_dest: 
+        extends: bimp_entrepot
+        instance: 
+            id_object: 
+                field_value: id_warehouse_dest
+                
+    user: 
+        instance: 
+            id_object: 
+                field_value: user_valid
+        
 fields:     
     id_warehouse_source:
         label: Entrepôt de départ
         type: id_object
-        object: entrepot_src
+        object: bimp_entrepot_src
         default_value: 0
         required: 1
         input: 
@@ -45,7 +65,7 @@ fields:
     id_warehouse_dest:
         label: Entrepôt d'arrivée
         type: id_object
-        object: entrepot_dest
+        object: bimp_entrepot_dest
         default_value: 0
         input:
             type: search_entrepot
@@ -70,7 +90,12 @@ fields:
         values: 
             array: status_list
         edit: 0
-
+        
+    user_valid: 
+        label: Validée par
+        type: id_object
+        object: user
+        
 fields_tables: 
     default: 
         footer_extra_btn:
@@ -89,7 +114,9 @@ fields_tables:
             - label: Terminée
               value: 
                   callback: displayIsGood
-            
+            - field: user_valid
+              display: nom_url
+
 views:
     default:
         objects_change_reload: lines
@@ -121,8 +148,10 @@ views:
                     list: 
                         name: default
                         children: lines
+                        
 forms:
     add:
+        on_save: redirect
         rows: 
             - field: id_warehouse_source
             - field: id_warehouse_dest
@@ -131,10 +160,43 @@ forms:
         rows: 
             - field: id_warehouse_dest
             
+    csv: 
+        rows: 
+            - custom: 1
+              label: Fichier CSV
+              input_name: csv_file
+              required: 1
+              input: 
+                  type: file_upload
+                  help: '1ère colonne: ref<br/>2ème colonne: qtés'
+            - custom: 1
+              label: Délimiteur
+              input_name: separator
+              required: 1
+              value: ';'
+              input: 
+                  type: text
+#            - custom: 1
+#              label: Récupérer automatiquement les N° de série (les quantités doivent correspondre à l'ensemble du stock)
+#              input_name: recup_serials
+#              data_type: bool
+#              input: 
+#                  type: toggle
+#              value: 1
+            - custom: 1
+              label: Tester seulement le fichier (aucune insertion en base)
+              input_name: test_only
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              
+            
 lists:
     default:
         checkboxes: 1
-        bulk_actions: 
+        configurable: 1
+#        bulk_actions: 
     # TODO reset with right admin
     #        - label: Supprimer les transferts sélectionnés
     #          icon: fas_trash-alt
@@ -143,9 +205,9 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-        list_filters: 
-            callback:
-                method: getListFilters
+#        list_filters:  => Le callback n'existe pas!
+#            callback:
+#                method: getListFilters
         add_form_name: add
         edit_btn: 
             callback: userIsAdminOrStatusSending
@@ -158,26 +220,18 @@ lists:
             callback: getListExtraButtons
         cols:
             id:
-                label: ID
-                field: id
-                min_width: 60px
             status:
-                field: status
             id_warehouse_source:
-                field: id_warehouse_source
-                display: nom_url
             id_warehouse_dest: 
-                field: id_warehouse_dest
-                display: nom_url
             date_opening:
-                field: date_opening
             date_closing:
-                field: date_closing
+                
     dash_board_reception:
        extends: default
        cols:
         status: unset
         id_warehouse_dest: unset
+        
     dash_board_send:
        extends: default
        cols:
@@ -194,3 +248,26 @@ cards:
             - label: Fermé le
               field: date_closing
         view_btn: 1
+
+searches: 
+    default: 
+        fields_search: 
+            - a.id
+            - es.ref
+            - es.lieu
+            - ed.ref
+            - ed.lieu
+        fields_return: 
+            - a.id
+            - es.ref
+            - es.lieu
+            - ed.ref
+            - ed.lieu
+        label_syntaxe: 'Transfert #<a.id> - De <es.ref> (<es.lieu>) Vers <ed.ref> (ed.lieu)'
+        joins: 
+            - table: entrepot
+              on: a.id_warehouse_source = es.rowid
+              alias: es
+            - table: entrepot
+              on: a.id_warehouse_dest = ed.rowid
+              alias: ed

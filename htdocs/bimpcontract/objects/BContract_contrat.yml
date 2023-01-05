@@ -1,27 +1,33 @@
-## Contrat hérite de bimpComm
-#extends: 
-#    module: bimpcommercial
-#    object_name: BimpComm
-
-primary: rowid
-
-header_btn: 
-    callback: getActionsButtons
-
-# Utilisation de l'object dolibarr contrat
 dol_object: 
     instance: 
         dol_object: 
             module: contrat
             file: contrat
-force_extrafields_update: 1
+            
+table: contrat
+primary: rowid
+controller: contrat
+icon: fas_file-signature
+public_icon: pe_news-paper
 
-filters_panels: 
-    default: 
-        filters:
-            ref:
-                field: ref
-                show: 1
+
+parent_module: bimpcore
+parent_object: Bimp_Societe
+parent_id_property: fk_soc
+
+
+list_page_url: 
+    controller: index  
+header_btn: 
+    callback: getActionsButtons
+header_edit_form: edit_contrat
+
+public_header_btn: 
+    callback: getPublicActionsButtons
+    
+labels: 
+    name: contrat
+                
 objects:
     client:
         instance:
@@ -32,8 +38,18 @@ objects:
                 field_value: fk_soc
     
     lines:
+        relation: hasMany
         instance:
             bimp_object: BContract_contratLine
+    
+    next_contrat:
+        instance:
+            bimp_object: BContract_contrat
+    
+    avenant:
+        relation: hasMany
+        instance:
+            bimp_object: BContract_avenant
     
     files:
         relation: hasMany
@@ -58,27 +74,70 @@ objects:
         instance:
             bimp_object: BContract_echeancier
     
-    user:
+    user_create:
         instance:
             bimp_object:
                 module: bimpcore
                 name: Bimp_User
             id_object:
-                field_value: fk_user_author       
-
-table: contrat
-controller: contrat
-icon: fas_file
-list_page_url: 
-    controller: index
-
-labels: 
-    name: contrat
+                field_value: fk_user_author
+    commercial:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_commercial_suivi
+                
+    commercial_sign:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_commercial_signature
+    
+    entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+                
+    bimp_entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+    
+    client_facturation:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Societe
+            id_object:
+                field_value: fk_soc_facturation
+    
+    fiche_inter:
+        instance:
+            bimp_object:
+                module: bimptechnique
+                name: BT_ficheInter
+                
+    signature: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
 
 fields:
     # Champs du contrat
     ref: 
         label: Référence
+        type: string
+    label:
+        label: Libellé du contrat
         type: string
     fk_soc:
         label: Client
@@ -99,9 +158,14 @@ fields:
     ref_ext:
         type: string
         label: Annule et remplace
+        input:
+            help: A remplir en cas de renouvellement d'un ancien contrat - 15 caractères maximum
+    ref_customer:
+        type: text
+        label: Référence client
     datec:
-        label: Date du contrat
-        type: date
+        label: Créé le
+        type: datetime
     date_contrat:
         label: Date de signature
         type: date
@@ -113,15 +177,29 @@ fields:
     fk_user_author:
         label: Créé par
         type: id_object
-        object: user
+        object: user_create
         dol_prop: user_author_id
+        input: 
+            type: search_user
     note_public:
         label: Note particulière au contrat
         type: html
+    note_private:
+        label: Note privée
+        type: html
+    id_signature: 
+        label: Signature
+        type: id_object
+        object: signature
+        displays: 
+            default: 
+                label: Lien signature
+                type: callback
+                method: displaySignature
         
     # Extrafields
     date_start:
-        label: Date d'effet du contrat
+        label: Date d'effet
         type: date
         dol_extra_field: 1
         required: 1
@@ -161,11 +239,11 @@ fields:
         type: int
         dol_extra_field: 1
     tacite:
-        label: Renouvellement
+        label: Renouvellement restant
         type: int
         dol_extra_field: 1
         values:
-            array: renouvellement
+            array: renouvellement_edit
         default_value: 12
     denounce:
         label: Contrat dénoncé
@@ -178,21 +256,58 @@ fields:
         label: Mode de règlement
         type: int
         dol_extra_field: 1
-        default_value: 3
+        default_value: 
+            callback: getModeReglementClient
         values:
             array: modeReglements
-
+    condregl:
+        label: Condition de règlement
+        type: int
+        dol_extra_field: 1
+        default_value: 
+            callback: getConditionReglementClient
+        values:
+            array: condReglements
     objet_contrat:
-        label: Objet du contrat
-        type: string
+        label: Type du contrat
         dol_extra_field: 1
         required: 1
         values:
             array: objet_contrat
-        
+    entrepot:
+        label: Entrepôt
+        dol_extra_field: 1
+        type: id_object
+        object: bimp_entrepot
+        input: 
+            type: search_entrepot
+    end_date_contrat:
+        label: Date de fin du contrat
+        dol_extra_field: 1
+        type: date
+    end_date_reel:
+        label: Date de fin réelle
+        dol_extra_field: 1
+        type: date
+    anticipate_close_note:
+        label: Note de cloture anticipée
+        dol_extra_field: 1
+        type: string
+    show_fact_line_in_pdf:
+        label: Afficher tarification par période
+        dol_extra_field: 1
+        type: bool
+    fk_soc_facturation:
+        label: Client pour facturation
+        type: id_object
+        object: client_facturation
+        input:
+            type: search_societe  
     fk_commercial_signature:
         label: Commercial signataire
         dol_prop: commercial_signature_id
+        type: id_object
+        object: commercial_sign
         input: 
             type: search_user
             help: Choisir le commercial responssable de la signature du contrat
@@ -202,10 +317,11 @@ fields:
                name: id
                object:
                    global: user
-    
     fk_commercial_suivi:
         label: Commercial suivi
         dol_prop: commercial_suivi_id
+        type: id_object
+        object: commercial
         input: 
             type: search_user
             help: Choisir le commercial responssable du suivi du contrat
@@ -215,68 +331,330 @@ fields:
                name: id
                object:
                    global: user
-        
+    date_cloture:
+        label: Clos le
+        type: datetime
+    fk_user_cloture:
+        label: Clos par
+        type: int
+    logs:
+        label: Logs contrat
+        type: text
+    relance_renouvellement:
+        label: Relance Email pour renouvellement du contrat
+        type: bool
+        input:
+            type: toggle
+    facturation_echu:
+        label: Facturation à terme échu
+        type: bool
+        input:
+            type: toggle
+    secteur:
+        label: Secteur
+        type: string
+        values:
+            array:
+                callback: getSecteursContrat
+    current_renouvellement:
+        label: Numéro du renouvellement
+        type: int
+        values:
+            array: renouvellement
+    syntec_renouvellement:
+        label: Syntec lors du dernier renouvellement
+        type: float
+    date_end_renouvellement:
+        label: Date de fin contrat (Renouvellement)
+        type: date
+#    initial_renouvellement:
+#        label: Renouvellement initial
+#        type: int
+#        values:
+#            array: renouvellement
+    next_contrat:
+        label: Contrat de renouvellement
+        type: id_object
+        object: next_contrat
+    replaced_ref: 
+        label: Référence remplacée
+        input: 
+            help: Utiliser ce champ si perte des données de la pièce remplacée
+    date_start_provisoire:
+        label: Date d'activation provisoir
+    signature_params: 
+        label: Paramètres incrustation signature
+        type: json
+
 fields_tables:
-    infos:
-        panel: 0
+    contrat:
+        panel: 1
+        title: Informations sur le contrat
         rows:
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
+            - field: label
+              edit: 0
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - label
             - field: ref
               label: Référence du contrat
               edit: 0
-            - field: ref_ext
+            - field: next_contrat
               edit: 0
-            - field: objet_contrat
-              edit: 0
-            - label: Contrat initial
-              value:
-                  callback: getContratSource
-              edit: 0
-            - field: date_start
-              edit: 0
-            - label: Date prochaine facture
-              value:
-                  callback: displayDateNextFacture
-            - field: duree_mois
-              edit: 0
-            - label: Date de fin du contrat
-              value: 
+              show:
                   callback:
-                      method: displayEndDate
+                      method: showInFieldsTable
                       params:
-                          - value:
-                              callback:
-                                  method: getData
-                                  params:
-                                      - date_start
-                          - value:
-                              callback:
-                                  method: getData
-                                  params:
-                                      - duree_mois
-            - field: periodicity
-              edit: 0
-            - field: moderegl
-              edit: 0
-            - field: gti
-              edit: 0
-            - field: syntec
+                          - next_contrat
+            - field: secteur
               edit: 0
             - field: tacite
               edit: 0
+#            - label: Renouvellement initial
+#              edit: 0
+#              value:
+#                  callback: renderInitialRenouvellement
+            - field: ref_ext
+              edit: 0
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - ref_ext
+            - field: ref_customer
+              edit: 0
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - ref_customer
+            - field: objet_contrat
+              edit: 0
+            - field: entrepot
+              display: nom_url
+              show:
+                  callback: useEntrepot
             - field: denounce
               edit: 0
-            - label: Commercial
+            - field: gti
+              edit: 0
+#            - label: Total actuelle
+#              value:
+#                  callback: getCurrentTotal
+    options_pdf:
+        panel: 1
+        title: Options PDF
+        rows:
+            - field: show_fact_line_in_pdf
+              edit: 1
+    facturation:
+        panel: 1
+        title: Informations sur la facturation du contrat
+        rows:
+            - field: periodicity
+              edit: 0
+            - field: syntec
+              edit: 0
+            - field: facturation_echu
+            - field: moderegl
+              edit: 0
+            - field: condregl
+              edit: 0
+            - label: Date de début de prochaine période de facturation
               value:
-                  callback: displayCommercial
-    client: 
-        panel: 0
+                  callback: displayDateNextFacture
+    duration:
+        panel: 1
+        title: Informations sur la durée de validité du contrat
+        rows:
+            - field: date_start
+              edit: 0
+            - label: Date de fin du contrat
+              value: 
+                  callback: displayRealEndDate
+            - field: duree_mois
+              edit: 0
+            - label: Durée initiale en mois
+              value: 
+                  callback: getDureeInitial
+    infos:
+        panel: 1
+        title: Informations commercial du contrat
+        rows:
+            - field: fk_commercial_suivi
+              display: nom_url
+            - field: fk_commercial_signature
+              display: nom_url
+            - field: relance_renouvellement
+              edit: 0
+            - label: Rentabilitée
+              value:
+                  callback: renderThisStatsFi
+    client:
+        title: Autres informations sur le contrat
+        panel: 1
         rows: 
             - field: fk_soc
               display: card
+            - field: fk_soc_facturation
+              display: card
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - fk_soc_facturation
             - field: note_public
-   
-              
-                              
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - note_public
+            - field: note_private
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - note_private
+            - field: logs
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - logs
+                          
+    public_infos: 
+        panel: 0
+        rows: 
+            - field: label
+            - field: date_start
+            - label: Date de fin du contrat
+              value: 
+                  callback: displayRealEndDate
+            - field: duree_mois
+            - field: periodicity
+            - field: facturation_echu
+            - label: Date de début de prochaine période de facturation
+              value:
+                  callback: displayDateNextFacture
+            - field: tacite
+            
+    public_commercial: 
+        panel: 0
+        rows: 
+            - field: fk_commercial_suivi
+            - field: fk_commercial_signature
+            - field: relance_renouvellement
+            
+    signature: 
+        title: Signature
+        icon: fas_signature
+#        show: 
+#            field_value: id_signature
+        rows: 
+            - field: id_signature
+#              display: card
+          
+filters:
+    end_date:
+        label: Date de fin
+        input:
+            type: date_range
+        data_type: date
+        exclude_btn: 0
+    commercialclient:
+        label: Commercial client
+        input:
+            type: search_user
+        data_type: id_object
+        type: user
+    use_syntec:
+        label: Utilisation Syntec
+        type: check_list
+        items:
+          1: OUI
+          0: NON
+        exclude_btn: 0
+    reconduction:
+        label: Recondution
+        type: check_list
+        items:
+            0: Aucune
+            1: Sur proposition
+            2: Tacite
+    negatif_positif:
+        label: Marge
+        type: check_list
+        items:
+            0: Négative
+            1: Positive
+            2: Nulle
+        
+filters_panels: 
+    default: 
+        filters:
+            ref:
+                show: 1
+            statut:
+            fk_commercial_suivi:
+            client:
+            commercialclient:
+            entrepot:
+            #end_date:
+            datec:
+            syntec:
+            use_syntec:
+            reconduction:
+            have_fi:
+                field: have_fi
+                custom: 1
+                label: Fiches d'interventions liées
+                type: check_list
+                items:
+                    1: OUI
+                    0: NON
+                exclude_btn: 0
+                show:
+                    callback:
+                        method: isActive
+                        object: fiche_inter
+                        is_static: 1
+            negatif_positif:
+                        
+lists_cols:
+    total:
+        label: Total actuel
+        value:
+            callback: getCurrentTotal
+    margeInter:
+        label: Marge Inters
+        value:
+            callback: displayMargeInter
+    signed:
+        label: Contrat signé
+        value:
+            callback:
+                method: isSigned
+                params:
+                    - display
+#                          
+#    date_fin:
+#        label: Date de fin du contrat
+#        value: 
+#            callback: displayRealEndDate
+                
+    commercialclient:
+        label: Commercial Client
+        value:
+            callback: displayCommercialClient
+        search:
+            input: 
+                type: search_user
+                
 lists: 
     default:
         title: Contrat
@@ -284,166 +662,540 @@ lists:
         checkboxes: 1
         icon: fas_file-contract
         filters_panel: default
-        list_filters: 
-            callback: getListFilters
-#        bulk_actions:
-#            callback: getBulkActions
+        bulk_actions:
+            callback: getBulkActions
         sort_field: datec
         sort_way: desc
         n: 20
-        add_form_name: add_contrat
-        add_btn_label: Créer un nouveau contrat
+#        add_form_name: add_contrat
+#        add_btn_label: Créer un nouveau contrat
         edit_btn: 1
         edit_form: edit_contrat
         delete_btn: 0
         modal_view: fiche_contrat
         page_btn: 1
         cols: 
-            ref: 
-                field: ref
+            ref:
+            objet_contrat:
             signed:
-                label: Contrat signé
-                value:
-                    callback:
-                        method: isSigned
-                        params:
-                            - display
+#            datec:
             statut:
-                field: statut
+#            entrepot:
             fk_soc:
-                field: fk_soc
-                display: nom_url
-            datec:
-                field: datec
-            fk_user_author:
-                field: fk_user_author
-            commercial:
-                label: Commercial
-                value:
-                    callback: displayCommercial
-    
+#            nb_renouvellement:
+#                label: Renouvellement
+#                value:
+#                    callback: displayNumberRenouvellement
+            date_start:
+#            date_fin_contrat:
+#                label: Date de fin
+#                value: 
+#                    callback: displayRealEndDate
+#            fk_user_author:
+            fk_commercial_suivi:
+#            fk_commercial_signature:
+            commercialclient:
+
     client:
         extends: default
+        n: 10
         cols:
             fk_soc: unset
+            
+    public: 
+        title: Tous mes contrats
+        configurable: 0
+        checkboxes: 0
+        icon: fas_bars
+        sort_field: datec
+        sort_way: desc
+        n: 10
+        extra_btn: 
+            callback: getPublicListExtraButtons
+        cols: 
+            ref:
+            objet_contrat:
+            datec:
+            statut:
+            nb_renouvellement:
+                label: Renouvellement
+                value:
+                    callback: displayNumberRenouvellement
+            date_start:
+            date_fin_contrat:
+                label: Date de fin
+                value: 
+                    callback: displayRealEndDate
+            fk_commercial_suivi:
 
 forms:
-#    email: 
-#        rows: 
-#            - custom: 1
-#              label: Emetteur
-#              input_name: from
-#              input: 
-#                  type: select
-#                  options: 
-#                      array: emailUsersFrom
-#                      
-#            - custom: 1
-#              label: Destinataires
-#              input_name: mail_to
-#              input: 
-#                  type: custom
-#                  content: 
-#                      callback: 
-#                          method: renderMailToInputs
-#                          params: 
-#                              - mail_to
-#                  multiple: 1
-#              values: 
-#                  array: mailsTo
-#              value: 
-#                  callback: getDefaultMailTo
-#              required: 1
-#              
-#            - custom: 1
-#              label: Copies à
-#              input_name: copy_to
-#              input: 
-#                  type: custom
-#                  content: 
-#                      callback: 
-#                          method: renderMailToInputs
-#                          params: 
-#                              - copy_to
-#                  multiple: 1
-#                          
-#            - custom: 1
-#              label: Accusé de réception
-#              input_name: confirm_reception
-#              data_type: bool
-#              input: 
-#                  type: toggle
-#              default_value: 0
-#              
-#            - custom: 1
-#              label: Modèle de courriel
-#              input_name: id_model
-#              input: 
-#                  type: select
-#                  options: 
-#                      array: emailModels
-#                      
-#            - custom: 1
-#              label: Objet
-#              input_name: mail_object
-#              input: 
-#                  type: text
-#              value: 
-#                  callback: getEmailTopicByModel
-#              depends_on: id_model
-#              
-#            - custom: 1
-#              label: Message
-#              data_type: html
-#              input_name: msg_html
-#              input: 
-#                  type: html
-#              value: 
-#                  callback: getEmailContentByModel
-#              depends_on: id_model
-#              
-#            - custom: 1
-#              label: Fichiers joints
-#              input_name: join_files
-#              data_type: id_object
-#              input: 
-#                  type: check_list
-#                  items: 
-#                      callback: getAllFiles
-##                      array: files
-#              value: 
-#                  callback: getJoinFilesValues
-#              object: files
-#              create_form: upload
-#              create_form_label: Ajouter
-#              create_form_values: 
-#                  fields: 
-#                      parent_module: 
-#                          prop: module
-#                      parent_object_name: 
-#                          prop: object_name
-#                      id_parent: 
-#                          prop: id
+    redefineEcheancier:
+        title: Re-define Echeancier ADMIN
+        rows:
+            - field: current_renouvellement
+            - field: tacite
+#            - field: initial_renouvellement
+            - field: date_end_renouvellement
+            - custom: 1
+              label: Lignes du contrat à supprimer
+              input_name: lines
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getLinesForList
+            - custom: 1
+              label: Lignes du contrat à activer
+              input_name: lines_activate
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getLinesForList
+
+    have_signed:
+        title: Vérification signature
+        msgs:
+            callback: displayMessagesFormActivate
+#            - type: info
+#              content: Si non est coché, le statut du contrat sera "Activation provisoire"
+#            - type: danger
+#              content: dddddd
+        rows:
+            - custom: 1
+              label: Le contrat dûment signé est-il bien présent en PJ ?
+              input_name: have_contrat_signed
+              value:
+                callback:
+                    method: getData
+                    params:
+                        - date_contrat
+              input:
+                  help: Merci de corriger si le curseur n'est pas sur le bon choix.
+                  type: toggle
+                  
+    renew_tacite:
+        title: Créer un renouvellement
+        msgs:
+            - content: Merci de confirmer le renouvellement du contrat. Si des champs s'affichent dans ce formulaire, merci de les renseigner correctement
+        rows:
+            - custom: 1
+              label: Date d'effet du renouvellement
+              input_name: date_effet
+              input:
+                  type: date
+                  display_now: 1
+              show:
+                  callback: isConformWithDate
+
+    use_syntec:
+        title: Utilisation de l'indice Syntec
+        rows:
+            - custom: 1
+              label: Utiliser l'indice syntec ?
+              input_name: use_syntec
+              value: 0
+              input:
+                  type: toggle
+              value: 1
+              
+    planningInter:
+        title: Plannifier une intervention
+        icon: calendar
+        msgs:
+            - content:
+                callback: getMsgsPlanningFi
+        rows:
+            - custom: 1
+              label: Intervention urgente
+              input_name: urgent
+              value: 0
+              input:
+                  type: toggle
+            - custom: 1
+              label: Techniciens
+              input_name: techs
+              content:
+                  callback: renderTechsInput
+            - custom: 1
+              label: Le
+              required: 1
+              input_name: le
+              input:
+                  type: date
+            - custom: 1
+              label: De
+              input_name: de
+              required: 1
+              input:
+                  help: Les secondes ne serons pas pris en compte
+                  type: time
+            - custom: 1
+              label: A
+              input_name: a
+              required: 1
+              input:
+                  help: Les secondes ne serons pas pris en compte
+                  type: time
+            - custom: 1
+              label: Type de plannification
+              required: 1
+              input_name: type_planning
+              input:
+                  type: select
+              values:
+                  callback: getTypeActionCommArray
+            - custom: 1
+              label: Actions à faires ?
+              input_name: description
+              input:
+                  type: html
+            - custom: 1
+              label: Lier une ou plusieurs commandes
+              input_name: linked_commandes
+              data_type: id_object
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getCommandesClientArray
+            - custom: 1
+              label: Lier un ou plusieurs tickets support
+              input_name: linked_tickets
+              data_type: id_object
+              input:
+                  type: check_list
+                  items:
+                      callback: getTicketsSupportClientArray
+                      
+    old_to_new:
+        title: Ancienne vers Nouvelle version
+        msgs:
+            - content: Merci de vérifier et de corriger les informations si nécéssaire, ceci est une action définitive.
+        rows:
+            - custom: 1
+              label: Date début du contrat
+              input_name: date_start
+              value: 
+                    callback: getStartDateForOldToNew
+              input:
+                  type: date
+            - custom: 1
+              label: Durée en mois
+              input_name: duree
+              value:
+                  callback: getDureeForOldToNew
+              input:
+                  type: qty
+            - custom: 1
+              label: Périodicitée
+              input_name: periode
+              value: 3
+              values:
+                  array: period
+              input:
+                  type: select
+            - custom: 1
+              label: Date prochaine facture
+              required: 1
+              input_name: date_facture_date
+              input:
+                  type: date
+              value:
+                  callback: getNextDateFactureOldToNew
+            - custom: 1
+              label: Contrat totalement facturé
+              input_name: total
+              input:
+                  type: toggle
+              value: 0
+              help: Si oui, aucun échéancier ne sera créé
+
+    demande_intervention:
+        title: Créer une demande d'intervention
+        rows:
+            - custom: 1
+              label: Date d'intervention (Indicative)
+              input_name: date
+              data_type: date
+              required: 1
+              input:
+                  type: date
+                  display_now: 1
+            - custom: 1
+              label: Durée de l'intervention
+              input_name: duree
+              required: 1
+              input:
+                  type: timer
+            - custom: 1
+              label: Titre
+              input_name: titre
+              data_type: text
+              input:
+                  type: text
+            - custom: 1
+              label: Intervenant
+              required: 1
+              input_name: tech
+              value:
+                    prop:
+                        name: id
+                        object:
+                            global: user
+              input:
+                  type: search_user
+            - custom: 1
+              label: Intervenants supplémentaires
+              input_name: techs
+              content:
+                  callback: renderTechsInput
+            - custom: 1
+              label: Lignes du contrat
+              input_name: lines
+              data_type: id_object
+              input: 
+                  help: Les lignes cochées apparaîtrons dans la DI
+                  type: check_list
+                  items: 
+                      callback: getLinesContrat
+              
+    fiche_inter:
+        rows:
+            - custom: 1
+              label: Date prévu d'intervention
+              input_name: date
+              date_type: date
+              required: 1
+              input:
+                  type: date
+            - custom: 1
+              label: Intervention urgente
+              value: 0
+              input_name: urgent
+              input:
+                  type: toggle
+            - custom: 1
+              label: Intervenant principal
+              input_name: fk_user_author
+              value:
+                    prop:
+                        name: id
+                        object:
+                            global: user
+              input:
+                  type: search_user
+                  
+            - custom: 1
+              label: Intervenants supplémentaires
+              input_name: techs
+              content:
+                  callback: renderTechsInput
+            - custom: 1
+              label: Type d'intervention
+              input_name: type_inter
+              value: 3
+              input:
+                  type: select
+                  options:
+                      prop:
+                          object: fiche_inter
+                          name: type_list
+                          is_static: 1
+            - custom: 1
+              label: Nature de l'intervention
+              input_name: nature_inter
+              value: 1
+              input:
+                  type: select
+                  options:
+                      prop:
+                          object: fiche_inter
+                          name: nature_list
+                          is_static: 1
+            - custom: 1
+              label: Note public
+              input_name: public
+              input:
+                  type: html
+            - custom: 1
+              input_name: private
+              label: Note privé
+              input:
+                  type: html
+                  
+    addAcc:
+        title: Ajouter un acompte
+        rows:
+            - custom: 1
+              label: Acompte sur compte client
+              input_name: acc
+              input:
+                  type: select
+                  options:
+                        callback: getAcomptesClient
+    
+    anticipate:
+        force_edit: 1
+        msgs:
+            - content: Quelques informations sont nécéssaires pour anticiper la fermeture de ce contrat
+              type: warning
+            - content: Cette action est irréversible
+              type: danger
+        rows:
+            - custom: 1
+              input_name: have_courrier
+              label: Lettre de résiliation déposée dans les fichiers de contrat
+              input:
+                  type: toggle
+            - custom: 1
+              input_name: end_date_reel
+              required: 1
+              label: Date de fin effective du contrat
+              input:
+                  type: date
+              display_if:
+                  field_name: have_courrier
+                  show_values: 1
+            - custom: 1
+              required: 1
+              label: Cause de clôture anticipée du contrat
+              input_name: note_close
+              input:
+                  type: html
+              display_if:
+                  field_name: have_courrier
+                  show_values: 1
+            
+    email: 
+        rows: 
+            - custom: 1
+              label: Emetteur
+              input_name: from
+              input: 
+                  type: select
+                  options: 
+                      array: emailUsersFrom
+                      
+            - custom: 1
+              label: Destinataires
+              input_name: mail_to
+              input: 
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderMailToInputs
+                          params: 
+                              - mail_to
+                  multiple: 1
+              values: 
+                  array: mailsTo
+              value: 
+                  callback: getDefaultMailTo
+              required: 1
+              
+            - custom: 1
+              label: Copies à
+              input_name: copy_to
+              input: 
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderMailToInputs
+                          params: 
+                              - copy_to
+                  multiple: 1
+                          
+            - custom: 1
+              label: Accusé de réception
+              input_name: confirm_reception
+              data_type: bool
+              input: 
+                  type: toggle
+              default_value: 0
+              
+            - custom: 1
+              label: Modèle de courriel
+              input_name: id_model
+              input: 
+                  type: select
+                  options: 
+                      array: emailModels
+                      
+            - custom: 1
+              label: Objet
+              input_name: mail_object
+              input: 
+                  type: text
+              value: 
+                  callback: getEmailTopicByModel
+              depends_on: id_model
+              
+            - custom: 1
+              label: Message
+              data_type: html
+              input_name: msg_html
+              input: 
+                  type: html
+              value: 
+                  callback: getEmailContentByModel
+              depends_on: id_model
+              
+            - custom: 1
+              label: Fichiers joints
+              input_name: join_files
+              data_type: id_object
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getAllFiles
+#                      array: files
+              value: 
+                  callback: getJoinFilesValues
+              object: files
+              create_form: upload
+              create_form_label: Ajouter
+              create_form_values: 
+                  fields: 
+                      parent_module: 
+                          prop: module
+                      parent_object_name: 
+                          prop: object_name
+                      id_parent: 
+                          prop: id
+                          
     edit_contrat:
         rows:
+            - field: replaced_ref
+            - field: label
             - field: ref
               edit: 0
             - field: ref_ext
+            - field: ref_customer
             - field: objet_contrat
+            - field: entrepot
             - field: fk_soc
               edit: 0
+            - field: fk_soc_facturation
             - field: date_start
             - field: duree_mois
             - field: periodicity
+            - field: facturation_echu
             - field: moderegl
+            - field: condregl
             - field: gti
             - field: syntec
+            - field: fk_commercial_suivi
+            - field: fk_commercial_signature
             - field: tacite
+              label: Renouvellement
             - field: denounce
             - field: note_public
+            - field: note_private
+            - field: relance_renouvellement
+              edit:
+                  callback: isCommercialOfContrat
     
     add_contrat:
         rows:
+            - field: replaced_ref
             - field: datec
               edit: 0
               show: 0
@@ -529,6 +1281,7 @@ forms:
         msgs:
             - content: <h4>Merci de confirmer le clone du contrat</h4>
               type: warning
+              
     contact:
         title: Ajouter un contact
         rows: 
@@ -604,9 +1357,116 @@ forms:
               display_if: 
                   field_name: type
                   show_values: 2 
+                  
+                  
+    create_signature_docu_sign: 
+        title: Signature DocuSign
+        icon: fas_file-signature
+        rows: 
+            - custom: 1
+              label: Contact
+              type: id_object
+              object: contact
+              input_name: id_contact
+              input:
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                            0: 
+                                field_value: fk_soc
+                                  
+#            - custom: 1
+#              label: Informations contact
+#              input_name: inut
+#              depends_on: id_contact
+#              content:
+#                callback: 
+#                     method: getContactInfo
+#                     params: 
+#                            - request: id_contact
             
-        
+    create_signature:
+        title: Créer signature
+        rows:
+            sign_dist:
+                custom: 1
+                label: Demander une signature à distance
+                data_type: bool
+                input_name: sign_dist
+                input: 
+                    type: toggle
+                value: 1
+            contact_signature: 
+                custom: 1
+                label: Contact signataire
+                data_type: id_object
+                input_name: id_contact_signature
+                object: contact
+                create_form: default
+                create_form_values: 
+                    callback: getSignatureContactCreateFormValues
+                input: 
+                    type: select
+                    help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+                    options: 
+                        callback: 
+                            method: getSocieteContactsArray
+                            params: 
+                                - field_value: fk_soc
+                value: 
+                    callback: getDefaultSignatureContact
+                display_if: 
+                    fields_names: sign_dist
+                    sign_dist:
+                        hide_values: 0
+            init_docusign: 
+                custom: 1
+                label: Envoyer immédiatement le document pour signature via DocuSign
+                data_type: bool
+                input_name: init_docusign
+                content: 
+                    callback: renderSignatureInitDocuSignInput
+                display_if: 
+                    fields_names: sign_dist
+                    sign_dist:
+                        hide_values: 0
+#            open_public_access: 
+#                custom: 1 
+#                label: Ouvrir immédiatement l'accès à la signature électronique à distance
+#                data_type: bool
+#                input_name: open_public_access
+#                content: 
+#                    callback: renderSignatureOpenDistAccessInput
+#                display_if: 
+#                    fields_names: create_signature,init_docusign,sign_dist
+#                    create_signature: 
+#                        show_values: 1
+#                    init_docusign: 
+#                        hide_values: 1
+#                    sign_dist:
+#                        hide_values: 0
+            email_content: 
+                custom: 1
+                label: Contenu e-mail client pour la signature à distance
+                input_name: email_content
+                input: 
+                    type: html
+                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+                value: 
+                    callback: getSignatureEmailContent
+                display_if: 
+                    fields_names: init_docusign
+                    init_docusign:
+                        hide_values: 0
+                depends_on: init_docusign
+                #,open_public_access
+                
 views:
+    default:
+        extends: fiche_contrat 
+        
     fiche_contrat:
         objects_change_reload: BContract_echeancier, BContract_contrat
         title:
@@ -626,7 +1486,20 @@ views:
                           - type: fields_table
                             col_lg: 12
                             fields_table: 
-                                name: infos
+                                name: contrat
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: duration
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: facturation
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: signature
+                          
                 - type: rows
                   col_lg: 6
                   col_md: 6
@@ -635,7 +1508,15 @@ views:
                           - type: fields_table
                             col_lg: 12
                             fields_table:
+                                name: options_pdf
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table:
                                 name: client
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: infos
             - cols: 
                 - type: custom
                   col_lg: 6
@@ -652,33 +1533,33 @@ views:
                   custom: 
                     callback:
                         method: renderFilesTable
-    interface_client:
-        title:
-            callback: displayRef
-        objects_change_reload: BContract_contract
-        delete_btn: 1
-        edit_form: edit_contrat
-        footer_extra_btn: 
-            callback: getActionsButtons
-        rows:
+#            - cols:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderNotesList
+#                          params:
+#                              - 1
+    inter:
+        show: 
+            callback:
+                method: isActive
+                object: fiche_inter
+                is_static: 1
+        title: Interventions
+        rows:                                                   
             - cols: 
-                - type: rows
-                  col_lg: 12
-                  col_md: 12
-                  rows:                        
-                      - cols: 
-                          - type: fields_table
-                            col_lg: 12
-                            fields_table: 
-                                name: infos
-                      - cols:
-                          - type: list
-                            col_lg: 12
-                            list:
-                                object: lines
-                                name: interface_client
+                - type: custom
+                  custom: 
+                        callback: 
+                            method: renderFi
+                - type: list
+                  list: 
+                      title: Fi du contrat
+                      name: contrat
+                      panel: 1
+                      object: fiche_inter 
 
-    
     file:
         title: Fichiers joint
         rows:
@@ -704,6 +1585,18 @@ views:
                   col_md: 12
                   custom:
                       callback: renderEcheancier
+    
+    avenant:
+        objects_change_reload: BContract_echeancier, BContract_contrat
+        title: Avenants du contrat
+        panel: 1
+        rows:
+            - cols:
+                - type: list
+                  col_lg: 18
+                  col_md: 12
+                  list:
+                      children: avenant
                       
     lines:
         objects_change_reload: BContract_echeancier, BContract_contrat
@@ -714,12 +1607,56 @@ views:
                 - type: list
                   list:
                       children: lines
+                      
+    public_client:
+        panel: 0
+        rows:
+            - cols: 
+                  - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: public_infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: public_commercial
 
 searches:
     default:
-        has_serial: 1
         fields_search: 
             - a.ref
+            - s.nom
+#            - ef.objet_contrat
+        joins:
+#            ef: 
+#                table: contrat_extrafields
+#                on: a.rowid = ef.fk_object
+#                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
         fields_return: 
             - a.ref
-        label_syntaxe: '<a.ref>'
+            - s.nom
+#            - ef.objet_contrat
+#        label_syntaxe: '<a.ref> (<s.nom>) - <ef.objet_contrat>'
+        label_syntaxe: '<a.ref> (<s.nom>)'
+        
+cards:
+    default:
+        title: 
+            field_value: ref
+        status: statut
+        fields: 
+            - field: replaced_ref
+            - field: objet_contrat
+            - field: fk_soc
+              display: nom_url
+            - field: date_start
+            - field: end_date_contrat
+        view_btn: 1

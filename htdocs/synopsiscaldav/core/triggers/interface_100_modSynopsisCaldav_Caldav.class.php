@@ -157,7 +157,7 @@ class InterfaceCaldav {
                 }
                 else{
                     $dtstamp = gmdate('Ymd').'T'. gmdate('His') . "Z";
-                    $sequence = "sequence + 1";
+                    $sequence = "sequence";// + 1";
                 }
 
                 

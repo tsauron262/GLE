@@ -28,7 +28,7 @@ class reservationController extends BimpController
 
         $html .= '<div id="equipmentForm" style="display: none;">';
         $html .= '<div style="display: inline-block">';
-        $html .= BimpRender::renderFreeForm($rows, $buttons, 'Attribution d\'équipement');
+        $html .= BimpForm::renderFreeForm($rows, $buttons, 'Attribution d\'équipement');
         $html .= '</div>';
         $html .= '</div>';
 

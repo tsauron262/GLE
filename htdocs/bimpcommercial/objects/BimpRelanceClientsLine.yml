@@ -1,0 +1,271 @@
+table: bimp_relance_clients_line
+common_fields: 0
+
+parent_module: bimpcommercial
+parent_object: BimpRelanceClients
+parent_id_property: id_relance
+
+labels: 
+    name: ligne de relance clients
+    name_plur: lignes de relances clients
+    is_female: 1
+    
+objects: 
+    user_send: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_send
+                
+    user_phone_call:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_phone_call
+    
+fields: 
+    id_relance: 
+        label: Relance
+        type: id_parent
+        searchable: 0
+        
+    id_client: 
+        label: Client
+        type: id_object
+        object: client
+        
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+            
+    relance_idx: 
+        label: N° Relance
+        type: int
+        
+    id_contact: 
+        label: Contact
+        type: id_object
+        object: contact
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getSocieteContactsArray
+                    params: 
+                        0: 
+                            field_value: id_client
+            help: 
+                callback: 
+                    method: getContactInputHelp
+                    params: 
+                        - id_contact
+        
+    email: 
+        label: E-mail destinataire
+        depends_on: id_contact
+        input: 
+            help: 
+                callback: getContactInputHelp
+        
+    factures: 
+        label: Factures
+        type: items_list
+        displays: 
+            default: 
+                type: callback
+                method: displayFactures
+        values: 
+            array: availableFactures
+        items_data_type: id
+        items_braces: 1    
+        items_sortable: 1
+        
+    date_prevue: 
+        label: Date d'envoi prévue
+        type: date
+        
+    date_send: 
+        label: Date envoi / abandon
+        type: datetime
+        
+    id_user_send: 
+        label: Envoyé / abandonné par
+        type: id_object
+        object: user_send
+        input: 
+            type: search_user
+            
+    method: 
+        label: Méthode de relance
+        type: int
+        values: 
+            array: methods
+        default_value: 0
+        
+    id_user_phone_call: 
+        label: Appel téléphonique effectué par
+        type: id_object
+        object: user_phone_call
+        default_value: 0
+        
+    date_phone_call: 
+        label: Date appel téléphonique
+        type: datetime
+                
+forms: 
+    edit: 
+        rows: 
+            - field: id_contact
+            - field: email
+            - field: date_prevue
+            - field: factures
+            - field: method
+            
+    edit_free: 
+        rows: 
+            - field: id_contact
+            - field: date_send
+            - field: relance_idx
+            - field: method
+            - custom: 1
+              label: Continuer le cycle des relances
+              input_name: activate_relances
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 
+                  callback: getFreeRelanceActivateRelances
+                  
+            
+    edit_date_prevue:
+        rows: 
+            - field: date_prevue
+            
+    edit_date_send: 
+        rows: 
+            - field: date_send
+            
+    cancel_contentieux: 
+        rows: 
+            - custom: 1
+              label: Désactiver les relances pour la ou les factures
+              input_name: deactivate_relances_factures
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              
+            - custom: 1
+              label: Désactiver les relances pour le client
+              input_name: deactivate_relances_client
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              
+    phone_call_done: 
+        rows: 
+            - custom: 1
+              label: Poursuivre la mise en demeure
+              input_name: continue
+              data_type: bool
+              input: 
+                  type: toggle
+                  help: Si NON, la mise en demeure sera abandonnée et les prochaines relances seront désactivées pour toutes les factures concernées.
+              value: 1
+     
+fields_tables: 
+    default: 
+        title: Informations
+        icon:  fas_info-circle
+        all_fields: 1
+        
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: default
+            
+filters_panels: 
+    default: 
+        filters: 
+            status: 
+            id_client: 
+            date_prevue: 
+                field: date_prevue
+            date_send: 
+                field: date_send
+            id_user_send: 
+                type: user
+            client:solvabilite_status:
+                label: Solvabilité client
+        
+    client: 
+        extends: default
+        filters: 
+            id_client: unset
+            
+lists: 
+    default: 
+        title: Détails des relances paiements clients
+        objects_change_reload: Bimp_Client,BimpRelanceClients
+        checkboxes: 1
+        configurable: 1
+        filters_panel: default
+        bulk_actions: 
+            callback: getListBulkActions
+        sort_field: id
+        sort_way: desc
+        n: 10
+        extra_btn: 
+            callback: getListExtraButtons
+        edit_btn: 1
+        edit_form: 
+            callback: getEditForm
+        modal_view: default
+        cols: 
+            id_relance: 
+            parent:mode:
+                label: mode de relance
+                min_width: 90
+            factures: 
+            relance_idx: 
+            method: 
+            status: 
+            id_client: 
+            client:code_compta:
+            id_contact: 
+            email: 
+            date_prevue: 
+            date_send: 
+            id_user_send:
+            client:solvabilite_status:
+                label: Solvabilité client
+                 
+    relance: 
+        extends: default
+        configurable: 0
+        filters_panel: unset
+        n: 0
+        cols: 
+            id_relance: unset
+            parent:mode: unset
+            
+    client: 
+        extends: default
+        objects_change_reload: Bimp_Client,BimpRelanceClients,Bimp_Facture
+        filters_panel: client
+        before_list_callback: renderBeforeClientListHtml
+        cols: 
+            code_compta: unset
+            id_client: unset
+            
+        

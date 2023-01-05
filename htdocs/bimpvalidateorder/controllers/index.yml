@@ -1,0 +1,47 @@
+title: Validations
+
+    
+    
+objects: 
+    valid_comm:
+        instance: 
+            bimp_object: ValidComm
+    demande_valid_comm:
+        instance: 
+            bimp_object: DemandeValidComm            
+        
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Validations
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: valid_comm
+                      
+        demande_validate_comm:
+            label: Demandes de validation
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: demande_valid_comm
+
+        my_validations:
+            label: Mes validations en attente (valideur)
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderMyValidations
+        my_validations2:
+            label: Mes validations en attente (demandeur)
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderMyValidations
+                          params:
+                              - 0

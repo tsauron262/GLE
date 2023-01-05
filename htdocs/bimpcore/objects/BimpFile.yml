@@ -1,5 +1,6 @@
 table: bimpcore_file
 common_fields: 1
+icon: fas_file
 
 parent_module: 
     field_value: parent_module
@@ -7,6 +8,11 @@ parent_object:
     field_value: parent_object_name
 parent_id_property: id_parent
     
+nom_url: 
+    syntaxe: <file_name>.<file_ext>
+    modal_view: ''
+name_syntaxe: <file_name>.<file_ext>
+        
 labels: 
     name: fichier
 
@@ -35,7 +41,9 @@ fields:
         type: id_parent
         input: 
             type: hidden
-        required: 1
+        search: 
+            input: 
+                type: text
             
     file_name:
         label: Nom
@@ -56,6 +64,7 @@ fields:
     description:
         label: Description
         type: text
+        hashtags: 1
         input:
             auto_expand: 1
             rows: 1
@@ -63,6 +72,8 @@ fields:
     deleted: 
         label: Supprimé
         type: bool
+        viewable: 0
+        filterable: 0
         default_value: 0
         
     user_delete: 
@@ -84,65 +95,118 @@ fields:
                 method: currentContext
                 params:
                     - default_value
-
+                    
+    is_deletable: 
+        label: Suppression autorisée
+        type: bool
+        default_value: 1
+        
+    in_emails: 
+        label: Inclure aux envois par e-mail des pièces commerciales liées (devis / commandes / factures)
+        type: bool
+        default_value: 0
+        user_edit: 1
+          
 forms:
-    upload: 
+    upload_light: 
         rows:
-            - field: parent_module
-            - field: parent_object_name
-            - field: id_parent
-            - label: Fichier
-              custom: 1
-              input_name: file
-              input:
-                  type: file_upload
-              required: 1
-            - field: file_name
-              label: Nom à donner au fichier
-            - field: description
-            - field: visibility
-              edit:
-                  callback: currentContext
-            - label: Notifier le service facturation ?   
-              custom: 1
-              input_name: taskFact
-              data_type: bool
-              input: 
-                  type: toggle
-                  
-                          
+            module: 
+                field: parent_module
+            obj_name: 
+                field: parent_object_name
+            id_parent: 
+                field: id_parent
+            file: 
+                label: Fichier
+                custom: 1
+                input_name: file
+                input:
+                    type: file_upload
+                required: 1
+            file_name: 
+                field: file_name
+                label: Nom à donner au fichier
+                
+    default: 
+        extends: upload_light
+        
+    upload: 
+        extends: upload_light
+        rows:
+            desc:
+                field: description
+            visibility: 
+                field: visibility
+            notify: 
+                label: Notifier le service facturation ?   
+                custom: 1
+                input_name: taskFact
+                data_type: bool
+                input: 
+                    type: toggle
+            in_mails: 
+                field: in_emails
+        
+    public_upload: 
+        extends: upload
+        rows: 
+            visibility: 
+                field: unset
+                custom: 1
+                hidden: 1
+                input_name: visibility
+                value: 1
+                input: 
+                    type: hidden
+            notify: unset
+                                            
     edit:
         rows:
             - field: file_name
             - field: description
+            - field: is_deletable
+              edit: 
+                  callback: isContextPrivate
             - field: visibility
               edit:
                   callback: currentContext
+            - field: in_emails
       
+filters_panels: 
+    global: 
+        filters: 
+            parent_module: 
+            parent_object_name: 
+            id_parent: 
+            type: 
+            file_name: 
+            description: 
+                
 lists_cols: 
     parent: 
         label: Propriétaire
-        field: id_parent
-        display: nom_url
+        value: 
+            callback: 
+                method: displayData
+                params: 
+                    - id_parent
     type: 
         label: Type
         value: 
             callback: displayType
-    nom:
-        field: file_name
-    size: 
-        field: file_size
-    date:
-        label: Date
-        field: date_create
-    descripton: 
+    date_create:
+        label: Date Creation
+    date_modif:
+        label: Date Modif
+        value:
+            callback: getDateModif
+    description:
         field: description
-    visibility:
-        field: visibility
         
 lists:
     default:
         title: Fichiers
+        icon: fas_folder-open
         checkboxes: 1
         bulk_actions: 
             - label: Supprimer les fichiers sélectionnés
@@ -150,10 +214,7 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this));
               btn_class: deleteSelectedObjects
         objects_change_reload: 
-            prop: 
-                name: object_name
-                object: 
-                    callback: getParentInstance
+            callback: getParentObjectName
         add_form_name: upload
         edit_btn: 1
         edit_form: edit
@@ -161,18 +222,72 @@ lists:
             callback: getFilterListInterfaceClient
         delete_btn: 
             callback: isDeletable
-        sort_field: id
-        sort_way: asc
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        extra_btn:
+            callback: getDefaultListExtraButtons
+        before_list_callback: displayAnonymizedFiles
+        cols:
+            type: 
+            file_name:
+            file_size: 
+            date_create:
+            date_modif:
+            description:
+            visibility:      
+            in_emails: 
+                label: Incl. dans e-mails
+                edit: 1
+        
+    globale:
+        title: Tous les Fichiers
+        icon: fas_folder-open
+        checkboxes: 1
+        configurable: 1
+        filters_panel: global
+        bulk_actions: 
+            - label: Supprimer les fichiers sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        delete_btn: 
+            callback: isDeletable
+        sort_field: date_create
+        sort_way: desc
         n: 10
         extra_btn:
             callback: getDefaultListExtraButtons
         cols:
+            parent_module: 
+            parent_object_name: 
+            id_parent:
+                display: value
+            parent: 
             type: 
-            nom:
-            size: 
-            date:
-            descripton:
-            visibility:                    
+            file_name:
+            file_size: 
+            date_create:
+            description:
+            visibility:     
+                
+    public: 
+        title: Fichiers
+        icon: fas_folder-open
+        add_form_name: public_upload
+        list_filters:
+            callback: getFilterListInterfaceClient
+        delete_btn: 
+            callback: isDeletable
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        cols:
+            type: 
+            file_name:
+            file_size: 
+            date_create:
+            description:     
         
     associates: 
         title: Fichiers associés
@@ -194,9 +309,17 @@ lists:
         cols:
             parent:
             type: 
-            nom:
-            size: 
-            date:
-            descripton: 
+            file_name:
+            file_size: 
+            date_create:
+            description: 
                 
-    
+searches: 
+    default: 
+        fields_search: 
+            - a.file_name
+            - a.file_ext
+        fields_return: 
+            - a.file_name
+            - a.file_ext
+        label_syntaxe: '<a.file_name>.<a.file_ext>'

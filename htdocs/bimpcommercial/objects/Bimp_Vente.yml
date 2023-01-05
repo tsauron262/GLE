@@ -1,6 +1,8 @@
 table: facturedet
 primary: rowid
 
+common_fields: 0
+
 parent_module: bimpcommercial
 parent_object: Bimp_Facture
 parent_id_property: fk_facture
@@ -50,6 +52,12 @@ objects:
             id_object: 
                 field_value: gamme
                 
+    user_commercial: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_commercial
+                
 fields: 
 #    Champs facturedet: 
     fk_facture: 
@@ -91,6 +99,11 @@ fields:
         label: Total TTC
         type: money
         
+    rang: 
+        label: Position
+        type: int
+        unsigned: 1
+        
 #    Champs extra: 
     
     date: 
@@ -108,20 +121,28 @@ fields:
         label: Entrepot
         extra: 1
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         values: 
             array: entrepots
         
     id_user: 
-        label: Utilisateur
+        label: Emetteur de la facture
         extra: 1
         type: id_object
         object: user
         values: 
             array: users
             
+    id_commercial:
+        label: Commercial
+        extra: 1
+        type: id_object
+        object: user_commercial
+        values: 
+            array: users
+            
     secteur:
-        label: Secteur
+        label: Canal de vente
         extra: 1
         values: 
             array: secteurs
@@ -166,6 +187,30 @@ forms:
               input_name: date_to
               input: 
                   type: date    
+            - custom: 1
+              label: Générer le fichier "Inventaire"
+              data_type: bool
+              input_name: include_inventory
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Générer le fichier "Ventes"
+              data_type: bool
+              input_name: include_sales
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Inclure les ventes aux particuliers
+              data_type: bool
+              input_name: include_part_soc
+              input: 
+                  type: toggle
+              value: 1
+              display_if: 
+                  field_name: soc_qties
+                  show_values: 1
             - custom: 1
               label: Répartir le CA
               input_name: distribute_ca
@@ -222,149 +267,45 @@ views:
                   fields_table: 
                       name: montants
             
+filters: 
+    id_commercial:
+        type: user
+        
 filters_panels: 
     default: 
         filters: 
-            client:
-                field: fk_soc
-                child: facture
-            dates: 
-                field: date
-            entrepot: 
-                field: id_entrepot
+            id_client:
+            date: 
+            id_entrepot: 
             secteur: 
-                field: secteur
-            status: 
-                field: fk_statut
-                child: parent
-            user: 
-                field: id_user
-#            client: 
-#                field: id_client
-            product: 
-                field: fk_product
-            priceProd:
-                field: price
-                child: product
+            parent:fk_statut:
+            id_user: 
+            id_commercial:
+            fk_product: 
+            product:price:
             qty: 
-                field: qty
             total_ht: 
-                field: total_ht
             tva_tx:
-                field: tva_tx
             marque: 
-                field: marque
             gamme: 
-                field: gamme
-            categ1:
-                custom: 1
-                label: Catégorie (1)
-                field: categ1
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ2:
-                custom: 1
-                label: Catégorie (2)
-                field: categ2
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ3:
-                custom: 1
-                label: Catégorie (3)
-                field: categ3
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categorie:
-                field: categorie
-                child: product
-            collection:
-                field: collection
-                child: product
-            nature:
-                field: nature
-                child: product
-            famille:
-                field: famille
-                child: product
+            product:categorie:
+            product:collection:
+            product:nature:
+            product:famille:
         
 lists_cols: 
-    facture: 
-        field: fk_facture
-        display: nom_url
-    product: 
-        field: fk_product
-        display: nom_url
     shortRef: 
         value: 
             callback: displayShortRef
         label: Ref courte
     pays2:
+        label: Pays
         value: 
             callback: displayCountry
-        label: Pays
-    label:
-        field: label
-        child: product
-#    pays:
-#        field: state
-#        child: client
-    subprice: 
-        field: subprice
-    tva_tx: 
-        field: tva_tx
-    qty: 
-        field: qty
-        has_total: 1
-    remise_percent: 
-        field: remise_percent
-    total_ht: 
-        field: total_ht
-        has_total: 1
-    total_tva: 
-        field: total_tva
-        has_total: 1
-    total_ttc: 
-        field: total_ttc
-        has_total: 1
-    date: 
-        field: date
-    entrepot: 
-        field: id_entrepot
-        display: nom_url
-    user: 
-        field: id_user
-        display: nom_url
-    secteur: 
-        field: secteur
-    marque: 
-        field: marque
-    gamme: 
-        field: gamme
     type_materiel: 
         label: Type matériel
         value: 
             callback: displayTypeMateriel
-    categorie:
-        field: categorie
-        child: product
-    collection:
-        field: collection
-        child: product
-    nature:
-        field: nature
-        child: product
-    famille:
-        field: famille
-        child: product
     
 lists: 
     default: 
@@ -384,17 +325,73 @@ lists:
         header_buttons:
             callback: getListHeaderButtons
         cols: 
-            pays: 
+            pays2: 
             marque: 
             shortRef: 
             product:
             qty:             
             gamme: 
-            type_materiel: 
-                
+            type_materiel:           
+
+stats_lists_cols: 
+    nb_secteurs: 
+        label: Nb Secteurs
+        type: count_distinct
+        field: secteur
+    tot_qty: 
+        label: Qté totale
+        type: sum
+        field: qty
+        data_type: float
+        decimals: 2
+    tot_brouillon: 
+        label: Tot. Fac. brouillons
+        type: sum
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        field: total_ttc
+        filters: 
+            f.fk_statut: 0
+    tot_valide: 
+        label: Tot. Fac. validées
+        type: sum
+        field: total_ttc
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        filters: 
+            f.fk_statut: 
+                in: 
+                    - 1
+                    - 2
+    tot_abandon: 
+        label: Tot. Fac. abandonnées
+        type: sum
+        field: total_ttc
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        filters: 
+            f.fk_statut: 3
+                    
 stats_lists: 
     default: 
+        n: 25
+        configurable: 1
+        joins: 
+            facture: 
+                table: facture
+                alias: f
+                on: f.rowid = a.fk_facture
         filters_panel: default
         group_by_options: 
             - id_entrepot
             - secteur
+            - fk_product
+        cols: 
+            nb_secteurs:
+            tot_qty: 
+            tot_brouillon:
+            tot_valide:
+            tot_abandon: 

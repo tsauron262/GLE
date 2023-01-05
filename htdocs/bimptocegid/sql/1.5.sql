@@ -1,0 +1,2 @@
+INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('BIMPTOCEGID_comptes_importPaiement', '{"C2BO":"51126500", "ONEY":"51151100", "YOUNITED":"51151200"}');
+ALTER TABLE `llx_Bimp_ImportPaiementLine` ADD `exported` INT(1) NOT NULL DEFAULT '0';

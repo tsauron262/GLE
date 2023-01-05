@@ -1,0 +1,1 @@
+DELETE FROM llx_bimpcore_note WHERE content LIKE "Ce compte client ne seras bientôt plus validé par Atradius"

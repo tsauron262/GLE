@@ -1,0 +1,1 @@
+ALTER TABLE `llx_user` ADD `is_dev` tinyint(1) NOT NULL DEFAULT 0;

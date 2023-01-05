@@ -168,25 +168,16 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         cols:
-            entrepot: 
-                field: id_entrepot
+            parent:id_entrepot: 
                 display: nom_url
-                child: parent
-            centre: 
-                field: id_caisse
+            id_caisse: 
                 display: nom
             date_open: 
-                field: date_open
             date_closed: 
-                field: date_closed
-            user_open: 
-                field: id_user_open
+            id_user_open: 
                 display: nom_url
-            user_closed: 
-                field: id_user_closed
+            id_user_closed: 
                 display: nom_url
             fonds_begin: 
-                field: fonds_begin
             fonds_end:
-                field: fonds_end
                 

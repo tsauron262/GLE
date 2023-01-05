@@ -1,0 +1,219 @@
+bootstrap: 1
+title: Interface développeurs
+
+js: 
+    - /bimpcore/views/js/dev.js
+    
+css: 
+    - /bimpcore/views/css/dev.css
+    
+objects: 
+    log: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Log
+                
+    process: 
+        instance: 
+            bimp_object: 
+                module: bimpdatasync
+                name: BDS_Process
+                
+    bds_report: 
+        instance: 
+            bimp_object: 
+                module: bimpdatasync
+                name: BDS_Report
+                
+    bds_report_line: 
+        instance: 
+            bimp_object:
+                module: bimpdatasync
+                name: BDS_ReportLine
+                
+    api: 
+        instance: 
+            bimp_object: 
+                module: bimpapi
+                name: API_Api
+                
+    api_user: 
+        instance: 
+            bimp_object: 
+                module: bimpapi
+                name: API_UserAccount
+                
+    bws_profiles: 
+        instance: 
+            bimp_object: 
+                module: bimpwebservice
+                name: BWS_Profile
+                
+    bws_user: 
+        instance: 
+            bimp_object: 
+                module: bimpwebservice
+                name: BWS_User
+                
+    bws_profile_right: 
+        instance: 
+            bimp_object: 
+                module: bimpwebservice
+                name: BWS_ProfileRight
+    notification: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpNotification
+                
+sections:
+    - type: tabs
+      tabs: 
+        default: 
+            label: Dashboard
+            icon: fas_tachometer-alt
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderDashboardTab
+        modules_conf: 
+            label: Config modules
+            icon: fas_cog
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderModulesConfTab
+        yml: 
+            label: Gestionnaire YML
+            icon: fas_stream 
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderYmlTab
+        scripts: 
+            label: Scripts
+            icon: fas_code
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderScriptsTabContent
+                      
+        logs:
+            label: Logs BimpCore
+            icon: fas_book-medical
+            show:
+                conf: 
+                    name: use_bimp_logs
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: log
+                      
+        processes: 
+            label: Processus
+            icon: fas_cogs
+            show:
+                conf: 
+                    name: module_version_bimpdatasync
+                    def: 0
+            sections: 
+                - type: nav_tabs
+                  nav_tabs: 
+                      tabs_id: processes
+                      tabs: 
+                          - id: processes_list
+                            title: Liste des processus
+                            struct: 
+                                type: list
+                                list: 
+                                    object: process
+                          - id: bds_reports_list
+                            title: Rapports
+                            struct: 
+                                type: list
+                                list: 
+                                    object: bds_report
+                          - id: bds_report_lines_list
+                            title: Lignes de rapport
+                            struct: 
+                                type: list
+                                list: 
+                                    object: bds_report_line
+                                    
+        apis: 
+            label: APIs
+            icon: fas_project-diagram
+            show:
+                conf: 
+                    name: module_version_bimpapi
+                    def: 0
+            sections: 
+                - type: nav_tabs
+                  nav_tabs: 
+                      tabs_id: processes
+                      tabs: 
+                          - id: processes_list
+                            title: Liste des APIs
+                            struct: 
+                                type: list
+                                list: 
+                                    object: api
+                          - id: apis_users
+                            title: Comptes utilisateurs APIs
+                            struct: 
+                                type: list
+                                list: 
+                                    object: api_user
+                                    
+        ws: 
+            label: Webservice
+            icon: fas_globe
+            show:
+                conf: 
+                    name: module_version_bimpwebservice
+                    def: 0
+            sections: 
+                - type: nav_tabs
+                  nav_tabs: 
+                      tabs_id: ws
+                      tabs: 
+                          - id: profiles
+                            title: Profiles
+                            struct: 
+                                type: list
+                                list: 
+                                    object: bws_profiles
+                          - id: users
+                            title: Utilisateurs
+                            struct:
+                                type: list
+                                list: 
+                                    object: bws_user
+                          - id: rights
+                            title: Tous les droits
+                            struct:
+                                type: list
+                                list: 
+                                    object: bws_profile_right
+        notification: 
+            label: Notifications
+            icon: fas_bell
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: notification
+                      name: default
+                                    
+        menu: 
+            label: Menu BimpTheme
+            icon: fas_bars
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderBimpThemeMenuList
+                                    
+                            
+                      

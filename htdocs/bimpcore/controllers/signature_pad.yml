@@ -1,0 +1,6 @@
+bootstrap: 1
+
+title: Signature électronique
+
+js:
+    - /bimpcore/views/js/signature_pad.js

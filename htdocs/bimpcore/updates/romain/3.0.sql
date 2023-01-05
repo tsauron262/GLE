@@ -1,0 +1,1 @@
+ALTER TABLE `llx_commande` ADD `paiement_comptant` INT NOT NULL DEFAULT '0'

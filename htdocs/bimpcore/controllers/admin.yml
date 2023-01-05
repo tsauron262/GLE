@@ -1,74 +1,98 @@
 bootstrap: 1
 title: BimpCore Admin
 
-objects:
-    users: 
+objects:            
+    entrepots: 
         instance: 
-            bimp_object: Bimp_User
+            bimp_object: Bimp_Entrepot
             
-    clients: 
+    hashtags: 
         instance: 
-            bimp_object: Bimp_Client
+            bimp_object: BimpHashtag
             
-    fournisseurs: 
+    signature: 
         instance: 
-            bimp_object: Bimp_Fournisseur
-            
-            
-    stocks: 
-        instance: 
-            bimp_object: Bimp_Stock
-            
+            bimp_object: BimpSignature
+
     correctifs: 
         instance: 
             bimp_object: BimpCorrectif
             
-    vente:
-        instance: 
-            bimp_object: 
-                module: bimpcommercial
-                name: Bimp_Vente
     droitUser:
         instance: 
             bimp_object: Bimp_User_Rights
+            
     droitGroupUser:
         instance: 
             bimp_object: Bimp_UserGroup_Rights
             
+    lists_configs: 
+        instance: 
+            bimp_object: 
+                module: bimpuserconfig
+                name: ListTableConfig
+                
+    lists_filters: 
+        instance: 
+            bimp_object: 
+                module: bimpuserconfig
+                name: ListFilters
+    files: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpFile
+    remote_token: 
+        instance: 
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Remote_Token
+    alert: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpAlert
+    mail_log: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpMailLog
+    session: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSession
+    
+                
 sections:
     - type: tabs
       tabs: 
-        default:
-            label: Utilisateurs
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: users
-        clients: 
-            label: Clients
+        default: 
+            label: Entrepôts
             sections: 
                 - type: list
                   list: 
                       panel: 1
-                      object: clients
+                      object: entrepots
                       name: default
-        fourns: 
-            label: Fournisseurs
+        hashtags: 
+            label: Hashtags
             sections: 
                 - type: list
                   list: 
                       panel: 1
-                      object: fournisseurs
+                      object: hashtags
                       name: default
-        stocks: 
-            label: Stocks
+                      
+        signatures: 
+            label: Signatures
             sections: 
                 - type: list
                   list: 
                       panel: 1
-                      object: stocks
+                      object: signature
                       name: default
+                      
         correctifs: 
             label: Correctifs
             sections: 
@@ -77,33 +101,49 @@ sections:
                       panel: 1
                       object: correctifs
                       name: default
-        stats: 
-            label: Test stats
+#        stats: 
+#            label: Test stats
+#            sections: 
+#                - type: stats_list
+#                  stats_list: 
+#                      panel: 1
+#                      object: vente
+#                      name: default
+                      
+        files: 
+            label: Tous les Fichiers
             sections: 
-                - type: stats_list
-                  stats_list: 
+                - type: list
+                  list: 
+                      object: files
+                      name: globale
+                            
+        lists_configs: 
+            label: Configuration des listes
+            sections: 
+                - type: list
+                  list: 
                       panel: 1
-                      object: vente
-                      name: default
-                      
-        scripts: 
-            label: Scripts
-            sections: 
-                - type: custom
-                  custom: 
-                      callback: renderScriptsTabContent
-                      
-        droit:
-            label: Droits
-            sections:
-                - type: custom
-                  custom: 
-                      callback: 
-                          method: renderTabs
-                          params: 
-                            - renderRightsTab
-                            - droit
+                      object: lists_configs
+                      name: globale
                         
+        lists_filters: 
+            label: Filtres listes
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: lists_filters
+                      name: globale
+                      
+        remote_token:
+            label: Remote token
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: remote_token
+                      
         testSpeed:
             label: Test SPEED
             sections:
@@ -114,5 +154,45 @@ sections:
                           params: 
                             - renderTestTab
                             - testSpeed
-            
+        
+        alert:
+            label: Alert
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: alert
+                      
+        mail_log:
+            label: Log Mail
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: mail_log
+        session:
+            label: Session
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: session
+                      
+#        test: 
+#            label: Tests views list
+#            sections: 
+#                - type: views_list
+#                  views_list: 
+#                      object: users
+        droit:
+            label: Droits
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderRightsTab
+                            - droit
+           
                             

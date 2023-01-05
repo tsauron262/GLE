@@ -29,6 +29,9 @@
  */
 
 require '../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcore", "Bimp_Fournisseur", $_REQUEST['socid']);
+$htmlRedirect = $bObj->processRedirect();
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
 require_once DOL_DOCUMENT_ROOT.'/supplier_proposal/class/supplier_proposal.class.php';
@@ -152,7 +155,8 @@ if ($object->id > 0)
 	$title=$langs->trans("ThirdParty")." - ".$langs->trans('Supplier');
 	if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/thirdpartynameonly/', $conf->global->MAIN_HTML_TITLE) && $object->name) $title=$object->name." - ".$langs->trans('Supplier');
 	$help_url='';
-	llxHeader('', $title, $help_url);
+	llxHeader('',$title, $help_url);
+echo $htmlRedirect;
 
 	/*
 	 * Show tabs

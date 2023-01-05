@@ -30,7 +30,7 @@ sections:
               sections: 
                   1: 
                       nav_tabs: 
-                          4:
+                          10:
                                 id: revals
                                 title: Revalorisations
                                 struct: 

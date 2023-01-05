@@ -1,0 +1,284 @@
+table: bimpcore_signature
+controller: signature
+icon: fas_signature
+public_icon: pe_pen
+common_fields: 0
+
+list_page_url: 
+    controller: admin
+    url_params: 
+        tab: signatures
+    
+nom_url: 
+    syntaxe: <name>
+    card: default
+    
+header_edit_form: edit
+header_list_name: default
+header_btn: 
+    callback: getActionsButtons
+    
+labels:
+    name: signature
+    is_female: 1
+    
+objects: 
+    signataires: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignataire
+                
+fields:     
+    obj_module: 
+        label: Module
+        required: 1
+
+    obj_name: 
+        label: Nom objet
+        required: 1
+        
+    id_obj: 
+        label: id_objet
+        type: id
+        required: 1
+
+    obj_params_field: 
+        label: Champ paramètres
+        input: 
+            help: Champ contenant les paramètres pour l'incrustation de la signature électronique et / ou la signature via DocuSign
+        default_value: signature_params
+            
+    doc_type:
+        label: Type de document
+        displays: 
+            name:
+                label: Nom document
+                type: callback
+                method: displayDocType
+                
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+        
+    allow_no_scan: 
+        label: Signature papier sans scan autorisée
+        type: bool
+        default_value: 0
+        
+    signed_doc_ext: 
+        label: Extension fichier signé
+        default_value: pdf
+        
+    id_envelope_docu_sign:
+        label: Id de l'envelope DocuSign
+    
+    id_account_docu_sign:
+        label: Id du compte utilisateur DocuSign
+        
+forms: 
+    sign_papier: 
+        title: Dépôt document signé
+        icon: fas_file-download
+        rows: 
+            - custom: 1
+              label: Document
+              input_name: doc_title
+              content: 
+                  callback: displayDocTitle
+            - custom: 1
+              hidden: 1
+              label: Dépôt doc signé
+              input_name: sign_papier
+              input: 
+                  type: hidden
+              value: 1
+            - custom: 1
+              label: Date Signature
+              input_name: date_signed
+              data_type: datetime
+              input: 
+                  type: datetime
+                  display_now: 1
+            - custom: 1
+              label: Signataires
+              input_name: signataires
+              input: 
+                  type: check_list
+                  items: 
+                      array: signataires
+                  help: veuillez sélectionner uniquement les signataires dont la signature est présente sur le document scanné
+                  select_all_buttons: 1
+              value: 
+                  callback:
+                      method: getChildrenList
+                      params: 
+                          - signataires
+            - custom: 1
+              label: Fichier
+              input_name: file_signed
+              input: 
+                  type: file_upload
+              required: 1
+            
+    sign_no_scan: 
+        title: Marquer signé sans scan du document
+        icon: fas_file-contract
+        rows: 
+            - custom: 1
+              label: Document
+              input_name: doc_title
+              content: 
+                  callback: displayDocTitle
+            - custom: 1
+              label: Date Signature
+              input_name: date_signed
+              data_type: datetime
+              input: 
+                  type: datetime
+                  display_now: 1
+                  
+    init_docu_sign: 
+        title: Initialiser la signature via DocuSign
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Type de signature
+              input_name: signature_type
+              input: 
+                  type: hidden
+              value: docusign            
+            - custom: 1
+              label: Contenu E-mail
+              input_name: email_content
+              input: 
+                  type: html
+              depends_on: signature_type
+                  
+    refresh_docusign: 
+        rows: 
+            - custom: 1
+              label: Notifier l'utilisateur en charge du suivi si la signature est complète
+              input_name: send_notification_email
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+              
+    motif: 
+        rows: 
+            - custom: 1
+              label: Motif
+              input_name: motif
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+            
+fields_tables: 
+    infos: 
+        icon: fas_info-circle
+        title: Informations
+        rows:
+            - label: Objet
+              value: 
+                  callback: displayObj
+            - field: doc_type
+              display: name
+            - label: Référence document
+              value: 
+                  callback: displayDocRef
+            - field: allow_no_scan
+              edit: 1
+            
+views:
+    default: 
+        objects_change_reload: BimpSignataire
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: infos
+            - cols: 
+                - type: list
+                  list:
+                      name: signature
+                      children: signataires
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderNotesList
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderRelancesReportsList
+              
+lists_cols: 
+    obj: 
+        label: Objet
+        value: 
+            callback: displayObj
+            
+    doc_type: 
+        display: name
+        
+    doc_ref: 
+        label: Référence document
+        value: 
+            callback: displayDocRef
+            
+    sign_buttons: 
+        label: Actions signature
+        value: 
+            callback: displayActionsButtons
+        min_width: 90
+        
+lists: 
+    default: 
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les signatures sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        extra_btn: 
+            callback: getListExtraBtn
+        cols: 
+            obj: 
+            doc_type: 
+            doc_ref: 
+            status:
+                
+cards: 
+    default: 
+        status: status
+        fields: 
+            doc_type: 
+                label: Ref. document
+                value: 
+                    callback: displayDocRef
+            
+            
+    
+            
+              
+            
+            
+        

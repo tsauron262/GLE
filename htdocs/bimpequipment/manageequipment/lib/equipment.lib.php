@@ -32,7 +32,7 @@ function addEquipments($db, $newEquipments, $user) {
             'note' => ''
         ));
 
-        $newErrors = array_merge($newErrors, $equipement->create());
+        $newErrors = BimpTools::merge_array($newErrors, $equipement->create());
 
         $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
 
@@ -44,7 +44,7 @@ function addEquipments($db, $newEquipments, $user) {
 //            'date_update' => '2999-01-01 00:00:00',
             'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
         ));
-        $newErrors = array_merge($newErrors, $emplacement->create());
+        $newErrors = BimpTools::merge_array($newErrors, $emplacement->create());
 
         if (sizeof($newErrors) == 0)
             $cntEquipment++;

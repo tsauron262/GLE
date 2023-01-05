@@ -12,25 +12,13 @@ class BContract_Serials_Imei extends BimpObject {
         4 => 'Fichier CSV'
     ];
     
-    public function canClientView() {
+    public function canView() {
         return 1;
-    }
-    
-    public function canClientCreate() {
-        return 0;
-    }
-    
-    public function canClientDelete() {
-        return 0;
-    }
-    
-    public function canClientEdit() {
-        return 0;
     }
     
     public function contrat_is_open() {
         
-        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
+        $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
         
         switch($contrat->getData('statut')) {
             case self::CONTRAT_IS_OPEN:
@@ -55,8 +43,8 @@ class BContract_Serials_Imei extends BimpObject {
         }
         $return = '';
         foreach($lines as $line => $id) {
-            $the_line = $this->getInstance('bimpcontract', 'BContract_contratLine', intval($id));
-            $produit = $this->getInstance('bimpcore', 'Bimp_Product', $the_line->getData('fk_product'));
+            $the_line = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', intval($id));
+            $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $the_line->getData('fk_product'));
             $return .= $produit->getNomUrl() . " ";
         }
         
@@ -77,7 +65,7 @@ class BContract_Serials_Imei extends BimpObject {
     public function getDefaultListExtraButtons()
     {
         
-        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
+        $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
         if($contrat->getData('statut') == self::CONTRAT_IS_OPEN){
             $buttons = array();
         
@@ -98,7 +86,7 @@ class BContract_Serials_Imei extends BimpObject {
     }
     
     public function create(&$warnings = array(), $force_create = false) {
-        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
+        $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
         
         switch(BimpTools::getValue('attached_serials_separator')) {
             case 1:
@@ -108,7 +96,7 @@ class BContract_Serials_Imei extends BimpObject {
         
         foreach ($tab_serials as $index => $serial) {
             if($serial != "") {
-                $instance = $this->getInstance('bimpcontract', 'BContract_Serials_Imei');
+                $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_Serials_Imei');
                 if($instance->find(['serial' => $serial, 'id_contrat' => $contrat->id])) {
                     $services = explode(',', $instance->getData('id_line'));
                     if(!in_array(BimpTools::getValue('attached_service'), $services)) {
@@ -129,9 +117,9 @@ class BContract_Serials_Imei extends BimpObject {
 
     public function list_service() {
         $liste = [];
-        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
+        $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
         foreach ($contrat->dol_object->lines as $line) {
-            $product = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
             $liste[$line->id] = $product->getData('ref') . ' - ' . $line->description;
         }
         return $liste;

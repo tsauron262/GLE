@@ -1,0 +1,84 @@
+.wrapper .header-top .top-menu .dropdown .dropdown-menu {
+    margin-top: 14px;
+}
+
+.dropdown-menu {
+    width: auto;
+    height: auto;
+}
+
+.dropdown-menu .dropdown-item {
+    padding: 5px 15px;
+    border-radius: 0px;
+}
+
+.dropdown-item {
+    margin-left: 25px;
+    margin-right: 20px;
+    padding: 7px;
+}
+
+.dropdown-menu .dropdown-item:hover, 
+.dropdown-menu .dropdown-item:focus {
+    background-color:  #fff !important;
+}
+
+.top-menu span.select2-container {
+    min-width: 240px;
+}
+
+.lnMsg {
+    background-color: #fff;
+}
+
+.modifDropdown {
+    display: inline;
+}
+
+.wrapper .header-top .top-menu .nav-link .badge {
+
+    right: -8px;
+    top: -13px;
+    position: absolute;
+    padding: 3px;
+    width: 17px !important;
+    font-weight: 800;
+    color: #fff;
+}
+
+.footer {
+    background-color: #fff;
+}
+
+
+/************
+* Dashboard
+************/
+
+/* correction problème de padding sur "tableau de bord des éléments ouverts" */
+.boxstatscontent {
+    padding: 0;
+}
+
+.boxstats130 {
+    width: 168px;
+    height: 58px;
+}
+
+
+/***********************************************************
+* Agenda : taille des cases ou figure le nom des utilisateurs
+**************************************************************/
+.wc-header .wc-user-header a, .wc-header .wc-user-header {
+    height: 110px;
+    width: 90px;
+}
+
+@media (max-device-width: 940px){
+    a img, td img {
+        height: 25px!important;
+    }
+    .footer {
+        background-color: #fff;
+    }
+}

@@ -1,15 +1,13 @@
 <?php
 
-if ((isset($_GET['ajax']) && $_GET['ajax']) ||
-        isset($_POST['ajax']) && $_POST['ajax']) {
+$context = (isset($_REQUEST['bimp_context']) && $_REQUEST['bimp_context'] ? $_REQUEST['bimp_context'] : '');
 
-    if (isset($_GET['request_id'])) {
-        $request_id = $_GET['request_id'];
-    } elseif (isset($_POST['request_id'])) {
-        $request_id = $_POST['request_id'];
-    } else {
-        $request_id = '';
-    }
+if ($context == 'public') {
+    define("NO_REDIRECT_LOGIN", 1);
+}
+
+if (isset($_REQUEST['ajax']) && $_REQUEST['ajax']) {
+    $request_id = (isset($_REQUEST['request_id']) ? $_REQUEST['request_id'] : '');
 
     if (!defined('NOLOGIN'))
         define('NOLOGIN', 1);
@@ -21,18 +19,16 @@ if ((isset($_GET['ajax']) && $_GET['ajax']) ||
 
     global $db, $user;
 
-    if (isset($_SESSION["dol_login"])) {
-        $user->fetch(null, $_SESSION["dol_login"]);
-        $user->getrights();
-    } elseif(isset($_SESSION['userClient'])){
-//        if($user->id < 1)
-//            die('Attention pas de client ne devrais jamais arrivé');
-        
-    } else {
-        die(json_encode(array(
-            'request_id' => $request_id,
-            'nologged'   => 1
-        )));
+    if ($context != 'public') {
+        if (isset($_SESSION["dol_login"]) && (string) $_SESSION['dol_login']) {
+            $user->fetch(null, $_SESSION["dol_login"]);
+            $user->getrights();
+        } else {
+            die(json_encode(array(
+                'request_id' => $request_id,
+                'nologged'   => 1
+            )));
+        }
     }
 } else {
     require_once __DIR__ . "/../main.inc.php";

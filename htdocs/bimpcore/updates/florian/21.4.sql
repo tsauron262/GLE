@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_log` ADD `send_to` VARCHAR(255) NOT NULL DEFAULT ''; 

@@ -1,7 +1,12 @@
 var modal_idx = 0;
 
-function BimpModal($modal) {
+function BimpModal($modal, var_name, open_btn_id, params) {
+    if (typeof (params) === 'undefined') {
+        params = {};
+    }
+
     var modal = this;
+    this.var_name = var_name;
     this.idx = 0;
     this.next_idx = 1;
     this.$modal = $modal;
@@ -14,9 +19,28 @@ function BimpModal($modal) {
     this.$nextBtn = $modal.find('.modal-nav-next');
     this.$historyToggle = $modal.find('.modal-nav-history').find('.dropdown-toggle');
 
-    this.newContent = function (title, content_html, show_loading, loading_text, $button, format) {
+    if (open_btn_id) {
+        this.$openBtn = $('#' + open_btn_id);
+    } else {
+        this.$openBtn = false;
+    }
+
+    this.content_removable = false;
+    this.max_contents = 'none';
+
+    for (var name in params) {
+        modal[name] = params[name];
+    }
+
+    this.newContent = function (title, content_html, show_loading, loading_text, $button, format, show, allow_close) {
         if (typeof (format) === 'undefined') {
             format = 'medium';
+        }
+        if (typeof (show) === 'undefined') {
+            show = true;
+        }
+        if (typeof (allow_close) === 'undefined') {
+            allow_close = true;
         }
 
         hidePopovers(modal.$modal);
@@ -53,7 +77,9 @@ function BimpModal($modal) {
             modal.$loading.hide();
         }
 
-        modal.$modal.modal('show');
+        if (show) {
+            modal.$modal.modal('show');
+        }
 
         modal.$modal.on('hide.bs.modal', function (e) {
             modal.$loading.hide();
@@ -62,16 +88,25 @@ function BimpModal($modal) {
             }
         });
 
-        var html = '<div class="modal_content" id="modal_content_' + modal.idx + '" data-idx="' + modal.idx + '" data-format="' + format + '" data-width="">';
+        var html = '<div class="modal_content" id="modal_content_' + modal.idx + '" data-idx="' + modal.idx + '" data-format="' + format + '" data-width=""';
+        if (!allow_close) {
+            html += ' data-no_close_button="1"';
+        }
+        html += '>';
         html += content_html;
         html += '</div>';
 
         modal.$contents.prepend(html);
+        var $container = modal.$contents.find('#modal_content_' + modal.idx);
 
-        html = '<li id="modal_history_' + modal.idx + '"><span class="btn btn-light-primary" onclick="bimpModal.displayContent(' + modal.idx + ')">' + title + '</span></li>';
+        $('body').trigger($.Event('contentLoaded', {
+            $container: $container
+        }));
+
+        html = '<li id="modal_history_' + modal.idx + '"><span class="btn btn-light-primary" onclick="' + modal.var_name + '.displayContent(' + modal.idx + ')">' + title + '</span></li>';
         modal.$history.prepend(html);
         modal.checkContents();
-        modal.checkCurrentContentFormat();
+        modal.checkCurrentContent();
     };
 
     this.clearCurrentContent = function () {
@@ -96,6 +131,10 @@ function BimpModal($modal) {
     };
 
     this.removeContent = function (idx, check_contents, display_remaining_content) {
+        if (!modal.content_removable) {
+            return;
+        }
+
         if (typeof (check_contents) === 'undefined') {
             check_contents = true;
         }
@@ -157,7 +196,7 @@ function BimpModal($modal) {
         modal.$contents.find('.modal_content').each(function () {
             n++;
             var idx = parseInt($(this).data('idx'));
-            if (n > 10) {
+            if (modal.max_contents !== 'none' && n > modal.max_contents) {
                 modal.removeContent(idx, false);
             } else {
                 if (idx > modal.idx) {
@@ -169,10 +208,15 @@ function BimpModal($modal) {
         });
 
         if (n > 0) {
-            $('#openModalBtn').removeClass('closed');
+            if (modal.$openBtn) {
+                modal.$openBtn.removeClass('closed');
+            }
         } else {
-            $('#openModalBtn').addClass('closed');
+            if (modal.$openBtn) {
+                modal.$openBtn.addClass('closed');
+            }
         }
+
         if (n > 1) {
             modal.$historyToggle.removeClass('disabled');
         } else {
@@ -214,7 +258,7 @@ function BimpModal($modal) {
         }
 
         modal.checkContents();
-        modal.checkCurrentContentFormat();
+        modal.checkCurrentContent();
     };
 
     this.displayPrev = function () {
@@ -263,12 +307,8 @@ function BimpModal($modal) {
     };
 
     this.loadAjaxContent = function ($button, ajax_action, ajax_data, title, loading_text, success_callback, ajax_params, modal_format) {
-        if ($button != null && $button.hasClass('disabled')) {
+        if ($.isOk($button) && $button.hasClass('disabled')) {
             return;
-        }
-
-        if (typeof (modal_format) === 'undefined') {
-            modal_format = 'medium';
         }
 
         modal.newContent(title, '', true, loading_text, null, modal_format);
@@ -291,10 +331,16 @@ function BimpModal($modal) {
         ajax_params.$button = $button;
         ajax_params.$modal = modal.$modal;
         ajax_params.success_callback = success_callback;
+        ajax_params.modal_format = modal_format;
         ajax_params.success = function (result, bimpAjax) {
             modal.$loading.hide();
             if (typeof (result.html) !== 'undefined') {
                 bimpAjax.$resultContainer.html(result.html).stop().show().removeAttr('style');
+
+                $('body').trigger($.Event('contentLoaded', {
+                    $container: bimpAjax.$resultContainer
+                }));
+
                 modal.$contents.stop().slideDown(250, function () {
                     $(this).css('height', 'auto');
                     if (typeof (bimpAjax.success_callback) === 'function') {
@@ -416,40 +462,82 @@ function BimpModal($modal) {
         modal.$footer.append(html);
     };
 
+    this.removeExtraButtons = function (idx) {
+        if (!idx) {
+            idx = modal.idx;
+        }
+
+        if (idx) {
+            modal.$footer.find('.extra_button.modal_' + idx).remove();
+        }
+    };
+
     this.setContentFormat = function (idx, format) {
         var $content = modal.$contents.find('#modal_content_' + idx);
         if ($content.length) {
             $content.data('format', format);
         }
 
-        modal.checkCurrentContentFormat();
+        modal.checkCurrentContent();
     };
 
-    this.checkCurrentContentFormat = function () {
+    this.disableContentCloseButton = function (idx) {
+        var $content = modal.$contents.find('#modal_content_' + idx);
+        if ($content.length) {
+            $content.data('no_close_button', 1);
+        }
+
+        modal.checkCurrentContent();
+    };
+
+    this.enableContentCloseButton = function (idx) {
+        var $content = modal.$contents.find('#modal_content_' + idx);
+        if ($content.length) {
+            $content.data('no_close_button', 0);
+        }
+
+        modal.checkCurrentContent();
+    };
+
+    this.checkCurrentContent = function () {
         var $content = modal.$contents.find('#modal_content_' + modal.idx);
         var $dialog = modal.$modal.find('.modal-dialog');
-        if ($content.length && $dialog.length) {
-            var format = $content.data('format');
+        if ($content.length) {
+            if ($dialog.length) {
+                
+                // check affichage boutons de fermeture: 
+                var no_close_button = $content.data('no_close_button');
+                if (typeof (no_close_button) !== 'undefined' && parseInt(no_close_button)) {
+                    $dialog.find('.modal-header').find('button.close').hide();
+                    modal.$footer.find('.closeModalButton').hide();
+                } else {
+                    $dialog.find('.modal-header').find('button.close').show();
+                    modal.$footer.find('.closeModalButton').show();
+                }
 
-            switch (format) {
-                case 'small':
-                    $dialog.removeClass('modal-lg');
-                    $dialog.removeClass('modal-md');
-                    $dialog.addClass('modal-sm');
-                    break;
+                // Check format modal: 
+                var format = $content.data('format');
 
-                default:
-                case 'medium':
-                    $dialog.removeClass('modal-lg');
-                    $dialog.removeClass('modal-sm');
-                    $dialog.addClass('modal-ms');
-                    break;
+                switch (format) {
+                    case 'small':
+                        $dialog.removeClass('modal-lg');
+                        $dialog.removeClass('modal-md');
+                        $dialog.addClass('modal-sm');
+                        break;
 
-                case 'large':
-                    $dialog.removeClass('modal-sm');
-                    $dialog.removeClass('modal-md');
-                    $dialog.addClass('modal-lg');
-                    break;
+                    default:
+                    case 'medium':
+                        $dialog.removeClass('modal-lg');
+                        $dialog.removeClass('modal-sm');
+                        $dialog.addClass('modal-ms');
+                        break;
+
+                    case 'large':
+                        $dialog.removeClass('modal-sm');
+                        $dialog.removeClass('modal-md');
+                        $dialog.addClass('modal-lg');
+                        break;
+                }
             }
         }
     };
@@ -476,6 +564,16 @@ function BimpModal($modal) {
 }
 
 var bimpModal = null;
+var docModal = null;
+
 $(document).ready(function () {
-    bimpModal = new BimpModal($('#page_modal'));
+    bimpModal = new BimpModal($('#page_modal'), 'bimpModal', 'openModalBtn', {
+        'content_removable': true,
+        'max_contents': 10
+    });
+
+    docModal = new BimpModal($('#docu_modal'), 'docModal', '', {
+        'content_removable': true,
+        'max_contents': 5
+    });
 });

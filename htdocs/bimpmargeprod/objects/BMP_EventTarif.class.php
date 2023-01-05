@@ -13,17 +13,17 @@ class BMP_EventTarif extends BimpObject
         return 0;
     }
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
         return (int) $this->isParentEditable();
     }
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         return (int) $this->isParentEditable();
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         if (!$this->isLoaded()) {
             return 0;

@@ -4,19 +4,31 @@ require_once DOL_DOCUMENT_ROOT."/bimpmargeprod/objects/Abstract_margeprod.class.
 class BMP_CalcMontant extends Abstract_margeprod
 {
 
-    // Getters : 
+    // Getters :
 
     public function canDelete()
     {
         global $user;
-        
+
         if ($user->admin) {
             return 1;
         }
-        
+
         return 0;
     }
-    
+
+    public function canView()
+    {
+        global $user;
+
+        if ($user->admin) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+
     public function getTypes_montantsArray()
     {
         BimpObject::loadClass($this->module, 'BMP_TypeMontant');
@@ -28,7 +40,7 @@ class BMP_CalcMontant extends Abstract_margeprod
         return self::getBimpObjectFullListArray($this->module, 'BMP_TotalInter');
     }
 
-    // Affichage: 
+    // Affichage:
 
     public function displaySource()
     {
@@ -70,7 +82,7 @@ class BMP_CalcMontant extends Abstract_margeprod
         return BimpRender::renderAlerts('Aucun');
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function checkConflicts()
     {
@@ -227,7 +239,7 @@ class BMP_CalcMontant extends Abstract_margeprod
         return 0;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validate()
     {

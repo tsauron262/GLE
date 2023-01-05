@@ -1,8 +1,8 @@
 table: bcontract_productservices
 
 labels:
-    name: Service
-    name_plur: Services
+    name: service
+    name_plur: services
            
 fields: 
     titre: 
@@ -35,7 +35,6 @@ list:
         callback: isEditable
     bulk_actions: 
         callback: getBulkActions
-        
     sort_field: date_create
     sort_way: desc
     n: 25
@@ -46,19 +45,14 @@ list:
     delete_btn: 1
     cols:
         titre:
-            field: titre
             edit: 1
         content:
-            field: content
             edit: 1
         use_in_contract:
-            field: use_in_contract
             edit: 1
         use_in_commercial:
-            field: use_in_commercial
             edit: 1
         test:
-            field: test
             edit: 1
 #        active:
 #            field: active

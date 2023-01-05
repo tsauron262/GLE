@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bordereau_cheque` ADD `exported` INT(1) NOT NULL DEFAULT '0';

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bs_sav` ADD `resgsx` VARCHAR(255) NOT NULL DEFAULT '' AFTER `replaced_ref`;

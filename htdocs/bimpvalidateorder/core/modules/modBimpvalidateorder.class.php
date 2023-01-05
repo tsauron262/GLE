@@ -172,15 +172,36 @@ class modBimpvalidateorder extends DolibarrModules {
 
 
         // Cronjobs (List of cron jobs entries to add when module is enabled)
-        $this->cronjobs = array(
+        $this->cronjobs=array(
+            0=>array(
+                'label'         => 'Rappel validations commerciales',
+                'jobtype'       => 'method',
+                'class'         =>  '/bimpvalidateorder/objects/ValidComm.class.php',
+                'objectname'    => 'DoliValidComm',
+                'method'        => 'sendRappel',
+                'parameters'    => '',
+                'comment'       => 'Envoie un email aux valideurs qui ont des demande à traiter',
+                'frequency'     => 2,
+                'unitfrequency' => 3600,
+                'status'        => 1,
+                'test'          => true
+            )
         );
         // Example: $this->cronjobs=array(0=>array('label'=>'My label', 'jobtype'=>'method', 'class'=>'/dir/class/file.class.php', 'objectname'=>'MyClass', 'method'=>'myMethod', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>0, 'test'=>true),
         //                                1=>array('label'=>'My label', 'jobtype'=>'command', 'command'=>'', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>1, 'unitfrequency'=>3600*24, 'status'=>0, 'test'=>true)
         // );
+        
+        
         // Permissions
-//        $this->rights = array();  // Permission array used by this module
-//
-//        $r = 0;
+        $this->rights = array();  // Permission array used by this module
+
+        $r = 0;
+        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+        $this->rights[$r][1] = 'Supprimer demande de validation'; // Permission label
+        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+        $this->rights[$r][4] = 'demande_validation';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $this->rights[$r][5] = 'delete';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
 //        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 //        $this->rights[$r][1] = 'Read restrictions'; // Permission label
 //        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)

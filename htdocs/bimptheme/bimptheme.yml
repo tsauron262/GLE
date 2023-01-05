@@ -1,0 +1,19 @@
+params: 
+    menu_handler: 
+        label: Type de menu
+        type: select
+        def: auguria
+        values: 
+            auguria: Auguria (classique)
+            bimptheme: BimpThème
+
+    use_full_menu: 
+        label: Utiliser la version complète du menu
+        info: Si actif, la version complète du menu bimptheme sera automatiquement synchronisée entre toutes les versions de l'ERP
+        type: bool
+        def: 0
+        
+    use_cache_server_for_menu: 
+        label: Mettre le menu en cache serveur
+        type: bool
+        def: 0

@@ -9,15 +9,11 @@ class BimpHistory extends BimpObject
         $errors = array();
         $baseErrorMsg = 'Echec de la mise à jour de l\'historique pour le champ "' . $field . '"';
 
-        if (is_null($object) || !$object || !is_a($object, 'BimpObject')) {
-            $errors[] = $baseErrorMsg . ' - Objet invalide';
-        } else {
-            $baseErrorMsg .= ' ' . $object->getLabel('of_the');
-            if (is_null($object->id) || !$object->id) {
-                $errors[] = ' - aucun ID';
-            } elseif (!$field || !$object->config->isDefined('fields/' . $field)) {
-                $errors[] = ' - champ invalide';
-            }
+        $baseErrorMsg .= ' ' . $object->getLabel('of_the');
+        if (is_null($object->id) || !$object->id) {
+            $errors[] = ' - aucun ID';
+        } elseif (!$field || !$object->config->isDefined('fields/' . $field)) {
+            $errors[] = ' - champ invalide';
         }
 
         $baseErrorMsg .= ' ' . $object->id;
@@ -53,7 +49,7 @@ class BimpHistory extends BimpObject
     public function deleteByObject(BimpObject $object, $id_object)
     {
         $errors = array();
-        if (!is_null($object) && is_a($object, 'BimpObject') && !is_null($id_object) && $id_object) {
+        if (!is_null($id_object) && $id_object) {
             $where = '`module` = \'' . $object->module . '\'';
             $where .= ' AND `object` = \'' . $object->object_name . '\'';
             $where .= ' AND `id_object` = ' . (int) $id_object;
@@ -68,7 +64,7 @@ class BimpHistory extends BimpObject
 
     public function getHistory(BimpObject $object, $field)
     {
-        if (is_null($object) || !isset($object->id) || !$object->id) {
+        if (!isset($object->id) || !$object->id) {
             return array();
         }
 
@@ -77,13 +73,17 @@ class BimpHistory extends BimpObject
                     'object'    => $object->object_name,
                     'id_object' => (int) $object->id,
                     'field'     => $field
-                        ), null, null, 'date', 'desc', 'array', array(
+                        ), null, null, 'id', 'desc', 'array', array(
                     'id', 'id_user', 'date', 'value'
         ));
     }
 
     public function renderCard(BimpObject $object, $field, $limit = 15, $display_user = true, $display_title = true)
     {
+        if (!$object->field_exists($field)) {
+            return '';
+        }
+
         $list = $this->getHistory($object, $field);
 
         $html = '';
@@ -100,6 +100,8 @@ class BimpHistory extends BimpObject
             $html .= '<h5>' . $title . '</h5>';
         }
 
+        $values = $object->getConf('fields/' . $field . '/values', array(), false, 'array');
+
         $n = 1;
         if (count($list)) {
             global $db;
@@ -115,18 +117,36 @@ class BimpHistory extends BimpObject
                 $html .= ' à <span class="time">' . $DT->format('H:i:s') . '</span></td>';
 
                 if ($display_user) {
-                    $html .= '<td>';
+                    $html .= '<td style="padding-left: 5px">';
                     if (!is_null($item['id_user']) && $item['id_user']) {
                         if (!array_key_exists((int) $item['id_user'], $users)) {
-                            $user->fetch((int) $item['id_user']);
-                            $users[(int) $item['id_user']] = $user->getNomUrl(1);
+                            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $item['id_user']);
+                            $users[(int) $item['id_user']] = $user->getName();
                         }
                         $html .= $users[(int) $item['id_user']];
                     }
                     $html .= '</td>';
                 }
 
-                $html .= '<td><span class="badge">' . $item['value'] . '</span></td>';
+                $html .= '<td style="padding-left: 5px">';
+                if (isset($values[$item['value']])) {
+                    $html .= '<span class="' . (isset($values[$item['value']]['classes']) ? implode(' ', $values[$item['value']]['classes']) : 'bold') . '">';
+                    if (isset($values[$item['value']]['icon'])) {
+                        $html .= BimpRender::renderIcon($values[$item['value']]['icon'], 'iconLeft');
+                    }
+                    if (is_string($values[$item['value']])) {
+                        $html .= $values[$item['value']];
+                    } elseif (isset($values[$item['value']]['label'])) {
+                        $html .= $values[$item['value']]['label'];
+                    } else {
+                        $html .= $item['value'];
+                    }
+                    $html .= '</span>';
+                } else {
+                    $html .= '<span class="badge">' . $item['value'] . '</span>';
+                }
+
+                $html .= '</td>';
                 $html .= '</tr>';
                 unset($DT);
                 $n++;

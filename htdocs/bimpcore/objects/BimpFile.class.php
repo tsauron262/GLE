@@ -11,13 +11,21 @@ class BimpFile extends BimpObject
         1 => 'Membres Bimp et client',
         2 => 'Membres BIMP',
     );
+    public $htmlName = 'file';
 
-    // CAN CONTEXTE CLIENT
+    // Droits users: 
 
     public function canClientView()
     {
         global $userClient;
-        if (isset($userClient)) {
+        if (BimpObject::objectLoaded($userClient)) {
+            if ($this->isLoaded()) {
+                if ((int) $this->getData('visibility') === 1) {
+                    return 1;
+                }
+
+                return 0;
+            }
             return 1;
         }
         return 0;
@@ -25,11 +33,19 @@ class BimpFile extends BimpObject
 
     public function canClientCreate()
     {
-        $instance = $this->getInstance('bimpsupport', 'BS_Ticket', $this->getData('id_parent'));
-        if ($instance->getData('status') != 999) {
-            return 1;
+        if (!$this->canClientView()) {
+            return 0;
         }
-        return 0;
+
+        if ($this->getData('parent_object_name') == 'BS_Ticket') {
+            $instance = $this->getInstance('bimpsupport', 'BS_Ticket', $this->getData('id_parent'));
+            if ($instance->getData('status') != 999) {
+                return 1;
+            }
+            return 0;
+        }
+
+        return 1;
     }
 
     public function canClientEdit()
@@ -37,31 +53,38 @@ class BimpFile extends BimpObject
         return $this->canClientCreate();
     }
 
-    public function currentContext($default_value = null)
+    public function canEditField($field_name)
     {
-        if (BimpTools::getContext() == 'public') {
-            if ($default_value == 'default_value')
+        if ($this->isLoaded() && $field_name == 'is_deletable') {
+            global $user;
+
+            if ($user->admin) {
                 return 1;
+            }
+
             return 0;
         }
-        if ($default_value = 'default_value')
-            return 2;
+
+        return parent::canEditField($field_name);
+    }
+
+    // Getters booléens: 
+
+    public function isDeletable($force_delete = false, &$errors = array())
+    {
+        if (!$force_delete && !(int) $this->getData('is_deletable')) {
+            return 0;
+        }
+
+        return (int) (!(int) $this->getData('deleted'));
+    }
+
+    public function isDownloadable()
+    {
         return 1;
     }
 
-    public function getFilterListInterfaceClient()
-    {
-        if (BimpTools::getContext() == 'public') {
-            return Array(
-                Array(
-                    'name'   => 'visibility',
-                    'filter' => 1
-                )
-            );
-        }
-    }
-
-    // Getters: 
+    // Getters:
 
     public function getFilePath()
     {
@@ -96,10 +119,10 @@ class BimpFile extends BimpObject
         return DOL_DATA_ROOT . '/bimpcore/' . $this->getData('parent_module') . '/' . $this->getData('parent_object_name') . '/' . $this->getData('id_parent') . '/';
     }
 
-    public function getFileUrl()
+    public function getFileUrl($file_name = '', $page = '')
     {
         $file = (string) $this->getData('file_name');
-        $ext = (string) $this->getData('file_ext');
+        $ext = (string) strtolower($this->getData('file_ext'));
 
         if (!$file || !$ext) {
             return '';
@@ -118,16 +141,6 @@ class BimpFile extends BimpObject
         $file = $this->getData('parent_module') . '/' . $this->getData('parent_object_name') . '/' . $this->getData('id_parent') . '/' . $file . '.' . $ext;
 
         return DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($file);
-    }
-
-    public function isDeletable($force_delete = false)
-    {
-        return (int) (!(int) $this->getData('deleted'));
-    }
-
-    public function isDownloadable()
-    {
-        return 1;
     }
 
     public function getDefaultListExtraButtons()
@@ -186,6 +199,52 @@ class BimpFile extends BimpObject
         return $buttons;
     }
 
+    public function getFilterListInterfaceClient()
+    {
+        if (BimpCore::isContextPublic()) {
+            return Array(
+                Array(
+                    'name'   => 'visibility',
+                    'filter' => 1
+                )
+            );
+        }
+
+        return array();
+    }
+
+    public function currentContext($default_value = null)
+    {
+        if (BimpCore::isContextPublic()) {
+            if ($default_value == 'default_value')
+                return 1;
+            return 0;
+        }
+        if ($default_value == 'default_value')
+            return 2;
+        return 1;
+    }
+
+    public function getDateModif()
+    {
+        return BimpTools::printDate(filemtime($this->getFilePath()));
+    }
+
+    public function getCreateJsCallback()
+    {
+//        return '$("#openForm").trigger("click");';
+
+        if (BimpTools::getValue('taskFact', 0) == 1) {
+            $note = BimpObject::getInstance("bimpcore", "BimpNote");
+            $parent = $this->getParentInstance();
+            $onclick = '';
+            $onclick .= 'setTimeout(function(){';
+            $onclick .= $note->getJsActionOnclick('repondre', array('obj_type' => 'bimp_object', 'obj_module' => $parent->module, 'obj_name' => $parent->object_name, 'id_obj' => $parent->id, 'type_dest' => $note::BN_DEST_GROUP, 'fk_group_dest' => BimpCore::getUserGroupId('facturation'), 'content' => 'Bonjour, vous trouverez pour ce/cette ' . $parent->getLabel() . ' : ' . $parent->getRef() . ' le document signé suivant : ' . $this->getData('file_name') . '.' . $this->getData('file_ext')), array('form_name' => 'rep', 'no_button' => 1));
+            $onclick .= '},500);';
+            return $onclick; //"<a onclick=\"".$onclick."\">Cliquer ici pour envopyé un mail au service facturation.</a>";
+        }
+    }
+
     // Getters - Overrides BimpObject: 
 
     public function getParentObjectName()
@@ -219,6 +278,39 @@ class BimpFile extends BimpObject
         return '';
     }
 
+    public function displayAnonymizedFiles($bc_list)
+    {
+        $html = '';
+        $dir = $this->getFileDir();
+
+        if ($dir) {
+            if (preg_match('/^(.+)\/+$/', $dir, $matches)) {
+                $dir = $matches[1];
+            }
+
+            $dir .= '_anonymized';
+
+            if (file_exists($dir) && is_dir($dir)) {
+                $files = scandir($dir);
+
+                if (count($files) > 2) {
+                    $html .= '<h3>Fichiers anonymisés (non accessibles)</h3>';
+
+                    foreach ($files as $f) {
+                        if (in_array($f, array('.', '..'))) {
+                            continue;
+                        }
+                        $html .= ' - ' . $f . '<br/>';
+                    }
+
+                    $html .= '<br/>';
+                }
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements: 
 
     public function uploadFile()
@@ -238,14 +330,13 @@ class BimpFile extends BimpObject
             return array('Aucun dossier de destination spécifié');
         }
 
-        $_FILES['file']['name'] = $file_name . '.' . $file_ext;
+        $_FILES[$this->htmlName]['name'] = $file_name . '.' . $file_ext;
 
-
-        if (file_exists($file_dir . $_FILES['file']['name'])) {
+        if (file_exists($file_dir . $_FILES[$this->htmlName]['name'])) {
             $errors[] = "Le Fichier existe déja";
             $this->dontRemove = true;
         } else {
-            $ret = dol_add_file_process($file_dir, 0, 0, 'file');
+            $ret = dol_add_file_process($file_dir, 0, 0, $this->htmlName);
             if ($ret <= 0) {
                 $errors = BimpTools::getDolEventsMsgs(array('errors', 'warnings'));
                 if (!count($errors)) {
@@ -271,9 +362,14 @@ class BimpFile extends BimpObject
         return $errors;
     }
 
+    public function getUrl($forced_context = '')
+    {
+        return $this->getFileUrl();
+    }
+
     public function checkObjectFiles($module, $object_name, $id_object)
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() || is_array($module) || is_array($object_name) || is_array($id_object)) {
             return;
         }
 
@@ -291,61 +387,124 @@ class BimpFile extends BimpObject
         $this->set('parent_object_name', $object_name);
         $this->set('id_parent', $id_object);
 
-        $file_dir = $this->getFileDir();
+        $parent = $this->getParentInstance();
 
-        $files = array();
+        if (BimpObject::objectLoaded($parent)) {
+            $file_dir = $this->getFileDir();
 
-        if (file_exists($file_dir)) {
-            $files = scandir($file_dir);
-            foreach ($files as $f) {
-                if (in_array($f, array('.', '..'))) {
-                    continue;
-                }
+            $files = array();
 
-                if (is_dir($file_dir . '/' . $f)) {
-                    continue;
-                }
+            if ($file_dir) {
+                // Récup fichiers dans dossier PROV pour les BimpComm: 
+                if (is_a($parent, 'BimpComm')) {
+                    $ref = $parent->getRef();
+                    if (strpos($ref, 'PROV') === false) {
+                        $prov_ref = '(PROV' . $parent->id . ')';
+                        $parent->setRef($prov_ref);
+                        $prov_dir = $parent->getFilesDir();
+                        $parent->setRef($ref);
 
-                if (preg_match('/^(.*)_deleted\..*$/', $f)) {
-                    continue;
-                }
+                        if ($prov_dir !== $file_dir && file_exists($prov_dir)) {
+                            $check = true;
 
-                if (!in_array($f, $current_files)) {
-                    $this->reset();
+                            foreach (scandir($prov_dir) as $f) {
+                                if (in_array($f, array('.', '..'))) {
+                                    continue;
+                                }
 
-                    $path_info = pathinfo($file_dir . '/' . $f);
+                                $new_f = $f;
 
-                    $file_name = BimpTools::cleanStringForUrl($path_info['filename']);
-                    if ($file_name !== $path_info['filename']) {
-                        $error = BimpTools::renameFile($file_dir, $f, $file_name . '.' . $path_info['extension']);
-                        if ($error) {
-                            continue;
-                        }
-                        if (in_array($file_name . '.' . $path_info['extension'], $current_files)) {
-                            continue;
+                                if (file_exists($file_dir . '/' . $f)) {
+                                    $inf = pathinfo($f);
+                                    $new_f .= $inf['filename'] . '_RECUP_AUTO.' . $inf['extension'];
+                                }
+
+                                if (!rename($prov_dir . '/' . $f, $file_dir . '/' . $new_f)) {
+                                    $check = false;
+                                }
+                            }
+
+                            if ($check) {
+                                rmdir($prov_dir);
+                            }
                         }
                     }
+                }
 
-                    if (!count($this->validateArray(array(
-                                        'parent_module'      => $module,
-                                        'parent_object_name' => $object_name,
-                                        'id_parent'          => $id_object,
-                                        'file_name'          => $file_name,
-                                        'file_ext'           => $path_info['extension'],
-                                        'file_size'          => filesize($file_dir . '/' . $f)
-                            )))) {
-                        parent::create();
+                $files = array();
+                if (file_exists($file_dir)) {
+                    $files = scandir($file_dir);
+
+                    foreach ($files as $f) {
+                        if (in_array($f, array('.', '..'))) {
+                            continue;
+                        }
+
+                        if (is_dir($file_dir . '/' . $f)) {
+                            continue;
+                        }
+
+                        if (preg_match('/^(.*)_deleted\..*$/', $f)) {
+                            continue;
+                        }
+
+                        if (!in_array($f, $current_files)) {
+                            $this->reset();
+
+                            $path_info = pathinfo($file_dir . '/' . $f);
+                            $file_errors = array();
+
+                            $file_name = BimpTools::cleanStringForUrl($path_info['filename']);
+                            if ($file_name !== $path_info['filename']) {
+                                if (in_array($file_name . '.' . $path_info['extension'], $current_files)) {
+                                    continue;
+                                }
+
+                                if (!file_exists($file_dir . '/' . $file_name . '.' . $path_info['extension'])) {
+                                    $error = BimpTools::renameFile($file_dir, $f, $file_name . '.' . $path_info['extension']);
+                                    if ($error) {
+                                        $file_errors[] = $error;
+                                    }
+                                }
+                            }
+
+                            if (!count($file_errors)) {
+                                $file_errors = $this->validateArray(array(
+                                    'parent_module'      => $module,
+                                    'parent_object_name' => $object_name,
+                                    'id_parent'          => $id_object,
+                                    'file_name'          => $file_name,
+                                    'file_ext'           => $path_info['extension'],
+                                    'file_size'          => filesize($file_dir . '/' . $f)
+                                ));
+
+                                if (!count($file_errors)) {
+                                    $file_warnings = array();
+                                    $file_errors = parent::create($file_warnings, true);
+                                }
+                            }
+
+                            if (count($file_errors)) {
+                                BimpCore::addlog('Echec création d\'un fichier en base', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                                    'Module'  => $module,
+                                    'Objet'   => $object_name,
+                                    'ID'      => $id_object,
+                                    'Fichier' => $file_name . '.' . $path_info['extension'],
+                                    'Erreurs' => $file_errors
+                                ));
+                            }
+                        }
                     }
                 }
-            }
-        }
 
-        foreach ($current_files as $id_file => $file_name) {
-            if (!in_array($file_name, $files)) {
-                if ($this->fetch((int) $id_file)) {
-                    $warnings = array();
-                    $this->delete($warnings, true);
-                    $this->reset();
+                foreach ($current_files as $id_file => $file_name) {
+                    if (!in_array($file_name, $files)) {
+                        if ($this->fetch((int) $id_file)) {
+                            $warnings = array();
+                            $this->delete($warnings, true);
+                            $this->reset();
+                        }
+                    }
                 }
             }
         }
@@ -362,6 +521,7 @@ class BimpFile extends BimpObject
         } elseif (!BimpObject::objectLoaded($object)) {
             $errors[] = 'ID ' . $object->getLabel('of_the') . ' absent';
         }
+        $dst_file = '';
 
         $src_file = $this->getFilePath();
 
@@ -437,16 +597,21 @@ class BimpFile extends BimpObject
 
     // Overrides: 
 
-    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null)
+    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null, $extra_order_by = NULL, $extra_order_way = 'ASC')
     {
         if (!$this->isLoaded()) {
             if (isset($filters['parent_module']) &&
                     isset($filters['parent_object_name']) &&
                     isset($filters['id_parent'])) {
                 $this->checkObjectFiles($filters['parent_module'], $filters['parent_object_name'], $filters['id_parent']);
+            } elseif (isset($filters['a.parent_module']) &&
+                    isset($filters['a.parent_object_name']) &&
+                    isset($filters['id_parent'])) {
+                $this->checkObjectFiles($filters['a.parent_module'], $filters['a.parent_object_name'], $filters['id_parent']);
             }
         }
-        return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins);
+
+        return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins, $extra_order_by, $extra_order_way);
     }
 
     public function beforeListFetchItems(BC_List $list)
@@ -503,13 +668,13 @@ class BimpFile extends BimpObject
     {
         $errors = array();
 
-        if (!isset($_FILES['file']) || empty($_FILES['file'])) {
+        if (!isset($_FILES[$this->htmlName]) || empty($_FILES[$this->htmlName])) {
             $errors[] = 'Aucun fichier transféré';
         } else {
             $name = (string) $this->getData('file_name');
 
             if (!$name) {
-                $name = BimpTools::cleanStringForUrl(pathinfo($_FILES['file']['name'], PATHINFO_FILENAME));
+                $name = BimpTools::cleanStringForUrl(pathinfo($_FILES[$this->htmlName]['name'], PATHINFO_FILENAME));
 
                 if (!$name) {
                     $errors[] = 'Nom du fichier invalide';
@@ -521,14 +686,14 @@ class BimpFile extends BimpObject
             $this->set('file_name', $name);
 
             if (!count($errors)) {
-                $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+                $ext = pathinfo($_FILES[$this->htmlName]['name'], PATHINFO_EXTENSION);
 
                 if (!(string) $ext) {
                     $errors[] = 'Extension du fichier absente. Veuillez renommer le fichier à envoyer avec une extension valide';
                 }
                 if (!count($errors)) {
                     $this->set('file_ext', $ext);
-                    $this->set('file_size', $_FILES['file']['size']);
+                    $this->set('file_size', $_FILES[$this->htmlName]['size']);
                     $errors = $this->uploadFile();
 
                     if (!count($errors)) {
@@ -545,21 +710,6 @@ class BimpFile extends BimpObject
         return $errors;
     }
 
-    public function getCreateJsCallback()
-    {
-//        return '$("#openForm").trigger("click");';
-
-        if (BimpTools::getValue('taskFact', 0) == 1) {
-            $note = BimpObject::getInstance("bimpcore", "BimpNote");
-            $parent = $this->getParentInstance();
-            $onclick = '';
-            $onclick .= 'setTimeout(function(){';
-            $onclick .= $note->getJsActionOnclick('repondre', array('obj_type' => 'bimp_object', 'obj_module' => $parent->module, 'obj_name' => $parent->object_name, 'id_obj' => $parent->id, 'type_dest' => $note::BN_DEST_GROUP, 'fk_group_dest' => $note::BN_GROUPID_FACT, 'content' => 'Bonjour, vous trouverez pour ce/cette ' . $parent->getLabel() . ' : ' . $parent->getRef() . ' le document signé suivant : ' . $this->getData('file_name') . '.' . $this->getData('file_ext')), array('form_name' => 'rep', 'no_button' => 1));
-            $onclick .= '},500);';
-            return $onclick; //"<a onclick=\"".$onclick."\">Cliquer ici pour envopyé un mail au service facturation.</a>";
-        }
-    }
-
     public function update(&$warnings = array(), $force_update = false)
     {
         if (!$this->isLoaded()) {
@@ -570,7 +720,7 @@ class BimpFile extends BimpObject
 
         if (!count($errors)) {
             $current_name = (string) $this->getInitData('file_name');
-            if (!is_null($current_name)) {
+            if ($current_name != '') {
                 $new_name = (string) $this->getData('file_name');
                 if ($new_name) {
                     if ($new_name !== $current_name) {
@@ -602,7 +752,7 @@ class BimpFile extends BimpObject
         }
 
         if ((int) $this->getData('deleted')) {
-            return array($this->getLabel('this') . ' a déjà été supprimé');
+            return array(); //$this->getLabel('this') . ' a déjà été supprimé');
         }
 
         $errors = array();
@@ -620,7 +770,7 @@ class BimpFile extends BimpObject
             $dir = $this->getFileDir();
             $file = $this->getData('file_name') . '.' . $this->getData('file_ext');
 
-            if (file_exists($dir . $file)) {
+            if (file_exists($dir . $file . 'TO')) {
                 BimpTools::renameFile($dir, $file, $this->getData('file_name') . $this->id . '_deleted.' . $this->getData('file_ext'));
             }
         }

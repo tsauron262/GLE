@@ -1,0 +1,118 @@
+table: bnf_frais_montant
+common_fields: 0
+
+parent_object: BRH_Frais
+parent_id_property: id_frais
+
+labels: 
+    name: montant
+    
+objects:
+    files:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimprh
+                parent_object_name: BRH_Frais
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimprh
+                    parent_object_name: BRH_Frais
+    comments:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: BRH_Comment
+
+    invite:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: BRH_FraisInvite
+
+fields: 
+    id_frais: 
+        label: Frais
+        type: id_parent
+        input:
+            type: int
+    tva_tx: 
+        label: TVA
+        type: float
+        values: 
+            array: taxes
+    amount: 
+        label: Montant TTC
+        type: money
+        required: 1
+#    periode:
+#        label: Periode
+#        type: int
+#        values:
+#            array: periode_restauration
+#        display_if:
+#            field_name: type
+#            show_values: 1
+#    type:
+#        label: Type
+#        type: int
+#        values:
+#            callback: displayTypesList
+#    validate:
+#        label: Ticket validé
+#        required: 1
+#        type: bool
+#        default-value: 0
+
+lists_cols: 
+    num:
+        label: N°
+        value:
+            callback: getNum
+            
+lists:
+    default: 
+        title: Montants
+        icon: euro
+        checkboxes: 1
+        bulk_actions:
+            - label: Supprimer les montants sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        extra_btn: 
+            callback: getListExtraBtn
+        sort_field: id
+        sort_way: desc
+        n: 0
+        enable_search: 0
+        delete_btn: 1
+        update_btn: 1
+        add_object_row: 1
+        cols:
+            num:
+            tva_tx:
+                edit:
+                    callback: canFraisEdit
+            amount: 
+                edit:
+                    callback: canFraisEdit
+#            periode:
+#                field: periode
+#                edit:
+#                    callback: canFraisEdit
+#                show: 
+#                    callback: hasParentPeriod
+#            type:
+#                field: type
+#                edit:
+#                    callback: canFraisEdit
+#                show:
+#                    callback: hasNecessaryType
+#            validate:
+#                field: validate
+#                edit: 1

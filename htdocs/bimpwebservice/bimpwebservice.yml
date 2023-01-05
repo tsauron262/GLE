@@ -1,0 +1,55 @@
+categories: 
+    allowed: 
+        label: Requêtes autorisées
+        
+params: 
+    check_erp_user_rights: 
+        label: Vérifier les droits de l\'utilisateur ERP   
+        warning: A désactiver uniquement pour les test
+        type: bool
+        def: 1
+    
+    id_default_user: 
+        label: Utilisateur ERP par défaut
+        required: 1
+        
+    default_tokens_expire_delay: 
+        label: Délai d'expiration par défaut des tokens
+        def: 720
+        
+    # Requêtes autorisées: 
+    getObjectData_allowed: 
+        label: Requête getObjectData autorisée
+        type: bool
+        def: 1
+        cat: allowed
+        
+    getObjectValue_allowed: 
+        label: Requête getObjectValue autorisée
+        type: bool
+        def: 1
+        cat: allowed
+        
+    getObjectsList_allowed: 
+        label: Requête getObjectsList autorisée
+        type: bool
+        def: 1
+        cat: allowed
+        
+    createObject_allowed: 
+        label: Requête createObject autorisée
+        type: bool
+        def: 1
+        cat: allowed
+        
+    updateObject_allowed: 
+        label: Requête updateObject autorisée
+        type: bool
+        def: 1
+        cat: allowed
+        
+    deleteObject_allowed: 
+        label: Requête deleteObject autorisée
+        type: bool
+        def: 1
+        cat: allowed

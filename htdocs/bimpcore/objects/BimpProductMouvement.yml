@@ -1,0 +1,226 @@
+table: stock_mouvement
+primary: rowid
+icon: fas_exchange-alt
+common_fields: 0
+
+labels: 
+    name: Mouvement de stock
+    name_plur: Mouvements de stock
+    is_female: 0
+    
+objects:   
+    product: 
+        instance: 
+            id_object: 
+                field_value: fk_product
+            
+    entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+               
+    bimp_entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+                
+    category: 
+        relation: none
+        delete: 0
+        instance: 
+            dol_object: 
+                module: categories
+                file: categorie
+
+    marque: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: marque
+                
+    gamme: 
+        extends: category
+        relation: hasOne
+        instance: 
+            id_object: 
+                field_value: gamme
+                
+    user:
+        instance: 
+            id_object: 
+                field_value: fk_user_author
+        
+fields: 
+    fk_entrepot: 
+        label: Entrepot
+        type: id_object
+        object: bimp_entrepot
+        values: 
+            array: entrepots
+    
+    fk_origin:
+        label: Id pièce d'origine
+        type: int
+           
+    origintype:
+        label: Type pièce d'origine
+        type: string
+        values: 
+           array: originetypes
+        
+    fk_product: 
+        label: Produit
+        type: id_object
+        object: product
+        displays: 
+            nom_url_libelle: 
+                type: callback
+                method: displayProduct
+    
+    datem:
+        label: Date du mouvement
+        type: datetime
+        
+    type_mouvement:
+        label: Type du mouvement
+        type: int
+        values:
+            array: type_mouvement
+    
+    value:
+        label: Quantité
+        type: int
+        has_total: 1
+    
+    inventorycode:
+        label: Code inventaire
+        type: string
+    
+    label:
+        label: Libellé mouvement
+        type: string
+        
+    fk_user_author:
+        label: Auteur
+        type: id_object
+        object: user
+        input:
+            type: search_user
+        
+    bimp_origin: 
+        label: Origine
+        
+    bimp_id_origin: 
+        label: ID origine
+        type: id
+        default_value: 0
+        
+    # extras: 
+    marque: 
+        label: Marque
+        extra: 1
+        type: id_object
+        object: marque
+        values: 
+            array: marques
+            
+    gamme: 
+        label: Gamme matériel
+        extra: 1
+        type: id_object
+        object: gamme
+        values: 
+            array: gammesMateriel
+
+filters: 
+    origin_type: 
+        label: Type origine
+        type: value
+        input: 
+            type: select
+            options: 
+                array: originetypes
+    origin: 
+        label: Elément d'origine
+        type: value_part
+        
+    fk_user_author:
+        type: user
+        
+filters_panels:
+    default: 
+        filters: 
+            fk_entrepot: 
+            fk_product: 
+            origin_type:
+            origin:
+            datem:
+            inventorycode:
+            label:
+            value:
+            type_mouvement: 
+            fk_user_author:
+                
+    product: 
+        extends: default
+        filters: 
+            fk_product: unset
+            
+lists_cols:
+    rowid: 
+        label: N°
+    fk_product: 
+        display: nom_url_libelle
+        min_width: 220
+    origin: 
+        label: Origine
+        value: 
+            callback: displayOriginMvt
+        min_width: 180
+    label:
+        min_width: 220
+    reason:
+        label: Raison
+        value:
+            callback: displayReasonMvt
+    value:
+        label: Qté
+        min_width: 30
+    type_mouvement:
+        label: Type mvt
+        field: type_mouvement
+        display: icon
+        min_width: 45
+    
+lists: 
+    default: 
+        icon: fas_exchange-alt
+        configurable: 1
+        filters_panel: default
+        sort_field: id
+        sort_way: desc
+        n: 50
+        cols: 
+            rowid:    
+            datem:
+            fk_entrepot: 
+            fk_product:
+            inventorycode:
+            label:
+            origin:
+            reason:
+            value:
+            type_mouvement:
+            fk_user_author:
+                
+    product: 
+        extends: default
+        filters_panel: product
+        cols: 
+            fk_product: unset
+            
+searches:
+    default: 
+        fields_search: 
+            - a.inventorycode

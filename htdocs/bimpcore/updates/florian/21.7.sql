@@ -1,0 +1,1 @@
+ALTER TABLE `llx_societe` ADD `id_user_status_demand` INT NOT NULL DEFAULT '0';

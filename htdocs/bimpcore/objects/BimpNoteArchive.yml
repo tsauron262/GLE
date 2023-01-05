@@ -1,0 +1,4 @@
+extends: 
+    module: bimpcore
+    object_name: BimpNote
+mode_archive: 1

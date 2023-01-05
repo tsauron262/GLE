@@ -1,0 +1,5 @@
+extends: 
+    module: bimpuserconfig
+    object_name: ListConfig
+    
+table: buc_list_views_config

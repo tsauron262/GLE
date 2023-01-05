@@ -16,6 +16,7 @@ objects:
 fields:
     pdf_hide_ref: 
         default_value: 1
+    expertise: unset
             
 fields_tables: 
     sav_infos: 
@@ -34,6 +35,8 @@ fields_tables:
             - field: libelle
               edit: 1
             - field: fk_cond_reglement
+              edit: 1
+            - field: fk_mode_reglement
               edit: 1
             - field: pdf_hide_reduc
               edit: 1

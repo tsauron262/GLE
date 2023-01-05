@@ -40,11 +40,11 @@ class controlStock{
                 $i++;
 //                $nbE = $this->getNbEquip($idPr, $idEn);
 //                $nbS = $this->getStockProd($idPr, $idEn);
-                
+
                 $nbE = isset($stocksEqui[$idEn][$idPr])? $stocksEqui[$idEn][$idPr] : 0;
                 $nbS = isset($stocks[$idEn][$idPr])? $stocks[$idEn][$idPr] : 0;
                 
-                
+               $light = true; 
                 
                 if($nbE != $nbS || $nbE != 0){
                     $millieuText = $debutText. "  -  Produit : ".$labPr;
@@ -61,6 +61,13 @@ class controlStock{
                             $ope = "+";
                         else
                             $ope = "-";
+                        
+                        if($light){
+                        echo $millieuText." ATTENTION ".$ope." d'equipement (".$nbE.") que de prod (".$nbS.")<br/>";
+                            continue;
+                        }
+                        
+                        
     
                         if($nbE > 0){
                             $tabSerials = $this->getTabSerials($idEn, $idPr, $ope);

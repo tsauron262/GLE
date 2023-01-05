@@ -3,19 +3,22 @@
 class BimpTools
 {
 
+    public $output = '';
     public static $currencies = array(
         'EUR' => array(
-            'label' => 'euro',
-            'icon'  => 'euro',
-            'html'  => '&euro;'
+            'label'   => 'euro',
+            'icon'    => 'euro',
+            'html'    => '&euro;',
+            'no_html' => '€'
         ),
         'USD' => array(
-            'label' => 'dollar',
-            'icon'  => 'dollar',
-            'html'  => '&#36;'
+            'label'   => 'dollar',
+            'icon'    => 'dollar',
+            'html'    => '&#36;',
+            'no_html' => '$'
         )
     );
-    private static $context = "";
+    public static $bloquages = array();
 
     // Gestion GET / POST
 
@@ -79,6 +82,41 @@ class BimpTools
         return $value;
     }
 
+    public static function isPostFieldSubmit($field_name)
+    {
+        // Chargement d'un formulaire:
+        if (BimpTools::isSubmit('param_values/fields/' . $field_name)) {
+            return 1;
+        }
+
+        // Chargement d'un input: 
+        if (BimpTools::isSubmit('fields/' . $field_name)) {
+            return 1;
+        }
+
+        // Action ajax: 
+        if (BimpTools::isSubmit('extra_data/' . $field_name)) {
+            return 1;
+        }
+
+        // Envoi des données d'un formulaire: 
+        if (BimpTools::isSubmit($field_name)) {
+            return 1;
+        }
+
+        // Filtres listes:
+        if (BimpTools::isSubmit('param_list_filters')) {
+            $filters = json_decode(BimpTools::getValue('param_list_filters'));
+            foreach ($filters as $filter) {
+                if (isset($filter->name) && $filter->name === $field_name) {
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
+    }
+
     public static function getPostFieldValue($field_name, $default_value = null)
     {
         // Chargement d'un formulaire:
@@ -114,6 +152,27 @@ class BimpTools
         return $default_value;
     }
 
+    public static function getAjaxFileName($field_name)
+    {
+        return str_replace("C:fakepath", '', BimpTools::getPostFieldValue($field_name));
+    }
+
+    public static function mouveAjaxFile(&$errors, $field_name, $dir_dest, $name_dest = null)
+    {//pas d'extension elle est géré en auto
+        global $user;
+        if (!is_dir($dir_dest))
+            mkdir($dir_dest);
+        $dir = DOL_DATA_ROOT . '/bimpcore/tmpFile/';
+        $file = $user->id . "_" . $field_name . "_" . BimpTools::getAjaxFileName($field_name);
+        if ($name_dest == null)
+            $name_dest = BimpTools::getAjaxFileName($field_name);
+        if (pathinfo($name_dest, PATHINFO_EXTENSION) == '') {
+            $extension = pathinfo($dir . $file, PATHINFO_EXTENSION);
+            $name_dest .= '.' . $extension;
+        }
+        rename($dir . $file, $dir_dest . '/' . $name_dest);
+    }
+
     // Gestion des objects Dolibarr:
 
     public static function loadDolClass($module, $file = null, $class = null)
@@ -142,34 +201,50 @@ class BimpTools
     public static function getDolObjectUrl($object, $id_object = null)
     {
         if (is_null($id_object)) {
-            if (isset($object->id) && $object->id) {
+            if (is_object($object) && isset($object->id) && $object->id) {
                 $id_object = $object->id;
             }
         }
-        $file = strtolower(get_class($object)) . '/card.php';
-        $primary = 'id';
-        switch (get_class($object)) {
-            case 'CommandeFournisseur':
-                return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
 
-            case 'FactureFournisseur':
-                return DOL_URL_ROOT . '/fourn/facture/card.php?facid=' . $id_object;
-
-            case 'Facture':
-                return DOL_URL_ROOT . '/compta/facture/card.php?id=' . $id_object;
-
-            case 'Propal':
-                return DOL_URL_ROOT . '/comm/propal/card.php?id=' . $id_object;
-
-            case 'Entrepot':
-                return DOL_URL_ROOT . '/product/stock/card.php?id=' . $id_object;
-
-            case 'Societe':
-                $primary = 'socid';
-                break;
+        $class_name = '';
+        if (is_object($object)) {
+            $class_name = get_class($object);
+        } elseif (is_string($object)) {
+            $class_name = $object;
         }
-        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
-            return DOL_URL_ROOT . '/' . $file . (!is_null($id_object) && $id_object ? '?' . $primary . '=' . $id_object : '');
+
+        if ($class_name) {
+            $file = strtolower($class_name) . '/card.php';
+            $primary = 'id';
+            switch ($class_name) {
+                case 'CommandeFournisseur':
+                    return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
+
+                case 'FactureFournisseur':
+                    return DOL_URL_ROOT . '/fourn/facture/card.php?facid=' . $id_object;
+
+                case 'Facture':
+                    return DOL_URL_ROOT . '/compta/facture/card.php?id=' . $id_object;
+
+                case 'Propal':
+                    return DOL_URL_ROOT . '/comm/propal/card.php?id=' . $id_object;
+
+                case 'Entrepot':
+                    return DOL_URL_ROOT . '/product/stock/card.php?id=' . $id_object;
+
+                case 'ActionComm':
+                    return DOL_URL_ROOT . '/comm/action/card.php?id=' . $id_object;
+
+                case 'UserGroup':
+                    return DOL_URL_ROOT . '/user/group/card.php?id=' . $id_object;
+
+                case 'Societe':
+                    $primary = 'socid';
+                    break;
+            }
+            if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
+                return DOL_URL_ROOT . '/' . $file . (!is_null($id_object) && $id_object ? '?' . $primary . '=' . $id_object : '');
+            }
         }
         return '';
     }
@@ -237,7 +312,7 @@ class BimpTools
         return '/test2/public/theme/common/nophoto.png';
     }
 
-    public static function getErrorsFromDolObject($object, $errors = null, $langs = null, &$warnings = array())
+    public static function getErrorsFromDolObject($object, $errors = null, $langs = null, &$warnings = array(), $with_events = false)
     {
         if (is_null($langs)) {
             global $langs;
@@ -247,26 +322,30 @@ class BimpTools
             $errors = array();
         }
 
-        if (isset($object->error)) {
-            if (!is_null($langs)) {
-                $errors[] = $langs->trans($object->error);
-            } else {
-                $errors[] = $object->error;
-            }
-        }
-
-        if (isset($object->errors) && count($object->errors)) {
-            foreach ($object->errors as $e) {
+        if (is_object($object)) {
+            if (isset($object->error)) {
                 if (!is_null($langs)) {
-                    $errors[] = $langs->trans($e);
+                    $errors[] = $langs->trans($object->error);
                 } else {
-                    $errors[] = $e;
+                    $errors[] = $object->error;
                 }
             }
-        }
 
-        $errors = array_merge($errors, self::getDolEventsMsgs(array('errors')));
-        $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings')));
+            if (isset($object->errors) && count($object->errors)) {
+                foreach ($object->errors as $e) {
+                    if (!is_null($langs)) {
+                        $errors[] = $langs->trans($e);
+                    } else {
+                        $errors[] = $e;
+                    }
+                }
+            }
+
+            if ($with_events) {
+                $errors = BimpTools::merge_array($errors, self::getDolEventsMsgs(array('errors'), false));
+                $warnings = BimpTools::merge_array($warnings, self::getDolEventsMsgs(array('warnings'), false));
+            }
+        }
 
         return $errors;
     }
@@ -276,6 +355,7 @@ class BimpTools
         if (is_null($date) || !$date) {
             return '';
         }
+
         $DT = new DateTime($date);
         return (int) $DT->format('U');
     }
@@ -399,6 +479,235 @@ class BimpTools
         return '';
     }
 
+    public static function getDolObjectActionsComm($dol_object, $contact = null, $code_filter = '', $done_filter = '', $label_search = '', $order_by = 'a.datep,a.id', $order_way = 'DESC')
+    {
+        global $conf;
+        $bdb = BimpCache::getBdb();
+        $now = date('Y-m-d H:i:s');
+
+        $sql = '';
+
+        $fields = array('id', 'label', 'a.datep as date_start', 'a.datep2 as date_end', 'note', 'percent', 'a.fk_element as id_object', 'a.elementtype as obj_type', 'a.fk_user_author as id_author', 'a.fk_contact as id_contact', 'c.code as ac_code', 'c.libelle as ac_label', 'c.picto ac_picto', 'u.rowid as id_user_action');
+        $joins = array(
+            array(
+                'table' => 'user',
+                'alias' => 'u',
+                'on'    => 'u.rowid = a.fk_user_action'
+            ),
+            array(
+                'table' => 'c_actioncomm',
+                'alias' => 'c',
+                'on'    => 'c.id = a.fk_action'
+            )
+        );
+        $filters = array(
+            'a.entity' => array(
+                'in' => '(' . getEntity('agenda') . ')'
+            )
+        );
+
+        switch (get_class($dol_object)) {
+            case 'Societe':
+                $filters['a.fk_soc'] = $dol_object->id;
+                break;
+
+            case 'Adherent':
+                $filters['a.fk_element'] = $dol_object->id;
+                $filters['a.elementtype'] = 'member';
+                break;
+
+            case 'CommandeFournisseur':
+                $filters['a.fk_element'] = $dol_object->id;
+                $filters['a.elementtype'] = 'order_supplier';
+                break;
+
+            case 'Product':
+                $filters['a.fk_element'] = $dol_object->id;
+                $filters['a.elementtype'] = 'product';
+                break;
+
+            case 'Project':
+                $filters['a.fk_project'] = $dol_object->id;
+                break;
+        }
+
+        if (BimpObject::objectLoaded($contact)) {
+            $filters['a.fk_contact'] = $contact->id;
+        }
+
+        if ($code_filter) {
+            if (empty($conf->global->AGENDA_USE_EVENT_TYPE)) {
+                switch ($code_filter) {
+                    case 'AC_NON_AUTO':
+                    case 'AC_OTH':
+                        $filters['c.type'] = array(
+                            'operator' => '!=',
+                            'value'    => 'systemauto'
+                        );
+                        break;
+
+                    case 'AC_ALL_AUTO':
+                    case 'AC_OTH_AUTO':
+                        $filters['c.type'] = 'systemauto';
+                        break;
+                }
+            } else {
+                switch ($code_filter) {
+                    case 'AC_NON_AUTO':
+                        $filters['c.type'] = array(
+                            'operator' => '!=',
+                            'value'    => 'systemauto'
+                        );
+                        break;
+
+                    case 'AC_ALL_AUTO':
+                        $filters['c.type'] = 'systemauto';
+                        break;
+
+                    default:
+                        $filters['c.type'] = $bdb->db->escape($code_filter);
+                        break;
+                }
+            }
+        }
+
+        if ($done_filter) {
+            switch ($done_filter) {
+                case 'done':
+                    $filters['done_custom'] = array(
+                        'custom' => '(a.percent = 100 OR (a.percent = -1 AND a.datep <= \'' . $now . '\'))'
+                    );
+                    break;
+
+                case 'todo':
+                    $filters['done_custom'] = array(
+                        'custom' => '((a.percent >= 0 AND a.percent < 100) OR (a.percent = -1 AND a.datep > \'' . $now . '\'))'
+                    );
+                    break;
+            }
+        }
+
+        if ($label_search) {
+            $filters['label_custom'] = array(
+                'custom' => natural_search('a.label', $label_search)
+            );
+        }
+
+        $sql = BimpTools::getSqlSelect($fields);
+        $sql .= BimpTools::getSqlFrom('actioncomm', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+        $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a');
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (!is_array($rows)) {
+            $rows = array();
+        }
+
+        foreach ($rows as $idx => $r) {
+            $state = '';
+            if (((float) $r['percent'] >= 0 && (float) $r['percent'] < 100) || ($r['percent'] == -1 && $r['date_start'] > $now)) {
+                $state = 'todo';
+            }
+
+            $rows[$idx]['type'] = 'action';
+            $rows[$idx]['state'] = $state;
+        }
+
+        if (!empty($conf->mailing->enabled) && is_object($conf) && isset($contact->email)) {
+            $sql = "SELECT m.rowid as id, mc.date_envoi as date_start, mc.date_envoi as date_end, m.titre as note, '100' as percentage,";
+            $sql .= " 'AC_EMAILING' as ac_code,";
+            $sql .= " m.fk_user_valid as id_user_action"; // User that valid action
+            $sql .= " FROM " . MAIN_DB_PREFIX . "mailing as m, " . MAIN_DB_PREFIX . "mailing_cibles as mc";
+            $sql .= " WHERE mc.email = '" . $bdb->db->escape($contact->email) . "'"; // Search is done on email.
+            $sql .= " AND mc.statut = 1";
+            $sql .= " AND mc.fk_mailing=m.rowid";
+            $sql .= " ORDER BY mc.date_envoi DESC, m.rowid DESC";
+
+            $rows2 = $bdb->executeS($sql, 'array');
+
+            if (is_array($rows2)) {
+                foreach ($rows2 as $idx => $r) {
+                    $rows[$idx]['type'] = 'mailing';
+                    $rows[$idx]['state'] = 'done';
+                }
+                $rows = array_merge($rows, $rows2);
+            }
+        }
+
+        return $rows;
+    }
+
+    public static function getInstanceByElementType($element_type, $id_object = 0)
+    {
+        switch ($element_type) {
+            case 'societe':
+                return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_object);
+
+            case 'propal':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_object);
+
+            case 'commande':
+            case 'order':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_object);
+
+            case 'facture':
+            case 'invoice':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_object);
+
+            case 'commande_fourn':
+            case 'commande_fournisseur':
+            case 'order_supplier':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_object);
+
+            case 'facture_fourn':
+            case 'facture_fournisseur':
+            case 'invoice_supplier':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $id_object);
+
+            case 'product':
+                return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_object);
+
+            case 'fichinter':
+                return BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $id_object);
+        }
+
+        return null;
+    }
+
+    public static function getBimpObjectFromDolObject($dol_object)
+    {
+        if (is_a($dol_object, 'BimpObject')) {
+            return $dol_object;
+        }
+
+        if (is_object($dol_object)) {
+            switch (get_class($dol_object)) {
+                case 'Propal':
+                    return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $dol_object->id);
+
+                case 'Commande':
+                    return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $dol_object->id);
+
+                case 'Facture':
+                    return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $dol_object->id);
+
+                case 'User':
+                    return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $dol_object->id);
+
+                case 'Societe':
+                    if ((int) $dol_object->client) {
+                        return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $dol_object->id);
+                    } elseif ((int) $dol_object->fournisseur) {
+                        return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', (int) $dol_object->id);
+                    }
+                    return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $dol_object->id);
+            }
+        }
+
+        return null;
+    }
+
     // Gestion générique des objets: 
 
     public static function getObjectTable(BimpObject $parent, $id_object_field, $object = null)
@@ -457,224 +766,11 @@ class BimpTools
         return $parent->getConf('fields/' . $id_object_field . '/object/primary', null, false);
     }
 
-    public static function changeBimpObjectId($old_id, $new_id, $module, $object_name)
-    {
-        if (!$old_id || !$new_id) {
-            return;
-        }
-        set_time_limit(120);
-        ignore_user_abort(true);
-
-        global $db;
-        $bdb = new BimpDb($db);
-
-        $list = BimpCache::getBimpObjectsList();
-
-        $fails = array();
-
-        foreach ($list as $mod => $objects) {
-            foreach ($objects as $name) {
-                $instance = BimpObject::getInstance($mod, $name);
-                if (is_a($instance, 'BimpObject')) {
-                    $table = $instance->getTable();
-
-                    if (!$table) {
-                        continue;
-                    }
-
-                    foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
-                        if (!$obj_params['relation'] === 'hasOne') {
-                            continue;
-                        }
-
-                        $obj_module = '';
-                        $obj_name = '';
-
-                        if (isset($obj_params['instance']['bimp_object'])) {
-                            if (is_string($obj_params['instance']['bimp_object'])) {
-                                $obj_name = $obj_params['instance']['bimp_object'];
-                                $obj_module = $instance->module;
-                            } else {
-                                if (isset($obj_params['instance']['bimp_object']['name'])) {
-                                    $obj_name = $obj_params['instance']['bimp_object']['name'];
-                                    $obj_module = $obj_params['instance']['bimp_object']['module'];
-                                    if (!$obj_module) {
-                                        $obj_module = $instance->module;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (!$obj_name || !$obj_module) {
-                            continue;
-                        }
-
-                        if ($obj_module === $module && $obj_name === $object_name) {
-                            $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
-                            if (isset($params['id_object']['field_value'])) {
-                                $field = $params['id_object']['field_value'];
-                                if ($field && $instance->field_exists($field)) {
-                                    if ($instance->isExtraField($field)) {
-                                        $primary = $instance->getPrimary();
-                                        $nFails = 0;
-                                        $nTotal = 0;
-                                        foreach ($instance->getList(array(
-                                            $field => $old_id
-                                                ), null, null, $primary, 'asc', 'array', array($primary)) as $item) {
-                                            $nTotal++;
-                                            if (count($instance->updateField($field, $new_id, (int) $item[$primary], true))) {
-                                                $nFails++;
-                                            }
-                                        }
-                                        if ($nFails) {
-                                            $fails[] = 'Objet: "' . $instance->object_name . '", Champ additionnel: "' . $field . '" (Echecs de la mise à jour de ' . $nFails . ') élément(s) sur ' . $nTotal;
-                                        }
-                                    } else {
-                                        if ($instance->isDolObject()) {
-                                            if ($instance->isDolExtraField($field)) {
-                                                $table .= '_extrafields';
-                                            }
-                                        }
-                                        $result = $bdb->update($table, array(
-                                            $field => $new_id
-                                                ), '`' . $field . '` = ' . (int) $old_id);
-
-                                        if ($result <= 0) {
-                                            $fails[] = 'Table: "' . $table . '", Champ: "' . $field . '"';
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!empty($fails)) {
-            $subject = 'ERREUR SUITE A CHANGEMENT D\'ID';
-
-            $msg = 'Plateforme: ' . DOL_URL_ROOT . "\n";
-            $msg .= 'Object: ' . $object_name . "\n";
-            $msg .= 'Ancien ID: ' . $old_id . "\n";
-            $msg .= 'Nouvel ID: ' . $new_id . "\n\n";
-
-            $msg .= 'Echec des mises à jour SQL: ' . "\n\n";
-
-            foreach ($fails as $fail) {
-                $msg .= ' - ' . $fail . "\n";
-            }
-
-            mailSyn2($subject, 'debugerp@bimp.fr', 'BIMP<admin@bimp.fr>', $msg);
-            dol_syslog($subject . "\n" . $msg, LOG_ERR);
-        }
-    }
-
-    public static function changeDolObjectId($old_id, $new_id, $module, $file = '', $class = '')
-    {
-        if (!$old_id || !$new_id) {
-            return;
-        }
-
-        set_time_limit(120);
-        ignore_user_abort(true);
-
-        if (!(string) $file) {
-            $file = $module;
-        }
-
-        if (!(string) $class) {
-            $class = ucfirst($file);
-        }
-
-        global $db;
-        $bdb = new BimpDb($db);
-
-        $list = BimpCache::getBimpObjectsList();
-
-        $fails = array();
-
-        foreach ($list as $mod => $objects) {
-            foreach ($objects as $name) {
-                $instance = BimpObject::getInstance($mod, $name);
-                if (is_a($instance, 'BimpObject')) {
-                    $table = $instance->getTable();
-
-                    if (!$table) {
-                        continue;
-                    }
-
-                    foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
-                        if (!$obj_params['relation'] === 'hasOne') {
-                            return;
-                        }
-
-                        $obj_module = '';
-                        $obj_file = '';
-                        $obj_class = '';
-
-                        if (isset($obj_params['instance']['dol_object'])) {
-                            if (is_string($obj_params['instance']['dol_object'])) {
-                                $obj_module = $obj_file = $obj_params['instance']['dol_object'];
-                                $obj_class = ucfirst($obj_file);
-                            } else {
-                                if (isset($obj_params['instance']['bimp_object']['module'])) {
-                                    $obj_module = $obj_params['instance']['bimp_object']['module'];
-                                    $obj_file = isset($obj_params['instance']['bimp_object']['file']) ? $obj_params['instance']['bimp_object']['file'] : $obj_module;
-                                    $obj_class = isset($obj_params['instance']['bimp_object']['class']) ? $obj_params['instance']['bimp_object']['class'] : ucfirst($obj_file);
-                                }
-                            }
-                        }
-
-                        if (!$obj_module || !$obj_file || !$obj_class) {
-                            continue;
-                        }
-
-                        if ($obj_class === $class) {
-                            $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
-                            if (isset($params['id_object']['field_value'])) {
-                                $field = $params['id_object']['field_value'];
-                                if ($field && $instance->field_exists($field)) {
-                                    $result = $bdb->update($table, array(
-                                        $field => $new_id
-                                            ), '`' . $field . '` = ' . (int) $old_id);
-                                    if ($result <= 0) {
-                                        $fails[] = 'Table: "' . $table . '", Champ: "' . $field . '"';
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!empty($fails)) {
-            $subject = 'ERREUR SUITE A CHANGEMENT D\'ID';
-
-            $msg = 'Plateforme: ' . DOL_URL_ROOT . "\n";
-            $msg .= 'Object: ' . $class . "\n";
-            $msg .= 'Ancien ID: ' . $old_id . "\n";
-            $msg .= 'Nouvel ID: ' . $new_id . "\n\n";
-
-            $msg .= 'Echec des mises à jour SQL: ' . "\n\n";
-
-            foreach ($fails as $fail) {
-                $msg .= ' - ' . $fail . "\n";
-            }
-
-            mailSyn2($subject, 'debugerp@bimp.fr', 'BIMP<admin@bimp.fr>', $msg);
-
-            dol_syslog($subject . "\n" . $msg, LOG_ERR);
-        }
-    }
-
     public static function getNextRef($table, $field, $prefix = '', $numCaractere = null)
     {
 
         $prefix = str_replace("{AA}", date('y'), $prefix);
         $prefix = str_replace("{MM}", date('m'), $prefix);
-
 
         if ($prefix) {
             $where = '`' . $field . '` LIKE \'' . $prefix . '%\'';
@@ -683,8 +779,12 @@ class BimpTools
         }
 
 
+        $nbCaractTotal = strlen($prefix)+$numCaractere;
 //        $max = BimpCache::getBdb()->getMax($table, $field, $where);
-        $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
+        if($numCaractere > 0)
+            $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = ".$nbCaractTotal);
+        else
+            $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
 
         if ((string) $max) {
             if (preg_match('/^' . $prefix . '([0-9]+)$/', $max, $matches)) {
@@ -716,6 +816,16 @@ class BimpTools
     {
         if (is_null($root_dir)) {
             $root_dir = DOL_DATA_ROOT;
+        }
+
+        if (is_string($dir_tree)) {
+            if (preg_match('/^\/*' . preg_quote($root_dir, '/') . '\/+(.+)$/', $dir_tree, $matches)) {
+                $dir_tree = $matches[1];
+            }
+        }
+
+        if (empty($dir_tree)) {
+            return 'Nom du dossier à créer absent';
         }
 
         if (!file_exists($root_dir)) {
@@ -786,13 +896,16 @@ class BimpTools
         if (file_exists($dir . 'thumbs/')) {
             $old_path = pathinfo($old_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
             $new_path = pathinfo($new_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
-            $dir .= 'thumbs/';
-            $suffixes = array('_mini', '_small');
-            foreach ($suffixes as $suffix) {
-                $old_thumb = $dir . $old_path['basename'] . $suffix . '.' . $old_path['extension'];
-                if (file_exists($old_thumb)) {
-                    $new_thumb = $dir . $new_path['basename'] . $suffix . '.' . $new_path['extension'];
-                    rename($old_thumb, $new_thumb);
+
+            if (isset($old_path['basename']) && isset($new_path['basename'])) {
+                $dir .= 'thumbs/';
+                $suffixes = array('_mini', '_small');
+                foreach ($suffixes as $suffix) {
+                    $old_thumb = $dir . $old_path['basename'] . $suffix . '.' . $old_path['extension'];
+                    if (file_exists($old_thumb)) {
+                        $new_thumb = $dir . $new_path['basename'] . $suffix . '.' . $new_path['extension'];
+                        rename($old_thumb, $new_thumb);
+                    }
                 }
             }
         }
@@ -903,26 +1016,90 @@ class BimpTools
         return $html;
     }
 
-    // Gestion Logs: 
-
-    public static function logTechnicalError($object, $method, $msg)
+    public static function unZip($srcPath, $destPath, &$errors = array())
     {
-        if (is_object($object)) {
-            $object = get_class($object);
+        if (!file_exists($srcPath)) {
+            $errors[] = 'L\'archive "' . $srcPath . '" n\'existe pas';
         }
 
-        $message = '[ERREUR TECHNIQUE] ' . $object . '::' . $method . '() - ' . $msg;
-        dol_syslog($message, LOG_ERR);
+        if (!is_dir($destPath)) {
+            $errors[] = 'Le dossier de destination "' . $destPath . '" n\'existe pas';
+        }
+
+        if (!class_exists('ZipArchive')) {
+            $errors[] = 'La classe "ZipArchive" n\'existe pas';
+        }
+
+        if (!count($errors)) {
+            $zip = new ZipArchive();
+            $result = $zip->open($srcPath);
+            if ($result === true) {
+                if ($zip->extractTo($destPath) === true) {
+                    $zip->close();
+                    return true;
+                }
+
+                $errors[] = 'Echec de l\'extraction de l\'archive "' . $srcPath . '"';
+                $zip->close();
+            } else {
+                $errors[] = 'Echec de l\'ouverture de l\'archive "' . $srcPath . '" (Code erreur: ' . $result . ')';
+            }
+        }
+
+        return false;
+    }
+
+    // Gestion Logs: 
+
+    public static function logTechnicalError($object, $method, $msg, $extra_data = array())
+    {
+        $message = '[ERREUR TECHNIQUE] ' . $msg;
+
+        if (is_object($object)) {
+            $extra_data['Classe'] = get_class($object);
+        }
+
+        if ($method) {
+            $extra_data['Méthode'] = $method;
+        }
+
+        BimpCore::addlog($message, Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', (is_a($object, 'BimpObject') ? $object : null), $extra_data);
     }
 
     // Gestion SQL:
+
+    public static function getSqlFullSelectQuery($table, $fields, $filters = array(), $joins = array(), $params = array())
+    {
+        $params = self::overrideArray(array(
+                    'order_by'        => null,
+                    'order_way'       => 'ASC',
+                    'extra_order_by'  => null,
+                    'extra_order_way' => 'ASC',
+                    'n'               => 0,
+                    'p'               => 1,
+                    'default_alias'   => 'a',
+                    'where_operator'  => 'WHERE'
+                        ), $params);
+
+        $sql = self::getSqlSelect($fields, $params['default_alias']);
+        $sql .= self::getSqlFrom($table, $joins, $params['default_alias']);
+
+        if (!empty($filters)) {
+            $sql .= self::getSqlWhere($filters, $params['default_alias'], $params['where_operator']);
+        }
+
+        $sql .= self::getSqlOrderBy($params['order_by'], $params['order_way'], $params['default_alias'], $params['extra_order_by'], $params['extra_order_way']);
+        $sql .= self::getSqlLimit($params['n'], $params['p']);
+
+        return $sql;
+    }
 
     public static function getSqlSelect($return_fields = null, $default_alias = 'a')
     {
         $sql = 'SELECT ';
 
-        if (!is_null($return_fields)) {
-            if (is_array($return_fields) && count($return_fields)) {
+        if (!is_null($return_fields) && !empty($return_fields)) {
+            if (is_array($return_fields)) {
                 $first_loop = true;
                 foreach ($return_fields as $field) {
                     if (!$first_loop) {
@@ -934,10 +1111,14 @@ class BimpTools
                         $sql .= $field;
                     } elseif (!is_null($default_alias) && $default_alias) {
                         $sql .= $default_alias . '.' . $field;
+                    } else {
+                        $sql .= $field;
                     }
                 }
             } elseif (is_string($return_fields)) {
                 $sql .= $return_fields;
+            } else {
+                $sql .= '*';
             }
         } else {
             $sql .= '*';
@@ -960,9 +1141,10 @@ class BimpTools
             $sql = ' FROM ' . MAIN_DB_PREFIX . $table . ($default_alias ? ' ' . $default_alias : '');
 
             if (!is_null($joins) && is_array($joins) && count($joins)) {
-                foreach ($joins as $join) {
-                    if (isset($join['table']) && isset($join['alias']) && isset($join['on'])) {
-                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $join['alias'] . ' ON ' . $join['on'];
+                foreach ($joins as $key => $join) {
+                    $alias = (isset($join['alias']) ? $join['alias'] : $key);
+                    if (isset($join['table']) && isset($join['on'])) {
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $alias . ' ON ' . $join['on'];
                     }
                 }
             }
@@ -970,7 +1152,7 @@ class BimpTools
         return $sql;
     }
 
-    public static function getSqlWhere($filters, $default_alias = 'a')
+    public static function getSqlWhere($filters, $default_alias = 'a', $operator = 'WHERE')
     {
         $sql = '';
         if (!is_null($filters) && is_array($filters) && !empty($filters)) {
@@ -978,17 +1160,34 @@ class BimpTools
             foreach ($filters as $field => $filter) {
                 $sql_filter = self::getSqlFilter($field, $filter, $default_alias);
 
-                if ($sql_filter) {
+                if ($sql_filter !== '') {
                     if (!$first_loop) {
                         $sql .= ' AND ';
                     } else {
-                        $sql .= ' WHERE ';
+                        if ($operator) {
+                            $sql .= ' ' . $operator . ' ';
+                        }
                         $first_loop = false;
                     }
                     $sql .= $sql_filter;
                 }
             }
         }
+        return $sql;
+    }
+
+    public static function getSqlCase($filters, $value_true, $value_false, $default_alias = 'a')
+    {
+        $sql = '';
+        if (!is_null($filters) && is_array($filters) && !empty($filters)) {
+            $sql .= ' CASE';
+            $sql .= BimpTools::getSqlWhere($filters, $default_alias, 'WHEN');
+            $sql .= ' THEN ' . $value_true . ' ELSE ' . $value_false;
+            $sql .= ' END';
+        } else {
+            $sql .= $value_true;
+        }
+
         return $sql;
     }
 
@@ -1067,13 +1266,15 @@ class BimpTools
         } elseif (is_array($filter) && isset($filter['custom'])) {
             $sql .= $filter['custom'];
         } else {
+            $sql_field = '';
             if (preg_match('/\./', $field)) {
-                $sql .= $field;
+                $sql_field = $field;
             } elseif (!is_null($default_alias) && $default_alias) {
-                $sql .= $default_alias . '.' . $field;
+                $sql_field = $default_alias . '.' . $field;
             } else {
-                $sql .= '`' . $field . '`';
+                $sql_field = '`' . $field . '`';
             }
+            $sql .= $sql_field;
 
             if (isset($filter['IN'])) {
                 $filter['in'] = $filter['IN'];
@@ -1082,8 +1283,11 @@ class BimpTools
             if (is_array($filter)) {
                 if (isset($filter['min']) || isset($filter['max'])) {
                     if (isset($filter['min']) && (string) $filter['min'] !== '' && isset($filter['max']) && (string) $filter['max'] !== '') {
-                        $sql .= ' BETWEEN ' . (is_string($filter['min']) ? '\'' . $filter['min'] . '\'' : $filter['min']);
-                        $sql .= ' AND ' . (is_string($filter['max']) ? '\'' . $filter['max'] . '\'' : $filter['max']);
+                        if (isset($filter['not'])) {
+                            $sql .= ' NOT';
+                        }
+                        $sql .= ' BETWEEN ' . ((is_string($filter['min']) && $filter['min'] != 'now()') ? '\'' . $filter['min'] . '\'' : $filter['min']);
+                        $sql .= ' AND ' . ((is_string($filter['max']) && $filter['max'] != 'now()') ? '\'' . $filter['max'] . '\'' : $filter['max']);
                     } elseif (isset($filter['min']) && (string) $filter['min'] !== '') {
                         $sql .= ' >= ' . (is_string($filter['min']) ? '\'' . $filter['min'] . '\'' : $filter['min']);
                     } elseif (isset($filter['max']) && (string) $filter['max'] !== '') {
@@ -1094,9 +1298,27 @@ class BimpTools
                 } elseif (isset($filter['operator']) && isset($filter['value'])) {
                     $sql .= ' ' . $filter['operator'] . ' ' . (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
                 } elseif (isset($filter['part_type']) && isset($filter['part'])) {
+                    $escape_char = '';
+                    foreach (array('$', '|', '&', '@') as $char) {
+                        if (strpos($filter['part'], $char) === false) {
+                            $escape_char = $char;
+                            break;
+                        }
+                    }
                     $filter['part'] = addslashes($filter['part']);
+                    if ($escape_char) {
+                        $filter['part'] = str_replace('%', $escape_char . '%', $filter['part']);
+                        $filter['part'] = str_replace('_', $escape_char . '_', $filter['part']);
+                    }
+                    if (isset($filter['not']) && (int) $filter['not']) {
+                        $sql .= ' NOT';
+                    }
                     $sql .= ' LIKE \'';
                     switch ($filter['part_type']) {
+                        case 'full':
+                            $sql .= $filter['part'];
+                            break;
+
                         case 'beginning':
                             $sql .= $filter['part'] . '%';
                             break;
@@ -1111,9 +1333,34 @@ class BimpTools
                             break;
                     }
                     $sql .= '\'';
+                    if ($escape_char) {
+                        $sql .= ' ESCAPE \'' . $escape_char . '\'';
+                    }
                 } elseif (isset($filter['in'])) {
                     if (is_array($filter['in'])) {
-                        $sql .= ' IN ("' . implode('","', $filter['in']) . '")';
+                        $has_null = false;
+                        foreach ($filter['in'] as $key => $in_value) {
+                            if (is_null($in_value)) {
+                                $has_null = true;
+                                unset($filter['in'][$key]);
+                            }
+                        }
+
+                        if (count($filter['in'])) {
+                            if ($has_null) {
+                                $sql = '(' . $sql_field;
+                            }
+                            $sql .= ' IN ("';
+                            $sql .= implode('","', $filter['in']);
+                            $sql .= '")';
+                            if ($has_null) {
+                                $sql .= ' OR ' . $sql_field . ' IS NULL)';
+                            }
+                        } elseif ($has_null) {
+                            $sql .= ' IS NULL';
+                        } else {
+                            $sql .= ' = 0 AND 0';
+                        }
                     } elseif ($filter['in'] == "") {
                         $sql .= ' = 0 AND 0';
                     } else {
@@ -1121,12 +1368,42 @@ class BimpTools
                     }
                 } elseif (isset($filter['not_in'])) {
                     if (is_array($filter['not_in'])) {
-                        $sql .= ' NOT IN (' . implode(',', $filter['not_in']) . ')';
+                        $has_null = false;
+                        foreach ($filter['not_in'] as $key => $not_in_value) {
+                            if (is_null($not_in_value)) {
+                                $has_null = true;
+                                unset($filter['not_in'][$key]);
+                            }
+                        }
+
+                        if (count($filter['not_in'])) {
+                            if ($has_null) {
+                                $sql = '(' . $sql_field;
+                            }
+                            $sql .= ' NOT IN ("';
+                            $sql .= implode('","', $filter['not_in']);
+                            $sql .= '")';
+                            if ($has_null) {
+                                $sql .= ' AND ' . $sql_field . ' IS NOT NULL)';
+                            }
+                        } elseif ($has_null) {
+                            $sql .= ' IS NOT NULL';
+                        } else {
+                            $sql .= ' = 0 AND 0';
+                        }
                     } else {
                         $sql .= ' NOT IN (' . $filter['not_in'] . ')';
                     }
                 } else {
-                    $sql .= ' IN (' . implode(',', $filter) . ')';
+                    if (is_array($filter) && count($filter) > 0) {
+                        $sql .= ' IN (' . implode(',', $filter) . ')';
+                    } elseif ((is_array($filter) && count($filter) == 0) || $filter == '') {
+                        $sql .= ' = 0 AND 0';
+                    } else {
+                        BimpCore::addlog('Erreur filtre SQL invalide', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                            'Filtre' => $filter
+                        ));
+                    }
                 }
             } elseif ($filter === 'IS_NULL') {
                 $sql .= ' IS NULL';
@@ -1135,9 +1412,12 @@ class BimpTools
             } elseif (is_string($filter) && preg_match('/^ *([<>!=]{1,2}) *(.+)$/', $filter, $matches)) {
                 $sql .= ' ' . $matches[1] . ' \'' . $matches[2] . '\'';
             } else {
-                $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
+//                $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
+                global $db;
+                $sql .= ' = \'' . $db->escape($filter) . '\'';
             }
         }
+
         return $sql;
     }
 
@@ -1199,27 +1479,77 @@ class BimpTools
         return $sql;
     }
 
-    public static function mergeSqlFilter($filters, $field, $new_filter)
+    public static function mergeSqlFilter($filters, $sqlKey, $new_filter, $type = 'and')
     {
-        if (isset($filters[$field])) {
-            if (isset($filters[$field]['and'])) {
-                $filters[$field]['and'][] = $new_filter;
-            } else {
-                $current_filter = $filters[$field];
-                $filters[$field] = array('and' => array());
-                $filters[$field]['and'][] = $current_filter;
-                $filters[$field]['and'][] = $new_filter;
+        if (isset($filters[$sqlKey])) {
+            switch (strtolower($type)) {
+                case 'or':
+                    if (isset($filters[$sqlKey]['or_field'])) {
+                        $filters[$sqlKey]['or_field'][] = $new_filter;
+                    } else {
+                        $current_filter = $filters[$sqlKey];
+                        $filters[$sqlKey] = array('or_field' => array());
+                        $filters[$sqlKey]['or_field'][] = $current_filter;
+                        $filters[$sqlKey]['or_field'][] = $new_filter;
+                    }
+                    break;
+
+                case 'and':
+                    if (isset($filters[$sqlKey]['and'])) {
+                        $filters[$sqlKey]['and'][] = $new_filter;
+                    } else {
+                        $current_filter = $filters[$sqlKey];
+                        $filters[$sqlKey] = array('and' => array());
+                        $filters[$sqlKey]['and'][] = $current_filter;
+                        $filters[$sqlKey]['and'][] = $new_filter;
+                    }
+                default:
             }
         } else {
-            $filters[$field] = $new_filter;
+            $filters[$sqlKey] = $new_filter;
         }
 
         return $filters;
     }
 
+    public static function mergeSqlFilters($filters, $new_filters, $type = 'and')
+    {
+        foreach ($new_filters as $filter_name => $new_filter) {
+            $filters = self::mergeSqlFilter($filters, $filter_name, $new_filter, $type);
+        }
+
+        return $filters;
+    }
+
+    public static function getSqlSelectFullQuery($table, $fields, $filters = array(), $joins = array(), $params = array())
+    {
+        $params = self::overrideArray(array(
+                    'order_by'        => null,
+                    'order_way'       => 'ASC',
+                    'extra_order_by'  => null,
+                    'extra_order_way' => 'ASC',
+                    'n'               => 0,
+                    'p'               => 1,
+                    'default_alias'   => 'a',
+                    'where_operator'  => 'WHERE'
+                        ), $params);
+
+        $sql = self::getSqlSelect($fields, $params['default_alias']);
+        $sql .= self::getSqlFrom($table, $joins, $params['default_alias']);
+
+        if (!empty($filters)) {
+            $sql .= self::getSqlWhere($filters, $params['default_alias'], $params['where_operator']);
+        }
+
+        $sql .= self::getSqlOrderBy($params['order_by'], $params['order_way'], $params['default_alias'], $params['extra_order_by'], $params['extra_order_way']);
+        $sql .= self::getSqlLimit($params['n'], $params['p']);
+
+        return $sql;
+    }
+
     // Gestion de données:
 
-    public static function checkValueByType($type, &$value)
+    public static function checkValueByType($type, &$value, &$errors = array())
     {
         if (is_null($value)) {
             return true;
@@ -1271,6 +1601,9 @@ class BimpTools
                     }
                 }
 
+                if (is_bool($value))
+                    $value = ($value ? 1 : 0);
+
                 if (is_numeric($value)) {
                     if ((int) $value !== 0) {
                         $value = 1;
@@ -1291,7 +1624,7 @@ class BimpTools
                         $value = 0;
                     }
                     $value = str_replace(',', '.', $value);
-                    if (preg_match('/^\-?[0-9]+\.?[0-9]*$/', $value)) {
+                    if (preg_match('/^\-?[0-9]+([\.,][0-9]+)?$/', $value)) {
                         $value = (float) $value;
                     }
                 }
@@ -1320,7 +1653,8 @@ class BimpTools
                     $value = null;
                     return true;
                 }
-                if (preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $value)) {
+                if (preg_match('/^(\d{2}):(\d{2}):?(\d{2})?$/', $value, $matches)) {
+                    $value = $matches[1] . ':' . $matches[2] . (isset($matches[3]) ? ':' . $matches[3] : ':00');
                     return true;
                 }
                 return false;
@@ -1336,16 +1670,8 @@ class BimpTools
                 return false;
 
             case 'json':
-                if (!is_array($value)) {
-                    if (is_string($value)) {
-                        $value = json_decode($value, true);
-                    } elseif (!empty($value)) {
-                        $value = array($value);
-                    }
-                    if (empty($value)) {
-                        $value = array();
-                    }
-                }
+            case 'object_filters':
+                $value = BimpTools::json_decode_array($value, $errors);
                 return is_array($value);
         }
         return true;
@@ -1472,7 +1798,7 @@ class BimpTools
             }
         }
 
-        if (preg_match('/^(\d{4}\-\d{2}\-\d{2}).?(\d{2}:\d{2}:\d{2})?.*$/', $value, $matches)) {
+        if (is_string($value) && preg_match('/^(\d{4}\-\d{2}\-\d{2}).?(\d{2}:\d{2}:\d{2})?.*$/', $value, $matches)) {
             if (preg_match('/^1970\-01\-01.*$/', $value)) {
                 return '';
             }
@@ -1490,7 +1816,50 @@ class BimpTools
             }
         }
 
+        if (is_array($value)) {
+            return BimpRender::renderRecursiveArrayContent($value);
+        }
+
         return $value;
+    }
+
+    public static function displayAddress($address, $zip, $town, $dept, $pays, $icon = false, $single_line = false)
+    {
+        $html = '';
+
+        if ($address) {
+            $html .= $address . ($single_line ? ', ' : '<br/>');
+        }
+
+        if ($zip) {
+            $html .= $zip;
+
+            if ($town) {
+                $html .= ' ' . $town;
+            }
+            $html .= ($single_line ? '' : '<br/>');
+        } elseif ($town) {
+            $html .= $town . ($single_line ? '' : '<br/>');
+        }
+
+        if (!$single_line && $dept) {
+            $html .= $dept;
+
+            if ($pays) {
+                $html .= ', ' . $pays;
+            }
+        } elseif ($pays) {
+            if ($single_line) {
+                $html .= ', ';
+            }
+            $html .= $pays;
+        }
+
+        if ($html && $icon) {
+            $html = BimpRender::renderIcon('fas_map-marker-alt', 'iconLeft') . $html;
+        }
+
+        return $html;
     }
 
     // Gestion des durées:
@@ -1534,10 +1903,18 @@ class BimpTools
         return $return;
     }
 
-    public static function displayTimefromSeconds($total_seconds)
+    public static function displayTimefromSeconds($total_seconds, $withDay = true, $withSecondes = true)
     {
-        $timer = self::getTimeDataFromSeconds((int) $total_seconds);
         $html = '<span class="timer">';
+        if ($total_seconds < 0) {
+            $html .= '-';
+            $total_seconds = $total_seconds * -1;
+        }
+        $timer = self::getTimeDataFromSeconds((int) $total_seconds);
+        if (!$withDay) {
+            $timer['hours'] += 24 * $timer['days'];
+            $timer['days'] = 0;
+        }
         if ($timer['days'] > 0) {
             $html .= $timer['days'] . ' j ';
             $html .= $timer['hours'] . ' h ';
@@ -1548,9 +1925,90 @@ class BimpTools
         } elseif ($timer['minutes'] > 0) {
             $html .= $timer['minutes'] . ' min ';
         }
-        $html .= $timer['secondes'] . ' sec ';
+        if ($withSecondes && $timer['secondes'])
+            $html .= $timer['secondes'] . ' sec ';
         $html .= '</span>';
         return $html;
+    }
+
+    // Gestion des dates: 
+
+    public function printDate($date, $balise = "span", $class = '', $format = 'd / m / Y H:i:s', $format_mini = 'd / m / Y')
+    {
+        if ($date == '')
+            return '';
+
+        if (is_string($date) && stripos($date, '-') > 0) {
+            $date = new DateTime($date);
+        }
+
+        if (is_object($date)) {
+            $date = $date->getTimestamp();
+        }
+
+        if (is_array($class)) {
+            $class = explode(" ", $class);
+        }
+
+        $html = '<' . $balise;
+
+        if ($format != $format_mini) {
+            $html .= ' title="' . date($format, $date) . '"';
+        }
+
+        if ($class != '') {
+            $html .= ' class="' . $class . '"';
+        }
+        $html .= '>' . date($format_mini, $date) . '</' . $balise . '>';
+
+        return $html;
+    }
+
+    public static function getDayOfWeekLabel($day)
+    {
+        switch ($day) {
+            case 1:
+                return 'Lundi';
+
+            case 2:
+                return 'Mardi';
+
+            case 3:
+                return 'Mercredi';
+
+            case 4:
+                return 'Jeudi';
+
+            case 5:
+                return 'Vendredi';
+
+            case 6:
+                return 'Samedi';
+
+            case 7:
+                return 'Dimanche';
+        }
+
+        return '';
+    }
+
+    public static function getMonthLabel($month)
+    {
+        // todo
+
+        return $month;
+    }
+
+    public static function getDayOfTwoWeeks()
+    {
+        $day = (int) date('w');
+        $week = (int) date('W');
+
+        if (floor($week / 2) * 2 == $week) { // sem. paire
+            $day += 7;
+        }
+
+        return $day;
     }
 
     // Devises / prix: 
@@ -1573,69 +2031,13 @@ class BimpTools
         return '&euro;';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false)
+    public static function getCurrencyNoHtml($currency)
     {
-        if (is_numeric($value)) {
-            $value = (float) $value;
+        if (array_key_exists(strtoupper($currency), self::$currencies)) {
+            return self::$currencies[$currency]['no_html'];
         }
 
-        if (!is_float($value)) {
-            return $value;
-        }
-
-        if ($value > -0.01 && $value < 0.01) {
-            $value = 0;
-        }
-
-        $base_price = $value;
-
-        if ($truncate) {
-            $code = '';
-            if ($value > 1000000000) {
-                $code = 'G';
-                $value = $value / 1000000000;
-            } elseif ($value > 1000000) {
-                $code = 'M';
-                $value = $value / 1000000;
-            } elseif ($value > 100000) {
-                $code = 'K';
-                $value = $value / 1000;
-            }
-            $price = price($value, 1, '', 1, -1, -1) . ' ' . $code . self::getCurrencyHtml($currency);
-        } else {
-            $price = price($value, 1, '', 1, -1, -1, $currency);
-        }
-
-        $html = '';
-
-        if ($with_styles) {
-            $html .= '<span style="';
-            if ((float) $value != 0) {
-                $html .= 'font-weight: bold;';
-            }
-            if ((float) $value < 0) {
-                $html .= 'color: #A00000;';
-            }
-            $html .= '">';
-        }
-
-        if ($truncate) {
-            $base_price = price($base_price, 1, '', 1, -1, -1, $currency);
-            $html .= '<span class="bs-popover"';
-            $html .= BimpRender::renderPopoverData($base_price, 'top', 'true');
-            $html .= '>';
-        }
-
-        $html .= $price;
-
-        if ($truncate) {
-            $html .= '</span>';
-        }
-
-        if ($with_styles) {
-            $html .= '</span>';
-        }
-        return $html;
+        return '€';
     }
 
     public static function getTaxes($id_country = 1)
@@ -1655,6 +2057,42 @@ class BimpTools
             return (float) $taxes[(int) $id_tax];
         }
         return 0;
+    }
+
+    public static function getTaxeRateByCode($code, $id_country = 1, $return_default = true)
+    {
+        $taxes = BimpCache::getTaxes($id_country, true, false, 'code');
+
+        if (isset($taxes[$code])) {
+            return (float) $taxes[$code];
+        }
+
+        if ($return_default) {
+            return self::getDefaultTva($id_country);
+        }
+
+        return 0;
+    }
+
+    public static function getTvaRateFromPrices($price_ht, $price_ttc)
+    {
+        if (!(float) $price_ht) {
+            return 0;
+        }
+
+        $tva = $price_ttc - $price_ht;
+        $tx = (float) ($tva / $price_ht) * 100;
+
+        $taxes = BimpCache::getTaxes(1);
+
+        // Pour répondre aux problèmes d'arrondis: (on retourne le taux en cours le plus proche)
+        foreach ($taxes as $id_taxe => $tva_tx) {
+            if ($tx < ($tva_tx + 1) && $tx > ($tva_tx - 1)) {
+                return $tva_tx;
+            }
+        }
+
+        return $tx;
     }
 
     public static function calculatePriceTaxEx($amout_tax_in, $tax_rate_percent, $precision = 6)
@@ -1807,6 +2245,73 @@ class BimpTools
         return $str;
     }
 
+    public static function cleanEmailsStr($emails_str, $name = '', $allow_multiple = true)
+    {
+        if ((string) $emails_str) {
+            $emails = str_replace(' ', '', $emails_str);
+            $emails = str_replace(';', ',', $emails);
+            $name = str_replace(',', '', $name);
+            $emails_str = '';
+
+            foreach (explode(',', $emails) as $email) {
+                if (preg_match('/^(.+)\[.+\]$/', $email, $matches)) {
+                    $email = $matches[1];
+                }
+
+                if ($name) {
+                    $emails_str .= ($emails_str ? ', ' : '') . $name . ' <' . $email . '>';
+                } else {
+                    $emails_str .= ($emails_str ? ', ' : '') . $email;
+                }
+            }
+        }
+
+        return $emails_str;
+    }
+
+    public static function displayPhone($phone)
+    {
+        if (strlen($phone) == 10)
+            return implode(' ', str_split($phone, 2));
+        return $phone;
+    }
+
+    public static function cleanStringMultipleNewLines($string, $html = false)
+    {
+        $string = str_replace("\n\n", "\n", $string);
+        $string = str_replace("\r\r", "\n", $string);
+        $string = str_replace(CHR(13) . CHR(13), "\n", $string);
+        $string = str_replace(CHR(10) . CHR(10), "\n", $string);
+        $string = str_replace(PHP_EOL . PHP_EOL, "\n", $string);
+
+        if ($html) {
+            $string = self::replaceBr($string, '<br/>');
+            $string = str_replace('<br/><br/>', '<br/>', $string);
+        }
+
+        return $string;
+    }
+
+    public static function isVowelFirst($string)
+    {
+        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', strtolower($string))) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public static function getOfTheLabel($label, $is_female = false)
+    {
+        if (self::isVowelFirst($label)) {
+            return 'de l\'' . $label;
+        } elseif ($is_female) {
+            return 'de la ' . $label;
+        }
+
+        return 'du ' . $label;
+    }
+
     // Traitements sur des array: 
 
     public static function getMsgFromArray($msgs, $title = '', $no_html = false)
@@ -1864,8 +2369,12 @@ class BimpTools
         return $array;
     }
 
-    public static function getArrayValueFromPath($array, $path, $value2String = false, $no_html = false)
+    public static function getArrayValueFromPath($array, $path, $default_value = null, &$errors = array(), $required = false, $missing_msg = '', $params = array())
     {
+        $params = BimpTools::overrideArray(array(
+                    'value2String' => false
+                        ), $params);
+
         $keys = explode('/', $path);
 
         $current_value = null;
@@ -1875,23 +2384,65 @@ class BimpTools
                 if (isset($array[$key])) {
                     $current_value = $array[$key];
                 } else {
-                    return null;
+                    $current_value = $default_value;
+                    break;
                 }
             } elseif (isset($current_value[$key])) {
                 $current_value = $current_value[$key];
             } else {
-                return null;
+                $current_value = $default_value;
+                break;
             }
         }
 
-        if ($value2String) {
-            $current_value = self::value2String($current_value);
+        if (!is_null($current_value)) {
+            if ($params['value2String']) {
+                $current_value = self::value2String($current_value);
+            }
+        }
+
+        if ($required && empty($current_value)) {
+            $errors[] = ($missing_msg ? $missing_msg : 'Valeur absente: "' . $path . '"');
+        }
+
+        if (is_string($current_value)) {
+            if (stripos($current_value, 'DOL_DATA_ROOT') !== false && defined('DOL_DATA_ROOT'))
+                $current_value = str_replace('DOL_DATA_ROOT', DOL_DATA_ROOT, $current_value);
+            if (stripos($current_value, 'PATH_TMP') !== false && defined('PATH_TMP'))
+                $current_value = str_replace('PATH_TMP', PATH_TMP, $current_value);
         }
 
         return $current_value;
     }
 
-    public static function overrideArray($array, $override)
+    public static function setArrayValueFromPath(&$array, $path, $value)
+    {
+        if (is_null($path) || !$path) {
+            return false;
+        }
+
+        $path = explode('/', $path);
+
+        foreach ($path as $key) {
+            if ($key === '') {
+                continue;
+            }
+            if (isset($array[$key])) {
+                $array = &$array[$key];
+            } else {
+                return false;
+            }
+        }
+
+        if (isset($array)) {
+            $array = $value;
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function overrideArray($array, $override, $skip_null = false, $recursive = false)
     {
         if (!is_array($array)) {
             $array = array();
@@ -1899,6 +2450,16 @@ class BimpTools
 
         if (is_array($override)) {
             foreach ($override as $key => $value) {
+                if ($skip_null && is_null($value)) {
+                    continue;
+                }
+
+                if ($recursive) {
+                    if (isset($array[$key]) && is_array($array[$key]) && is_array($value)) {
+                        $array[$key] = self::overrideArray($array[$key], $value, $skip_null, $recursive);
+                        continue;
+                    }
+                }
                 $array[$key] = $value;
             }
         }
@@ -1906,45 +2467,355 @@ class BimpTools
         return $array;
     }
 
+    public static function getMaxArrayDepth($array)
+    {
+        $max_depth = 1;
+
+        if (is_array($array)) {
+            foreach ($array as $value) {
+                if (is_array($value)) {
+                    $depth = self::getMaxArrayDepth($value) + 1;
+
+                    if ($depth > $max_depth) {
+                        $max_depth = $depth;
+                    }
+                }
+            }
+        }
+
+        return $max_depth;
+    }
+
+    public static function implodeWithQuotes($array, $delimiter = ',')
+    {
+        $str = '';
+
+        if (is_array($array)) {
+            foreach ($array as $value) {
+                $str .= ($str ? $delimiter : '') . "'" . $value . "'";
+            }
+        }
+
+        return $str;
+    }
+
+    public static function implodeArrayKeys($array, $delimiter = ',', $with_quotes = false)
+    {
+        $str = '';
+
+        if (is_array($array)) {
+            foreach ($array as $key => $value) {
+                $str .= ($str ? $delimiter : '') . ($with_quotes ? "'" : '') . $key . ($with_quotes ? "'" : '');
+            }
+        }
+
+        return $str;
+    }
+
+    public static function merge_array($array1, $array2 = null, $keep_keys = false)
+    {
+        if (!is_array($array1)) {
+            if (!is_null($array1)) {
+                BimpCore::addlog('Erreur BimpTools::merge_array() - "$array1" n\'est pas un tableau', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                    'Type array1' => gettype($array1)
+                ));
+            }
+            return $array2;
+        }
+        if (!is_array($array2)) {
+            if (!is_null($array2)) {
+                BimpCore::addlog('Erreur BimpTools::merge_array() - "$array2" n\'est pas un tableau', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                    'Type array2' => gettype($array1)
+                ));
+            }
+            return $array1;
+        }
+
+        if ($keep_keys) {
+            foreach ($array2 as $key => $value) {
+                $array1[$key] = $value;
+            }
+
+            return $array1;
+        }
+
+        return array_merge($array1, $array2);
+    }
+
+    // Gestion des nombres: 
+
+    public static function getDecimalesNumber($float_number)
+    {
+        if (is_numeric($float_number)) {
+            $value_str = number_format($float_number, 8);
+
+            if ($value_str) {
+                if (preg_match('/^(\d+)\.(\d+)0*$/U', $value_str, $matches)) {
+                    return strlen($matches[2]);
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public static function getAvatarImgSrc($text, $size, $color)
+    {
+        return 'http://placehold.it/' . $size . '/' . $color . '/fff&amp;text=' . $text;
+    }
+
+    public static function getBadge($text, $size = 35, $style = 'info', $popover = '')
+    {
+        return '<span class="badge badge-pill badge-' . $style . (($popover != '') ? ' bs-popover' : '') . '" ' . (($popover != '') ? BimpRender::renderPopoverData($popover) : '') . ' style="size:' . $size . '">' . $text . '</span>';
+    }
+
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
+    {
+        // $decimals: indiquer 'full' pour afficher toutes les décimales. 
+        global $modeCSV;
+        if ($modeCSV)
+            return str_replace(".", ",", $value);
+        if (is_numeric($value)) {
+            $value = (float) $value;
+        }
+
+        if (!is_float($value)) {
+            return $value;
+        }
+
+        $base_price = $value;
+        $code = '';
+        $hasMoreDecimals = false;
+
+        // Troncature: 
+        if ($truncate) {
+            if ($value > 1000000000) {
+                $code = 'G';
+                $value = $value / 1000000000;
+            } elseif ($value > 1000000) {
+                $code = 'M';
+                $value = $value / 1000000;
+            } elseif ($value > 100000) {
+                $code = 'K';
+                $value = $value / 1000;
+            }
+
+            $decimals = 2;
+        }
+
+        // Ajustement du nombre de décimales:
+        if ($decimals === 'full') {
+            $decimals = (int) self::getDecimalesNumber($value);
+        }
+
+        if ($value) {
+            $min_decimals = 2;
+            $min = 0.01;
+            for ($i = 2; $i <= 8; $i++) {
+                if ($value > -$min && $value < $min) {
+                    $min /= 10;
+                    $min_decimals++;
+                    continue;
+                }
+                break;
+            }
+
+            if ($min_decimals > $decimals) {
+                $decimals = $min_decimals;
+            }
+        }
+
+        if ((int) $decimals < 2) {
+            $decimals = 2;
+        } elseif ((int) $decimals > 8) {
+            $decimals = 8;
+        }
+
+        // Arrondi: 
+        $value = round($value, (int) $decimals);
+
+        if ($value != round($base_price, 8)) {
+            $hasMoreDecimals = true;
+        }
+
+        // Espaces entre les milliers: 
+        if (!(string) $separator) {
+            $separator = ',';
+        }
+
+        $price = number_format($value, $decimals, $separator, ($spaces ? ' ' : ''));
+
+        $html = '';
+
+        if (!$no_html) {
+            // Styles: 
+            $html .= '<span';
+
+            if ($with_styles) {
+                $html .= ' style="';
+                if ((float) $value != 0) {
+                    $html .= 'font-weight: bold;';
+                }
+                if ((float) $value < 0) {
+                    $html .= 'color: #A00000;';
+                }
+                $html .= '"';
+            }
+
+            // popover: 
+            if ($hasMoreDecimals) {
+                $html .= ' class="bs-popover"';
+                $html .= BimpRender::renderPopoverData(number_format($base_price, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
+            }
+
+            $html .= '>';
+
+            $html .= $price;
+
+            if ($hasMoreDecimals && $round_points) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
+            if ($currency) {
+                $html .= ' ' . self::getCurrencyHtml($currency);
+            }
+
+            $html .= '</span>';
+        } else {
+            $html .= $price;
+
+            if ($hasMoreDecimals && $round_points) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
+            if ($currency) {
+                $html .= ' ' . self::getCurrencyHtml($currency);
+            }
+            $html = str_replace('&nbsp;', ' ', $html);
+        }
+
+        return $html;
+    }
+
+    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false, $truncate = false, $no_html = false, $round_points = false, $spaces = true)
+    {
+        // $decimals: indiquer 'full' pour afficher toutes les décimales. 
+
+        if (is_numeric($value)) {
+            $value = (float) $value;
+        }
+
+        if (!is_float($value)) {
+            return $value;
+        }
+
+        $base_price = $value;
+        $code = '';
+        $hasMoreDecimals = false;
+
+        // Troncature: 
+        if ($truncate) {
+            if ($value > 1000000000) {
+                $code = 'G';
+                $value = $value / 1000000000;
+            } elseif ($value > 1000000) {
+                $code = 'M';
+                $value = $value / 1000000;
+            } elseif ($value > 100000) {
+                $code = 'K';
+                $value = $value / 1000;
+            }
+        }
+
+        // Ajustement du nombre de décimales:
+        if ($decimals === 'full') {
+            $decimals = (int) self::getDecimalesNumber($value);
+        }
+
+        // Arrondi: 
+        $value = round($value, (int) $decimals);
+
+        if ($value != round($base_price, 8)) {
+            $hasMoreDecimals = true;
+        }
+
+        // Espaces entre les milliers: 
+        if (!(string) $separator) {
+            $separator = ',';
+        }
+        $number = number_format($value, $decimals, $separator, ($spaces ? ' ' : ''));
+
+        $html = '';
+
+        if (!$no_html) {
+            // Styles: 
+            $html .= '<span';
+
+            if ($with_styles) {
+                $html .= ' style="';
+                if ((float) $value != 0) {
+                    $html .= 'font-weight: bold;';
+                }
+                if ((float) $value < 0) {
+                    $html .= 'color: #A00000;';
+                }
+                $html .= '"';
+            }
+
+            // popover: 
+            if ($hasMoreDecimals) {
+                $html .= ' class="bs-popover"';
+                $html .= BimpRender::renderPopoverData(number_format($base_price, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
+            }
+
+            $html .= '>';
+
+            $html .= $number;
+
+            if ($hasMoreDecimals && $round_points) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
+            $html .= '</span>';
+        } else {
+            $html .= $number;
+
+            if ($hasMoreDecimals && $round_points) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
+            $html = str_replace('&nbsp;', ' ', $html);
+        }
+
+        return $html;
+    }
+
     // Divers:
 
     public static function getContext()
     {
-        if (self::$context != "")
-            return self::$context;
-
-        if (isset($_REQUEST['context'])) {
-            self::setContext($_REQUEST['context']);
-        }
-
-        if (isset($_SESSION['context'])) {
-            return $_SESSION['context'];
-        }
-
-        return "";
+        return BimpCore::getContext();
     }
 
-    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false)
+    public static function setContext($context)
     {
-        $html = '';
-
-        if ($with_styles) {
-            $html .= '<span style="';
-            if ((float) $value != 0) {
-                $html .= 'font-weight: bold;';
-            }
-            if ((float) $value < 0) {
-                $html .= 'color: #A00000;';
-            }
-            $html .= '">';
-        }
-
-        $html .= str_replace('.', $separator, '' . (round((float) $value, $decimals)));
-
-        if ($with_styles) {
-            $html .= '</span>';
-        }
-        return $html;
+        BimpCore::setContext($context);
     }
 
     public static function getAlertColor($class)
@@ -1970,7 +2841,7 @@ class BimpTools
         $return = array();
         foreach ($types as $type) {
             if (isset($_SESSION['dol_events'][$type])) {
-                $return = array_merge($_SESSION['dol_events'][$type], $return);
+                $return = BimpTools::merge_array($_SESSION['dol_events'][$type], $return);
                 if ($clean) {
                     unset($_SESSION['dol_events'][$type]);
                 }
@@ -1989,11 +2860,24 @@ class BimpTools
         }
     }
 
+    public static function makeUrlParamsFromArray($url_params)
+    {
+        $str = '';
+
+        if (is_array($url_params)) {
+            foreach ($url_params as $key => $value) {
+                $str .= ($str ? '&' : '') . $key . '=' . urlencode($value);
+            }
+        }
+
+        return $str;
+    }
+
     public static function makeUrlFromConfig(BimpConfig $config, $path, $default_module, $default_controller)
     {
         $url = DOL_URL_ROOT . '/';
 
-        $params = $config->get($path, null, true, 'array');
+        $params = $config->get($path, null, false, 'array');
 
         if (is_null($params)) {
             return '';
@@ -2011,14 +2895,17 @@ class BimpTools
 
         if ($url && isset($params['url_params'])) {
             $url_params = $config->getCompiledParams($path . '/url_params');
-            foreach ($url_params as $name => $value) {
-                if ((string) $name && (string) $value) {
+
+            if (is_array($url_params) && !empty($url_params)) {
+                $params_str = self::makeUrlParamsFromArray($url_params);
+
+                if ($params_str) {
                     if (!preg_match('/\?/', $url)) {
                         $url .= '?';
                     } else {
                         $url .= '&';
                     }
-                    $url .= $name . '=' . $value;
+                    $url .= $params_str;
                 }
             }
         }
@@ -2077,6 +2964,110 @@ class BimpTools
         return BimpCache::getSocieteCommerciauxObjectsList($socid);
     }
 
+    public static function json_decode_array($json, &$errors = array())
+    {
+        if (is_null($json) || in_array($json, array('', '[]', '{}'))) {
+            return array();
+        }
+
+        if (is_array($json)) {
+            return $json;
+        }
+        $json = str_replace('\%', '%', $json);
+
+        $result = json_decode($json, 1);
+
+        if (json_last_error()) {
+            $errors[] = 'Erreur décodage JSON: ' . json_last_error_msg();
+            return array();
+        }
+
+        if ($result == '') {
+            return array();
+        }
+
+        if (!is_array($result)) {
+            $result = array($result);
+        }
+
+        return $result;
+    }
+
+    public static function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
+    {
+        for ($i = 0, $z = strlen($chars) - 1, $s = $chars[rand(0, $z)], $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars[$x], $s = ($s[$i] == $s[$i - 1] ? substr($s, 0, -1) : $s), $i = strlen($s)) {
+            
+        }
+        return $s;
+    }
+
+    public static function displayMemory(&$init_mem = null)
+    {
+        $mem = memory_get_usage();
+        $html = 'Memory: ' . BimpTools::displayFloatValue($mem, 0);
+
+        if (!is_null($init_mem)) {
+            $diff = ($mem - $init_mem);
+
+            if ((int) $diff) {
+                $html .= ' (<span class="' . ($diff > 0 ? 'danger' : 'success') . '">' . ($diff > 0 ? '+' : '-') . ' ' . BimpTools::displayFloatValue(abs($diff), 0) . '</span>)';
+            } else {
+                $html .= ' (<span class="bold">+0</span>)';
+            }
+        }
+
+        if (!is_null($init_mem)) {
+            $init_mem = $mem;
+        }
+
+        return $html;
+    }
+
+    public static function createQrCodeImg($data, $dir, $file_name)
+    {
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");
+
+        if (!is_dir($dir)) {
+            $err = BimpTools::makeDirectories($dir);
+
+            if ($err) {
+                return false;
+            }
+        }
+
+        if (!preg_match('/^.+\.png$/', $file_name)) {
+            $file_name .= '.png';
+        }
+
+        if (!preg_match('/^.+\/$/', $dir)) {
+            $dir .= '/';
+        }
+
+        QRcode::png($data
+                , $dir . $file_name
+                , "L", 4, 2);
+    }
+
+    public static function displayBacktrace($nb_lines = 15)
+    {
+        return BimpRender::renderBacktrace(BimpTools::getBacktraceArray(debug_backtrace(null, $nb_lines)));
+    }
+
+    public static function clearAllPhpErrors()
+    {
+        $err = error_get_last();
+        $n = 0;
+        while (!empty($err)) {
+            error_clear_last();
+            $err = error_get_last();
+            $n++;
+
+            if ($n > 10000) {
+                break;
+            }
+        }
+    }
+
     // Gestion des couleurs: 
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)
@@ -2126,7 +3117,7 @@ class BimpTools
     public static function hexToHsl($hex)
     {
         $hex = array($hex[0] . $hex[1], $hex[2] . $hex[3], $hex[4] . $hex[5]);
-        $rgb = array_map(function($part) {
+        $rgb = array_map(function ($part) {
             return hexdec($part) / 255;
         }, $hex);
 
@@ -2163,6 +3154,8 @@ class BimpTools
     {
         list($h, $s, $l) = $hsl;
 
+//        echo $h . ', ' . $s . ', ' . $l . '<br/>';
+
         if ($s == 0) {
             $r = $g = $b = 1;
         } else {
@@ -2172,6 +3165,8 @@ class BimpTools
             $r = self::hue2rgb($p, $q, $h + 1 / 3);
             $g = self::hue2rgb($p, $q, $h);
             $b = self::hue2rgb($p, $q, $h - 1 / 3);
+
+//            echo $r . ', ' . $g . ', ' . $b . '<br/>';
         }
 
         return self::rgb2hex($r) . self::rgb2hex($g) . self::rgb2hex($b);
@@ -2198,66 +3193,251 @@ class BimpTools
         return str_pad(dechex($rgb * 255), 2, '0', STR_PAD_LEFT);
     }
 
-    public static function setContext($context)
+    // Debug: 
+
+    public static function getBacktraceArray($backtrace)
     {
-        self::$context = $context;
-        $_SESSION['context'] = $context;
+        // Génère un tableau de la backtrace classée par fichiers
+        // Ce tableau peut être fourni à BimpRender::renderBacktrace() pour un rendu HTML
+
+        $files = array();
+
+        $base_dir = DOL_DOCUMENT_ROOT;
+
+        if ($base_dir === '/var/www/html/bimp8/') {
+            $base_dir = '/var/GLE/bimp8/htdocs/';
+        }
+
+        if (is_array($backtrace) && !empty($backtrace)) {
+            unset($backtrace[0]);
+            krsort($backtrace);
+
+            $current_file = '';
+            $lines = array();
+
+            foreach ($backtrace as $idx => $trace) {
+                if (isset($trace['file'])) {
+                    $file = str_replace($base_dir, '', $trace['file']);
+                    if (!$current_file) {
+                        $current_file = $file;
+                    } elseif ($file != $current_file) {
+                        // Changement de fichier: 
+                        $files[] = array(
+                            'file'  => $current_file,
+                            'lines' => $lines
+                        );
+                        $current_file = $file;
+                        $lines = array();
+                    }
+                }
+
+                $args = '';
+
+                if (isset($trace['args'])) {
+                    foreach ($trace['args'] as $arg) {
+                        if ($args) {
+                            $args .= ', ';
+                        }
+
+                        if (is_object($arg)) {
+                            $args .= '*' . get_class($arg) . (isset($arg->id) ? ' #' . $arg->id : '');
+                        } elseif (is_bool($arg)) {
+                            $args .= ((int) $arg ? 'true' : 'false');
+                        } elseif (is_array($arg)) {
+                            $args .= print_r($arg, 1);
+                        } else {
+                            $args .= (string) $arg;
+                        }
+                    }
+                }
+
+                if (isset($trace['line']))
+                    $line = $trace['line'] . ': ';
+
+                if (isset($trace['class']) && $trace['class']) {
+                    $line .= $trace['class'] . BimpTools::getArrayValueFromPath($trace, 'type', '->');
+                }
+
+                $line .= $trace['function'] . '(' . $args . ')';
+                $lines[] = $line;
+            }
+
+            if ($current_file && !empty($lines)) {
+                $files[] = array(
+                    'file'  => $current_file,
+                    'lines' => $lines
+                );
+            }
+        }
+
+        return $files;
     }
 
-    public static function bloqueDebloque($type, $bloque = true)
+    public static function printBackTrace($depth)
     {
+        $bt = debug_backtrace(null, $depth);
+        echo BimpRender::renderBacktrace(self::getBacktraceArray($bt));
+    }
+
+    // Autres:
+
+    public static $nbMax = 15 * 4;
+
+    public static function lockNum($type, $nb = 0, $errors = array())
+    {
+        global $user, $langs;
+        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
+            return;
+        }
+
+        if (in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
+            return true;
+
+
+        $nb++;
+        self::sleppIfBloqued($type, $nb);
         $file = static::getFileBloqued($type);
-        if ($bloque) {
-            $random = rand(0, 10000000);
-            $text = "Yes" . $random;
-            file_put_contents($file, $text);
-            sleep(0.400);
-            $text2 = file_get_contents($file);
-            if ($text == $text2)
+
+        if ($nb > static::$nbMax) {
+            $errors[] = 'Dépassement du nombre de tentative lockNum';
+            BimpCore::addlog('Probléme lockNum ' . $type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors' => $errors));
+            die(print_r($errors, 1));
+        }
+
+
+        if (is_file($file)) {
+            $errors[] = 'Fichier existant aprés sleepIfBlocked';
+            BimpCore::addlog('Probléme lockNum ' . $type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors' => $errors));
+            return static::lockNum($type, $nb, $errors);
+        }
+
+
+        $text = "Yes" . rand(0, 10000000) . $user->getFullName($langs);
+        if (!file_put_contents($file, $text))
+            die('droit sur fichier incorrect : ' . $file);
+        usleep(1000000);
+        $text2 = file_get_contents($file);
+        if ($text == $text2) {
+            if (defined('ID_ERP')) {
+                $autreInstanceBloquage = static::isBloqued($type, true);
+                if (!$autreInstanceBloquage) {
+                    static::$bloquages[] = $type;
+                    return 1;
+                } else {
+                    unlink($file);
+                    $errors[] = 'Fichier lock d\'une autre instance : ' . $autreInstanceBloquage;
+                    BimpCore::addlog('Probléme lockNum ' . $type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors' => $errors));
+                    return static::lockNum($type, $nb, $errors);
+                }
+            } else {
+                static::$bloquages[] = $type;
                 return 1;
-            else {//conflit
-                mailSyn2("Conflit de ref évité", "dev@bimp.fr", "admin@bimp.fr", "Attention : Un conflit de ref de type " . $type . " a été évité");
-                self::sleppIfBloqued($type);
-                return static::bloqueDebloque($type, $bloque);
             }
-        } elseif (is_file($file))
-            return unlink($file);
+        } else {
+            $errors[] = 'Fichier diférent de celui attendue';
+            BimpCore::addlog('Probléme lockNum ' . $type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors' => $errors));
+            return static::lockNum($type, $nb, $errors);
+        }
+    }
+
+//    public static function unlockNum($type){
+//        
+//    }
+//    public static function bloqueDebloque($type, $bloque = true, $nb = 1)
+//    {
+//        $file = static::getFileBloqued($type);
+//        if ($bloque) {
+//            $msg = '';
+//            if (!is_file($file)) {
+//                $random = rand(0, 10000000);
+//                $text = "Yes" . $random;
+//                if (!file_put_contents($file, $text))
+//                    die('droit sur fichier incorrect : ' . $file);
+//                sleep(0.400);
+//                $text2 = file_get_contents($file);
+//                if ($text == $text2){
+//                    static::$bloquages[] = $type;
+//                    return 1;
+//                }
+//                else
+//                    $msg = 'Fichier diférent de celui attendue';
+//            }
+//            else
+//                $msg = 'Fichier deja existant';
+//            //conflit
+//            global $user;
+//            mailSyn2("Conflit de ref évité", BimpCore::getConf('devs_email'), null, $user->login."  Attention : Un conflit de ref de type " . $type . " a été évité : ".$msg);
+//            $nb++;
+//            if ($nb > static::$nbMax)
+//                die('On arrete tout erreur 445834834857');
+//            self::sleppIfBloqued($type, $nb);
+//            return static::bloqueDebloque($type, $bloque, $nb);
+//        } elseif (is_file($file))//on ne debloque plus ici mais dans debloqueAll
+//            return 1;//unlink($file);
+//    }
+
+    public static function deloqueAll(&$debloquer = array())
+    {
+        $i = 0;
+        foreach (static::$bloquages as $id => $type) {
+            if (!unlink(static::getFileBloqued($type)))
+                BimpCore::addlog('Suppression fichier de lock impossible ' . static::getFileBloqued($type), Bimp_Log::BIMP_LOG_URGENT);
+            unset(static::$bloquages[$id]);
+            $i++;
+            $debloquer[] = $type;
+        }
+        return $i;
     }
 
     public static function getFileBloqued($type)
     {
+        return static::getDirBloqued() . $type . (defined('ID_ERP') ? '_' . ID_ERP : '') . ".txt";
+    }
+
+    public static function getDirBloqued()
+    {
         $folder = DOL_DATA_ROOT . '/bloqueFile/';
         if (!is_dir($folder))
             mkdir($folder);
-        return $folder . $type . ".txt";
+        return $folder;
     }
 
-    public static function isBloqued($type)
+    public static function isBloqued($type, $notThis = false)
     {
-        $file = static::getFileBloqued($type);
-        return (file_exists($file));
+        $dir = static::getDirBloqued();
+        $files = scandir($dir);
+        foreach ($files as $file) {
+            if (stripos($file, $type) === 0 && (!$notThis || stripos($file, '_' . ID_ERP) === false))
+                return $file;
+        }
+        return false;
     }
 
     public static function sleppIfBloqued($type, $nb = 0)
     {
-        $nbMax = 10;
         $nb++;
-        if (static::isBloqued($type)) {
-            if ($nb < $nbMax) {
-                sleep(1);
+        $fichierBloquant = static::isBloqued($type);
+        if ($fichierBloquant) {
+            if ($nb < static::$nbMax) {
+                usleep(250000);
                 return static::sleppIfBloqued($type, $nb);
             } else {
-                $text = "Attention bloquage de plus de " . $nbMax . " secondes voir pour type : " . $type;
-                dol_syslog("ATTENTION " . $text, 3);
-                mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : " . $text);
-                static::bloqueDebloque($type, false);
+                $text = "sleppIfBloqued() : bloquage de plus de " . static::$nbMax / 4 . " secondes";
+//                static::bloqueDebloque($type, false, $nb);
+//                unlink(static::getFileBloqued($type));
+                BimpCore::addlog($text, Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                    'Type' => $type,
+                    'File' => $fichierBloquant
+                ));
+                global $db;
+                $db::stopAll();
                 return 0;
             }
         } else
             return 0;
     }
 
-    public static function getMailOrSuperiorMail($idComm)
+    public static function getMailOrSuperiorMail($idComm, $defMail = 'erp@bimp.fr')
     {
         $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
         $ok = true;
@@ -2267,8 +3447,165 @@ class BimpTools
             return $userT->getData('email');
 
         if ($userT->getData('fk_user') > 0)
-            return static::getMailOrSuperiorMail($userT->getData('fk_user'));
+            return static::getMailOrSuperiorMail($userT->getData('fk_user'), $defMail);
 
-        return "admin@bimp.fr";
+        return $defMail;
+    }
+
+    public static function mailGrouper($to, $from, $msg)
+    {
+        $dir = PATH_TMP . "/bimpcore/mailsGrouper/";
+        if (!is_dir($dir))
+            mkdir($dir);
+        if (!is_dir($dir))
+            return false;
+        $msg = "<br/><br/>" . dol_print_date(dol_now(), '%d/%m/%Y %H:%M:%S') . " : " . $msg;
+        $file = $dir . $to;
+        $file .= "$" . $from;
+        $file .= "$.txt";
+        file_put_contents($file, $msg, FILE_APPEND);
+    }
+
+    public static function htmlToText($html)
+    {
+        $html = preg_replace('/\<br(\s*)?\/?\>/i', "\n", $html);
+
+        return $html;
+    }
+
+    public static function sendMailGrouper()
+    {
+        $dir = PATH_TMP . "/bimpcore/mailsGrouper/";
+        if (!is_dir($dir))
+            mkdir($dir);
+        if (!is_dir($dir))
+            return false;
+        $files = scandir($dir);
+        $i = 0;
+        foreach ($files as $file) {
+            $tabInfo = explode("$", $file);
+            if (isset($tabInfo[2])) {
+                $msg = file_get_contents($dir . $file);
+                if (mailSyn2("Infos grouper Bimp-ERP", $tabInfo[0], $tabInfo[1], $msg)) {
+                    unlink($dir . $file);
+                    $i++;
+                }
+            }
+        }
+        return "OK " . $i . ' mails envoyés';
+    }
+
+    public function envoieMailGrouper()
+    {
+        $this->output = static::sendMailGrouper();
+        return 0;
+    }
+
+    public static function isModuleDoliActif($module)
+    {
+        global $conf;
+        if (stripos($module, 'MAIN_MODULE_') === false)
+            $module = 'MAIN_MODULE_' . $module;
+        if (isset($conf->global->$module) && $conf->global->$module)
+            return 1;
+        return 0;
+    }
+
+    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14'))
+    {
+        $errors = array();
+        require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+        foreach ($tels as $tel) {
+            $tel = traiteNumMobile($tel);
+            $smsfile = new CSMSFile($tel, 'BIMP ADMIN', $text);
+            if (!$smsfile->sendfile()) {
+                $errors[] = 'Echec de l\'envoi du sms';
+            }
+        }
+
+        return $errors;
+    }
+
+    public static function getDataLightWithPopover($data, $lenght = 5)
+    {
+        global $modeCSV;
+        if ($modeCSV) {
+            return $data;
+        } else {
+            $return = '<span class=" bs-popover"';
+            $return .= BimpRender::renderPopoverData($data, 'top', true);
+            $return .= '>';
+            $return .= substr($data, 0, $lenght) . '...';
+            $return .= '</span>';
+            return $return;
+        }
+    }
+}
+
+if (!function_exists('mime_content_type')) {
+
+    function mime_content_type($filename)
+    {
+
+        $mime_types = array(
+            'txt'  => 'text/plain',
+            'htm'  => 'text/html',
+            'html' => 'text/html',
+            'php'  => 'text/html',
+            'css'  => 'text/css',
+            'js'   => 'application/javascript',
+            'json' => 'application/json',
+            'xml'  => 'application/xml',
+            'swf'  => 'application/x-shockwave-flash',
+            'flv'  => 'video/x-flv',
+            // images
+            'png'  => 'image/png',
+            'jpe'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'jpg'  => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'bmp'  => 'image/bmp',
+            'ico'  => 'image/vnd.microsoft.icon',
+            'tiff' => 'image/tiff',
+            'tif'  => 'image/tiff',
+            'svg'  => 'image/svg+xml',
+            'svgz' => 'image/svg+xml',
+            // archives
+            'zip'  => 'application/zip',
+            'rar'  => 'application/x-rar-compressed',
+            'exe'  => 'application/x-msdownload',
+            'msi'  => 'application/x-msdownload',
+            'cab'  => 'application/vnd.ms-cab-compressed',
+            // audio/video
+            'mp3'  => 'audio/mpeg',
+            'qt'   => 'video/quicktime',
+            'mov'  => 'video/quicktime',
+            // adobe
+            'pdf'  => 'application/pdf',
+            'psd'  => 'image/vnd.adobe.photoshop',
+            'ai'   => 'application/postscript',
+            'eps'  => 'application/postscript',
+            'ps'   => 'application/postscript',
+            // ms office
+            'doc'  => 'application/msword',
+            'rtf'  => 'application/rtf',
+            'xls'  => 'application/vnd.ms-excel',
+            'ppt'  => 'application/vnd.ms-powerpoint',
+            // open office
+            'odt'  => 'application/vnd.oasis.opendocument.text',
+            'ods'  => 'application/vnd.oasis.opendocument.spreadsheet',
+        );
+
+        $ext = strtolower(array_pop(explode('.', $filename)));
+        if (array_key_exists($ext, $mime_types)) {
+            return $mime_types[$ext];
+        } elseif (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME);
+            $mimetype = finfo_file($finfo, $filename);
+            finfo_close($finfo);
+            return $mimetype;
+        } else {
+            return 'application/octet-stream';
+        }
     }
 }

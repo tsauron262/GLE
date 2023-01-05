@@ -171,7 +171,7 @@ class modBimpCommercial extends DolibarrModules
 
         // Boxes/Widgets
 		// Add here list of php file(s) stored in mymodule/core/boxes that contains class to show a widget.
-        $this->boxes = array();
+//        $this->boxes = array(0=>array('file'=>'box_graph_fact_annee.php@bimpcommercial','note'=>'Facture par Statut Paiement','enabledbydefaulton'=>'Home'));
         	//0=>array('file'=>'mymodulewidget1.php@mymodule','note'=>'Widget provided by MyModule','enabledbydefaulton'=>'Home'),
         	//1=>array('file'=>'mymodulewidget2.php@mymodule','note'=>'Widget provided by MyModule'),
         	//2=>array('file'=>'mymodulewidget3.php@mymodule','note'=>'Widget provided by MyModule')
@@ -201,7 +201,7 @@ class modBimpCommercial extends DolibarrModules
                 
                 
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
-		$this->rights[$r][1] = 'Modifié prix vente';	// Permission label
+		$this->rights[$r][1] = 'Modifier prix vente';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'priceVente';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
@@ -209,7 +209,7 @@ class modBimpCommercial extends DolibarrModules
 		$r++;
                 
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
-		$this->rights[$r][1] = 'Modifié prix achat';	// Permission label
+		$this->rights[$r][1] = 'Modifier prix achat';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'priceAchat';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
@@ -217,7 +217,7 @@ class modBimpCommercial extends DolibarrModules
 		$r++;
                 
                 $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
-		$this->rights[$r][1] = 'Attribué les commerciaux';	// Permission label
+		$this->rights[$r][1] = 'Attribuer les commerciaux des clients';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'commerciauxToSoc';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
@@ -312,9 +312,143 @@ class modBimpCommercial extends DolibarrModules
 
 		$r++;
                 
-                
-                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Administration paiement';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'adminPaiement';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Administration financière';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'admin_financier';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Administration relances global';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'admin_relance_global';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Administration relances individuelles';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'admin_relance_individuelle';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Désactivation des relances auto (clients / factures)';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'admin_deactivate_relances';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Désactivation des relances auto 1 mois';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'deactivate_relances_one_month';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+                // (Flo) Par précaution, je met +4 car les droits de 514587 à 514589 sont enregistrés pour des groupes (bien que ces droits semblent ne plus exister). 
+		$r += 4;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Administration recouvrement';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'admin_recouvrement';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Editer commercial d\'une pièce';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'edit_commercial';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Administration facture';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'admin_fact';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Réceptionner vers stocks boutiques';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'br_stock_out';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Choisir ref commandes fourn';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'edit_comm_fourn_ref';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Saisir paiements par chèque';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'paiement_cheque';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Gestion Recouvrement';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'gestion_recouvrement';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Forcer status';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'forcerStatus';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Exports Chorus';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'chorus_exports';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Gestion comptable';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'admin_compta';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Demande de location';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'demande_financement';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
 		// Main menu entries
 		$this->menu = array();			// List of menus to add
 		$r=0;
@@ -404,7 +538,7 @@ class modBimpCommercial extends DolibarrModules
                 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
                 $name = 'module_version_'.strtolower($this->name);
                 // Se fais que lors de l'installation du module
-                if(BimpCore::getConf($name) == "") {
+                if(BimpCore::getConf($name, '') == "") {
                     BimpCore::setConf($name, floatval($this->version));
                     $this->_load_tables('/'.strtolower($this->name).'/sql/');
                     $extrafields = new ExtraFields($this->db);//a:1:{s:7:"options";a:1:{s:37:"socpeople:lastname:rowid::fk_soc=$ID$";N;}}
@@ -441,7 +575,7 @@ class modBimpCommercial extends DolibarrModules
 		//$this->_load_tables('/bimpcommercial/sql/');
 //                
 //                $extrafields = new ExtraFields($this->db);
-//                $extrafields->addExtraField('crt', 'Remise CRT', 'varchar', 1, 10, 'product');
+//                $extrafields->addExtraField('crt', 'Remise arrière', 'varchar', 1, 10, 'product');
 //                $extrafields->addExtraField('ref_constructeur', 'Réf. constructeur', 'int', 1, 255, 'product');
 //                $extrafields->addExtraField('pa_prevu', 'Prix d\'achat HT prévu', 'decimal', 1, '24,8', 'product', 0, 0, 0);
 //                $extrafields->addExtraField('infos_pa', 'Informations prix d\'achat', 'text', 1, 2000, 'product');

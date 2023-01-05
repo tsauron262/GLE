@@ -1,0 +1,23 @@
+params: 
+    use_sav: 
+        label: SAV activé
+        type: bool
+        def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  sav_public_reservations: 
+                      label: Réservations SAV en ligne activées
+                      type: bool
+                      def: 0
+                  sav_mode_reglement: 
+                      label: Mode de réglement par défaut du SAV
+                      required: 1
+                  sav_cond_reglement: 
+                      label: Conditions de règlement par défaut du SAV
+                      required: 1
+                      
+    use_tickets: 
+        label: Tickets hotline activés
+        type: bool
+        def: 0

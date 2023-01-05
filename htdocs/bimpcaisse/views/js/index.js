@@ -919,6 +919,17 @@ function saveNotePlus() {
     });
 }
 
+function saveNotePublic() {
+    BimpAjax('saveNotePublic', {
+        note_public: $('#note_public').val(),
+        id_vente: Vente.id_vente
+    }, null, {
+        display_success_in_popup_only: true,
+        display_errors_in_popup_only: true,
+        display_warnings_in_popup_only: true
+    });
+}
+
 // Articles vente: 
 
 function findProduct($button) {
@@ -1392,7 +1403,6 @@ function setCartLineEvents($line) {
 
 function onVenteLoaded() {
     var $input = $('#id_user_resp');
-
     if ($input.length && !parseInt($input.data('event_init'))) {
         $input.change(function () {
             saveCommercial();
@@ -1401,16 +1411,22 @@ function onVenteLoaded() {
     }
 
     $input = $('#note_plus');
-
     if ($input.length && !parseInt($input.data('event_init'))) {
         $input.change(function () {
             saveNotePlus();
         });
         $input.data('event_init', 1);
     }
+    
+    $input = $('#note_public');
+    if ($input.length && !parseInt($input.data('event_init'))) {
+        $input.change(function () {
+            saveNotePublic();
+        });
+        $input.data('event_init', 1);
+    }
 
     $input = $('#venteSearchProduct');
-
     if ($input.length && !$input.data('event_init')) {
         $input.keyup(function (e) {
             if (e.key === 'Enter') {

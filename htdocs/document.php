@@ -120,6 +120,14 @@ if (in_array($modulepart, array('facture_paiement','unpaid')))
  * View
  */
 
+// Define attachment (attachment=true to force choice popup 'open'/'save as')
+$attachment = true;
+if (preg_match('/\.(html|htm)$/i',$original_file)) $attachment = false;
+if (isset($_GET["attachment"])) $attachment = GETPOST("attachment",'alpha')?true:false;
+if (! empty($conf->global->MAIN_DISABLE_FORCE_SAVEAS)) $attachment=false;
+
+if (preg_match('/\.(zip|exe)$/i',$original_file)) $attachment = true;
+
 // If we have a hash public (hashp), we guess the original_file.
 if (! empty($hashp))
 {
@@ -241,6 +249,12 @@ if (preg_match('/\.\./', $fullpath_original_file) || preg_match('/[<>|]/', $full
 
 clearstatcache();
 
+if(DOL_DATA_ROOT != PATH_TMP){
+    $inTmpPath = str_replace(DOL_DATA_ROOT, PATH_TMP,$fullpath_original_file);
+    if(file_exists($inTmpPath)){
+        $fullpath_original_file = $inTmpPath;
+    }
+}
 $filename = basename($fullpath_original_file);
 $filename = preg_replace('/\.noexe$/i', '', $filename);
 
@@ -249,6 +263,13 @@ dol_syslog("document.php download $fullpath_original_file filename=$filename con
 $fullpath_original_file_osencoded=dol_osencode($fullpath_original_file);	// New file name encoded in OS encoding charset
 
 // This test if file exists should be useless. We keep it to find bug more easily
+if (! file_exists($fullpath_original_file_osencoded))
+{
+	dol_syslog("ErrorFileDoesNotExists: ".$fullpath_original_file);
+	print "ErrorFileDoesNotExists: ".$original_file;
+	exit;
+}
+
 if (! file_exists($fullpath_original_file_osencoded))
 {
 	dol_syslog("ErrorFileDoesNotExists: ".$fullpath_original_file);

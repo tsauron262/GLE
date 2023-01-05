@@ -12,6 +12,10 @@ class Bimp_Categorie extends BimpObject
         if (!is_null($max_levels) && $max_levels < $level) {
             return array();
         }
+        
+        if (is_null($skiped_levels)) {
+            $skiped_levels = array();
+        }
 
         $cats = array();
 
@@ -19,8 +23,8 @@ class Bimp_Categorie extends BimpObject
 
         if (is_array($rows)) {
             foreach ($rows as $r) {
+                $label = '';
                 if (!in_array($level, $skiped_levels)) {
-                    $label = '';
                     if ($with_full_path && $path) {
                         $label .= $path . ' >> ';
                     }

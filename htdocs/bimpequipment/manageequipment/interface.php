@@ -96,7 +96,7 @@ switch (GETPOST('action')) {
             break;
         }
     case 'closeInventory': {
-            ini_set('max_execution_time', 30000);
+            BimpCore::setMaxExecutionTime(30000);
             $inventory->fetch(GETPOST('inventory_id'));
             echo json_encode(array('success' => $inventory->updateStock($user), 'errors' => $inventory->errors));
             break;
@@ -126,9 +126,9 @@ switch (GETPOST('action')) {
     case 'receiveTransfer': {
             $transfer = new BimpTransfer($db);
             $transfer->fetch(GETPOST('fk_transfer'));
-            echo json_encode(array('nb_update' => $transfer->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')),
+            echo json_encode(array('nb_update'     => $transfer->receiveTransfert($user, GETPOST('products'), GETPOST('equipments')),
                 'is_now_closed' => $transfer->checkClose(),
-                'errors' => $transfer->errors));
+                'errors'        => $transfer->errors));
             break;
         }
 
@@ -153,13 +153,13 @@ switch (GETPOST('action')) {
             $transferstatic = new BimpTransfer($db);
             $blstatic = new BimpLivraison($db);
             echo json_encode(array(
-                'transfers' => $transferstatic->getTransfers(GETPOST('fk_warehouse'), array($transferstatic::STATUS_DRAFT,
+                'transfers'          => $transferstatic->getTransfers(GETPOST('fk_warehouse'), array($transferstatic::STATUS_DRAFT,
                     $transferstatic::STATUS_SENT,
                     $transferstatic::STATUS_RECEIVED_PARTIALLY), true),
-                'orders' => $blstatic->getOrders(GETPOST('fk_warehouse'), 3, 4),
+                'orders'             => $blstatic->getOrders(GETPOST('fk_warehouse'), 3, 4),
                 'right_caisse_admin' => $user->rights->bimpequipment->caisse_admin->read,
-                'right_caisse' => $user->rights->bimpequipment->caisse->read,
-                'errors' => array_merge($transferstatic->errors, $blstatic->errors)));
+                'right_caisse'       => $user->rights->bimpequipment->caisse->read,
+                'errors'             => BimpTools::merge_array($transferstatic->errors, $blstatic->errors)));
             break;
         }
 

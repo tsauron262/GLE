@@ -1,0 +1,1 @@
+ALTER TABLE `llx_commande_fournisseur` ADD `edi_status` INT NOT NULL DEFAULT '0';

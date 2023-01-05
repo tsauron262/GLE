@@ -20,7 +20,7 @@
  */
 /*
  * BIMP-ERP by Synopsis et DRSI
- *
+ * 
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
  *
@@ -78,7 +78,7 @@ class Synopsisfichinter extends Fichinter {
      *    \param      DB            Handler acces base de donnees
      *    \param      socid            Id societe
      */
-    function Synopsisfichinter($DB, $socid = "") {
+    function __construct($DB, $socid = "") {
         global $langs;
 
         $this->db = $DB;
@@ -954,7 +954,7 @@ class Synopsisfichinter extends Fichinter {
       \param        option            Sur quoi pointe le lien: 0=fiche commande,3=fiche compta commande,4=fiche expedition commande
       \return        string            Chaine avec URL
      */
-    function getNomUrl($withpicto = 0, $option = 0) {
+    function getNomUrl($withpicto = 0, $option = '', $notooltip = 0, $save_lastsearch_value = -1) {
         global $langs;
 
         $result = '';
@@ -1002,7 +1002,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
      *      \brief     Constructeur d'objets ligne d'intervention
      *      \param     DB      handler d'acces base de donnee
      */
-    function SynopsisfichinterLigne($DB) {
+    function __construct($DB) {
         $this->db = $DB;
     }
 
@@ -1110,7 +1110,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
         $sql.= ')';
         $sql.= " VALUES (" . $this->fk_fichinter . ",";
         $sql.= " '" . addslashes($this->desc) . "',";
-        $sql.= " '" . $this->db->idate($this->db->jdate($this->datei)) . "',";
+        $sql.= " '" . $this->db->idate($this->datei) . "',";
         $sql.= " " . $this->duration . ",";
         $sql.= ' ' . $rangToUse;
         $sql.= ')';
@@ -1212,7 +1212,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
         // Mise a jour ligne en base
         $sql = "UPDATE " . MAIN_DB_PREFIX . "fichinterdet SET";
         $sql.= " description='" . addslashes($this->desc) . "'";
-        $sql.= ",date='" . $this->db->idate($this->db->jdate($this->datei))."'";//Non testé
+        $sql.= ",date='" . $this->db->idate($this->datei)."'";//Non testé
         $sql.= ",duree=" . $this->duration;
         $sql.= ",rang='" . $this->rang . "'";
         $sql.= " WHERE rowid = " . $this->rowid;

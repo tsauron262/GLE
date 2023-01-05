@@ -654,7 +654,7 @@ function asPosition($str) {
     return false;
 }
 
-function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '', $css = '') {
+function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '', $css = '', $replyTo = '') {
     global $dolibarr_main_url_root, $conf;
 
     $subject = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'].DOL_URL_ROOT), DOL_URL_ROOT, $subject);
@@ -667,10 +667,13 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
 
     if ($from == ''){
         $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <';
-        if(isset($conf->global->MAIN_INFO_SOCIETE_MAIL) && $conf->global->MAIN_INFO_SOCIETE_MAIL != '')
+        
+        if(isset($conf->global->MAIN_MAIL_EMAIL_FROM))
+            $from .= $conf->global->MAIN_MAIL_EMAIL_FROM;
+        elseif(isset($conf->global->MAIN_INFO_SOCIETE_MAIL) && $conf->global->MAIN_INFO_SOCIETE_MAIL != '')
             $from .= $conf->global->MAIN_INFO_SOCIETE_MAIL;
         else
-            $from .= 'admin@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr';
+            $from .= 'no-reply@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr';
         
         $from .= '>';
     }
@@ -678,8 +681,8 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = "";
     if (defined('MOD_DEV_SYN_MAIL')) {
-        $msg = "OrigineTo = " . $to . "\n\n" . $msg;
-        $msg = "OrigineCc = " . $addr_cc . "\n\n" . $msg;
+        $msg = "OrigineTo = " . htmlentities($to) . "\n\n" . $msg;
+        $msg = "OrigineCc = " . htmlentities($addr_cc) . "\n\n" . $msg;
         $addr_cc = '';
         $to = MOD_DEV_SYN_MAIL;
     } elseif ($ccAdmin != '' && $addr_cc != '')
@@ -698,16 +701,64 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
 //    }
     $msg = str_replace("\n", "<br/>", $msg);
     if (isset($to) && $to != '') {
+        if (preg_match('/^(.+)\[.+\]$/', $to, $matches)) { // Pour les adresses e-mail des comptes utilisateurs client (par précaution)
+            $to = $matches[1];
+        }
 //        mail($to, $sujet, $msg, $headers);
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
-        $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css);
+        $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css, '', '', 'standard', $replyTo);
         $return = $mailfile->sendfile();
         if (!$return || !$mailOk)
             $_SESSION['error']["Mail non envoyé"] = 1;
         else
             $_SESSION['error']["Mail envoyé"] = 0;
+                
+        if (!$return) {            
+            if (!defined('BIMP_LIB')) {
+                require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+            }
+            
+            if (class_exists('BimpCore')) {
+                $ip = BimpCache::getIpFromDns($mailfile->smtps->_smtpsHost);
+                BimpCore::addlog('Echec envoi email '.$mailfile->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
+                    'Ip'    => $ip,
+                    'Destinataire' => $to,
+                    'Sujet' => $subject,
+                    'Message' => $msg
+                ));
+                
+                $lastMailFailedTms = (int) BimpCore::getConf('bimpcore_last_mail_failed_tms', 0);
+                $tms = (int) time();
+                
+                if ($tms - $lastMailFailedTms > 7200) {
+                    $nMailsFailed = 0;
+                } else {
+                    $nMailsFailed = BimpCore::getConf('bimpcore_nb_mails_failed', 0);
+                }
+                
+                $nMailsFailed++;
+                
+                if ($nMailsFailed == 10) {
+                    if (!BimpCore::isModeDev()) {
+                        if (!class_exists('CSMSFile')) {
+                            require_once DOL_DOCUMENT_ROOT . '/core/class/CSMSFile.class.php';
+                        }
+                        $smsfile = new CSMSFile('0686691814', 'ADMIN BIMP', '10 ECHECS ENVOI EMAIL EN 2H SUR ' . DOL_URL_ROOT);
+                        $smsfile->sendfile();
+                        $smsfile = new CSMSFile('0628335081', 'ADMIN BIMP', '10 ECHECS ENVOI EMAIL EN 2H SUR ' . DOL_URL_ROOT);
+                        $smsfile->sendfile();
+                    }
+                }
+                
+                BimpCore::setConf('bimpcore_nb_mails_failed', $nMailsFailed);
+                BimpCore::setConf('bimpcore_last_mail_failed_tms', $tms);
+            }
+        }
+        
         return ($return && $mailOk);
     }
+    
+    return false;
 }
 
 function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
@@ -837,7 +888,7 @@ function select_dolusersInGroup($form, $group = '', $selected = '', $htmlname = 
         $sql .= " AND u.rowid NOT IN ('" . $excludeUsers . "')";
     if (is_array($include) && $includeUsers)
         $sql .= " AND u.rowid IN ('" . $includeUsers . "')";
-    $sql .= " AND statut = 1";
+    //$sql .= " AND statut = 1";
     $sql .= " ORDER BY u.firstname ASC";
 
     dol_syslog(get_class($form) . "::select_dolusers sql=" . $sql);
@@ -1029,7 +1080,7 @@ function userInGroupe($groupe, $idUser) {
 }
 
 function cashVal($hash, $val = null, $delay = 14){
-    $path = DOL_DATA_ROOT."/cacheSyn/";
+    $path = PATH_TMP."/cacheSyn/";
     if(!is_dir($path))
         mkdir($path);
     $file = $path.$hash;
@@ -1047,7 +1098,7 @@ function cashVal($hash, $val = null, $delay = 14){
 }
 
 function cachePage($page, $delay = 0, $mode = 2){//Mod 0 = get, 1 = force refresh, 2 = set
-    $path = DOL_DATA_ROOT."/cacheSyn/";
+    $path = PATH_TMP."/cacheSyn/";
     if(!is_dir($path))
         mkdir($path);
     $file = $path.$page;

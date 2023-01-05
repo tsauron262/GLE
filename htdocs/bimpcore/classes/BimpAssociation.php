@@ -28,6 +28,12 @@ class BimpAssociation
                 $this->errors[] = 'Erreur de configuration pour l\'association "' . $association . '". Instance associée non définie';
             }
         }
+
+        $type = $this->object->config->getParams($this->association_path . '/type');
+        
+        if ($type == 'reverse' && stripos(static::$table, "_reverse") === false) {
+            static::$table .= '_reverse';
+        }
     }
 
     // Listings: 
@@ -592,7 +598,7 @@ class BimpAssociation
         if ($this->object->isLoaded()) {
             $items = $this->getAssociatesList();
         } else {
-            $items = array();
+            $items = $this->object->getAssociatesList($this->association);
         }
 
         $values = array();

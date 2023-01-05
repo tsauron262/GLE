@@ -14,7 +14,7 @@ class BMP_EventCalcMontant extends BimpObject
          return 0;
      }
      
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         if (!$this->isEventEditable()) {
             return 0;
@@ -29,7 +29,7 @@ class BMP_EventCalcMontant extends BimpObject
         return 1;
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         if (!$this->isEventEditable()) {
             return 0;

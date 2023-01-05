@@ -25,6 +25,7 @@ class majCodeConfigurationnProd{
     private $erreurs = array();
     private $info = array();
     private $ok = array();
+    public $db = null;
 
     function getSN($fin, $id_prod = null, $max = null){
         $return = array();

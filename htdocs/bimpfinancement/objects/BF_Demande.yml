@@ -1,69 +1,39 @@
 table: bf_demande
 controller: demande
+icon: fas_comment-dollar
+new_status_logs: 1
 
-icon: fas_hand-holding-usd
 header_btn: 
     callback: getActionsButtons
 header_list_name: default
+header_edit_form: default
+
 list_page_url: 
     controller: index
     
+nom_url: 
+    syntaxe: <ref>
+    
 labels:
-    name: demande de financement
-    name_plur: demandes de financement
+    name: demande de location
+    name_plur: demandes de location
     is_female: 1
 
 objects:
-#    commande:
-#        instance: 
-#            id_object: unset
-
-    reference:
-        relation: hasOne
-        delete: 0
-        instance:
-            bimp_object:
-                module: bimpfinancement
-                name: Bimp_Demande
-
-    facture:
-        instance: 
-            id_object: unset
-
-    facture_banque: 
-        extends: facture
-        instance: 
-            id_object: 
-                field_value: id_facture
-                
-    facture_client:
-        extends: facture
-        instance: 
-            id_object: 
-                field_value: id_facture_client
-
-    facture_fournisseur:
-        extends: facture
-        instance:
-            id_object:
-                field_value: id_facture_fournisseur
-                
-    client_contact: 
+    contact_client: 
         extends: contact
         instance: 
             id_object:
-                field_value: id_client_contact
+                field_value: id_contact_client
     
-    commercial:
-        extends: user
-        instance:
-            id_object:
-                fiels_value: id_commercial
-
-    supplier:
-        extends: societe
+    supplier: 
+        relation: hasOne
+        delete: 0
         instance: 
-            id_object:
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Fournisseur
+            id_object: 
                 field_value: id_supplier
                 
     supplier_contact:
@@ -72,18 +42,75 @@ objects:
             id_object:
                 field_value: id_supplier_contact
                 
-    comments:
+    user_resp: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_resp
+        
+    main_source: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BF_DemandeSource
+            id_object: 
+                field_value: id_main_source
+                
+    signature_devis: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_devis
+            
+    signature_contrat: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_contrat
+
+    signature_pvr:
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_pvr
+                
+    facture_fin: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: id_facture_fin
+    
+    sources: 
         relation: hasMany
         delete: 1
-        instance:
-            bimp_object: BF_Comment
+        instance: 
+            bimp_object: 
+                module: bimpfinancement
+                name: BF_DemandeSource
+        
+    lines: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_Line
             
-    refinanceurs:
+    demandes_refinanceurs:
         relation: hasMany
         delete: 1
         instance: 
             bimp_object: BF_DemandeRefinanceur
-            
             
     rents_except: 
         relation: hasMany
@@ -118,212 +145,249 @@ objects:
                 fields: 
                     parent_module: bimpfinancement
                     parent_object_name: BF_Demande
-                    
-    lines: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: BF_Line
-            
-associations:
-#    commandes:
-#        object: commande
-#        label: Ajouter une commande liée
-#        display: 
-#            default:
-#                type: nom_url
-#        input:
-#            type: search_list
-#            search_list:
-#                table: commande c
-#                field_return_value: c.rowid
-#                field_return_label: c.ref
-#                options:
-#                    default:
-#                        label: Recherche par référence de commande
-#                        fields_search: c.ref,c.rowid
-#                        join: societe s
-#                        join_on: c.fk_soc = s.rowid
-#                        join_return_label: s.nom
-#                        help: Entrez la référence de la commande
-#                    by_client:
-#                        label: Recherche par client
-#                        fields_search: s.nom,s.code_client
-#                        join: societe s
-#                        join_on: c.fk_soc = s.rowid
-#                        join_return_label: s.nom
-#                        help: Entrez le nom ou le code d'un client
-                        
-    factures: 
-        object: 
-            instance: 
-                bimp_object:
-                    module: bimpcommercial
-                    name: Bimp_Facture
-        label: Factures liées
-        display: 
-            default: 
-                type: nom_url
 
-fields:
+fields: 
     id_client:
         label: Client
         type: id_object
         object: client
+        input:
+            card: default
         create_form: light
-        input:
-            type: search_societe
-            societe_type: customer
-            help: Entrez le nom ou la référence pour rechercher un client
-        sort_options:
-            by_ref: 
-                label: référence
-                value:
-                    join:
-                        table: societe
-                        field_value: ref
-                        field_on: rowid
-
-    id_commercial:
-        label: Commercial
+        edit_form: default
+        default_value: 0
+            
+    id_contact_client: 
+        label: Contact client signataire
         type: id_object
-        object: commercial
-        input:
-            type: search_user
-        default_value: 
-            prop: 
-                name: id
-                object: 
-                    global: user
-
-    id_contrat:
-        label: Contrat
-        type: id_object
-        object: contrat
-        input: 
-            type: hidden
-
-    agreement_number:
-        label: N° d'accord
-        type: int
-
-    id_facture:
-        label: Facture banque
-        type: id_object
-        object: facture_banque
-        input:
-            type: hidden
-
-    id_facture_client:
-        label: Facture VR client
-        type: id_object
-        object: facture_client
-        input:
-            type: hidden
-
-    id_facture_fournisseur:
-        label: Facture VR fournisseur
-        type: id_object
-        object: facture_fournisseur
-        input:
-            type: hidden
-
-    id_client_contact:
-        label: Contact client
-        type: id_object
-        object: client_contact
+        object: contact_client
         create_form: default
         create_form_values:
             fields: 
                 fk_soc: 
                     field_value: id_client
-        depends_on: id_client
         input: 
             type: select
             options: 
-                array: client_contacts
+                array: clientContacts
+        search: 
+            input: 
+                type: search_object
+        depends_on: id_client
         display_if:
             field_name: id_client
             hide_values: 0,''
+            
+    contacts_livraisons: 
+        label: Contacts livraison(s) / installation(s)
+        type: items_list
+        items_data_type: id_object
+        object: contact
+        items_braces: 1
+        input: 
+            type: select
+            options: 
+                array: clientContacts
+            help: Laisser vide pour utiliser le contact signataire comme contact de livraison.
+        depends_on: id_client
+        display_if:
+            field_name: id_client
+            hide_values: 0,''
+            
+    id_supplier:
+        label: Apporteur
+        type: id_object
+        object: supplier
+        input: 
+            card: default
+        create_form: light
+        edit_form: default
+        default_value: 0
+        
+    id_supplier_contact:
+        label: Contact apporteur
+        type: id_object
+        object: supplier_contact
+        input: 
+            type: select
+            options:
+                array: supplierContacts
+        search: 
+            input: 
+                type: search_object
+        display_if: 
+            field_name: id_supplier
+            hide_values: 0,''
+        depends_on: id_supplier
+        create_form: default
+        create_form_values:
+            fields: 
+                fk_soc: 
+                    field_value: id_supplier
                     
+    commission_apporteur:
+        label: Commission apporteur
+        type: percent
+        default_value: 0
+        decimals: 2
+        display_if: 
+            field_name: id_supplier
+            hide_values: 0,''
+        depends_on: id_supplier
+                    
+    id_user_resp: 
+        label: Responsable
+        type: id_object
+        object: user_resp
+        input: 
+            type: search_user
+        default_value: 0
+        
+    id_main_source: 
+        label: Source principale
+        type: id_object
+        object: main_source
+        default_value: 0
+        
+    label: 
+        label: Libellé
+        
+    ref: 
+        label: Référence
+        
+    status:
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        
+    devis_status: 
+        label: Statut Devis
+        type: int
+        values: 
+            array: doc_status_list
+        default_value: 0
+        
+    contrat_status: 
+        label: Statut Contrat
+        type: int
+        values: 
+            array: doc_status_list
+        default_value: 0
+        
+    pvr_status: 
+        label: Statut PVR
+        type: int
+        values: 
+            array: doc_status_list
+        default_value: 0
+        
     duration:
-        label: Durée
+        label: Durée totale
         type: int
         values: 
             array: durations
+        default_value:
+            conf: 
+                module: bimpfinancement
+                name: def_duration
         
     periodicity: 
         label: Périodicité
         type: int
         values: 
             array: periodicities
+        default_value: 
+            conf: 
+                module: bimpfinancement
+                name: def_periodicity
+            
+    mode_calcul:
+        label: Terme des paiements
+        type: int
+        values: 
+            array: calc_modes
+        default_value: 
+            conf: 
+                module: bimpfinancement
+                name: def_mode_calcul
+            
+    marge_souhaitee:
+        label: Marge
+        type: percent
+        decimals: 2
+        input: 
+            extra_content: 
+                callback: 
+                    method: renderOptionInputExtraContent
+                    params: 
+                        - marge_souhaitee
+        default_value:
+            conf: 
+                module: bimpfinancement
+                name: def_marge_souhaitee
         
+    def_tx_cession:
+        label: Taux de cession par défaut
+        values: 
+            moyen: Taux moyen
+            reel: Taux réel
+        default_value: moyen
+            
+    tx_cession:
+        label: Taux de cession annuel
+        type: percent
+        default_value: 0
+        decimals: 3
+        input: 
+            extra_content: 
+                callback: 
+                    method: renderOptionInputExtraContent
+                    params: 
+                        - tx_cession
+                        
     montant_materiels:
-        label: Montant matériels
+        label: Montant matériels HT
         type: money
         default_value: 0
         
     montant_services:
-        label: Montant services
+        label: Montant services HT
         type: money
         default_value: 0
                 
     montant_logiciels:
-        label: Montant logiciels
-        type: money
-        default_value: 0
-    
-    commission_commerciale:
-        label: Commission commerciale
-        type: percent
-        default_value: 0
-        decimals: 6
-                
-    commission_financiere:
-        label: Commission financière
-        type: percent
-        default_value: 0
-        decimals: 6
-                
-    vr: 
-        label: VR achat
+        label: Montant logiciels HT
         type: money
         default_value: 0
         
+    vr_achat: 
+        label: VR achat
+        type: percent
+        input: 
+            extra_content: 
+                callback: 
+                    method: renderOptionInputExtraContent
+                    params: 
+                        - vr_achat
+        default_value:
+            conf: 
+                module: bimpfinancement
+                name: def_vr_achat
+            
     vr_vente: 
         label: VR vente
-        type: money
-        default_value: 0
-                
-    mode_calcul:
-        label: Mode de calcul
-        type: int
-        default_value: 2
-        values: 
-            array: calc_modes
-                
-    status:
-        label: Statut
-        type: int
-        values: 
-            array: status_list
-                
-    accepted:
-        label: Acceptation définitive de la banque
-        type: bool
-        default_value: 0
-                
-    insurance:
-        label: Assurance
-        type: bool
-        default_value: 0
-        
-    annexe: 
-        label: Annexes
-        type: int
-        values: 
-            array: annexes
-        default_value: 0
+        type: percent
+        input: 
+            extra_content: 
+                callback: 
+                    method: renderOptionInputExtraContent
+                    params: 
+                        - vr_vente
+        default_value:
+            conf: 
+                module: bimpfinancement
+                name: def_vr_vente
         
     ca_prevu: 
         label: CA prévu
@@ -334,204 +398,706 @@ fields:
         label: PBA prévu
         type: money
         required: 0
-        
-    date_livraison:
-        label: Date de livraison
-        type: date
             
     date_loyer:
         label: Date de mise en loyer
         type: date
         
-    id_supplier:
-        label: Apporteur
-        type: id_object
-        object: supplier
+    formule: 
+        label: Formule choisie
+        values: 
+            array: formules
+        default_value: none
+            
+    agreement_number:
+        label: N° d'accord
+    
+    loyer_mensuel_evo_ht: 
+        label: Loyer mensuel HT (form. évo) 
+        type: money
+        default_value: 0
         input: 
-            type: search_societe
-            help: Entrez le nom ou la référence pour rechercher un tiers
-        create_form: light
+            extra_content: 
+                callback: 
+                    method: renderOptionInputExtraContent
+                    params: 
+                        - loyer_mensuel_evo_ht
         
-    id_supplier_contact:
-        label: Contact apporteur
-        type: id_object
-        object: supplier_contact
+    loyer_mensuel_dyn_ht: 
+        label: Loyer mensuel HT (form. dyn) 
+        type: money
+        default_value: 0
         input: 
-            type: select
-            options:
-                array: supplier_contacts
-        display_if: 
-            field_name: id_supplier
-            hide_values: 0,''
-        depends_on: id_supplier
-        create_form: default
-        create_form_values:
-            fields: 
-                fk_soc: 
-                    field_value: id_supplier
+            extra_content: 
+                callback: 
+                    method: renderOptionInputExtraContent
+                    params: 
+                        - loyer_mensuel_dyn_ht
         
-    sites: 
-        label: Sites
-        type: items_list
+    loyer_mensuel_suppl_ht: 
+        label: Loyer mensuel HT suppl. (form. dyn) 
+        type: money
+        default_value: 0
+        input: 
+            extra_content: 
+                callback: 
+                    method: renderOptionInputExtraContent
+                    params: 
+                        - loyer_mensuel_suppl_ht
         
-forms:
+    id_signature_devis: 
+        label: Signature du devis
+        type: id_object
+        object: signature_devis
+        default_value: 0
+        
+    signature_devis_params: 
+        label: Paramètres signature du devis
+        type: json
+        
+    id_signature_contrat: 
+        label: Signature du contrat
+        type: id_object
+        object: signature_contrat
+        default_value: 0
+        
+    signature_contrat_params: 
+        label: Paramètres signature du contrat
+        type: json
+      
+    contrat_signataires_data: 
+        label: Données signataires contrat
+        type: json
+        
+    id_signature_pvr: 
+        label: Signature du PV de réception
+        type: id_object
+        object: signature_pvr
+        
+    signature_pvr_params: 
+        label: Paramètres signature du pvr
+        type: json
+        
+    pvr_signataires_data: 
+        label: Données signataires PVR
+        type: json
+        
+    closed: 
+        label: Terminée
+        type: bool
+        default_value: 0
+        
+    id_facture_fourn:
+        label: Facture Fournisseur
+        type: id_object
+        object: facture_fourn
+        default_value: 0
+        
+    id_facture_fin: 
+        label: Facture financeur
+        type: id_object
+        object: facture_fin
+        default_value: 0        
+        
+forms: 
     default: 
         rows: 
-            - field: id_commercial
-            - field: id_client
-            - field: id_client_contact
-            - field: id_supplier
-            - field: id_supplier_contact
+            resp: 
+                field: id_user_resp
+            label: 
+                field: label
+            client:    
+                field: id_client
+            contact: 
+                field: id_contact_client
+            contacts_livraisons: 
+                field: contacts_livraisons
+            supplier: 
+                field: id_supplier
+            contact_supplier: 
+                field: id_supplier_contact
+            commission_apporteur: 
+                field: commission_apporteur
+            duration: 
+                field: duration
+            periodicity: 
+                field: periodicity
+            mode_calcul: 
+                field: mode_calcul
+            def_tx_cession: 
+                field: def_tx_cession
+            date_loyer: 
+                field: date_loyer
+        
+    proposition:
+        rows: 
+            - custom: 1
+              label: Titre du document
+              input_name: title
+              value: Proposition de location de vos équipements informatiques
+              input: 
+                      type: text
+            - field: montant_materiels
+            - field: montant_services
             - field: duration
             - field: periodicity
-            - field: sites
-            
-    new_commandes_fourn:
+            - field: mode_calcul
+              
+    cancel: 
         rows: 
             - custom: 1
-              label: Entrepôt
-              input_name: id_entrepot
-              data_type: int
+              label: Raisons de l'abandon
+              input_name: reasons
+              data_type: text
               input: 
-                  type: search_entrepot
-                  
-            - custom: 1
-              label: Sélection des fournisseurs et des éléments à inclure aux commandes
-              input_name: commandes_fourn
-              content: 
-                  callback: renderNewCommandesFournInputs
-                  
-    add_to_invoice:
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+                
+    create_signature: 
+        title: Création de la signature
+        rows: 
+            contact_signature: 
+                custom: 1
+                label: Contact signataire du client
+                data_type: id_object
+                input_name: id_contact_signature
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getSocieteContactsArray
+                            params: 
+                                - field_value: id_client
+                    help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+                value: 
+                    callback: getDefaultSignatureContact
+            init_docusign: 
+                custom: 1
+                label: Envoyer immédiatement le document pour signature via DocuSign
+                data_type: bool
+                input_name: init_docusign
+                content: 
+                    callback: 
+                        method: renderSignatureInitDocuSignInput
+            open_public_access: 
+                custom: 1 
+                label: Ouvrir immédiatement l'accès à la signature électronique à distance
+                data_type: bool
+                input_name: open_public_access
+                content: 
+                    callback: 
+                        method: renderSignatureOpenDistAccessInput
+                display_if: 
+                    field_name: init_docusign
+                    hide_values: 1
+            email_content: 
+                custom: 1
+                label: Contenu e-mail client pour la signature à distance
+                input_name: email_content
+                input: 
+                    type: html
+                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+                value: 
+                    callback: 
+                        method: getSignatureEmailContent
+                depends_on: init_docusign,open_public_access
+    
+    create_signature_devis: 
+        extends: create_signature
+        title: Création de la signature du devis
+        rows: 
+            init_docusign: 
+                content: 
+                    callback: 
+                        params: 
+                            - devis
+            open_public_access: 
+                content: 
+                    callback: 
+                        params: 
+                            - devis
+            email_content:
+                value: 
+                    callback: 
+                        params: 
+                            - devis
+                            
+    create_signature_contrat: 
+        extends: create_signature
+        title: Création de la signature du contrat
+        rows: 
+            init_docusign: 
+                content: 
+                    callback: 
+                        params: 
+                            - contrat
+            open_public_access: 
+                content: 
+                    callback: 
+                        params: 
+                            - contrat
+            email_content:
+                value: 
+                    callback: 
+                        params: 
+                            - contrat
+            
+    create_signature_pvr: 
+        extends: create_signature
+        title: Création de la signature du PV de réception
+        rows: 
+            init_docusign: 
+                content: 
+                    callback: 
+                        params: 
+                            - pvr
+            open_public_access: 
+                content: 
+                    callback: 
+                        params: 
+                            - pvr
+            email_content:
+                value: 
+                    callback: 
+                        params: 
+                            - pvr
+        
+    generate_devis: 
+        title: Création du devis de location
         rows: 
             - custom: 1
-              label: Facture
-              input_name: id_facture
+              label: Formules à proposer
+              input_name: formules
+              input: 
+                  type: check_list
+                  items:
+                      evo: Formule évolutive
+                      dyn: Formule dynamique
+              value: evo,dyn 
+                      
+    generate_contrat: 
+        title: Création du contrat de location
+        msgs: 
+            callback: getContratFormMsgs
+        rows: 
+            - field: formule
+              required: 1
+              
+            # LOCATAIRE: 
+            - title: Locataire
+            - custom: 1
+              label: Nom Client locataire
+              input_name: client_name
+              input: 
+                  type: text
+            - custom: 1
+              label: Entreprise
+              input_name: client_is_company
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Forme juridique
+              input_name: client_forme_juridique
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+            - custom: 1
+              label: Capital
+              input_name: client_capital
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1      
+            - custom: 1
+              label: N° Siren
+              input_name: client_siren
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+            - custom: 1
+              label: Ville d'enregistrement au RCS
+              input_name: client_rcs
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1              
+            - custom: 1
+              label: adresse / siège (si pro)
+              input_name: client_address
+              input: 
+                  type: textarea
+            - custom: 1
+              label: Nom du représentant signataire
+              input_name: client_representant
+              input: 
+                  type: text          
+            - custom: 1
+              label: Qualité du représentant signataire
+              input_name: client_repr_qualite
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+            - custom: 1
+              label: Site(s) d'installation
+              input: 
+                  type: textarea
+              input_name: client_livraisons
+                  
+            # LOUEUR: 
+            - title: Loueur
+            - custom: 1
+              label: Nom loueur
+              input_name: loueur_nom
+              input: 
+                  type: text
+            - custom: 1
+              label: Qualité loueur
+              input_name: loueur_qualite
+              input: 
+                  type: text
+            - custom: 1
+              label: Adresse e-mail loueur
+              input_name: loueur_email
+              input: 
+                  type: text
+                  
+            # CESSIONNAIRE: 
+            - title: Cessionnaire
+            - custom: 1
+              label: Raison sociale
+              input_name: cessionnaire_saison_sociale
+              input: 
+                  type: text
+            - custom: 1
+              label: N° SIREN
+              input_name: cessionnaire_siren
+              input: 
+                  type: text
+            - custom: 1
+              label: Contact signataire du refinanceur
+              input_name: cessionnaire_id_contact_signataire
+              data_type: id
               input: 
                   type: select
                   options: 
-                      array: demandeFactures
-                  select_first: 1
+                      array: cessionnaireContacts
             - custom: 1
-              label: Entrepôt
-              input_name: id_entrepot
+              label: Nom Cessionnaire
+              input_name: cessionnaire_nom
               input: 
-                  type: search_entrepot
-              display_if: 
-                  field_name: id_facture
-                  show_values: 0,
-            
-lists:
-    default:
-        checkboxes: 1
-        bulk_actions:
-            - label: supprimer les demandes de fincancement sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        sort_field: date_create
-        sort_way: desc
-        n: 10
-        add_form_name: default
-        delete_btn: 1
-        page_btn: 1
-        modal_view: demande
-        edit_form: default
-        update_btn: 1
-        cols:
-            id:
-                label: ID
-                field: id
-            date_create:
-                field: date_create
-            client: 
-                field: id_client
-                display: nom_url
-            duration:
-                field: duration
-            periodicity:
-                field: periodicity
-            vr:
-                field: vr
-            vr_vente:
-                field: vr_vente
-            status:
-                field: status
-                edit: 1
-      
-fields_tables:
-    contrat: 
-        title: Contrat
-        footer_extra_btn: 
-            callback: getInfosExtraBtn
-        icon: fas_file-signature
+                  type: text
+              depends_on: cessionnaire_id_contact_signataire
+            - custom: 1
+              label: Adresse e-mail cessionnaire
+              input_name: cessionnaire_email
+              input: 
+                  type: text
+              depends_on: cessionnaire_id_contact_signataire
+            - custom: 1
+              label: Qualité cessionnaire
+              input_name: cessionnaire_qualite
+              input: 
+                  type: text
+              depends_on: cessionnaire_id_contact_signataire
+              
+    generate_pvr: 
         rows: 
-            - field: status
-              edit: 1
-            - field: agreement_number
-              edit: 1
-            - field: accepted
-              edit: 1
-            - field: annexe
-              edit: 1
-            - field: date_livraison
-              edit: 1
+            # LOCATAIRE: 
+            - title: Locataire
+            - custom: 1
+              label: Entreprise
+              input_name: client_is_company
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Nom du représentant signataire
+              input_name: client_representant
+              input: 
+                  type: text          
+            - custom: 1
+              label: Qualité du représentant signataire
+              input_name: client_repr_qualite
+              input: 
+                  type: text
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+                  
+            # LOUEUR: 
+            - title: Loueur
+            - custom: 1
+              label: Nom loueur
+              input_name: loueur_nom
+              input: 
+                  type: text
+            - custom: 1
+              label: Qualité loueur
+              input_name: loueur_qualite
+              input: 
+                  type: text
+            - custom: 1
+              label: Adresse e-mail loueur
+              input_name: loueur_email
+              input: 
+                  type: text
+                  
+    upload_document:
+        rows: 
+            file: 
+                custom: 1
+                label: Fichier
+                input_name: doc_file
+                input: 
+                    type: file_upload  
+                    help: Format PDF uniquement
+            flag: 
+                custom: 1
+                hidden: 1
+                label: Dépôt doc
+                input_name: updload_doc_type
+                input: 
+                    type: hidden
+        
+    upload_devis: 
+        extends: upload_document
+        rows: 
+            flag: 
+                value: devis
+                
+    upload_contrat: 
+        extends: upload_document
+        rows: 
+            flag: 
+                value: contrat
+                
+    submit_new_status: 
+        msgs: 
+          - type: warning
+        rows: 
+          - custom: 1
+            label: Notes à l'intention du commercial 
+            input_name: note
+            input: 
+                type: textarea
+                rows: 3
+                auto_expand: 1
+                
+    submit_refuse: 
+        extends: submit_new_status
+        msgs: 
+            0: 
+                content: '<b>Attention: refus définitif - la demande sera fermée</b>'
+                
+    submit_cancel: 
+        extends: submit_new_status
+        msgs: 
+            0: 
+                content: '<b>Attention: abandon définitif - la demande sera fermée</b>'
+                
+    merge_demandes: 
+        msgs: 
+            callback: getDemandesToMergeErrorsMsgs
+        rows: 
+            - custom: 1
+              label: Source principale
+              input_name: id_main_source
+              data_type: id
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      array: demandesSources
+                  help: Sélectionnez la source qui sera en charge de transmettre au client les documents à signer.<br/>Ce sera la demande de location correspondant à cette source qui sera conservée.
+                
+    factures:
+        title: Facturation
+        msgs: 
+            callback: getFacturesFormMsgs
+        rows:
+          - title: Facture Fournisseur
+          - custom: 1
+            label: Créer la facture fournisseur
+            input_name: create_fac_fourn
+            data_type: bool
+            content: 
+                callback: renderCreateFacFournToggleInput
+          - custom: 1
+            show: 
+                field_value: 
+                    field_name: id_main_source
+                    not: 1
+            label: Fournisseur
+            input_name: fac_fourn_id_fourn
+            data_type: id_object
+            object: fournisseur
+            input: 
+                type: search_object
+            display_if: 
+                field_name: create_fac_fourn
+                show_values: 1
+          - custom: 1
+            label: Libellé
+            input_name: fac_fourn_libelle
+            input: 
+                type: text
+            display_if: 
+                field_name: create_fac_fourn
+                show_values: 1
+          - custom: 1
+            label: Ref. fournisseur
+            input_name: fac_fourn_ref_supplier
+            input: 
+                type: text
+            display_if: 
+                field_name: create_fac_fourn
+                show_values: 1
+          - custom: 1
+            label: Mode de réglement
+            input_name: fac_fourn_id_mode_reglement
+            data_type: id
+            value: 
+                conf: 
+                    name: fac_fourn_def_id_mode_reglement
+                    module: bimpfinancement
+                    is_int: 1
+            input: 
+                type: select
+                options: 
+                    callback: 
+                        method: getModeReglementsArray
+                        params: 
+                            - id
+                            - 1
+            display_if: 
+                field_name: create_fac_fourn
+                show_values: 1
+          - custom: 1
+            label: Conditions de réglement
+            input_name: fac_fourn_id_cond_reglement
+            data_type: id
+            value: 
+                conf: 
+                    name: fac_fourn_def_id_cond_reglement
+                    module: bimpfinancement
+                    is_int: 1
+            input: 
+                type: select
+                options: 
+                    callback: getCondReglementsArray
+            display_if: 
+                field_name: create_fac_fourn
+                show_values: 1
+          - title: Facture client (financeur)
+          - custom: 1
+            label: Créer la facture client
+            input_name: create_fac_fin
+            data_type: bool
+            content: 
+                callback: renderCreateFacFinToggleInput
+          - custom: 1
+            label: Libellé
+            input_name: fac_fin_libelle
+            input: 
+                type: text
+            display_if: 
+                field_name: create_fac_fin
+                show_values: 1
+          - custom: 1
+            label: Mode de réglement
+            input_name: fac_fin_id_mode_reglement
+            data_type: id
+            value: 
+                conf: 
+                    name: fac_fin_def_id_mode_reglement
+                    module: bimpfinancement
+                    is_int: 1
+            input: 
+                type: select
+                options: 
+                    callback: 
+                        method: getModeReglementsArray
+                        params: 
+                            - id
+                            - 1
+            display_if: 
+                field_name: create_fac_fin
+                show_values: 1
+          - custom: 1
+            label: Conditions de réglement
+            input_name: fac_fin_id_cond_reglement
+            data_type: id
+            value: 
+                conf: 
+                    name: fac_fin_def_id_cond_reglement
+                    module: bimpfinancement
+                    is_int: 1
+            input: 
+                type: select
+                options: 
+                    callback: getCondReglementsArray
+            display_if: 
+                field_name: create_fac_fin
+                show_values: 1
+                
+fields_tables:
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: id_user_resp
             - field: date_loyer
               edit: 1
-            - field: id_commercial
-              edit: 1
-            - field: sites
-            - field: id_contrat
-              display: nom_url
-            - field: id_facture
+            - field: id_client
               display: card
+              show: 
+                  field_value: id_client
+            - field: id_contact_client
+              display: card
+              show: 
+                  field_value: id_contact_client
+            - field: contacts_livraisons
+            - field: id_supplier
+              display: card
+              show: 
+                  field_value: id_supplier
+            - field: id_supplier_contact
+              display: card
+              show: 
+                  field_value: id_supplier_contact
     
     options: 
         title: Options
-        footer_extra_btn:
-            callback: genFacture
-        icon: check-square-o
+        icon: fas_check-square
         rows: 
             - field: duration
+              label: Durée<br/><span class="small">(hors loyers suppl.)</span>
               edit: 1
             - field: periodicity
               edit: 1
-            - field: insurance
-              edit: 1
             - field: mode_calcul
               edit: 1 
-            - field: vr
-              edit: 1    
+            - field: vr_achat
+              edit: 1
             - field: vr_vente
-              edit: 1    
-            - field: ca_prevu
               edit: 1
-            - field: pba_prevu
+            - field: marge_souhaitee
               edit: 1
-              
-    client: 
-        title: Client
-        icon: user-circle
-        rows: 
-            - field: id_client
-              label: Société
-              display: card
-            - field: id_client_contact
-              label: Contact
-              display: card
-            - field: id_facture_client
-              display: card
-    
-    apporteur: 
-        title: Apporteur
-        icon: handshake-o
-        rows:
-            - field: id_supplier
-              label: Société
-              display: card
-            - field: id_supplier_contact
-              label: Contact
-              display: card
-            - field: id_facture_fournisseur
-              display: card
+            - field: def_tx_cession
+              edit: 1
+            - field: tx_cession
+              edit: 1
+            - field: formule
+              label: Formule choisie par le client
+              edit: 1
               
     montants: 
         title: Montants
@@ -540,167 +1106,169 @@ fields_tables:
             - field: montant_materiels
             - field: montant_services
             - field: montant_logiciels
-            - field: vr
-              edit: 1
-            - field: vr_vente
-              edit: 1
-            - label: Montant total
-              value: <span id="montant_total"></span>
-            - label: Commission commerciale
+            - label: Total demande HT
               value: 
-                  callback: 
-                      method: renderCommissionInputs
-                      params: 
-                          - commission_commerciale
-            - label: Commission financière
-              value: 
-                  callback: 
-                      method: renderCommissionInputs
-                      params: 
-                          - commission_financiere
-#            - label: Montant total
-#              value: <span id="montant_total2"></span>
-#            - label: Durée Calculée
-#              value: <span id="duree_total"></span>
-#            - field: duration
-#              label: Durée demandée
-#            - field: mode_calcul
-#            - field: periodicity
-#              label: Périodicité demandé
-#            - label: Coût banque
-#              value: <span id="cout_banque"></span>
-#            - label: Loyer Théorique
-#              value: <span id="loyer_the"></span>
-#            - label: Total loyer Calculé
-#              value: <span id="total_loyer"></span>
-#            - label: Dif financement/demande
-#              value: <span id="dif_banque_demande"></span>
-#            - label: Loyer intermediaire
-#              value: <span id="loy_inter"></span>
-#            - label: Frais Divers
-#              value: <span id="frais_div"></span>
-#            - label: Marge Calculé
-#              value: <span id="ca_calc"></span>
-              
-    montants_fournisseurs: 
-        title: Montants
-        icon: euro
-        rows:
-            - field: montant_materiels
-            - field: montant_services
-            - field: montant_logiciels
-            - label: Reste a payé Fournisseur
-              value: <span id="rest_fact"></span>
+                  callback: displayTotalDemande        
+            - field: loyer_mensuel_evo_ht
+              edit: 1
+              show: 
+                  callback: showLoyers
+            - field: loyer_mensuel_dyn_ht
+              edit: 1
+              show: 
+                  callback: showLoyers
+            - field: loyer_mensuel_suppl_ht
+              edit: 1
+              show: 
+                  callback: showLoyers
+                  
+    signatures: 
+        title: Signatures
+        icon: fas_signature
+        rows: 
+            - field: id_signature_devis
+              display: card
+              show: 
+                  field_value: id_signature_devis
+            - field: id_signature_contrat
+              display: card
+              show: 
+                  field_value: id_signature_contrat
+            - field: id_signature_pvr
+              display: card
+              show: 
+                  field_value: id_signature_pvr
+                  
+    factures: 
+        title: Factures
+        icon: fas_file-invoice-dollar
+        rows: 
+            - field: id_facture_fourn
+              display: card
+            - field: id_facture_fin
+              display: card
         
 views:
-    demande: 
+    default: 
         title: nom
         edit_form: default
-        delete_btn: 1
+        objects_change_reload: BF_DemandeRefinanceur,BF_Line,BimpSignature
         rows:
+            0: 
+                cols: 
+                    - type: object_header
+            1: 
+                cols: 
+                    - type: fields_table
+                      col_lg: 6
+                      col_md: 6
+                      fields_table:
+                          name: infos
+                          
+                    - type: fields_table
+                      col_lg: 6
+                      col_md: 6
+                      show: 
+                          callback: hasFacture
+                      fields_table:
+                          name: factures
+                          
+                    - type: fields_table
+                      col_lg: 6
+                      col_md: 6
+                      show: 
+                          callback: hasSignature
+                      fields_table:
+                          name: signatures
+    
+    demande: 
+        extends: default
+        rows: 
+            0: unset
+            
+    montants: 
+        panel: 0
+        objects_change_reload: BF_DemandeRefinanceur,BF_Line,BimpSignature
+        rows: 
             - cols: 
-                - type: rows
-                  col_lg: 6
+                - type: fields_table
                   col_md: 6
-                  rows:                        
+                  col_lg: 6
+                  fields_table: 
+                      name: options
+                      
+                - type: rows
+                  col_md: 6
+                  col_lg: 6
+                  rows: 
                       - cols: 
                           - type: fields_table
-                            col_lg: 12
                             fields_table: 
-                                name: contrat
-                          
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  fields_table:
-                      name: options
-                
-            - cols: 
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    col_sm: 12
-                    fields_table:
-                        name: client
-                              
-                  - type: fields_table
-                    col_lg: 6
-                    col_md: 6
-                    col_sm: 12
-                    fields_table:
-                        name: apporteur
-                        
-    montants:
-        panel: 0
-        objects_change_reload: BF_Line
-        rows:
-            - cols: 
-                - type: view
-                  col_lg: 4
-                  col_md: 4
-                  view: 
-                      panel: 0
-                      name: infos_fin
-            - cols:
-                - type: list
-                  list: 
-                      children: refinanceurs
-                      panel: 0
-            - cols:  
-                  - type: fields_table
-                    col_lg: 3
-                    col_md: 3
-                    fields_table:
-                        name: montants
-                        
-                  - type: rows
-                    col_lg: 9
-                    col_md: 9
-                    rows: 
-                        - cols: 
-                            - type: list
-                              list: 
-                                  children: rents_except
-                                  panel: 0
-                            - type: list
-                              list: 
-                                  children: frais_divers
-                                  panel: 0
+                                name: montants
             - cols: 
                 - type: custom
                   custom: 
-                      callback: renderFacturesFraisList
-    
-    fournisseurs:
-        title: nom
-        objects_change_reload: BF_Line,Bimp_CommandeFourn,Bimp_CommandeFournLine
+                      callback: renderCalcValues
+        
+filters_panels: 
+    default: 
+        filters: 
+            status: 
+            devis_status: 
+            contrat_status: 
+            ref: 
+            date_create: 
+            id_client: 
+            id_user_resp: 
+                
+lists_cols: 
+    id: 
+        label: ID
+        
+    client: 
+        label: Client
+        value: 
+            callback: displayClient
+        
+lists:
+    default:
+        checkboxes: 1
+        configurable: 1
+        filters_panel: default
+        bulk_actions:
+            - label: supprimer les demandes de fincancement sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+        header_buttons: 
+            callback: getDefaultListHeaderButton
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        delete_btn: 1
+        page_btn: 1
+        modal_view: demande
+        edit_btn: 1
         edit_form: default
         delete_btn: 1
-        rows:
-            - cols: 
-                - type: custom
-                  col_lg: 3
-                  col_md: 4
-                  custom: 
-                      callback: renderCommandesInfos
-            - cols: 
-                  - type: custom
-                    custom: 
-                        callback: renderCommandesFournisseursList
-                        
-    factures: 
-        objects_change_reload: BF_Line,Bimp_CommandeFourn,Bimp_CommandeFournLine,Bimp_Facture,BF_RentExcept,BF_FraisDivers
-        rows: 
-            - cols: 
-                - type: custom
-                  custom: 
-                      callback: renderAllFacturesList
-                      
-    infos_fin: 
-        objects_change_reload: BF_Line,BF_RentExcept,BF_FraisDivers,BF_FraisFournisseur,BF_DemandeRefinanceur
-        rows: 
-            - cols: 
-                - type: custom
-                  custom: 
-                      callback: renderInfoFin
-        
+        extra_btn: 
+            callback: getListExtraButtons
+        cols:
+            ref: 
+            date_create:
+            label: 
+            id_user_resp: 
+            client: 
+            status:
+            devis_status: 
+            contrat_status: 
+
+signatures: 
+    devis: 
+        label: Devis de location
+    contrat: 
+        label: Contrat de location
+    pvr: 
+        label: PV de réception

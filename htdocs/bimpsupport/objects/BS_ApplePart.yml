@@ -43,12 +43,12 @@ fields:
         values: 
             array: comptia_modifiers
         default_value: A
-    qty: 
-        label: Quantité
-        type: qty
-        unsigned: 1
-        min: 1
-        default_value: 1
+#    qty: 
+#        label: Quantité
+#        type: qty
+#        unsigned: 1
+#        min: 1
+#        default_value: 1
     component_code: 
         label: Code pièce
         values: 
@@ -106,8 +106,8 @@ fields_tables:
             - field: part_number
             - field: new_part_number
             - field: label
-            - field: qty
-              edit: 1
+#            - field: qty
+#              edit: 1
             - field: price_type
               edit: 1
             - field: out_of_warranty
@@ -116,6 +116,11 @@ fields_tables:
               edit: 1
             - field: is_tier
             - field: not_invoiced
+            - field: type_for_price
+            - custom: 1
+              label: Type pour tarification
+              value: 
+                callback: getThisCategProdApple
 
 views: 
     default: 
@@ -145,34 +150,25 @@ lists:
         cols: 
             label: 
                 label: Nom
-                field: label
-            num: 
+            part_number: 
                 label: Réf.
-                field: part_number
-            compTIAcode: 
-                field: comptia_code
+            comptia_code: 
                 edit: 1
-                max_width: 250px
-                min_width: 250px
-            compTIAmod: 
-                field: comptia_modifier
-                max_width: 180px
+                max_width: 250
+            comptia_modifier: 
+                max_width: 180
                 edit: 1
-            qty: 
-                label: Qté
-                field: qty
-                edit: 
-                    callback: isCartEditable
+#            qty: 
+#                label: Qté
+#                edit: 
+#                    callback: isCartEditable
             out_of_warranty: 
-                field: out_of_warranty
                 edit: 
                     callback: isCartEditable
-            price: 
-                field: price_type
+            price_type: 
                 edit: 
                     callback: isCartEditable
             no_order: 
-                field: no_order
                 edit: 
                     callback: isCartEditable
                     
@@ -195,25 +191,19 @@ lists:
         cols: 
             label: 
                 label: Nom
-                field: label
-            num: 
+            part_number: 
                 label: Réf.
-                field: part_number
-            qty: 
-                label: Qté
-                field: qty
-                edit: 
-                    callback: isCartEditable
+#            qty: 
+#                label: Qté
+#                edit: 
+#                    callback: isCartEditable
             out_of_warranty: 
-                field: out_of_warranty
                 edit: 
                     callback: isCartEditable
-            price: 
-                field: price_type
+            price_type: 
                 edit: 
                     callback: isCartEditable
             no_order: 
-                field: no_order
                 edit: 
                     callback: isCartEditable
         

@@ -20,7 +20,7 @@ fields:
         required: 1
         input: 
             type: search_product
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayProduct
@@ -32,6 +32,9 @@ fields:
         max: none
         decimals: 0
         default_value: 1
+        
+    infos:
+        label: Infos
         
 forms: 
     default: 
@@ -46,11 +49,18 @@ forms:
                   type: search_entrepot
                   include_empty: 1
               value: 0
+              
+filters_panel: 
+    default: 
+        filters: 
+            id_product: 
             
 lists: 
     default: 
-        enable_search: 0
+        enable_search: 1
+        configurable: 1
         enable_sort: 0
+        filters_panel: default
         checkboxes: 1
         bulk_actions: 
             - label: Retirer les produits sélectionnés
@@ -62,10 +72,16 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         cols: 
-            product: 
-                field: id_product
+            id_product: 
             qty:
-                field: qty
+            infos:
+                edit: 1
+                
+    user:
+        extends: default
+        cols:
+            id_package:
+            package:label:
                 
     immos: 
         enable_search: 0
@@ -82,3 +98,7 @@ lists:
                 field: id_product
             qty:
                 field: qty
+            place: 
+                label: Emplacement
+                value: 
+                    callback: displayCurrentPlace

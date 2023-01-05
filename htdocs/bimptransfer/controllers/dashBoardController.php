@@ -27,7 +27,10 @@ class dashBoardController extends BimpController {
 
 
         //    $html .=$this->getButtonLink(Créer transfert" onclick="location.href=\'' . DOL_URL_ROOT . '/bimpequipment/manageequipment/viewTransfer.php?entrepot=' . fk_warehouse );';
-        $html .= $this->getButtonLink('Accéder equipement', '/bimpequipment/?fc=entrepot&id=' . $id_warehouse);
+        if($id_warehouse > 0)
+            $html .= $this->getButtonLink('Accéder equipement', '/bimpequipment/?fc=entrepot&id=' . $id_warehouse);
+        else
+            $html .= $this->getButtonLink('Accéder equipement', '/bimpequipment/');
         $html .= $this->getButtonLink('Accéder réservation', '/bimpreservation/index.php?fc=entrepot&id=' . $id_warehouse . '#all_res');
 //    $html .=$this->getButtonLink(Accéder inventaire" onclick="location.href=\'' . DOL_URL_ROOT . '/bimpequipment/manageequipment/viewInventoryMain.php?entrepot=' . fk_warehouse );';
         if ((int) $user->rights->bimpequipment->caisse->read === 1){

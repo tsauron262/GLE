@@ -3,7 +3,7 @@
 class BC_CaisseUser extends BimpObject
 {
 
-    public function create(&$warnings = array())
+    public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
 

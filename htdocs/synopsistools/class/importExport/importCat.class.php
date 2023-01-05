@@ -512,7 +512,7 @@ class importCat extends import8sens {
                 array("Gamme", "Occasion")
             ),
             "Remises Volumes CRT" => array(
-                array("Gamme", "Remise CRT")
+                array("Gamme", "Remise arrière")
             ),
             "JAM SOFTWARE" => array(
                 array("Marque", "JAM SOFTWARE")

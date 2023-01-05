@@ -17,16 +17,21 @@ class BC_Form extends BC_Panel
         'field'              => array('default' => ''),
         'association'        => array('default' => ''),
         'object'             => array('default' => ''),
+        'title'              => array('default' => ''),
         'custom'             => array('data_type' => 'bool', 'default' => 0),
         'label'              => array('default' => ''),
         'create_form'        => array('default' => ''),
         'create_form_values' => array('data_type' => 'array'),
         'create_form_label'  => array('default' => 'Créer'),
+        'edit_form'          => array('default' => ''),
+        'edit_form_values'   => array('data_type' => 'array'),
+        'edit_form_label'    => array('default' => 'Editer'),
         'display'            => array('default' => 'default'),
         'hidden'             => array('data_type' => 'bool', 'default' => 0),
         'required'           => array('data_type' => 'bool', 'default' => null),
         'edit'               => array('data_type' => 'bool', 'default' => 1),
         'display_if'         => array('data_type' => 'array', 'compile' => 1, 'default' => null),
+        'value'              => array('data_type' => 'any', 'default' => null)
     );
     public static $association_params = array(
         'display_if' => array('data_type' => 'array'),
@@ -37,10 +42,9 @@ class BC_Form extends BC_Panel
         'display_if'      => array('data_type' => 'array'),
         'depends_on'      => array(),
         'data_type'       => array('default' => 'string'),
-        'value'           => array('data_type' => 'any', 'default' => ''),
         'no_container'    => array('data_type' => 'bool', 'default' => 0),
         'multiple'        => array('data_type' => 'bool', 'default' => 0),
-        'keep_new_value'  => array('data_type' => 'bool', 'default' => 0),
+        'keep_new_value'  => array('data_type' => 'bool', 'default' => null),
         'items_data_type' => array()
     );
     public static $object_params = array(
@@ -62,6 +66,9 @@ class BC_Form extends BC_Panel
         $this->params_def['sub_objects'] = array('type' => 'keys');
         $this->params_def['no_auto_submit'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['force_edit'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['cancel_btn'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['on_submit'] = array('default' => 'null');
+        $this->params_def['all_fields'] = array('data_type' => 'bool', 'default' => 0);
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -83,12 +90,6 @@ class BC_Form extends BC_Panel
             }
         } else {
             $path = 'forms';
-        }
-
-        if ($object->isLoaded()) {
-            $title = 'Edition ' . $object->getLabel('of_the') . ' ' . $object->getInstanceName();
-        } else {
-            $title = 'Ajout ' . $object->getLabel('of_a');
         }
 
         if ((is_null($id_parent) || !$id_parent) && !is_null($object)) {
@@ -113,7 +114,19 @@ class BC_Form extends BC_Panel
             $this->params['on_save'] = $on_save;
         }
 
-        parent::__construct($object, $name, $path, $content_only, $level, $title, 'edit');
+        parent::__construct($object, $name, $path, $content_only, $level);
+
+        if (!$this->params['title']) {
+            if ($object->isLoaded()) {
+                $this->params['title'] = 'Edition ' . $object->getLabel('of_the') . ' ' . $object->getInstanceName();
+            } else {
+                $this->params['title'] = 'Ajout ' . $object->getLabel('of_a');
+            }
+        }
+
+        if (!$this->params['icon']) {
+            $this->params['icon'] = 'fas_edit';
+        }
 
         if (isset($this->params['values']) && !is_null($this->params['values'])) {
             if (isset($this->params['values']['fields'])) {
@@ -247,7 +260,7 @@ class BC_Form extends BC_Panel
             $html .= '<input type="hidden" name="' . $this->fields_prefix . $parent_id_property . '" value="' . $this->id_parent . '"/>';
         }
 
-        if (is_null($this->config_path)) {
+        if (is_null($this->config_path) || count($this->params['rows']) == 0 || $this->params['all_fields']) {
             $fields = $this->object->getConf('fields', array(), true, 'array');
             foreach ($fields as $field_name => $field_params) {
                 if ($field_name === $parent_id_property) {
@@ -255,7 +268,10 @@ class BC_Form extends BC_Panel
                 }
                 $html .= $this->renderFieldRow($field_name);
             }
-        } else {
+        }
+
+        if (is_array($this->params['rows'])) {
+            $end_div = 0;
             foreach ($this->params['rows'] as $row) {
                 $row_params = parent::fetchParams($this->config_path . '/rows/' . $row, self::$row_params);
 
@@ -265,12 +281,12 @@ class BC_Form extends BC_Panel
                 if ($row_params['field']) {
                     $html .= $this->renderFieldRow($row_params['field'], $row_params);
                 } elseif ($row_params['association']) {
-                    $row_params = array_merge($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$association_params));
+                    $row_params = BimpTools::merge_array($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$association_params));
                     $html .= $this->renderAssociationRow($row_params);
                 } elseif ((int) $row_params['custom']) {
                     $html .= $this->renderCustomRow($row, $row_params);
                 } elseif ($row_params['object']) {
-                    $row_params = array_merge($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$object_params));
+                    $row_params = BimpTools::merge_array($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$object_params));
                     if (!(int) $row_params['on_edit'] && $this->object->isLoaded()) {
                         continue;
                     }
@@ -280,7 +296,21 @@ class BC_Form extends BC_Panel
                     $html .= '<div>';
                     $html .= $this->renderObjectRow($row_params['object'], $row_params);
                     $html .= '</div>';
+                } elseif ($row_params['title']) {
+                    if ($end_div > 0) {
+                        $html .= '</div>';
+                        $end_div--;
+                    }
+                    $html .= $this->renderTitleRow($row_params);
+
+                    $html .= '<div class="formInputGroup">';
+                    $end_div++;
                 }
+            }
+
+            while ($end_div > 0) {
+                $html .= '</div>';
+                $end_div--;
             }
         }
 
@@ -297,20 +327,24 @@ class BC_Form extends BC_Panel
     public function renderHtmlFooter()
     {
         $html = '';
-        $html .= BimpRender::renderButton(array(
-                    'label'       => 'Annuler',
-                    'icon_before' => 'times',
-                    'classes'     => array('btn', 'btn-default'),
-                    'attr'        => array(
-                        'onclick' => 'closeObjectForm(\'' . $this->object->object_name . '\')'
-                    )
-                        ), 'button');
+
+        if ((int) $this->params['cancel_btn']) {
+            $html .= BimpRender::renderButton(array(
+                        'label'       => 'Annuler',
+                        'icon_before' => 'times',
+                        'classes'     => array('btn', 'btn-default'),
+                        'attr'        => array(
+                            'onclick' => 'closeObjectForm(\'' . $this->object->object_name . '\')'
+                        )
+                            ), 'button');
+        }
+
         $html .= BimpRender::renderButton(array(
                     'label'       => 'Enregistrer',
                     'icon_before' => 'fas_save',
                     'classes'     => array('btn', 'btn-primary', 'pull-right', 'save_object_button'),
                     'attr'        => array(
-                        'onclick' => 'saveObjectFromForm(\'' . $this->identifier . '\')'
+                        'onclick' => 'saveObjectFromForm(\'' . $this->identifier . '\', $(this), null, null, ' . $this->params['on_submit'] . ')'
                     )
                         ), 'button');
         return $html;
@@ -318,6 +352,10 @@ class BC_Form extends BC_Panel
 
     public function renderFieldRow($field_name, $params = array(), $label_cols = 3)
     {
+        if (in_array($field_name, $this->object->params['fields']) && !$this->object->isFieldActivated($field_name)) {
+            return '';
+        }
+
         $field = new BC_Field($this->object, $field_name, true, 'fields', (int) $this->params['force_edit']);
         $field->name_prefix = $this->fields_prefix;
         $field->display_card_mode = 'visible';
@@ -336,6 +374,18 @@ class BC_Form extends BC_Panel
             }
         }
 
+        if (isset($params['value'])) {
+            if (is_array($params['value'])) {
+                if ($params['data_type'] === 'json') {
+                    $params['value'] = json_encode($params['value']);
+                } else {
+                    $params['value'] = implode(',', $params['value']);
+                }
+            }
+
+            $field->value = $params['value'];
+        }
+
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -345,6 +395,10 @@ class BC_Form extends BC_Panel
 
         $label = (isset($params['label']) && $params['label']) ? $params['label'] : $field->params['label'];
         $required = (!is_null($params['required']) ? (int) $params['required'] : (int) $field->params['required']);
+        if ($required && !$field->params['required']) {
+            $field->params['required'] = 1;
+        }
+
         $input_type = $this->object->getConf('fields/' . $field_name . '/input/type', 'text', false);
         $display_if = (bool) (!is_null($params['display_if']));
         if (!$display_if) {
@@ -364,16 +418,16 @@ class BC_Form extends BC_Panel
         }
         $html .= '>';
 
-        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-' . (int) $label_cols . '">';
         $html .= $label;
         if ($required) {
             $html .= '&nbsp;*';
         }
         $html .= '</div>';
 
-        $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div class="formRowInput field col-xs-12 col-sm-' . (12 - (int) $label_cols) . '">';
 
-        if ($field->params['editable']) {
+        if ($field->edit && $field->isEditable()) {
             if ($field->params['type'] === 'id_object' ||
                     ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {
                 $form_name = ($params['create_form'] ? $params['create_form'] : ($field->params['create_form'] ? $field->params['create_form'] : ''));
@@ -381,18 +435,28 @@ class BC_Form extends BC_Panel
                 $btn_label = ($params['create_form_label'] ? $params['create_form_label'] : ($field->params['create_form_label'] ? $field->params['create_form_label'] : 'Créer'));
 
                 if ($form_name) {
-                    $html .= self::renderCreateObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values, $btn_label);
+                    $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values, $btn_label);
+                }
+
+                $form_name = ($params['edit_form'] ? $params['edit_form'] : ($field->params['edit_form'] ? $field->params['edit_form'] : ''));
+                $form_values = ($params['edit_form_values'] ? $params['edit_form_values'] : ($field->params['edit_form_values'] ? $field->params['edit_form_form_values'] : ''));
+                $btn_label = ($params['edit_form_label'] ? $params['edit_form_label'] : ($field->params['edit_form_label'] ? $field->params['edit_form_label'] : 'Editer'));
+
+                if ($form_name) {
+                    $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values, $btn_label, true, null, '', -1);
                 }
             }
         }
+
+
         $html .= $field->renderHtml();
 
         $html .= '</div>';
-
         $html .= '</div>';
 
         if ($depends_on) {
-            $html .= $field->renderDependsOnScript($this->identifier);
+            $force_keep_new_value = (isset($this->params['values']['fields'][$field_name]) ? 1 : 0);
+            $html .= $field->renderDependsOnScript($this->identifier, $force_keep_new_value);
         }
 
         $current_bc = $prev_bc;
@@ -420,6 +484,8 @@ class BC_Form extends BC_Panel
 
         if ($this->object->isLoaded()) {
             $items = $asso->getAssociatesList();
+        } else {
+            $items = $this->object->getAssociatesList($params['association']);
         }
 
         $html .= '<div class="row formRow' . ($params['hidden'] ? ' hidden' : '') . (!is_null($params['display_if']) ? ' display_if' : '') . '"';
@@ -428,7 +494,7 @@ class BC_Form extends BC_Panel
         }
         $html .= '>';
 
-        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-' . (int) $label_cols . '">';
         if ($params['label']) {
             $html .= $params['label'];
         } elseif ($this->object->config->isDefined('associations/' . $params['association'] . '/label')) {
@@ -443,7 +509,7 @@ class BC_Form extends BC_Panel
         }
         $html .= '</div>';
 
-        $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div class="formRowInput field col-xs-12 col-sm-' . (12 - (int) $label_cols) . '">';
 
         if (count($asso->errors)) {
             $html .= BimpRender::renderAlerts($asso->errors);
@@ -455,7 +521,12 @@ class BC_Form extends BC_Panel
                 if (is_a($associate, 'BimpObject')) {
                     $form_name = ($params['create_form'] ? $params['create_form'] : $this->object->getConf('associations/' . $params['association'] . '/create_form', ''));
                     if ($form_name) {
-                        $html .= $this->renderCreateObjectButton($this->object, $this->identifier, '', '', $form_name, null, 'Créer', false, $associate);
+                        $html .= $this->renderLoadFormObjectButton($this->object, $this->identifier, '', '', $form_name, null, 'Créer', false, $associate);
+                    }
+
+                    $form_name = ($params['edit_form'] ? $params['edit_form'] : $this->object->getConf('associations/' . $params['association'] . '/edit_form', ''));
+                    if ($form_name) {
+                        $html .= $this->renderLoadFormObjectButton($this->object, $this->identifier, '', '', $form_name, null, 'Editer', false, $associate, '', -1);
                     }
                 }
                 $html .= $asso->renderAddAssociateInput($params['display'], false, $this->fields_prefix, (int) $params['required']);
@@ -487,8 +558,8 @@ class BC_Form extends BC_Panel
 
         $html = '';
 
-        $params = array_merge($params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$custom_row_params));
-        if (is_array($params['value'])) {
+        $params = BimpTools::merge_array($params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$custom_row_params));
+        if (isset($params['value']) && is_array($params['value'])) {
             if ($params['data_type'] === 'json') {
                 $params['value'] = json_encode($params['value']);
             } else {
@@ -506,14 +577,14 @@ class BC_Form extends BC_Panel
         }
         $html .= '>';
 
-        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-' . (int) $label_cols . '">';
         $html .= $params['label'];
         if ((int) $params['required']) {
             $html .= '&nbsp;*';
         }
         $html .= '</div>';
 
-        $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div class="formRowInput field col-xs-12 col-sm-' . (12 - (int) $label_cols) . '">';
 
         $html .= $this->renderCustomInput($row, $params);
 
@@ -521,7 +592,13 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         if (!is_null($params['depends_on'])) {
-            $html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix, (int) $params['keep_new_value']);
+            if (!is_null($params['keep_new_value'])) {
+                $keep_new_value = (int) $params['keep_new_value'];
+            } else {
+                $keep_new_value = (isset($this->params['values']['fields'][$params['input_name']]) ? 1 : 0);
+            }
+
+            $html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix, $keep_new_value);
         }
 
         $current_bc = $prev_bc;
@@ -685,6 +762,22 @@ class BC_Form extends BC_Panel
         return $html;
     }
 
+    public function renderTitleRow($params = array())
+    {
+        $html = '';
+
+        $html .= '<div class="formGroupTitle">';
+        $title = '';
+        if (isset($params['icon'])) {
+            $title .= BimpRender::renderIcon($params['icon'], 'iconLeft');
+        }
+        $title .= $params['title'];
+
+        $html .= '<h3>' . $title . '</h3>';
+        $html .= '</div>';
+        return $html;
+    }
+
     public function renderCustomInput($row, $params = null)
     {
         global $current_bc;
@@ -702,18 +795,22 @@ class BC_Form extends BC_Panel
             }
 
             $params = $this->fetchParams($row_path, self::$row_params);
-            $params = array_merge($params, $this->fetchParams($row_path, self::$custom_row_params));
+            $params = BimpTools::merge_array($params, $this->fetchParams($row_path, self::$custom_row_params));
         }
 
-//        if ((is_null($params['value']) || $params['value'] === '') && isset($this->params['values']['fields'][$params['input_name']])) {
         if (isset($this->params['values']['fields'][$params['input_name']])) {
             $params['value'] = $this->params['values']['fields'][$params['input_name']];
         }
 
         $html = '';
 
-        if (($params['data_type'] === 'id_object' || (($params['data_type'] === 'items_list') && isset($params['items_data_type']) && $params['items_data_type'] === 'id_object')) && $params['object'] && $params['create_form']) {
-            $html .= self::renderCreateObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values'], $params['create_form_label']);
+        if (($params['data_type'] === 'id_object' || (($params['data_type'] === 'items_list') && isset($params['items_data_type']) && $params['items_data_type'] === 'id_object')) && $params['object']) {
+            if ($params['create_form']) {
+                $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values'], $params['create_form_label']);
+            }
+            if ($params['edit_form']) {
+                $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['edit_form'], $params['edit_form_values'], $params['edit_form_label'], true, null, '', -1);
+            }
         }
 
         if ($this->object->config->isDefined($row_path . '/input')) {
@@ -768,7 +865,7 @@ class BC_Form extends BC_Panel
         return $html;
     }
 
-    public static function renderCreateObjectButton(BimpObject $parent, $parent_form_id, $object_name, $result_input_name, $form_name, $form_values = null, $btn_label = 'Créer', $reload_input = true, $object = null, $successcallBack = '')
+    public static function renderLoadFormObjectButton(BimpObject $parent, $parent_form_id, $object_name, $result_input_name, $form_name, $form_values = null, $btn_label = 'Créer', $reload_input = true, $object = null, $successcallBack = '', $id_object = 0)
     {
         if (!$form_name) {
             return '';
@@ -780,7 +877,14 @@ class BC_Form extends BC_Panel
 
         if (!is_null($object) && is_a($object, 'BimpObject')) {
             $label = $btn_label . ' ' . $object->getLabel('a');
-            $title = 'Ajout ' . addslashes($object->getLabel('of_a'));
+            if ($id_object == 0) {
+                $label = $btn_label . ' ' . $object->getLabel('a');
+                $title = 'Ajout ' . addslashes($object->getLabel('of_a'));
+            } else {
+                $label = $btn_label . ' ' . $object->getLabel('the');
+                $title = 'Edition ' . addslashes($object->getLabel('of_the'));
+            }
+
 
             if ($parent->isLoaded() && $object->getParentObjectName() === $parent->object_name) {
                 $id_parent = $parent->id;
@@ -790,24 +894,46 @@ class BC_Form extends BC_Panel
 
             $html = '';
 
-            $html .= '<div style="text-align: right">';
+            $html .= '<div style="text-align: right; float: right;">';
 
-            $onclick = '\'' . $title . '\', \'' . $result_input_name . '\', \'' . $parent_form_id . '\'';
-            $onclick .= ', \'' . $object->module . '\', \'' . $object->object_name . '\'';
-            $onclick .= ', \'' . $form_name . '\', ' . $id_parent;
-            $onclick .= ', ' . ($reload_input ? 'true' : 'false');
-            $onclick .= ', $(this)';
-            if (!is_null($form_values) && is_array($form_values)) {
-                $onclick .= ', \'' . htmlentities(json_encode($form_values)) . '\'';
+            foreach (BimpTools::getArrayValueFromPath($form_values, 'fields', array()) as $field_name => $value) {
+                if ($object->field_exists($field_name)) {
+                    $object->set($field_name, $value);
+                }
             }
-            $html .= BimpRender::renderButton(array(
-                        'icon_before' => 'plus-circle',
-                        'label'       => $label,
-                        'classes'     => array('btn', 'btn-light-default'),
-                        'attr'        => array(
-                            'onclick' => 'loadObjectFormFromForm(' . $onclick . ')'
-                        )
-            ));
+
+            if ($id_object && $object->canEdit() || (!$id_object && $object->canCreate())) {
+                $onclick = 'loadObjectFormFromForm(\'' . $title . '\', \'' . $result_input_name . '\', \'' . $parent_form_id . '\'';
+                $onclick .= ', \'' . $object->module . '\', \'' . $object->object_name . '\'';
+                $onclick .= ', \'' . $form_name . '\', ' . $id_parent;
+                $onclick .= ', ' . ($reload_input ? 'true' : 'false');
+                $onclick .= ', $(this)';
+                if (!is_null($form_values) && is_array($form_values)) {
+                    $onclick .= ', \'' . htmlentities(json_encode($form_values)) . '\'';
+                } else {
+                    $onclick .= ', null';
+                }
+                $onclick .= ', ' . $id_object;
+                $onclick .= ')';
+
+                $html .= BimpRender::renderButton(array(
+                            'icon_before' => ($id_object ? 'fas_edit' : 'fas_plus-circle'),
+                            'label'       => $label,
+                            'classes'     => array('btn', 'btn-light-default'),
+                            'attr'        => array(
+                                'onclick' => $onclick
+                            )
+                ));
+            } else {
+                $html .= BimpRender::renderButton(array(
+                            'icon'     => ($id_object ? 'fas_edit' : 'fas_plus-circle'),
+                            'label'    => $label,
+                            'type'     => 'light-default',
+                            'onclick'  => '',
+                            'disabled' => 1,
+                            'popover'  => 'Vous n\'avez pas la permission'
+                ));
+            }
 
             $html .= '</div>';
         }

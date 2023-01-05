@@ -1,0 +1,156 @@
+
+table: bws_profile
+icon: fas_id-card-alt
+controller: profile
+
+header_edit_form: default
+header_list_name: default
+
+list_page_url: 
+    module: bimpcore
+    controller: dev
+    url_params: 
+        tab: ws
+        navtab-ws: profiles
+    
+labels: 
+    name: profile webservice
+    name_plur: profiles webservice
+    
+objects: 
+    rights: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpwebservice
+                name: BWS_ProfileRight
+        
+    user_def: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
+            id_object: 
+                field_value: id_user_def
+        
+fields: 
+    name: 
+        label: Nom
+        required: 1
+        
+    description: 
+        label: Description
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+        
+    id_user_def: 
+        label: Utilisateur par défaut
+        type: id_object
+        object: user_def
+        default_value: 0
+        input: 
+            type: search_user
+            help: Utilisateur erp utilisé par défaut pour les utilisatuers ws lié à ce profile
+        
+    token_expire_delay: 
+        label: Délai d'expiration des tokens (Min.)
+        type: int
+        decimals: 0
+        unsigned: 1
+        input: 
+            help: Indiquer un nombre de minutes
+        default_value: 
+            conf: 
+                module: bimpwebservice
+                name: default_tokens_expire_delay
+            
+    active: 
+        label: Actif
+        type: bool
+        default_value: 1
+        
+forms: 
+    duplicate: 
+        rows: 
+            - custom: 1
+              label: Nom
+              input_name: name
+              input: 
+                  type: text
+                  help: Veuillez saisir un nom unique
+              required: 1
+            - field: id_user_def
+            - field: description
+
+fields_tables: 
+    infos: 
+        panel_header: 0
+        rows: 
+            - field: name
+            - field: description
+            - field: id_user_def 
+            - field: active
+              edit: 1
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: nav_tabs
+                  nav_tabs: 
+                      - id: card
+                        title: Fiche
+                        struct:
+                            type: rows
+                            rows: 
+                                - cols: 
+                                    - type: fields_table
+                                      col_lg: 6
+                                      col_md: 6
+                                      fields_table: 
+                                          name: infos
+                                - cols: 
+                                    - type: list
+                                      list: 
+                                          name: profile
+                                          children: rights
+                      - id: users
+                        title: Utilisateurs
+                        struct: 
+                            type: custom
+                            custom: 
+                                callback: renderUsersList
+lists: 
+    default: 
+        checkboxes: 1
+        configurable: 0
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_object_row: 1
+        add_object_row_open: 1
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        extra_btn: 
+            callback: getListExtraBtn
+        bulk_actions:
+            - label: supprimer les profils sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        cols: 
+            name: 
+            description: 
+            id_user_def:
+            token_expire_delay: 
+            active:
+                edit: 1

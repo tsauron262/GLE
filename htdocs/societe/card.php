@@ -35,6 +35,12 @@
  */
 
 require '../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+if(BimpTools::getValue('type', 's') == 'f')
+    $bObj = BimpObject::getInstance("bimpcore", "Bimp_Fournisseur", $_REQUEST['socid']);
+else
+    $bObj = BimpObject::getInstance("bimpcore", "Bimp_Client", $_REQUEST['socid']);
+$htmlRedirect = $bObj->processRedirect();
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
@@ -141,6 +147,15 @@ if (empty($reshook))
 			    // TODO Move the merge function into class of object.
 
 				$db->begin();
+                                
+                                
+                                /* moddrsi */
+                                $sql = $db->query('SELECT Count(*) as nb, `ref_fourn`, `fk_product` FROM `llx_product_fournisseur_price` WHERE `fk_soc` IN ('.$soc_origin_id.', '.$object->id.') GROUP BY `ref_fourn`, `fk_product` HAVING nb > 1');
+                                while($ln = $db->fetch_object($sql)){
+                                    $db->query('UPDATE `llx_product_fournisseur_price` SET ref_fourn = CONCAT(ref_fourn, "-B") WHERE fk_product = '.$ln->fk_product.' AND ref_fourn = "'.$ln->ref_fourn.'" AND fk_soc = '.$soc_origin_id.' ');
+                                }
+                                /* fmoddrsi*/
+                                
 
 				// Recopy some data
 				$object->client = $object->client | $soc_origin->client;
@@ -894,7 +909,9 @@ if ($socid > 0 && empty($object->id))
 $title=$langs->trans("ThirdParty");
 if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/thirdpartynameonly/', $conf->global->MAIN_HTML_TITLE) && $object->name) $title=$object->name." - ".$langs->trans('Card');
 $help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
-llxHeader('', $title, $help_url);
+llxHeader('',$title,$help_url);
+echo $htmlRedirect;
+
 
 $countrynotdefined=$langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("SeeAbove").')';
 

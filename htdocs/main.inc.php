@@ -36,15 +36,38 @@
 
 // For optional tuning. Enabled if environment variable MAIN_SHOW_TUNING_INFO is defined.
 $micro_start_time = 0;
-if (!empty($_SERVER['MAIN_SHOW_TUNING_INFO']))
-{
-	list($usec, $sec) = explode(" ", microtime());
-	$micro_start_time = ((float) $usec + (float) $sec);
-	// Add Xdebug code coverage
-	//define('XDEBUGCOVERAGE',1);
-	if (defined('XDEBUGCOVERAGE')) {
-		xdebug_start_code_coverage();
-	}
+
+ini_set('upload_max_filesize', '20M');
+
+
+if (!empty($_SERVER['MAIN_SHOW_TUNING_INFO'])) {
+    list($usec, $sec) = explode(" ", microtime());
+    $micro_start_time = ((float) $usec + (float) $sec);
+    // Add Xdebug code coverage
+    //define('XDEBUGCOVERAGE',1);
+    if (defined('XDEBUGCOVERAGE')) {
+        xdebug_start_code_coverage();
+    }
+}
+
+// Removed magic_quotes
+if (function_exists('get_magic_quotes_gpc')) { // magic_quotes_* deprecated in PHP 5.0 and removed in PHP 5.5
+    if (get_magic_quotes_gpc()) {
+
+        // Forcing parameter setting magic_quotes_gpc and cleaning parameters
+        // (Otherwise he would have for each position, condition
+        // Reading stripslashes variable according to state get_magic_quotes_gpc).
+        // Off mode recommended (just do $db->escape for insert / update).
+        function stripslashes_deep($value)
+        {
+            return (is_array($value) ? array_map('stripslashes_deep', $value) : stripslashes($value));
+        }
+        $_GET = array_map('stripslashes_deep', $_GET);
+        $_POST = array_map('stripslashes_deep', $_POST);
+        $_FILES = array_map('stripslashes_deep', $_FILES);
+        //$_COOKIE  = array_map('stripslashes_deep', $_COOKIE); // Useless because a cookie should never be outputed on screen nor used into sql
+        @set_magic_quotes_runtime(0);
+    }
 }
 
 /**
@@ -213,26 +236,50 @@ session_name($sessionname);
 session_set_cookie_params(0, '/', null, false, true); // Add tag httponly on session cookie (same as setting session.cookie_httponly into php.ini). Must be called before the session_start.
 // This create lock, released when session_write_close() or end of page.
 // We need this lock as long as we read/write $_SESSION ['vars']. We can remove lock when finished.
-if (!defined('NOSESSION'))
-{
-	session_start();
-	/*if (ini_get('register_globals'))    // Deprecated in 5.3 and removed in 5.4. To solve bug in using $_SESSION
-	{
-		foreach ($_SESSION as $key=>$value)
-		{
-			if (isset($GLOBALS[$key])) unset($GLOBALS[$key]);
-		}
-	}*/
-}
 
-// Init the 5 global objects, this include will make the 'new Xxx()' and set properties for: $conf, $db, $langs, $user, $mysoc
+
+// Init the 5 global objects, this include will make the new and set properties for: $conf, $db, $langs, $user, $mysoc
+
+
 require_once 'master.inc.php';
-
 /* Mod drsi */
 include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
 $synopsisHook = new synopsisHook();
 global $synopsisHook; //Pour vision global de l'objet
 /* FMod Drsi */
+
+
+if (!defined('NOSESSION')) {
+    if(defined('USE_BDD_FOR_SESSION')){
+        global $db;
+        
+        
+        require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpSession.php';
+    // Démarrage de la session
+        if(class_exists('BimpCache')){
+            $bdb = BimpCache::getBdb(true);
+            $dbNoTransac = $bdb->db;
+        }
+        else{
+            $dbNoTransac = $db;
+        }
+        
+        
+        $session = new Session($dbNoTransac);
+    }
+    
+    
+    session_start();
+//    echo "<pre>";print_r($_SESSION);
+    /* if (ini_get('register_globals'))    // Deprecated in 5.3 and removed in 5.4. To solve bug in using $_SESSION
+      {
+      foreach ($_SESSION as $key=>$value)
+      {
+      if (isset($GLOBALS[$key])) unset($GLOBALS[$key]);
+      }
+      } */
+}
+
 
 // Activate end of page function
 register_shutdown_function('dol_shutdown');
@@ -1022,6 +1069,12 @@ else
 
 $heightforframes = 50;
 
+/*moddrsi*/
+// Initialisation BimpCore
+$hookmanager->initHooks(array('bimpcoreInit'));
+$hookmanager->executeHooks('bimpcoreInit', array());
+/*fmoddrsi*/
+
 // Init menu manager
 if (!defined('NOREQUIREMENU'))
 {
@@ -1135,8 +1188,23 @@ function top_httphead($contenttype = 'text/html', $forcenocache = 0)
 {
 	global $db, $conf, $hookmanager;
 
-	if ($contenttype == 'text/html') header("Content-Type: text/html; charset=".$conf->file->character_set_client);
-	else header("Content-Type: ".$contenttype);
+    if ($contenttype == 'text/html')
+        header("Content-Type: text/html; charset=" . $conf->file->character_set_client);
+    else
+        header("Content-Type: " . $contenttype);
+    // Security options
+    header("X-Content-Type-Options: nosniff");  // With the nosniff option, if the server says the content is text/html, the browser will render it as text/html (note that most browsers now force this option to on)
+    if(!defined('ALLOW_ALL_IFRAME') || ALLOW_ALL_IFRAME == 0)
+        header("X-Frame-Options: SAMEORIGIN");      // Frames allowed only if on same domain (stop some XSS attacks)
+    //header("X-XSS-Protection: 1");      		// XSS protection of some browsers (note: use of Content-Security-Policy is more efficient). Disabled as deprecated.
+    if (!defined('FORCECSP')) {
+        //if (! isset($conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY))
+        //{
+        //	// A default security policy that keep usage of js external component like ckeditor, stripe, google, working
+        //	$contentsecuritypolicy = "font-src *; img-src *; style-src * 'unsafe-inline' 'unsafe-eval'; default-src 'self' *.stripe.com 'unsafe-inline' 'unsafe-eval'; script-src 'self' *.stripe.com 'unsafe-inline' 'unsafe-eval'; frame-src 'self' *.stripe.com; connect-src 'self';";
+        //}
+        //else $contentsecuritypolicy = $conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY;
+        $contentsecuritypolicy = $conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY;
 
 	// Security options
 	header("X-Content-Type-Options: nosniff"); // With the nosniff option, if the server says the content is text/html, the browser will render it as text/html (note that most browsers now force this option to on)
@@ -1484,19 +1552,24 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
             print '<script src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php?lang='.$langs->defaultlang.($ext ? '&'.$ext : '').'"></script>'."\n";
 
             // JS forced by modules (relative url starting with /)
-            if (!empty($conf->modules_parts['js']))		// $conf->modules_parts['js'] is array('module'=>array('file1','file2'))
-        	{
-        		$arrayjs = (array) $conf->modules_parts['js'];
-	            foreach ($arrayjs as $modjs => $filesjs)
-	            {
-        			$filesjs = (array) $filesjs; // To be sure filejs is an array
-		            foreach ($filesjs as $jsfile)
-		            {
-	    	    		// jsfile is a relative path
-	        	    	print '<!-- Include JS added by module '.$modjs.'-->'."\n".'<script src="'.dol_buildpath($jsfile, 1).'"></script>'."\n";
-		            }
-	            }
-        	}
+            if (!empty($conf->modules_parts['js'])) {  // $conf->modules_parts['js'] is array('module'=>array('file1','file2'))
+                $arrayjs = (array) $conf->modules_parts['js'];
+                foreach ($arrayjs as $modjs => $filesjs) {
+                    $filesjs = (array) $filesjs; // To be sure filejs is an array
+                    foreach ($filesjs as $jsfile) {
+                        // jsfile is a relative path
+                        print '<!-- Include JS added by module ' . $modjs . '-->' . "\n" . '<script type="text/javascript" src="' . dol_buildpath($jsfile, 1) . '"></script>' . "\n";
+                    }
+                }
+            }
+            
+            /*moddrsi*/
+            global $bimp_layout_js_vars; 
+            if ($bimp_layout_js_vars) {
+                print $bimp_layout_js_vars;
+            }
+            /*fmoddrsi*/
+            
             // JS forced by page in top_htmlhead (relative url starting with /)
             if (is_array($arrayofjs))
             {
@@ -2303,7 +2376,11 @@ function main_area($title = '')
 
 	print '<!-- Begin div class="fiche" -->'."\n".'<div class="fiche">'."\n";
 
-	if (!empty($conf->global->MAIN_ONLY_LOGIN_ALLOWED)) print info_admin($langs->trans("WarningYouAreInMaintenanceMode", $conf->global->MAIN_ONLY_LOGIN_ALLOWED));
+    if(function_exists('hookDebutFiche'))
+        echo hookDebutFiche();
+    
+    if (!empty($conf->global->MAIN_ONLY_LOGIN_ALLOWED))
+        print info_admin($langs->trans("WarningYouAreInMaintenanceMode", $conf->global->MAIN_ONLY_LOGIN_ALLOWED));
 }
 
 
@@ -2437,17 +2514,11 @@ if (!function_exists("llxFooter"))
 			}
 		}
 
-
-		$relativepathstring = $_SERVER["PHP_SELF"];
-		// Clean $relativepathstring
-		if (constant('DOL_URL_ROOT')) $relativepathstring = preg_replace('/^'.preg_quote(constant('DOL_URL_ROOT'), '/').'/', '', $relativepathstring);
-		$relativepathstring = preg_replace('/^\//', '', $relativepathstring);
-		$relativepathstring = preg_replace('/^custom\//', '', $relativepathstring);
-		if (preg_match('/list\.php$/', $relativepathstring))
-		{
-			unset($_SESSION['lastsearch_contextpage_tmp_'.$relativepathstring]);
-			unset($_SESSION['lastsearch_page_tmp_'.$relativepathstring]);
-			unset($_SESSION['lastsearch_limit_tmp_'.$relativepathstring]);
+        /*moddrsi*/
+        if (class_exists('BimpLayout') && BimpLayout::hasInstance()) {
+            BimpLayout::getInstance()->end();
+        }
+        /*fmoddrsi*/
 
 			if (!empty($contextpage))                     $_SESSION['lastsearch_contextpage_tmp_'.$relativepathstring] = $contextpage;
 			if (!empty($page) && $page > 0)               $_SESSION['lastsearch_page_tmp_'.$relativepathstring] = $page;

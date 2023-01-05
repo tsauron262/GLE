@@ -57,12 +57,32 @@ fields:
             rows: 2
         sortable: 0
         searchable: 0
+        user_edit: 1
+        hashtags: 1
     
     id_user_client:
-        label: Demandeur
+        label: Utilisateur client
         type: id_object
         object: userClient
+        default_value: 0
     
+forms: 
+    public_client: 
+        title: Ajouter une note au ticket support
+        rows: 
+            - field: content
+              label: Message
+        
+lists_cols: 
+    date_create:
+        label: Date
+    user_create:
+        label: Auteur
+    author: 
+        label: Auteur
+        value: 
+            callback: displayAuthor
+        
 lists:
     default:
         title: Notes
@@ -76,32 +96,18 @@ lists:
         sort_field: date_create
         sort_way: desc
         n: 50
-        cols:
-            date_create:
-                label: Date
-                field: date_create
-            user_create:
-                label: Auteur
-                field: user_create
-            inter:
-                label: Intervention
-                field: id_inter
-                edit: 1
-            visibilite:
-                label: Visibilité
-                field: visibility
-                edit: 1
-                default_value: 1
-            contenu:
-                label: Contenu
-                field: content
-                edit: 1
-                min_width: 40%
-            id_user_client:
-                field: id_user_client
         add_object_row: 1
         update_btn: 1
         delete_btn: 1
+        cols:
+            id_inter:
+                edit: 1
+            visibility:
+                edit: 1
+            content:
+                edit: 1
+            id_user_client:
+        
     client:
         extends: default
         cols:
@@ -116,10 +122,22 @@ lists:
         add_object_row: 0
         list_filters:
             callback: getListFilterNotesInterface
-        
     
-forms:
-    addClientNote:
-        title: Ajouter une note au ticket support
-        rows:
-            - field: content
+    public: 
+        title: Messages
+        icon: far_comments
+        checkboxes: 0
+        configurable: 0
+        enable_search: 0
+        sort_field: date_create
+        sort_way: desc
+        n: 50
+        add_btn: 1
+        add_form_name: public_client
+        add_btn_label: Ajouter un message
+        cols:
+            author: 
+            date_create: 
+            content:
+                label: Message
+                edit: 1

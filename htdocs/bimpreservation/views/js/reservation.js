@@ -201,28 +201,36 @@ function onReserveEquipmentsFormLoaded($form) {
             if ($.isOk($container)) {
                 var $btn = $container.find('.addValueBtn');
                 $btn.removeAttr('onclick').click(function () {
-                    var serial = $input.val();
-                    if (serial) {
-                        var $select = $container.find('[name="equipments_add_value"]');
-                        if ($select.length) {
-                            var done = false;
-                            $select.find('option').each(function () {
-                                if ($input.hasClass('apple_prod')) {
-                                    serial = serial.replace(/^S?(.+)$/i, '$1');
+                    var serialTmp = $input.val();
+                    if (serialTmp) {
+                        var serials=serialTmp.split(";");
+                        serials.forEach(function(serial){
+                            var $select = $container.find('[name="equipments_add_value"]');
+                            if ($select.length) {
+                                var done = false;
+                                $select.find('option').each(function () {
+                                    if ($input.hasClass('apple_prod')) {
+                                        serial = serial.replace(/^S?(.+)$/i, '$1');
+                                    }
+                                    if ($(this).text().indexOf(serial) !== -1) {
+                                        $input.val('');
+                                        $select.val($(this).attr('value')).change();
+                                        done = true;
+                                    }
+                                });
+                                if (!done) {
+                                    bimp_msg('Le numéro de série '+serial+' n\'a pas été trouvé parmi les équipements disponibles', 'warning', null, true);
+                                    return;
                                 }
-                                if ($(this).text().indexOf(serial) !== -1) {
-                                    $input.val('');
-                                    $select.val($(this).attr('value')).change();
-                                    done = true;
-                                }
-                            });
-                            if (!done) {
-                                bimp_msg('Le numéro de série saisi n\'a pas été trouvé parmi les équipements disponibles', 'warning', null, true);
-                                return;
                             }
-                        }
+                            addMultipleInputCurrentValue($btn, 'equipments_add_value', 'equipments_add_value', false);
+                        });
                     }
-                    addMultipleInputCurrentValue($btn, 'equipments_add_value', 'equipments_add_value', false);
+                    else{
+                        var $select = $container.find('[name="equipments_add_value"]');
+                        if($select.val() > 0)
+                            addMultipleInputCurrentValue($btn, 'equipments_add_value', 'equipments_add_value', false);
+                    }
                 });
             }
 

@@ -5,3 +5,47 @@ extends:
     
 parent_module: bimpcommercial
 parent_object: Bimp_FactureLine
+
+filters_panels: 
+    default: 
+        filters: 
+            parent:id_obj:
+                label: Facture
+            parent:parent:facnumber:
+                label: Ref. facture
+            equipment:serial:
+                label: N° de série équipement
+                
+lists: 
+    globale: 
+        configurable: 1
+        sort_field: id
+        sort_way: asc
+        n: 10
+        filters_panel: default
+        cols:
+            parent:id_obj:
+                label: Facture
+                display: nom_url
+            parent:position:
+                label: Ligne n°
+                searchable: 0
+            id_equipment: 
+            equipment:serial:
+                label: N° de série
+            prix_achat: 
+            pa_tva_tx:
+                
+    forExport:
+        extends: global
+        cols:
+            parent:parent:datef:
+            parent:parent:ref_client:
+            parent:parent:facnumber:
+            parent:parent:client:nom:
+            parent:dol_line:product:ref_short:
+            parent:desc:
+            qty1:
+            equipment:serial:
+            equipment:imei:
+            parent:pu_ht_remise:

@@ -1,0 +1,25 @@
+
+bootstrap: 1
+
+title: 
+    callback: 
+        object: report
+        method: getPageTitle
+    
+objects:
+    report: 
+        instance: 
+            bimp_object: BDS_Report
+            id_object:
+                request: id
+                
+sections:
+    - type: object_header
+      object_header:
+          object: report
+      
+    - type: view
+      view:
+          name: default
+          panel: 0
+          object: report

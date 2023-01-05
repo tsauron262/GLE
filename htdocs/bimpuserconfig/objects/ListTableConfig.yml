@@ -1,0 +1,41 @@
+extends: 
+    module: bimpuserconfig
+    object_name: ListConfig
+    
+table: buc_list_table_config
+
+labels: 
+    name: configuration de liste
+    name_plur: configurations de liste
+    is_female: 1
+            
+fields: 
+    sheet_name: 
+        label: Nom de la feuille dans les fichiers excel
+        input: 
+            help: Max 30 caractères
+            
+forms:               
+    default: 
+        rows: 
+            sheet_name: 
+                field: sheet_name
+                
+    bulk_csv: 
+        rows: 
+            - custom: 1
+              label: Nom du fichier
+              input_name: file_name
+              required: 1
+              input: 
+                  type: text
+                  help: Caractères aplhanumériques et tirets seulement
+              value: 
+                  callback: getDefaultBulkCsvFileName
+            - custom: 1
+              label: En-têtes
+              input_name: headers
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1

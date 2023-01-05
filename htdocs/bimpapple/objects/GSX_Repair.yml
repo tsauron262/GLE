@@ -16,6 +16,8 @@ fields:
         label: SAV
         type: id_object
         object: sav
+    ship_to: 
+        label: N° shipTo        
     repair_number: 
         label: N° de réparation
     repair_confirm_number: 
@@ -200,3 +202,13 @@ views:
                   - type: custom
                     custom: 
                         callback: renderRepairParts
+                        
+searches: 
+    default: 
+        fields_search: 
+            - a.serial
+            - a.repair_number
+        fields_return: 
+            - a.serial
+            - a.repair_number
+        label_syntaxe: 'Réparation n°<a.repair_number> - N° de série: <a.serial>'

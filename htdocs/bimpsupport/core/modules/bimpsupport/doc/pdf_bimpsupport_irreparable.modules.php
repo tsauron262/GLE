@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2004-2014 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2008      Raphael Bertrand     <raphael.bertrand@resultic.fr>
@@ -24,48 +25,50 @@
  */
 
 /**
- *	\file       htdocs/core/modules/propale/doc/pdf_azur.modules.php
- *	\ingroup    propale
- *	\brief      Fichier de la classe permettant de generer les propales au modele Azur
+ * 	\file       htdocs/core/modules/propale/doc/pdf_azur.modules.php
+ * 	\ingroup    propale
+ * 	\brief      Fichier de la classe permettant de generer les propales au modele Azur
  */
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/classes/OrderPDF.php';
-
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/OrderPDF.php';
 
 /**
- *	Class to generate PDF proposal Azur
+ * 	Class to generate PDF proposal Azur
  */
-class pdf_bimpsupport_irreparable extends BimpDocumentPDF
+class pdf_bimpsupport_irreparable extends BimpCommDocumentPDF
 {
-    public function initData() {
+
+    public $signature_bloc = true;
+
+    public function initData()
+    {
         parent::initData();
         static::$use_cgv = false;
         $this->pdf->addCgvPages = false;
     }
-    
+
     protected function initHeader()
     {
         parent::initHeader();
-        
-        
+
         $this->header_vars['doc_name'] = 'Dossier n° :';
     }
-    
-    public function renderBottom(){
+
+    public function renderBottom()
+    {
         
     }
-    
-    public function renderLines(){
+
+    public function renderLines()
+    {
         $equipment = $this->object->getChildObject('equipment');
-        
+
         $text = "<h1>ATTESTATION DE NON-REPARABILITE</h1>
 
-<p>Nous soussigné, ".($this->fromCompany->name == "OLYS" ? "Bimp OLYS SAS" : $this->fromCompany->name).", ".$this->fromCompany->address." - ".$this->fromCompany->zip." ".$this->fromCompany->town.", 
+<p>Nous soussigné, " . ($this->fromCompany->name == "OLYS" ? "Bimp OLYS SAS" : $this->fromCompany->name) . ", " . $this->fromCompany->address . " - " . $this->fromCompany->zip . " " . $this->fromCompany->town . ", 
 agissant en qualité de revendeur informatique, 
 
-attestons que le produit :
-
-".$equipment->getData('product_label')."
-N° de série : ".$equipment->getData('serial')."
+attestons que le produit : " . $equipment->getProductLabel() . "
+N° de série : " . $equipment->getData('serial') . "
 
 a fait l’objet d’un diagnostic par notre service technique et est considéré comme non réparable. 
 
@@ -74,20 +77,17 @@ Il est classé obsolète par la marque Apple et ne peut être pris en charge par
 Cette attestation est délivrée à la demande du destinataire, pour servir et faire valoir ce que de droit.
 
 Le Service Après-Vente</p>";
-        
-        
-        
-        
-        $this->writeContent('<div>'.str_replace("\n", "<br/>", $text).'</div>');
+
+        $this->writeContent('<div>' . str_replace("\n", "<br/>", $text) . '</div>');
     }
-    
-    public function getFilePath(){
-        return DOL_DATA_ROOT."/bimpcore/sav/".$this->object->id."/";
+
+    public function getFilePath()
+    {
+        return DOL_DATA_ROOT . "/bimpcore/sav/" . $this->object->id . "/";
     }
-    
-    public function getFileName(){
-        return "Obsolete-".parent::getFileName();
+
+    public function getFileName()
+    {
+        return "Obsolete-" . parent::getFileName();
     }
 }
-
-

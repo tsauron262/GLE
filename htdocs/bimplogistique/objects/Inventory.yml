@@ -20,12 +20,22 @@ objects:
             bimp_object: InventoryLine
         delete: 
             callback: isAdmin
+               
+    entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_warehouse
+                
+    bimp_entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_warehouse
                 
 fields: 
     fk_warehouse:
         label: Entrepôt
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         default_value: 0
         input:
             type: search_entrepot 
@@ -59,7 +69,6 @@ fields:
         input:
             help: Un inventaire ne peut pas être rattaché à un inventaire déjà rattaché
 
-            
 fields_tables: 
     default: 
         footer_extra_btn:
@@ -155,21 +164,12 @@ lists:
         modal_view: default
         cols:
             id:
-                label: ID
-                field: id
                 min_width: 60px
             status:
-                label: Statut
-                field: status
             fk_warehouse:
-                field: fk_warehouse
-                display: nom_url
             date_opening:
-                field: date_opening
             date_closing:
-                field: date_closing
             parent:
-                field: parent
         
 cards: 
     default: 

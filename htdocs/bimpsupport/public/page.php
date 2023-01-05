@@ -1,6 +1,6 @@
 <?php
 define("NOLOGIN", 1);
-require_once('../../main.inc.php');
+require_once('../main.inc.php');
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
 BimpObject::getInstance('bimpsupport', 'BS_SAV');
 
@@ -164,7 +164,9 @@ if (count($savs)) {
                 $savStr .= $idSav;
             }
 
+            $etat = $sav::$status_list[$sav->getData("status")]['label'];
             $savsList[] = array(
+                'etat' => $etat,
                 'id_sav' => $idSav,
                 'ref' => ((isset($sav->ref) && !empty($sav->ref)) ? $sav->ref : 'inconnu'),
                 'date_create' => $sav->getData("date_create"),
@@ -216,14 +218,18 @@ if ($id_sav) {
         <meta charset="UTF-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width, target-densitydpi=device-dpi">
         <title>SAV, Support &amp; Hotline / Bimp Informatique</title>
-        <link rel="stylesheet" href="../../bimpcore/views/css/bimpcore_bootstrap.css">
-        <link rel="stylesheet" href="../../theme/common/fontawesome/css/font-awesome.min.css?version=6.0.4">
-        <link rel="stylesheet" href="./css/styles.css">
+        <link rel="stylesheet" href="<?php echo DOL_URL_ROOT; ?>/bimpcore/views/css/bimpcore.css">
+        <link rel="stylesheet" href="<?php echo DOL_URL_ROOT; ?>/theme/common/fontawesome/css/font-awesome.min.css?version=6.0.4">
+        <link rel="stylesheet" href="<?php echo DOL_URL_ROOT; ?>/bimpsupport/public/css/styles.css">
+         <style>
+            .error:before {
+                position:initial;
+            }
+        </style>
     </head>
     <body>
         <div class="container">
             <div class="row">
-                <h1>Suivi SAV&nbsp;&nbsp;<i class="fa fa-hand-o-right"></i></h1>
                     <?php
                     
                     /*Si erreur*/
@@ -238,7 +244,18 @@ if ($id_sav) {
                         echo '</div>';
                         echo '<div class="row">';
                     }
+                    
+                    echo '<h1>Suivi SAV&nbsp;&nbsp;<i class="fa fa-hand-o-right"></i></h1>';
 
+                    
+                    $tabTextEtat = array("Nouveau" => "Nous allons bientot commencer le diagnostic de votre machine.",
+                        "Examen en cours" => "Nous avons commencé le diagnostic de votre produit",
+                        "Attente client" => "Nous attendons une information de votre part. Merci de nous contacter",
+                        "Attente Pièce" => "Nous avons commandé une pièce ou un produit et nous l’attendons",
+                        "Pièce reçu" => "Nous avons reçu la pièce commandée et elle est en cous de remontage",
+                        "Terminé" => "Votre produit est terminé et à votre disposition",
+                        "Fermé" => "Ce dossier est pour nous clôturé");
+                    
                     /* si liste des SAV*/
                     if (count($savRows)) {// si sav seul
                         if(isset($sav->societe) && is_object($sav->societe))
@@ -255,13 +272,6 @@ if ($id_sav) {
                         echo '<div class="row">';
                         
                         if(isset($etat)){
-                            $tabTextEtat = array("Nouveau" => "Nous allons bientot commencer le diagnostic de votre machine.",
-                                "Examen en cours" => "Nous avons commencé le diagnostic de votre produit",
-                                "Attente client" => "Nous attendons une information de votre part. Merci de nous contacter",
-                                "Attente Pièce" => "Nous avons commandé une pièce ou un produit et nous l’attendons",
-                                "Pièce reçu" => "Nous avons reçu la pièce commandée et elle est en cous de remontage",
-                                "Terminé" => "Votre produit est terminé et à votre disposition",
-                                "Fermé" => "Ce dossier est pour nous clôturé");
                             if(isset($tabTextEtat[$etat]))
                                 echo "<h3>ETAT d'avancement : ".$tabTextEtat[$etat] . " </h3><br/><br/>";
                         }
@@ -293,21 +303,28 @@ if ($id_sav) {
 
                         echo '<p class="infos">Vous avez ' . count($savsList) . ' suivis SAV enregistrés pour le n° de série <strong>"' . $serial . '"</strong></p>';
                         echo '<table><thead><tr>';
+                        echo '<th>Etat</th>';
                         echo '<th>Référence</th>';
                         echo '<th>Date de création</th>';
-                        echo '<th>Symptômes</th>';
+                        echo '<th>Etat d\'avancement</th>';
                         echo '<th></th>';
                         echo '</tr></thead><tbody>';
                         foreach ($savsList as $savInfos) {
                             echo '<tr>';
+                            echo '<td>' . $savInfos['etat'] . '</td>';
                             echo '<td>' . $savInfos['ref'] . '</td>';
                             echo '<td>' . $savInfos['date_create'] . '</td>';
-                            echo '<td>' . $savInfos['symptom'] . '</td>';
+                            
+                            echo "<td>";
+                             if(isset($tabTextEtat[$etat]))
+                                echo $tabTextEtat[$etat];
+                             echo "</td>";
+//                            echo '<td>' . $savInfos['symptom'] . '</td>';
                             echo '<td><a class="butAction" href="./' . $page . '?id_sav=' . $savInfos['id_sav'];
                             if (!empty($savStr) && $serial) {
                                 echo '&savs_str=' . $savStr . '&serial=' . $serial;
                             }
-                            echo '"><i class="fa fa-bars left"></i>Afficher</a></td>';
+                            echo '"><i class="fa fa-bars left"></i>Afficher détails</a></td>';
                             echo '</tr>';
                         }
                         echo '</tbody></table></div>';

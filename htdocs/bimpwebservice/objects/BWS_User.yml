@@ -1,0 +1,145 @@
+
+table: bws_user
+icon: fas_user
+
+controller: user
+header_list_name: default
+header_edit_form: default
+header_btn: 
+    callback: getActionsButtons
+    
+list_page_url: 
+    module: bimpcore
+    controller: dev
+    url_params: 
+        tab: ws
+        navtab-ws: users
+
+labels: 
+    name: utilisateur webservice
+    name_plur: utilisateurs webservice
+    
+objects: 
+    profile: 
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpwebservice
+                name: BWS_Profile
+        
+fields: 
+    name: 
+        label: Nom
+        required: 1
+        
+    email: 
+        label: Adresse e-mail (login)
+        required: 1
+        
+    pword: 
+        label: Mot de passe
+        type: password
+        
+    token: 
+        label: Token
+        type: password
+        
+    token_expire: 
+        label: Expiration du token
+        type: datetime
+        
+    profiles: 
+        label: Profiles
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        items_sortable: 1
+        object: profile
+        
+    id_user: 
+        label: Utilisateur ERP lié
+        type: id_object
+        object: user
+        default_value: 0
+        input: 
+            help: Laisser vide pour utiliser l'utilisateur lié au profile principal
+        
+    active: 
+        label: Actif
+        type: bool
+        default_value: 1
+        
+forms: 
+    default: 
+        rows: 
+            - field: name
+            - field: email
+            - field: profiles
+            - field: id_user
+            - field: active
+    
+fields_tables: 
+    infos: 
+        panel_header: 0
+        rows: 
+            - field: active
+              edit: 1
+            - field: name
+            - field: email
+            - field: profiles
+            - field: id_user
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderUserErpUsedPanel
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderRequestsRightsList
+                      
+lists_cols: 
+    user_erp_used: 
+        label: Utilisateur ERP utilisé
+        value: 
+            callback: displayUserErpUsed
+            
+lists: 
+    default: 
+        checkboxes: 1
+        configurable: 0
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_btn: 1
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        bulk_actions:
+            - label: supprimer les utilisateurs sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        cols: 
+            name: 
+            email: 
+            profiles: 
+            id_user: 
+            user_erp_used: 
+            active:
+                edit: 1

@@ -93,7 +93,54 @@ class InventoryLine extends BimpObject {
         }
         return 0;
     }
+    
+    
+    public function create(&$warnings = array(), $force_create = false) {
         
+        $errors = array();
         
+        parent::create($warnings, $force_create);
+        $errors = array_merge($errors, $this->onCreate());
+        
+        return $errors;
+    }
+
+    public function onCreate() {
+        
+//        $errors = array();
+//        
+//        // Création MAJ de l'expected concerné par cette ligne de scan
+//        $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
+//        
+//        $filters =  array(
+//            'id_wt' => array(
+//                'operator' => '=',
+//                'value'    => $this->getData('fk_warehouse_type')
+//            ),
+//            'id_product' => array(
+//                'operator' => '=',
+//                'value'    => $this->getData('fk_product')
+//            )
+//        );
+//
+//        $l_expected = $expected->getList($filters, null, null, 'id', 'asc', 'array', array('id'));
+//        
+//        // Equipment
+//        if(0 < (int) $this->getData('fk_equipment')) {
+//            
+//            $errors = array_merge($errors, $expected->fetch((int) $l_expected[0]['id']));
+//            $errors = array_merge($errors, $expected->setScannedEquipment((int) $this->getData('fk_equipment')));
+//            
+//        // Produit non sérialisé
+//        } else {
+//        
+//            $errors = array_merge($errors, $expected->fetch((int) $l_expected[0]['id']));
+//            $errors = array_merge($errors, $expected->addProductQtyScanned((int) $this->getData('qty')));
+//            
+//        }
+//        
+//        return $errors;
+        
+    }
 
 }

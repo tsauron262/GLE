@@ -12,6 +12,63 @@ class Bimp_ProductFournisseurPrice extends BimpObject
         parent::__construct($module, $object_name);
     }
 
+    public function canCreate()
+    {
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent)) {
+            return $parent->canCreate();
+        }
+
+        return parent::canCreate();
+    }
+
+    public function canEdit()
+    {
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent)) {
+            return $parent->canEdit();
+        }
+
+        return parent::canEdit();
+    }
+
+    public function isCreatable($force_create = false, &$errors = array())
+    {
+        if ($force_create) {
+            return 1;
+        }
+
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent)) {
+            return $parent->isEditable($force_create, $errors);
+        }
+
+        return 1;
+    }
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        if ($force_edit) {
+            return 1;
+        }
+
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent)) {
+            return $parent->isEditable($force_edit, $errors);
+        }
+
+        return 1;
+    }
+
+    public function getRefProperty()
+    {
+        return 'ref_fourn';
+    }
+
     public function displayLabel()
     {
         $html = '';
@@ -108,14 +165,23 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 }
                 $errors[] = $msg;
             } else {
-                if ((int) BimpTools::getValue('is_cur_pa', 0)) {
+                if($this->getInitData('price') != $this->getData('price'))
+                    $this->history['price'] = $this->getData('price');
+                $this->saveHistory();
+                if ((int) BimpTools::getPostFieldValue('is_cur_pa', 0)) {
                     $prod = $this->getChildObject('product');
-                    $curpa_errors = $prod->setCurrentPaHt($buyprice, (int) $this->id, 'fourn_price', (int) $result);
+                    $curpa_errors = $prod->setCurrentPaHt($buyprice, (int) $result, 'fourn_price', (int) $result);
                     if (count($curpa_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($curpa_errors);
                     }
                 }
 
+                if ((int) BimpTools::getPostFieldValue('update_comm_fourn', 0)) {
+                    $prod = $this->getChildObject('product');
+                    if (BimpObject::objectLoaded($prod)) {
+                        $prod->updateCommandesFournPa((int) $this->getData('fk_soc'), $buyprice);
+                    }
+                }
                 if (!$this->isLoaded()) {
                     $this->id = $result;
                     $this->fetch($this->id);

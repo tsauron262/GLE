@@ -4,15 +4,16 @@ class BimpConfigDefinitions
 {
 
     public static $labels = array(
-        'name'      => array('required' => true, 'default' => ''),
-        'name_plur' => array(),
-        'is_female' => array('data_type' => 'bool', 'default' => 0)
+        'name'      => array('required' => true, 'default' => ''), // Le nom au singulier de l'objet (doit être entièrement en minuscule)
+        'name_plur' => array(), // Le nom au pluriel (par défaut : le nom au singulier + "s" 
+        'is_female' => array('data_type' => 'bool', 'default' => 0) // 1 = nom féminin
     );
     public static $object_child = array(
-        'relation'  => array('default' => 'none'),
-        'delete'    => array('data_type' => 'bool', 'default' => 0),
-        'instance'  => array('data_type' => 'array'),
-        'has_files' => array('data_type' => 'bool', 'default' => 0)
+        'label' => array('default' => ''),
+        'relation'  => array('default' => 'none'), // none (aucune relation) / HasOne (l'objet contient un champ contenant l'ID de l'objet lié) ou HasMany (liste de sous-objets liés (relation parent -> enfants)
+        'delete'    => array('data_type' => 'bool', 'default' => 0), // 1 => entraîne la suppression auto des objets enfants lors de la suppr du parent (relation hasMany uniquement) 
+        'instance'  => array('data_type' => 'array'), // Définition de l'objet
+        'has_files' => array('data_type' => 'bool', 'default' => 0) // 1 => possède des fichiers joints. 
     );
     public static $button = array(
         'id'          => array(),
@@ -60,12 +61,9 @@ class BimpConfigDefinitions
         'type'    => array('default' => 'info')
     );
     public static $list_filter = array(
-        'custom' => array('data_type' => 'bool', 'default' => 0),
-        'field'  => array('default' => true),
-        'child'  => array(),
-        'name'   => array('default' => 'default'),
-        'open'   => array('data_type' => 'bool', 'default' => 0),
-        'show'   => array('data_type' => 'bool', 'default' => 1)
+        'label' => array('default' => null),
+        'open'  => array('data_type' => 'bool', 'default' => null),
+        'show'  => array('data_type' => 'bool', 'default' => null)
     );
     public static $icon_button = array(
         'label'   => array('default' => ''),
@@ -74,6 +72,14 @@ class BimpConfigDefinitions
     );
     public static $group_by_option = array(
         'field' => array('default' => '')
+    );
+    public static $nom_url = array(
+        'syntaxe'       => array('default' => '<ref> - <name>'),
+        'with_icon'     => array('data_type' => 'bool', 'default' => 1),
+        'with_status'   => array('data_type' => 'bool', 'default' => 0),
+        'card'          => array('default' => ''),
+        'external_link' => array('data_type' => 'bool', 'default' => 1),
+        'modal_view'    => array('default' => 'default')
     );
 
 }

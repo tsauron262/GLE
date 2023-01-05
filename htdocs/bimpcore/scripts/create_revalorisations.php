@@ -48,7 +48,7 @@ foreach ($factures as $facture) {
             $remise_percent = (float) $product->getRemiseCrt();
 
             if (!$remise_percent) {
-                echo 'PAS DE REMISE CRT SUR LE PROD <br/>';
+                echo 'PAS DE Remise arrière SUR LE PROD <br/>';
                 continue;
             }
 

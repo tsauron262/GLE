@@ -70,7 +70,7 @@ class pdf_crabeSav extends ModelePDFFactures
 		$langs->load("bills");
 
 		$this->db = $db;
-		$this->name = "crabe";
+		$this->name = "crabeSav";
 		$this->description = $langs->trans('PDFCrabeDescription');
 
 		// Dimension page pour format A4

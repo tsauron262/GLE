@@ -1,0 +1,131 @@
+
+table: bl_inventory_expected
+
+labels:
+    name: attendu
+
+objects:
+    inventory: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: Inventory2
+            id_object: 
+                field_value: id_inventory
+            
+    warehouse_type: 
+        instance: 
+            bimp_object: InventoryWarehouse
+            id_object: 
+                field_value: id_wt
+    package: 
+        instance: 
+            id_object: 
+                field_value: id_package
+
+fields: 
+    id_inventory:
+        label: Id de l'inventaire
+        type: id_object
+        object: inventory
+        
+    id_wt:
+        label: Id de l'entrepôt/type
+        type: id_object
+        object: warehouse_type
+        
+    id_package:
+        label: Package
+        type: id_object
+        object: package
+        
+    id_product: 
+        label: Produit
+        type: id_object
+        object: product
+        
+    qty:
+        label: Attendu
+        type: int
+        
+    qty_scanned:
+        label: Scanné
+        type: int
+        edit: 1
+        default: 0
+        
+    ids_equipments:
+        label: Id des équipements
+        type: json
+        
+    serialisable:
+        label: Sérialisable
+        type: bool
+            
+lists_cols: 
+    qty:
+        edit: 
+            callback: qtyEditable
+
+    valorisation:
+        label: Valorisation
+        value:
+            callback: renderValorisation
+            
+    manquant:
+        label: SN Manquants
+        value:
+            callback:
+                method: renderEquipments
+                params:
+                    - 0
+                    - false
+                    
+    en_trop:
+        label: SN excès
+        value:
+            callback:
+                method: renderEquipments
+                params:
+                    - 2
+                    - false
+            
+lists:
+    default:
+        objects_change_reload: Inventory2
+        modal_view: default
+        total_row: 1
+        view_btn: 1
+        delete_btn: 1
+        cols:
+            id:
+            id_product:
+            product:label:
+                label: Nom produit
+            id_package:
+            qty:
+            qty_scanned:                
+            valorisation:                    
+            manquant:                    
+            en_trop:
+        
+        
+fields_tables: 
+    default: 
+        title: Informations
+        icon: info-circle
+        rows:
+            - label: Equipement
+              value: 
+                  callback: renderEquipments
+            
+views:
+    default:
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 7
+                    col_md: 8
+                    col_sm: 12
+                    fields_table:
+                        name: default  

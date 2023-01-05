@@ -2,6 +2,8 @@ extends:
     module: bimpcommercial
     object_name: BimpComm
 
+abstract: 0
+
 dol_object: 
     instance: 
         dol_object: 
@@ -23,11 +25,6 @@ objects:
     lines: 
         instance: 
             bimp_object: Bimp_PropalLine
-            
-    entrepot: 
-        instance: 
-            id_object:
-                field_value: entrepot
                 
     files:
         list: 
@@ -38,29 +35,70 @@ objects:
                 fields: 
                     parent_object_name: Bimp_Propal
                     
-    user_close: 
+    user_close:
         extends: user
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: fk_user_cloture
+    
+    contrat:
+        instance:
+            dol_object: unset
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+                
+    client_facture: 
+        extends: client
+        instance:
+            id_object:
+                field_value: id_client_facture
+                
+    signature: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
                 
 fields:
-    datec: 
+    libelle: 
+        required: 1
+    datec:
         label: Créée le
         type: datetime
-    datep: 
+    datep:
         label: Date
         dol_prop: date
         type: date
-        input: 
+        input:
             display_now: 1
         required: 1
-    fin_validite: 
+    fin_validite:
         label: Date de fin de validité
         type: date
     date_livraison: 
         label: Date de livraison
         type: date
+        input:
+            help:
+                callback: getHelpDateRenouvellementContrat
+    id_client_facture:
+        label: Client facturation
+        type: id_object
+        object: client_facture
+        default_value: 
+            field_value: 0
+        input:
+            card: default
+            help: Laissez vide si même client
+    marge: 
+        label: Marge
+        type: money
+        default_value: 0
     model_pdf: 
         default_value: bimpdevis
     pdf_hide_pu: 
@@ -119,11 +157,19 @@ fields:
         object: user_close
         input: 
             type: hidden
+    id_signature: 
+        label: Signature
+        type: id_object
+        object: signature              
+    signature_params: 
+        label: Paramètres incrustation signature
+        type: json
                 
 forms: 
     default: 
         on_save: redirect
         rows: 
+            - field: replaced_ref
             - custom: 1
               input_name: id_user_commercial
               label: Commercial suivi proposition
@@ -136,11 +182,14 @@ forms:
                       object: 
                           global: user
                       name: id
-            - field: entrepot
-            - field: ef_type
             - field: fk_soc
             - field: ref_client
+            - field: id_client_facture
+            - field: entrepot
+            - field: ef_type
             - field: libelle
+            - field: expertise
+              required: 1
             - field: fk_input_reason
               show: 
                   callback: isEditable
@@ -182,17 +231,19 @@ forms:
                   callback: isLoaded
             - field: note_private
             - field: note_public
+            - field: prime
+            - field: prime2
             
     close: 
         rows: 
-            - custom: 1
-              label: Nouveau statut
-              data_type: int
-              input_name: new_status
-              input: 
-                  type: select
-                  options: 
-                      array: closeStatus
+#            - custom: 1
+#              label: Nouveau statut
+#              data_type: int
+#              input_name: new_status
+#              input: 
+#                  type: select
+#                  options: 
+#                      array: closeStatus
             - custom: 1
               label: Note
               data_type: text
@@ -205,85 +256,149 @@ forms:
                   field_value: note_private
                   
     duplicate_propal:
+        extends: duplicate
         force_edit: 1
         rows: 
-            - field: entrepot
-            - field: fk_soc
-            - field: libelle
-            - field: ef_type
-            - field: datep
-            - field: date_livraison
+            date_propal: 
+                field: datep
+            date_liv: 
+                field: date_livraison
     
     contrat:
+        msgs:
+            callback: displayIfMessageFormContrat
         rows:
             - field: fk_soc
-              edit: 0
+              show: 
+                  callback: isNotRenouvellementContrat
+            - custom: 1
+              label: Secteur
+              show:
+                  callback: isNotRenouvellementContrat
+              input_name: secteur_contrat
+              value:
+                  callback:
+                      object: contrat
+                      method: showValueSecteurInPropal
+                      params:
+                          0:
+                              field_value: ef_type
+              input:
+                  type: select
+                  options:
+                      callback:
+                            object: contrat
+                            method: getSecteursContrat
+                  
+            - custom: 1
+              label: Libellé du contrat
+              show: 
+                  callback: isNotRenouvellementContrat
+              input_name: label
+              value:
+                  field_value: libelle
+              input:
+                  type: text
             - custom: 1
               label: Annule et remplace
               input_name: ref_ext
+              show: 
+                  callback: isNotRenouvellementContrat
               input:
                   type: text
-                  help: A remplire en cas de renouvellement d'un ancien contrat
+                  size: 15
+                  help: A remplir en cas de renouvellement d'un ancien contrat - 15 caractères maximum
+            - custom: 1
+              label: Référence client
+              input_name: ref_customer
+              show: 
+                  callback: isNotRenouvellementContrat
+              input:
+                  type: text
+              value:
+                  callback:
+                      method: getData
+                      params:
+                          - ref_client
             - custom: 1
               label: Début de validité du contrat
               required: 1
               input_name: valid_start
+              value:
+                  field_value: date_livraison
               input:
                   type: date
                   display_now: 1
+              show:
+                  callback: isServiceAutorisedInContrat
             - custom: 1
               label: Durée en mois
               input_name: duree_mois
+              show: 
+                  callback: isNotRenouvellementContrat
               input:
                   type: qty
               value: 12
             - custom: 1
               label: Périodicitée de facturation
               input_name: periodicity
-              input: 
-                  type: select
-                  options:
-                      1: Mensuel
-                      3: Trimestriel 
-                      6: Semestriel
-                      12: Annuel
-            - custom: 1
-              label: Objet du contrat
-              input_name: objet_contrat
+              value: 12
+              show: 
+                  callback: isNotRenouvellementContrat
               input:
                   type: select
                   options:
-                      CT: Contrat global
-                      CMA: Contrat de maintenance
-                      CST: Contrat de support téléphonique
-                      CMO: Contrat de monitoring
-                      CSP: Contrat de spare
-                      CDP: Contrat de délégation du personel
+                      prop:
+                          object: contrat
+                          name: period
+                          is_static: 1
             - custom: 1
+              label: Objet du contrat
+              input_name: objet_contrat
+              show: 
+                  callback: isNotRenouvellementContrat
+              input:
+                  type: select
+                  options:
+                      prop:
+                          object: contrat
+                          name: objet_contrat
+                          is_static: 1
+            - custom: 1
+              show: 
+                  callback: isNotRenouvellementContrat
               label: Delai d'intervention
               input_name: gti
               value: 8
               input:
                   type: select
                   options:
-                      0:
-                      4: 4 heures ouvrées
-                      6: 6 heures ouvrées
-                      8: 8 heures ouvrées        
+                      prop:
+                          object: contrat
+                          name: gti
+                          is_static: 1       
             - custom: 1
               label: Renouvellement
+              show:
+                  callback: isServiceAutorisedInContrat
               input_name: re_new
-              value: 1
+              required: 1
               input:
                   type: select
                   options:
-                      0: Non
-                      1: Tacite 1 fois
-                      2: Tacite 2 fois
-                      3: Tacite 3 fois
-                      12: Sur proposition
+                      prop:
+                          object: contrat
+                          name: renouvellement_create
+                          is_static: 1
             - field: fk_mode_reglement
+              show:
+                  callback: isServiceAutorisedInContrat
+            - field: fk_cond_reglement
+              show:
+                  callback: isServiceAutorisedInContrat
             - custom: 1
+              show: 
+                  callback: isNotRenouvellementContrat
               label: Utiliser l'indice SYNTEC
               value: 1
               input_name: use_syntec
@@ -292,7 +407,8 @@ forms:
             - custom: 1
               label: Commercial signature
               input_name: commercial_signature
-              type: value
+              show: 
+                  callback: isNotRenouvellementContrat
               value:
                   prop:
                     name: id
@@ -302,8 +418,9 @@ forms:
                 type: search_user
             - custom: 1
               label: Commercial suivi du contrat
+              show: 
+                  callback: isNotRenouvellementContrat
               input_name: commercial_suivi
-              type: value
               value:
                   prop:
                     name: id
@@ -316,11 +433,134 @@ forms:
               input_name: note_public
               input:
                   type: html
+              value:
+                  callback:
+                      method: getData
+                      params:
+                          - note_public
+              show:
+                  callback: isServiceAutorisedInContrat
+            - custom: 1
+              label: Note privée
+              input_name: note_private
+              input:
+                  type: html
+              value:
+                  callback:
+                      method: getData
+                      params:
+                          - note_private
+              show:
+                  callback: isServiceAutorisedInContrat
+                  
+    create_signature:
+        title: Création de la signature
+        extends: validate
+        rows: 
+            create_signature: unset
             
+    # Attention create_signature étend ce form
+    validate:
+        title: Validation
+        rows:
+            create_signature: 
+                custom: 1
+                label: Créer la fiche signature
+                data_type: bool
+                input_name: create_signature
+                input: 
+                    type: toggle
+                value: 1
+            sign_dist:
+                custom: 1
+                label: Demander une signature à distance
+                data_type: bool
+                input_name: sign_dist
+                input: 
+                    type: toggle
+                value: 1
+                display_if: 
+                    field_name: create_signature
+                    show_values: 1
+            contact_signature: 
+                custom: 1
+                label: Contact signataire
+                data_type: id_object
+                input_name: id_contact_signature
+                object: contact
+                create_form: default
+                create_form_values: 
+                    callback: getSignatureContactCreateFormValues
+                input: 
+                    type: select
+                    help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+                    options: 
+                        callback: 
+                            method: getSocieteContactsArray
+                            params: 
+                                - field_value: fk_soc
+                value: 
+                    callback: getDefaultSignatureContact
+                display_if: 
+                    fields_names: create_signature,sign_dist
+                    create_signature: 
+                        show_values: 1
+                    sign_dist:
+                        hide_values: 0
+            init_docusign: 
+                custom: 1
+                label: Envoyer immédiatement le document pour signature via DocuSign
+                data_type: bool
+                input_name: init_docusign
+                content: 
+                    callback: renderSignatureInitDocuSignInput
+                display_if: 
+                    fields_names: create_signature,sign_dist
+                    create_signature: 
+                        show_values: 1
+                    sign_dist:
+                        hide_values: 0
+            open_public_access: 
+                custom: 1 
+                label: Ouvrir immédiatement l'accès à la signature électronique à distance
+                data_type: bool
+                input_name: open_public_access
+                content: 
+                    callback: renderSignatureOpenDistAccessInput
+                display_if: 
+                    fields_names: create_signature,init_docusign,sign_dist
+                    create_signature: 
+                        show_values: 1
+                    init_docusign: 
+                        hide_values: 1
+                    sign_dist:
+                        hide_values: 0
+            email_content: 
+                custom: 1
+                label: Contenu e-mail client pour la signature à distance
+                input_name: email_content
+                input: 
+                    type: html
+                    help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+                value: 
+                    callback: getSignatureEmailContent
+                display_if: 
+                    fields_names: create_signature,sign_dist
+                    create_signature: 
+                        show_values: 1
+                    sign_dist:
+                        hide_values: 0
+                depends_on: init_docusign,open_public_access
+                  
 fields_tables: 
     infos: 
         rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - field: libelle
+              edit: 1
+            - field: expertise
               edit: 1
             - field: fk_statut
             - field: entrepot
@@ -329,19 +569,15 @@ fields_tables:
             - field: ef_type
               edit: 1
             - field: fk_input_reason
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: datep
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: fin_validite
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: date_livraison
               edit: 1
             - field: fk_availability
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: zone_vente
               edit: 1
     
@@ -349,9 +585,12 @@ fields_tables:
         rows: 
             - field: fk_soc
               display: card
+            - field: id_client_facture
+              display: card
+              show: 
+                  field_value: id_client_facture
             - field: ref_client
-              edit: 
-                  callback: isEditable
+              edit: 1
             - label: Remises client
               value: 
                   callback: displayRemisesClient
@@ -359,11 +598,9 @@ fields_tables:
     payment:
         rows:
             - field: fk_cond_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: fk_mode_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
                 
     pdf: 
         rows: 
@@ -395,58 +632,79 @@ fields_tables:
             - field: total_ht
             - field: tva
             - field: total
+            - field: prime
+            - field: prime2
             
+    signature: 
+        title: Signature
+        icon: fas_signature
+        show: 
+            field_value: id_signature
+        rows: 
+            - field: id_signature
+              display: card
+        
 views: 
     default: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale,BimpSignature
+        rows: 
+            0: 
+                cols: 
+                    1: 
+                        rows: 
+                            2: 
+                                cols: 
+                                    0: 
+                                        type: fields_table
+                                        fields_table: 
+                                            name: signature
     content_infos: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale,BimpSignature
     full: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale,BimpSignature
      
 lists_cols: 
-    date_create: 
-        field: datec
-    date: 
-        field: datep
-    fin: 
-        field: fin_validite
+    fin_validite: 
         label: Fin validité
-    livraison: 
-        field: date_livraison
+    date_livraison: 
         label: Livraison
            
 filters_panels: 
     default: 
         filters: 
+            total_ttc: unset
             type: unset
-            date_propal: 
-                field: datep
+            datep: 
             date_livraison: 
-                field: date_livraison
                 
 lists: 
     default: 
+        configurable: 1
         title: Propositions commerciales
         icon: fas_file-invoice
         bulk_actions:
-            - label: supprimer les propositions commerciales sélectionnées
+            delete: 
+                label: supprimer les propositions commerciales sélectionnées
         add_form_values: 
             fields: 
                 entrepot: 
                     request: id_entrepot
                 fk_soc:
                     request: id_client
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+        list_actions: 
+            callback: getFilteredListActions
         cols: 
             ref: 
             libelle: 
-            statut: 
-            date_create: 
-            soc:
+            fk_statut: 
+            datec: 
+            fk_soc:
             entrepot: 
-            secteur: 
+            ef_type: 
             commercial:
-            total_ttc: 
+            total: 
         
     user: 
         extends: default
@@ -457,7 +715,7 @@ lists:
     client: 
         extends: default
         cols: 
-            soc: unset
+            fk_soc: unset
                 
 cards: 
     default: 
@@ -466,6 +724,7 @@ cards:
         status: fk_statut
         view_btn: 1
         fields: 
+            - field: replaced_ref
             - field: total
             - label: Fichier PDF
               value: 
@@ -474,9 +733,11 @@ cards:
 searches:
     default: 
         fields_search: 
+            - a.rowid
             - a.ref
             - ef.libelle
             - s.nom
+            - a.replaced_ref
         joins:
             ef: 
                 table: propal_extrafields
@@ -490,3 +751,12 @@ searches:
             - a.ref
             - s.nom
         label_syntaxe: '<a.ref> (Client: <s.nom>)'
+    light:
+        fields_search: 
+            - a.ref
+        fields_return: 
+            - a.ref
+
+signatures: 
+    devis: 
+        label: Devis

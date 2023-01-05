@@ -1,5 +1,7 @@
 <?php
 
+die('Désactivé'); 
+
 require_once("../../main.inc.php");
 
 ini_set('display_errors', 1);

@@ -356,7 +356,9 @@ class ActionComm extends CommonObject
         /*Moddrsi*/
         if(!defined('USER_EXTERNE_ID'))
             define('USER_EXTERNE_ID',  326);
-        if(count($this->userassigned)>1 && $this->userownerid != $user->id){//PLusieurs user et ce n'est pas l'orga qu'il la fait
+        if(!defined('USER_SYNCHRO'))
+            define('USER_SYNCHRO',  1495);
+        if(count($this->userassigned)>1 && $this->userownerid != $user->id && $user->id != USER_SYNCHRO){//PLusieurs user et ce n'est pas l'orga qu'il la fait
             $ok = false;
             
             foreach($this->userassigned as $tab){
@@ -735,10 +737,10 @@ class ActionComm extends CommonObject
                 $this->elementtype			= $obj->elementtype;
 
                 $this->fetchResources();
-            }
             $this->db->free($resql);
             $this->oldcopy = clone($this);
             $this->oldcopy->fetch_userassigned();
+            }
         }
         else
         {

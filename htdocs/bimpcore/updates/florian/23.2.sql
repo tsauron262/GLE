@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_c_secteur` ADD `email_from` varchar(30) NOT NULL DEFAULT '';

@@ -18,7 +18,7 @@ class BC_Panel extends BimpComponent
         'objects_change_reload' => ''
     );
 
-    public function __construct(BimpObject $object, $name, $path, $content_only = false, $level = 1, $title = null, $icon = null)
+    public function __construct(BimpObject $object, $name, $path, $content_only = false, $level = 1, $title = null, $icon = null, $id_config = null)
     {
         $this->params_def['title'] = array();
         $this->params_def['icon'] = array();
@@ -35,8 +35,8 @@ class BC_Panel extends BimpComponent
         $this->params_def['msgs'] = array('data_type' => 'array', 'default' => null, 'compile' => true);
         $this->params_def['before_content'] = array('default' => '');
         $this->params_def['after_content'] = array('default' => '');
+        $this->params_def['open'] = array('default' => '1');
         $this->params_def['modal_format'] = array('default' => $this->default_modal_format);
-
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -62,7 +62,7 @@ class BC_Panel extends BimpComponent
             }
         }
 
-        parent::__construct($object, $name, $path);
+        parent::__construct($object, $name, $path, $id_config);
 
         if (!is_null($title)) {
             $this->params['title'] = $title;
@@ -89,10 +89,10 @@ class BC_Panel extends BimpComponent
 
     public function renderHtml()
     {
-        if ((int) !$this->params['show']) {
+        if (!(int) $this->params['show']) {
             return '';
         }
-
+        
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -117,6 +117,9 @@ class BC_Panel extends BimpComponent
         $html .= $this->object->object_name . '_' . static::$type . '_container"';
         $html .= '>';
 
+        if (BimpObject::objectLoaded($this->userConfig)) {
+            $this->data['id_config'] = $this->userConfig->id;
+        }
 
         if (count($this->errors)) {
             $html .= BimpRender::renderAlerts($this->errors);
@@ -138,6 +141,9 @@ class BC_Panel extends BimpComponent
             }
             $content .= '"';
             foreach ($this->data as $data_name => $data_value) {
+                if (is_array($data_value)) {
+                    $data_value = htmlentities(json_encode($data_value));
+                }
                 $content .= ' data-' . $data_name . '="' . $data_value . '"';
             }
             $content .= '>';
@@ -190,7 +196,8 @@ class BC_Panel extends BimpComponent
                             'header_icons'   => $this->getHeaderIcons(),
                             'no_header'      => (int) !$this->params['panel_header'],
                             'no_footer'      => (int) !$this->params['panel_footer'],
-                            'no_borders'     => (int) $this->params['no_borders']
+                            'no_borders'     => (int) $this->params['no_borders'],
+                            'open'           => (int) $this->params['open']
                 ));
             } else {
                 $html .= $content;
@@ -235,7 +242,7 @@ class BC_Panel extends BimpComponent
 
     public function renderFooterExtraBtn()
     {
-        if (count($this->params['footer_extra_btn'])) {
+        if (is_array($this->params['footer_extra_btn']) && count($this->params['footer_extra_btn'])) {
             $items = array();
 
             foreach ($this->params['footer_extra_btn'] as $action_params) {
@@ -296,15 +303,23 @@ class BC_Panel extends BimpComponent
 
     public function getTitle()
     {
+        $title = '';
         if (isset($this->params['title'])) {
-            return $this->params['title'];
+            $title = $this->params['title'];
         }
 
-        if ($this->isObjectValid()) {
-            return $this->object->getInstanceName();
+        elseif ($this->isObjectValid()) {
+            $title = $this->object->getInstanceName();
+        }
+        $date = BimpCore::getConf('date_archive', '');
+        if($date != ''){
+            if($this->object->modeArchive == 0)
+                $title .= ' (depuis le '.$date.')';
+            elseif($this->object->modeArchive == 1)
+                $title .= ' (avant le '.$date.')';
         }
 
-        return '';
+        return $title;
     }
 
     public function getIcon()
@@ -343,5 +358,12 @@ class BC_Panel extends BimpComponent
     {
         $this->identifier .= '_' . $suffix;
         $this->data['identifier'] = $this->identifier;
+    }
+
+    public function addExtraData($clef, $value)
+    {
+        if (!isset($this->data['extra_data']))
+            $this->data['extra_data'] = array();
+        $this->data['extra_data'][$clef] = $value;
     }
 }

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_fichinterdet` ADD `pourcentage_commercial` DOUBLE NOT NULL DEFAULT '0';

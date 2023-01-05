@@ -26,12 +26,12 @@ class BMP_EventBillets extends BimpObject
         return 1;
     }
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
         return (int) $this->isEventEditable();
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         return (int) $this->isEventEditable();
     }
@@ -83,12 +83,12 @@ class BMP_EventBillets extends BimpObject
             $actions[] = array(
                 'label'   => 'Assigner les DL distributeur par défaut',
                 'icon'    => 'fas_arrow-circle-right',
-                'onclick' => $this->getJsBulkActionOnclick('setDefaultDL', array('dl_type' => 'dist', 'id_event' => $id_event), array('single_action' => 'true'))
+                'onclick' => $this->getJsBulkActionOnclick('setDefaultDL', array('dl_type' => 'dist', 'id_event' => $id_event), array('single_action' => true))
             );
             $actions[] = array(
                 'label'   => 'Assigner les DL producteur par défaut',
                 'icon'    => 'fas_arrow-circle-right',
-                'onclick' => $this->getJsBulkActionOnclick('setDefaultDL', array('dl_type' => 'prod', 'id_event' => $id_event), array('single_action' => 'true'))
+                'onclick' => $this->getJsBulkActionOnclick('setDefaultDL', array('dl_type' => 'prod', 'id_event' => $id_event), array('single_action' => true))
             );
         }
 

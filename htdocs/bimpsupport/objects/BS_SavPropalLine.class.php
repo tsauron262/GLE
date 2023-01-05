@@ -10,7 +10,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
 
     // Getters: 
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         if (!$force_edit && !(int) $this->getData('editable') && ($this->getData('linked_object_name') !== 'sav_apple_part')) {
             return 0;
@@ -86,7 +86,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
             return 'apple_part';
         }
 
-        return 'default';
+        return 'sav';
     }
 
     // Traitements:
@@ -153,7 +153,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
 //    }
     // overrides: 
 
-    public function attributeEquipment($id_equipment, $id_equipment_line = 0)
+    public function attributeEquipment($id_equipment, $id_equipment_line = 0, $recal_line_pa = true, $check_equipment = true)
     {
         $current_id_equipment = 0;
         $equipment_line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLineEquipment');
@@ -162,7 +162,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
             $current_id_equipment = (int) $equipment_line->getSavedData('id_equipment', $id_equipment_line);
         }
 
-        $errors = parent::attributeEquipment($id_equipment, $id_equipment_line);
+        $errors = parent::attributeEquipment($id_equipment, $id_equipment_line, $recal_line_pa, $check_equipment);
         if (count($errors)) {
             return $errors;
         }
@@ -186,7 +186,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
         return $errors;
     }
 
-    public function isEquipmentAvailable(Equipment $equipment)
+    public function isEquipmentAvailable(Equipment $equipment = null)
     {
         if (!BimpObject::objectLoaded($equipment)) {
             return array('Equipement invalide');
@@ -342,15 +342,15 @@ class BS_SavPropalLine extends Bimp_PropalLine
         $propal = $this->getParentInstance();
         if (BimpObject::objectLoaded($propal)) {
             $sav = $propal->getSav();
-        }
 
-        $errors = parent::delete($warnings, $force_delete);
+            $errors = parent::delete($warnings, $force_delete);
 
-        if (!count($errors)) {
-            if (!$is_garantie) {
-                $sav_error = $sav->processPropalGarantie();
-                if ($sav_error) {
-                    $warnings[] = $sav_error;
+            if (!count($errors)) {
+                if (!$is_garantie) {
+                    $sav_error = $sav->processPropalGarantie();
+                    if ($sav_error) {
+                        $warnings[] = $sav_error;
+                    }
                 }
             }
         }

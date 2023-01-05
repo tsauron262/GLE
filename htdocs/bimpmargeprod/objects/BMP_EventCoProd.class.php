@@ -13,7 +13,7 @@ class BMP_EventCoProd extends BimpObject
         return 0;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array(), $force_create = false)
     {

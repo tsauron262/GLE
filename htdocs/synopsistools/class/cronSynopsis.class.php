@@ -3,6 +3,8 @@
 require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+
 class CronSynopsis {
 
     var $nbErreur = 0;
@@ -14,19 +16,20 @@ class CronSynopsis {
     }
 
     public function netoyage() {
+        ini_set('display_errors', 1);
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE  `sourcetype` LIKE  'resa'");
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE  `tms` <  '" . $this->db->idate(strtotime("-3 day")) . "'");
         
         
-        $sql = $this->db->query('SELECT * FROM `llx_facture` f WHERE `total_ttc` != (SELECT SUM(`total_ttc`) FROM `llx_facturedet` WHERE `fk_facture` = f.rowid GROUP BY `fk_facture`)');
+        $sql = $this->db->query('SELECT rowid, SUM(`total_ttc`) as dif FROM `llx_facture` f WHERE `total_ttc` != (SELECT SUM(`total_ttc`) FROM `llx_facturedet` WHERE `fk_facture` = f.rowid GROUP BY `fk_facture`)');
         while ($ln = $this->db->fetch_object($sql)){
-            mailSyn2("prob  total fact", 'tommy@bimp.fr, f.martinez@bimp.fr', "admin@bimp.fr", "ID facture total faux ".$ln->rowid);
-            
+            if(($ln->dif > 0.02 || $ln->dif < -0.02) && $ln->rowid != 139472)
+                mailSyn2("prob  total fact", 'tommy@bimp.fr, f.martinez@bimp.fr', null, "ID facture total faux ".$ln->rowid);
         }
         
         $sql = $this->db->query("SELECT * FROM `llx_facture` WHERE `datef` > '2019-07-01' AND `fk_user_comm` < 1 AND fk_statut > 0");
         while ($ln = $this->db->fetch_object($sql)){
-            mailSyn2("prob  total fact", 'tommy@bimp.fr, f.martinez@bimp.fr', "admin@bimp.fr", "ID facture sans commercial ".$ln->rowid);
+            mailSyn2("prob  total fact", 'tommy@bimp.fr, f.martinez@bimp.fr', null, "ID facture sans commercial ".$ln->rowid);
             
         }
     }
@@ -39,7 +42,7 @@ class CronSynopsis {
 
     public function testGlobal() {
         $this->verifCompteFermer();
-        $this->sauvBdd();
+//        $this->sauvBdd();
 
         $this->netoyage();
 //        $this->majChrono();
@@ -386,26 +389,26 @@ class CronSynopsis {
         global $user;
         $str = "";
         if (array_key_exists('options_date_s', $user->array_options)) {
-            $mails = "tommy@bimp.fr, grh@bimp.fr";
-            $mails2 = $mails .", j.belhocine@bimp.fr";
-            $sql = $this->db->query("SELECT u.login, u.rowid, u2.email  FROM `" . MAIN_DB_PREFIX . "user_extrafields` ue, " . MAIN_DB_PREFIX . "user u LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user  WHERE `date_s` <= now() AND fk_object = u.rowid AND u.statut = 1");
-            while ($result = $this->db->fetch_object($sql)) {
-                $userF = new User($this->db);
-                $userF->fetch($result->rowid);
-                $userF->setstatus(0);
-                $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
-                $str .= $str2."<br/>";
-                mailSyn2("Fermeture compte " . $result->login, $mails2.($result->email != "" ? ",".$result->email :""), null, $str2);
-            }
-            
-            foreach(array(14, 7) as $nbDay){
-                $sql = $this->db->query("SELECT u.login, u.rowid, u2.email  FROM `" . MAIN_DB_PREFIX . "user_extrafields` ue, " . MAIN_DB_PREFIX . "user u LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user WHERE `date_s` = DATE(DATE_ADD(now(), INTERVAL ".$nbDay." DAY)) AND fk_object = u.rowid AND u.statut = 1");
-                while ($result = $this->db->fetch_object($sql)) {
-                    $str2 = "Bonjour le compte de " . $result->login . " sera fermé dans ".$nbDay." jours. Cordialement.";
-                    $str .= $str2."<br/>";
-                    mailSyn2("Fermeture compte " . $result->login. " dans ".$nbDay." jours", $mails.($result->email != "")? ",".$result->email :"", null, $str2);
-                }
-            }
+//            $mails = "tommy@bimp.fr, grh@bimp.fr";
+//            $mails2 = $mails .", j.belhocine@bimp.fr";
+//            $sql = $this->db->query("SELECT u.login, u.rowid, u2.email  FROM `" . MAIN_DB_PREFIX . "user_extrafields` ue, " . MAIN_DB_PREFIX . "user u LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user  WHERE `date_s` <= now() AND fk_object = u.rowid AND u.statut = 1");
+//            while ($result = $this->db->fetch_object($sql)) {
+//                $userF = new User($this->db);
+//                $userF->fetch($result->rowid);
+//                $userF->setstatus(0);
+//                $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
+//                $str .= $str2."<br/>";
+//                mailSyn2("Fermeture compte " . $result->login, $mails2.($result->email != "" ? ",".$result->email :""), null, $str2);
+//            }
+//            
+//            foreach(array(14, 7) as $nbDay){
+//                $sql = $this->db->query("SELECT u.login, u.rowid, u2.email  FROM `" . MAIN_DB_PREFIX . "user_extrafields` ue, " . MAIN_DB_PREFIX . "user u LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user WHERE `date_s` = DATE(DATE_ADD(now(), INTERVAL ".$nbDay." DAY)) AND fk_object = u.rowid AND u.statut = 1");
+//                while ($result = $this->db->fetch_object($sql)) {
+//                    $str2 = "Bonjour le compte de " . $result->login . " sera fermé dans ".$nbDay." jours. Cordialement.";
+//                    $str .= $str2."<br/>";
+//                    mailSyn2("Fermeture compte " . $result->login. " dans ".$nbDay." jours", $mails.($result->email != "")? ",".$result->email :"", null, $str2);
+//                }
+//            }
         echo $str." Comptes fermés";
         }
         else

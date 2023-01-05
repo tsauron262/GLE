@@ -6,18 +6,38 @@ parent_object: Inventory2
 parent_id_property: fk_inventory
 
 labels:
-    name: Entrepôt/type
+    name: Entrepôt / type
+    name_plur: Entrepôts / types
+                
+objects: 
+    inventory: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: Inventory2
+            id_object: 
+                field_value: fk_inventory
+                
+    entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_warehouse
+                
+    bimp_entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_warehouse
                 
 fields: 
     fk_inventory:
-        label: Id de l'inventaire
+        label: Inventaire
         type: id_object
         object: inventory
             
     fk_warehouse:
         label: Entrepôt
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         default_value: 0
         input:
             type: search_entrepot
@@ -35,32 +55,16 @@ fields:
 lists:
     default:
         add_form_name: default
-        view_btn: 1
         page_btn: 1
-        delete_btn: 1
-        modal_view: default
         cols:
             id:
-                field: id
             is_main:
-                field: is_main
             fk_inventory:
-                field: fk_inventory
-                display: nom_url
             fk_warehouse:
-                field: fk_warehouse
-                display: nom_url
             type:
-                field: type
             user_create:
-                field: user_create
-                display: nom_url
             user_update:
-                field: user_update
-                display: nom_url
             date_create:
-                field: date_create
-                display: date
                 
     inventory:
         extends: default

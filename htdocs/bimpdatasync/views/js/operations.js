@@ -1,22 +1,42 @@
-function OperationStep(data) {
+var bds_process_url = dol_url_root + '/bimpdatasync/index.php?fc=process';
+var bds_current_operation = null;
+var bds_operations = [];
+
+function BDS_OperationStep(name, data, $container) {
     var step = this;
 
-    this.name = data.name;
+    this.name = name;
     this.label = data.label;
     this.status = 'waiting';
     this.is_done = 0;
     this.nbReset = 0;
+    this.step_data = {};
 
     this.on_error = 'stop';
     this.on_cancel = 'stop';
 
-    this.$row = $('#step_' + data.name);
+    this.$container = $container;
+
+    if ($.isOk(this.$container)) {
+        this.$table = $container.find('#operationStepsTable');
+    } else {
+        this.$table = null;
+    }
+
+    if ($.isOk(this.$table)) {
+        this.$row = this.$table.find('#step_' + name);
+    } else {
+        this.$row = null;
+    }
 
     if (typeof (data.on_error) !== 'undefined') {
         this.on_error = data.on_error;
     }
     if (typeof (data.on_cancel) !== 'undefined') {
         this.on_cancel = data.on_cancel;
+    }
+    if (typeof (data.data) !== 'undefined') {
+        this.step_data = data.data;
     }
 
     // Gestion de la liste des éléments:
@@ -25,7 +45,7 @@ function OperationStep(data) {
         'list': [],
         'nbTotal': 0,
         'nbDone': 0,
-        'nbPerIteration': 1
+        'nbPerIteration': 0
     };
 
     this.setElements = function (elements) {
@@ -88,7 +108,7 @@ function OperationStep(data) {
 
         var n = 0;
         for (var i = step.elements.nbDone; i < step.elements.nbTotal; i++) {
-            if (step.elements.nbPerIteration) {
+            if (step.elements.nbPerIteration > 0) {
                 if (n >= step.elements.nbPerIteration) {
                     break;
                 }
@@ -97,11 +117,14 @@ function OperationStep(data) {
             n++;
         }
 
+        var nbIterations = 1;
         var nbIterationsDone = 0;
         if (step.elements.nbPerIteration > 0) {
             nbIterationsDone = Math.ceil(step.elements.nbDone / step.elements.nbPerIteration);
+            nbIterations = Math.ceil(step.elements.nbTotal / step.elements.nbPerIteration);
+        } else {
+            nbIterationsDone = Math.ceil(step.elements.nbDone / step.elements.nbTotal);
         }
-        var nbIterations = Math.ceil(step.elements.nbTotal / step.elements.nbPerIteration);
 
         var msg = 'traitement du paquet ' + (nbIterationsDone + 1) + ' sur ';
         msg += nbIterations + ' en cours...';
@@ -125,10 +148,16 @@ function OperationStep(data) {
 
     this.onAjaxSuccess = function () {
         if (step.elements.list.length) {
-            step.elements.nbDone += step.elements.nbPerIteration;
+            if (step.elements.nbPerIteration > 0) {
+                step.elements.nbDone += step.elements.nbPerIteration;
+            } else {
+                step.elements.nbDone += step.elements.nbTotal;
+            }
             if (step.elements.nbDone > step.elements.nbTotal) {
                 step.elements.nbDone = step.elements.nbTotal;
             }
+        } else {
+            step.elements.nbDone++;
         }
 
         if (step.elements.nbDone < step.elements.nbTotal) {
@@ -185,12 +214,12 @@ function OperationStep(data) {
         if (!$body.length) {
             var msg = 'Une erreur est survenue. Ajout de l\'étape ';
             msg += '"' + step.label + '" impossible (conteneur absent)';
-            bimp_display_msg(msg, $('#operationStepAjaxResult'), 'danger');
+            bimp_msg(msg, $('#operationStepAjaxResult'), 'danger');
             return false;
         }
 
         var html = '<tr id="step_' + step.name + '"';
-        html += ' class="operationStepRow ' + step.status + '"';
+        html += ' class="operationStepRow operationStepRow_' + step.name + ' ' + step.status + '"';
         html += '>';
 
         html += '<td class="stepLabel">' + step.label + '</td>';
@@ -200,7 +229,7 @@ function OperationStep(data) {
             html += '<span class="nbStepElementsDone">';
             html += step.elements.nbDone;
             html += '</span>';
-            html += '&nbsp;/&nbsp;'
+            html += '&nbsp;/&nbsp;';
             html += '<span class="nbStepElementsTotal">';
             html += step.elements.nbTotal;
             html += '</span>';
@@ -220,11 +249,20 @@ function OperationStep(data) {
 
         $body.append(html);
 
-        step.$row = $body.find('#step_' + step.name);
+        var id = 'step_' + step.name;
+        step.$row = $body.find('#' + id);
 
-        if (!step.$row.length) {
-            var msg = 'Echec de l\'insertion de l\'étape "' + step.label + '"';
-            bimp_display_msg(msg, $('#operationStepAjaxResult'), 'danger');
+        if (!$.isOk(step.$row)) {
+            var $rows = $body.find('tr');
+            $rows.each(function () {
+                if (id === $(this).attr('id')) {
+                    step.$row = $(this);
+                }
+            });
+        }
+
+        if (!$.isOk(step.$row)) {
+            bimp_msg('Echec de l\'insertion de l\'étape "' + step.label + '"', 'danger');
             return false;
         }
 
@@ -232,22 +270,33 @@ function OperationStep(data) {
     };
 
     this.setRowVars = function (msg) {
-        if (!step.$row || !step.$row.length) {
-            return;
+        if (!$.isOk(step.$row)) {
+            step.$row = $('#operationStepsTable').find('tbody').find('tr.operationStepRow_' + step.name);
+
+            if (!$.isOk(step.$row)) {
+                return;
+            }
         }
 
         step.$row.attr('class', 'operationStepRow ' + step.status);
+
+
         if (step.elements.list.length) {
             step.$row.find('.nbStepElementsDone').text(step.elements.nbDone);
             step.$row.find('.nbStepElementsTotal').text(step.elements.nbTotal);
+
             if (step.elements.nbTotal > 0) {
                 var progression = Math.floor((step.elements.nbDone / step.elements.nbTotal) * 100);
                 step.$row.find('.progressionDone').css('width', progression + '%');
             }
         } else {
             if (step.is_done) {
+                step.$row.find('.nbStepElementsDone').text(1);
+                step.$row.find('.nbStepElementsTotal').text(1);
                 step.$row.find('.progressionDone').css('width', '100%');
             } else {
+                step.$row.find('.nbStepElementsDone').text(0);
+                step.$row.find('.nbStepElementsTotal').text(1);
                 step.$row.find('.progressionDone').css('width', '0%');
             }
         }
@@ -266,22 +315,43 @@ function OperationStep(data) {
         }
     }
 
-    if (!this.$row.length) {
-        this.append($('#operationStepsTable').find('tbody'));
+    if (!$.isOk(this.$row)) {
+        if ($.isOk(this.$table)) {
+            this.append($('#operationStepsTable').find('tbody'));
+        } else {
+            step.status = 'error';
+            step.setRowVars('Une erreur est survenue');
+        }
     }
 }
 
-function ProcessOperation(data, options) {
+function BDS_ProcessOperation(data, options) {
     var operation = this;
-    this.$notification = $('#operationStepAjaxResult');
 
     this.id_process = data.id_process;
     this.id_operation = data.id_operation;
     this.options = options;
     this.retry_delay = 0;
 
+    this.$container = $('#process_' + data.id_process + '_operation_' + data.id_operation + '_progress_container');
+    this.$notification = this.$container.find('.operationStepAjaxResult');
+
+    if ($.isOk(this.$notification)) {
+        this.$notification.show();
+    }
+
     this.steps = [];
     this.status = 'init';
+    this.operation_data = {};
+    this.has_finalization = false;
+
+    if (typeof (data.data) !== 'undefined') {
+        this.operation_data = data.data;
+    }
+
+    if (typeof (data.has_finalization) !== 'undefined') {
+        this.has_finalization = data.has_finalization;
+    }
 
     this.curStep = {
         'step': 0,
@@ -290,47 +360,52 @@ function ProcessOperation(data, options) {
     };
 
     this.report = {
+        'id': 0,
         'use': 0,
-        'reference': 0,
         'is_active': 0,
         'is_loading': 0,
-        'display_loaded': 0,
-        '$container': null,
-        '$content': null
+        '$container': null
     };
+
+    if (data.use_report && data.id_report) {
+        this.report.use = 1;
+        this.report.id = data.id_report;
+        this.report.is_active = 1;
+
+        if ($.isOk(this.$container)) {
+            this.report.$container = this.$container.find('#processReportContainer');
+        }
+    }
 
     this.buttons = {
-        '$cancel': $('#cancelOperationButton'),
-        '$hold': $('#holdOperationButton'),
-        '$resume': $('#resumeOperationButton'),
-        '$retry': $('#retryOperationStepButton'),
-        '$back': $('#backButton'),
-        '$reportOn': $('#enableReportButton'),
-        '$reportOff': $('#disableReportButton')
+        '$cancel': $('#bds_cancelOperationButton'),
+        '$hold': $('#bds_holdOperationButton'),
+        '$resume': $('#bds_resumeOperationButton'),
+        '$retry': $('#bds_retryOperationStepButton'),
+        '$back': $('#bds_backButton'),
+        '$reportOn': $('#bds_enableReportButton'),
+        '$reportOff': $('#bds_disableReportButton')
     };
-
-    if (data.use_report && data.report_ref) {
-        this.report.use = 1;
-        this.report.reference = data.report_ref;
-        this.report.$container = $('#reportContentContainer');
-        this.report.$content = $('#reportContentContainer');
-    }
 
     this.addSteps = function (steps) {
         if (steps) {
-            for (var i in steps) {
-                var step = new OperationStep(steps[i]);
+            for (var step_name in steps) {
+                var step = new BDS_OperationStep(step_name, steps[step_name], operation.$container.find('#stepsProgressionContainer'));
                 operation.steps.push(step);
             }
         }
     };
+
+    if (typeof (data.steps) !== 'undefined') {
+        this.addSteps(data.steps);
+    }
 
     this.start = function () {
         if (!operation.steps.length) {
             var html = '<div class="alert alert-warning">';
             html += 'Aucune opération à traiter';
             html += '</div>';
-            operation.$notification.html(html);
+            operation.$notification.html(html).show();
             operation.status = 'success';
             operation.hideButtons();
             operation.buttons.$back.show();
@@ -354,14 +429,15 @@ function ProcessOperation(data, options) {
 
         if (operation.status === 'hold') {
             var html = '<div class="alert alert-warning">Opération suspendue</div>';
-            operation.$notification.html(html);
+            operation.$notification.html(html).show();
             operation.curStep.step.hold();
         }
 
         if (operation.status === 'cancelled') {
-            var html = '<div class="alert alert-danger">Opération annulée</div>';
-            operation.$notification.html(html);
             operation.curStep.step.cancel();
+            operation.hideButtons();
+            operation.onCancel();
+            return;
         }
 
         if ((operation.status !== 'processing') || !operation.curStep.step) {
@@ -372,7 +448,7 @@ function ProcessOperation(data, options) {
             var html = '<div class="alert alert-info">';
             html += 'Nouvelle tentative dans ' + operation.retry_delay + ' secondes';
             html += '</div>';
-            operation.$notification.html(html);
+            operation.$notification.html(html).show();
             if (operation.retry_delay === 1) {
                 operation.resume();
             } else {
@@ -400,8 +476,6 @@ function ProcessOperation(data, options) {
             switch (operation.curStep.step.on_cancel) {
                 case 'stop':
                     operation.status = 'stoped';
-                    var html = '<div class="alert alert-danger">Opération annulée</div>';
-                    operation.$notification.append(html);
                     operation.hideButtons();
                     operation.buttons.$back.show();
                     return;
@@ -413,7 +487,7 @@ function ProcessOperation(data, options) {
                 case 'retry':
                     operation.status = 'stoped';
                     var html = '<div class="alert alert-danger">Opération annulée</div>';
-                    operation.$notification.append(html);
+                    operation.$notification.append(html).show();
                     operation.hideButtons();
                     operation.buttons.$retry.show();
                     operation.buttons.$back.show();
@@ -426,7 +500,7 @@ function ProcessOperation(data, options) {
                 case 'stop':
                     operation.status = 'stoped';
                     var html = '<div class="alert alert-danger">Une erreur est survenue. Opération abandonnée</div>';
-                    operation.$notification.append(html);
+                    operation.$notification.append(html).show();
                     operation.hideButtons();
                     operation.buttons.$back.show();
                     return;
@@ -442,7 +516,7 @@ function ProcessOperation(data, options) {
                 case 'hold':
                     operation.status = 'hold';
                     var html = '<div class="alert alert-danger">Une erreur est survenue. Opération suspendue</div>';
-                    operation.$notification.append(html);
+                    operation.$notification.append(html).show();
                     operation.hideButtons();
                     operation.buttons.$retry.show();
                     operation.buttons.$back.show();
@@ -462,80 +536,95 @@ function ProcessOperation(data, options) {
 
         if ((typeof (operation.curStep.step) === 'undefined') || 
                 !operation.curStep.step) {
-            operation.setSuccess('Opération terminée');
+            if (operation.has_finalization) {
+                operation.finalize();
+            } else {
+                operation.setSuccess('Opération terminée');
+            }
             return;
         }
 
         var data = {
-            'ajax': 1,
-            'action': 'executeOperationStep',
             'id_process': operation.id_process,
             'id_operation': operation.id_operation,
             'step_name': operation.curStep.step.name,
-            'report_ref': 0,
-            'return_report': 0,
+            'use_report': operation.report.use,
+            'id_report': operation.report.id,
             'options': operation.options,
             'step_options': {},
-            'elements': 0,
-            'iteration': 1
+            'elements': {},
+            'iteration': 1,
+            'operation_data': {},
+            'step_data': {}
         };
-
-        if (operation.report.use) {
-            data.report_ref = operation.report.reference;
-            data.return_report = operation.report.is_active;
-        }
 
         if (typeof (operation.curStep.step.options) !== 'undefined') {
             data.step_options = operation.curStep.step.options;
         }
+        if (typeof (operation.operation_data) !== 'undefined') {
+            data.operation_data = operation.operation_data;
+        }
+        if (typeof (operation.curStep.step.step_data) !== 'undefined') {
+            data.step_data = operation.curStep.step.step_data;
+        }
 
-        if (operation.curStep.step.elements.nbTotal) {
+        if (operation.curStep.step.elements.list.length) {
             data.elements = operation.curStep.step.getIterationElements();
-            var iterationsDone = Math.ceil(operation.curStep.step.elements.nbDone / operation.curStep.step.elements.nbPerIteration);
+            var iterationsDone = 0;
+            if (operation.curStep.step.elements.nbPerIteration > 0) {
+                iterationsDone = Math.ceil(operation.curStep.step.elements.nbDone / operation.curStep.step.elements.nbPerIteration);
+            } else {
+                iterationsDone = Math.ceil(operation.curStep.step.elements.nbDone / operation.curStep.step.elements.nbTotal);
+            }
             data['iteration'] = iterationsDone + 1;
         }
 
         operation.curStep.ajax_processing = 1;
 
-        $.ajax({
-            type: 'POST',
-            url: './ajax.php',
-            dataType: 'json',
-            data: data,
-            success: function (result) {
-                operation.curStep.ajax_processing = 0;
-                if (result.report_html) {
-                    operation.setReport(result.report_html);
-                }
+        BimpAjax('bds_executeOperationStep', data, operation.$notification, {
+            operation: operation,
+            url: bds_process_url,
+            display_success: false,
+            success: function (result, bimpAjax) {
+                bimpAjax.operation.curStep.ajax_processing = 0;
+                bimpAjax.operation.refreshReport();
+                bimpAjax.operation.$notification.show();
+
                 if (typeof (result.step_result.debug_content) !== 'undefined') {
-                    $('#debugContent').append(result.step_result.debug_content);
-                    setFoldableEvents();
+                    var $content = bimpAjax.operation.$container.find('#processDebugContent').children('.foldable_content').first();
+                    if ($.isOk($content)) {
+                        $content.append(result.step_result.debug_content);
+                        setCommonEvents($content);
+                    }
                 }
-                if (result.errors.length) {
+
+                if (typeof (result.step_result.errors) !== 'undefined' && result.step_result.errors.length) {
                     var msg = '<ul>';
-                    for (var e in result.errors) {
-                        msg += '<li>' + result.errors[e] + '</li>';
+                    for (var e in result.step_result.errors) {
+                        msg += '<li>' + result.step_result.errors[e] + '</li>';
                     }
                     msg += '</ul>';
-                    operation.setError(msg);
-                    operation.curStep.step.onAjaxError();
+                    bimp_msg(msg, 'danger', bimpAjax.operation.$notification);
+                    bimpAjax.operation.$notification.show();
+                    bimpAjax.operation.curStep.step.onAjaxError();
                 } else {
                     if (typeof (result.step_result.retry) !== 'undefined') {
-                        operation.curStep.step.hold(result.step_result.retry.msg);
-                        operation.retry_delay = parseInt(result.step_result.retry.delay);
+                        bimpAjax.operation.curStep.step.hold(result.step_result.retry.msg);
+                        bimpAjax.operation.retry_delay = parseInt(result.step_result.retry.delay);
                     } else {
-                        operation.curStep.step.onAjaxSuccess();
+                        bimpAjax.operation.curStep.step.onAjaxSuccess();
                     }
                 }
                 if (typeof (result.step_result.new_steps) !== 'undefined') {
-                    operation.addSteps(result.step_result.new_steps);
+                    bimpAjax.operation.addSteps(result.step_result.new_steps);
                 }
-                operation.processStep();
+
+                bimpAjax.operation.processStep();
             },
-            error: function () {
-                operation.curStep.ajax_processing = 0;
-                operation.curStep.step.onAjaxError();
-                operation.processStep();
+            error: function (result, bimpAjax) {
+                bimpAjax.operation.curStep.ajax_processing = 0;
+                bimpAjax.operation.curStep.step.onAjaxError();
+                bimpAjax.operation.processStep();
             }
         });
     };
@@ -554,7 +643,8 @@ function ProcessOperation(data, options) {
             msg = 'Opération suspendue';
         }
         var html = '<div class="alert alert-warning">' + msg + '</div>';
-        operation.$notification.html(html);
+
+        operation.$notification.html(html).show();
     };
 
     this.resume = function () {
@@ -578,14 +668,92 @@ function ProcessOperation(data, options) {
         operation.buttons.$back.show();
         var msg = '';
         if (operation.curStep.ajax_processing) {
-            msg = 'Opération en cours d\'annulation';
+            msg = 'Arrêt du processus après la fin du traitement du paquet en cours.';
+            var html = '<div class="alert alert-warning">' + msg + '</div>';
+            operation.$notification.html(html).show();
         } else {
             operation.curStep.step.cancel();
-            msg = 'Opération annulée';
+            msg = 'Arrêt du processus';
+            var html = '<div class="alert alert-warning">' + msg + '</div>';
+            operation.$notification.html(html).show();
+            operation.onCancel();
         }
-        var html = '<div class="alert alert-warning">' + msg + '</div>';
-        operation.$notification.html(html);
+    };
 
+    this.onCancel = function () {
+        var data = {
+            'id_process': operation.id_process,
+            'id_operation': operation.id_operation,
+            'use_report': operation.report.use,
+            'id_report': operation.report.id,
+            'options': operation.options,
+            'operation_data': operation.operation_data
+        };
+
+        BimpAjax('bds_cancelOperation', data, operation.$notification, {
+            operation: operation,
+            url: bds_process_url,
+            display_success: true,
+            display_success_in_popup_only: false,
+            display_warnings_in_popup_only: false,
+            display_processing: true,
+            processing_msg: 'Arrêt en cours',
+            success_msg: 'Arrêt effectué',
+            processing_padding: 0,
+            success: function (result, bimpAjax) {
+                bimpAjax.operation.refreshReport();
+                bimpAjax.operation.$notification.show();
+                bimpAjax.operation.buttons.$back.show();
+
+                if (typeof (result.result.debug_content) !== 'undefined' && result.result.debug_content) {
+                    var $content = bimpAjax.operation.$container.find('#processDebugContent').children('.foldable_content').first();
+                    if ($.isOk($content)) {
+                        $content.append(result.result.debug_content);
+                        setCommonEvents($content);
+                    }
+                }
+            }
+        });
+    };
+
+    this.finalize = function () {
+        var data = {
+            'id_process': operation.id_process,
+            'id_operation': operation.id_operation,
+            'use_report': operation.report.use,
+            'id_report': operation.report.id,
+            'options': operation.options,
+            'operation_data': operation.operation_data
+        };
+
+        BimpAjax('bds_finalizeOperationStep', data, operation.$notification, {
+            operation: operation,
+            url: bds_process_url,
+            display_success: true,
+            display_success_in_popup_only: false,
+            display_warnings_in_popup_only: false,
+            success_msg: 'Opération terminée',
+            display_processing: true,
+            processing_msg: 'Finalisation en cours',
+            processing_padding: 0,
+            success: function (result, bimpAjax) {
+                bimpAjax.operation.refreshReport();
+                bimpAjax.operation.$notification.show();
+
+                if (typeof (result.result.debug_content) !== 'undefined' && result.result.debug_content) {
+                    var $content = bimpAjax.operation.$container.find('#processDebugContent').children('.foldable_content').first();
+                    if ($.isOk($content)) {
+                        $content.append(result.result.debug_content);
+                        setCommonEvents($content);
+                    }
+                }
+
+                operation.setSuccess('Opération terminée');
+            },
+            error: function (result, bimpAjax) {
+                operation.setError('Echec de la finalisation');
+            }
+        });
     };
 
     this.retryOperationStep = function () {
@@ -596,7 +764,7 @@ function ProcessOperation(data, options) {
             operation.buttons.$cancel.show();
             operation.buttons.$hold.show();
             operation.status = 'processing';
-            operation.$notification.html('');
+            operation.$notification.html('').show();
             operation.processStep();
         }
     };
@@ -604,93 +772,48 @@ function ProcessOperation(data, options) {
     this.enableReport = function () {
         operation.buttons.$reportOn.hide();
 
-        if ((!operation.report.use) ||
-                typeof (operation.report.reference) === 'undefined') {
+        if ((!operation.report.use) || !operation.report.id) {
             var msg = 'Aucun rapport n\'est disponible pour ce type d\'opération';
-            bimp_display_msg(msg, operation.$notification, 'danger');
+            bimp_msg(msg, 'danger');
             return;
         }
+
+        if ($.isOk(operation.report.$container)) {
+            operation.report.$container.stop().slideDown(250, function () {
+                $(this).attr('style', '');
+            });
+        } else {
+            bimp_msg('Aucun rapport trouvé', 'danger');
+        }
+
         operation.buttons.$reportOff.show();
-
-        if (operation.report.is_loading) {
-            return;
-        }
-
         operation.report.is_active = true;
-        operation.loadReport();
+        operation.refreshReport();
     };
 
     this.disableReport = function () {
         operation.buttons.$reportOn.show();
         operation.buttons.$reportOff.hide();
         operation.report.is_active = false;
-        operation.report.display_loaded = false;
-        operation.report.$content.slideUp(250, function () {
-            operation.report.$content.html('');
-        });
+        if ($.isOk(operation.report.$container)) {
+            operation.report.$container.slideUp(250);
+        } else {
+            bimp_msg('Aucun rapport trouvé', 'danger');
+        }
     };
 
-    this.loadReport = function () {
-        if (typeof (operation.report.reference) !== 'undefined') {
-            if (operation.report.use &&
-                    operation.report.is_active &&
-                    !operation.report.display_loaded) {
-
-                operation.report.display_loaded = true;
-
-                var html = '<p class="alert alert-info">';
-                html += 'Chargement du rapport en cours</p>';
-                $('#reportLoadingResult').html(html).show();
-
-                $.ajax({
-                    type: 'POST',
-                    url: './ajax.php',
-                    dataType: 'html',
-                    data: {
-                        'ajax': 1,
-                        'action': 'loadReport',
-                        'report_ref': operation.report.reference
-                    },
-                    success: function (report_html) {
-                        $('#reportLoadingResult').html('').hide();
-                        if (operation.report.display_loaded) {
-                            operation.report.display_loaded = false;
-                            if (report_html) {
-                                operation.setReport(report_html);
-                                operation.report.$container.slideDown();
-                            } else {
-                                var msg = '<p class="alert alert-danger">Echec du chargement du rapport</p>';
-                                $('#reportLoadingResult').html(msg).show();
-                            }
-                        }
-                    },
-                    error: function () {
-                        if (operation.report.display_loaded) {
-                            operation.report.display_loaded = false;
-                            var msg = '<p class="alert alert-danger">Echec du chargement du rapport</p>';
-                            $('#reportLoadingResult').html(msg).show();
-                        }
-                    }
+    this.refreshReport = function () {
+        if (operation.report.use && operation.report.is_active) {
+            if ($.isOk(operation.report.$container)) {
+                operation.report.$container.find('.object_list_table').each(function () {
+                    reloadObjectList($(this).attr('id'));
                 });
-                return;
             }
         }
-        bimp_display_msg('Aucun rapport disponible', operation.$notification, 'danger');
     };
 
     this.displayReport = function () {
         operation.report.is_active = false;
-    };
-
-    this.setReport = function (report_html) {
-        operation.report.display_loaded = false;
-        if (!operation.report.is_active ||
-                !operation.report.use ||
-                !report_html) {
-            return;
-        }
-        operation.report.$content.html(report_html);
-        setReportEvents();
     };
 
     this.setSuccess = function (msg) {
@@ -698,7 +821,7 @@ function ProcessOperation(data, options) {
         var html = '<div class="alert alert-success">';
         html += msg;
         html += '</div>';
-        operation.$notification.append(html);
+        operation.$notification.html(html).show();
         operation.hideButtons();
         operation.buttons.$back.show();
     };
@@ -707,7 +830,7 @@ function ProcessOperation(data, options) {
         var html = '<div class="alert alert-danger">';
         html += msg;
         html += '</div>';
-        operation.$notification.html(html);
+        operation.$notification.html(html).show();
         operation.hideButtons();
         operation.buttons.$back.show();
         operation.buttons.$retry.show();
@@ -721,93 +844,148 @@ function ProcessOperation(data, options) {
         operation.buttons.$back.hide();
     };
 
-    if (typeof (data.steps) !== 'undefined') {
-        this.addSteps(data.steps);
-    }
-
-    if (typeof (data.debug_content) !== 'undefined') {
-        setFoldableEvents();
-    }
-
     this.start();
 }
 
-var Operation = null;
-
-function initProcessOperation($button, id_process, id_operation) {
+function bds_initProcessOperation($button, id_process, id_operation) {
     if ($button.hasClass('disabled')) {
         return;
     }
 
-    var $resultContainer = $('#operation_' + id_operation + '_resultContainer');
-
     if (!id_process) {
-        bimp_display_msg('Opération impossible - ID du processus absent', $resultContainer, 'danger');
+        bimp_msg('Opération impossible - ID du processus absent', 'danger');
         return;
     }
 
-    if (!id_process) {
-        bimp_display_msg('Opération impossible - ID de l\'opération absent', $resultContainer, 'danger');
+    if (!id_operation) {
+        bimp_msg('Opération impossible - ID de l\'opération absent', 'danger');
         return;
     }
 
-    $button.addClass('disabled');
+    var $processContainer = $('#process_' + id_process + '_operations');
 
-    var options = {};
-    var inputs = $('#process_' + id_process + '_operation_' + id_operation + '_options_form').serializeArray();
-    for (i in inputs) {
-        options[inputs[i].name] = inputs[i].value;
+    if (!$.isOk($processContainer)) {
+        bimp_msg('Une erreur technique est survenue (conteneur absent)', 'danger');
+        return;
     }
 
-    var data = {
-        'id_process': id_process,
-        'id_operation': id_operation,
-        'options': options
-    };
+    var $resultContainer = $('#process_' + id_process + '_operation_' + id_operation + '_ajaxResultContainer');
 
-    bimp_display_msg('Initialisation du processus en cours...', $resultContainer, 'info');
+    var $form = $('#process_' + id_process + '_operation_' + id_operation + '_form');
+    if (!$form.length) {
+        bimp_msg('Erreur - formulaire absent', 'danger');
+        return;
+    }
 
-    bimp_json_ajax('initProcessOperation', data, $resultContainer, function (result) {
-        if (result.html) {
-            $('#contentContainer').slideUp(250, function () {
-                $(this).html(result.html).slideDown(250, function () {
-                    Operation = new ProcessOperation(result.data, result.options);
+    var data = new FormData($form.get(0));
+
+    $processContainer.find('.executeProcessOperationBtn').addClass('disabled');
+
+    BimpAjax('bds_initProcessOperation', data, $resultContainer, {
+        $processContainer: $processContainer,
+        id_process: id_process,
+        id_operation: id_operation,
+        url: bds_process_url,
+        display_success: false,
+        display_processing: true,
+        processing_msg: 'Initialisation de l\'opération en cours',
+        processing_padding: 20,
+        processData: false,
+        contentType: false,
+        success: function (result, bimpAjax) {
+            if (typeof (result.result_html) !== 'undefined' && result.result_html) {
+                bimpAjax.$resultContainer.slideUp(250, function () {
+                    $(this).html(result.result_html).slideDown(250, function () {
+                        $(this).attr('style', 'display: block;');
+                        setCommonEvents(bimpAjax.$resultContainer);
+                    });
                 });
-            });
-        } else {
-            var html = '';
-            if ((typeof (result.data.result_html) !== 'undefined') &&
-                    result.data.result_html) {
-                html += result.data.result_html;
+                bimp_msg('Une erreur est survenue. Echec de l\'initialisation de l\'opération', 'danger', bimpAjax.$resultContainer);
+                $processContainer.find('.executeProcessOperationBtn').removeClass('disabled');
+            } else if (typeof (result.process_html) !== 'undefined' && result.process_html) {
+                bimpAjax.$processContainer.slideUp(250, function () {
+                    $(this).html(result.process_html);
+                    $(this).slideDown(250, function () {
+                        $(this).attr('style', '');
+                        $('body').trigger($.Event('contentLoaded', {
+                            $container: bimpAjax.$processContainer
+                        }));
 
+                        bds_operations[bimpAjax.id_operation] = new BDS_ProcessOperation(result.operation_data, result.operation_options);
+                        bds_operations[bimpAjax.id_operation].start();
+                    });
+                });
+            } else {
+                bimp_msg('Une erreur est survenue. Echec de l\'initialisation de l\'opération', 'danger', bimpAjax.$resultContainer);
+                $processContainer.find('.executeProcessOperationBtn').removeClass('disabled');
             }
-            if ((typeof (result.data.debug_content) !== 'undefined') &&
-                    result.data.debug_content) {
-                html += result.data.debug_content;
-            }
-            $resultContainer.stop().html(html).slideDown(function () {
-                setFoldableEvents();
-                $resultContainer.removeAttr('style');
-            });
-        }
-
-        $button.removeClass('disabled');
-    }, function (result) {
-        $button.removeClass('disabled');
-        if ((typeof (result.data.debug_content) !== 'undefined') &&
-                result.data.debug_content) {
-            $resultContainer.append(result.data.debug_content).stop().slideDown(250, function () {
-                setFoldableEvents();
-                $resultContainer.removeAttr('style');
-            });
+        },
+        error: function (result, bimpAjax) {
+            $processContainer.find('.executeProcessOperationBtn').removeClass('disabled');
         }
     });
 }
 
+function bds_initObjectActionProcess($button, data, modal_title, $resultContainer) {
+    var success_callback = function (result, bimpAjax) {
+        if (typeof (result.process_html) !== 'undefined' && result.process_html) {
+            var $container = bimpAjax.$resultContainer;
+
+            if ($.isOk($container) && !bimpAjax.$resultContainer.hasClass('modal_content')) {
+                $container = bimpAjax.$resultContainer.findParentByClass('modal_content');
+            }
+
+            if (!$.isOk($container)) {
+                bimp_msg('Erreur technique - opération impossible (conteneur absent)');
+                return;
+            }
+
+            var modal_idx = parseInt($container.data('idx'));
+
+            bimpModal.removeComponentContent('stepsProgressionContainer');
+            $container.slideUp(250, function () {
+                $container.html(result.process_html);
+                $container.slideDown(250, function () {
+                    bimpModal.disableContentCloseButton(modal_idx);
+                    bimpModal.removeExtraButtons(modal_idx);
+
+                    $(this).attr('style', '');
+                    $('body').trigger($.Event('contentLoaded', {
+                        $container: $container
+                    }));
+
+                    bds_operations[result.id_operation] = new BDS_ProcessOperation(result.operation_data, result.operation_options);
+                    bds_operations[result.id_operation].start();
+                });
+            });
+        }
+    };
+
+    if ($.isOk($resultContainer)) {
+        // Si on dans un form:
+        BimpAjax('bds_initObjectActionProcess', data, $resultContainer, {
+            $button: $button,
+            url: bds_process_url,
+            display_success: false,
+            display_processing: true,
+            processing_msg: 'Initialisation de l\'opération en cours',
+            processing_padding: 30,
+            append_html: true,
+            modal_scroll_bottom: true,
+            success: success_callback
+        });
+    } else {
+        // Sinon: 
+        bimpModal.loadAjaxContent($button, 'bds_initObjectActionProcess', data, modal_title, 'Initialisation de l\'opération en cours', success_callback, {
+            url: bds_process_url
+        });
+    }
+}
+
 function endOperation() {
-    $('#cancelOperationButton').hide();
-    $('#holdOperationButton').hide();
-    $('#retryOperationStepButton').hide();
-    $('#resumeOperationButton').hide();
-    $('#backButton').show();
+    $('#bds_cancelOperationButton').hide();
+    $('#bds_holdOperationButton').hide();
+    $('#bds_retryOperationStepButton').hide();
+    $('#bds_resumeOperationButton').hide();
+    $('#bds_backButton').show();
 }

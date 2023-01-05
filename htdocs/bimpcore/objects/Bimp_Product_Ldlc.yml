@@ -1,0 +1,129 @@
+table: bimp_product_import_fourn
+icon: fas_box-open
+
+labels: 
+    name: Produit Fournisseurs Inc
+    name_plur: Produits Fournisseurs
+    is_female: 0
+    
+   
+objects: 
+    fournisseur: 
+        instance: 
+            id_object: 
+                field_value: id_fourn
+                
+fields: 
+    id_fourn: 
+        label: Fournisseur
+        type: id_object
+        object: fournisseur
+        input: 
+            type: search_societe
+            societe_type: supplier
+            help: Entrez le nom ou la référence d'un fournisseur pour effectuer une recherche
+        required: 1
+    refLdlc: 
+        label: Réf Fournisseur
+    codeLdlc: 
+        label: Code Fournisseur
+    pu_ht: 
+        label: Prix unitaire HT
+        type: money
+    tva_tx: 
+        label: Tx TVA
+        type: percent
+    pa_ht: 
+        label: Prix d'achat HT
+        type: money
+    marque: 
+        label: Marque
+    libelle: 
+        label: Libellé
+    refFabriquant: 
+        label: Réf Fabriquant
+    data:
+        label: Data Fourn
+        type: json
+        
+forms: 
+    link_to_product: 
+        rows: 
+            - custom: 1
+              label: Produit
+              input_name: id_product
+              data_type: id_object
+              object: product
+              input: 
+                  type: search_object
+            - custom: 1
+              label: Mettre à jour / créer le prix d\'achat
+              input_name: fourn_price
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Définir comme prix d'achat actuel du produit
+              input_name: is_cur_pa
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              display_if: 
+                  field_name: fourn_price
+                  show_values: 1
+            - custom: 1
+              label: Mettre à jour les prix d'achats des commandes fournisseurs pour les unités non réceptionnées
+              input_name: update_comm_fourn
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              display_if: 
+                  field_name: is_cur_pa
+                  show_values: 1
+            - custom: 1
+              label: Mettre à jour le prix de vente
+              input_name: sell_price
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+                
+filters_panels: 
+    default: 
+        filters: 
+            id_fourn:
+            refLdlc: 
+            codeLdlc:
+            pu_ht: 
+            tva_tx: 
+            pa_ht:
+            marque:
+            libelle:
+            refFabriquant:
+            data:
+                
+lists: 
+    default: 
+        icon: fas_box-open
+        checkboxes: 1
+        configurable: 1
+        filters_panel: default
+        extra_btn: 
+            callback: getListExtraButtons
+        sort_field: refLdlc
+        sort_way: ASC
+        n: 50
+        cols: 
+            id_fourn:
+            refLdlc: 
+            codeLdlc:
+            pu_ht: 
+            tva_tx:
+            pa_ht:
+            marque:
+            libelle:
+            refFabriquant:
+                

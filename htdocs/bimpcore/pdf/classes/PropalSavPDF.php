@@ -28,8 +28,30 @@ class PropalSavPDF extends PropalPDF
     protected function initData()
     {
         parent::initData();
-        if (isset($this->object) && is_a($this->object, 'Propal'))
+        if (isset($this->object) && is_a($this->object, 'Propal')) {
             $this->bimpCommObject = BimpObject::getInstance('bimpsupport', 'BS_SavPropal', (int) $this->object->id);
+                
+            $secteur = $this->bimpCommObject->getData('ef_type');
+            
+            // SAV
+            if($secteur == 'S') {
+
+                $code_centre = $this->sav->getData('code_centre');
+
+                if($code_centre == '') {
+                    $this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
+                } else {
+
+                    $centres = BimpCache::getCentres();
+                    if(isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
+                        $centre = $centres[$code_centre];
+                        $this->fromCompany->phone   = $centre['tel'];
+                        $this->fromCompany->email   = $centre['mail'];
+                    }
+                }
+            }
+        }
+
     }
 
     protected function initHeader()
@@ -46,6 +68,9 @@ class PropalSavPDF extends PropalPDF
                     $rows .= '<span style="font-size: 9px;">' . $equipment->getData('product_label') . "</span><br/>";
                 }
                 $rows .= '<span style="font-size: 9px;">' . $equipment->getData('serial') . '</span>';
+                $imei = $equipment->getData('imei');
+                if ($imei != '' && $imei != "n/a")
+                    $rows .= "<br/>" . '<span style="font-size: 9px;">' . $imei . '</span>';
             }
 
             $infoCentre = $this->sav->getCentreData();
@@ -58,9 +83,9 @@ class PropalSavPDF extends PropalPDF
         $this->header_vars['header_right'] = $rows;
     }
 
-    public function getCommercialInfosHtml()
+    public function getFromUsersInfosHtml()
     {
-        $html = parent::getCommercialInfosHtml();
+        $html = parent::getFromUsersInfosHtml();
 
         if (!is_null($this->sav)) {
             if ((int) $this->sav->getData('id_user_tech')) {
@@ -68,8 +93,7 @@ class PropalSavPDF extends PropalPDF
                 if (!is_null($tech) && $tech->isLoaded()) {
                     $primary = BimpCore::getParam('pdf/primary', '000000');
                     $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">';
-                    $html .= 'Technicien en charge :</span><br/>';
-                    $html .= $tech->dol_object->getFullName($this->langs, 0, -1, 20) . '</div>';
+                    $html .= 'Technicien en charge :</span> ' . $tech->dol_object->firstname . '</div>';
                 }
             }
         }
@@ -79,7 +103,7 @@ class PropalSavPDF extends PropalPDF
 
     public function renderAfterBottom()
     {
-        $html .= '<table cellpadding="20px"><tr><td>';
+        $html = '<table cellpadding="20px"><tr><td>';
 //        $html .= '<p style="font-size: 7px; color: #002E50">';
         $html .= '<div style="text-indent: 15px; font-size: 7px; color: #002E50">';
         $html .= 'Si le service est requis conformément à une obligation de réparation d’un tiers, ces informations seront ';
@@ -105,14 +129,14 @@ class SavRestitutePDF extends PropalSavPDF
 {
 
     public $restitution_sav = 1;
-    public $after_totaux_label = '';
+    public $signature_bloc_label = '';
 
     public function initData()
     {
         parent::initData();
 
         $this->pdf->addCgvPages = false;
-        
+
         if (BimpObject::objectLoaded($this->object) && BimpObject::objectLoaded($this->sav)) {
             Propal::STATUS_BILLED;
             $line = new PropaleLigne($this->db);
@@ -121,31 +145,32 @@ class SavRestitutePDF extends PropalSavPDF
         }
     }
 
-    public function getBottomRightHtml(){
-        $html = '<br/>';
-        $html .= '<table style="width: 95%" cellpadding="3">';
+    public function renderSignatureBloc()
+    {
+        // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique. 
 
-        /* if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
-          $html .= '<tr>';
-          $html .= '<td style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
-          $html .= (isset($this->contact->poste) && $this->contact->poste ? ' - ' . $this->contact->poste : '') . '</td>';
-          $html .= '</tr>';
-          } */
+        $html = '<br/>';
+
+        $html .= '<table style="width: 95%;font-size: 7px;" cellpadding="3">';
+        $html .= '<tr>';
+        $html .= '<td style="width: 50%"></td>';
+        $html .= '<td style="width: 50%">';
+
+        $html .= '<table cellpadding="3">';
 
         $html .= '<tr>';
-//        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
         $html .= '<td style="text-align:center;"><i><b>Je reconnais avoir récupéré ce jour mon matériel :</b></i></td>';
 
         $html .= '<td></td>';
         $html .= '</tr>';
         $html .= '<tr>';
-        $html .= '<td>Nom :</td>';
+        $html .= '<td>Nom et prénom:</td>';
 
         $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<td>Prénom :</td>';
+        $html .= '<td></td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
@@ -153,10 +178,36 @@ class SavRestitutePDF extends PropalSavPDF
         $html .= '</tr>';
 
         $html .= '</table>';
+
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        $page = 0;
+        $yPos = 0;
+
+        $this->writeFullBlock($html, $page, $yPos);
+
+        $this->signature_params = array(
+            'page'          => $page,
+            'y_pos'         => $yPos + 10,
+            'x_pos'         => 148,
+            'width'         => 40,
+            'nom_x_offset'  => -47,
+            'nom_y_offset'  => 5,
+            'date_x_offset' => -38,
+            'date_y_offset' => 12,
+        );
+
+        if (BimpObject::objectLoaded($this->sav)) {
+            $this->sav->updateField('signature_resti_params', $this->signature_params);
+        }
+
         return $html;
     }
-    
-    public function getBottomLeftHtml(){
+
+    public function getBottomLeftHtml()
+    {
         
     }
 }

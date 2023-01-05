@@ -7,6 +7,8 @@ primary: rowid
 icon: fas_box
 controller: product
 
+#force_extrafields_update: 1
+
 header_btn: 
     callback: getActionsButtons
     
@@ -14,12 +16,17 @@ header_list_name: default
 header_edit_form: card
 header_delete_btn: 1
 
-list_page_url: list
+list_page_url:
+    controller: products
+
+nom_url: 
+    syntaxe: <ref>
+    card: detailed
 
 labels: 
     name: produit
     
-objects: 
+objects:
     fourn_price: 
         relation: hasOne
         delete: 0
@@ -50,11 +57,6 @@ objects:
                 parent_module: bimpcore
                 parent_object_name: Bimp_Product
                 
-    entrepot: 
-        instance: 
-            id_object:
-                field_value: entrepot
-                
     category: 
         relation: none
         delete: 0
@@ -68,6 +70,12 @@ objects:
         instance:
             id_object: 
                 field_value: fk_default_warehouse
+                
+    default_bimp_entrepot:
+        extends: bimp_entrepot
+        instance:
+            id_object: 
+                field_value: fk_default_warehouse
         
     cur_prix_achats: 
         relation: hasMany
@@ -77,16 +85,37 @@ objects:
                 module: bimpcore
                 name: BimpProductCurPa
         
+    prices: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductPrice
+        list: 
+            title: Historique des prix de vente
+            
+    remises_arrieres: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductRA
+            
 fields: 
     ref: 
         label: Réf.
         
     label: 
         label: Libellé
+        user_edit: 1
         
     description: 
         label: Description
         type: html
+        user_edit: 1
+        hashtags: 1
         
     url: 
         label: URL publique
@@ -94,6 +123,7 @@ fields:
     note: 
         label: Note
         type: text
+        user_edit: 1
         dol_prop: note_private
         
     fk_product_type: 
@@ -111,6 +141,7 @@ fields:
         
     barcode: 
         label: Code-barres
+        user_edit: 1
         
     fk_barcode_type: 
         label: Type de code-barres
@@ -121,6 +152,7 @@ fields:
         label: Prix HT
         type: money
         default_value: 0
+        decimals: 4
         display_if: 
             field_name: no_fixe_prices
             show_values: 0
@@ -138,6 +170,11 @@ fields:
         type: money
         decimals: 4
         default_value: 4
+        
+    2hotline:
+        label: Durée hotline en mois
+        type: int
+        dol_extra_field: 1
         
     pmp: 
         label: Prix d'achat moyen pondéré
@@ -185,7 +222,8 @@ fields:
     tva_tx: 
         label: Taux de TVA
         type: percent
-        default_value: 20
+        default_value: 
+            callback: getDefaultTva
         
     recuperableonly: 
         label: TVA récupérable seulement
@@ -196,16 +234,19 @@ fields:
         label: En vente
         dol_prop: status
         type: bool
+        user_edit: 1
         default_value: 1
         
     tobuy: 
         label: En achat
         dol_prop: status_buy
         type: bool
+        user_edit: 1
         default_value: 1
         
     customcode: 
         label: Code douane
+        user_edit: 1
         
     fk_country: 
         label: Pays d'origine
@@ -214,7 +255,7 @@ fields:
         default_value: 1
         input: 
             type: search_country
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: renderCountry        
@@ -222,67 +263,82 @@ fields:
     weight: 
         label: Poids 
         type: float
+        user_edit: 1
         
     weight_units: 
         label: Unité de poids
         type: int
+        user_edit: 1
         values:
             array: units_weight
         
     length: 
         label: Longueur
         type: float
+        user_edit: 1
         
     length_units: 
         label: Unité de longueur
         type: int
+        user_edit: 1
         values:
             array: units_length
         
     width: 
         label: Largeur
         type: float
+        user_edit: 1
         
     width_units: 
         label: Unité de largeur
         type: int
+        user_edit: 1
         values:
             array: units_length
             
     height: 
         label: Hauteur
         type: float
+        user_edit: 1
         
     height_units: 
         label: Unité de hauteur
         type: int
+        user_edit: 1
         values:
             array: units_length
         
     surface: 
         label: Surface
         type: float
+        user_edit: 1
         
     surface_units: 
         label: Unité de surface
         type: int
+        user_edit: 1
         values:
             array: units_surface
         
     volume: 
         label: Volume
         type: float
+        user_edit: 1
         
     volume_units:
         label: Unité de volume
         type: int
+        user_edit: 1
         values:
             array: units_volume
         
     validate: 
         label: Validé
         dol_extra_field: 1
-        type: bool
+        type: int
+        user_edit: 1
+        values: 
+            array: status_list
         default_value: 0
         
     serialisable: 
@@ -305,24 +361,20 @@ fields:
         dol_extra_field: 1
         default_value: 0
         
-    crt: 
-        label: Remise CRT
-        type: percent
-        decimals: 3
-        dol_extra_field: 1
-        default_value: 0
-        
     accountancy_code_sell:
-        label: Code comptable (Vente)
+        label: Code comptable Vente (Spécifique)
         type: string
+        user_edit: 1
         
     accountancy_code_buy:
-        label: Code comptable (Achat)
+        label: Code comptable Achat (Spécifique)
         type: string
+        user_edit: 1
         
     deee:
         label: Eco-Taxe
         type: money
+        user_edit: 1
         dol_extra_field: 1
         
     rpcp:
@@ -341,6 +393,7 @@ fields:
         decimals: 4
         min: none
         unsigned: 0
+        user_edit: 1
 
     desiredstock:
         label: Stock désiré optimal
@@ -348,6 +401,7 @@ fields:
         decimals: 4
         unsigned: 0
         min: none
+        user_edit: 1
         
     physical_stock:
         label: Stock physique
@@ -377,14 +431,14 @@ fields:
     fk_default_warehouse:
         label: Entrepôt par défaut
         type: id_object
-        object: default_entrepot
+        object: default_bimp_entrepot
         default_value: 0
         input:
             type: search_entrepot 
         dol_extra_field: 1
         
     duration:
-        label: Durée
+        label: Durée (obsoléte)
         type: string
         
     fk_user_valid:
@@ -406,65 +460,82 @@ fields:
     no_fixe_prices: 
         label: Pas de prix fixes
         type: bool 
+        user_edit: 1
         default_value: 0
         
     categorie:
         label: Categorie
         dol_extra_field: 1
         type: int
+        user_edit: 1
         values:
             callback: 
                 method: getValues8sens
                 params:
                     - categorie
+        default_value: 0
                     
     collection:
         label: Collection
         dol_extra_field: 1
         type: int
+        user_edit: 1
         values:
             callback: 
                 method: getValues8sens
                 params:
                     - collection
+        default_value: 0
                     
     nature:
         label: Nature
         dol_extra_field: 1
+        default: 0
         type: int
+        user_edit: 1
         values:
             callback: 
                 method: getValues8sens
                 params:
                     - nature
+        default_value: 0
                     
     famille:
         label: Famille
         dol_extra_field: 1
         type: int
+        user_edit: 1
         values:
             callback: 
                 method: getValues8sens
                 params:
                     - famille
+        default_value: 0
                     
     gamme:
         label: Gamme
         dol_extra_field: 1
         type: int
+        user_edit: 1
         values:
             callback: 
                 method: getValues8sens
                 params:
                     - gamme
+        default_value: 0
                     
     fk_user_modif:
         label: Utilisateur modification
         type: id_object
         object: user
         
+    fk_user_author:
+        label: Créateur
+        type: id_object
+        object: user
+        
     datec:
-        type: date
+        type: datetime
         label: Date Création
         
     cto: 
@@ -480,12 +551,52 @@ fields:
         dol_extra_field: 1
         values:
             array: type_compta
+            
+    duree: 
+        label: Durée limitée (en mois)
+        type: int
+        min: 0
+        default_value: 0
+        input: 
+            type: text
+            help: Uniquement pour les prestations réalisées au fil du temps
+            
+    lock_admin:
+        label: Blocage Admin
+        type: bool
+        default_value: 0
+        
+    duree_i:
+        label: Durée inter
+        type: timer
+        input: 
+            type: timer
+        displays: 
+            default: 
+                type: timer
+#        default_value: 00:00:00
+#        input:
+#            help: En secondes (1h = 3600s - 7h = 25200s)
+        dol_extra_field: 1
+        
+        
+    renta_service:
+        label: Rentabilitée €/h
+        type: money
+        extra: 1
+        has_total: 0
+        
+    alerteActive: 
+        label: Activer les alertes de stock
+        type: bool
+        default_value: 1
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
     # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.
     default: 
         rows:
+            - field: lock_admin
             - field: ref
             - field: code_config
             - field: label
@@ -501,7 +612,6 @@ forms:
             - field: tva_tx
             - field: deee
             - field: rpcp
-            - field: crt
             - field: gamme
             - field: categorie
             - field: collection
@@ -512,6 +622,9 @@ forms:
             - field: url
             - field: seuil_stock_alerte
             - field: desiredstock
+            - field: 2hotline
+            - field: duree
+            - field: duree_i
             # Measure
 #            - field: weight
 #            - field: weight_units
@@ -552,13 +665,14 @@ forms:
             - field: label
             - field: description  
             - field: fk_product_type
-            - field: type2
+            - field: type2           
             - field: no_fixe_prices
-            - field: price                  
+            - field: serialisable
+            - field: price
+              label: Prix de vente HT
             - field: tva_tx
             - field: pa_prevu
             - field: infos_pa
-            - field: serialisable
             - field: note
             - field: zone_pr
             
@@ -571,7 +685,21 @@ forms:
               input_name: mailValid
               input: 
                   type: toggle
+                  
+    light_fourn_price: 
+        extends: light
+        rows: 
+            pa_prevu: unset
+            infos_pa: unset
             
+            fp_id_fourn:
+                custom: 1
+                input_name: has_fourn_price
+                data_type: bool
+                label: Prix d'achat fournisseur
+                content: 
+                    callback: renderFournPriceInputs
+                
     etiquettes: 
         title: Générer des etiquettes
         icon: fas_sticky-note
@@ -614,12 +742,72 @@ forms:
               content: 
                   callback: renderMergeKeptProductInput
               depends_on: id_merged_product                  
+              
+    price: 
+        title: Nouveau prix de vente
+        rows: 
+            - custom: 1
+              label: Base du prix de vente
+              input_name: price_base_type
+              input: 
+                  type: select
+                  options: 
+                      HT: HT
+                      TTC: TTC
+            - custom: 1
+              label: Taux de TVA
+              input_name: tva_tx
+              input: 
+                  type: select
+                  options: 
+                      callback: getTaxesByRates
+            - custom: 1
+              label: Prix de base
+              input_name: price_base
+              data_type: money
+              decimals: 8
+              input: 
+                  type: text
+                  
+    mouvement:
+        title: Mouvement de stock manuel
+        rows: 
+            - custom: 1
+              label: Sens
+              input_name: sens
+              input: 
+                  type: select
+                  options: 
+                      0: Entrant (ajout)
+                      1: Sortant (retrait)
+            - custom: 1
+              label: Quantité
+              input_name: qty
+              data_type: int
+              min: 1
+              input: 
+                  type: qty
+                  
+            - custom: 1
+              input_name: id_entrepot
+              label: Entrepôt
+              dol_extra_field: 1
+              type: id_object
+              object: entrepot
+              required: 
+                  callback: useEntrepot
+              input: 
+                  type: search_entrepot
+              default_value: 
+                  callback: getDefaultEntrepot
         
 fields_tables: 
     infos: 
         title: Informations
         icon: fas_info-circle
         rows:  
+            - field: lock_admin
+              edit: 1
             - field: ref
             - field: code_config
             - field: label
@@ -634,20 +822,27 @@ fields_tables:
             - field: accountancy_code_sell
             - field: description
             - field: note
+            - field: url
             
     options: 
         title: Options
         icon: fas_check-square
         rows: 
-            - field: validate
-              edit: 0
             - field: serialisable
               edit: 1
             - field: tosell
               edit: 1
             - field: tobuy
               edit: 1
+            - field: remisable
+              edit: 1
             - field: no_fixe_prices
+              edit: 1
+            - field: alerteActive
+              edit: 1
+            - field: duree
+              edit: 1
+            - field: duree_i
               edit: 1
             - custom: 1
               label: Durée validation
@@ -657,32 +852,25 @@ fields_tables:
               edit: 1
             
     infos_complementaires:
-        title: Informations complémentaires
-        icon: plus
-        edit: 1
+        title: Catégories
+        icon: fas_tags
         rows:
             - field: gamme
+              edit: 1
             - field: categorie
+              edit: 2
             - field: collection
+              edit: 2
             - field: nature
+              edit: 1
             - field: famille
-            - field: url
-            - field: stock
-            - field: fk_country
-            - label: Cétégories
-              value: 
-                  callback: displayCategories
-            - field: localtax1_tx
-            - field: localtax1_type
-            - field: localtax2_tx
-            - field: localtax2_type
-#            - field: ref_constructeur
-            - field: crt
+              edit: 1
 
     measures: 
         title: Mesures
         icon: fas_ruler
         rows:
+            - field: duree_i
             - field: weight
             - field: weight_units
             - field: length
@@ -695,6 +883,7 @@ fields_tables:
             - field: surface_units
             - field: volume
             - field: volume_units
+            - field: 2hotline
             
     prices: 
         title: Prix de vente
@@ -707,6 +896,7 @@ fields_tables:
             - field: tva_tx
             - field: deee
             - field: rpcp
+            - field: type_remise_arr
             
     prices_buy: 
         title: Prix d'achat
@@ -719,26 +909,16 @@ fields_tables:
                   callback: displayCurrentPaHt
             - field: pmp
             - field: pa_prevu
+            - field: infos_pa
         
     stock:
-        title: Vue globale
-        icon: fas_box-open
+        title: Options
+        icon: far_check-square
         rows:
             - field: seuil_stock_alerte
               edit: 1
             - field: desiredstock
               edit: 1
-            - field: stock
-            - custom: 1
-              label: Stock virtuel
-              type: integer
-              value: Non implémenté
-#                 callback:
-            - custom: 1
-              label: Dernier mouvement
-              type: string
-              value:
-                 callback: getLastMouvement
 
 views: 
     default: 
@@ -795,6 +975,7 @@ views:
                       name: measures
     
     product_price:
+        objects_change_reload: Bimp_ProductPrice,BimpProductCurPa,Bimp_ProductFournisseurPrice
         rows:
             - cols:
                 - type: fields_table
@@ -803,31 +984,49 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: prices
-                
+                      
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  list: 
+                      children: prices
+                      name: product
+                     
+            - cols: 
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
                   col_sm: 12
                   fields_table: 
                       name: prices_buy
-                     
-            - cols: 
+                      
                 - type: list
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
                   show: 
                       callback: hasFixePa
                   list: 
                       children: cur_prix_achats
                       name: product
+                      
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  list: 
+                      children: remises_arrieres
+                      name: product
+                      
             - cols: 
                 - type: list
                   list: 
                       children: fourn_prices
                       name: default
-#                - type: custom
-#                  col_lg: 12
-#                  col_md: 12
-#                  custom:
-#                      callback: renderListeVente
+                - type: custom
+                  custom: 
+                      callback: renderFournPricesReports
                       
     product_note:
         rows:
@@ -859,115 +1058,89 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: stock
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderStocksView
                       
 filters_panels: 
     default: 
         filters: 
-            - field: ref
-            - field: code_config
-            - field: label
-            - field: fk_product_type
-            - field: stock
-            - field: price
-            - field: price_ttc
-            - field: barcode
-            - field: serialisable
-            - field: remisable
-            - field: validate
-            - field: tosell
-            - field: tobuy
-            - field: no_fixe_prices
-            - field: datec
-#            - custom: 1
-#              label: Catégorie (1)
-#              field: categ1
-#              type: value
-#              input:
-#                  type: select
-#                  options: 
-#                      callback: getCategoriesArray
-#            - custom: 1
-#              label: Catégorie (2)
-#              field: categ2
-#              type: value
-#              input:
-#                  type: select
-#                  options: 
-#                      callback: getCategoriesArray
-#            - custom: 1
-#              label: Catégorie (3)
-#              field: categ3
-#              type: value
-#              input:
-#                  type: select
-#                  options: 
-#                      callback: getCategoriesArray
-            - field: gamme
-            - field: categorie
-            - field: collection
-            - field: nature
-            - field: famille
-            - field: seuil_stock_alerte
+            ref:
+            code_config:
+            label:
+            fk_product_type:
+            barcode:
+            serialisable:
+            remisable:
+            validate:
+            tosell:
+            tobuy:
+            gamme:
+            categorie:
+            collection:
+            nature:
+            famille:
       
 lists_cols: 
-    ref: 
-        field: ref
+    seuil_stock_alerte: 
+        label: Lim. stock
     stock_picto: 
         label: Stock Picto
         value:
             callback: displayStock_picto
+    ref_ldlc: 
+        label: Ref LDLC
+        value: 
+            callback:
+                method: getRefFourn
+                params: 
+                    - 230880
     ref_short: 
         label: Réf. fabricant
         value: 
             callback: displayRefShort
-    label: 
-        field: label
-    type: 
-        field: fk_product_type
-    barcode: 
-        field: barcode
-    stock: 
-        field: stock
-    price: 
-        field: price_ttc
-    tva: 
-        field: tva_tx
-    serialisable: 
-        field: serialisable
-    zone_pr: 
-        field: zone_pr
-    validate: 
-        field: validate
-    fk_user_modif:
-        field: fk_user_modif
-    datec:
-        field: datec
-    date_ask_valid:
-        field: date_ask_valid
-    date_valid:
-        field: date_valid
-    fk_user_valid:
-        field: fk_user_valid
-    cur_pa_ht:
-        field: cur_pa_ht
-    tosell:
-        field: tosell
-    gamme:
-        field: gamme
-    categorie:
-        field: categorie
-    collection:
-        field: collection
-    nature:
-        field: nature
-    famille:
-        field: famille
-    seuil_stock: 
-        label: Lim. stock
-        field: seuil_stock_alerte
-    code_config:
-        field: code_config
-                
+    accountancy_code_sell_ue:
+       label: Code Comptable Vente (Final UE)
+       value:
+           callback:
+               method: getCodeComptableVente
+               params:
+                   - 2
+    accountancy_code_sell_ex:
+       label: Code Comptable Vente (Final Export)
+       value:
+           callback:
+               method: getCodeComptableVente
+               params:
+                   - 3
+    accountancy_code_sell_reel:
+        label: Code Comptable Vente (Final France)
+        value:
+            callback: getCodeComptableVente
+    accountancy_code_buy_reel:
+        label: Code Comptable Achat (Final France)
+        value:
+            callback: getCodeComptableAchat
+    last_fourn_name:
+        label: Derier fournisseur modifié
+        value:
+            callback: getLastFournPriceFournName
+    accountancy_code_buy_ue:
+        label: Code Comptable Achat (Final UE)
+        value:
+            callback: 
+                method: getCodeComptableAchat
+                params:
+                    - 2
+    accountancy_code_buy_ex:
+        label: Code Comptable Achat (Final Export)
+        value:
+            callback: 
+                method: getCodeComptableAchat
+                params:
+                    - 3
+                    
 lists: 
     default: 
         title: Produits
@@ -976,11 +1149,13 @@ lists:
         configurable: 1
         bulk_actions:
             - label: étiquettes stock
-              icon: fas_trash-alt
+              icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'stock'}, '', 'Générer les étiquettes ?', true)
             - label: étiquettes magasin
-              icon: fas_trash-alt
+              icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
+        list_actions: 
+            callback: getFilteredListActions            
         filters_panel: default
         sort_field: id
         sort_way: desc
@@ -995,21 +1170,21 @@ lists:
         cols: 
             ref: 
             label: 
-            type: 
+            fk_product_type: 
             barcode: 
             stock: 
             price: 
-            tva: 
-            serialisable: 
+            tva_tx: 
+            serialisable:
                 
     inventory:
         extends: default
         add_btn: 0
         cols:
-            type: unset
+            fk_product_type: unset
             stock: unset
             price: unset
-            tva: unset
+            tva_tx: unset
             
             nb_scanned:
                 label: Nombre scanné
@@ -1046,11 +1221,34 @@ lists:
                 label: Stock
                 value: 
                     callback: 
-                        method: displayStockInventorySr      
+                        method: displayStockInventorySr
+                        
+    inventory_stock:
+        extends: default
+        add_btn: 0
+        sort_field: ref
+        sort_way: asc
+        cols:
+            fk_product_type: unset
+            stock: unset
+            price: unset
+            tva_tx: unset
+            nb_scanned:
+                label: Nombre scanné
+                value:
+                    callback: renderNbScanned
+            stock_entrepot:
+                show: 
+                    callback:
+                        method: canViewStock
+                label: Stock
+                value: 
+                    callback: renderStock
                         
 cards: 
     default: 
         view_btn: 1
+        status: validate
         fields: 
             - field: ref
             - field: fk_product_type
@@ -1059,6 +1257,7 @@ cards:
             
     detailed: 
         view_btn: 1
+        status: validate
         fields: 
             - field: ref
             - field: fk_product_type
@@ -1066,7 +1265,6 @@ cards:
             - field: price
             - field: tva_tx
             - field: serialisable
-            - field: validate
             
 searches:
     default: 
@@ -1074,12 +1272,23 @@ searches:
             - a.label
             - a.ref
             - a.barcode
+            - fp.ref_fourn
+        joins:
+            fp: 
+                table: product_fournisseur_price
+                on: a.rowid = fp.fk_product
+                alias: fp
+            fpl: 
+                table: product_fournisseur_price
+                on: a.rowid = fpl.fk_product AND fpl.fk_soc = 230880
+                alias: fpl
         fields_return:
             - a.ref
             - a.label
             - REPLACE(ROUND(a.price,2),'.',',') as price
             - a.stock
-        label_syntaxe: '<ref> - <label> - <price> € HT - Stock: [REDIFNEG]<stock>[/REDIFNEG]'
+            - fpl.stockFourn as stockFournL
+        label_syntaxe: '<ref> - <label> - <price> € HT - Stock: [REDIFNEG]<stock>[/REDIFNEG] - Stock LDLC : <stockFournL>'
         
     tosell: 
         extends: default
@@ -1090,5 +1299,4 @@ searches:
         extends: default
         filters: 
             a.tobuy: 1
-            
-        
+    

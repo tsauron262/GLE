@@ -1759,4 +1759,5 @@ class FichinterLigne extends CommonObjectLine
 			return -2;
 		}
 	}
+
 }

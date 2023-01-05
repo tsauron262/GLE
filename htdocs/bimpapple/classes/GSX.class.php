@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/GSX_Const.php';
 
 /**
  *
@@ -140,10 +141,10 @@ class GSX
 //        $userId = 'sav@bimp.fr';
 //        $password = '@Savbimp2014#';
 //        $serviceAccountNo = '100520';
-        $userId = 'admin.gle@bimp.fr';
+        $userId = GSX_Const::$default_ids['apple_id'];
 //        $password = 'BIMP@gle69#';
-        $serviceAccountNo = '897316';
-        $this->shipTo = '897316';
+        $serviceAccountNo = GSX_Const::$default_ids['sold_to'];;
+        $this->shipTo = GSX_Const::$default_ids['ship_to'];
 
         if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_service']) &&
                 $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_service'] != "") {
@@ -732,7 +733,7 @@ class GSX
         if (isset($wrapperName) && ($wrapperName !== ''))
             $requestArray[$requestName][$wrapperName] = $details;
         else
-            $requestArray[$requestName] = array_merge($requestArray[$requestName], $details);
+            $requestArray[$requestName] = BimpTools::merge_array($requestArray[$requestName], $details);
         return $requestArray;
     }
 
@@ -804,7 +805,7 @@ class GSX
                 break;
 
             case 'serialNumber' :
-                return '/^[A-Z0-9]{11,16}$/';
+                return '/^[A-Z0-9]{10,16}$/';
                 break;
 
             case 'diagnosticEventNumber' :

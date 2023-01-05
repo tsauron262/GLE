@@ -1,7 +1,5 @@
 <?php
 
-
-
 class vendeurController extends BimpController {
 
     public function renderSession() {
@@ -13,6 +11,7 @@ class vendeurController extends BimpController {
         
         $obj = BimpObject::getInstance('bimpcaisse', 'BC_CaisseSession');
         $list = new BC_ListTable($obj, 'default', 1, null, "Sessions de caisse fermées par " .$user->getNomUrl(1));
+        $list->addIdentifierSuffix('deux');
         $list->addFieldFilterValue('id_user_closed', $user->id);
         $html .= $list->renderHtml();
         return $html;    

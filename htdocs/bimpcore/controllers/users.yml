@@ -1,0 +1,38 @@
+bootstrap: 1
+title: Utilisateurs
+
+objects:    
+    user:
+        instance: 
+            bimp_object: Bimp_User
+
+    user_group:
+        instance:
+            bimp_object: Bimp_UserGroup            
+
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Utilisateurs
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: user
+
+        user_group:
+            label: Groupes
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      title: Liste des groupes
+                      object: user_group 
+
+        rights: 
+            label: Droits
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderRightsTab

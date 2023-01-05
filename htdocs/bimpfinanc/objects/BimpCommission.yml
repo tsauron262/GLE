@@ -2,6 +2,7 @@ table: bimp_commission
 common_fields: 0
 icon: fas_comment-dollar
 controller: commission
+
 list_page_url:
     controller: index
     url_params: 
@@ -35,7 +36,7 @@ fields:
     id_entrepot: 
         label: Entrepôt
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         input: 
             type: search_entrepot
             has_commissions_only: 1
@@ -135,6 +136,66 @@ fields_tables:
                       method: displayAmount
                       params: 
                           - tx_marque
+                          
+    amounts_serv:
+        title: Montants services
+        icon: fas_euro-sign
+        open : 0
+        rows: 
+            - label: Total CA
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_ca_serv
+            - label: Total achats
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_pa_serv
+            - label: Total revalorisations
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_reval_serv
+            - label: Total marges
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_marges_serv
+        
+    amounts_prod:
+        title: Montants produits
+        icon: fas_euro-sign
+        open : 0
+        rows: 
+            - label: Total CA
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_ca_prod
+            - label: Total achats
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_pa_prod
+            - label: Total revalorisations
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_reval_prod
+            - label: Total marges
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_marges_prod
                 
 views: 
     default: 
@@ -154,6 +215,18 @@ views:
                     col_md: 6
                     fields_table:
                         name: amounts
+                  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: amounts_serv
+                  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: amounts_prod
                         
             - cols: 
                 - type: custom
@@ -192,7 +265,7 @@ forms:
                   type: search_group
             - field: date
             - custom: 1
-              label: Inclure uniquement les facture entièrement payée
+              label: Inclure uniquement les factures entièrement payées
               input_name: paid_only
               value: 0
               data_type: bool
@@ -202,37 +275,16 @@ forms:
 filters_panel: 
     default: 
         filters: 
-            - field: id_user
-            - field: id_entrepot
-            - field: date
-            - field: status
+            id_user:
+            id_entrepot:
+            date:
+            status:
 
 lists_cols: 
-    date: 
-        field: date
     owner: 
         label: Utilisateur / Entrepôt
         value: 
             callback: displayLinkedObject
-    marges: 
-        field: total_marges
-    status: 
-        field: status
-#    ecarts: 
-#        label: Ecarts secteurs
-#        value: 
-#            callback: displaySecteursErrors
-#    amounts:
-#        label: CA
-#        value:
-#            callback: 
-#                method: displayAmount
-#                params: 
-#                    - total_ca
-    amounts:
-        field: total_ca
-    total_pa:
-        field: total_pa
     tx_marque:
         label: Taux de marque
         value: 
@@ -240,15 +292,6 @@ lists_cols:
               method: displayTaux
               params: 
                   -  marque
-                
-#                    
-#    tx_marque:               
-#        label: Taux de marque
-#        value: 
-#          callback: 
-#              method: displayAmount
-#              params: 
-#                  - tx_marque
 
 lists: 
     default: 
@@ -258,8 +301,6 @@ lists:
             - label: supprimer les commissions sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
-        list_filters: 
-            callback: getListFilters
         filters_panel: default
         sort_field: id
         sort_way: desc
@@ -280,18 +321,15 @@ lists:
         cols: 
             date: 
             owner: 
-            marges: 
+            total_marges: 
             status: 
-            amounts:
+            total_ca:
             tx_marque:
-            ecarts: 
+        list_filters: 
+            callback: getListFilters
             
     user: 
         extends: default
         cols: 
             owner: unset
-              
-    
-        
-        
     

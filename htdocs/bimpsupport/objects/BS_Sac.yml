@@ -1,0 +1,115 @@
+table: bs_sac
+controller: sac
+common_fields: 1
+
+icon: fas_shopping-bag
+
+nom_url: 
+    syntaxe: <ref>
+    
+header_list_name: default
+header_btn: 
+    callback: getHeaderButtons
+    
+list_page_url: 
+    controller: index
+    url_params: 
+        tab: sac
+            
+labels:
+    name: sac
+    name_plur: sacs
+    
+objects:
+    sav:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Sav
+                
+
+fields:    
+    ref:
+        label: Réf
+    code_centre: 
+        label: Centre de prise en charge
+        values: 
+            callback: 
+                method: getListCentre
+                params:
+                    - code_centre
+                    - 1
+        required: 1
+        default_value: 
+            callback: getDefaultCodeCentre
+
+
+lists:
+    default: 
+        title: Sacs
+        modal_view: default
+        add_form_name: add
+        cols:
+            ref:
+            code_centre:
+                
+
+forms: 
+    add:
+        rows: 
+            - custom: 1
+              label: Nombre de QR a créer
+              input_name: nb_create
+              data_type: int
+              input: 
+                  type: qty
+            - field: code_centre
+                  
+                                
+views: 
+    default: 
+        title: 
+            callback: getRef
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement,BimpSignature
+        rows:
+            - cols: 
+                  - type: object_header
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: infos
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: sav
+                        
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: info-circle
+        rows: 
+            - field: ref
+    sav: 
+        title: SAV
+        icon: wrench
+        rows: 
+            - custom: 1
+              label: SAV
+              value:
+                callback: displaySav
+                
+                
+                
+                
+searches:
+    default: 
+        fields_search: 
+            - ref
+        fields_return: 
+            - a.ref
+        

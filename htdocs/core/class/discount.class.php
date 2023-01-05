@@ -57,49 +57,16 @@ class DiscountAbsolute
     public $amount_ht;			//
     public $amount_tva;			//
     public $amount_ttc;			//
-    public $multicurrency_amount_ht;
-    public $multicurrency_amount_tva;
-    public $multicurrency_amount_ttc;
-    // Vat rate
-    public $tva_tx;
-
-    /**
-	 * @var int User ID Id utilisateur qui accorde la remise
-	 */
-	public $fk_user;
-
-    /**
-	 * @var string description
-	 */
-	public $description;
-
-    /**
-     * Date creation record (datec)
-     *
-     * @var integer
-     */
-    public $datec;
-
-    /**
-     * @var int ID invoice line when a discount is used into an invoice line (for absolute discounts)
-     */
-    public $fk_facture_line;
-
-    /**
-     * @var int ID invoice when a discount line is used into an invoice (for credit note)
-     */
-    public $fk_facture;
-
-    /**
-     * @var int ID credit note or deposit used to create the discount
-     */
-    public $fk_facture_source;
-    public $ref_facture_source;	    		// Ref credit note or deposit used to create the discount
-	public $type_facture_source;
-
-    public $fk_invoice_supplier_source;
-    public $ref_invoice_supplier_source;	// Ref credit note or deposit used to create the discount
-    public $type_invoice_supplier_source;
+    public $tva_tx;				// Vat rate
+    public $fk_user;				// Id utilisateur qui accorde la remise
+    public $description;			// Description libre
+    public $datec;					// Date creation
+    public $fk_facture_line;  		// Id invoice line when a discount is used into an invoice line (for absolute discounts)
+    public $fk_facture;			    // Id invoice when a discount line is used into an invoice (for credit note)
+    public $fk_facture_source;		// Id facture avoir a l'origine de la remise
+    public $ref_facture_source;	    // Ref facture avoir a l'origine de la remise
+    public $ref_invoice_supplier_source;
+    public $fk_invoice_supplier_source = 0;
 
     /**
      *	Constructor

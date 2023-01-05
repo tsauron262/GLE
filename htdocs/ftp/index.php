@@ -701,6 +701,12 @@ $db->close();
 function dol_ftp_connect($ftp_server, $ftp_port, $ftp_user, $ftp_password, $section, $ftp_passive = 0)
 {
 	global $langs, $conf;
+        
+        /*moddrsi*/
+        if (defined('FTP_SORTANT_MODE_PASSIF')) {
+            $ftp_passive = FTP_SORTANT_MODE_PASSIF;
+        }
+        /*fmoddrsi*/
 
 	$ok=1;
     $conn_id=null;

@@ -1,0 +1,9 @@
+params: 
+    nom_espace_client: 
+        label: Nom de l'espace client
+        required: 1
+        
+    base_url: 
+        label: Base URL de l'espace client
+        required: 1
+    

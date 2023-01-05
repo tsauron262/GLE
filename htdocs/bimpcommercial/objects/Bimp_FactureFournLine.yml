@@ -1,6 +1,8 @@
 extends: 
     module: bimpcommercial
     object_name: FournObjectLine
+
+abstract: 0
     
 table: bimp_facture_fourn_line
 
@@ -33,6 +35,7 @@ objects:
 filters_panels: 
     default: 
         filters: 
-            date_valid: 
-                field: date_valid
-                child: parent
+            parent:ref:
+                label: Ref. Facture
+            pu_ht:
+            parent:date_valid: 

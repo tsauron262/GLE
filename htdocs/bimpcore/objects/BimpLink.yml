@@ -1,0 +1,43 @@
+table: bimpcore_link
+common_fields: 0
+icon: fas_link
+
+labels: 
+    name: lien objet
+    name_plur: liens objets
+    
+fields: 
+    src_module: 
+        label: Module source
+        
+    src_name: 
+        label: Objet source
+        
+    src_id: 
+        label: ID Objet source
+        type: id
+        
+    src_field: 
+        label: Champ objet source
+        
+    linked_type: 
+        label: Type objet lié
+        
+    linked_module: 
+        label: Module objet lié
+        
+    linked_name: 
+        label: Objet lié
+        
+    linked_file: 
+        label: Fichier objet lié
+        
+    linked_id: 
+        label: ID objet lié
+        type: id
+    viewed:
+        label: Vue
+        type: bool
+        
+        
+    

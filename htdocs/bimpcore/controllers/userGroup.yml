@@ -1,0 +1,24 @@
+bootstrap: 1
+
+title: 
+    callback: 
+        object: user_group
+        method: getPageTitle
+
+objects: 
+    user_group:
+        instance: 
+            bimp_object: Bimp_UserGroup
+            id_object: 
+                request: id
+                
+sections:
+    - type: object_header
+      object_header:
+          object: user_group
+          
+    - type: custom
+      custom: 
+          callback: 
+              method: renderPageView
+              object: user_group

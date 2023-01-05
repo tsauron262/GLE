@@ -1,37 +1,116 @@
 bootstrap: 1
 
 table: bcontract_prelevement
+icon: fas_clipboard-list
 
 parent_id_property: id_contrat
 parent_object: BContract_contrat
+
+labels: 
+    name: échéancier
 
 objects:
     contrat:
         instance:
             bimp_object: BContract_contrat
+        id_object:
+            field_value: id_contrat
+    commercial:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
             id_object:
-                field_value: id_contrat
-            
+                field_value: commercial
+    facture:
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Facture
+    client:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Societe
+            id_object:
+                field_value: client
+
 fields:
     id_contrat:
         label: Numéro de contrat
         type: id_object
         object: contrat
     next_facture_date:
-        label: Date de la prochaine facture
+        label: Date de début de prochaine période de facturation
         type: datetime
     next_facture_amount:
         label: Montant de la prochaine facture
         type: money
     validate:
-        label: Validation automatique des factures
+        label: Création automatique des factures
         type: bool
+    statut:
+        label: Statut
+        type: int
+        values:
+            array: statut_list
+    commercial:
+        label: Commercial du contrat
+        type: id_object
+        object: commercial
+        input:
+            type: search_user
+    client:
+        label: Client
+        type: id_object
+        object: client
+    old_to_new:
+        label: Ancienne vers nouvelle version
+        type: bool
+    facturesExterne_soldePeriode:
+        label: Périodes soldée 
+        type: text
         
+filters_panels: 
+    default: 
+        filters:
+            id_contrat:
+            client:
+            commercial:
+            next_facture_date:
+            statut:
+      
+lists_cols: 
+    reste_a_payer:
+        label: Reste à payer
+        value:
+            callback:
+                method: display_reste_a_payer
+                object: contrat
+                
+    facture_send:
+        label: Factures émisent
+        value:
+            callback: displayFactureEmises
+    next_facture_date:
+        label: Date de début de prochaine période de facturation
+        field: next_facture_date
+        type: date
+    etat_facturation:
+        label: Etat facturation
+        value:
+            callback: displayRetard
+            
 lists:
     default:
+        extra_btn:
+            callback: getListExtraButtons
+        filters_panel: default
         title: Récapitulatif des échéanciers contrat
         icon: fas_euro
-        sort_field: id
+        list_filters: 
+            callback: getListFilter
+        sort_field: next_facture_date
         sort_way: desc
         n: 25
         delete_btn: 0
@@ -42,39 +121,51 @@ lists:
         #page_btn: 1
         cols: 
             id_contrat:
-                field: id_contrat
-                display: nom_url
             client:
-                label: Client
-                value: 
-                    callback:
-                        method: displayParentInfos
-                        params:
-                            - fk_soc
-                            - bimpcore
-                            - Bimp_Societe
+            reste_a_payer:
             facture_send:
-                label: Factures émisent
-                value:
-                    callback: displayFactureEmises
-            next_facture:
-                label: Date de la prochaine facture
-                value:
-                    callback: displayNextFactureDate
+            next_facture_date:
             etat_facturation:
-                label: Etat facturation
-                value:
-                    callback: displayRetard
-                    
+            commercial:
+            statut:
+            validate:
     client:
         extends: default
         cols:
             client: unset
-                
+    recap:
+        extends: default
+        #modal_view: unset
+        cols:
+            reste_a_payer: unset
+    recap_retard:
+      extends: default
+      cols:
+        reste_a_payer: unset
+      list_filters:
+        callback: getListFilterRetard
+
+
 forms:
+    pdfEcheancier:
+        title: Informations à afficher dans le PDF
+        rows:
+            - custom: 1
+              label: Total des lignes
+              input_name: total_lines
+              input:
+                  type: toggle
+    addFactureForSoldPeriode:
+        rows:
+            - custom: 1
+              label: Numéro de facture externe
+              input_name: factureExterne
+              required: 1
+              input:
+                  type: text
+
     create_perso:
         rows:
-            - field: validate
             - field: next_facture_date
               edit: 0
             - custom: 1
@@ -93,8 +184,70 @@ forms:
               input:
                   type: text
                   help: Laisser vide pour la facturation normale des périodes
-                  
-
+    unlinkLastFacture:
+        rows:
+            - custom: 1
+              label: Date de la prochaine periode de facturation
+              input_name: date_next_facture
+              input:
+                  type: date
+              value:
+                  callback: getDateNextPeriodRegen
+            - custom: 1
+              label: Facture à dé-liée
+              input_name: unlink_invoice
+              input:
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderLastFactureCard
+            - custom: 1
+              label: Avoir à dé-liée
+              input_name: unlink_invoice              
+              input:
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderLastFactureCard
+                          params:
+                              - 1
+            - custom: 1
+              label: Est-ce le bon avoir ?
+              input_name: is_good_avoir
+              value: 1
+              input:
+                  type: toggle
+            - custom: 1
+              label: Nouvel avoir
+              input_name: new_avoir
+              input:
+                  type: search_object
+                  object: facture
+                  display: card
+              display_if:
+                  field_name: is_good_avoir
+                  show_values: 0
+            - custom: 1
+              label: id_facture
+              input_name: id_facture_unlink
+              display_if:
+                  field_name: is_good_avoir
+                  show_values: 3
+              input:
+                  type: qty
+              value: 
+                callback: getLastFactureId
+            - custom: 1
+              label: id_avoir
+              input_name: id_avoir_unlink
+              display_if:
+                  field_name: is_good_avoir
+                  show_values: 3
+              input:
+                  type: qty
+              value: 
+                callback: getLastFactureAvoirId
+    
 views:
     fiche_contrat:
         title: echeancier

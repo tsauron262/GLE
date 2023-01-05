@@ -23,7 +23,7 @@ class FournObjectLine extends ObjectLine
 
     // Getters - overrides ObjectLine: 
 
-    public function getProductFournisseursPricesArray()
+    public function getProductFournisseursPricesArray($include_empty = true, $empty_label = '')
     {
         $id_product = (int) $this->getIdProductFromPost();
         $parent = $this->getParentInstance();
@@ -138,7 +138,11 @@ class FournObjectLine extends ObjectLine
             case 'id_fourn_price':
                 $value = $this->getValueByProduct('id_fourn_price');
                 $values = $this->getProductFournisseursPricesArray(true, 'Prix d\'achat exceptionnel');
-
+                if(!$value && count($values))
+                    foreach($values as $idP => $inut)
+                        if($idP > $value)
+                            $value = $idP;
+                        
                 if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
                     $html .= BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
                                 'options' => $values
@@ -263,7 +267,7 @@ class FournObjectLine extends ObjectLine
                             if($statut == 0)
                                 $errors[] = 'Le produit ' . $product->getData('ref') . ' est hors achat';
                             else{
-                                if ((int) $product->getData('fk_product_type') === 0) {
+                                if ((int) $product->getData('fk_product_type') === 0 && BimpCore::getConf('not_decimal_product', 1, 'bimpcore')) {
                                     $qty_str = (string) $this->qty;
 
                                     if (preg_match('/.*\..*/', $qty_str)) {
@@ -287,6 +291,7 @@ class FournObjectLine extends ObjectLine
                                         } elseif (is_null($this->tva_tx)) {
                                             $this->tva_tx = $pfp->getData('tva_tx');
                                         }
+                                        $this->ref_supplier = $pfp->getData('ref_fourn');
                                     } else {
                                         if (!$this->canEditPrixAchat()) {
                                             $errors[] = 'Aucun prix d\'achat fournisseur enregistré pour ce produit et ce fournisseur';

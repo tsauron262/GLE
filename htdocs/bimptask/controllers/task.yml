@@ -1,4 +1,10 @@
 bootstrap: 1
+
+title:
+    callback: 
+        object: task
+        method: getPageTitle
+
 objects:
     task: 
         instance: 

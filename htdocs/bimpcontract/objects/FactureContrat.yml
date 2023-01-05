@@ -1,0 +1,116 @@
+bootstrap: 1
+common_fields: 0
+
+table: view_facture_contrat
+icon: fas_clipboard-list
+
+
+labels: 
+    name: facuration
+
+objects:
+    contrat:
+        instance:
+            bimp_object: BContract_contrat
+            id_object:
+                field_value: fk_contrat
+    facture:
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Facture
+            id_object:
+                field_value: fk_facture
+    product:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Product
+            id_object:
+                field_value: fk_product
+    contradet:
+        instance:
+            bimp_object: BContract_contratLine
+            id_object:
+                field_value: fk_contradet
+
+fields:
+    fk_contrat:
+        label: Contrat
+        type: id_object
+        object: contrat
+    fk_facture:
+        label: Facture
+        type: id_object
+        object: facture
+    fk_product:
+        label: Produit
+        type: id_object
+        object: product
+    totalFact:
+        label: Total Facture
+        type: price
+    totalLn:
+        label: Total Ligne
+        type: price
+    datef:
+        label: Date Facture
+        type: date
+    renouvellement:
+        label: Renouvellement
+        type: int
+    
+    
+filters_panels: 
+    default: 
+        filters:
+            fk_contrat:
+            fk_facture:
+            fk_product:
+            datef:
+      
+lists_cols: 
+    montant:
+        label: Total Ht
+        value:
+            callback: display_montant_ln
+#    reste_a_payer:
+#        label: Reste à payer
+#        value:
+#            callback:
+#                method: display_reste_a_payer
+#                object: contrat
+#                
+#    facture_send:
+#        label: Factures émisent
+#        value:
+#            callback: displayFactureEmises
+#    next_facture_date:
+#        label: Date de début de prochaine période de facturation
+#        field: next_facture_date
+#        type: date
+#    etat_facturation:
+#        label: Etat facturation
+#        value:
+#            callback: displayRetard
+            
+lists:
+    default:
+        filters_panel: default
+        configurable: 1
+        title: Facturations
+        icon: fas_euro
+        n: 25
+        delete_btn: 0
+        edit_btn: 0
+        update_btn: 1
+        add_object_row: 0
+        modal_view: fiche_contrat
+        #page_btn: 1
+        cols: 
+            fk_contrat:
+            fk_facture:
+            fk_product:
+            montant:
+            datef:
+    

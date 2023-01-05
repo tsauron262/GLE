@@ -1,13 +1,20 @@
 table: be_equipment
 controller: equipment
-icon: desktop
+icon: fas_desktop
 
 header_list_name: default
 header_edit_form: default
 
 list_page_url: 
     controller: index
+        
+header_btn: 
+    callback: getActionsButtons
             
+nom_url: 
+    syntaxe: <ref>
+    card: default
+    
 labels:
     name: équipement
 
@@ -20,21 +27,27 @@ objects:
             default: 
                 type: product_card
                 
+    bimp_product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Product
+            id_object: 
+                field_value: id_product
+                
     contrat:
+        relation: none
         instance:
             id_object: unset
             
     places: 
+        label: Emplacements
         relation: hasMany
         delete: 1
         instance: 
             bimp_object: BE_Place
-            
-    logiciels: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: BE_EquipmentLogiciel
             
     facture: 
         instance: 
@@ -42,8 +55,46 @@ objects:
             dol_object: 
                 module: compta/facture
                 file: facture
+                
+    bimp_facture: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Facture
+            id_object: 
+                field_value: id_facture
+                
+    commandeFourn:
+        instance:
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_CommandeFourn
+                
+    factureFourn:
+        instance:
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_FactureFourn
 
 associations:
+    achatsCommFourn_Equipments:
+        type: reverse
+        object: commandeFourn
+        label: Commandes fournisseur
+        input:
+            type: search_object
+            object: commandeFourn
+            
+    achatsFactFourn_Equipments:
+        type: reverse
+        object: factureFourn
+        label: Facture fournisseur
+        input:
+            type: search_object
+            object: factureFourn
+            
     contrats:
         object: contrat
         display:
@@ -76,7 +127,7 @@ fields:
     id_product: 
         label: Produit
         type: id_object
-        object: product
+        object: bimp_product
         default_value: 0
         input:
             type: search_list
@@ -91,25 +142,10 @@ fields:
                 filters: 
                     pe.serialisable: 1
             help: Entrez la référence, le nom, le code-barre ou l'id d'un produit pour effectuer une recherche
-        display:
-            default:
-                type: field_value
-            nom_url: 
-                type: nom_url
-            nom:
-                type: nom
+        displays:
             card:
                 type: card
                 card: default
-        sort_options:
-            default:
-                label: référence
-                join_field: ref
-            id:
-                label: id du produit
-            label:
-                label: nom
-                join_field: label
                 
     product_label: 
         label: Désignation produit
@@ -124,6 +160,12 @@ fields:
         label: Type
         values: 
             array: types
+            
+    status_gsx:
+        label: Status GSX
+        values:
+            array: list_status_gsx
+        default_value: 0
         
     serial: 
         label: Numéro de série
@@ -132,6 +174,13 @@ fields:
         search:
             type: value_part
             part_type: beginning
+        input:
+            scanner: 1
+            
+    old_serial:
+        label: Ancien(s) serial
+        type: text
+        size: 300
             
     imei: 
         label: N° IMEI
@@ -176,6 +225,10 @@ fields:
         required: 0
         search:
             type: date_range
+            
+    date_immo: 
+        label: Date de première immobilisation
+        type: date
         
     warranty_type: 
         label: Type de garantie
@@ -221,7 +274,7 @@ fields:
         label: ID de l'élément d'origine
         type: int
         default_value: 0
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayOriginElement
@@ -237,13 +290,10 @@ fields:
     id_facture:
         label: Facture
         type: id_object
-        object: facture
+        object: bimp_facture
         default_value: 0
         input: 
             type: hidden
-        display: 
-            default: 
-                type: nom_url
                 
     admin_login: 
         label: Login admin
@@ -266,6 +316,7 @@ fields:
         required: 0
         sortable: 0
         searchable: 0
+        hashtags: 1
         
     id_package: 
         label: Package
@@ -283,7 +334,9 @@ fields_tables:
             - field: imei
             - field: imei2
             - field: meid
+            - field: status_gsx
             - field: ref_immo
+            - field: date_immo
             - label: Disponibilité
               value: 
                   callback: displayAvailability
@@ -298,6 +351,7 @@ fields_tables:
             - field: date_warranty_end
             - field: note
               edit: 1
+            - field: old_serial
     
     objects: 
         panel: 1
@@ -310,16 +364,39 @@ fields_tables:
                       method: displayProduct
                       params: 
                           - card
-            - field: id_package
-              display: nom_url
+            - label: Package
+              value: 
+                  callback: 
+                      method: displayPackage
+                      params: 
+                          - nom_url
               show:
                   field_value: id_package
             - label: Type d'élément d'origine
               field: origin_element
+              show: 
+                  field_value: origin_id_element
             - field: origin_id_element
               label: Element d'origine
+              show: 
+                  field_value: origin_id_element
             - association: contrats
               edit: 1
+            - label: Contrats liées
+              value:
+                callback: displayContrats
+            - association: achatsCommFourn_Equipments
+              edit: 1
+              show:
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
+            - association: achatsFactFourn_Equipments
+              edit: 1
+              show:
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
     
     vente: 
         show: 
@@ -388,17 +465,17 @@ views:
 forms:
     default:
         rows: 
+            - field: status_gsx
+              hidden: 1
             - field: serial
             - field: imei
             - field: imei2
             - field: meid
             - field: id_product
               show: 
-                  callback: isNotLoaded
+                  callback: showProductInput
             - field: product_label
             - field: type
-#            - field: available
-#            - field: return_available
             - field: date_purchase
             - field: prix_achat
             - field: achat_tva_tx
@@ -415,16 +492,17 @@ forms:
     light:
         force_edit: 1
         rows:
+            - field: status_gsx
+              hidden: 1
             - field: serial
             - field: imei
             - field: imei2
             - field: meid
             - field: id_product
               show: 
-                  callback: isNotLoaded
+                  callback: showProductInput
             - field: product_label
             - field: type
-#            - field: available
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
@@ -437,81 +515,51 @@ forms:
             - field: imei2
             - field: meid
             - field: id_product
+              show: 
+                  callback: showProductInput
             - field: product_label
             - field: type
-#            - field: available
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
             - object: places
             
+filters: 
+    in_package: 
+        label: inclus dans un package
+        type: check_list
+        items: 
+            0: NON
+            1: OUI
+
+    place_date_end:
+        data_type: date
+        label: Date de départ (emplacement)
+        type: date_range
+        exclude_btn: 0
+        
 filters_panel: 
     default: 
         filters: 
-            product: 
-                field: id_product
+            id_product: 
             serial: 
-                field: serial
             imei: 
-                field: imei
             imei2: 
-                field: imei2
             meid: 
-                field: meid
-            date_purchase: 
-                field: date_purchase
-            date_vente:
-                field: date_vente
             type: 
-                field: type
-            in_package: 
-                custom: 1
-                field: in_package
-                label: inclus dans un package
-                type: check_list
-                items: 
-                    0: NON
-                    1: OUI                
-            place_position: 
-                field: position
-                child: places
-#                default_values:
-#                    - min: ''
-#                      max: 1
-            place_type: 
-                field: type
-                child: places
-            place_entrepot: 
-                field: id_entrepot
-                child: places
-            place_user: 
-                field: id_user
-                child: places
-            place_client: 
-                field: id_client
-                child: places
-            place_infos: 
-                field: infos
-                child: places
-            place_date:
-                field: date
-                child: places
+            date_purchase: 
+            date_vente:
+            in_package:
+            places:position:
+            places:type:
+            places:id_entrepot:
+            places:id_user:
+            places:id_client:
+            places:infos: 
+            places:date:
             place_date_end:
-                custom: 1
-                field: place_date_end
-                data_type: date
-                label: Date de départ (emplacement)
-                type: date_range
             
 lists_cols: 
-    id:
-        label: ID
-        field: id
-        min_width: 60px
-    ref_immo: 
-        field: ref_immo
-    type: 
-        field: type
     product: 
         label: Produit
         value: 
@@ -521,23 +569,16 @@ lists_cols:
                     - nom_url
         search: 
             type: value_part
-    serial:
-        field: serial
-    imei: 
-        label: IMEI
-        field: imei
-    imei2: 
-        label: IMEI2
-        field: imei2
-    meid: 
-        label: MEID
-        field: meid
     place: 
         label: Emplacement
         value:
             callback: displayCurrentPlace
         search: 
             type: value_part
+    factFourn: 
+        label: Facture d'achat
+        value:
+            callback: displayFactFourn
     place2: 
         label: Type emplacement
         value:
@@ -549,10 +590,6 @@ lists_cols:
                 options: 
                     options: 
                         array: typesPlace
-
-    package: 
-        field: id_package
-        display: nom_url
     reserved: 
         label: Réservé / transfert en cours
         value: 
@@ -564,20 +601,31 @@ lists_cols:
                 options: 
                     options: 
                         array: hasReservations
-    user_create:
-        field: user_create
-    prix_achat:
-        field: prix_achat
-        has_total: 1
     oldSn:
-        custom: 1
         label: Ancien SN
         value: 
-            callback:  displayOldSn
-    date_purchase:
-        field: date_purchase
-    date_create:
-        field: date_create
+            callback: displayOldSn
+    id_facture: 
+        label: Facture vente
+    pack_serial: 
+        label: N° de série
+        value: 
+            callback: 
+                method: getNomUrl
+                params: 
+                    - 1
+                    - 1
+                    - 1
+                    - default
+    pack_product: 
+        label: Produit
+        value: 
+            callback: 
+                method: displayProduct
+                params: 
+                    - nom_url
+                    - 0
+                    - 1
 
 lists:
     default: 
@@ -594,9 +642,9 @@ lists:
         sort_field: date_create
         sort_way: desc
         n: 10
-        list_filters: 
-            callback:
-                method: getListFilters
+#        list_filters: 
+#            callback:
+#                method: getListFilters
         extra_btn: 
             callback: getDefaultListExtraBtn
         add_form_name: default
@@ -612,13 +660,37 @@ lists:
             serial:
             place2: 
             place: 
-            package: 
+            id_package: 
             user_create:
             prix_achat:
+                
+    product: 
+        extends: default
+        cols: 
+            product: unset
 
+    client: 
+        configurable: 1
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        edit_btn: 1
+        update_btn: 1
+        delete_btn: 1
+        view_btn: 1
+        page_btn: 1
+        modal_view: default
+        cols:
+            product: 
+            serial:
+            prix_achat:
+            prix_vente: 
+            vente_tva_tx: 
+            id_facture: 
+        
     package: 
         objects_change_reload: BE_Package
-        enable_search: 0
+        enable_search: 1
         enable_sort: 0
         checkboxes: 1
         bulk_actions: 
@@ -635,24 +707,7 @@ lists:
             callback: getPackageListExtraBtn
         cols: 
             pack_serial: 
-                label: N° de série
-                value: 
-                    callback: 
-                        method: getNomUrl
-                        params: 
-                            - 1
-                            - 1
-                            - 1
-                            - default
-            pack_product: 
-                label: Produit
-                value: 
-                    callback: 
-                        method: displayProduct
-                        params: 
-                            - nom_url
-                            - 0
-                            - 1
+            pack_product:
                             
     immos: 
         enable_search: 0
@@ -664,7 +719,7 @@ lists:
         cols: 
             serial: 
             product: 
-            package: 
+            id_package: 
             ref_immo:
             place2:
             place:
@@ -700,12 +755,15 @@ searches:
     default:
         has_serial: 1
         fields_search: 
+            - a.id
             - a.product_label
             - a.serial
             - CONCAT('S', a.serial)
             - a.imei
             - a.imei2
             - a.meid
+            - a.old_serial
+            - a.note
         fields_return: 
             - a.serial
         label_syntaxe: '<a.serial>'
@@ -726,3 +784,17 @@ cards:
             - field: imei
             - field: imei2
             - field: meid
+            
+    test: 
+        fields: 
+            - icon: fas_box
+              label: Produit
+              value: 
+                  callback:
+                      method: displayProduct
+                      params:
+                          - nom_url
+            - icon: fas_info
+              label: info
+              value: 
+                  callback: getInfoCard

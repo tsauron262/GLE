@@ -1,0 +1,139 @@
+abstract: 1
+
+extends: 
+    module: bimpuserconfig
+    object_name: BCUserConfig
+    
+objects: 
+    default_filter: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                name: ListFilters
+            id_object: 
+                field_value: id_default_filters
+                
+fields: 
+    sort_field: 
+        label: Tri
+        type: string
+        values: 
+            array: objSortableFields
+        default_value: id
+        
+    sort_option:
+        label: Option de tri
+        type: string
+        values: 
+            array: objSortOptions
+        default_value: ''
+        depends_on: sort_field
+        
+    sort_way:
+        label: Ordre
+        values: 
+            asc: Croissant
+            desc: Décroissant
+        default_value: desc
+        
+    nb_items: 
+        label: Nombre d'éléments par page
+        type: int
+        values: 
+            array: nbItems
+        input: 
+            type: switch_options
+        default_value: 10
+        
+    id_default_filters_config: 
+        label: Configuration de filtres par défaut
+        type: id_object
+        object: default_filters_config
+        values: 
+            array: ownerFiltersConfigs
+        default_value: 0
+        depends_on: owner_type,id_group,obj_module,obj_name
+        search: 
+            input: 
+                type: search_object
+                
+    id_default_filters: 
+        label: Filtres par défaut
+        type: id_object
+        object: default_filter
+        values: 
+            array: ownerFilters
+        default_value: 0
+        depends_on: owner_type,id_group,obj_module,obj_name,component_name
+        search: 
+            input: 
+                type: search_object
+        
+    active_filters: 
+        label: Afficher les filtres actifs
+        type: bool
+        default_value: 1
+        
+    filters_open: 
+        label: Panneau filtres ouvert par défaut
+        type: bool
+        default_value: 0
+        
+    total_row: 
+        label: Afficher les totaux
+        type: bool
+        default_value: 0
+        
+    search_open: 
+        label: Barre de recherche ouverte par défaut
+        type: bool
+        default_value: 0
+            
+    cols: 
+        label: Colonnes
+        type: json
+        
+forms: 
+    default: 
+        rows: 
+            nb_items: 
+                field: nb_items
+                show: 
+                  callback: hasPagination
+            sort_field: 
+                field: sort_field
+                show: 
+                  callback: isListSortable
+            sort_option: 
+                field: sort_option
+                show: 
+                  callback: isListSortable
+            sort_way: 
+                field: sort_way
+                show: 
+                  callback: isListSortable
+            def_filters_config: 
+                field: id_default_filters_config
+                show: 
+                  callback: hasFiltersPanel
+            def_filters: 
+                field: id_default_filters
+                show: 
+                  callback: hasFiltersPanel
+            filters_open: 
+                field: filters_open
+                show: 
+                  callback: hasFiltersPanel
+            active_filters: 
+                field: active_filters
+                show: 
+                  callback: hasFiltersPanel
+            search_open: 
+                field: search_open
+                show: 
+                    callback: isListSearchable
+            total_row: 
+                field: total_row
+                show: 
+                    callback: hasTotalRow

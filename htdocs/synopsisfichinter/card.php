@@ -51,14 +51,19 @@
   \ingroup    ficheinter
   \version    $Id: card.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
  */
+
+
 $afficherLigneContrat = false;
 
 
 require("../synopsisfichinter/pre.inc.php");
+header("Location: " . DOL_URL_ROOT . '/bimptechnique/?fc=fi&id=' . $_REQUEST['id']);
+die;
 
 
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
 $bObj = BimpObject::getInstance("bimpfichinter", "Bimp_Fichinter", $_REQUEST['id']);
+header("Location: " . DOL_URL_ROOT . '/bimptechnique/?fc=fi&id=' . $_REQUEST['id']);
 $htmlRedirect = $bObj->processRedirect();
 
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
@@ -219,7 +224,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
 //$groups = $usergroup->listGroupsForUser($user->id,1);
 $accesGrTech = userInGroupe(64, $user->id);
 $accesGrCom = userInGroupe(2, $user->id);
-if (!($user->admin || $accesGrTech || $accesGrCom) && !(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create'))
+$accesGrCom2 = userInGroupe(43, $user->id);
+$accesGrCom3 = userInGroupe(517, $user->id);
+if (!($user->admin || $accesGrTech || $accesGrCom || $accesGrCom2 || $accesGrCom3) && !(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create'))
     if (isset($_REQUEST['id']) && stripos($_SERVER['REQUEST_URI'], "?") === false)
         header('Location: ' . str_replace("card.php", "../synopsisfichinter/ficheFast.php?id=" . $_REQUEST['id'], "http".((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])? "s" :"") . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
     else

@@ -21,8 +21,15 @@ require_once('../main.inc.php');
 
 
 
-
-
+//$log1 = "tommy@bimp.fr";
+//$command = 'git pull https://'. urlencode($log1).":".urlencode($log2).'@git2.bimp.fr/BIMP/bimp-erp.git';
+//$result = array();
+//$retour = exec("cd ".DOL_DOCUMENT_ROOT, $result);
+//$retour .= exec($command, $result);
+//foreach ($result as $line) {
+//    print($line . "\n");
+//}
+//die($retour."fin");
 
 llxHeader();
 
@@ -47,6 +54,8 @@ if(GETPOST('action') == "addProdCatExtra"){
 
 print load_fiche_titre($text);
 if (isset($user->rights->SynopsisTools->Global->phpMyAdmin)) {
+    print" <br/><br/><a href='git_pull.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>GIT Pull</span></a>";
+    print" <br/><br/><a href='phantomApple.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Connect Apple</span></a>";
     print" <br/><br/><a href='myAdmin.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>PhpMyAdmin</span></a>";
     print" <br/><br/><a href='./Synopsis_MyAdmin/index.php'  target='_blank'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>PhpMyAdmin (Nouvelle onglet)</span></a>";
     print" <br/><br/><a href='./Synopsis_MyAdmin3/index.php'  target='_blank'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>PhpMyAdmin (Nouvelle onglet) old version</span></a>";
@@ -81,6 +90,7 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin)){
 }
 
 
+print" <br/><br/><a href='../bimptheme/switch.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Changé de théme</span></a>";
 
 
 

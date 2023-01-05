@@ -12,8 +12,6 @@ define("NOLOGIN", 1);
 $errors = array();
 
 require_once '../bimpcore/main.php';
-
-
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 //dol_syslog(print_r($_REQUEST,1),3);
@@ -59,12 +57,15 @@ if (!($dst != "" && $src != "" && $subj != "" && $txt != "")) {
 
 function traiteTask($dst, $src, $subj, $txt) {
     global $db, $user;
+    
+    $errors = array();
     echo "traite" . $subj;
     $idTask = 0;
     $task = BimpObject::getInstance("bimptask", "BIMP_Task");
 
-    $dst = str_replace("console@bimp.fr", "consoles@bimp.fr", $dst);
-    $dst = str_replace("vol@bimp.fr", "vols@bimp.fr", $dst);
+//    $dst = str_replace("bimp-groupe.net", "bimp.fr", $dst);
+    $dst = str_replace("console@", "consoles@", $dst);
+    $dst = str_replace("vol@", "vols@", $dst);
     //verif destinataire
     foreach(BIMP_Task::$valSrc as $destCorrect => $nom){
         if($destCorrect != "other" && stripos($dst, $destCorrect) !== false){
@@ -79,7 +80,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         $idTask = str_replace($const, "", $matches[0]);
     }
     
-    if($dst == "sms-apple@bimp.fr")
+    if($dst == "sms-apple@bimp-groupe.net")
         $idTask= 25350;
 
     $tabTxt = explode("-------------", $txt);
@@ -97,8 +98,8 @@ function traiteTask($dst, $src, $subj, $txt) {
     else
         $user->fetch(ID_USER_DEF);
     
-    $user->rights->bimptask->$dst->write = 1;
-    $user->rights->bimptask->other->write = 1;
+    @$user->rights->bimptask->$dst->write = 1;
+    @$user->rights->bimptask->other->write = 1;
 
 
     if ($idTask > 0) {
@@ -110,16 +111,16 @@ function traiteTask($dst, $src, $subj, $txt) {
         
         echo "<br/>Création task";
         $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "");
-        $errors = array_merge($errors, $task->validateArray($tab));
-        $errors = array_merge($errors, $task->create());
+        $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
+        $errors = BimpTools::merge_array($errors, $task->create());
     } else {
         echo "<br/>Création note, task : ".$idTask;
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $tab = array("obj_type" => "bimp_object", "obj_module" => "bimptask", "obj_name" => "BIMP_Task", "id_obj" => $idTask, "type_author" => "3", "email" => $src, "visibility" => 4, "content" => $txt);
-        $errors = array_merge($errors, $note->validateArray($tab));
-        $errors = array_merge($errors, $note->create());
+        $errors = BimpTools::merge_array($errors, $note->validateArray($tab));
+        $errors = BimpTools::merge_array($errors, $note->create());
         
-//        $errors = array_merge($errors, $task->addNote($txt, 4, 0, 0, $src, 3));
+//        $errors = BimpTools::merge_array($errors, $task->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, 3));
     }
 
     if (count($errors) > 0) {

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_validate_comm` ADD `only_child` INT NOT NULL DEFAULT '0' AFTER `val_min`;

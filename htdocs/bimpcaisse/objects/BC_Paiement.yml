@@ -65,7 +65,57 @@ fields:
                     field_return_label: ref
                     field_return_value: rowid
         
+lists_cols: 
+    type: 
+        label: Type
+        value: 
+            callback: displayType
+    amount: 
+        label: Montant
+        value: 
+            callback: displayAmount
+    facture: 
+        label: Facture(s)
+        value: 
+            callback: displayFacture
+    facture_ref: 
+        label: Ref. Facture
+        value: 
+            callback: 
+                method: displayFacture
+                params: 
+                    - ref
+    user_create: 
+        label: Caissier
+    client: 
+        label: Client
+        value: 
+             callback: 
+                method: displayClient
+                params: 
+                    - nom_url
+    client_nom: 
+        label: Nom client
+        value: 
+             callback: 
+                method: displayClient
+                params: 
+                    - nom
+                            
 lists: 
+    default:
+        configurable: 1 
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            type: 
+            amount: 
+            id_vente: 
+            facture: 
+            id_paiement: 
+            user_create: 
+            client: 
     session: 
         objects_change_reload: BC_Vente,Bimp_Paiement
         sort_field: id
@@ -73,37 +123,17 @@ lists:
         n: 10
         cols:
             type: 
-                label: Type
-                value: 
-                    callback: displayType
             amount: 
-                label: Montant
-                value: 
-                    callback: displayAmount
-            vente: 
-                field: id_vente
-                display: nom_url
+            id_vente: 
             facture: 
-                label: Facture(s)
-                value: 
-                    callback: displayFacture
-            paiement: 
-                field: id_paiement
-                display: nom_url
-            user: 
-                label: Caissier
-                field: user_create
+            id_paiement: 
+            user_create: 
             client: 
-                label: Client
-                value: 
-#                    callback: displayClient
-                     callback: 
-                        method: displayClient
-                        params: 
-                            - nom_url
             
     full_session: 
-        extends: session
+        objects_change_reload: BC_Vente,Bimp_Paiement
+        sort_field: id
+        sort_way: desc
         n: 0
         pagination: 0
         enable_search: 0
@@ -111,21 +141,13 @@ lists:
         enable_refresh: 0
         enable_edit: 0
         cols: 
-            vente: 
+            type: 
+            amount: 
+            id_vente: 
                 display: ref
-            facture: 
-                value: 
-                    callback: 
-                        method: displayFacture
-                        params: 
-                            - ref
-            paiement: 
+            facture_ref: 
+            id_paiement: 
                 display: ref
-            user: 
+            user_create: 
                 display: nom
-            client: 
-                value: 
-                    callback: 
-                        method: displayClient
-                        params: 
-                            - nom
+            client_nom: 

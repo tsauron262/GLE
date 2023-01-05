@@ -3,7 +3,8 @@
 class BimpRevision
 {
 
-    static $separateur = "–";
+    static $old_separateur = "–";
+    static $separateur = "_";
 
     static function alpha2num($a)
     {
@@ -26,9 +27,10 @@ class BimpRevision
 
     static function convertRef($oldRef, $table)
     {
-        global $conf;
+        global $conf, $db;
         $oldRef = self::getRefMax($oldRef, $table);
         if ($oldRef) {
+            $oldRef[1] = str_replace(self::$old_separateur, self::$separateur, $oldRef[1]);
             $tabT = explode(self::$separateur, $oldRef[1]);
             if (!isset($tabT[1]))
                 $tabT[1] = 0;
@@ -54,6 +56,7 @@ class BimpRevision
     static function getRefMAx($ref, $table)
     {
         global $db;
+        $ref = str_replace(self::$old_separateur, self::$separateur, $ref);
         $tabT = explode(self::$separateur, $ref);
         $ref = $tabT[0];
         $sql = $db->query("SELECT ref, rowid FROM " . MAIN_DB_PREFIX . $table . " WHERE ref LIKE '" . $ref . "%' ORDER BY rowid DESC");
@@ -69,6 +72,9 @@ class BimpRevisionPropal extends BimpRevision
 {
 
     private static $oldRefCli = "";
+    public $propalSui = null;
+    public $propalPre = null;
+    public $propal = null;
 
     public function __construct($propal)
     {
@@ -175,7 +181,7 @@ class BimpRevisionPropal extends BimpRevision
                     if(!is_dir($dir2))
                         mkdir ($dir2);
                     
-                    if (!in_array($value,array(".","..")))
+                    if (!in_array($value,array(".","..")) && stripos($value, "/") !== false)
                     {
                         link($dir.$value, $dir2.$value);
                     }

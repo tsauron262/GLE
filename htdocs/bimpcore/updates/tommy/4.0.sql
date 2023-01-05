@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_php_session` CHANGE `data` `data` LONGTEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL;

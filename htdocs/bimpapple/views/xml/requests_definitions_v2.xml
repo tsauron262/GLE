@@ -3,23 +3,24 @@
     <request name="repairCreate">
         <label>Création d'une réparation</label>
         <datas>
+            <data name="code_centre"></data>
             <data name="repairType" required="1" values="repair_types" default="CIN">
                 <label>Type de réparation</label>
             </data>
+            <data name="coverageOption" required="0" edit="0"></data>
+            <data name="consumerLaw" required="0" edit="0"></data>
             
             <data name="questions" donotprocess="1"></data>
             
             <data name="serviceNonRepairType" required="0">
                 <display_if input_name="repairType" show_values="SVNR"></display_if>
             </data>
-            <data name="techId" required="0"></data>
-            <data name="repairClassification" required="0"></data>
+            <data name="technicianId" required="0"></data>
+            <data name="repairClassification" required="1"></data>
             <data name="referenceNumber" required="0"></data>
             <data name="purchaseOrderNumber" required="1"></data>
             <data name="reservationId" required="0"></data>
-            <data name="coverageOption" required="0"></data>
             <data name="unitReceivedDateTime" required="1"></data>
-            <data name="consumerLaw" required="0"></data>
             <data name="boxRequired" required="0">
                 <display_if input_name="repairType" show_values="MINS,MINC,WUMS,WUMC"></display_if>
             </data>
@@ -28,7 +29,7 @@
             <data name="repairFlags" required="0">
                 <datas>
                     <data name="requestReviewByApple" required="0"></data>
-                    <data name="markComplete" required="0"></data>
+                    <!--<data name="markComplete" required="0"></data>-->
                 </datas>
             </data>
             
@@ -115,7 +116,7 @@
                     <data name="partUsed" required="0"></data>
                     <data name="coverageOption" required="0"></data>
                     <data name="pricingOption" required="0"></data>
-                    <data name="fromConsignedStock" required="0"></data>
+                    <data name="fromConsignedStock" required="1" default="0" edit="0"></data>
                     <data name="kgbDeviceDetail" required="0">
                         <datas>
                             <data name="id" required="1">
@@ -137,7 +138,7 @@
                 <datas>
                     <data name="partUsed" required="1"></data>
                     <data name="returnStatusCode" required="0"></data>
-                    <data name="partNumber" required="1"></data>
+                    <data name="number" required="1"></data>
                     <data name="fromConsignedStock" required="1"></data>
                     <data name="componentIssue" required="0">
                         <datas>

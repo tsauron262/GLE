@@ -464,7 +464,7 @@ class Spyc {
   private static function getTranslations(array $words) {
     $result = array();
     foreach ($words as $i) {
-      $result = array_merge($result, array(ucfirst($i), strtoupper($i), strtolower($i)));
+      $result = BimpTools::merge_array($result, array(ucfirst($i), strtoupper($i), strtolower($i)));
     }
     return $result;
   }

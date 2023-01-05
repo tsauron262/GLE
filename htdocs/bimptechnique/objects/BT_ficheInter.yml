@@ -1,0 +1,817 @@
+bootstrap: 1
+dol_object: 
+    instance: 
+        dol_object: 
+            module: fichinter
+            file: fichinter
+            
+table: fichinter
+primary: rowid
+icon: fas_ambulance
+controller: fi
+
+list_page_url: 
+    controller: index
+    url_params: 
+        navtab-maintabs: liste_fiche
+
+header_list_name: default
+header_edit_form: edit
+header_btn: 
+    callback: getActionsButtons
+    
+labels:
+    name: fiche d'intervention
+    name_plur: fiches d'interventions
+    is_female: 1
+    
+nom_url: 
+    syntaxe: <ref>
+    external_link: 1
+    modal_view: default
+    
+objects:
+    contrat:
+        instance:
+            dol_object: unset
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+            id_object:
+                field_value: fk_contrat
+                
+    client:
+        instance:
+            id_object:
+                field_value: fk_soc
+                
+    userCreate:
+        extends: user
+        instance:
+            id_object:
+                field_value: fk_user_author
+                
+    user_tech: 
+        extends: user
+        instance:
+            id_object:
+                field_value: fk_user_tech
+                
+    userValid:
+        extends: user
+        instance:
+            id_object:
+                field_value: fk_user_valid
+                
+    userUpdate:
+        extends: user
+        instance:
+            id_object:
+                field_value: fk_user_modif
+                
+    inters:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimptechnique
+                name: BT_ficheInter_det
+                
+    facturation:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimptechnique
+                name: BT_ficheInter_facturation
+                
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimptechnique
+                parent_object_name: BT_ficheInter
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimptechnique
+                    parent_object_name: BT_ficheInter
+                    
+    commande: 
+        relation: none
+        instance: 
+            id_object: unset
+            
+    ticket: 
+        relation: none
+        instance: 
+            id_object: unset
+            
+    actionComm:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_ActionComm
+    
+    facture:
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Facture
+            id_object:
+                field_value: fk_facture
+                
+fields: 
+    # Champs dol object: 
+    ref:
+        label: Référence
+        
+    fk_soc:
+        label: Client
+        type: id_object
+        object: client
+        dol_prop: socid
+        required: 1
+        create_form: light
+        edit_form: default
+        input:
+            type: search_object
+            card: default
+            
+    fk_statut:
+        label: Statut
+        dol_prop: statut
+        type: int
+        values:
+            array: status_list
+        default_value: 0
+            
+    fk_contrat:
+        label: Contrat lié
+        type: id_object
+        object: contrat
+        input:
+            type: 
+                callback: getLinkedInput
+            options:
+                array: contratsClient
+        depends_on: fk_soc
+        
+    fk_user_author:
+        label: Créée par
+        dol_prop: user_creation
+        type: id_object
+        object: userCreate
+        input:
+            type: search_user
+            
+    datec:
+        label: Créée le
+        type: datetime
+        
+    duree:
+        label: Durée totale
+        dol_prop: duration
+        type: int
+        displays:
+            default:
+                type: timer
+                with_day: 0
+    
+    description:
+        label: Description
+        type: html
+        
+    note_public:
+        label: Préconisation technicien
+        type: html
+        
+    note_private:
+        label: Note privée
+        type: html
+        
+    # champs dol_object non gérés: 
+    # dateo
+    # datee
+    # datet 
+    # date_valid (dol_prop: datev)
+    # tms (dol_prop: datem) 
+    # fk_project
+    # model_pdf
+    # extraparams
+        
+    # Champs BimpObject:         
+        
+    fk_user_tech: 
+        label: Technicien
+        type: id_object
+        object: user_tech
+        required: 1
+        default_value: 
+            prop:
+                name: id
+                object:
+                    global: user
+        input: 
+            type: search_user
+            
+    fk_user_valid:
+        label: Validée par
+        type: id_object
+        object: userValid
+        
+    fk_user_modif:
+        label: Modifiée par
+        type: id_object
+        object: userUpdate
+    
+    commandes:
+        label: Commandes liées
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: commande
+        input:
+            type: 
+                callback: getLinkedInput
+            options: 
+                array: commandesClient
+        depends_on: fk_soc
+            
+    tickets:
+        label: Tickets liés
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: ticket
+        input:
+            type: select
+            options: 
+                array: ticketsClient
+        depends_on: fk_soc
+                
+    datei:
+        label: Date prévu d'intervention
+        type: date
+        input:
+            display_now: 1
+            
+    time_from: 
+        label: De
+        type: time
+        input: 
+            with_secondes: 0
+        
+    time_to: 
+        label: A
+        type: time
+        input: 
+            with_secondes: 0
+            
+    urgent:
+        label: Intervention urgente
+        type: bool
+            
+    logs:
+        label: Logs FI
+        type: text
+        
+    signed:
+        label: Fiche signée
+        type: bool
+        
+    base_64_signature:
+        label: Image en base 64
+        type: text
+        
+    signataire:
+        label: Signataire
+        
+    date_signed:
+        label: Date de signature client
+        type: datetime
+        
+    attente_client:
+        label: Attente du client
+        type: html
+        input: 
+            help: À remplir obligatoirement si l'intervention n'a pas été terminée suite à un évènement dû au client. (Visible sur la FI)
+        
+    email_signature:
+        label: Fiche envoyée à
+        
+    public_signature_code:
+        label: Code d'accès à distance
+        
+    public_signature_url:
+        label: Numéro FI encodé
+        
+    public_signature_date_delivrance:
+        label: Date d'ouverture de l'accès
+        type: datetime
+        
+    public_signature_date_cloture:
+        label: Date de fermeture de l'accès
+        type: datetime
+        
+    new_fi:
+        label: Nouvelle version FI
+        type: bool
+        default_value: 0
+        
+    client_want_contact:
+        label: Le client veux être contacté par son commercial.
+        type: bool
+        default_value: 0
+        input: 
+            help: 
+                callback: 
+                    method: displayCommercial
+                    params: 
+                        - 1
+        
+    no_finish_reason:
+        label: Intervention non terminée
+        type:  html
+        input: 
+            help: À remplir obligatoirement si l'intervention n'est pas terminée (Autre que attente client) (Visible sur la FI).
+        
+    type_signature:
+        label: Type de signature
+        type: int
+        default_value: 0
+        values: 
+            array: types_signature
+        input: 
+            options: 
+                array: inputTypesSignature
+            
+    old_status:
+        label: Status avant modif
+        type: int
+    
+    fk_facture:
+        label: Facture
+        type: id_object
+        object: facture
+        input:
+            type: search_object
+            object: facture
+            
+    ef_type:
+        label: Canal de vente
+        type: text
+        values:
+            array: secteurs
+    
+forms:
+    
+    reattach_an_object:
+        title: Rattacher un objet à la FI
+        rows:
+            - custom: 1
+              label: id fichinter
+              input_name: id_fi
+              type: hidden
+              input:
+                  type: hidden
+              value:
+                  request: id
+              hidden: 1
+            - custom: 1
+              label: Type d'objet
+              input_name: type_of_object
+              input:
+                  type: select
+                  options:
+                      array: typeOfReattachmentObject
+            - custom: 1
+              label: Contrat
+              input_name: fk_facture
+              input:
+                  help: Ici apparaissent les factures du client
+                  type: select
+                  options: 
+                      array: factures
+              display_if:
+                  field_name: type_of_object
+                  show_values: 1
+            - custom: 1
+              label: Contrat
+              input_name: id_contrat
+              input:
+                  help: Ici apparaissent les contrat de l'année et de l'année N-1
+                  type: select
+                  options: 
+                      array: ContratNNmoins1
+              display_if:
+                  field_name: type_of_object
+                  show_values: 2
+            - custom: 1
+              label: Lignes à mettre sous contrat
+              input_name: lines_for_contrat
+              input:
+                  type: check_list
+                  items: 
+                      array: linesFacturableContrat
+              display_if:
+                  field_name: type_of_object
+                  show_values: 2
+            - custom: 1
+              label: Commande
+              input_name: id_commande
+              input:
+                  type: search_object
+                  object: commande
+              display_if:
+                  field_name: type_of_object
+                  show_values: 3
+            - custom: 1
+              label: Lignes à mettre en commande
+              input_name: lines_for_commande
+              depends_on: id_commande
+              input:
+                  type: custom
+                  content: 
+                      callback: displayLinesForCommande
+              display_if:
+                  field_name: type_of_object
+                  show_values: 3
+    default: 
+        rows: 
+            client: 
+                field: fk_soc
+            urgent: 
+                field: urgent
+            tech: 
+                field: fk_user_tech                
+            date: 
+                field: datei
+            from: 
+                field: time_from
+            to: 
+                field: time_to                    
+            type_planning: 
+                custom: 1
+                label: Type de plannification
+                required: 1
+                input_name: type_planning
+                input:
+                    type: select
+                    options:
+                        array: TypeActionComm
+            contrat: 
+                field: fk_contrat
+                label: Contrat client lié
+            commandes: 
+                field: commandes
+                label: Commandes client liées
+            tickets: 
+                field: tickets
+                label: Tickets clients liés
+            desc: 
+                field: description
+            note_private: 
+                field: note_private
+                
+    edit: 
+        extends: default
+        rows: 
+            type_planning: unset
+            contrat: unset
+            commandes: unset
+            tickets: unset
+
+    signature: 
+        title: Formulaire signature
+        icon: fas_file-signature
+        on_submit: function($form) {return onSignatureFormSubmit($form);}
+        rows: 
+            - custom: 1
+              label: Action signature
+              hidden: 1
+              input_name: signature_set
+              input: 
+                  type: hidden
+              value: 1
+            - field: type_signature
+            - field: signataire
+              label: Nom du signataire
+              display_if: 
+                  field_name: type_signature
+                  show_values: 2,3
+            - field: email_signature
+              label: Adresse e-mail du client
+            - field: note_public
+            - field: attente_client
+            - field: no_finish_reason
+#            - custom: 1
+#              label: Ticket support à fermer
+#              input_name: tickets_to_close
+#              input: 
+#                  type: check_list
+#                  items: 
+#                      array: linkedTickets
+#            - field: client_want_contact  
+            - custom: 1
+              label: Signature
+              input_name: signature_client
+              content: 
+                  callback: renderSignaturePad
+              display_if: 
+                  field_name: type_signature
+                  show_values: 3
+                  
+    linked_object: 
+        rows:
+            - field: fk_contrat
+            - field: commandes
+            - field: tickets  
+            
+    forBilling:
+        force_edit: 1
+        rows: 
+            - field: ef_type
+            
+#    messageFacturation:
+#        rows:
+#            - custom: 1
+#              label: Me mettre en copie
+#              input_name: copy
+#              value: 1
+#              input:
+#                type: toggle
+#            - custom: 1
+#              label: Message
+#              input_name: message
+#              value: Bonjour, merci de bien vouloir facturer cette fiche d'intervention indépendante d'une commande ou d'un contrat en cours
+#              input:
+#                  type: textarea
+                  
+    duplicate:
+        extends: default
+        force_edit: 1
+        rows:
+            date: 
+              field: unset
+              custom: 1
+              label: Date prévu d'intervention
+              input_name: dateDuplicate
+              input:
+                  type: date
+                  multiple: 1
+       
+fields_tables:
+    infos:
+        title: Informations
+        icon: info
+        rows:
+            - field: fk_user_tech
+            - label: Version Fi
+              value:
+                  callback: displayVersion
+            - label: Commercial Client
+              value: 
+                  callback: displayCommercial
+            - field: datei
+            - label: Durée totale
+              value:
+                  callback: displayDuree
+            - label: Marge
+              value:
+                  callback: displayRatioTotal
+            - field: urgent
+            - field: signed
+            - field: type_signature
+            - field: description
+            - field: ef_type
+              edit: 1
+                  
+    client:
+        title: Client
+        icon: building
+        rows:
+            - field: fk_soc
+              display: card
+            - field: fk_facture
+              display: card
+            - field: note_private
+            - field: logs
+            
+    linked:
+        title: Objets liés
+        icon: link
+        header_buttons: 
+            callback: getLinkedObjectsActionsButtons
+        rows:
+            contrat:
+                label: Contrat lié
+                value:
+                    callback: displayLinkedContratCard
+            commandes:
+                label: Commandes liées
+                value:
+                    callback: displayAllCommandesCards
+            tickets:
+                label: Tickets support
+                value:
+                    callback: displayAllTicketsCards
+                    
+views: 
+    events:
+        rows:
+            - cols:
+                - type: rows
+                  rows:
+                      - cols:
+                          - type: custom
+                            custom: 
+                                callback: renderEventsTable
+    default:
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 12
+                            title: Informations
+                            fields_table: 
+                                name: infos
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: client
+            - cols:
+                - type: list
+                  list:
+                      name: in_fiche
+                      children: inters
+            - cols:
+                - type: fields_table
+                  fields_table:
+                      name: linked
+            - cols:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderNotesList
+                          params:
+                              - 1
+                              
+lists_cols: 
+    duree:
+        has_total: 1
+        total_type: timer_with_not_day
+    nombre_inter:
+        label: Nb d'interventions
+        value:
+            callback: displayNombreInters
+    commercialclient:
+        label: Commercial Client
+        value:
+            callback: displayCommercialClient
+        search:
+            input: 
+                type: search_user
+    fk_facture:
+       
+filters:
+    linked:
+       label: Objet(s) lié(s)
+       type: check_list
+       items:
+           0: Contrat
+           1: Commande(s)
+           2: Ticket(s) support
+    no_linked:
+        label: FI(s) non liée(s)
+        type: check_list
+        items:
+          0: OUI
+    commercialclient:
+        label: Commercial client
+        input: 
+            type: search_user
+            include_empty: 1
+            include_current: 1
+            empty_label: Aucun
+        data_type: id_object
+        type: user
+
+filters_panels: 
+    default: 
+        filters:
+          fk_statut:
+          type_signature:
+          ref:
+          fk_user_author:
+          fk_user_tech:
+          fk_soc:
+          commercialclient:
+          linked:
+          no_linked:
+          datec:
+          datei:
+          commandes:
+
+lists: 
+    default:
+        checkboxes: 1
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+#        list_actions: 
+#            callback: getListExtraListActions
+        configurable: 1
+        filters_panel: default
+        total_row: 1
+        sort_field: datec
+        sort_way: desc
+        list_filters:
+            is_new: 
+                name: new_fi
+                filter: 1
+        delete_btn: 1
+        page_btn: 1
+        add_btn: 1
+        add_form_name: default
+        add_btn_label: Planifier une intervention
+        modal_view: default
+        cols:
+            ref:
+            datec:
+            fk_statut:
+            type_signature:
+            fk_user_tech:
+            fk_soc: 
+            commercialclient:
+            datei:
+            duree:
+            urgent:
+            nombre_inter:
+            
+    contrat:
+        extends: default
+        list_filters: 
+            contrat: 
+                name: fk_contrat
+                filter: 
+                    request: id
+            is_new: unset
+                    
+    tech:
+        extends: default
+        n: 5
+        delete_btn: unset
+        edit_btn: unset
+        cols:
+            fk_user_tech: unset
+            stat:
+                label: Marge
+                value:
+                    callback: displayRatioTotal
+                    
+    client:
+        extends: default
+        cols: 
+            fk_soc: unset
+        
+    historique:
+        extends: default
+        list_filters:
+            is_new: 
+                filter: 0
+        extra_btn: unset
+        add_btn: 0
+        edit_btn: 0
+        delete_btn: 0
+        cols: 
+            fk_user_tech: unset
+
+searches: 
+    default: 
+        fields_search: 
+            - a.ref
+            - s.nom
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: 'FI <a.ref> - Client: <s.nom>'
+        joins: 
+            - table: societe
+              on: a.fk_soc = s.rowid
+              alias: s

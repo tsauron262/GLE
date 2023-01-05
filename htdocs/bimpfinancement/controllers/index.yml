@@ -15,7 +15,7 @@ sections:
       tabs: 
           default: 
               label: Demandes
-              icon: fas_hand-holding-usd
+              icon: fas_comment-dollar
               sections: 
                   - type: list
                     list: 

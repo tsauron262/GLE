@@ -1,341 +1,301 @@
 <?php
 
-class BF_DemandeRefinanceur extends BimpObject {
+require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/BF_Lib.php';
 
-    public static $coefALaCon = 0.0833333333333;
+class BF_DemandeRefinanceur extends BimpObject
+{
 
-    const BF_REFINANCEUR_RIEN = 0;
-    const BF_REFINANCEUR_ETUDE = 1;
-    const BF_REFINANCEUR_ACCORD = 2;
-    const BF_REFINANCEUR_REFUS = 3;
-    const BF_REFINANCEUR_SOUS_CONDITION = 4;
+    const STATUS_TODO = 0;
+    const STATUS_ATTENTE = 1;
+    const STATUS_ACCEPTEE = 10;
+    const STATUS_ACCEPTEE_CONDS = 11;
+    const STATUS_SELECTIONNEE = 12;
+    const STATUS_REFUSEE = 20;
+    const STATUS_ANNULEE = 21;
 
-    public static $payments = array(
-        0 => '-',
-        1 => 'Prélévement auto',
-        2 => 'Virement',
-        3 => 'Mandat administratif'
+    public static $status_list = array(
+        self::STATUS_TODO           => array('label' => 'Demande à effectuer', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
+        self::STATUS_ATTENTE        => array('label' => 'Réponse en attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        self::STATUS_ACCEPTEE       => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::STATUS_ACCEPTEE_CONDS => array('label' => 'Acceptée sous conditions', 'icon' => 'fas_check-square', 'classes' => array('info')),
+        self::STATUS_SELECTIONNEE   => array('label' => 'Acceptée / sélectionnée', 'icon' => 'fas_check-double', 'classes' => array('success')),
+        self::STATUS_REFUSEE        => array('label' => 'Refusée', 'icon' => 'fas_exclamation-triangle', 'classes' => array('danger')),
+        self::STATUS_ANNULEE        => array('label' => 'Annulée', 'icon' => 'fas_times-circle', 'classes' => array('danger'))
+    );
+    public static $modes_paiements = array(
+        ''       => '',
+        'prelev' => 'Prélévement auto',
+        'vir'    => 'Virement',
+        'mandat' => 'Mandat administratif'
     );
     public static $periodicities = array(
-        1 => 'Mensuelle',
-        3 => 'Trimestrielle',
-        6 => 'Semestrielle',
+        1  => 'Mensuelle',
+        3  => 'Trimestrielle',
+        6  => 'Semestrielle',
         12 => 'Annuelle'
     );
-    public static $periodicities_masc = array(
-        1 => 'mensuel',
-        3 => 'trimestriel',
-        6 => 'semestriel',
-        12 => 'annuel'
-    );
     public static $period_label = array(
-        1 => 'mois',
-        3 => 'trimestre',
-        6 => 'semestre',
+        1  => 'mois',
+        3  => 'trimestre',
+        6  => 'semestre',
         12 => 'an'
     );
     public static $period_label_plur = array(
-        1 => 'mois',
-        3 => 'trimestres',
-        6 => 'semestres',
+        1  => 'mois',
+        3  => 'trimestres',
+        6  => 'semestres',
         12 => 'ans'
     );
-    public static $status_list = array(
-        // Oblkigatoirement une constante pour self::
-        self::BF_REFINANCEUR_RIEN => array('label' => '-', 'classes' => array('important')),
-        self::BF_REFINANCEUR_ACCORD => array('label' => 'Accord', 'classes' => array('success')),
-        self::BF_REFINANCEUR_REFUS => array('label' => 'Refus', 'classes' => array('danger')),
-        self::BF_REFINANCEUR_ETUDE => array('label' => '&Eacute;tude', 'classes' => array('warning')),
-        self::BF_REFINANCEUR_SOUS_CONDITION => array('label' => 'Sous-condition', 'classes' => array('warning')),
-    );
-    public static $names = array(
-        0 => '-',
-        228225 => 'BNP',
-        233883 => 'FRANFINANCE',
-        231492 => 'GE - CM-CIC BAIL',
-        234057 => 'GRENKE',
-        5 => 'LIXXBAIL',
-        230634 => 'LOCAM'
-    );
-    protected $calcValues = array(
-        'cout_with_coef' => 0,
-        'cout_with_tx' => 0,
-        'nb_mois' => 0,
-        'total_loyer' => 0,
-    );
+    protected $values = null;
 
-    public function isCreatable($force_create = false) {
+    // getters booléens: 
+
+    public function isActionAllowed($action, &$errors = [])
+    {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+
+        $status = (int) $this->getData('status');
+
+        switch ($action) {
+            case 'processDemande':
+                if ($status !== self::STATUS_TODO) {
+                    $errors[] = 'La demande a déjà été effectuée';
+                    return 0;
+                }
+                return 1;
+
+            case 'demandeDone':
+                if ($status !== self::STATUS_TODO) {
+                    $errors[] = 'La demande est déjà marquée comme effectuée';
+                    return 0;
+                }
+                return 1;
+
+            case 'cancel':
+                if ($status >= 10) {
+                    $errors[] = 'Cette demande ne peux plus être annulée';
+                    return 0;
+                }
+                return 1;
+
+            case 'accepted':
+            case 'refused':
+                if ($status !== self::STATUS_ATTENTE) {
+                    $errors[] = 'Cette demande n\'est pas en attente d\'acceptation';
+                    return 0;
+                }
+                return 1;
+
+            case 'selected':
+                if ($status < 10 || $status >= 20) {
+                    $errors[] = 'Cette demande n\'est pas sélectionnable';
+                    return 0;
+                }
+
+                $demande = $this->getParentInstance();
+                if (!BimpObject::objectLoaded($demande)) {
+                    $errors[] = 'Demande de location liée absente';
+                    return 0;
+                }
+
+                if ((int) $demande->getData('status') >= 10) {
+                    $errors[] = 'Le statut de la demande de location ne permet pas cette opération';
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::isActionAllowed($action, $errors);
+    }
+
+    public function isNewStatusAllowed($new_status, &$errors = [])
+    {
+        $cur_status = (int) $this->getData('status');
+
+        switch ($new_status) {
+            case self::STATUS_TODO:
+                if ($cur_status === self::STATUS_ATTENTE) {
+                    return 1;
+                }
+                return 0;
+
+            case self::STATUS_ATTENTE:
+                if ($cur_status >= 10) {
+                    return 1;
+                }
+                return 0;
+        }
+        return parent::isNewStatusAllowed($new_status, $errors);
+    }
+
+    public function isCreatable($force_create = false, &$errors = array())
+    {
         $demande = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($demande)) {
-            if (!(int) $demande->getData('accepted')) {
-                return 1;
-            }
+            return $demande->areDemandesRefinanceursEditable($errors);
+        } else {
+            $errors[] = 'Demande liée non spécifiée';
         }
 
         return 0;
     }
 
-    public function isEditable($force_edit = false) {
-        return $this->isCreatable($force_edit);
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        if ($force_edit) {
+            return 1;
+        }
+
+        return $this->isCreatable($force_edit, $errors);
     }
 
-    public function isDeletable($force_delete = false) {
-        return $this->isCreatable($force_delete);
+    public function isDeletable($force_delete = false, &$errors = array())
+    {
+        return $this->isCreatable($force_delete, $errors);
     }
 
-    public function isEchouar() {
-        //todo
-        $demande = $this->getParentInstance();
-        return ($demande->getData("mode_calcul") == 2);
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        if (!$this->isLoaded()) {
+            return 1;
+        }
+
+        if ($force_edit) {
+            return 1;
+        }
+
+        $status = (int) $this->getData('status');
+        switch ($field) {
+            case 'id_demande':
+            case 'id_refinanceur':
+                return 0;
+
+            case 'rate':
+            case 'coef':
+            case 'qty':
+            case 'amount_ht':
+            case 'payment':
+            case 'periodicity':
+                if ($status >= 10) {
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::isFieldEditable($field, $force_edit);
     }
 
-    public function getCalcValues() {
-        if (is_null($this->calcValues)) {
-            if ($this->isLoaded() && BimpTools::isSubmit('new_values/' . $this->id)) {
-                $amount_ht = BimpTools::getValue('new_values/' . $this->id . '/amount_ht', $this->getData('amount_ht'));
-                $coef = BimpTools::getValue('new_values/' . $this->id . '/coef', $this->getData('coef'));
-                $taux = BimpTools::getValue('new_values/' . $this->id . '/rate', $this->getData('rate'));
-                $nbPeriodes = BimpTools::getValue('new_values/' . $this->id . '/quantity', $this->getData('quantity'));
-                $dureePeriode = BimpTools::getValue('new_values/' . $this->id . '/periodicity', $this->getData('periodicity'));
-            } else {
-                $amount_ht = $this->getData("amount_ht");
-                $coef = $this->getData('coef');
-                $taux = $this->getData("rate");
-                $nbPeriodes = $this->getData('quantity');
-                $dureePeriode = $this->getData('periodicity');
+    // Getters params: 
+
+    public function getActionsButtons()
+    {
+        $buttons = array();
+
+        if ($this->isActionAllowed('processDemande') && $this->canSetAction('processDemande')) {
+            $refinanceur = $this->getChildObject('refinanceur');
+
+            if (BimpObject::objectLoaded($refinanceur)) {
+                $url = $refinanceur->getData('url_demande');
+
+                if ($url) {
+                    $soc = $refinanceur->getChildObject('societe');
+                    $title = 'Demande refinanceur ' . $soc->getName();
+
+                    $buttons[] = array(
+                        'label'   => 'Effectuer la demande',
+                        'icon'    => 'fas_cogs',
+                        'onclick' => htmlentities('window.open(\'' . $url . '\', \'' . $title . '\', "menubar=no, status=no, width=1200, height=800")')
+//                        'onclick' => 'window.open(\'' . $url . '\');'
+                    );
+                }
             }
+        }
 
-            $nbMois = $nbPeriodes * $dureePeriode;
-            $total_loyer = $nbPeriodes * $amount_ht;
-            $coutWithTx = 0;
-            $coutWithCoef = 0;
-            $loyer = 0;
-            $totalDemande = $this->getTotalDemande();
-
-            $isEchoir = $this->isEchouar();
-
-
-            $parent = $this->getParentInstance();
-            $vr = $parent->getData("vr_vente");
-            $tauxPM = $taux / 100 / (12/$dureePeriode);
-
-            $loyer = $this->vpm($tauxPM, 0, $nbPeriodes, $totalDemande, -$vr, $isEchoir);
-
-            $totalEmprunt = $this->va($tauxPM, 0, $nbPeriodes, $amount_ht, -$vr, $isEchoir);
-//            die($totalEmprunt);
-            if($coef > 0){
-                $coutWithCoef = $total_loyer - $totalEmprunt;
-            }
-            else
-                $coutWithTx = $total_loyer - $totalEmprunt;
-
-            $this->calcValues = array(
-                'cout_with_coef' => $coutWithCoef,
-                'cout_with_tx' => $coutWithTx,
-                'cout_total' => $coutWithCoef + $coutWithTx,
-                'nb_mois' => $nbMois,
-                'loyer' => $loyer,
-                'total_loyer' => $total_loyer,
-                'total_emprunt' => $totalEmprunt
+        if ($this->isActionAllowed('demandeDone') && $this->canSetAction('demandeDone')) {
+            $buttons[] = array(
+                'label'   => 'Demande éffectuée',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsLoadModalForm('demande_done', 'Demande effectuée')
             );
         }
 
-        return $this->calcValues;
-    }
-
-//    public function getCalcValues()
-//    {
-//        if (is_null($this->calcValues)) {
-//            if ($this->isLoaded() && BimpTools::isSubmit('new_values/' . $this->id)) {
-//                $amount_ht = BimpTools::getValue('new_values/' . $this->id . '/amount_ht', $this->getData('amount_ht'));
-//                $coef = BimpTools::getValue('new_values/' . $this->id . '/coef', $this->getData('coef'));
-//                $taux = BimpTools::getValue('new_values/' . $this->id . '/rate', $this->getData('rate'));
-//                $nbPeriodes = BimpTools::getValue('new_values/' . $this->id . '/quantity', $this->getData('quantity'));
-//                $dureePeriode = BimpTools::getValue('new_values/' . $this->id . '/periodicity', $this->getData('periodicity'));
-//            } else {
-//                $amount_ht = $this->getData("amount_ht");
-//                $coef = $this->getData('coef');
-//                $taux = $this->getData("rate");
-//                $nbPeriodes = $this->getData('quantity');
-//                $dureePeriode = $this->getData('periodicity');
-//            }
-//
-//            $nbMois = $nbPeriodes * $dureePeriode;
-//            $total_loyer = $nbPeriodes * $amount_ht;
-//            $coutWithTx = 0;
-//            $coutWithCoef = 0;
-//            $loyer = 0;
-//            $totalDemande = $this->getTotalDemande();
-//
-//            $isEchoir = $this->isEchouar();
-//
-//            // Cout banque avec taux: 
-//            if ($taux > 0) {
-//                $tauxPM = $taux / 100 / 12;
-//                $echoirCalc = 1;
-//                if ($isEchoir) {
-//                    $echoirCalc = 1 + $taux / 100 * self::$coefALaCon;
-//                }
-//                $capital = $amount_ht / ($tauxPM / (1 - pow((1 + $tauxPM), -($nbMois))) / $echoirCalc) / $dureePeriode;
-//                $coutWithTx = $total_loyer - $capital;
-//            }
-//
-//            // Cout banque avec coef:
-//            if ($coef > 0) {
-//                $loyerTest = $amount_ht;
-//                $total = $loyerTest * $nbMois;
-//
-//                //cherchons total
-//                for ($i = 1; $i <= 100; $i++) {
-//                    $loyerT = $total * $coef / 100;
-//                    $coefCorrec = $nbPeriodes * (1 - $i / 100);
-//                    if ($loyerT == $loyerTest) {
-//                        break;
-//                    } elseif ($loyerT < $loyerTest) {
-//                        $total += ($loyerTest - $loyerT) * $coefCorrec;
-//                    } elseif ($loyerT > $loyerTest) {
-//                        $total += ($loyerTest - $loyerT) * $coefCorrec;
-//                    }
-//                }
-//
-//                $coutWithCoef = ($total * $nbPeriodes * $coef / 100) - $total;
-//            }
-//
-//            // Calcul Loyer: 
-//            if ($taux > 0) {
-//                $tauxPM = $taux / 100 / 12;
-//                $echoirCalc = 1;
-//                if ($isEchoir) {
-//                    $echoirCalc = 1 + $taux / 100 * self::$coefALaCon;
-//                }
-//                $loyer = $totalDemande * ($dureePeriode * (($tauxPM / (1 - pow((1 + $tauxPM), -($nbMois))) / $echoirCalc)));
-////             $loyer = $totalDemande * ($tauxPM / (1 - pow((1 + $tauxPM), -($nbMois)))  / $echoirCalc) * $dureePeriode;
-////             $loyer = (($totalDemande * $tauxPM) / (1 - pow((1 + $tauxPM), -($nbMois)))  / $echoirCalc) * $dureePeriode;
-//            } else {
-//                $loyer = $totalDemande / $nbPeriodes;
-//            }
-//
-//            if ($coef != 0) {
-//                $interet = $totalDemande - ($totalDemande * ($nbMois / $dureePeriode * $coef / 100));
-//                $loyer = ($totalDemande - $interet) / $nbPeriodes;
-//            }
-//
-//            // Emprunt total: 
-//            $totalEmprunt = $total_loyer - ($coutWithCoef + $coutWithTx);
-//
-//            $this->calcValues = array(
-//                'cout_with_coef' => $coutWithCoef,
-//                'cout_with_tx'   => $coutWithTx,
-//                'cout_total'     => $coutWithCoef + $coutWithTx,
-//                'nb_mois'        => $nbMois,
-//                'loyer'          => $loyer,
-//                'total_loyer'    => $total_loyer,
-//                'total_emprunt'  => $totalEmprunt
-//            );
-//        }
-//
-//        return $this->calcValues;
-//    }
-
-    public function getTotalLoyer() {
-        return $this->getData("quantity") * $this->getData("amount_ht");
-    }
-
-    public function displayLoyerSuggest() {
-        $calc_values = $this->getCalcValues(true);
-
-        $info = "Total emprunt : " . price($calc_values['total_emprunt']);
-        $info .= "<br />Coût banque : " . price($calc_values['cout_total']);
-        $info .= '<br/>Total remboursement : ' . price($calc_values['total_loyer']);
-
-        $verif = ($calc_values['cout_total'] > 0) && ($calc_values['cout_total'] < ($calc_values['total_emprunt'] / 2));
-        $verif2 = ((float) round($calc_values['loyer'], 2) === (float) round($this->getData('amount_ht'), 2));
-
-        $html = "";
-
-        $html .= '<span type="button" class="loyer_calc_btn btn btn-' . ($verif ? ($verif2 ? 'success' : 'default') : 'danger') . ' bs-popover"';
-        $html .= ' onclick="majLoyerAuto($(this), ' . $calc_values['loyer'] . ');"';
-        $html .= BimpRender::renderPopoverData($info, 'top', 'true');
-        $html .= '>';
-
-        $html .= BimpTools::displayMoneyValue($calc_values['loyer']);
-
-        $html .= '<i class="fas fa-question-circle iconRight"></i>';
-        $html .= '</span>';
-
-        return $html;
-    }
-
-    public function getTotalEmprunt() {
-        $calcValues = $this->getCalcValues();
-        if (isset($calcValues['total_emprunt'])) {
-            return $calcValues['total_emprunt'];
-        }
-        return 0;
-    }
-
-    public function getNbMois() {
-        return $this->getData("quantity") * $this->getData("periodicity");
-    }
-
-    public function getTotalDemande() {
-        $demande = $this->getParentInstance();
-
-        if (BimpObject::objectLoaded($demande)) {
-            return $demande->getTotalDemande();
+        if ($this->isActionAllowed('accepted') && $this->canSetAction('accepted')) {
+            $buttons[] = array(
+                'label'   => 'Demande acceptée',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsLoadModalForm('accepted', 'Demande acceptée par le refinanceur')
+            );
         }
 
-        return 0;
-    }
-
-    public function getCoutBanqueWithTaux() {
-        $calcValues = $this->getCalcValues();
-        if (isset($calcValues['cout_with_tx'])) {
-            return $calcValues['cout_with_tx'];
+        if ($this->isActionAllowed('refused') && $this->canSetAction('refused')) {
+            $buttons[] = array(
+                'label'   => 'Demande refusée',
+                'icon'    => 'fas_times',
+                'onclick' => $this->getJsActionOnclick('refused', array(), array(
+                    'form_name' => 'refused'
+                ))
+            );
         }
-        return 0;
-    }
 
-    public function getCoutBanqueWithCoeficient() {
-        $calcValues = $this->getCalcValues();
-        if (isset($calcValues['cout_with_coef'])) {
-            return $calcValues['cout_with_coef'];
+        if ($this->isActionAllowed('cancel') && $this->canSetAction('cancel')) {
+            $buttons[] = array(
+                'label'   => 'Abandonner cette demande',
+                'icon'    => 'fas_times-circle',
+                'onclick' => $this->getJsActionOnclick('cancel', array(), array(
+                    'form_name' => 'cancel'
+                ))
+            );
         }
-        return 0;
-    }
 
-    public function getLoyer() {
-        $calcValues = $this->getCalcValues();
-        if (isset($calcValues['loyer'])) {
-            return $calcValues['loyer'];
+        if ($this->isActionAllowed('selected') && $this->canSetAction('selected')) {
+            $buttons[] = array(
+                'label'   => 'Sélectionner (validation définitive)',
+                'icon'    => 'fas_check-double',
+                'onclick' => $this->getJsActionOnclick('selected', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer'
+                ))
+            );
         }
-        return 0;
-    }
 
-    public function displayRefinanceur() {
-        if ($this->isLoaded()) {
-            $refinanceur = BimpCache::getBimpObjectInstance($this->module, 'BF_Refinanceur', (int) $this->getData('id_refinanceur'));
-
-            if (!$refinanceur->isLoaded()) {
-                return $this->renderChildUnfoundMsg('id_refinanceur', $refinanceur);
-            } else {
-                return $refinanceur->getName();
+        // Remises au statut précédent: 
+        foreach (array(self::STATUS_TODO, self::STATUS_ATTENTE) as $reset_status) {
+            if ($this->isNewStatusAllowed($reset_status) && $this->canSetStatus($reset_status)) {
+                $buttons[] = array(
+                    'label'   => 'Remettre au statut "' . self::$status_list[$reset_status]['label'] . '"',
+                    'icon'    => 'fas_undo',
+                    'onclick' => $this->getJsNewStatusOnclick($reset_status, array(), array(
+                        'confirm_msg' => htmlentities('Veuillez confirmer la remise au statut "' . self::$status_list[$reset_status]['label'] . '"')
+                    ))
+                );
             }
         }
 
-        return '';
+        return $buttons;
     }
 
-    public static function getRefinanceursArray($include_empty = true) {
+    // Getters array:
+
+    public static function getRefinanceursArray($include_empty = true, $active_only = true)
+    {
         $cache_key = 'bf_refinanceurs_array';
+
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
             $instance = BimpObject::getInstance('bimpfinancement', 'BF_Refinanceur');
 
-            foreach ($instance->getList(array(), null, null, 'id', 'asc', 'array', array('id', 'id_societe')) as $item) {
+            $filters = array();
+
+            if ($active_only) {
+                $filters['active'] = 1;
+            }
+
+            foreach ($instance->getList($filters, null, null, 'id', 'asc', 'array', array('id', 'id_societe')) as $item) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['id_societe']);
                 if ($soc->isLoaded()) {
                     self::$cache[$cache_key][(int) $item['id']] = $soc->getName();
@@ -346,62 +306,397 @@ class BF_DemandeRefinanceur extends BimpObject {
         return self::getCacheArray($cache_key, $include_empty);
     }
 
+    // Getters données:
+
+    public function getInputValue($field_name)
+    {
+        if (!$this->isLoaded()) {
+            switch ($field_name) {
+                case 'qty':
+                    $demande = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($demande)) {
+                        return $demande->getNbLoyers();
+                    }
+                    return 0;
+
+                case 'periodicity':
+                    $demande = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($demande)) {
+                        return $demande->getData('periodicity');
+                    }
+                    return 0;
+
+                case 'rate':
+                    if (!$this->isLoaded() || !(float) $this->getData('rate') || ((int) $this->getData('id_refinanceur') !== (int) $this->getInitData('id_refinanceur'))) {
+                        $demande = $this->getParentInstance();
+
+                        if ($demande->getData('def_tx_cession') == 'reel') {
+                            $refin = $this->getChildObject('refinanceur');
+
+                            if (BimpObject::objectLoaded($refin) && BimpObject::objectLoaded($demande)) {
+                                return $refin->getTaux($demande->getTotalDemandeHT());
+                            }
+                        } else {
+                            BimpObject::loadClass('bimpfinancement', 'BF_Refinanceur');
+                            return BF_Refinanceur::getTauxMoyen($demande->getTotalDemandeHT());
+                        }
+                    }
+                    return (float) $this->getData('rate');
+            }
+        }
+
+        return $this->getData($field_name);
+    }
+
+    public function getNbMois()
+    {
+        return $this->getData("qty") * $this->getData("periodicity");
+    }
+
+    public function getTotalDemandeHT()
+    {
+        $demande = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($demande)) {
+            return $demande->getTotalDemandeHT();
+        }
+
+        return 0;
+    }
+
+    public function getTotalLoyers()
+    {
+        return $this->getData("qty") * $this->getData("amount_ht");
+    }
+
+    public function getCalcValues($recalculate = false, &$errors = array())
+    {
+        if (is_null($this->values) || $recalculate) {
+            $demande = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($demande)) {
+                $total_materiels = $demande->getData('montant_materiels');
+                $total_services = $demande->getData('montant_services') + $demande->getData('montant_logiciels');
+                $total_demande = $total_materiels + $total_services;
+                $marge = $demande->getDefaultMargePercent($total_demande) / 100;
+                $tx_cession = (float) $this->getData('rate');
+                $nb_mois = $this->getNbMois();
+                $periodicity = (int) $this->getData('periodicity');
+
+                $values = BFTools::getCalcValues($total_materiels, $total_services, $tx_cession, $nb_mois, $marge, (float) $demande->getData('vr_achat'), $demande->getData('mode_calcul'), $periodicity, $errors);
+            } else {
+                $errors[] = 'Demande de location liée absente';
+            }
+
+            $this->values = $values;
+        }
+
+        return $this->values;
+    }
+
+    // Affichage: 
+
+    public function displayRefinanceur($display_name = 'nom_url')
+    {
+        if ($this->isLoaded()) {
+            $refinanceur = BimpCache::getBimpObjectInstance($this->module, 'BF_Refinanceur', (int) $this->getData('id_refinanceur'));
+
+            if (!$refinanceur->isLoaded()) {
+                return $this->renderChildUnfoundMsg('id_refinanceur', $refinanceur);
+            } else {
+                $soc = $refinanceur->getChildObject('societe');
+                if (BimpObject::objectLoaded($soc)) {
+                    if ($display_name === 'nom_url') {
+                        return $soc->getLink();
+                    }
+                    if ($display_name === 'card') {
+                        $card = new BC_Card($soc);
+                        return $card->renderHtml();
+                    }
+                }
+
+                return $refinanceur->getName();
+            }
+        }
+
+        return '';
+    }
+
+    public function displayLoyerMensuelHT()
+    {
+        $html = '';
+
+        $errors = array();
+        $values = $this->getCalcValues(false, $errors);
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        } else {
+            $html .= '<div>';
+            $html .= '<span class="small">Form. évo: </span><br/>';
+            $html .= BimpTools::displayMoneyValue($values['loyer_evo_mensuel'], 'EUR', 1);
+            $html .= '</div>';
+
+            $html .= '<div style="margin-top: 10px">';
+            $html .= '<div>';
+            $html .= '<span class="small">Form. dyn: </span><br/>';
+            $html .= BimpTools::displayMoneyValue($values['loyer_dyn_mensuel'], 'EUR', 1) . '<br/>';
+            $html .= '</div>';
+
+            $html .= '<div>';
+            $html .= 'Puis ' . BimpTools::displayMoneyValue($values['loyer_dyn_suppl_mensuel'], 'EUR', 1);
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
+    // Rendus HTML: 
+
+    public function renderAmountInputExtraContent()
+    {
+        $html = '';
+
+        if ($this->isFieldEditable('amount_ht')) {
+            $html .= '<span class="btn btn-default" onclick="BimpFinancement.calculateMontantLoyerHT($(this), ' . ($this->isLoaded() ? $this->id : 0) . ')">';
+            $html .= BimpRender::renderIcon('fas_calculator', 'iconLeft') . 'Calculer';
+            $html .= '</span>';
+            $html .= '<span class="calc_loading" style="display: none"><i class="fa fa-spinner fa-spin"></i></span>';
+        }
+
+        return $html;
+    }
+
+    public function renderMontants($content_only = false)
+    {
+        $html = '';
+
+        $errors = array();
+        $values = $this->getCalcValues($errors);
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        } else {
+            $html .= BFTools::renderValuesTable($values);
+        }
+
+        if ($content_only) {
+            return $html;
+        }
+
+        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft') . 'Montant';
+        return BimpRender::renderPanel($title, $html, '', array(
+                    'type' => 'secondary'
+        ));
+    }
+
+    // Traitements : 
+
+    public function setSelected(&$warings = array())
+    {
+        $errors = array();
+
+        $values = $this->getCalcValues(true, $errors);
+        $demande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($demande)) {
+            $errors[] = 'Demande de location liée absente';
+        }
+
+        if (!count($errors)) {
+            $errors = $this->setNewStatus(self::STATUS_SELECTIONNEE);
+
+            if (!count($errors)) {
+                $demande = $this->getParentInstance();
+
+                if (BimpObject::objectLoaded($demande)) {
+                    $values = $this->getCalcValues();
+                    $demande->set('periodicity', $values['periodicity']);
+                    $demande->set('duration', $values['nb_mois']);
+                    $demande->set('tx_cession', $this->getData('rate'));
+                    $demande->set('loyer_mensuel_evo_ht', round($values['loyer_evo_mensuel'], 2));
+                    $demande->set('loyer_mensuel_dyn_ht', round($values['loyer_dyn_mensuel'], 2));
+                    $demande->set('loyer_mensuel_suppl_ht', round($values['loyer_dyn_suppl_mensuel'], 2));
+
+                    $up_warnings = array();
+                    $up_errors = $demande->update($up_warnings, true);
+
+                    if (count($up_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des données de la demande de location');
+                    } else {
+                        // Par précaution : 
+                        $this->db->update($this->getTable(), array(
+                            'status' => self::STATUS_ACCEPTEE
+                                ), 'id_demande = ' . (int) $this->getData('id_demande') . ' AND id != ' . $this->id . ' AND status = ' . self::STATUS_SELECTIONNEE);
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    // Actions:
+
+    public function actionRefused($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Refus enregistré avec succès';
+
+        $errors = $this->updateField('status', self::STATUS_REFUSEE); // Pour contourner le log automatique
+
+        if (!count($errors)) {
+            $reasons = BimpTools::getArrayValueFromPath($data, 'reasons', '');
+            if ($reasons) {
+                $comment = $this->getData('comment');
+                $comment .= ($comment ? '<br/><br/>' : '') . '<b>Raisons du refus par le refinanceur : </b>' . $reasons;
+                $this->updateField('comment', $comment);
+            }
+
+            $this->addObjectLog('Demande refusée par le refinanceur.' . ($reasons ? '<br/><br/><b>Raisons : </b>' . $reasons : ''));
+
+            $demande = $this->getParentInstance();
+            if (BimpObject::objectLoaded($demande)) {
+                $demande->checkStatus();
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCancel($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Abandon enregistré avec succès';
+
+        $errors = $this->updateField('status', self::STATUS_ANNULEE); // Pour contourner le log automatique
+
+        if (!count($errors)) {
+            $reasons = BimpTools::getArrayValueFromPath($data, 'reasons', '');
+            if ($reasons) {
+                $comment = $this->getData('comment');
+                $comment .= ($comment ? '<br/><br/>' : '') . '<b>Raisons de l\'abandon : </b>' . $reasons;
+                $this->updateField('comment', $comment);
+            }
+
+            $this->addObjectLog('Demande abandonnée.' . ($reasons ? '<br/><br/><b>Raisons : </b>' . $reasons : ''));
+            $demande = $this->getParentInstance();
+            if (BimpObject::objectLoaded($demande)) {
+                $demande->checkStatus();
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSelected($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Validation définitive effectuée avec succès';
+
+        $errors = $this->setSelected($warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
-    public function reset() {
+    public function reset()
+    {
         $this->calcValues = null;
-
         parent::reset();
     }
 
-    public function onSave(&$errors = array(), &$warnings = array()) {
-        $this->calcValues = null;
-    }
-
-    function vpm($taux, $coef, $npm, $va, $vc = 0, $type = 0) {//Calcul loyé avec taux et capital
-        if ($coef > 0) {
-            return $coef / 100 * ($va);
+    public function create(&$warnings = [], $force_create = false)
+    {
+        $date_demande = '';
+        if ((int) BimpTools::getPostFieldValue('demande_done', 0)) {
+            $date_demande = BimpTools::getPostFieldValue('date_demande', '');
+            $this->set('status', self::STATUS_ATTENTE);
+        } else {
+            $this->set('status', self::STATUS_TODO);
         }
 
+        $errors = parent::create($warnings, $force_create);
 
-        if (!is_numeric($taux) || !is_numeric($npm) || !is_numeric($va) || !is_numeric($vc)):
-            return false;
-        endif;
+        if (!count($errors)) {
+            if ($date_demande) {
+                $this->addObjectLog('Demande effectuée le ' . date('d / m / H à H:i', strtotime($date_demande)), 'DEMANDE_DONE');
+            }
+        }
 
-        if ($type > 1 || $type < 0):
-            return false;
-        endif;
-
-        $tauxAct = pow(1 + $taux, -$npm);
-
-        if ((1 - $tauxAct) == 0):
-            return 0;
-        endif;
-
-        $vpm = ( ($va + ($vc * $tauxAct)) * $taux / (1 - $tauxAct) ) / (1 + $taux * $type);
-        return $vpm;
+        return $errors;
     }
 
-    function va($taux, $coef, $npm, $vpm, $vc = 0, $type = 0) {
-        if ($coef > 0)
-            return $vpm / $coef * 100;
+    public function update(&$warnings = [], $force_update = false)
+    {
+        $date_demande = '';
+        $conds = '';
+        $new_status = null;
 
-        if (!is_numeric($taux) || !is_numeric($npm) || !is_numeric($vpm) || !is_numeric($vc)):
-            return false;
-        endif;
+        if ((int) $this->getData('status') === self::STATUS_TODO && (int) BimpTools::getPostFieldValue('demande_done', 0)) {
+            $date_demande = BimpTools::getPostFieldValue('date_demande', '');
+            $this->set('status', self::STATUS_ATTENTE);
+        }
+        if ((int) $this->getData('status') === self::STATUS_ATTENTE && (int) BimpTools::getPostFieldValue('demande_accepted', 0)) {
+            if ((int) BimpTools::getPostFieldValue('under_conditions', 0)) {
+                $new_status = self::STATUS_ACCEPTEE_CONDS;
 
-        if ($type > 1 || $type < 0):
-            return false;
-        endif;
+                $conds = BimpTools::getPostFieldValue('conditions', '');
+                if ($conds) {
+                    $comment = $this->getData('comment');
+                    $comment .= ($comment ? '<br/><br/>' : '') . '<b>Conditions d\'acceptation : </b><br/>' . $conds;
+                    $this->set('comment', $comment);
+                }
+            } else {
+                $new_status = self::STATUS_ACCEPTEE;
+            }
+        }
 
-        $tauxAct = pow(1 + $taux, -$npm);
+        if (!is_null($new_status)) {
+            $this->set('status', $new_status);
+        }
 
-        if ((1 - $tauxAct) == 0):
-            return 0;
-        endif;
+        $errors = parent::update($warnings, $force_update);
 
-        $va = $vpm * (1 + $taux * $type) * (1 - $tauxAct) / $taux - $vc * $tauxAct;
-        return $va;
+        if (!count($errors)) {
+            if ($date_demande) {
+                $this->addObjectLog('Demande effectuée le ' . date('d / m / H à H:i', strtotime($date_demande)));
+            }
+
+            if (!is_null($new_status)) {
+                switch ($new_status) {
+                    case self::STATUS_ACCEPTEE:
+                        $this->addObjectLog('Demande acceptée');
+                        break;
+                    case self::STATUS_ACCEPTEE_CONDS:
+                        $this->addObjectLog('Demande acceptée sous conditions.' . ($conds ? ' <br/><b>Conditions : </b>' . $conds : ''));
+                        break;
+                }
+            }
+
+            if ((int) BimpTools::getPostFieldValue('demande_selected', 0)) {
+                $select_errors = $this->setSelected();
+
+                if (!empty($select_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($select_errors, 'Echec de la sélection de ce refinancement');
+                }
+            }
+        }
+
+        return $errors;
     }
-
 }

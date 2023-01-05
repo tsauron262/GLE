@@ -1,0 +1,308 @@
+table: bimpcore_log
+common_fields: 0
+no_transaction_db: 1
+icon: fas_book-medical
+
+controller: log
+list_page_url:
+    controller: dev
+    url_params: 
+        tab: logs
+        
+has_graph: 1
+
+header_list_name: default
+header_delete_btn: 1
+header_btn: 
+    callback: getActionsButtons
+    
+labels: 
+    name: log
+            
+objects: 
+    user_processed: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_processed
+                
+fields: 
+    type: 
+        label: Type
+        values: 
+            array: types
+    
+    id_user: 
+        label: Utilisateur
+        type: id_object
+        object: user
+        input: 
+            type: search_user
+        
+    date: 
+        label: Date
+        type: datetime
+        
+    last_occurence: 
+        label: Date dernier log
+        type: datetime
+        
+    level: 
+        label: Niveau
+        type: int
+        values: 
+            array: levels
+            
+    msg: 
+        label: Message
+        type: text
+        
+    url: 
+        label: URL
+        
+    url_params: 
+        label: Params URL
+        type: json
+        
+    obj_module: 
+        label: Module
+        
+    obj_name: 
+        label: Type objet
+        
+    id_object: 
+        label: ID objet
+        type: id
+        search: 
+            input: 
+                type: text
+    id_erp: 
+        label: ID ERP
+        type: int
+        
+    extra_data: 
+        label: Données suppl. 
+        type: json
+        
+    backtrace: 
+        label: Trace
+        type: json
+            
+    resolution_infos: 
+        label: Résolution
+        type: text
+        input: 
+            auto_expand: 1
+            rows: 1
+            note: 1
+        
+    processed: 
+        label: Traité
+        type: bool
+        default_value: 0
+        
+    ignored: 
+        label: Ignoré
+        type: bool
+        default_value: 0
+        
+    id_user_processed: 
+        label: Traité par
+        type: id_object
+        object: user_processed
+            
+    date_processed: 
+        label: Traité le
+        type: datetime
+        
+    send_to: 
+        label: A traiter par
+        values: 
+            callback: 
+                    method: getDevsNamesArray
+                    params: 
+                        - 1
+        input: 
+            type: select
+            options: 
+                array: devsNames
+                
+    nb_occurence:
+        label: Nombre de fois
+        type: int
+        
+forms: 
+    send_to: 
+        rows: 
+            - field: send_to
+            - custom: 1
+              label: Note
+              input_name: note
+              input: 
+                  type: textarea
+                  auto_expand: 1
+                  rows: 3
+            
+fields_tables: 
+    default: 
+        title: Infos
+        icon: fas_info
+        rows: 
+            - field: type
+            - field: level
+            - field: send_to
+            - field: processed
+              edit: 1
+            - field: ignored
+              edit: 1
+            - label: Objet
+              value: 
+                  callback: displayObj
+            - field: msg
+            - field: nb_occurence
+            
+    url: 
+        title: URL
+        icon: fas_globe
+        rows: 
+            - field: url
+            - field: url_params
+            - label: Lien
+              value: 
+                  callback: displayLink
+                  
+    resolution: 
+        title: Résolution
+        rows: 
+            - field: resolution_infos
+              edit: 1
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: rows
+                  col_md: 6
+                  col_lg: 6
+                  rows: 
+                      - cols: 
+                          - type: fields_table
+                            fields_table: 
+                                name: default
+                          - type: fields_table
+                            fields_table: 
+                                name: url
+                - type: rows
+                  col_md: 6
+                  col_lg: 6
+                  rows: 
+                      - cols: 
+                          - type: custom
+                            custom: 
+                                callback: displayExtraData
+                          - type: custom
+                            custom: 
+                                callback: displayBacktrace
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: resolution
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderNotesList
+                          params:
+                              - 1
+        
+filters_panels: 
+    default: 
+        filters: 
+            type:
+            level: 
+            processed: 
+            ignored: 
+            date: 
+            id_user: 
+            send_to: 
+        
+lists_cols: 
+    msg: 
+        min_width: 220
+    obj: 
+        label: Objet
+        value: 
+            callback: displayObj
+    processed: 
+        edit: 1
+    ignored: 
+        edit: 1
+    resolution_infos: 
+        edit: 1
+        min_width: 300
+        
+lists: 
+    default: 
+        title: Logs
+        checkboxes: 1
+        configurable: 1
+        bulk_actions:
+            - label: Supprimer les logs sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+            - label: Marquer traité
+              icon: fas_check
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setProcessed', {}, '', 'Veuillez confirmer', true)
+            - label: Ignorer
+              icon: fas_times-circle
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setIgnored', {}, '', 'Veuillez confirmer', true)
+        list_actions: 
+            - label: Supprimer les logs
+              icon: fas_trash-alt
+              action: bulkDelete
+              confirm_msg: Veuillez confirmer la suppression de tous les logs filtrés
+            - label: Marquer traités
+              icon: fas_check
+              action: setProcessed
+              confirm_msg: Veuillez confirmer
+            - label: Ignorer
+              icon: fas_times-circle
+              action: setIgnored
+              confirm_msg: Veuillez confirmer
+        filters_panel: default
+        filters_panel_open: 1
+        sort_field: last_occurence
+        sort_way: desc
+        n: 50
+        delete_btn: 1
+        update_btn: 1
+        modal_view: default
+        page_btn: 1
+        extra_btn:
+            callback: getListExtraButtons
+        before_list_callback: renderBeforeListContent
+        cols: 
+            date: 
+            last_occurence:
+            type: 
+            level: 
+            msg: 
+            obj: 
+            send_to: 
+            processed:
+            nb_occurence:
+        graph:
+            - 15M
+            - 1H
+            - 3H
+            - 6H
+            - 12H
+
+    object: 
+        extends: default
+        before_list_callback: unset
+        cols: 
+            obj: unset
+        

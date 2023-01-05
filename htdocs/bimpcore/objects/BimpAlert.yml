@@ -1,0 +1,85 @@
+table: bimpcore_alert
+common_fields: 0
+in_cache_serveur: 1
+
+labels: 
+    name: alerte
+    is_female: 1
+    
+positions: 1
+position_insert: after
+
+fields: 
+    label: 
+        label: Titre
+    status:
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+    conditionExec:
+        label: Code de condition
+        type: text
+        input: 
+            auto_expand: 1
+            help: Positionné $exec a 1 pour activer l'alert
+    execution:
+        label: Code a exécuter
+        type: text
+        input: 
+            auto_expand: 1
+            help: Vous pouvez positionné $msg et $niveau
+    niveau:
+        label: Niveau d'alert
+        type: int
+        values: 
+            array: niveaux
+    msg: 
+        label: Message
+        hashtags: 1  
+        type: html
+        input:
+            type: html
+    type:
+        label: Type
+        type: int
+        values:
+            - Message
+            - Popup
+    filter:
+        label: Filtre
+#        type: text
+        type: object_filters
+        obj_module: bimpcore
+        obj_name: Bimp_User
+        
+lists:
+    default:
+        positions: 1
+        extra_btn: 
+            callback: getListExtraButtons
+        positions_open: 1
+        title: Alerts
+        add_form_name: default
+        edit_form_name: default
+        delete_btn: 1
+        edit_btn: 1
+        sort_field: position
+        sort_way: asc
+        n: 10
+        cols:
+            status:
+            label:
+            niveau:
+            msg:
+            type:
+            filter:
+            nb:
+                
+lists_cols:
+    nb:
+        label: Nombre de vue
+        value: 
+            callback: getNbView
+                

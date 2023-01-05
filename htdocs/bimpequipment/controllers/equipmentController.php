@@ -49,14 +49,56 @@ class equipmentController extends BimpController
 
         return $list->renderHtml();
     }
+    
+    
+    
+    public function renderHotlineList(){
+        if (!BimpTools::isSubmit('id')) {
+            return BimpRender::renderAlerts('ID de l\'équipement absent');
+        }
+
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) BimpTools::getValue('id', 0));
+
+        if (!BimpObject::objectLoaded($equipment)) {
+            return BimpRender::renderAlerts('ID de l\'équipement invalide');
+        }
+
+        $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_Ticket'), 'default', 1, null, 'Tickets enregistrés pour cet équipement', 'wrench');
+        $list->addFieldFilterValue('serial', array('or_field' => array($equipment->getData('serial'), $equipment->getData('imei'))));
+
+        return $list->renderHtml();
+    }
+    
+    public function renderAchats(){
+        $html = '';
+        $id_equipment = (int) BimpTools::getValue('id', 0);
+        if ($id_equipment) {
+            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+            $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commande Fournisseur', 'wrench');
+            $list->addObjectAssociationFilter($equipment, $id_equipment, 'achatsCommFourn_Equipments');
+            $html .= $list->renderHtml();
+            
+            $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'default', 1, null, 'Facture Fournisseur', 'wrench');
+            $list->addObjectAssociationFilter($equipment, $id_equipment, 'achatsFactFourn_Equipments');
+            $html .= $list->renderHtml();
+        }
+        return $html;
+    }
 
     protected function ajaxProcessEquipmentGgxLookup()
     {
         $errors = array();
+        $data = array();
+        
+        if(!BimpObject::useApple())
+            die(json_encode(array(
+                'errors'     => $errors,
+                'data'       => $data,
+                'request_id' => BimpTools::getValue('request_id', 0)
+            )));
+            
 
         $serial = (string) BimpTools::getValue('serial', '');
-
-        $data = array();
 
         if (!$serial) {
             $errors[] = 'Numéro de série absent';
@@ -132,13 +174,25 @@ class equipmentController extends BimpController
         if (!BimpTools::isSubmit('id')) {
             return BimpRender::renderAlerts('ID de l\'équipement absent');
         }
+        $html = '';
         
-        $inventory_line = BimpObject::getInstance('bimplogistique', 'InventoryLine');
+        $inventory_line = BimpObject::getInstance('bimplogistique', 'InventoryLine2');
 
         $list = new BC_ListTable($inventory_line, 'equipment', 1, null, "Lignes d'inventaire contenant l'équipement");
         $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id'));
+        $list->addJoin('bl_inventory_2', 'a.fk_inventory = i.id', 'i');
+        $html .= $list->renderHtml();
+        
+        
+        
+        $inventory_line = BimpObject::getInstance('bimplogistique', 'InventoryLine');
+
+        $list = new BC_ListTable($inventory_line, 'equipment', 1, null, "Lignes dancien inventaire contenant l'équipement");
+        $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id'));
         $list->addJoin('bl_inventory', 'a.fk_inventory = i.id', 'i');
-        return $list->renderHtml();
+        $html .=  $list->renderHtml();
+        
+        return $html;
     }
 
 }

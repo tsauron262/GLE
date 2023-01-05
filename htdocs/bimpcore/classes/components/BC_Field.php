@@ -9,69 +9,115 @@ class BC_Field extends BimpComponent
     public $value = null;
     public $new_value = null;
     public $display_name = 'default';
+    public $display_options = array();
     public $container_id = null;
     public $display_input_value = true;
     public $no_html = false;
+    public $no_history = false;
     public $name_prefix = '';
     public $display_card_mode = 'none'; // hint / visible
     public $force_edit = false;
+    public static $types = array(
+        'string'         => 'Chaîne de caractères',
+        'text'           => 'Text long',
+        'html'           => 'HTML',
+        'password'       => 'Mot de passe',
+        'int'            => 'Nombre entier',
+        'float'          => 'Nombre décimal',
+        'bool'           => 'Booléen (valeur OUI/NON)',
+        'qty'            => 'Quantité',
+        'money'          => 'Valeur monétaire',
+        'percent'        => 'Pourcentage',
+        'id'             => 'Identifiant numérique',
+        'id_parent'      => 'Objet parent',
+        'id_object'      => 'Objet lié',
+        'items_list'     => 'Liste',
+        'color'          => 'Couleur',
+        'json'           => 'Ensemble de données au format JSON',
+        'date'           => 'Date',
+        'time'           => 'Heure',
+        'datetime'       => 'Date et heure',
+        'object_filters' => 'Filtres objet'
+    );
     public static $type_params_def = array(
-        'id_parent'  => array(
-            'object'             => array('default' => ''),
-            'create_form'        => array('default' => ''),
-            'create_form_values' => array('data_type' => 'array'),
-            'create_form_label'  => array('default' => 'Créer')
-        ),
-        'id_object'  => array(
+        'id_parent'      => array(
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
             'create_form_label'  => array('default' => 'Créer'),
+            'edit_form'          => array('default' => ''),
+            'edit_form_values'   => array('data_type' => 'array'),
+            'edit_form_label'    => array('default' => 'Editer')
         ),
-        'items_list' => array(
-            'items_data_type' => array('default' => 'string'),
-            'items_sortable'  => array('data_type' => 'bool', 'default' => 0),
-            'items_delimiter' => array('default' => ',')
+        'id_object'      => array(
+            'object'             => array('default' => ''),
+            'create_form'        => array('default' => ''),
+            'create_form_values' => array('data_type' => 'array'),
+            'create_form_label'  => array('default' => 'Créer'),
+            'edit_form'          => array('default' => ''),
+            'edit_form_values'   => array('data_type' => 'array'),
+            'edit_form_label'    => array('default' => 'Editer')
         ),
-        'number'     => array(
-            'min'      => array('data_type' => 'float'),
-            'max'      => array('data_type' => 'float'),
+        'items_list'     => array(
+            'items_data_type'   => array('default' => 'string'),
+            'items_sortable'    => array('data_type' => 'bool', 'default' => 0),
+            'items_delimiter'   => array('default' => ','),
+            'items_braces'      => array('data_type' => 'bool', 'default' => 0),
+            'items_add_all_btn' => array('data_type' => 'bool', 'default' => 0)
+        ),
+        'number'         => array(
+            'min'      => array('data_type' => 'string'),
+            'max'      => array('data_type' => 'string'),
             'unsigned' => array('data_type' => 'bool', 'default' => 0),
             'decimals' => array('data_type' => 'int', 'default' => 2)
         ),
-        'money'      => array(
+        'money'          => array(
             'currency' => array('default' => 'EUR')
         ),
-        'string'     => array(
+        'string'         => array(
+            'hashtags'        => array('data_type' => 'bool', 'default' => 0),
             'size'            => array('data_type' => 'int', 'default' => 128),
             'forbidden_chars' => array('default' => ''),
             'regexp'          => array('default' => ''),
             'invalid_msg'     => array('default' => ''),
             'uppercase'       => array('data_type' => 'bool', 'default' => 0),
             'lowercase'       => array('data_type' => 'bool', 'default' => 0),
+        ),
+        'text'           => array(
+            'hashtags' => array('data_type' => 'bool', 'default' => 0)
+        ),
+        'html'           => array(
+            'hashtags' => array('data_type' => 'bool', 'default' => 0)
+        ),
+        'object_filters' => array(
+            'obj_module' => array('default' => ''),
+            'obj_name'   => array('default' => '')
         )
     );
     public static $missing_if_empty_types = array(
         'string', 'text', 'password', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
     );
-    public static $has_total_types = array('qty', 'money');
+    public static $has_total_types = array('qty', 'money', 'timer');
+    public static $not_searchable_types = array('object_filters');
 
     public function __construct(BimpObject $object, $name, $edit = false, $path = 'fields', $force_edit = false)
     {
         $this->params_def['label'] = array('required' => true);
         $this->params_def['type'] = array('default' => 'string');
         $this->params_def['required'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['unused'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['required_if'] = array();
         $this->params_def['default_value'] = array('data_type' => 'any', 'default' => null);
         $this->params_def['sortable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['searchable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['editable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['viewable'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['filterable'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['user_edit'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['search'] = array('type' => 'definitions', 'defs_type' => 'search');
         $this->params_def['sort_options'] = array('type' => 'definitions', 'defs_type' => 'sort_option', 'multiple' => 1);
         $this->params_def['next_sort_field'] = array();
         $this->params_def['next_sort_way'] = array('default' => 'asc');
-//        $this->params_def['display'] = array('type' => 'definitions', 'defs_type' => 'display', 'multiple' => 1);
         $this->params_def['depends_on'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['keep_new_value'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['values'] = array('data_type' => 'array', 'compile' => true);
@@ -80,6 +126,8 @@ class BC_Field extends BimpComponent
         $this->params_def['extra'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['has_total'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['no_dol_prop'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['nl2br'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['sync'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->edit = $edit;
         $this->force_edit = $force_edit;
@@ -100,10 +148,10 @@ class BC_Field extends BimpComponent
         }
 
         if (in_array($this->params['type'], array('qty', 'int', 'float', 'money', 'percent'))) {
-            $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
+            $this->params = BimpTools::merge_array($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
         } elseif ($this->params['type'] === 'items_list') {
             if (isset($this->params['items_data_type']) && $this->params['items_data_type'] === 'id_object') {
-                $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['id_object']));
+                $this->params = BimpTools::merge_array($this->params, parent::fetchParams($this->config_path, self::$type_params_def['id_object']));
             }
         }
 
@@ -116,9 +164,52 @@ class BC_Field extends BimpComponent
         $current_bc = $prev_bc;
     }
 
+    // Getters booléens: 
+
+    public function isEditable()
+    {
+        if (!$this->isObjectValid()) {
+            return 0;
+        }
+
+        return (int) ((int) $this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isEditable($this->force_edit) && $this->object->isFieldEditable($this->name, $this->force_edit));
+    }
+
+    public function isUsed()
+    {
+        return (!(int) $this->params['unused']);
+    }
+
+    public function isSearchable()
+    {
+        if (!$this->params['searchable']) {
+            return 0;
+        }
+
+        $type = $this->getParam('type', 'string');
+
+        if (in_array($type, self::$not_searchable_types)) {
+            return 0;
+        }
+
+        if ($type === 'items_list') {
+            if (!(int) $this->getParam('items_braces', 0)) {
+                return 0;
+            }
+
+            if (in_array($this->getParam('items_data_type'), self::$not_searchable_types)) {
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+
+    // Rendus HTML principaux: 
+
     public function renderHtml()
     {
-        if ((!$this->params['editable'] && !$this->params['viewable']) || !$this->params['show']) {
+        if (!$this->params['show'] || !$this->isUsed()) {
             return '';
         }
 
@@ -143,17 +234,33 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->edit) {
-            
-            if ($this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit)) {
+            if ($this->isEditable()) {
                 $html .= $this->renderInput();
             } else {
+                if (method_exists($this->object, 'getInputValue')) {
+                    $input_val = $this->object->getInputValue($this->name);
+
+                    if (!is_null($input_val)) {
+                        $this->value = $input_val;
+                    }
+                }
                 $content = $this->displayValue();
+
+                $help = $this->object->getConf('fields/' . $this->name . '/input/help', '');
+
+                if ($help) {
+                    $content .= '<p class="inputHelp">' . $help . '</p>';
+                }
+
                 $html .= BimpInput::renderInputContainer($this->name, $this->value, $content, $this->name_prefix);
             }
         } else {
             $html .= $this->displayValue();
-        }
 
+            if ($this->params['nl2br']) {
+                $html = nl2br($html);
+            }
+        }
 
         $current_bc = $prev_bc;
         return $html;
@@ -161,10 +268,6 @@ class BC_Field extends BimpComponent
 
     public function renderInput($input_path = null)
     {
-        if (!$this->params['show']) {
-            return '';
-        }
-
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -176,6 +279,21 @@ class BC_Field extends BimpComponent
             $input_path = $this->config_path . '/input';
         }
 
+        if ($this->params['type'] === 'items_list' && is_array($this->value)) {
+            $this->params['multiple_values_matches'] = array();
+
+            $field_params = $this->params;
+            $field_params['type'] = $this->getParam('items_data_type', 'string');
+            $bc_display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $field_params);
+            $bc_display->no_html = $this->no_html;
+            $bc_display->setDisplayOptions($this->display_options);
+
+            foreach ($this->value as $value) {
+                $bc_display->value = $value;
+                $this->params['multiple_values_matches'][$value] = $bc_display->renderHtml();
+            }
+        }
+
         $input = new BC_Input($this->object, $this->params['type'], $this->name, $input_path, $this->value, $this->params);
         $input->setNamePrefix($this->name_prefix);
         $input->display_card_mode = $this->display_card_mode;
@@ -185,10 +303,12 @@ class BC_Field extends BimpComponent
         }
 
         $history_html = '';
-        if ($this->params['history'] && BimpObject::objectLoaded($this->object)) {
-            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name);
+        if ($this->params['history'] && BimpObject::objectLoaded($this->object) && BimpCore::isContextPrivate()) {
+            $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
+            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name, 15, $history_user);
         }
 
+        $html = '';
         if ($history_html) {
             $html .= '<div style="padding-left: 32px;">';
             $html .= '<div style="float: left; margin-left: -28px; margin-top: 4px">';
@@ -206,7 +326,9 @@ class BC_Field extends BimpComponent
         return $html;
     }
 
-    public function displayValue()
+    // Affichages: 
+
+    public function displayValue($label_only = false)
     {
         if (!$this->params['viewable'] || !$this->object->canViewField($this->name)) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce champ', 'warning');
@@ -226,18 +348,19 @@ class BC_Field extends BimpComponent
         }
 
         $history_html = '';
-        if ($this->params['history']) {
-            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name);
+        if (!$this->no_html && !$label_only && $this->params['history'] && BimpCore::isContextPrivate() && !$this->no_history) {
+            $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
+            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name, 15, $history_user);
         }
 
         if ($history_html) {
-            $html .= '<div style="padding-right: 45px;">';
-            $html .= '<div style="float: left; margin-left: -40px; margin-top: 4px">';
+            $html .= '<div style="padding-left: 28px;">';
+            $html .= '<div style="float: left; margin-left: -28px; margin-top: 4px">';
             $html .= $history_html;
             $html .= '</div>';
         }
 
-        if ($this->display_input_value) {
+        if (!$this->no_html && !$label_only && $this->display_input_value) {
             $value = $this->value;
             if (is_array($value)) {
                 if ($this->params['type'] === 'json') {
@@ -249,9 +372,9 @@ class BC_Field extends BimpComponent
             $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($value) . '">';
         }
 
-        $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $this->params, $this->value);
+        $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/displays/' . $this->display_name, $this->name, $this->params, $this->value);
         $display->no_html = $this->no_html;
-
+        $display->setDisplayOptions($this->display_options);
         $html .= $display->renderHtml();
 
         if ($history_html) {
@@ -262,9 +385,289 @@ class BC_Field extends BimpComponent
         return $html;
     }
 
-    public function renderDependsOnScript($form_identifier)
+    public function displayType()
     {
-        return self::renderDependsOnScriptStatic($this->object, $form_identifier, $this->name, $this->params['depends_on'], $this->name_prefix, $this->params['keep_new_value']);
+        if (isset($this->params['values']) && is_array($this->params['values']) && !empty($this->params['values'])) {
+            return 'Identifiant d\'une liste de valeurs prédéfinies';
+        }
+
+        $type = $this->params['type'];
+
+        if (!$type) {
+            return 'Non défini';
+        }
+
+        if (isset(self::$types[$type])) {
+            $label = self::$types[$type];
+
+            if (($type === 'id_objet') || ($type === 'items_list' && $this->params['item_data_type'] === 'id_object')) {
+                if ($this->isObjectValid()) {
+                    $object = $this->object->getChildObject($this->params['object']);
+
+                    if (is_a($object, 'BimpObject')) {
+                        $label .= ' (' . BimpTools::ucfirst($object->getLabel()) . ')';
+                    }
+                }
+            } elseif ($type === 'id_parent') {
+                if ($this->isObjectValid()) {
+                    $object = $this->object->getParentInstance();
+
+                    if (is_a($object, 'BimpObject')) {
+                        $label .= ' (' . BimpTools::ucfirst($object->getLabel()) . ')';
+                    }
+                }
+            }
+
+            return $label;
+        }
+
+        return 'Inconnu';
+    }
+
+    public function displayCreateObjectButton($trigger_obj_change = false, $auto_save = false)
+    {
+        $data_type = $this->params['type'];
+
+        if ($data_type === 'items_list') {
+            $data_type = $this->getParam('items_data_type', 'string');
+        }
+
+        if (!in_array($data_type, array('id_parent', 'id_object'))) {
+            return '';
+        }
+
+        $instance = $this->object->config->getObject('fields/' . $this->name . '/object');
+
+        if (is_null($instance)) {
+            return '';
+        }
+
+        $html = '';
+
+        $create_form = $this->getParam('create_form', '');
+        $edit_form = $this->getParam('edit_form', '');
+
+        if ($create_form || $edit_form) {
+
+            $success_callback = 'null';
+
+            if ($trigger_obj_change || $auto_save) {
+                $success_callback = 'function(result) {';
+
+                if ($auto_save && BimpObject::objectLoaded($this->object)) {
+                    $success_callback .= 'if (result.id_object) {saveObjectField(\'' . $this->object->module . '\'';
+                    $success_callback .= ', \'' . $this->object->object_name . '\'';
+                    $success_callback .= ', ' . $this->object->id;
+                    $success_callback .= ', \'' . $this->name . '\'';
+                    $success_callback .= ', result.id_object';
+                    $success_callback .= ', null';
+                    $success_callback .= ');}';
+                } elseif ($trigger_obj_change) {
+                    $success_callback .= 'triggerObjectChange(\'' . $this->object->module . '\'';
+                    $success_callback .= ', \'' . $this->object->object_name . '\'';
+                    $success_callback .= ', ' . (BimpObject::objectLoaded($this->object) ? $this->object->id : 0);
+                    $success_callback .= ');';
+                }
+
+                $success_callback .= '}';
+            }
+
+            $html .= '<div class="buttonsContainer align-right">';
+
+            if ($edit_form && $instance->isLoaded()) {
+                $form_values = $this->getParam('edit_form_values', array());
+                $btn_label = $this->getParam('edit_form_label', 'Editer') . ' ' . $instance->getLabel('the');
+
+                $onclick = $instance->getJsLoadModalForm($edit_form, $btn_label, $form_values, '', 'close', 0, '$(this)', $success_callback);
+
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_edit', 'iconLeft') . $btn_label;
+                $html .= '</span>';
+            }
+
+            if ($create_form) {
+                if ($instance->isLoaded()) {
+                    $instance = BimpObject::getInstance($instance->module, $instance->object_name);
+                }
+
+                $form_values = $this->getParam('create_form_values', array());
+                $btn_label = $this->getParam('create_form_label', 'Ajouter') . ' ' . $instance->getLabel('a');
+
+                $onclick = $instance->getJsLoadModalForm($create_form, $btn_label, $form_values, '', 'close', 0, '$(this)', $success_callback);
+
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . $btn_label;
+                $html .= '</span>';
+            }
+
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
+    // Getters: 
+
+    public function getLinkedObject()
+    {
+        if ($this->isObjectValid()) {
+            if ($this->params['object']) {
+                return $this->object->getChildObject($this->params['object']);
+            }
+        }
+
+        return null;
+    }
+
+    public function hasValuesArray()
+    {
+        return (isset($this->params['values']) && is_array($this->params['values']) && !empty($this->params['values']));
+    }
+
+    public function getValuesArrayData()
+    {
+        $data = array(
+            'has_values'  => 0,
+            'has_icon'    => 0,
+            'has_classes' => 0
+        );
+
+        if (isset($this->params['values']) && is_array($this->params['values']) && !empty($this->params['values'])) {
+            $data['has_values'] = 1;
+            foreach ($this->params['values'] as $key => $value) {
+                if (is_array($value)) {
+                    if (isset($value['icon'])) {
+                        $data['has_icon'] = 1;
+                    }
+                    if (isset($value['classes'])) {
+                        $data['has_classes'] = 1;
+                    }
+
+                    if ($data['has_icon'] && $data['has_classes']) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    public static function getInputType(BimpObject $object, $field)
+    {
+        $path = 'fields/' . $field . '/';
+        if ($object->config->isDefined($path . 'input/type')) {
+            return $object->getConf($path . 'input/type');
+        }
+
+        if ($object->config->isDefined($path . 'values')) {
+            return 'select';
+        }
+
+        $data_type = $object->getConf($path . 'type', 'string');
+
+        switch ($data_type) {
+            case 'int':
+            case 'float':
+            case 'string':
+            case 'percent':
+            case 'money':
+            case 'color':
+                return 'text';
+
+            case 'text':
+                return 'textarea';
+
+            case 'bool':
+                return 'toggle';
+
+            case 'qty':
+            case 'html':
+            case 'time':
+            case 'date':
+            case 'datetime':
+            case 'password':
+            case 'object_filters':
+                return $data_type;
+        }
+
+        return '';
+    }
+
+    public function getDefaultDisplayWidth()
+    {
+        return self::getDefaultDisplayWidthFromType($this->params['type']);
+    }
+
+    public static function getDefaultDisplayWidthFromType($type)
+    {
+        switch ($type) {
+            case 'string':
+            case 'datetime':
+                return 120;
+
+            case 'text':
+            case 'html':
+            case 'json':
+            case 'items_list':
+                return 300;
+
+            case 'id':
+            case 'int':
+            case 'float':
+            case 'qty':
+            case 'money':
+            case 'percent':
+            case 'color':
+                return 60;
+
+            case 'date':
+            case 'time':
+                return 100;
+
+            case 'id_object':
+            case 'id_parent':
+                return 120;
+        }
+    }
+
+    public static function getFieldObject($base_object, &$field_name, &$errors = array())
+    {
+        $field_object = null;
+        $children = explode(':', $field_name);
+        $field_name = array_pop($children);
+
+        if (is_a($base_object, 'BimpObject')) {
+            if ((string) $field_name) {
+                $field_object = $base_object;
+
+                if (count($children)) {
+                    foreach ($children as $child_name) {
+                        $child = $field_object->getChildObject($child_name);
+
+                        if (is_a($child, 'BimpObject')) {
+                            $field_object = $child;
+                        } else {
+                            $errors[] = 'Instance enfant "' . $child_name . '" invalide pour l\'objet "' . $field_object->object_name . '"';
+                            break;
+                        }
+                    }
+                }
+            } else {
+                $errors[] = 'Nom du champ absent';
+            }
+        } else {
+            $errors[] = 'Object associé invalide';
+        }
+
+        return $field_object;
+    }
+
+    // Display_if / Depends_on: 
+
+    public function renderDependsOnScript($form_identifier, $force_keep_new_value = false)
+    {
+        return self::renderDependsOnScriptStatic($this->object, $form_identifier, $this->name, $this->params['depends_on'], $this->name_prefix, ($force_keep_new_value ? 1 : (int) $this->params['keep_new_value']));
     }
 
     public static function renderDependsOnScriptStatic(BimpObject $object, $form_identifier, $field_name, $depends_on, $name_prefix = '', $keep_new_value = 1)
@@ -277,20 +680,12 @@ class BC_Field extends BimpComponent
                 $dependances = explode(',', $depends_on);
             }
 
-//            foreach ($dependances as $key => $dependance) {
-//                if (!$object->config->isDefined('fields/' . $dependance) &&
-//                        !$object->config->isDefined('associations/' . $dependance)) {
-//                    unset($dependances[$key]);
-//                }
-//            }
-
             if (count($dependances)) {
                 $script .= '<script type="text/javascript">' . "\n";
                 foreach ($dependances as $dependance) {
                     $script .= 'addInputEvent(\'' . $form_identifier . '\', \'' . $name_prefix . $dependance . '\', \'change\', function() {' . "\n";
                     $script .= '  var data = {};' . "\n";
                     $script .= '  var $form = $(\'#' . $form_identifier . '\');';
-//                    $script.= ' bimp_msg(\'HERE: ' . $dependance . '\');';
                     foreach ($dependances as $dep) {
                         $script .= '  if ($form.find(\'[name=' . $name_prefix . $dep . ']\').length) {' . "\n";
                         $script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $name_prefix . $dep . '\');' . "\n";
@@ -308,42 +703,6 @@ class BC_Field extends BimpComponent
     public function renderDisplayIfData()
     {
         return self::renderDisplayifDataStatic($this->params['display_if'], $this->name_prefix);
-    }
-
-    public function checkDisplayIf()
-    {
-        if (isset($this->params['display_if']['field_name'])) {
-            $field = $this->params['display_if']['field_name'];
-            if ($field && $this->object->field_exists($field)) {
-                $field_value = $this->object->getData($field);
-
-                if (isset($this->params['display_if']['show_values'])) {
-                    $show_values = $this->params['display_if']['show_values'];
-                    if (!is_array($show_values)) {
-                        $show_values = explode(',', $show_values);
-                    }
-
-                    if (!in_array($field_value, $show_values)) {
-                        return 0;
-                    }
-                }
-
-                if (isset($this->params['display_if']['hide_values'])) {
-                    $hide_values = $this->params['display_if']['hide_values'];
-                    if (!is_array($hide_values)) {
-                        $hide_values = explode(',', $hide_values);
-                    }
-
-                    if (in_array($field_value, $hide_values)) {
-                        return 0;
-                    }
-                }
-            }
-        }
-
-        // todo : ajouter display_if/fields_names
-
-        return 1;
     }
 
     public static function renderDisplayifDataStatic($params, $name_prefix = '')
@@ -400,44 +759,40 @@ class BC_Field extends BimpComponent
         return $html;
     }
 
-    public static function getInputType(BimpObject $object, $field)
+    public function checkDisplayIf()
     {
-        $path = 'fields/' . $field . '/';
-        if ($object->config->isDefined($path . 'input/type')) {
-            return $object->getConf($path . 'input/type');
+        if (isset($this->params['display_if']['field_name'])) {
+            $field = $this->params['display_if']['field_name'];
+            if ($field && $this->object->field_exists($field)) {
+                $field_value = $this->object->getData($field);
+
+                if (isset($this->params['display_if']['show_values'])) {
+                    $show_values = $this->params['display_if']['show_values'];
+                    if (!is_array($show_values)) {
+                        $show_values = explode(',', $show_values);
+                    }
+
+                    if (!in_array($field_value, $show_values)) {
+                        return 0;
+                    }
+                }
+
+                if (isset($this->params['display_if']['hide_values'])) {
+                    $hide_values = $this->params['display_if']['hide_values'];
+                    if (!is_array($hide_values)) {
+                        $hide_values = explode(',', $hide_values);
+                    }
+
+                    if (in_array($field_value, $hide_values)) {
+                        return 0;
+                    }
+                }
+            }
         }
 
-        if ($object->config->isDefined($path . 'values')) {
-            return 'select';
-        }
+        // todo : ajouter display_if/fields_names
 
-        $data_type = $object->getConf($path . 'type', 'string');
-
-        switch ($data_type) {
-            case 'int':
-            case 'float':
-            case 'string':
-            case 'percent':
-            case 'money':
-            case 'color':
-                return 'text';
-
-            case 'text':
-                return 'textarea';
-
-            case 'bool':
-                return 'toggle';
-
-            case 'qty':
-            case 'html':
-            case 'time':
-            case 'date':
-            case 'datetime':
-            case 'password':
-                return $data_type;
-        }
-
-        return '';
+        return 1;
     }
 
     // Recherches: 
@@ -460,7 +815,6 @@ class BC_Field extends BimpComponent
                     switch ($this->params['type']) {
 //                        case 'id_object':
 //                        case 'id_parent':
-//                            
 //                            $search_type = 'search_object';
 //                            $input_type = 'text';
 //                            break;
@@ -491,10 +845,6 @@ class BC_Field extends BimpComponent
                         case 'time':
                             $search_type = $input_type = 'time_range';
                             break;
-
-//                    case 'datetime':
-//                        $search_type = $input_type = 'datetime_range';
-//                        break;
 
                         case 'bool':
                             $input_type = 'select';
@@ -544,13 +894,13 @@ class BC_Field extends BimpComponent
         );
     }
 
-    public function renderSearchInput($extra_data = array())
+    public function renderSearchInput($extra_data = array(), $input_name = null)
     {
         if (!$this->params['show']) {
             return '';
         }
 
-        if (!$this->params['searchable']) {
+        if (!$this->isSearchable()) {
             return '';
         }
 
@@ -562,7 +912,10 @@ class BC_Field extends BimpComponent
         $current_bc = $this;
 
         $input_id = $this->object->object_name . '_search_' . $this->name;
-        $input_name = 'search_' . $this->name;
+
+        if (is_null($input_name)) {
+            $input_name = 'search_' . $this->name;
+        }
 
         $search_data = $this->getSearchData();
 
@@ -574,7 +927,7 @@ class BC_Field extends BimpComponent
             }
             $content = BimpInput::renderSearchListInputFromConfig($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
         } elseif ($search_data['search_type'] === 'values_range') {
-            $content .= '<div>';
+            $content = '<div>';
             $input_options = $search_data['input_options'];
             $input_options['addon_left'] = 'Min';
             $content .= BimpInput::renderInput($search_data['input_type'], $input_name . '_min', null, $input_options);
@@ -591,7 +944,55 @@ class BC_Field extends BimpComponent
         return BimpInput::renderSearchInputContainer($input_name, $search_data['search_type'], $search_data['search_on_key_up'], 1, $content, $extra_data);
     }
 
-    //No-HTML: 
+    // Options d'affichage: 
+
+    public function getDisplayTypesArray()
+    {
+        if (!$this->isOk()) {
+            return array();
+        }
+
+        return BC_Display::getObjectFieldDisplayTypesArray($this->object, $this->name, $this);
+    }
+
+    public function getDisplayOptionsInputs($display_name = '', $values = array())
+    {
+        if (!$this->isOk()) {
+            return array();
+        }
+
+        return BC_Display::getObjectFieldDisplayOptionsInputs($this->object, $this->name, $display_name, $values, $this);
+    }
+
+    public function renderCsvOptionsInput($input_name, $value = '')
+    {
+        if (count($this->errors)) {
+            return BimpRender::renderAlerts($this->errors);
+        }
+
+        $html = '';
+
+        $def_val = '';
+
+        $options = $this->getNoHtmlOptions($def_val);
+
+        if (!$value) {
+            $value = $def_val;
+        }
+
+        if (!empty($options)) {
+            $html .= BimpInput::renderInput('select', $input_name, $value, array(
+                        'options'     => $options,
+                        'extra_class' => 'col_option'
+            ));
+        } else {
+            $html .= 'Valeur';
+        }
+
+        return $html;
+    }
+
+    // No-HTML: 
 
     public function getNoHtmlOptions(&$default_value = '')
     {
@@ -607,8 +1008,9 @@ class BC_Field extends BimpComponent
         if (isset($this->params['values']) && !empty($this->params['values'])) {
             $default_value = 'label';
             $options = array(
-                'key'   => 'Identifiant',
-                'label' => 'Valeur affichée'
+                'key'       => 'Identifiant',
+                'label'     => 'Valeur affichée',
+                'key_label' => 'Identifiant et valeur affichée'
             );
         } else {
             switch ($this->params['type']) {
@@ -634,7 +1036,9 @@ class BC_Field extends BimpComponent
                         'Y-m-d H:i:s'     => 'AAAA-MM-JJ H:min:sec',
                         'Y-m-d H:i'       => 'AAAA-MM-JJ H:min',
                         'd / m / Y H:i:s' => 'JJ / MM / AAAA H:min:sec',
-                        'd / m / Y H:i'   => 'JJ / MM / AAAA H:min'
+                        'd / m / Y H:i'   => 'JJ / MM / AAAA H:min',
+                        'Y-m-d'           => 'AAAA-MM-JJ',
+                        'd / m / Y'       => 'JJ / MM / AAAA'
                     );
                     break;
 
@@ -656,29 +1060,44 @@ class BC_Field extends BimpComponent
                     $instance = null;
                     if ($this->params['type'] === 'id_parent') {
                         $instance = $this->object->getParentInstance();
-                    } elseif (isset($this->params['object']) && (string) $this->params['object']) {
-                        $instance = $this->object->config->getObject('', $this->params['object']);
+                    } elseif (isset($this->params['object'])) {
+                        if (is_string($this->params['object']) && $this->params['object']) {
+                            $instance = $this->object->config->getObject('', $this->params['object']);
+                        } elseif (is_object($this->params['object']) && is_a($this->params['object'], 'BimpObject')) {
+                            $instance = $this->params['object'];
+                        }
                     }
+
                     if (is_a($instance, 'BimpObject')) {
+                        $ref_prop = $instance->getRefProperty();
+                        $name_props = $instance->getNameProperties();
+
+                        if ($ref_prop && count($name_props)) {
+                            $options['ref_nom'] = $instance->getConf('fields/' . $ref_prop . '/label', $ref_prop) . ' - Nom complet';
+                        }
+
                         foreach ($instance->params['fields'] as $field_name) {
-                            $options[$field_name] = $instance->getConf('fields/' . $field_name . '/label', $field_name);
-                        }
-                    }
-                    foreach (BimpObject::$ref_properties as $ref_prop) {
-                        if (isset($options[$ref_prop])) {
-                            $default_value = $ref_prop;
-                            break;
-                        }
-                    }
-                    if (!$default_value) {
-                        foreach (BimpObject::$name_properties as $name_prop) {
-                            if (isset($options[$name_prop])) {
-                                $default_value = $name_prop;
+                            if ($instance->field_exists($field_name)) {
+                                $options[$field_name] = $instance->getConf('fields/' . $field_name . '/label', $field_name);
                             }
                         }
                     }
+
                     if (!$default_value) {
-                        $default_value = 'fullname';
+                        if (isset($options['ref_nom'])) {
+                            $default_value = 'ref_nom';
+                        } else {
+                            foreach (BimpObject::$name_properties as $name_prop) {
+                                if (isset($options[$name_prop])) {
+                                    $default_value = $name_prop;
+                                    break;
+                                }
+                            }
+
+                            if (!$default_value) {
+                                $default_value = 'fullname';
+                            }
+                        }
                     }
                     break;
 
@@ -686,6 +1105,7 @@ class BC_Field extends BimpComponent
                 case 'percent':
                 case 'float':
                 case 'qty':
+                case 'timer':
                     $default_value = 'number';
                     $options = array(
                         'number' => 'Valeur numérique',
@@ -713,127 +1133,174 @@ class BC_Field extends BimpComponent
 
         $value = '';
 
-        if (isset($this->params['values']) && !empty($this->params['values'])) {
-            if ($option === 'label') {
-                if (isset($this->params['values'][$this->value])) {
-                    $value = $this->params['values'][$this->value];
-                    if (is_array($value)) {
-                        if (isset($value['label'])) {
-                            $value = $value['label'];
-                        } else {
-                            $value = 'Pas de label (' . $this->value . ')';
-                        }
-                    } else {
-                        $value = $this->params['values'][$this->value];
-                    }
-                } else {
-                    $value = 'Non défini (' . $this->value . ')';
-                }
-            } else {
-                $value = $this->value;
-            }
-        } else {
-            switch ($this->params['type']) {
-                case 'date':
-                case 'time':
-                case 'datetime':
-                    if (!(string) $this->value) {
-                        break;
-                    }
-                    $dt = new DateTime($this->value);
-                    if (!(string) $option) {
-                        switch ($this->params['type']) {
-                            case 'date':
-                                $option = 'd / m / Y';
-                                break;
-                            case 'time':
-                                $option = 'H:i';
-                                break;
-                            case 'datetime':
-                                $option = 'd / m / Y H:i';
-                                break;
-                        }
-                    }
-                    $value = $dt->format($option);
-                    break;
+        if (isset($this->value)) {
+            if (isset($this->params['values']) && !empty($this->params['values'])) {
+                switch ($option) {
+                    case 'key_label':
+                        $value = $this->value;
 
-                case 'bool':
-                    if ($option === 'number') {
-                        $value = (int) $this->value;
-                    } else {
-                        $value = ((int) $this->value ? 'OUI' : 'NON');
-                    }
-                    break;
-
-                case 'id_object':
-                case 'id_parent':
-                    if (!$option) {
-                        $option = 'id';
-                    }
-                    switch ($option) {
-                        case 'id':
-                            $value = $this->value;
-                            break;
-
-                        case 'fullname';
-                        default:
-                            switch ($this->params['type']) {
-                                case 'id_parent':
-                                    $obj = $this->object->getParentInstance();
-                                    break;
-
-                                case 'id_object':
-                                    $obj = $this->object->getChildObject($this->params['object']);
-                                    break;
-                            }
-
-                            if (!BimpObject::objectLoaded($obj)) {
-                                $value = $this->value;
-                            } else {
-                                if ($option === 'fullname') {
-                                    if (method_exists($obj, 'getName')) {
-                                        $value = $obj->getName();
-                                    } elseif (isset($obj->ref)) {
-                                        $value = $obj->ref;
-                                    } else {
-                                        $value = "N/C";
+                    default:
+                    case 'label':
+                        if (is_array($this->value)) {
+                            foreach ($this->value as $valTmp) {
+                                if (isset($this->params['values'][$valTmp])) {
+                                    if (isset($this->params['values'][$valTmp]['label'])) {
+                                        $value .= ($value ? ' - ' : '') . $this->params['values'][$valTmp]['label'];
+                                    } elseif (is_string($this->params['values'][$valTmp])) {
+                                        $value .= ($value ? ' - ' : '') . $this->params['values'][$valTmp];
                                     }
-                                } elseif ($obj->field_exists($option)) {
-                                    $value = $obj->getData($option);
-                                } else {
-                                    $value = $this->value;
                                 }
                             }
+                        } else {
+                            if (isset($this->params['values'][$this->value])) {
+                                if (isset($this->params['values'][$this->value]['label'])) {
+                                    $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value]['label'];
+                                } elseif (is_string($this->params['values'][$this->value])) {
+                                    $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value];
+                                }
+                            }
+                        }
+                        break;
+                }
+                if (!$value) {
+                    if (is_array($this->value))
+                        $value = implode(' - ', $this->value);
+                    else
+                        $value = $this->value;
+                }
+            } else {
+                switch ($this->params['type']) {
+                    case 'date':
+                    case 'time':
+                    case 'datetime':
+                        if (!(string) $this->value) {
                             break;
-                    }
-                    break;
+                        }
+                        $dt = new DateTime($this->value);
+                        if (!(string) $option) {
+                            switch ($this->params['type']) {
+                                case 'date':
+                                    $option = 'd / m / Y';
+                                    break;
+                                case 'time':
+                                    $option = 'H:i';
+                                    break;
+                                case 'datetime':
+                                    $option = 'd / m / Y H:i';
+                                    break;
+                            }
+                        }
+                        $value = $dt->format($option);
+                        break;
 
-                case 'money':
-                case 'percent':
-                case 'float':
-                case 'qty':
-                    if ($option === 'string') {
-                        switch ($this->params['type']) {
-                            case 'money':
-                                $value = BimpTools::displayMoneyValue($this->value);
+                    case 'bool':
+                        if ($option === 'number') {
+                            $value = (int) $this->value;
+                        } else {
+                            $value = ((int) $this->value ? 'OUI' : 'NON');
+                        }
+                        break;
+
+                    case 'id_object':
+                    case 'id_parent':
+                        if (!$option) {
+                            $option = 'id';
+                        }
+                        switch ($option) {
+                            case 'id':
+                                $value = $this->value;
                                 break;
 
-                            case 'percent':
-                                $value = BimpTools::displayFloatValue($this->value) . ' %';
-                                break;
+                            case 'ref_nom':
+                            case 'fullname';
+                            default:
+                                switch ($this->params['type']) {
+                                    case 'id_parent':
+                                        $obj = $this->object->getParentInstance();
+                                        break;
 
-                            case 'float':
-                            case 'qty':
-                                $value = BimpTools::displayFloatValue($this->value);
+                                    case 'id_object':
+                                        if (is_string($this->params['object']) && $this->params['object']) {
+                                            $obj = $this->object->getChildObject($this->params['object']);
+                                        } elseif (is_object($this->params['object']) && is_a($this->params['object'], 'BimpObject')) {
+                                            $obj = $this->params['object'];
+                                        } else {
+                                            $obj = null;
+                                        }
+                                        break;
+                                }
+
+                                if (!BimpObject::objectLoaded($obj)) {
+                                    $value = ($this->value ? $this->value : '');
+                                } else {
+                                    switch ($option) {
+                                        case 'ref_nom':
+                                            $ref = $obj->getRef();
+                                            if ($ref) {
+                                                $value .= $ref;
+                                            }
+
+                                            $name = $obj->getName();
+                                            if ($name) {
+                                                $value .= ($value ? ' - ' : '') . $name;
+                                            }
+                                            break;
+
+                                        case 'fullname':
+                                            if (method_exists($obj, 'getName')) {
+                                                $value = $obj->getName();
+                                            }
+
+                                            if (!$value) {
+                                                $value = $obj->getRef();
+                                            }
+
+                                            if (!$value) {
+                                                $value = BimpTools::ucfirst($obj->getLabel()) . ' #' . $obj->id;
+                                            }
+                                            break;
+
+                                        default:
+                                            if ($obj->field_exists($option)) {
+                                                $value = $obj->getData($option);
+                                            } else {
+                                                $value = $this->value;
+                                            }
+                                            break;
+                                    }
+                                }
                                 break;
                         }
-                    } else {
-                        $value = str_replace(".", ",", $this->value);
-                    }
-                    break;
+                        break;
 
-                default:
-                    $value = $this->value;
+                    case 'money':
+                    case 'percent':
+                    case 'float':
+                    case 'qty':
+                    case 'timer':
+                        if ($option === 'string') {
+                            switch ($this->params['type']) {
+                                case 'money':
+                                    $value = BimpTools::displayMoneyValue($this->value);
+                                    break;
+
+                                case 'percent':
+                                    $value = BimpTools::displayFloatValue($this->value) . ' %';
+                                    break;
+
+                                case 'float':
+                                case 'qty':
+                                    $value = BimpTools::displayFloatValue($this->value);
+                                    break;
+                            }
+                        } else {
+                            $value = str_replace(".", ",", $this->value);
+                        }
+                        break;
+
+                    default:
+                        $value = $this->value;
+                }
             }
         }
 

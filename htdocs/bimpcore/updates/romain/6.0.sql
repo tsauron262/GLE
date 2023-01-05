@@ -1,0 +1,1 @@
+UPDATE `llx_bimpcore_conf` SET `value` = '0' WHERE `llx_bimpcore_conf`.`name` = 'contrat_signature_allow_refuse';

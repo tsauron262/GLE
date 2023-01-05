@@ -10,6 +10,24 @@ icon: fas_euro-sign
 
 labels: 
     name: paiement
+    
+    
+objects: 
+    user_creat: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_creat
+cards: 
+    default: 
+        title: 
+            field_value: ref
+        status: fk_statut
+        view_btn: 1
+        fields: 
+            - field: amount
+            - field: datep
+            - field: type
 
 fields: 
 #    Champs en base
@@ -19,13 +37,19 @@ fields:
         label: Statut
         type: int
     datec:
-        label: Créer le
-        type: date
+        label: Créé le
+        type: datetime
+    fk_user_creat:
+        label: Créé par
+        type: id_object
+        object: user_creat
+        input: 
+            type: search_user
     datep: 
         label: Date
-        type: date
+        type: datetime
         input:
-            type: date
+            type: datetime
             display_now: 1
         dol_prop: date
     amount: 
@@ -44,16 +68,24 @@ fields:
     note: 
         label: Note
         type: text
+        user_edit: 1
     exported:
         label: Comptabilisée
-        type: int
-        
+        type: bool
+
 #    Champs extra: 
-    type: 
+#    type: 
+#        label: Type
+#        values: 
+#            array: modeReglements
+#        extra: 1   
+        
+            
+    fk_paiement:
         label: Type
+        type: int
         values: 
             array: modeReglements
-        extra: 1   
     
 forms: 
     default: 
@@ -192,48 +224,115 @@ forms:
                 input_name: single_amount
                 label: Montant
                 data_type: money
-                min: 0
                 decimals: 2
                 input: 
                     type: text
+                    
+            force_extra_paiement: 
+                custom: 1
+                hidden: 1
+                input_name: force_extra_paiement
+                input: 
+                    type: hidden
+                value: 0
+                
+                    
+    move_amount: 
+        title: Déplacer un montant d'une facture à une autre
+        rows: 
+            - custom: 1
+              label: Facture d'origine
+              input_name: id_facture_from
+              data_type: id
+              required: 1
+              input: 
+                  type: select
+                  options: 
+                      array: factures
+            - custom: 1
+              label: Montant à déplacer
+              input_name: amount_to_move
+              data_type: money
+              required: 1
+              content: 
+                  callback: renderAmountToMoveInput
+              depends_on: id_facture_from
+            - custom: 1
+              label: Facture de destination
+              input_name: id_facture_to
+              required: 1
+              input: 
+                  type: search_object
+                  object: facture
+                  card: detail
+      
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: fk_paiement
+            - field: amount
+            - field: ref
+            - field: num_paiement
+            - field: datep
+            - field: exported
+            - field: note
+            
+    objects: 
+        title: Objets liés
+        icon: fas_link
+        rows: 
+            - label: Client(s)
+              value: 
+                  callback: displayClient
+            - label: Facture(s)
+              value: 
+                  callback: displayFactures
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: objects
+                
+filters: 
+    id_facture: 
+        label: Facture
+        data_type: id_object
+        type: value
+        input: 
+            object: facture
+    id_client: 
+        custom: 1
+        label: Client
+        data_type: id_object
+        type: value
+        input: 
+            type: search_societe
             
 filters_panels: 
     default: 
         filters: 
             ref: 
-                field: ref
             datep: 
-                field: datep
-            type: 
-                field: type
+            fk_paiement: 
             amount: 
-                field: amount
-            facture: 
-                custom: 1
-                data_type: id_object
-                field: id_facture
-                label: Facture
-                type: value
-                input: 
-                    object: facture
-            client: 
-                custom: 1
-                data_type: id_object
-                field: id_client
-                label: Client
-                type: value
-                input: 
-                    type: search_societe
+            id_facture: 
+            id_client:
                     
 lists_cols: 
-    ref: 
-        field: ref
-    date: 
-        field: datep
-    type: 
-        field: type
-    amount: 
-        field: amount
     factures: 
         label: Factures
         value: 
@@ -267,13 +366,13 @@ lists:
         cols: 
             ref: 
             client: 
-            type: 
-            date:  
+            fk_paiement: 
+            datep:  
             amount: 
             factures: 
                 
     client: 
         extends: default
         cols: 
-            client: 
-                
+            client: unset
+

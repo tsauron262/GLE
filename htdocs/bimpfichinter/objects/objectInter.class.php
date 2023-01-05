@@ -56,7 +56,7 @@ class ObjectInter extends extraFI{
             $clef = 'getList_contratArray_user_'.$this->getData("fk_soc");
             if(!isset(self::$cache[$clef])){
                 self::$cache[$clef] = array(0=>array('label'=>''));
-                $sql = $this->db->db->query("SELECT ref, rowid FROM ".MAIN_DB_PREFIX."contrat WHERE fk_soc = ".$this->getData("fk_soc")." AND (statut = 1 || rowid = '".$this->getData("fk_contrat")."')");
+                $sql = $this->db->db->query("SELECT ref, rowid FROM ".MAIN_DB_PREFIX."contrat WHERE fk_soc = ".$this->getData("fk_soc")." AND (statut = 1 || statut = 11 || rowid = '".$this->getData("fk_contrat")."')");
                 while($ln = $this->db->db->fetch_object($sql))
                         self::$cache[$clef][$ln->rowid] = array('label' => $ln->ref, 'icon' => '', 'classes' => array('info'));
             }
@@ -167,7 +167,7 @@ class ObjectInter extends extraFI{
     
     public function iAmAdminRedirect() {
         global $user;
-        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42, 330, 62)))
+        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42, 330, 62, 157, 206, 376)))
             return true;
         parent::iAmAdminRedirect();
     }  
@@ -184,12 +184,12 @@ class ObjectInter extends extraFI{
         return DOL_DATA_ROOT . '/'.$this->getFileFolder().'/' . dol_sanitizeFileName($this->getRef()) . '/';
     }
 
-    public function getFileUrl($file_name)
+    public function getFileUrl($file_name, $page = 'document')
     {
         $dir = $this->getFilesDir();
         if ($dir) {
             if (file_exists($dir . $file_name)) {
-                return DOL_URL_ROOT . '/document.php?modulepart='.$this->getFileFolder().'&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+                return DOL_URL_ROOT . '/'.$page.'.php?modulepart='.$this->getFileFolder().'&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
             }
         }
 

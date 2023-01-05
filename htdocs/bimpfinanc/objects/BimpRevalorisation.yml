@@ -39,6 +39,16 @@ objects:
             id_object: 
                 field_value: id_user_commission
                 
+    commission_apporteur:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object: 
+                module: bimpfinanc
+                name: Bimp_CommissionApporteur
+            id_object: 
+                field_value: id_commission_apporteur
+                
     entrepot_commission: 
         extends: commission
         instance: 
@@ -72,6 +82,12 @@ fields:
         label: Commission utilisateur
         type: id_object
         object: user_commission
+        default_value: 0
+
+    id_commission_apporteur: 
+        label: Commission apporteur
+        type: id_object
+        object: commission_apporteur
         default_value: 0
         
     id_entrepot_commission: 
@@ -128,7 +144,26 @@ fields:
         input: 
             rows: 1
             auto_expand: 1
+            
+    serial:
+        label: Serial
+        type: text
         
+    equipments: 
+        label: Equipements
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: equipment        
+        input: 
+            type: check_list
+            select_all_buttons: 1
+            search_input: 1
+            max: 
+                field_value: qty
+            items: 
+                callback: getAvailableEquipmentsArray
+                
 forms: 
     default: 
         rows: 
@@ -144,6 +179,27 @@ forms:
               label: Différence unitaire à corriger
             - field: qty
             - field: note
+            - field: serial
+            
+    add_global:
+        title: Ajouter une revalorisation sur la globalité de la facture
+        rows: 
+            - field: id_facture
+              show: 
+                  callback: isNotLoaded
+            - field: id_facture_line
+              hidden: 1
+            - field: type
+            - field: date
+            - field: amount
+              label: Différence unitaire à corriger
+            - field: note
+            - custom: 1
+              hidden: 1
+              input_name: global
+              input: 
+                  type: hidden
+              value: 1
         
     add_to_commission: 
         title: Ajout à une commission
@@ -157,6 +213,22 @@ forms:
                   type: select
                   options: 
                       array: draftCommission
+                      
+    setSerial:
+        title: Saisie du numéro de série
+        rows:       
+            - custom: 1
+              label: Serial
+              input_name: serial
+              data_type: text
+              required: 1
+              input: 
+                  type: text
+                  
+    set_equipments: 
+        title: Attribution des équipments
+        rows: 
+            - field: equipments
                   
 fields_tables: 
     infos: 
@@ -173,6 +245,7 @@ fields_tables:
                   callback: displayTotal
             - field: status
             - field: note
+            - field: serial
             - field: id_user_commission
               display: nom_url
               show: 
@@ -181,6 +254,9 @@ fields_tables:
               display: nom_url
               show: 
                   field_value: id_entrepot_commission
+            - field: id_commission_apporteur
+              show: 
+                  field_value: id_commission_apporteur
             
     elements: 
         title: Eléments liés
@@ -191,6 +267,7 @@ fields_tables:
             - label: Ligne de facture
               value: 
                   callback: displayDesc
+            - field: equipments
               
 views: 
     default: 
@@ -210,24 +287,31 @@ views:
                     fields_table:
                         name: elements
             
-filters_panel: 
+filters: 
+    id_product: 
+        label: Produit
+        object: product
+        data_type: id_object
+        type: value
+        input: 
+              type: search_product
+        display: 
+          nom_url_libelle: 
+              type: callback
+              method: displayProduct
+                
+filters_panels: 
     default: 
         filters: 
-            - field: status
-            - field: type
-            - field: date
-            - field: amount
-            - field: ef_type
-              child: facture
-            - field: entrepot
-              child: facture
+            status:
+            type:
+            date:
+            amount:
+            facture:ef_type:
+            facture:entrepot:
+            id_product: 
             
 lists_cols: 
-    facture: 
-        field: id_facture
-        display: nom_url
-    type: 
-        field: type
     commercial: 
         label: Commercial facture
         value: 
@@ -237,39 +321,20 @@ lists_cols:
         search: 
             input: 
                 type: search_user
-    date: 
-        field: date
     desc: 
         label: Désignation
         value: 
             callback: displayDesc
-    amount: 
-        field: amount
     qty: 
-        field: qty
         edit: 1
     total: 
         label: total
         value: 
             callback: displayTotal
-    status: 
-        field: status
     commissions: 
         label: Commissions
         value: 
             callback: displayCommissions
-    secteur: 
-        field: ef_type
-        child: facture
-    entrepot: 
-        field: entrepot
-        child: facture
-    client_facture: 
-        field: fk_soc
-        child: facture
-        display: nom_url
-    note: 
-        field: note
     
 lists: 
     default: 
@@ -280,8 +345,14 @@ lists:
             - label: supprimer les revalorisations sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
-        list_filters: 
-            callback: getListFilters
+            - label: Valider les revalorisations sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'1'}, '', 'Valider les revalorisations', true)
+            - label: Refuser les revalorisations sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'2'}, '', 'Refuser les revalorisations', true)
+#        list_filters: 
+#            callback: getListFilters
         filters_panel: default
         sort_field: id
         sort_way: desc
@@ -292,11 +363,10 @@ lists:
         edit_btn: 1
         edit_form: default
         delete_btn: 1
-        update_btn: 1
         extra_btn: 
             callback: getActionsButtons
         cols: 
-            facture: 
+            id_facture: 
             type: 
             commercial: 
             date: 
@@ -306,6 +376,7 @@ lists:
             total:
             status: 
             commissions: 
+            equipments: 
         
     commission: 
         configurable: 1
@@ -319,7 +390,7 @@ lists:
                 method: getCommissionListButtons
         modal_view: default
         cols: 
-            facture: 
+            id_facture: 
             type: 
             date: 
             desc: 
@@ -346,11 +417,22 @@ lists:
         n: 20
         sort_field: id
         sort_way: asc
+        add_form_name: add_global
+        add_btn: 1
         extra_btn: 
             callback: getActionsButtons
         edit_btn: 1
         edit_form: default
         modal_view: default
+        checkboxes: 1
+        delete_btn: 1
+        bulk_actions:
+            - label: Valider les revalorisations sélectionnées
+              icon: fas_check
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'1'}, '', 'Valider les revalorisations', true)
+            - label: Refuser les revalorisations sélectionnées
+              icon: fas_times
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'2'}, '', 'Refuser les revalorisations', true)
         cols: 
             type: 
             date: 
@@ -358,3 +440,4 @@ lists:
             total: 
             status:  
             commissions:
+            equipments: 

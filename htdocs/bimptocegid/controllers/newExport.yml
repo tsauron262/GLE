@@ -1,0 +1,85 @@
+#bootstrap: 1
+#
+#objects:
+#    rib:
+#        instance:
+#            bimp_object:
+#                module: bimpcore
+#                name: Bimp_SocBankAccount
+#    TRA_RIB:
+#        instance:
+#            bimp_object:
+#                module: bimptocegid
+#                name: BTC_exportRibAndMandat
+#    TRA_TIERS:
+#        instance:
+#            bimp_object:
+#                module: bimptocegid
+#                name: BTC_export_societe
+#
+sections:
+    - type: custom
+      custom:
+        callback: displayHeaderInterface
+#    - type: nav_tabs
+#      nav_tabs:
+#        - id: tiers
+#          title: TIERS
+#          struct:
+#            type: rows
+#            rows:                                                   
+#                - cols:
+#                    - type: custom
+#                      custom:
+#                          callback: 
+#                              method: displayBtn
+#                              object: TRA_TIERS
+#                    - type: custom
+#                      custom: 
+#                        callback: 
+#                            method: displayFileExported
+#                            params:
+#                                - tier
+#                    
+#        - id: payni
+#          title: PAIEMENTS
+#          struct:
+#            type: rows
+#            rows:                                                   
+#                - cols:
+#                    - type: custom
+#                      custom: 
+#                        callback: 
+#                            method: displayFileExported
+#                            params:
+#                                - pay
+#                    - type: custom
+#                      custom: 
+#                        callback: 
+#                            method: displayFileExported
+#                            params:
+#                                - payni
+#                    
+#        - id: rib_mandat
+#          title: RIB / MANDAT
+#          struct:
+#            type: rows
+#            rows:                                                   
+#                - cols:
+#                    - type: custom
+#                      custom: 
+#                        callback: 
+#                            method: displayExportedRib
+#                            object: TRA_RIB
+#                    - type: custom
+#                      custom: 
+#                        callback: 
+#                            method: displayFileExported
+#                            params:
+#                                - rib
+#                    - type: custom
+#                      custom: 
+#                        callback: 
+#                            method: displayFileExported
+#                            params:
+#                                - mandat

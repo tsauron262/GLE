@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` CHANGE `close_note` `close_note` TEXT NULL DEFAULT NULL;

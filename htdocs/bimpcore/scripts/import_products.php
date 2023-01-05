@@ -17,15 +17,109 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
-//importProducts(DOL_DOCUMENT_ROOT . '/bimpcore/products.txt');
-//importFournPrices(DOL_DOCUMENT_ROOT . '/bimpcore/pa_apple.txt', 261968);
-//importFournPrices(DOL_DOCUMENT_ROOT . '/bimpcore/pa_td.txt', 229890);
-//importFournPrices(DOL_DOCUMENT_ROOT . '/bimpcore/pa_ingram.txt', 230496);
-//validateProducts(DOL_DOCUMENT_ROOT . '/bimpcore/products.txt', 0, $bdb);
+$maj_comm_fourn = false;
 
-function importProducts($file)
+$dir = DOL_DATA_ROOT . '/bimpcore/imports/' . date('Y-m-d') . '/';
+
+$actions = array(
+    'import_apple_products'  => 'Import produits Apple',
+    'import_apple_prices'    => 'Import prix Apple',
+    'import_td_prices'       => 'Import prix TechData',
+    'import_ingram_prices'   => 'Import prix Ingram',
+    'validate_apple_producs' => 'Valider les produits Apple importés',
+    'import_ldlc_products'   => 'Import produits LDLC'
+);
+
+global $action;
+$action = BimpTools::getValue('action', '');
+
+if (!$action) {
+    $path = pathinfo(__FILE__);
+
+    foreach ($actions as $code => $label) {
+        echo '<div style="margin-bottom: 10px">';
+        echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=' . $code . '" class="btn btn-default">';
+        echo $label . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+        echo '</a>';
+        echo '</div>';
+    }
+
+    exit;
+}
+
+switch ($action) {
+    case 'import_apple_products':
+        importAppleProducts($dir . 'products.txt');
+        break;
+
+    case 'import_apple_prices':
+        importFournPrices($dir . 'pa_apple.txt', 261968, $maj_comm_fourn);
+        break;
+
+    case 'import_td_prices':
+        importFournPrices($dir . 'pa_td.txt', 229890, $maj_comm_fourn);
+        break;
+
+    case 'import_ingram_prices':
+        importFournPrices($dir . 'pa_ingram.txt', 230496, $maj_comm_fourn);
+        break;
+
+    case 'validate_apple_producs':
+        validateProducts($dir . 'products.txt', 0, $bdb);
+        break;
+
+    case 'import_ldlc_products':
+        importLdlcProducts();
+        break;
+    
+    case 'import_ingram_products':
+        importIngramProducts();
+        break;
+    
+    case 'import_techdata_products':
+        importTechDataProducts();
+        break;
+
+    case 'import_techdata_stock':
+        importTechDataStocks();
+        break;
+
+    default:
+        echo 'Action invalide';
+        break;
+}
+
+function importAppleProducts($file)
 {
+    if (!file_exists($file)) {
+        echo BimpRender::renderAlerts('Le fichier "' . $file . '" n\'existe pas');
+        return;
+    }
+
     $rows = file($file, FILE_IGNORE_NEW_LINES);
+
+    if (!count($rows)) {
+        echo BimpRender::renderAlerts('Aucune ligne à traiter');
+        return;
+    }
+
+    if (!(int) BimpTools::getValue('exec', 0)) {
+        global $action;
+        $path = pathinfo(__FILE__);
+
+        echo '<div style="margin-bottom: 30px">';
+        echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=' . $action . '&exec=1" class="btn btn-default">';
+        echo 'Exécuter' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+        echo '</a>';
+        echo '</div>';
+
+        echo '<pre>';
+        print_r($rows);
+        echo '</pre>';
+
+        return;
+    }
+
 
     $keys = array(
         0  => 'ref',
@@ -43,7 +137,7 @@ function importProducts($file)
         15 => 'deee',
         16 => 'cto',
         17 => 'cur_pa_ht',
-        22 => 'crt'
+        21 => 'crt'
     );
 
     $categories = BimpCache::getProductsTagsByTypeArray('categorie', false);
@@ -84,7 +178,7 @@ function importProducts($file)
                     case 'price_ttc':
                     case 'ecotaxe':
                     case 'cur_pa':
-                    case 'remise_crt':
+                    case 'crt':
                         $value = (float) str_replace(',', '.', $value);
                         break;
 
@@ -217,9 +311,42 @@ function validateProducts($file, $ref_key, BimpDb $bdb)
     }
 }
 
-function importFournPrices($file, $id_fourn)
+function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 {
+    $warnings = array();
+    
+    if ($maj_comm_fourn) {
+        $_POST['update_comm_fourn'] = 1;
+    }
+
+    if (!file_exists($file)) {
+        echo BimpRender::renderAlerts('Le fichier "' . $file . '" n\'existe pas');
+        return;
+    }
+
     $rows = file($file, FILE_IGNORE_NEW_LINES);
+
+    if (!count($rows)) {
+        echo BimpRender::renderAlerts('Aucune ligne à traiter');
+        return;
+    }
+
+    if (!(int) BimpTools::getValue('exec', 0)) {
+        global $action;
+        $path = pathinfo(__FILE__);
+
+        echo '<div style="margin-bottom: 30px">';
+        echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=' . $action . '&exec=1" class="btn btn-default">';
+        echo 'Exécuter' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+        echo '</a>';
+        echo '</div>';
+
+        echo '<pre>';
+        print_r($rows);
+        echo '</pre>';
+
+        return;
+    }
 
     $keys = array(
         'id_fourn'    => 0,
@@ -230,6 +357,15 @@ function importFournPrices($file, $id_fourn)
     );
     foreach ($rows as $r) {
         $data = explode("\t", $r);
+
+//        if ($data[$keys['ref_product']] !== 'APP-MRT32FN/A') { // POURT TESTS
+//            continue;
+//        }
+//        echo '<pre>';
+//        print_r($data);
+//        echo '</pre>';
+//        
+//        continue;
 
         $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                     'ref' => $data[$keys['ref_product']]
@@ -258,6 +394,550 @@ function importFournPrices($file, $id_fourn)
         if (count($errors)) {
             echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Produit "' . $data[$keys['ref_product']] . '"'));
         }
+
+        BimpCache::$cache = array();
+    }
+}
+
+function importTechDataStocks()
+{
+    $class = new importCatalogueTechData();
+    $class->initProdBimp();
+
+
+    $class->traiteStockFile();
+
+    $class->displayResult();
+}
+
+function importTechDataProducts()
+{
+
+    $class = new importCatalogueTechData();
+
+    $class->traiteFile();
+
+
+    $class->displayResult();
+}
+
+function importLdlcProducts()
+{
+    $class = new importCatalogueLdlc();
+
+    $class->traiteFile();
+
+    $class->displayResult();
+}
+
+function importIngramProducts()
+{
+    $class = new importCatalogueIngram();
+
+    $class->traiteFile();
+
+    $class->displayResult();
+}
+
+class importCatalogueFourn
+{
+
+    public $infoProdBimp = array();
+    public $stockFourn = array();
+    public $refProdFournToIdPriceFourn = array();
+    public $refProdToIdProd = array();
+    public $idProdFournToIdProdBimp = array();
+    public $idProdTrouve = array(); //tableau des id bimp trouve dans le fichier fourn
+    public $idProdTrouveActif = array(); //tableau des id bimp trouve dans le fichier fourn qua les actifs
+    public $errors = array();
+    public $msgOk = array();
+    public $dir = '';
+    public $sep = ";";
+    public $updateSql = true;
+    public $modeProdFourn = "insert";
+    public $idProdFournToPrice = array();
+    public $idFourn = 0;
+    public $keys = array();
+    
+    function majStock($ref, $qty){
+        global $db;
+
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "product_fournisseur_price SET stockFourn ='" . $qty . "' WHERE ref_fourn = '" . $ref . "' AND  fk_soc = " . $this->idFourn;
+        if ($this->updateSql)
+            $db->query($sql);
+    }
+
+    public function getFileName()
+    {
+        return '';
+    }
+
+    function calcPrice($price)
+    {
+        return $price; // / 0.97;
+    }
+
+    function traiteFile()
+    {
+        $file = $this->getFileName();
+
+        $errors = $msgOk = array();
+
+        if (!$file) {
+            echo BimpRender::renderAlerts('Aucun fichier ' . $file . ' trouvé dans le dossier "' . $this->dir . '"');
+            return;
+        }
+
+        $this->msgOk[] = 'Fichier: ' . $file . '';
+
+
+        $rows = file($this->dir . $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+        if (empty($rows)) {
+            $this->msgOk[] = 'Aucune ligne trouvée';
+            return;
+        }
+
+        $this->initProdBimp();
+
+        $ok = $bad = $doublon = 0;
+        $total = $aJour = $nonActifIgnore = 0;
+        $refFournTraite = array();
+        foreach ($rows as $idx => $r) {
+            if (!$idx) {
+                continue;
+            }
+
+            $total++;
+
+            $r = utf8_encode($r);
+
+            if (stripos($this->sep, "|") !== false)
+                $data = explode($this->sep, $r);
+            else
+                $data = str_getcsv($r, $this->sep);
+
+
+            //        patch bug file
+            if (isset($refFournTraite[(string) $data[$this->keys['ref']]])) {
+                $this->errors[] = "Doublons : " . $data[$this->keys['ref']];
+                $doublon++;
+                continue;
+            } else
+                $refFournTraite[(string) $data[$this->keys['ref']]] = 1;
+
+            if ($data[$this->keys['ManufacturerRef']] == "N/A")
+                $data[$this->keys['ManufacturerRef']] = '';
+
+            $data['BIMP_idPrixAchatBimp'] = '';
+            
+            if($this->keys['isSleep'] && $this->keys['isDelete'])
+                $data['BIMP_isActif'] = ($data[$this->keys['isSleep']] == "false" && $data[$this->keys['isDelete']] == "false");
+            else
+                $data['BIMP_isActif'] = true;
+
+            foreach ($data as $id => $val) {
+                $data[$id] = trim($val);
+            }
+
+
+            if ($this->traiteLineFile($data))
+                $ok++;
+            else
+                $bad++;
+        }
+
+
+
+
+        foreach ($this->idProdTrouve as $idProd => $data) {
+            $prix = $this->calcPrice($data[$this->keys['prixBase']]);
+            $updatePrice = $updateRef = false;
+
+            if (!$data['BIMP_idPrixAchatBimp'] && isset($this->infoProdBimp[$idProd]['idProdFournisseur']) && $this->infoProdBimp[$idProd]['idProdFournisseur'] > 0) {
+                $data['BIMP_idPrixAchatBimp'] = $this->infoProdBimp[$idProd]['idProdFournisseur'];
+                $updateRef = true;
+            }
+
+            $pu_ht = $pu_ttc = 0;
+            if($this->keys['puHT'] > 0 && isset($data[$this->keys['puHT']]))
+                $pu_ht = $data[$this->keys['puHT']];
+            if($this->keys['puTTC'] > 0 && isset($data[$this->keys['puTTC']]))
+                $pu_ttc = $data[$this->keys['puTTC']];
+            if ($pu_ht > 0 && $pu_ttc > 0)
+                $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
+            else
+                $tva_tx = 20;
+            
+            if ($data['BIMP_idPrixAchatBimp']) {
+                $prixActuel = $this->idProdFournToPrice[$data['BIMP_idPrixAchatBimp']];
+
+                if (round($prix, 2) != round($prixActuel, 2))
+                    $updatePrice = true;
+
+                if ($updateRef)
+                    $this->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $tva_tx, $data[$this->keys['ref']]);
+                elseif ($updatePrice)
+                    $this->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $tva_tx);
+                else
+                    $aJour++;
+            }
+            else {
+                if ($data['BIMP_isActif']) {
+                    $this->addPriceFourn($idProd, $prix, $tva_tx, $data[$this->keys['ref']]);
+                } else
+                    $nonActifIgnore++;
+            }
+        }
+
+        $this->msgOk[] = $ok . " ok ";
+        $this->msgOk[] = $bad . " bad ";
+        $this->msgOk[] = $doublon . " doublons";
+        $this->msgOk[] = $total . " total ";
+        $this->msgOk[] = count($this->idProdTrouve) . " lienOk ";
+        $this->msgOk[] = $aJour . " a jour";
+        $this->msgOk[] = $nonActifIgnore . " nonActifIgnore ";
+    }
+
+    function traiteStockFile()
+    {
+        if (is_file($this->dir . $this->getStockFileName())) {
+            $this->msgOk[] = "Fichier : " . $this->getStockFileName();
+            $rows = file($this->dir . $this->getStockFileName(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+            $maj = $traite = 0;
+            foreach ($rows as $r) {
+                $data = explode("\t", $r);
+                $traite++;
+                if (isset($this->stockFourn[$data[0]]) && $this->stockFourn[$data[0]] != $data[3]) {
+                    $this->majStock($data[0], $data[3]);
+                    $maj++;
+                }
+            }
+            $this->msgOk[] = $traite . ' lignes traité';
+            $this->msgOk[] = $maj . ' maj';
+        }
+    }
+
+    function getStockFileName()
+    {
+        return '';
+    }
+
+    function traiteLineFile($data)
+    {
+        $idProdBimp = $idPrixAchat = 0;
+
+        $idPrixAchat = $this->getIdPrixFourn($data[$this->keys['ref']]);
+//        
+        if ($idPrixAchat) {
+            $idProdBimp = $this->idProdFournToIdProdBimp[$idPrixAchat];
+            $data['BIMP_idPrixAchatBimp'] = $idPrixAchat;
+        } else {
+            $refs = $this->getPossibleRefs($data[$this->keys['ref']], $data[$this->keys['ManufacturerRef']], $data[$this->keys['Brand']]);
+            $idProdBimp = $this->getProduct($refs);
+        }
+
+
+        if ($idProdBimp) {
+            if (!isset($this->idProdTrouve[$idProdBimp]) && !isset($this->idProdTrouveActif[$idProdBimp]))
+                $this->idProdTrouve[$idProdBimp] = $data;
+            if ($data['BIMP_isActif']) {
+                if (isset($this->idProdTrouveActif[$idProdBimp])) {
+                    if ($this->idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'] && !$data['BIMP_idPrixAchatBimp']) {//L'ancien est liée a un prix d'achat on ne fait rien
+                    } elseif (!$this->idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'] && $data['BIMP_idPrixAchatBimp']) {//Le nouveau est li a un prix d'achat on prend celui la
+                        $this->idProdTrouveActif[$idProdBimp] = $data;
+                        $this->idProdTrouve[$idProdBimp] = $data; //pour être sur au cas ou ceux d'avant ne sont pas actif
+                    } else {
+                        $this->errors[] = "Attention deux ligne du fichier fournisseur pour le même prod " . $idProdBimp . " | " . $data[$this->keys['ref']] . "(" . $data['BIMP_idPrixAchatBimp'] . ")et " . $this->idProdTrouveActif[$idProdBimp][$this->keys['ref']] . "(" . $this->idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'] . ")";
+                        if (isset($this->idProdTrouve[$idProdBimp])) {
+                            unset($this->idProdTrouve[$idProdBimp]);
+                        }
+                    }
+                } else {
+                    $this->idProdTrouveActif[$idProdBimp] = $data;
+                    $this->idProdTrouve[$idProdBimp] = $data; //pour être sur au cas ou ceux d'avant ne sont pas actif
+                }
+            }
+        } elseif ($data['BIMP_isActif']) {
+            //ajout a la table de creation
+            $pu_ht = $data[$this->keys['puHT']];
+            $pu_ttc = $data[$this->keys['puTTC']];
+            $lib = $data[$this->keys['lib']];
+            if($pu_ht > 0 && $pu_ttc > 0)
+                $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
+            else
+                $tva_tx = 20;
+            $pa_ht = $this->calcPrice($data[$this->keys['prixBase']]);
+
+            $this->addTableProdFourn($data[$this->keys['ref']], $data[$this->keys['code']], $pu_ht, $tva_tx, $pa_ht, $data[$this->keys['Brand']], $lib, $data[$this->keys['ManufacturerRef']], $data);
+        }
+
+        return $idProdBimp;
+    }
+
+    function getPossibleRefs($refLdlc, $refConstructeur, $marque)
+    {
+        $tabRef = array();
+
+        $tabBrandBad = array('AIRIS');
+        if (in_array($marque, $tabBrandBad))
+            $marque = '';
+
+        if (isset($refLdlc) && $refLdlc != '')
+            $tabRef[] = $refLdlc;
+        if (isset($refConstructeur) && $refConstructeur != '') {
+            $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0, 3) . "-" : "";
+            $tabRef[] = $prefixe . $refConstructeur;
+            if (stripos(substr($marque, 0, 3), "-") !== false) {
+                $prefixe2 = substr(str_replace("-", "", $marque), 0, 3) . "-";
+                $tabRef[] = $prefixe2 . $refConstructeur;
+            }
+
+            if ($marque == "V7")
+                $tabRef[] = "VSE-" . $refConstructeur;
+            if ($marque == "GÉNÉRIQUE-HP")
+                $tabRef[] = "HEW-" . $refConstructeur;
+//            if($marque == "D-LINK")
+//                $tabRef[] = "DLI-".$refConstructeur;
+//            if($marque == "TP-LINK")
+//                $tabRef[] = "DPL-".$refConstructeur;
+            if ($marque == "HP")
+                $tabRef[] = "HEW-" . $refConstructeur;
+        }
+        return $tabRef;
+    }
+
+    function truncTableProdFourn()
+    {
+        global $db;
+        if($this->updateSql && $this->modeProdFourn == "insert")
+            $db->query("DELETE FROM " . MAIN_DB_PREFIX . "bimp_product_import_fourn WHERE id_fourn = ".$this->idFourn);
+    }
+
+    function addPriceFourn($idProd, $prix, $tva_tx, $ref)
+    {
+        $this->msgOk[] = 'INSERT PRICE' . $idProd . " | " . round($prix, 2) . "|" . $ref;
+
+        global $db;
+        if ($this->updateSql)
+            $db->query("INSERT INTO " . MAIN_DB_PREFIX . "product_fournisseur_price (price, tva_tx, fk_product, ref_fourn, fk_soc) VALUES('" . $prix . "','" . $tva_tx . "','" . $idProd . "','" . $ref . "'," . $this->idFourn . ")");
+    }
+
+    function addTableProdFourn($refLdlc, $codeLdlc, $pu_ht, $tva_tx, $pa_ht, $marque, $lib, $refFabriquant, $data)
+    {
+        global $db;
+
+        $data = addslashes(json_encode($data, JSON_UNESCAPED_UNICODE));
+
+
+        $marque = addslashes($marque);
+        $lib = addslashes($lib);
+        $refFabriquant = addslashes($refFabriquant);
+        if($this->updateSql){
+            if($this->modeProdFourn == "insert")
+                $db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
+                    . "VALUES (".$this->idFourn.", '" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "')");
+            else
+                $db->query("UPDATE `" . MAIN_DB_PREFIX . "bimp_product_import_fourn` SET codeLdlc = '" . $codeLdlc . "', pu_ht = '" . $pu_ht . "', tva_tx = '" . $tva_tx . "', pa_ht = '" . $pa_ht . "',marque = '" . $marque . "', libelle= '" . $lib . "',refFabriquant = '" . $refFabriquant . "',data = '" . $data . "'"
+                    . " WHERE id_fourn = ".$this->idFourn." AND refLdLC = '" . $refLdlc . "'");
+        }
+    }
+
+    function majPriceFourn($id, $prix, $tva_tx, $ref = null)
+    {
+        $text = 'Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->idProdFournToPrice[$id], 2) . "|" . $ref;
+
+        global $db;
+        if (abs($prix) > 0.01) {
+            if ($this->updateSql) {
+                if ($db->query("UPDATE " . MAIN_DB_PREFIX . "product_fournisseur_price SET quantity = '1',price = '" . $prix . "',unitprice = '" . $prix . "', tva_tx = '" . $tva_tx . "'" . ($ref ? ", ref_fourn = '" . $ref . "'" : "") . " WHERE fk_soc = " . $this->idFourn . " AND rowid = " . $id))
+                    $this->msgOk[] = $text;
+                else
+                    $this->errors[] = "maj abordée probléme SQL " . $text;
+            }
+        } else
+            $this->errors[] = "maj abordée " . $text;
+    }
+
+    function displayResult()
+    {
+        if (count($this->msgOk)) {
+            echo '<pre>';
+            print_r($this->msgOk);
+            echo '</pre>';
+        }
+        if (count($this->errors)) {
+            echo 'Erreurs :<pre>';
+            print_r($this->errors);
+            echo '</pre>';
+        }
+
+//        $id_fp = (int) $bdb->getRow('');
+    }
+
+    function initProdBimp()
+    {
+        $bdb = BimpCache::getBdb();
+
+        $result = $bdb->getRows('product', '1', null, 'array', array('ref', 'rowid'));
+
+        if (!is_null($result)) {
+            foreach ($result as $res) {
+                $this->infoProdBimp[$res['rowid']]['refBimp'] = $res['ref'];
+                $this->refProdToIdProd[$res['ref']] = $res['rowid'];
+            }
+        }
+
+        $result2 = $bdb->getRows('product_fournisseur_price', '`fk_soc` = ' . $this->idFourn, null, 'array', array('rowid', 'fk_product', 'ref_fourn', 'price', 'stockFourn'));
+
+        if (!is_null($result2)) {
+            foreach ($result2 as $res) {
+                if (isset($this->infoProdBimp[$res['fk_product']])) {
+                    $this->infoProdBimp[$res['fk_product']]['idProdFournisseur'] = $res['rowid'];
+                    $this->stockFourn[$res['ref_fourn']] = $res['stockFourn'];
+                    $this->infoProdBimp[$res['fk_product']]['refFourn'] = $res['ref_fourn'];
+                    $this->refProdFournToIdPriceFourn[$res['ref_fourn']] = $res['rowid'];
+                    $this->idProdFournToIdProdBimp[$res['rowid']] = $res['fk_product'];
+                    $this->idProdFournToPrice[$res['rowid']] = $res['price'];
+                }
+            }
+        }
+
+        $this->truncTableProdFourn();
+    }
+
+    function getIdPrixFourn($ref)
+    {
+        if (isset($this->refProdFournToIdPriceFourn[$ref]))
+            return $this->refProdFournToIdPriceFourn[$ref];
+    }
+
+    function getProduct($tabRef)
+    {
+        $tabOk = array();
+        foreach ($tabRef as $ref) {
+            if ($ref) {
+                if (isset($this->refProdToIdProd[$ref]))
+                    $tabOk[] = $this->refProdToIdProd[$ref];
+//                    foreach($this->infoProdBimp as $idProdBimp => $data){
+//                        if($data['refBimp'] == $ref)
+//                            $tabOk[] = $idProdBimp;
+//                    }
+            }
+        }
+        if (count($tabOk) == 1)
+            return $tabOk[0];
+        
+        elseif (count($tabOk) > 1)
+            $this->errors[] = "Plusisuers résultat coté BIMP pour les réf : " . print_r($tabRef, 1);
+    }
+}
+
+class importCatalogueTechData extends importCatalogueFourn
+{
+
+    public $idFourn = 229890;
+    public $dir = DOL_DATA_ROOT . '/importldlc/importProduit/techData/';
+    public $keys = array(
+        'ref'             => 1,
+        'ean'             => 0,
+        'lib'             => 2,
+        'code'            => 0,
+        'Brand'           => 4,
+        'ManufacturerRef' => 3,
+        'isSleep'         => 0,
+        'isDelete'        => 0,
+        'puHT'            => 5,
+        'puTTC'           => 0,
+        'prixBase'        => 7,
+    );
+    public $sep = "\t";
+
+    public function getFileName()
+    {
+        return "CustSpecific.txt";
+    }
+
+    function getStockFileName()
+    {
+        return "StockFile.txt";
+    }
+}
+
+class importCatalogueIngram extends importCatalogueFourn
+{
+
+    public $idFourn = 230496;
+    public $dir = DOL_DATA_ROOT . '/importldlc/importProduit/ingram/';
+    public $keys = array(
+        'ref'             => 3,
+        'ean'             => 0,
+        'lib'             => 4,
+        'code'            => 0,
+        'Brand'           => 1,
+        'ManufacturerRef' => 7,
+        'isSleep'         => 0,
+        'isDelete'        => 0,
+        'puHT'            => 9,
+        'puTTC'           => 0,
+        'prixBase'        => 8,
+    );
+    public $sep = ',';
+    public $modeProdFourn = "update";
+    
+    public function getFileName() {
+        return "PRICE.TXT";
+    }
+
+    function getStockFileName()
+    {
+        return "StockFile.txt";
+    }
+}
+
+class importCatalogueLdlc extends importCatalogueFourn
+{
+
+    public $idFourn = 230880;
+    public $dir = DOL_DATA_ROOT . '/importldlc/importProduit/ldlc/';
+    public $keys = array(
+        'ref'             => 0,
+        'ean'             => 1,
+        'lib'             => 2,
+        'code'            => 3,
+        'Brand'           => 4,
+        'ManufacturerRef' => 11,
+        'isSleep'         => 14,
+        'isDelete'        => 15,
+        'puHT'            => 16,
+        'puTTC'           => 17,
+        'prixBase'        => 20,
+    );
+    public $sep = '|;|';
+
+    public function getFileName()
+    {
+        $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
+
+        if (!file_exists($this->dir . $file)) {
+            $file = '';
+            if (file_exists($this->dir) && is_dir($this->dir)) {
+                $files = scandir($this->dir);
+                arsort($files);
+
+                foreach ($files as $f) {
+                    if (preg_match('/^[0-9]{8}_catalog_ldlc_to_bimp\.csv$/', $f)) {
+                        $file = $f;
+                        break;
+                    }
+                }
+            } else {
+                $this->errors[] = 'Dossier "' . $this->dir . '" absent';
+            }
+        }
+
+        return $file;
     }
 }
 

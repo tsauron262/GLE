@@ -22,7 +22,7 @@ function reloadObjectView(view_id) {
                     if (field_name) {
                         var $input = $inputContainer.find('[name="' + field_name + '"]');
                         if ($input.length) {
-                            new_values[field_name] = $input.val();
+                            new_values[field_name] = getInputValue($inputContainer);
                         }
                     }
                 }
@@ -42,7 +42,7 @@ function reloadObjectView(view_id) {
     $view.find('ul.nav-tabs').each(function () {
         var navtabs_id = $(this).data('navtabs_id');
         var active = $(this).find('li.active').first().data('navtab_id');
-        
+
         if (navtabs_id && active) {
             data['navtab-' + navtabs_id] = active;
         }
@@ -121,20 +121,6 @@ function loadModalView(module, object_name, id_object, view_name, $button, title
     }, {}, 'large');
 }
 
-function deleteObjectFromView(view_id, $button) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    var $view = $('#' + view_id);
-
-    if (!$view.length) {
-        return;
-    }
-
-    $button.addClass('disabled');
-}
-
 function saveObjectFromViewModalForm(view_id, $button) {
     if ($button.hasClass('disabled')) {
         return;
@@ -192,6 +178,8 @@ function saveObjectfromFieldsTable(fields_table_id, $button) {
 
     BimpAjax('saveObject', data, $resultContainer, {
         $button: $button,
+        display_success_in_popup_only: 1,
+        display_warnings_in_popup_only: 1,
         success: function (result) {
             $('body').trigger($.Event('objectChange', {
                 module: result.module,
@@ -481,7 +469,7 @@ $(document).ready(function () {
         });
     });
 
-    $('body').on('controllerTabLoaded', function (e) {
+    $('body').on('contentLoaded', function (e) {
         if (e.$container.length) {
             e.$container.find('.object_view').each(function () {
                 onViewLoaded($(this));

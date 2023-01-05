@@ -7,7 +7,7 @@ class Bimp_Stock extends BimpObject
     {
         $product = $this->getChildObject('product');
         if (BimpObject::objectLoaded($product)) {
-            $html = $product->dol_object->getNomUrl(1);
+            $html = $product->getLink();
             $html .= BimpRender::renderObjectIcons($product, 1, 'default');
             $html .= '<br/>';
             $html .= $product->getData('label');

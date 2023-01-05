@@ -338,7 +338,7 @@ class BR_CommandeShipment extends BimpObject
                 foreach ($rows as $r) {
                     $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $r['id_product']);
                     if ((int) $r['id_equipment']) {
-                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int)$r['id_equipment']);
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $r['id_equipment']);
                     } else {
                         $equipment = null;
                     }
@@ -467,7 +467,7 @@ class BR_CommandeShipment extends BimpObject
                     if (is_null($line->desc) || !$line->desc) {
                         if (!is_null($product)) {
                             $desc = $product->ref;
-                            $desc.= ($desc ? ' - ' : '') . $product->label;
+                            $desc .= ($desc ? ' - ' : '') . $product->label;
                         }
                     }
                     if (!$desc) {
@@ -751,8 +751,9 @@ class BR_CommandeShipment extends BimpObject
                                 $warnings[] = 'Numéro de série obligatoire pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ')';
                             } else {
                                 $item_qty_shipped = (int) $reservationShipment->getData('qty');
-                                if ($product->dol_object->correct_stock($user, $id_entrepot, $item_qty_shipped, 1, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
-                                    $warnings[] = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités à retirer: ' . $item_qty_shipped . ')';
+                                $stock_errors = $product->correctStocks($id_entrepot, $item_qty_shipped, Bimp_Product::STOCK_OUT, $codemove, $stock_label, 'commande', $commande->id);
+                                if (count($stock_errors)) {
+                                    $warnings[] = BimpTools::getMsgFromArray($stock_errors);
                                 }
                             }
                         }

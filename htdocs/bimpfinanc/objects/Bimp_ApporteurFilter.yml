@@ -1,0 +1,97 @@
+table: Bimp_ApporteurFilter
+primary: id
+
+
+positions: 1
+
+position_insert: after
+
+labels: 
+    name: filtre apporteur
+    name_plur: filtres apporteur
+    
+    
+parent_module: bimpfinanc
+parent_object: Bimp_Apporteur
+parent_id_property: id_rapporteur
+
+common_fields: 0
+     
+                
+fields: 
+    id_rapporteur:
+        label: Apporteur
+        type: id_parent
+    libelle:
+        label: Libelle
+        type: text
+    filter:
+        label: Filtre
+#        type: text
+        type: object_filters
+        obj_module: bimpcommercial
+        obj_name: Bimp_FactureLine
+    commition: 
+        label: Commission
+        type: percent
+        default_value: 0
+    sur_marge:
+        label: Sur marge
+        type: bool
+    contact_apporteur:
+        label: Contact Apporteur configuré
+        type: bool
+        default_value: 1
+    
+forms:
+    default: 
+        rows:
+            - field: libelle
+            - field: filter
+            - field: commition
+            - field: sur_marge
+            - field: contact_apporteur
+    
+filters_panels: 
+    default: 
+        filters: 
+            libelle:
+            filter:
+            commition:
+                
+lists:
+    default: 
+        positions: 1
+        positions_open: 1
+        add_object_row: 1
+        checkboxes: 1
+        configurable: 1
+        sort_field: position
+        sort_way: ASC
+        n: 25
+        delete_btn: 1
+        modal_view: default
+        add_form_name: default
+        filters_panel: default
+        edit_btn: 1
+        cols:
+            libelle:
+            filter: 
+            commition:
+            nb_prod:
+                label: Nb Prod
+                value: 
+                    callback: getNbRsult 
+            sur_marge:
+            contact_apporteur:
+    
+
+                      
+lists_cols: 
+    position: 
+        label: N°
+        min_width: 40;
+                     
+        
+        
+

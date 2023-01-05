@@ -28,6 +28,18 @@ class InterfaceBimpbimp extends DolibarrTriggers {
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf, $user;
+        // Edit signature
+//        if($action == 'USER_CREATE' or $action == 'USER_MODIFY') {
+//            global $db;
+//            // tab card and signature unset
+//                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+//                if ((int) $object->id > 0)
+//                    define('ID_SELECTED_FOR_SIGNATURE', (int) $object->id); // used in next script
+//                if(ID_SELECTED_FOR_SIGNATURE > 0) {
+//                    require_once DOL_DOCUMENT_ROOT . '/bimpcore/scripts/edit_signature.php';
+//                }
+//        }
+        
         
         
         if($action == "USER_CREATE" && $object->array_options['options_mail_bienvenue']){
@@ -48,7 +60,7 @@ class InterfaceBimpbimp extends DolibarrTriggers {
 <strong><a href="http://www.bimp.fr/contact"><strong>2 Rue des Erables 69760 Limonest</strong></a></strong>';
             $msg .= '<br/><strong><span style="color:#ff9300"><span style="font-size:36px">Bimp</span><span style="font-size:x-large">&nbsp;</span></span></strong><span style="font-size:x-large"><span style="color:#919191">Groupe LDLC</span></span>';
             
-            mailSyn2("Nouveau Collaborateur", "go@bimp.fr", "rh@bimp.fr", $msg);
+            mailSyn2("Nouveau Collaborateur", "bimpgroupe@bimp.fr", "rh@bimp.fr", $msg);
         }
     }
 

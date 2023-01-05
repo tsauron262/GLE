@@ -20,7 +20,12 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_CommandeFournLine
-            
+    bimp_achat: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Achat
+                
 sections: 
     - type: tabs
       tabs: 
@@ -36,6 +41,10 @@ sections:
                             - default
         receptions: 
             label: Réceptions
+            show: 
+              callback:
+                  method: useLogistique
+                  object: commande_fourn
             sections: 
                 - type: custom
                   custom: 

@@ -1,0 +1,133 @@
+table: bimp_apple_consigned_stock_mvt
+primary: id
+icon: fas_exchange-alt
+common_fields: 0
+
+list_page_url: 
+    module: bimpsupport
+    controller: index
+    url_params: 
+        tab: consigned_stocks
+        navtab-maintabs: mvts
+        
+header_list_name: default
+
+labels: 
+    name: mouvement de stock consigné
+    name_plur: mouvementd de stock consigné
+
+objects: 
+    stock: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: ConsignedStock
+            id_object: 
+                field_value: id_stock
+            
+fields: 
+    id_stock: 
+        label: Stock consigné
+        type: id_object
+        object: stock
+        required: 1
+        
+    id_user: 
+        label: Utilisateur
+        type: id_object
+        object: user
+        
+    date: 
+        label: Date
+        type: datetime
+        
+    qty: 
+        label: Qté
+        type: int
+        displays: 
+            badge: 
+                label: avec code couleur
+                type: callback
+                method: displayBadgeQty
+        
+    serial: 
+        label: N° de série
+        
+    code_mvt: 
+        label: Code
+        
+    description: 
+        label: Description
+        type: text
+        
+    cancelled: 
+        label: Annulation effectuée
+        type: bool
+        default_value: 0
+        
+fields_tables: 
+    infos: 
+        rows: 
+            - field: code_centre
+            - field: id_stock
+            - field: date
+            - field: qty
+            - field: serial
+            - field: code_mvt
+            - field: description
+            - field: cancelled
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: infos
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 6
+                  
+filters_panel: 
+    default: 
+        filters: 
+            stock:code_centre:
+            stock:part_number:
+            date: 
+            id_user:
+            code_mvt: 
+            description: 
+            
+lists: 
+    default: 
+        title: Mouvements stocks consignés Apple
+        icon: fas_exchange-alt
+        checkboxes:
+            callback: isUserAdmin
+        filters_panel: default
+        sort_field: id
+        sort_way: desc
+        n: 50
+        extra_btn: 
+            callback: getListExtraButtons
+        bulk_actions: 
+            callback: getListsBulkActions
+        list_actions: 
+            - label: Annuler
+              icon: fas_times-circle
+              action: cancel
+              confirm_msg: Veuillez confirmer l\'annulation de tous les mouvements de stock filtrés
+        cols: 
+            id: 
+            id_stock: 
+            stock:code_centre:
+            stock:part_number:
+            date: 
+            qty: 
+                display: badge
+            serial: 
+            code_mvt: 
+            description: 
+            id_user:

@@ -1,0 +1,19 @@
+bootstrap: 1
+
+title: 
+    callback: 
+        object: hashtag
+        method: getPageTitle
+
+objects: 
+    hashtag: 
+        instance: 
+            bimp_object: BimpHashtag
+            id_object: 
+                request: id
+                
+sections:
+    - type: view
+      view: 
+          name: default
+          object: hashtag

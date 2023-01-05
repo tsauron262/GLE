@@ -1,0 +1,19 @@
+colors: 
+    default: 'B4B4B4'
+    primary: '4C71B3'
+    secondary: '4C5667'
+    success: '348C41'
+    info: '3B6EA0'
+    warning: 'E69900'
+    danger: 'A00000'
+    important: '963E96'
+    selection: '5897FB'
+        
+pdf:
+    primary: '4C71B3'
+
+interface_client: 
+    primary: '4C71B3'
+    
+public_email: 
+    primary: '4C71B3'

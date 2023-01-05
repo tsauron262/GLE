@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bds_process_param` CHANGE `value` `value` TEXT NOT NULL DEFAULT '';

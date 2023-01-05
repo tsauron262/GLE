@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bc_vente_return` ADD `type` INT NOT NULL DEFAULT '1' AFTER `id_equipment`; 

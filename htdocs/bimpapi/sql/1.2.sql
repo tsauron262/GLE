@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpapi_api` ADD `api_idx` INT(11) NOT NULL DEFAULT 0;

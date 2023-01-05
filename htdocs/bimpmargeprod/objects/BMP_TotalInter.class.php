@@ -17,18 +17,30 @@ class BMP_TotalInter extends Abstract_margeprod
         )
     );
 
-    // Getters: 
-    
+    // Getters:
+
     public function canDelete()
     {
         global $user;
-        
+
         if ($user->admin) {
             return 1;
         }
-        
+
         return 0;
     }
+
+    public function canView()
+    {
+        global $user;
+
+        if ($user->admin) {
+            return 1;
+        }
+
+        return 0;
+    }
+
 
     public function getCategoriesBMPArray()
     {
@@ -163,7 +175,7 @@ class BMP_TotalInter extends Abstract_margeprod
         ));
 
         $asso = new BimpAssociation($this, 'types_montants');
-        
+
         foreach ($list as $item) {
             $code = null;
             $montants = $asso->getAssociatesList((int) $item['id']);
@@ -331,7 +343,7 @@ class BMP_TotalInter extends Abstract_margeprod
         return $return;
     }
 
-    // Affichage: 
+    // Affichage:
 
     public function displayCategorie($id_categorie)
     {
@@ -383,7 +395,7 @@ class BMP_TotalInter extends Abstract_margeprod
         return $this->displayTypeMontant($id_typeMontant);
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function update(&$warnings = array(), $force_update = false)
     {

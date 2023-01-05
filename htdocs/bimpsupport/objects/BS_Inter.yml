@@ -1,8 +1,10 @@
 table: bs_inter
+icon: fas_user-clock
+
 parent_id_property: id_ticket
 parent_object: BS_Ticket
+parent_module: bimpsupport
 
-icon: fas_user-clock
 labels:
     name: intervention
     is_female: 1
@@ -45,7 +47,7 @@ fields:
         input: 
             type: timer
         default_value: 0
-        display: 
+        displays: 
             default: 
                 type: timer
         searchable: 0
@@ -80,9 +82,15 @@ fields:
             rows: 3
             auto_expand: 1
 
+    is_public: 
+        label: Visible par le client
+        type: bool
+        default_value: 1
+
 forms: 
     default:
         rows: 
+            - field: is_public
             - field: tech_id_user
               show: 
                   callback: isNotLoaded
@@ -107,6 +115,12 @@ forms:
     resolution: 
         rows: 
             - field: resolution
+            
+lists_cols: 
+    user_create:
+        label: Créé par
+    date_create:
+        label: Début
                   
 lists:
     default:
@@ -121,29 +135,6 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-        cols:
-            id:
-                label: ID
-                field: id
-            user_create:
-                label: Créé par
-                field: user_create
-            date_create:
-                label: Début
-                field: date_create
-            description:
-                field: description
-            tech_user: 
-                label: Technicien
-                field: tech_id_user
-            duree:
-                field: timer
-    #        priorite:
-    #            field: priorite
-    #            edit: 1
-            status:
-                field: status
-                edit: 1
         add_form_name: default
         add_btn: 
             callback: isCreatable
@@ -154,36 +145,32 @@ lists:
         inline_view_item: 
             request: id_inter
         page_btn: 1
-    client_inters:
-        title: Liste des interventions
-        checkbox: 0
-        sort_field: id
-        sort_way: desc
-        n: 25
-        list_filters:
-            callback: getListFiltersInterfaceClient
         cols:
             id:
-                label: ID
-                field: id
-            status:
-                field: status
-                edit: 0
-            description:
-                field: description
+            user_create:
             date_create:
-                label: Début
-                field: date_create
-            tech_user: 
-                label: Technicien
-                field: tech_id_user
-        add_btn: 0
-        edit_btn: 0
-        delete_btn: 0
-        inline_view: interface_client
-        inline_view_item: 
-            request: id_inter
-        page_btn: 1
+            description:
+            tech_id_user: 
+            timer:
+            status:
+                edit: 1
+            is_public:
+                edit: 1
+        
+    public_client:
+        title: Interventions
+        icon: fas_user-clock
+        checkboxes: 0
+        configurable: 0
+        sort_field: date_create
+        sort_way: desc
+        n: 25
+        cols:
+            date_create:
+            tech_id_user: 
+            status:
+            description:
+            resolution: 
 
 fields_tables: 
     infos: 
@@ -197,6 +184,8 @@ fields_tables:
 #            - field: priorite
 #              edit: 1
             - field: status
+              edit: 1
+            - field: is_public
               edit: 1
             - field: description
               edit: 1
@@ -241,7 +230,7 @@ views:
                     fields_table:
                         panel: 1
                         name: infos
-    
+                        
     interface_client:
         title: nom
         edit_form: default
@@ -276,3 +265,16 @@ views_lists:
         list_filters: 
             callback: getUserCurrentIntersFilters
         
+searches: 
+    default: 
+        fields_search: 
+            - a.id
+            - t.ticket_number
+        fields_return: 
+            - a.id
+            - t.ticket_number
+        label_syntaxe: 'Inter #<a.id> - Ticket <t.ticket_number>'
+        joins: 
+            - table: bs_ticket
+              on: a.id_ticket = t.id
+              alias: t

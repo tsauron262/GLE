@@ -1,0 +1,8 @@
+abstract: 1
+common_fields: 0
+
+fields: 
+    name: 
+        label: Nom
+        
+    

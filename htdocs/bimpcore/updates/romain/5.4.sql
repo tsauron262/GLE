@@ -1,0 +1,1 @@
+ALTER TABLE llx_user ADD day_off VARCHAR(255) NOT NULL DEFAULT '';

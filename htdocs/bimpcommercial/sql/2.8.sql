@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` ADD `prelevement` BOOLEAN NOT NULL DEFAULT FALSE;

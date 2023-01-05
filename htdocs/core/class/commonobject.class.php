@@ -935,7 +935,7 @@ abstract class CommonObject
 		$contacts = $objFrom->liste_contact(-1, $source);
 		foreach($contacts as $contact)
 		{
-			if ($this->add_contact($contact['id'], $contact['fk_c_type_contact'], $contact['source']) < 0)
+			if ($this->add_contact($contact['id'], $contact['code'], $contact['source']) < 0)
 			{
 				$this->error=$this->db->lasterror();
 				return -1;
@@ -1227,6 +1227,12 @@ abstract class CommonObject
 	 */
 	public function getIdContact($source, $code, $status = 0)
 	{
+            if(class_exists('BimpCache')){
+                $clef = 'getIdContact'.$this->id.$source.$code.$status;
+                if(isset(BimpCache::$cache[$clef]))
+                    return BimpCache::$cache[$clef];
+            }
+            
 		global $conf;
 
 		$result=array();
@@ -1274,6 +1280,9 @@ abstract class CommonObject
 			$this->error=$this->db->error();
 			return null;
 		}
+                
+                if(class_exists('BimpCache'))
+                    BimpCache::$cache[$clef] = $result;
 
 		return $result;
 	}
@@ -4830,6 +4839,8 @@ if($obj->up == null)
 			{
 				$this->errors=$interface->errors;
 			}
+                        if(class_exists('BimpCore'))
+                            BimpCore::addLogs_extra_data ('Probléme call_trigger '.get_class ());
 		}
 		return $result;
 	}
@@ -5078,7 +5089,7 @@ if($obj->up == null)
              			break;*/
 			   		case 'password':
 			   			$algo='';
-			   			if ($this->array_options[$key] != '' && is_array($extrafields->attributes[$this->table_element]['param'][$attributeKey]['options']))
+			   			if ($this->array_options[$key] != '' /*moddrsi*/&& isset($extrafields->attributes[$this->table_element]['param'][$attributeKey]['options']) /*fmoddrsi*/&& is_array($extrafields->attributes[$this->table_element]['param'][$attributeKey]['options']))
 			   			{
 			   				// If there is an encryption choice, we use it to crypt data before insert
 			   				$tmparrays = array_keys($extrafields->attributes[$this->table_element]['param'][$attributeKey]['options']);
@@ -5196,7 +5207,10 @@ if($obj->up == null)
 				// Add field of attribute
 				if ($extrafields->attributes[$this->table_element]['type'][$attributeKey] != 'separate') // Only for other type than separator)
 				{
-					if ($new_array_options[$key] != '')
+//					if ($new_array_options[$key] != '')
+                                    /* moddrsi */
+                                    if (isset($new_array_options[$key]) && !is_null($new_array_options[$key]))
+                                    /* fmoddrsi */
 					{
 						$sql.=",'".$this->db->escape($new_array_options[$key])."'";
 					}

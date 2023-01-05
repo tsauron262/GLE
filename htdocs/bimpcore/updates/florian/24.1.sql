@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_file` ADD `in_emails` tinyint(1) NOT NULL DEFAULT 0;

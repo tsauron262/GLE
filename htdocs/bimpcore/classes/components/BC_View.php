@@ -11,7 +11,6 @@ class BC_View extends BC_Panel
     public function __construct(BimpObject $object, $name, $content_only = false, $level = 1, $title = null, $icon = null)
     {
         $this->params_def['delete_btn'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['buttons'] = array('type' => 'definitions', 'defs_type' => 'button', 'multiple' => true);
         $this->params_def['edit_form'] = array();
 
         global $current_bc;
@@ -107,15 +106,16 @@ class BC_View extends BC_Panel
                 $html .= '><i class="fas fa5-trash-alt iconLeft"></i>Supprimer</button>';
             }
 
-            $buttons = $this->object->getCurrentConf('buttons', array(), false, 'array');
-            if (count($buttons)) {
-                foreach ($buttons as $idx => $button) {
-                    $buttons_params = array(
-                        'data' => array(
-                            'view_id' => $this->identifier
-                        )
-                    );
-                    $html .= BimpRender::renderButtonFromConfig($this->object->config, $this->config_path . '/buttons/' . $idx, $buttons_params, 'button');
+            $buttons = $this->object->config->getCompiledParams($this->config_path . '/buttons');
+            
+            if (is_array($buttons) && count($buttons)) {
+                foreach ($buttons as $button) {
+                    if (!isset($button['data'])) {
+                        $button['data'] = array();
+                    }
+                    $button['data']['view_id'] = $this->identifier;
+//                    $html .= BimpRender::renderButtonFromConfig($this->object->config, $this->config_path . '/buttons/' . $idx, $buttons_params, 'button');
+                    $html .= BimpRender::renderButton($button);
                 }
             }
 

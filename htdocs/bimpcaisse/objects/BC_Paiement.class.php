@@ -7,7 +7,8 @@ class BC_Paiement extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if ($this->isLoaded()) {
+        global $user;
+        if ($this->isLoaded() && !$user->rights->bimpcommercial->adminPaiement){
             $caisse_session = $this->getChildObject('caisse_session');
             $caisse = $this->getChildObject('caisse');
             if (BimpObject::objectLoaded($caisse_session)) {
@@ -113,11 +114,10 @@ class BC_Paiement extends BimpObject
 
         return '';
     }
-
-    public function displayClient($display_name = 'nom_url')
-    {
+    
+    public function getClient(){
         if (!$this->isLoaded()) {
-            return '';
+            return null;
         }
 
         $facture = null;
@@ -145,14 +145,22 @@ class BC_Paiement extends BimpObject
         if (BimpObject::objectLoaded($facture)) {
             $client = $facture->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
-                if ($display_name === 'nom_url') {
-                    return $client->getNomUrl(1, 1, 1, 'default');
-                } else {
-                    return BimpTools::ucfirst($client->getRef() . ' - ' . $client->getData('nom'));
-                }
+                return $client;
             }
         }
+        return null;
+    }
 
+    public function displayClient($display_name = 'nom_url')
+    {
+        $client = $this->getClient();
+        if($client && $client->isLoaded()){
+            if ($display_name === 'nom_url') {
+                return $client->getLink();
+            } else {
+                return BimpTools::ucfirst($client->getRef() . ' - ' . $client->getName());
+            }
+        }
         return '';
     }
 }

@@ -1,0 +1,16 @@
+bootstrap: 1
+    
+title: Notes de frais
+
+objects:
+    period:
+        instance:
+            bimp_object: BRH_Period
+            id_object: 
+                request: id
+            
+sections:
+    - type: view
+      view: 
+          object: period
+          name: default

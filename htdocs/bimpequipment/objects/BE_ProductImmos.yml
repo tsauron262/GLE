@@ -29,76 +29,72 @@ fields:
         sortable: 0
         extra: 1
     
+filters: 
+    place_position: 
+        label: Position emplacement
+        type: range             
+        exclude_btn: 0
+    place_type:
+        label: Type emplacement
+        type: check_list
+        items: 
+            array: placeTypes
+        exclude_btn: 0
+    place_id_entrepot: 
+        label: Entrepôt emplacement
+        type: value
+        input: 
+            type: search_entrepot
+        exclude_btn: 0
+    place_id_user: 
+        label: Utilisateur emplacement
+        type: user
+        input: 
+            type: search_user
+        exclude_btn: 0
+    place_id_client:
+        label: Client emplacement
+        type: value
+        input: 
+            type: search_societe
+            societe_type: customer
+        exclude_btn: 0
+    place_name: 
+        label: Nom libre emplacement
+        type: value_part
+        exclude_btn: 0
+    place_date: 
+        label: Date arrivée emplacement
+        data_type: date
+        type: date_range
+        exclude_btn: 0
+    place_date_end:
+        label: Date de départ emplacement
+        data_type: date
+        type: date_range
+        exclude_btn: 0
+        
 filters_panels: 
-    immos: 
+    default:
+        unextends: 1
         filters: 
             ref: 
-                field: ref
             label: 
-                field: label
             place_position: 
-                custom: 1
-                label: Position emplacement
-                field: place_position
-                type: range                
             place_type:
-                custom: 1
-                label: Type emplacement
-                field: place_type
-                type: check_list
-                items: 
-                    array: placeTypes
-            place_entrepot: 
-                custom: 1
-                label: Entrepôt emplacement
-                field: place_id_entrepot
-                type: value
-                input: 
-                    type: search_entrepot
-            place_user: 
-                custom: 1
-                label: Utilisateur emplacement
-                field: place_id_user
-                type: value
-                input: 
-                    type: search_user
-            place_client: 
-                custom: 1
-                label: Client emplacement
-                field: place_id_client
-                type: value
-                input: 
-                    type: search_societe
-                    societe_type: customer
+            place_id_entrepot: 
+            place_id_user: 
+            place_id_client: 
             place_name: 
-                custom: 1
-                label: Nom libre emplacement
-                field: place_name
-                type: value_part
             place_date: 
-                custom: 1
-                label: Date arrivée emplacement
-                field: place_date
-                data_type: date
-                type: date_range
-#            place_date_end:
-#                custom: 1
-#                field: place_date_end
-#                data_type: date
-#                label: Date de départ emplacement
-#                type: date_range
+            place_date_end:
                 
-lists_cols: 
-    qty_immos: 
-        field: qty
-    total_achats_immos: 
-        field: total_achats
-        
 lists: 
     immos: 
         title: Totaux équipements
         configurable: 1
-        filters_panel: immos
+        enable_total_row: 0
+        filters_panel: default
         filters_panel_open: 1
         sort_field: rowid
         sort_way: asc
@@ -108,12 +104,12 @@ lists:
         extra_btn: 
             callback: getListExtraBtn
         joins: 
-            ef: 
-                alias: ef
+            a___ef: 
+                alias: a___ef
                 table: product_extrafields
-                on: a.rowid = ef.fk_object
+                on: a.rowid = a___ef.fk_object
         cols: 
             ref: 
             label:
-            qty_immos: 
-            total_achats_immos:
+            qty: 
+            total_achats:

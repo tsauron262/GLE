@@ -53,7 +53,7 @@ class GSX_Request_v2
         }
 
         ini_set('display_errors', 1);
-        error_reporting(E_All);
+        error_reporting(E_ALL);
 
         $doc = new DOMDocument();
         if (!$doc->load($fileName)) {
@@ -72,7 +72,7 @@ class GSX_Request_v2
 
         $requestNode = $requestNode[0];
 
-        $labelNode = XMLDoc::findChildElements($requestNode, 'label', null, null, 1);
+        $labelNode = XMLDoc::findChildElements($requestNode, 'label', null, array(), 1);
         if (count($labelNode)) {
             $this->requestLabel = XMLDoc::getElementInnerText($labelNode[0]);
         } else {
@@ -81,9 +81,9 @@ class GSX_Request_v2
 
         $dataNodes = null;
 
-        $datasNode = XMLDoc::findChildElements($requestNode, 'datas', null, null, 1);
+        $datasNode = XMLDoc::findChildElements($requestNode, 'datas', null, array(), 1);
         if (count($datasNode) == 1) {
-            $dataNodes = XMLDoc::findChildElements($datasNode[0], 'data', null, null, 1);
+            $dataNodes = XMLDoc::findChildElements($datasNode[0], 'data', null, array(), 1);
         }
 
         if (!isset($dataNodes) || !count($dataNodes)) {
@@ -116,14 +116,19 @@ class GSX_Request_v2
                     }
                 }
 
-                $nodes = XMLDoc::findChildElements($defsNode, 'label', null, null, 1);
+                $nodes = XMLDoc::findChildElements($defsNode, 'label', null, array(), 1);
                 if (count($nodes) == 1) {
                     $defs['label'] = XMLDoc::getElementInnerText($nodes[0]);
                 }
 
-                $nodes = XMLDoc::findChildElements($defsNode, 'infos', null, null, 1);
+                $nodes = XMLDoc::findChildElements($defsNode, 'infos', null, array(), 1);
                 if (count($nodes) == 1) {
                     $defs['infos'] = XMLDoc::getElementInnerText($nodes[0]);
+                }
+
+                $nodes = XMLDoc::findChildElements($defsNode, 'warning', null, array(), 1);
+                if (count($nodes) == 1) {
+                    $defs['warning'] = XMLDoc::getElementInnerText($nodes[0]);
                 }
 
                 $data = $defsNode->getAttribute('values');
@@ -139,15 +144,13 @@ class GSX_Request_v2
                 }
 
                 if (!isset($defs['values'])) {
-                    $nodes = XMLDoc::findChildElements($defsNode, 'values', null, null, 1);
+                    $nodes = XMLDoc::findChildElements($defsNode, 'values', null, array(), 1);
                     if (count($nodes) == 1) {
                         $defs['values'] = array();
                         $nodes = XMLDoc::filterElement($nodes[0], 'val', null);
                         foreach ($nodes as $node) {
                             $val = $node->getAttribute('val');
-                            if ($val !== '') {
-                                $defs['values'][$val] = XMLDoc::getElementInnerText($node);
-                            }
+                            $defs['values'][$val] = XMLDoc::getElementInnerText($node);
                         }
                     }
                 }
@@ -166,6 +169,10 @@ class GSX_Request_v2
         }
 
         $dataName = $dataNode->getAttribute('name');
+        $edit = 1;
+        if ($dataNode->hasAttribute('edit')) {
+            $edit = (int) $dataNode->getAttribute('edit');
+        }
 
         if ($dataNode->hasAttribute('multiple'))
             $multiple = $dataNode->getAttribute('multiple');
@@ -178,11 +185,11 @@ class GSX_Request_v2
 
         $inputName = ($prefixe ? $prefixe . '_' : '') . $dataName . (isset($index) ? '_' . $index : '');
         $valuesName = $dataName;
-        
+
         if (isset($values[$valuesName]) && $values[$valuesName] === 'hidden') {
             return '';
         }
-        
+
         $defs = $this->getDataDefinitionsArray($dataName);
 
         if (!isset($defs)) {
@@ -211,15 +218,17 @@ class GSX_Request_v2
         }
 
         $label = '';
-        $nodes = XMLDoc::findChildElements($dataNode, 'label', null, null, 1);
-        if (count($nodes) == 1) {
+        $nodes = XMLDoc::findChildElements($dataNode, 'label', null, array(), 1);
+        if (is_array($nodes) && count($nodes) == 1) {
             $label = XMLDoc::getElementInnerText($nodes[0]);
         } else {
             $label = (isset($defs['label']) ? $defs['label'] : $dataName);
         }
 
+        $warning = (isset($defs['warning']) ? $defs['warning'] : '');
+
         $display_if = null;
-        $nodes = XMLDoc::findChildElements($dataNode, 'display_if', null, null, 1);
+        $nodes = XMLDoc::findChildElements($dataNode, 'display_if', null, array(), 1);
         if (isset($nodes[0])) {
             $display_if = array(
                 'field_name' => $nodes[0]->getAttribute('input_name')
@@ -240,13 +249,13 @@ class GSX_Request_v2
                 $params['display_if'] = $display_if;
             }
 
-            $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
+            $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, array(), 1);
             if (count($subDatasNode) == 1) {
-                $dataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
+                $dataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, array(), 1);
 
                 if ($multiple) {
                     $items_contents = array();
-                    $node = XMLDoc::findChildElements($dataNode, 'itemLabel', null, null, 1);
+                    $node = XMLDoc::findChildElements($dataNode, 'itemLabel', null, array(), 1);
                     if (count($node) == 1) {
                         $params['item_label'] = XMLDoc::getElementInnerText($node[0]);
                     } elseif (isset($defs['itemLabel'])) {
@@ -271,13 +280,16 @@ class GSX_Request_v2
 
                     $i = 0;
 
-                    foreach ($values[$valuesName] as $subValues) {
-                        $i++;
-                        $items_contents[$i] = '';
-                        foreach ($dataNodes as $node) {
-                            $items_contents[$i] .= $this->getDataInput($node, $serial, $subValues, $i, $inputName);
+                    if (isset($values[$valuesName]) && is_array($values[$valuesName])) {
+                        foreach ($values[$valuesName] as $subValues) {
+                            $i++;
+                            $items_contents[$i] = '';
+                            foreach ($dataNodes as $node) {
+                                $items_contents[$i] .= $this->getDataInput($node, $serial, $subValues, $i, $inputName);
+                            }
                         }
                     }
+
                     $html .= BimpRender::renderFormGroupMultiple($items_contents, $inputName, $label, $params);
                 } else {
                     $inputsContent = '';
@@ -309,6 +321,11 @@ class GSX_Request_v2
             $inputValue = (isset($values[$valuesName]) ? $values[$valuesName] : $default);
 
             $html .= '<div class="formRowInput col-xs-12 col-sm-6 col-md-9">';
+
+            if ($warning) {
+                $html .= BimpRender::renderAlerts($warning, 'warning');
+            }
+
             if ($multiple) {
                 $valuesArray = null;
                 if (isset($values[$valuesName])) {
@@ -341,8 +358,8 @@ class GSX_Request_v2
                         }
                     }
                 } else {
-                    $nodes = XMLDoc::findChildElements($dataNode, 'values', null, null, 1);
-                    if (count($nodes) == 1) {
+                    $nodes = XMLDoc::findChildElements($dataNode, 'values', null, array(), 1);
+                    if (is_array($nodes) && count($nodes) == 1) {
                         $nodes = XMLDoc::filterElement($nodes[0], 'val', null);
                         foreach ($nodes as $node) {
                             $val = $node->getAttribute('val');
@@ -358,7 +375,7 @@ class GSX_Request_v2
 
             while (true) {
                 $html .= '<div class="inputContainer">';
-                if (isset($defs['edit']) && !(int) $defs['edit']) {
+                if (!$edit || (isset($defs['edit']) && !(int) $defs['edit'])) {
                     $html .= '<input type="hidden" name="' . $inputName . '" value="' . $inputValue . '"/>';
                     switch ($defs['type']) {
                         case 'text':
@@ -390,7 +407,16 @@ class GSX_Request_v2
 
                         case 'select':
                             if (isset($options[$inputValue])) {
-                                $html .= $options[$inputValue];
+                                if (is_string($options[$inputValue])) {
+                                    $html .= $options[$inputValue];
+                                } elseif (isset($options[$inputValue]['label'])) {
+                                    $classes = BimpTools::getArrayValueFromPath($options[$inputValue], 'classes', array());
+                                    if (!empty($classes)) {
+                                        $html .= '<span class="' . implode(' ', $classes) . '">' . $options[$inputValue]['label'] . '</span>';
+                                    } else {
+                                        $html .= $options[$inputValue]['label'];
+                                    }
+                                }
                             } else {
                                 $html .= $inputValue;
                             }
@@ -435,7 +461,7 @@ class GSX_Request_v2
                             ));
                             break;
 
-                        case 'select':
+                        case 'select':                            
                             $html .= BimpInput::renderInput('select', $inputName, $inputValue, array(
                                         'options' => $options
                             ));
@@ -555,7 +581,7 @@ class GSX_Request_v2
         if ($xmlDoc->load(DOL_DOCUMENT_ROOT . '/bimpapple/views/xml/requests_definitions.xml')) {
             $requestsNodes = XMLDoc::findElementsList($xmlDoc, 'request', array('name' => 'type', 'value' => $type));
             foreach ($requestsNodes as $node) {
-                $labelNode = XMLDoc::findChildElements($node, 'label', null, null, 1);
+                $labelNode = XMLDoc::findChildElements($node, 'label', null, array(), 1);
                 if (count($labelNode) == 1) {
                     if ($node->hasAttribute('name'))
                         $results[$node->getAttribute('name')] = XMLDoc::getElementInnerText($labelNode[0]);
@@ -636,7 +662,7 @@ class GSX_Request_v2
         $datas = array();
         foreach ($datasNodes as $dataNode) {
             // Check du display_if: 
-            $nodes = XMLDoc::findChildElements($dataNode, 'display_if', null, null, 1);
+            $nodes = XMLDoc::findChildElements($dataNode, 'display_if', null, array(), 1);
             if (isset($nodes[0])) {
                 $input_name = (string) $nodes[0]->getAttribute('input_name');
                 if ($input_name) {
@@ -703,9 +729,9 @@ class GSX_Request_v2
             }
 
             if ($defs['type'] === 'datasGroup') {
-                $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
+                $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, array(), 1);
                 if (count($subDatasNode) == 1) {
-                    $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
+                    $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, array(), 1);
                     if ($multiple) {
                         $nextIdx = (int) BimpTools::getValue($inputName . '_nextIdx', 0);
                         if ($nextIdx) {

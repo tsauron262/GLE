@@ -9,10 +9,6 @@ ALTER TABLE llx_bimp_objects_associations RENAME TO llx_bimpcore_objects_associa
 ALTER TABLE llx_bimp_timer RENAME TO llx_bimpcore_timer;
 ALTER TABLE llx_bimp_note RENAME TO llx_bimpcore_note;
 
-
-
-
-
 CREATE TABLE IF NOT EXISTS `llx_bimpcore_conf` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(128) NOT NULL,

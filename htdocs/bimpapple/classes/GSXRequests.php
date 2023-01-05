@@ -431,7 +431,7 @@ class GSX_Request
                                     if (stripos($ln[0], $result->nom2) === 0)
                                         $tab4[] = $ln;
                                 }
-//                    $tab3 = array_merge($tab3, $tab2[$result->nom]);
+//                    $tab3 = BimpTools::merge_array($tab3, $tab2[$result->nom]);
                             }
                         }
                         if (count($tab3) < 2) {

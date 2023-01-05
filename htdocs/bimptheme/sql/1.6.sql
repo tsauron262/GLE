@@ -1,0 +1,1 @@
+ALTER TABLE `llx_menu` ADD `bimp_module` varchar(50) NOT NULL DEFAULT '' AFTER `active`;

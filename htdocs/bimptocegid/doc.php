@@ -11,6 +11,6 @@
     header('Content-Disposition: attachment; filename='.$_REQUEST['nom'].';');
     header('Cache-Control: Public, must-revalidate');
     header('Pragma: public');
-    header('Content-Length: '.filesize(DIR_SYNCH . 'exportCegid/' . $_REQUEST['folder'] . '/' . $_REQUEST['nom']));
-    readfile(DIR_SYNCH . 'exportCegid/' . $_REQUEST['folder'] . '/' . $_REQUEST['nom']);
+    header('Content-Length: '.filesize(PATH_TMP . '/exportCegid/' . $_REQUEST['folder'] . '/' . $_REQUEST['nom']));
+    readfile(PATH_TMP . '/exportCegid/' . $_REQUEST['folder'] . '/' . $_REQUEST['nom']);
 

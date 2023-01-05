@@ -78,9 +78,28 @@
 .bimp_controller_content {
     color: $gray-darker;
 }
+
 .page_content {
     background-color: #fff;
     padding: 15px;
+
+    .page_title {
+        .header_button {
+            display: inline-block;
+            margin-right: 20px;
+            vertical-align: top;
+        }
+
+        & > h1, & > h2, & > h3, & > h4 {
+            display: inline-block;
+            margin-top: 7px;
+        }
+
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+
+        border-bottom: 2px solid $gray-darker;
+    }
 }
 
 div.tabBar {
@@ -148,6 +167,10 @@ body.has_fullscreen {
     .loading-text {
         font-size: 16px;
     }
+}
+
+.formRowInput .loading-spin {
+    font-size: 16px!important;
 }
 
 .typeLabel {
@@ -228,15 +251,31 @@ div.alert {
 .objectIcon {
     @include transition(all 0.3s ease);
 
-    margin-left: 10px;
+    margin-left: 8px;
     cursor: pointer;
     display: inline-block;
-    font-size: 11px;
+    font-size: 10px;
 
     color: $gray-dark;
 
     &:hover {
         color: $primary;
+    }
+}
+
+.infoIcon {
+    @include transition(all 0.3s ease);
+
+    display: inline-block;
+    margin: 0 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    color: $gray;
+
+    &:hover {
+        color: $info
     }
 }
 
@@ -248,6 +287,42 @@ div.alert {
     color: $gray-darker;
     font-weight: bold;
     font-size: 12px;
+}
+
+.check_on {
+    font-weight: bold;
+    color: $success;
+
+    &:after {
+        font-family: 'FA5S';
+        content: '\f00c';
+    }
+}
+
+.check_off {
+    font-weight: bold;
+    color: $danger;
+
+    &:after {
+        font-family: 'FA5S';
+        content: '\f00d';
+    }
+}
+
+.copyTextIcon {
+    display: inline-block;
+    margin: 0 5px;
+    font-size: 10px;
+    font-weight: normal;
+    color: #505050;
+}
+
+.note_content {
+    background-color: #FFFFE1;
+    border-color: #FFFFE1;
+    padding: 6px 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 2px #787878;
 }
 
 /*Objects Components*/
@@ -337,22 +412,22 @@ i.iconRight {
 }
 
 .btn-large {
-    @media (min-width: $screen-sm-max) {
-        font-size: 14px;
-        padding: 12px 20px;
+    /*@media (min-width: $screen-xs-max) {*/
+    font-size: 14px;
+    padding: 12px 20px;
 
-        i {
-            font-size: 18px;
+    i {
+        font-size: 18px;
 
-            &.iconLeft {
-                margin-right: 12px;
-            }
+        &.iconLeft {
+            margin-right: 12px;
+        }
 
-            &.iconRight {
-                margin-left: 12px;
-            }
+        &.iconRight {
+            margin-left: 12px;
         }
     }
+    /*}*/
 }
 
 .btn-small {
@@ -628,7 +703,7 @@ i.iconRight {
     .modal-body {
         overflow-y: auto;
         padding-bottom: 60px;
-        
+
         .page_modal_img {
             max-width: 100%;
             height: auto;
@@ -638,6 +713,10 @@ i.iconRight {
     .select2-container {
         z-index: 11000;
     }
+
+    .modal_content {
+        min-height: 300px;
+    }
 }
 
 .modal-ui-dialog {
@@ -645,6 +724,7 @@ i.iconRight {
 }
 
 #openModalBtn {
+    z-index: 999999;
     position: fixed;
     bottom: 0;
     right: 0;
@@ -673,6 +753,61 @@ i.iconRight {
 
     &.closed {
         margin-right: -40px;
+    }
+}
+
+#openDebugModalBtn {
+    z-index: 999999;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    margin-bottom: 20px;
+    margin-left: 10px;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+    @include transition(all 0.3s ease);
+
+    i {
+        color: $secondary;
+        font-size: 16px;
+    }
+
+    &:hover i {
+        color: $primary;
+    }
+
+    &.closed {
+        margin-left: -40px;
+    }
+
+}
+
+/*Open/Close Buttons*/
+
+.openCloseButton {
+    @include transition(all 0.3s ease);
+    font-size: 12px;
+    font-weight: bold;
+    font-style: italic;
+    color: $gray-dark!important;
+    cursor: pointer;
+
+    &:hover {
+        color: #000!important;
+    }
+
+    &:after {
+        font-family: 'FA5S';
+        margin-left: 8px;
+    }
+
+    &.open-content:after {
+        content: '\f0d7';
+    }
+
+    &.close-content:after {
+        content: '\f0d8';
     }
 }
 
@@ -734,7 +869,21 @@ i.iconRight {
 }
 
 .foldable_container {
+    &.offset_left > .foldable_content {
+        padding-left: 10px;
+        margin-left: 10px;
+        border-left: 1px dotted $gray;
+    }
+
     & > .foldable_caption {
+        font-weight: bold;
+        padding: 5px;
+        margin-bottom: 3px;
+
+        &.grey_bk {
+            background-color: #F0F0F0;   
+        }
+
         cursor: pointer;
 
         & > .foldable-caret {
@@ -953,11 +1102,57 @@ i.iconRight {
         font-size: 12px;
     }
     .btn:hover {
-        background-color: #EF7D00;
+        background-color: $primary;
         color: #fff;
     }
 }
 
+/*Info Card*/
+
+.bimp_info_card {
+    display: inline-block;
+    min-width: 200px;
+    margin: 5px;
+    padding: 12px 8px;
+    border-left: 4px solid $gray-darker;
+    border-top: 1px solid $gray-darker;
+    border-radius: 4px;
+    vertical-align: top;
+    background-color: #F8F8F8;
+    box-shadow: 1px 1px 3px #7B7B7B;
+
+    &.small {
+        min-width: 160px;
+    }
+
+    &.large {
+
+    }
+
+    .bimp_info_card_icon {
+        display: inline-block;
+        width: 20px;
+        font-size: 20px;
+        font-weight: bold;
+        margin-right: 10px;
+        margin-left: 2px;
+        float: left;
+    }
+
+    .bimp_info_card_content {
+        display: inline-block;
+        font-weight: bold;
+
+        .bimp_info_card_title {
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .bimp_info_card_value {
+            font-size: 15px;
+        }
+    }
+}
 
 /*Bimp Timer*/ 
 
@@ -1232,4 +1427,26 @@ i.iconRight {
     .debug_info_title {
         font-weight: bold;
     }
+}
+
+/*Backtraces*/
+
+.BimpBacktraceContainer {
+    .bt_file {
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    .bt_file_lines {
+        display: inline-block;
+        font-size: 11px;
+        margin: 10px 5px;
+        padding-left: 10px;
+    }
+}
+
+
+body.modal-open ul.ui-autocomplete{
+    overflow: auto;
+    max-height: 400px;
 }

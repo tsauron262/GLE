@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bds_process_operation` ADD `reports_delay` INT(11) NOT NULL DEFAULT '90';

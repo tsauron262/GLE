@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_object_lock` ADD `token` VARCHAR(30) NOT NULL DEFAULT '';

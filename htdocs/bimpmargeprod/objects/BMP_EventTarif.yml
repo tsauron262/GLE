@@ -21,9 +21,9 @@ fields:
         label: Montant TTC
         type: money
         
-    previsionnel: 
-        label: Ventes prévisionnelles
-        type: int
+#    previsionnel: 
+#        label: Ventes prévisionnelles
+#        type: int
         
 #    droits_loc: 
 #        label: Droits de location (Le Fil)
@@ -52,6 +52,8 @@ list:
     update_btn: 1
     add_form_name: default
     delete_btn: 1
+    extra_cols: 
+        callback: getListExtraCols
     cols: 
         name: 
             field: name
@@ -59,14 +61,14 @@ list:
         amount: 
             field: amount
             edit: 1
-        previsionnel:
-            show: 
-                callback: 
-                    method: isInPrevisionnelMode
-                    object: 
-                        callback: getParentInstance
-            field: previsionnel
-            edit: 1
+#        previsionnel:
+#            show: 
+#                callback: 
+#                    method: isInPrevisionnelMode
+#                    object: 
+#                        callback: getParentInstance
+#            field: previsionnel
+#            edit: 1
 #        loc: 
 #            field: droits_loc
 #            edit: 1

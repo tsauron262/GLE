@@ -25,13 +25,7 @@ class Bimp_user_client_controller extends BimpController {
                 require_once DOL_DOCUMENT_ROOT . "/bimpinterfaceclient/views/header.php";
                 parent::display();
 
-                echo BimpRender::renderAjaxModal('page_modal');
-
-                $this->addDebugTime('Fin affichage page');
-
-                if (BimpDebug::isActive('bimpcore/controller/display_times')) {
-                    echo $this->renderDebugTime();
-                }
+                echo BimpRender::renderAjaxModal('page_modal', 'bimpModal');
 
                 llxFooter();
 

@@ -1,0 +1,111 @@
+table: fichinter_facturation
+icon: fas_file-invoice-dollar
+
+parent_module: bimptechnique
+parent_id_property: fk_fichinter
+parent_object: BT_ficheInter
+
+labels:
+    name: Facturation
+    name_plur: Facturations
+    is_female: 1
+    
+objects: 
+    fi_line: 
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimptechnique
+                name: BT_ficheInter_det
+                
+fields:
+    fk_fichinter:
+        label: Fiche d'intervention
+        type: id_parent
+        
+    id_commande:
+        label: Commande
+        type: id_object
+        object: commande
+        
+    fi_lines:
+        label: Lignes de la FI
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: fi_line
+        
+    id_commande_line:
+        label: Ligne de la commande
+        type: id
+        
+    is_vendu:
+        label: Service/Déplacement vendu
+        type: bool
+        
+    id_facture:
+        label: Facture
+        type: id_object
+        object: facture
+        
+    total_ht_vendu:
+        label: Total HT vendu
+        type: money
+        
+    tva_tx:
+        label: Taux de TVA
+        type: percent
+        
+    total_ht_depacement:
+        label: Total HT depacement
+        type: money
+        
+    remise:
+        label: Remise commercial (Sur le supplément)
+        type: percent
+    
+lists_cols: 
+    displayAssocLines:
+        label: Lignes de la fiche
+        value:
+            callback: displayAssocLines
+
+    displayTTC:
+        label: Total TTC vendu
+        value:
+            callback: displayTTC
+                    
+    displayHTfacture:
+        label: HT réellement facturé
+        value:
+            callback: displayHTfacture
+            
+    displayAlertes:
+        label: Alertes
+        value:
+            callback: displayAlertes
+lists:
+    in_fiche:
+        checkboxes: 1
+        title: Facturation
+        delete_btn: 1
+        extra_btn:
+            callback: getListExtraButtons
+        cols:
+            is_vendu:
+            displayAssocLines:
+            total_ht_vendu:
+            tva_tx:
+            displayTTC:
+            total_ht_depacement:
+            remise:
+            displayHTfacture:
+            id_commande:
+            displayAlertes:
+            id_facture: 
+             
+forms:
+    addRemisePercent:
+        rows:
+           - field: remise

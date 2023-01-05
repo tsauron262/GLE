@@ -1,14 +1,23 @@
 bootstrap: 1
 title: Produits
 
+js: 
+    - /bimplogistique/views/js/create_inventory2.js
+    
 objects:
     productentrepot: 
         instance: 
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_Product_Entrepot
+                
+    productldlc:
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Product_Ldlc
             
-    products: 
+    product: 
         instance: 
             bimp_object: Bimp_Product
             
@@ -17,12 +26,7 @@ objects:
             bimp_object: 
                 module: bimpequipment
                 name: Equipment
-            
-    vente:
-        instance: 
-            bimp_object: 
-                module: bimpcommercial
-                name: Bimp_Vente
+                
     package: 
         instance: 
             bimp_object: 
@@ -34,11 +38,18 @@ objects:
             bimp_object: 
                 module: bimpequipment
                 name: BE_ProductImmos
-    inventory:
+    
+    values8sens: 
         instance: 
-            bimp_object:
-                module: bimplogistique
-                name: Inventory
+            bimp_object: BimpValues8Sens     
+            
+    productfourn: 
+        instance: 
+            bimp_object: Bimp_ProductFournisseurPrice 
+            
+    remises_arrieres: 
+        instance: 
+            bimp_object: Bimp_ProductRA
             
 sections:
     - type: tabs
@@ -49,47 +60,74 @@ sections:
                 - type: list
                   list: 
                       panel: 1
-                      object: products
+                      object: product
                       name: default
-        equipments: 
+        equipments:
             label: Equipements
+            show: 
+                is_module_active: bimpequipment
             sections:
                 - type: list
                   list: 
                       panel: 1
                       object: equipment
-        productentrepot: 
-            label: Stock / Entrepot
+        productfourn:
+            label: Produits Fournisseurs
+            show: 
+                conf: 
+                    module: bimpcore
+                    name: use_imports_fournisseurs
             sections: 
                 - type: list
                   list: 
                       panel: 1
-                      object: productentrepot
+                      object: productfourn
                       name: default
-        ventes: 
-              label: Stats ventes
-              sections: 
-                  - type: list
-                    list: 
-                        panel: 1
-                        object: vente
-        packages: 
+                      
+        productldlc:
+            label: Imports produits Fournisseurs
+            show: 
+                conf: 
+                    module: bimpcore
+                    name: use_imports_fournisseurs
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: productldlc
+                      name: default
+                        
+        packages:
             label: Packages
+            show: 
+                is_module_active: bimpequipment
             sections: 
                 - type: list
                   list: 
                       object: package  
-        immos: 
+        immos:
             label: Equipements + Package
+            show: 
+                is_module_active: bimpequipment
             sections: 
                 - type: list
                   list: 
                       object: immos
                       name: immos
-        inventory:
-            label: Inventaires
-            sections:
+                      
+        values8sens: 
+            label: Tags 8sens
+            sections: 
                 - type: list
                   list: 
                       panel: 1
-                      object: inventory
+                      object: values8sens
+                      name: default
+        remises_arrieres: 
+            label: Remises arrières
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: remises_arrieres
+                      name: default

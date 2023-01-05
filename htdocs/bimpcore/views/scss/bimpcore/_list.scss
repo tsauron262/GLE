@@ -7,12 +7,13 @@ table.objectlistTable {
     border: none;
     box-shadow: none;
     width: 100%;
-
+    
     & > thead > tr > th {
         padding: 10px 6px;
         margin-bottom: 8px;
-        color: #fff;
-        background-color: $primary;
+        color: $bimp_list_header_color;
+        background-color: $bimp_list_header_bk_color;
+        border-bottom: $bimp_list_header_border;
         text-align: left;
         font-weight: bold;
 
@@ -34,8 +35,8 @@ table.objectlistTable {
 
         & > th {
             padding: 5px 12px 5px 6px;
-            background-color: $primary;
-            color: #fff;
+            color: $bimp_headers_color;
+            background-color: $bimp_headers_bk_color;
             border-bottom: 1px solid #fff;
             text-align: right;
 
@@ -76,8 +77,17 @@ table.objectlistTable {
                 width: 99%;
             }
 
-            .inputHelp, .inputInfo {
+            .qty_inputContainer {
+                min-width: 160px;
+            }
+
+            .inputHelp, .inputInfo, .texarea_values {
                 display: none;
+            }
+
+            .inputGroupContainer, 
+            .input-group {
+                width: 100%;
             }
 
             input, textarea, select {
@@ -106,12 +116,12 @@ table.objectlistTable {
         }
 
         &.deactivated {
-            background-color: #DCDCDC!important;
+            background-color: #B3B2B2!important;
             border-color: #C8C8C8!important;
             color: #646464!important;
 
             & > td {
-                background-color: #DCDCDC!important;
+                background-color: #B3B2B2!important;
                 border-color: #C8C8C8!important;
                 color: #646464!important;
             }
@@ -139,6 +149,16 @@ table.objectlistTable {
             }
         }
 
+        &.has_errors {
+            background-color: #FFE6E5!important;
+            border-color: #E62119!important;
+
+            & > td {
+                background-color: #FFE6E5!important;
+                border-color: #E62119!important;
+            }
+        }
+
         &:hover {
             background-color: #FAFAFA!important;
 
@@ -148,10 +168,10 @@ table.objectlistTable {
         }
 
         &.deactivated:hover {
-            background-color: #E6E6E6!important;
+            background-color: #BFBFBF!important;
 
             & > td {
-                background-color: #E6E6E6!important;
+                background-color: #BFBFBF!important;
             }
         }
 
@@ -170,17 +190,26 @@ table.objectlistTable {
                 background-color: #CDEFFF!important;
             }
         }
+
+        &.has_errors:hover {
+            background-color: #FFC4C2!important;
+
+            & > td {
+                background-color: #FFC4C2!important;
+            }
+        }
     }
-    
+
     & > tbody.headers_col > tr > th {
         width: 160px;
     }
 
     & > tfoot > tr > th {
-        color: #fff;
-        background-color: $primary;
+        color: $bimp_headers_color;
+        background-color: $bimp_headers_bk_color;
         text-align: right;
         padding: 5px 12px 5px 6px;
+        vertical-align: top;
     }
 
     & > tfoot > tr > td {
@@ -188,108 +217,6 @@ table.objectlistTable {
         font-weight: bold;
         color: $gray-darker;
         padding: 5px 6px;
-    }
-
-    .objectSubList {
-        width: 100%;
-        & > thead > tr > th {
-            padding: 4px 10px;
-            margin-bottom: 4px;
-            color: $gray-darker;
-            background-color: $gray-lighter;
-            text-align: left;
-            font-weight: bold;
-            border-bottom: 1px solid $primary;
-        }
-
-        & > tbody > tr {
-            &.selected {
-                background-color: #FFF5E1!important;
-
-                & > td {
-                    background-color: #FFF5E1!important;
-                }
-            }
-
-            &.deactivated {
-                background-color: #DCDCDC!important;
-                border-color: #C8C8C8!important;
-                color: #646464!important;
-
-                & > td {
-                    background-color: #DCDCDC!important;
-                    border-color: #C8C8C8!important;
-                    color: #646464!important;
-                }
-            }
-
-            &.modified  {
-                background-color: #E1F5FF!important;
-                border-color: #E1F5FF!important;
-
-                & > td {
-                    background-color: #E1F5FF!important;
-                    border-color: #E1F5FF!important;
-
-                    .inputContainer .modified {
-                        box-shadow: 0 0 3px #003550!important;
-                    }
-                }
-            }
-
-            &:hover {
-                background-color: #FAFAFA!important;
-
-                & > td {
-                    background-color: #FAFAFA!important;
-                }
-            }
-
-            &.deactivated:hover {
-                background-color: #E6E6E6!important;
-
-                & > td {
-                    background-color: #E6E6E6!important;
-                }
-            }
-
-            &.selected:hover {
-                background-color: #FFEFCD!important;
-
-                & > td {
-                    background-color: #FFEFCD!important;
-                }
-            }
-
-            &.modified:hover {
-                background-color: #CDEFFF!important;
-
-                & > td {
-                    background-color: #CDEFFF!important;
-                }
-            }
-        }
-
-        & > tbody > tr > td {
-            padding: 4px 10px;
-            border-bottom: 1px solid $gray-light;
-            background-color: #fff;
-            color: $gray-dark;
-        }
-
-        & > tfoot > tr {
-            & > td, & > th {
-                padding: 4px 10px;
-                border: none;
-                background-color: #F0F0F0;
-                color: $gray-darker;
-                font-weight: bold;
-            }
-            & > th {
-                text-align: right;
-                padding-right: 20px;
-            }
-        }
     }
 
     tr.margin_row {
@@ -344,6 +271,107 @@ table.objectlistTable {
     }
 }
 
+table.objectSubList {
+    width: 100%;
+    & > thead > tr > th {
+        padding: 4px 10px;
+        margin-bottom: 4px;
+        color: $gray-darker;
+        background-color: $gray-lighter;
+        text-align: left;
+        font-weight: bold;
+        border-bottom: 1px solid $primary;
+    }
+
+    & > tbody > tr {
+        &.selected {
+            background-color: #FFF5E1!important;
+
+            & > td {
+                background-color: #FFF5E1!important;
+            }
+        }
+
+        &.deactivated {
+            background-color: #DCDCDC!important;
+            border-color: #C8C8C8!important;
+            color: #646464!important;
+
+            & > td {
+                background-color: #DCDCDC!important;
+                border-color: #C8C8C8!important;
+                color: #646464!important;
+            }
+        }
+
+        &.modified  {
+            background-color: #E1F5FF!important;
+            border-color: #E1F5FF!important;
+
+            & > td {
+                background-color: #E1F5FF!important;
+                border-color: #E1F5FF!important;
+
+                .inputContainer .modified {
+                    box-shadow: 0 0 3px #003550!important;
+                }
+            }
+        }
+
+        &:hover {
+            background-color: #FAFAFA!important;
+
+            & > td {
+                background-color: #FAFAFA!important;
+            }
+        }
+
+        &.deactivated:hover {
+            background-color: #E6E6E6!important;
+
+            & > td {
+                background-color: #E6E6E6!important;
+            }
+        }
+
+        &.selected:hover {
+            background-color: #FFEFCD!important;
+
+            & > td {
+                background-color: #FFEFCD!important;
+            }
+        }
+
+        &.modified:hover {
+            background-color: #CDEFFF!important;
+
+            & > td {
+                background-color: #CDEFFF!important;
+            }
+        }
+    }
+
+    & > tbody > tr > td {
+        padding: 4px 10px;
+        border-bottom: 1px solid $gray-light;
+        background-color: #fff;
+        color: $gray-dark;
+    }
+
+    & > tfoot > tr {
+        & > td, & > th {
+            padding: 4px 10px;
+            border: none;
+            background-color: #F0F0F0;
+            color: $gray-darker;
+            font-weight: bold;
+        }
+        & > th {
+            text-align: right;
+            padding-right: 20px;
+        }
+    }
+}
 /*.objectlistTableContainer {
     overflow-x: auto;
 }*/
@@ -355,7 +383,7 @@ table.objectlistTable {
         font-family: 'FontAwesome';
         margin-left: 8px;
         opacity: 0;
-        color: #fff;
+        color: $bimp_list_header_color;
         transition: all 0.15s ease;
         -webkit-transition: all 0.15s ease;
     }
@@ -487,7 +515,7 @@ th.th_tools {
     .headerButton {
         display: inline-block;
         margin: 5px;
-        color: #fff;
+        color: $bimp_list_header_icons_color;
         font-weight: normal;
         margin: 0 3px;
         padding: 4px 6px;
@@ -499,8 +527,8 @@ th.th_tools {
         -webkit-transition: all 0.3s ease;
 
         &:hover {
-            color: #EF7D00;
-            background-color: #fff;
+            color: $bimp_list_header_icons_hover_color;
+            background-color: $bimp_list_header_icons_hover_bk_color;
         }
         &:before,
             &:after {
@@ -531,7 +559,7 @@ th.th_tools {
     .loadingIcon {
         display: inline-block;
         margin: 5px;
-        color: #fff;
+        color: $bimp_list_header_icons_color;
         font-weight: bold;
         margin: 0 3px;
         padding: 2px 6px;
@@ -561,7 +589,7 @@ td.buttons {
 }
 
 .rowButton {
-    color: #636363!important;
+    color: $gray-darker!important;
     text-align: center;
     width: 28px;
     height: 28px;
@@ -579,7 +607,7 @@ td.buttons {
 
     &:hover {
         color: #fff!important;
-        background-color: #EF7D00;
+        background-color: $primary;
         text-decoration: none;
 
         i {
@@ -603,7 +631,7 @@ td.buttons {
     }
 
     i {
-        color: #636363!important;
+        color: $gray-darker!important;
     }
 }
 
@@ -647,8 +675,9 @@ td.buttons {
         line-height: 16px;
         vertical-align: middle;
 
-        &:hover {
-            color: #EF7D00;
+        &:hover,
+            &.selected {
+            color: $primary;
         }
         &:before,
             &:after {
@@ -661,6 +690,10 @@ td.buttons {
         &.disabled:hover {
             color: #C8C8C8;
             cursor: default;
+        }
+
+        &.processing {
+            cursor: progress;
         }
     }
     span.prevButton:before {
@@ -679,13 +712,20 @@ td.buttons {
         .pageBtn {
             font-weight: bold;
             cursor: pointer;
-            &:hover {
+
+            &:hover,
+                &.selected {
                 color: #505050;
             }
+
             &.active,
             &.active:hover {
-                color: #EF7D00;
+                color: $primary;
                 cursor: default;
+            }
+
+            &.processing {
+                cursor: progress;
             }
         }
     }
@@ -693,20 +733,46 @@ td.buttons {
 
 /*Panel Filtres*/
 
+.filters_toolbar {
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid $gray-darker;
+}
+
 .bimp_filter_container {
     margin-bottom: 5px;
 
     .bimp_filter_caption {
         font-weight: bold;
         color: $gray-darker;
-        padding: 6px 8px;
+        padding: 6px 24px 6px 6px;
         margin-bottom: 5px;
         background-color: #DCDCDC;
+
+        .foldable-caret {
+            margin-right: -12px;
+        }
     }
-    
+
+    .bimp_filter_type_select {
+        font-weight: bold;
+        font-size: 11px;
+        margin-bottom: 5px;
+    }
+
+    .bimp_filter_type_container {
+        margin-top: 5px;
+        display: none;
+    }
+
     .bimp_filter_input_container {
+        font-size: 11px;
         .input-group {
             width: 100%;
+        }
+
+        .check_list_container {
+            font-size: 12px;
         }
     }
 
@@ -737,14 +803,29 @@ td.buttons {
         }
 
         .bimp_filter_value_remove_btn {
-
             margin-left: 10px;
-            color: #9EC5E6;;
+            color: #9EC5E6;
             cursor: pointer;
             float: right;
 
             &:hover {
                 color: #fff;
+            }
+        }
+
+        &.excluded {
+            background-color: #A60000;
+
+            &:hover {
+                background-color: #CC2929;
+            }
+
+            .bimp_filter_value_remove_btn {
+                color: #DBAFAF;
+
+                &:hover {
+                    color: #fff;
+                }
             }
         }
     }
@@ -756,29 +837,137 @@ td.buttons {
     i.loading {
         display: none;
     }
-    
+
     .bimp_filter_date_range_period {
-        font-size: 11px;
         margin-bottom: 10px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #7D7D7D;
-        
+
         input, select, .select2 {
             display: inline-block;
             font-size: 11px!important;
             width: auto!important;
             min-width: 30px!important;
             width: 80px!important;
-            
+
             &.qtyInput {
                 width: 30px!important;
+            }
+        }
+
+        .date_range_limits_container {
+            input {
+                width: 100%!important;
             }
         }
     }
 }
 
-.load_saved_filters_container {
+.filters_panel_search_filter {
+    margin-bottom: 10px;
+
+    input {
+        width: 100%;
+
+        &:before {
+            font-family: 'FA5S';
+            content: '\f002';
+            margin-right: 8px;
+        }
+    }
+}
+
+.load_saved_filters_container,
+.filters_panel_configurations_container {
     padding: 5px 0;
     margin: 5px 0;
-    border-top: 1px solid $gray-darker;
+}
+
+/*Filtres actifs:*/ 
+
+.list_active_filters {
+    background-color: #F0F0F0;
+    padding: 4px;
+    margin-bottom: 5px;
+
+    .list_active_filters_title {
+        font-size: 13px;
+        font-weight: bold;
+    }
+}
+
+.list_active_filters,
+.obj_filters_input_values {
+    .filter_active_values {
+        display: inline-block;
+        vertical-align: top;
+        margin: 0 3px;
+        padding: 4px;
+        font-size: 11px;
+
+        .filter_label {
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .relation {
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        .included_values,
+        .excluded_values {
+            .filter_value {
+                color: #fff;
+                padding: 5px 15px 5px 5px;
+                margin: 2px 0;
+
+                &.no-buttons {
+                    padding-right: 5px;
+                }
+
+                .remove_btn {
+                    margin-left: 5px;
+                    cursor: pointer;
+                    float: right;
+                    margin-right: -10px;
+
+                    &:hover {
+                        color: #fff;
+                    }
+                }
+            }
+        }
+
+        .included_values {
+            .filter_value {
+                background-color: #3E88D2;
+
+                .remove_btn {
+                    color: #9EC5E6;
+                }
+            }
+        }
+
+        .excluded_values {
+            .filter_value {
+                background-color: #A60000;
+
+                .remove_btn {
+                    color: #DBAFAF;
+                }
+            }
+        }
+    }
+}
+
+/*Stats listes*/
+
+.subStatsListTitle {
+    margin: 10px;
+    font-weight: bold;
+}
+
+.subStatsListContent {
+    margin-left: 10px;
+    padding-left: 0;
+    border-left: 3px solid $gray-dark;
 }

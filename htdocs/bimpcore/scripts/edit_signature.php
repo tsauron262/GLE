@@ -27,14 +27,15 @@ $user_errors = array();
 $nb_user = sizeof($ids);
 $cnt = 0;
 foreach ($ids as $id) {
-    $user = new User($db);
-    $user->oldcopy = clone($user); 
-    $user->fetch((int) $id);
-    $new = getSignature($user);
-    if($user->signature != $new){
-        $user->signature = $new;
-        if ($user->update($admin) < 0)
-            $user_errors[] = $user;
+    $userT  = new User($db);
+    $userT ->oldcopy = clone($userT ); 
+    $userT ->fetch((int) $id);
+    $new = getSignature($userT );
+    if($userT ->signature != $new){
+        $userT ->signature = $new;
+        $db->query("UPDATE `llx_user` SET `signature` = '".$new."' WHERE rowid = ".$id);
+        if ($userT ->update($admin,1) < 0)
+            $user_errors[] = $userT ;
         $cnt++;
     }
 }
@@ -47,7 +48,7 @@ if (sizeof($user_errors) == 0)
 else {
     $errors = 'Erreurs lors de la mise à jour de la signature de(des) utilisateur(s) avec id= ';
     foreach ($user_errors as $u) {
-        $errors .= $u->id . ',';
+        $errors .= $u->id .":". $u->error. print_r($u->errors,1) . ',';
     }
     if($called_from_hook)
         setEventMessages($errors, array(), 'errors');
@@ -88,9 +89,10 @@ function getSignature($user) {
         $signature .= '<span style="color:#919191">' . $user->job . ' | </span>';
     if (isset($user->office_phone) and strlen($user->office_phone) > 6)
         $signature .= '<span style="color:#919191">' . $user->office_phone . ' | </span>';
-    $signature .= '<span style="color:#919191">0 812 211 211 | </span>';
-    $signature .= '</span><span style="font-size:14px">';
-    $signature .= '<span style="color:#919191"></span><a href="http://www.bimp.fr/"><span style="color:#919191">www.bimp.fr</span></a><span style="color:#919191"></span></span><span style="font-size:14px"><span style="color:#919191"></span></span></span></span></div>';
+    $signature .= '<span style="color:#919191">0 812 211 211</span>';
+    $signature .= '</span>';
+//    $signature .= '<span style="font-size:14px"><span style="color:#919191"></span><a href="http://www.bimp.fr/"><span style="color:#919191"> | www.bimp.fr</span></a><span style="color:#919191"></span></span><span style="font-size:14px"><span style="color:#919191"></span></span>';
+    $signature .= '</span></span></div>';
     $signature .= '<div></div><div><span style="font-size:medium"><span style="color:#000000"><span style="color:#888888"><span style="font-size:9px">Ce message et &eacute;ventuellement les pi&egrave;ces jointes, sont exclusivement transmis &agrave; l&#39;usage de leur destinataire et leur contenu est strictement confidentiel. Une quelconque copie, retransmission, diffusion ou autre usage, ainsi que toute utilisation par des personnes physiques ou morales ou entit&eacute;s autres que le destinataire sont formellement interdits. Si vous recevez ce message par erreur, merci de le d&eacute;truire et d&#39;en avertir imm&eacute;diatement l&#39;exp&eacute;diteur. L&#39;Internet ne permettant pas d&#39;assurer l&#39;int&eacute;grit&eacute; de ce message, l&#39;exp&eacute;diteur d&eacute;cline toute responsabilit&eacute; au cas o&ugrave; il aurait &eacute;t&eacute; intercept&eacute; ou modifi&eacute; par quiconque.</span></span></span></span></div></div>';
     return $signature;
 }

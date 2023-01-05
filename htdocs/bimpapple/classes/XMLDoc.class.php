@@ -146,7 +146,7 @@ class XMLDoc {
     }
 
     //--------------------------------------------------------------------------
-    static public function findChildElements($parent, $tagFilter = null, $attrFilter = null, array $datas = null, $searchDepth = null) {
+    static public function findChildElements($parent, $tagFilter = null, $attrFilter = null, array $datas = array(), $searchDepth = null) {
         if (!is_a($parent, 'DOMElement'))
             return $datas;
 

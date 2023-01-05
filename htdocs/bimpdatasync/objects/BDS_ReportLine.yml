@@ -1,0 +1,78 @@
+
+extends: 
+    module: bimpcore
+    object_name: BimpReportLine
+    
+table: bds_report_line
+
+parent_module: bimpdatasync
+parent_object: BDS_Report
+
+fields: 
+    obj_module: 
+        label: Module objet
+        
+    obj_name: 
+        label: Type objet
+        
+    id_obj: 
+        label: ID objet
+        type: id
+       
+lists_cols: 
+    obj_link: 
+        label: Objet
+        value: 
+            callback: displayObjLink
+        min_width: 200
+    type: 
+        display: icon
+        min_width: 45
+    msg: 
+        display: alert
+        min_width: 350
+        
+filters_panels: 
+    default: 
+        filters: 
+            id_report: 
+            type: 
+            ref: 
+            msg: 
+                
+    report: 
+        extends: default
+        filters: 
+            id_report: unset
+            
+lists: 
+    default: 
+        title: Notifications
+        icon: fas_comment
+        configurable: 1
+        filters_panel: default
+        filters_panel_open: 1
+        before_list_callback: renderBeforeListContent
+        sort_field: id
+        sort_way: desc
+        n: 50
+        cols: 
+            type: 
+            id_report: 
+            time: 
+            ref: 
+            obj_link: 
+            msg: 
+            
+    report: 
+        extends: default
+        configurable: 1
+        filters_panel: report
+        cols: 
+            id_report: unset
+            
+    linked_object: 
+        extends: default
+        configurable: 0
+        cols: 
+            obj_link: unset

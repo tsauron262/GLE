@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcomm_demande_fin` ADD `signataires_cf_data` text NOT NULL DEFAULT '';

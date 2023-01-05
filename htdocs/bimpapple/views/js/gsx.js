@@ -2,7 +2,7 @@ var gsx_is_logged = true;
 var gsx_login_url = '';
 var gsx_nologged_requests = [];
 var use_gsx = false;
-var use_gsx_v2 = false;
+var use_gsx_v2 = true;
 var next_gsx_ajax_id = 1;
 var maxProdQty = 99;
 var importCart = false;
@@ -33,6 +33,9 @@ var partDataType = {
 };
 
 // GSX V2:
+function gsxLogOut() {
+    new BimpAjax("gsxLogOut", {}, null, {url: dol_url_root + '/bimpapple/index.php'});
+}
 
 function GsxAjax(method, data, $resultContainer, params) {
 
@@ -89,23 +92,29 @@ function GsxAjax(method, data, $resultContainer, params) {
     this.nologged = function () {
         gsx_is_logged = false;
         gsx_nologged_requests[gsxAjax.id] = gsxAjax;
-
-//        window.open(gsx_login_url);
-        bimp_msg('Veuillez vous authentifier sur la plateforme GSX', 'warning', null, true);
-        window.open(gsx_login_url, 'Authentification GSX', "menubar=no, status=no, width=800, height=600");
-
-        setObjectAction($(''), {
-            module: 'bimpsupport',
-            object_name: 'BS_SAV'
-        }, 'setGsxActiToken', {}, 'gsx_token', null, function () {
-            gsx_on_login_success();
-        });
+        gsx_open_login_modal();
     };
 
     this.send();
 }
 
-function gsx_on_login_success() {
+function gsx_open_login_modal($button, success_callback) {
+    if (typeof ($button) === 'undefined') {
+        $button = $('');
+    }
+
+    bimp_msg('Veuillez vous authentifier sur la plateforme GSX', 'warning', null, true);
+//    window.open(gsx_login_url, 'Authentification GSX', "menubar=no, status=no, width=800, height=600");
+
+    setObjectAction($button, {
+        module: 'bimpsupport',
+        object_name: 'BS_SAV'
+    }, 'setGsxActiToken', {}, 'gsx_token', null, function () {
+        gsx_on_login_success(success_callback);
+    });
+}
+
+function gsx_on_login_success(callback) {
     if (gsx_is_logged) {
         return;
     }
@@ -119,6 +128,10 @@ function gsx_on_login_success() {
     }
 
     gsx_nologged_requests = [];
+
+    if (typeof (callback) === 'function') {
+        callback();
+    }
 }
 
 function gsx_loadRequestModalForm($button, title, requestName, data, params) {
@@ -128,7 +141,7 @@ function gsx_loadRequestModalForm($button, title, requestName, data, params) {
 
     data.requestName = requestName;
 
-    if (requestName === 'repairCreate') {
+    if (requestName === 'repairCreate' && typeof (data.repairType) === 'undefined') {
         var $repairForm = $('#createRepairForm');
         if ($.isOk($repairForm)) {
             data.repairType = $repairForm.find('[name="repairType"]').val();
@@ -136,6 +149,8 @@ function gsx_loadRequestModalForm($button, title, requestName, data, params) {
                 bimp_msg('Veuillez sélectionner un type de réparation', 'warning', null, true);
                 return;
             }
+            data.coverageOption = $repairForm.find('[name="coverageOption"]').val();
+            data.consumerLaw = $repairForm.find('[name="consumerLaw"]').val();
         }
     }
 
@@ -334,6 +349,33 @@ function gsx_loadAddPartsForm($button, id_issue) {
     });
 }
 
+function gsx_loadAddPartsTestForm($button, serial, isIphone) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
+    bimpModal.newContent('Ajout de composant Apple', '', false, '', null, 'large');
+    var modal_idx = bimpModal.idx;
+    var $container = bimpModal.$contents.find('#modal_content_' + modal_idx);
+
+    GsxAjax('gsx_loadAddPartsTestForm', {
+        'isIphone': isIphone,
+        'serial': serial
+    }, $container, {
+        $button: $button,
+        modal_idx: modal_idx,
+        display_success: false,
+        append_html: true,
+        display_processing: true,
+        processing_padding: 20,
+        processing_msg: 'Chargement en cours',
+        success: function (result, bimpAjax) {
+            setCommonEvents(bimpAjax.$resultContainer);
+            PM['parts' + '_issue_'] = new PartsManager('_issue_');
+        }
+    });
+}
+
 function gsx_saveAppleParts($button, id_issue, modal_idx) {
     if ($button.hasClass('disabled')) {
         return;
@@ -353,14 +395,18 @@ function gsx_saveAppleParts($button, id_issue, modal_idx) {
 
         $inputs.each(function () {
             var $row = $(this).findParentByClass('partRow');
-
+            var exchange_price = $row.data('exchange_price');
+            if(exchange_price == 0 && $row.data('stock_price') == 0 && ($row.data('num').indexOf('661') == 0 || $row.data('num').indexOf('F661') == 0 || $row.data('num').indexOf('ZM661') == 0))
+                exchange_price = window.prompt('Pas de prix pour le '+$row.data('num') + ' : ' + $row.data('name') + ' merci d\'indiquer le prix', 0);
+            if(exchange_price == null)
+                return;
             if ($.isOk($row)) {
                 parts.push({
                     part_number: $row.data('num'),
-                    new_part_number: $row.data('newNum'),
+                    new_part_number: $row.data('newnum'),
                     label: $row.data('name'),
                     stock_price: $row.data('stock_price'),
-                    exchange_price: $row.data('exchange_price'),
+                    exchange_price: exchange_price,
                     price_options: $row.data('price_options')
                 });
             }
@@ -648,9 +694,225 @@ function gsx_updatePartKgb($button, id_sav, id_repair, part_number) {
     }
 }
 
+function gsx_UpsShipmentAction($button, action, id_shipment, action_data, confirm_msg, ajax_params, $resultContainer) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (confirm_msg) {
+        if (!confirm(confirm_msg)) {
+            return;
+        }
+    }
+
+    $button.addClass('disabled');
+
+    var params = {
+        $button: $button,
+        display_processing: true
+    };
+
+    for (var param_name in ajax_params) {
+        params[param_name] = ajax_params[param_name];
+    }
+
+    GsxAjax('gsxUpsShipmentAction', {
+        action: action,
+        id_shipment: id_shipment,
+        action_data: action_data
+    }, $resultContainer, params);
+}
+
+function gsx_addAppleShipmentPart($button, id_shipment) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var action_data = {
+        'parts': []
+    };
+
+    var part_data = false;
+    if ($button.hasClass('add_from_parts_list')) {
+        var $row = $button.findParentByClass('bimp_list_table_row');
+
+        if (!$.isOk($row)) {
+            bimp_msg('Erreur - impossible d\'ajouter le composant', 'danger', null, true);
+            console.error('gsx_addAppleShipmentPart(): $row absente');
+            return;
+        }
+
+        part_data = $row.data('part_data');
+    } else {
+        var $form = $button.findParentByClass('singleLineFormContent');
+        if ($.isOk($form)) {
+            var $select = $form.find('select[name="part_number"]');
+
+            if ($select.length) {
+                var part_number = $select.val();
+
+                if (!part_number) {
+                    bimp_msg('Veuillez sélectionner un composant', 'warning', null, true);
+                    return;
+                }
+
+                var $option = $select.find('option[value="' + part_number + '"]');
+
+                if ($option.length) {
+                    part_data = $option.data('part_data');
+                }
+            }
+        }
+    }
+
+    if (!part_data) {
+        bimp_msg('Erreur - données du composant absentes', 'danger', null, true);
+        return;
+    }
+
+    action_data.parts.push(part_data);
+
+    gsx_UpsShipmentAction($button, 'addParts', id_shipment, action_data, '', {
+        $button: null,
+        $btn: $button, // le bouton ne doit pas être réactivé si succcès. 
+        success: function (result, bimpAjax) {
+            $('body').find('.AppleShipmentPart_list_table').each(function () {
+                reloadObjectList($(this).attr('id'));
+            });
+            triggerObjectChange('bimpapple', 'AppleShipmentPart');
+        },
+        error: function (result, bimpAjax) {
+            bimpAjax.$btn.removeClass('disabled');
+        }
+    });
+}
+
+function gsx_addAppleShipmentSelectedParts($button, id_shipment) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var action_data = {
+        'parts': []
+    };
+
+    var $rows = $button.parent().parent().find('#parts_pending_return_list').find('tbody > tr');
+
+    if (!$rows.length) {
+        bimp_msg('Aucun composant trouvé', 'danger', null, true);
+        return;
+    }
+
+    $rows.each(function () {
+        var $input = $(this).find('input[name="row_check"]');
+
+        if ($input.length) {
+            if ($input.prop('checked')) {
+                var part_data = $(this).data('part_data');
+
+                if (part_data) {
+                    action_data.parts.push(part_data);
+                }
+            }
+        }
+    });
+
+    if (!action_data.parts.length) {
+        bimp_msg('Aucun composant sélectionné', 'warning', null, true);
+        return;
+    }
+
+    gsx_UpsShipmentAction($button, 'addParts', id_shipment, action_data, 'Veuillez confirmer l\'ajout des composants sélectionnés', {
+        $button: null,
+        $btn: $button, // le bouton ne doit pas être réactivé si succcès. 
+        success: function (result, bimpAjax) {
+            $('body').find('.AppleShipmentPart_list_table').each(function () {
+                reloadObjectList($(this).attr('id'));
+            });
+            triggerObjectChange('bimpapple', 'AppleShipmentPart');
+        },
+        error: function (result, bimpAjax) {
+            bimpAjax.$btn.removeClass('disabled');
+        }
+    });
+}
+
+function gsx_LoadRepairConsignedStockForm($button, id_sav, serial) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
+    var data = {
+        'id_sav': id_sav,
+        'serial': serial
+    };
+
+    var $repairForm = $('#createRepairForm');
+    if ($.isOk($repairForm)) {
+        data.repairType = $repairForm.find('[name="repairType"]').val();
+        if (!data.repairType) {
+            bimp_msg('Veuillez sélectionner un type de réparation', 'warning', null, true);
+            return;
+        }
+        data.coverageOption = $repairForm.find('[name="coverageOption"]').val();
+        data.consumerLaw = $repairForm.find('[name="consumerLaw"]').val();
+    }
+
+    loadModalForm($button, {
+        'module': 'bimpsupport',
+        'object_name': 'BS_SAV',
+        'id_object': id_sav,
+        'form_name': 'parts_consigned_stock'
+    }, 'Gestion du stock consigné', function ($form) {
+        if ($.isOk($form)) {
+            var modal_idx = parseInt($form.data('modal_idx'));
+            if (!modal_idx) {
+                bimp_msg('Erreur technique: index de la modale absent', 'danger', null, true);
+                return;
+            }
+
+            bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).remove();
+            bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
+            bimpModal.addButton('Valider<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
+            bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
+                var parts = {};
+
+                $form.find('input.from_consigned_stock_check').each(function () {
+                    if (parseInt($(this).val())) {
+                        var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
+
+                        if (id_part && !isNaN(id_part)) {
+                            parts[id_part] = 1;
+                        }
+                    }
+                });
+
+                $form.find('select.from_consigned_stock_serial').each(function () {
+                    var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
+
+                    if (id_part && !isNaN(id_part)) {
+                        var serial = $(this).val();
+
+                        if (serial && serial !== 'none') {
+                            parts[id_part] = {'serial': serial};
+                        }
+                    }
+                });
+
+                data.parts_cs_data = parts;
+
+                setTimeout(function () {
+                    gsx_loadRequestModalForm($button, 'Création d\'une nouvelle réparation', 'repairCreate', data, {});
+                }, 500);
+            });
+        }
+    });
+}
+
 // GSX V1 / V2:
 
 var PM = [];
+
 function PartsManager(sufixe) {
     var ptr = this;
     this.sufixe = sufixe;
@@ -714,10 +976,10 @@ function PartsManager(sufixe) {
         var $result = this.$container.find('.partsSearchResult');
         var search = this.$container.find('.searchPartInput').val();
         if (!search) {
-            bimp_msg('Veuillez entrer un code produit', 'danger', null, true);
+            bimp_msg('Veuillez entrer un code produit' + search, 'danger', null, true);
             return;
         }
-        if (!/^[a-zA-Z0-9\-\_ ]+$/.test(search)) {
+        if (!/[a-zA-Z0-9\-\_ ]+$/.test(search)) {
             bimp_msg('Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques ainsi que "-" ou "_"', 'danger', null, true);
             return;
         }

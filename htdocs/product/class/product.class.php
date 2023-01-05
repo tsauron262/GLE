@@ -805,33 +805,34 @@ class Product extends CommonObject
         if (! $this->label) { $this->label = 'MISSING LABEL';
         }
 
-        // Clean parameters
-        $this->ref = dol_string_nospecial(trim($this->ref));
-        $this->label = trim($this->label);
-        $this->description = trim($this->description);
-        $this->note = (isset($this->note) ? trim($this->note) : null);
-        $this->weight = price2num($this->weight);
-        $this->weight_units = trim($this->weight_units);
-        $this->length = price2num($this->length);
-        $this->length_units = trim($this->length_units);
-        $this->width = price2num($this->width);
-        $this->width_units = trim($this->width_units);
-        $this->height = price2num($this->height);
-        $this->height_units = trim($this->height_units);
-        // set unit not defined
-        if (is_numeric($this->length_units)) { $this->width_units = $this->length_units;    // Not used yet
-        }
-        if (is_numeric($this->length_units)) { $this->height_units = $this->length_units;    // Not used yet
-        }
-        // Automated compute surface and volume if not filled
-        if (empty($this->surface) && !empty($this->length) && !empty($this->width) && $this->length_units == $this->width_units) {
-            $this->surface = $this->length * $this->width;
-            $this->surface_units = measuring_units_squared($this->length_units);
-        }
-        if (empty($this->volume) && !empty($this->surface_units) && !empty($this->height) && $this->length_units == $this->height_units) {
-            $this->volume =  $this->surface * $this->height;
-            $this->volume_units = measuring_units_cubed($this->height_units);
-        }
+		// Clean parameters
+                $forbidden_chars_to_replace=array(" ", "'", "\\", "*", "?", "\"", "<", /*">", "/",*/ "|", "[", "]", ",", ";", "=", '°');
+		$this->ref = dol_string_nospecial(trim($this->ref), "_", $forbidden_chars_to_replace);
+		$this->label = trim($this->label);
+		$this->description = trim($this->description);
+		$this->note = (isset($this->note_private) ? trim($this->note_private) : (isset($this->note) ? trim($this->note) : null));
+		$this->weight = price2num($this->weight);
+		$this->weight_units = trim($this->weight_units);
+		$this->length = price2num($this->length);
+		$this->length_units = trim($this->length_units);
+		$this->width = price2num($this->width);
+		$this->width_units = trim($this->width_units);
+		$this->height = price2num($this->height);
+		$this->height_units = trim($this->height_units);
+		// set unit not defined
+		if ($this->length_units) $this->width_units = $this->length_units;    // Not used yet
+		if ($this->length_units) $this->height_units = $this->length_units;    // Not used yet
+		// Automated compute surface and volume if not filled
+		if (empty($this->surface) && !empty($this->length) && !empty($this->width) && $this->length_units == $this->width_units)
+		{
+			$this->surface = $this->length * $this->width;
+			$this->surface_units = measuring_units_squared($this->length_units);
+		}
+		if (empty($this->volume) && !empty($this->surface_units) && !empty($this->height) && $this->length_units == $this->height_units)
+		{
+			$this->volume =  $this->surface * $this->height;
+			$this->volume_units = measuring_units_cubed($this->height_units);
+		}
 
         $this->surface = price2num($this->surface);
         $this->surface_units = trim($this->surface_units);

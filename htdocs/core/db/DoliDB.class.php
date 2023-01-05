@@ -67,6 +67,11 @@ abstract class DoliDB implements Database
 	/** @var string */
 	public $error;
 
+        /* moddrsi */
+        public $has_rollback = false;
+        public $noTransaction = false;
+        /* fmoddrsi */
+        
 	/**
 	 *	Format a SQL IF
 	 *
@@ -110,7 +115,7 @@ abstract class DoliDB implements Database
 	 */
     public function begin()
 	{
-		if (! $this->transaction_opened)
+		if (! $this->transaction_opened && !$this->noTransaction)
 		{
 			$ret=$this->query("BEGIN");
 			if ($ret)
@@ -137,10 +142,35 @@ abstract class DoliDB implements Database
 	 */
     public function commit($log = '')
 	{
-		dol_syslog('', 0, -1);
-		if ($this->transaction_opened<=1)
+		dol_syslog('',0,-1);
+                
+                if (defined('BIMP_LIB') && BimpDebug::isActive()) {
+                    $id_trans = $this->transaction_opened;
+                    $content = '<span class="danger">COMMIT #' . $id_trans . '</span><br/><br/>';
+                    BimpDebug::addDebug('sql', '', $content, array(
+                        'foldable' => false
+                    ));
+                }
+                
+		if ($this->transaction_opened==1 && !$this->noTransaction)
 		{
+                        /* moddrsi */
+                        if ($this->has_rollback) {
+                            if (!defined('BIMP_LIB')) {
+                                require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+                            }
+                            BimpCore::addlog('Tentative de COMMIT SQL à la suite d\'un ROLLBACK', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore');
+                            $this->rollback();
+                            return 0;
+                        }
+                        
+                        /* fmoddrsi */
+                        
 			$ret=$this->query("COMMIT");
+                        
+                        if(class_exists('BimpTools'))
+                            BimpTools::deloqueAll ();
+                        
 			if ($ret)
 			{
 				$this->transaction_opened=0;
@@ -149,14 +179,32 @@ abstract class DoliDB implements Database
 			}
 			else
 			{
+                            BimpCore::addlog('COMMIT ERREUR', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                                'Dernière Erreur SQL' => $this->lasterror(),
+                                'lasterror'           => $this->error(),
+                                'lasterrno'           => $this->errno()
+                            ));
+                            
+                            
+
+                            if (defined('BIMP_LIB') && BimpDebug::isActive()) {
+                                $content = BimpRender::renderAlerts('Echec COMMIT  - ' . $this->lasterror());
+                                BimpDebug::addDebug('sql', '', $content, array(
+                                    'foldable' => false
+                                ));
+                            }
 				return 0;
 			}
 		}
-		else
+		elseif($this->transaction_opened > 1 || $this->noTransaction)
 		{
 			$this->transaction_opened--;
 			return 1;
 		}
+                else{
+                        BimpCore::addlog('Tentative de COMMIT transaction deja fermée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore');
+                        return 0;
+                }
 	}
 
 	/**
@@ -167,17 +215,53 @@ abstract class DoliDB implements Database
 	 */
     public function rollback($log = '')
 	{
-		dol_syslog('', 0, -1);
-		if ($this->transaction_opened<=1)
+		dol_syslog('',0,-1);
+                
+                if (defined('BIMP_LIB') && BimpDebug::isActive()) {
+                    $id_trans = $this->transaction_opened;
+                    $content = '<span class="danger">ROLLBACK #' . $id_trans . '</span><br/><br/>';
+                    BimpDebug::addDebug('sql', '', $content, array(
+                        'foldable' => false
+                    ));
+                }
+                
+                
+		if ($this->transaction_opened<=1 && !$this->noTransaction)
 		{
 			$ret=$this->query("ROLLBACK");
 			$this->transaction_opened=0;
-			dol_syslog("ROLLBACK Transaction".($log?' '.$log:''), LOG_DEBUG);
+                        
+                        /* moddrsi */
+                        if(class_exists('BimpTools'))
+                            BimpTools::deloqueAll ();
+                        $this->has_rollback = false;
+                        
+                        if (defined('BIMP_LIB') && BimpDebug::isActive()) {
+                            if ($ret <= 0) {
+                                $content = BimpRender::renderAlerts('Echec ROLLBACK  - ' . $this->lasterror());
+                                BimpDebug::addDebug('sql', '', $content, array(
+                                    'foldable' => false
+                                ));
+                            }
+                        }
+                        /* fmoddrsi */
+                        
+			dol_syslog("ROLLBACK Transaction".($log?' '.$log:''),LOG_DEBUG);
 			return $ret;
 		}
+                elseif($this->noTransaction){
+                        BimpCore::addlog('Tentative de ROLLBACK sur instance sans transactions', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                        return 1;
+                }
 		else
 		{
 			$this->transaction_opened--;
+                        
+                        /* moddrsi */
+                        $this->has_rollback = true;
+                        BimpCore::addLogs_debug_trace('Tentative de ROLLBACK sur transaction d\'id '.($this->transaction_opened + 1));
+                        /* fmoddrsi */
+                        
 			return 1;
 		}
 	}
@@ -314,4 +398,20 @@ abstract class DoliDB implements Database
 	{
 		return $this->lastqueryerror;
 	}
+        
+    
+    static function stopAll(){
+        $errors = array('Problème réseau, merci de relancer l\'opération');
+        if (BimpTools::isSubmit('ajax')) {
+            echo json_encode(array(
+                'errors'           => $errors,
+                'request_id'       => BimpTools::getValue('request_id', 0)
+            ));
+        }
+        else{
+            echo 'Oupppps   '.print_r($errors,1);
+        }
+        die();
+        exit;
+    }
 }

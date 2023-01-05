@@ -2,7 +2,7 @@
 
 require_once __DIR__.'/BF_Frais.class.php';
 
-class BF_rentExcept extends BF_Frais
+class BF_RentExcept extends BF_Frais
 {
 
     public static $payments = array(

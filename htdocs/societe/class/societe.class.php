@@ -1619,17 +1619,21 @@ class Societe extends CommonObject
 		{
 			$newclient=1;
 			if ($this->client == 2 || $this->client == 3) $newclient=3;	//If prospect, we keep prospect tag
-			$sql = "UPDATE ".MAIN_DB_PREFIX."societe";
-			$sql.= " SET client = ".$newclient;
-			$sql.= " WHERE rowid = " . $this->id;
+                        if($this->client != $newclient){
+                            $sql = "UPDATE ".MAIN_DB_PREFIX."societe";
+                            $sql.= " SET client = ".$newclient;
+                            $sql.= " WHERE rowid = " . $this->id;
 
-			$resql=$this->db->query($sql);
-			if ($resql)
-			{
-				$this->client = $newclient;
-				return 1;
-			}
-			else return -1;
+                            $resql=$this->db->query($sql);
+                            if ($resql)
+                            {
+                                    $this->client = $newclient;
+                                    return 1;
+                            }
+                            else return -1;
+                        }
+                        else
+                            return 1;
 		}
 		return 0;
 	}
@@ -3896,6 +3900,9 @@ class Societe extends CommonObject
 		} else {
 			$sql .= " AND entity IN (".getEntity('invoice').")";
 		}
+                /* mod dersi*/
+                $sql .= " AND `datef` > '2019-07-01'";
+                /*fmod drsi*/
 
 		dol_syslog("getOutstandingBills", LOG_DEBUG);
 		$resql=$this->db->query($sql);
@@ -3936,8 +3943,7 @@ class Societe extends CommonObject
 					$paiement = $tmpobject->getSommePaiement();
 					$creditnotes = $tmpobject->getSumCreditNotesUsed();
 					$deposits = $tmpobject->getSumDepositsUsed();
-
-					$outstandingOpened+=$obj->total_ttc - $paiement - $creditnotes - $deposits;
+					$outstandingOpened+=$obj->total_ht - $paiement - $creditnotes - $deposits;
 				}
 
                 //if credit note is converted but not used

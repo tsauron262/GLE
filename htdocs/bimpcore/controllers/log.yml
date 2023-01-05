@@ -1,0 +1,19 @@
+
+boostrap: 1
+
+title: 
+    callback: 
+        object: log
+        method: getPageTitle
+        
+objects:
+    log:
+        instance:
+            bimp_object: Bimp_Log
+            id_object:
+                request: id
+    
+sections:
+    - type: view
+      view: 
+          object: log

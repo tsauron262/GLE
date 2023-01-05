@@ -1750,6 +1750,7 @@ class Propal extends CommonObject
 		// Protection
 		if ($this->statut == self::STATUS_VALIDATED)
 		{
+			$this->error='Devis déja validée';
 			dol_syslog(get_class($this)."::valid action abandonned: already validated", LOG_WARNING);
 			return 0;
 		}
@@ -1774,8 +1775,7 @@ class Propal extends CommonObject
 		if (! $error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) // empty should not happened, but when it occurs, the test save life
 		{
                         /* mod drsi*/
-                        BimpTools::sleppIfBloqued("numPropal");
-                        BimpTools::bloqueDebloque("numPropal");
+                        BimpTools::lockNum("numPropal");
                         /*fmoddrsi*/
 			$num = $this->getNextNumRef($soc);
 		}
@@ -1792,11 +1792,10 @@ class Propal extends CommonObject
 
 		dol_syslog(get_class($this)."::valid", LOG_DEBUG);
 		$resql=$this->db->query($sql);
-                /*moddrsi*/
-                BimpTools::bloqueDebloque("numPropal", 0);
-                /*fmoddrsi*/
+                
 		if (! $resql)
 		{
+			$this->error='Probléme sql';//todo verifier si doublons
 			dol_print_error($this->db);
 			$error++;
 		}
@@ -3506,7 +3505,8 @@ class Propal extends CommonObject
 				$dir = dol_buildpath($reldir."core/modules/propale/");
 
 				// Load file with numbering class (if found)
-				$mybool|=@include_once $dir.$file;
+                                if(is_file($dir.$file))
+                                    $mybool|=@include_once $dir.$file;
 			}
 
 			if (! $mybool)

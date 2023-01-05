@@ -1,0 +1,1 @@
+ALTER TABLE `llx_menu` ADD `icon` VARCHAR(50) DEFAULT NULL;

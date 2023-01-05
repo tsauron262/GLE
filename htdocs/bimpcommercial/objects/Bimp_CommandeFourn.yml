@@ -1,7 +1,8 @@
-
 extends: 
     module: bimpcommercial
     object_name: BimpComm
+
+abstract: 0
 
 dol_object: 
     instance: 
@@ -79,11 +80,11 @@ objects:
        instance: 
            id_object: 
               field_value: fk_user_resp
-              
-    entrepot: 
-        instance: 
-            id_object: 
-                field_value: entrepot
+                
+    equipment:
+        instance:
+            module: bimpequipment
+            name: Equipment
       
 associations: 
     factures: 
@@ -92,6 +93,12 @@ associations:
         display: 
             default: 
                 type: nom_url
+    achatsCommFourn_Equipments:
+        object: equipment
+        label: Equipements concerné
+        input:
+            type: search_object
+            object: equipment
                 
 fields: 
     fk_soc: 
@@ -102,6 +109,8 @@ fields:
             create_form: fournisseur_light
     ref_supplier: 
         label: Référence fournisseur
+    model_pdf: 
+        default_value: bimpcommandefourn
     total_ttc: 
         label: Total TTC
         type: money
@@ -163,6 +172,13 @@ fields:
             array: commandeMethods
     fk_cond_reglement:
         required: 0
+    fk_mode_reglement: 
+        required: 0
+        values: 
+            callback:
+                method: getModeReglements
+                params:
+                    - 1
     attente_info: 
         label: En attente d'infos
         type: bool
@@ -191,9 +207,26 @@ fields:
         input: 
             auto_expand: 1
             rows: 3
+            help: Societe<br/>Contact (laisser vide si pas de contact)<br/>Adresse<br/>Info Optionelle 1 (peut être invisible chez certains transporteurs)<br/>Code postal Ville<br/>Pays (optionnel si France)
         display_if: 
             field_name: delivery_type
             show_values: 2
+    methode_liv:
+        label: Methode de livraison
+        type: int
+        values: 
+            array: delivery_mode
+        default_value: 0
+        dol_extra_field: 1
+    edi_status:
+        label: Statut chez le fournisseur
+        type: int
+        values: 
+            array: edi_status
+        default_value: 0
+        display_if: 
+            field_name: fk_input_method
+            show_values: 7
 #    type_entrepot:
 #        label: Type entrepôt
 #        type: int
@@ -202,13 +235,16 @@ fields:
 #        default_value: 2
         
     ref_client: unset
-#    total: unset
+    total: unset
     fk_availability: unset
     fk_input_reason: unset
-    
+    replaced_ref: unset
+    expertise: unset
+        
 forms: 
     default: 
         rows: 
+            - field: ref
             - field: entrepot
 #            - field: type_entrepot
             - field: libelle
@@ -218,6 +254,7 @@ forms:
             - field: ref_supplier
             - field: delivery_type
             - field: custom_delivery
+            - field: methode_liv
             - field: date_livraison
             - field: fk_cond_reglement
             - field: fk_mode_reglement
@@ -228,6 +265,12 @@ forms:
             - field: attente_info
             - field: note_private
             - field: note_public
+            - association: achatsCommFourn_Equipments
+              edit: 1
+              show:
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
             
     make_order: 
         rows: 
@@ -268,7 +311,10 @@ forms:
             - field: ref_supplier
             - field: delivery_type
             - field: custom_delivery
+            - field: methode_liv
             - field: date_livraison
+            - field: fk_cond_reglement
+            - field: fk_mode_reglement
             
     force_status: 
         title: Forcer un statut
@@ -277,19 +323,8 @@ forms:
               type: info
         rows: 
             - custom: 1
-              label: Type de statut
-              input_name: status_type
-              input: 
-                  type: select
-                  options: 
-                      reception: Statut réception
-                      invoice: Statut facturation
-            - custom: 1
-              label: Forcer le statut à
+              label: Forcer le statut réception à
               input_name: reception_status
-              display_if: 
-                  field_name: status_type
-                  show_values: reception
               input: 
                   type: select
                   options:
@@ -298,11 +333,8 @@ forms:
                       4: Reçue partiellement
                       5: Reçue entièrement
             - custom: 1
-              label: Forcer le statut à
+              label: Forcer le statut facturation à
               input_name: invoice_status
-              display_if: 
-                  field_name: status_type
-                  show_values: invoice
               input: 
                   type: select
                   options:
@@ -315,6 +347,13 @@ forms:
         title: Facturation de réceptions
         icon: fas_file-invoice-dollar
         rows: 
+            replaced_ref: 
+                custom: 1
+                label: Ref facture remplacée
+                input_name: replaced_ref
+                input: 
+                    type: text
+                    help: Utiliser ce champ si perte des données de la facture remplacée
             receptions: 
                 custom: 1
                 label: Réceptions de la commande à facturer
@@ -376,6 +415,7 @@ forms:
             ref_supplier:
                 custom: 1
                 label: Référence fournisseur
+                required: 1
                 input_name: ref_supplier
                 data_type: string
                 input: 
@@ -415,6 +455,8 @@ forms:
                 display_if: 
                     field_name: id_facture
                     show_values: 0
+                value: 
+                    callback: getCondReglementBySociete
             mode_reglement: 
                 custom: 1
                 label: Mode de réglement
@@ -425,6 +467,8 @@ forms:
                 display_if: 
                     field_name: id_facture
                     show_values: 0
+                value: 
+                    callback: getModeReglementBySociete
             note_publique: 
                 custom: 1
                 label: Note publique
@@ -474,7 +518,7 @@ forms:
          
 fields_tables: 
     infos: 
-        rows: 
+        rows:         
             - field: entrepot
               display: nom_url
               edit: 1
@@ -492,6 +536,8 @@ fields_tables:
               edit: 1
             - field: custom_delivery
               edit: 1
+            - field: methode_liv
+              edit: 1
             - field: fk_input_method
               show: 
                   field_value: fk_input_method
@@ -499,6 +545,13 @@ fields_tables:
               display: nom_url
             - field: zone_vente
               edit: 1
+            - field: edi_status
+            - association: achatsCommFourn_Equipments
+              edit: 1
+              show:
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
     
     fournisseur: 
         title: Fournisseur
@@ -555,70 +608,34 @@ views:
     content_infos: 
         objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile
     full: 
-        objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile                 
+        objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile    
+        
+    header_only: 
+        objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile,BL_CommandeFournReception
+        rows: 
+            - cols: 
+                - type: object_header
     
 filters_panels: 
     default: 
         filters: 
             type: unset
-            date_create: 
-                field: date_creation
-            total_ttc: 
-                field: total_ttc
-            ref_supplier: 
-                field: ref_supplier
-            date_commande: 
-                field: date_commande
-            date_livraison: 
-                field: date_livraison
-            fk_user_resp: 
-                field: fk_user_resp
-                
-            availability: unset
+            total: unset
             ref_client: unset
+            client:status: unset
+            datec: unset
+            
+            date_creation: 
+            ref_supplier: 
+            date_commande: 
+            date_livraison: 
+            fk_user_resp: 
             
 lists_cols: 
-    ref_supplier: 
-        field: ref_supplier
-    total_ttc:
-        field: total_ttc    
-    remise: 
-        field: remise_percent
-    date_creation: 
-        field: date_creation
-    date_valid: 
-        field: date_valid
-    date_approve: 
-        field: date_approve
-    date_approve2: 
-        field: date_approve2
-    date_commance: 
-        field: date_commance
-    date_livration: 
-        field: date_livration
-    attente: 
-        field: attente_info
-    user_author: 
-        field: fk_user_author
-        display: nom_url
-    user_valid: 
-        field: fk_user_valid
-        display: nom_url
-    user_approve: 
-        field: fk_user_approve
-        display: nom_url
-    user_approve2: 
-        field: fk_user_approve2
-        display: nom_url
-    user_resp: 
-        field: fk_user_resp
-        display: nom_url
     invoice_status:
         label: St. Fac
-        field: invoice_status
         display: icon
-        min_width: 30px;
-        max_width: 30px;
+        min_width: 30;
     billed: 
         label: Facturée
         type: bool
@@ -626,18 +643,8 @@ lists_cols:
         input: 
             type: hidden
         
-        
-#    input_method: 
-#        field: fk_input_method
-#        display: nom_url
-#    account: 
-#        field: fk_account
-#        display: nom_url
-        
     total_pa: unset
-    ref_client: unset
-    availability: unset
-    input_reason: unset
+    client_facturation: unset
     tx_marge: unset
     tx_marque: unset
     
@@ -646,23 +653,31 @@ lists:
         title: Commandes fournisseurs
         icon: fas_cart-arrow-down
         bulk_actions:
-            - label: supprimer les commandes fournisseurs sélectionnées
+            delete: 
+                label: supprimer les commandes fournisseurs sélectionnées
+            force_paye:
+            - label: Forcer facturé les commandes sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'2','type':'invoice_status'}, '', 'Forcer facturé ', true)
+            force_recep:
+            - label: Forcer receptionné les commandes sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'5','type':'reception_status'}, '', 'Forcer receptionné ', true)
         sort_field: date_creation
         sort_way: desc
         cols: 
             ref: 
-            statut: 
-            attente:
+            fk_statut: 
+            attente_info:
             date_creation:
-            user_resp:
-            soc: 
+            fk_user_resp:
+            fk_soc: 
             total_ttc:
                 
     fourn:
         extends: default
-        extends: default
         cols: 
-            soc: unset
+            fk_soc: unset
                 
 cards:
     default: 

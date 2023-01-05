@@ -92,7 +92,7 @@ function loadGSXView($button, id_sav) {
     var $gsxForm = $('#loadGSXForm');
     var $container = $('#gsxResultContainer');
     var serial = $gsxForm.find('#gsx_equipment_serial').val();
-    if (/^S?[A-Z0-9]{11,12}$/.test(serial) || /^S?[0-9]{15}$/.test(serial)) {
+    if (/^S?[A-Z0-9]{10,12}$/.test(serial) || /^S?[0-9]{15}$/.test(serial)) {
         var params = {
             append_html: true,
             display_processing: true,
@@ -101,7 +101,7 @@ function loadGSXView($button, id_sav) {
             $button: $button,
             success: function (result, bimpAjax) {
                 bimpAjax.$gsxForm.slideUp(250);
-                $('body').trigger($.Event('controllerTabLoaded', {
+                $('body').trigger($.Event('contentLoaded', {
                     $container: bimpAjax.$resultContainer
                 }));
             }

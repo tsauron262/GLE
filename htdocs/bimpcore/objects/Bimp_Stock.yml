@@ -18,6 +18,11 @@ objects:
             id_object: 
                 field_value: fk_entrepot
                 
+    bimp_entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+                
 fields: 
     fk_product: 
         label: Produit
@@ -25,7 +30,7 @@ fields:
         object: product
         input: 
             type: search_product
-        display: 
+        displays: 
             nom_url_libelle: 
                 type: callback
                 method: displayProduct
@@ -33,7 +38,7 @@ fields:
     fk_entrepot:
         label: Entrepôt
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         input: 
             type: search_entrepot
             
@@ -45,12 +50,9 @@ fields:
 filters_panels: 
     default: 
         filters: 
-            product: 
-                field: fk_product
-            entrepot: 
-                field: fk_entrepot
-            stock_reel: 
-                field: reel
+            fk_product: 
+            fk_entrepot: 
+            reel: 
             
 lists: 
     default:
@@ -62,15 +64,10 @@ lists:
         sort_field: rowid
         sort_way: desc
         cols: 
-            product: 
-                field: fk_product
+            fk_product: 
                 display: nom_url_libelle
-            entrepot: 
-                field: fk_entrepot
-                display: nom_url
-            stock_reel:
-                field: reel
-                
+            fk_entrepot: 
+            reel:
         
     
     

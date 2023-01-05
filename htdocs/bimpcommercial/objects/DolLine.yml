@@ -1,10 +1,13 @@
+abstract: 1
+
 labels: 
     name: ligne
     is_female: 1
     
 primary: rowid
+common_fields: 0
     
-objects:
+objects: 
     product: 
         instance: 
             id_object: 
@@ -20,8 +23,6 @@ fields:
         label: Produit
         type: id_object
         object: product
-        display: 
-            default: nom_url
             
     label: 
         label: Libellé
@@ -54,23 +55,25 @@ fields:
         label: Prix fournisseur
         type: id_object
         object: fourn_price
-        display: 
-            default: 
-                callback: 
-                    object: fourn_price
-                    method: displayLabel
+#        displays: 
+#            default: 
+#                type: callback
+#                method: displayLabel
         
     total_ht: 
         label: Total HT
         type: money
+        has_total: 1
         
     total_tva: 
         label: Total TVA
         type: money
+        has_total: 1
         
     total_ttc: 
         label: Total TTC
         type: money
+        has_total: 1
         
     date_start: 
         label: Début
@@ -79,7 +82,23 @@ fields:
     date_end: 
         label: Fin
         type: datetime
-        
-        
-        
-    
+          
+
+lists: 
+    default:  
+        n: 10
+        cols:  
+            fk_product:
+            label:
+            description: 
+            subprice: 
+            tva_tx: 
+            qty: 
+            remise_percent: 
+            buy_price_ht:
+            fk_product_fournisseur_price:
+            total_ht:
+            total_tva:
+            total_ttc:
+            date_start:
+            date_end:

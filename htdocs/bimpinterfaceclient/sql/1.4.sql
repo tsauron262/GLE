@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bic_user` ADD `id_contact` int(11) NOT NULL DEFAULT 0;

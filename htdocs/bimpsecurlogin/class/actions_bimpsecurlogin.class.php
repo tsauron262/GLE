@@ -19,8 +19,8 @@ class Actionsbimpsecurlogin {
     
     function printLeftBlock(){
         global $user;
-        if(isset($user->array_options['options_date_val_mdp']) && $user->array_options['options_date_val_mdp'] < (time()+(3600*24*2)))
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer obligatoirement votre mdp</a>", null, 'errors');
+//        if(isset($user->array_options['options_date_val_mdp']) && $user->array_options['options_date_val_mdp'] < (time()+(3600*24*2)))
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer obligatoirement votre mdp</a>", null, 'errors');
 //        if(isset($user->array_options['options_date_val_mdp']) && $user->array_options['options_date_val_mdp'] < (time()))
 //            if(stripos($_SERVER['REQUEST_URI'], "/user/card.php") === false)
 //                header("Location: ".DOL_URL_ROOT."/user/card.php?id=".$user->id);
@@ -36,19 +36,20 @@ class securLogSms {
     var $max_tentative = 3;
     var $debug = 2; //0 pas de verif //1 pas de sms code ecran //2 normal
     var $message = array();
+    var $ip = '';
 
     public function __construct($db) {
         $this->db = $db;
-        $this->filename = DOL_DATA_ROOT . "/white-ip.txt";
+        $this->filename = PATH_TMP . "/bimpcore/white-ip.txt";
         
-        
-        if(class_exists("BimpCore") && BimpCore::getConf('mode_securlogin')!= "")
-            $this->debug = BimpCore::getConf('mode_securlogin');
-        
-        
-        if (defined('MOD_DEV') && $this->debug > 1) {
+        if (defined('MOD_DEV') && MOD_DEV == 1 && $this->debug > 1) {
             $this->debug = 1;
         }
+        
+        if(class_exists("BimpCore") && BimpCore::getConf('mode_securlogin', "")!= "")
+            $this->debug = BimpCore::getConf('mode_securlogin');
+        
+//        $this->debug = 0;
     }
 
     public function testSecur() {
@@ -57,7 +58,7 @@ class securLogSms {
             if ($this->user->array_options['options_echec_auth'] < $this->max_tentative) {
                 $dateFinBloquage = time() - (60 * 5);
 
-                $secondeRestante = $this->user->array_options['options_heure_sms'] - $dateFinBloquage;
+                $secondeRestante = (int) $this->user->array_options['options_heure_sms'] - $dateFinBloquage;
 
 
                 if (!empty($code))
@@ -88,8 +89,9 @@ class securLogSms {
         } elseif (is_object($id_user))
             $this->user = $id_user;
         $this->user->oldcopy = clone $this->user;
-
-        $this->nomCookie = "secu_erp" . $this->user->id . "_" . str_replace(".", "_", $_SERVER['REMOTE_ADDR']);
+        $this->ip = synopsisHook::getUserIp();
+       
+        $this->nomCookie = "secu_erp" . $this->user->id . "_" . str_replace(".", "_", $this->ip);
 
         $this->testSecur();
     }
@@ -100,7 +102,7 @@ class securLogSms {
         if ($statut == 1) {
             if (is_null($codeR)) {
                 $codeR = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
-                $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "bimp_secure_log (id_user, crypt, IP) VALUES (" . $this->user->id . ",'" . $codeR . "', '" . $_SERVER['REMOTE_ADDR'] . "')");
+                $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "bimp_secure_log (id_user, crypt, IP) VALUES (" . $this->user->id . ",'" . $codeR . "', '" . $this->ip. "')");
             }
 
             $this->setCookie($codeR);
@@ -120,8 +122,8 @@ class securLogSms {
     function asSecureCokie() {
         if (isset($_COOKIE[$this->nomCookie])) {//cokkie secur en place
             $crypt = $_COOKIE[$this->nomCookie];
-            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $_SERVER['REMOTE_ADDR'] . "'");
-//            echo "<pre>"; print_r($_COOKIE);die($crypt);
+            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $this->ip . "' AND DATEDIFF(now(), tms ) <= 31");
+//            echo "<pre>"; print_r($_COOKIE);die("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $this->ip . "'");
             if ($this->db->num_rows($sql) > 0) {
                 $this->setSecure(1, $crypt);
                 return 1;
@@ -141,8 +143,10 @@ class securLogSms {
         if ($this->asSecureCokie())
             return 1;
 
-
-        if ($this->isIpWhite($_SERVER['REMOTE_ADDR']))
+        if(stripos($this->ip, '10.20.') !== false)//interne
+                return 1;
+        
+        if ($this->isIpWhite($this->ip))
             return 1;
 
 
@@ -219,17 +223,18 @@ class securLogSms {
                 }
             }
 
+            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
             $groups = new UserGroup($this->db);
 //            $grps = $groups->listGroupsForUser($this->user->id, false);
 //            if (!isset($grps[3])) {
                 $toM = $this->traiteMail();
-                if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, "admin@bimp.fr", $text)) {
+                if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, null, $text.' IP : '.$this->ip)) {
                     $this->message[] = 'Code envoyé à ' . substr($toM, 0, 4) . "*******" . substr($toM, -7) . "<br/><br/>";
                     $okMail = true;
                 }
 //            }
 
-            mailSyn2("Code envoyé", "admin@bimp.fr", "admin@bimp.fr", "Bonjour un code a été envoyé " . ($okSms ? "par sms " : "") . ($okMail ? "par mail " : "") . " pour l'utilisateur " . $this->user->getNomUrl(1) . " ip " . $_SERVER['REMOTE_ADDR']);
+//            mailSyn2("Code envoyé", "admin@bimp.fr", "admin@bimp.fr", "Bonjour un code a été envoyé " . ($okSms ? "par sms " : "") . ($okMail ? "par mail " : "") . " pour l'utilisateur " . $this->user->getNomUrl(1) . " ip " . $_SERVER['REMOTE_ADDR']);
 
             if ($okSms || $okMail) {
                 
@@ -242,6 +247,11 @@ class securLogSms {
     }
 
     public function traiteMessageUser() {
+        if (defined('BIMP_LIB') && BimpCore::isContextPublic()) {
+            return;
+        }
+        
+        
         $to = $this->traitePhone();
         $toM = $this->traiteMail();
         if (!$this->isPhoneMobile($to) && !$this->isMAil($toM)) {
@@ -286,25 +296,30 @@ class securLogSms {
     }
 
     public function traitePhone() {
-        $phone = str_replace(array(" ", "-", ":"), "", $this->user->user_mobile);
-        if (stripos($phone, "+") === false) {
-            if (stripos($phone, "0") === 0)
-                $phone = "+33" . substr($phone, 1);
-        }
-        if (!$this->isPhoneMobile($phone) && $this->user->array_options['options_phone_perso'] != "") {//Si pas trouver 
-            $phone = str_replace(array(" ", "-", ":"), "", $this->user->array_options['options_phone_perso']);
+//        $phone = str_replace(array(" ", "-", ":"), "", $this->user->user_mobile);
+//        if (stripos($phone, "+") === false) {
+//            if (stripos($phone, "0") === 0)
+//                $phone = "+33" . substr($phone, 1);
+//        }
+//        if (!$this->isPhoneMobile($phone) && $this->user->array_options['options_phone_perso'] != "") {//Si pas trouver 
+//            $phone = str_replace(array(" ", "-", ":"), "", $this->user->array_options['options_phone_perso']);
+//            if (stripos($phone, "+") === false) {
+//                if (stripos($phone, "0") === 0)
+//                    $phone = "+33" . substr($phone, 1);
+//            }
+//        }
+        $nums = array($this->user->user_mobile, $this->user->office_phone, $this->user->array_options['options_phone_perso']);
+        foreach($nums as $phone){
+            $phone = str_replace(array(" ", "-", ":"), "", $phone);
             if (stripos($phone, "+") === false) {
                 if (stripos($phone, "0") === 0)
                     $phone = "+33" . substr($phone, 1);
             }
+            if($this->isPhoneMobile($phone))
+                return $phone;
         }
-
-
-//        if (!$this->isPhoneMobile($phone) && strtolower($phone) != "no"){
-//            setEventMessages("<a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php'>Vos numéros de mobile (pro et perso) sont invalide : dans quelques jours vous ne pourrez plus accéder à l'application, inscrire 'NO' si vous n'avez pas de téléphone pro et que vous refusez d'inscrire votre tel perso (qui ne serait utilisé que pour l'envoi de code par SMS et non communiqué aux équipes)</a>", null, 'warnings');
-//            setEventMessages("<a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php'>Vos numéros de mobile (pro et perso) sont invalide : dans quelques jours vous ne pourrez plus accéder à l'application, inscrire 'NO' si vous n'avez pas de téléphone pro et que vous refusez d'inscrire votre tel perso (qui ne serait utilisé que pour l'envoi de code par SMS et non communiqué aux équipes)</a>", null, 'warnings');
-//        }
-        return $phone;
+        
+        return '';
     }
 
     public function traiteMail() {
@@ -326,7 +341,7 @@ class securLogSms {
 
     public function createWhiteList() {
 //        $sql = $this->db->query("SELECT count(DISTINCT(fk_user)) as nb, `ip` FROM `".MAIN_DB_PREFIX."events` WHERE `type` = 'USER_LOGIN' GROUP BY `ip` ORDER BY `nb` DESC");
-        $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `".MAIN_DB_PREFIX."bimp_secure_log` WHERE 1 GROUP BY IP ORDER BY `nb` DESC");
+        $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `".MAIN_DB_PREFIX."bimp_secure_log` WHERE DATEDIFF(now(), tms ) <= 31 GROUP BY IP ORDER BY `nb` DESC");
         $tabIp = array("78.195.193.207//flo");
         while ($ln = $this->db->fetch_object($sql))
             if ($ln->nb > 1)
@@ -336,3 +351,4 @@ class securLogSms {
     }
 
 }
+// 

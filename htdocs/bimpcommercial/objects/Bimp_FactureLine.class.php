@@ -11,7 +11,7 @@ class Bimp_FactureLine extends ObjectLine
     public $equipment_required = true;
     public static $equipment_required_in_entrepot = false;
 
-    // Gestion des droits: 
+    // Droits user: 
 
     public function canCreate()
     {
@@ -22,6 +22,22 @@ class Bimp_FactureLine extends ObjectLine
 
         return 0;
     }
+
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'bulkCreateRevalorisation':
+                if ($user->admin) {
+                    return 1;
+                }
+                return 0;
+        }
+        return parent::canSetAction($action);
+    }
+
+    // Getters booléens: 
 
     public function isEquipmentAvailable(Equipment $equipment = null)
     {
@@ -41,7 +57,6 @@ class Bimp_FactureLine extends ObjectLine
                 return 1;
 
             case 'remise_crt':
-            case 'remise_crt_percent':
                 if (!$this->isParentDraft()) {
                     return 0;
                 }
@@ -73,7 +88,49 @@ class Bimp_FactureLine extends ObjectLine
         return (int) parent::isActionAllowed($action, $errors);
     }
 
+    public function isTypeProductAllowed()
+    {
+        $facture = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($facture)) {
+            $comms = $facture->getCommandesOriginList();
+            if (count($comms)) {
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+
     // Getters params: 
+
+    public function getListExtraBtnApporteur()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded() && $this->isNotTypeText()) {
+            $tmp = $this->getData('commission_apporteur');
+            $tabTmp = explode("-", $tmp);
+            $idComm = $tabTmp[0];
+            $idFiltre = $tabTmp[1];
+            if ($idComm > 0 && $idFiltre > 0) {
+                $commission = BimpObject::getInstance('bimpfinanc', 'Bimp_CommissionApporteur', $idComm);
+                if ($commission->getData('status') == 0) {
+                    $buttons[] = array(
+                        'label'   => 'Supprimer de la commission',
+                        'icon'    => 'fas_trash',
+                        'onclick' => $commission->getJsActionOnclick('delLine', array('idLn' => $this->id, 'idFiltre' => $idFiltre))
+                    );
+                    $buttons[] = array(
+                        'label'   => 'Changer de la commission',
+                        'icon'    => 'fas_exchange-alt',
+                        'onclick' => $commission->getJsActionOnclick('changeLine', array('idLn' => $this->id, 'idFiltre' => $idFiltre), array('form_name' => 'change'))
+                    );
+                }
+            }
+        }
+        return $buttons;
+    }
 
     public function getListExtraBtn()
     {
@@ -101,6 +158,60 @@ class Bimp_FactureLine extends ObjectLine
         return $buttons;
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'type_soc':
+                $fac_alias = $main_alias . '___facture';
+                if (!isset($joins[$fac_alias])) {
+                    $joins[$fac_alias] = array(
+                        'alias' => $fac_alias,
+                        'table' => 'facture',
+                        'on'    => $fac_alias . '.rowid = ' . $main_alias . '.id_obj'
+                    );
+                }
+
+                $soc_alias = $main_alias . '___client';
+                if (!isset($joins[$soc_alias])) {
+                    $joins[$soc_alias] = array(
+                        'alias' => $soc_alias,
+                        'table' => 'societe',
+                        'on'    => $soc_alias . '.rowid = ' . $fac_alias . '.fk_soc'
+                    );
+                }
+
+                $filters[$soc_alias . '.fk_typent'] = array(
+                    ($excluded ? 'not_' : '') . 'in' => $values
+                );
+                break;
+        }
+
+        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
+    }
+
+    // Getters Array: 
+
+    public function getTypesArray()
+    {
+        global $current_bc;
+
+        if (is_a($current_bc, 'BC_Form') || is_a($current_bc, 'BC_Field')) {
+            if (!$this->isTypeProductAllowed()) {
+                return array(
+                    self::LINE_TEXT => 'Text libre'
+                );
+            }
+        }
+
+        return parent::getTypesArray();
+    }
+
+    public function getRevalTypesArray()
+    {
+        BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
+        return BimpRevalorisation::$types;
+    }
+
     // Getters données: 
 
     public function getPaWithRevalorisations()
@@ -126,6 +237,17 @@ class Bimp_FactureLine extends ObjectLine
 
     // Affichages: 
 
+    public function displayCommissionApporteur()
+    {
+        $temp = $this->getData('commission_apporteur');
+        $tabT = explode('-', $temp);
+        if (isset($tabT[0]) && $tabT[0] > 0) {
+            $obj = BimpCache::getBimpObjectInstance('bimpfinanc', 'Bimp_CommissionApporteur', $tabT[0]);
+            return $obj->getLink();
+        }
+        return '';
+    }
+
     public function displayRevalorisations()
     {
         $html = '';
@@ -141,6 +263,8 @@ class Bimp_FactureLine extends ObjectLine
             foreach ($revals as $reval) {
                 switch ((int) $reval->getData('status')) {
                     case 0:
+                    case 10:
+                    case 20:
                         $total_attente += (float) $reval->getTotal();
                         break;
 
@@ -185,6 +309,17 @@ class Bimp_FactureLine extends ObjectLine
         return $html;
     }
 
+    // Rendus HTML: 
+
+    public function renderQuickAddForm($bc_list)
+    {
+        if (!$this->isTypeProductAllowed()) {
+            return '';
+        }
+
+        return parent::renderQuickAddForm($bc_list);
+    }
+
     // Traitements:
 
     public function onFactureValidate()
@@ -205,6 +340,15 @@ class Bimp_FactureLine extends ObjectLine
                         $equipment->set('vente_tva_tx', (float) $this->tva_tx);
                         $equipment->set('date_vente', date('Y-m-d H:i:s'));
                         $equipment->set('id_facture', (int) $this->getData('id_obj'));
+
+                        if (!static::useLogistique()) {
+                            $facture = $this->getParentInstance();
+                            $place = $equipment->getCurrentPlace();
+                            if (BimpObject::ObjectLoaded($place) && BimpObject::ObjectLoaded($facture)) {
+                                if ($place->getData('type') != BE_Place::BE_PLACE_CLIENT || $place->getData('id_client') != $facture->getData('fk_soc'))
+                                    $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $facture->getData('fk_soc'), 'Vente ' . $facture->id, 'Vente : ' . $facture->getRef(), 1);
+                            }
+                        }
 
                         $warnings = array();
                         $equipment->update($warnings, true);
@@ -261,6 +405,13 @@ class Bimp_FactureLine extends ObjectLine
                     $warnings = array();
                     $equipment->update($warnings, true);
                 }
+
+
+                if (!static::useLogistique()) {
+                    $place = $equipment->getCurrentPlace();
+                    if ($place->getData('type') != BE_Place::BE_PLACE_CLIENT || $place->getData('id_client') != $facture->getData('fk_soc'))
+                        $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $facture->getData('fk_soc'), 'Vente ' . $facture->id, 'Vente : ' . $facture->getRef(), 1);
+                }
             }
         }
     }
@@ -294,7 +445,7 @@ class Bimp_FactureLine extends ObjectLine
             if (BimpObject::objectLoaded($product)) {
                 if ($product->isSerialisable()) {
                     $cur_pa_ht = null;
-                    $errors = array_merge($errors, $this->calcPaByEquipments(false, $date, $pa_ht, $cur_pa_ht, $details));
+                    $errors = BimpTools::merge_array($errors, $this->calcPaByEquipments(false, $date, $pa_ht, $cur_pa_ht, $details));
                 } else {
                     $commande_line = null;
                     if ($this->getData('linked_object_name') === 'commande_line' && (int) $this->getData('linked_id_object')) {
@@ -543,6 +694,95 @@ class Bimp_FactureLine extends ObjectLine
         return $errors;
     }
 
+    // Actions: 
+
+    public function actionBulkCreateRevalorisation($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_lines = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (!count($id_lines)) {
+            $errors[] = 'Aucune lignes de factures à traiter';
+        } else {
+            $type = BimpTools::getArrayValueFromPath($data, 'type', '', $errors, 1, 'Type de revalorisation absent');
+            $date = BimpTools::getArrayValueFromPath($data, 'date', date('Y-m-d'));
+            $amount_type = BimpTools::getArrayValueFromPath($data, 'amount_type', '', $errors, 1, 'Type de montant absent');
+            $amount = BimpTools::getArrayValueFromPath($data, 'amount', null);
+            $note = BimpTools::getArrayValueFromPath($data, 'note', '');
+
+            if (is_null($amount)) {
+                $errors[] = 'Aucun montant spécitifé';
+            }
+
+            $nOK = 0;
+            if (!count($errors)) {
+                foreach ($id_lines as $id_line) {
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', $id_line);
+
+                    if (!BimpObject::objectLoaded($line)) {
+                        $warnings[] = 'La ligne de facture d\'ID ' . $id_line . ' n\'existe plus';
+                        continue;
+                    }
+
+                    $facture = $line->getParentInstance();
+
+                    if (!BimpObject::objectLoaded($facture)) {
+                        $warnings[] = 'Aucune facture trouvée pour la ligne de facture #' . $id_line;
+                        continue;
+                    }
+
+                    $reval_amount = 0;
+
+                    switch ($amount_type) {
+                        case 'new_pa':
+                            $pa_ht = (float) $line->getPaWithRevalorisations();
+                            $reval_amount = $pa_ht - $amount;
+                            break;
+
+                        default:
+                        case 'reval':
+                            $reval_amount = $amount;
+                            break;
+                    }
+                    $rev_errors = array();
+                    $rev_warnings = array();
+
+                    BimpObject::createBimpObject('bimpfinanc', 'BimpRevalorisation', array(
+                        'id_facture'      => (int) $facture->id,
+                        'id_facture_line' => (int) $line->id,
+                        'type'            => $type,
+                        'date'            => $date,
+                        'amount'          => $reval_amount,
+                        'qty'             => (float) $line->getFullQty(),
+                        'note'            => $note
+                            ), true, $rev_errors, $rev_warnings);
+
+                    if (count($rev_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($rev_errors, 'Facture "' . $facture->getRef() . '" - Ligne n°' . $line->getData('position'));
+                    } else {
+                        $nOK++;
+                    }
+
+                    if (count($rev_warnings)) {
+                        $warnings[] = BimpTools::getMsgFromArray($rev_warnings, 'Facture "' . $facture->getRef() . '" - Ligne n°' . $line->getData('position'));
+                    }
+                }
+
+                if ($nOK > 0) {
+                    $success = $nOK . ' revalorisation(s) créée(s) avec succès';
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
     public function create(&$warnings = array(), $force_create = false)
@@ -557,7 +797,7 @@ class Bimp_FactureLine extends ObjectLine
             return $errors;
         }
 
-        $errors = parent::create($warnings, $force_create);
+        return parent::create($warnings, $force_create);
     }
 
     public function delete(&$warnings = array(), $force_delete = false)
@@ -574,9 +814,14 @@ class Bimp_FactureLine extends ObjectLine
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors)) {
+            $prevDeleting = $this->isDeleting;
+            $this->isDeleting = true;
+
             if (BimpObject::objectLoaded($commLine)) {
                 $commLine->onFactureDelete($id_facture);
             }
+
+            $this->isDeleting = $prevDeleting;
         }
 
         return $errors;

@@ -1,9 +1,9 @@
 <?php
 
-require_once __DIR__ . '/BimpDocumentPDF.php';
+require_once __DIR__ . '/BimpCommDocumentPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 
-class InvoicePDF extends BimpDocumentPDF
+class InvoicePDF extends BimpCommDocumentPDF
 {
 
     public static $type = 'invoice';
@@ -12,6 +12,7 @@ class InvoicePDF extends BimpDocumentPDF
     public $shipments = array();
     public $deliveries = array();
     public $nb_deliveries = 0;
+    public $signature_bloc = false;
 
     public function __construct($db)
     {
@@ -27,6 +28,10 @@ class InvoicePDF extends BimpDocumentPDF
     {
         if (isset($this->object) && is_a($this->object, 'Facture')) {
             if (isset($this->object->id) && $this->object->id) {
+                if ($this->object->mode_reglement_code == 'FIN_YC') {
+                    $this->signature_bloc = true;
+                }
+                        
                 $this->bimpCommObject = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $this->object->id);
                 $this->facture = $this->object;
                 $this->facture->fetch_thirdparty();
@@ -77,6 +82,18 @@ class InvoicePDF extends BimpDocumentPDF
                 $this->shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
                             'id_facture' => (int) $this->facture->id
                 ));
+                if(empty($this->shipments) && $this->bimpCommObject->getData('fk_facture_source') > 0){
+                    $this->shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
+                                'id_facture' => (int) $this->bimpCommObject->getData('fk_facture_source')
+                    ));
+                }
+                if(empty($this->shipments) && !empty($this->commandes)){//on chereche tous les BL de la commande
+                    foreach($this->commandes as $commande){
+                        $this->shipments = BimpTools::merge_array($this->shipments, BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
+                                    'id_commande_client' => (int) $commande->id
+                        )));
+                    }
+                }
 
                 // Contacts livraisons:
                 if (!empty($this->shipments)) {
@@ -142,6 +159,42 @@ class InvoicePDF extends BimpDocumentPDF
                         }
                     }
                 }
+
+                $secteur = $this->bimpCommObject->getData('ef_type');
+                // SAV
+                if($secteur == 'S') {
+                    
+                    $code_centre = $this->bimpCommObject->getData('centre');
+                    if($code_centre == '') {
+//                        $this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
+                    } else {
+                        
+                        $centres = BimpCache::getCentres();
+                        if(isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
+                            $centre = $centres[$code_centre];
+                            $this->fromCompany->address = $centre['address'];
+                            $this->fromCompany->zip     = $centre['zip'];
+                            $this->fromCompany->town    = $centre['town'];
+                            $this->fromCompany->phone   = $centre['tel'];
+                            $this->fromCompany->email   = $centre['mail'];
+
+                        } else {
+                            $this->errors[] = 'Centre ayant pour code' . $code_centre . ' absent de la liste des centres';
+                        }
+                    }
+                    
+                    $this->fromCompany->name = "LDLC";
+                    
+                // Éducation
+                } elseif($secteur == 'E') {
+                    $this->fromCompany->name = "BIMP.PRO";
+                    
+                // PRO
+                } elseif(!in_array($secteur, array('S', 'M')) ) {
+                    $this->fromCompany->name = "BIMP.PRO";
+                }
+                
+                
             } else {
                 $this->errors[] = 'Facture invalide (ID absent)';
             }
@@ -171,9 +224,9 @@ class InvoicePDF extends BimpDocumentPDF
                 $docName = $this->langs->transnoentities('Invoice');
         }
 
-        if ($this->sitationinvoice) {
-            $docName = $this->langs->transnoentities('InvoiceSituation');
-        }
+//        if ($this->sitationinvoice) {
+//            $docName = $this->langs->transnoentities('InvoiceSituation');
+//        }
 
         // Réf facture: 
         $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->facture->ref);
@@ -198,7 +251,7 @@ class InvoicePDF extends BimpDocumentPDF
             $soc = null;
         }
 
-        $html .= '<div>';
+        $html = '<div>';
 
         // Ref. client:
         if ($this->facture->ref_client) {
@@ -349,7 +402,7 @@ class InvoicePDF extends BimpDocumentPDF
                             $contact = null;
                         }
 
-                        $html .= str_replace("\n", "<br/>", pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target'));
+                        $html .= str_replace("\n", "<br/>", $client->dol_object->nom . '<br/>' . pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (BimpObject::objectLoaded($contact) ? $contact->dol_object : ''), !is_null($contact) ? 1 : 0, 'target'));
                         break 2;
                     }
                 }
@@ -389,7 +442,7 @@ class InvoicePDF extends BimpDocumentPDF
             if (empty($this->object->mode_reglement_code) && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($conf->global->FACTURE_RIB_NUMBER)) {
                 $error = $this->langs->transnoentities("ErrorNoPaiementModeConfigured");
             } elseif (($this->object->mode_reglement_code == 'CHQ' && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank)) || ($this->object->mode_reglement_code == 'VIR' && empty($conf->global->FACTURE_RIB_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank))) {
-                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $object->mode_reglement_code);
+                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $this->object->mode_reglement_code);
             }
 
             if ($error) {
@@ -407,59 +460,92 @@ class InvoicePDF extends BimpDocumentPDF
             $html .= '</td></tr>';
         }
 
-        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'CHQ') {
+        if (stripos($this->object->mode_reglement_code, 'FIN') === false) {
+            $html .= '<tr><td style="color: #A00000; font-weight: bold">';
+            $html .= '<br/>Merci de noter systématiquement le n° de facture sur votre règlement<br/>';
+            $html .= '</td></tr>';
 
-            if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {
-                echo $conf->global->FACTURE_CHQ_NUMBER;
-                exit;
-                if ($conf->global->FACTURE_CHQ_NUMBER > 0) {
-                    $html .= '<tr><td>';
-                    if (!class_exists('Account')) {
-                        require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
+            if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'CHQ') {
+
+                if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {
+                    if ($conf->global->FACTURE_CHQ_NUMBER > 0) {
+                        $html .= '<tr><td>';
+                        if (!class_exists('Account')) {
+                            require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
+                        }
+                        $account = new Account($this->db);
+                        $account->fetch($conf->global->FACTURE_CHQ_NUMBER);
+
+                        $html .= '<span style="font-style: italic">' . $this->langs->transnoentities('PaymentByChequeOrderedTo', $account->proprio) . ':</span><br/><br/>';
+
+                        if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
+                            $html .= '<strong>' . str_replace("\n", '<br/>', $this->langs->convToOutputCharset($account->owner_address)) . '</strong>';
+                        }
+                        $html .= '</td></tr>';
+                    } elseif ($conf->global->FACTURE_CHQ_NUMBER == -1) {
+                        $html .= '<tr><td>';
+                        $html .= $this->langs->transnoentities('PaymentByChequeOrderedTo', $this->fromCompany->name) . '<br/>';
+
+                        if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
+                            $html .= $this->langs->convToOutputCharset($this->fromCompany->getFullAddress()) . '<br/>';
+                        }
+                        $html .= '</td></tr>';
                     }
-                    $account = new Account($this->db);
-                    $account->fetch($conf->global->FACTURE_CHQ_NUMBER);
-
-                    $html .= '<span style="font-style: italic">' . $this->langs->transnoentities('PaymentByChequeOrderedTo', $account->proprio) . ':</span><br/><br/>';
-
-                    if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
-                        $html .= '<strong>' . str_replace("\n", '<br/>', $this->langs->convToOutputCharset($account->owner_address)) . '</strong>';
-                    }
-                    $html .= '</td></tr>';
-                } elseif ($conf->global->FACTURE_CHQ_NUMBER == -1) {
-                    $html .= '<tr><td>';
-                    $html .= $this->langs->transnoentities('PaymentByChequeOrderedTo', $this->fromCompany->name) . '<br/>';
-
-                    if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
-                        $html .= $this->langs->convToOutputCharset($this->fromCompany->getFullAddress()) . '<br/>';
-                    }
-                    $html .= '</td></tr>';
                 }
             }
+
+            //        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
+            $id_default_account = BimpCore::getConf('id_default_bank_account', (!empty($conf->global->FACTURE_RIB_NUMBER) ? $conf->global->FACTURE_RIB_NUMBER : 0));
+            if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || $id_default_account) {
+                $html .= '<tr><td>';
+                $bankid = (!empty($this->object->fk_account) ? $this->object->fk_account : (!empty($this->object->fk_bank) ? $this->object->fk_bank : $id_default_account));
+
+                $only_number = false;
+                if (!empty($this->object->mode_reglement_code) && $this->object->mode_reglement_code !== 'VIR') {
+                    $only_number = true;
+                }
+
+                require_once(DOL_DOCUMENT_ROOT . "/compta/bank/class/account.class.php");
+                $account = new Account($this->db);
+                $account->fetch($bankid);
+                $html .= $this->getBankHtml($account, $only_number);
+                $html .= '</td></tr>';
+            }
         }
+        $html .= '</table></div>';
 
-//        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
-        if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || !empty($conf->global->FACTURE_RIB_NUMBER)) {
-            $html .= '<tr><td>';
-            $bankid = (empty($this->object->fk_account) ? $conf->global->FACTURE_RIB_NUMBER : $this->object->fk_account);
-            if (!empty($this->object->fk_bank)) {
-                $bankid = $this->object->fk_bank;
+        if ($this->object->mode_reglement_code == 'FIN_YC') {
+            global $db, $langs;
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->facture->socid);
+            $contactName = $client->dol_object->nom;
+
+            $contacts = $this->facture->getIdContact('external', 'BILLING');
+            if (count($contacts)) {
+                $contacttmp = new Contact($db);
+                $contacttmp->fetch($contacts[0]);
+                $contactName = $contacttmp->getFullName($this->langs);
             }
 
-            $only_number = false;
-            if (!empty($this->object->mode_reglement_code) && $this->object->mode_reglement_code !== 'VIR') {
-                $only_number = true;
+            $contacts = $this->facture->getIdContact('internal', 'SALESREPFOLL');
+            if (count($contacts)) {
+                $usertmp = new User($db);
+                $usertmp->fetch($contacts[0]);
+                $commName = $usertmp->getFullName($this->langs);
             }
 
-            require_once(DOL_DOCUMENT_ROOT . "/compta/bank/class/account.class.php");
-            $account = new Account($this->db);
-            $account->fetch($bankid);
-            $html .= $this->getBankHtml($account, $only_number);
-            $html .= '</td></tr>';
+
+            $html .= '<p style="font-size: 7px; font-style: italic; ">';
+            $html .= '';
+            $html .= '<img src="' . DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/img/checkbox.png" width="9px" height="9px"/>';
+            $html .= " Je soussigné " . $contactName . " certifie que l'ensemble des biens détaillés dans cette facture m’a été remis en mains propres par " . $commName . ".<br/> <br/>";
+            $html .= '<span style="font-weight: bold; ">' . "Cette mention doit obligatoirement être recopiée de la main de l'acheteur pour que le contrat de vente soit valable<br/>" . "</span>";
+            $html .= "\"Je demande la remise immédiate de mon bien. Le délai légal de rétractation de mon contrat de crédit arrive dès lors à échéance à la date de remise du bien, sans pouvoir être inférieur à trois jours ni supérieur à quatorze jours suivant sa signature. Je suis tenu (e) par mon contrat de vente principal dès le quatrième jour suivant sa signature.\"";
+            $html .= '</p>';
+            $html .= '<p style="font-size: 12px; font-style: italic; ">';
+            $html .= "........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................";
+            $html .= '</p>';
         }
 //        }
-
-        $html .= '</table></div>';
 
         return $html;
     }
@@ -521,7 +607,7 @@ class InvoicePDF extends BimpDocumentPDF
         $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
         $html .= $this->langs->transnoentities("Type");
         $html .= '</td>';
-        $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
+        $html .= '<td style="background-color: #DCDCDC; font-size: 7px; width: 70px">';
         $html .= $this->langs->transnoentities("Num");
         $html .= '</td>';
         $html .= '</tr>';
@@ -552,7 +638,7 @@ class InvoicePDF extends BimpDocumentPDF
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= $text;
                 $html .= '</td>';
-                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
+                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC; width: 70px">';
                 $html .= $invoice->ref;
                 $html .= '</td>';
                 $html .= '</tr>';
@@ -576,7 +662,7 @@ class InvoicePDF extends BimpDocumentPDF
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= $this->langs->transnoentitiesnoconv("PaymentTypeShort" . $row->code);
                 $html .= '</td>';
-                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
+                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC; width: 70px">';
                 $html .= $row->num;
                 $html .= '</td>';
                 $html .= '</tr>';
@@ -589,12 +675,7 @@ class InvoicePDF extends BimpDocumentPDF
 
         return $html;
     }
-
-    public function getAfterTotauxHtml()
-    {
-        return '';
-    }
-
+    
     public function renderAnnexes()
     {
         $this->next_annexe_idx = 1;
@@ -688,7 +769,7 @@ class InvoicePDF extends BimpDocumentPDF
                         }
 
                         $html .= '<span style="font-weight: bold">';
-                        $html .= pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target');
+                        $html .= pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (!is_null($contact)? $contact->dol_object : null), (!is_null($contact) ? 1 : 0), 'target');
                         $html .= '</span>';
 
                         $html .= '</td>';
@@ -703,6 +784,9 @@ class InvoicePDF extends BimpDocumentPDF
             $html .= '</tr>';
             $html .= '</table>';
             $html .= '</div>';
+
+
+
 
             $this->writeContent($html);
         }

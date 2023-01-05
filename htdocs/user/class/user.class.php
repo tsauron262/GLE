@@ -297,7 +297,7 @@ class User extends CommonObject
 
 		if ($sid)    // permet une recherche du user par son SID ActiveDirectory ou Samba
 		{
-			$sql.= " AND (u.ldap_sid = '".$this->db->escape($sid)."' OR u.login = '".$this->db->escape($login)."') LIMIT 1";
+			$sql.= " AND (u.ldap_sid = '".$this->db->escape($sid)."' OR u.login = '".$this->db->escape($sid)."')";
 		}
 		elseif ($login)
 		{
@@ -1805,8 +1805,8 @@ class User extends CommonObject
 			if (! $error && ! $notrigger)
 			{
 				// Call trigger
-				$result=$this->call_trigger('USER_MODIFY', $user);
-				if ($result < 0) { $error++; }
+				$result=$this->call_trigger('USER_MODIFY',$user);
+				if ($result < 0) { $error++; $this->error .= "Erreur trigger USER_MODIFY";}
 				// End call triggers
 			}
 
@@ -2392,6 +2392,7 @@ class User extends CommonObject
 		$label.= '<br><b>' . $langs->trans("EMail").':</b> '.$this->email;
 		if (! empty($this->admin))
 			$label.= '<br><b>' . $langs->trans("Administrator").'</b>: '.yn($this->admin);
+                $companylink = '';
 		if (! empty($this->socid) )	// Add thirdparty for external users
 		{
 			$thirdpartystatic = new Societe($db);
@@ -2605,11 +2606,20 @@ class User extends CommonObject
         // phpcs:enable
 		global $conf;
 		$dn='';
+                
+                
+                /*mod drsi*/
+//                if($conf->global->LDAP_KEY_USERS == "sAMAccountName" && isset($this->array_options['options_newlogin']))
+//                    $info[$conf->global->LDAP_KEY_USERS] = $this->array_options['options_newlogin'];
+                /*fmoddrsi*/
+                
+                
 		if ($mode==0) $dn=$conf->global->LDAP_KEY_USERS."=".$info[$conf->global->LDAP_KEY_USERS].",".$conf->global->LDAP_USER_DN;
 		if ($mode==1) $dn=$conf->global->LDAP_USER_DN;
 		if ($mode==2) $dn=$conf->global->LDAP_KEY_USERS."=".$info[$conf->global->LDAP_KEY_USERS];
                 
                 /*mod drsi*/
+                
                 if(!defined("LIST_DOMAINE_VALID"))
                     dol_syslog("Constante LIST_DOMAINE_VALID non definie",3);
                 else{
@@ -2623,9 +2633,28 @@ class User extends CommonObject
                 }
                 /*f mod drsi*/
                 
-                
 		return $dn;
 	}
+        
+        function getReal_ldap_dn(){
+            $ldap=new Ldap();
+            $result=$ldap->connect_bind();
+            if($result){
+                $info=$this->_load_ldap_info();
+                $dn=$this->_load_ldap_dn($info,1);
+                $search = "(".$this->_load_ldap_dn($info,2).")";
+                $records = $ldap->getAttribute($dn,$search);
+                if(count($records) > 0){
+                    return $records['distinguishedName'][0];
+                }
+                else{
+                    echo "<pre>";print_r($records);
+                    echo 'Introuvable dans LDAP : '.$dn." | ".$search; 
+                }
+            }
+            else
+                setEventMessages($ldap->error, $ldap->errors, 'errors');
+        }
 
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.PublicUnderscore
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
@@ -2807,9 +2836,11 @@ class User extends CommonObject
                     }
                 }
                 
-                $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser", "erpUser"));
-                $info ['accountstatus'] = ($this->statut == 1)? "active" : "disabled";
-                $info ['enabledservice'] = array();
+                if(!defined('LDAP_MOD_AD')){
+                    $info['objectclass'] = array_merge($info['objectclass'], array("shadowAccount", "amavisAccount", "mailUser", "erpUser"));
+                    $info ['accountstatus'] = ($this->statut == 1)? "active" : "disabled";
+                    $info ['enabledservice'] = array();
+                }
                 
                 
                 $domain = false;
@@ -2886,8 +2917,59 @@ class User extends CommonObject
                         if($info[$nom] == "" || $info[$nom] == " ")
                             $info[$nom] = "N/C";
                             //unset($info[$nom]);
-                
-		return $info;
+                        
+                        
+                if(!defined('LDAP_MOD_AD')){
+                    return $info;
+                }
+                else{
+                    $info2 = array();
+                    $arrAlias = array();
+                    if(isset($this->array_options['options_alias'])){
+                        $arrAliasT = explode(",", $this->array_options['options_alias']);
+                        foreach($arrAliasT as $al)
+                            $arrAlias[trim($al)] = trim($al);
+                    }
+    //                $info2["objectclass"] = $oldInfo["objectclass"];
+//                    $info2['description'] = 'Responsable Developpement ERP Bimp';
+                    $info2["sAMAccountName"] = $info["sAMAccountName"];
+                    $sql = $this->db->query("SELECT `oldMail`, `oldLogin` FROM `llx_user` WHERE `rowid` =  ".$this->id);
+                    $ln = $this->db->fetch_object($sql);
+                    $info2["bimpOldLogin"] = $ln->oldLogin;
+                    $info2["bimpOldMail"] = $ln->oldMail;
+                    $arrAlias[strtolower($ln->oldMail)] = strtolower($ln->oldMail);
+                    $debMail = $this->ldap_sid;
+                    $debMail = str_replace("ë", "e", $debMail);
+//                    $prefixe = "Z_";
+                    $prefixe = "";
+//                    $mailPr = $debMail."@bimp.fr";
+                    $mailPr = $this->email;
+//                    $info2["mail"] = $prefixe.trim($mailPr);
+//                    $mailPr = $this->email;
+                        $tabT = explode("@", $mailPr);
+//                        if(isset($tabT[1])){
+//                            $debMail = $tabT[0];
+                            $arrAlias[$debMail."@LDLCCOM173.mail.onmicrosoft.com"] = $debMail."@LDLCCOM173.mail.onmicrosoft.com";
+                            $arrAlias[$debMail."@LDLCCOM173.onmicrosoft.com"] = $debMail."@LDLCCOM173.onmicrosoft.com";
+                            $arrAlias[$debMail."@ldlc.fr"] = $debMail."@ldlc.fr";
+                            $arrAlias[$debMail."@ldlc.com"] = $debMail."@ldlc.com";
+                            if(stripos($mailPr, "bimp") === false){
+                                $info2['proxyAddresses'][] = "SMTP:".$mailPr;
+                                $arrAlias[$debMail."@bimp.fr"] = $debMail."@bimp.fr";
+                            }
+                            else
+                                $info2['proxyAddresses'][] = "SMTP:".$prefixe.$mailPr;
+                            foreach($arrAlias as $all)
+                                if($all != $mailPr){
+                                    if(stripos($all, "bimp") == false)
+                                        $info2['proxyAddresses'][] = trim("smtp:".$all);
+                                    else
+                                        $info2['proxyAddresses'][] ="smtp:".$prefixe.trim($all);
+                                }
+//                        }
+//                    echo "<pre>";print_r($info2);
+                    return $info2;
+                }
 	}
 
 

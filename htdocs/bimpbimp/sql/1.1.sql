@@ -1,0 +1,1 @@
+INSERT INTO `llx_bimpcore_conf` (`id`, `module`, `name`, `value`) VALUES (NULL, 'bimpcontract', 'id_responsable_education', 201), (NULL, 'bimpcontract', 'id_responsable_commercial', 62)

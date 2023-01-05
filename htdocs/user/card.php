@@ -36,6 +36,15 @@
  */
 
 require '../main.inc.php';
+
+
+if(!isset($_REQUEST['action']) || ($_REQUEST['action'] != 'create' && $_REQUEST['action'] != 'add' && $_REQUEST['action'] != 'adduserldap')){
+    require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+    $bObj = BimpObject::getInstance("bimpcore", "Bimp_User", $_REQUEST['id']);
+    $htmlRedirect = $bObj->processRedirect();
+}
+
+
 require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
@@ -677,7 +686,8 @@ $formcompany = new FormCompany($db);
 $formfile = new FormFile($db);
 if (! empty($conf->stock->enabled)) $formproduct = new FormProduct($db);
 
-llxHeader('', $langs->trans("UserCard"));
+llxHeader('',$langs->trans("UserCard"));
+echo $htmlRedirect;
 
 if ($action == 'create' || $action == 'adduserldap')
 {
@@ -1822,7 +1832,7 @@ else
 						print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=edit">'.$langs->trans("Modify").'</a></div>';
 					}
 				}
-				elseif ($caneditpassword && ! $object->ldap_sid &&
+				elseif ($caneditpassword && /*! $object->ldap_sid &&*/
 				(empty($conf->multicompany->enabled) || ! $user->entity || ($object->entity == $conf->entity) || ($conf->global->MULTICOMPANY_TRANSVERSE_MODE && $conf->entity == 1)))
 				{
 					print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=edit">'.$langs->trans("EditPassword").'</a></div>';
@@ -1835,7 +1845,7 @@ else
 					{
 						print '<div class="inline-block divButAction"><a class="butActionRefused classfortooltip" href="#" title="'.dol_escape_htmltag($langs->trans("UserDisabled")).'">'.$langs->trans("ReinitPassword").'</a></div>';
 					}
-					elseif (($user->id != $id && $caneditpassword) && $object->login && !$object->ldap_sid &&
+					elseif (($user->id != $id && $caneditpassword) && $object->login && /*!$object->ldap_sid &&*/
 					((empty($conf->multicompany->enabled) && $object->entity == $user->entity) || ! $user->entity || ($object->entity == $conf->entity) || ($conf->global->MULTICOMPANY_TRANSVERSE_MODE && $conf->entity == 1)))
 					{
 						print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=password">'.$langs->trans("ReinitPassword").'</a></div>';
@@ -1845,7 +1855,7 @@ else
 					{
 						print '<div class="inline-block divButAction"><a class="butActionRefused classfortooltip" href="#" title="'.dol_escape_htmltag($langs->trans("UserDisabled")).'">'.$langs->trans("SendNewPassword").'</a></div>';
 					}
-					elseif (($user->id != $id && $caneditpassword) && $object->login && !$object->ldap_sid &&
+					else if (($user->id != $id && $caneditpassword) && $object->login /*&& !$object->ldap_sid*/ &&
 					((empty($conf->multicompany->enabled) && $object->entity == $user->entity) || ! $user->entity || ($object->entity == $conf->entity) || ($conf->global->MULTICOMPANY_TRANSVERSE_MODE && $conf->entity == 1)))
 					{
 						if ($object->email) print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=passwordsend">'.$langs->trans("SendNewPassword").'</a></div>';

@@ -31,8 +31,9 @@ sections:
           default: 
               label: Logistique
               sections: 
-                  - type: object_header
-                    object_header: 
+                  - type: view
+                    view:
+                        name: header_only
                         object: commande_fourn
                   - type: custom
                     custom: 

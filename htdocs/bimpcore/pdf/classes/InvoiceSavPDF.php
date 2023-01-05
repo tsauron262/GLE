@@ -10,6 +10,7 @@ class InvoiceSavPDF extends InvoicePDF
 
     public static $type = 'sav';
     public $sav = null;
+    public $signature_bloc = false;
 
     public function init($object)
     {
@@ -30,12 +31,15 @@ class InvoiceSavPDF extends InvoicePDF
     protected function initHeader()
     {
         parent::initHeader();
-
+        $rows = '';
         if (!is_null($this->sav)) {
-            $rows .= $this->sav->getData('ref') . '<br/>';
+            $rows .= '<span style="color: #' . BimpCore::getParam('pdf/primary', '000000') . '">' . $this->sav->getData('ref') . '</span><br/>';
             $equipment = $this->sav->getchildObject('equipment');
             if (!is_null($equipment) && $equipment->isLoaded()) {
                 $rows .= $equipment->getData('serial');
+                $imei = $equipment->getData('imei');
+                if($imei != '' && $imei != "n/a")
+                    $rows .= "<br/>".$imei;
             }
         }
 
@@ -50,45 +54,45 @@ class InvoiceSavPDF extends InvoicePDF
 
     public function renderSignature()
     {
-        if ($this->object->type === 3) {
-            return;
-        }
-
-        $html = '';
-        $html .= '<table style="width: 95%" cellpadding="3">';
-
-        $html .= '<tr>';
-        $html .= '<td>Matériel récupéré le:</td>';
-        $html .= '</tr>';
-
-        $html .= '<tr>';
-        $html .= '<td>Signature :</td>';
-        $html .= '</tr>';
-
-        $html .= '<tr>';
-        $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
-        $html .= '</tr>';
-
-        $html .= '</table>';
-
-        $table = new BimpPDF_Table($this->pdf, false);
-        $table->cellpadding = 0;
-        $table->remove_empty_cols = false;
-        $table->addCol('left', '', 95);
-        $table->addCol('right', '', 95);
-
-        $table->rows[] = array(
-            'left'  => '',
-            'right' => $html
-        );
-
-        $this->writeContent('<br/><br/>');
-        $table->write();
+//        if ($this->object->type === 3) {
+//            return;
+//        }
+//
+//        $html = '';
+//        $html .= '<table style="width: 95%" cellpadding="3">';
+//
+//        $html .= '<tr>';
+//        $html .= '<td>Matériel récupéré le:</td>';
+//        $html .= '</tr>';
+//
+//        $html .= '<tr>';
+//        $html .= '<td>Signature :</td>';
+//        $html .= '</tr>';
+//
+//        $html .= '<tr>';
+//        $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
+//        $html .= '</tr>';
+//
+//        $html .= '</table>';
+//
+//        $table = new BimpPDF_Table($this->pdf, false);
+//        $table->cellpadding = 0;
+//        $table->remove_empty_cols = false;
+//        $table->addCol('left', '', 95);
+//        $table->addCol('right', '', 95);
+//
+//        $table->rows[] = array(
+//            'left'  => '',
+//            'right' => $html
+//        );
+//
+//        $this->writeContent('<br/><br/>');
+//        $table->write();
     }
 
     public function renderSavConditions()
     {
-        $html .= '<table cellpadding="20px"><tr><td>';
+        $html = '<table cellpadding="20px"><tr><td>';
 //        $html .= '<p style="font-size: 7px; color: #002E50">';
         $html .= '<div style="text-indent: 15px; font-size: 7px; color: #002E50">';
         $html .= 'Si le service est requis conformément à une obligation de réparation d’un tiers, ces informations seront ';
@@ -113,5 +117,20 @@ class InvoiceSavPDF extends InvoicePDF
     {
         $this->renderFullBlock('renderSignature');
         $this->renderFullBlock('renderSavConditions');
+    }
+    public function renderAfterLines()
+    {
+        $html = parent::renderAfterLines();
+        if (!is_null($this->sav)) {
+            $equipment = $this->sav->getchildObject('equipment');
+            if($equipment->getData('old_serial') != ''){
+                $html .= '<p style="font-size: 6px; font-style: italic">';
+                if($html != '')
+                    $html .= "<br/>";
+                $html .= 'Ancien(s) serial :<br/>'.str_replace('<br/>', ' - ',$equipment->getData('old_serial'));
+            $html .= '</p>';
+            }
+        }
+        $this->writeContent($html);
     }
 }

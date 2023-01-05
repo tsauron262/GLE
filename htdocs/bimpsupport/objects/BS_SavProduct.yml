@@ -38,7 +38,7 @@ fields:
                 fields_search: e.serial,e.id
             help: Numéro de série ou ID d'un équipement<br/>Laissez vide pour attribuer un équipement ultérieurement
         create_form: light
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayEquipment
@@ -72,6 +72,22 @@ forms:
         rows: 
             - field: id_equipment
             
+lists_cols: 
+    desc: 
+        label: Désignation
+        value: 
+            callback: displayProduct
+            
+    unit_price: 
+        label: PU TTC
+        value: 
+            callback: displayUnitPrice
+            
+    price: 
+        label: Total TTC
+        value: 
+            callback: displayTotal
+            
 lists: 
     default: 
         title: Produits / Services
@@ -101,34 +117,18 @@ lists:
         edit_form: equipment
         objects_change_reload: BS_SAV
         cols: 
-            product: 
-                field: id_product
-                display: nom_url
+            id_product: 
             desc: 
-                label: Désignation
-                value: 
-                    callback: displayProduct
-            equipement:
-                field: id_equipment
+            id_equipment:
             unit_price: 
-                label: PU TTC
-                value: 
-                    callback: displayUnitPrice
             qty: 
-                field: qty
                 edit:
                     callback: 
                         object: product
                         method: isNotSerialisable
             remise: 
-                field: remise
                 edit: 1
-            price: 
-                label: Total TTC
-                value: 
-                    callback: displayTotal
-            
+            price:             
             out_of_warranty: 
-                field: out_of_warranty
                 edit: 1
             

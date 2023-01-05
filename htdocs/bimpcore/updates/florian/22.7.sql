@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_log` ADD `id_erp` int(11) DEFAULT NULL;

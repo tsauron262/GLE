@@ -1,0 +1,195 @@
+table: bimpapi_user_account
+common_fields: 0
+icon: fas_user-tag
+no_transaction_db: 1
+
+parent_object: API_Api
+parent_id_property: id_api
+
+list_page_url: 
+    controller: admin
+    url_params: 
+        tab: users
+            
+header_list_name: default
+header_edit_form: default
+
+labels:
+    name: Compte utilisateur API
+    name_plur: Comptes utilisateurs API
+
+nom_url: 
+    syntaxe: <name>
+    
+objects: 
+    user: 
+        instance: 
+            id_object: unset
+            
+fields: 
+    id_api: 
+        label: API
+        type: id_parent
+        required: 1
+        input: 
+            type: select
+            options: 
+                array: apis
+        search: 
+            input: 
+                type: select
+                options: 
+                    callback: 
+                        method: getApisArray
+                        params: 
+                            - 1
+                            
+    users: 
+        label: Utilisateurs liés
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: user
+        required: 1
+        input: 
+            type: search_user
+        
+    name: 
+        label: Nom
+        required: 1
+        
+    login : 
+        label: Login
+        
+    pword: 
+        label: MDP
+        type: password
+        
+    tokens: 
+        label: Tokens
+        type: json
+        displays: 
+            default: 
+                type: callback
+                method: displayTokens
+        input: 
+            type: hidden
+            
+    logged_end: 
+        label: Fin de connexion
+        type: datetime
+        displays: 
+            default: 
+                type: datetime
+                show_hour: 1
+        input: 
+            type: hidden
+        
+forms: 
+    external_token: 
+        title: 
+            callback: getExternalTokenFormTitle
+        rows: 
+            - custom: 1
+              label: Token
+              input_name: external_token
+              input: 
+                  type: text
+                  help: Veuillez vous athentifier puis copier-coller le token obtenu. 
+                  extra_content: 
+                      callback: renderExternalTokenInputExtraContent
+              required: 1
+              
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: id_api
+            - field: users
+              display: card
+            - field: login
+            - field: pword
+            
+    tokens: 
+        title: Données de connexion
+        icon: fas_power-off
+        rows: 
+            - field: logged_end
+            - field: tokens
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_md: 6
+                  col_lg: 6
+                  col_sm: 12
+                  fields_table:
+                      name: infos
+                - type: fields_table
+                  col_md: 6
+                  col_lg: 6
+                  col_sm: 12
+                  fields_table:
+                      name: tokens
+        
+filters_panels: 
+    default: 
+        filters: 
+            id_api: 
+            users: 
+            login: 
+                
+    api: 
+        extends: default
+        filters: 
+            id_api: unset
+                
+lists_cols: 
+    logged: 
+        label: Connecté
+        value: 
+            callback: displayLogged
+    tokens_light:
+        label: Token
+        value:
+            callback: getTokenLight
+            
+lists: 
+    default: 
+        title: Tous les comptes utilisateurs API
+        icon: fas_user-tag
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            callback: getListBulkActions
+        filters_panel: default
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        edit_btn: 1
+        edit_form: edit
+        delete_btn: 1
+        modal_view: default
+        extra_btn: 
+            callback: getListExtraButtons
+        cols:             
+            id_api: 
+            name:    
+            users: 
+            tokens_light:
+            logged:
+            logged_end: 
+                
+    api: 
+        extends: default
+        title: Comptes utilisateurs
+        header_buttons: unset
+        filters_panel: api
+        cols: 
+            id_api: unset

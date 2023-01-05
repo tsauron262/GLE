@@ -1,3 +1,5 @@
+labels:
+    name: A redefinir
 objects:
 #   Dol objets: 
     entrepot:
@@ -8,6 +10,16 @@ objects:
                 module: product/stock
                 file: entrepot
             id_object:
+                field_value: id_entrepot
+                
+    bimp_entrepot: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Entrepot
+            id_object: 
                 field_value: id_entrepot
                 
     account: 
@@ -29,6 +41,7 @@ objects:
                 field_value: id_contrat
                 
 #    Bimpcore objects:
+    
     user:
         relation: hasOne
         delete: 0
@@ -37,7 +50,7 @@ objects:
                 module: bimpcore
                 name: Bimp_User
             id_object:
-                field_value: id_user
+                field_value: id_user   
                 
     group: 
         relation: hasOne
@@ -112,7 +125,18 @@ objects:
             id_object: 
                 field_value: id_fourn_price
                 
+    signature: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
+        
 #    BimpComm objects: 
+    
     paiement: 
         relation: hasOne
         delete: 0
@@ -303,90 +327,28 @@ objects:
             id_object: 
                 field_value: id_revalorisation
                 
+#    Objets enfants communs: 
+    notes: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpNote
+        list: 
+            filters: 
+                obj_type: bimp_object
+                obj_module: 
+                    prop: module
+                obj_name: 
+                    prop: object_name
+                
 associations: 
     files: 
         label: Fichiers associés
         object: file
                 
-forms: 
-    list_config: 
-        title: Paramètres de la liste
-        icon: fas_user-cog
-        rows: 
-            - custom: 1
-              label: Type propriétaire
-              input_name: type_object
-              hidden: 1
-              input: 
-                  type: hidden
-            - custom: 1
-              label: ID propriétaire
-              input_name: id_object
-              data_type: int
-              hidden: 1
-              input: 
-                  type: hidden
-            - custom: 1
-              label: Nom liste
-              input_name: list_name
-              hidden: 1
-              input: 
-                  type: hidden
-            - custom: 1
-              label: Nombre d'items par page par défaut
-              input_name: nb_items
-              show: 
-                  callback: showListConfigNbItems
-              input: 
-                  type: switch_options
-                  options: 
-                      10: 10
-                      20: 20
-                      30: 30
-                      40: 40
-                      50: 50
-            - custom: 1
-              label: Tri par défaut
-              input_name: sort_field
-              show: 
-                  callback: showListConfigSort
-              input: 
-                  type: select
-                  options: 
-                      array: sortableFields
-            - custom: 1
-              label: Option de tri
-              show: 
-                  callback: showListConfigSort
-              input_name: sort_option
-              input: 
-                  type: select
-                  options: 
-                      array: sortOptions
-              depends_on: sort_field
-            - custom: 1
-              label: Ordre par défaut
-              input_name: sort_way
-              input: 
-                  type: switch_options
-                  options: 
-                      asc: Croissant
-                      desc: Décroissant
-              show: 
-                  callback: showListConfigSort
-            - custom: 1
-              label: Afficher les totaux
-              input_name: total_row
-              data_type: bool
-              input: 
-                  type: toggle
-            - custom: 1
-              label: Colonnes
-              input_name: cols
-              no_container: 1
-              content: 
-                  callback: renderListConfigColsInput
-              
+forms:               
     move_file: 
         title: Déplacer un fichier
         icon: fas_file-export
@@ -440,38 +402,71 @@ forms:
         title: Générer CSV
         icon: fas_file-excel
         rows: 
+            list_name: 
+                custom: 1
+                hidden: 1
+                label: Nom de la liste
+                input_name: list_name
+                input: 
+                    type: hidden
+            file_name: 
+                custom: 1
+                label: Nom du fichier
+                input_name: file_name
+                input: 
+                    type: text
+                    help: Caractères aplhanumériques et tirets seulement
+            separator: 
+                custom: 1
+                label: Séparateur
+                input_name: separator
+                input: 
+                    type: text
+                value: ;
+            header:
+                custom: 1
+                label: En-têtes
+                input_name: headers
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            light_export:
+                custom: 1
+                label: Export allégé
+                input_name: light_export
+                data_type: bool
+                value: 1
+                show:
+                    callback: isLight_exportActif
+                input: 
+                    type: toggle
+                    help: Plus rapide mais certaines colonnes peuvent ne pas être disponibles si cette option est activée
+            col_options:
+                custom: 1
+                label: Options des colonnes
+                input_name: cols_options
+                content: 
+                    callback: renderListCsvColsOptions
+                depends_on: light_export,list_name
+                    
+    generate_pdf: 
+        title: Générer un document PDF
+        icon: fas_sync
+        rows: 
             - custom: 1
-              hidden: 1
-              label: Nom de la liste
-              input_name: list_name
+              label: Modèle
+              input_name: model
               input: 
-                  type: hidden
-            - custom: 1
-              label: Nom du fichier
-              input_name: file_name
-              input: 
-                  type: text
-                  help: Caractères aplhanumériques et tirets seulement
-            - custom: 1
-              label: Séparateur
-              input_name: separator
-              input: 
-                  type: text
-              value: ';'
-            - custom: 1
-              label: En-têtes
-              input_name: headers
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 1
-            - custom: 1
-              label: Options des colonnes
-              input_name: cols_options
-              content: 
-                  callback: renderListCsvColsOptions
-            
-              
-                
+                  type: select
+                  options: 
+                      array: modelsPdf
+                      
+    bulk_edit_field: 
+        title: Edition en série
+        icon: fas_pen
+        rows: 
+            - field: 
+                  request_field: field_name
                   
         

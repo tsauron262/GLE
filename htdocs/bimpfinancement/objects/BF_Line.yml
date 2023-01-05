@@ -1,62 +1,230 @@
-extends: 
-    module: bimpcore
-    object_name: BimpLine
-
 table: bf_demande_line
-    
+common_fields: 0
+positions: 1
+position_insert: after
+
 parent_module: bimpfinancement
 parent_object: BF_Demande
+parent_id_property: id_demande
 
-fields:             
-    in_contrat:
-        label: Afficher dans le contrat
-        type: bool
-        default_value: 1     
-    qty: 
-        min: 
-            callback: getQtyOrdered
-    id_fourn_price: 
+
+labels: 
+    name: élément financé
+    name_plur: éléments financés
+    
+objects: 
+    source: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpfinancement
+                name: BF_DemandeSource
+            id_object: 
+                field_value: id_source
+                
+    fourn_price: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                object_name: Bimp_ProductFournisseurPrice
+            id_object: 
+                field_value: id_fourn_price
+                
+fields:
+    id_demande: 
+        label: Demande de location
+        type: id_parent
+        
+    id_source: 
+        label: Source
+        type: id_object
+        object: source
+        default_value: 0
+        
+    id_line_origine: 
+        label: ID ligne d'origine
+        type: id
+        default_value: 0
+        
+    type: 
+        label: Type de ligne
+        type: int
+        required: 1
+        values: 
+            array: types
+        default_value: 1
+            
+    id_product: 
+        label: Produit
+        type: id_object
+        object: product
         display_if: 
-            field_name: unset
-            show_values: unset
+            field_name: type
+            show_values: 1
+            
+    ref: 
+        label: Réf. produit
+        display_if: 
+            field_name: type
+            show_values: 2
+            
+    label: 
+        label: Libellé produit
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+            help: Facultatif
+        display_if: 
+            field_name: type
+            show_values: 2
+            
+    description: 
+        label: Description
+        type: html
+            
+    product_type: 
+        label: Type de produit
+        type: int
+        values:
+            callback: getProductTypesArray
+        search: 
+            input: 
+                type: select
+                options: 
+                    array: product_types
+        display_if: 
+            field_name: type
+            show_values: 2
+        
+    qty: 
+        label: Quantité
+        type: qty
+        input: 
+            step: 
+                callback: getQtyStep
+        decimals: 
+            callback: getQtyDecimals
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        
+    pu_ht: 
+        label: Prix unitaire HT
+        type: money
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        depends_on: id_product
+        
+    tva_tx: 
+        label: Taux de TVA
+        type: percent
+        default_value: 20
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        depends_on: id_product
+        
+    pa_ht: 
+        label: Prix d'achat HT
+        type: money
+        display_if: 
+            fields_names: type,use_pu_for_pa,id_fourn_price
+            type: 
+                hide_values: 3
+            use_pu_for_pa: 
+                hide_values: 1
+            id_fourn_price: 
+                show_values: 0
+        depends_on: id_product
+        
+    id_fourn_price: 
+        label: Prix d'achat fournisseur
+        type: id_object
+        object: fourn_price
+        default_value: 0
+        input: 
+            type: select
+            options: 
+                callback: getFournPricesArray
+        display_if:
             fields_names: type,use_pu_for_pa
             type: 
                 show_values: 1
             use_pu_for_pa: 
                 hide_values: 1
-    pa_ht: 
-        display_if: 
-            fields_names: type,id_fourn_price,use_pu_for_pa
-            use_pu_for_pa: 
-                hide_values: 1
+        depends_on: id_product
+                
     commandes_fourn:
         label: Commandes fournisseurs
         type: json
         input: 
             type: hidden
-    site: 
-        label: Site
-        values: 
-            callback: 
-                object: 
-                    callback: getParentInstance
-                method: getSitesArray
-                
-    remisable: unset
-    
+            
+    remise: 
+        label: Remise
+        type: percent
+        decimals: 4
+        display_if: 
+            fields_names: type
+            type: 
+                hide_values: 3
+        default_value: 0
+        
+    total_ht: 
+        label: Total HT
+        type: money
+        
+    total_ttc: 
+        label: Total TTC
+        type: money
+        
+    serialisable: 
+        label: Produit sérialisé
+        type: bool
+        default_value: 0
+        depends_on: id_product,type
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        
+    serials: 
+        label: N° de série
+        type: items_list
+        items_braces: 1
+        input: 
+            rows: 3
+            auto_expand: 1
+#            help: Entrez une liste de numéros de série séparés par une virgule, un point-virgule, un espace ou un saut de ligne
+        display_if: 
+            fields_names: type,serialisable
+            type: 
+                show_values: 1,2
+            serialisable: 
+                hide_values: 0
+        sortable: 0
+            
 forms: 
-    default: 
+    default:
         rows: 
-            - field: site
             - field: type
-            - field: in_contrat
             - field: id_product
-            - field: product_type
+            - field: ref
             - field: label
+            - field: product_type
+            - field: serialisable
             - field: qty
+            - field: serials
             - field: pu_ht
             - field: tva_tx
+            - field: remise
             - custom: 1
+              show: 
+                  callback: isParentEditable
               input_name: use_pu_for_pa
               label: Prix d'achat identique au prix de vente
               data_type: bool
@@ -66,38 +234,117 @@ forms:
                   field_name: type
                   hide_values: 3  
             - field: id_fourn_price
-            - field: id_fournisseur
             - field: pa_ht
-            - field: equipments
-            - field: extra_serials
             - field: description
+     
+fields_tables: 
+    infos: 
+        panel_header: 0
+        rows: 
+            - field: ref
+            - field: label
+            - field: description
+            - field: id_product
+              display: card
+              show: 
+                  field_value: id_product
+            - field: qty
+            - field: serialisable
+            - field: serials
+              show: 
+                  field_value: serialisable
+                  
+    vente: 
+        title: Montants vente
+        icon: fas_euro-sign
+        rows: 
+            - field: pu_ht
+            - field: remise
+            - field: total_ht
+            - field: total_ttc
 
-            
+    achat: 
+        title: Montants achat
+        icon: fas_euro-sign
+        rows: 
+            - field: id_fourn_price
+              show: 
+                  field_value: id_fourn_price
+            - field: pa_ht
+                
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_md: 6
+                  col_lg: 6
+                  fields_table: 
+                      name: infos
+                
+                - type: rows
+                  col_md: 6
+                  col_lg: 6
+                  rows: 
+                      - cols: 
+                          - type: fields_table
+                            fields_table: 
+                                name: vente
+                          - type: fields_table
+                            fields_table: 
+                                name: achat      
+                  
 lists_cols: 
-    qty_ordered: 
-        label: Qté commandée
+    desc: 
+        label: Description
         value: 
-            callback: displayQtyOrdered
-    site: 
-        field: site
-        edit: 1
+            callback: displayDesc
+    desc_light: 
+        label: Description courte
+        value: 
+            callback: 
+                method: displayDesc
+                params: 
+                    - 1
             
 lists: 
     default: 
-        objects_change_reload: BF_Demande
+        configurable: 1
+        checkboxes: 1
+        positions: 1
+        positions_open: 1
+        enable_search: 0
+        enable_sort: 0
+        pagination: 0
+        bulk_actions:
+            - label: supprimer les lignes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: position
+        sort_way: asc
+        n: 0
+        single_cell:
+            filters:
+                type: 3
+            col: desc
+        add_btn: 
+            callback: isParentEditable
+        add_form_name: default
+        add_btn_label: Ajouter une ligne
+        edit_btn: 1
+        delete_btn: 1
+        modal_view: default
+        item_checkbox: 
+            callback: isDeletable
+        extra_btn: 
+            callback: getListExtraButtons
         cols: 
-            unextends: 1
-            label:
+            desc: 
             product_type: 
+            qty:
             pu_ht: 
             tva:
-            pa_ht: 
-            qty: 
-            qty_ordered: 
+            pa_ht:
+            remise: 
+            total_ht: 
             total_ttc:
-            equipments:
-            fourn:
-            in_contrat: 
-            site:
-
-    

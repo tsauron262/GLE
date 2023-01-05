@@ -1,11 +1,17 @@
 table: product_stock
 primary: rowid
 icon: fas_box-open
+common_fields: 0
 
 labels: 
     name: Stock par entrepôt
     name_plur: Stocks par entrepôt
     is_female: 0
+    
+    
+list_page_url:
+    controller: stocks
+    module: bimpcore
     
 objects:   
     product: 
@@ -14,6 +20,11 @@ objects:
                 field_value: fk_product
             
     entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+                
+    bimp_entrepot: 
         instance: 
             id_object: 
                 field_value: fk_entrepot
@@ -39,12 +50,26 @@ objects:
         instance: 
             id_object: 
                 field_value: gamme
+              
+forms: 
+    date_bilan:
+        title: Date sotck a date
+        rows: 
+            - custom: 1
+              label: Date
+              input_name: date
+              input: 
+                  type: date
+              value:
+                  callback: getDateBilan
+                  
+        
                 
 fields: 
     fk_entrepot: 
         label: Entrepot
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         values: 
             array: entrepots
         
@@ -54,7 +79,7 @@ fields:
         object: product
         input: 
             type: search_product
-        display: 
+        displays: 
             nom_url_libelle: 
                 type: callback
                 method: displayProduct
@@ -67,12 +92,22 @@ fields:
     stockShowRoom: 
         label: Stock ShowRoom
         extra: 1
+        filterable: 0
         type: int
         sortable: 0
         searchable: 0
         
     stockDate:
         label: Stock date
+        filterable: 0
+        extra: 1
+        type: int
+        sortable: 0
+        searchable: 0
+        
+    stockDepuisDate:
+        label: Stock depuis date
+        filterable: 0
         extra: 1
         type: int
         sortable: 0
@@ -81,6 +116,7 @@ fields:
     ventes_qty:
         label: Nb Ventes
         extra: 1
+        filterable: 0
         type: int
         sortable: 0
         searchable: 0
@@ -88,6 +124,7 @@ fields:
     ventes_ht:
         label: Ventes Ht
         extra: 1
+        filterable: 0
         type: money
         sortable: 0
         searchable: 0
@@ -95,6 +132,7 @@ fields:
     derPv:
         label: Dernier prix de Vente
         extra: 1
+        filterable: 0
         type: money
         sortable: 0
         searchable: 0
@@ -109,11 +147,11 @@ fields:
     cur_pa: 
         label: Prix d'achat actuel
         extra: 1
+        filterable: 0
         type: money
         sortable: 0
         searchable: 0
         
-
     marque: 
         label: Marque
         extra: 1
@@ -130,42 +168,65 @@ fields:
         values: 
             array: gammesMateriel
         
-    type_materiel: 
-        label: Type matériel
-        value: 
-            callback: displayTypeMateriel
 
+filters: 
+    stockDateDifZero:
+        label: Stock a date <> 0
+        type: check_list
+        items: 
+          1: OUI
+        
+filters_panels: 
+    default: 
+        filters: 
+            fk_entrepot: 
+            fk_product: 
+#            product:product: 
+            reel: 
+            product:categorie:
+            product:collection:
+            product:nature:
+            product:famille:
+            product:gamme:
+                
+    product: 
+        extends: default
+        filters: 
+            fk_product: unset
+            product:categorie: unset
+            product:collection: unset
+            product:nature: unset
+            product:famille: unset
+            product:gamme: unset
+            
 lists_cols: 
-    fk_entrepot: 
-        field: fk_entrepot
-        display: nom_url
-    fk_product: 
-        field: fk_product
-        display: nom_url_libelle
-    ref_prod: 
-        label: Ref produit
-        field: ref
-        child: product
-    label_prod: 
+    product:ref: 
+        label: Ref. produit
+    product:label: 
         label: Libellé produit
-        field: label
-        child: product
-    reel: 
-        field: reel
-    stockShowRoom:
-        field: stockShowRoom
-    stockDate:
-        field: stockDate
-    ventes_qty:
-        field: ventes_qty
-    ventes_ht:
-        field: ventes_ht
-    derPv:
-        field: derPv
-    cur_pa: 
-        field: cur_pa
+    ref_ldlc: 
+        label: Ref LDLC
+        value: 
+            callback:
+                method: getRefFourn
+                params: 
+                    - 230880
+    stock_dispo: 
+        label: Stock dispo
+        value: 
+            callback:
+                method: getStockByType
+                params: 
+                    - dispo
+    stock_virtuel: 
+        label: Stock virtuel
+        value: 
+            callback:
+                method: getStockByType
+                params: 
+                    - virtuel
     last_pa: 
-        label: Dernier PA
+        label: Dernier PA fourn enregistré
         value:
           callback: displayLastBuyPrice
     date_last_vente: 
@@ -176,17 +237,14 @@ lists_cols:
         label: Date dernier achat
         value: 
             callback: displayLastAchatDate
-    marque: 
-        field: marque
-    gamme: 
-        field: gamme
+    cur_pa_date:
+        label: Prix d'achat courant a date
+        value: 
+            callback: displayCur_pa_date
     type_materiel: 
         label: Type matériel
         value: 
             callback: displayTypeMateriel
-    price:
-        child: product
-        field: price
     stock_desire: 
         label: Stock desire
         value: 
@@ -195,35 +253,29 @@ lists_cols:
         label: Stock Alert
         value: 
             callback: displayStockAlert
-    categorie:
-        child: product
-        field: categorie
-    collection:
-        child: product
-        field: collection
-    nature:
-        child: product
-        field: nature
-    famille:
-        child: product
-        field: famille
-    gamme:
-        child: product
-        field: gamme
+    pa_reel: 
+        label: Dernier PA HT réel
+        value: 
+            callback: getLastTruePaHt
+    type_materiel: 
+        label: Type matériel
+        value: 
+            callback: displayTypeMateriel
                 
 lists: 
     default: 
         title: 
             callback: displayTitre
+        before_list_callback: renderHeaderList
         icon: fas_box-open
         checkboxes: 1
         configurable: 1
         bulk_actions:
             - label: étiquettes stock
-              icon: fas_trash-alt
+              icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'stock'}, '', 'Générer les étiquettes ?', true)
             - label: étiquettes magasin
-              icon: fas_trash-alt
+              icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
         filters_panel: default
         sort_field: fk_entrepot
@@ -243,62 +295,23 @@ lists:
             marque: 
             gamme:
             type_materiel:
-        
-filters_panels: 
-    default: 
-        filters: 
-            entrepot: 
-                field: fk_entrepot
-            product: 
-                field: fk_product
-            stock: 
-                field: reel
-            categ1:
-                custom: 1
-                label: Catégorie (1)
-                field: categ1
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ2:
-                custom: 1
-                label: Catégorie (2)
-                field: categ2
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ3:
-                custom: 1
-                label: Catégorie (3)
-                field: categ3
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            stockDateDifZero:
-                custom: 1
-                label: Stock a date <> 0
-                field: stockDateDifZero
-                type: check_list
-                items: 
-                  1: OUI
-            categorie:
-                child: product
-                field: categorie
-            collection:
-                child: product
-                field: collection
-            nature:
-                child: product
-                field: nature
-            famille:
-                child: product
-                field: famille
-            gamme:
-                child: product
-                field: gamme
+                
+    product: 
+        extends: default
+        filters_panel: product
+        n: 10
+        cols: 
+            stock_dispo: 
+            stock_virtuel:
+                
+            fk_product: unset
+            stockShowRoom: unset
+            stockDate: unset
+            ventes_qty: unset
+            ventes_ht: unset
+            derPv: unset
+            last_pa: unset
+            cur_pa: unset
+            marque: unset
+            gamme: unset
+            type_materiel: unset

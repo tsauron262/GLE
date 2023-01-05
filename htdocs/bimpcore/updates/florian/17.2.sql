@@ -81,4 +81,4 @@ ALTER TABLE `llx_bimpcore_note` ADD INDEX( `obj_type`, `obj_module`, `obj_name`,
 ALTER TABLE `llx_bimpcore_timer` ADD INDEX(`obj_module`, `obj_name`, `id_obj`); 
 
 ALTER TABLE `llx_bimpcore_objects_associations` ADD INDEX( `src_object_module`, `src_object_name`, `src_object_type`, `src_id_object`); 
-ALTER TABLE `llx_bimpcore_objects_associations` ADD INDEX( `dest_object_module`, `dest_object_name`, `dest_object_type`, `dest_id_object`); 
+ALTER TABLE `llx_bimpcore_objects_associations` ADD INDEX( `dest_object_module`, `dest_object_name`, `dest_object_type`, `dest_id_object`);

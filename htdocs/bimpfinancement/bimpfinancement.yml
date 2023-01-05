@@ -1,0 +1,139 @@
+categories: 
+    defaults: 
+        label: Valeurs par défaut
+    signatures: 
+        label: Signatures
+    factures: 
+        label: Facturation
+        
+params: 
+    loueur_signataire_nom: 
+        label: Nom loueur signataire
+        
+    loueur_signataire_email: 
+        label: Adresse e-mail loueur signataire
+        
+    loueur_signataire_qualite: 
+        label: Qualité loueur signataire
+        
+    id_group_commerciaux: 
+        label: ID du groupe des commerciaux pour les demandes de locations
+        def: 0
+        required: 1
+        
+    use_frais_divers: 
+        label: Activer les frais divers
+        type: bool
+        def: 0
+        
+    use_loyers_inter: 
+        label: Activer les loyers intermédiaires
+        type: bool  
+        def: 0
+        
+    # Valeurs par défauts: 
+    def_duration: 
+        label: Durée par défaut
+        cat: defaults
+        def: 12
+        
+    def_periodicity:
+        label: Périodicité par défaut
+        cat: defaults
+        def: 1
+        
+    def_mode_calcul: 
+        label: Mode de calcul par défaut
+        cat: defaults
+        def: 2
+        
+    def_marge_souhaitee: 
+        label: Marge souhaitée par défaut (pourcentage)
+        cat: defaults
+        def: 10
+        
+    def_vr_achat: 
+        label: VR achat par défaut (pourcentage)
+        cat: defaults
+        def: 5
+        
+    def_vr_vente: 
+        label: VR vente par défaut (pourcentage du prix de cession)
+        cat: defaults
+        def: 6        
+    
+    # Signatures: 
+    devis_loc_signature_allow_dist: 
+        label: Autoriser les signatures électroniques à distance pour les devis de location
+        type: bool
+        cat: signatures
+        def: 1
+        
+    devis_loc_signature_allow_docusign: 
+        label: Autoriser les signatures DocuSign pour les devis de location
+        type: bool
+        cat: signatures
+        def: 0
+        
+    devis_loc_signature_allow_refuse: 
+        label: Autoriser le refus des signatures pour les devis de location
+        type: bool
+        cat: signatures
+        def: 0
+                      
+    contrat_loc_signature_allow_dist: 
+        label: Autoriser les signatures électroniques à distance pour les contrats de location
+        type: bool
+        cat: signatures
+        def: 1
+        
+    contrat_loc_signature_allow_docusign: 
+        label: Autoriser les signatures DocuSign pour les contrats de location
+        type: bool
+        cat: signatures
+        def: 0
+        
+    contrat_loc_signature_allow_refuse: 
+        label: Autoriser le refus des signatures pour les contrats de location
+        type: bool
+        cat: signatures
+        def: 0
+        
+    pvr_loc_signature_allow_dist: 
+        label: Autoriser les signatures électroniques à distance pour les PV de réception
+        type: bool
+        cat: signatures
+        def: 1
+        
+    pvr_loc_signature_allow_docusign: 
+        label: Autoriser les signatures DocuSign pour les PV de réception
+        type: bool
+        cat: signatures
+        def: 0
+        
+    cpvr_loc_signature_allow_refuse: 
+        label: Autoriser le refus des signatures pour les PV de réception
+        type: bool
+        cat: signatures
+        def: 0
+        
+    # Facturation: 
+    fac_fourn_def_id_mode_reglement: 
+        label: ID Mode de réglement par défaut pour les factures fournisseur
+        cat: factures
+        required: 1
+        
+    fac_fourn_def_id_cond_reglement: 
+        label: ID Conditions de réglement par défaut pour les factures fournisseur
+        cat: factures
+        required: 1
+        
+    fac_fin_def_id_mode_reglement: 
+        label: ID Mode de réglement par défaut pour les factures client financeur
+        cat: factures
+        required: 1
+        
+    fac_fin_def_id_cond_reglement: 
+        label: ID Conditions de réglement par défaut pour les factures client financeur
+        cat: factures
+        required: 1

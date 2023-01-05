@@ -7,6 +7,7 @@ class BE_ProductImmos extends Bimp_Product
 
 //    public static $place_types = null;
     public static $currentFilters = array();
+    public static $places_positions_filters_set = array();
     public $items = array();
 
     // Getters array: 
@@ -44,10 +45,10 @@ class BE_ProductImmos extends Bimp_Product
             'name'   => 'or_product',
             'filter' => array(
                 'or' => array(
-                    'cust_noserial'   => array(
-                        'custom' => '((ef.serialisable != 1 || ef.serialisable is NULL) AND a.rowid IN (SELECT DISTINCT pp.id_product FROM ' . MAIN_DB_PREFIX . 'be_package_product pp WHERE pp.id_product = a.rowid))'
+                    'cust_noserial'       => array(
+                        'custom' => '((a___ef.serialisable != 1 || a___ef.serialisable is NULL) AND a.rowid IN (SELECT DISTINCT pp.id_product FROM ' . MAIN_DB_PREFIX . 'be_package_product pp WHERE pp.id_product = a.rowid))'
                     ),
-                    'ef.serialisable' => 1
+                    'a___ef.serialisable' => 1
                 )
             )
         );
@@ -55,92 +56,175 @@ class BE_ProductImmos extends Bimp_Product
         return $filters;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
+        // Tous les boutons Exclure sont désactivés:
+
         switch ($field_name) {
             case 'place_position':
-                self::$currentFilters['place_position'] = $values;
+                if ($main_alias === 'a' && is_array($values) && !empty($values)) {
+                    self::$currentFilters['place_position'] = $values;
+                }
+
+                $ef_alias = $main_alias . '___ef';
+
+                if (!isset($joins[$ef_alias])) {
+                    $joins[$ef_alias] = array(
+                        'alias' => $ef_alias,
+                        'table' => 'product_extrafields',
+                        'on'    => $main_alias . '.rowid = ' . $ef_alias . '.fk_object'
+                    );
+                }
+
+                $filters[$main_alias . '___or_place_position'] = array(
+                    'or' => array(
+                        'ppl_position' => array(
+                            'custom' => '((' . $ef_alias . '.serialisable = 0 || ' . $ef_alias . '.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter($main_alias . '___ppl') . ')'
+                        ),
+                        'epl_position' => array(
+                            'custom' => '(' . $ef_alias . '.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter($main_alias . '___epl') . ')'
+                        )
+                    )
+                );
+
+                if ($main_alias === 'a') {
+                    self::$places_positions_filters_set['ppl'] = 1;
+                    self::$places_positions_filters_set['epl'] = 1;
+                }
+
+                $this->getPlacesJoins($joins, $main_alias);
                 break;
 
             case 'place_type':
                 if (is_array($values) && !empty($values)) {
-                    self::$currentFilters['place_type'] = $values;
-                    $filters['or_place_type'] = array(
+                    if ($main_alias === 'a') {
+                        self::$currentFilters['place_type'] = $values;
+                    }
+
+                    $ef_alias = $main_alias . '___ef';
+                    if (!isset($joins[$ef_alias])) {
+                        $joins[$ef_alias] = array(
+                            'alias' => $ef_alias,
+                            'table' => 'product_extrafields',
+                            'on'    => $main_alias . '.rowid = ' . $ef_alias . '.fk_object'
+                        );
+                    }
+
+                    $filters[$main_alias . '___or_place_type'] = array(
                         'or' => array(
                             'ppl_type' => array(
-                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.type IN (' . implode(',', $values) . '))'
+                                'custom' => '((' . $ef_alias . '.serialisable = 0 || ' . $ef_alias . '.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter($main_alias . '___ppl') . ' AND ' . $main_alias . '___ppl.type IN (' . implode(',', $values) . '))'
                             ),
                             'epl_type' => array(
-                                'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.type IN (' . implode(',', $values) . '))'
+                                'custom' => '(' . $ef_alias . '.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter($main_alias . '___epl') . ' AND ' . $main_alias . '___epl.type IN (' . implode(',', $values) . '))'
                             )
                         )
                     );
-                    $this->getPlacesJoins($joins);
-                } else {
+                    $this->getPlacesJoins($joins, $main_alias);
+                } elseif ($main_alias === 'a') {
                     self::$currentFilters['place_type'] = array();
                 }
                 break;
 
             case 'place_id_entrepot':
                 if (is_array($values) && !empty($values)) {
-                    self::$currentFilters['place_id_entrepot'] = $values;
-                    $filters['or_place_entrepot'] = array(
+                    $ef_alias = $main_alias . '___ef';
+                    if (!isset($joins[$ef_alias])) {
+                        $joins[$ef_alias] = array(
+                            'alias' => $ef_alias,
+                            'table' => 'product_extrafields',
+                            'on'    => $main_alias . '.rowid = ' . $ef_alias . '.fk_object'
+                        );
+                    }
+
+                    if ($main_alias === 'a') {
+                        self::$currentFilters['place_id_entrepot'] = $values;
+                    }
+
+                    $filters[$main_alias . '___or_place_entrepot'] = array(
                         'or' => array(
                             'ppl_entrepot' => array(
-                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_entrepot IN (' . implode(',', $values) . '))'
+                                'custom' => '((' . $ef_alias . '.serialisable = 0 || ' . $ef_alias . '.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter($main_alias . '___ppl') . ' AND ' . $main_alias . '___ppl.id_entrepot IN (' . implode(',', $values) . '))'
                             ),
                             'epl_entrepot' => array(
-                                'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.id_entrepot IN (' . implode(',', $values) . '))'
+                                'custom' => '(' . $ef_alias . '.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter($main_alias . '___epl') . ' AND ' . $main_alias . '___epl.id_entrepot IN (' . implode(',', $values) . '))'
                             )
                         )
                     );
-                    $this->getPlacesJoins($joins);
-                } else {
+                    $this->getPlacesJoins($joins, $main_alias);
+                } elseif ($main_alias === 'a') {
                     self::$currentFilters['place_id_entrepot'] = array();
                 }
                 break;
 
             case 'place_id_user':
                 if (is_array($values) && !empty($values)) {
-                    self::$currentFilters['place_id_user'] = $values;
-                    $filters['or_place_user'] = array(
+                    $ef_alias = $main_alias . '___ef';
+                    if (!isset($joins[$ef_alias])) {
+                        $joins[$ef_alias] = array(
+                            'alias' => $ef_alias,
+                            'table' => 'product_extrafields',
+                            'on'    => $main_alias . '.rowid = ' . $ef_alias . '.fk_object'
+                        );
+                    }
+
+                    if ($main_alias === 'a') {
+                        self::$currentFilters['place_id_user'] = $values;
+                    }
+
+                    $filters[$main_alias . '___or_place_user'] = array(
                         'or' => array(
                             'ppl_user' => array(
-                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_user IN (' . implode(',', $values) . '))'
+                                'custom' => '((' . $ef_alias . '.serialisable = 0 || ' . $ef_alias . '.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter($main_alias . '___ppl') . ' AND ' . $main_alias . '___ppl.id_user IN (' . implode(',', $values) . '))'
                             ),
                             'epl_user' => array(
-                                'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.id_user IN (' . implode(',', $values) . '))'
+                                'custom' => '(' . $ef_alias . '.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter($main_alias . '___epl') . ' AND ' . $main_alias . '___epl.id_user IN (' . implode(',', $values) . '))'
                             )
                         )
                     );
-                    $this->getPlacesJoins($joins);
-                } else {
+                    $this->getPlacesJoins($joins, $main_alias);
+                } elseif ($main_alias === 'a') {
                     self::$currentFilters['place_id_user'] = array();
                 }
                 break;
 
             case 'place_id_client':
                 if (is_array($values) && !empty($values)) {
-                    self::$currentFilters['place_id_client'] = $values;
-                    $filters['or_place_client'] = array(
+                    if ($main_alias === 'a') {
+                        self::$currentFilters['place_id_client'] = $values;
+                    }
+
+                    $ef_alias = $main_alias . '___ef';
+                    if (!isset($joins[$ef_alias])) {
+                        $joins[$ef_alias] = array(
+                            'alias' => $ef_alias,
+                            'table' => 'product_extrafields',
+                            'on'    => $main_alias . '.rowid = ' . $ef_alias . '.fk_object'
+                        );
+                    }
+
+                    $filters[$main_alias . '___or_place_client'] = array(
                         'or' => array(
                             'ppl_client' => array(
-                                'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ppl.id_client IN (' . implode(',', $values) . '))'
+                                'custom' => '((' . $ef_alias . '.serialisable = 0 || ' . $ef_alias . '.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter($main_alias . '___ppl') . ' AND ' . $main_alias . '___ppl.id_client IN (' . implode(',', $values) . '))'
                             ),
                             'epl_client' => array(
-                                'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND epl.id_client IN (' . implode(',', $values) . '))'
+                                'custom' => '(' . $ef_alias . '.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter($main_alias . '___epl') . ' AND ' . $main_alias . '___epl.id_client IN (' . implode(',', $values) . '))'
                             )
                         )
                     );
-                    $this->getPlacesJoins($joins);
-                } else {
+                    $this->getPlacesJoins($joins, $main_alias);
+                } elseif ($main_alias === 'a') {
                     self::$currentFilters['place_id_client'] = array();
                 }
                 break;
 
             case 'place_name':
                 if (is_array($values) && !empty($values)) {
-                    self::$currentFilters['place_name'] = $values;
+                    if ($main_alias === 'a') {
+                        self::$currentFilters['place_name'] = $values;
+                    }
+
                     $or_field = array();
                     foreach ($values as $value) {
                         $value = (string) $value;
@@ -153,121 +237,209 @@ class BE_ProductImmos extends Bimp_Product
                     }
 
                     if (!empty($or_field)) {
-                        $filters['or_place_name'] = array(
+                        $ef_alias = $main_alias . '___ef';
+                        if (!isset($joins[$ef_alias])) {
+                            $joins[$ef_alias] = array(
+                                'alias' => $ef_alias,
+                                'table' => 'product_extrafields',
+                                'on'    => $main_alias . '.rowid = ' . $ef_alias . '.fk_object'
+                            );
+                        }
+
+                        $filters[$main_alias . '___or_place_name'] = array(
                             'or' => array(
                                 'ppl_client' => array(
-                                    'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ' . BimpTools::getSqlFilter('ppl.place_name', array('or_field' => $or_field)) . ')'
+                                    'custom' => '((' . $ef_alias . '.serialisable = 0 || ' . $ef_alias . '.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter($main_alias . '___ppl') . ' AND ' . BimpTools::getSqlFilter($main_alias . '___ppl.place_name', array('or_field' => $or_field)) . ')'
                                 ),
                                 'epl_client' => array(
-                                    'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND ' . BimpTools::getSqlFilter('epl.place_name', array('or_field' => $or_field)) . ')'
+                                    'custom' => '(' . $ef_alias . '.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter($main_alias . '___epl') . ' AND ' . BimpTools::getSqlFilter($main_alias . '___epl.place_name', array('or_field' => $or_field)) . ')'
                                 )
                             )
                         );
-                        $this->getPlacesJoins($joins);
+                        $this->getPlacesJoins($joins, $main_alias);
                     }
-                } else {
+                } elseif ($main_alias === 'a') {
                     self::$currentFilters['place_id_client'] = array();
                 }
                 break;
 
             case 'place_date':
                 if (is_array($values) && !empty($values)) {
-                    self::$currentFilters['place_date'] = $values;
+                    if ($main_alias === 'a') {
+                        self::$currentFilters['place_date'] = $values;
+                    }
+
                     $or_field = array();
-                    foreach ($this->values as $value) {
+                    foreach ($values as $value) {
                         $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
                     }
 
                     if (!empty($or_field)) {
-                        $filters['or_place_date'] = array(
+                        $ef_alias = $main_alias . '___ef';
+                        if (!isset($joins[$ef_alias])) {
+                            $joins[$ef_alias] = array(
+                                'alias' => $ef_alias,
+                                'table' => 'product_extrafields',
+                                'on'    => $main_alias . '.rowid = ' . $ef_alias . '.fk_object'
+                            );
+                        }
+
+                        $filters[$main_alias . '___or_place_date'] = array(
                             'or' => array(
                                 'ppl_client' => array(
-                                    'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ' . BimpTools::getSqlFilter('ppl.date', array('or_field' => $or_field)) . ')'
+                                    'custom' => '((' . $ef_alias . '.serialisable = 0 || ' . $ef_alias . '.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter($main_alias . '___ppl') . ' AND ' . BimpTools::getSqlFilter($main_alias . '___ppl.date', array('or_field' => $or_field)) . ')'
                                 ),
                                 'epl_client' => array(
-                                    'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND ' . BimpTools::getSqlFilter('epl.date', array('or_field' => $or_field)) . ')'
+                                    'custom' => '(' . $ef_alias . '.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter($main_alias . '___epl') . ' AND ' . BimpTools::getSqlFilter($main_alias . '___epl.date', array('or_field' => $or_field)) . ')'
                                 )
                             )
                         );
-                        $this->getPlacesJoins($joins);
+                        $this->getPlacesJoins($joins, $main_alias);
                     }
+                } elseif ($main_alias === 'a') {
+                    self::$currentFilters['place_date'] = array();
                 }
                 break;
-                
-//            case 'place_date_end':
-//                $joins['place'] = array(
-//                    'table' => 'be_package_place',
-//                    'on'    => 'place.id_package = a.id',
-//                    'alias' => 'place'
-//                );
-//                $joins['next_place'] = array(
-//                    'table' => 'be_package_place',
-//                    'on'    => 'next_place.id_package = a.id',
-//                    'alias' => 'next_place'
-//                );
-//                $filters['next_place_position'] = array('custom' => 'next_place.position = (place.position - 1)');
-//
-//                $or_field = array();
-//                foreach ($values as $value) {
-//                    $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
-//                }
-//
-//                if (!empty($or_field)) {
-//                    $filters['next_place.date'] = array(
-//                        'or_field' => $or_field
-//                    );
-//                }
-//                if (!empty($or_field)) {
-//                        $filters['or_next_place_date'] = array(
-//                            'or' => array(
-//                                'ppl_client' => array(
-//                                    'custom' => '((ef.serialisable = 0 || ef.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter('ppl') . ' AND ' . BimpTools::getSqlFilter('ppl.date', array('or_field' => $or_field)) . ')'
-//                                ),
-//                                'epl_client' => array(
-//                                    'custom' => '(ef.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter('epl') . ' AND ' . BimpTools::getSqlFilter('epl.date', array('or_field' => $or_field)) . ')'
-//                                )
-//                            )
-//                        );
-//                        $this->getPlacesJoins($joins);
-//                    }
-//                break;
+
+            case 'place_date_end':
+                if (is_array($values) && !empty($values)) {
+                    if ($main_alias === 'a') {
+                        self::$currentFilters['place_date_end'] = $values;
+                    }
+
+                    $or_field = array();
+                    foreach ($values as $value) {
+                        $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
+                    }
+
+                    if (!empty($or_field)) {
+                        $ef_alias = $main_alias . '___ef';
+                        if (!isset($joins[$ef_alias])) {
+                            $joins[$ef_alias] = array(
+                                'alias' => $ef_alias,
+                                'table' => 'product_extrafields',
+                                'on'    => $main_alias . '.rowid = ' . $ef_alias . '.fk_object'
+                            );
+                        }
+
+                        $this->getPlacesJoins($joins, $main_alias);
+                        $this->getNextPlacesJoins($joins, $main_alias);
+
+                        $filters[$main_alias . '___next_place_position'] = array(
+                            'or' => array(
+                                'ppl_next_position' => array(
+                                    'custom' => '((' . $ef_alias . '.serialisable = 0 || ' . $ef_alias . '.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter($main_alias . '___ppl') . ' AND ' . $main_alias . '___ppl_next.position = (' . $main_alias . '___ppl.position - 1))'
+                                ),
+                                'epl_next_position' => array(
+                                    'custom' => '(' . $ef_alias . '.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter($main_alias . '___epl') . ' AND ' . $main_alias . '___epl_next.position = (' . $main_alias . '___epl.position - 1))'
+                                )
+                            )
+                        );
+
+                        $filters[$main_alias . '___or_next_place_date'] = array(
+                            'or' => array(
+                                'ppl_next_date_end' => array(
+                                    'custom' => '((' . $ef_alias . '.serialisable = 0 || ' . $ef_alias . '.serialisable IS NULL) AND ' . $this->getPlacePositionSqlFilter($main_alias . '___ppl') . ' AND ' . BimpTools::getSqlFilter($main_alias . '___ppl_next.date', array('or_field' => $or_field)) . ')'
+                                ),
+                                'epl_next_date_end' => array(
+                                    'custom' => '(' . $ef_alias . '.serialisable = 1 AND ' . $this->getPlacePositionSqlFilter($main_alias . '___epl') . ' AND ' . BimpTools::getSqlFilter($main_alias . '___epl_next.date', array('or_field' => $or_field)) . ')'
+                                )
+                            )
+                        );
+                    }
+                } elseif ($main_alias === 'a') {
+                    self::$currentFilters['place_date_end'] = array();
+                }
+                break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
+    }
+
+    public function getPlacesJoins(&$joins = array(), $main_alias = 'a')
+    {
+        $pp_alias = $main_alias . '___pp';
+        if (!isset($joins[$pp_alias])) {
+            $joins[$pp_alias] = array(
+                'alias' => $pp_alias,
+                'table' => 'be_package_product',
+                'on'    => $pp_alias . '.id_product = ' . $main_alias . '.rowid'
+            );
+        }
+
+        $ppl_alias = $main_alias . '___ppl';
+        if (!isset($joins[$ppl_alias])) {
+            $joins[$ppl_alias] = array(
+                'alias' => $ppl_alias,
+                'table' => 'be_package_place',
+                'on'    => $ppl_alias . '.id_package = ' . $pp_alias . '.id_package'
+            );
+        }
+
+        $e_alias = $main_alias . '___e';
+        if (!isset($joins[$e_alias])) {
+            $joins[$e_alias] = array(
+                'alias' => $e_alias,
+                'table' => 'be_equipment',
+                'on'    => $e_alias . '.id_product = ' . $main_alias . '.rowid'
+            );
+        }
+
+        $epl_alias = $main_alias . '___epl';
+        if (!isset($joins[$epl_alias])) {
+            $joins[$epl_alias] = array(
+                'alias' => $epl_alias,
+                'table' => 'be_equipment_place',
+                'on'    => $epl_alias . '.id_equipment = ' . $e_alias . '.id'
+            );
         }
     }
 
-    public function getPlacesJoins(&$joins = array())
+    public function getNextPlacesJoins(&$joins = array(), $main_alias = 'a')
     {
-        if (!isset($joins['pp'])) {
-            $joins['pp'] = array(
-                'alias' => 'pp',
+        $pp_alias = $main_alias . '___pp';
+        if (!isset($joins[$pp_alias])) {
+            $joins[$pp_alias] = array(
+                'alias' => $pp_alias,
                 'table' => 'be_package_product',
-                'on'    => 'pp.id_product = a.rowid'
+                'on'    => $pp_alias . '.id_product = ' . $main_alias . '.rowid'
             );
         }
-        if (!isset($joins['ppl'])) {
-            $joins['ppl'] = array(
-                'alias' => 'ppl',
+
+        $ppl_next_alias = $main_alias . '___ppl_next';
+        if (!isset($joins[$ppl_next_alias])) {
+            $joins[$ppl_next_alias] = array(
+                'alias' => $ppl_next_alias,
                 'table' => 'be_package_place',
-                'on'    => 'ppl.id_package = pp.id_package'
+                'on'    => $ppl_next_alias . '.id_package = ' . $pp_alias . '.id_package'
             );
         }
-        if (!isset($joins['e'])) {
-            $joins['e'] = array(
-                'alias' => 'e',
+
+        $e_alias = $main_alias . '___e';
+        if (!isset($joins[$e_alias])) {
+            $joins[$e_alias] = array(
+                'alias' => $e_alias,
                 'table' => 'be_equipment',
-                'on'    => 'e.id_product = a.rowid'
+                'on'    => $e_alias . '.id_product = ' . $main_alias . '.rowid'
             );
         }
-        if (!isset($joins['epl'])) {
-            $joins['epl'] = array(
-                'alias' => 'epl',
+
+        $epl_next_alias = $main_alias . '___epl_next';
+        if (!isset($joins[$epl_next_alias])) {
+            $joins[$epl_next_alias] = array(
+                'alias' => $epl_next_alias,
                 'table' => 'be_equipment_place',
-                'on'    => 'epl.id_equipment = e.id'
+                'on'    => $epl_next_alias . '.id_equipment = ' . $e_alias . '.id'
             );
         }
     }
 
     public function getPlacePositionSqlFilter($alias)
     {
+        if (isset(self::$places_positions_filters_set[$alias]) && (int) self::$places_positions_filters_set[$alias]) {
+            return '1';
+        }
+
         if (isset(self::$currentFilters['place_position'])) {
             $or_field = array();
 
@@ -298,7 +470,8 @@ class BE_ProductImmos extends Bimp_Product
             }
         }
 
-        return $alias . '.position = 1';
+        return '1';
+        //return $alias . '.position = 1';
     }
 
     public function getPlaceFiltersSql($alias)
@@ -332,33 +505,41 @@ class BE_ProductImmos extends Bimp_Product
             }
             $sql .= ')';
         }
-        if (isset(self::$currentFilters['place_date']) && !empty(self::$currentFilters['place_date'])) {
-            $fl = true;
-            $sql .= ' AND (';
-            foreach (self::$currentFilters['place_date'] as $value) {
-                if (!is_array($value) || ((!isset($value['min']) || $value['min'] === '') && (!isset($value['max']) || $value['max'] === ''))) {
-                    continue;
-                }
 
-                if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
-                    $value['max'] .= ' 23:59:59';
-                }
+        foreach (array(
+    'place_date',
+    'place_date_end'
+        ) as $filters_key) {
+            if (isset(self::$currentFilters[$filters_key]) && !empty(self::$currentFilters[$filters_key])) {
+                $suffixe = ($filters_key === 'place_date_end' ? '_next' : '');
 
-                if (!$fl) {
-                    $sql .= ' OR ';
-                } else {
-                    $fl = false;
-                }
+                $fl = true;
+                $sql .= ' AND (';
+                foreach (self::$currentFilters[$filters_key] as $value) {
+                    if (!is_array($value) || ((!isset($value['min']) || $value['min'] === '') && (!isset($value['max']) || $value['max'] === ''))) {
+                        continue;
+                    }
 
-                if (isset($value['min']) && $value['min'] !== '' && isset($value['max']) && $value['max'] !== '') {
-                    $sql .= $alias . '.date BETWEEN \'' . $value['min'] . '\' AND \'' . $value['max'] . '\'';
-                } elseif (isset($value['min']) && $value['min'] !== '') {
-                    $sql .= $alias . '.date >= \'' . $value['min'] . '\'';
-                } elseif (isset($value['max']) && $value['max'] !== '') {
-                    $sql .= $alias . '.date <= \'' . $value['max'] . '\'';
+                    if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
+                        $value['max'] .= ' 23:59:59';
+                    }
+
+                    if (!$fl) {
+                        $sql .= ' OR ';
+                    } else {
+                        $fl = false;
+                    }
+
+                    if (isset($value['min']) && $value['min'] !== '' && isset($value['max']) && $value['max'] !== '') {
+                        $sql .= $alias . $suffixe . '.date BETWEEN \'' . $value['min'] . '\' AND \'' . $value['max'] . '\'';
+                    } elseif (isset($value['min']) && $value['min'] !== '') {
+                        $sql .= $alias . $suffixe . '.date >= \'' . $value['min'] . '\'';
+                    } elseif (isset($value['max']) && $value['max'] !== '') {
+                        $sql .= $alias . $suffixe . '.date <= \'' . $value['max'] . '\'';
+                    }
                 }
+                $sql .= ')';
             }
-            $sql .= ')';
         }
 
         return $sql;
@@ -377,7 +558,7 @@ class BE_ProductImmos extends Bimp_Product
                 );
             }
         } else {
-            $filters[$alias . '.position'] = 1;
+//            $filters[$alias . '.position'] = 1;
         }
 
         if (isset(self::$currentFilters['place_type']) && !empty(self::$currentFilters['place_type'])) {
@@ -425,6 +606,17 @@ class BE_ProductImmos extends Bimp_Product
                 );
             }
         }
+        if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+            $or_field = array();
+            foreach (self::$currentFilters['place_date_end'] as $value) {
+                $or_field[] = $value;
+            }
+            if (!empty($or_field)) {
+                $filters[$alias . '_next.date'] = array(
+                    'or_field' => $or_field
+                );
+            }
+        }
     }
 
     public function getQtySql($id_product, $serialisable = 0)
@@ -434,13 +626,25 @@ class BE_ProductImmos extends Bimp_Product
             if (!empty(self::$currentFilters)) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_package_place place ON place.id_package = pp.id_package';
             }
+            if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_package_place place_next ON place_next.id_package = pp.id_package';
+            }
             $sql .= ' WHERE pp.id_product = ' . $id_product;
+            if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                $sql .= ' AND place_next.position = (place.position - 1)';
+            }
         } else {
             $sql = 'SELECT count(DISTINCT e.id) as qty FROM ' . MAIN_DB_PREFIX . 'be_equipment e';
             if (!empty(self::$currentFilters)) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place ON place.id_equipment = e.id';
             }
+            if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place_next ON place_next.id_equipment = e.id';
+            }
             $sql .= ' WHERE e.id_product = ' . $id_product;
+            if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                $sql .= ' AND place_next.position = (place.position - 1)';
+            }
         }
 
         if (!empty(self::$currentFilters)) {
@@ -462,12 +666,35 @@ class BE_ProductImmos extends Bimp_Product
                         'on'    => 'place.id_equipment = a.id',
                         'alias' => 'place'
                     );
+
+                    if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                        $joins['place_next'] = array(
+                            'table' => 'be_equipment_place',
+                            'on'    => 'place_next.id_equipment = a.id',
+                            'alias' => 'place_next'
+                        );
+
+                        $filters['next_place_position'] = array(
+                            'custom' => 'place_next.position = (place.position - 1)'
+                        );
+                    }
                 } else {
                     $joins['place'] = array(
                         'table' => 'be_package_place',
                         'on'    => 'place.id_package = a.id_package',
                         'alias' => 'place'
                     );
+                    if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                        $joins['place_next'] = array(
+                            'table' => 'be_package_place',
+                            'on'    => 'place_next.id_package = a.id_package',
+                            'alias' => 'place_next'
+                        );
+
+                        $filters['next_place_position'] = array(
+                            'custom' => 'place_next.position = (place.position - 1)'
+                        );
+                    }
                 }
 
                 $this->getPlaceFilters('place', $filters);
@@ -553,9 +780,16 @@ class BE_ProductImmos extends Bimp_Product
                 if (!empty(self::$currentFilters)) {
                     $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place ON place.id_equipment = e.id';
                 }
+                if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place_next ON place_next.id_equipment = e.id';
+                }
 
                 $sql .= ' WHERE e.id_product = ' . (int) $this->id;
                 $sql .= ' AND e.prix_achat != 0';
+
+                if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                    $sql .= ' AND place_next.position = (place.position - 1)';
+                }
 
                 if (!empty(self::$currentFilters)) {
                     $sql .= ' AND ' . $this->getPlaceFiltersSql('place');
@@ -571,8 +805,16 @@ class BE_ProductImmos extends Bimp_Product
                 if (!empty(self::$currentFilters)) {
                     $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place ON place.id_equipment = e.id';
                 }
+                if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place place_next ON place_next.id_equipment = e.id';
+                }
+
                 $sql .= ' WHERE e.id_product = ' . (int) $this->id;
                 $sql .= ' AND e.prix_achat = 0';
+
+                if (isset(self::$currentFilters['place_date_end']) && !empty(self::$currentFilters['place_date_end'])) {
+                    $sql .= ' AND place_next.position = (place.position - 1)';
+                }
 
                 if (!empty(self::$currentFilters)) {
                     $sql .= ' AND ' . $this->getPlaceFiltersSql('place');
@@ -624,7 +866,7 @@ class BE_ProductImmos extends Bimp_Product
         return null;
     }
 
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '')
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
         // Retourner la clé de filtre SQL sous la forme alias_table.nom_champ_db 
         // Implémenter la jointure dans $joins en utilisant l'alias comme clé du tableau (pour éviter que la même jointure soit ajouté plusieurs fois à $joins). 

@@ -1,0 +1,13 @@
+
+params: 
+    use_mode_reglement_caisse: 
+        label: Activer le choix du mode de réglement en caisse
+        type: bool
+        def: 0
+    default_id_client: 
+        label: ID Client par défaut
+        info: Compte client utilisé pour les ventes en caisse sans client enregistré
+        def: 0
+    id_cond_reglement_default: 
+        label: ID conditions de réglements par défaut
+        def: 0

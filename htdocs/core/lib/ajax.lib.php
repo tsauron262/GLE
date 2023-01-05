@@ -424,6 +424,8 @@ function ajax_combobox($htmlname, $events = array(), $minLengthToAutocomplete = 
 	    			}
 				});
 			});
+                        
+                        console.log('.$htmlname.');
 
 			function runJsCodeForEvent'.$htmlname.'(obj) {
 				var id = $("#'.$htmlname.'").val();

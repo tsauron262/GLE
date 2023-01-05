@@ -1,0 +1,22 @@
+
+bootstrap: 1
+title: 
+    callback: 
+        method: getPageTitle
+        object: api
+
+js: 
+    - /bimpapi/views/js/bimp_api.js
+    
+objects:
+    api: 
+        instance: 
+            bimp_object: API_Api
+            id_object: 
+                request: id
+                
+sections: 
+    - type: view
+      view: 
+          object: api
+          name: default

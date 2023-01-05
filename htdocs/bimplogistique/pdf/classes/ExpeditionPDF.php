@@ -73,7 +73,7 @@ class ExpeditionPDF extends BimpEtiquettePDF
                         $name = substr($name, 0, 50) . '...';
                     }
 
-                    $font_size = 18;
+                    $font_size = 17;
                     $max_chars = 14;
 
                     while (BimpTools::getStringNbLines($name, $max_chars) > 1) {
@@ -89,11 +89,11 @@ class ExpeditionPDF extends BimpEtiquettePDF
                     $html .= '</tr>';
 
                     $html .= '<tr>';
-                    $html .= '<td style="text-align: center;font-size: 18px;font-weight: bold;color: #000000">' . $commande->getRef() . '</td>';
+                    $html .= '<td style="text-align: center;font-size: 17px;font-weight: bold;color: #000000">' . $commande->getRef() . '</td>';
                     $html .= '</tr>';
 
 
-                    $html .= '<tr><td style="text-align: center;font-size: 18px;font-weight: bold">';
+                    $html .= '<tr><td style="text-align: center;font-size: 17px;font-weight: bold">';
                     if (BimpObject::objectLoaded($shipment)) {
                         $html .= 'Livraison n°' . $shipment->getData('num_livraison');
                     } else {

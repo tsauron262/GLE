@@ -89,18 +89,11 @@ lists:
         modal_view: default
         cols: 
             name: 
-                field: name
             ip: 
-                field: ip
             mask:
-                field: mask
             gateway: 
-                field: gateway
             comment: 
-                field: comment
-            connection:
-                field: id_connection
-                display: nom_url
+            id_connection:
             
     
         

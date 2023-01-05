@@ -9,6 +9,10 @@ function send_detail(id) {
 //            console.log($('div#selected_object > div.panel-body'));
             $('div#selected_object').empty();
             $('div#selected_object').html(result.html);
+            $('div#selected_object').find('.object_list_table').each(function(){
+                onListLoaded($(this));
+            });
+            
         }
     });
 }

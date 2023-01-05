@@ -1,0 +1,1 @@
+UPDATE `llx_contrat` SET `id_signature` = '0' WHERE `llx_contrat`.`rowid` = 14332

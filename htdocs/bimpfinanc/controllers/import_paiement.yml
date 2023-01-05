@@ -1,0 +1,49 @@
+bootstrap: 1
+
+title: Import Paiement
+        
+objects: 
+    import_paiement: 
+        instance: 
+            bimp_object: Bimp_ImportPaiement
+            id_object: 
+                request: id
+                
+                
+                
+sections: 
+    - type: tabs
+      tabs: 
+          default: 
+              label: Fiche
+              sections: 
+                    - type: object_header
+                      object_header: 
+                          object: import_paiement
+                    - type: nav_tabs
+                      nav_tabs: 
+                          - id: card
+                            title: Fiche
+                            struct: 
+                                type: rows
+                                rows: 
+                                    - cols: 
+                                        - type: view
+                                          view: 
+                                              panel: 1
+                                              object: import_paiement
+                                              name: default
+                          - id: files
+                            title: Fichiers
+                            struct: 
+                                type: rows
+                                rows:                                                   
+                                    - cols: 
+                                        - type: list
+                                          list: 
+                                              title: Fichier joints
+                                              name: default
+                                              panel: 1
+                                              object: import_paiement
+                                              children: files  
+          

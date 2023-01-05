@@ -278,9 +278,10 @@ class Commande extends CommonOrder
 			{
 				$dir = dol_buildpath($reldir."core/modules/commande/");
 
-				// Load file with numbering class (if found)
-				$mybool|=@include_once $dir.$file;
-			}
+                // Load file with numbering class (if found)
+                if(is_file($dir.$file))
+                $mybool|=@include_once $dir.$file;
+            }
 
             if ($mybool === false)
             {
@@ -298,11 +299,75 @@ class Commande extends CommonOrder
 			else
 			{
 				$this->error=$obj->error;
-				//dol_print_error($this->db,get_class($this)."::getNextNumRef ".$obj->error);
-				return "";
-			}
-		}
-		else
+            	//dol_print_error($this->db,get_class($this)."::getNextNumRef ".$obj->error);
+            	return "";
+            }
+        }
+        else
+        {
+            print $langs->trans("Error")." ".$langs->trans("Error_COMMANDE_ADDON_NotDefined");
+            return "";
+        }
+    }
+
+
+    /**
+     *	Validate order
+     *
+     *	@param		User	$user     		User making status change
+     *	@param		int		$idwarehouse	Id of warehouse to use for stock decrease
+     *  @param		int		$notrigger		1=Does not execute triggers, 0= execute triggers
+     *	@return  	int						<=0 if OK, 0=Nothing done, >0 if KO
+     */
+    function valid($user, $idwarehouse=0, $notrigger=0)
+    {
+        global $conf,$langs;
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+
+        $error=0;
+
+        // Protection
+        if ($this->statut == self::STATUS_VALIDATED)
+        {
+            dol_syslog(get_class($this)."::valid action abandonned: already validated", LOG_WARNING);
+            return 0;
+        }
+
+        if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->commande->creer))
+       	|| (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->commande->order_advance->validate))))
+        {
+            $this->error='NotEnoughPermissions';
+            dol_syslog(get_class($this)."::valid ".$this->error, LOG_ERR);
+            return -1;
+        }
+
+        $now=dol_now();
+
+        $this->db->begin();
+
+        // Definition du nom de module de numerotation de commande
+        $soc = new Societe($this->db);
+        $soc->fetch($this->socid);
+
+        if (! $error && ! $notrigger)
+        {
+            // Call trigger
+            $result=$this->call_trigger('ORDER_VALIDATE',$user);
+            if ($result < 0) $error++;
+            // End call triggers
+        }
+        // Class of company linked to order
+        $result=$soc->set_as_client();
+
+        // Define new ref
+        if (! $error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) // empty should not happened, but when it occurs, the test save life
+        {
+            /* mod drsi*/
+            BimpTools::lockNum("numCommande");
+            /*fmoddrsi*/
+            $num = $this->getNextNumRef($soc);
+        }
+        else
 		{
 			print $langs->trans("Error")." ".$langs->trans("Error_COMMANDE_ADDON_NotDefined");
 			return "";
@@ -409,13 +474,67 @@ class Commande extends CommonOrder
 			}
 		}
 
-		if (! $error && ! $notrigger)
+
+        if (! $error)
+        {
+            $this->oldref = $this->ref;
+
+            // Rename directory if dir was a temporary ref
+            if (preg_match('/^[\(]?PROV/i', $this->ref))
+            {
+            	// On renomme repertoire ($this->ref = ancienne ref, $num = nouvelle ref)
+                // in order not to lose the attachments
+                $oldref = dol_sanitizeFileName($this->ref);
+                $newref = dol_sanitizeFileName($num);
+                $dirsource = $conf->commande->dir_output.'/'.$oldref;
+                $dirdest = $conf->commande->dir_output.'/'.$newref;
+                if (file_exists($dirsource))
+                {
+                    dol_syslog(get_class($this)."::valid() rename dir ".$dirsource." into ".$dirdest);
+                    
+                    if(is_dir($dirdest)){
+                        $dirErreur = DOL_DATA_ROOT.'/problemes/commande'.$this->id.'-'.$newref;
+                        rename($dirdest, $dirErreur);
+                        BimpCore::addlog('Probléme grave de déplacment de fichier', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array('source'=>$dirsource, 'dest'=>$dirdest, 'dossier deja existant déplacé'=>$dirErreur));
+                    }
+
+                    if (@rename($dirsource, $dirdest))
+                    {
+                        dol_syslog("Rename ok");
+                        // Rename docs starting with $oldref with $newref
+                        $listoffiles=dol_dir_list($conf->commande->dir_output.'/'.$newref, 'files', 1, '^'.preg_quote($oldref,'/'));
+                        foreach($listoffiles as $fileentry)
+                        {
+                        	$dirsource=$fileentry['name'];
+                        	$dirdest=preg_replace('/^'.preg_quote($oldref,'/').'/',$newref, $dirsource);
+                        	$dirsource=$fileentry['path'].'/'.$dirsource;
+                        	$dirdest=$fileentry['path'].'/'.$dirdest;
+                        	@rename($dirsource, $dirdest);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Set new ref and current status
+        if (! $error)
+        {
+            $this->ref = $num;
+            $this->statut = self::STATUS_VALIDATED;
+        }
+
+        if (! $error)
+        {
+            $this->db->commit();
+            return 1;
+        }
+        else
 		{
-			// Call trigger
-			$result=$this->call_trigger('ORDER_VALIDATE', $user);
-			if ($result < 0) $error++;
-			// End call triggers
-		}
+            BimpCore::addLogs_extra_data(['roolbackCommande' => $this->error]);
+            $this->db->rollback();
+            return -1;
+        }
+    }
 
 		if (! $error)
 		{

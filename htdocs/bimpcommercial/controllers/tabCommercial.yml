@@ -1,6 +1,5 @@
 bootstrap: 1
 
-
 js: 
     - /bimplogistique/views/js/logistique.js
     
@@ -25,6 +24,13 @@ sections:
                   custom: 
                       callback: 
                           method: renderAccueil
+        dash:
+            label: Dashboard
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderDash
 #        objects:
 #            show: 
 #                callback: 

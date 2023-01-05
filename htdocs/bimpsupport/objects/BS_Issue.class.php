@@ -33,7 +33,7 @@ class BS_Issue extends BimpObject
         return 1;
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         $parts = $this->getChildrenList('parts', array(
             'id_issue' => (int) $this->id
@@ -113,7 +113,7 @@ class BS_Issue extends BimpObject
                     if (BimpCache::cacheExists($cache_key)) {
                         $this->issueCodes = BimpCache::getCacheArray($cache_key);
                     } else {
-                        $gsx = GSX_v2::getInstance();
+                        $gsx = GSX_v2::getInstance(true, $sav->getShipTo());
 
                         // En principe, ici, le fait de ne pas être loggué à gsx devrait arriver très rarement
                         // (Le login est checké au chargement du formulaire. 
@@ -127,8 +127,10 @@ class BS_Issue extends BimpObject
                                         'label'  => $categ['componentDescription'],
                                         'issues' => array()
                                     );
-                                    foreach ($categ['issues'] as $issue) {
-                                        $this->issueCodes[$categ['componentCode']]['issues'][$issue['code']] = $issue['description'];
+                                    if (isset($categ['issues']) && is_array($categ['issues'])) {
+                                        foreach ($categ['issues'] as $issue) {
+                                            $this->issueCodes[$categ['componentCode']]['issues'][$issue['code']] = $issue['description'];
+                                        }
                                     }
                                 }
                                 BimpCache::$cache[$cache_key] = $this->issueCodes;
@@ -242,7 +244,7 @@ class BS_Issue extends BimpObject
                 $html .= '<thead>';
                 $html .= '<th>Ref.</th>';
                 $html .= '<th>Libellé</th>';
-                $html .= '<th>Qté</th>';
+//                $html .= '<th>Qté</th>';
                 $html .= '<th>Hors garantie</th>';
                 $html .= '<th>Prix</th>';
                 $html .= '<th>Cmde stock</th>';
@@ -254,7 +256,7 @@ class BS_Issue extends BimpObject
                     $html .= '<tr>';
                     $html .= '<td>' . $part->displayData('part_number') . '</td>';
                     $html .= '<td>' . $part->displayData('label') . '</td>';
-                    $html .= '<td>' . $part->displayData('qty') . '</td>';
+//                    $html .= '<td>' . $part->displayData('qty') . '</td>';
                     $html .= '<td>' . $part->displayData('out_of_warranty') . '</td>';
                     $html .= '<td>' . $part->displayData('price_type') . '</td>';
                     $html .= '<td>' . $part->displayData('no_order') . '</td>';
@@ -431,6 +433,7 @@ class BS_Issue extends BimpObject
                         $part_warnings = array();
 
                         $part_data['stock_price'] = str_replace(",", "", $part_data['stock_price']);
+                        $part_data['exchange_price'] = str_replace(",", "", $part_data['exchange_price']);
                         $part_errors = $part->validateArray(array(
                             'id_sav'          => (int) $sav->id,
                             'id_issue'        => (int) $this->id,

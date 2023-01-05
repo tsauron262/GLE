@@ -17,9 +17,10 @@ class BC_FieldsTable extends BC_Panel
         'history'     => array('data_type' => 'bool', 'default' => 0)
     );
 
-    public function __construct(BimpObject $object, $path, $content_only = false, $level = 1, $title = null, $icon = null)
+    public function __construct(BimpObject $object, $name, $content_only = false, $title = null, $icon = null)
     {
-        $this->params_def['rows'] = array('type' => 'keys');
+        $this->params_def['rows'] = array('type' => 'keys', 'default' => array());
+        $this->params_def['all_fields'] = array('data_type' => 'bool', 'default' => 0);
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -28,22 +29,27 @@ class BC_FieldsTable extends BC_Panel
         $prev_bc = $current_bc;
         $current_bc = $this;
 
-        $name = $object->getConf($path . '/name', 'default');
+        parent::__construct($object, $name, '', $content_only, 1, $title, $icon);
 
-        if (!$object->config->isDefined($path . '/rows')) {
-            if (!$name || $name === 'default') {
-                if ($object->config->isDefined('fields_table')) {
-                    $path = 'fields_table';
-                } elseif ($object->config->isDefined('fields_tables/default')) {
-                    $path = 'fields_tables';
-                    $name = 'default';
+        if (empty($this->params['rows']) && $this->params['all_fields']) {
+            $fields = $this->object->getFieldsList(true, true, false);
+
+            $this->params['rows'] = array();
+
+            foreach ($fields as $field_name) {
+                $row = array(
+                    'field' => $field_name
+                );
+                foreach ($this->row_params as $param_name => $defs) {
+                    if ($param_name == 'field') {
+                        continue;
+                    }
+
+                    $row[$param_name] = BimpTools::getArrayValueFromPath($defs, 'default', null);
                 }
-            } else {
-                $path = 'fields_tables';
+                $this->params['rows'][] = $row;
             }
         }
-
-        parent::__construct($object, $name, $path, $content_only, $level, $title, $icon);
 
         if (!count($this->errors)) {
             if (!$this->object->can("view")) {
@@ -75,8 +81,20 @@ class BC_FieldsTable extends BC_Panel
         $html .= '<table class="objectFieldsTable ' . $this->object->object_name . '_fieldsTable">';
         $html .= '<tbody>';
 
+        $has_content = false;
+
         foreach ($this->params['rows'] as $row) {
-            $row_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
+            $row_params = array();
+
+            if (isset($row['field'])) {
+                $row_params = $row;
+            } else {
+                $row_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
+            }
+
+            if (empty($row_params)) {
+                continue;
+            }
 
             if (!(int) $row_params['show']) {
                 continue;
@@ -85,31 +103,57 @@ class BC_FieldsTable extends BC_Panel
             $label = $row_params['label'];
             $content = '';
             if ($row_params['field']) {
-                if ($this->object->isDolObject()) {
-                    if (!$this->object->dol_field_exists($row_params['field'])) {
+                $field_errors = array();
+                $field_name = $row_params['field'];
+                $field_object = BC_Field::getFieldObject($this->object, $field_name, $field_errors);
+
+                if (count($field_errors)) {
+                    $content .= BimpRender::renderAlerts($field_errors);
+                } else {
+                    if (!$field_object->isFieldActivated($field_name)) {
                         continue;
                     }
-                }
-                $field = new BC_Field($this->object, $row_params['field'], (int) $row_params['edit']);
-                $field->display_name = $row_params['display'];
 
-                if (!$field->params['show']) {
-                    continue;
-                }
+                    if ($field_object->isDolObject()) {
+                        if (!$field_object->dol_field_exists($field_name)) {
+                            continue;
+                        }
+                    }
 
-                if (!$field->checkDisplayIf()) {
-                    continue;
-                }
+                    $isBaseObjectField = ($field_name == $row_params['field']);
+                    $edit = 0;
 
-                if (isset($this->new_values[$row_params['field']])) {
-                    $field->new_value = $this->new_values[$row_params['field']];
-                }
+                    if ($isBaseObjectField && (int) $row_params['edit']) {
+                        $edit = 1;
+                    }
 
-                if (!$label) {
-                    $label = $field->params['label'];
+                    $field = new BC_Field($field_object, $field_name, $edit);
+                    $field->display_name = $row_params['display'];
+
+                    if (!$field->params['show']) {
+                        continue;
+                    }
+
+                    if (!$field->checkDisplayIf()) {
+                        continue;
+                    }
+
+                    if (isset($this->new_values[$row_params['field']])) {
+                        $field->new_value = $this->new_values[$row_params['field']];
+                    }
+
+                    if (!$label) {
+                        $label = $field->params['label'];
+                    }
+
+                    $content = $field->renderHtml();
+
+                    if ($edit && $field->isEditable()) {
+                        $content .= $field->displayCreateObjectButton(true, true);
+                    }
+
+                    unset($field);
                 }
-                $content = $field->renderHtml();
-                unset($field);
             } elseif ($row_params['association']) {
                 $asso = new BimpAssociation($this->object, $row_params['association']);
                 if (count($asso->errors)) {
@@ -163,6 +207,8 @@ class BC_FieldsTable extends BC_Panel
                 $label = BimpTools::ucfirst($row);
             }
 
+            $has_content = true;
+
             $html .= '<tr>';
             $html .= '<th>' . $label . '</th>';
             $html .= '<td>' . $content . '</td>';
@@ -172,7 +218,13 @@ class BC_FieldsTable extends BC_Panel
         $html .= '</tbody>';
         $html .= '</table>';
 
+        if (!$has_content) {
+            $this->params['show'] = 0;
+            return '';
+        }
+
         $current_bc = $prev_bc;
+
         return $html;
     }
 

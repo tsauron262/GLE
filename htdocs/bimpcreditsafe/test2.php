@@ -18,20 +18,46 @@ $xml_data = file_get_contents('request.xml');
 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
 
-
+$debug = 0;
 
 
 	$sClient = new SoapClient($link."?wsdl", array('trace' => 1));
 	$returnData = $sClient->GetData(array("requestXmlStr" =>str_replace("SIREN", str_replace(" ", "", $siren), $xml_data)));
         
 
-$returnData = htmlspecialchars_decode($returnData->GetDataResult);
+//$returnData = htmlspecialchars_decode($returnData->GetDataResult);
+$returnData = ($returnData->GetDataResult);
 $returnData = str_replace("&", "et", $returnData);
 $returnData = str_replace(" < ", " ", $returnData);
 $returnData = str_replace(" > ", " ", $returnData);
+$returnData = str_replace("<.", ".", $returnData);
+
+if($debug == 2){
+    header("Content-type: text/xml");
+    echo $returnData;
+    
+    die;
+}
 
 $result = simplexml_load_string($returnData);
-//echo "<pre>"; print_r($result);echo('fin');
+
+if($debug == 1){
+    if ($result === false) {
+        echo "Erreur lors du chargement du XML\n";
+        foreach(libxml_get_errors() as $error) {
+            echo "\t", $error->message;
+        }
+    }
+    echo "<pre>";
+    
+    
+    print_r($result);
+    
+    echo('fin');
+    
+    
+    die;
+}
 
 
 if(stripos($result->header->reportinformation->reporttype, "Error") !== false){
@@ -42,7 +68,7 @@ if(stripos($result->header->reportinformation->reporttype, "Error") !== false){
 }
 else{
     if($mode != "xml")
-        echo getJsonReduit($result);
+        echo getJsonReduit($result, $siret, $siren);
     else{
         header("Content-type: text/xml");
         print_r($returnData);die();
@@ -51,7 +77,7 @@ else{
 
 
 
-function getJsonReduit($result){
+function getJsonReduit($result, $siret, $siren){
     $summary = $result->body->company->summary;
     $base = $result->body->company->baseinformation;
     $branches = $base->branches->branch;
@@ -112,18 +138,20 @@ function getJsonReduit($result){
 
 
     $return = array("Nom" => "".$nom,
-        "Tva" => "".$base->vatnumber,
-        "Tel" => "".$tel,
-        "Naf" => "".$summary->activitycode,
-        "Note" => "".$note,
-        "Adresse" => "".$adress,
-        "CodeP" => "".$codeP,
-        "Ville" => "".$ville,
-        "Siret" => "".$siret,
-        "limit" => "".price(intval($limit)),
-        "tradename" => "".$summary->tradename,
+        "Tva" => "".htmlspecialchars_decode($base->vatnumber),
+        "Tel" => "".htmlspecialchars_decode($tel),
+        "Naf" => "".htmlspecialchars_decode($summary->activitycode),
+        "Note" => "". htmlspecialchars_decode($note),
+        "Adresse" => "".htmlspecialchars_decode($adress),
+        "CodeP" => "".htmlspecialchars_decode($codeP),
+        "Ville" => "".htmlspecialchars_decode($ville),
+        "Siret" => "".htmlspecialchars_decode($siret),
+        "limit" => "".price(intval(htmlspecialchars_decode($limit))),
+        "tradename" => "".htmlspecialchars_decode($summary->tradename),
         "info" => ""."",
-        "Capital" => "".str_replace(" Euros", "", $summary->sharecapital));
+        "Capital" => "".str_replace(" Euros", "", htmlspecialchars_decode($summary->sharecapital)));
 //    $return = $result;
-    return json_encode($return);
+    
+    
+    return json_encode($return, JSON_UNESCAPED_UNICODE);
 }

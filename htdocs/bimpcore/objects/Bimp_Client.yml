@@ -1,326 +1,431 @@
 extends: 
     module: bimpcore
     object_name: Bimp_Societe
+    
+controller: client
+
+list_page_url: 
+    controller: clients
+    
+icon: fas_user-circle
+
+header_list_name: default
+header_edit_form: default
+header_delete_btn: 1
+                    
+public_header_edit_form: public
+           
+objects: 
+    public_users: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClient
         
 fields: 
     client: 
         default_value: 1
     fournisseur:
         default_value: 0
-    code_client:
-        label: Code Client
-        default_value: -1
-    code_fournisseur: 
-        label: Code Fournisseur
-    code_compta:
-        label: Code comptable
-    code_compta_fournisseur:
-        label: Code comptable fournisseur
-    address:
-        label: Adresse
-        type: text
-    zip: 
-        label: Code postal
-        input: 
-            type: search_ziptown
-            field_type: zip
-            town_field: town
-            state_field: fk_departement
-            country_field: fk_pays
-        search: 
-            input: 
-                type: text
-            type: value_part
-            part_type: beginning
-    town: 
-        label: Ville
-        input: 
-            type: search_ziptown
-            field_type: town
-            zip_field: zip
-            state_field: fk_departement
-            country_field: fk_pays
-        search: 
-            input: 
-                type: text
-            type: value_part
-    fk_pays:
-        label: Pays
-        dol_prop: country_id
-        type: int
-        default_value: 1
-        input: 
-            type: search_country
-        display: 
-            default: 
-                type: callback
-                method: displayCountry
-    fk_departement: 
-        dol_prop: state_id
-        label: Département / Canton
-        type: int
-        input: 
-            type: search_state
-            id_country: 
-                field_value: fk_pays
-        display: 
-            default: 
-                type: callback
-                method: displayDepartement
-        display_if:
-            field_name: fk_pays
-            hide_values: 0
-        depends_on: fk_pays
-    email: 
-        label: E-mail
-        required: 1
-    skype: 
-        label: Skype
-    url: 
-        label: Site web
-    phone: 
-        label: Téléphone
-    fax: 
-        label: Fax
-    barcode: 
-        label: Code-barres
-    siren: 
-        dol_prop: idprof1
-        label: SIREN (ID Prof. 1)
-    siret: 
-        dol_prop: idprof2
-        label: SIRET (ID Prof. 2)
-    ape: 
-        dol_prop: idprof3
-        label: NAF (ID Prof. 3)
-    idprof4: 
-        label: RCS (ID Prof. 4)
-    idprof5: 
-        label: ID Prof. 5
-    idprof6:
-        label: ID Prof. 6
-    tva_assuj: 
-        label: Assujetti à la TVA
-        type: bool
-        default_value: 1
-    tva_intra: 
-        label: N° de TVA
-    capital: 
-        label: Capital
-        type: money
-    fk_typent: 
-        dol_prop: typent_id
-        label: Type du tiers
-        type: int
-        values: 
-            array: types_ent
-    fk_effectif:
-        dol_prop: effectif_id
-        label: Effectifs
-        type: int
-        values: 
-            array: effectifs
-    fk_forme_juridique:
-        dol_prop: forme_juridique_code
-        label: Forme juridique
-        type: int
-        input: 
-            type: search_juridicalstatus
-            country_code: 
-                callback: getCountryCode
-        display: 
-            default: 
-                type: callback
-                method: displayJuridicalStatus
-#    remise_client: 
-#        label: Remise
-#        type: int
-#    mode_reglement: 
-#        label: Mode de réglement
-#        type: int
-#    cond_reglement: 
-#        label: Conditions de réglement
-#        type: int
-#    mode_reglement_supplier:
-#        label: Mode de réglement fournisseur
-#        type: int
-#    cond_reglement_supplier:
-#        label: Conditions de réglement fournisseur
-#        type: int
-    fk_account: 
-        label: Compte
-        type: int
-    note_private: 
-        label: Note privée
-        type: text
-        input: 
-            note: 1
-    note_public: 
-        label: Note publique
-        type: text
-        input: 
-            note: 1
         
-    
-#    *** Champs non gérés: ***
-#    entity
-#    ref_ext
-#    ref_int
-#    prefix_comm
-#    price_level
-#    model_pdf
-#    webservices_url
-#    webservices_key
-#    parent
-#    fk_stcomm
-#    localtax1_assuj
-#    localtax1_value
-#    localtax2_assuj
-#    localtax2_value
-#    fk_prospectlevel
-#    default_lang
-#    logo
-#    fk_shipping_method
-#    outstanding_limit
-#    import_key
-#    canvas
-#    fk_incoterms
-#    location_incoterms
-#    fk_multicurrency
-#    multicurrency_code
-
+    mode_reglement_supplier: unset
+    cond_reglement_supplier: unset
+    status_atradius:
+        label: Statut Atradius
+        type: int
+        values: 
+            array: status_atradius
+        default_value: 0
+                    
 fields_tables: 
-    identity:
-        title: Identité
-        icon: id-card
+    public_infos: 
+        panel: 0
         rows: 
             - field: nom
             - field: name_alias
             - field: code_client
-            - field: barcode
             - field: code_compta
+            - field: num_sepa
+            - label: Adresse
+              value: 
+                  callback: displayFullAddress
+            - label: Informations de contact
+              value: 
+                  callback: displayFullContactInfos
             
-    contact: 
-        title: Informations de contact
-        icon: phone
+    public_infos_company: 
+        panel: 0
         rows: 
-            - field: email
-            - field: phone
-            - field: fax
-            - field: skype   
-            - field: url
+            - field: tva_assuj
+            - field: tva_intra
+            - field: siren
+              label: SIREN
+            - field: siret
+              label: SIRET
+            - field: ape
+              label: APE
+            - field: idprof4
+              label: RCS
+              
+    atradius:
+        panel: 1
+        rows: 
+            - field: notecreditsafe
+            - custom: 1 
+              label: Lettre Crédit Safe  
+              value:
+                  callback: getCreditSafeLettre
+            - field: outstanding_limit_credit_safe
+              edit: 1
+            - field: outstanding_limit_icba
+              edit: 1
+            - field: outstanding_limit_credit_check
+              edit: 1
+            - field: outstanding_limit_atradius
+              edit: 1
+            - field: outstanding_limit_manuel
+              edit: 1
+            - field: outstanding_limit
+            - label: PDF Rapport Assurance crédit
+              input_name: send_emails
+              input: 
+                  type: file_upload
+              value:
+                callback: displayAtradiusFile
+            - field: date_depot_icba
+              edit: 1
+            - field: date_atradius
+              edit: 1
+            - field: date_demande_atradius
+            - label: Mettre à jour assurance Atradius
+              value: 
+                  callback: displayFormAtradius
+            - field: id_atradius
+            - field: status_atradius
+           
+
+views: 
+    client:
+        extends: default
+        objects_change_reload: BimpRelanceClientsLine
+                      
+    public_client: 
+        title: Mon compte client
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: public_infos
+                - type: fields_table
+                  show: 
+                      callback: isCompany
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: public_infos_company    
+            - cols: 
+                - type: list
+                  col_lg: 12
+                  list: 
+                      name: public
+                      children: contacts
+                      
+    atradius:
+        title: Assurance crédit HT
+        objects_change_reload: Bimp_Client
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: atradius 
+                      
+forms:
+    light: 
+        title: Ajout d'un client
+        rows: 
+            client: 
+                hidden: 1
+                value: 1
+            fournisseur: 
+                hidden: 1
+                value: 0
+            mode_reglement_supplier: unset
+            cond_reglement_supplier: unset
+                  
+    default: 
+        rows: 
+            client: 
+                hidden: 0
+            fournisseur: 
+                hidden: 0
+                value: unset
+            mode_reglement_supplier: unset
+            cond_reglement_supplier: unset
+            code_compta_fournisseur: unset
+            accounting_account_fournisseur: unset
+            remise_supplier: unset
             
-    address:
-        title: Adresse
-        icon: map-marker
+    merge: 
         rows: 
+            soc_merge: 
+                label: Client en doublon</br>(Le client à supprimer)
+                input: 
+                    type: search_object
+                    object: client
+            import_data: 
+                label: Récupérer les données du client à supprimer<br/>(Pour celles non définies dans le client à conserver)
+                
+    relance_paiements: 
+        modal_format: large
+        title: Relancer les paiements clients
+        rows: 
+#            - custom: 1
+#              label: Liste clients
+#              input_name: id_objects
+#              hidden: 1
+#              input: 
+#                  type: hidden
+            - custom: 1
+              input_name: send_emails
+              label: Envoyer les emails pour les premières et deuxièmes relances
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              input_name: date_prevue
+              label: Date prévue d'envoi des relances
+              input: 
+                  type: date
+                  display_now: 1
+                  help: Cette date pourra être modifiée individuellement pour chaque relance en attente
+            - custom: 1
+              label: Afficher
+              hidden: 
+                  callback: isLoaded
+              input_name: display_mode
+              input: 
+                  type: select
+                  options: 
+                      callback: getRelancesDisplayModesArray
+              value: 
+                  callback: getDefaultRelancesDisplayMode
+            - custom: 1
+              label: Factures impayées à relancer
+              input_name: id_objects
+              content: 
+                  callback: renderFacturesToRelancesInputs
+              depends_on: id_objects,display_mode
+              
+    free_relance: 
+        modal_format: large
+        rows: 
+            relance_idx: 
+                custom: 1
+                label: N° de relance
+                input_name: relance_idx
+                input: 
+                    type: qty
+                data_type: int
+                min: 1
+                max: 3
+                value: 1
+                required: 1
+            date: 
+                custom: 1
+                label: Date
+                input_name: date
+                data_type: date
+                input: 
+                    type: date
+                    display_now: 1
+                required: 1
+            contact: 
+                custom: 1
+                label: Contact
+                input_name: id_contact
+                input: 
+                    type: select
+                    options: 
+                        array: contacts
+                value: 
+                    callback: getIdContactForRelances
+            method: 
+                custom: 1
+                label: Méthode de relance
+                input_name: method
+                value: 0
+                data_type: id
+                required: 1
+                input: 
+                    type: select
+                    options: 
+                        0: ''
+                        1: Courrier
+                        2: E-mail
+                        3: SMS
+                        4: Téléphone
+                        5: Interne
+            note: 
+                custom: 1
+                label: Note
+                input_name: note
+                input: 
+                    type: textarea
+                    rows: 3
+                    auto_expand: 1
+            factures: 
+                custom: 1
+                label: Factures
+                input_name: factures
+                content: 
+                    callback: renderFreeRelancesFacturesInputs
+                depends_on: relance_idx
+               
+    deactivate_relances: 
+        title: Déactivation des relances
+        rows: 
+            - field: relances_infos
+              required: 1
+              
+    attribute_commercial: 
+        title: Attribution d'un commercial
+        rows: 
+            - custom: 1
+              label: Commercial
+              input_name: id_user_commercial
+              input: 
+                  type: search_user
+                  
+    cond_mode_reglement:
+        title: Condition et Mode de réglement
+        rows:
+              - custom: 1
+                label: Mode de réglement
+                input_name: mode_reglement
+                input: 
+                    type: select
+                    options: 
+#                        array: modeReglements
+                        callback:
+                            method: getModeReglements
+                            params:
+                                - 0
+                    
+              - custom: 1
+                label: Conditions de réglement
+                input_name: cond_reglement
+                input: 
+                    type: select
+                    options: 
+                        array: condReglements
+      
+    public: 
+        rows: 
+            - field: nom
+            - field: name_alias
             - field: address
             - field: zip
             - field: town
             - field: fk_pays
-            - field: fk_departement  
-            
-    infos: 
-        title: informations (entreprise)
-        icon: info-circle
-        rows: 
-            - field: tva_assuj
-            - field: tva_intra
-            - field: capital
-            - field: fk_typent
-            - field: fk_effectif
-            - field: fk_forme_juridique
-            
-    identifiers: 
-        title: Identifiants (entreprise)
-        icon: user
-        rows: 
-            - field: siren
-            - field: siret
-            - field: ape
-            - field: idprof4
-            - field: idprof5
-            - field: idprof6
-            
-    notes: 
-        title: Notes
-        icon: fas_file-alt
-        rows: 
-            - field: note_public
-            - field: note_private
-
-views: 
-    client:
-        title: nom
-        rows: 
-            - cols: 
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: identity
-                      
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: contact
-                      
-            - cols: 
-                - type: fields_table
-                  col_lg: 12
-                  fields_table: 
-                      name: address
-            
-            - cols:
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: identifiers
-                      
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: infos
-                      
-            - cols: 
-                - type: fields_table
-                  col_lg: 12
-                  fields_table: 
-                      name: notes
-                      
-forms: 
-    light: 
-        title: Ajout d'un client
-        rows: 
-            1: 
+            - field: email
+            - field: phone
+            - field: fax
+            - field: skype
+    atradius_file:
+        rows:
+            - custom: 1
+              label: PDF Rapport Assurance crédit
+              input_name: file
               input: 
-                  help: A remplir si le client est un particulier
+                  type: file_upload
+#              value:
+#                callback: displayAtradiusFile
+    setOutstandingAtradius:
+        rows:
+            - custom: 1
+              label: Montant 
+              input_name: montant_atradius
+              input: 
+                  type: text
+        
+filters: 
+    nb_notes_suivi: 
+        label: Nb notes suivi recouvrement
+        type: range
+        
+filters_panels: 
+    default: 
+        filters: 
+            code_fournisseur: unset
+            code_compta_fournisseur: unset
+            accounting_account_fournisseur: unset
+    
+lists_cols: 
+    nb_notes_suivi: 
+        label: Nb. notes suivi recouvrement
+        align: center
+        value: 
+            callback: displayNbNotesSuivi
+    icba_file:
+      label: PDF Rapport Assurance crédit ICBA
+      value:
+        callback: 
+            method: displayAtradiusFile
+            params:
+                - 1
             
 lists:
     default: 
         title: Liste des Clients
-        icon: user
+        icon: fas_user-circle
         list_filters:
-            - name: fournisseur
-              filter: 0
+            - name: client
+              filter: 
+                  operator: '>'
+                  value: 0
         add_btn_label: Nouveau client
+        header_buttons: 
+            callback: getDefaultListExtraHeaderButtons
+        modal_view: full
         bulk_actions:
             0: 
                 label: supprimer les clients sélectionnés
-                
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+        list_actions: 
+            callback: getFilteredListActions
+        cols: 
+            code_fournisseur: unset
+            
     clients_caisse: 
         extends: default
         extra_btn: 
             - label: Sélectionner ce client
               icon: arrow-circle-right
               onclick: selectClientFromList($(this))
+
+cards: 
+    default: 
+        fields: 
+            code_fournisseur: unset
+            code_compta_fournisseur: unset
+            outstanding_limit: 
+                field: outstanding_limit
+            commercial: 
+                label: Commercial
+                value: 
+                    callback: 
+                        method: displayCommerciaux
+                        params: 
+                            - 0
 
 searches: 
     default:
@@ -337,3 +442,66 @@ searches:
                         - 1
                         - 2
                         - 3
+      
+stats_lists_cols: 
+    nb_client: 
+        label: Nb Client
+        type: count_distinct
+        field: nom
+#    tot_qty: 
+#        label: Qté totale
+#        type: sum
+#        field: qty
+#        data_type: float
+#        decimals: 2
+#    tot_brouillon: 
+#        label: Tot. Fac. brouillons
+#        type: sum
+#        data_type: money
+#        decimals: 2
+#        with_styles: 1
+#        field: total_ttc
+#        filters: 
+#            f.fk_statut: 0
+#    tot_valide: 
+#        label: Tot. Fac. validées
+#        type: sum
+#        field: total_ttc
+#        data_type: money
+#        decimals: 2
+#        with_styles: 1
+#        filters: 
+#            f.fk_statut: 
+#                in: 
+#                    - 1
+#                    - 2
+#    tot_abandon: 
+#        label: Tot. Fac. abandonnées
+#        type: sum
+#        field: total_ttc
+#        data_type: money
+#        decimals: 2
+#        with_styles: 1
+#        filters: 
+#            f.fk_statut: 3
+            
+            
+stats_lists: 
+    default: 
+        n: 10
+        configurable: 1
+#        joins: 
+#            facture: 
+#                table: facture
+#                alias: f
+#                on: f.rowid = a.fk_facture
+        filters_panel: default
+        group_by_options: 
+            - secteuractivite
+            - marche
+        cols: 
+            nb_client:
+#            tot_qty: 
+#            tot_brouillon:
+#            tot_valide:
+#            tot_abandon:

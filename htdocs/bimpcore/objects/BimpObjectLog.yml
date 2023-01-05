@@ -1,0 +1,57 @@
+table: bimpcore_object_log
+common_fields: 0
+icon: fas_history
+
+labels:
+    name: historique
+    name_plur: historiques
+    
+fields: 
+    obj_module: 
+        label: Module
+        required: 1
+        
+    obj_name: 
+        label: Objet
+        required: 1
+        
+    id_object:
+        label: ID objet
+        type: id
+        required: 1
+        
+    msg: 
+        label: Message
+        type: text
+        required: 1
+        
+    code: 
+        label: Code
+        
+    date:
+        label: Date
+        type: datetime
+        required: 1
+        displays: 
+            default: 
+                type: datetime
+                show_hour: 1
+                format: d / m / Y H:i
+        
+    id_user: 
+        label: Utilisateur
+        type: id_object
+        object: user
+        default_value: 0
+
+lists: 
+    object:
+        sort_field: date
+        sort_way: desc
+        n: 50
+        cols: 
+            date: 
+            id_user:
+            msg: 
+            
+        

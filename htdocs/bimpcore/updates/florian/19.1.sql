@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_list_config` ADD `sheet_name` VARCHAR(30) NOT NULL DEFAULT ''; 

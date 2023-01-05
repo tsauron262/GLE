@@ -1,0 +1,57 @@
+table: bs_remote_token
+
+labels: 
+    name: remote_token
+
+objects: 
+    user_demand:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user
+             
+fields:
+    id_user: 
+        label: Demandeur
+        type: id_object
+        object: user_demand
+    id_client: 
+        label: Client
+        type: id_object
+        object: societe
+    token: 
+        label: Token
+        type: string
+    mdp:
+        label: Mdp
+        type: string
+    port: 
+        label: Port
+        type: int
+    date_valid: 
+        label: Date fin validité
+        type: datetime
+    
+lists:
+    default:
+        title: Remote Token
+        modal_view: default
+        add_form_name: default
+        icon: fas_file-alt
+        cols:
+            id_user:
+            id_client:
+            token:
+            port:
+            mdp:
+            date_valid:
+                
+views: 
+    default: 
+        title: Connexion/deconnexion
+        rows:
+            - cols: 
+                    - type: custom
+                      custom: 
+                          callback: 
+                              method: renderNotesList

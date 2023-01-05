@@ -1,6 +1,11 @@
 bootstrap: 1
 pdf: 1
 
+title: 
+    callback: 
+        method: getPageTitle
+        object: event
+        
 objects:
     event: 
         instance: 

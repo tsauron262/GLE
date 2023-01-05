@@ -136,6 +136,9 @@ class PDO extends AbstractBackend {
                 '{' . CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new CalDAV\Property\SupportedCalendarComponentSet($components),
                 '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-calendar-transp' => new CalDAV\Property\ScheduleCalendarTransp($row['transparent'] ? 'transparent' : 'opaque'),
             );
+            
+            $row['calendarcolor'] = '#FF5733';
+            $row['transparent'] = '0';
 
 
             foreach ($this->propertyMap as $xmlName => $dbName) {
@@ -265,7 +268,7 @@ class PDO extends AbstractBackend {
                         $hasError = true;
                         $result[403][$propertyName] = null;
                         unset($mutations[$propertyName]);
-                        continue;
+                        continue 2;
                     }
 
                     $fieldName = $this->propertyMap[$propertyName];
@@ -424,6 +427,8 @@ class PDO extends AbstractBackend {
             $tabPartExtInt = array();
         //echo "<pre>"; print_r($row);die;
         foreach ($action->userassigned as $val) {
+//            if($val['id'] == $calendarId && $val['answer_status'] == -2)//supprimé pour cette user
+//                return null;
             if ($val['id'] > 0 && $val["id"] != USER_EXTERNE_ID) {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
@@ -628,7 +633,7 @@ class PDO extends AbstractBackend {
             if (isset($calendarData2['DESCRIPTION']))
                 $action->note = str_replace($tabR, "", str_replace("\\n", "\n", $calendarData2['DESCRIPTION']));
             if (isset($calendarData2['LOCATION']))
-                $action->location = $calendarData2['LOCATION'];
+                $action->location = str_replace($tabR, "", str_replace("\\n", "\n", $calendarData2['LOCATION']));
 
 //            $action->array_options['agendaplus'] = $calendarData;
             $user = $this->getUser($calendarId);
@@ -654,6 +659,7 @@ class PDO extends AbstractBackend {
 
 
 //        $this->userIdCaldavPlus($calendarId);
+            return $extraData['etag'];
         }
     }
 
@@ -694,7 +700,7 @@ class PDO extends AbstractBackend {
             if (stripos($nom, "LAST-MODIFIED") !== false) {
                 $last_modified = str_replace("LAST-MODIFIED:", "", $ligne);
             }
-            if (stripos($ligne, "ATTENDEE") !== false || stripos($ligne, "CUTYPE") != false || stripos($nom, "ATTENDEE") != false) {
+            if (stripos($ligne, "ATTENDEE") === 0 || stripos($ligne, "CUTYPE") === 0 || stripos($nom, "ATTENDEE") === 0) {
                 $stat = "NEEDS-ACTION";
                 if (preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
                     $stat = $retour[1];
@@ -719,7 +725,7 @@ class PDO extends AbstractBackend {
                     }
                 }
             }
-            if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
+            if (stripos($ligne, "ORGANIZER") === 0 || stripos($nom, "ORGANIZER") === 0) {
                 $tabT = explode("mailto:", strtolower($ligne));
                 if (isset($tabT[2])) {
                     $mailT = str_replace(" ", "", $tabT[2]);
@@ -1276,6 +1282,18 @@ WHERE  `email` LIKE  '" . $mail . "'");
                     $requirePostFilter = false;
                 }
             }
+            // There was a time-range filter
+//            if ($componentType == 'VEVENT' && isset($filters['comp-filters'][0]['uid'])) {
+//                $uid = $filters['comp-filters'][0]['uid'];
+//
+//            }
+            
+            foreach($filters['comp-filters'][0]['prop-filters'] as $filter){
+                if($filter['name'] == 'UID'){
+                    $uid = '%'.$filter['text-match']['value'].'%';
+                }
+                
+            }
         }
 
         if ($requirePostFilter) {
@@ -1301,6 +1319,11 @@ WHERE  `email` LIKE  '" . $mail . "'");
             $query .= " AND firstoccurence < :enddate";
             $values['enddate'] = $timeRange['end']->getTimeStamp();
         }
+        if ($uid) {
+            $query .= " AND uri LIKE :uri";
+            $values['uri'] = $uid;
+        }
+        
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($values);
 

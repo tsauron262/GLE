@@ -13,7 +13,7 @@ llxHeader();
     <label for="serialInput">Entrez un numéro de série: </label>
     <!--013409004309660-->
     <!--C2QMDSAVFH00-->
-    <input type="text" name="serialInput" id="gsx_equipment_serial" value="C2QMDSAVFH00" onfocus="this.value = ''"/>
+    <input type="text" name="serialInput" id="gsx_equipment_serial" value="C02ZMDAKMD6M" onfocus="this.value = ''"/>
     <button id="gsx_button" onclick="loadGSXView($(this));">&nbsp;&nbsp;OK&nbsp;&nbsp;</button>
 </div>
 <div id="gsxResultContainer"></div>

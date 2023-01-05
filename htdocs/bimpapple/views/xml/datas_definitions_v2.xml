@@ -7,8 +7,14 @@
     <def name="id" type="text" max="18" regex="^[0-9a-zA-Z]{1,18}$" format="Lettres et chiffres seulement">
         <label>Identifiant</label>
     </def>
+    <def name="number" type="text" max="18">
+        <label>Réf. composant</label>
+    </def>
     
     <!--Repairs-->
+    <def name="code_centre" type="select" values="centres">
+        <label>Centre (n° shipTo)</label>
+    </def>
     <def name="repairType" type="select" values="repair_types" edit="0">
         <label>Type de réparation</label>
     </def>
@@ -46,7 +52,7 @@
     <def name="consumerLaw" type="select" values="consumer_law">
         <label>Couverture du droit de la consommation</label>
     </def>
-    <def name="techId" type="text" max="15">
+    <def name="technicianId" type="text" max="15">
         <label>Identifiant du technicien</label>
     </def>
     
@@ -58,12 +64,26 @@
         <label>Contenu</label>
     </def>
     
+    <!--parts-->
+    <def name="parts" type="datasGroup" useCart="1" itemLabel="Composant">
+        <label>Composants</label>
+    </def>
+    <def name="part_label" type="text" max="255" edit="0">
+        <label>Désignation</label>
+    </def>    
+    <def name="partUsed" type="text" max="18">
+        <label>Réf. composant utilisé</label>
+    </def>
+    <def name="kgbDeviceDetail" type="datasGroup">
+        <label>Détail KGB</label>
+    </def>
+    <def name="pricingOption" type="text" max="10">
+        <label>Code prix spécial</label>
+    </def>
+    
     <!--loaners-->
     <def name="loaners" type="datasGroup" itemLabel="Composant de prêt">
         <label>Composants de prêt</label>
-    </def>
-    <def name="partNumber" type="text" max="18">
-        <label>Réf. composant</label>
     </def>
     <def name="returnStatusCode" type="select">
         <label>Raison du retour</label>
@@ -71,7 +91,6 @@
             <val val="DOA">HS à l'arrivée</val>
         </values>
     </def>
-    
     <def name="fromConsignedStock" type="bool">
         <label>Pris dans le stock consigné</label>
     </def>
@@ -143,30 +162,10 @@
         <label>Statuts réparation</label>
     </def>
     <def name="requestReviewByApple" type="bool">
-        <label>Requête vérifiée par Apple</label>
+        <label>Requête à vérifier par Apple</label>
     </def>
     <def name="markComplete" type="bool">
         <label>Marquer complète</label>
-    </def>
-    
-    <!--parts-->
-    <def name="parts" type="datasGroup" useCart="1" itemLabel="Composant">
-        <label>Composants</label>
-    </def>
-    <def name="part_label" type="text" max="255" edit="0">
-        <label>Désignation</label>
-    </def>
-    <def name="number" type="text" max="18">
-        <label>Réf. composant</label>
-    </def>
-    <def name="partUsed" type="text" max="18">
-        <label>Réf. composant utilisé</label>
-    </def>
-    <def name="kgbDeviceDetail" type="datasGroup">
-        <label>Détail KGB</label>
-    </def>
-    <def name="pricingOption" type="text" max="10">
-        <label>Code prix spécial</label>
     </def>
     
     <!--account-->

@@ -1,0 +1,211 @@
+
+table: demande_validate_comm
+icon: fas_check
+no_transaction_db: 1
+
+labels:
+    name: demande de validation
+    name_plur:  demandes de validation
+    is_female: 1
+
+objects:
+    user_ask: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_ask
+                
+    user_affected: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_affected
+                
+                
+    user_valid: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_valid
+                
+    valid_comm: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpvalidateorder
+                name: ValidComm
+            id_object: 
+                field_value: val_comm_validation
+                
+fields:
+    status:
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+        
+    type:
+        label: Type
+        type: int
+        values: 
+            array: types
+            
+    type_de_piece:
+        label: Piece
+        type: int
+        values: 
+            array: objets
+            
+    id_piece:            
+        label: Id de la pièce
+        type: int
+
+    id_user_ask: 
+        label: Demandeur
+        type: id_object
+        object: user_ask       
+        input: 
+            type: search_user
+            
+    id_user_affected: 
+        label: Chargé de validation
+        type: id_object
+        object: user_affected
+        input: 
+            type: search_user
+            
+    id_user_valid: 
+        label: Valideur
+        type: id_object
+        object: user_valid
+        input: 
+            type: search_user
+            
+    date_valid:
+        label: Date de traitement
+        type: datetime
+        search:
+            type: date_range
+            
+    val_comm_demande:
+        label: Validation config demande
+        required: 1
+        type: id_object
+        object: valid_comm
+    
+    val_comm_validation:
+        label: Validation config validation
+        type: id_object
+        object: valid_comm
+        
+        
+fields_tables:
+    default: 
+        title: Informations
+        icon: info-circle
+        rows:
+            user_create:
+                field: user_create
+            user_update:
+                field: user_update
+            date_create:
+                field: date_create
+            date_update:
+                field: date_update
+                
+        
+views:
+    default:
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 12
+                    col_md: 12
+                    col_sm: 12
+                    fields_table:
+                        name: default
+                        
+                        
+    valid_comm_details: 
+        rows:     
+            - cols: 
+                - type: custom
+                  col_lg: 12
+                  col_md: 12
+                  col_sm: 12
+                  custom: 
+                      callback: renderValidComm
+                
+    valid_comm: 
+        rows:
+            - cols: 
+                - type: view
+                  view: 
+                      name: valid_comm_details
+                            
+lists_cols:     
+    piece: 
+        label: Pièce
+        value: 
+            callback: displayObject
+    montant_ht: 
+        label: Montant HT
+        value: 
+            callback: displayMontantHT
+    client: 
+        label: Client
+        value: 
+            callback: displayClient
+        search: 
+            input: 
+                type: search_societe
+            
+lists:
+    default:
+        sort_field: id
+        sort_way: desc
+        page_btn: 1
+        update_btn: 1
+        # enlever delete btn
+        checkboxes: 1
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+        delete_btn: 1 
+        modal_view: default
+        extra_btn: 
+            callback: getDemandeValidCommExtraButtons
+        cols:
+            type:
+            status:
+            piece: 
+            total:
+            client:
+            id_user_ask: 
+            id_user_affected: 
+            id_user_valid: 
+            date_create:
+            date_valid:
+            montant_ht:
+            
+    my_demand:
+        extends: default
+        cols: 
+            status: unset
+            id_user_affected: unset
+            id_user_valid: unset
+            date_valid: unset
+            date_create:
+    my_demand2:
+        extends: default
+        cols: 
+            status: unset
+            id_user_ask: unset
+            id_user_valid: unset
+            date_valid: unset
+            date_create:
+            montant_ht: unset
+
+            
+            

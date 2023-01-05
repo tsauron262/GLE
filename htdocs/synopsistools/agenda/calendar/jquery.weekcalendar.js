@@ -2235,7 +2235,7 @@
       w: function(date) { return date.getDay(); },
       z: function(date) { var d = new Date(date.getFullYear(), 0, 1); return Math.ceil((date - d) / 86400000); }, // Fixed now
       // Week
-      W: function(date) { var d = new Date(date.getFullYear(), 0, 1); return Math.ceil((((date - d) / 86400000) + d.getDay() + 1) / 7); }, // Fixed now
+      W: function(date) { var d = new Date(date.getFullYear(), 0, 1); return Math.ceil((((date - d) / 86400000) + d.getDay() + 1) / 7)-1; }, // Fixed now//bug 2022
       // Month
       F: function(date, calendar) { return calendar.options.longMonths[date.getMonth()]; },
       m: function(date) { return (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1); },

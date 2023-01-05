@@ -4,10 +4,24 @@ dol_object:
         
 table: socpeople
 primary: rowid
+icon: far_id-card
 
 parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
+list_page_url: 
+    controller: clients
+    url_params: 
+        tab: contacts
+header_list_name: default
+header_edit_form: default
+
+name_syntaxe: <firstname> <lastname>
+
+nom_url: 
+    syntaxe: <name>
+    card: default
+    
 labels: 
     name: contact
     
@@ -17,23 +31,53 @@ fields:
         dol_prop: socid
         type: id_parent
         required: 1
+    statut: 
+        label: Etat
+        type: int
+        user_edit: 1
+        values: 
+            array: status_list
+        default_value: 1
     civility:
         label: Titre civilité
         dol_prop: civility_id
-        type: int
+        user_edit: 1
         values: 
-            array: civilities
+            callback: 
+                method: getCivilitiesArray
+                params: 
+                    - 1
+                    - 0
+                    - 1
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getCivilitiesArray
+                params: 
+                    - 0
+                    - 1
         default_value: 0
     lastname:
         label: Nom
         required: 1
+        user_edit: 1
     firstname: 
         label: Prénom
-        required: 1
+        user_edit: 1
+        input: 
+            help: Obligatoire sauf pour la civilité "Service"
     address: 
         label: Adresse
+        user_edit: 1
+        default_value:
+            callback:
+                method: getParentData
+                params:
+                    - address
     zip: 
         label: Code postal
+        user_edit: 1
         input: 
             type: search_ziptown
             field_type: zip
@@ -45,8 +89,14 @@ fields:
                 type: text
             type: value_part
             part_type: beginning
+        default_value:
+            callback:
+                method: getParentData
+                params:
+                    - zip
     town: 
         label: Ville
+        user_edit: 1
         input: 
             type: search_ziptown
             field_type: town
@@ -57,25 +107,34 @@ fields:
             input: 
                 type: text
             type: value_part
+        default_value:
+            callback:
+                method: getParentData
+                params:
+                    - town
     fk_pays: 
         label: Pays
+        user_edit: 1
         dol_prop: country_id
         type: int
         default_value: 1
         input: 
             type: search_country
-        display: 
-            default: 
-                type: callback
-                method: displayCountry
+        values:
+            callback: getCountriesArray
+#        displays: 
+#            default: 
+#                type: callback
+#                method: displayCountry
     fk_departement:
         label: Département / Canton
         type: int
+        user_edit: 1
         input: 
             type: search_state
             id_country: 
                 field_value: fk_pays
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayDepartement
@@ -85,31 +144,44 @@ fields:
         depends_on: fk_pays
     email: 
         label: E-mail
+        user_edit: 1
         required: 1
     phone:
         label: Tél. pro
+        user_edit: 1
         dol_prop: phone_pro
     phone_perso: 
         label: Tél. perso
+        user_edit: 1
     phone_mobile:
         label: Tél. portable
+        user_edit: 1
     fax: 
         label: Fax
+        user_edit: 1
     jabberid:
         label: Messagerie instantanée
+        user_edit: 1
     skype: 
         label: Identifiant Skype
+        user_edit: 1
     birthday:
         label: Date de naissance
         type: date
+        user_edit: 1
     poste:
         label: Poste / fonction
+        user_edit: 1
     note_private: 
         label: Note privée
         type: text
+        user_edit: 1
+        hashtags: 1
     note_public:
         label: Note publique
         type: text
+        user_edit: 1
+        hashtags: 1
         
 #Champs non gérés:
 #    ref_ext
@@ -121,6 +193,46 @@ fields:
 #    default_lang
 #    no_email
 
+#address zip town fk_pays email phone phone_perso phone_mobile phone_mobile fax poste note_public
+
+forms: 
+    public_create: 
+        rows: 
+            civility: 
+                field: civility
+            firstname: 
+                field: firstname
+            lastname: 
+                field: lastname
+            address: 
+                field: address
+            address: 
+                field: address
+            zip: 
+                field: zip
+            town: 
+                field: town
+            fk_pays: 
+                field: fk_pays
+            email: 
+                field: email
+            phone: 
+                field: phone
+            phone_perso: 
+                field: phone_perso
+            phone_mobile: 
+                field: phone_mobile
+            fax: 
+                field: fax
+            poste: 
+                field: poste
+                
+    public_edit:
+        extends: public_create
+        msgs: 
+            - type: warning
+              content: Attention, si vous avez des commandes en cours <b>à livrer à ce contact</b>, toute modification de l'adresse affectera la livraison de ces commandes.<br/>Veuillez de préférence créer un nouveau contact si vous ne souhaitez pas modifier l'adresse de livraison des commandes en cours.
+            
 fields_tables: 
     identity:
         title: Identité
@@ -163,9 +275,9 @@ fields_tables:
             
 views: 
     default: 
-        title: 
-            callback: getName
         rows: 
+            - cols: 
+                - type: object_header
             - cols: 
                 - type: fields_table
                   col_lg: 6
@@ -192,8 +304,119 @@ views:
                   col_lg: 12
                   fields_table: 
                       name: notes
-                      
+
+filters_panel: 
+    default: 
+        filters: 
+            fk_soc: 
+            statut: 
+            lastname:
+            firstname: 
+            email:
+            address: 
+            zip: 
+            town: 
+            fk_pays: 
+            fk_departement:
+            phone:
+            phone_perso: 
+            phone_mobile:
+            fax: 
+            jabberid:
+            skype: 
+                
+lists_cols: 
+    full_address: 
+        label: Adresse complète
+        value: 
+            callback: displayFullAddress
+    contact_infos: 
+        label: Infos contact
+        value: 
+            callback: displayContactInfos
+            
+    nomComplet:
+        label: Nom Complet  
+        value: 
+            callback: displayNomComplet
+        csv_needed_fields: 
+            - lastname
+            - firstname
+        
+lists: 
+    default: 
+        title: 
+            callback: getSocContactsListTitle
+        configurable: 1
+        filters_panel: default
+        pagination: 1
+        sort_field: rowid
+        sort_way: desc
+        n: 10
+        modal_view: default
+        edit_btn: 1
+        delete_btn: 1
+        extra_btn: 
+            callback: getListExtraButtons
+        cols: 
+            fk_soc: 
+            civility: 
+            lastname: 
+            firstname: 
+            poste: 
+            full_address: 
+            contact_infos:
+            statut:
+        
+    soc: 
+        extends: default
+        filters_panel: unset
+        pagination: 0
+        n: 0
+        add_btn: 1
+        add_form_name: default
+        cols: 
+            fk_soc: unset
+              
+    public: 
+        extends: soc
+        enable_search: 0
+        configurable: 0
+        delete_btn: 0
+        add_form_name: public_create
+        edit_form: public_edit
+        modal_view: unset
+              
 cards: 
     default: 
-        type: contact_card
+        title: nom
+        status: statut
+        fields: 
+            poste: 
+                field: poste
+                label: Poste
+            address: 
+                label: Adresse
+                value: 
+                    callback: displayFullAddress
+            contact: 
+                label: Contact
+                value: 
+                    callback: displayContactInfos
         view_btn: 1
+        
+searches: 
+    default: 
+        fields_search: 
+            - a.firstname
+            - a.lastname
+            - s.nom
+        fields_return: 
+            - a.firstname
+            - a.lastname
+            - s.nom
+        label_syntaxe: '<a.firstname> - <a.lastname> (<s.nom>)'
+        joins: 
+            - table: societe
+              on: a.fk_soc = s.rowid
+              alias: s

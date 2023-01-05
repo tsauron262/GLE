@@ -748,16 +748,18 @@ class SMTPs
         $this->_smtpsHost = $_strHost;
     }
 
-    /**
-     * Retrieves the Host Name or IP of the Mail Server to use
-     * This is  used only with 'socket' based mail transmission
-     *
-     * @return 	string 	$_strHost 		Host Name or IP of the Mail Server to use
-     */
-    public function getHost()
-    {
-        return $this->_smtpsHost;
-    }
+	/**
+	 * Retrieves the Host Name or IP of the Mail Server to use
+	 * This is  used only with 'socket' based mail transmission
+	 *
+	 * @return 	string 	$_strHost 		Host Name or IP of the Mail Server to use
+	 */
+	function getHost()
+	{
+            if(class_exists('BimpCache'))
+                return BimpCache::getIpFromDns($this->_smtpsHost);
+            return $this->_smtpsHost;
+	}
 
     /**
      * Defines the Port Number of the Mail Server to use

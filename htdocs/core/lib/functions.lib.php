@@ -191,6 +191,12 @@ function getBrowserInfo($user_agent)
  */
 function dol_shutdown()
 {
+    /*moddrsi*/
+    if(class_exists('BimpController'))
+        BimpController::bimp_shutdown();
+    /*fmoddrsi*/
+    
+    
 	global $conf,$user,$langs,$db;
 	$disconnectdone=false; $depth=0;
 	if (is_object($db) && ! empty($db->connected)) { $depth=$db->transaction_opened; $disconnectdone=$db->close(); }
@@ -987,7 +993,7 @@ function dol_strtoupper($utf8_string)
  *  @param	string		$restricttologhandler	Output log only for this log handler
  *  @return	void
  */
-function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename = '', $restricttologhandler = '')
+function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='', $restricttologhandler='', $backTrace = true)
 {
     global $conf, $user, $debugbar;
 
@@ -997,14 +1003,15 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename =
         
         /*mod drsi*/
         if(! empty($message)){
+            if(function_exists("synGetDebug") && $backTrace)
+                $message .= synGetDebug();
             if(stripos($message, "deprecated") !== false){
-                if(function_exists("synGetDebug"))
-                    $message .= synGetDebug();
                 $suffixinfilename = "_deprecated";
             }
+            if(stripos($message, "Redis") !== false){
+                $suffixinfilename = "_redis";
+            }
             if(stripos($message, "Forbidden") !== false || stripos($message, "Duplicate") !== false || stripos($message, "a déjà le statut") !== false || stripos($message, "Doublon") !== false){
-                if(function_exists("synGetDebug"))
-                    $message .= synGetDebug();
                 $suffixinfilename = "_duplicate";
             }
             if(stripos($message, "Creating default object from empty value") !== false)
@@ -1013,10 +1020,10 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename =
                     $suffixinfilename = "_ldap";
 
 
-            $monUrl = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            $monUrl = "http://" . (isset($_SERVER['HTTP_HOST'])? $_SERVER['HTTP_HOST'] : '') . (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '');
             $oldUrl = (isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : "n/c");
             $nomUser = (is_object($user) && isset($user->login) ? $user->login : "n/c");
-            $message = " | ".$nomUser." | ".$_SERVER['HTTP_USER_AGENT']."\n".$monUrl . " | " . $oldUrl . "\n". dol_trunc(print_r($_POST,1),200). "\n". $message. "\n";
+            $message = " | ".$nomUser." | ".(isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '')."\n".$monUrl . " | " . $oldUrl . "\n". dol_trunc(print_r($_POST,1),200). "\n". $message. "\n";
         }
         /*f mod drsi*/
 
@@ -1453,7 +1460,7 @@ function dol_banner_tab($object, $paramid, $morehtml = '', $shownav = 1, $fieldi
 						}
 					}
 				}
-				elseif (! $phototoshow)
+				else if (! $phototoshow && is_object($form))
 				{
 					$phototoshow.= $form->showphoto($modulepart, $object, 0, 0, 0, 'photoref', 'small', 1, 0, $maxvisiblephotos);
 				}
@@ -1581,7 +1588,8 @@ function dol_banner_tab($object, $paramid, $morehtml = '', $shownav = 1, $fieldi
 		$morehtmlref.='</div>';
 	}
 
-	print '<div class="'.($onlybanner?'arearefnobottom ':'arearef ').'heightref valignmiddle centpercent">';
+	print '<div class="'.($onlybanner?'arearefnobottom ':'arearef ').'heightref valignmiddle" width="100%">';
+        if(is_object($form))
 	print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, $nodbprefix, $morehtmlleft, $morehtmlstatus, $morehtmlright);
 	print '</div>';
 	print '<div class="underrefbanner clearboth"></div>';

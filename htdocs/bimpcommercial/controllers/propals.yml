@@ -5,8 +5,35 @@ objects:
     propal: 
         instance:
             bimp_object: Bimp_Propal
+    propal_line: 
+        instance:
+            bimp_object: Bimp_PropalLine
+            
+#sections: 
+#    - type: list
+#      list: 
+#          object: propal
+          
+          
+          
+
             
 sections: 
-    - type: list
-      list: 
-          object: propal
+    - type: tabs
+      tabs: 
+        default:
+            label: Devis
+            sections:
+                - type: list
+                  list: 
+                      object: propal
+
+        prods: 
+            label: Produits en devis
+            sections:
+                - type: list
+                  list: 
+                      object: propal_line
+                      name: global
+                            
+

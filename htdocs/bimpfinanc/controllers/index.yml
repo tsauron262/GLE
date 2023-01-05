@@ -14,6 +14,22 @@ objects:
         instance:
             bimp_object: BimpRevalorisation
             
+    apporteur: 
+        instance:
+            bimp_object: Bimp_Apporteur
+    comm_apporteur: 
+        instance:
+            bimp_object: Bimp_CommissionApporteur
+    import_paiement: 
+        instance:
+            bimp_object: Bimp_ImportPaiement
+    import_paiement_line:
+        instance:
+            bimp_object: Bimp_ImportPaiementLine
+    import_prelevement: 
+        instance:
+            bimp_object: Bimp_ImportPrelevement
+            
 sections:
     - type: tabs
       tabs: 
@@ -39,3 +55,51 @@ sections:
                   list: 
                       panel: 1
                       object: PaiementInc
+        apporteur:
+            label: Apporteurs
+            icon: fas_handshake
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: apporteur
+        comm_apporteur:
+            label: Commissions Apporteur
+            icon: fas_handshake
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: comm_apporteur
+                      
+        import_paiement:
+            label: Import Paiement
+            icon: fas_file-import
+            sections: 
+                  - type: nav_tabs
+                    nav_tabs: 
+                        - id: jour
+                          title: Par Jour
+                          struct: 
+                                type: list
+                                list: 
+                                  panel: 1
+                                  object: import_paiement
+                        - id: tout
+                          title: Tous
+                          struct: 
+                                type: list
+                                list: 
+                                  panel: 1
+                                  object: import_paiement_line
+                                  name: global
+                                  
+        import_prelevement:
+            label: Import prélévement
+            icon: fas_file-import
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: import_prelevement
+                      

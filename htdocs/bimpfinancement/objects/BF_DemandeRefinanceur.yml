@@ -4,10 +4,17 @@ parent_object: BF_Demande
 parent_id_property: id_demande
 
 positions: 1
-position_insert: before
+position_insert: after
+new_status_logs: 1
+
+header_edit_form: default
+header_btn: 
+    callback: getActionsButtons
 
 labels:
-    name: Refinanceur
+    name: demande refinanceur
+    name_plur: demandes refinanceurs
+    is_female: 1
     
 objects: 
     refinanceur: 
@@ -29,13 +36,18 @@ fields:
         label: Refinanceur
         type: id_object
         object: refinanceur
+        displays: 
+            default: 
+                type: callback
+                method: displayRefinanceur
+            soc_card: 
+                type: callback
+                method: displayRefinanceur
+                params: 
+                    - card
         values: 
             array: refinanceurs
         required: 1
-        display: 
-            nom_url: 
-                type: nom_url
-                modal_view: default
         
     status:
         label: Statut
@@ -46,105 +58,212 @@ fields:
         required: 1
         
     rate:
-        label: Taux
+        label: Taux de cession annuel
         type: percent
-        
-    coef:
-        label: Coéficient
-        type: float
-        decimals: 5
+        depends_on: id_refinanceur
             
-    quantity: 
-        label: Nombre
+    qty: 
+        label: Nombre de périodes
         type: qty
         min: 0
         default_value: 0
         decimals: 0
-        required: 1
-        
-    amount_ht:
-        label: Montant HT
-        type: money
-        required: 0
         
     payment:
-        label: Règlement
-        type: int
+        label: Mode de règlement
         values: 
-            array: payments
+            array: modes_paiements
         
     periodicity:
         label: Périodicité
         type: int
         values: 
             array: periodicities
-            
-    periode2:
-        label: Seconde période
-        type: bool
-        default_value: 0
         
     comment:
         label: Commentaire
-        type: text
+        type: html
         input:
-            rows: 1
+            rows: 3
             auto_expand: 1
+
+forms: 
+    default: 
+        rows: 
+            - field: id_refinanceur
+            - custom: 1
+              label: Demande éffectuée
+              input_name: demande_done
+              input: 
+                  type: toggle
+              value: 0
+            - custom: 1
+              label: Date demande
+              input_name: date_demande
+              input: 
+                  type: datetime
+                  display_now: 1
+              display_if: 
+                  field_name: demande_done
+                  show_values: 1
+            - field: periodicity
+            - field: qty
+            - field: rate
+#            - field: amount_ht
+            - field: comment
+             
+    demande_done: 
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Demande effectuée
+              input_name: demande_done
+              input: 
+                  type: hidden
+              value: 1
+            - custom: 1
+              label: Date demande
+              input_name: date_demande
+              input: 
+                  type: datetime
+                  display_now: 1
+            - field: periodicity
+            - field: qty
+            - field: rate
+#            - field: amount_ht
+            - field: payment
+            - field: comment
+
+    accepted: 
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Demande acceptée
+              input_name: demande_accepted
+              input: 
+                  type: hidden
+              value: 1
+            - custom: 1
+              label: Sous conditions
+              input_name: under_conditions
+              input: 
+                  type: toggle
+              value: 0
+            - custom: 1
+              label: Conditions
+              input_name: conditions
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              display_if: 
+                  field_name: under_conditions
+                  show_values: 1
+            - custom: 1
+              label: Sélectionner directement ce refinancement
+              input_name: demande_selected
+              input: 
+                  type: toggle
+              value: 1
+            - field: comment
+            
+    refused: 
+        rows: 
+            - custom: 1
+              label: Raisons du refus par le refinanceur
+              input_name: reasons
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+                  
+    cancel: 
+        extends: refused
+        rows: 
+            0: 
+                label: Raisons de l'abandon de cette demande
         
-list:
-    checkboxes: 
-        callback: isDeletable
-    positions: 1
-    title: Refinanceurs
-    icon: bank
-    bulk_actions: 
-        - label: Supprimer les lignes sélectionnées
-          icon: fas_trash-alt
-          onclick: deleteSelectedObjects('list_id', $(this));
-          btn_class: deleteSelectedObjects
-    update_btn: 1
-    delete_btn: 1
-    edit_btn: 1
-    add_form_name: default
-    edit_form: default
-    sort_field: position
-    sort_way: asc
-    n: 10
-    cols:
-        refinanceur: 
-            field: id_refinanceur
-            display: nom_url
-        status: 
-            field: status
-            edit: 1
-        rate: 
-            field: rate
-            edit: 1
-            max_width: 100px
-        coef: 
-            field: coef
-            edit: 1
-            max_width: 60px
-        quantity: 
-            field: quantity
-            edit: 1
-        amount: 
-            label: Loyer
-            field: amount_ht
-            edit: 1
-            max_width: 100px
-        amount2: 
-            label: Loyer calculé
-            value: 
-                callback: displayLoyerSuggest
-            show: 
-                callback: isEditable
-        periodicity:
-            field: periodicity
-            edit: 1
-        periode2:
-            field: periode2
-            edit: 1        
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: id_demande
+            - field: id_refinanceur
+              display: soc_card
+            - field: periodicity
+              edit: 1
+            - field: qty
+              edit: 1
+            - field: rate
+              edit: 1
+#            - field: payment
+#              edit: 1
+            - field: comment
+              edit: 1
+              
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                      
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderMontants
+                      
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderLogsList
+      
+lists_cols: 
+    loyer_mensuel_ht: 
+        label: Loyer mensuel HT
+        value: 
+            callback: displayLoyerMensuelHT
+            
+lists:
+    default: 
+        checkboxes: 
+            callback: isDeletable
+        positions: 1
+        title: Demandes Refinanceurs
+        icon: bank
+        bulk_actions: 
+            - label: Supprimer les lignes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        delete_btn: 1
+        edit_btn: 1
+        add_form_name: default
+        edit_form: default
+        modal_view: default
+        sort_field: position
+        sort_way: asc
+        n: 10
+        extra_btn: 
+            callback: getActionsButtons
+        cols:
+            id_refinanceur: 
+            status: 
+            periodicity: 
+                edit: 1
+            qty:
+                edit: 1
+            rate: 
+                edit: 1
+            loyer_mensuel_ht: 
+            comment: 
             
             
         

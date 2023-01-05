@@ -1,0 +1,1 @@
+ALTER TABLE `llx_be_equipment` CHANGE `status_gsx` `status_gsx` INT NOT NULL DEFAULT '0';

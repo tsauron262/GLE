@@ -37,7 +37,7 @@ if (!$invite)
 else {
     if ($code != "nc" && $code != "" && $code != 0) {
 //        $tabRes = getElementElement("demSign", null, $code);
-        $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsissignature WHERE code ='" . $code . "';";
+        $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsissignature WHERE code ='" . $code . "' AND `date_fin` > now();";
         $result = $db->query($sql);
         if ($db->num_rows($result) > 0)
             $ligne = $db->fetch_object($result);
@@ -226,6 +226,7 @@ if ($object != $soc && $socid > 0) {
 
 
 $dir = DOL_DATA_ROOT . "/" . $dirFile . "/" . $object->$clef;
+$dirTmp = PATH_TMP . "/" . $dirFile . "/" . $object->$clef;
 if (!$selectedFile) {
     $filearray = dol_dir_list($dir, "files");
     $filearray2 = array();
@@ -249,10 +250,10 @@ if ($selectedFile) {
     $signeFile = str_replace(".pdf", "-signe.pdf", $selectedFile);
 
     if (isset($_REQUEST['demSign'])) {
-        $code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
-        //$code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
+//        $code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
+        $code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
 //        setElementElement("demSign", $typeObj . "|" . $selectedFile, $code, $id);
-        if (strlen($code) > 8)
+        if (strlen($code) > 7)
             $dateFin = strtotime("+ 2 day");
         else
             $dateFin = strtotime("+ 10 minutes");
@@ -265,9 +266,9 @@ if ($selectedFile) {
         $lien = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . "/synopsissignature/signature.php?code=" . $code;
         echo "<br/><h4>Lien : <a href='" . $lien . "'>" . $lien . "</a></h4>";
     } else if (isset($_REQUEST['img'])) {
-        if (!is_dir($dir . "/temp"))
-            mkdir($dir . "/temp");
-        $nomSign = $dir . "/temp/signature.png";
+        if (!is_dir($dirTmp . "/temp"))
+            mkdir($dirTmp . "/temp",0777,true);
+        $nomSign = $dirTmp . "/temp/signature.png";
         base64_to_jpeg($_REQUEST['img'], $nomSign);
 
         $afficheSign = false;

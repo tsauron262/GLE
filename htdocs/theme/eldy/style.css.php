@@ -33,14 +33,30 @@ if (!defined('NOCSRFCHECK'))     define('NOCSRFCHECK', 1);
 if (!defined('NOTOKENRENEWAL'))  define('NOTOKENRENEWAL', 1);
 if (!defined('NOLOGIN'))         define('NOLOGIN', 1); // File must be accessed by logon page so without login
 //if (! defined('NOREQUIREMENU'))   define('NOREQUIREMENU',1);  // We need top menu content
-if (!defined('NOREQUIREHTML'))   define('NOREQUIREHTML', 1);
-if (!defined('NOREQUIREAJAX'))   define('NOREQUIREAJAX', '1');
-
-
-define('ISLOADEDBYSTEELSHEET', '1');
-
-
-require __DIR__.'/theme_vars.inc.php';
+if (! defined('NOREQUIREHTML'))   define('NOREQUIREHTML',1);
+if (! defined('NOREQUIREAJAX'))   define('NOREQUIREAJAX','1');
+ 
+// Colors
+$colorbackhmenu1='80,90,120';      // topmenu
+$colorbackvmenu1='248,248,248';      // vmenu
+$colortopbordertitle1='200,200,200';    // top border of title
+$colorbacktitle1='220,220,223';      // title of tables,list
+$colorbacktabcard1='255,255,255';  // card
+$colorbacktabactive='234,234,234';
+$colorbacklineimpair1='255,255,255';    // line impair
+$colorbacklineimpair2='255,255,255';    // line impair
+$colorbacklinepair1='250,250,250';    // line pair
+$colorbacklinepair2='250,250,250';    // line pair
+$colorbacklinepairhover='238,246,252';    // line pair
+$colorbacklinebreak='214,218,220';        // line break
+$colorbackbody='255,255,255';
+$colortexttitlenotab='100,60,20';
+$colortexttitle='0,0,0';
+$colortext='0,0,0';
+$colortextlink='0,0,100';
+$fontsize='0.85em';
+$fontsizesmaller='0.75em';
+ 
 if (defined('THEME_ONLY_CONSTANT')) return;
 
 

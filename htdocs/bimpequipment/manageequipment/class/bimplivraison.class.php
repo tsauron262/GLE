@@ -188,8 +188,8 @@ class BimpLivraison {
                 } else {    // non serialisable
                     $result = $doliProduct->correct_stock($user, $entrepotId, $product['qty'], 0, $labelmove, 0, $codemove, 'order_supplier', $this->commande->id);
                     if ($result < 0) {
-                        $this->errors = array_merge($this->errors, $doliProduct->errors);
-                        $this->errors = array_merge($this->errors, $doliProduct->errorss);
+                        $this->errors = BimpTools::merge_array($this->errors, $doliProduct->errors);
+                        $this->errors = BimpTools::merge_array($this->errors, $doliProduct->errorss);
                     }
 
                     if ($length != sizeof($this->errors))
@@ -243,7 +243,7 @@ class BimpLivraison {
             'origin_id_element' => $this->commande->id
         ));
 
-        $this->errors = array_merge($this->errors, $equipement->create());
+        $this->errors = BimpTools::merge_array($this->errors, $equipement->create());
 
         $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
 
@@ -255,7 +255,7 @@ class BimpLivraison {
             'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'), // date et heure d'arrivée
             'code_mvt' => $this->getcodeMove()
         ));
-        $this->errors = array_merge($this->errors, $emplacement->create());
+        $this->errors = BimpTools::merge_array($this->errors, $emplacement->create());
         if ($length != sizeof($this->errors))
             $this->errors[] = ' id : ' . $prodId . ' numéro de série : ' . $serial;
     }

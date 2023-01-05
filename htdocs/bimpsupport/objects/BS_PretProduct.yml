@@ -47,8 +47,5 @@ lists:
         add_object_row: 1
         cols: 
             product: 
-                field: id_product
-                display: nom_url
             qty: 
-                field: qty
                 edit: 1

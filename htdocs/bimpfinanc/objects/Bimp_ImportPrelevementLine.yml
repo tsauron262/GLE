@@ -1,0 +1,126 @@
+table: Bimp_ImportPrelevementLine
+primary: id
+
+labels: 
+    name: ligne d'import
+    name_plur: lignes d'import
+    
+export_light: 0
+    
+    
+parent_module: bimpfinanc
+parent_object: Bimp_ImportPrelevement
+parent_id_property: id_import
+
+common_fields: 0
+
+objects:
+    facture:
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Facture
+     
+                
+fields: 
+    id_import:
+        label: Import
+        type: id_parent
+    facture:
+        label: Facture liée
+        type: id_object
+        object: facture
+    data:
+        label: Data
+        type: text
+    price:
+        label: Montant
+        type: money
+    traite:
+        label: Traité
+        type: bool
+    date: 
+        label: Date
+        type: date
+        
+    
+forms:
+    default: 
+        rows:
+            - field: facture
+            - field: data
+            - field: commition
+    
+filters_panels: 
+    default: 
+        filters: 
+            traite:
+                
+lists:
+    default: 
+        objects_change_reload: Bimp_ImportPrelevement
+        checkboxes: 1
+        modal_view: default
+        row_style:
+            callback: getRowStyle
+        configurable: 1
+        n: 25
+        filters_panel: default
+        extra_btn: 
+            callback: getListExtraButtons
+        update_btn: 1
+        cols:
+            facture:
+            dataLight:
+            price:
+            fact_reconnue:
+            fact_possible:
+            fact_client:
+            date: 
+            traite:
+                
+    global:
+        extends: default
+        header_buttons:
+            callback: getGlobalBtn
+                      
+lists_cols: 
+    dataLight:
+        label: Data light
+        value: 
+            callback: getDataInfo
+        
+views: 
+    default: 
+        objects_change_reload: Bimp_ImportPrelevementLine
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: infos
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: data
+        
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+            - field: name
+              edit: 1
+            - field: type
+            - field: facture
+            - field: price
+            - field: traite
+    data: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+            - field: data

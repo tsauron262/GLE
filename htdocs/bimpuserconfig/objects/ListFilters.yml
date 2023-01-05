@@ -1,0 +1,40 @@
+extends: 
+    module: bimpuserconfig
+    object_name: BCUserConfig
+    
+table: buc_list_filters
+
+labels: 
+    name: enregistrement de filtres
+    name_plur: enregistrements de filtres    
+    
+fields: 
+    filters: 
+        label: filtres
+        type: json
+        input: 
+            type: hidden
+            
+    component_name: unset
+        
+forms: 
+    default: 
+        rows: 
+            component_name: unset
+            is_default: unset
+            filters_id: 
+                custom: 1
+                hidden: 1
+                label: ID Filtres,
+                input_name: filters_id
+                input: 
+                    type: hidden
+            filters: 
+                field: filters
+                  
+lists: 
+    default: 
+        add_form_name: unset
+        add_btn_label: unset
+        cols: 
+            utilisation: unset

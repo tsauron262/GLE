@@ -29,8 +29,8 @@ objects:
                 module: bimpcore
                 name: Bimp_Product
             id_object:
-                field_value:
-                    fk_product
+                field_value: fk_product
+        relation: hasOne
 
 fields:
     rowid:
@@ -41,9 +41,14 @@ fields:
         type: string
         input:
             help: Laisse vide pour mettre la description du service
+    statut:
+        label: Etat du service
+        type: int
+        values:
+            array: list_statut
     fk_contrat:
         label: Contrat
-        type: int
+        type: id_parent
     fk_product:
         label: Produit
         type: id_object
@@ -53,18 +58,17 @@ fields:
             type: search_product
             help: Entrez le nom ou la référence d'un produit pour effectuer une recherche
             card: default
-        search:
-            input: 
-                type: search_product
-                societe_type: customer    
     qty:
         label: Qté
         type: qty
         default_value: 1
     serials:
         label: N° de série
-    price_ht:
+    subprice:
         label: P.U HT
+        type: money
+    price_ht:
+        label: P.U HT (Avec remise)
         type: money
     tva_tx: 
         label: Taux de TVA
@@ -73,55 +77,135 @@ fields:
     total_ttc: 
         label: Total TTC
         type: money
+    total_tva:
+        label: Total TVA
+        type: money
+    total_ht:
+        label: Total HT
+        type: money
+        has_total: 1
     remise_percent:
         label: Remise
         type: percent
         default_value: 0
+    buy_price_ht:
+        label: Prix d'achat HT
+        type: money
+        required: 1
     remise:
         label: Total remise
         type: money
+    logs:
+        label: Suivi du remplacement des numéros de séries
+    date_ouverture_prevue:
+        label: Date start
+        type: date
+    date_fin_validite:
+        label: Date End
+        type: date
+    product_type:
+        label: Type
+        type: int
+        values:
+            array: type_p
+    renouvellement:
+        label: Appartenance
+        type: int
+        
 lists: 
     default: 
         title: Lignes du contrat
-        icon: fas_file-contract
-        sort_field: tms
-        sort_way: desc
+        sort_field: rowid
+        sort_way: asc
         n: 20
         checkbox: 1
-        add_object_row: 0
         edit_btn: 1
         edit_form: default
         add_form_name: add
         delete_btn: 1
         page_btn: 1
         modal_view: default
+        extra_btn:
+            callback: getListExtraButtons
         cols: 
+            statut:
             description:
-                field: description
             fk_product:
-                field: fk_product
-                display: nom_url
+            subprice:
             qty:
-                field: qty
             tva_tx:
-                field: tva_tx
             remise_percent:
-                field: remise_percent
             remise:
-                field: remise
-            price_ht:
-                field: price_ht
+            total_ht:
+            total_tva:
             total_ttc:
-                field: total_ttc
+            buy_price_ht:
+            product_type:
+            renouvellement_renew:
+                label: Appartenance
+                value:
+                    callback: displayRenouvellementIn
+#            date_ouverture_prevue:
+    
+    global: 
+        title: Lignes du contrat
+        filters_panel: default
+        configurable: 1
+        total_row: 1
+        sort_field: rowid
+        sort_way: desc
+        n: 20
+        checkbox: 1
+        page_btn: 1
+        modal_view: default
+        cols: 
+            parent:fk_soc:
+            fk_contrat:
+            statut:
+            description:
+            fk_product:
+            subprice:
+            qty:
+            tva_tx:
+            remise_percent:
+            remise:
+            total_ht:
+            total_tva:
+            total_ttc:
+            buy_price_ht:
+            product_type:
+    
+    fi:
+        extends: default
+        delete_btn: 0
+        page_btn: 0
+        edit_form: 0
+        edit_btn: 0
+        add_form_name: 0
+        modal_view: 0
+        extra_btn:
+            callback: extraBtnFi
+        
+    product: 
+        extends: default
+        add_form_name: unset
+        cols: 
+            fk_product: unset
+        
     interface_client:
         edit_btn: 0
+        show: 0
         extends: default
         cols:
             fk_product: unset
             qty: unset
         list_filters: 
             callback: getListFilters
+        
 forms:
+    newAppartenance:
+        row:
+            - field: renouvellement
     default:
         rows:
             - field: rowid
@@ -131,9 +215,13 @@ forms:
               input_name: desc
             - field: fk_product
               edit: 0
+            - field: subprice
             - field: tva_tx
             - field: qty
             - field: remise_percent
+            - field: buy_price_ht
+            - field: renouvellement
+            - field: statut
             
     add:
         rows:
@@ -154,7 +242,7 @@ forms:
                           - 1
               input:
                   type: textarea
-                  help: Merci de séparer les numéros de séries par un saut de ligne
+                  help: Merci d'effectuer un retour à la ligne entre chaque n° de série
     rebase_serial:
         rows:
             - custom: 1
@@ -180,7 +268,8 @@ fields_tables:
             - field: fk_product
               display: nom
               label: Service
-#            - field: price_ht
+            - field: logs
+#            - field: subprice
 #              label: Prix unitaire hors-taxe
 #            - field: qty
 #              label: Quantitée dans le contrat
@@ -204,3 +293,13 @@ views:
                   col_md: 12
                   fields_table:
                       name: infos
+
+                        
+filters_panels: 
+    default: 
+        filters: 
+            parent:date_contrat:
+            fk_product:
+            produit:ref:
+            parent:secteur:
+            

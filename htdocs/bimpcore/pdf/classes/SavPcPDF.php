@@ -1,13 +1,14 @@
 <?php
 
-require_once __DIR__ . '/BimpDocumentPDF.php';
+require_once __DIR__ . '/BimpCommDocumentPDF.php';
 
-class SavPcPDF extends BimpDocumentPDF
+class SavPcPDF extends BimpCommDocumentPDF
 {
 
     public static $type = 'sav_pc';
     public $sav = null;
     public $mode = "normal";
+    public $signature_bloc = true;
 
     public function __construct($db)
     {

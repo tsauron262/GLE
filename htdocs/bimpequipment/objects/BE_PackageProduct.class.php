@@ -23,7 +23,7 @@ class BE_PackageProduct extends BimpObject
                         ))
                     );
                 }
-                
+
                 if ($package->isActionAllowed('moveProduct') && $package->canSetAction('moveProduct')) {
                     $buttons[] = array(
                         'label'   => 'Changer de package',
@@ -67,5 +67,13 @@ class BE_PackageProduct extends BimpObject
         }
 
         return '';
+    }
+
+    public function displayCurrentPlace()
+    {
+        if ($this->isLoaded()) {
+            $package = $this->getParentInstance();
+            return $package->displayCurrentPlace();
+        }
     }
 }

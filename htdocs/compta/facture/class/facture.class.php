@@ -2362,8 +2362,7 @@ class Facture extends CommonInvoice
                         
                         
                         /* mod drsi*/
-                        BimpTools::sleppIfBloqued("numFact");
-                        BimpTools::bloqueDebloque("numFact");
+                        BimpTools::lockNum("numFact");
                         /*fmoddrsi*/
 			$num = $this->getNextNumRef($this->thirdparty);
 		}
@@ -2389,9 +2388,6 @@ class Facture extends CommonInvoice
 
 			dol_syslog(get_class($this)."::validate", LOG_DEBUG);
 			$resql=$this->db->query($sql);
-                        /*moddrsi*/
-                        BimpTools::bloqueDebloque("numFact", 0);
-                        /*fmoddrsi*/
 			if (! $resql)
 			{
 				dol_print_error($this->db);
@@ -2473,11 +2469,11 @@ class Facture extends CommonInvoice
 	                        $listoffiles=dol_dir_list($conf->facture->dir_output.'/'.$newref, 'files', 1, '^'.preg_quote($oldref, '/'));
 	                        foreach($listoffiles as $fileentry)
 	                        {
-	                        	$dirsource=$fileentry['name'];
-	                        	$dirdest=preg_replace('/^'.preg_quote($oldref, '/').'/', $newref, $dirsource);
-	                        	$dirsource=$fileentry['path'].'/'.$dirsource;
-	                        	$dirdest=$fileentry['path'].'/'.$dirdest;
-	                        	@rename($dirsource, $dirdest);
+//	                        	$dirsource=$fileentry['name'];
+//	                        	$dirdest=preg_replace('/^'.preg_quote($oldref,'/').'/',$newref, $dirsource);
+//	                        	$dirsource=$fileentry['path'].'/'.$dirsource;
+//	                        	$dirdest=$fileentry['path'].'/'.$dirdest;
+//	                        	@rename($dirsource, $dirdest);
 	                        }
 						}
 					}
@@ -4713,7 +4709,7 @@ class FactureLigne extends CommonInvoiceLine
 		$sql.= " ".price2num($this->remise_percent).",";
 		$sql.= " ".price2num($this->subprice).",";
 		$sql.= ' '.(! empty($this->fk_remise_except)?$this->fk_remise_except:"null").',';
-		$sql.= " ".(! empty($this->date_start)?"'".$this->db->idate($this->db->jdate($this->date_start))."'":"null").",";
+		$sql.= " ".(! empty($this->date_start)?"'".$this->db->idate($this->date_start)."'":"null").",";
 		$sql.= " ".(! empty($this->date_end)?"'".$this->db->idate($this->date_end)."'":"null").",";
 		$sql.= ' '.$this->fk_code_ventilation.',';
 		$sql.= ' '.$this->rang.',';

@@ -7,7 +7,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 //    accessforbidden();
 //}
 
-$nameController = $_REQUEST['fc'] ? $_REQUEST['fc'] : 'index';
+$nameController = $_REQUEST['fc'] ? $_REQUEST['fc'] : 'cegid';
 $controller = BimpController::getInstance('bimptocegid', $nameController);
 
 $controller->display();

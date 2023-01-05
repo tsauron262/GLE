@@ -17,6 +17,10 @@ objects:
     session_caisse:
         instance: 
             bimp_object: BC_CaisseSession
+            
+    paiement:
+        instance: 
+            bimp_object: BC_Paiement
 sections:
     - type: tabs
       tabs: 
@@ -45,6 +49,13 @@ sections:
                       panel: 1
                       name: full
                       object: ventes
+        paiements:
+            label: Paiements
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: paiement
                       
         fonds:
             label: Mouvements de fonds

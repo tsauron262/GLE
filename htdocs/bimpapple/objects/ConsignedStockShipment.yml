@@ -1,0 +1,133 @@
+table: bimp_apple_consigned_stock_shipment
+primary: id
+icon: fas_shipping-fast
+controller: csShipment
+common_fields: 0
+
+list_page_url: 
+    module: bimpsupport
+    controller: index
+    url_params: 
+        tab: consigned_stocks
+        navtab-maintabs: cs_shipments
+        
+header_list_name: default
+header_btn: 
+    callback: getActionsButtons
+
+labels: 
+    name: renvoi stock consigné
+    name_plur: renvois stocks consignés
+
+fields: 
+    code_centre: 
+        label: Centre
+        required: 1
+        values: 
+            array: centres
+            
+    order_id: 
+        label: N° de commande
+        required: 1
+        
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+        
+    carrier_code: 
+        label: Transporteur
+        values: 
+            array: carriers
+            
+    tracking_number: 
+        label: N° de suivi
+        
+    date_submitted: 
+        label: Validé le
+        type: datetime
+        
+    date_shipped: 
+        label: Expédié le 
+        type: datetime
+        
+    shipment_number: 
+        label: N° d'envoi
+        
+    parts: 
+        label: Composants
+        type: json
+     
+forms: 
+    ship: 
+        rows: 
+            - field: carrier_code
+              required: 1
+            - field: tracking_number
+              required: 1
+        
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: code_centre
+            - field: order_id
+            - field: status
+            - field: carrier_code
+            - field: tracking_number
+            - field: date_submitted
+            - field: date_shipped
+            - field: shipment_number
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: infos
+                  col_md: 6
+                  col_lg: 6
+            - cols: 
+                - type: custom
+                  custom:
+                      callback: renderPartsList
+    
+filters_panels: 
+    default: 
+        filters: 
+            code_centre: 
+            order_id: 
+            status: 
+            date_submitted: 
+            date_shipped:
+            
+lists: 
+    default: 
+        title: Renvois Stocks consignés
+        icon: fas_shipping-fast
+        configurable: 1
+        filters_panel: default
+        sort_field: id
+        sort_way: desc
+        n: 10
+        page_btn: 1
+        header_buttons: 
+            callback: getListHeaderButtons
+        cols: 
+            order_id: 
+            status: 
+            date_submitted: 
+            date_shipped:
+            carrier_code: 
+            tracking_number: 
+            
+        
+        
+    
+    

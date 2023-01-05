@@ -19,7 +19,7 @@ class inventoryController extends BimpController {
 
         if($err_serializable and 1 < $quantity_input) {
             $tab = $inventory->createMultipleEquipment($id_product, $quantity_input);
-            $errors = array_merge($errors, $tab['errors']);
+            $errors = BimpTools::merge_array($errors, $tab['errors']);
             $msg = $tab['msg'];
             if(count($errors) == 1 and !count($tab['id_inventory_det'])) // une seule erreur et ajout de lignes
                 unset($errors[0]);
@@ -34,7 +34,7 @@ class inventoryController extends BimpController {
                 $tab = $inventory->createLinesProduct($id_product, $quantity_input);
             }
             $id_inventory_det = $tab['id_inventory_det'];
-            $errors = array_merge($errors, $tab['errors']);
+            $errors = BimpTools::merge_array($errors, $tab['errors']);
             $msg = $tab['msg'];
         }
 

@@ -317,10 +317,18 @@ $article_color: #004264;
     padding-bottom: 15px;
 }
 
-#curVenteCommercial {
+#curVenteInfos {
     background-color: #fff;
     padding: 10px;
     margin-bottom: 15px;
+    
+    .curVenteInfo {
+        display: inline-block;
+        margin-bottom: 2px;
+        input {
+            width: 450px;
+        }
+    }
 }
 
 #venteClientFormContainer {

@@ -9,6 +9,15 @@ labels:
     name_plur: lignes de transfert
     is_female: 1
     
+objects: 
+    transfer: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: Transfer
+            id_object: 
+                field_value: id_transfer
+                
 fields: 
     id_transfer:
         label: Transfert
@@ -37,129 +46,60 @@ fields:
         label: Quantité transférée
         type: int
 
+filters_panels: 
+    default: 
+        filters: 
+            parent:id_warehouse_source:
+            parent:id_warehouse_dest:
+            parent:status:
+            id_product: 
+            id_equipment: 
+            quantity_sent: 
+            quantity_transfered: 
+            parent:date_opening:
+            parent:date_create:
+                
 lists:
     default:
        title: Lignes de transfert
        objects_change_reload: Transfer
        delete_btn: 1
        update_btn: 1
+       configurable: 1
        cols:
            id_product: 
-               field: id_product
-               display: nom_url
            id_equipment: 
-               field: id_equipment
-               display: nom_url
-           quantity_sent: 
-               field: quantity_sent
+           quantity_sent:
                edit: 1
            quantity_received: 
-               field: quantity_received
                label: Quantité reçue (brouillon)
                edit: 1
-           quantity_transfered: 
-               field: quantity_transfered
+           quantity_transfered:
 
     prod:
        filters_panel: default
+       configurable: 1
        cols:
            id_transfer:
-               field: id_transfer
-               display: nom_url
-           id_warehouse_source:
-               field: id_warehouse_source
-               display: nom_url
-               child: parent
-           id_warehouse_dest:
-               field: id_warehouse_dest
-               display: nom_url
-               child: parent
-           status:
-               field: status
-               child: parent
-           date_create:
-               field: date_create
-               child: parent
+           parent:id_warehouse_source:
+           parent:id_warehouse_dest:
+           parent:status:
+           parent:date_create:
            id_product: 
-               field: id_product
-               display: nom_url
            id_equipment: 
-               field: id_equipment
-               display: nom_url
            quantity_sent: 
-               field: quantity_sent
            quantity_transfered: 
-               field: quantity_transfered
                
     dash_board_reception:
        extends: prod
        objects_change_reload: Transfer
        cols:
-           id_warehouse_dest: unset
-           status: unset
+           parent:id_warehouse_dest: unset
+           parent:status: unset
            
     dash_board_send:
        extends: prod
        objects_change_reload: Transfer
        cols:
-           id_warehouse_source: unset
-           status: unset
-
-
-filters_panels: 
-    default: 
-        filters: 
-            id_warehouse_source:
-               field: id_warehouse_source
-               display: nom_url
-               child: parent
-            id_warehouse_dest:
-               field: id_warehouse_dest
-               display: nom_url
-               child: parent
-            status:
-               field: status
-               child: parent
-            id_product: 
-               field: id_product
-               display: nom_url
-            id_equipment: 
-               field: id_equipment
-               display: nom_url
-            quantity_sent: 
-               field: quantity_sent
-            quantity_transfered: 
-               field: quantity_transfered
-            date_opening: 
-                field: date_opening
-                child: parent
-            date_create:
-                field: date_create
-                child: parent
-            categ1:
-                custom: 1
-                label: Catégorie (1)
-                field: categ1
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ2:
-                custom: 1
-                label: Catégorie (2)
-                field: categ2
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ3:
-                custom: 1
-                label: Catégorie (3)
-                field: categ3
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
+           parent:id_warehouse_source: unset
+           parent:status: unset

@@ -27,6 +27,10 @@
     border-left: 3px solid $gray;
     margin: 30px 0;
 
+    .dataInputTemplate {
+        display: none;
+    }
+    
     .formGroupHeading {
         margin-bottom: 5px;
 
@@ -46,7 +50,7 @@
             }
         }
     }
-    
+
     .formGroupButtons {
         display: block;
         text-align: right;
@@ -78,15 +82,15 @@
     display: flex;
 
     .inputLabel, 
-    .inputContainer,
+    /*.inputContainer, (transféré dans .fieldRowInput)*/
     .inputMultipleValuesContainer {
         padding: 10px 15px;
         /*margin-right: 12px;*/
     }
 
     .inputLabel {
-        color: #fff;
-        background-color: $primary;
+        color: $bimp_headers_color;
+        background-color: $bimp_headers_bk_color;
         border-bottom: 1px solid #fff;
         font-weight: bold;
         text-align: right;
@@ -98,6 +102,7 @@
         color: $secondary;
         background-color: #fff;
         border-bottom: 1px solid $gray_light;
+        padding: 10px 15px;
 
         .inputContainer {      
             select {
@@ -125,11 +130,15 @@
 
 @media (max-width: $screen-sm) {
     .fieldRow,
-    formRow {
+    .formRow {
         display: block;
 
         .inputLabel {
             text-align: left;
+        }
+
+        input, select, textarea {
+            width: 95% !important;
         }
     }
 }
@@ -220,6 +229,11 @@ input, select {
     background-color: #fff;
     color: #3C3C3C;
     @include transition(all 0.5s ease);
+    
+    &.error {
+        border: 1px solid #ff0000;
+        box-shadow: 0 0 2px #780000
+    }
 }
 
 .elect2-selection__rendered {
@@ -363,6 +377,15 @@ select.switch {
                 0 0 0 0 rgba(#4c6,.7) inset;
         }
     }
+    & + span + .toggle-slider.disabled {
+        &:before {
+            display:none;
+        }
+
+        &:after {
+            display:none;
+        }
+    }
     &:checked {
         & + span {
             color: $gray;
@@ -394,7 +417,7 @@ select.switch {
     padding: 0 15px;
     overflow-y: auto;
     max-height: 600px;
-    
+
     button,
     .btn {
         display: block;
@@ -469,6 +492,9 @@ select.switch {
         }
     }
 }
+.multiple_values_items_options {
+    display: none;
+}
 .inputMultipleValues {
     margin: 15px 0;
 
@@ -488,6 +514,21 @@ select.switch {
 
         & > td.item_label {
             width: 80%;
+
+            .item_option {
+                margin-top: 10px;
+                margin-bottom: 5x;
+
+                .item_option_label {
+                    font-size: 11px;
+                    font-weight: bold;
+                    font-style: italic;
+                    color: $gray-dark;
+                    margin-bottom: 3px;
+                    padding-bottom: 3px;
+                    border-bottom: 1px solid #DCDCDC;
+                }
+            }
         }
         & > td.positionHandle {
             width: 10%;
@@ -670,7 +711,7 @@ input[type=text].large_input {
 }
 
 .check_list_item > label,
-.check_list_group_caption {
+.check_list_group_caption.selectable {
     margin: 0 0 5px 0;
     padding: 0 6px 0 24px;
 
@@ -686,7 +727,7 @@ input[type=text].large_input {
 }
 
 .check_list_item > input[type=checkbox]:checked + label,
-.check_list_group > input[type=checkbox]:checked + .check_list_group_caption {
+.check_list_group > input[type=checkbox]:checked + .check_list_group_caption.selectable {
     color: $gray-darker;
 
     &:before {
@@ -738,6 +779,15 @@ input[type=text].large_input {
     margin-left: 5px;
 
     border-left: 1px dotted #B4B4B4;
+}
+
+/*JSON Inputs*/
+
+.bimp_json_input_value {
+    .bimp_json_input_title {
+        font-size: 13px;
+        font-weight: bold;
+    }
 }
 
 /*Free Forms*/
@@ -916,4 +966,133 @@ input[type=text].large_input {
     .check_list_search_input {
         display: none!important;
     }   
+}
+
+/*Filters Input*/
+
+.obj_filters_input_container input {
+    max-width: 350px!important;
+}
+
+/*Input Hastags*/
+
+#bih_autocomplete_modal {
+    #bih_autocomplete_modal_body {
+        overflow: visible;
+    }
+
+    #bihCurValueLabel {
+        background-color: #fff;
+        padding: 15px;
+        display: inline-block;
+        display: none;
+        margin: auto;
+        margin-top: 15px;
+        max-width: 500px;
+        text-align: left;
+    }
+
+    #bihValidateMsg {
+        display: inline-block;
+        margin: auto;
+        margin-top: 20px;
+        display: none;
+        text-align: center;
+        font-size: 16px;
+    }
+
+    .modal-body {
+        padding: 15px!important;
+        background-color: #F7F7F7;
+        max-height: none!important;
+    }
+
+    p {
+        margin-bottom: 20px;
+    }
+
+    #bih_search_form {
+        display: inline-block;
+        margin: auto;
+    }
+
+    #bihObjectTypeContainer {
+        display: inline-block;
+        margin-right: 10px;
+        text-align: left;
+    }
+
+    #bihSearchInputContainer {
+        display: inline-block;
+        text-align: left;
+
+        .spinner {
+            opacity: 0;
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 16px;
+        }
+    }
+
+    #bihObjectLabel {
+        @include transition(all 0.3s ease);
+        display: none;
+        padding: 7px;
+        font-weight: bold;
+
+        &:hover {
+            color: #fff;
+            background-color: #A00000;
+            cursor: pointer;
+        }
+    }
+
+    label {
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    input {
+        @include transition(all 0.3s ease);
+        border: 1px solid #6C6C6C;
+        padding: 5px 10px!important; 
+        font-size: 14px;
+
+        &:focus {
+            border-color: #3B6EA0;
+            box-shadow: 0 0 8px 0 #559EE6;
+        }
+
+        &.no_results {
+            color: #CC0000;
+            border-color: #CC0000;
+            box-shadow: 0 0 8px 0 #E67373;
+        }
+
+        &[name="bih_search_object_input"] {
+            width: 180px!important;
+        }
+
+        &[name="bih_search_input"] {
+            width: 350px!important;
+        }
+    }
+
+    #bihAddHastagFormContainer {
+        display: none;
+        margin-top: 30px;
+
+        .singleLineForm {
+            text-align: left;
+
+            input {
+                min-width: 160px;
+            }
+
+            textarea {
+                min-width: 300px;
+            }
+        }
+    }
 }

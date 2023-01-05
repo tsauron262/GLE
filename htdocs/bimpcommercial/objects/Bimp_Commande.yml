@@ -2,6 +2,8 @@ extends:
     module: bimpcommercial
     object_name: BimpComm
 
+abstract: 0
+
 dol_object: 
     instance: 
         dol_object: commande
@@ -22,38 +24,6 @@ objects:
         instance: 
             bimp_object: Bimp_CommandeLine
             
-    order_lines: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: 
-                module: bimpreservation
-                name: BR_OrderLine
-                
-    products: 
-        relation: hasMany
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpreservation
-                name: BR_OrderLine
-        list: 
-            title: Produits
-            filters: 
-                type: 1
-    
-    services: 
-        relation: hasMany
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpreservation
-                name: BR_OrderLine
-        list: 
-            title: Services
-            filters: 
-                type: 2
-                
     shipment: 
         relation: none
         delete: 0
@@ -61,14 +31,6 @@ objects:
             bimp_object: 
                 module: bimplogistique
                 name: BL_CommandeShipment
-                
-    old_shipments: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: 
-                module: bimpreservation
-                name: BR_CommandeShipment
                 
     shipments: 
         relation: hasMany
@@ -85,11 +47,6 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_ProductFournisseurPrice
-                
-    entrepot: 
-        instance: 
-            id_object:
-                field_value: entrepot
                 
     files:
         list: 
@@ -127,20 +84,31 @@ associations:
                 type: nom_url
                 
 fields: 
-    validComm:
-        label: Validation Commerciale
-        type: bool
-        edit: 0
-            
-    validFin:
-        label: Validation Financiére
-        type: bool
-        edit: 0
+    fk_cond_reglement:
+        depends_on: fk_soc,id_client_facture
+        
+    fk_mode_reglement: 
+        depends_on: fk_soc,id_client_facture
+        
+#    validComm:
+#        label: Validation Commerciale
+#        type: bool
+#        edit: 0
+#            
+#    validFin:
+#        label: Validation Financiére
+#        type: bool
+#        edit: 0
         
     id_facture: 
         label: Facture globale
         type: id_object
         object: facture
+        default_value: 0
+        
+    marge:
+        label: Marge
+        type: money
         default_value: 0
     
     date_commande:
@@ -162,6 +130,10 @@ fields:
         label: Fermée le
         type: datetime
         
+    date_prevue_facturation:
+        label: Date prévisionnelle de facturation
+        type: date
+        
 #    fk_user_modif: 
 #        label: Dernière modification par
 #        type: int
@@ -174,7 +146,7 @@ fields:
 #        type: int
         
     date_livraison: 
-        label: Date prévue de livraison
+        label: Date de livraison souhaitée
         type: date
         
     total_ttc: 
@@ -285,10 +257,35 @@ fields:
         default_value: 0
         
     total: unset
+    
+    paiement_comptant:
+        label: Paiement comptant
+        type: bool
+        default_value: 0
+        
+    rappel_service_expire:
+        label: Rappel service expire
+        type: bool
+        default_value: 1
+        
+    mode_liv:
+        label: Mode de livraison
+        type: int
+        values:
+            - Livraison en totalité
+            - Livraison partielle
+        default_value: 1
+    
+    consigne_liv:
+        label: Consigne de livraison
+        type: text
         
 fields_tables: 
     infos: 
         rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - field: fk_statut
             - field: logistique_status
             - field: shipment_status
@@ -299,10 +296,29 @@ fields_tables:
               display: nom_url
               edit: 1
             - field: ef_type
+            - field: expertise
+              edit: 1
             - field: fk_input_reason
               edit: 
                   callback: isEditable
             - field: date_commande
+              edit: 
+                  callback: isEditable
+#            - field: validComm
+#            - field: validFin
+            - field: zone_vente
+              edit: 1
+            - field: revalorisation
+              edit: 1
+            - field: rappel_service_expire
+              edit:
+                  callback: isCommercialOrSup
+                  
+    livraison: 
+        title: Livraison
+        icon: truck
+        rows: 
+            - field: mode_liv
               edit: 
                   callback: isEditable
             - field: date_livraison
@@ -311,21 +327,38 @@ fields_tables:
             - field: fk_availability
               edit: 
                   callback: isEditable
-            - field: validComm
-            - field: validFin
-            - field: zone_vente
-              edit: 1
-            - field: revalorisation
-              edit: 1
+            - field: consigne_liv
+              edit: 
+                  callback: isEditable
+            - label: Contact livraison
+              value: 
+                  callback: 
+                    method: renderContacts
+                    params:
+                        - external
+                        - SHIPPING
+                  
+            
+                  
                   
     payment:
         rows:
             - field: fk_cond_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: fk_mode_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
+            - field: rib_client
+              edit: 1
+            - field: date_prevue_facturation
+              edit: 1
+            - field: paiement_comptant
+            - custom: 1
+              label: Preuve de paiement
+              value:
+                  callback: 
+                    method: displayBool
+                    params:
+                        - asPreuvePaiment
                   
     client: 
         rows: 
@@ -365,15 +398,51 @@ fields_tables:
             - label: Remises
               value: 
                   callback: displayTotalRemises
-            - field: total_ht
-            - field: tva
-            - field: total_ttc
+            - label: Total HT
+              value: 
+                  callback: 
+                      method: displayValueWithFullQty
+                      params: 
+                          - total_ht
+            - label: Total TVA
+              value: 
+                  callback: 
+                      method: displayFullQtyValue
+                      params: 
+                          - tva
+            - label: Total TTC
+              value: 
+                  callback: 
+                      method: displayFullQtyValue
+                      params: 
+                          - total_ttc
                   
 views: 
     default: 
         objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
+        rows: 
+            0: 
+                cols: 
+                    1: 
+                        rows: 
+                            2: 
+                                cols: 
+                                        - type: fields_table
+                                          fields_table: 
+                                              name: livraison
     content_infos: 
         objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
+        rows: 
+            0: 
+                cols: 
+                    0: 
+                        rows: 
+                            0: 
+                                cols: 
+                                    1: 
+                                        type: custom
+                                        custom: 
+                                            callback: renderTotalsPanel
     full: 
         objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
     commandes_fourn: 
@@ -394,13 +463,34 @@ views:
         
 forms: 
     default: 
+        on_save: redirect
         msgs:
             callback: getCreateFromOriginCheckMsg
         rows: 
+            - field: replaced_ref
             - field: libelle
+            - field: expertise
             - field: entrepot
             - field: ef_type
             - field: fk_soc
+            - custom: 1
+              label: Afficher forçage création
+              input_name: show_force_create
+              hidden: 1
+              input: 
+                  type: hidden
+              depends_on: fk_soc
+              value: 
+                  callback: showForceCreateBySoc
+            - custom: 1
+              label: Forcer la création
+              input_name: force_create_by_soc
+              content: 
+                  callback: renderForceCreateBySoc
+              depends_on: fk_soc
+              display_if: 
+                  field_name: show_force_create
+                  show_values: 1
             - field: id_client_facture
             - field: ref_client
             - field: fk_input_reason
@@ -408,6 +498,16 @@ forms:
                   callback: isEditable
             - field: fk_cond_reglement
             - field: fk_mode_reglement
+            - field: rib_client
+            - custom: 1
+              label: Paiement Comptant
+              input_name: paiement_comptant
+              hidden: 1
+              input: 
+                  type: hidden
+              depends_on: fk_cond_reglement,fk_mode_reglement
+              value: 
+                  callback: isPaiementComptant                  
             - field: date_commande
             - field: date_livraison
             - field: fk_availability
@@ -448,19 +548,14 @@ forms:
                   type: hidden
               value: 
                   request: param_values/fields/close_propal
-    
 
     duplicate:
         rows: 
-            2: 
-                field: libelle
-            3: 
-                field: ef_type
-            4:
+            date_commande:
                 field: date_commande
-            5: 
+            date_liv: 
                 field: date_livraison
-            6: 
+            availability: 
                 field: fk_availability
                   
     shipment: 
@@ -496,6 +591,7 @@ forms:
     invoice: 
         title: Facturation
         icon: fas_file-invoice-dollar
+        modal_format: large
         rows: 
             - custom: 1
               label: Facture
@@ -506,6 +602,15 @@ forms:
                   callback: renderFacturesInput
               hidden: 
                   request_field: new_facture
+            - custom: 1
+              label: Référence facture remplacée
+              input_name: replaced_ref
+              input: 
+                  type: text
+                  help: Utiliser ce champ si perte des données de la facture remplacée
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
             - custom: 1
               label: Client
               input_name: id_client_facture
@@ -518,20 +623,20 @@ forms:
               display_if: 
                   field_name: id_facture
                   show_values: 0
+#            - custom: 1
+#              label: Contact
+#              input_name: id_contact
+#              data_type: id
+#              input: 
+#                  type: select
+#                  options: 
+#                      array: clientFactureContacts
+#              display_if: 
+#                  field_name: id_facture
+#                  show_values: 0
+#              depends_on: id_client_facture
             - custom: 1
-              label: Contact
-              input_name: id_contact
-              data_type: id
-              input: 
-                  type: select
-                  options: 
-                      array: clientFactureContacts
-              display_if: 
-                  field_name: id_facture
-                  show_values: 0
-              depends_on: id_client_facture
-            - custom: 1
-              label: Conditions de réglement
+              label: Conditions de règlement
               input_name: id_cond_reglement
               data_type: id
               input: 
@@ -543,7 +648,7 @@ forms:
               value: 
                   callback: getCondReglementBySociete
             - custom: 1
-              label: Compte financier
+              label: Compte bancaire
               input_name: id_account
               data_type: id_object
               input: 
@@ -552,6 +657,8 @@ forms:
               display_if: 
                   field_name: id_facture
                   show_values: 0
+              value: 
+                  conf: id_default_bank_account
             - custom: 1
               label: Avoirs client à utiliser
               input_name: id_remises_list
@@ -634,20 +741,8 @@ forms:
               type: info
         rows: 
             - custom: 1
-              label: Type de statut
-              input_name: status_type
-              input: 
-                  type: select
-                  options: 
-                      logistique: Statut logistique
-                      shipment: Statut expédition
-                      invoice: Statut facturation
-            - custom: 1
-              label: Forcer le statut à
+              label: Forcer le statut logistique à
               input_name: logistique_status
-              display_if: 
-                  field_name: status_type
-                  show_values: logistique
               input: 
                   type: select
                   options:
@@ -656,14 +751,9 @@ forms:
                       1: En cours de traitement
                       2: Traitée
                       3: Compléte
-                      4: En attente
-                      5: A supprimer
             - custom: 1
-              label: Forcer le statut à
+              label: Forcer le statut expédition à
               input_name: shipment_status
-              display_if: 
-                  field_name: status_type
-                  show_values: shipment
               input: 
                   type: select
                   options:
@@ -672,11 +762,8 @@ forms:
                       1: Expédiée partiellement
                       2: Expédiée
             - custom: 1
-              label: Forcer le statut à
+              label: Forcer le statut facturation à
               input_name: invoice_status
-              display_if: 
-                  field_name: status_type
-                  show_values: invoice
               input: 
                   type: select
                   options:
@@ -694,82 +781,67 @@ forms:
               input: 
                   type: qty
               value: 1
-                           
+              
+    livraison:
+        rows:
+            - field: mode_liv
+            - field: date_livraison
+            - field: fk_availability
+            - field: consigne_liv
+            - custom: 1
+              input_name: liv_contact
+              label: Contact livraison
+              content: 
+                  callback: 
+                    method: renderContacts
+                    params:
+                        - external
+                        - SHIPPING
+                        - liv_contact
+                        
+    preuve_paiement:
+        rows:
+            - custom: 1
+              input_name: file
+              label: Fichier
+              input:
+                  type: file_upload
+            
+    
 filters_panels: 
     default: 
         filters: 
             type: unset
+            datec: unset
+            total: unset
             id_user_resp: 
-                field: id_user_resp
             total_ttc: 
-                field: total_ttc
-            date_create: 
-                field: date_creation
+            date_creation: 
             logistique_status:
-                field: logistique_status
             shipment_status: 
-                field: shipment_status
             invoice_status: 
-                field: invoice_status
             date_livraison: 
-                field: date_livraison
-            reval:
-                field: revalorisation
-            validComm:
-                field: validComm
-            validFin:
-                field: validFin
+            revalorisation:
+#            validComm:
+#            validFin:
             
-lists_cols: 
-    date_create: 
-        field: date_creation
-        date_commande:
-    date_commande: 
-        field: date_commande
-    date_livraison: 
-        field: date_livraison
-    total_ttc: 
-        field: total_ttc
-        has_total: 1
-    total_ht: 
-        field: total_ht
-        has_total: 1
-    facture: 
-        field: id_facture
-        display: nom_url
-    validComm: 
-        label: Valid. comm.
-        field: validComm
-        max_width: 45px
-    validFin:
-        label: Valid. fin.
-        field: validFin
-        max_width: 45px
-    logistique_status:
-        label: St. log.
-        field: logistique_status
-        display: icon
-        max_width: 30px
-        min_width: 30px
-    shipment_status: 
-        label: St. exp.
-        field: shipment_status
-        display: icon
-        max_width: 30px
-        min_width: 30px
-    invoice_status: 
-        label: St. fac.
-        field: invoice_status
-        display: icon
-        max_width: 30px
-        min_width: 30px
-    id_user_resp: 
-        field: id_user_resp
-    client_facture:
-        field: id_client_facture
-        display: nom_url
-    revalorisation:
-        field: revalorisation
+#lists_cols: 
+#    validComm: 
+#        label: Valid. comm.
+#    validFin:
+#        label: Valid. fin.
+#    logistique_status:
+#        label: St. log.
+#        display: icon
+#        min_width: 30
+#    shipment_status: 
+#        label: St. exp.
+#        display: icon
+#        min_width: 30
+#    invoice_status: 
+#        label: St. fac.
+#        display: icon
+#        min_width: 30
         
 lists: 
     default: 
@@ -777,7 +849,28 @@ lists:
         title: Liste des commandes
         icon: fas_dolly
         bulk_actions:
-            - label: supprimer les commandes sélectionnées
+            delete:
+                label: supprimer les commandes sélectionnées
+            force_paye:
+                label: Forcer facturé les commandes sélectionnées
+                icon: far_check-square
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'2','type':'invoice_status'}, '', 'Forcer facturé ', true)
+            force_expe:
+                label: Forcer expédié les commandes sélectionnées
+                icon: far_check-square
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'2','type':'shipment_status'}, '', 'Forcer expédié ', true)
+            force_logi:
+                label: Forcer logistique complète les commandes sélectionnées
+                icon: far_check-square
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'3','type':'logistique_status'}, '', 'Forcer logistique complète ', true)
+            cancel: 
+                label: Annuler
+                icon: fas_times
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'cancel', {}, '', 'Veuillez confirmer', true)
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+        list_actions: 
+            callback: getFilteredListActions
         sort_field: date_creation
         sort_way: desc
         add_form_values: 
@@ -788,17 +881,15 @@ lists:
                     request: id_client
         cols: 
             ref: 
-            statut: 
+            fk_statut: 
             commercial:
             libelle:
             entrepot: 
-            soc:
-            date_create: 
+            fk_soc:
+            date_creation: 
             total_ttc:
     client: 
         extends: default
-        cols: 
-            soc: unset
             
 cards: 
     default: 
@@ -807,9 +898,9 @@ cards:
         status: fk_statut
         view_btn: 1
         fields: 
+            - field: replaced_ref
             - field: total_ttc
             - field: fk_soc
-              display: nom_url
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
@@ -818,8 +909,10 @@ searches:
     default: 
         fields_search: 
             - a.ref
+            - a.rowid
             - ef.libelle
             - s.nom
+            - a.replaced_ref
         joins:
             ef: 
                 table: commande_extrafields
@@ -833,3 +926,12 @@ searches:
             - a.ref
             - s.nom
         label_syntaxe: '<a.ref> (Client: <s.nom>)'
+    light:
+        fields_search:
+            - a.ref
+        fields_return: 
+            - a.ref
+
+views_lists: 
+    default:
+        sort_field: date_creation

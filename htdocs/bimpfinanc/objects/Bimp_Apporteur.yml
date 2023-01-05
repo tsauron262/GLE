@@ -1,0 +1,134 @@
+table: Bimp_Apporteur
+primary: id
+controller: apporteur
+
+
+list_page_url:
+    controller: index
+    url_params: 
+        tab: apporteur
+        
+header_list_name: default
+
+labels: 
+    name: Apporteur
+    name_plur: Apporteurs
+    is_female: 0
+    
+    
+
+nom_url: 
+    syntaxe: Apporteur <id_fourn>
+    external_link: 1
+    modal_view: full
+    
+    
+objects:
+    filtres: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: Bimp_ApporteurFilter
+    commissions: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: Bimp_CommissionApporteur
+    fourn: 
+        extends: fournisseur
+        instance: 
+            id_object: 
+                field_value: id_fourn
+     
+                
+fields: 
+    id_fourn:
+        label: Fournisseur
+        type: id_object
+        object: fourn
+        default_value: 
+            field_value: 0
+    
+forms:
+    default: 
+        rows:
+            - field: id_fourn
+    
+filters_panels: 
+    default: 
+        filters: 
+            1:
+                field: id_fourn
+                
+lists:
+    default: 
+        checkboxes: 1
+        configurable: 1
+        sort_field: id
+        sort_way: desc
+        n: 25
+        delete_btn: 1
+        modal_view: default
+        add_form_name: default
+        filters_panel: default
+        edit_btn: 1
+        page_btn: 1
+        cols:
+            id_fourn: 
+    
+    
+views: 
+    default: 
+        objects_change_reload: BimpFile,BimpNote,RemiseGlobale
+        delete_btn: 1
+        edit_form: default
+#        footer_extra_btn: 
+#            callback: getActionsButtons
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: filtres
+                      title: Filtres
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: commissions
+                      title: Commissions
+
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        panel: 0
+        rows: 
+            - field: id_fourn
+    
+
+searches:
+    default: 
+        fields_search: 
+            - ef.nom
+        joins:
+            ef: 
+                table: societe
+                on: a.id_fourn = ef.rowid
+                alias: ef
+        fields_return: 
+            - ef.nom
+        label_syntaxe: '<ef.nom>'
+                     
+        
+        
+
+

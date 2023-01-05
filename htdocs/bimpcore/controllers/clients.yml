@@ -1,0 +1,162 @@
+bootstrap: 1
+title: Clients
+    
+objects: 
+    client: 
+        instance: 
+            bimp_object: Bimp_Client
+    societe: 
+        instance: 
+            bimp_object: Bimp_Societe
+            
+    contact: 
+        instance: 
+            bimp_object: Bimp_ContactClient
+            
+    soc_remise_except: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_SocRemiseExcept
+            
+    relance: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: BimpRelanceClients
+                
+    relance_lines:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: BimpRelanceClientsLine
+                
+    relances_report: 
+        instance: 
+            bimp_object: 
+                module: bimpdatasync
+                name: BDS_Report
+            
+    suivi_rec: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Client_Suivi_Recouvrement
+                
+    user_client:
+        instance:
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+        
+    ribs:
+        instance:
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_SocBankAccount
+                
+    stats:
+        instance:
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Stat_Date
+        
+                
+sections: 
+    - type: tabs
+      tabs: 
+          default: 
+              label: Clients
+              sections: 
+                  - type: list
+                    list: 
+                        object: client
+          contacts: 
+              label: Contacts clients
+              sections: 
+                  - type: list
+                    list: 
+                        object: contact
+          user_client: 
+              label: Comptes espace client
+              show: 
+                  is_module_active: bimpinterfaceclient
+              sections: 
+                  - type: list
+                    list: 
+                        object: user_client
+          
+          remises: 
+              label: Avoirs clients
+              sections: 
+                  - type: list
+                    list: 
+                        object: soc_remise_except
+                        name: clients
+          stat_client: 
+              label: Stats clients
+              sections: 
+                - type: stats_list
+                  stats_list: 
+                      panel: 1
+                      object: client
+                      name: default
+          relances: 
+              label: Relances paiements
+              show: 
+                  conf: 
+                      module: bimpcommercial
+                      name: use_relances_paiements_clients
+              sections: 
+                  - type: list
+                    list: 
+                        object: relance
+          relances_lines: 
+              show: 
+                  conf: 
+                      module: bimpcommercial
+                      name: use_relances_paiements_clients
+              label: Détails des relances
+              sections: 
+                  - type: list
+                    list: 
+                        object: relance_lines
+          relances_reports: 
+              show: 
+                  conf: 
+                      module: bimpcommercial
+                      name: use_relances_paiements_clients
+              label: Rapports relances auto
+              sections: 
+                  - type: list
+                    list: 
+                        name: relances_clients
+                        object: relances_report
+          suivis_recouvrement: 
+              show: 
+                  conf: 
+                      module: bimpcommercial
+                      name: use_relances_paiements_clients
+              label: Suivis recouvrements
+              sections: 
+                  - type: list
+                    list: 
+                        object: suivi_rec
+                        name: globale
+          ribs:
+              label: Rib
+              sections:
+                  - type: list
+                    list:
+                        object: ribs
+          stats:
+              label: Stats par date
+              sections:
+                  - type: list
+                    list:
+                        object: stats
+                        name: clientMonth
+                  - type: list
+                    list:
+                        object: stats
+                        name: clientYear

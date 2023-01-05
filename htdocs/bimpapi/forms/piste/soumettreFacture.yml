@@ -1,0 +1,182 @@
+
+title: Dépot facture
+
+fields: 
+#    idUtilisateurCourant: 
+#        label: ID utilisateur
+#        type: int
+        
+    numeroFactureSaisi: 
+        label: N° Facture
+        
+    dateFacture: 
+        label: Date Facture
+        type: date
+        
+    modeDepot: 
+        label: Mode de dépôt
+        edit: 0
+        values: 
+            SAISIE_API: Saisie
+            DEPOT_PDF_API: Dépôt PDF
+            DEPOT_PDF_SIGNE_API: Dépôt PDF signé
+        default_value: SAISIE_API
+        
+    fournisseur: 
+        label: Fournisseur
+        type: fields_group
+        fields: 
+            idFournisseur: 
+                label: Identifiant
+                type: int
+                edit: 0
+                
+#            idServiceFournisseur: 
+#                label: ID Service
+#                type: int
+#                
+#            codeCoordonneesBancairesFournisseur: 
+#                label: Code RIB
+#                type: int
+
+    destinataire: 
+        label: Destinataire
+        type: fields_group
+        fields: 
+            codeDestinataire: 
+                label: N° Siret
+                
+            codeServiceExecutant: 
+                label: Code service exécutant
+        
+    references: 
+        label: Données facture
+        type: fields_group
+        fields: 
+            deviseFacture: 
+                label: Devise
+                
+            typeFacture: 
+                label: Type
+                values: 
+                    FACTURE: Facture
+                    AVOIR: Avoir
+                    
+            typeTva: 
+                label: Type TVA
+                values: 
+                    TVA_SUR_DEBIT: TVA sur débit
+                    TVA_SUR_ENCAISSEMENT: TVA sur encaissement
+                    EXONERATION: Exonération
+                    SANS_TVA: Sans TVA
+                    
+            motifExonerationTva: 
+                label: Motif exonération TVA
+                display_if: 
+                    field_name: typeTva
+                    show_values: EXONERATION
+                    
+            numeroMarche: 
+                label: N° Marché
+                
+            numeroBonCommande: 
+                label: N° d'engagement
+                
+            numeroFactureOrigine: 
+                label: N° Facture d'origine
+                
+            modePaiement: 
+                label: Mode de paiement
+                values: 
+                    CHEQUE: Chèque
+                    VIREMENT: Virement
+                    PRELEVEMENT: Prélèvement
+                    ESPECE: Espèce
+                    REPORT: Report
+                    AUTRE: Autre
+                    
+    montantTotal: 
+        label: Totaux
+        type: fields_group
+        fields: 
+            montantHtTotal: 
+                label: Total HT
+                type: money
+                
+            montantTVA: 
+                label: Total TVA
+                type: money
+                
+            montantTtcTotal: 
+                label: Total TTC
+                type: money
+                
+            montantRemiseGlobaleTTC:
+                label: Total Remises globales TTC
+                type: money
+                
+            motifRemiseGlobaleTTC: 
+                label: Motif remises globales
+                
+            montantAPayer: 
+                label: A Payer
+                type: money
+                
+    commentaire: 
+        label: Commentaires
+        
+    cadreDeFacturation: 
+        label: Cadre de facturation
+        type: fields_group
+        fields: 
+            codeCadreFacturation: 
+                label: Code
+                values: 
+                    A1_FACTURE_FOURNISSEUR: A1 - Facture fournisseur
+                    A2_FACTURE_FOURNISSEUR_DEJA_PAYEE: A2 - Facture fournisseur déjà payée
+                    A9_FACTURE_SOUSTRAITANT: A9 - Facture sous-traitant
+                    A12_FACTURE_COTRAITANT: A12 - Facture Co-traitant
+                    
+#            codeStructureValideur: 
+#                label: Code structure valideur
+#                
+#            codeServiceValideur: 
+#                label: Code service valideur
+
+    pieceJointePrincipale: 
+        label: Fichier PDF
+        type: fields_group
+        multiple: 1
+        fields: 
+            pieceJointePrincipaleId: 
+                label: Identifiant Chorus fichier PDF
+                type: int
+                edit: 0
+                
+            pieceJointePrincipaleDesignation: 
+                label: Nom Fichier
+                edit: 0
+                
+    pieceJointeComplementaire:
+        label: Piece Jointe Complementaire
+        type: fields_group
+        multiple: 1
+        fields: 
+            pieceJointeComplementaireDesignation:
+                label: Designation
+            pieceJointeComplementaireId:
+                label: Identifiant Chorus fichier
+                type: int
+                edit: 0
+            pieceJointeComplementaireType: 
+                label: Type
+                values: 
+                    callback: getTypePj
+#                    BC: Bon de commande
+#                    BL: Bon de livraison
+#                    BORDEREAU_SUIVI: Bordereau de suivi
+#                    BORDEREAU_SUIVI_VALIDATION: Bordereau de suivi de validation
+#                    DIVERS: Document annexe
+#                    FACTURE_PDF: Facture PDF
+#                    FACTURE_XML: Facture XML
+                

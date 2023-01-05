@@ -1,0 +1,2 @@
+UPDATE `llx_bimpcore_conf` SET `name` = 'default_id_client', `module` = 'bimpcaisse' WHERE `name` = 'default_id_client' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf` SET `name` = 'use_mode_reglement_caisse', `module` = 'bimpcaisse' WHERE `name` = 'use_mode_reglement_caisse' AND `module` = 'bimpcore';

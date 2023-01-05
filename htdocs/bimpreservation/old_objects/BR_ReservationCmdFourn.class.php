@@ -364,7 +364,7 @@ class BR_ReservationCmdFourn extends BimpObject
 
             if (count($res_errors)) {
                 $errors[] = 'Echec de la mise à jour du statut de la réservation';
-                $errors = array_merge($errors, $res_errors);
+                $errors = BimpTools::merge_array($errors, $res_errors);
             } else {
                 $reservation->update();
             }
@@ -389,7 +389,7 @@ class BR_ReservationCmdFourn extends BimpObject
                 $this->addToCommandeFournisseur($add_errors);
                 if (count($add_errors)) {
                     $errors[] = 'Echec de l\'ajout à la commande fournisseur';
-                    $errors = array_merge($errors, $add_errors);
+                    $errors = BimpTools::merge_array($errors, $add_errors);
                     return $errors;
                 }
                 if ($reservation->find(array(
@@ -400,7 +400,7 @@ class BR_ReservationCmdFourn extends BimpObject
                     $res_errors = $reservation->setNewStatus(100, $qty);
                     if (count($res_errors)) {
                         $errors[] = 'Echec de la mise à jour du statut de la réservation';
-                        $errors = array_merge($errors, $res_errors);
+                        $errors = BimpTools::merge_array($errors, $res_errors);
                     } else {
                         $reservation->update();
                     }
@@ -415,7 +415,7 @@ class BR_ReservationCmdFourn extends BimpObject
                 $res_errors = $reservation->setNewStatus(3, $qty);
                 if (count($res_errors)) {
                     $errors[] = 'Echec de la mise à jour du statut de la réservation';
-                    $errors = array_merge($errors, $res_errors);
+                    $errors = BimpTools::merge_array($errors, $res_errors);
                 } else {
                     $reservation->update();
                 }

@@ -14,7 +14,6 @@ class commandeController extends BimpController
 //        dol_fiche_head($head, 'bimplogisitquecommande', $langs->trans("CustomerOrder"), -1, 'order');
 //    }
 
-
     public function getPageTitle()
     {
         $title = 'Logistique ';
@@ -52,17 +51,17 @@ class commandeController extends BimpController
 
         $html = '';
 
-        if (count($errors)) {
-            $html .= BimpRender::renderAlerts('Des incohérences dans les données de cette commande ont été détectées. Des correctifs sont nécessaires');
-            $html .= BimpRender::renderAlerts($errors);
-            $subject = '[URGENT] Erreurs sur la commande ' . $commande->id;
-            $mail_msg = DOL_URL_ROOT . '/bimpreservation/index.php?fc=commande&id=' . $commande->id . "\n\n";
-            $mail_msg .= 'Erreur(s): ' . "\n";
-            foreach ($errors as $error) {
-                $mail_msg .= ' - ' . $error . "\n";
-            }
-            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
-        }
+//        if (count($errors)) {
+//            $html .= BimpRender::renderAlerts('Des incohérences dans les données de cette commande ont été détectées. Des correctifs sont nécessaires');
+//            $html .= BimpRender::renderAlerts($errors);
+//            $subject = '[URGENT] Erreurs sur la commande ' . $commande->id;
+//            $mail_msg = DOL_URL_ROOT . '/bimpreservation/index.php?fc=commande&id=' . $commande->id . "\n\n";
+//            $mail_msg .= 'Erreur(s): ' . "\n";
+//            foreach ($errors as $error) {
+//                $mail_msg .= ' - ' . $error . "\n";
+//            }
+//            mailSyn2($subject, 'f.martinez@bimp.fr', '', $mail_msg);
+//        }
 
         $entrepôt = $commande->getChildObject('entrepot');
 
@@ -82,28 +81,42 @@ class commandeController extends BimpController
             $tabs_header .= '</div>';
         }
 
-        $html .= BimpRender::renderNavTabs(array(
-                    array(
-                        'id'      => 'reservations',
-                        'title'   => 'Logistique produits / services',
-                        'content' => $tabs_header . $this->renderCommandesLinesLogisticTab($commande)
-                    ),
-                    array(
-                        'id'      => 'shipments',
-                        'title'   => 'Expéditions',
-                        'content' => $tabs_header . $this->renderShipmentsTab($commande)
-                    ),
-                    array(
-                        'id'      => 'supplier_orders',
-                        'title'   => 'Commandes fournisseurs',
-                        'content' => $tabs_header . $this->renderSupplierOrdersTab($commande)
-                    ),
-                    array(
-                        'id'      => 'invoices',
-                        'title'   => 'Factures / Avoirs',
-                        'content' => $tabs_header . $this->renderFacturesTab($commande)
-                    ),
-        ));
+        $tabs = array(
+            array(
+                'id'      => 'reservations',
+                'title'   => 'Logistique produits / services',
+                'content' => $tabs_header . $this->renderCommandesLinesLogisticTab($commande)
+            ),
+            array(
+                'id'      => 'shipments',
+                'title'   => 'Expéditions',
+                'content' => $tabs_header . $this->renderShipmentsTab($commande)
+            ),
+            array(
+                'id'      => 'supplier_orders',
+                'title'   => 'Commandes fournisseurs',
+                'content' => $tabs_header . $this->renderSupplierOrdersTab($commande)
+            ),
+            array(
+                'id'      => 'invoices',
+                'title'   => 'Factures / Avoirs',
+                'content' => $tabs_header . $this->renderFacturesTab($commande)
+            )
+        );
+
+        if ($commande->field_exists('id_demande_fin') && (int) $commande->getData('id_demande_fin')) {
+            $df = $commande->getChildObject('demande_fin');
+            if (BimpObject::objectLoaded($df)) {
+                $tabs[] = array(
+                    'id'            => 'demande_financement_tab',
+                    'title'         => 'Demande de location',
+                    'ajax'          => 1,
+                    'ajax_callback' => $commande->getJsLoadCustomContent('renderDemandeFinancementView', '$(\'#demande_financement_tab .nav_tab_ajax_result\')', array('demande_financement_tab'), array('button' => ''))
+                );
+            }
+        }
+
+        $html .= BimpRender::renderNavTabs($tabs);
 
         $html .= $commande->renderNotesList(true);
 
@@ -171,7 +184,7 @@ class commandeController extends BimpController
         $html .= '<div class="col-lg-12">';
 
         $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-        $list = new BC_ListTable($instance, 'default', 1, null, 'Factures');
+        $list = new BC_ListTable($instance, 'logistique', 1, null, 'Factures');
         $list->params['add_btn'] = 0;
         $list->addObjectAssociationFilter($commande, $commande->id, 'factures');
         $list->addObjectChangeReload('Bimp_Commande');

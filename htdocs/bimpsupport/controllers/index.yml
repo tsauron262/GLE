@@ -4,6 +4,7 @@ js:
     - /bimpcore/views/js/BimpTimer.js
     - /bimpsupport/views/js/ticket.js
     - /bimpapple/views/js/gsx.js
+    - /bimpapple/views/js/consigned_stocks.js
     - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js
     - /bimpcommercial/views/js/paiement.js
@@ -27,6 +28,33 @@ objects:
         instance: 
             bimp_object: BS_Pret
             
+    shipments: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: AppleShipment 
+    sac: 
+        instance: 
+            bimp_object: BS_Sac         
+            
+    stocks: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: ConsignedStock
+                
+    cs_shipment: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: ConsignedStockShipment
+                
+    cs_mvt: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: ConsignedStockMvt
+            
 sections:
     - type: tabs
       tabs: 
@@ -47,6 +75,11 @@ sections:
             label: SAV
             icon: fas_wrench
             sections:
+                - type: custom
+                  custom: 
+                    callback: 
+                        method: displayHeaderListInfo
+                        object: sav
                 - type: list
                   list: 
                       object: sav
@@ -57,3 +90,58 @@ sections:
                 - type: list
                   list: 
                       object: sav_pret
+        shipments: 
+            label: Retours groupés
+            icon: fas_shipping-fast
+            sections:
+                - type: nav_tabs
+                  nav_tabs: 
+                      tabs_id: shipments
+                      tabs: 
+                          - id: shipments_list
+                            title: Liste des retours groupés
+                            struct: 
+                                type: list
+                                list: 
+                                    object: shipments
+                          - id: parts_pending_list
+                            title: Pièces en attente de retour
+                            struct: 
+                                type: custom
+                                custom: 
+                                    callback: renderPartsPendingList
+                                            
+                            
+        sac: 
+            label: Sacs
+            icon: fas_shopping-bag
+            sections:
+                - type: list
+                  list: 
+                      object: sac
+                      
+        consigned_stocks: 
+            label: Stocks consignés
+            icon: fas_boxes
+            sections: 
+                - type: nav_tabs
+                  nav_tabs: 
+                    - id: cs_stocks
+                      title: Stocks
+                      struct: 
+                          type: list
+                          list: 
+                              object: stocks
+                    - id: cs_shipments
+                      title: Renvois
+                      struct: 
+                          type: list
+                          list: 
+                              object: cs_shipment
+                    - id: cs_mvts
+                      title: Mouvements de stock
+                      struct: 
+                          type: list
+                          list: 
+                              object: cs_mvt
+                

@@ -1,0 +1,1 @@
+INSERT INTO `llx_bimpcore_conf`(`module`, `name`, `value`) VALUES ('bimptocegid', 'applecare_compte', '70750200');

@@ -1,44 +1,79 @@
 <?php
 
-require_once __DIR__ . '/../BDS_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
-class CronExec
+class CronExec extends BimpCron
 {
 
-    public $db;
-
-    public function __construct($db)
-    {
-        $this->db = $db;
-    }
-
-    public function execute($id_process_cron)
+    public function executeProcessOperation($id_process_cron)
     {
         $error = '';
-        $processCron = new BDSProcessCron();
-        if ($processCron->fetch($id_process_cron)) {
-            if (isset($processCron->id_process) && $processCron->id_process) {
-                $user = new User($this->db);
-                $user->fetch(1);
-                $options = $processCron->getOptionsData();
-                $process = BDS_Process::createProcessById($user, $processCron->id_process, $error, $options);
-                if ($error) {
-                    $error = ' - ' . $error;
-                } elseif (is_null($process)) {
-                    $error .= ' - Echec du chargement du processus';
-                } else {
-                    $process->executeCronProcess($processCron->id_operation);
+
+        $this->current_cron_name = 'Opération BDS';
+
+        if (!(int) $id_process_cron) {
+            $error = 'ID de la tâche planifiée absent';
+        } else {
+            $this->current_cron_name .= ' - CRON #' . $id_process_cron;
+
+            $cron = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessCron', (int) $id_process_cron);
+
+            if (BimpObject::objectLoaded($cron)) {
+                $this->current_cron_name .= ' - ' . $cron->getData('title');
+
+                $cron_errors = array();
+                $cron->executeOperation($cron_errors);
+
+                if (count($cron_errors)) {
+                    $error = BimpTools::getMsgFromArray($cron_errors);
                 }
             } else {
-                $error .= ' - ID du processus absent';
+                $error = 'La tâche planifiée #' . $id_process_cron . ' n\'existe plus';
             }
-        } else {
-            $error .= ' - Aucun enregistrement trouvé pour l\'ID ' . $id_process_cron;
         }
 
         if ($error) {
-            $msg = 'BimpDataSync: Echec de l\'exécution d\'une tâche planifiée' . $error;
-            dol_syslog($msg, 3);
+            $log_data = array(
+                'Erreur' => $error
+            );
+
+            $process = null;
+            if (BimpObject::objectLoaded($cron)) {
+                $log_data['Tâche'] = '#' . $cron->id . ' - ' . $cron->getData('title');
+
+                $process = $cron->getParentInstance();
+                if (BimpObject::objectLoaded($process)) {
+                    $log_data['Processus'] = '#' . $process->id . ' - ' . $process->getData('title');
+
+                    $operation = $cron->getChildObject('operation');
+
+                    if (BimpObject::objectLoaded($operation)) {
+                        $log_data['Opération'] = '#' . $operation->id . ' - ' . $operation->getData('title');
+                    }
+                } else {
+                    $process = null;
+                }
+            }
+
+            BimpCore::addlog('BDS: Erreur exécution tâche CRON', Bimp_Log::BIMP_LOG_ERREUR, 'bds', $process, $log_data);
+            return 'KO';
+        } else {
+            return 'OK';
         }
+    }
+
+    public function cleanReports()
+    {
+        $this->current_cron_name = 'Nettoyage des rapports BDS';
+
+        BimpObject::loadClass('bimpdatasync', 'BDS_Report');
+
+        $errors = array();
+
+        $n = BDS_Report::cleanReports($errors);
+
+        return 'OK: ' . $n . ' - KO: ' . count($errors);
     }
 }

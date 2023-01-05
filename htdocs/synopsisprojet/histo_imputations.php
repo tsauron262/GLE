@@ -8,8 +8,13 @@
  * BIMP-ERP-2
  */
 
-ini_set('max_execution_time', 40000);
-ini_set("memory_limit", "1200M");
+if (defined('BIMP_LIB')) {
+    BimpCore::setMaxExecutionTime(40000);
+    BimpCore::setMemoryLimit(1200);
+} else {
+    ini_set('max_execution_time', 40000);
+    ini_set("memory_limit", "1200M");
+}
 
 require_once('pre.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");

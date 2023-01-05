@@ -36,7 +36,7 @@ objects:
                     parent_module: bimptask
                     parent_object_name: BIMP_Task
                     
-fields:            
+fields: 
     src:
         label: Source email
         type: text
@@ -44,10 +44,10 @@ fields:
         label: Destinataire email
         type: text
     subj:
-        label: Sujet email
+        label: Sujet
         type: text
     txt:
-        label: Email originel
+        label: Description
         type: html
     comment:
         label: Commentaire
@@ -72,10 +72,20 @@ fields:
     test_ferme:
         label: Test pour Fermeture
         type: text
+        
+    auto:
+        label: Tâche automatique
+        type: bool
+        
+    type_manuel:
+        label: Type de tache manuel
+        type: text
+        values: 
+            array: types_manuel
  
 fields_tables:
     default: 
-        title: Tache
+        title: Tâche
         footer_extra_btn: 
             callback: getInfosExtraBtn
         icon: fas_tasks
@@ -111,6 +121,23 @@ forms:
             - field: comment
             - field: id_user_owner
             
+    add:
+        rows:
+            - field: type_manuel
+            - field: prio
+            - field: subj
+            - field: txt
+            - field: comment
+            - field: id_user_owner
+            - object: files
+              form_name: upload
+              form_label: Ajouter
+              form_values: 
+                  fields: 
+                      id_parent: 1
+                  
+              multiple: 1
+            
     newMail:
         rows:
             - custom: 1
@@ -129,7 +156,20 @@ forms:
     attribute:
         rows:
             - field: id_user_owner
-            
+           
+lists_cols: 
+    typeTache:
+        label: Type de tâche
+        value:
+            callback: displayType
+        search:
+          input:
+              type: select
+              options:
+                options:
+                    callback: getTypeArray
+#                    array: valSrc
+                            
 lists:
     default:
         checkboxes: 1
@@ -137,10 +177,11 @@ lists:
             - label: supprimer les tâches sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
-        sort_field: src
+        sort_field: id
         sort_way: desc
+        filters_panel: default
         n: 10
-        add_form_name: default
+        add_form_name: add
         delete_btn: 1
         page_btn: 1
         edit_btn: 1
@@ -149,35 +190,15 @@ lists:
         update_btn: 1
         cols:
             id:
-                label: ID
-                field: id
             src:
-                field: src
             dst:
-                field: dst
-            typeTache:
-                label: Type de tâche
-                value:
-                    callback: displayType
-                search:
-                  input:
-                      type: select
-                      options:
-                        options:
-                            array: valSrc
-                    
+            typeTache:                    
             subj:
-                field: subj
             txt:
-                field: txt
             comment:
-                field: comment
             status:
-                field: status
                 edit: 1
             id_user_owner:
-                field: id_user_owner
-
 
 views:
     default: 
@@ -217,3 +238,27 @@ views:
                   - type: custom
                     custom: 
                         callback: renderNotesList
+
+searches: 
+    default: 
+        fields_search: 
+            - a.id
+            - u.firstname
+            - u.lastname
+        fields_return: 
+            - a.id
+            - u.firstname
+            - u.lastname
+        label_syntaxe: 'Tâche #<a.id> (a.subj) - Utilisateur: <u.firstname> <u.lastname>'
+        joins: 
+            - table: user
+              on: a.id_user_owner = u.rowid
+              alias: u
+              
+filters_panels:
+    default:
+        filters: 
+            type_manuel:
+            subj:
+            status:
+        

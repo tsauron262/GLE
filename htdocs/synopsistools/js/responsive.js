@@ -14,8 +14,11 @@ var tailleMenu1 = 150;
 var tailleMenu2 = 200;
 var maxmenu = tailleMenu1 + tailleMenu2;
 
-
 $(window).on("load", function () {
+    if ($('#BimpThemeWrapper').length) {
+        responsive = false; // Autre système utilisé
+    }
+
     var larg = $(window).width();
     if (larg < 940 || 1) {
         $('.login_table td').wrap("<tr></tr>");
@@ -23,16 +26,14 @@ $(window).on("load", function () {
 
     if (responsive) {
         ts = 0;
-        
-
         $('#id-container').append("<div id='but-menu'></div>");
-        
+
         $('#mainmenutd_menu').click();
         $('#mainmenutd_menu, .side-nav').css('margin-left', '-200px');
 
         $('#id-right').parent().append("<div id='id_cach' ></div>");
-        
-        $('#tmenu_tooltip').append("<div id='responsive_titre'><a href='"+DOL_URL_ROOT+"/index.php?mainmenu=home'>BIMP-ERP</a></div>");
+
+        $('#tmenu_tooltip').append("<div id='responsive_titre'><a href='" + DOL_URL_ROOT + "/index.php?mainmenu=home'>BIMP-ERP</a></div>");
 
         $('#but-menu').click(function (e) {
             if (is_open == false) {
@@ -106,25 +107,25 @@ $(window).on("load", function () {
 memoireTe = 0;
 function move_menu(te) {
     diff = memoireTe - te;
-    if(diff > 10 || diff < -10){//Pour ne bouger que tous les 10px
-    memoireTe = te;
+    if (diff > 10 || diff < -10) {//Pour ne bouger que tous les 10px
+        memoireTe = te;
 //    console.log(te);
-    if (is_open) {
-        te += maxmenu;
-    }
-    moving = true;
+        if (is_open) {
+            te += maxmenu;
+        }
+        moving = true;
 //            if (te - ts > 1) {
-    var ti = (te - ts);
-    if (ti > maxmenu) {
-        ti = maxmenu;
+        var ti = (te - ts);
+        if (ti > maxmenu) {
+            ti = maxmenu;
+        }
+        $('#id-left').css("left", ti - maxmenu + tailleMenu1);
+        $('.tmenudiv').css("left", ti - maxmenu);
+        $('#id-left').css("z-index", "60");
+        $('.tmenudiv').css("z-index", "60");
+        $('#id_cach').show();
+        $('#id_cach').css("opacity", ti / maxmenu * opac);
     }
-    $('#id-left').css("left", ti - maxmenu + tailleMenu1);
-    $('.tmenudiv').css("left", ti - maxmenu);
-    $('#id-left').css("z-index", "60");
-    $('.tmenudiv').css("z-index", "60");
-    $('#id_cach').show();
-    $('#id_cach').css("opacity", ti / maxmenu * opac);
-}
 //    is_open = true;
 }
 
@@ -162,8 +163,10 @@ function push_menu(posX) {//posX -> sert à savoir si le menu doit etre pousser 
     } else {
         $('#id-left').clearQueue().animate({"left": -maxmenu});
         $('.tmenudiv').clearQueue().animate({"left": -maxmenu});
-        $('#id_cach').clearQueue().animate({"opacity": 0},null,null,function(){$('#id_cach').hide();});
-        
+        $('#id_cach').clearQueue().animate({"opacity": 0}, null, null, function () {
+            $('#id_cach').hide();
+        });
+
         $('body').css('overflow', 'scroll');
         is_open = false;
     }

@@ -3,8 +3,9 @@
 class BimpTimer extends BimpObject
 {
 
-    public function setObject(Bimpobject $object, $object_time_field, $start = false, $id_user = null)
+    public function setObject(BimpObject $object, $object_time_field, $start = false, $id_user = null)
     {
+        $warnings = array();
         $this->reset();
         if (is_null($object) || !isset($object->id) || !$object->id) {
             return false;
@@ -186,7 +187,7 @@ class BimpTimer extends BimpObject
         return $html;
     }
 
-    public function onSave()
+    public function onSave(&$errors = array(), &$warnings = array())
     {
         $errors = array();
 
@@ -229,7 +230,7 @@ class BimpTimer extends BimpObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            $warnings = array_merge($warnings, $this->onSave());
+            $warnings = BimpTools::merge_array($warnings, $this->onSave());
         }
 
         return $errors;
@@ -240,15 +241,15 @@ class BimpTimer extends BimpObject
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
-            $warnings = array_merge($warnings, $this->onSave());
+            $warnings = BimpTools::merge_array($warnings, $this->onSave());
         }
 
         return $errors;
     }
 
-    public function updateField($field, $value, $id_object = null)
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
     {
-        $errors = parent::updateField($field, $value, $id_object);
+        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
 
         if (!count($errors) && $field === 'session_start' && $value > 0) {
             if (!$this->isLoaded() && (int) $id_object) {

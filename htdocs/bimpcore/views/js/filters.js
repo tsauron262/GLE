@@ -1,50 +1,100 @@
-function loadUserListFiltersModalList($button, filters_id, id_user) {
-    var $filters = $('#' + filters_id);
+function getBimpFilterInputValue($container, filter_name) {
+    var value = '';
+    switch ($container.data('type')) {
+        case 'user':
+        case 'value':
+            value = $container.find('[name="add_' + filter_name + '_filter"]').val();
+            break;
 
-    if (!$.isOk($filters)) {
-        bimp_msg('Erreur: panneau filtre non trouvé pour l\'identifiant "' + filters_id + '"', 'danger');
-        return;
+        case 'value_part':
+            value = {};
+            value.value = $container.find('[name="add_' + filter_name + '_filter"]').val();
+            var $partTypeInput = $container.find('[name="add_' + filter_name + '_filter_part_type"]');
+            if ($partTypeInput.length) {
+                value.part_type = $partTypeInput.val();
+            } else {
+                value.part_type = 'middle';
+            }
+            break;
+
+        case 'date_range':
+            value = {};
+            value.min = $container.find('[name="add_' + filter_name + '_filter_from"]').val();
+            value.max = $container.find('[name="add_' + filter_name + '_filter_to"]').val();
+            break;
+
+        case 'range':
+            value = {};
+            value.min = $container.find('[name="add_' + filter_name + '_filter_min"]').val();
+            value.max = $container.find('[name="add_' + filter_name + '_filter_max"]').val();
+            break;
     }
 
-    bimpModal.loadAjaxContent($button, 'loadUserListFiltersList', {
-        module: $filters.data('module'),
-        object_name: $filters.data('object_name'),
-        panel_name: $filters.data('name'),
-        id_user: id_user
-    }, 'Gestion des filtres enregistrés', 'Chargement', function (result, bimpAjax) {
-        var $new_list = bimpAjax.$resultContainer.find('#' + result.list_id);
-        if ($new_list.length) {
-            $new_list.data('modal_idx', bimpAjax.$resultContainer.data('idx'));
-            bimpModal.removeComponentContent($new_list.attr('id'));
-            onListLoaded($new_list);
-        }
-    }, {}, 'medium');
+    return value;
 }
 
-function addFieldFilterValue($button) {
+function addFieldFilterValue($button, exclude, context) {
     if ($button.hasClass('disabled')) {
         return;
     }
 
     $button.addClass('disabled');
 
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    if (typeof (context) === 'undefined') {
+        context = 'filters_panel';
+    }
+
     var $container = $button.findParentByClass('bimp_filter_container');
     if ($.isOk($container)) {
-        $container.data('new_value_set', 0);
-        var field_name = $container.data('field_name');
-        if (field_name) {
+        var $filters_panel = $container.findParentByClass('object_filters_panel_content');
+
+        if ($.isOk($filters_panel)) {
+            $filters_panel.find('.filter_submit_btn').addClass('disabled');
+        } else {
+            $container.find('.filter_submit_btn').addClass('disabled');
+        }
+
+        if (context === 'filters_panel') {
+            $container.data('new_value_set', 0);
+            $container.data('new_excluded_value_set', 0);
+        }
+
+        var filter_name = $container.data('filter_name');
+        if (filter_name) {
             if ($container.data('type') === 'value_part') {
-                var $input = $container.find('input[name="add_' + field_name + '_filter"]');
+                var $input = $container.find('input[name="add_' + filter_name + '_filter"]');
                 if ($input.val() === '') {
-                    bimp_msg('Veuillez saisir une valeur', 'warning', null, true);
-                    return;
+                    var $option_input = $container.find('select[name="add_' + filter_name + '_filter_part_type"]');
+                    if (!$option_input.length || $option_input.val() !== 'full') {
+                        bimp_msg('Veuillez saisir une valeur ou sélectionner "Est égale à"', 'warning', null, true);
+                        $button.removeClass('disabled');
+                        return;
+                    }
                 }
             }
 
-            $container.data('new_value_set', 1);
-            $('body').trigger($.Event('listFiltersChange', {
-                $filters: $container.findParentByClass('object_filters_panel')
-            }));
+            switch (context) {
+                case 'filters_panel':
+                    if (exclude) {
+                        $container.data('new_excluded_value_set', 1);
+                    } else {
+                        $container.data('new_value_set', 1);
+                    }
+
+                    $('body').trigger($.Event('listFiltersChange', {
+                        $filters: $container.findParentByClass('object_filters_panel')
+                    }));
+                    break;
+
+                case 'filters_input':
+                    var value = getBimpFilterInputValue($container, filter_name);
+                    addFiltersInputFilter($button, filter_name, value, exclude);
+                    break;
+            }
         } else {
             bimp_msg('Une erreur est survenue (Nom du champ absent)', 'danger');
         }
@@ -53,35 +103,158 @@ function addFieldFilterValue($button) {
     }
 }
 
-function addFieldFilterCustomValue($button, value) {
+function addFieldFilterCustomValue($button, value, exclude, context) {
     if ($button.hasClass('disabled')) {
         return;
     }
 
     $button.addClass('disabled');
 
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    if (typeof (context) === 'undefined') {
+        context = 'filters_panel';
+    }
+
     var $container = $button.findParentByClass('bimp_filter_container');
     if ($.isOk($container)) {
-        var field_name = $container.data('field_name');
-        if (field_name) {
-            var html = '<div class="bimp_filter_value" data-value="' + value.replace(/"/g, '&quot;') + '" style="display: none">';
-            html += '</div>';
+        var filter_name = $container.data('filter_name');
+        if (filter_name) {
+            switch (context) {
+                case 'filters_panel':
+                    var html = '<div class="bimp_filter_value' + (exclude ? ' excluded' : '') + '" data-value="' + value.replace(/"/g, '&quot;') + '" style="display: none">';
+                    html += '</div>';
 
-            $container.find('.bimp_filter_values_container').append(html);
+                    $container.find('.bimp_filter_values_container').append(html);
 
-            $container.data('new_value_set', 0);
-            $('body').trigger($.Event('listFiltersChange', {
-                $filters: $container.findParentByClass('object_filters_panel')
-            }));
+                    $container.data('new_value_set', 0);
+                    $('body').trigger($.Event('listFiltersChange', {
+                        $filters: $container.findParentByClass('object_filters_panel')
+                    }));
+                    break;
+
+                case 'filters_input':
+                    addFiltersInputFilter($button, filter_name, value, exclude);
+                    break;
+            }
         }
     } else {
         bimp_msg('Une erreur est survenue (Conteneur absent)', 'danger');
     }
 }
 
-function addFieldFilterDateRangerPeriod($button) {
+function addFieldFilterObjectIDs($button, exclude, context) {
     if ($button.hasClass('disabled')) {
         return;
+    }
+
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    if (typeof (context) === 'undefined') {
+        context = 'filters_panel';
+    }
+
+    var $container = $button.findParentByClass('bimp_filter_type_ids');
+    if ($.isOk($container)) {
+        var separator = $container.find('input.bimp_filter_object_ids_separator').val();
+
+        if (!separator) {
+            bimp_msg('Veuillez définir un séparateur', 'warning', null, true);
+            return;
+        }
+
+        var ids_list = $container.find('input.bimp_filter_object_ids_list').val();
+
+        if (!ids_list) {
+            bimp_msg('Veuillez saisir un ou plusieurs ID(s)', 'warning', null, true);
+            return;
+        }
+
+        switch (context) {
+            case 'filters_panel':
+                addFieldFilterCustomValue($button, JSON.stringify({'ids_list': {'separator': separator, 'list': ids_list}}), exclude);
+                break;
+
+            case 'filters_input':
+                var $filterContainer = $container.findParentByClass('bimp_filter_container');
+                if ($.isOk($filterContainer)) {
+                    var filter_name = $filterContainer.data('filter_name');
+                    if (filter_name) {
+                        addFiltersInputFilter($button, filter_name, {'ids_list': {'separator': separator, 'list': ids_list}}, exclude);
+                    }
+                } else {
+                    bimp_msg('Une erreur est survenue (Conteneur absent). Impossible d\'ajouter le filtre');
+                }
+
+                break;
+        }
+    } else {
+        bimp_msg('Une erreur est survenue (Conteneur absent)', 'danger');
+    }
+}
+
+function addFieldFilterObjectFilters($button, exclude, context) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    if (typeof (context) === 'undefined') {
+        context = 'filters_panel';
+    }
+
+    var $container = $button.findParentByClass('bimp_filter_type_filters');
+    if ($.isOk($container)) {
+        var id_filters = parseInt($container.find('select.bimp_filter_child_id_filters').val());
+
+        if (!id_filters) {
+            bimp_msg('Veuillez sélectionner un enregistrement de filtres', 'warning', null, true);
+            return;
+        }
+
+        switch (context) {
+            case 'filters_panel':
+                addFieldFilterCustomValue($button, JSON.stringify({'id_filters': id_filters}), exclude);
+                break;
+
+            case 'filters_input':
+                var $filterContainer = $container.findParentByClass('bimp_filter_container');
+                if ($.isOk($filterContainer)) {
+                    var filter_name = $filterContainer.data('filter_name');
+                    if (filter_name) {
+                        addFiltersInputFilter($button, filter_name, {'id_filters': id_filters}, exclude);
+                    }
+                } else {
+                    bimp_msg('Une erreur est survenue (Conteneur absent). Impossible d\'ajouter le filtre');
+                }
+
+                break;
+        }
+
+
+    } else {
+        bimp_msg('Une erreur est survenue (Conteneur absent)', 'danger');
+    }
+}
+
+function addFieldFilterDateRangePeriod($button, exclude, context) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    if (typeof (context) === 'undefined') {
+        context = 'filters_panel';
     }
 
     var $container = $button.findParentByClass('bimp_filter_date_range_period');
@@ -99,6 +272,8 @@ function addFieldFilterDateRangerPeriod($button) {
         data.offset_qty = parseInt($container.find('input.bimp_filter_date_range_offset_qty').val());
         data.offset_unit = $container.find('select.bimp_filter_date_range_offset_unit').val();
         data.mode = $container.find('select.bimp_filter_date_range_period_mode').val();
+        data.limit_min = $container.find('.date_range_limits_container').find('input.date_range_from').val();
+        data.limit_max = $container.find('.date_range_limits_container').find('input.date_range_to').val();
 
         if (!data.qty || isNaN(data.qty)) {
             bimp_msg('Veuillez saisir une valeur supérieure à 0 pour la durée de la période', 'warning', null, true);
@@ -110,7 +285,72 @@ function addFieldFilterDateRangerPeriod($button) {
             return;
         }
 
-        addFieldFilterCustomValue($button, JSON.stringify({period: data}));
+        switch (context) {
+            case 'filters_panel':
+                addFieldFilterCustomValue($button, JSON.stringify({period: data}), exclude);
+                break;
+
+            case 'filters_input':
+                var $filterContainer = $container.findParentByClass('bimp_filter_container');
+                if ($.isOk($filterContainer)) {
+                    var filter_name = $filterContainer.data('filter_name');
+                    if (filter_name) {
+                        addFiltersInputFilter($button, filter_name, {period: data}, exclude);
+                    }
+                } else {
+                    bimp_msg('Une erreur est survenue (Conteneur absent). Impossible d\'ajouter le filtre');
+                }
+
+                break;
+        }
+
+    } else {
+        bimp_msg('Une erreur est survenue (Conteneur absent)', 'danger');
+    }
+}
+
+function addFieldFilterDateRangeOption($button, exclude, context) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    if (typeof (context) === 'undefined') {
+        context = 'filters_panel';
+    }
+
+    var $container = $button.findParentByClass('bimp_filter_date_range_option');
+    if ($.isOk($container)) {
+        var option = $container.find('select.bimp_filter_date_range_option').val();
+
+        if (!option) {
+            bimp_msg('Veuillez sélectionner une option', 'warning', null, true);
+            return;
+        }
+
+        switch (context) {
+            case 'filters_panel':
+                addFieldFilterCustomValue($button, JSON.stringify({'option': option}), exclude);
+                break;
+
+            case 'filters_input':
+                var $filterContainer = $container.findParentByClass('bimp_filter_container');
+                if ($.isOk($filterContainer)) {
+                    var filter_name = $filterContainer.data('filter_name');
+                    if (filter_name) {
+                        addFiltersInputFilter($button, filter_name, {'option': option}, exclude);
+                    }
+                } else {
+                    bimp_msg('Une erreur est survenue (Conteneur absent). Impossible d\'ajouter le filtre');
+                }
+
+                break;
+        }
+
+
     } else {
         bimp_msg('Une erreur est survenue (Conteneur absent)', 'danger');
     }
@@ -120,123 +360,240 @@ function editBimpFilterValue($value) {
     var $container = $value.findParentByClass('bimp_filter_container');
 
     if ($.isOk($container)) {
-        var type = $container.data('type');
+        var filter_type = $container.data('type');
         var value = $value.data('value');
-        var field_name = $container.data('field_name');
+        var filter_name = $container.data('filter_name');
         var check = false;
         var $input = null;
-        switch (type) {
-            case 'value':
-            case 'value_part':
-                $input = $container.find('input[name="add_' + field_name + '_filter"]');
-                if ($input.length) {
-                    $input.val(value);
-                    check = true;
+        var value_type = $value.data('type');
 
-                    var $search_input = $container.find('.search_object_input').find('input');
-                    if ($search_input.length) {
-                        $search_input.val($value.text());
+        if (filter_name) {
+            switch (filter_type) {
+                case 'value_part':
+                    $input = $container.find('input[name="add_' + filter_name + '_filter"]');
+                    var $partTypeInput = $container.find('select[name="add_' + filter_name + '_filter_part_type"]');
+                    var part = value;
+                    var part_type = 'middle';
+
+                    if (typeof (value.value) !== 'undefined') {
+                        part = value.value;
                     }
-                }
-                break;
+                    if (typeof (value.part_type) !== 'undefined') {
+                        part_type = value.part_type;
+                    }
 
-            case 'range':
-                if (typeof (value.min) !== 'undefined') {
-                    $input = $container.find('input[name="add_' + field_name + '_filter_min"]');
                     if ($input.length) {
-                        $input.val(value.min);
+                        $input.val(part);
+
+                        if ($partTypeInput.length) {
+                            $partTypeInput.val(part_type).change();
+                        }
                         check = true;
                     }
-                }
-                if (typeof (value.max) !== 'undefined') {
-                    $input = $container.find('input[name="add_' + field_name + '_filter_max"]');
-                    if ($input.length) {
-                        $input.val(value.max);
-                        check = true;
-                    }
-                }
-                break;
+                    break;
 
-            case 'date_range':
-                if (typeof (value.period) !== 'undefined') {
-                    var input_name = 'add_' + field_name + '_filter';
-                    check = true;
+                case 'value':
+                case 'user':
+                    if (value_type) {
+                        switch (value_type) {
+                            case 'ids':
+                                if (typeof (value.ids_list) !== 'undefined') {
+                                    check = true;
+                                    var sub_check = false;
+                                    if (typeof (value.ids_list.separator) !== 'undefined') {
+                                        $input = $container.find('input[name="add_' + filter_name + '_filter_ids_serparator"]');
+                                        if ($input.length) {
+                                            $input.val(value.ids_list.separator);
+                                            sub_check = true;
+                                        }
+                                    }
 
-                    var sub_check = false;
-                    if (typeof (value.period.qty) !== 'undefined') {
-                        $input = $container.find('input[name="' + input_name + '_period_qty"]');
+                                    if (!sub_check) {
+                                        check = false;
+                                    }
+
+                                    sub_check = false;
+                                    if (typeof (value.ids_list.list) !== 'undefined') {
+                                        $input = $container.find('input[name="add_' + filter_name + '_filter_ids_list"]');
+                                        if ($input.length) {
+                                            $input.val(value.ids_list.list);
+                                            sub_check = true;
+                                        }
+                                    }
+
+                                    if (!sub_check) {
+                                        check = false;
+                                    }
+                                }
+                                break;
+
+                            case 'filters':
+                                if (typeof (value.id_filters) !== 'undefined') {
+                                    $input = $container.find('select[name="add_' + filter_name + '_filter_child_filters"]');
+                                    if ($input.length) {
+                                        $input.val(value.id_filters).change();
+                                        check = true;
+                                    }
+                                }
+                                break;
+                        }
+                    } else {
+                        $input = $container.find('input[name="add_' + filter_name + '_filter"]');
                         if ($input.length) {
-                            $input.val(parseInt(value.period.qty));
-                            sub_check = true;
+                            $input.val(value);
+                            check = true;
+
+                            var $search_input = $container.find('.search_object_input').find('input');
+                            if ($search_input.length) {
+                                $search_input.val($value.text());
+                            }
                         }
                     }
-                    if (!sub_check) {
-                        check = false;
-                    }
+                    break;
 
-                    sub_check = false;
-                    if (typeof (value.period.unit) !== 'undefined') {
-                        $input = $container.find('select[name="' + input_name + '_period_unit"]');
-                        if ($input.length) {
-                            $input.val(value.period.unit).change();
-                            sub_check = true;
-                        }
-                    }
-                    if (!sub_check) {
-                        check = false;
-                    }
-
-                    if (typeof (value.period.offset_qty) !== 'undefined') {
-                        $input = $container.find('input[name="' + input_name + '_period_offset_qty"]');
-                        if ($input.length) {
-                            $input.val(parseInt(value.period.offset_qty));
-                        }
-                    }
-
-                    if (typeof (value.period.offset_unit) !== 'undefined') {
-                        $input = $container.find('select[name="' + input_name + '_period_offset_unit"]');
-                        if ($input.length) {
-                            $input.val(value.period.offset_unit).change();
-                        }
-                    }
-
-                    sub_check = false;
-                    if (typeof (value.period.mode) !== 'undefined') {
-                        $input = $container.find('select[name="' + input_name + '_period_mode"]');
-                        if ($input.length) {
-                            $input.val(value.period.mode).change();
-                            sub_check = true;
-                        }
-                    }
-                    if (!sub_check) {
-                        check = false;
-                    }
-                } else {
+                case 'range':
                     if (typeof (value.min) !== 'undefined') {
-//                    .find('input.bs_datetimepicker').data('DateTimePicker').date(moment(initial_value)
-                        $input = $container.find('input[name="add_' + field_name + '_filter_from_picker"]');
+                        $input = $container.find('input[name="add_' + filter_name + '_filter_min"]');
                         if ($input.length) {
-                            $input.data('DateTimePicker').date(moment(value.min));
+                            $input.val(value.min);
                             check = true;
                         }
                     }
                     if (typeof (value.max) !== 'undefined') {
-                        $input = $container.find('input[name="add_' + field_name + '_filter_to_picker"]');
+                        $input = $container.find('input[name="add_' + filter_name + '_filter_max"]');
                         if ($input.length) {
-                            $input.data('DateTimePicker').date(moment(value.max));
+                            $input.val(value.max);
                             check = true;
                         }
                     }
-                }
-                break;
+                    break;
 
-            case 'check_list':
-                return;
+                case 'date_range':
+                    switch (value_type) {
+                        case 'period':
+                            if (typeof (value.period) !== 'undefined') {
+                                var input_name = 'add_' + filter_name + '_filter';
+                                check = true;
+
+                                var sub_check = false;
+                                if (typeof (value.period.qty) !== 'undefined') {
+                                    $input = $container.find('input[name="' + input_name + '_period_qty"]');
+                                    if ($input.length) {
+                                        $input.val(parseInt(value.period.qty));
+                                        sub_check = true;
+                                    }
+                                }
+                                if (!sub_check) {
+                                    check = false;
+                                }
+
+                                sub_check = false;
+                                if (typeof (value.period.unit) !== 'undefined') {
+                                    $input = $container.find('select[name="' + input_name + '_period_unit"]');
+                                    if ($input.length) {
+                                        $input.val(value.period.unit).change();
+                                        sub_check = true;
+                                    }
+                                }
+                                if (!sub_check) {
+                                    check = false;
+                                }
+
+                                if (typeof (value.period.offset_qty) !== 'undefined') {
+                                    $input = $container.find('input[name="' + input_name + '_period_offset_qty"]');
+                                    if ($input.length) {
+                                        $input.val(parseInt(value.period.offset_qty));
+                                    }
+                                }
+
+                                if (typeof (value.period.offset_unit) !== 'undefined') {
+                                    $input = $container.find('select[name="' + input_name + '_period_offset_unit"]');
+                                    if ($input.length) {
+                                        $input.val(value.period.offset_unit).change();
+                                    }
+                                }
+
+                                sub_check = false;
+                                if (typeof (value.period.mode) !== 'undefined') {
+                                    $input = $container.find('select[name="' + input_name + '_period_mode"]');
+                                    if ($input.length) {
+                                        $input.val(value.period.mode).change();
+                                        sub_check = true;
+                                    }
+                                }
+                                if (!sub_check) {
+                                    check = false;
+                                }
+
+                                sub_check = false;
+                                if (typeof (value.period.limit_min) !== 'undefined') {
+                                    $input = $container.find('input[name="' + input_name + '_period_limit_from_picker"]');
+                                    if ($input.length) {
+                                        $input.data('DateTimePicker').date(moment(value.period.limit_min));
+                                        sub_check = true;
+                                    }
+                                }
+                                if (!sub_check) {
+                                    check = false;
+                                }
+
+                                sub_check = false;
+                                if (typeof (value.period.limit_max) !== 'undefined') {
+                                    $input = $container.find('input[name="' + input_name + '_period_limit_to_picker"]');
+                                    if ($input.length) {
+                                        $input.data('DateTimePicker').date(moment(value.period.limit_max));
+                                        sub_check = true;
+                                    }
+                                }
+                                if (!sub_check) {
+                                    check = false;
+                                }
+                            }
+                            break;
+
+                        case 'option':
+                            if (typeof (value.option) !== 'undefined') {
+                                var input_name = 'add_' + filter_name + '_filter';
+                                $input = $container.find('select[name="' + input_name + 'date_range_option"]');
+                                if ($input.length) {
+                                    $input.val(value.option).change();
+                                    check = true;
+                                }
+                            }
+                            break;
+
+                        case 'min_max':
+                            if (typeof (value.min) !== 'undefined') {
+                                $input = $container.find('input[name="add_' + filter_name + '_filter_from_picker"]');
+                                if ($input.length) {
+                                    $input.data('DateTimePicker').date(moment(value.min));
+                                    check = true;
+                                }
+                            }
+                            if (typeof (value.max) !== 'undefined') {
+                                $input = $container.find('input[name="add_' + filter_name + '_filter_to_picker"]');
+                                if ($input.length) {
+                                    $input.data('DateTimePicker').date(moment(value.max));
+                                    check = true;
+                                }
+                            }
+                            break;
+                    }
+                    break;
+
+                case 'check_list':
+                    return;
+            }
         }
 
         if (check) {
             $container.addClass('open').removeClass('closed').find('.bimp_filter_content').stop().slideDown(250);
+            if (value_type) {
+                $container.find('.bimp_filter_type_select').find('select').val(value_type).change();
+            }
             $value.remove();
+        } else {
+            bimp_msg('Erreur - impossible d\'éditer ce filtre', 'danger', null, true);
         }
     }
 }
@@ -281,24 +638,80 @@ function removeBimpFilterValue(e, $button) {
     }
 }
 
+function removeBimpFilterValueFromActiveFilters($button, filters_id, filter_name, value, excluded) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $filters = $('#' + filters_id);
+
+    if (!$.isOk($filters)) {
+        bimp_msg('Erreur: panneau filtre non trouvé', 'danger', null, true);
+        return;
+    }
+
+    $button.addClass('disabled');
+
+    var done = false;
+    $filters.find('.bimp_filter_container').each(function () {
+        if (!done) {
+            var $container = $(this);
+            if ($container.data('filter_name') === filter_name) {
+                if ($container.data('type') === 'check_list') {
+                    var $input = $container.find('input.check_list_item_input[value="' + value + '"]');
+                    if ($input.length) {
+                        $input.prop('checked', false).change();
+                        done = true;
+                    }
+                } else {
+                    $container.find('.bimp_filter_value').each(function () {
+                        if (!done) {
+                            var $value = $(this);
+                            var val = $value.data('value');
+
+                            if (typeof (val) === 'object') {
+                                val = JSON.stringify(val);
+                            }
+                            if (val == value) {
+                                if ((excluded && $value.hasClass('excluded')) || (!excluded && !$value.hasClass('excluded'))) {
+                                    $value.remove();
+                                    done = true;
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    });
+
+    if (done) {
+        var $value = $button.findParentByClass('filter_value');
+        $value.remove();
+        $('body').trigger($.Event('listFiltersChange', {
+            $filters: $filters
+        }));
+    } else {
+        bimp_msg('Filtre actif non trouvé', 'danger', null, true);
+    }
+
+    $filters.find();
+}
+
 function getAllListFieldsFilters($filters, with_open_value) {
     if (typeof (with_open_value) === 'undefined') {
         with_open_value = true;
     }
 
-    var filters = {
-        fields: {},
-        children: {}
-    };
-
+    var filters = {};
     if ($.isOk($filters)) {
         $filters.find('.bimp_filter_container').each(function () {
             var $container = $(this);
-            var field_name = $container.data('field_name');
-            var child_name = $container.data('child_name');
+            var filter_name = $container.data('filter_name');
 
             var filter = {
-                values: []
+                values: [],
+                excluded_values: []
             };
 
             if (with_open_value) {
@@ -307,51 +720,43 @@ function getAllListFieldsFilters($filters, with_open_value) {
                     open = 0;
                 }
                 filter.open = open;
+
+                var $type_select = $container.find('.bimp_filter_type_select').find('select');
+                if ($.isOk($type_select)) {
+                    filter.value_type = $type_select.val();
+                }
             }
 
             if ($container.data('type') === 'check_list') {
-                $container.find('[name="add_' + field_name + '_filter[]"]').each(function () {
+                $container.find('[name="add_' + filter_name + '_filter[]"]').each(function () {
                     if ($(this).prop('checked')) {
                         filter.values.push($(this).val());
                     }
                 });
             } else {
                 $container.find('.bimp_filter_value').each(function () {
-                    filter.values.push($(this).data('value'));
+                    if ($(this).hasClass('excluded')) {
+                        filter.excluded_values.push($(this).data('value'));
+                    } else {
+                        filter.values.push($(this).data('value'));
+                    }
                 });
             }
 
-            if (parseInt($container.data('new_value_set'))) {
-                switch ($container.data('type')) {
-                    case 'user': 
-                    case 'value':
-                    case 'value_part':
-                        filter.values.push($container.find('[name="add_' + field_name + '_filter"]').val());
-                        break;
+            var new_values_set = parseInt($container.data('new_value_set'));
+            var new_excluded_values_set = parseInt($container.data('new_excluded_value_set'));
 
-                    case 'date_range':
-                        var values = {};
-                        values.min = $container.find('[name="add_' + field_name + '_filter_from"]').val();
-                        values.max = $container.find('[name="add_' + field_name + '_filter_to"]').val();
-                        filter.values.push(values);
-                        break;
-
-                    case 'range':
-                        var values = {};
-                        values.min = $container.find('[name="add_' + field_name + '_filter_min"]').val();
-                        values.max = $container.find('[name="add_' + field_name + '_filter_max"]').val();
-                        filter.values.push(values);
-                        break;
+            if (new_values_set || new_excluded_values_set) {
+                var new_value = getBimpFilterInputValue($container, filter_name);
+                if (new_values_set) {
+                    filter.values.push(new_value);
+                } else if (new_excluded_values_set) {
+                    filter.excluded_values.push(new_value);
                 }
             }
 
-            if (child_name) {
-                if (typeof (filters['children'][child_name]) === 'undefined') {
-                    filters['children'][child_name] = {};
-                }
-                filters['children'][child_name][field_name] = filter;
-            } else {
-                filters['fields'][field_name] = filter;
+            if (with_open_value || filter.values.length || filter.excluded_values.length) {
+                filters[filter_name] = filter;
             }
         });
     }
@@ -384,23 +789,29 @@ function saveListFilters($button, filters_id, id_list_filters) {
             id_list_filters = 0;
         }
 
-        loadModalForm($button, {
-            module: 'bimpcore',
-            object_name: 'ListFilters',
-            id_object: id_list_filters,
-            id_parent: 0,
-            form_name: 'default',
-            param_values: {
-                fields: {
-                    filters_id: $filters.attr('id'),
-                    obj_module: $filters.data('module'),
-                    obj_name: $filters.data('object_name'),
-                    panel_name: $filters.data('name'),
-                    filters: filters,
-                    owner_type: 2
+        if (!id_list_filters) {
+            loadModalForm($button, {
+                module: 'bimpuserconfig',
+                object_name: 'ListFilters',
+                id_object: id_list_filters,
+                id_parent: 0,
+                form_name: 'default',
+                param_values: {
+                    fields: {
+                        filters_id: $filters.attr('id'),
+                        obj_module: $filters.data('module'),
+                        obj_name: $filters.data('object_name'),
+                        filters: filters
+                    }
                 }
+            }, 'Enregistrer les filtres actuels');
+        } else {
+            if ($.isEmptyObject(filters)) {
+                bimp_msg('Aucun filtre sélectionné', 'warning', null, true);
+                return;
             }
-        }, 'Enregistrer les filtres actuels');
+            saveObjectField('bimpuserconfig', 'ListFilters', id_list_filters, 'filters', filters);
+        }
     } else {
         bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
     }
@@ -436,12 +847,68 @@ function showAllFilters(filters_id) {
     }
 }
 
-function loadSavedFilters(filters_id, id_list_filters) {
+function loadFiltersConfig(filters_id, id_filters_config) {
+    var $filters = $('#' + filters_id);
+
+    if (!$.isOk($filters)) {
+        bimp_msg('Une erreur est survenue. Impossible de charger la configuration de filtres', 'danger', null, true);
+        console.log('loadFiltersConfig(): $filters absent (#' + filters_id + ')');
+        return;
+    }
+
+    var $container = $filters.find('.object_filters_panel_content');
+
+    if (!$.isOk($container)) {
+        bimp_msg('Une erreur est survenue. Impossible de charger la configuration de filtres', 'danger', null, true);
+        console.log('loadFiltersConfig(): $container absent (#' + filters_id + ')');
+        return;
+    }
+
+    var data = {
+        module: $filters.data('module'),
+        object_name: $filters.data('object_name'),
+        list_type: $filters.data('list_type'),
+        list_name: $filters.data('list_name'),
+        list_identifier: $filters.data('list_identifier'),
+        panel_name: $filters.data('name'),
+        id_list_filters: 0,
+        id_filters_panel_config: id_filters_config
+    };
+
+    var $input = $filters.find('select[name="id_filters_to_load"]');
+
+    if ($input.length) {
+        data['id_list_filters'] = parseInt($input.val());
+    }
+
+    data['filters_panel_values'] = getAllListFieldsFilters($filters);
+
+    BimpAjax('loadFiltersPanelConfig', data, $container, {
+        $filters: $filters,
+        display_success: false,
+        display_errors_in_popup_only: true,
+        display_warnings_in_popup_only: true,
+        append_html: true,
+        remove_current_content: false,
+        success: function (result, bimpAjax) {
+            bimpAjax.$filters.data('filters_panels_events_init', 0);
+            onListFiltersPanelLoaded(bimpAjax.$filters);
+        }
+    });
+}
+
+function loadSavedFilters(filters_id, id_list_filters, full_panel_html) {
     var $filters = $('#' + filters_id);
 
     if ($.isOk($filters)) {
-        if (typeof (id_list_filters) === 'undefined') {
-            id_list_filters = parseInt($filters.find('select[name="id_filters_to_load"]').val());
+        if (typeof (id_list_filters) === 'undefined' || !id_list_filters) {
+            var $input = $filters.find('select[name="id_filters_to_load"]');
+            if ($input.length) {
+                id_list_filters = parseInt($input.val());
+            }
+        }
+        if (typeof (full_panel_html) === 'undefined') {
+            full_panel_html = 1;
         }
 
         if (!id_list_filters || isNaN(id_list_filters)) {
@@ -449,7 +916,19 @@ function loadSavedFilters(filters_id, id_list_filters) {
             return;
         }
 
-        var $container = $filters.findParentByClass('listFiltersPanelContainer');
+        if (full_panel_html) {
+            var $container = $filters.findParentByClass('listFiltersPanelContainer');
+        } else {
+            var $container = $filters.find('.load_saved_filters_container');
+        }
+
+        var id_filters_config = 0;
+
+        var $input = $filters.find('select[name="id_filters_config_to_load"]');
+        if ($input.length) {
+            id_filters_config = parseInt($input.val());
+        }
+
         if ($.isOk($container)) {
             BimpAjax('loadSavedListFilters', {
                 module: $filters.data('module'),
@@ -458,20 +937,27 @@ function loadSavedFilters(filters_id, id_list_filters) {
                 list_name: $filters.data('list_name'),
                 list_identifier: $filters.data('list_identifier'),
                 panel_name: $filters.data('name'),
-                id_list_filters: id_list_filters
+                id_list_filters: id_list_filters,
+                id_filters_config: id_filters_config,
+                full_panel_html: full_panel_html
             }, $container, {
-                $filters: $filters,
+                full_panel_html: full_panel_html,
                 display_success: false,
                 display_errors_in_popup_only: true,
                 display_warnings_in_popup_only: true,
                 append_html: true,
                 remove_current_content: false,
                 success: function (result, bimpAjax) {
-                    var $filters = bimpAjax.$resultContainer.find('.object_filters_panel');
-                    onListFiltersPanelLoaded($filters);
-                    $('body').trigger($.Event('listFiltersChange', {
-                        $filters: bimpAjax.$filters
-                    }));
+                    if (bimpAjax.full_panel_html) {
+                        var $filters = bimpAjax.$resultContainer.find('.object_filters_panel');
+                        onListFiltersPanelLoaded($filters);
+                        $('body').trigger($.Event('listFiltersChange', {
+                            $filters: $filters
+                        }));
+                    } else {
+                        onListFiltersSavedFiltersLoaded(bimpAjax.$resultContainer);
+                    }
+
                 }
             });
 
@@ -479,6 +965,14 @@ function loadSavedFilters(filters_id, id_list_filters) {
         }
     }
     bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
+}
+
+function loadAllSavedFiltersByObject(object_name, full_panel_html) {
+    if (object_name) {
+        $('.' + object_name + '_filters_panel').each(function () {
+            loadSavedFilters($(this).attr('id'), 0, full_panel_html);
+        });
+    }
 }
 
 function hideFiltersValues($container) {
@@ -491,17 +985,34 @@ function showFiltersValues($container) {
     });
 }
 
+function displayFiltersJson(filters_id) {
+    var $filters = $('#' + filters_id);
+
+    if ($.isOk($filters)) {
+        var filters = getAllListFieldsFilters($filters, false);
+
+        bimpModal.newContent('JSON Filtres', '<pre>' + JSON.stringify(filters, null, ' ') + '</pre>');
+    } else {
+        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
+    }
+}
+
 // Gestion des événements: 
 
 function onListFiltersPanelLoaded($filters) {
     if ($.isOk($filters)) {
-        if (!parseInt($filters.data('filters_panels_panel_events_init'))) {
+        if (!parseInt($filters.data('filters_panels_events_init'))) {
             var $container = $filters.findParentByClass('listFiltersPanelContainer');
             if (!$.isOk($container)) {
                 $container = $filters;
             }
+
             setCommonEvents($container);
             setInputsEvents($container);
+
+            $filters.find('select[name="id_filters_config_to_load"]').change(function () {
+                loadFiltersConfig($filters.attr('id'), parseInt($(this).val()));
+            });
 
             $filters.find('select[name="id_filters_to_load"]').change(function () {
                 loadSavedFilters($filters.attr('id'), parseInt($(this).val()));
@@ -509,9 +1020,9 @@ function onListFiltersPanelLoaded($filters) {
 
             $filters.find('.bimp_filter_container').each(function () {
                 if ($(this).data('type') === 'check_list') {
-                    var field_name = $(this).data('field_name');
-                    if (field_name) {
-                        $(this).find('[name="add_' + field_name + '_filter[]"]').change(function () {
+                    var filter_name = $(this).data('filter_name');
+                    if (filter_name) {
+                        $(this).find('[name="add_' + filter_name + '_filter[]"]').change(function () {
                             $('body').trigger($.Event('listFiltersChange', {
                                 $filters: $filters
                             }));
@@ -520,10 +1031,74 @@ function onListFiltersPanelLoaded($filters) {
                 }
             });
 
-            $filters.find('.select2-container').css('width', '100%');
-            $filters.find('.inputHelp').hide();
+            setBimpFiltersEvents($filters);
 
-            $filters.data('filters_panels_panel_events_init', 1);
+            if (!parseInt($filters.data('config_change_event_init'))) {
+                $('body').on('objectChange', function (e) {
+                    if (e.module === 'bimpuserconfig' && e.object_name === 'FiltersConfig') {
+                        var id_config = 0;
+                        var $input = $filters.find('select[name="id_filters_config_to_load"]');
+                        if ($input.length) {
+                            id_config = parseInt($input.val());
+                        }
+                        loadFiltersConfig($filters.attr('id'), id_config);
+                    }
+                });
+
+                $('body').on('objectDelete', function (e) {
+                    if ((e.module === 'bimpuserconfig') && (e.object_name === 'FiltersConfig')) {
+                        var id_config = 0;
+                        var $input = $filters.find('select[name="id_filters_config_to_load"]');
+                        if ($input.length) {
+                            id_config = parseInt($input.val());
+                            if (typeof (e.id_config !== 'undefined') && id_config === e.id_object) {
+                                id_config = 0;
+                            }
+                        }
+                        loadFiltersConfig($filters.attr('id'), id_config);
+                    }
+                });
+
+                $filters.data('config_change_event_init', 1);
+            }
+            $filters.data('filters_panels_events_init', 1);
         }
     }
+}
+
+function onListFiltersSavedFiltersLoaded($container) {
+    if ($.isOk($container)) {
+        var $filters = $container.findParentByClass('object_filters_panel');
+
+        if ($.isOk($filters)) {
+            setCommonEvents($container);
+            setInputsEvents($container);
+
+            $container.find('select[name="id_filters_to_load"]').change(function () {
+                loadSavedFilters($filters.attr('id'), parseInt($(this).val()));
+            });
+            $container.find('.select2-container').css('width', '100%');
+
+            $container.data('filters_saved_filters_events_init', 1);
+        }
+    }
+}
+
+function setBimpFiltersEvents($container) {
+    $container.find('.select2-container').css('width', '100%');
+    $container.find('.inputHelp').hide();
+
+    $container.find('.bimp_filter_type_select').each(function () {
+        var $type_select = $(this).find('select');
+        if ($.isOk($type_select)) {
+            $type_select.change(function () {
+                var $filter_container = $(this).findParentByClass('bimp_filter_input_container');
+                if ($.isOk($filter_container)) {
+                    $filter_container.find('.bimp_filter_type_container').hide();
+                    $filter_container.find('.bimp_filter_type_' + $(this).val()).slideDown(250);
+                }
+            });
+            $type_select.change();
+        }
+    });
 }

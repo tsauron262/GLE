@@ -10,6 +10,13 @@ $_REQUEST['bimp_context'] = 'public';
 
 $url = "https://";       
 $url.= $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];  
+
+
+if(isset($_REQUEST['not_compatible'])){
+    
+    echo '<h1>Votre navigateur n\'est pas compatible.</h1><h2> <a href="'.$url.'" target="popup">Merci de cliquer ici</a></h2>';
+    die;
+}
 //if(isset($_SERVER['HTTP_REFERER'])){
 //    $result = parse_url($_SERVER['HTTP_REFERER']);
 //    if(isset($result['host']) && stripos($result['host'],'ldlc.com') !== false){
@@ -22,8 +29,6 @@ $url.= $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
 //                $url = "http://";     
 //            $url.= $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];   
 //
-//            echo '<h1>Votre navigateur n\'est pas compatible.</h1><h2> <a href="'.$url.'" target="popup">Merci de cliquer ici</a></h2>';
-//            die;
 //        }
 //    }
 //}

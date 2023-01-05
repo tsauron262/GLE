@@ -188,7 +188,7 @@ class BContract_contrat extends BimpDolObject
         switch ($action) {
             case 'createSignature': 
             case 'createSignatureDocuSign': 
-                return (int) $this->getData('id_signature') == 0 and ((int) $this->getData('statut') == self::CONTRAT_STATUS_VALIDE || (int) $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER_TMP);
+                return !$this->getChildObject('signature')->isLoaded() and ((int) $this->getData('statut') == self::CONTRAT_STATUS_VALIDE || (int) $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER_TMP);
         }
         return parent::isActionAllowed($action, $errors);
     }

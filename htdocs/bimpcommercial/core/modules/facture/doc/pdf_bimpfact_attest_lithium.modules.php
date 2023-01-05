@@ -214,7 +214,10 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                 'in' => $lines
             )
                 ), null, null, 'id', 'asc', 'array', array('id'));
-        
+        $all_fourn_lines = array();
+//        echo '<pre>';print_r($all_lines_list);die();
+        foreach($all_lines_list as $line)
+            $all_fourn_lines[] = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $line['id']);
         
         // Commandes fournisseur avec équipement
         $cfs_prod = array();
@@ -223,31 +226,46 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
             if ((int) $fact_line->id_product) {
                 $product = $fact_line->getProduct();
                 if (BimpObject::objectLoaded($product)) {
-                    if (!$product->isSerialisable() and !$fact_line->equipment_required) {
+//                    if (!$product->isSerialisable()) {
                         // Recherche si une ligne de la commande fournisseur contient le produit de la ligne de facture
                         foreach($cfs_eq as $cf) {
-                            $cf_lines = $cf->getChildrenObject('lines');
+                            $cf_lines = $cf->getChildrenObjects('lines');
                             foreach($cf_lines as $cf_line) {
                                 if((int) $cf_line->getData('id_product') == (int) $fact_line->getData('id_product'))
                                     continue;
+                                
                             }
                         }
                         
                         // On n'a pas trouvé de commandes fournisseur avec ce produit les commandes fournisseur avec équipement
-                        foreach($all_lines_list as $cf_line) {
-                            $this->errors[] = $cf_line->getParentInstance()->getNomUrl();
+                        foreach($all_fourn_lines as $cf_line) {
+//                            $this->errors[] = 'AAAA' . $cf_line;
                             if((int) $cf_line->getData('id_product') == (int) $fact_line->getData('id_product')) {
-                                $cfs_prod[] = $cf_line->getParentInstance();
+                                $cf = $cf_line->getParentInstance();
+                                $cfs_prod[$cf->id] = $cf;
+                                continue;
                             }
+                            
+                            $this->errors[] = $cf_line->getData('id_product') . ' != ' . $fact_line->getData('id_product');
                         }
-                    }
                 } else {
                     $this->errors[] = 'ID du produit inconnu.';
                 }
             }
         }
+        
+        $cfs = array();
+        foreach ($cfs_eq as $cf) {
+            if(!isset($cfs[$cf->id]))
+                $cfs[$cf->id] = $cf;
+        }
+        
+        foreach ($cfs_prod as $cf) {
+            if(!isset($cfs[$cf->id]))
+                $cfs[$cf->id] = $cf;
+        }
        
-        return BimpTools::merge_array($cfs_eq, $cfs_prod);
+        return $cfs;
     }
     
     function addCheck($pdf, $x, $y, $t = 4, $width = 0.7) {

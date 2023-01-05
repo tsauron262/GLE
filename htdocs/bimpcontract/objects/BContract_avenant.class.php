@@ -233,6 +233,7 @@ class BContract_avenant extends BContract_contrat {
                 
                 $errors = $this->updateField('added_month', $months);
                 
+                $date_end = new DateTime($parent->displayRealEndDate("Y-m-d"));
                 $date_effect = new DateTime($parent->displayRealEndDate("Y-m-d"));
                 $date_effect->add(new DateInterval("P1D"));
                 
@@ -243,7 +244,7 @@ class BContract_avenant extends BContract_contrat {
                 
                 BimpTools::merge_array($errors, $this->updateField('want_end_date', $date_de_fin->format('Y-m-d')));
                 BimpTools::merge_array($errors, $this->updateField('date_effect', $date_effect->format("Y-m-d")));
-                BimpTools::merge_array($errors, $this->updateField('date_end', $date_effect->format("Y-m-d")));
+                BimpTools::merge_array($errors, $this->updateField('date_end', $date_end->format("Y-m-d")));
 
             }            
             

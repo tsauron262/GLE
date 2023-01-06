@@ -4906,10 +4906,10 @@ class Bimp_Facture extends BimpComm
         }
     }
     
-    public function generatePdf($file_type, &$errors = array()) {
+    public function generatePdf($file_type, &$errors = array(), &$warnings = array()) {
         require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/core/modules/facture/modules_bimpfacture.php';
 
-        $errors = BimpTools::merge_array($errors, createFactureAttachment($this->db->db, $this, 'facture', $file_type));
+        $errors = BimpTools::merge_array($errors, createFactureAttachment($this->db->db, $this, 'facture', $file_type, $warnings));
     }
 
     // Actions - Overrides BimpComm:
@@ -5934,7 +5934,7 @@ class Bimp_Facture extends BimpComm
     public function actionGeneratePdfAttestLithium($data, &$success = '')
     {
         $errors = $warnings = array();
-        $this->generatePDF($data['file_type'], $errors);
+        $this->generatePDF($data['file_type'], $errors, $warnings);
         $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
         $success_callback = 'window.open(\'' . $url . '\');';
 

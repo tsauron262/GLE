@@ -836,7 +836,7 @@ class Bimp_Facture extends BimpComm
                 return (count($errors) ? 0 : 1);
                 
             case 'generatePdfAttestLithium':
-                return $status == 1;
+                return $status == 1 or $status == 2;
         }
 
         return (int) parent::isActionAllowed($action, $errors);

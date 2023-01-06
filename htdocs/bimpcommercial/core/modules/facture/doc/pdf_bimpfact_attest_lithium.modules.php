@@ -173,8 +173,9 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                                     $this->errors[] = 'L\'équipement ' . $equipment->getNomUrl() . ' n\'a pas de commande fournisseur associé';
                                 } else {
                                     foreach($places_cf as $place_cf){
-                                        if(0 < (int) $place_cf->getData('id_origin') and !isset($cfs_eq[$place_cf->getData('id_origin')])) {
-                                            $cfs_eq[$place_cf->getData('id_origin')] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $place_cf->getData('id_origin'));
+                                        if(0 < (int) $place_cf->getData('id_origin')) {
+                                            if(!isset($cfs_eq[$place_cf->getData('id_origin')]))
+                                                $cfs_eq[$place_cf->getData('id_origin')] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $place_cf->getData('id_origin'));
                                             $origine_trouvee = 1;
                                         }
                                     }                                }

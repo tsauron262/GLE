@@ -175,8 +175,7 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                                         if(!empty($places_cf)) {
                                             foreach($places_cf as $place_cf){
                                                 if(0 < (int) $place_cf->getData('id_origin')) {
-        //                                            if(!isset($cfs_eq[$place_cf->getData('id_origin')]))
-                                                        $cfs_eq[$place_cf->getData('id_origin')] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $place_cf->getData('id_origin'));
+                                                    $cfs_eq[$place_cf->getData('id_origin')] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $place_cf->getData('id_origin'));
                                                     $origine_trouvee = 1;
                                                 } else {
                                                     $this->errors[] = 'L\'emplacement de la CF de ' . $equipment->getNomUrl() . ' est introuvable.';
@@ -191,8 +190,9 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                                     if(!$origine_trouvee)
                                         $this->errors[] = 'ID de la commande fournisseur associé à ' . $equipment->getNomUrl() . ' inconnu.';
                                 }
-                                $this->warnings[] = "<b>Eq trouvé </b>" . $display_eq;
-                                $this->errors[] = 'La ligne de facture "' . $fact_line->desc . '" ne contient aucun équipement';
+                                $this->warnings[] = "<b>Eq trouvé pour " . $product->getNomUrl() . "</b>" . $display_eq;
+                            } else {
+                                $this->errors[] = 'La ligne de facture "' . $product->getNomUrl() . '" ne contient aucun équipement';
                             }
                         }
                     } else {

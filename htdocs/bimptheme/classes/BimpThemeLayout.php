@@ -120,7 +120,7 @@ class BimpThemeLayout extends BimpLayout
             include_once (DOL_DOCUMENT_ROOT . '/bookmarks/bookmarks.lib.php');
             $langs->load("bookmarks");
 
-            $html .= printBookmarksList($db, $langs);
+            $html .= printDropdownBookmarksList($db, $langs);
         }
         $parameters = array();
         $reshook = $hookmanager->executeHooks('printLeftBlock', $parameters);    // Note that $action and $object may have been modified by some hooks

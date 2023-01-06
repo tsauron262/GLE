@@ -109,7 +109,7 @@ fields:
     ref: 
         label: Référence
     fk_statut: 
-        label: Statut
+        label: Statutmmm
         type: int
         dol_prop: statut
         values: 
@@ -117,7 +117,7 @@ fields:
         displays: 
             icon: 
                 icon_only: 1
-                label: Statut
+                label: Statutmmm
     fk_soc: 
         label: Client
         dol_prop: socid
@@ -203,10 +203,10 @@ fields:
     date_valid:
         type: datetime
         label: Date Validation
-    total: 
-        label: Total TTC
-        dol_prop: total_ttc
-        type: money
+#    total: 
+#        label: Total TTC
+#        dol_prop: total_ttc
+#        type: money
     total_ttc: 
         label: Total TTC
         dol_prop: total_ttc
@@ -821,7 +821,6 @@ filters_panels:
             datec: 
             date_valid: 
             total_ht: 
-            total:
             total_ttc: 
             zone_vente:
                     

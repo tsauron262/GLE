@@ -162,9 +162,9 @@ fields:
     jabberid:
         label: Messagerie instantanée
         user_edit: 1
-    skype: 
-        label: Identifiant Skype
-        user_edit: 1
+#    skype: 
+#        label: Identifiant Skype
+#        user_edit: 1
     birthday:
         label: Date de naissance
         type: date
@@ -254,7 +254,7 @@ fields_tables:
             - field: phone_mobile
             - field: fax
             - field: jabberid
-            - field: skype
+#            - field: skype
             
     address:
         title: Adresse
@@ -323,7 +323,7 @@ filters_panel:
             phone_mobile:
             fax: 
             jabberid:
-            skype: 
+#            skype: 
                 
 lists_cols: 
     full_address: 

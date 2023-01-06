@@ -50,7 +50,6 @@ if (!empty($_SERVER['MAIN_SHOW_TUNING_INFO'])) {
 	}
 }
 
-
 /**
  * Return the real char for a numeric entities.
  * WARNING: This function is required by testSqlAndScriptInject() and the GETPOST 'restricthtml'. Regex calling must be similar.
@@ -341,6 +340,11 @@ if (!defined('NOSESSION')) {
 
 // Init the 5 global objects, this include will make the 'new Xxx()' and set properties for: $conf, $db, $langs, $user, $mysoc
 require_once 'master.inc.php';
+/* Mod drsi */
+include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
+$synopsisHook = new synopsisHook();
+global $synopsisHook; //Pour vision global de l'objet
+/* FMod Drsi */
 
 // If software has been locked. Only login $conf->global->MAIN_ONLY_LOGIN_ALLOWED is allowed.
 if (!empty($conf->global->MAIN_ONLY_LOGIN_ALLOWED)) {
@@ -776,6 +780,7 @@ if (!defined('NOLOGIN')) {
 			}
 			$langs->setDefaultLang($langcode);
 		}
+
 		// Validation of login/pass/entity
 		// If ok, the variable login will be returned
 		// If error, we will put error message in session under the name dol_loginmesg
@@ -1183,9 +1188,6 @@ if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) && !empty($user->conf->MAI
 // set MAIN_OPTIMIZEFORCOLORBLIND for user
 $conf->global->MAIN_OPTIMIZEFORCOLORBLIND = empty($user->conf->MAIN_OPTIMIZEFORCOLORBLIND) ? '' : $user->conf->MAIN_OPTIMIZEFORCOLORBLIND;
 
-// set MAIN_OPTIMIZEFORCOLORBLIND
-$conf->global->MAIN_OPTIMIZEFORCOLORBLIND = $user->conf->MAIN_OPTIMIZEFORCOLORBLIND;
-
 // Set terminal output option according to conf->browser.
 if (GETPOST('dol_hide_leftmenu', 'int') || !empty($_SESSION['dol_hide_leftmenu'])) {
 	$conf->dol_hide_leftmenu = 1;
@@ -1295,6 +1297,12 @@ if (empty($conf->browser->firefox)) {
 }
 
 $heightforframes = 50;
+
+/*moddrsi*/
+// Initialisation BimpCore
+$hookmanager->initHooks(array('bimpcoreInit'));
+$hookmanager->executeHooks('bimpcoreInit', array());
+/*fmoddrsi*/
 
 // Init menu manager
 if (!defined('NOREQUIREMENU')) {
@@ -1823,6 +1831,17 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
 					}
 				}
 			}
+                        
+                        
+                        /*moddrsi*/
+                        global $bimp_layout_js_vars; 
+                        if ($bimp_layout_js_vars) {
+                            print $bimp_layout_js_vars;
+                        }
+                        /*fmoddrsi*/
+                        
+                        
+                        
 			// JS forced by page in top_htmlhead (relative url starting with /)
 			if (is_array($arrayofjs)) {
 				print '<!-- Includes JS added by page -->'."\n";
@@ -2775,181 +2794,6 @@ function top_menu_search()
 	return $html;
 }
 
-
-/**
- * Build the tooltip on top menu bookmark
- *
- * @return  string                  HTML content
- */
-function top_menu_bookmark()
-{
-    global $langs, $conf, $db, $user;
-
-	$html = '';
-
-    // Define $bookmarks
-    if (!empty($conf->bookmark->enabled) && $user->rights->bookmark->lire)
-    {
-        include_once DOL_DOCUMENT_ROOT.'/bookmarks/bookmarks.lib.php';
-        $langs->load("bookmarks");
-
-        $html .= '<!-- div for bookmark link -->
-        <div id="topmenu-bookmark-dropdown" class="atoplogin dropdown inline-block">
-            <a class="dropdown-toggle login-dropdown-a" data-toggle="dropdown" href="#" title="'.$langs->trans('Bookmarks').' ('.$langs->trans('BookmarksMenuShortCut').')">
-                <i class="fa fa-star" ></i>
-            </a>
-            <div class="dropdown-menu">
-                '.printDropdownBookmarksList().'
-            </div>
-        </div>';
-
-
-
-        $html .= '
-        <!-- Code to show/hide the user drop-down -->
-        <script>
-        $( document ).ready(function() {
-            $(document).on("click", function(event) {
-                if (!$(event.target).closest("#topmenu-bookmark-dropdown").length) {
-                    // Hide the menus.
-                    $("#topmenu-bookmark-dropdown").removeClass("open");
-                }
-            });
-            $("#topmenu-bookmark-dropdown .dropdown-toggle").on("click", function(event) {
-                openBookMarkDropDown();
-            });
-            // Key map shortcut
-            $(document).keydown(function(e){
-                  if( e.which === 77 && e.ctrlKey && e.shiftKey ){
-                     console.log(\'control + shift + m : trigger open bookmark dropdown\');
-                     openBookMarkDropDown();
-                  }
-            });
-            var openBookMarkDropDown = function() {
-                event.preventDefault();
-                $("#topmenu-bookmark-dropdown").toggleClass("open");
-                $("#top-bookmark-search-input").focus();
-            }
-        });
-        </script>
-        ';
-    }
-    return $html;
-}
-
-/**
- * Build the tooltip on top menu tsearch
- *
- * @return  string                  HTML content
- */
-function top_menu_search()
-{
-    global $langs, $conf, $db, $user, $hookmanager;
-
-	$html = '';
-
-    $usedbyinclude = 1;
-    $arrayresult = null;
-    include DOL_DOCUMENT_ROOT.'/core/ajax/selectsearchbox.php'; // This set $arrayresult
-
-    $defaultAction = '';
-    $buttonList = '<div class="dropdown-global-search-button-list" >';
-    // Menu with all bookmarks
-    foreach ($arrayresult as $keyItem => $item)
-    {
-        if (empty($defaultAction)) {
-            $defaultAction = $item['url'];
-        }
-        $buttonList .= '<button class="dropdown-item global-search-item" data-target="'.dol_escape_htmltag($item['url']).'" >';
-        $buttonList .= $item['text'];
-        $buttonList .= '</button>';
-    }
-    $buttonList .= '</div>';
-
-
-    $searchInput = '<input name="sall" id="top-global-search-input" class="dropdown-search-input" placeholder="'.$langs->trans('Search').'" autocomplete="off" >';
-
-
-    $dropDownHtml = '<!-- form with POST method by default, will be replaced with GET for external link by js -->'."\n";
-    $dropDownHtml .= '<form id="top-menu-action-bookmark" name="actionbookmark" method="POST" action="'.$defaultAction.'" >';
-
-    $dropDownHtml .= '
-        <!-- search input -->
-        <div class="dropdown-header search-dropdown-header">
-            ' . $searchInput.'
-        </div>
-    ';
-
-    $dropDownHtml .= '
-        <!-- Menu Body -->
-        <div class="dropdown-body search-dropdown-body">
-        '.$buttonList.'
-        </div>
-        ';
-
-    $dropDownHtml .= '</form>';
-
-
-    $html .= '<!-- div for Global Search -->
-    <div id="topmenu-global-search-dropdown" class="atoplogin dropdown inline-block">
-        <a class="dropdown-toggle login-dropdown-a" data-toggle="dropdown" href="#" title="'.$langs->trans('Search').' ('.$langs->trans('SearchMenuShortCut').')">
-            <i class="fa fa-search" ></i>
-        </a>
-        <div class="dropdown-menu">
-            '.$dropDownHtml.'
-        </div>
-    </div>';
-
-    $html .= '
-    <!-- Code to show/hide the user drop-down -->
-    <script>
-    $( document ).ready(function() {
-        // prevent submiting form on press ENTER
-        $("#top-global-search-input").keydown(function (e) {
-            if (e.keyCode == 13) {
-                var inputs = $(this).parents("form").eq(0).find(":button");
-                if (inputs[inputs.index(this) + 1] != null) {
-                    inputs[inputs.index(this) + 1].focus();
-                }
-                e.preventDefault();
-                return false;
-            }
-        });
-        // submit form action
-        $(".dropdown-global-search-button-list .global-search-item").on("click", function(event) {
-            $("#top-menu-action-bookmark").attr("action", $(this).data("target"));
-            $("#top-menu-action-bookmark").submit();
-        });
-        // close drop down
-        $(document).on("click", function(event) {
-            if (!$(event.target).closest("#topmenu-global-search-dropdown").length) {
-                // Hide the menus.
-                $("#topmenu-global-search-dropdown").removeClass("open");
-            }
-        });
-        // Open drop down
-        $("#topmenu-global-search-dropdown .dropdown-toggle").on("click", function(event) {
-            openGlobalSearchDropDown();
-        });
-        // Key map shortcut
-        $(document).keydown(function(e){
-              if( e.which === 70 && e.ctrlKey && e.shiftKey ){
-                 console.log(\'control + shift + f : trigger open global-search dropdown\');
-                 openGlobalSearchDropDown();
-              }
-        });
-        var openGlobalSearchDropDown = function() {
-            event.preventDefault();
-            $("#topmenu-global-search-dropdown").toggleClass("open");
-            $("#top-global-search-input").focus();
-        }
-    });
-    </script>
-    ';
-
-    return $html;
-}
-
 /**
  *  Show left menu bar
  *
@@ -3373,11 +3217,6 @@ if (!function_exists("llxFooter")) {
 			}
 		}
 
-        /*moddrsi*/
-        if (class_exists('BimpLayout') && BimpLayout::hasInstance()) {
-            BimpLayout::getInstance()->end();
-        }
-        /*fmoddrsi*/
 
 		$relativepathstring = $_SERVER["PHP_SELF"];
 		// Clean $relativepathstring
@@ -3584,6 +3423,13 @@ if (!function_exists("llxFooter")) {
 		if ($reshook > 0) {
 			print $hookmanager->resPrint;
 		}
+                
+                
+                /*moddrsi*/
+                if (class_exists('BimpLayout') && BimpLayout::hasInstance()) {
+                    BimpLayout::getInstance()->end();
+                }
+                /*fmoddrsi*/
 
 		print "</body>\n";
 		print "</html>\n";

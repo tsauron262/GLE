@@ -2236,7 +2236,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $html .= '<tr>';
                         $html .= '<td>' . $propal->getRef() . '</td>';
                         $html .= '<td>' . $propal->displayData('fk_statut') . '</td>';
-                        $html .= '<td>' . $propal->displayData('total') . '</td>';
+                        $html .= '<td>' . $propal->displayData('total_ttc') . '</td>';
                         $html .= '<td>' . $propal->displayPDFButton(false) . '</td>';
                         $html .= '</tr>';
                     }

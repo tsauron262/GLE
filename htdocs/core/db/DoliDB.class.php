@@ -189,12 +189,10 @@ abstract class DoliDB implements Database
 			}
 		} else {
 			$this->transaction_opened--;
+                        if(class_exists('BimpCore'))
+                             BimpCore::addlog('Tentative de COMMIT transaction deja fermée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore');
 			return 1;
 		}
-                else{
-                        BimpCore::addlog('Tentative de COMMIT transaction deja fermée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore');
-                        return 0;
-                }
 	}
 
 	/**

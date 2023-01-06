@@ -1,0 +1,8 @@
+Erreurs SQL :
+
+
+Erreur DB_ERROR_1452: UPDATE llx_propal SET fk_user_signature = fk_user_cloture WHERE fk_user_signature IS NULL AND fk_user_cloture IS NOT NULL;
+Cannot add or update a child row: a foreign key constraint fails (`test3_doli16`.`llx_propal`, CONSTRAINT `fk_propal_fk_user_signature` FOREIGN KEY (`fk_user_signature`) REFERENCES `llx_user` (`rowid`))
+
+Erreur DB_ERROR_1452: ALTER TABLE llx_element_contact ADD CONSTRAINT fk_element_contact_fk_c_type_contact FOREIGN KEY (fk_c_type_contact) REFERENCES llx_c_type_contact(rowid);
+Cannot add or update a child row: a foreign key constraint fails (`test3_doli16`.`#sql-c8a7_24b2b1`, CONSTRAINT `fk_element_contact_fk_c_type_contact` FOREIGN KEY (`fk_c_type_contact`) REFERENCES `llx_c_type_contact` (`rowid`))

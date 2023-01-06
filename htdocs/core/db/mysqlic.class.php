@@ -941,7 +941,7 @@ class DoliDBMysqliC extends DoliDB
      *  @param  string	$type           Type of SQL order ('ddl' for insert, update, select, delete or 'dml' for create, alter...)
      *	@return	bool|mysqli_result		Resultset of answer
      */
-    function query($query,$usesavepoint=0,$type='auto')
+    function query($query,$usesavepoint=0,$type='auto', $result_mode = 0)
     {
         $this->timeDebReq = microtime(true);
 //    	global $conf, $user;
@@ -1104,6 +1104,27 @@ class DoliDBMysqliC extends DoliDB
 
         return $ret;
     }
+	/**
+	 *	Escape a string to insert data into a like
+	 *
+	 *	@param	string	$stringtoencode		String to escape
+	 *	@return	string						String escaped
+	 */
+	public function escapeforlike($stringtoencode)
+	{
+		return str_replace(array('_', '\\', '%'), array('\_', '\\\\', '\%'), (string) $stringtoencode);
+	}
+	/**
+	 *	Escape a string to insert data
+	 *
+	 *	@param	string	$stringtoencode		String to escape
+	 *	@return	string						String escaped
+	 *  @deprecated
+	 */
+	public function escapeunderscore($stringtoencode)
+	{
+		return str_replace('_', '\_', (string) $stringtoencode);
+	}
     
     function catch($query, $ret, $e = null){
         $deadLock = false;

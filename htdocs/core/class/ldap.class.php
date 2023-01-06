@@ -143,7 +143,7 @@ class Ldap
 	 */
 	public function __construct()
 	{
-		global $conf, $dolibarr_main_auth_ldap_host;
+		global $conf;
 
 		// Server
 		if (!empty($conf->global->LDAP_SERVER_HOST)) {
@@ -621,19 +621,6 @@ class Ldap
 			$this->error = "NotConnected";
 			return -3;
 		}
-                 if(defined('LDAP_MOD_AD')){
-                    if(stripos($dn, "OU=Olys") === false && stripos($dn, "OU=Blois") === false && stripos($dn, "OU=Bourg-en-Bresse") === false)
-                    {
-                            $this->error="Pas dans OU=Olys";
-                            dol_syslog(get_class($this)."::modify failed: ".$this->error, LOG_ERR);
-                            return -1;
-                    }
-                    
-//                    $info['sAMAccountName'] = $info['cn'];
-                    unset($info['sAMAccountName']);
-                    unset($info['cn']);
-                 }
-                
 
 		if (!$olddn || $olddn != $dn) {
 			if (!empty($olddn) && !empty($newrdn) && !empty($newparent) && $this->ldapProtocolVersion === '3') {
@@ -1084,32 +1071,7 @@ class Ldap
 			return -1;
 		}
 
-                        
-                        if (is_array($attributeArray))
-                        {
-                                // Return list with required fields
-                                $attributeArray=array_values($attributeArray);	// This is to force to have index reordered from 0 (not make ldap_search fails)
-                                dol_syslog(get_class($this)."::getRecords connection=".$this->connection." userDn=".$userDn." filter=".$filter. " attributeArray=(".join(',',$attributeArray).")");
-                                //var_dump($attributeArray);
-                                $this->result = @ldap_search($this->connection, $userDn, $filter, $attributeArray);
-                        }
-                        else
-                        {
-                                // Return list with fields selected by default
-                                dol_syslog(get_class($this)."::getRecords connection=".$this->connection." userDn=".$userDn." filter=".$filter);
-                                $this->result = @ldap_search($this->connection, $userDn, $filter);
-                        }
-                        if (!$this->result)
-                        {
-                                $this->error = 'LDAP search failed: '.ldap_errno($this->connection)." ".ldap_error($this->connection);
-                                return -1;
-                        }
-                        $info = array_merge($info, @ldap_get_entries($this->connection, $this->result));
-
-                        ldap_control_paged_result_response($this->connection, $this->result, $cookie);
-
-                } while($cookie !== null && $cookie != '');
-
+		$info = @ldap_get_entries($this->connection, $this->result);
 
 		// Warning: Dans info, les noms d'attributs sont en minuscule meme si passe
 		// a ldap_search en majuscule !!!
@@ -1418,7 +1380,6 @@ class Ldap
 				$retval[$val] = $flag;
 			}
 		}
-                /*fmoddrsi*/
 
 		//Return human friendly flags
 		return($retval);

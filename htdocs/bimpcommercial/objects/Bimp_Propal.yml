@@ -631,7 +631,7 @@ fields_tables:
                   callback: displayTotalRemises
             - field: total_ht
             - field: tva
-            - field: total
+            - field: total_ttc
             - field: prime
             - field: prime2
             
@@ -672,7 +672,6 @@ lists_cols:
 filters_panels: 
     default: 
         filters: 
-            total_ttc: unset
             type: unset
             datep: 
             date_livraison: 
@@ -704,7 +703,7 @@ lists:
             entrepot: 
             ef_type: 
             commercial:
-            total: 
+            total_ttc: 
         
     user: 
         extends: default
@@ -725,7 +724,7 @@ cards:
         view_btn: 1
         fields: 
             - field: replaced_ref
-            - field: total
+            - field: total_ttc
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton

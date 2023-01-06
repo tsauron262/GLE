@@ -136,8 +136,8 @@ fields:
         label: Tél. portable perso
         dol_extra_field: 1
         type: password
-    skype: 
-        label: Identifiant Skype
+#    skype: 
+#        label: Identifiant Skype
     fk_user: 
         label: Responsable hiérarchique
         type: id_object
@@ -387,7 +387,7 @@ fields_tables:
             - field: user_mobile
             - field: phone_perso
             - field: mail_sec
-            - field: skype
+#            - field: skype
             - field: synchaction
             - field: displayedinglobaladdressbook
             - field: mailquota

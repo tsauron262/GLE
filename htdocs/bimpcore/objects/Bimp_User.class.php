@@ -137,7 +137,7 @@ class Bimp_User extends BimpObject
                 $fields[] = 'office_phone';
                 $fields[] = 'user_mobile';
                 $fields[] = 'email';
-                $fields[] = 'skype';
+//                $fields[] = 'skype';
                 break;
         }
 
@@ -527,7 +527,7 @@ class Bimp_User extends BimpObject
         'office_phone' => 'fas_phone',
         'email'        => 'fas_envelope',
         'fax'          => 'fas_fax',
-        'skype'        => 'fab_skype',
+//        'skype'        => 'fab_skype',
         'url'          => 'fas_globe',
             ) as $field => $icon_class) {
                 if ($this->getData($field)) {

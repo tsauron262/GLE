@@ -72,6 +72,7 @@ class DoliDBMysqli extends DoliDB
 		$this->database_user = $user;
 		$this->database_host = $host;
 		$this->database_port = $port;
+		$this->database_pass_secur_sfddsfsdqsdfsfddsqf = $pass;
 
 		$this->transaction_opened = 0;
 
@@ -344,7 +345,39 @@ class DoliDBMysqli extends DoliDB
 				}
 				dol_syslog(get_class($this)."::query SQL Error message: ".$this->lasterrno." ".$this->lasterror, LOG_ERR);
 				//var_dump(debug_print_backtrace());
+                                
+                                
+                                if (class_exists('BimpCore')) {
+                                    $extra_data = array(
+                                        'Code erreur' => $this->lasterrno,
+                                        'Erreur SQL' => $this->lasterror,
+                                        'Serveur' => $this->database_host
+                                    );
+
+                                    if ($this->timeDebReq > 0) {
+                                        $extra_data['Durée req 1'] = (microtime(true) - $this->timeDebReq);
+                                    }
+
+                                    if ($this->timeDebReq2 > 0) {
+                                        $extra_data['Durée req 2'] = (microtime(true) - $this->timeDebReq2);
+                                    }
+
+                                    $extra_data['Requête'] = '<br/><br/>' . BimpRender::renderSql($query).'<br/><br/>';
+
+                                    BimpCore::addlog('ERREUR SQL', Bimp_Log::BIMP_LOG_ERREUR, $classLog, null, $extra_data);
+                                }else{
+                                    dol_syslog ('Erreur sql BimpCore non loadé', LOG_ERR);
+                                    die('erreur sql '.$this->lasterror);
+                                }
+        
 			}
+                        
+                        
+//                        $content = BimpRender::renderAlerts('Erreur SQL - ' . $this->lasterror());
+//                        BimpDebug::addDebug('sql', '', $content, array(
+//                            'foldable' => false
+//                        ));
+                                
 			$this->lastquery = $query;
 			$this->_results = $ret;
 		}

@@ -2248,8 +2248,8 @@ class BimpComm extends BimpDolObject
                     $fk_soc = 0;
                     break;
             }
-
-            $list = ActionComm::getActions($this->db->db, $fk_soc, $this->id, $type_element);
+            $ActionComm = new ActionComm($this->db->db);
+            $list = $ActionComm->getActions($fk_soc, $this->id, $type_element);
 
             if (!is_array($list)) {
                 $html .= BimpRender::renderAlerts('Echec de la récupération de la liste des événements');

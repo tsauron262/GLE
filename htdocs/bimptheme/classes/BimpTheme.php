@@ -83,7 +83,7 @@ class BimpTheme
 
     public static function initTopSearchHtml(BimpThemeLayout $layout)
     {
-        global $db, $langs, $hookmanager;
+        global $db, $langs, $hookmanager, $user;
         $form = new Form($db);
         $selected = -1;
         $usedbyinclude = 1;

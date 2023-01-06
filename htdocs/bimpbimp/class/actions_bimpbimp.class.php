@@ -23,9 +23,9 @@ class ActionsBimpbimp {
     function sendMail($parameters, &$object, &$action, $hookmanager){
         global $db;
         $tabDomainValid = array('bimp.fr', 'ldlc.com');
-        if ($object->sendmode == 'smtps' && !in_array($object->smtps->_msgFrom['host'], $tabDomainValid))
+        if ($object->sendmode == 'smtps' && !in_array($object->smtps->getFrom('host'), $tabDomainValid))
         {
-            $add = $object->smtps->_msgFrom['user']."@".$object->smtps->_msgFrom['host'];
+            $add = $object->smtps->getFrom('user')."@".$object->smtps->getFrom('host');
             $sql = $db->query("SELECT u.email, ue.alias FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.fk_object  
 AND (u.email = '".$add."' || ue.alias LIKE '%".$add."%')");
             while($ln = $db->fetch_object($sql)){
@@ -36,8 +36,8 @@ AND (u.email = '".$add."' || ue.alias LIKE '%".$add."%')");
                     if(isset($tabT[1])){
                         $domaine = $tabT[1];
                         if(in_array($domaine, $tabDomainValid)){
-                            $object->smtps->_msgFrom['user'] = $tabT[0];
-                            $object->smtps->_msgFrom['host'] = $tabT[1];
+                            $object->smtps->setFrom('user') = $tabT[0];
+                            $object->smtps->setFrom('host') = $tabT[1];
                             
                             $object->smtps->setFrom($mailT);
                             $object->smtps->setReplyTo($mailT);

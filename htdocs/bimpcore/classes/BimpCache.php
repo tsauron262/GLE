@@ -32,7 +32,7 @@ class BimpCache
     public static function getBdb($no_transactions = false, $mode_archive = -1, $force_new = false)
     {
         global $db;
-
+        
         if ($mode_archive == 1) {
             if (is_null(self::$bdb_archive)) {
                 $dolibarr_main_db_port = '3306';
@@ -57,7 +57,7 @@ class BimpCache
 
         if (is_null(self::$bdb_noTransac) || $force_new) {
             global $conf;
-            $db2 = getDoliDBInstance($conf->db->type, $conf->db->host, $conf->db->user, $db->database_pass, $conf->db->name, $conf->db->port);
+            $db2 = getDoliDBInstance($conf->db->type, $conf->db->host, $conf->db->user, $db->database_pass_secur_sfddsfsdqsdfsfddsqf, $conf->db->name, $conf->db->port);
             $db2->noTransaction = true;
 
             if ($force_new) {
@@ -3153,7 +3153,7 @@ class BimpCache
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
-            $rows = self::getBdb()->getRows('bimpcore_log', 'processed = 0', null, 'array', array('id', 'type', 'level', 'msg', 'extra_data'));
+            $rows = self::getBdb(true)->getRows('bimpcore_log', 'processed = 0', null, 'array', array('id', 'type', 'level', 'msg', 'extra_data'));
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {

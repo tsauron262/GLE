@@ -326,6 +326,7 @@ class BimpObject extends BimpCache
     {
         if ($mode < 0)
             $mode = (int) $this->getConf('no_transaction_db', 0, false, 'bool');
+//        echo 'yy'.$mode. get_class($this).'<br/>';
         $this->db = self::getBdb($mode, $this->modeArchive);
     }
 

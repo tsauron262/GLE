@@ -273,9 +273,9 @@ fields:
         input:
             no_autocorrect: 1
         
-    skype: 
-        label: Skype
-        user_edit: 1
+#    skype: 
+#        label: Skype
+#        user_edit: 1
         
     url: 
         label: Site web
@@ -879,7 +879,7 @@ fields_tables:
             - field: email
             - field: phone
             - field: fax
-            - field: skype   
+#            - field: skype   
             - field: url
             - label: Adresse
               value: 
@@ -1091,8 +1091,8 @@ forms:
                 field: fk_departement
             fax: 
                 field: fax
-            skype: 
-                field: skype
+#            skype: 
+#                field: skype
             url: 
                 field: url
             # ce type de champ (item_list) n'est pas filtrable pour l'instant. 

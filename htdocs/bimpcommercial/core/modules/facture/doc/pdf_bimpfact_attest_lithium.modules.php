@@ -158,35 +158,39 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
         foreach($fact_lines as $fact_line) {
             if ((int) $fact_line->id_product) {
                 $product = $fact_line->getProduct();
-                if($product->isTypeService())
-                    continue;
-                if (BimpObject::objectLoaded($product)) {
-                    if ($product->isSerialisable() and $fact_line->equipment_required) {
-                        $fact_lines_equipment = $fact_line->getChildrenObjects('equipment_lines');
+                if(!$product->isTypeService()){
+                    if (BimpObject::objectLoaded($product)) {
+                        if ($product->isSerialisable()) {
+                            $fact_lines_equipment = $fact_line->getChildrenObjects('equipment_lines');
 
-                        foreach($fact_lines_equipment as $line_equipment) {
-                            $origine_trouvee = 0;
-                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $line_equipment->getData('id_equipment'));
-                            if(BimpObject::objectLoaded($equipment)) {
-                                $places_cf = $equipment->getChildrenObjects('places', array('origin' => 'order_supplier'));
-                                if(empty($places_cf)) {
-                                    $this->errors[] = 'L\'équipement ' . $equipment->getNomUrl() . ' n\'a pas de commande fournisseur associé';
-                                } else {
-                                    foreach($places_cf as $place_cf){
-                                        if(0 < (int) $place_cf->getData('id_origin') and !isset($cfs_eq[$place_cf->getData('id_origin')])) {
-                                            $cfs_eq[$place_cf->getData('id_origin')] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $place_cf->getData('id_origin'));
-                                            $origine_trouvee = 1;
+                            foreach($fact_lines_equipment as $line_equipment) {
+                                $origine_trouvee = 0;
+                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $line_equipment->getData('id_equipment'));
+                                if(BimpObject::objectLoaded($equipment)) {
+                                    $places_cf = $equipment->getChildrenObjects('places', array('origin' => 'order_supplier'));
+                                    if(!empty($places_cf)) {
+                                        foreach($places_cf as $place_cf){
+                                            if(0 < (int) $place_cf->getData('id_origin')) {
+    //                                            if(!isset($cfs_eq[$place_cf->getData('id_origin')]))
+                                                    $cfs_eq[$place_cf->getData('id_origin')] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $place_cf->getData('id_origin'));
+                                                $origine_trouvee = 1;
+                                            } else {
+                                                $this->errors[] = 'L\'emplacement de la CF de ' . $equipment->getNomUrl() . ' est introuvable.';
+                                            }
                                         }
-                                    }                                }
-                            } else {
-                               $this->errors[] = 'Équipement inconnu ' . $line_equipment->getData('id_equipment');
+                                    } else {
+                                        $this->errors[] = 'L\'équipement ' . $equipment->getNomUrl() . ' n\'a pas de commande fournisseur associé';
+                                    }
+                                } else {
+                                   $this->errors[] = 'Équipement inconnu ' . $line_equipment->getData('id_equipment');
+                                }
+                                if(!$origine_trouvee)
+                                    $this->errors[] = 'ID de la commande fournisseur associé à ' . $equipment->getNomUrl() . ' inconnu.';
                             }
-                            if(!$origine_trouvee)
-                                $this->errors[] = 'ID de la commande fournisseur associé à ' . $equipment->getNomUrl() . ' inconnu.';
                         }
+                    } else {
+                        $this->errors[] = 'ID du produit inconnu.';
                     }
-                } else {
-                    $this->errors[] = 'ID du produit inconnu.';
                 }
             }
         }
@@ -230,20 +234,21 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                         foreach($cfs_eq as $cf) {
                             $cf_lines = $cf->getChildrenObjects('lines');
                             foreach($cf_lines as $cf_line) {
-                                if((int) $cf_line->getData('id_product') == (int) $fact_line->getData('id_product'))
+                                if((int) $cf_line->getProduct()->id == (int) $product->id)
                                     $origine_trouvee = 1;
                             }
                         }
                         
                         // On n'a pas trouvé de commandes fournisseur avec ce produit dans les commandes fournisseur avec équipement
-                        foreach($all_fourn_lines as $cf_line) {
-                            if(0 < (int) $cf_line->getProduct()->id and (int) $cf_line->getProduct()->id == (int) $fact_line->getProduct()->id) {
-                                $cf = $cf_line->getParentInstance();
-                                $cfs_prod[$cf->getData('id')] = $cf;
-                                $origine_trouvee = 1;
+                        if(!$origine_trouvee){
+                            foreach($all_fourn_lines as $cf_line) {
+                                if(0 < (int) $cf_line->getProduct()->id and (int) $cf_line->getProduct()->id == (int) $product->id) {
+                                    $cf = $cf_line->getParentInstance();
+                                    $cfs_prod[$cf->getData('id')] = $cf;
+                                    $origine_trouvee = 1;
+                                }
                             }
                         }
-                        
                         if(!$origine_trouvee)
                             $this->errors[] = 'Origine du produit ' . $product->getNomUrl() . ' inconnue';
                     }

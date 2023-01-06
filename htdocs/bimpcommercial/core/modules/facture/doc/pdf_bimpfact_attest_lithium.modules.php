@@ -159,7 +159,7 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
         foreach($fact_lines as $fact_line) {
             if ((int) $fact_line->id_product) {
                 $product = $fact_line->getProduct();
-                $this->warnings[] = "<b>Eq Ligne considérée </b>" . $product->getNomUrl();
+//                $this->warnings[] = "<b>Eq Ligne considérée </b>" . $product->getNomUrl();
                 if(!$product->isTypeService()) {
                     if (BimpObject::objectLoaded($product)) {
                         if ($product->isSerialisable()) {
@@ -191,7 +191,7 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                                     if(!$origine_trouvee)
                                         $this->errors[] = 'ID de la commande fournisseur associé à ' . $equipment->getNomUrl() . ' inconnu.';
                                 }
-                                $this->warnings[] = "<b>Eq trouvé pour " . $product->getNomUrl() . "</b>" . $display_eq;
+//                                $this->warnings[] = "<b>Eq trouvé pour " . $product->getNomUrl() . "</b>" . $display_eq;
                             } else {
                                 $this->errors[] = 'La ligne de facture ' . $product->getNomUrl() . ' ne contient aucun équipement';
                             }
@@ -200,9 +200,10 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                         $this->errors[] = 'ID du produit inconnu.';
                     }
                 }
-            } else {
-                $this->warnings[] = "<b>Eq Ligne ignorée </b>" . $fact_line->desc;
             }
+//            else {
+//                $this->warnings[] = "<b>Eq Ligne ignorée </b>" . $fact_line->desc;
+//            }
         }
         
         // Obtention de toutes les lignes des commandes fournisseur associé à la commande de cette facture
@@ -234,7 +235,7 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
             $origine_trouvee = 0;
             if ((int) $fact_line->id_product) {
                 $product = $fact_line->getProduct();
-                $this->warnings[] = "<b>Prod Ligne considérée </b>" . $product->getNomUrl();
+//                $this->warnings[] = "<b>Prod Ligne considérée </b>" . $product->getNomUrl();
                     if(!$product->isTypeService()) {
 
                     if (BimpObject::objectLoaded($product)) {
@@ -266,9 +267,10 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                         $this->errors[] = 'ID du produit inconnu.';
                     }
                 }
-            } else {
-                $this->warnings[] = "<b>Prod Ligne ignorée </b>" . $fact_line->desc;
             }
+//            else {
+//                $this->warnings[] = "<b>Prod Ligne ignorée </b>" . $fact_line->desc;
+//            }
         }
         
         $cfs = array();

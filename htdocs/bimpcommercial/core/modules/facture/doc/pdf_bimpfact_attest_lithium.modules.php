@@ -164,30 +164,35 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                     if (BimpObject::objectLoaded($product)) {
                         if ($product->isSerialisable()) {
                             $fact_lines_equipment = $fact_line->getChildrenObjects('equipment_lines');
-
-                            foreach($fact_lines_equipment as $line_equipment) {
-                                $origine_trouvee = 0;
-                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $line_equipment->getData('id_equipment'));
-                                if(BimpObject::objectLoaded($equipment)) {
-                                    $places_cf = $equipment->getChildrenObjects('places', array('origin' => 'order_supplier'));
-                                    if(!empty($places_cf)) {
-                                        foreach($places_cf as $place_cf){
-                                            if(0 < (int) $place_cf->getData('id_origin')) {
-    //                                            if(!isset($cfs_eq[$place_cf->getData('id_origin')]))
-                                                    $cfs_eq[$place_cf->getData('id_origin')] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $place_cf->getData('id_origin'));
-                                                $origine_trouvee = 1;
-                                            } else {
-                                                $this->errors[] = 'L\'emplacement de la CF de ' . $equipment->getNomUrl() . ' est introuvable.';
+                            if(count($fact_lines_equipment)) {
+                                $display_eq = '';
+                                foreach($fact_lines_equipment as $line_equipment) {
+                                    $origine_trouvee = 0;
+                                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $line_equipment->getData('id_equipment'));
+                                    $display_eq .= $equipment->getNomUrl();
+                                    if(BimpObject::objectLoaded($equipment)) {
+                                        $places_cf = $equipment->getChildrenObjects('places', array('origin' => 'order_supplier'));
+                                        if(!empty($places_cf)) {
+                                            foreach($places_cf as $place_cf){
+                                                if(0 < (int) $place_cf->getData('id_origin')) {
+        //                                            if(!isset($cfs_eq[$place_cf->getData('id_origin')]))
+                                                        $cfs_eq[$place_cf->getData('id_origin')] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $place_cf->getData('id_origin'));
+                                                    $origine_trouvee = 1;
+                                                } else {
+                                                    $this->errors[] = 'L\'emplacement de la CF de ' . $equipment->getNomUrl() . ' est introuvable.';
+                                                }
                                             }
+                                        } else {
+                                            $this->errors[] = 'L\'équipement ' . $equipment->getNomUrl() . ' n\'a pas de commande fournisseur associé';
                                         }
                                     } else {
-                                        $this->errors[] = 'L\'équipement ' . $equipment->getNomUrl() . ' n\'a pas de commande fournisseur associé';
+                                       $this->errors[] = 'Équipement inconnu ' . $line_equipment->getData('id_equipment');
                                     }
-                                } else {
-                                   $this->errors[] = 'Équipement inconnu ' . $line_equipment->getData('id_equipment');
+                                    if(!$origine_trouvee)
+                                        $this->errors[] = 'ID de la commande fournisseur associé à ' . $equipment->getNomUrl() . ' inconnu.';
                                 }
-                                if(!$origine_trouvee)
-                                    $this->errors[] = 'ID de la commande fournisseur associé à ' . $equipment->getNomUrl() . ' inconnu.';
+                                $this->warnings[] = "<b>Eq trouvé </b>" . $display_eq;
+                                $this->errors[] = 'La ligne de facture "' . $fact_line->desc . '" ne contient aucun équipement';
                             }
                         }
                     } else {

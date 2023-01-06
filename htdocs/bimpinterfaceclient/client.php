@@ -4,6 +4,7 @@ header('x-frame-options: ALLOWALL',false);
 define('ALLOW_ALL_IFRAME', true);
 $_REQUEST['bimp_context'] = 'public';
 
+
 //echo '<pre>';
 //print_r($_SERVER);
 //echo '</pre>';
@@ -36,27 +37,27 @@ if(isset($_REQUEST['nav_not_compatible'])){
 require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-//if(!isset($_COOKIE[$sessionname])){
+if(!isset($_COOKIE[$sessionname])){
     setcookie($sessionname, session_id(), array('SameSite' => 'None', 'Secure'=>true));
-//}
+}
 
 BimpCore::setContext("public");
 
-
-
-echo "<script>function testCookie(){"
-. "setTimeout(function() {"
-    . "if(document.cookie.match('DOLSESSID_')){ "
-    . "}else{ "
-            . "window.open('".$url."', '_blank'); "
-        . "if(window.location.href.indexOf('?') > 0) "
-            . "window.location.href = window.location.href + '&nav_not_compatible=true';"
-        . "else "
-            . "window.location.href = window.location.href + '?nav_not_compatible=true';"
-    . "}"
-. "}, 500)}; "
-. "testCookie();"
-. "</script>";
+if(!isset($_REQUEST['ajax'])){
+    echo "<script>function testCookie(){"
+    . "setTimeout(function() {"
+        . "if(document.cookie.match('DOLSESSID_')){ "
+        . "}else{ "
+                . "window.open('".$url."', '_blank'); "
+            . "if(window.location.href.indexOf('?') > 0) "
+                . "window.location.href = window.location.href + '&nav_not_compatible=true';"
+            . "else "
+                . "window.location.href = window.location.href + '?nav_not_compatible=true';"
+        . "}"
+    . "}, 500)}; "
+    . "testCookie();"
+    . "</script>";
+}
 
 
 $controllerName = BimpTools::getValue('fc', 'InterfaceClient');

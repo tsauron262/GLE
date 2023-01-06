@@ -50,7 +50,6 @@ class BimpComm extends BimpDolObject
         70  => "Partner",
         80  => "Santé",
         90  => "SAV",
-        14  => "Bureautique-Formation",
         100 => "Autre"
     ];
     public static $zones_vente = array(

@@ -2321,6 +2321,15 @@ class BContract_contrat extends BimpDolObject
                 $errors[] = 'Vous n\'avez pas la permission de valider ce contrat';
             }
         }
+        
+        if($user->admin and 0 < (int) $this->getData('id_signature')) {
+            $buttons[] = array(
+                'label'   => 'Supprimer signature (ADMIN)',
+                'icon'    => 'fas_trash',
+                'onclick' => $this->getJsActionOnclick('deleteSignature', array(), array(
+                    'confirm_msg' => "Cette action est irréverssible, continuer ?",
+                )));
+        }
 
 
         return $buttons;
@@ -3041,7 +3050,7 @@ class BContract_contrat extends BimpDolObject
                     }
                 } else {
                     return array(
-                        'errors'   => array('Merci de choisir une méthode de signatre à distance'),
+                        'errors'   => array('Merci de choisir une méthode de signature à distance'),
                         'warnings' => array()
                     );
                 }
@@ -3283,6 +3292,35 @@ class BContract_contrat extends BimpDolObject
         return array('errors' => $errors, 'warnings' => $warnings);
     }
     /* OTHERS FUNCTIONS */
+    
+    public function actionDeleteSignature($data, &$success) {
+        
+        $errors = $warnings = array();
+        $success_callback = 'bimp_reloadPage();';
+        
+        if ((int) $this->getData('id_signature')) {
+            $signature = $this->getChildObject('signature');
+
+            if (BimpObject::objectLoaded($signature)) {
+                $errors = $signature->delete($warnings, $force_delete = false);
+                if(!count($errors))
+                    $success .= 'Objet signature supprimée avec succès<br/>';
+            }
+            
+            if(!count($errors)) {
+                $errors = $this->updateField('id_signature', 0);
+                if(!count($errors))
+                    $success .= 'Champs id_signature mis à 0<br/>';
+            }
+        }
+        
+        return array(
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+            
 
     public function create(&$warnings = array(), $force_create = false)
     {

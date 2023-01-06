@@ -667,7 +667,7 @@ forms:
                   field_name: payee
                   hide_values: 0
             - custom: 1
-              label: Montant
+              label: Montant TTC
               input_name: amount
               data_type: money
               required: 1

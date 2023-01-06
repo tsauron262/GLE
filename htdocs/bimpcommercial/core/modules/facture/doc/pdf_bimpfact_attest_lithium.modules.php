@@ -163,7 +163,8 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                 if(!$product->isTypeService()) {
                     if (BimpObject::objectLoaded($product)) {
                         if ($product->isSerialisable()) {
-                            $fact_lines_equipment = $fact_line->getChildrenObjects('equipment_lines');
+//                            $fact_lines_equipment = $fact_line->getChildrenObjects('equipment_lines');
+                            $fact_lines_equipment = $fact_line->getEquipmentLines();
                             if(count($fact_lines_equipment)) {
                                 $display_eq = '';
                                 foreach($fact_lines_equipment as $line_equipment) {
@@ -192,7 +193,7 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                                 }
                                 $this->warnings[] = "<b>Eq trouvé pour " . $product->getNomUrl() . "</b>" . $display_eq;
                             } else {
-                                $this->errors[] = 'La ligne de facture "' . $product->getNomUrl() . '" ne contient aucun équipement';
+                                $this->errors[] = 'La ligne de facture ' . $product->getNomUrl() . ' ne contient aucun équipement';
                             }
                         }
                     } else {

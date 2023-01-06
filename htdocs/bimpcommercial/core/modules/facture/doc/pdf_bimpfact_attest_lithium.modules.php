@@ -149,76 +149,120 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
     }
 
     public function getCommandesFournisseur($commande, $facture) {
-        // Obtention ligne de la facture
+        // Obtention des lignes de la facture
         $fact_lines = $facture->getChildrenObjects('lines');
-//        print_r($fact_lines);
-//        die(count($fact_lines). 'AAAAAAAAAAAAAAAAAAAAAA');
-//        $fact_line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
-//        $fact_lines_list = $fact_line_instance->getList(array(
-//            'id_obj' => (int) $facture->id
-//                ), null, null, 'id', 'asc', 'array', array('id'));
-//        $fact_lines = array();
-//        
-//        foreach ($fact_lines_list as $item)
-//            $fact_lines[] = (int) $item['id'];
-        
-//        // Obtention ligne de la commande
-//        $cmd_line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-//        $cmd_lines_list = $cmd_line_instance->getList(array(
-//            'id_obj' => (int) $commande->id
-//                ), null, null, 'id', 'asc', 'array', array('id'));
-//        $cmd_lines = array();
-//
-//        foreach ($cmd_lines_list as $item)
-//            $cmd_lines[] = (int) $item['id'];
-//
-//        // Obtention ligne de la commande fournisseur associée à cette ligne de commande
-//        $fourn_line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
-//        $fourn_lines_list = $fourn_line_instance->getList(array(
-//            'linked_object_name' => 'commande_line',
-//            'linked_id_object'   => array(
-//                'in' => $cmd_lines
-//            )
-//        ), null, null, 'id', 'asc', 'array', array('id'));
-        
-        $cfs = array();
-        foreach($fact_lines as $fact_line) {
-            
-                if ($fact_line->getData('linked_object_name') === 'commande_fourn_line' and (int) $fact_line->getData('linked_id_object')) {
-                    $comm_fourn_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $fact_line->getData('linked_id_object'));
-                    $cf = $comm_fourn_line->getParentInstance();
-                    
-                 }
-                if(BimpObject::objectLoaded($cf))
-                    $cfs[$cf->id] = $cf;
-                else
-                    $this->errors[] = "Une ligne de facture n'est liée à aucune commande fournisseur " . $fact_line->id . ' ' . $fact_line->getData('linked_object_name') . ' ' . $fact_line->getData('linked_id_object');        
-                
 
+        // Commandes fournisseur avec équipement
+        $cfs_eq = array();
+        // Boucle sur toutes les lignes de facture AVEC équipement
+        foreach($fact_lines as $fact_line) {
+            if ((int) $fact_line->id_product) {
+                $product = $fact_line->getProduct();
+                if($product->isTypeService())
+                    continue;
+                if (BimpObject::objectLoaded($product)) {
+                    if ($product->isSerialisable() and $fact_line->equipment_required) {
+                        $fact_lines_equipment = $fact_line->getChildrenObjects('equipment_lines');
+
+                        foreach($fact_lines_equipment as $line_equipment) {
+                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $line_equipment->getData('id_equipment'));
+                            if(BimpObject::objectLoaded($equipment)) {
+
+                                $places_cf = $equipment->getChildrenObjects('places', array('origin' => 'order_supplier'));
+                                if(empty($places_cf)) {
+                                    $this->errors[] = 'L\'équipement ' . $equipment->getNomUrl() . ' n\'a pas de commande fournisseur associé';
+                                } else {
+                                    foreach($places_cf as $place_cf){
+                                        if(0 < (int) $place_cf->getData('id_origin') and !isset($cfs_eq[$place_cf->getData('id_origin')])) {
+                                            $cfs_eq[$place_cf->getData('id_origin')] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $place_cf->getData('id_origin'));
+                                            continue;
+                                        } else 
+                                            $this->errors[] = 'ID de la commande fournisseur associé à ' . $equipment->getNomUrl() . ' inconnu.';
+                                    }
+                                }
+                            } else {
+                               $this->errors[] = 'Équipement inconnu ' . $line_equipment->getData('id_equipment');
+                            }
+                            $this->errors[] = "Origine de l'équipement " . $equipment->getNomUrl() . ' inconnue';
+                        }
+                    }
+                } else {
+                    $this->errors[] = 'ID du produit inconnu.';
+                }
+            }
         }
         
+        // Obtention de toutes les lignes des commandes fournisseur associé à la commande de cette facture
+        $line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+        $lines_list = $line_instance->getList(array(
+            'id_obj' => (int) $commande->id
+                ), null, null, 'id', 'asc', 'array', array('id'));
+        $lines = array();
 
-//        $cfs = array();
-//        if (!is_null($fourn_lines_list)) {
-//            foreach ($fourn_lines_list as $item) {
-//                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $item['id']);
-//                if (BimpObject::objectLoaded($line)) {
-//                    $commande_fourn = $line->getParentInstance();
-//                    if (BimpObject::objectLoaded($commande_fourn)) {
-//                        $cfs[$commande_fourn->id] = $commande_fourn;
-//                    }
-//                }
-//            }
-//        } else {
-//            $this->errors[] = "Aucune ligne de commande fournisseur n'est associé à cette commande client";
-//            return !count($this->errors);
-//        }
-//        
-//        if (count($cfs) == 0) {
-//            $this->errors[] = "Aucune ligne de commande fournisseur n'est associé à cette commande client";
-//            return !count($this->errors);
-//        }
+        foreach ($lines_list as $item) {
+            $lines[] = (int) $item['id'];
+        }
+
+        $fourn_line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+        $all_lines_list = $fourn_line_instance->getList(array(
+            'linked_object_name' => 'commande_line',
+            'linked_id_object'   => array(
+                'in' => $lines
+            )
+                ), null, null, 'id', 'asc', 'array', array('id'));
+        $all_fourn_lines = array();
+        foreach($all_lines_list as $line) 
+            $all_fourn_lines[] = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $line['id']);
         
+        // Commandes fournisseur avec équipement
+        $cfs_prod = array();
+        // Boucle sur toutes les lignes de facture SANS équipement
+        foreach($fact_lines as $fact_line) {
+            if ((int) $fact_line->id_product) {
+                $product = $fact_line->getProduct();
+                if($product->isTypeService())
+                    continue;
+                if (BimpObject::objectLoaded($product)) {
+                    if (!$product->isSerialisable()) {
+                        
+                        // Recherche si une ligne de la commande fournisseur contient le produit de la ligne de facture
+                        foreach($cfs_eq as $cf) {
+                            $cf_lines = $cf->getChildrenObjects('lines');
+                            foreach($cf_lines as $cf_line) {
+                                if((int) $cf_line->getData('id_product') == (int) $fact_line->getData('id_product'))
+                                    continue;
+                                
+                            }
+                        }
+                        
+                        // On n'a pas trouvé de commandes fournisseur avec ce produit dans les commandes fournisseur avec équipement
+                        foreach($all_fourn_lines as $cf_line) {
+                            if(0 < (int) $cf_line->getProduct()->id and (int) $cf_line->getProduct()->id == (int) $fact_line->getProduct()->id) {
+                                $cf = $cf_line->getParentInstance();
+                                $cfs_prod[$cf->id] = $cf;
+//                                $this->errors[] = $cf_line->getData('id_product') . ' == ' . $fact_line->getData('id_product');
+                                continue;
+                            }
+                        }
+                        $this->errors[] = 'Origine du produit ' . $product->getNomUrl() . ' inconnue';
+                    }
+                } else {
+                    $this->errors[] = 'ID du produit inconnu.';
+                }
+            }
+        }
+        
+        $cfs = array();
+        foreach ($cfs_eq as $id_cf => $cf) {
+            if(!isset($cfs[$id_cf]))
+                $cfs[$id_cf] = $cf;
+        }
+        
+        foreach ($cfs_prod as $id_cf => $cf) {
+            if(!isset($cfs[$id_cf]))
+                $cfs[$id_cf] = $cf;
+        }
+
         return $cfs;
     }
     

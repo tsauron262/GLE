@@ -12,7 +12,7 @@ $url = "https://";
 $url.= $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];  
 
 
-if(isset($_REQUEST['not_compatible'])){
+if(isset($_REQUEST['nav_not_compatible'])){
     
     echo '<h1>Votre navigateur n\'est pas compatible.</h1><h2> <a href="'.$url.'" target="popup">Merci de cliquer ici</a></h2>';
     die;
@@ -49,7 +49,7 @@ echo "<script>function testCookie(){"
     . "if(document.cookie.match('DOLSESSID_')){ "
     . "}else{ "
             . "window.open('".$url."', '_blank'); "
-        . "window.location.href = window.location.href + '&not_compatible=true'"
+        . "window.location.href = window.location.href + '&nav_not_compatible=true'"
     . "}"
 . "}, 500)}; "
 . "testCookie();"

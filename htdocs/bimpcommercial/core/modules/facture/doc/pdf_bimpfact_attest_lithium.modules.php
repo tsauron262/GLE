@@ -188,9 +188,9 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                                     $this->errors[] = 'ID de la commande fournisseur associé à ' . $equipment->getNomUrl() . ' inconnu.';
                             }
                         }
+                    } else {
+                        $this->errors[] = 'ID du produit inconnu.';
                     }
-                } else {
-                    $this->errors[] = 'ID du produit inconnu.';
                 }
             }
         }

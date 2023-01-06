@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
 
     public $errors = array();
+    public $warnings = array();
     
     function __construct($db) {
         parent::__construct($db);
@@ -158,7 +159,8 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
         foreach($fact_lines as $fact_line) {
             if ((int) $fact_line->id_product) {
                 $product = $fact_line->getProduct();
-                if(!$product->isTypeService()){
+                $this->warnings[] = "<b>Eq Ligne considérée </b>" . $product->getNomUrl();
+                if(!$product->isTypeService()) {
                     if (BimpObject::objectLoaded($product)) {
                         if ($product->isSerialisable()) {
                             $fact_lines_equipment = $fact_line->getChildrenObjects('equipment_lines');
@@ -192,6 +194,8 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                         $this->errors[] = 'ID du produit inconnu.';
                     }
                 }
+            } else {
+                $this->warnings[] = "<b>Eq Ligne ignorée </b>" . $fact_line->desc;
             }
         }
         
@@ -224,37 +228,40 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
             $origine_trouvee = 0;
             if ((int) $fact_line->id_product) {
                 $product = $fact_line->getProduct();
-                if($product->isTypeService())
-                    continue;
+                $this->warnings[] = "<b>Prod Ligne considérée </b>" . $product->getNomUrl();
+                    if(!$product->isTypeService()) {
 
-                if (BimpObject::objectLoaded($product)) {
-                    if (!$product->isSerialisable()) {
-                        
-                        // Recherche si une ligne de la commande fournisseur contient le produit de la ligne de facture
-                        foreach($cfs_eq as $cf) {
-                            $cf_lines = $cf->getChildrenObjects('lines');
-                            foreach($cf_lines as $cf_line) {
-                                if((int) $cf_line->getProduct()->id == (int) $product->id)
-                                    $origine_trouvee = 1;
-                            }
-                        }
-                        
-                        // On n'a pas trouvé de commandes fournisseur avec ce produit dans les commandes fournisseur avec équipement
-                        if(!$origine_trouvee){
-                            foreach($all_fourn_lines as $cf_line) {
-                                if(0 < (int) $cf_line->getProduct()->id and (int) $cf_line->getProduct()->id == (int) $product->id) {
-                                    $cf = $cf_line->getParentInstance();
-                                    $cfs_prod[$cf->getData('id')] = $cf;
-                                    $origine_trouvee = 1;
+                    if (BimpObject::objectLoaded($product)) {
+                        if (!$product->isSerialisable()) {
+
+                            // Recherche si une ligne de la commande fournisseur contient le produit de la ligne de facture
+                            foreach($cfs_eq as $cf) {
+                                $cf_lines = $cf->getChildrenObjects('lines');
+                                foreach($cf_lines as $cf_line) {
+                                    if((int) $cf_line->getProduct()->id == (int) $product->id)
+                                        $origine_trouvee = 1;
                                 }
                             }
+
+                            // On n'a pas trouvé de commandes fournisseur avec ce produit dans les commandes fournisseur avec équipement
+                            if(!$origine_trouvee){
+                                foreach($all_fourn_lines as $cf_line) {
+                                    if(0 < (int) $cf_line->getProduct()->id and (int) $cf_line->getProduct()->id == (int) $product->id) {
+                                        $cf = $cf_line->getParentInstance();
+                                        $cfs_prod[$cf->getData('id')] = $cf;
+                                        $origine_trouvee = 1;
+                                    }
+                                }
+                            }
+                            if(!$origine_trouvee)
+                                $this->errors[] = 'Origine du produit ' . $product->getNomUrl() . ' inconnue';
                         }
-                        if(!$origine_trouvee)
-                            $this->errors[] = 'Origine du produit ' . $product->getNomUrl() . ' inconnue';
+                    } else {
+                        $this->errors[] = 'ID du produit inconnu.';
                     }
-                } else {
-                    $this->errors[] = 'ID du produit inconnu.';
                 }
+            } else {
+                $this->warnings[] = "<b>Prod Ligne ignorée </b>" . $fact_line->desc;
             }
         }
         

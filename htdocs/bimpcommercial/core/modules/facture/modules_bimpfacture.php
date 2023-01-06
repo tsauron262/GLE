@@ -3,7 +3,7 @@
 require_once(DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php');
 require_once DOL_DOCUMENT_ROOT . '/core/class/commondocgenerator.class.php';
 
-function createFactureAttachment($db, $object, $obj_type, $modele = '', $outputlangs = '') {
+function createFactureAttachment($db, $object, $obj_type, $modele = '', &$warnings = array()) {
     $errors = array();
     global $langs;
 
@@ -26,7 +26,10 @@ function createFactureAttachment($db, $object, $obj_type, $modele = '', $outputl
                 if ($obj->write_file($object, $outputlangs, $modele)) {
                     $pdf_dir = DOL_DATA_ROOT . '/bimpcommercial/' . $obj_type . '/' . $obj->id . '/';
                 }
-
+                
+                if(isset($obj->warnings) and is_array($obj->warnings))
+                    $warnings = BimpTools::merge_array ($warnings, $obj->warnings);
+                
                 $errors = BimpTools::merge_array($errors, $obj->errors);
 //                    }
             } else {

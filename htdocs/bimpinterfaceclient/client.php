@@ -36,9 +36,9 @@ if(isset($_REQUEST['nav_not_compatible'])){
 require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-if(!isset($_COOKIE[$sessionname])){
+//if(!isset($_COOKIE[$sessionname])){
     setcookie($sessionname, session_id(), array('SameSite' => 'None', 'Secure'=>true));
-}
+//}
 
 BimpCore::setContext("public");
 
@@ -49,7 +49,10 @@ echo "<script>function testCookie(){"
     . "if(document.cookie.match('DOLSESSID_')){ "
     . "}else{ "
             . "window.open('".$url."', '_blank'); "
-        . "window.location.href = window.location.href + '&nav_not_compatible=true'"
+        . "if(window.location.href.indexOf('?') > 0) "
+            . "window.location.href = window.location.href + '&nav_not_compatible=true';"
+        . "else "
+            . "window.location.href = window.location.href + '?nav_not_compatible=true';"
     . "}"
 . "}, 500)}; "
 . "testCookie();"

@@ -51,7 +51,7 @@ class BimpComm extends BimpDolObject
         80  => "Santé",
         90  => "SAV",
         14  => "Bureautique-Formation",
-        100 => "Autre"
+        100 => "Autre (ne pas utiliser)"
     ];
     public static $zones_vente = array(
         self::BC_ZONE_FR      => 'France',

@@ -73,6 +73,7 @@ class BContract_contrat extends BimpDolObject
     CONST CONTRAT_MONITORING = 'CMO';
     CONST CONTRAT_DE_SPARE = 'CSP';
     CONST CONTRAT_DE_DELEGATION_DE_PERSONEL = 'CDP';
+    CONST CONTRAT_MONETIQUE = 'CMQ';
     // Type mail interne
     CONST MAIL_DEMANDE_VALIDATION = 1;
     CONST MAIL_VALIDATION = 2;
@@ -153,6 +154,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_MONITORING                => ['label' => "Contrat de monitoring", 'classes' => [], 'icon' => 'terminal'],
         self::CONTRAT_DE_SPARE                  => ['label' => "Contrat de spare", 'classes' => [], 'icon' => 'share'],
         self::CONTRAT_DE_DELEGATION_DE_PERSONEL => ['label' => "Contrat de délégation du personnel", 'classes' => [], 'icon' => 'male'],
+        self::CONTRAT_MONETIQUE                 => ['label' => "Contrat monétique", 'classes' => [], 'icon' => 'fas_file-invoice-dollar'],
     ];
     public static $true_objects_for_link = [
         'commande'      => 'Commande',

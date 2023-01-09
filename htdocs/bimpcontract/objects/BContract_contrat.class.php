@@ -3750,9 +3750,9 @@ class BContract_contrat extends BimpDolObject
         return $this->totalContrat;
     }
 
-    public function getCurrentTotal()
+    public function getCurrentTotal($taxe = 0)
     {
-        return $this->getTotal($this->getData('current_renouvellement'));
+        return $this->getTotal($this->getData('current_renouvellement'), $taxe);
     }
 
     public function getDureeInitial()
@@ -3777,20 +3777,23 @@ class BContract_contrat extends BimpDolObject
         return ($this->getData('duree_mois') - $dureePrlong) / ($this->getData('current_renouvellement') + 1);
     }
 
-    public function getTotal($renouvellement)
+    public function getTotal($renouvellement, $taxe = 0)
     {
         $montant = 0;
         foreach ($this->dol_object->lines as $line) {
             $child = $this->getChildObject("lines", $line->id);
             if ($child->getData('renouvellement') == $renouvellement) {
-                $montant += $line->total_ht;
+                if($taxe)
+                    $montant += $line->total_ttc;
+                else
+                    $montant += $line->total_ht;
             }
         }
 
         return $montant;
     }
 
-    public function getAddAmountAvenantProlongation($idAvenant = 0)
+    public function getAddAmountAvenantProlongation($idAvenant = 0, $taxe = 0)
     {
 
         $now = new DateTime();
@@ -3815,7 +3818,7 @@ class BContract_contrat extends BimpDolObject
             $av = $this->getChildObject('avenant', $id_child);
             $dureePrlong += $av->getNbMois();
             if (!$idAvenant || $idAvenant == $id_child)
-                $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getDureeInitial());
+                $total += $this->getCurrentTotal($taxe) * $av->getNbMois() / ($this->getDureeInitial());
         }
 
         return $total;

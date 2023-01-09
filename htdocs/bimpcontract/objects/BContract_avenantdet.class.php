@@ -52,9 +52,9 @@ class BContract_avenantdet extends BContract_avenant {
         return 1;
     }
     
-    public function getCoup($display = true) {
+    public function getCoup($display = true, $taxe = 0) {
         $html = '<strong>';
-        $priceForOne = $this->getCurrentPriceForQty();
+        $priceForOne = $this->getCurrentPriceForQty(true, true, $taxe);
             //Calcule des ajouts
             $qtyUp = $this->getQtyAdded();
             $coupUp = $qtyUp * $priceForOne;
@@ -102,7 +102,7 @@ class BContract_avenantdet extends BContract_avenant {
         return $html;
     }
     
-    public function getCurrentPriceForQty($prorata = true, $return_daily_price = false) {
+    public function getCurrentPriceForQty($prorata = true, $return_daily_price = false, $taxe = 0) {
         $contrat = null;
 //        if($this->getData('id_line_contrat')) {
 //            $line = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
@@ -125,7 +125,10 @@ class BContract_avenantdet extends BContract_avenant {
             $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);            
         }
         
-        $price = $this->getData('ht');
+        if($taxe)
+            $price = $this->getData('ttc');
+        else
+            $price = $this->getData('ht');
         
         if(is_object($contrat)) {
             if($contrat->isLoaded()) {

@@ -176,8 +176,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
                         $desc = trim(strip_tags(html_entity_decode(htmlspecialchars_decode($desc))));
 
                         $pdf->MultiCell($W * 13, 6, $desc, 1, 'L', true);
+                    } else {
+                    $print = false;    
                     }
-                    $print = false;
+                    
                 } else {
                     //echo '<pre>';print_r($p);
                     $label = $p->label;

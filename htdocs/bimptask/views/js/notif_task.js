@@ -90,40 +90,34 @@ class notif_task extends AbstractNotification {
 
         // Cette tâche concerne directement l'utilisateur connecté
 //        if (element.user_type == this.my)
-            return 1;
+        return 1;
 
         // Cette tâche est non attribué
         return 0;
     }
 
-    getButton(button_name, name_display, icon, params) {
-        return '<button name="' + button_name + '" class="btn btn-default" type="button" onclick="setObjectAction($(this), '
-                + '{module: \'bimptask\', object_name: \'BIMP_Task\', ' + params
-                + ');"><i class="fa ' + icon + ' iconLeft"></i>' + name_display + '</button>';
-    }
-
     getbuttonSendMail(id_object) {
-        return this.getButton('rep_mail', 'Rep Mail', 'fa-send',
-                'id_object: \'' + id_object + '\'}, \'sendMail\', {}, \'newMail\','
-                + 'null, null, null, null, false, \'medium\'');
+        var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
+        onclick += ', \'sendMail\', {}, null, null, {form_name: \'newMail\'})';
+        return '<button name="rep_mail" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fa fa-send iconLeft"></i>Rep Mail</button>';
     }
 
     getbuttonClose(id_object) {
-        return this.getButton('close', 'Terminer', 'fa-close',
-                'id_object: \'' + id_object + '\'}, \'close\', {}, null, null, '
-                + 'null, \'Terminer la tâche ?\', null, false, \'medium\'');
+        var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
+        onclick += ', \'close\', {}, null, null, {confirm_msg: \'Terminer la tâche ?\'})';
+        return '<button name="close" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fa fa-close iconLeft"></i>Terminer</button>';
     }
 
     getButtonAttribute(id_object) {
-        return this.getButton('attribute', 'Attribuer', 'fa-user',
-                'id_object: \'' + id_object + '\'}, \'attribute\', {}, '
-                + '\'attribute\', null, null, null, null, false, \'medium\'');
+        var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
+        onclick += ', \'attribute\', {}, null, null, {form_name: \'attribute\'})';
+        return '<button name="attribute" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fa fa-user iconLeft"></i>Attribuer</button>';
     }
 
     getButtonRefuseAttribute(id_object) {
-        return this.getButton('refuse_attribute', 'Refuser l\'attribution', 'fa-window-close',
-                'id_object: \'' + id_object + '\'}, \'attribute\', '
-                + '{id_user_owner: 0}, null, null, null, \'Refuser cette attribution ?\', null, false, \'medium\'');
+        var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
+        onclick += ', \'attribute\', {id_user_owner: 0}, null, null, {confirm_msg: \'Refuser cette attribution ?\'})';
+        return '<button name="refuse_attribute" class="btn btn-default  btn-small" type="button" onclick="' + onclick + '"><i class="fa fa-window-close iconLeft"></i>Refuser l\'attribution</button>';
     }
 
 //<button class="btn  btn-danger" type="button"
@@ -139,7 +133,7 @@ class notif_task extends AbstractNotification {
         if (not_viewed > 1)
             s = 's';
 
-        return '<button not_viewed=' + not_viewed + ' class="btn  btn-danger" type="button" onclick="loadModalView('
+        return '<button not_viewed=' + not_viewed + ' class="btn  btn-danger btn-small" type="button" onclick="loadModalView('
                 + '\'bimptask\', \'BIMP_Task\', ' + id_object + ', \'notes\', $(this), '
                 + '\'Infos\')"><i class="fa fa-fas fa-comments iconLeft"></i>' + not_viewed + ' Info' + s + ' ' + not_viewed + ' Non lue ' + s + '</button>';
     }
@@ -149,20 +143,44 @@ class notif_task extends AbstractNotification {
     }
 
     formatElement(element, key) {
-
         var html = '';
 
-        if (parseInt(element.prio) === 20) {
-            html += '<i class="danger fa fa-exclamation iconLeft"></i>';
+        var is_prio = (parseInt(element.prio) === 20);
+        html += '<div class="task_content">';
+
+        if (is_prio) {
             element.append = 'div.tab-content > #' + element.user_type + ' > div.task_with_prio';
 
         } else {
             element.append = 'div.tab-content > #' + element.user_type + ' > div.task_no_prio';
         }
 
-        html += element.subj + ' de "' + element.src + '" ' + element.txt;
+        if (element.src) {
+            html += '<div class="task_src">' + element.src + '</div>';
+        }
 
-        // Boutons
+        if (element.subj) {
+            html += '<div class="task_subj">';
+            if (is_prio) {
+                html += '<i class="danger fa fa-exclamation iconLeft"></i>';
+            }
+            html += element.subj + '</div>';
+        }
+
+        if (element.txt) {
+            html += '<div class="task_txt">' + element.txt + '</div>';
+        }
+
+        this.updateNav(element.user_type, 1, element.not_viewed);
+
+        element.class = 'single_task';
+
+        return html;
+    }
+
+    getElementHeaderButtons(element, key) {
+        var html = '';
+
         html += this.getButtonNotViewed(element.id, element.not_viewed);
 
         // Tâche pour l'utilisateur courant
@@ -183,10 +201,6 @@ class notif_task extends AbstractNotification {
             if (element.can_attribute)
                 html += this.getButtonAttribute(element.id);
         }
-
-        this.updateNav(element.user_type, 1, element.not_viewed);
-
-        element.class = 'single_task';
 
         return html;
     }
@@ -295,7 +309,7 @@ class notif_task extends AbstractNotification {
 
             n.onclick = function () {
                 $('#' + bn.dropdown_id).trigger('click');
-            }
+            };
         }
     }
 

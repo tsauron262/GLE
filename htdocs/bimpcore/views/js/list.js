@@ -927,7 +927,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                     module: $list.data('module'),
                     object_name: object_name,
                     id_object: 0
-                }, action, extra_data, null, $resultContainer, success_callback, null);
+                }, action, extra_data, $resultContainer, success_callback);
             } else {
                 $button.addClass('disabled');
                 var i = 1;
@@ -938,7 +938,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                             module: $list.data('module'),
                             object_name: object_name,
                             id_object: id_object
-                        }, action, extra_data, null, $resultContainer, null, null);
+                        }, action, extra_data, $resultContainer);
                     } else {
                         var msg = '';
                         if (object_labels[object_name]['is_female']) {
@@ -1639,7 +1639,7 @@ function onListLoaded($list) {
 
             $list.data('object_change_event_init', 1);
         }
-        
+
         $('body').trigger($.Event('listLoaded', {
             $list: $list
         }));
@@ -2047,16 +2047,17 @@ function onGenerateCsvFormSubmit($form, extra_data) {
 }
 
 function updateGraph(list_id, idGraph, list_name) {
-    extra_data = {};
+    var extra_data = {};
     extra_data['list_name'] = list_name;
     extra_data['list_id'] = list_id;
+
     var $list = null;
+
     if (typeof (list_id) !== 'undefined' && list_id) {
         var $list = $('#' + list_id);
         var $conteneur = $('#' + list_id + '_' + idGraph + '_chartContainer');
-        console.log('av');
+
         if ($.isOk($list) && $.isOk($conteneur)) {
-            console.log('apresddd');
             extra_data['list_data'] = getListData($list);
             extra_data['idGraph'] = idGraph;
 
@@ -2064,7 +2065,9 @@ function updateGraph(list_id, idGraph, list_name) {
                 module: $list.data('module'),
                 object_name: $list.data('object_name'),
                 id_object: 0
-            }, 'getGraphData', extra_data, null, null, null, null, null, true);
+            }, 'getGraphData', extra_data, null, null, {
+                no_triggers: true
+            });
         }
     }
 

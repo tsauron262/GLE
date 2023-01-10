@@ -175,6 +175,7 @@ forms:
             - field: fk_user_dest
             - field: fk_group_dest
             - field: content
+            
     rep: 
         rows: 
             - field: obj_type

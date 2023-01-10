@@ -266,7 +266,7 @@ function BimpUserRightsTable() {
             id_object: id_user
         }, 'addRight', {
             id_rights: id_rights
-        }, '', null, function (result) {
+        }, null, function (result) {
             if (typeof (result.results) !== 'undefined') {
                 for (var id_right in result.results) {
                     if (parseInt(result.results[id_right])) {
@@ -306,7 +306,7 @@ function BimpUserRightsTable() {
             id_object: id_user
         }, 'removeRight', {
             id_rights: id_rights
-        }, '', null, function (result) {
+        }, null, function (result) {
             if (typeof (result.results) !== 'undefined') {
                 for (var id_right in result.results) {
                     if (parseInt(result.results[id_right]['ok'])) {
@@ -455,7 +455,7 @@ function BimpUserGroupRightsTable() {
             id_object: id_group
         }, 'addRight', {
             id_rights: id_rights
-        }, '', null, function (result) {
+        }, null, function (result) {
             if (typeof (result.results) !== 'undefined') {
                 for (var id_right in result.results) {
                     if (parseInt(result.results[id_right])) {
@@ -495,7 +495,7 @@ function BimpUserGroupRightsTable() {
             id_object: id_group
         }, 'removeRight', {
             id_rights: id_rights
-        }, '', null, function (result) {
+        }, null, function (result) {
             if (typeof (result.results) !== 'undefined') {
                 for (var id_right in result.results) {
                     if (parseInt(result.results[id_right])) {

@@ -119,7 +119,7 @@ fields:
             field_name: ef_type
             show_values: S
         default_value: ''
-    total: 
+    total_ht: 
         label: Total HT
         dol_prop: total_ht
         type: money
@@ -292,7 +292,6 @@ fields:
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
-    total_ht: unset
        
 forms: 
     default: 
@@ -818,7 +817,7 @@ fields_tables:
             - label: Remises
               value: 
                   callback: displayTotalRemises
-            - field: total
+            - field: total_ht
             - field: tva
             - field: total_ttc
             - field: prime
@@ -862,7 +861,6 @@ filters_panels:
     default: 
         filters: 
             ref: unset
-            total_ht: unset
             fk_availability: unset
             
             facnumber: 
@@ -871,7 +869,6 @@ filters_panels:
             datef: 
                 
 lists_cols:
-    total_ht: unset
     facnumber: 
         object_link: 1
     ref: unset
@@ -1045,7 +1042,7 @@ lists:
             secteur_comm_check:
             statut: 
             paiement_status: 
-            total: 
+            total_ht: 
             total_pa:
             marge: 
             
@@ -1141,7 +1138,7 @@ stats_lists_cols:
         field: marge
         data_type: money
     tot_ht: 
-        field: total
+        field: total_ht
     tot_brouillon: 
         label: Tot. Fac. brouillons
         type: sum

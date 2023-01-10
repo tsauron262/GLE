@@ -6617,7 +6617,7 @@ class Bimp_Facture extends BimpComm
         $year = (isset($boxObj->confUser['year']) ? $boxObj->confUser['year'] : $boxObj->config['year']['val_default']);
         $boxObj->boxlabel .= ' ' . $year;
 
-        $lns = BimpCache::getBdb()->executeS("SELECT SUM(total) as tot, COUNT(*) as nb, ae.type as secteur FROM `llx_facture` a, llx_facture_extrafields ae WHERE ae.fk_object = a.rowid AND YEAR(a.datef) = '" . $year . "' GROUP BY ae.type");
+        $lns = BimpCache::getBdb()->executeS("SELECT SUM(total_ht) as tot, COUNT(*) as nb, ae.type as secteur FROM `llx_facture` a, llx_facture_extrafields ae WHERE ae.fk_object = a.rowid AND YEAR(a.datef) = '" . $year . "' GROUP BY ae.type");
         $field = new BC_Field($this, 'ef_type');
         $data = $data2 = array();
         $i = 0;

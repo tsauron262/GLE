@@ -36,8 +36,8 @@ AND (u.email = '".$add."' || ue.alias LIKE '%".$add."%')");
                     if(isset($tabT[1])){
                         $domaine = $tabT[1];
                         if(in_array($domaine, $tabDomainValid)){
-                            $object->smtps->setFrom('user') = $tabT[0];
-                            $object->smtps->setFrom('host') = $tabT[1];
+//                            $object->smtps->setFrom('user') = $tabT[0];
+//                            $object->smtps->setFrom('host') = $tabT[1];
                             
                             $object->smtps->setFrom($mailT);
                             $object->smtps->setReplyTo($mailT);

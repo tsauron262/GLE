@@ -29,7 +29,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/db/Database.interface.php';
  */
 abstract class DoliDB implements Database
 {
-	/** @var bool|resource|SQLite3 Database handler */
+	/** @var bool|resource|mysqli|SQLite3|PgSql\connection Database handler */
 	public $db;
 	/** @var string Database type */
 	public $type;
@@ -37,8 +37,10 @@ abstract class DoliDB implements Database
 	public $forcecharset = 'utf8';
 	/** @var string Collate used to force collate when creating database */
 	public $forcecollate = 'utf8_unicode_ci';
+
 	/** @var resource Resultset of last query */
 	private $_results;
+
 	/** @var bool true if connected, else false */
 	public $connected;
 	/** @var bool true if database selected, else false */
@@ -70,15 +72,11 @@ abstract class DoliDB implements Database
 	/** @var string */
 	public $error;
 
-        /* moddrsi */
-        public $has_rollback = false;
-        public $noTransaction = false;
-        /* fmoddrsi */
-        
 
 
 	/**
-	 *	Return the DB prefix
+	 *	Return the DB prefix found into prefix_db (if it was set manually by doing $dbhandler->prefix_db=...).
+	 *  Otherwise return MAIN_DB_PREFIX (common use).
 	 *
 	 *	@return string		The DB prefix
 	 */
@@ -112,6 +110,25 @@ abstract class DoliDB implements Database
 		return '';
 	}
 
+
+	/**
+	 *	Format a SQL REGEXP
+	 *
+	 *	@param	string	$subject        string tested
+	 *	@param	string  $pattern        SQL pattern to match
+	 *	@param	string	$sqlstring      whether or not the string being tested is an SQL expression
+	 *	@return	string          		SQL string
+	 */
+	public function regexpsql($subject, $pattern, $sqlstring = false)
+	{
+		if ($sqlstring) {
+			return "(". $subject ." REGEXP '" . $pattern . "')";
+		}
+
+		return "('". $subject ."' REGEXP '" . $pattern . "')";
+	}
+
+
 	/**
 	 *   Convert (by PHP) a GM Timestamp date into a string date with PHP server TZ to insert into a date field.
 	 *   Function to use to build INSERT, UPDATE or WHERE predica
@@ -141,29 +158,27 @@ abstract class DoliDB implements Database
 	 *
 	 * @param   string 	$stringtosanitize 	String to escape
 	 * @param   int		$allowsimplequote 	1=Allow simple quotes in string. When string is used as a list of SQL string ('aa', 'bb', ...)
+	 * @param	string	$allowsequals		1=Allow equals sign
 	 * @return  string                      String escaped
 	 */
-	public function sanitize($stringtosanitize, $allowsimplequote = 0)
+	public function sanitize($stringtosanitize, $allowsimplequote = 0, $allowsequals = 0)
 	{
-		if ($allowsimplequote) {
-			return preg_replace('/[^a-z0-9_\-\.,\']/i', '', $stringtosanitize);
-		} else {
-			return preg_replace('/[^a-z0-9_\-\.,]/i', '', $stringtosanitize);
-		}
+		return preg_replace('/[^a-z0-9_\-\.,'.($allowsequals ? '=' : '').($allowsimplequote ? "\'" : '').']/i', '', $stringtosanitize);
 	}
 
 	/**
 	 * Start transaction
 	 *
-	 * @return	    int         1 if transaction successfuly opened or already opened, 0 if error
+	 * @param	string	$textinlog		Add a small text into log. '' by default.
+	 * @return	int         			1 if transaction successfuly opened or already opened, 0 if error
 	 */
-	public function begin()
+	public function begin($textinlog = '')
 	{
 		if (!$this->transaction_opened) {
 			$ret = $this->query("BEGIN");
 			if ($ret) {
 				$this->transaction_opened++;
-				dol_syslog("BEGIN Transaction", LOG_DEBUG);
+				dol_syslog("BEGIN Transaction".($textinlog ? ' '.$textinlog : ''), LOG_DEBUG);
 				dol_syslog('', 0, 1);
 			}
 			return $ret;
@@ -182,51 +197,20 @@ abstract class DoliDB implements Database
 	 */
 	public function commit($log = '')
 	{
+		dol_syslog('', 0, -1);
+		if ($this->transaction_opened <= 1) {
+			$ret = $this->query("COMMIT");
+			if ($ret) {
+				$this->transaction_opened = 0;
+				dol_syslog("COMMIT Transaction".($log ? ' '.$log : ''), LOG_DEBUG);
 				return 1;
+			} else {
 				return 0;
 			}
-		dol_syslog('',0,-1);
-                
-                if (defined('BIMP_LIB') && BimpDebug::isActive()) {
-                    $id_trans = $this->transaction_opened;
-                    $content = '<span class="danger">COMMIT #' . $id_trans . '</span><br/><br/>';
-                    BimpDebug::addDebug('sql', '', $content, array(
-                        'foldable' => false
-                    ));
-                }
-                
-		if ($this->transaction_opened==1 && !$this->noTransaction)
-		{
-                        /* moddrsi */
-                        if ($this->has_rollback) {
-                            if (!defined('BIMP_LIB')) {
-                                require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-                            }
-                            BimpCore::addlog('Tentative de COMMIT SQL à la suite d\'un ROLLBACK', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore');
-                            $this->rollback();
-                            return 0;
-                        }
-                        
-                        /* fmoddrsi */
-                        
-			$ret=$this->query("COMMIT");
-                        
-                        if(class_exists('BimpTools'))
-                            BimpTools::deloqueAll ();
-                        
-			if ($ret)
-			{
-				$this->transaction_opened=0;
-				dol_syslog("COMMIT Transaction".($log?' '.$log:''),LOG_DEBUG);
+		} else {
 			$this->transaction_opened--;
-                        if(class_exists('BimpCore'))
-                             BimpCore::addlog('Tentative de COMMIT transaction deja fermée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore');
 			return 1;
 		}
-                else{
-                        BimpCore::addlog('Tentative de COMMIT transaction deja fermée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore');
-                        return 0;
-                }
 	}
 
 	/**
@@ -237,34 +221,14 @@ abstract class DoliDB implements Database
 	 */
 	public function rollback($log = '')
 	{
-			}
-			else
-			{
-                            BimpCore::addlog('COMMIT ERREUR', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
-                                'Dernière Erreur SQL' => $this->lasterror(),
-                                'lasterror'           => $this->error(),
-                                'lasterrno'           => $this->errno()
-                            ));
-                            
-                            
-
-                            if (defined('BIMP_LIB') && BimpDebug::isActive()) {
-                                $content = BimpRender::renderAlerts('Echec COMMIT  - ' . $this->lasterror());
-                                BimpDebug::addDebug('sql', '', $content, array(
-                                    'foldable' => false
-                                ));
-                            }
+		dol_syslog('', 0, -1);
+		if ($this->transaction_opened <= 1) {
+			$ret = $this->query("ROLLBACK");
+			$this->transaction_opened = 0;
+			dol_syslog("ROLLBACK Transaction".($log ? ' '.$log : ''), LOG_DEBUG);
 			return $ret;
-		}
-		elseif($this->transaction_opened > 1 || $this->noTransaction)
-		{
+		} else {
 			$this->transaction_opened--;
-                        
-                        /* moddrsi */
-                        $this->has_rollback = true;
-                        BimpCore::addLogs_debug_trace('Tentative de ROLLBACK sur transaction d\'id '.($this->transaction_opened + 1));
-                        /* fmoddrsi */
-                        
 			return 1;
 		}
 	}
@@ -311,23 +275,6 @@ abstract class DoliDB implements Database
 	{
 		return $this->lastquery;
 	}
-        
-        
-            /**
-     *	Drop a table into database
-     *
-     *	@param	    string	$table 			Name of table
-     *	@return	    int						<0 if KO, >=0 if OK
-     */
-    function DDLDropTable($table)
-    {
-    	$sql = "DROP TABLE ".$table;
-
-		if (! $this->query($sql))
- 			return -1;
-    	else
-    		return 1;
-    }
 
 	/**
 	 * Define sort criteria of request
@@ -414,38 +361,6 @@ abstract class DoliDB implements Database
 	{
 		return $this->lastqueryerror;
 	}
-		dol_syslog('',0,-1);
-                
-                if (defined('BIMP_LIB') && BimpDebug::isActive()) {
-                    $id_trans = $this->transaction_opened;
-                    $content = '<span class="danger">ROLLBACK #' . $id_trans . '</span><br/><br/>';
-                    BimpDebug::addDebug('sql', '', $content, array(
-                        'foldable' => false
-                    ));
-                }
-                
-                
-		if ($this->transaction_opened<=1 && !$this->noTransaction)
-		{
-			$ret=$this->query("ROLLBACK");
-			$this->transaction_opened=0;
-                        
-                        /* moddrsi */
-                        if(class_exists('BimpTools'))
-                            BimpTools::deloqueAll ();
-                        $this->has_rollback = false;
-                        
-                        if (defined('BIMP_LIB') && BimpDebug::isActive()) {
-                            if ($ret <= 0) {
-                                $content = BimpRender::renderAlerts('Echec ROLLBACK  - ' . $this->lasterror());
-                                BimpDebug::addDebug('sql', '', $content, array(
-                                    'foldable' => false
-                                ));
-                            }
-                        }
-                        /* fmoddrsi */
-                        
-			dol_syslog("ROLLBACK Transaction".($log?' '.$log:''),LOG_DEBUG);
 
 	/**
 	 * Return first result from query as object
@@ -497,10 +412,3 @@ abstract class DoliDB implements Database
 		return false;
 	}
 }
-		}
-                elseif($this->noTransaction){
-                        BimpCore::addlog('Tentative de ROLLBACK sur instance sans transactions', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
-                        return 1;
-                }
-		else
-		{

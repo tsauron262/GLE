@@ -1072,53 +1072,53 @@ class Commande extends CommonOrder
 	 *	@param      User	$user       Object user that change status
 	 *	@return     int         		<0 if KO, 0 if nothing is done, >0 if OK
 	 */
-	public function set_reopen($user)
-	{
-		// phpcs:enable
-		$error = 0;
-
-		if ($this->statut != self::STATUS_CANCELED && $this->statut != self::STATUS_CLOSED) {
-			dol_syslog(get_class($this)."::set_reopen order has not status closed", LOG_WARNING);
-			return 0;
-		}
-
-		$this->db->begin();
-
-		$sql = 'UPDATE '.MAIN_DB_PREFIX.'commande';
-		$sql .= ' SET fk_statut='.self::STATUS_VALIDATED.', facture=0,';
-		$sql .= " fk_user_modif = ".((int) $user->id);
-		$sql .= " WHERE rowid = ".((int) $this->id);
-
-		dol_syslog(get_class($this)."::set_reopen", LOG_DEBUG);
-		$resql = $this->db->query($sql);
-		if ($resql) {
-			// Call trigger
-			$result = $this->call_trigger('ORDER_REOPEN', $user);
-			if ($result < 0) {
-				$error++;
-			}
-			// End call triggers
-		} else {
-			$error++;
-			$this->error = $this->db->lasterror();
-			dol_print_error($this->db);
-		}
-
-		if (!$error) {
-			$this->statut = self::STATUS_VALIDATED;
-			$this->billed = 0;
-
-			$this->db->commit();
-			return 1;
-		} else {
-			foreach ($this->errors as $errmsg) {
-				dol_syslog(get_class($this)."::set_reopen ".$errmsg, LOG_ERR);
-				$this->error .= ($this->error ? ', '.$errmsg : $errmsg);
-			}
-			$this->db->rollback();
-			return -1 * $error;
-		}
-	}
+//	public function set_reopen($user)
+//	{
+//		// phpcs:enable
+//		$error = 0;
+//
+//		if ($this->statut != self::STATUS_CANCELED && $this->statut != self::STATUS_CLOSED) {
+//			dol_syslog(get_class($this)."::set_reopen order has not status closed", LOG_WARNING);
+//			return 0;
+//		}
+//
+//		$this->db->begin();
+//
+//		$sql = 'UPDATE '.MAIN_DB_PREFIX.'commande';
+//		$sql .= ' SET fk_statut='.self::STATUS_VALIDATED.', facture=0,';
+//		$sql .= " fk_user_modif = ".((int) $user->id);
+//		$sql .= " WHERE rowid = ".((int) $this->id);
+//
+//		dol_syslog(get_class($this)."::set_reopen", LOG_DEBUG);
+//		$resql = $this->db->query($sql);
+//		if ($resql) {
+//			// Call trigger
+//			$result = $this->call_trigger('ORDER_REOPEN', $user);
+//			if ($result < 0) {
+//				$error++;
+//			}
+//			// End call triggers
+//		} else {
+//			$error++;
+//			$this->error = $this->db->lasterror();
+//			dol_print_error($this->db);
+//		}
+//
+//		if (!$error) {
+//			$this->statut = self::STATUS_VALIDATED;
+//			$this->billed = 0;
+//
+//			$this->db->commit();
+//			return 1;
+//		} else {
+//			foreach ($this->errors as $errmsg) {
+//				dol_syslog(get_class($this)."::set_reopen ".$errmsg, LOG_ERR);
+//				$this->error .= ($this->error ? ', '.$errmsg : $errmsg);
+//			}
+//			$this->db->rollback();
+//			return -1 * $error;
+//		}
+//	}
 
 	/**
 	 *  Close order
@@ -1127,58 +1127,58 @@ class Commande extends CommonOrder
 	 *  @param		int		$notrigger	1=Does not execute triggers, 0=Execute triggers
 	 *	@return		int					<0 if KO, >0 if OK
 	 */
-	public function cloture($user, $notrigger = 0)
-	{
-		global $conf;
-
-		$error = 0;
-
-		$usercanclose = ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->creer))
-			|| (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->order_advance->close)));
-
-		if ($usercanclose) {
-			if ($this->statut == self::STATUS_CLOSED) {
-				return 0;
-			}
-			$this->db->begin();
-
-			$now = dol_now();
-
-			$sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element;
-			$sql .= ' SET fk_statut = '.self::STATUS_CLOSED.',';
-			$sql .= ' fk_user_cloture = '.((int) $user->id).',';
-			$sql .= " date_cloture = '".$this->db->idate($now)."',";
-			$sql .= " fk_user_modif = ".((int) $user->id);
-			$sql .= " WHERE rowid = ".((int) $this->id).' AND fk_statut > '.self::STATUS_DRAFT;
-
-			if ($this->db->query($sql)) {
-				if (!$notrigger) {
-					// Call trigger
-					$result = $this->call_trigger('ORDER_CLOSE', $user);
-					if ($result < 0) {
-						$error++;
-					}
-					// End call triggers
-				}
-
-				if (!$error) {
-					$this->statut = self::STATUS_CLOSED;
-
-					$this->db->commit();
-					return 1;
-				} else {
-					$this->db->rollback();
-					return -1;
-				}
-			} else {
-				$this->error = $this->db->lasterror();
-
-				$this->db->rollback();
-				return -1;
-			}
-		}
-		return 0;
-	}
+//	public function cloture($user, $notrigger = 0)
+//	{
+//		global $conf;
+//
+//		$error = 0;
+//
+//		$usercanclose = ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->creer))
+//			|| (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->order_advance->close)));
+//
+//		if ($usercanclose) {
+//			if ($this->statut == self::STATUS_CLOSED) {
+//				return 0;
+//			}
+//			$this->db->begin();
+//
+//			$now = dol_now();
+//
+//			$sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element;
+//			$sql .= ' SET fk_statut = '.self::STATUS_CLOSED.',';
+//			$sql .= ' fk_user_cloture = '.((int) $user->id).',';
+//			$sql .= " date_cloture = '".$this->db->idate($now)."',";
+//			$sql .= " fk_user_modif = ".((int) $user->id);
+//			$sql .= " WHERE rowid = ".((int) $this->id).' AND fk_statut > '.self::STATUS_DRAFT;
+//
+//			if ($this->db->query($sql)) {
+//				if (!$notrigger) {
+//					// Call trigger
+//					$result = $this->call_trigger('ORDER_CLOSE', $user);
+//					if ($result < 0) {
+//						$error++;
+//					}
+//					// End call triggers
+//				}
+//
+//				if (!$error) {
+//					$this->statut = self::STATUS_CLOSED;
+//
+//					$this->db->commit();
+//					return 1;
+//				} else {
+//					$this->db->rollback();
+//					return -1;
+//				}
+//			} else {
+//				$this->error = $this->db->lasterror();
+//
+//				$this->db->rollback();
+//				return -1;
+//			}
+//		}
+//		return 0;
+//	}
 
 	/**
 	 * 	Cancel an order
@@ -1187,70 +1187,70 @@ class Commande extends CommonOrder
 	 *	@param	int		$idwarehouse	Id warehouse to use for stock change.
 	 *	@return	int						<0 if KO, >0 if OK
 	 */
-	public function cancel($idwarehouse = -1)
-	{
-		global $conf, $user, $langs;
-
-		$error = 0;
-
-		$this->db->begin();
-
-		$sql = "UPDATE ".MAIN_DB_PREFIX."commande";
-		$sql .= " SET fk_statut = ".self::STATUS_CANCELED.",";
-		$sql .= " fk_user_modif = ".((int) $user->id);
-		$sql .= " WHERE rowid = ".((int) $this->id);
-		$sql .= " AND fk_statut = ".self::STATUS_VALIDATED;
-
-		dol_syslog(get_class($this)."::cancel", LOG_DEBUG);
-		if ($this->db->query($sql)) {
-			// If stock is decremented on validate order, we must reincrement it
-			if (!empty($conf->stock->enabled) && !empty($conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER) && $conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER == 1) {
-				require_once DOL_DOCUMENT_ROOT.'/product/stock/class/mouvementstock.class.php';
-				$langs->load("agenda");
-
-				$num = count($this->lines);
-				for ($i = 0; $i < $num; $i++) {
-					if ($this->lines[$i]->fk_product > 0) {
-						$mouvP = new MouvementStock($this->db);
-						$mouvP->setOrigin($this->element, $this->id);
-						// We increment stock of product (and sub-products)
-						$result = $mouvP->reception($user, $this->lines[$i]->fk_product, $idwarehouse, $this->lines[$i]->qty, 0, $langs->trans("OrderCanceledInDolibarr", $this->ref)); // price is 0, we don't want WAP to be changed
-						if ($result < 0) {
-							$error++;
-							$this->error = $mouvP->error;
-							break;
-						}
-					}
-				}
-			}
-
-			if (!$error) {
-				// Call trigger
-				$result = $this->call_trigger('ORDER_CANCEL', $user);
-				if ($result < 0) {
-					$error++;
-				}
-				// End call triggers
-			}
-
-			if (!$error) {
-				$this->statut = self::STATUS_CANCELED;
-				$this->db->commit();
-				return 1;
-			} else {
-				foreach ($this->errors as $errmsg) {
-					dol_syslog(get_class($this)."::cancel ".$errmsg, LOG_ERR);
-					$this->error .= ($this->error ? ', '.$errmsg : $errmsg);
-				}
-				$this->db->rollback();
-				return -1 * $error;
-			}
-		} else {
-			$this->error = $this->db->error();
-			$this->db->rollback();
-			return -1;
-		}
-	}
+//	public function cancel($idwarehouse = -1)
+//	{
+//		global $conf, $user, $langs;
+//
+//		$error = 0;
+//
+//		$this->db->begin();
+//
+//		$sql = "UPDATE ".MAIN_DB_PREFIX."commande";
+//		$sql .= " SET fk_statut = ".self::STATUS_CANCELED.",";
+//		$sql .= " fk_user_modif = ".((int) $user->id);
+//		$sql .= " WHERE rowid = ".((int) $this->id);
+//		$sql .= " AND fk_statut = ".self::STATUS_VALIDATED;
+//
+//		dol_syslog(get_class($this)."::cancel", LOG_DEBUG);
+//		if ($this->db->query($sql)) {
+//			// If stock is decremented on validate order, we must reincrement it
+//			if (!empty($conf->stock->enabled) && !empty($conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER) && $conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER == 1) {
+//				require_once DOL_DOCUMENT_ROOT.'/product/stock/class/mouvementstock.class.php';
+//				$langs->load("agenda");
+//
+//				$num = count($this->lines);
+//				for ($i = 0; $i < $num; $i++) {
+//					if ($this->lines[$i]->fk_product > 0) {
+//						$mouvP = new MouvementStock($this->db);
+//						$mouvP->setOrigin($this->element, $this->id);
+//						// We increment stock of product (and sub-products)
+//						$result = $mouvP->reception($user, $this->lines[$i]->fk_product, $idwarehouse, $this->lines[$i]->qty, 0, $langs->trans("OrderCanceledInDolibarr", $this->ref)); // price is 0, we don't want WAP to be changed
+//						if ($result < 0) {
+//							$error++;
+//							$this->error = $mouvP->error;
+//							break;
+//						}
+//					}
+//				}
+//			}
+//
+//			if (!$error) {
+//				// Call trigger
+//				$result = $this->call_trigger('ORDER_CANCEL', $user);
+//				if ($result < 0) {
+//					$error++;
+//				}
+//				// End call triggers
+//			}
+//
+//			if (!$error) {
+//				$this->statut = self::STATUS_CANCELED;
+//				$this->db->commit();
+//				return 1;
+//			} else {
+//				foreach ($this->errors as $errmsg) {
+//					dol_syslog(get_class($this)."::cancel ".$errmsg, LOG_ERR);
+//					$this->error .= ($this->error ? ', '.$errmsg : $errmsg);
+//				}
+//				$this->db->rollback();
+//				return -1 * $error;
+//			}
+//		} else {
+//			$this->error = $this->db->error();
+//			$this->db->rollback();
+//			return -1;
+//		}
+//	}
 
 	/**
 	 *	Create order

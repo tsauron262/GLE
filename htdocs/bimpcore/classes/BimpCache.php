@@ -57,7 +57,7 @@ class BimpCache
 
         if (is_null(self::$bdb_noTransac) || $force_new) {
             global $conf;
-            $db2 = getDoliDBInstance($conf->db->type, $conf->db->host, $conf->db->user, $db->database_pass_secur_sfddsfsdqsdfsfddsqf, $conf->db->name, $conf->db->port);
+            $db2 = getDoliDBInstance($conf->db->type, $conf->db->host, $conf->db->user, $db->database_pass, $conf->db->name, $conf->db->port);
             $db2->noTransaction = true;
 
             if ($force_new) {

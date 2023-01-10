@@ -177,14 +177,6 @@ interface Database
 	 */
 	public function escape($stringtoencode);
 
-	/**
-	 * Escape a string to insert data
-	 *
-	 * @param   string $stringtoencode String to escape
-	 * @return  string                        String escaped
-	 * @deprecated
-	 */
-	public function escapeunderscore($stringtoencode);
 
 	/**
 	 *	Escape a string to insert data into a like

@@ -524,6 +524,17 @@ class DoliDBMysqli extends DoliDB
     {
         return $this->db->real_escape_string($stringtoencode);
     }
+    
+    /**
+     *	Escape a string to insert data into a like
+     *
+     *	@param	string	$stringtoencode		String to escape
+     *	@return	string						String escaped
+     */
+    public function escapeforlike($stringtoencode)
+    {
+            return str_replace(array('_', '\\', '%'), array('\_', '\\\\', '\%'), (string) $stringtoencode);
+    }
 
     /**
      * 	Return generic error code of last operation.
@@ -970,104 +981,73 @@ class DoliDBMysqli extends DoliDB
         return -1;
     }
 
-    /**
-     * 	Create a user and privileges to connect to database (even if database does not exists yet)
-     *
-     * 	@param	string	$dolibarr_main_db_host 		Ip server or '%'
-     * 	@param	string	$dolibarr_main_db_user 		Nom user a creer
-     * 	@param	string	$dolibarr_main_db_pass 		Mot de passe user a creer
-     * 	@param	string	$dolibarr_main_db_name		Database name where user must be granted
-     * 	@return	int									<0 if KO, >=0 if OK
-     */
-    function DDLCreateUser($dolibarr_main_db_host, $dolibarr_main_db_user, $dolibarr_main_db_pass, $dolibarr_main_db_name)
-    {
-        $sql = "CREATE USER '" . $this->escape($dolibarr_main_db_user) . "'";
-        dol_syslog(get_class($this) . "::DDLCreateUser", LOG_DEBUG); // No sql to avoid password in log
-        $resql = $this->query($sql);
-        if (!$resql) {
-            if ($this->lasterrno != 'DB_ERROR_USER_ALREADY_EXISTS') {
-                return -1;
-            } else {
-                // If user already exists, we continue to set permissions
-                dol_syslog(get_class($this) . "::DDLCreateUser sql=" . $sql, LOG_WARNING);
-            }
-        }
-        $sql = "GRANT ALL PRIVILEGES ON " . $this->escape($dolibarr_main_db_name) . ".* TO '" . $this->escape($dolibarr_main_db_user) . "'@'" . $this->escape($dolibarr_main_db_host) . "' IDENTIFIED BY '" . $this->escape($dolibarr_main_db_pass) . "'";
-        dol_syslog(get_class($this) . "::DDLCreateUser", LOG_DEBUG); // No sql to avoid password in log
-        $resql = $this->query($sql);
-        if (!$resql) {
-            return -1;
-        }
+ 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
+	/**
+	 * 	Create a user and privileges to connect to database (even if database does not exists yet)
+	 *
+	 *	@param	string	$dolibarr_main_db_host 		Ip server or '%'
+	 *	@param	string	$dolibarr_main_db_user 		Nom user a creer
+	 *	@param	string	$dolibarr_main_db_pass 		Mot de passe user a creer
+	 *	@param	string	$dolibarr_main_db_name		Database name where user must be granted
+	 *	@return	int									<0 if KO, >=0 if OK
+	 */
+	public function DDLCreateUser($dolibarr_main_db_host, $dolibarr_main_db_user, $dolibarr_main_db_pass, $dolibarr_main_db_name)
+	{
+		// phpcs:enable
+		$sql = "CREATE USER '".$this->escape($dolibarr_main_db_user)."' IDENTIFIED BY '".$this->escape($dolibarr_main_db_pass)."'";
+		dol_syslog(get_class($this)."::DDLCreateUser", LOG_DEBUG); // No sql to avoid password in log
+		$resql = $this->query($sql);
+		if (!$resql) {
+			if ($this->lasterrno != 'DB_ERROR_USER_ALREADY_EXISTS') {
+				return -1;
+			} else {
+				// If user already exists, we continue to set permissions
+				dol_syslog(get_class($this)."::DDLCreateUser sql=".$sql, LOG_WARNING);
+			}
+		}
 
-        $sql = "FLUSH Privileges";
+		// Redo with localhost forced (sometimes user is created on %)
+		$sql = "CREATE USER '".$this->escape($dolibarr_main_db_user)."'@'localhost' IDENTIFIED BY '".$this->escape($dolibarr_main_db_pass)."'";
+		$resql = $this->query($sql);
 
-        dol_syslog(get_class($this) . "::DDLCreateUser", LOG_DEBUG);
-        $resql = $this->query($sql);
-        if (!$resql) {
-            return -1;
-        }
+		$sql = "GRANT ALL PRIVILEGES ON ".$this->escape($dolibarr_main_db_name).".* TO '".$this->escape($dolibarr_main_db_user)."'@'".$this->escape($dolibarr_main_db_host)."'";
+		dol_syslog(get_class($this)."::DDLCreateUser", LOG_DEBUG); // No sql to avoid password in log
+		$resql = $this->query($sql);
+		if (!$resql) {
+			$this->error = "Connected user not allowed to GRANT ALL PRIVILEGES ON ".$this->escape($dolibarr_main_db_name).".* TO '".$this->escape($dolibarr_main_db_user)."'@'".$this->escape($dolibarr_main_db_host)."'";
+			return -1;
+		}
 
 		$sql = "FLUSH Privileges";
 
-    /**
-     * 	Return charset used to store data in current database
-     *  Note: if we are connected to databasename, it is same result than using SELECT default_character_set_name FROM information_schema.SCHEMATA WHERE schema_name = "databasename";)
-     *
-     * 	@return		string		Charset
-     *  @see getDefaultCollationDatabase
-     */
-    function getDefaultCharacterSetDatabase()
-    {
-        $resql = $this->query('SHOW VARIABLES LIKE \'character_set_database\'');
-        if (!$resql) {
-            // version Mysql < 4.1.1
-            return $this->forcecharset;
-        }
-        $liste = $this->fetch_array($resql);
-        $tmpval = $liste['Value'];
+		dol_syslog(get_class($this)."::DDLCreateUser", LOG_DEBUG);
+		$resql = $this->query($sql);
+		if (!$resql) {
+			return -1;
+		}
 
 		return 1;
 	}
 
-    /**
-     * 	Return list of available charset that can be used to store data in database
-     *
-     * 	@return		array|null		List of Charset
-     */
-    function getListOfCharacterSet()
-    {
-        $resql = $this->query('SHOW CHARSET');
-        $liste = array();
-        if ($resql) {
-            $i = 0;
-            while ($obj = $this->fetch_object($resql)) {
-                $liste[$i]['charset'] = $obj->Charset;
-                $liste[$i]['description'] = $obj->Description;
-                $i++;
-            }
-            $this->free($resql);
-        } else {
-            // version Mysql < 4.1.1
-            return null;
-        }
-        return $liste;
-    }
+	/**
+	 *	Return charset used to store data in current database
+	 *  Note: if we are connected to databasename, it is same result than using SELECT default_character_set_name FROM information_schema.SCHEMATA WHERE schema_name = "databasename";)
+	 *
+	 *	@return		string		Charset
+	 *  @see getDefaultCollationDatabase()
+	 */
+	public function getDefaultCharacterSetDatabase()
+	{
+		$resql = $this->query('SHOW VARIABLES LIKE \'character_set_database\'');
+		if (!$resql) {
+			// version Mysql < 4.1.1
+			return $this->forcecharset;
+		}
+		$liste = $this->fetch_array($resql);
+		$tmpval = $liste['Value'];
 
-    /**
-     * 	Return collation used in current database
-     *
-     * 	@return		string		Collation value
-     *  @see getDefaultCharacterSetDatabase
-     */
-    function getDefaultCollationDatabase()
-    {
-        $resql = $this->query('SHOW VARIABLES LIKE \'collation_database\'');
-        if (!$resql) {
-            // version Mysql < 4.1.1
-            return $this->forcecollate;
-        }
-        $liste = $this->fetch_array($resql);
-        $tmpval = $liste['Value'];
+		return $tmpval;
+	}
 
 	/**
 	 *	Return list of available charset that can be used to store data in database
@@ -1093,28 +1073,47 @@ class DoliDBMysqli extends DoliDB
 		return $liste;
 	}
 
-    /**
-     * 	Return list of available collation that can be used for database
-     *
-     * 	@return		array|null		Liste of Collation
-     */
-    function getListOfCollation()
-    {
-        $resql = $this->query('SHOW COLLATION');
-        $liste = array();
-        if ($resql) {
-            $i = 0;
-            while ($obj = $this->fetch_object($resql)) {
-                $liste[$i]['collation'] = $obj->Collation;
-                $i++;
-            }
-            $this->free($resql);
-        } else {
-            // version Mysql < 4.1.1
-            return null;
-        }
-        return $liste;
-    }
+	/**
+	 *	Return collation used in current database
+	 *
+	 *	@return		string		Collation value
+	 *  @see getDefaultCharacterSetDatabase()
+	 */
+	public function getDefaultCollationDatabase()
+	{
+		$resql = $this->query('SHOW VARIABLES LIKE \'collation_database\'');
+		if (!$resql) {
+			// version Mysql < 4.1.1
+			return $this->forcecollate;
+		}
+		$liste = $this->fetch_array($resql);
+		$tmpval = $liste['Value'];
+
+		return $tmpval;
+	}
+
+	/**
+	 *	Return list of available collation that can be used for database
+	 *
+	 *	@return		array|null		Liste of Collation
+	 */
+	public function getListOfCollation()
+	{
+		$resql = $this->query('SHOW COLLATION');
+		$liste = array();
+		if ($resql) {
+			$i = 0;
+			while ($obj = $this->fetch_object($resql)) {
+				$liste[$i]['collation'] = $obj->Collation;
+				$i++;
+			}
+			$this->free($resql);
+		} else {
+			// version Mysql < 4.1.1
+			return null;
+		}
+		return $liste;
+	}
 
     /**
      * 	Return full path of dump program

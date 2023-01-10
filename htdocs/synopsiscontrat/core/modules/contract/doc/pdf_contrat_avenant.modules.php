@@ -214,7 +214,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->SetTextColor(0,50,255);
                 $pdf1->SetTextColor(255,140,115);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à " . $mysoc->name, 0, 'R');
+//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à " . $mysoc->name, 0, 'R');
                 
                 $pdf->SetFont('', '', 8);
                 $pdf1->SetFont('', '', 8);
@@ -643,13 +643,13 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                            
                 if(stripos($this->avenant->displayData('type'), 'prolongation') !== false){
                     $pdf->ln();
-                    $pdf->Cell($W*5, 4, "Cet avenant porte sur un montant de " . price($this->avenant->getTotalCoup()) . ' € HT pour une période de '.$this->avenant->getData('added_month').' mois', 0, null, 'L', false);
+                    $pdf->Cell($W*5, 4, "Cet avenant porte sur un montant de " . price($this->avenant->getTotalCoup()) . ' € HT, soit ' . price($this->avenant->getTotalCoup(1)) . ' € TTC pour une période de ' . $this->avenant->getData('added_month') . ' mois', 0, null, 'L', false);
                     $pdf->ln();
-                    $pdf->Cell($W*5, 4, 'Pour mémoire, le contrat initial portait sur un montant de '. price($bContract->getTotal(0)).' € HT pour une période de '.$bContract->getDureeInitial().' mois', 0, null, 'L', false);
+                    $pdf->Cell($W*5, 4, 'Pour mémoire, le contrat initial portait sur un montant de ' . price($bContract->getTotal(0)) . ' € HT, soit ' . price($bContract->getTotal(0, 1)) . ' € TTC pour une période de ' . $bContract->getDureeInitial().' mois', 0, null, 'L', false);
                     $pdf1->ln();
-                    $pdf1->Cell($W*5, 4, "Cet avenant porte sur un montant de " . price($this->avenant->getTotalCoup()) . ' € HT pour une période de '.$this->avenant->getData('added_month').' mois', 0, null, 'L', false);
+                    $pdf1->Cell($W*5, 4, "Cet avenant porte sur un montant de " . price($this->avenant->getTotalCoup()) . ' € HT, soit ' . price($this->avenant->getTotalCoup(1)) . ' € TTC pour une période de ' . $this->avenant->getData('added_month') . ' mois', 0, null, 'L', false);
                     $pdf1->ln();
-                    $pdf1->Cell($W*5, 4, 'Pour mémoire, le contrat initial portait sur un montant de '.price($bContract->getTotal(0)).'  € HT pour une période de '.$bContract->getDureeInitial().' mois', 0, null, 'L', false);
+                    $pdf1->Cell($W*5, 4, 'Pour mémoire, le contrat initial portait sur un montant de ' . price($bContract->getTotal(0)) . ' € HT, soit ' . price($bContract->getTotal(0, 1)) . ' € TTC pour une période de ' . $bContract->getDureeInitial() . ' mois', 0, null, 'L', false);
                 }
                 $current_article++;
                 

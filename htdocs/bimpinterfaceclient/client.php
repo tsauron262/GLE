@@ -4,6 +4,7 @@ header('x-frame-options: ALLOWALL',false);
 define('ALLOW_ALL_IFRAME', true);
 $_REQUEST['bimp_context'] = 'public';
 
+
 //echo '<pre>';
 //print_r($_SERVER);
 //echo '</pre>';
@@ -12,7 +13,7 @@ $url = "https://";
 $url.= $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];  
 
 
-if(isset($_REQUEST['not_compatible'])){
+if(isset($_REQUEST['nav_not_compatible'])){
     
     echo '<h1>Votre navigateur n\'est pas compatible.</h1><h2> <a href="'.$url.'" target="popup">Merci de cliquer ici</a></h2>';
     die;
@@ -42,18 +43,21 @@ if(!isset($_COOKIE[$sessionname])){
 
 BimpCore::setContext("public");
 
-
-
-echo "<script>function testCookie(){"
-. "setTimeout(function() {"
-    . "if(document.cookie.match('DOLSESSID_')){ "
-    . "}else{ "
-            . "window.open('".$url."', '_blank'); "
-        . "window.location.href = window.location.href + '&not_compatible=true'"
-    . "}"
-. "}, 500)}; "
-. "testCookie();"
-. "</script>";
+if(!isset($_REQUEST['ajax'])){
+    echo "<script>function testCookie(){"
+    . "setTimeout(function() {"
+        . "if(document.cookie.match('DOLSESSID_')){ "
+        . "}else{ "
+                . "window.open('".$url."', '_blank'); "
+            . "if(window.location.href.indexOf('?') > 0) "
+                . "window.location.href = window.location.href + '&nav_not_compatible=true';"
+            . "else "
+                . "window.location.href = window.location.href + '?nav_not_compatible=true';"
+        . "}"
+    . "}, 500)}; "
+    . "testCookie();"
+    . "</script>";
+}
 
 
 $controllerName = BimpTools::getValue('fc', 'InterfaceClient');

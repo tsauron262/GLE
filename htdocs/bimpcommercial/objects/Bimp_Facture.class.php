@@ -836,7 +836,7 @@ class Bimp_Facture extends BimpComm
                 return (count($errors) ? 0 : 1);
                 
             case 'generatePdfAttestLithium':
-                return $status == 1;
+                return $status == 1 or $status == 2;
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -1917,6 +1917,19 @@ class Bimp_Facture extends BimpComm
     public function getRef($withGeneric = true)
     {
         return $this->getData('ref');
+    }
+
+    public function getPotentielRemise()
+    {
+        $return = array();
+        if ($this->isLoaded()) {
+            $sql = $this->db->db->query("SELECT r.amount_ttc, cdet.fk_commande FROM `" . MAIN_DB_PREFIX . "societe_remise_except` r, " . MAIN_DB_PREFIX . "commandedet cdet, " . MAIN_DB_PREFIX . "element_element el WHERE r.`discount_type` = 0 AND r.fk_facture IS NULL AND r.fk_facture_line IS NULL AND cdet.fk_remise_except = r.rowid AND cdet.fk_commande = el.fk_source AND el.sourcetype = 'commande' AND el.targettype = 'facture' AND el.fk_target = " . $this->id);
+            while ($ln = $this->db->db->fetch_object($sql)) {
+                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $ln->fk_commande);
+                $return[] = array($ln->amount_ttc, $commande);
+            }
+        }
+        return $return;
     }
 
     public function getPotentielRemise()
@@ -4906,10 +4919,10 @@ class Bimp_Facture extends BimpComm
         }
     }
     
-    public function generatePdf($file_type, &$errors = array()) {
+    public function generatePdf($file_type, &$errors = array(), &$warnings = array()) {
         require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/core/modules/facture/modules_bimpfacture.php';
 
-        $errors = BimpTools::merge_array($errors, createFactureAttachment($this->db->db, $this, 'facture', $file_type));
+        $errors = BimpTools::merge_array($errors, createFactureAttachment($this->db->db, $this, 'facture', $file_type, $warnings));
     }
 
     // Actions - Overrides BimpComm:
@@ -5934,7 +5947,7 @@ class Bimp_Facture extends BimpComm
     public function actionGeneratePdfAttestLithium($data, &$success = '')
     {
         $errors = $warnings = array();
-        $this->generatePDF($data['file_type'], $errors);
+        $this->generatePDF($data['file_type'], $errors, $warnings);
         $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
         $success_callback = 'window.open(\'' . $url . '\');';
 

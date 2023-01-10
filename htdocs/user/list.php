@@ -38,6 +38,11 @@ require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
 $bObj = BimpObject::getInstance("bimpcore", "Bimp_User", $_REQUEST['id']);
 $htmlRedirect = $bObj->processRedirect();
 
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcore", "Bimp_User", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
 if (! $user->rights->user->user->lire && ! $user->admin)
 	accessforbidden();
 

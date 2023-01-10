@@ -428,9 +428,10 @@ class Commande extends CommonOrder
 			foreach ($dirmodels as $reldir) {
 				$dir = dol_buildpath($reldir."core/modules/commande/");
 
-				// Load file with numbering class (if found)
-				$mybool |= @include_once $dir.$file;
-			}
+                // Load file with numbering class (if found)
+                if(is_file($dir.$file))
+                $mybool|=@include_once $dir.$file;
+            }
 
 			if ($mybool === false) {
 				dol_print_error('', "Failed to include file ".$file);
@@ -454,15 +455,384 @@ class Commande extends CommonOrder
 	}
 
 
-	/**
-	 *	Validate order
-	 *
-	 *	@param		User	$user     		User making status change
-	 *	@param		int		$idwarehouse	Id of warehouse to use for stock decrease
-	 *  @param		int		$notrigger		1=Does not execute triggers, 0= execute triggers
-	 *	@return  	int						<=0 if OK, 0=Nothing done, >0 if KO
-	 */
-	public function valid($user, $idwarehouse = 0, $notrigger = 0)
+    /**
+     *	Validate order
+     *
+     *	@param		User	$user     		User making status change
+     *	@param		int		$idwarehouse	Id of warehouse to use for stock decrease
+     *  @param		int		$notrigger		1=Does not execute triggers, 0= execute triggers
+     *	@return  	int						<=0 if OK, 0=Nothing done, >0 if KO
+     */
+    function valid($user, $idwarehouse=0, $notrigger=0)
+    {
+        global $conf,$langs;
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+
+        $error=0;
+
+        // Protection
+        if ($this->statut == self::STATUS_VALIDATED)
+        {
+            dol_syslog(get_class($this)."::valid action abandonned: already validated", LOG_WARNING);
+            return 0;
+        }
+
+        if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->commande->creer))
+       	|| (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->commande->order_advance->validate))))
+        {
+            $this->error='NotEnoughPermissions';
+            dol_syslog(get_class($this)."::valid ".$this->error, LOG_ERR);
+            return -1;
+        }
+
+        $now=dol_now();
+
+        $this->db->begin();
+
+        // Definition du nom de module de numerotation de commande
+        $soc = new Societe($this->db);
+        $soc->fetch($this->socid);
+
+        if (! $error && ! $notrigger)
+        {
+            // Call trigger
+            $result=$this->call_trigger('ORDER_VALIDATE',$user);
+            if ($result < 0) $error++;
+            // End call triggers
+        }
+        // Class of company linked to order
+        $result=$soc->set_as_client();
+
+        // Define new ref
+        if (! $error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) // empty should not happened, but when it occurs, the test save life
+        {
+            /* mod drsi*/
+            BimpTools::lockNum("numCommande");
+            /*fmoddrsi*/
+            $num = $this->getNextNumRef($soc);
+        }
+        else
+		{
+            $num = $this->ref;
+        }
+        $this->newref = $num;
+
+        // Validate
+        $sql = "UPDATE ".MAIN_DB_PREFIX."commande";
+        $sql.= " SET ref = '".$num."',";
+        $sql.= " fk_statut = ".self::STATUS_VALIDATED.",";
+        $sql.= " date_valid='".$this->db->idate($now)."',";
+        $sql.= " fk_user_valid = ".$user->id;
+        $sql.= " WHERE rowid = ".$this->id;
+
+        dol_syslog(get_class($this)."::valid()", LOG_DEBUG);
+        $resql=$this->db->query($sql);
+        if (! $resql)
+        {
+            dol_print_error($this->db);
+            $this->error=$this->db->lasterror();
+            $error++;
+        }
+
+        if (! $error)
+        {
+            // If stock is incremented on validate order, we must increment it
+            if ($result >= 0 && ! empty($conf->stock->enabled) && $conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER == 1)
+            {
+                require_once DOL_DOCUMENT_ROOT.'/product/stock/class/mouvementstock.class.php';
+                $langs->load("agenda");
+
+                // Loop on each line
+                $cpt=count($this->lines);
+                for ($i = 0; $i < $cpt; $i++)
+                {
+                    if ($this->lines[$i]->fk_product > 0)
+                    {
+                        $mouvP = new MouvementStock($this->db);
+						$mouvP->origin = &$this;
+                        // We decrement stock of product (and sub-products)
+                        $result=$mouvP->livraison($user, $this->lines[$i]->fk_product, $idwarehouse, $this->lines[$i]->qty, $this->lines[$i]->subprice, $langs->trans("OrderValidatedInDolibarr",$num));
+                        if ($result < 0)
+                        {
+                        	$error++;
+                        	$this->error=$mouvP->error;
+                        }
+                    }
+                    if ($error) break;
+                }
+            }
+        }
+
+
+        if (! $error)
+        {
+            $this->oldref = $this->ref;
+
+            // Rename directory if dir was a temporary ref
+            if (preg_match('/^[\(]?PROV/i', $this->ref))
+            {
+            	// On renomme repertoire ($this->ref = ancienne ref, $num = nouvelle ref)
+                // in order not to lose the attachments
+                $oldref = dol_sanitizeFileName($this->ref);
+                $newref = dol_sanitizeFileName($num);
+                $dirsource = $conf->commande->dir_output.'/'.$oldref;
+                $dirdest = $conf->commande->dir_output.'/'.$newref;
+                if (file_exists($dirsource))
+                {
+                    dol_syslog(get_class($this)."::valid() rename dir ".$dirsource." into ".$dirdest);
+                    
+                    if(is_dir($dirdest)){
+                        $dirErreur = DOL_DATA_ROOT.'/problemes/commande'.$this->id.'-'.$newref;
+                        rename($dirdest, $dirErreur);
+                        BimpCore::addlog('Probléme grave de déplacment de fichier', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array('source'=>$dirsource, 'dest'=>$dirdest, 'dossier deja existant déplacé'=>$dirErreur));
+                    }
+
+                    if (@rename($dirsource, $dirdest))
+                    {
+                        dol_syslog("Rename ok");
+                        // Rename docs starting with $oldref with $newref
+                        $listoffiles=dol_dir_list($conf->commande->dir_output.'/'.$newref, 'files', 1, '^'.preg_quote($oldref,'/'));
+                        foreach($listoffiles as $fileentry)
+                        {
+                        	$dirsource=$fileentry['name'];
+                        	$dirdest=preg_replace('/^'.preg_quote($oldref,'/').'/',$newref, $dirsource);
+                        	$dirsource=$fileentry['path'].'/'.$dirsource;
+                        	$dirdest=$fileentry['path'].'/'.$dirdest;
+                        	@rename($dirsource, $dirdest);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Set new ref and current status
+        if (! $error)
+        {
+            $this->ref = $num;
+            $this->statut = self::STATUS_VALIDATED;
+        }
+
+        if (! $error)
+        {
+            $this->db->commit();
+            return 1;
+        }
+        else
+		{
+            BimpCore::addLogs_extra_data(['roolbackCommande' => $this->error]);
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+    /**
+     *	Set draft status
+     *
+     *	@param	User	$user			Object user that modify
+     *	@param	int		$idwarehouse	Warehouse ID to use for stock change (Used only if option STOCK_CALCULATE_ON_VALIDATE_ORDER is on)
+     *	@return	int						<0 if KO, >0 if OK
+     */
+    function set_draft($user, $idwarehouse=-1)
+    {
+        global $conf,$langs;
+
+        $error=0;
+
+        // Protection
+        if ($this->statut <= self::STATUS_DRAFT)
+        {
+            return 0;
+        }
+
+        if (! ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->commande->creer))
+       	|| (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->commande->order_advance->validate))))
+        {
+            $this->error='Permission denied';
+            return -1;
+        }
+
+        $this->db->begin();
+
+        $sql = "UPDATE ".MAIN_DB_PREFIX."commande";
+        $sql.= " SET fk_statut = ".self::STATUS_DRAFT;
+        $sql.= " WHERE rowid = ".$this->id;
+
+        dol_syslog(get_class($this)."::set_draft", LOG_DEBUG);
+        if ($this->db->query($sql))
+        {
+            // If stock is decremented on validate order, we must reincrement it
+            if (! empty($conf->stock->enabled) && $conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER == 1)
+            {
+                $result = 0;
+
+                require_once DOL_DOCUMENT_ROOT.'/product/stock/class/mouvementstock.class.php';
+                $langs->load("agenda");
+
+                $num=count($this->lines);
+                for ($i = 0; $i < $num; $i++)
+                {
+                    if ($this->lines[$i]->fk_product > 0)
+                    {
+                        $mouvP = new MouvementStock($this->db);
+                        $mouvP->origin = &$this;
+                        // We increment stock of product (and sub-products)
+                        $result=$mouvP->reception($user, $this->lines[$i]->fk_product, $idwarehouse, $this->lines[$i]->qty, 0, $langs->trans("OrderBackToDraftInDolibarr",$this->ref));
+                        if ($result < 0) { $error++; $this->error=$mouvP->error; break; }
+                    }
+                }
+            }
+
+            if (!$error) {
+            	// Call trigger
+            	$result=$this->call_trigger('ORDER_UNVALIDATE',$user);
+            	if ($result < 0) $error++;
+            }
+
+            if (!$error) {
+           		$this->statut=self::STATUS_DRAFT;
+            	$this->db->commit();
+            	return 1;
+            }else {
+            	$this->db->rollback();
+            	return -1;
+            }
+        }
+        else
+        {
+            $this->error=$this->db->error();
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+
+    /**
+     *	Tag the order as validated (opened)
+     *	Function used when order is reopend after being closed.
+     *
+     *	@param      User	$user       Object user that change status
+     *	@return     int         		<0 if KO, 0 if nothing is done, >0 if OK
+     */
+    function set_reopen($user)
+    {
+        $error=0;
+
+        if ($this->statut != self::STATUS_CANCELED && $this->statut != self::STATUS_CLOSED)
+        {
+        	dol_syslog(get_class($this)."::set_reopen order has not status closed", LOG_WARNING);
+            return 0;
+        }
+
+        $this->db->begin();
+
+        $sql = 'UPDATE '.MAIN_DB_PREFIX.'commande';
+        $sql.= ' SET fk_statut='.self::STATUS_VALIDATED.', facture=0';
+        $sql.= ' WHERE rowid = '.$this->id;
+
+        dol_syslog(get_class($this)."::set_reopen", LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if ($resql)
+        {
+            // Call trigger
+            $result=$this->call_trigger('ORDER_REOPEN',$user);
+            if ($result < 0) $error++;
+            // End call triggers
+        }
+        else
+        {
+            $error++;
+            $this->error=$this->db->lasterror();
+            dol_print_error($this->db);
+        }
+
+        if (! $error)
+        {
+        	$this->statut = self::STATUS_VALIDATED;
+        	$this->billed = 0;
+
+            $this->db->commit();
+            return 1;
+        }
+        else
+        {
+	        foreach($this->errors as $errmsg)
+	        {
+		        dol_syslog(get_class($this)."::set_reopen ".$errmsg, LOG_ERR);
+		        $this->error.=($this->error?', '.$errmsg:$errmsg);
+	        }
+	        $this->db->rollback();
+	        return -1*$error;
+        }
+    }
+
+    /**
+     *  Close order
+     *
+     * 	@param      User	$user       Objet user that close
+     *  @param		int		$notrigger	1=Does not execute triggers, 0=Execute triggers
+     *	@return		int					<0 if KO, >0 if OK
+     */
+    function cloture($user, $notrigger=0)
+    {
+        global $conf;
+
+        $error=0;
+
+        if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->commande->creer))
+       	|| (! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! empty($user->rights->commande->order_advance->validate)))
+        {
+            $this->db->begin();
+
+            $now=dol_now();
+
+            $sql = 'UPDATE '.MAIN_DB_PREFIX.'commande';
+            $sql.= ' SET fk_statut = '.self::STATUS_CLOSED.',';
+            $sql.= ' fk_user_cloture = '.$user->id.',';
+            $sql.= " date_cloture = '".$this->db->idate($now)."'";
+            $sql.= ' WHERE rowid = '.$this->id.' AND fk_statut > '.self::STATUS_DRAFT;
+
+            if ($this->db->query($sql))
+            {
+            	if (! $notrigger)
+            	{
+		            // Call trigger
+	            	$result=$this->call_trigger('ORDER_CLOSE',$user);
+	            	if ($result < 0) $error++;
+		            // End call triggers
+            	}
+
+                if (! $error)
+                {
+                	$this->statut=self::STATUS_CLOSED;
+
+                    $this->db->commit();
+                    return 1;
+                }
+                else
+                {
+                    $this->db->rollback();
+                    return -1;
+                }
+            }
+            else
+            {
+                $this->error=$this->db->lasterror();
+
+                $this->db->rollback();
+                return -1;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * 	Cancel an order
+     * 	If stock is decremented on order validation, we must reincrement it
+     *
+     *	@param	int		$idwarehouse	Id warehouse to use for stock change.
+     *	@return	int						<0 if KO, >0 if OK
+     */
+	function cancel($idwarehouse=-1)
 	{
 		global $conf, $langs;
 

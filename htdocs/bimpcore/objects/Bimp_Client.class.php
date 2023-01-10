@@ -3504,7 +3504,7 @@ class Bimp_Client extends Bimp_Societe
 
             if ($c->isLoaded()) {
 
-                if ((int) $c->getData('status_atradius') == (int) Bimp_Client::STATUS_ATRADIUS_OK) {
+//                if ((int) $c->getData('status_atradius') == (int) Bimp_Client::STATUS_ATRADIUS_OK) {
 
                     $init_credit_check = $c->getInitData('outstanding_limit_credit_check');
                     $init_credit_limit = $c->getInitData('outstanding_limit_atradius');
@@ -3552,7 +3552,7 @@ class Bimp_Client extends Bimp_Societe
                     } else {
                         $syncro_sans_maj .= $c->getNomUrl() . ' Syncro faite, aucun changement<br/>';
                     }
-                }
+//                }
             }
         }
 

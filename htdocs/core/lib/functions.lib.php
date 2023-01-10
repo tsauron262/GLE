@@ -1586,14 +1586,31 @@ function dol_ucwords($string, $encoding = "UTF-8")
  *  @param	array|null	$logcontext				If defined, an array with extra informations (can be used by some log handlers)
  *  @return	void
  */
-function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename = '', $restricttologhandler = '', $logcontext = null)
+function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='', $restricttologhandler='', $backTrace = true)
 {
 	global $conf, $user, $debugbar;
 
 	// If syslog module enabled
-	if (empty($conf->syslog->enabled)) {
-		return;
-	}
+	if (empty($conf->syslog->enabled)) return;
+        
+        
+        /*mod drsi*/
+        if(! empty($message)){
+            if(function_exists("synGetDebug") && $backTrace)
+                $message .= synGetDebug();
+            if(stripos($message, "deprecated") !== false){
+                $suffixinfilename = "_deprecated";
+            }
+            if(stripos($message, "Redis") !== false){
+                $suffixinfilename = "_redis";
+            }
+            if(stripos($message, "Forbidden") !== false || stripos($message, "Duplicate") !== false || stripos($message, "a déjà le statut") !== false || stripos($message, "Doublon") !== false){
+                $suffixinfilename = "_duplicate";
+            }
+            if(stripos($message, "Creating default object from empty value") !== false)
+                    $suffixinfilename = "_recurent";
+            if(stripos($message, "Ldap::") !== false)
+                    $suffixinfilename = "_ldap";
 
 	// Check if we are into execution of code of a website
 	if (defined('USEEXTERNALSERVER') && !defined('USEDOLIBARRSERVER') && !defined('USEDOLIBARREDITOR')) {
@@ -1605,10 +1622,12 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename =
 		}
 	}
 
-	// Check if we have a forced suffix
-	if (defined('USESUFFIXINLOG')) {
-		$suffixinfilename .= constant('USESUFFIXINLOG');
-	}
+            $monUrl = "http://" . (isset($_SERVER['HTTP_HOST'])? $_SERVER['HTTP_HOST'] : '') . (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '');
+            $oldUrl = (isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : "n/c");
+            $nomUser = (is_object($user) && isset($user->login) ? $user->login : "n/c");
+            $message = " | ".$nomUser." | ".(isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '')."\n".$monUrl . " | " . $oldUrl . "\n". dol_trunc(print_r($_POST,1),200). "\n". $message. "\n";
+        }
+        /*f mod drsi*/
 
 	if ($ident < 0) {
 		foreach ($conf->loghandlers as $loghandlerinstance) {
@@ -2169,8 +2188,10 @@ function dol_banner_tab($object, $paramid, $morehtml = '', $shownav = 1, $fieldi
 							$phototoshow .= '</div>';
 						}
 					}
-				} elseif (!$phototoshow) { // example if modulepart = 'societe' or 'photo'
-					$phototoshow .= $form->showphoto($modulepart, $object, 0, 0, 0, 'photowithmargin photoref', 'small', 1, 0, $maxvisiblephotos);
+				}
+				else if (! $phototoshow && is_object($form))
+				{
+					$phototoshow = $form->showphoto($modulepart,$object,0,0,0,'photoref','small',1,0,$maxvisiblephotos);
 				}
 
 				if ($phototoshow) {
@@ -2304,18 +2325,8 @@ function dol_banner_tab($object, $paramid, $morehtml = '', $shownav = 1, $fieldi
 		$morehtmlref .= '</div>';
 	}
 
-	$parameters=array('morehtmlref'=>$morehtmlref);
-	$reshook = $hookmanager->executeHooks('formDolBanner', $parameters, $object, $action);
-	if ($reshook < 0) {
-		setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
-	} elseif (empty($reshook)) {
-		$morehtmlref .= $hookmanager->resPrint;
-	} elseif ($reshook > 0) {
-		$morehtmlref = $hookmanager->resPrint;
-	}
-
-
-	print '<div class="'.($onlybanner ? 'arearefnobottom ' : 'arearef ').'heightref valignmiddle centpercent">';
+	print '<div class="'.($onlybanner?'arearefnobottom ':'arearef ').'heightref valignmiddle" width="100%">';
+        if(is_object($form))
 	print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, $nodbprefix, $morehtmlleft, $morehtmlstatus, $morehtmlright);
 	print '</div>';
 	print '<div class="underrefbanner clearboth"></div>';

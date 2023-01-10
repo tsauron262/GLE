@@ -73,6 +73,7 @@ class BContract_contrat extends BimpDolObject
     CONST CONTRAT_MONITORING = 'CMO';
     CONST CONTRAT_DE_SPARE = 'CSP';
     CONST CONTRAT_DE_DELEGATION_DE_PERSONEL = 'CDP';
+    CONST CONTRAT_MONETIQUE = 'CMQ';
     // Type mail interne
     CONST MAIL_DEMANDE_VALIDATION = 1;
     CONST MAIL_VALIDATION = 2;
@@ -153,6 +154,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_MONITORING                => ['label' => "Contrat de monitoring", 'classes' => [], 'icon' => 'terminal'],
         self::CONTRAT_DE_SPARE                  => ['label' => "Contrat de spare", 'classes' => [], 'icon' => 'share'],
         self::CONTRAT_DE_DELEGATION_DE_PERSONEL => ['label' => "Contrat de délégation du personnel", 'classes' => [], 'icon' => 'male'],
+        self::CONTRAT_MONETIQUE                 => ['label' => "Contrat monétique", 'classes' => [], 'icon' => 'fas_file-invoice-dollar'],
     ];
     public static $true_objects_for_link = [
         'commande'      => 'Commande',
@@ -2321,6 +2323,15 @@ class BContract_contrat extends BimpDolObject
                 $errors[] = 'Vous n\'avez pas la permission de valider ce contrat';
             }
         }
+        
+        if($user->admin and 0 < (int) $this->getData('id_signature')) {
+            $buttons[] = array(
+                'label'   => 'Supprimer signature (ADMIN)',
+                'icon'    => 'fas_trash',
+                'onclick' => $this->getJsActionOnclick('deleteSignature', array(), array(
+                    'confirm_msg' => "Cette action est irréverssible, continuer ?",
+                )));
+        }
 
 
         return $buttons;
@@ -3041,7 +3052,7 @@ class BContract_contrat extends BimpDolObject
                     }
                 } else {
                     return array(
-                        'errors'   => array('Merci de choisir une méthode de signatre à distance'),
+                        'errors'   => array('Merci de choisir une méthode de signature à distance'),
                         'warnings' => array()
                     );
                 }
@@ -3283,6 +3294,35 @@ class BContract_contrat extends BimpDolObject
         return array('errors' => $errors, 'warnings' => $warnings);
     }
     /* OTHERS FUNCTIONS */
+    
+    public function actionDeleteSignature($data, &$success) {
+        
+        $errors = $warnings = array();
+        $success_callback = 'bimp_reloadPage();';
+        
+        if ((int) $this->getData('id_signature')) {
+            $signature = $this->getChildObject('signature');
+
+            if (BimpObject::objectLoaded($signature)) {
+                $errors = $signature->delete($warnings, $force_delete = false);
+                if(!count($errors))
+                    $success .= 'Objet signature supprimée avec succès<br/>';
+            }
+            
+            if(!count($errors)) {
+                $errors = $this->updateField('id_signature', 0);
+                if(!count($errors))
+                    $success .= 'Champs id_signature mis à 0<br/>';
+            }
+        }
+        
+        return array(
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+            
 
     public function create(&$warnings = array(), $force_create = false)
     {
@@ -3712,9 +3752,9 @@ class BContract_contrat extends BimpDolObject
         return $this->totalContrat;
     }
 
-    public function getCurrentTotal()
+    public function getCurrentTotal($taxe = 0)
     {
-        return $this->getTotal($this->getData('current_renouvellement'));
+        return $this->getTotal($this->getData('current_renouvellement'), $taxe);
     }
 
     public function getDureeInitial()
@@ -3739,20 +3779,23 @@ class BContract_contrat extends BimpDolObject
         return ($this->getData('duree_mois') - $dureePrlong) / ($this->getData('current_renouvellement') + 1);
     }
 
-    public function getTotal($renouvellement)
+    public function getTotal($renouvellement, $taxe = 0)
     {
         $montant = 0;
         foreach ($this->dol_object->lines as $line) {
             $child = $this->getChildObject("lines", $line->id);
             if ($child->getData('renouvellement') == $renouvellement) {
-                $montant += $line->total_ht;
+                if($taxe)
+                    $montant += $line->total_ttc;
+                else
+                    $montant += $line->total_ht;
             }
         }
 
         return $montant;
     }
 
-    public function getAddAmountAvenantProlongation($idAvenant = 0)
+    public function getAddAmountAvenantProlongation($idAvenant = 0, $taxe = 0)
     {
 
         $now = new DateTime();
@@ -3777,7 +3820,7 @@ class BContract_contrat extends BimpDolObject
             $av = $this->getChildObject('avenant', $id_child);
             $dureePrlong += $av->getNbMois();
             if (!$idAvenant || $idAvenant == $id_child)
-                $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getDureeInitial());
+                $total += $this->getCurrentTotal($taxe) * $av->getNbMois() / ($this->getDureeInitial());
         }
 
         return $total;

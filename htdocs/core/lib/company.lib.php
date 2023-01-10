@@ -488,7 +488,13 @@ function societe_admin_prepare_head()
  */
 function getCountry($searchkey, $withcode = '', $dbtouse = 0, $outputlangs = '', $entconv = 1, $searchlabel = '')
 {
-	global $db, $langs;
+    global $db,$langs;
+    
+    if(class_exists('BimpCache')){
+        $clef = 'getCountry'.$searchkey.$withcode. $entconv.$searchlabel;
+        if(isset(BimpCache::$cache[$clef]))
+            return BimpCache::$cache[$clef];
+    }
 
 	$result = '';
 
@@ -516,39 +522,41 @@ function getCountry($searchkey, $withcode = '', $dbtouse = 0, $outputlangs = '',
 		$sql .= " WHERE label = '".$db->escape($searchlabel)."'";
 	}
 
-	$resql = $dbtouse->query($sql);
-	if ($resql) {
-		$obj = $dbtouse->fetch_object($resql);
-		if ($obj) {
-			$label = ((!empty($obj->label) && $obj->label != '-') ? $obj->label : '');
-			if (is_object($outputlangs)) {
-				$outputlangs->load("dict");
-				if ($entconv) {
-					$label = ($obj->code && ($outputlangs->trans("Country".$obj->code) != "Country".$obj->code)) ? $outputlangs->trans("Country".$obj->code) : $label;
-				} else {
-					$label = ($obj->code && ($outputlangs->transnoentitiesnoconv("Country".$obj->code) != "Country".$obj->code)) ? $outputlangs->transnoentitiesnoconv("Country".$obj->code) : $label;
-				}
-			}
-			if ($withcode == 1) {
-				$result = $label ? "$obj->code - $label" : "$obj->code";
-			} elseif ($withcode == 2) {
-				$result = $obj->code;
-			} elseif ($withcode == 3) {
-				$result = $obj->rowid;
-			} elseif ($withcode === 'all') {
-				$result = array('id'=>$obj->rowid, 'code'=>$obj->code, 'label'=>$label);
-			} else {
-				$result = $label;
-			}
-		} else {
-			$result = 'NotDefined';
-		}
-		$dbtouse->free($resql);
-		return $result;
-	} else {
-		dol_print_error($dbtouse, '');
-	}
-	return 'Error';
+    $resql=$dbtouse->query($sql);
+    if ($resql)
+    {
+        $obj = $dbtouse->fetch_object($resql);
+        if ($obj)
+        {
+            $label=((! empty($obj->label) && $obj->label!='-')?$obj->label:'');
+            if (is_object($outputlangs))
+            {
+                $outputlangs->load("dict");
+                if ($entconv) $label=($obj->code && ($outputlangs->trans("Country".$obj->code)!="Country".$obj->code))?$outputlangs->trans("Country".$obj->code):$label;
+                else $label=($obj->code && ($outputlangs->transnoentitiesnoconv("Country".$obj->code)!="Country".$obj->code))?$outputlangs->transnoentitiesnoconv("Country".$obj->code):$label;
+            }
+            if ($withcode == 1) $result=$label?"$obj->code - $label":"$obj->code";
+            else if ($withcode == 2) $result=$obj->code;
+            else if ($withcode == 3) $result=$obj->rowid;
+            else if ($withcode === 'all') $result=array('id'=>$obj->rowid,'code'=>$obj->code,'label'=>$label);
+            else $result=$label;
+        }
+        else
+        {
+            $result='NotDefined';
+        }
+        $dbtouse->free($resql);
+        
+        
+        if(class_exists('BimpCache')){
+            BimpCache::setCache($clef,$result);
+        }
+    
+    
+        return $result;
+    }
+    else dol_print_error($dbtouse,'');
+    return 'Error';
 }
 
 /**

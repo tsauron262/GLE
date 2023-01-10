@@ -65,17 +65,17 @@ class BContract_avenant extends BContract_contrat {
         return $html;
     }
     
-    public function getTotalCoup() {
+    public function getTotalCoup($taxe = 0) {
         $total = 0;
         if(stripos($this->displayData('type'), 'prolongation') !== false){//patch cr getData('type') ne fonctionne pas TODO
             $parent = $this->getParentInstance();
-            $total += $parent->getAddAmountAvenantProlongation($this->id);
+            $total += $parent->getAddAmountAvenantProlongation($this->id, $taxe);
         }
         else{
             $children = $this->getChildrenList("avenantdet");
             foreach($children as $id_child) {
                 $child = $this->getChildObject('avenantdet', $id_child);
-                $total += $child->getCoup(false);
+                $total += $child->getCoup(false, $taxe);
             }
 
             

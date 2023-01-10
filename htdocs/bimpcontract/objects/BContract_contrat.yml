@@ -1398,6 +1398,7 @@ forms:
                 input: 
                     type: toggle
                 value: 1
+                hidden: 1
             contact_signature: 
                 custom: 1
                 label: Contact signataire
@@ -1432,6 +1433,8 @@ forms:
                     fields_names: sign_dist
                     sign_dist:
                         hide_values: 0
+                hidden: 1
+
 #            open_public_access: 
 #                custom: 1 
 #                label: Ouvrir immédiatement l'accès à la signature électronique à distance

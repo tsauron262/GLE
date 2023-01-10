@@ -317,9 +317,11 @@ if (!empty($conf->global->MAIN_HTML_TITLE) && preg_match('/thirdpartynameonly/',
 	$title = $object->name." - ".$langs->trans('Customer');
 }
 
-$help_url = 'EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas|DE:Modul_Geschäftspartner';
-
-llxHeader('', $title, $help_url);
+$title=$langs->trans("CustomerCard");
+if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/thirdpartynameonly/',$conf->global->MAIN_HTML_TITLE) && $object->name) $title=$object->name;
+$help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
+llxHeader('',$title,$help_url);
+echo $htmlRedirect;
 
 
 if ($object->id > 0) {

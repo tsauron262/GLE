@@ -672,6 +672,7 @@ lists_cols:
 filters_panels: 
     default: 
         filters: 
+            total_ttc: unset
             type: unset
             datep: 
             date_livraison: 
@@ -703,7 +704,7 @@ lists:
             entrepot: 
             ef_type: 
             commercial:
-            total_ttc: 
+            total: 
         
     user: 
         extends: default

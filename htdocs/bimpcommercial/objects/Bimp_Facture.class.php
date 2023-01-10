@@ -168,7 +168,7 @@ class Bimp_Facture extends BimpComm
             case 'forceChorusExported':
             case 'markSendNoChorusExport':
                 return ($user->admin || !empty($user->rights->bimpcommercial->chorus_exports));
-                
+
             case 'generatePdfAttestLithium':
                 return $user->admin or $user->id == 7;
         }
@@ -834,7 +834,7 @@ class Bimp_Facture extends BimpComm
                 }
 
                 return (count($errors) ? 0 : 1);
-                
+
             case 'generatePdfAttestLithium':
                 return $status == 1 or $status == 2;
         }
@@ -1378,7 +1378,7 @@ class Bimp_Facture extends BimpComm
                 'onclick' => $this->getJsActionOnclick('checkMargin')
             );
         }
-        
+
         return $buttons;
     }
 
@@ -1577,7 +1577,7 @@ class Bimp_Facture extends BimpComm
 
         return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
-    
+
     public function getInfosExtraBtn()
     {
         $buttons = array();
@@ -1593,7 +1593,7 @@ class Bimp_Facture extends BimpComm
                 );
             }
         }
-        
+
         return $buttons;
     }
 
@@ -3617,7 +3617,7 @@ class Bimp_Facture extends BimpComm
     public function renderRevalorisationsList()
     {
         $html = '';
-        
+
         if ($this->isLoaded()) {
             $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
             $bc_list = new BC_ListTable($reval, 'facture');
@@ -4905,8 +4905,9 @@ class Bimp_Facture extends BimpComm
             $this->updateField('date_relance', $prev_relance_date);
         }
     }
-    
-    public function generatePdf($file_type, &$errors = array(), &$warnings = array()) {
+
+    public function generatePdf($file_type, &$errors = array(), &$warnings = array())
+    {
         require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/core/modules/facture/modules_bimpfacture.php';
 
         $errors = BimpTools::merge_array($errors, createFactureAttachment($this->db->db, $this, 'facture', $file_type, $warnings));
@@ -5930,7 +5931,7 @@ class Bimp_Facture extends BimpComm
             'success_callback' => $success_callback
         );
     }
-    
+
     public function actionGeneratePdfAttestLithium($data, &$success = '')
     {
         $errors = $warnings = array();
@@ -5939,13 +5940,26 @@ class Bimp_Facture extends BimpComm
         $success_callback = 'window.open(\'' . $url . '\');';
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
     }
 
     // Overrides BimpObject:
+
+    public function validate()
+    {
+        $errors = parent::validate();
+
+        if (!count($errors)) {
+            if ($this->field_exists('expertise') && !(int) $this->getData('expertise') && $this->getData('ef_type') == 'S') {
+                $this->set('expertise', 90);
+            }
+        }
+
+        return $errors;
+    }
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {

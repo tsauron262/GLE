@@ -2242,7 +2242,7 @@ class Bimp_User extends BimpObject
 
         $boxObj->boxlabel .= ' sur ' . $nbJ . ' jours';
 
-        $sql = "SELECT u.lastname, u.firstname, SUM(total_ht) as total, COUNT(DISTINCT a.rowid) as nbTot, SUM(IF(fk_product_type=1, total_ht, 0)) as totalServ, SUM(IF(fk_product_type=1, 1, 0)) as nbServ, SUM(a.qty) as qtyTot, SUM(IF(fk_product_type=1, a.qty, 0)) as qtyServ
+        $sql = "SELECT u.lastname, u.firstname, SUM(a.total_ht) as total, COUNT(DISTINCT a.rowid) as nbTot, SUM(IF(fk_product_type=1, a.total_ht, 0)) as totalServ, SUM(IF(fk_product_type=1, 1, 0)) as nbServ, SUM(a.qty) as qtyTot, SUM(IF(fk_product_type=1, a.qty, 0)) as qtyServ
     FROM llx_facturedet a
     LEFT JOIN llx_facture f ON f.rowid = a.fk_facture
     LEFT JOIN llx_element_contact elemcont ON elemcont.element_id = a.fk_facture

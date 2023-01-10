@@ -232,7 +232,7 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
         }
     }
 
-    function showBox($head = null, $contents = null) {
+    function showBox($head = null, $contents = null, $nooutput = 0) {
         $html = parent::showBox($this->info_box_head, $this->info_box_contents);
         return ($html);
     }

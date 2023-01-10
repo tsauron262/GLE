@@ -4,7 +4,7 @@ class fileInfo {
 
     private $ok = true;
 
-    function fileInfo($db) {
+    function __construct($db) {
         $this->pathFileInfo = DOL_DOCUMENT_ROOT . "/synopsistools/fileInfo/";
         $this->db = $db;
         $this->fileVue = array();

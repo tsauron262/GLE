@@ -143,7 +143,7 @@ class Ldap
 	 */
 	public function __construct()
 	{
-		global $conf, $dolibarr_main_auth_ldap_host;
+		global $conf;
 
 		// Server
 		if (!empty($conf->global->LDAP_SERVER_HOST)) {
@@ -621,19 +621,6 @@ class Ldap
 			$this->error = "NotConnected";
 			return -3;
 		}
-                 if(defined('LDAP_MOD_AD')){
-                    if(stripos($dn, "OU=Olys") === false && stripos($dn, "OU=Blois") === false && stripos($dn, "OU=Bourg-en-Bresse") === false)
-                    {
-                            $this->error="Pas dans OU=Olys";
-                            dol_syslog(get_class($this)."::modify failed: ".$this->error, LOG_ERR);
-                            return -1;
-                    }
-                    
-//                    $info['sAMAccountName'] = $info['cn'];
-                    unset($info['sAMAccountName']);
-                    unset($info['cn']);
-                 }
-                
 
 		if (!$olddn || $olddn != $dn) {
 			if (!empty($olddn) && !empty($newrdn) && !empty($newparent) && $this->ldapProtocolVersion === '3') {
@@ -995,7 +982,7 @@ class Ldap
 	 *
 	 * 	@param	string	$filterrecord		Record
 	 * 	@param	string	$attribute			Attributes
-	 * 	@return void
+	 * 	@return array|boolean
 	 */
 	public function getAttributeValues($filterrecord, $attribute)
 	{
@@ -1029,16 +1016,16 @@ class Ldap
 	}
 
 	/**
-	 * 	Returns an array containing a details or list of LDAP record(s)
+	 * 	Returns an array containing a details or list of LDAP record(s).
 	 * 	ldapsearch -LLLx -hlocalhost -Dcn=admin,dc=parinux,dc=org -w password -b "ou=adherents,ou=people,dc=parinux,dc=org" userPassword
 	 *
 	 *	@param	string	$search			 	Value of field to search, '*' for all. Not used if $activefilter is set.
 	 *	@param	string	$userDn			 	DN (Ex: ou=adherents,ou=people,dc=parinux,dc=org)
-	 *	@param	string	$useridentifier 	Name of key field (Ex: uid)
+	 *	@param	string	$useridentifier 	Name of key field (Ex: uid).
 	 *	@param	array	$attributeArray 	Array of fields required. Note this array must also contains field $useridentifier (Ex: sn,userPassword)
 	 *	@param	int		$activefilter		'1' or 'user'=use field this->filter as filter instead of parameter $search, 'group'=use field this->filtergroup as filter, 'member'=use field this->filtermember as filter
 	 *	@param	array	$attributeAsArray 	Array of fields wanted as an array not a string
-	 *	@return	array						Array of [id_record][ldap_field]=value
+	 *	@return	array|int					Array of [id_record][ldap_field]=value
 	 */
 	public function getRecords($search, $userDn, $useridentifier, $attributeArray, $activefilter = 0, $attributeAsArray = array())
 	{
@@ -1071,12 +1058,12 @@ class Ldap
 		if (is_array($attributeArray)) {
 			// Return list with required fields
 			$attributeArray = array_values($attributeArray); // This is to force to have index reordered from 0 (not make ldap_search fails)
-			dol_syslog(get_class($this)."::getRecords connection=".$this->connection." userDn=".$userDn." filter=".$filter." attributeArray=(".join(',', $attributeArray).")");
+			dol_syslog(get_class($this)."::getRecords connection=".$this->connectedServer.":".$this->serverPort." userDn=".$userDn." filter=".$filter." attributeArray=(".join(',', $attributeArray).")");
 			//var_dump($attributeArray);
 			$this->result = @ldap_search($this->connection, $userDn, $filter, $attributeArray);
 		} else {
 			// Return list with fields selected by default
-			dol_syslog(get_class($this)."::getRecords connection=".$this->connection." userDn=".$userDn." filter=".$filter);
+			dol_syslog(get_class($this)."::getRecords connection=".$this->connectedServer.":".$this->serverPort." userDn=".$userDn." filter=".$filter);
 			$this->result = @ldap_search($this->connection, $userDn, $filter);
 		}
 		if (!$this->result) {
@@ -1084,32 +1071,7 @@ class Ldap
 			return -1;
 		}
 
-                        
-                        if (is_array($attributeArray))
-                        {
-                                // Return list with required fields
-                                $attributeArray=array_values($attributeArray);	// This is to force to have index reordered from 0 (not make ldap_search fails)
-                                dol_syslog(get_class($this)."::getRecords connection=".$this->connection." userDn=".$userDn." filter=".$filter. " attributeArray=(".join(',',$attributeArray).")");
-                                //var_dump($attributeArray);
-                                $this->result = @ldap_search($this->connection, $userDn, $filter, $attributeArray);
-                        }
-                        else
-                        {
-                                // Return list with fields selected by default
-                                dol_syslog(get_class($this)."::getRecords connection=".$this->connection." userDn=".$userDn." filter=".$filter);
-                                $this->result = @ldap_search($this->connection, $userDn, $filter);
-                        }
-                        if (!$this->result)
-                        {
-                                $this->error = 'LDAP search failed: '.ldap_errno($this->connection)." ".ldap_error($this->connection);
-                                return -1;
-                        }
-                        $info = array_merge($info, @ldap_get_entries($this->connection, $this->result));
-
-                        ldap_control_paged_result_response($this->connection, $this->result, $cookie);
-
-                } while($cookie !== null && $cookie != '');
-
+		$info = @ldap_get_entries($this->connection, $this->result);
 
 		// Warning: Dans info, les noms d'attributs sont en minuscule meme si passe
 		// a ldap_search en majuscule !!!
@@ -1277,10 +1239,10 @@ class Ldap
 	/**
 	 * 		Load all attribute of a LDAP user
 	 *
-	 * 		@param	User	$user		User to search for. Not used if a filter is provided.
-	 *      @param  string	$filter		Filter for search. Must start with &.
-	 *                       	       	Examples: &(objectClass=inetOrgPerson) &(objectClass=user)(objectCategory=person) &(isMemberOf=cn=Sales,ou=Groups,dc=opencsi,dc=com)
-	 *		@return	int					>0 if OK, <0 if KO
+	 * 		@param	User|string	$user		Not used.
+	 *      @param  string		$filter		Filter for search. Must start with &.
+	 *                       		       	Examples: &(objectClass=inetOrgPerson) &(objectClass=user)(objectCategory=person) &(isMemberOf=cn=Sales,ou=Groups,dc=opencsi,dc=com)
+	 *		@return	int						>0 if OK, <0 if KO
 	 */
 	public function fetch($user, $filter)
 	{
@@ -1380,7 +1342,7 @@ class Ldap
 	 * 	UserAccountControl Flgs to more human understandable form...
 	 *
 	 *	@param	string		$uacf		UACF
-	 *	@return	void
+	 *	@return	array
 	 */
 	public function parseUACF($uacf)
 	{
@@ -1418,10 +1380,9 @@ class Ldap
 				$retval[$val] = $flag;
 			}
 		}
-                /*fmoddrsi*/
 
 		//Return human friendly flags
-		return($retval);
+		return $retval;
 	}
 
 	/**
@@ -1453,7 +1414,7 @@ class Ldap
 			$retval = "UNKNOWN_TYPE_".$samtype;
 		}
 
-		return($retval);
+		return $retval;
 	}
 
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps

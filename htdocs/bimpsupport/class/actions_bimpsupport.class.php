@@ -142,7 +142,7 @@ class ActionsBimpsupport
             $tabResult = array();
 
             if (!$mode_eco) {
-                $result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE status >= -1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode($centreUser, "','") . "')" : "") . " GROUP BY code_centre, status");
+                $result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE status >= -1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode("','", $centreUser) . "')" : "") . " GROUP BY code_centre, status");
                 while ($ligne2 = $db->fetch_object($result2)) {
                     $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
                     if (!isset($tabResult['Tous'][$ligne2->EtatVal]))

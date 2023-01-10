@@ -1211,7 +1211,7 @@ class Bimp_User extends BimpObject
         $htmlP .= '<td>';
         $s = picto_from_langcode((empty($valLang)) ? $conf->global->MAIN_LANG_DEFAULT : $valLang);
         $htmlP .= ($s ? $s . ' ' : '');
-        $htmlP .= ((isset($valLang) && $valLang == 'auto' || isset($conf->global->MAIN_LANG_DEFAULT) && $conf->global->MAIN_LANG_DEFAULT == 'auto' ? $langs->trans("AutoDetectLang") : (empty($valLang)) ? $langs->trans("Language_" . $conf->global->MAIN_LANG_DEFAULT) : $langs->trans("Language_" . $valLang)));
+        $htmlP .= ((isset($valLang) && $valLang == 'auto' || isset($conf->global->MAIN_LANG_DEFAULT) && $conf->global->MAIN_LANG_DEFAULT == 'auto' ? $langs->trans("AutoDetectLang") : (empty($valLang) ? $langs->trans("Language_" . $conf->global->MAIN_LANG_DEFAULT) : $langs->trans("Language_" . $valLang))));
         $htmlP .= '</td>';
         $htmlP .= '<td>';
         $htmlP .= '<input ' . $bc[$var] . ' type="checkbox" disabled ' . (!empty($valLang) ? " checked" : "") . '> ' . $langs->trans("UsePersonalValue") . '';

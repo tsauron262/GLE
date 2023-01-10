@@ -19,7 +19,7 @@ class synopsisHook {//FA1506-0369
     private static $MAX_REQ_LOG = 1200;
     private static $reload = false;
 
-    function synopsisHook() {
+    function __construct() {
         global $conf, $db, $dbBIMPERP, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
 
         static::initDeb();
@@ -34,7 +34,6 @@ class synopsisHook {//FA1506-0369
         
 
         
-
 
 
         if (is_object($db) && isset($conf->global->MAIN_MODULE_SYNOPSISTOOLS)) {
@@ -75,7 +74,7 @@ class synopsisHook {//FA1506-0369
             $conf->global->MAIN_SESSION_TIMEOUT = $conf->global->MAIN_SESSION_TIMEOUT * 6;
 
         include_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
-
+//die('kkkk');
         /* $conf->global->MAIN_MAX_DECIMALS_TOT = 5;
           $conf->global->MAIN_MAX_DECIMALS_UNIT = 5;
           $conf->global->MAIN_MAX_DECIMALS_SHOWN = 2; */
@@ -610,7 +609,7 @@ class Synopsis_Commande extends Commande {
 ////        return $this->fetch_lines($only_product);
     }
 
-    function getNomUrl($withpicto = 0, $option = 0, $max = 0, $short = 0, $notooltip = 0, $save_lastsearch_value = -1) {
+    function getNomUrl($withpicto = 0, $option = '', $max = 0, $short = 0, $notooltip = 0, $save_lastsearch_value = -1, $addlinktonotes = 0, $target = '') {
         global $conf, $langs;
 
         $result = '';

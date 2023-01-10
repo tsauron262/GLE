@@ -65,17 +65,17 @@ class BContract_avenant extends BContract_contrat {
         return $html;
     }
     
-    public function getTotalCoup() {
+    public function getTotalCoup($taxe = 0) {
         $total = 0;
         if(stripos($this->displayData('type'), 'prolongation') !== false){//patch cr getData('type') ne fonctionne pas TODO
             $parent = $this->getParentInstance();
-            $total += $parent->getAddAmountAvenantProlongation($this->id);
+            $total += $parent->getAddAmountAvenantProlongation($this->id, $taxe);
         }
         else{
             $children = $this->getChildrenList("avenantdet");
             foreach($children as $id_child) {
                 $child = $this->getChildObject('avenantdet', $id_child);
-                $total += $child->getCoup(false);
+                $total += $child->getCoup(false, $taxe);
             }
 
             
@@ -233,16 +233,18 @@ class BContract_avenant extends BContract_contrat {
                 
                 $errors = $this->updateField('added_month', $months);
                 
+                $date_end = new DateTime($parent->displayRealEndDate("Y-m-d"));
+                $date_effect = new DateTime($parent->displayRealEndDate("Y-m-d"));
+                $date_effect->add(new DateInterval("P1D"));
+                
                 $date_de_fin = new DateTime($parent->displayRealEndDate("Y-m-d"));
                 $date_de_fin->add(new DateInterval('P' . $months . 'M'));
                 //$date_de_fin->sub(new DateInterval('P1D'));
                 
-                $date_effect = new DateTime($parent->displayRealEndDate("Y-m-d"));
-                $date_effect->add(new DateInterval("P1D"));
                 
                 BimpTools::merge_array($errors, $this->updateField('want_end_date', $date_de_fin->format('Y-m-d')));
                 BimpTools::merge_array($errors, $this->updateField('date_effect', $date_effect->format("Y-m-d")));
-                BimpTools::merge_array($errors, $this->updateField('date_end', $parent->displayRealEndDate("Y-m-d")));
+                BimpTools::merge_array($errors, $this->updateField('date_end', $date_end->format("Y-m-d")));
 
             }            
             

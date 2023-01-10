@@ -139,6 +139,7 @@ lists:
         n: 10
         page_btn: 1
         edit_btn: 1
+        add_form_name: default
         cols: 
             nom:
             mail: 

@@ -71,6 +71,7 @@ $tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated",
     "_charge_sql" => "Charge SQL",
     "_duplicate" => "Duplicate/Forbiden",
     "_redis" => "Redis",
+    "_cron" => "Cron",
     "_correcte_dates_lines_contrats" => "Correction des dates des lignes des contrats"
     );
 

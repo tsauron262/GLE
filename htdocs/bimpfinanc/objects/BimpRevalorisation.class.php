@@ -934,8 +934,8 @@ class BimpRevalorisation extends BimpObject
         $errors = array();
 
         $eqs = $this->getData('equipments');
-        if (count($eqs) > (int) $this->getData('qty')) {
-            $errors[] = 'Veuillez retirer ' . (count($eqs) - (int) $this->getData('qty')) . ' équipements';
+        if (count($eqs) > (int) abs($this->getData('qty'))) {
+            $errors[] = 'Veuillez retirer ' . (count($eqs) - (int) abs($this->getData('qty'))) . ' équipements';
         }
 
         if ($this->getData('type') === 'applecare') {

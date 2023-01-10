@@ -385,6 +385,12 @@ fields:
     signature_params: 
         label: Paramètres incrustation signature
         type: json
+    expertise:
+        label: Expertise Bimp
+        dol_extra_field: 1
+        type: int
+        values: 
+            array: expertise
 
 fields_tables:
     contrat:
@@ -446,6 +452,9 @@ fields_tables:
 #            - label: Total actuelle
 #              value:
 #                  callback: getCurrentTotal
+            - field: expertise
+              edit: 1
+                
     options_pdf:
         panel: 1
         title: Options PDF
@@ -1398,6 +1407,7 @@ forms:
                 input: 
                     type: toggle
                 value: 1
+                hidden: 1
             contact_signature: 
                 custom: 1
                 label: Contact signataire
@@ -1432,6 +1442,8 @@ forms:
                     fields_names: sign_dist
                     sign_dist:
                         hide_values: 0
+                hidden: 1
+
 #            open_public_access: 
 #                custom: 1 
 #                label: Ouvrir immédiatement l'accès à la signature électronique à distance

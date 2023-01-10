@@ -73,6 +73,7 @@ class BContract_contrat extends BimpDolObject
     CONST CONTRAT_MONITORING = 'CMO';
     CONST CONTRAT_DE_SPARE = 'CSP';
     CONST CONTRAT_DE_DELEGATION_DE_PERSONEL = 'CDP';
+    CONST CONTRAT_MONETIQUE = 'CMQ';
     // Type mail interne
     CONST MAIL_DEMANDE_VALIDATION = 1;
     CONST MAIL_VALIDATION = 2;
@@ -153,14 +154,27 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_MONITORING                => ['label' => "Contrat de monitoring", 'classes' => [], 'icon' => 'terminal'],
         self::CONTRAT_DE_SPARE                  => ['label' => "Contrat de spare", 'classes' => [], 'icon' => 'share'],
         self::CONTRAT_DE_DELEGATION_DE_PERSONEL => ['label' => "Contrat de délégation du personnel", 'classes' => [], 'icon' => 'male'],
+        self::CONTRAT_MONETIQUE                 => ['label' => "Contrat monétique", 'classes' => [], 'icon' => 'fas_file-invoice-dollar'],
     ];
     public static $true_objects_for_link = [
         'commande'      => 'Commande',
         'facture_fourn' => 'Facture fournisseur',
             //'propal' => 'Proposition commercial'
     ];
-
-    
+    public static $expertise = [
+        ''  => "",
+        10  => "Arts graphiques",
+        20  => "Constructions",
+        30  => "Education et Administrations",
+        40  => "Infrastructure",
+        50  => "Marketing",
+        60  => "Mobilité",
+        70  => "Partner",
+        80  => "Santé",
+        90  => "SAV",
+        14  => "Bureautique-Formation",
+        100 => "Autre (ne pas utiliser)"
+    ];
     private $totalContrat = null;
 
     function __construct($module, $object_name)
@@ -186,12 +200,13 @@ class BContract_contrat extends BimpDolObject
     public function isActionAllowed($action, &$errors = []): int
     {
         switch ($action) {
-            case 'createSignature': 
-            case 'createSignatureDocuSign': 
-                return (int) $this->getData('id_signature') == 0 and ((int) $this->getData('statut') == self::CONTRAT_STATUS_VALIDE || (int) $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER_TMP);
+            case 'createSignature':
+            case 'createSignatureDocuSign':
+                return !$this->getChildObject('signature')->isLoaded() and ((int) $this->getData('statut') == self::CONTRAT_STATUS_VALIDE || (int) $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER_TMP);
         }
         return parent::isActionAllowed($action, $errors);
     }
+
     public function getHeuresRestantesDelegation()
     {
 
@@ -1140,7 +1155,7 @@ class BContract_contrat extends BimpDolObject
         $errors = [];
         $warnings = [];
         global $user;
-        if($user->id == 330)
+        if ($user->id == 330)
             $errors[] = $this->getData('id_signature');
 
         return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
@@ -1304,7 +1319,6 @@ class BContract_contrat extends BimpDolObject
             // Maj de la signature si nécessaire: 
 //            if ((int) $this->getData('id_signature')) {
 //                $signature = $this->getChildObject('signature');
-
 //                if (BimpObject::objectLoaded($signature)) {
 //                    if (!(int) $signature->isSigned()) {
 //                        $id_contact = $this->getcontact();
@@ -1508,11 +1522,12 @@ class BContract_contrat extends BimpDolObject
         $errors = Array();
         if (!count($errors)) {
             $success = "Contrat ré-ouvert avec succès";
-            $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
+            $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
             $this->addLog('Contrat ré-ouvert');
             foreach ($this->dol_object->lines as $line) {
                 $the_line = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $line->id);
-                $the_line->updateField('statut', $the_line->LINE_STATUT_INIT);
+                if ($the_line->getData('renouvellement') == $this->getData('current_renouvellement'))
+                    $the_line->updateField('statut', $the_line->LINE_STATUT_OPEN);
             }
             $this->db->delete('bcontract_prelevement', 'id_contrat = ' . $this->id);
         }
@@ -1816,7 +1831,7 @@ class BContract_contrat extends BimpDolObject
         $current_renouvellement = $this->getData('current_renouvellement');
         $next_renouvellement = ($current_renouvellement + 1);
         $syntec_for_use_this_renouvellement = ($current_renouvellement == 0) ? $this->getData('syntec') : $this->getData('syntec_renouvellement');
-        $duree_contratIni = $this->getData('duree_mois') / ($this->getData('current_renouvellement')+1);
+        $duree_contratIni = $this->getData('duree_mois') / ($this->getData('current_renouvellement') + 1);
 
         $new_date_start = new DateTime($this->displayRealEndDate("Y-m-d"));
 
@@ -2251,7 +2266,7 @@ class BContract_contrat extends BimpDolObject
                 );
             }
 
-            
+
             //trop bizarre ces conditions....
 //            if (($status != self::CONTRAT_STATUS_BROUILLON || $status == self::CONTRAT_STATUS_WAIT ) && ($user->rights->bimpcontract->to_generate)) {
 //
@@ -2298,7 +2313,7 @@ class BContract_contrat extends BimpDolObject
                 $signed = true;
             }
         }
-            
+
         $errors = array();
         $use_signature = (int) BimpCore::getConf('contrat_use_signatures', null, 'bimpcontract');
 
@@ -2319,6 +2334,15 @@ class BContract_contrat extends BimpDolObject
             } else {
                 $errors[] = 'Vous n\'avez pas la permission de valider ce contrat';
             }
+        }
+
+        if ($user->admin and 0 < (int) $this->getData('id_signature')) {
+            $buttons[] = array(
+                'label'   => 'Supprimer signature (ADMIN)',
+                'icon'    => 'fas_trash',
+                'onclick' => $this->getJsActionOnclick('deleteSignature', array(), array(
+                    'confirm_msg' => "Cette action est irréverssible, continuer ?",
+            )));
         }
 
 
@@ -3017,8 +3041,9 @@ class BContract_contrat extends BimpDolObject
             'warnings' => array()
         );
     }
-    
-    public function actionValidate($data, &$success) {
+
+    public function actionValidate($data, &$success)
+    {
         $result = array('errors' => array(), 'warnings' => array());
         $use_signature = (int) BimpCore::getConf('contrat_use_signatures', null, 'bimpcontract');
         $id_contact_signature = 0;
@@ -3031,7 +3056,7 @@ class BContract_contrat extends BimpDolObject
 //                    $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0);
                 $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', '');
 
-                if ($init_docusign /*|| $open_public_access*/) {
+                if ($init_docusign /* || $open_public_access */) {
                     if (!$id_contact_signature) {
                         return array(
                             'errors'   => array('Contact signataire obligatoire pour la signature à distance'),
@@ -3040,7 +3065,7 @@ class BContract_contrat extends BimpDolObject
                     }
                 } else {
                     return array(
-                        'errors'   => array('Merci de choisir une méthode de signatre à distance'),
+                        'errors'   => array('Merci de choisir une méthode de signature à distance'),
                         'warnings' => array()
                     );
                 }
@@ -3194,11 +3219,12 @@ class BContract_contrat extends BimpDolObject
         }
         return $actions;
     }
-    
-    public function canSetAction($action) {
-        
+
+    public function canSetAction($action)
+    {
+
         global $user;
-        
+
         return parent::canSetAction($action);
     }
 
@@ -3283,9 +3309,37 @@ class BContract_contrat extends BimpDolObject
     }
     /* OTHERS FUNCTIONS */
 
-    public function create(&$warnings = array(), $force_create = false)
+    public function actionDeleteSignature($data, &$success)
     {
 
+        $errors = $warnings = array();
+        $success_callback = 'bimp_reloadPage();';
+
+        if ((int) $this->getData('id_signature')) {
+            $signature = $this->getChildObject('signature');
+
+            if (BimpObject::objectLoaded($signature)) {
+                $errors = $signature->delete($warnings, $force_delete = false);
+                if (!count($errors))
+                    $success .= 'Objet signature supprimée avec succès<br/>';
+            }
+
+            if (!count($errors)) {
+                $errors = $this->updateField('id_signature', 0);
+                if (!count($errors))
+                    $success .= 'Champs id_signature mis à 0<br/>';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
         $errors = [];
 
         if (BimpTools::getValue('use_syntec') && !BimpTools::getValue('syntec')) {
@@ -3297,6 +3351,7 @@ class BContract_contrat extends BimpDolObject
                 $errors[] = 'Vous ne pouvez pas demander un renouvellement TACITE pour des périodes différentes de (12, 24 ou 36 mois)';
             }
         }
+
         if (!count($errors)) {
             $errors = parent::create($warnings, $force_create);
 
@@ -3464,6 +3519,10 @@ class BContract_contrat extends BimpDolObject
 
             $data = $this->action_line_echeancier();
             //echo "<pre>" . print_r($data, 1);
+            if (!$instance || !$instance->isLoaded()) {
+                $this->createEcheancier();
+                $instance = BimpCache::findBimpObjectInstance('bimpcontract', 'BContract_echeancier', ['id_contrat' => $this->id]);
+            }
             if ($instance && $instance->isLoaded()) {
                 $html .= $instance->displayEcheancier($data, $display);
             }
@@ -3707,9 +3766,9 @@ class BContract_contrat extends BimpDolObject
         return $this->totalContrat;
     }
 
-    public function getCurrentTotal()
+    public function getCurrentTotal($taxe = 0)
     {
-        return $this->getTotal($this->getData('current_renouvellement'));
+        return $this->getTotal($this->getData('current_renouvellement'), $taxe);
     }
 
     public function getDureeInitial()
@@ -3734,20 +3793,23 @@ class BContract_contrat extends BimpDolObject
         return ($this->getData('duree_mois') - $dureePrlong) / ($this->getData('current_renouvellement') + 1);
     }
 
-    public function getTotal($renouvellement)
+    public function getTotal($renouvellement, $taxe = 0)
     {
         $montant = 0;
         foreach ($this->dol_object->lines as $line) {
             $child = $this->getChildObject("lines", $line->id);
             if ($child->getData('renouvellement') == $renouvellement) {
-                $montant += $line->total_ht;
+                if ($taxe)
+                    $montant += $line->total_ttc;
+                else
+                    $montant += $line->total_ht;
             }
         }
 
         return $montant;
     }
 
-    public function getAddAmountAvenantProlongation($idAvenant = 0)
+    public function getAddAmountAvenantProlongation($idAvenant = 0, $taxe = 0)
     {
 
         $now = new DateTime();
@@ -3772,11 +3834,12 @@ class BContract_contrat extends BimpDolObject
             $av = $this->getChildObject('avenant', $id_child);
             $dureePrlong += $av->getNbMois();
             if (!$idAvenant || $idAvenant == $id_child)
-                $total += $this->getCurrentTotal() * $av->getNbMois() / ($this->getDureeInitial());
+                $total += $this->getCurrentTotal($taxe) * $av->getNbMois() / ($this->getDureeInitial());
         }
 
         return $total;
     }
+
     public function getAddAmountAvenantModification($idAvenant = 0)
     {
 
@@ -3785,7 +3848,7 @@ class BContract_contrat extends BimpDolObject
         $total = 0;
 
         $filters = [
-            'type'          => 0,
+            'type' => 0,
         ];
         if ($idAvenant == 0)//veut le total des valide
             $filters['statut'] = 2;
@@ -3823,7 +3886,7 @@ class BContract_contrat extends BimpDolObject
         if (count($element_factures)) {
             foreach ($element_factures as $element) {
                 $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $element['d']);
-                if($instance->getData('type') != 3){
+                if ($instance->getData('type') != 3) {
                     if ($paye_distinct) {
                         if ($instance->getData('paye')) {
                             if ($field == 'total')
@@ -4168,6 +4231,11 @@ class BContract_contrat extends BimpDolObject
         $new_contrat->set('label', $data['label']);
         $new_contrat->set('relance_renouvellement', 1);
         $new_contrat->set('secteur', $secteur);
+
+        if ($new_contrat->field_exists('expertise') && $propal->field_exists('expertise')) {
+            $new_contrat->set('expertise', $propal->getData('expertise'));
+        }
+
         if ($propalIsRenouvellement)
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         if (isset($data['use_syntec']) && $data['use_syntec'] == 1) {
@@ -4433,9 +4501,8 @@ class BContract_contrat extends BimpDolObject
                                     'target' => '_blank',
                                 )
                                     ), "a");
-                }
-                else
-                    $html .= BimpRender::renderAlerts ('Signature en attente de création', 'danger', false);
+                } else
+                    $html .= BimpRender::renderAlerts('Signature en attente de création', 'danger', false);
             }
         }
 
@@ -4890,7 +4957,7 @@ class BContract_contrat extends BimpDolObject
 //    {
 //        return;
 //    }
-        // Vérification du commercial
+    // Vérification du commercial
 //        $comm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
 //        if (BimpObject::objectLoaded($comm)) {
 //            $nom_comm = $comm->getData('lastname');
@@ -4916,7 +4983,7 @@ class BContract_contrat extends BimpDolObject
 //        } else {
 //            $errors[] = 'ID de l\'utilisateur courant absent';
 //        }
-        
+
     public function createSignature($init_docu_sign = false, $open_public_acces = true, $id_contact = 0, $email_content = '', &$warnings = array(), &$success = '')
     {
         $errors = array();
@@ -4963,8 +5030,8 @@ class BContract_contrat extends BimpDolObject
 
                     // Client
                     $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $id_contact);
-                    if(!BimpObject::objectLoaded($contact) or $contact->getData('poste') == '') {
-                        $errors[] = "Fonction du contact client absent, merci de le définir";
+                    if (!BimpObject::objectLoaded($contact)) {
+                        $errors[] = "Contact client absent, merci de le définir";
                     } else {
                         BimpObject::loadClass('bimpcore', 'BimpSignataire');
                         $signataire_client = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
@@ -4980,13 +5047,13 @@ class BContract_contrat extends BimpDolObject
                                     'code'           => 'client',
                                         ), true, $signataire_errors, $warnings);
                     }
-                    
+
                     if (!BimpObject::objectLoaded($signataire_client)) {
                         $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
                     } else {
                         // Responsable
-                        if($this->getTotalContrat() < 8000) {
-                            if($this->getData('secteur') == 'CTE') {
+                        if ($this->getTotalContrat() < 8000) {
+                            if ($this->getData('secteur') == 'CTE') {
                                 $id_user = BimpCore::getConf('id_responsable_education', null, 'bimpcontract');
                             } else {
                                 $id_user = BimpCore::getConf('id_responsable_commercial', null, 'bimpcontract');
@@ -4994,10 +5061,10 @@ class BContract_contrat extends BimpDolObject
                         } else {
                             $id_user = BimpCore::getConf('id_responsable_general', null, 'bimpcontract');
                         }
-                        
+
                         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-                        
-                        if(0 < $id_user) {
+
+                        if (0 < $id_user) {
                             $signataire_user = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
                                         'id_signature'   => $signature->id,
                                         'label'          => 'Responsable',
@@ -5009,7 +5076,6 @@ class BContract_contrat extends BimpDolObject
                                         'allow_refuse'   => $allow_refuse,
                                         'code'           => 'user',
                                             ), true, $signataire_errors, $warnings);
-
 
                             if (!BimpObject::objectLoaded($signataire_user)) {
                                 $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
@@ -5046,7 +5112,6 @@ class BContract_contrat extends BimpDolObject
                             $errors[] = 'Responsable inconnu pour le secteur ' . $this->getData('secteur');
                         }
                     }
-                    
                 }
             }
         }
@@ -5063,7 +5128,7 @@ class BContract_contrat extends BimpDolObject
                 $signature_type = 'elec';
             }
         }
-        
+
         BimpObject::loadClass('bimpcore', 'BimpSignature');
         return BimpSignature::getDefaultSignDistEmailContent($signature_type);
     }
@@ -5073,7 +5138,6 @@ class BContract_contrat extends BimpDolObject
         $html = '';
 
         // Signatures non fonctionnelles sur les contrats pour le moments (remontées des params signature absente) 
-         
 //        if ((int) $this->getData('id_signature') < 1) {
 //            if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
 //                $onclick = $this->getJsActionOnclick('createSignatureDocuSign', array(), array(
@@ -5145,7 +5209,7 @@ class BContract_contrat extends BimpDolObject
         $html .= time() . 'id = ' . $id_contact;
         return $html;
     }
-    
+
     public function getSignatureContactCreateFormValues()
     {
         $client = $this->getChildObject('client');
@@ -5169,7 +5233,7 @@ class BContract_contrat extends BimpDolObject
         }
         return array();
     }
-    
+
     public function getDefaultSignatureContact()
     {
         foreach (array('CUSTOMER'/* , 'SHIPPING', 'BILLING2', 'BILLING' */) as $type_contact) {
@@ -5181,8 +5245,7 @@ class BContract_contrat extends BimpDolObject
 
         return 0;
     }
-    
-   
+
     public function renderSignatureInitDocuSignInput()
     {
         $html = '';
@@ -5216,7 +5279,7 @@ class BContract_contrat extends BimpDolObject
 
         return $html;
     }
-    
+
     public function isDocuSignAllowed(&$errors = array(), &$is_required = false)
     {
         if (!(int) BimpCore::getConf('contrat_signature_allow_docusign', null, 'bimpcontract')) {
@@ -5246,10 +5309,9 @@ class BContract_contrat extends BimpDolObject
 
         return 1;
     }
-    
+
     public function getSignatureParams($doc_type)
     {
-        return self::$default_signature_params;// return  BimpTools::overrideArray(self::$default_signature_params, (array) $this->getData('signature_params'));
+        return self::$default_signature_params; // return  BimpTools::overrideArray(self::$default_signature_params, (array) $this->getData('signature_params'));
     }
-    
 }

@@ -4,11 +4,11 @@ global $tabCentre;
 $tabCentre = array(
     "V"     => array("04 75 62 73 80", "sav07@ldlc.com", "Guillerand Granges", 19, "1461030", "07500", "GUILLERAND GRANGES", "Espace Colibri \n 85 rue Conrad Kilian", 25, 1),
     "M"     => array(/*"04 50 22 15 55"*/"04 50 32 89 07", "sav74@ldlc.com", "Meythet", 58, "462140", "74960", "Meythet", "3 RUE DU VIEUX MOULIN", 21, 0),
-    "CB"    => array("04 28 67 77 31", "sav73@ldlc.com", "Chambéry", 213, "1461034", "73000", "Chambéry", "150 rue croix d'or", 36, 1),
+    "CB"    => array("09 70 72 12 32", "sav73@ldlc.com", "Chambéry", 213, "1461034", "73000", "Chambéry", "150 rue croix d'or", 36, 1),
     'L'     => array("04 78 17 30 23", "sav69@ldlc.com", "Lyon 6", 21, "1461023", "69006", "Lyon", "67 rue Vendome", 23, 1),
     'L3'     => array("04 78 17 30 23", "sav69@ldlc.com", "Lyon 3", 21, "1461023", "69003", "Lyon", "20 Rue Servient", 23, 0, 'L'),
     "S"     => array("04 77 81 58 12", "sav42@ldlc.com", "Saint-Etienne", 18, "1461019", "42000", "Saint Etienne", "14 rue gambetta", 24, 1),
-    "GA"    => array("04 76 23 05 18", "sav38@ldlc.com", "Grenoble boutique (old)", 52, "1461027", "38000", "Grenoble", "11 Place Victor Hugo", 26, 0),
+    "GA"    => array("04 76 54 02 54", "sav38@ldlc.com", "Grenoble boutique (old)", 52, "1461027", "38000", "Grenoble", "11 Place Victor Hugo", 26, 0),
     "B"     => array("09 70 72 12 33", "sav250@ldlc.com", "Besançon", 83, "1461035", "25000", "Besançon", "CC Châteaufarine route de Dole", 22, 1),
     "MO"    => array("03 81 95 19 20", "sav252@ldlc.com", "Montbeliard", 84, "1461025", "25200", "Montbéliard", "37 place Denfert Rochereau", 27, 0),
     "C"     => array("03 44 200 200", "sav60@ldlc.com", "Compiegne", 106, "1461028", "60200", "Compiègne", "10 rue de l’étoile", 30, 1),

@@ -483,7 +483,7 @@ class Synopsis_Commande extends Commande {
         }
     }
 
-    function fetch_lines($only_product = 0) {
+    function fetch_lines($only_product = 0, $loadalsotranslation = 0) {
 //        parent::fetch_lines($only_product);
 ////        $this->lines=array();
 //

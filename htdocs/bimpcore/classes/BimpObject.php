@@ -9461,7 +9461,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         global $modeCSV, $modeGraph;
         $modeCSV = $modeGraph = true;
-        $success = "Donnée Maj";
+        $success = "";
         $errors = array();
         $warnings = array();
 

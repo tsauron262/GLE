@@ -2066,7 +2066,9 @@ function updateGraph(list_id, idGraph, list_name) {
                 object_name: $list.data('object_name'),
                 id_object: 0
             }, 'getGraphData', extra_data, null, null, {
-                no_triggers: true
+                no_triggers: true,
+                display_processing: false,
+                
             });
         }
     }

@@ -39,13 +39,31 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                 }
                 break;
 
-//            case 'createOrder':
+            case 'createOrder':
             case 'createInvoice':
             case 'classifyBilled':
             case 'createContrat':
             case 'createSignature':
             case 'addAcompte':
-                if ((int) $this->getData('id_demande_fin')) {
+                if (in_array($action, array('createOrder', 'createInvoice'))) {
+                    if (!(int) $this->getData('id_demande_fin')) {
+                        if (!(int) $this->getData('id_signature')) {
+                            $errors[] = 'Fiche signature obligatoire';
+                            return 0;
+                        }
+
+                        $signature = $this->getChildObject('signature');
+                        if (!BimpObject::objectLoaded($signature)) {
+                            $errors[] = 'Fiche signature invalide';
+                            return 0;
+                        } elseif (!$signature->isSigned()) {
+                            $errors[] = 'Fiche signature non signée';
+                            return 0;
+                        }
+                    }
+                }
+
+                if ($action !== 'createOrder' && (int) $this->getData('id_demande_fin')) {
                     $df = $this->getChildObject('demande_fin');
                     if (BimpObject::objectLoaded($df)) {
                         $df_status = (int) $df->getData('status');
@@ -409,11 +427,11 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                                             'file_name'          => 'Proposition_Location',
                                             'file_ext'           => 'pdf'
                                                 ), true);
-                                
+
                                 if (BimpObject::objectLoaded($file)) {
                                     $file->updateField('in_emails', 1);
                                 }
-                                
+
                                 $url = $this->getFileUrl($file_name);
                                 if ($url) {
                                     $sc = 'window.open(\'' . $url . '\');';

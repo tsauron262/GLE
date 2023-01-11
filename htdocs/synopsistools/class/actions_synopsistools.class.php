@@ -31,6 +31,8 @@ class ActionsSynopsisTools {
         return 0;
     }
     function printMenuAfter($parameters, &$object, &$action, $hookmanager) {
+        global $conf, $langs;
+        $return = '';
         
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
 //            $return .= '<div id="blockvmenusearch" class="blockvmenusearch">';

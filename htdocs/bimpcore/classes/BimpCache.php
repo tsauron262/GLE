@@ -1853,7 +1853,7 @@ class BimpCache
     {
         global $conf, $langs;
 
-        if ($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX) {
+        if (!empty($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX)) {
             $active_only = true;
         } else {
             $active_only = false;

@@ -106,7 +106,7 @@ class Bimp_Stat_Date extends BimpObject
         return parent::displayData('date');
     }
 
-    public function getInfoGraph($idGraph)
+    public function getInfoGraph($graphName = '')
     {
         if (static::$modeDateGraph == 'day')
             $xValueFormatString = 'DD MMM, YYYY';
@@ -119,7 +119,7 @@ class Bimp_Stat_Date extends BimpObject
         
         
         
-        $data = parent::getInfoGraph($idGraph);
+        $data = parent::getInfoGraph($graphName);
         $data["data1"] = array("name"=>'Facture HT');
         $data["data2"] = array("name"=>'Commande HT', 'visible'=>0);
         $data["data3"] = array("name"=>'Devis HT', 'visible'=>0);

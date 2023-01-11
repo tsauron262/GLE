@@ -1939,7 +1939,7 @@ class BimpObject extends BimpCache
             return 0;
     }
 
-    public function getInfoGraph($nameGraph)
+    public function getInfoGraph($graphName = 'default')
     {
         return
                 array("data1"     => array("title" => "Nom Data1"),
@@ -2050,7 +2050,7 @@ class BimpObject extends BimpCache
         // /!\ Cette méthode ne doit être appellée QUE par BimpCollection /!\
 
         if ((int) $this->id != (int) $id) {
-            $this->reset($delete_in_cache);
+            $this->reset();
             $this->id = $id;
             $this->data = $data;
             $this->initData = $data;
@@ -9517,17 +9517,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $list->initForGraph();
 
                 $tmpData['dataPoints'] = $list->getPointsForGraph($dataGraphe['params'], $i);
-            } elseif ($dataGraphe['mode_data'] == 'unique' && isset($tmpDatas)) {//On apelle une seul methode pour tous les points
+            } elseif ($dataGraphe['mode_data'] == 'unique' && isset($tmpDatas[$i])) {//On apelle une seul methode pour tous les points
                 $tmpData['dataPoints'] = $tmpDatas[$i];
             } else {
-                echo '<pre>';
-                print_r($dataGraphe);
                 $errors[] = 'Aucune methode pour charger les points ' . $dataGraphe['mode_data'];
             }
             $options['data'][] = $tmpData;
             $i++;
         }
-
 
         $success_callback = 'var options = ' . json_encode($options) . ';';
         $success_callback = str_replace('"new Date', 'new Date', $success_callback);

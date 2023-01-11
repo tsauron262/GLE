@@ -949,7 +949,7 @@ class BimpCore
 
         return 0;
     }
-    
+
     public static function isVersion($version)
     {
         if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION == $version) {
@@ -1027,27 +1027,30 @@ class BimpCore
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
             $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
-            if (BimpCore::isModeDev() && (int) self::getConf('print_bimp_logs') && !defined('NO_BIMPLOG_PRINTS')) {
-                $bt = debug_backtrace(null, 30);
+//            if (BimpCore::isModeDev() && (int) self::getConf('print_bimp_logs') && !defined('NO_BIMPLOG_PRINTS')) {
+            $bt = debug_backtrace(null, 30);
 
-                $html = 'LOG ' . Bimp_Log::$levels[$level]['label'] . '<br/><br/>';
-                $html .= 'Message: ' . $msg . '<br/><br/>';
+            $html = '<div style="margin-top: 100px">';
 
-                if (is_a($object, 'BimpObject') && BimpObject::objectLoaded($object)) {
-                    $html .= 'Objet: ' . $object->getLink() . '<br/><br/>';
-                }
+            $html .= 'LOG ' . Bimp_Log::$levels[$level]['label'];
+            $html .= '</div><br/><br/>';
+            $html .= 'Message: ' . $msg . '<br/><br/>';
 
-                if (!empty($extra_data)) {
-                    $html .= 'Données: <pre>';
-                    $html .= print_r($extra_data, 1);
-                    $html .= '</pre>';
-                }
-
-                $html .= 'Backtrace: <br/>';
-                $html .= BimpRender::renderBacktrace(BimpTools::getBacktraceArray($bt));
-
-                die($html);
+            if (is_a($object, 'BimpObject') && BimpObject::objectLoaded($object)) {
+                $html .= 'Objet: ' . $object->getLink() . '<br/><br/>';
             }
+
+            if (!empty($extra_data)) {
+                $html .= 'Données: <pre>';
+                $html .= print_r($extra_data, 1);
+                $html .= '</pre>';
+            }
+
+            $html .= 'Backtrace: <br/>';
+            $html .= BimpRender::renderBacktrace(BimpTools::getBacktraceArray($bt));
+
+            die($html);
+//            }
 
             if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('mode_eco')) {
                 return array();

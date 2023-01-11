@@ -2187,7 +2187,7 @@ class BC_ListTable extends BC_List
                     }
 
                     if ($this->params['positions']) {
-                        $html .= '<td class="positionHandle" style="' . (!$this->params['position'] ? 'display: none;' : '') . $item_params['td_style'] . '"><span></span></td>';
+                        $html .= '<td class="positionHandle" style="' . (!$this->params['positions_open'] ? 'display: none;' : '') . $item_params['td_style'] . '"><span></span></td>';
                     }
 
                     foreach ($this->cols as $col_name => $col_params) {

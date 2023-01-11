@@ -136,8 +136,6 @@ class BC_Filter extends BimpComponent
         $this->params['type'] = $this->object->getConf($type_path, '');
 
         if (!is_null($this->bc_field)) {
-            $field_params = $this->bc_field->params;
-
             if ($this->object->config->isDefined('fields/' . $this->bc_field->name . '/search/input/type')) {
                 $input_path = 'fields/' . $this->bc_field->name . '/search/input/type';
             } elseif ($this->object->config->isDefined('fields/' . $this->bc_field->name . '/filter/input/type')) {
@@ -162,10 +160,9 @@ class BC_Filter extends BimpComponent
                     $this->params['type'] = 'user';
                 }
             }
-        }
+        }       
         
-        
-
+        $items = null;
         if (is_null($this->params['type']) || !(string) $this->params['type']) {
             if (!is_null($this->bc_field)) {
                 // Type de filtre selon paramètre du champ: 

@@ -66,6 +66,7 @@ class ActionsBimpsupport
     function afficherMenu($context)
     {
         global $conf, $user, $db;
+        $return = '';
 
         $mode_eco = true;
         if (defined('BIMP_LIB')) {
@@ -80,19 +81,20 @@ class ActionsBimpsupport
         }
 
         //consigne commande
-        if ($element_id > 0 && ($element_type == "contrat" || $element_type == "commande" || $element_type == "DI" || $element_type == "FI" || $element_type == "expedition")) {
-            $return .= '<div class="blockvmenufirst blockvmenupair rouge' . ($context == 1 ? ' vmenu' : '') . '">';
-            $return .= '<div class="menu_titre">';
-            $return .= '<a href="#" class="vmenu">Consigne Commande</a>';
-            $return .= "</div>";
-            $return .= '<div class="menu_contenu editable consigne">';
-            global $db;
-            $consigne = new consigneCommande($db);
-            $consigne->fetch($element_type, $element_id);
-            $return .= $consigne->note;
-            $return .= '</div></div><div class="blockvmenuend">';
-            $return .= "</div>";
-        }
+        // ??? 
+//        if ($element_id > 0 && ($element_type == "contrat" || $element_type == "commande" || $element_type == "DI" || $element_type == "FI" || $element_type == "expedition")) {
+//            $return .= '<div class="blockvmenufirst blockvmenupair rouge' . ($context == 1 ? ' vmenu' : '') . '">';
+//            $return .= '<div class="menu_titre">';
+//            $return .= '<a href="#" class="vmenu">Consigne Commande</a>';
+//            $return .= "</div>";
+//            $return .= '<div class="menu_contenu editable consigne">';
+//            global $db;
+//            $consigne = new consigneCommande($db);
+//            $consigne->fetch($element_type, $element_id);
+//            $return .= $consigne->note;
+//            $return .= '</div></div><div class="blockvmenuend">';
+//            $return .= "</div>";
+//        }
 
 
 

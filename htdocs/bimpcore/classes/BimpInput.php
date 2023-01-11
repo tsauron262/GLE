@@ -743,21 +743,29 @@ class BimpInput
                         $options['max'] = 'none';
                     }
 
+                    $options = BimpTools::overrideArray(array(
+                                'search_input'       => 1,
+                                'select_all_buttons' => 1,
+                                'max'                => 'none',
+                                'max_input_name'     => '',
+                                'max_input_abs'      => 0
+                                    ), $options);
+
                     $nb_selected = 0;
 
                     $html = '<div class="check_list_container' . ($extra_class ? ' ' . $extra_class : '') . '"';
                     $html .= ' data-max="' . $options['max'] . '"';
-                    $html .= ' data-max_input_name="' . (isset($options['max_input_name']) ? $options['max_input_name'] : '') . '"';
-                    $html .= ' data-max_input_abs="' . (isset($options['max_input_abs']) ? $options['max_input_abs'] : 0) . '"';
+                    $html .= ' data-max_input_name="' . $options['max_input_name'] . '"';
+                    $html .= ' data-max_input_abs="' . $options['max_input_abs'] . '"';
                     $html .= '>';
                     if (count($options['items']) > 1) {
-                        if (!isset($options['search_input']) || (int) $options['search_input']) {
+                        if ((int) $options['search_input']) {
                             $html .= '<div class="check_list_search_input">';
                             $html .= '<span class="searchIcon">' . BimpRender::renderIcon('fas_search', 'iconLeft') . '</span>';
                             $html .= self::renderInput('text', $field_name . '_search_input');
                             $html .= '</div>';
                         }
-                        if (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons']) {
+                        if ((int) $options['select_all_buttons']) {
                             $html .= self::renderToggleAllCheckboxes('$(this).parent().parent()', '.' . $field_name . '_check');
                         }
                     }
@@ -1564,6 +1572,8 @@ class BimpInput
 
     public static function renderInputContainer($input_name, $value, $content = '', $field_prefix = '', $required = 0, $multiple = 0, $extra_class = '', $extra_data = array())
     {
+        $html = '';
+
         if (is_null($value)) {
             $value = '';
         }

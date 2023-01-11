@@ -143,6 +143,9 @@ function getTypeAndId($url = null, $request = null) {
 
 
     $tabTypeObject = getTabTypeObject();
+    $element_type = null;
+    $element_id = null;
+    
     foreach ($tabTypeObject as $typeT => $dataT) {
         foreach ($dataT['urls'] as $filtreUrl) {
             if (stripos($url, $filtreUrl) !== false) {

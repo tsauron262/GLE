@@ -42,7 +42,7 @@ class Bimp_Log extends BimpObject
     );
     
     
-    public function getInfoGraph($graphName)
+    public function getInfoGraph($graphName = '')
     {
         $data = parent::getInfoGraph($graphName);
         if($graphName == '15M')
@@ -76,15 +76,13 @@ class Bimp_Log extends BimpObject
     public function getGraphDatasPoints($params, $numero_data = 1)
     {
         $result = array();
-        $dataGraph = $this->getInfoGraph($graphName);
+        
         $arrondirEnMinuteGraph = $params['minutes'];
         $dateStr = "FLOOR(UNIX_TIMESTAMP(date)/($arrondirEnMinuteGraph*60))*$arrondirEnMinuteGraph*60";
         $sql = $this->db->db->query('SELECT count(*) as nb, '.$dateStr.' as timestamp FROM '.MAIN_DB_PREFIX.'bimpcore_log GROUP BY '.$dateStr);
         while($ln = $this->db->db->fetch_object($sql)){
-            $tabDate = array($ln->annee, $ln->month, $ln->day, $ln->hour, $ln->minute);
             $result[1][] = array("x" => "new Date(" . $ln->timestamp*1000 . ")", "y" => (int)$ln->nb);
         }
-            
 
         return $result;
     }

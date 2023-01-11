@@ -132,15 +132,17 @@ class histoNavigation
         }
 
         return self::$mode_eco;
-        
-        return false;
     }
 
     static function getBlocHisto($context)
     {
+        $return = '';
+        
         global $db, $user, $conf, $langs;
         static::$menu_ok = true;
+        
         $langs->load("histo@synopsishisto");
+        
 //        if ($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher) {
         $return .= '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
         $return .= '<div class="menu_titre">';

@@ -49,7 +49,7 @@ class Bimp_Propal extends Bimp_PropalTemp
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
-        2 => array('label' => 'Signée / Acceptée', 'icon' => 'check', 'classes' => array('success')),
+        2 => array('label' => 'Acceptée', 'icon' => 'check', 'classes' => array('success')),
         3 => array('label' => 'Refusée', 'icon' => 'exclamation-circle', 'classes' => array('danger')),
         4 => array('label' => 'Facturée', 'icon' => 'check', 'classes' => array('success')),
     );
@@ -313,8 +313,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 1;
 
             case 'createSignature':
-                if ($status != 1) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                if ($status < 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas validé' . $this->e();
                     return 0;
                 }
 

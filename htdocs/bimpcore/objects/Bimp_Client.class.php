@@ -3223,7 +3223,8 @@ class Bimp_Client extends Bimp_Societe
 
                 if (empty($cover)) {
                     $warnings[] = "Aucune couverture pour ce client.";
-                    return $errors;
+                    $cover['amount'] = 0;
+//                    return $errors;
                 }
 
                 if (is_array($cover) and!empty($cover)) {

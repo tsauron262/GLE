@@ -221,7 +221,7 @@ function addReceivedEquipmentsToReservation($btn, equipments) {
                         $qty.text(done);
                     }
                 }
-                
+
                 $parent.find('.process_msg').show();
                 check = true;
             }
@@ -267,8 +267,11 @@ function addSelectedCommandeLinesToShipment($button, list_id, id_commande) {
         module: 'bimpcommercial',
         object_name: 'Bimp_Commande',
         id_object: id_commande
-    }, 'linesShipmentQties', extra_data, 'shipment', null, null, null, function ($form, extra_data) {
-        return onShipmentFormSubmit($form, extra_data);
+    }, 'linesShipmentQties', extra_data, null, null, {
+        form_name: 'shipment',
+        on_form_submit: function ($form, extra_data) {
+            return onShipmentFormSubmit($form, extra_data);
+        }
     });
 }
 
@@ -362,7 +365,7 @@ function saveCommandeLineShipments($button, id_line) {
                 id_object: id_line
             }, 'saveShipments', {
                 shipments: shipments
-            }, null, $resultContainer, function () {
+            }, $resultContainer, function () {
                 var $modalContent = $form.findParentByClass('modal_content');
                 if ($.isOk($modalContent)) {
                     var modal_idx = parseInt($modalContent.data('idx'));
@@ -406,8 +409,11 @@ function setSelectedCommandeLinesReservationsEquipmentsToShipment($button, id_co
         id_object: id_commande
     }, 'addEquipmentsToShipment', {
         'reservations': reservations
-    }, 'shipment_equipments', null, null, null, function ($form, extra_data) {
-        return onShipmentEquipmentsFormSubmit($form, extra_data);
+    }, null, null, {
+        form_name: 'shipment_equipments',
+        on_form_submit: function ($form, extra_data) {
+            return onShipmentEquipmentsFormSubmit($form, extra_data);
+        }
     });
 }
 
@@ -479,7 +485,7 @@ function saveShipmentLines($button, id_shipment, modal_idx) {
             id_object: id_shipment
         }, 'saveLines', {
             lines: lines
-        }, null, $resultContainer, function () {
+        }, $resultContainer, function () {
             bimpModal.removeContent(modal_idx);
         });
     } else {
@@ -782,7 +788,7 @@ function saveCommandeLineFactures($button, id_line) {
                     id_object: id_line
                 }, 'saveFactures', {
                     factures: factures
-                }, null, $resultContainer, function () {
+                }, $resultContainer, function () {
                     var $modalContent = $form.findParentByClass('modal_content');
                     if ($.isOk($modalContent)) {
                         var modal_idx = parseInt($modalContent.data('idx'));
@@ -830,8 +836,11 @@ function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_cli
         module: 'bimpcommercial',
         object_name: 'Bimp_Commande',
         id_object: id_commande
-    }, 'linesFactureQties', extra_data, 'invoice', null, null, null, function ($form, extra_data) {
-        return onFactureFormSubmit($form, extra_data);
+    }, 'linesFactureQties', extra_data, null, null, {
+        form_name: 'invoice',
+        on_form_submit: function ($form, extra_data) {
+            return onFactureFormSubmit($form, extra_data);
+        }
     });
 }
 
@@ -1191,7 +1200,7 @@ function saveCommandeFournReceptionLinesData($button, id_reception, modal_idx) {
         object_name: 'BL_CommandeFournReception', id_object: id_reception
     }, 'saveLinesData', {
         lines: lines
-    }, null, $content.find('.ajaxResultContainer'));
+    }, $content.find('.ajaxResultContainer'));
 }
 
 function onCommandeFournLineReceptionViewLoaded($view) {
@@ -1297,13 +1306,13 @@ function addCommandeFournLineReceptions($button, id_line, modal_idx) {
             module: 'bimpcommercial',
             object_name: 'Bimp_CommandeFournLine',
             id_object: id_line
-        }, 'addReceptions', rows_data, null, $resultContainer, function () {
+        }, 'addReceptions', rows_data, $resultContainer, function () {
             var $modalContent = $container.findParentByClass('modal_content');
             if ($.isOk($modalContent)) {
                 var modal_idx = parseInt($modalContent.data('idx'));
                 bimpModal.removeContent(modal_idx);
             }
-        }, null, null);
+        });
     }
 }
 
@@ -1466,7 +1475,9 @@ function selectedReceptionsFactureFourn($button, list_id) {
     setObjectAction($button, {
         module: 'bimpcommercial',
         object_name: 'Bimp_CommandeFourn'
-    }, 'createInvoice', extra_data, 'bulk_invoice');
+    }, 'createInvoice', extra_data, null, null, {
+        form_name: 'bulk_invoice'
+    });
 }
 
 $(document).ready(function () {

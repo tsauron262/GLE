@@ -10,8 +10,9 @@ class BimpLink extends BimpObject
         if (!$this->getData("viewed") && $this->i_am_dest()) {
             $this->set('viewed', 1);
             $warn = array();
-            if (empty($this->update($warn, true)))
+            if (empty($this->update($warn, true))) {
                 return 1;
+            }
         }
 
         return 0;
@@ -138,27 +139,31 @@ class BimpLink extends BimpObject
 
         $links = BimpCache::getBimpObjectObjects($this->module, $this->object_name, $filters, 'a.viewed', 'DESC', array(), 15);
 
-        foreach ($links as $d) {
+        $nb_demandes = 0;
 
+        foreach ($links as $d) {
             $bimp_object = $d->getSourceObject();
 
             if ($bimp_object->isLoaded()) {
+                $nb_demandes++;
                 $new_demande = array(
-                    'obj'     => array('nom_url' => $bimp_object->getLink()),
-                    'content' => $d->getSourceFieldLabel() . '<br/>' . $d->displaySourceFieldContent()
+                    'id'             => $d->id,
+                    'is_viewed'      => (int) $d->getData('viewed'),
+                    'can_set_viewed' => (int) $this->i_view(),
+                    'obj_link'       => $bimp_object->getLink(),
+                    'src'            => $d->getSourceFieldLabel(),
+                    'content'        => $d->displaySourceFieldContent()
                 );
-            } else
-                $new_demande = array();
-            $new_demande['id'] = $d->id;
-            $new_demande['is_viewed'] = $d->getData('viewed');
 
-            $demandes['content'][] = $new_demande;
+                $demandes['content'][] = $new_demande;
+            }
         }
 
-        if (!isset($demandes['content']))
+        if (!isset($demandes['content'])) {
             $demandes['content'] = array();
+        }
 
-        $demandes['nb_demande'] = (int) sizeof($links);
+        $demandes['nb_demande'] = $nb_demandes;
 
         return $demandes;
     }

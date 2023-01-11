@@ -150,7 +150,7 @@ function ConsignedStocksShipment() {
                 id_object: id_cs_shipment
             }, 'saveParts', {
                 parts: parts
-            }, null, $form.find('.ajaxResultContainer'));
+            }, $form.find('.ajaxResultContainer'));
         }
     };
 }

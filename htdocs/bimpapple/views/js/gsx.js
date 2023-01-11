@@ -104,13 +104,14 @@ function gsx_open_login_modal($button, success_callback) {
     }
 
     bimp_msg('Veuillez vous authentifier sur la plateforme GSX', 'warning', null, true);
-//    window.open(gsx_login_url, 'Authentification GSX', "menubar=no, status=no, width=800, height=600");
-
+    
     setObjectAction($button, {
         module: 'bimpsupport',
         object_name: 'BS_SAV'
-    }, 'setGsxActiToken', {}, 'gsx_token', null, function () {
+    }, 'setGsxActiToken', {}, null, function () {
         gsx_on_login_success(success_callback);
+    }, {
+        form_name: 'gsx_token'
     });
 }
 
@@ -419,7 +420,7 @@ function gsx_saveAppleParts($button, id_issue, modal_idx) {
                 id_object: id_issue
             }, 'addParts', {
                 parts: parts
-            }, null, null, function () {
+            }, null, function () {
                 bimpModal.removeContent(modal_idx);
             });
         } else {

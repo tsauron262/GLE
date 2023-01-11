@@ -293,7 +293,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 1;
 
             case 'createContrat':
-                if ($status !== Propal::STATUS_VALIDATED) {
+                if ($status !== Propal::STATUS_SIGNED) {
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;
                 }
@@ -734,16 +734,19 @@ class Bimp_Propal extends Bimp_PropalTemp
                     $signature = $this->getChildObject('signature');
                     $no_signature = false;
                     $signature_cancelled = false;
-                    $signed = in_array($status, array(2, 4));
+                    $accepted = in_array($status, array(2, 4));
+                    $signed = false;
 
                     if (BimpObject::objectLoaded($signature)) {
                         $signature_buttons = BimpTools::merge_array($signature_buttons, $signature->getActionsButtons(true));
 
-                        if ((int) $signature->getData('status') === BimpSignature::STATUS_CANCELLED) {
+                        if ($signature->isSigned()) {
+                            $signed = true;
+                        } elseif ((int) $signature->getData('status') === BimpSignature::STATUS_CANCELLED) {
                             $signature_cancelled = true;
                         }
                     } else {
-                        if (!$signed && $use_signature) {
+                        if ($use_signature) {
                             if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
                                 $no_signature = true;
                                 // Créer Signature: 
@@ -754,19 +757,13 @@ class Bimp_Propal extends Bimp_PropalTemp
                                         'form_name' => 'create_signature'
                                     ))
                                 );
-//                                if ($user->admin) {//$user->rights->devis->creer and $status == 1) {
-//                                    $signature_buttons[] = array(
-//                                        'label'   => 'Envoyer via DocuSign',
-//                                        'icon'    => 'fas_signature',
-//                                        'onclick' => $this->getJsActionOnclick('createSignatureDocuSign', array(), array(
-//                                            'form_name' => 'create_signature_docu_sign'
-//                                    )));
-//                                }
                             }
+                        } elseif ($accepted) {
+                            $signed = true;
                         }
                     }
 
-                    if (!$signed) {
+                    if (!$accepted) {
                         // Refuser
                         if ($this->isActionAllowed('close')) {
                             if ($this->canSetAction('close')) {

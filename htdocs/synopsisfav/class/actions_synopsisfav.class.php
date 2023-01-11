@@ -2,20 +2,24 @@
 
 require_once(DOL_DOCUMENT_ROOT . "/synopsisres/extractObjTypeId.php");
 
-class Actionssynopsisfav {
+class Actionssynopsisfav
+{
 
     var $menuOk = false;
 
-    function doActions($parameters, &$object, &$action, $hookmanager) {
+    function doActions($parameters, &$object, &$action, $hookmanager)
+    {
         
     }
 
-    function printSearchForm($parameters, &$object, &$action, $hookmanager) {
+    function printSearchForm($parameters, &$object, &$action, $hookmanager)
+    {
 
         return 0;
     }
 
-    function printMenuAfter($parameters, &$object, &$action, $hookmanager) {
+    function printMenuAfter($parameters, &$object, &$action, $hookmanager)
+    {
         if (!$this->menuOk) {
             $this->afficherMenu(0);
             $this->menuOk = true;
@@ -23,7 +27,8 @@ class Actionssynopsisfav {
         return 0;
     }
 
-    function printLeftBlock($parameters, &$object, &$action, $hookmanager) {
+    function printLeftBlock($parameters, &$object, &$action, $hookmanager)
+    {
         if (!$this->menuOk) {
             $this->afficherMenu(1);
             $this->menuOk = true;
@@ -31,13 +36,13 @@ class Actionssynopsisfav {
         return 0;
     }
 
-    function afficherMenu($context) {
+    function afficherMenu($context)
+    {
         global $conf, $user, $db;
         $return = '';
         $tabElem = getTypeAndId();
         $element_type = $tabElem[0];
         $element_id = $tabElem[1];
-
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISFAV)) {
             $socid = favoriCli::saveHisto($element_type, $element_id);
@@ -49,12 +54,13 @@ class Actionssynopsisfav {
         $this->resprints = $return;
         return 0;
     }
-
 }
 
-class favoriCli {
+class favoriCli
+{
 
-    static function getBlocHisto($context, $socid) {
+    static function getBlocHisto($context, $socid)
+    {
         global $db, $user, $conf, $langs;
         $soc = new Societe($db);
         $soc->fetch($socid);
@@ -89,7 +95,8 @@ class favoriCli {
         return $return;
     }
 
-    public static function histoUser($res) {
+    public static function histoUser($res)
+    {
         global $conf;
         $tabResult = favoriCli::getObjAndMenu($res->element_type);
         $obj = $tabResult[0];
@@ -125,12 +132,14 @@ class favoriCli {
         }
     }
 
-    public static function getObj($type) {
+    public static function getObj($type)
+    {
         $tabResult = self::getObjAndMenu($type);
         return $tabResult[0];
     }
 
-    static function saveHisto($element_type, $element_id) {
+    static function saveHisto($element_type, $element_id)
+    {
 //        //saveHistoUser($fichinter->id, "FI", $fichinter->ref);
 
 
@@ -140,7 +149,6 @@ class favoriCli {
                 $obj->fetch($element_id);
                 $ref = $obj->ref;
                 global $user, $db;
-
 
                 $socid = 0;
                 if (isset($obj->fk_soc))
@@ -181,7 +189,8 @@ class favoriCli {
         }
     }
 
-    public static function getObjAndMenu($type) {
+    public static function getObjAndMenu($type)
+    {
         global $db, $conf;
         $tabMenu = array(false, false);
         $obj = false;
@@ -333,20 +342,22 @@ class favoriCli {
             if (is_file(DOL_DOCUMENT_ROOT . $data['path'])) {
                 require_once DOL_DOCUMENT_ROOT . $data['path'];
                 $nomObj = $data['obj'];
-                if (class_exists($nomObj)) {
-                    if(stripos($nomObj, "bimp") !== false || stripos($nomObj, "equipment") !== false){
-                        $obj = BimpObject::getInstance($data['module'], $nomObj);
-                    }
-                    else{
-                        $obj = new $nomObj($db);
-                    }
-                    if (!method_exists($obj, "getNomUrl")) {
-                        dol_syslog("Pas de methode getNomUrl dans la class " . $nomObj, 3);
-                        $obj = false;
-                    }
+
+                if (isset($data['module']) && strpos($data['module'], 'bimp') === 0) {
+                    $obj = BimpObject::getInstance($data['module'], $nomObj);
                 } else {
-                    dol_syslog("Impossible de charger l'object " . $nomObj, 3);
+                    if (class_exists($nomObj)) {
+                        $obj = new $nomObj($db);
+
+                        if (!method_exists($obj, "getNomUrl")) {
+                            dol_syslog("Pas de methode getNomUrl dans la class " . $nomObj, 3);
+                            $obj = false;
+                        }
+                    } else {
+                        dol_syslog("Impossible de charger l'object " . $nomObj, 3);
+                    }
                 }
+
                 $tabMenu[0] = $data['tabMenu1'];
                 $tabMenu[1] = $data['tabMenu2'];
             } else
@@ -355,11 +366,8 @@ class favoriCli {
             dol_syslog("Type inconnue : " . $type, 3);
         }
 
-
-
         if (is_object($obj))
             @$obj->loadObject = false;
         return array($obj, $tabMenu, $data);
     }
-
 }

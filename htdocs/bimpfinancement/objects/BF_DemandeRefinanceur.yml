@@ -91,6 +91,9 @@ fields:
         label: Prix ce cession HT
         type: money
         default_value: 0
+        
+    num_accord: 
+        label: N° d'accord
 
 forms: 
     default: 
@@ -115,6 +118,7 @@ forms:
             - field: qty
             - field: rate
             - field: prix_cession_ht
+            - field: num_accord
             - field: comment
             
              
@@ -137,7 +141,7 @@ forms:
             - field: qty
             - field: rate
             - field: prix_cession_ht
-            - field: payment
+            - field: num_accord
             - field: comment
 
     accepted: 
@@ -172,6 +176,7 @@ forms:
                   type: toggle
               value: 1
             - field: prix_cession_ht
+            - field: num_accord
             - field: comment
             
     refused: 
@@ -204,9 +209,9 @@ fields_tables:
               edit: 1
             - field: rate
               edit: 1
-#            - field: payment
-#              edit: 1
             - field: prix_cession_ht
+              edit: 1
+            - field: num_accord
               edit: 1
             - field: comment
               edit: 1
@@ -273,6 +278,8 @@ lists:
                 edit: 1
             loyer_mensuel_ht: 
             prix_cession_ht:
+              edit: 1
+            num_accord: 
               edit: 1
             comment: 
             

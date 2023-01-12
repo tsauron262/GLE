@@ -134,6 +134,9 @@ class BF_Demande extends BimpObject
 
         $status = (int) $this->getData('status');
         switch ($field) {
+            case 'agreement_number': // Editable uniquement via demande refin. 
+                return 0;
+                
             case 'marge_souhaitee':
             case 'tx_cession':
             case 'loyer_mensuel_evo_ht':

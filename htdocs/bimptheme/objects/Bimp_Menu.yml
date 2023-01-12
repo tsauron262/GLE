@@ -55,6 +55,14 @@ fields:
         
     bimp_object: 
         label: BimpObject lié
+        
+    allowed_users: 
+        label: Utilisateurs autorisés
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: user
+            
             
 forms:
     add_sub_item: 
@@ -114,6 +122,7 @@ forms:
             - field: bimp_icon
             - field: bimp_object
             - field: active
+            - field: allowed_users
             
 lists: 
     default: 

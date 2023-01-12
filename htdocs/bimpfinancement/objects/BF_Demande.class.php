@@ -4967,6 +4967,14 @@ class BF_Demande extends BimpObject
 
                         switch ((int) BimpTools::getArrayValueFromPath($line, 'type', BF_Line::TYPE_FREE)) {
                             case BF_Line::TYPE_FREE:
+                                $pu_ht = (float) BimpTools::getArrayValueFromPath($line, 'pu_ht', 0);
+                                $remise = (float) BimpTools::getArrayValueFromPath($line, 'remise', 0);
+                                $pa_ht = $pu_ht;
+
+                                if ($remise) {
+                                    $pa_ht -= ($pu_ht * ($remise / 100));
+                                }
+                                
                                 $line_data = array(
                                     'id_demande'      => $demande->id,
                                     'id_source'       => $source->id,
@@ -4977,10 +4985,10 @@ class BF_Demande extends BimpObject
                                     'description'     => BimpTools::getArrayValueFromPath($line, 'description', ''),
                                     'product_type'    => (int) BimpTools::getArrayValueFromPath($line, 'product_type', 0),
                                     'qty'             => (float) BimpTools::getArrayValueFromPath($line, 'qty', 0),
-                                    'pu_ht'           => (float) BimpTools::getArrayValueFromPath($line, 'pu_ht', 0),
+                                    'pu_ht'           => $pu_ht,
                                     'tva_tx'          => (float) BimpTools::getArrayValueFromPath($line, 'tva_tx', 0),
-                                    'remise'          => (float) BimpTools::getArrayValueFromPath($line, 'remise', 0),
-                                    'pa_ht'           => (float) BimpTools::getArrayValueFromPath($line, 'pa_ht', 0),
+                                    'remise'          => $remise,
+                                    'pa_ht'           => $pa_ht,
                                     'serialisable'    => (int) BimpTools::getArrayValueFromPath($line, 'serialisable', 0),
                                     'serials'         => BimpTools::getArrayValueFromPath($line, 'serials', '')
                                 );

@@ -380,7 +380,7 @@ table.objectSubList {
     cursor: pointer;
 
     &:after {
-        font-family: 'FontAwesome';
+        font-family: 'FA5S';
         margin-left: 8px;
         opacity: 0;
         color: $bimp_list_header_color;
@@ -532,7 +532,7 @@ th.th_tools {
         }
         &:before,
             &:after {
-            font-family: 'FontAwesome';
+            font-family: 'FA5S';
         }
     }
     .openFiltersPanelButton:before {
@@ -545,10 +545,10 @@ th.th_tools {
         content: '\f055';
     }
     .activatePositionsButton:before {
-        content: '\f07d';
+        content: '\f338';
     }
     .openBulkActionsPopupButton:before {
-        content: '\f046';
+        content: '\f14a';
     }
     .openParametersPopupButton:before {
         content: '\f013';
@@ -568,7 +568,7 @@ th.th_tools {
         font-size: 16px;
 
         &:before {
-            font-family: 'FontAwesome';
+            font-family: 'FA5S';
             content: '\f110';
         }
 
@@ -681,7 +681,7 @@ td.buttons {
         }
         &:before,
             &:after {
-            font-family: 'FontAwesome';
+            font-family: 'FA5S';
             font-size: 12px;
             transition: all 0.3s ease;
             -webkit-transition: all 0.3s ease;

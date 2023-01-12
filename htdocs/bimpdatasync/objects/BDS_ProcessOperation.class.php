@@ -215,7 +215,7 @@ class BDS_ProcessOperation extends BimpObject
             ));
 
             if (BimpObject::objectLoaded($option)) {
-                $options[] = $option;
+                $options[] = $option->id;
             } else {
                 $errors[] = 'L\'option "' . $opt_name . '" n\'existe pas';
             }

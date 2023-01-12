@@ -8312,7 +8312,7 @@ div.alert {
   transition: all 0.3s ease; }
   /* line 241, ../scss/bimpcore/_styles.scss */
   .historyPopoverButton:before {
-    font-family: 'FontAwesome';
+    font-family: 'FA5S';
     content: '\f1da'; }
   /* line 246, ../scss/bimpcore/_styles.scss */
   .historyPopoverButton:hover {
@@ -8422,7 +8422,7 @@ div.alert {
 
 /* line 362, ../scss/bimpcore/_styles.scss */
 .open-close:after {
-  font-family: 'FontAwesome';
+  font-family: 'FA5S';
   margin-left: 5px; }
 /* line 366, ../scss/bimpcore/_styles.scss */
 .open-close.action-open:after {
@@ -8695,7 +8695,7 @@ i.iconRight {
       cursor: pointer; }
       /* line 678, ../scss/bimpcore/_styles.scss */
       .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle:before {
-        font-family: 'FontAwesome';
+        font-family: 'FA5S';
         content: '\f0d7'; }
       /* line 683, ../scss/bimpcore/_styles.scss */
       .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle:hover {
@@ -8846,7 +8846,7 @@ i.iconRight {
   /* IE6-9 */ }
 /* line 843, ../scss/bimpcore/_styles.scss */
 .foldable_section > .foldable_section_caption:after {
-  font-family: 'FontAwesome';
+  font-family: 'FA5S';
   margin-right: 10px;
   float: right;
   font-size: 14px; }
@@ -8895,7 +8895,7 @@ i.iconRight {
     float: right; }
     /* line 897, ../scss/bimpcore/_styles.scss */
     .foldable_container > .foldable_caption > .foldable-caret:before {
-      font-family: 'FontAwesome'; }
+      font-family: 'FA5S'; }
   /* line 903, ../scss/bimpcore/_styles.scss */
   .foldable_container > .foldable_caption:hover .foldable-caret {
     opacity: 1; }
@@ -8921,7 +8921,7 @@ i.iconRight {
     line-height: 30px; }
     /* line 934, ../scss/bimpcore/_styles.scss */
     .panel.foldable > .panel-heading:first-child .panel-caret:before {
-      font-family: 'FontAwesome'; }
+      font-family: 'FA5S'; }
   /* line 940, ../scss/bimpcore/_styles.scss */
   .panel.foldable > .panel-heading:first-child:hover .panel-caret {
     opacity: 1; }
@@ -8947,7 +8947,7 @@ i.iconRight {
     float: right; }
     /* line 972, ../scss/bimpcore/_styles.scss */
     .objectViewtable.foldable > thead tr:first-child .foldable-caret:before {
-      font-family: 'FontAwesome'; }
+      font-family: 'FA5S'; }
   /* line 978, ../scss/bimpcore/_styles.scss */
   .objectViewtable.foldable > thead tr:first-child:hover .foldable-caret {
     opacity: 1; }
@@ -9101,7 +9101,7 @@ i.iconRight {
       padding: 0; }
       /* line 1171, ../scss/bimpcore/_styles.scss */
       .bimp_timer .bimp_timer_header .title:before {
-        font-family: 'FontAwesome';
+        font-family: 'FA5S';
         margin-right: 8px;
         content: '\f017'; }
   /* line 1179, ../scss/bimpcore/_styles.scss */
@@ -9284,8 +9284,8 @@ i.iconRight {
     margin: 0 6px; }
   /* line 1393, ../scss/bimpcore/_styles.scss */
   .positionHandle span:before {
-    font-family: 'FontAwesome';
-    content: '\f07d'; }
+    font-family: 'FA5S';
+    content: '\f338'; }
 
 /* line 1399, ../scss/bimpcore/_styles.scss */
 .select2-results ul li {
@@ -9794,7 +9794,7 @@ select.switch {
     .optionsContainer .optionsButton:before {
       font-size: 14px;
       color: #4195C8;
-      font-family: 'FontAwesome';
+      font-family: 'FA5S';
       content: '\f013';
       margin-right: 8px; }
 
@@ -10010,7 +10010,7 @@ input[type=text].large_input {
   /* line 718, ../scss/bimpcore/_form.scss */
   .check_list_item > label:before,
   .check_list_group_caption.selectable:before {
-    font-family: 'FontAwesome';
+    font-family: 'FA5R';
     margin-left: -24px;
     margin-right: 16px;
     font-weight: normal;
@@ -10026,7 +10026,7 @@ input[type=text].large_input {
   .check_list_item > input[type=checkbox]:checked + label:before,
   .check_list_group > input[type=checkbox]:checked + .check_list_group_caption.selectable:before {
     font-size: 16px;
-    content: '\f046';
+    content: '\f14a';
     color: #4195C8; }
 
 /* line 740, ../scss/bimpcore/_form.scss */
@@ -10691,7 +10691,7 @@ table.objectSubList {
   cursor: pointer; }
   /* line 382, ../scss/bimpcore/_list.scss */
   .sortTitle:after {
-    font-family: 'FontAwesome';
+    font-family: 'FA5S';
     margin-left: 8px;
     opacity: 0;
     color: #4195C8;
@@ -10817,7 +10817,7 @@ th.th_tools {
       background-color: transparent; }
     /* line 533, ../scss/bimpcore/_list.scss */
     .headerTools .headerButton:before, .headerTools .headerButton:after {
-      font-family: 'FontAwesome'; }
+      font-family: 'FA5S'; }
   /* line 538, ../scss/bimpcore/_list.scss */
   .headerTools .openFiltersPanelButton:before {
     content: '\f0b0'; }
@@ -10829,10 +10829,10 @@ th.th_tools {
     content: '\f055'; }
   /* line 547, ../scss/bimpcore/_list.scss */
   .headerTools .activatePositionsButton:before {
-    content: '\f07d'; }
+    content: '\f338'; }
   /* line 550, ../scss/bimpcore/_list.scss */
   .headerTools .openBulkActionsPopupButton:before {
-    content: '\f046'; }
+    content: '\f14a'; }
   /* line 553, ../scss/bimpcore/_list.scss */
   .headerTools .openParametersPopupButton:before {
     content: '\f013'; }
@@ -10852,7 +10852,7 @@ th.th_tools {
     font-size: 16px; }
     /* line 570, ../scss/bimpcore/_list.scss */
     .headerTools .loadingIcon:before {
-      font-family: 'FontAwesome';
+      font-family: 'FA5S';
       content: '\f110'; }
     /* line 575, ../scss/bimpcore/_list.scss */
     .headerTools .loadingIcon.visible {
@@ -10952,7 +10952,7 @@ td.buttons {
       color: #4195C8; }
     /* line 682, ../scss/bimpcore/_list.scss */
     .listPagination span.navButton:before, .listPagination span.navButton:after {
-      font-family: 'FontAwesome';
+      font-family: 'FA5S';
       font-size: 12px;
       transition: all 0.3s ease;
       -webkit-transition: all 0.3s ease; }

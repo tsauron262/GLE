@@ -1939,16 +1939,16 @@ class BimpObject extends BimpCache
             return 0;
     }
 
-    public function getInfoGraph($graphName = 'default')
+    public function getInfoGraph($graphName = '')
     {
-        return
-                array("data1"     => array("title" => "Nom Data1"),
-                    "data2"     => array("title" => "Nom Data2"),
-                    "axeX"      => array("title" => "X", "valueFormatString" => 'value type'),
-                    "axeY"      => array("title" => "Y"), //Attention potentiellement plusiuers donné sur cette axe
-                    'title'     => $this->getLabel(),
-                    'params'    => array(), //tous les paramétre qui seront transmis a getGraphDataPoint ou a getGraphDatasPoints
-                    'mode_data' => (method_exists($this, 'getGraphDataPoint')) ? 'objects' : 'unique'
+        return array(
+            "data1"     => array("title" => "Nom Data1"),
+            "data2"     => array("title" => "Nom Data2"),
+            "axeX"      => array("title" => "X", "valueFormatString" => 'value type'),
+            "axeY"      => array("title" => "Y"), //Attention potentiellement plusiuers donné sur cette axe
+            'title'     => $this->getLabel(),
+            'params'    => array(), //tous les paramétre qui seront transmis a getGraphDataPoint ou a getGraphDatasPoints
+            'mode_data' => (method_exists($this, 'getGraphDataPoint')) ? 'objects' : 'unique'
         );
     }
 
@@ -3962,10 +3962,11 @@ class BimpObject extends BimpCache
 
         return $display;
     }
-    
-    public function displayBool($method){
-        if(method_exists($this, $method))
-                return ($this->$method()? '<span class="success">OUI</span>' : '<span class="error">NON</span>');
+
+    public function displayBool($method)
+    {
+        if (method_exists($this, $method))
+            return ($this->$method() ? '<span class="success">OUI</span>' : '<span class="error">NON</span>');
         else
             return $method . ' n\'existe pas';
     }
@@ -6555,13 +6556,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             if (BimpCore::getConf('date_archive', '') != '') {
-                $btnHisto = '<div id="notes_archives_' . $this->object_name .'_'.$list->identifier. '_container">';
-                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name.'_'.$list->identifier . "_container')", array($filter_by_user, $list_model, $suffixe, true, $withLinked)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
+                $btnHisto = '<div id="notes_archives_' . $this->object_name . '_' . $list->identifier . '_container">';
+                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#notes_archives_" . $this->object_name . '_' . $list->identifier . "_container')", array($filter_by_user, $list_model, $suffixe, true, $withLinked)) . '">' . BimpRender::renderIcon('fas_history') . ' Afficher les notes archivées</button>';
                 $btnHisto .= '</div>';
             }
 
             $sup = '';
-            if($withLinked && $withLinked !== 'false'){
+            if ($withLinked && $withLinked !== 'false') {
                 $linkedObjects = $this->getFullLinkedObjetsArray(false);
                 if (count($linkedObjects) > 0) {
                     $filterLinked = array('linked' => array('or' => array()));
@@ -6811,7 +6812,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</span>';
 
             //Suivi mail
-            $random = rand(11111111, 99999999);
+            $random = rand(11111, 99999);
             $htmlId = 'suivi_mail_' . $random;
             $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails', array(), 'large');
             $html .= '<span id="' . $htmlId . '" class="btn btn-default bs-popover"';
@@ -6820,8 +6821,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_inbox');
             $html .= '</span>';
-            if ($_GET['open'] == 'suivi_mail')
+
+            if (BimpTools::getValue('open') == 'suivi_mail') {
                 $html .= '<script>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
+            }
 
 
             $html .= '</div>';
@@ -9547,18 +9550,19 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             'success_callback' => $success_callback
         );
     }
-    
-    public function actionEraseCache($data, &$success){
+
+    public function actionEraseCache($data, &$success)
+    {
         $success = 'Cache vidé';
         $errors = $warnings = array();
-        if(BimpCache::$cache_server)
+        if (BimpCache::$cache_server)
             BimpCache::eraseCacheServer();
         else
             $errors[] = 'Pas de cache serveur';
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings
-        ); 
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     public function actionBulkDelete($data, &$success)

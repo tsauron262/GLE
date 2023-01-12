@@ -486,7 +486,7 @@ select.switch {
         &:before {
             font-size: 14px;
             color: $primary;
-            font-family: 'FontAwesome';
+            font-family: 'FA5S';
             content: '\f013';
             margin-right: 8px;
         }
@@ -716,7 +716,7 @@ input[type=text].large_input {
     padding: 0 6px 0 24px;
 
     &:before {
-        font-family: 'FontAwesome';
+        font-family: 'FA5R';
         margin-left: -24px;
         margin-right: 16px;
         font-weight: normal;
@@ -732,7 +732,7 @@ input[type=text].large_input {
 
     &:before {
         font-size: 16px;
-        content: '\f046';
+        content: '\f14a';
         color: $primary;
     }
 }

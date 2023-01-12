@@ -239,7 +239,7 @@ div.alert {
     @include transition(all 0.3s ease);
 
     &:before {
-        font-family: 'FontAwesome';
+        font-family: 'FA5S';
         content: '\f1da';
     }
 
@@ -360,7 +360,7 @@ div.alert {
 
 .open-close {
     &:after {
-        font-family: 'FontAwesome';
+        font-family: 'FA5S';
         margin-left: 5px;
     }
     &.action-open:after {
@@ -676,7 +676,7 @@ i.iconRight {
                 cursor: pointer;
 
                 &:before {
-                    font-family: 'FontAwesome';
+                    font-family: 'FA5S';
                     content: '\f0d7';
                 }
 
@@ -841,7 +841,7 @@ i.iconRight {
 
     }
     & > .foldable_section_caption:after {
-        font-family: 'FontAwesome';
+        font-family: 'FA5S';
         margin-right: 10px;
         float: right;
         font-size: 14px;
@@ -895,7 +895,7 @@ i.iconRight {
             float: right;
 
             &:before {
-                font-family: 'FontAwesome';
+                font-family: 'FA5S';
             }
         }
 
@@ -932,7 +932,7 @@ i.iconRight {
             line-height: 30px;
 
             &:before {
-                font-family: 'FontAwesome';
+                font-family: 'FA5S';
             }
         }
 
@@ -970,7 +970,7 @@ i.iconRight {
                 float: right;
 
                 &:before {
-                    font-family: 'FontAwesome';
+                    font-family: 'FA5S';
                 }
             }
 
@@ -1169,7 +1169,7 @@ i.iconRight {
             padding: 0;
 
             &:before {
-                font-family: 'FontAwesome';
+                font-family: 'FA5S';
                 margin-right: 8px;
                 content: '\f017';
             }
@@ -1391,8 +1391,8 @@ i.iconRight {
     }
 
     span:before {
-        font-family: 'FontAwesome';
-        content: '\f07d';
+        font-family: 'FA5S';
+        content: '\f338';
     }
 }
 

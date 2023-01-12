@@ -144,11 +144,7 @@ class BF_DemandeRefinanceur extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if ($force_edit) {
-            return 1;
-        }
-
-        return $this->isCreatable($force_edit, $errors);
+        return 1;
     }
 
     public function isDeletable($force_delete = false, &$errors = array())

@@ -86,6 +86,11 @@ fields:
         input:
             rows: 3
             auto_expand: 1
+            
+    prix_cession_ht: 
+        label: Prix ce cession HT
+        type: money
+        default_value: 0
 
 forms: 
     default: 
@@ -109,8 +114,9 @@ forms:
             - field: periodicity
             - field: qty
             - field: rate
-#            - field: amount_ht
+            - field: prix_cession_ht
             - field: comment
+            
              
     demande_done: 
         rows: 
@@ -130,7 +136,7 @@ forms:
             - field: periodicity
             - field: qty
             - field: rate
-#            - field: amount_ht
+            - field: prix_cession_ht
             - field: payment
             - field: comment
 
@@ -165,6 +171,7 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - field: prix_cession_ht
             - field: comment
             
     refused: 
@@ -199,6 +206,8 @@ fields_tables:
               edit: 1
 #            - field: payment
 #              edit: 1
+            - field: prix_cession_ht
+              edit: 1
             - field: comment
               edit: 1
               
@@ -263,6 +272,8 @@ lists:
             rate: 
                 edit: 1
             loyer_mensuel_ht: 
+            prix_cession_ht:
+              edit: 1
             comment: 
             
             

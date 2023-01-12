@@ -1366,6 +1366,10 @@ class BF_Demande extends BimpObject
                     }
                 }
                 return '';
+
+            case 'fac_fourn_libelle':
+            case 'fac_fin_libelle':
+                return 'Contrat de location n° ' . str_replace('DF', '', $this->getRef());
         }
 
         return $this->getData($field_name);
@@ -3395,13 +3399,19 @@ class BF_Demande extends BimpObject
             return $errors;
         }
 
+        $note = '<b>Client Final : </b>' . strip_tags($this->displayClient());
+        if ($this->getData('agreement_number')) {
+            $note .= '<br/><b>N° D\'accord : </b>' . $this->getData('agreement_number');
+        }
+
         $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_FactureFourn', array(
                     'libelle'           => $libelle,
                     'ref_supplier'      => $ref_supplier,
                     'fk_soc'            => $fourn->id,
                     'fk_mode_reglement' => $id_mode_reglement,
                     'fk_cond_reglement' => $id_cond_reglement,
-                    'datef'             => date('Y-m-d')
+                    'datef'             => date('Y-m-d'),
+                    'note_public'       => $note
                         ), true, $errors, $warnings);
 
         if (!BimpObject::objectLoaded($facture) && empty($errors)) {
@@ -3452,6 +3462,18 @@ class BF_Demande extends BimpObject
             return $errors;
         }
 
+        $prix_cession = (float) $this->getSelectedDemandeRefinanceurData('prix_cession_ht');
+
+        if (!$prix_cession) {
+            $errors[] = 'Prix de cession total HT non défini pour la demande refinanceur sélectionnée';
+            return $errors;
+        }
+
+        $note = '<b>Client Final : </b>' . strip_tags($this->displayClient());
+        if ($this->getData('agreement_number')) {
+            $note .= '<br/><b>N° D\'accord : </b>' . $this->getData('agreement_number');
+        }
+
         $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
                     'libelle'           => $libelle,
                     'fk_soc'            => $client->id,
@@ -3459,7 +3481,8 @@ class BF_Demande extends BimpObject
                     'type'              => 0,
                     'fk_mode_reglement' => (int) $id_mode_reglement,
                     'fk_cond_reglement' => (int) $id_cond_reglement,
-                    'datef'             => date('Y-m-d')
+                    'datef'             => date('Y-m-d'),
+                    'note_public'       => $note
                         ), true, $errors, $warnings);
 
         if (!BimpObject::objectLoaded($facture) && empty($errors)) {
@@ -3467,7 +3490,7 @@ class BF_Demande extends BimpObject
         }
 
         if (!count($errors)) {
-            $lines_errors = $this->addBimpCommObjectLines($facture, 7510.57);
+            $lines_errors = $this->addBimpCommObjectLines($facture, $prix_cession);
 
             if (count($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture');
@@ -4824,7 +4847,7 @@ class BF_Demande extends BimpObject
         return parent::update($warnings, $force_update);
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function createFromSource($data, &$errors = array(), &$warnings = array())
     {

@@ -926,8 +926,34 @@ class BimpCommDemandeFin extends BimpObject
                         $parent = $this->getParentInstance();
                         if (BimpObject::objectLoaded($parent)) {
                             $parent->addObjectLog(static::getDocTypeLabel($doc_type) . ' reçu', strtoupper($doc_type) . '_RECEIVED');
-                            $this->addParentNoteForCommercial('Document reçu : ' . self::$doc_types[$doc_type]);
+                            $this->addParentNoteForCommercial('Document reçu : ' . $this->getDocTypeLabel($doc_type));
                         }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function setDocFinStatus($doc_type, $new_status)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if (!array_key_exists($new_status, self::$doc_status_list)) {
+                $errors[] = 'Nouveau statut invalide: ' . $new_status;
+            } else {
+                $errors = $this->updateField($doc_type . '_status', $new_status);
+                
+                if ($new_status >= 10 && $new_status < 20) {
+                    $this->updateField('status', self::DOC_STATUS_ACCEPTED);
+                }
+
+                if (!count($errors)) {
+                    $parent = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($parent)) {
+                        $parent->addObjectLog(static::getDocTypeLabel($doc_type) . ' mis au statut : ' . self::$doc_status_list[$new_status]['label'], strtoupper($doc_type) . '_STATUS_' . $new_status);
                     }
                 }
             }

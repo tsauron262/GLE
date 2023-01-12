@@ -4610,14 +4610,14 @@ class BF_Demande extends BimpObject
 
         $use_db_transactions = (int) BimpCore::getConf('use_db_transactions', null);
 
-        if ($use_db_transactions) {
-            $this->db->db->commit();
-        }
+//        if ($use_db_transactions) {
+//            $this->db->db->commit();
+//        }
 
         if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fourn', 0)) {
-            if ($use_db_transactions) {
-                $this->db->db->begin();
-            }
+//            if ($use_db_transactions) {
+//                $this->db->db->begin();
+//            }
 
             $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fourn_libelle', '');
             $ref_supplier = BimpTools::getArrayValueFromPath($data, 'fac_fourn_ref_supplier', '');
@@ -4628,15 +4628,15 @@ class BF_Demande extends BimpObject
             $fac_errors = $this->createFactureFournisseur($id_fourn, $id_mode_reglement, $id_cond_reglement, $ref_supplier, $libelle, $warnings);
 
             if (count($fac_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture fournisseur');
+                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture fournisseur');
 
-                if ($use_db_transactions) {
-                    $this->db->db->rollback();
-                }
+//                if ($use_db_transactions) {
+//                    $this->db->db->rollback();
+//                }
             } else {
-                if ($use_db_transactions) {
-                    $this->db->db->commit();
-                }
+//                if ($use_db_transactions) {
+//                    $this->db->db->commit();
+//                }
 
                 $success = 'Facture fournisseur créée avec succès';
 
@@ -4651,9 +4651,9 @@ class BF_Demande extends BimpObject
         }
 
         if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fin', 0)) {
-            if ($use_db_transactions) {
-                $this->db->db->begin();
-            }
+//            if ($use_db_transactions) {
+//                $this->db->db->begin();
+//            }
 
             $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fin_libelle', '');
             $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_mode_reglement', 0);
@@ -4662,15 +4662,15 @@ class BF_Demande extends BimpObject
             $fac_errors = $this->createFactureFin($libelle, $id_mode_reglement, $id_cond_reglement, $warnings);
 
             if (count($fac_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture client');
+                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture client');
 
-                if ($use_db_transactions) {
-                    $this->db->db->rollback();
-                }
+//                if ($use_db_transactions) {
+//                    $this->db->db->rollback();
+//                }
             } else {
-                if ($use_db_transactions) {
-                    $this->db->db->commit();
-                }
+//                if ($use_db_transactions) {
+//                    $this->db->db->commit();
+//                }
 
                 $success = 'Facture client créée avec succès';
 
@@ -4684,9 +4684,9 @@ class BF_Demande extends BimpObject
             }
         }
 
-        if ($use_db_transactions) {
-            $this->db->db->begin();
-        }
+//        if ($use_db_transactions) {
+//            $this->db->db->begin();
+//        }
 
         $this->checkIsClosed();
 
@@ -4900,11 +4900,11 @@ class BF_Demande extends BimpObject
         }
 
         if (!count($errors)) {
-            BimpCache::getBdb()->db->commit();
+//            BimpCache::getBdb()->db->commit();
             $msg = 'Nouvelle demande de location de la part de ' . $source_label;
             $demande->addNotificationNote($msg, BimpNote::BN_AUTHOR_USER, '', 0, BimpNote::BN_MEMBERS, 1);
         } else {
-            BimpCache::getBdb()->db->rollback();
+//            BimpCache::getBdb()->db->rollback();
         }
 
         return $demande;

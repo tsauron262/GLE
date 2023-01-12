@@ -2681,6 +2681,7 @@ class BimpCache
     public static function getCondReglementsArray()
     {
         global $langs;
+        $langs->load('bills');
         if (!isset(self::$cache['cond_reglements_array'])) {
             $rows = self::getBdb()->getRows('c_payment_term', '`active` > 0', null, 'array', array('rowid', 'libelle', 'code'), 'sortorder');
 
@@ -2705,6 +2706,8 @@ class BimpCache
 
     public static function getModeReglementsArray($key = 'id', $active_only = false, $type = 2)
     {
+        global $langs;
+        $langs->load('bills');
         $cache_key = 'mode_reglements_by_' . $key;
         if ($active_only) {
             $cache_key .= '_active_only';

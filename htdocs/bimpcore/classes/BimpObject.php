@@ -1841,28 +1841,30 @@ class BimpObject extends BimpCache
         if ($logo_prop && $dir) {
             $file = $this->getData($logo_prop);
 
-            $file_infos = pathinfo($file);
-            $ext = $file_infos['extension'];
-            $name = $file_infos['filename'];
+            if(!empty($file)){
+                $file_infos = pathinfo($file);
+                $ext = $file_infos['extension'];
+                $name = $file_infos['filename'];
 
-            $file_path = '';
+                $file_path = '';
 
-            if ($format) {
-                $file_path = 'thumbs/' . $name . '_' . $format . '.' . $ext;
-            } else {
-                $file_path = $file;
-            }
-
-            if ($ext && file_exists($dir . '/logos/' . $file_path)) {
-                $url = $this->getFileUrl('logos/' . $file_path, 'viewimage');
-
-                if (BimpCore::isContextPublic()) {
-                    $url .= '&hashp=1';
+                if ($format) {
+                    $file_path = 'thumbs/' . $name . '_' . $format . '.' . $ext;
+                } else {
+                    $file_path = $file;
                 }
 
+                if ($ext && file_exists($dir . '/logos/' . $file_path)) {
+                    $url = $this->getFileUrl('logos/' . $file_path, 'viewimage');
 
-                if ($url && $preview) {
-                    $url = 'javascript:document_preview(\'' . $url . '\', \'image/' . $ext . '\', \'Aperçu\');';
+                    if (BimpCore::isContextPublic()) {
+                        $url .= '&hashp=1';
+                    }
+
+
+                    if ($url && $preview) {
+                        $url = 'javascript:document_preview(\'' . $url . '\', \'image/' . $ext . '\', \'Aperçu\');';
+                    }
                 }
             }
         }
@@ -8120,6 +8122,44 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function getJsActionOnclick($action, $data = array(), $params = array())
     {
+        $options = '';
+    
+        if (isset($params['form_name']) && $params['form_name']) {
+            $options .= 'form_name: \'' . $params['form_name'] . '\'';
+        }
+
+        if (isset($params['confirm_msg']) && $params['confirm_msg']) {
+            $options .= ($options ? ', ' : '') . 'confirm_msg: \'' . $params['confirm_msg'] . '\'';
+        }
+
+        if (isset($params['modal_title']) && $params['modal_title']) {
+            $options .= ($options ? ', ' : '') . 'modal_title: \'' . $params['modal_title'] . '\'';
+        }
+
+        if (isset($params['modal_format']) && $params['modal_format']) {
+            $options .= ($options ? ', ' : '') . 'modal_format: \'' . $params['modal_format'] . '\'';
+        }
+
+        if (isset($params['on_form_submit']) && $params['on_form_submit']) {
+            $options .= ($options ? ', ' : '') . 'on_form_submit: ' . $params['on_form_submit'];
+        }
+
+        if (isset($params['no_triggers']) && $params['no_triggers']) {
+            $options .= ($options ? ', ' : '') . 'no_triggers: ' . ((int) $params['no_triggers'] ? 1 : 0);
+        }
+
+        if (isset($params['modal_scroll_bottom']) && $params['modal_scroll_bottom']) {
+            $options .= ($options ? ', ' : '') . 'modal_scroll_bottom: ' . ((int) $params['modal_scroll_bottom'] ? 1 : 0);
+        }
+
+        if (isset($params['use_bimpdatasync']) && $params['use_bimpdatasync']) {
+            $options .= ($options ? ', ' : '') . 'use_bimpdatasync: ' . ((int) $params['use_bimpdatasync'] ? 1 : 0);
+        }
+
+        if (isset($params['display_processing']) && $params['display_processing']) {
+            $options .= ($options ? ', ' : '') . 'display_processing: ' . ((int) $params['display_processing'] ? 1 : 0);
+        }
+
         $js = 'setObjectAction(';
         if (!isset($params['no_button']) || !$params['no_button']) {
             $js .= '$(this), ';
@@ -8138,12 +8178,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . $value . '\''));
         }
         $js .= '}, ';
-        if (isset($params['form_name'])) {
-            $js .= '\'' . $params['form_name'] . '\'';
-        } else {
-            $js .= 'null';
-        }
-        $js .= ', ';
         if (isset($params['result_container'])) {
             $js .= $params['result_container'];
         } else {
@@ -8156,47 +8190,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $js .= 'null';
         }
         $js .= ', ';
-        if (isset($params['confirm_msg'])) {
-            $js .= '\'' . $params['confirm_msg'] . '\'';
-        } else {
-            $js .= 'null';
-        }
-        $js .= ', ';
-        if (isset($params['on_form_submit'])) {
-            $js .= $params['on_form_submit'];
-        } else {
-            $js .= 'null';
-        }
-        $js .= ', ';
-        if (isset($params['no_triggers'])) {
-            $js .= ((int) $params['no_triggers'] ? 'true' : 'false');
-        } else {
-            $js .= 'false';
-        }
-        $js .= ', ';
-        if (isset($params['modal_format']) && in_array($params['modal_format'], array('small', 'medium', 'large'))) {
-            $js .= '\'' . $params['modal_format'] . '\'';
-        } else {
-            $js .= '\'medium\'';
-        }
-        $js .= ', ';
-        if (isset($params['modal_scroll_bottom'])) {
-            $js .= ($params['modal_scroll_bottom'] ? 'true' : 'false');
-        } else {
-            $js .= 'true';
-        }
-        $js .= ', ';
-        if (isset($params['modal_title'])) {
-            $js .= '\'' . $params['modal_title'] . '\'';
-        } else {
-            $js .= '\'\'';
-        }
-        $js .= ', ';
-        if (isset($params['use_bimpdatasync'])) {
-            $js .= ((int) $params['use_bimpdatasync'] ? 'true' : 'false');
-        } else {
-            $js .= 'false';
-        }
+        $js .= '{' . $options . '}';
         $js .= ');';
 
         return $js;
@@ -9471,7 +9465,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         global $modeCSV, $modeGraph;
         $modeCSV = $modeGraph = true;
-        $success = "Donnée Maj";
+        $success = "";
         $errors = array();
         $warnings = array();
 

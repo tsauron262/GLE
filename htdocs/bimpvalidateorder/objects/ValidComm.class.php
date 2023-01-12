@@ -39,6 +39,8 @@ class ValidComm extends BimpObject
 
     private $valideur = array();
     private $isContrat = false;
+    
+    public $nb_validation = 0;
 
     public function canEdit()
     {
@@ -140,7 +142,7 @@ class ValidComm extends BimpObject
         if (method_exists($bimp_object, 'getClientFacture'))
             $client = $bimp_object->getClientFacture();
         else {
-            if (!is_a($object, 'BContract_contrat'))
+            if (!is_a($bimp_object, 'BContract_contrat'))
                 $client = $bimp_object->getChildObject('client');
             else
                 $bimp_object->getData('fk_soc');
@@ -163,7 +165,7 @@ class ValidComm extends BimpObject
 
 
         // Validation commerciale
-        if (!is_a($object, 'BContract_contrat')) {
+        if (!is_a($bimp_object, 'BContract_contrat')) {
             if (($percent_pv != 0 or $percent_marge != 0) and in_array(self::TYPE_COMMERCIAL, $validations)) {
                 $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent_pv, $bimp_object, $errors, array('sur_marge' => $percent_marge));
             } elseif (is_a($this->demandeExists($class, (int) $bimp_object->id, self::TYPE_COMMERCIAL), 'DemandeValidComm')) {
@@ -228,7 +230,7 @@ class ValidComm extends BimpObject
         elseif (in_array(self::TYPE_IMPAYE, $validations))
             $success[] = "Validation d'impayé effectuée.";
 
-        if (!is_a($object, 'BContract_contrat'))
+        if (!is_a($bimp_object, 'BContract_contrat'))
             $ret = ($valid_comm == 1 and $valid_encours == 1 and $valid_impaye == 1);
         else
             $ret = ($valid_encours == 1 && $valid_impaye == 1);

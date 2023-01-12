@@ -30,7 +30,9 @@ function BimpSignaturePad() {
                 module: 'bimpcore',
                 object_name: 'BimpSignature',
                 id_object: id_signature
-            }, 'signElec', {}, 'sign_elec', ptr.$resultContainer);
+            }, 'signElec', {}, ptr.$resultContainer, null, {
+                'form_name' : 'sign_elec'
+            });
         }
     };
 

@@ -173,10 +173,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
 
                 if (!BimpObject::objectLoaded($p) && !(float) $line->total_ht) {
                     if ($line->desc) {
-                        $pdf->Cell($W * 13, 6, $line->desc, 1, null, 'L', true);
-                    } else {
-                        $print = false;
+                        $desc = BimpTools::replaceBr($line->desc);
+                        $desc = trim(strip_tags(html_entity_decode(htmlspecialchars_decode($desc))));
+                        $pdf->MultiCell($W * 13, 6, $desc, 1, 'L', true);
                     }
+                    $print = false;
                 } else {
                     //echo '<pre>';print_r($p);
                     $label = $p->label;

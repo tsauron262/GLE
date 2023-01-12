@@ -385,6 +385,12 @@ fields:
     signature_params: 
         label: Paramètres incrustation signature
         type: json
+    expertise:
+        label: Expertise Bimp
+        dol_extra_field: 1
+        type: int
+        values: 
+            array: expertise
 
 fields_tables:
     contrat:
@@ -446,6 +452,9 @@ fields_tables:
 #            - label: Total actuelle
 #              value:
 #                  callback: getCurrentTotal
+            - field: expertise
+              edit: 1
+                
     options_pdf:
         panel: 1
         title: Options PDF

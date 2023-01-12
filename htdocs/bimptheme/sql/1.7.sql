@@ -1,0 +1,1 @@
+ALTER TABLE `llx_menu` ADD `allowed_users` TEXT NOT NULL DEFAULT '';

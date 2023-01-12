@@ -364,7 +364,7 @@ class BC_List extends BC_Panel
 
     public function setAddFormName($name)
     {
-        if (is_null($this->params['add_form'])) {
+        if (!isset($this->params['add_form']) || is_null($this->params['add_form'])) {
             $this->params['add_form'] = array();
         }
 

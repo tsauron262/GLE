@@ -302,7 +302,7 @@ class Bimp_Stat_Date extends BimpObject
             $this->datasCommande[$ln->date . $this->signatureFilter] = $ln;
         }
 
-        $req = "SELECT " . $selectDate . " as date, count(*) as nb, SUM(total) as tot FROM `llx_facture` a";
+        $req = "SELECT " . $selectDate . " as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_facture` a";
         if ($extrafield)
             $req .= " LEFT JOIN llx_facture_extrafields f ON a.rowid = f.fk_object ";
         if ($contact)

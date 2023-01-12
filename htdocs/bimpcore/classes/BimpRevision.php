@@ -94,7 +94,7 @@ class BimpRevisionPropal extends BimpRevision
 
     function reviserPropal($ajoutLigne = true, $qteZeroSaufAccomte = false, $pdfModel = 'azurSAV', &$errors = array(), $socid = 0)
     {
-        global $langs, $db;
+        global $langs, $db, $user;
         $propal = $this->propal;
         if($socid < 1)
             $socid = $propal->socid;
@@ -147,7 +147,7 @@ class BimpRevisionPropal extends BimpRevision
             }
         }
 
-        $newId = $object->createFromClone($socid, $hookmanager);
+        $newId = $object->createFromClone($user, $socid, $hookmanager);
         if ($newId > 0) {
             $newRef = self::convertRef($oldRef, "propal");
             self::setLienRevision($oldRef, $oldId, $newId, $newRef);

@@ -60,6 +60,8 @@ class BimpComm extends BimpDolObject
         self::BC_ZONE_HORS_UE => 'Hors UE'
     );
     protected $margins_infos = null;
+    
+    public $onChildSaveProcessed = false;
 
     public function __construct($module, $object_name)
     {
@@ -2045,9 +2047,9 @@ class BimpComm extends BimpDolObject
                     $html .= '<td>' . price($marginInfo['pa_services']) . '</td>';
                     $html .= '<td>' . price($marginInfo['margin_on_services']) . ' (';
                     if ($conf_tx_marque) {
-                        $html .= round($marginInfo['mark_rate_services'], 4);
+                        $html .= round((float) $marginInfo['mark_rate_services'], 4);
                     } else {
-                        $html .= round($marginInfo['margin_rate_services'], 4);
+                        $html .= round((float) $marginInfo['margin_rate_services'], 4);
                     }
                     $html .= ' %)</td>';
                     $html .= '</tr>';
@@ -2084,6 +2086,7 @@ class BimpComm extends BimpDolObject
 
     public function renderMarginTableExtra($marginInfo)
     {
+        $html = '';
         if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande'))) {
             $remises_arrieres = 0;
 

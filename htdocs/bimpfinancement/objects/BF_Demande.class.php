@@ -3459,7 +3459,7 @@ class BF_Demande extends BimpObject
         }
 
         if (!count($errors)) {
-            $lines_errors = $this->addBimpCommObjectLines($facture);
+            $lines_errors = $this->addBimpCommObjectLines($facture, 7510.57);
 
             if (count($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture');
@@ -3473,11 +3473,16 @@ class BF_Demande extends BimpObject
         return $errors;
     }
 
-    protected function addBimpCommObjectLines($bimpcomm)
+    protected function addBimpCommObjectLines($bimpcomm, $total_attendu = 0)
     {
         $errors = array();
 
         $lines = $this->getLines();
+        
+        $pourcentage = 1;
+        if($total_attendu){
+            $pourcentage = $total_attendu / $this->getTotalDemandeHT();
+        }
 
         foreach ($lines as $line) {
             $line_type = (int) $line->getData('type');
@@ -3494,10 +3499,10 @@ class BF_Demande extends BimpObject
 
             if ($line_type !== BF_Line::TYPE_TEXT) {
                 $fac_line->qty = $line->getData('qty');
-                $fac_line->pu_ht = $line->getData('pu_ht');
+                $fac_line->pu_ht = $line->getData('pu_ht')*$pourcentage;
                 $fac_line->tva_tx = $line->getData('tva_tx');
                 $fac_line->pa_ht = $line->getData('pa_ht');
-                $fac_line->remises = $line->getData('remise');
+//                $fac_line->remises = $line->getData('remise');
                 $fac_line->product_type = ((int) $fac_line->getData('product_type') === BF_Line::PRODUIT ? 0 : 1);
             }
 
@@ -3510,12 +3515,25 @@ class BF_Demande extends BimpObject
 
             $line_warnings = array();
             $line_errors = $fac_line->create($line_warnings, true);
+            
+            
+            if (!count($line_errors)) {
+                if($line->getData('remise') > 0){
+                    BimpObject::createBimpObject('bimpcommercial', 'ObjectLineRemise', array(
+                                                        'id_object_line'           => (int) $fac_line->id,
+                                                        'object_type'              => $fac_line::$parent_comm_type,
+                                                        'linked_id_remise_globale' => (int) 0,
+                                                        'type'                     => ObjectLineRemise::OL_REMISE_PERCENT,
+                                                        'percent'                  => (float) $line->getData('remise')
+                                                            ), $errors, $errors);
+                }
+            }
 
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $line->getData('position'));
             }
         }
-
+        
         return $errors;
     }
 
@@ -4592,14 +4610,14 @@ class BF_Demande extends BimpObject
 
         $use_db_transactions = (int) BimpCore::getConf('use_db_transactions', null);
 
-        if ($use_db_transactions) {
-            $this->db->db->commit();
-        }
+//        if ($use_db_transactions) {
+//            $this->db->db->commit();
+//        }
 
         if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fourn', 0)) {
-            if ($use_db_transactions) {
-                $this->db->db->begin();
-            }
+//            if ($use_db_transactions) {
+//                $this->db->db->begin();
+//            }
 
             $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fourn_libelle', '');
             $ref_supplier = BimpTools::getArrayValueFromPath($data, 'fac_fourn_ref_supplier', '');
@@ -4610,15 +4628,15 @@ class BF_Demande extends BimpObject
             $fac_errors = $this->createFactureFournisseur($id_fourn, $id_mode_reglement, $id_cond_reglement, $ref_supplier, $libelle, $warnings);
 
             if (count($fac_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture fournisseur');
+                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture fournisseur');
 
-                if ($use_db_transactions) {
-                    $this->db->db->rollback();
-                }
+//                if ($use_db_transactions) {
+//                    $this->db->db->rollback();
+//                }
             } else {
-                if ($use_db_transactions) {
-                    $this->db->db->commit();
-                }
+//                if ($use_db_transactions) {
+//                    $this->db->db->commit();
+//                }
 
                 $success = 'Facture fournisseur créée avec succès';
 
@@ -4633,26 +4651,26 @@ class BF_Demande extends BimpObject
         }
 
         if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fin', 0)) {
-            if ($use_db_transactions) {
-                $this->db->db->begin();
-            }
+//            if ($use_db_transactions) {
+//                $this->db->db->begin();
+//            }
 
             $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fin_libelle', '');
-            $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_mode_reglement', 0);
-            $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_cond_reglement', 0);
+            $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_mode_reglement', 0);
+            $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_cond_reglement', 0);
 
             $fac_errors = $this->createFactureFin($libelle, $id_mode_reglement, $id_cond_reglement, $warnings);
 
             if (count($fac_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture client');
+                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture client');
 
-                if ($use_db_transactions) {
-                    $this->db->db->rollback();
-                }
+//                if ($use_db_transactions) {
+//                    $this->db->db->rollback();
+//                }
             } else {
-                if ($use_db_transactions) {
-                    $this->db->db->commit();
-                }
+//                if ($use_db_transactions) {
+//                    $this->db->db->commit();
+//                }
 
                 $success = 'Facture client créée avec succès';
 
@@ -4666,9 +4684,9 @@ class BF_Demande extends BimpObject
             }
         }
 
-        if ($use_db_transactions) {
-            $this->db->db->begin();
-        }
+//        if ($use_db_transactions) {
+//            $this->db->db->begin();
+//        }
 
         $this->checkIsClosed();
 
@@ -4882,11 +4900,11 @@ class BF_Demande extends BimpObject
         }
 
         if (!count($errors)) {
-            BimpCache::getBdb()->db->commit();
+//            BimpCache::getBdb()->db->commit();
             $msg = 'Nouvelle demande de location de la part de ' . $source_label;
             $demande->addNotificationNote($msg, BimpNote::BN_AUTHOR_USER, '', 0, BimpNote::BN_MEMBERS, 1);
         } else {
-            BimpCache::getBdb()->db->rollback();
+//            BimpCache::getBdb()->db->rollback();
         }
 
         return $demande;

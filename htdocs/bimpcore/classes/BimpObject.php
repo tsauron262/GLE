@@ -1875,6 +1875,10 @@ class BimpObject extends BimpCache
         if ($this->field_exists($field)) {
             $data_type = $this->getConf('fields/' . $field . '/type', 'string');
             switch ($data_type) {
+                case 'id_object':
+                    if($value == 0)
+                        $value = null;
+                    break;
                 case 'date':
                 case 'time':
                 case 'datetime':
@@ -2597,6 +2601,9 @@ class BimpObject extends BimpCache
         }
 
         if ($type) {
+            if($type == 'id_object' && $value == 0 && $this->isDolObject())
+                $value = null;
+            
             // Ajustement du format des dates dans le cas des objets Dolibarr:
             if ($this->isDolField($field)) {
                 if (in_array($type, array('datetime', 'date'/* , 'time' */))) {

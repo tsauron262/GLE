@@ -2680,13 +2680,14 @@ class BimpCache
 
     public static function getCondReglementsArray()
     {
+        global $langs;
         if (!isset(self::$cache['cond_reglements_array'])) {
             $rows = self::getBdb()->getRows('c_payment_term', '`active` > 0', null, 'array', array('rowid', 'libelle'), 'sortorder');
 
             self::$cache['cond_reglements_array'] = array();
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache['cond_reglements_array'][(int) $r['rowid']] = $r['libelle'];
+                    self::$cache['cond_reglements_array'][(int) $r['rowid']] = $langs->trans($r['libelle']);
                 }
             }
         }

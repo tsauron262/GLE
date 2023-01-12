@@ -1935,6 +1935,12 @@ class BimpObject extends BimpCache
 
     public function getDefaultTva()
     {
+        $idDef = $this->getTaxeIdDefault();
+        if($idDef){
+            return self::getBdb()->getValue('c_tva', 'taux', '`rowid` = ' . $idDef);
+        }
+        
+        
         global $mysoc;
         // If France, show VAT mention if not applicable
         if ($mysoc->tva_assuj)

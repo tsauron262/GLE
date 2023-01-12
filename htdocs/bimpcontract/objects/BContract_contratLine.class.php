@@ -217,6 +217,7 @@ class BContract_contratLine extends BContract_contrat {
             case 'description': return ($rights->can_change_desc) ? 1 : 0; break;
             case 'qty' :
             case 'remise_percent':
+            case 'fk_product':
             case 'subprice':
                 return ($parent->getData('statut') == 0) ? 1 : 0; break;
             case 'renouvellement': 

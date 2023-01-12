@@ -7,14 +7,17 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/apis/ErpAPI.php';
 ErpApi::$requests['setDemandeFinancementStatus'] = array(
     'label' => 'Soumettre nouveau statut de la demande de location'
 );
+ErpApi::$requests['reopenDemandeFinancement'] = array(
+    'label' => 'Réouvrir une demande de location'
+);
 ErpApi::$requests['newDemandeFinancementNote'] = array(
     'label' => 'Nouvelle note d\'une demande de location'
 );
 ErpApi::$requests['sendDocFinancement'] = array(
     'label' => 'Envoyer document de location'
 );
-ErpApi::$requests['reopenDemandeFinancement'] = array(
-    'label' => 'Réouvrir une demande de location'
+ErpApi::$requests['setDocFinancementStatus'] = array(
+    'label' => 'Définir le statut du document d\'une demande de location'
 );
 
 class ErpAPI_ExtEntity extends ErpAPI
@@ -110,6 +113,30 @@ class ErpAPI_ExtEntity extends ErpAPI
                 'doc_content'      => $doc_content,
                 'signature_params' => $signature_params,
                 'signataires_data' => $signataires_data
+            )), $errors);
+
+        if (isset($response['warnings'])) {
+            $warnings = BimpTools::merge_array($warnings, $response['warnings']);
+            unset($response['warnings']);
+        }
+
+        if (!count($errors)) {
+            return $response;
+        }
+
+        return null;
+    }
+
+    public function setDocFinancementStatus($id_demande, $type_origine, $id_origine, $doc_type, $new_status, &$errors = array(), &$warnings = array())
+    {
+        $response = $this->execCurl('setDocFinancementStatus', array(
+            'fields' => array(
+                'demande_target' => 'prolease',
+                'id_demande'     => $id_demande,
+                'type_origine'   => $type_origine,
+                'id_origine'     => $id_origine,
+                'doc_type'       => $doc_type,
+                'status'         => $new_status
             )), $errors);
 
         if (isset($response['warnings'])) {

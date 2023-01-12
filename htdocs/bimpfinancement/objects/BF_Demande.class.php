@@ -271,6 +271,7 @@ class BF_Demande extends BimpObject
 
             case 'generateDevisFinancement':
             case 'uploadDevisFinancement':
+            case 'forceDevisSigned':
                 if ((int) $this->getData('status') !== self::STATUS_ACCEPTED) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut ' . self::$status_list[self::STATUS_ACCEPTED]['label'];
                 }
@@ -283,6 +284,7 @@ class BF_Demande extends BimpObject
 
             case 'generateContratFinancement':
             case 'uploadContratFinancement':
+            case 'forceContratSigned':
                 if ((int) $this->getData('status') !== self::STATUS_ACCEPTED) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut ' . self::$status_list[self::STATUS_ACCEPTED]['label'];
                 }
@@ -299,6 +301,7 @@ class BF_Demande extends BimpObject
                 return (count($errors) ? 0 : 1);
 
             case 'generatePVReception':
+            case 'forcePvrSigned':
                 if ((int) $this->getData('status') !== self::STATUS_ACCEPTED) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut ' . self::$status_list[self::STATUS_ACCEPTED]['label'];
                 }
@@ -650,6 +653,19 @@ class BF_Demande extends BimpObject
                     'onclick' => $this->getJsLoadModalForm('upload_' . $doc_type, 'Déposer le ' . $doc_type . ' de location')
                 );
             }
+            $action = 'force' . ucfirst($doc_type) . 'Signed';
+            if ($this->isActionAllowed($action) && $this->canSetAction($action)) {
+                $label = 'Forcer ' . $doc_type . ' de location signé';
+                $confirm_msg = htmlentities('ATTENTION : le ' . $doc_type . ' de location ne sera pas généré et sera directement marqué "Signé"');
+
+                $buttons['force_' . $doc_type] = array(
+                    'label'   => $label,
+                    'icon'    => 'fas_check',
+                    'onclick' => $this->getJsActionOnclick($action, array(), array(
+                        'confirm_msg' => $confirm_msg
+                    ))
+                );
+            }
 
             $action = 'createSignature' . ucfirst($doc_type);
             if ($this->isActionAllowed($action) && $this->canSetAction($action)) {
@@ -669,6 +685,16 @@ class BF_Demande extends BimpObject
                 'icon'    => 'fas_cogs',
                 'onclick' => $this->getJsActionOnclick('generatePVReception', array(), array(
                     'form_name' => 'generate_pvr'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('forcePvrSigned') && $this->canSetAction('forcePvrSigned')) {
+            $buttons[] = array(
+                'label'   => 'Forcer PVR signé',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('forcePvrSigned', array(), array(
+                    'confirm_msg' => htmlentities('ATTENTION : le PVR de ne sera pas généré et sera directement marqué "Signé"')
                 ))
             );
         }
@@ -699,24 +725,6 @@ class BF_Demande extends BimpObject
                 'onclick' => $this->getJsActionOnclick('reopen', array(), array())
             );
         }
-
-//        if ((int) $this->getData('id_main_source')) {
-//            if (isset($buttons['generate_devis'])) {
-//                $buttons['generate_devis']['onclick'] = $this->getJsActionOnclick('generateDevisFinancement', array(
-//                    'create_signature' => 0
-//                        ), array(
-//                    'confirm_msg' => 'Veuillez confirmer'
-//                ));
-//            }
-//
-//            if (isset($buttons['generate_contrat'])) {
-//                $buttons['generate_contrat']['onclick'] = $this->getJsActionOnclick('generateContratFinancement', array(
-//                    'create_signature' => 0
-//                        ), array(
-//                    'confirm_msg' => 'Veuillez confirmer'
-//                ));
-//            }
-//        }
 
         if ($this->isActionAllowed('submitDevis') && $this->canSetAction('submitDevis')) {
             $buttons[] = array(
@@ -3118,7 +3126,7 @@ class BF_Demande extends BimpObject
                             break;
                     }
 
-                    $api->sendDocFinancement($this->id, $type_origine, $id_origine, $doc_type, $doc_content, $signature_params, $signataires_data, $req_errors, $warnings);
+                    $api->sendDocFinancement($this->id, $type_origine, $id_origine, $doc_type, $doc_content, $signature_params, $signataires_data, $req_errors);
 
                     if (count($req_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la requête');
@@ -3478,9 +3486,9 @@ class BF_Demande extends BimpObject
         $errors = array();
 
         $lines = $this->getLines();
-        
+
         $pourcentage = 1;
-        if($total_attendu){
+        if ($total_attendu) {
             $pourcentage = $total_attendu / $this->getTotalDemandeHT();
         }
 
@@ -3499,7 +3507,7 @@ class BF_Demande extends BimpObject
 
             if ($line_type !== BF_Line::TYPE_TEXT) {
                 $fac_line->qty = $line->getData('qty');
-                $fac_line->pu_ht = $line->getData('pu_ht')*$pourcentage;
+                $fac_line->pu_ht = $line->getData('pu_ht') * $pourcentage;
                 $fac_line->tva_tx = $line->getData('tva_tx');
                 $fac_line->pa_ht = $line->getData('pa_ht');
 //                $fac_line->remises = $line->getData('remise');
@@ -3515,17 +3523,16 @@ class BF_Demande extends BimpObject
 
             $line_warnings = array();
             $line_errors = $fac_line->create($line_warnings, true);
-            
-            
+
             if (!count($line_errors)) {
-                if($line->getData('remise') > 0){
+                if ($line->getData('remise') > 0) {
                     BimpObject::createBimpObject('bimpcommercial', 'ObjectLineRemise', array(
-                                                        'id_object_line'           => (int) $fac_line->id,
-                                                        'object_type'              => $fac_line::$parent_comm_type,
-                                                        'linked_id_remise_globale' => (int) 0,
-                                                        'type'                     => ObjectLineRemise::OL_REMISE_PERCENT,
-                                                        'percent'                  => (float) $line->getData('remise')
-                                                            ), $errors, $errors);
+                        'id_object_line'           => (int) $fac_line->id,
+                        'object_type'              => $fac_line::$parent_comm_type,
+                        'linked_id_remise_globale' => 0,
+                        'type'                     => ObjectLineRemise::OL_REMISE_PERCENT,
+                        'percent'                  => (float) $line->getData('remise')
+                            ), $errors, $errors);
                 }
             }
 
@@ -3533,7 +3540,44 @@ class BF_Demande extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $line->getData('position'));
             }
         }
-        
+
+        return $errors;
+    }
+
+    public function forceDocSigned($doc_type, &$warnings = array())
+    {
+        $errors = array();
+
+        $field_name = $doc_type . '_status';
+        $errors = $this->updateField($field_name, self::DOC_ACCEPTED);
+
+        if (!count($errors)) {
+            if ((int) $this->getData('id_main_source')) {
+                $source = $this->getSource('main', $errors);
+
+                if (!count($errors)) {
+                    $type_origine = $source->getData('type_origine');
+                    $id_origine = (int) $source->getData('id_origine');
+
+                    if ($type_origine && $id_origine) {
+                        $api = $this->getMainSourceAPI($errors);
+
+                        if (!count($errors)) {
+                            $req_errors = array();
+                            BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin');
+                            $api->setDocFinancementStatus($this->id, $type_origine, $id_origine, $doc_type, BimpCommDemandeFin::DOC_STATUS_ACCEPTED, $req_errors);
+
+                            if (count($req_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de l\'enrgistrement du status signé sur ' . $this->displaySourceName());
+                            } else {
+                                $this->addObjectLog(static::getDocTypeLabel($doc_type) . ' forcé au statut "Signé"', strtoupper($doc_type) . '_FORCED_SIGNED');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return $errors;
     }
 
@@ -4208,6 +4252,48 @@ class BF_Demande extends BimpObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $sc
+        );
+    }
+
+    public function actionForceDevisSigned($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Devis de location marqué signé';
+
+        $errors = $this->forceDocSigned('devis', $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionForceContratSigned($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Contrat de location marqué signé';
+
+        $errors = $this->forceDocSigned('contrat', $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionForcePvrSigned($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'PVR de réception marqué signé';
+
+        $errors = $this->forceDocSigned('pvr', $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 
@@ -4900,11 +4986,11 @@ class BF_Demande extends BimpObject
         }
 
         if (!count($errors)) {
-//            BimpCache::getBdb()->db->commit();
+            BimpCache::getBdb()->db->commit();
             $msg = 'Nouvelle demande de location de la part de ' . $source_label;
             $demande->addNotificationNote($msg, BimpNote::BN_AUTHOR_USER, '', 0, BimpNote::BN_MEMBERS, 1);
         } else {
-//            BimpCache::getBdb()->db->rollback();
+            BimpCache::getBdb()->db->rollback();
         }
 
         return $demande;

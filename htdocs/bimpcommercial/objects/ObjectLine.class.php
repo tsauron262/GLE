@@ -4285,6 +4285,9 @@ class ObjectLine extends BimpObject
                         ));
                     } else {
                         $tva_rates = BimpCache::getTaxesByRates(1);
+                        if(is_null($value)){
+                            $value = $this->getDefaultTva();
+                        }
                         $html = BimpInput::renderInput('select', $prefixe . 'tva_tx', (float) $value, array(
                                     'options' => $tva_rates
                         ));

@@ -515,9 +515,9 @@ class BF_DemandeRefinanceur extends BimpObject
                     $demande->set('periodicity', $values['periodicity']);
                     $demande->set('duration', $values['nb_mois']);
                     $demande->set('tx_cession', $this->getData('rate'));
-                    $demande->set('loyer_mensuel_evo_ht', round($values['loyer_evo_mensuel'], 2));
-                    $demande->set('loyer_mensuel_dyn_ht', round($values['loyer_dyn_mensuel'], 2));
-                    $demande->set('loyer_mensuel_suppl_ht', round($values['loyer_dyn_suppl_mensuel'], 2));
+                    $demande->set('loyer_mensuel_evo_ht', $values['loyer_evo_mensuel'], 2);
+                    $demande->set('loyer_mensuel_dyn_ht', $values['loyer_dyn_mensuel'], 2);
+                    $demande->set('loyer_mensuel_suppl_ht', $values['loyer_dyn_suppl_mensuel'], 2);
 
                     $up_warnings = array();
                     $up_errors = $demande->update($up_warnings, true);

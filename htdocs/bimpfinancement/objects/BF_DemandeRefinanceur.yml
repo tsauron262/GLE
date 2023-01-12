@@ -67,7 +67,6 @@ fields:
         label: Nombre de périodes
         type: qty
         min: 0
-        default_value: 0
         decimals: 0
         
     payment:

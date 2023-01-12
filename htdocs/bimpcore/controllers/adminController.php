@@ -35,7 +35,7 @@ class adminController extends BimpController
                 . "$('#retourTransfert').html('*');"
                 . "$('#retourTotal').html('*');"
                 . "$('#retourInfo').html('*');"
-                . "setObjectAction($(this), {module: 'bimpcore', object_name: 'BimpTest'}, 'testSpeed', {}, null, null, function(){}, null, null, false);"
+                . "setObjectAction($(this), {module: 'bimpcore', object_name: 'BimpTest'}, 'testSpeed');"
                 . "}";
 
         $html .= "goTest();";

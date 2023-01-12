@@ -1,80 +1,109 @@
 <?php
 
-function getTabTypeObject($typeFiltre = null) {
-    $tabTypeObject = array('synopsischrono' => array("obj" => "Chrono", "tabMenu1" => "Process"),
-        'propal' => array("path" => "/comm/propal/class/propal.class.php",
+function getTabTypeObject($typeFiltre = null)
+{
+    $tabTypeObject = array('synopsischrono'        => array("obj" => "Chrono", "tabMenu1" => "Process"),
+        'propal'                => array("path"     => "/comm/propal/class/propal.class.php",
             "tabMenu1" => "commercial",
             "tabMenu2" => "propals",
-            "urls" => array("comm/propal/card.php")),
-        'facture' => array("path" => "/compta/facture/class/facture.class.php",
+            "urls"     => array("comm/propal/card.php")),
+        'facture'               => array("path"     => "/compta/facture/class/facture.class.php",
             "tabMenu1" => "accountancy",
-            "urls" => array("compta/facture/card.php"),
+            "urls"     => array("compta/facture/card.php"),
             "nomIdUrl" => "facid"),
-        'fichinter' => array(),
-        'synopsisfichinter' => array("tabMenu1" => "synopsisficheinter",
-            "urls" => array("synopsisfichinter/card.php", "synopsisfichinter/ficheFast.php")),
+        'fichinter'             => array(),
+        'synopsisfichinter'     => array("tabMenu1" => "synopsisficheinter",
+            "urls"     => array("synopsisfichinter/card.php", "synopsisfichinter/ficheFast.php")),
         'synopsisdemandeinterv' => array("tabMenu1" => "synopsisficheinter"),
-        'contrat' => array("tabMenu1" => "commercial",
+        'contrat'               => array("tabMenu1" => "commercial",
             "tabMenu2" => "contracts"),
-        'expedition' => array(),
-        'livraison' => array(),
-        'commande' => array("tabMenu1" => "commercial",
+        'expedition'            => array(),
+        'livraison'             => array(),
+        'commande'              => array("tabMenu1" => "commercial",
             "tabMenu2" => "orders",
-            "urls" => array("commande/card.php")),
-        'synopsiscommande' => array("obj" => 'commande',
-            "path" => "/commande/class/commande.class.php",
-            "tabMenu1" => "commercial",
-            "tabMenu2" => "orders",
-            "urls" => array("Synopsis_PrepaCommande/prepacommande.php"),
+            "urls"     => array("commande/card.php")),
+        'synopsiscommande'      => array("obj"          => 'commande',
+            "path"         => "/commande/class/commande.class.php",
+            "tabMenu1"     => "commercial",
+            "tabMenu2"     => "orders",
+            "urls"         => array("Synopsis_PrepaCommande/prepacommande.php"),
             "changeNomUrl" => array("commande/card.php", "Synopsis_PrepaCommande/prepacommande.php"),
-            "refPlus" => "-PrC"),
-        'banque' => array("obj" => 'Account',
+            "refPlus"      => "-PrC"),
+        'banque'                => array("obj"  => 'Account',
             "path" => "/compta/bank/class/account.class.php",
             "urls" => array("compta/bank/card.php")),
-        'contact' => array("tabMenu1" => "companies"),
-        'societe' => array("tabMenu1" => "companies",
-            "urls" => array("comm/card.php"),
+        'contact'               => array("tabMenu1" => "companies"),
+        'societe'               => array("tabMenu1" => "companies",
+            "urls"     => array("comm/card.php"),
             "nomIdUrl" => "socid"),
-        'projet' => array("obj" => 'project',
+        'projet'                => array("obj"      => 'project',
             "tabMenu1" => "synopsisprojet"),
-        'synopsisprojet' => array("obj" => 'synopsisproject',
-            "path" => "/synopsisprojet/class/synopsisproject.class.php",
+        'synopsisprojet'        => array("obj"      => 'synopsisproject',
+            "path"     => "/synopsisprojet/class/synopsisproject.class.php",
             "tabMenu1" => "synopsisprojet"),
-        'tache' => array("obj" => 'Task',
-            "path" => "/projet/class/task.class.php",
+        'tache'                 => array("obj"      => 'Task',
+            "path"     => "/projet/class/task.class.php",
             "tabMenu1" => "synopsisprojet"),
-        'process' => array("obj" => 'processDet',
-            "path" => "/Synopsis_Process/class/process.class.php",
+        'process'               => array("obj"      => 'processDet',
+            "path"     => "/Synopsis_Process/class/process.class.php",
             "tabMenu1" => "Process"),
-        'product' => array("tabMenu1" => "products"),
-        'user' => array("tabMenu1" => "home",
+        'product'               => array("tabMenu1" => "products"),
+        'user'                  => array("tabMenu1" => "home",
             "tabMenu2" => "users"),
-        'ndfp' => array("tabMenu1" => "accountancy"),
-        'synopsisholiday' => array("obj" => 'synopsisholiday',
-            'path' => '/synopsisholiday/class/holiday.class.php',
+        'ndfp'                  => array("tabMenu1" => "accountancy"),
+        'synopsisholiday'       => array("obj"      => 'synopsisholiday',
+            'path'     => '/synopsisholiday/class/holiday.class.php',
             "tabMenu1" => "hrm"),
 //            'UserGroup' => array("path" => "/user/class/usergroup.class.php",
 //                "urls" => array("/group/card.php")),
-        'synopsistasks' => array('urls' => array("synopsisprojet/tasks/task.php"),
+        'synopsistasks'         => array('urls' => array("synopsisprojet/tasks/task.php"),
             'path' => '/synopsisprojet/class/task.class.php',
-            'obj' => 'Task'),
-        'equipement' => array('urls' => array("equipement/card.php"),
+            'obj'  => 'Task'),
+        'equipement'            => array('urls' => array("equipement/card.php"),
             'path' => '/equipement/class/equipement.class.php',
-            'obj' => 'Equipement'),
-        'commandeFournisseur' => array('urls' => array("fourn/commande/card.php"),
+            'obj'  => 'Equipement'),
+        'commandeFournisseur'   => array('urls' => array("fourn/commande/card.php"),
             'path' => '/fourn/class/fournisseur.commande.class.php',
-            'obj' => 'CommandeFournisseur'),
-        'BS_SAV' => array('urls' => array("bimpsupport/index.php?fc=sav"),
+            'obj'  => 'CommandeFournisseur'),
+        'BS_SAV'                => array('urls' => array("bimpsupport/index.php?fc=sav"),
             'path' => '/bimpsupport/objects/BS_SAV.class.php'),
-        'Equipment' => array('urls' => array("bimpequipment/index.php?fc=equipment"),
-            'path' => '/bimpequipment/objects/Equipment.class.php',
+        'Equipment'             => array('urls'   => array("bimpequipment/index.php?fc=equipment"),
+            'path'   => '/bimpequipment/objects/Equipment.class.php',
             'module' => 'bimpequipment'),
-        'Bimp_Propal' => array('urls' => array("bimpcommercial/index.php?fc=propal"),
+        'Bimp_Propal'           => array('urls'   => array("bimpcommercial/index.php?fc=propal"),
             'module' => 'bimpcommercial'),
-        'Bimp_Commande' => array('urls' => array("bimpcommercial/index.php?fc=commande"),
+        'Bimp_Commande'         => array('urls'   => array("bimpcommercial/index.php?fc=commande"),
             'module' => 'bimpcommercial'),
-        'Bimp_Facture' => array('urls' => array("bimpcommercial/index.php?fc=facture"),
+        'Bimp_Facture'          => array('urls'   => array("bimpcommercial/index.php?fc=facture"),
             'module' => 'bimpcommercial'),
+        'Bimp_CommandeFourn'    => array(
+            'urls'   => array('bimpcommercial/index.php?fc=commandeFourn'),
+            'module' => 'bimpcommercial'
+        ),
+        'Bimp_FactureFourn'     => array(
+            'urls'   => array('bimpcommercial/index.php?fc=factureFourn'),
+            'module' => 'bimpcommercial'
+        ),
+        'Bimp_Client'           => array(
+            'urls'   => array('bimpcore/index.php?fc=client'),
+            'module' => 'bimpcore'
+        ),
+        'Bimp_Fournisseur'      => array(
+            'urls'   => array('bimpcore/index.php?fc=fournisseur'),
+            'module' => 'bimpcore'
+        ),
+        'BT_ficheInter'         => array(
+            'urls'   => array('bimptechnique/index.php?fc=fi'),
+            'module' => 'bimptechnique'
+        ),
+        'BContract_contrat'     => array(
+            'urls'   => array('bimpcontract/index.php?fc=contrat'),
+            'module' => 'bimpcontract'
+        ),
+        'Bimp_Product'          => array(
+            'urls'   => array('bimpcore/index.php?fc=product'),
+            'module' => 'bimpcore'
+        )
     );
 
     $tabTypeObject2 = array();
@@ -85,9 +114,9 @@ function getTabTypeObject($typeFiltre = null) {
             if (!isset($data['obj']))
                 $data['obj'] = ucfirst($typeT);
 
-            if (!isset($data['path'])){
-                if(stripos($data['obj'], "bimp") !== false && isset($data['module']))
-                     $data['path'] = $data['module']."/objects/".$data['obj'].".class.php";
+            if (!isset($data['path'])) {
+                if (isset($data['module']) && strpos($data['module'], 'bimp') === 0) 
+                    $data['path'] = $data['module'] . "/objects/" . $data['obj'] . ".class.php";
                 else
                     $data['path'] = "/" . $data['type'] . "/class/" . strtolower($data['obj']) . ".class.php";
             }
@@ -100,8 +129,7 @@ function getTabTypeObject($typeFiltre = null) {
                     die("impossible de charger " . $data['path1'] . " ni " . $data['path']);
 //                else
 //                    dol_syslog("Impossible de charger " . DOL_DOCUMENT_ROOT . $data['path'], 3);
-            }
-            else {
+            } else {
 
                 if (!isset($data['tabMenu1']))
                     $data['tabMenu1'] = "";
@@ -131,7 +159,8 @@ function getTabTypeObject($typeFiltre = null) {
     return $tabTypeObject2;
 }
 
-function getTypeAndId($url = null, $request = null) {
+function getTypeAndId($url = null, $request = null)
+{
 
     if ($url == NULL)
         $url = $_SERVER['REQUEST_URI'];
@@ -143,15 +172,16 @@ function getTypeAndId($url = null, $request = null) {
 
 
     $tabTypeObject = getTabTypeObject();
-    $element_type = null;
-    $element_id = null;
     
+    $element_type = null;
+    $element_id = 0;
+
     foreach ($tabTypeObject as $typeT => $dataT) {
         foreach ($dataT['urls'] as $filtreUrl) {
             if (stripos($url, $filtreUrl) !== false) {
                 $element_type = $typeT;
-                if(isset($request[$dataT['nomIdUrl']]))
-                    $element_id = $request[$dataT['nomIdUrl']];
+                $element_id = BimpTools::getValue($dataT['nomIdUrl'], 0);
+                break;
             }
         }
     }

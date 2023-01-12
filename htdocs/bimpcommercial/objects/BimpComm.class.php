@@ -2047,9 +2047,9 @@ class BimpComm extends BimpDolObject
                     $html .= '<td>' . price($marginInfo['pa_services']) . '</td>';
                     $html .= '<td>' . price($marginInfo['margin_on_services']) . ' (';
                     if ($conf_tx_marque) {
-                        $html .= round($marginInfo['mark_rate_services'], 4);
+                        $html .= round((float) $marginInfo['mark_rate_services'], 4);
                     } else {
-                        $html .= round($marginInfo['margin_rate_services'], 4);
+                        $html .= round((float) $marginInfo['margin_rate_services'], 4);
                     }
                     $html .= ' %)</td>';
                     $html .= '</tr>';

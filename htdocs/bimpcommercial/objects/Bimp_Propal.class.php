@@ -49,7 +49,7 @@ class Bimp_Propal extends Bimp_PropalTemp
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
-        2 => array('label' => 'Signée / Acceptée', 'icon' => 'check', 'classes' => array('success')),
+        2 => array('label' => 'Acceptée', 'icon' => 'check', 'classes' => array('success')),
         3 => array('label' => 'Refusée', 'icon' => 'exclamation-circle', 'classes' => array('danger')),
         4 => array('label' => 'Facturée', 'icon' => 'check', 'classes' => array('success')),
     );
@@ -313,8 +313,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 1;
 
             case 'createSignature':
-                if ($status != 1) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé' . $this->e() . '"';
+                if ($status < 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas validé' . $this->e();
                     return 0;
                 }
 
@@ -733,12 +733,20 @@ class Bimp_Propal extends Bimp_PropalTemp
                 } else {
                     $signature = $this->getChildObject('signature');
                     $no_signature = false;
-                    $signed = in_array($status, array(2, 4));
+                    $signature_cancelled = false;
+                    $accepted = in_array($status, array(2, 4));
+                    $signed = false;
 
                     if (BimpObject::objectLoaded($signature)) {
                         $signature_buttons = BimpTools::merge_array($signature_buttons, $signature->getActionsButtons(true));
+
+                        if ($signature->isSigned()) {
+                            $signed = true;
+                        } elseif ((int) $signature->getData('status') === BimpSignature::STATUS_CANCELLED) {
+                            $signature_cancelled = true;
+                        }
                     } else {
-                        if (!$signed && $use_signature) {
+                        if ($use_signature) {
                             if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
                                 $no_signature = true;
                                 // Créer Signature: 
@@ -749,19 +757,13 @@ class Bimp_Propal extends Bimp_PropalTemp
                                         'form_name' => 'create_signature'
                                     ))
                                 );
-//                                if ($user->admin) {//$user->rights->devis->creer and $status == 1) {
-//                                    $signature_buttons[] = array(
-//                                        'label'   => 'Envoyer via DocuSign',
-//                                        'icon'    => 'fas_signature',
-//                                        'onclick' => $this->getJsActionOnclick('createSignatureDocuSign', array(), array(
-//                                            'form_name' => 'create_signature_docu_sign'
-//                                    )));
-//                                }
                             }
+                        } elseif ($accepted) {
+                            $signed = true;
                         }
                     }
 
-                    if (!$signed) {
+                    if (!$accepted) {
                         // Refuser
                         if ($this->isActionAllowed('close')) {
                             if ($this->canSetAction('close')) {
@@ -778,7 +780,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                             }
                         }
 
-                        if ($no_signature || !$use_signature) {
+                        if ($no_signature || !$use_signature || $signature_cancelled) {
                             // Accepter (sans signature)
                             if ($this->isNewStatusAllowed(2)) {
                                 $buttons[] = array(
@@ -803,89 +805,87 @@ class Bimp_Propal extends Bimp_PropalTemp
                         }
                     }
 
-                    if ($signed || $no_signature || !$use_signature) {
-                        // Créer commande: 
-                        $errors = array();
-                        if ($this->isActionAllowed('createOrder', $errors) && $this->canSetAction('createOrder')) {
-                            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-                            $clientFact = $this->getClientFacture();
+                    // Créer commande: 
+                    $errors = array();
+                    if ($this->isActionAllowed('createOrder', $errors) && $this->canSetAction('createOrder')) {
+                        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+                        $clientFact = $this->getClientFacture();
 
+                        $values = array(
+                            'fields' => array(
+                                'entrepot'           => (int) $this->getData('entrepot'),
+                                'ef_type'            => $this->getData('ef_type'),
+                                'fk_soc'             => (int) $this->getData('fk_soc'),
+                                'ref_client'         => $this->getData('ref_client'),
+                                'fk_cond_reglement'  => (int) $this->getData('fk_cond_reglement'),
+                                'fk_mode_reglement'  => (int) $this->getData('fk_mode_reglement'),
+                                'fk_availability'    => (int) $this->getData('fk_availability'),
+                                'fk_input_reason'    => (int) $this->getData('fk_input_reason'),
+                                'date_commande'      => date('Y-m-d'),
+                                'date_livraison'     => $this->getData('date_livraison'),
+                                'libelle'            => $this->getData('libelle'),
+                                'pdf_hide_pu'        => $this->getData('pdf_hide_pu'),
+                                'pdf_hide_reduc'     => $this->getData('pdf_hide_reduc'),
+                                'pdf_hide_total'     => $this->getData('pdf_hide_total'),
+                                'pdf_hide_ttc'       => $this->getData('pdf_hide_ttc'),
+                                'pdf_periodicity'    => $this->getData('pdf_periodicity'),
+                                'pdf_periods_number' => $this->getData('pdf_periods_number'),
+                                'expertise'          => $this->getData('expertise'),
+                                'note_public'        => addslashes(htmlentities($this->getData('note_public'))),
+                                'note_private'       => addslashes(htmlentities($this->getData('note_private'))),
+                                'origin'             => 'propal',
+                                'origin_id'          => (int) $this->id,
+                                'close_propal'       => 0
+                            )
+                        );
+
+                        if (BimpObject::objectLoaded($clientFact) && ($clientFact->id != $this->getData('fk_soc'))) {
+                            $values['fields']['id_client_facture'] = $clientFact->id;
+                        }
+
+                        $buttons[] = array(
+                            'label'   => 'Créer une commande',
+                            'icon'    => 'fas_dolly',
+                            'onclick' => $commande->getJsLoadModalForm('default', 'Création d\\\'une commande', $values, '', 'redirect')
+                        );
+                    }
+
+                    // Créer facture: 
+                    if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
+                        $onclick = '';
+                        if (!BimpCore::getConf('commande_required_for_factures', null, 'bimpcommercial')) {
+                            $clientFact = $this->getClientFacture();
+                            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                             $values = array(
                                 'fields' => array(
-                                    'entrepot'           => (int) $this->getData('entrepot'),
-                                    'ef_type'            => $this->getData('ef_type'),
-                                    'fk_soc'             => (int) $this->getData('fk_soc'),
-                                    'ref_client'         => $this->getData('ref_client'),
-                                    'fk_cond_reglement'  => (int) $this->getData('fk_cond_reglement'),
-                                    'fk_mode_reglement'  => (int) $this->getData('fk_mode_reglement'),
-                                    'fk_availability'    => (int) $this->getData('fk_availability'),
-                                    'fk_input_reason'    => (int) $this->getData('fk_input_reason'),
-                                    'date_commande'      => date('Y-m-d'),
-                                    'date_livraison'     => $this->getData('date_livraison'),
-                                    'libelle'            => $this->getData('libelle'),
-                                    'pdf_hide_pu'        => $this->getData('pdf_hide_pu'),
-                                    'pdf_hide_reduc'     => $this->getData('pdf_hide_reduc'),
-                                    'pdf_hide_total'     => $this->getData('pdf_hide_total'),
-                                    'pdf_hide_ttc'       => $this->getData('pdf_hide_ttc'),
-                                    'pdf_periodicity'    => $this->getData('pdf_periodicity'),
-                                    'pdf_periods_number' => $this->getData('pdf_periods_number'),
-                                    'expertise'          => $this->getData('expertise'),
-                                    'note_public'        => addslashes(htmlentities($this->getData('note_public'))),
-                                    'note_private'       => addslashes(htmlentities($this->getData('note_private'))),
-                                    'origin'             => 'propal',
-                                    'origin_id'          => (int) $this->id,
-                                    'close_propal'       => 0
+                                    'entrepot'          => (int) $this->getData('entrepot'),
+                                    'ef_type'           => $this->getData('ef_type'),
+                                    'fk_soc'            => (BimpObject::objectLoaded($clientFact) ? (int) $clientFact->id : 0),
+                                    'ref_client'        => $this->getData('ref_client'),
+                                    'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
+                                    'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
+                                    'fk_availability'   => (int) $this->getData('fk_availability'),
+                                    'fk_input_reason'   => (int) $this->getData('fk_input_reason'),
+                                    'note_public'       => addslashes(htmlentities($this->getData('note_public'))),
+                                    'note_private'      => addslashes(htmlentities($this->getData('note_private'))),
+                                    'date_commande'     => date('Y-m-d'),
+                                    'date_livraison'    => $this->getData('date_livraison'),
+                                    'libelle'           => $this->getData('libelle'),
+                                    'origin'            => 'propal',
+                                    'origin_id'         => (int) $this->id,
                                 )
                             );
-
-                            if (BimpObject::objectLoaded($clientFact) && ($clientFact->id != $this->getData('fk_soc'))) {
-                                $values['fields']['id_client_facture'] = $clientFact->id;
-                            }
-
-                            $buttons[] = array(
-                                'label'   => 'Créer une commande',
-                                'icon'    => 'fas_dolly',
-                                'onclick' => $commande->getJsLoadModalForm('default', 'Création d\\\'une commande', $values, '', 'redirect')
-                            );
+                            $onclick = $facture->getJsLoadModalForm('default', 'Création d\\\'une facture', $values, '', 'redirect');
+                        } else {
+                            $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $clientFact->id;
+                            $onclick = 'window.location = \'' . $url . '\'';
                         }
 
-                        // Créer facture: 
-                        if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
-                            $onclick = '';
-                            if (!BimpCore::getConf('commande_required_for_factures', null, 'bimpcommercial')) {
-                                $clientFact = $this->getClientFacture();
-                                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                                $values = array(
-                                    'fields' => array(
-                                        'entrepot'          => (int) $this->getData('entrepot'),
-                                        'ef_type'           => $this->getData('ef_type'),
-                                        'fk_soc'            => (BimpObject::objectLoaded($clientFact) ? (int) $clientFact->id : 0),
-                                        'ref_client'        => $this->getData('ref_client'),
-                                        'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
-                                        'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
-                                        'fk_availability'   => (int) $this->getData('fk_availability'),
-                                        'fk_input_reason'   => (int) $this->getData('fk_input_reason'),
-                                        'note_public'       => addslashes(htmlentities($this->getData('note_public'))),
-                                        'note_private'      => addslashes(htmlentities($this->getData('note_private'))),
-                                        'date_commande'     => date('Y-m-d'),
-                                        'date_livraison'    => $this->getData('date_livraison'),
-                                        'libelle'           => $this->getData('libelle'),
-                                        'origin'            => 'propal',
-                                        'origin_id'         => (int) $this->id,
-                                    )
-                                );
-                                $onclick = $facture->getJsLoadModalForm('default', 'Création d\\\'une facture', $values, '', 'redirect');
-                            } else {
-                                $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $clientFact->id;
-                                $onclick = 'window.location = \'' . $url . '\'';
-                            }
-
-                            $buttons[] = array(
-                                'label'   => 'Créer une facture ou un avoir',
-                                'icon'    => 'fas_file-invoice-dollar',
-                                'onclick' => $onclick
-                            );
-                        }
+                        $buttons[] = array(
+                            'label'   => 'Créer une facture ou un avoir',
+                            'icon'    => 'fas_file-invoice-dollar',
+                            'onclick' => $onclick
+                        );
                     }
 
                     // Créer un contrat

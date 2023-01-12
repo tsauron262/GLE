@@ -255,7 +255,7 @@ class BimpController
             case E_WARNING:
             case E_USER_WARNING:
                 global $bimpLogPhpWarnings;
-
+$bimpLogPhpWarnings = false;
                 if (is_null($bimpLogPhpWarnings) || $bimpLogPhpWarnings) {
                     BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
                         'Fichier' => $file,

@@ -330,7 +330,7 @@ class DemandeValidComm extends BimpObject
     public function onValidate()
     {
 
-        if (in_array($this->getData('type_de_piece'), array(self::OBJ_DEVIS, self::OBJ_FACTURE, self::OBJ_COMMANDE))) {
+        if ((int) $this->getData('status') == self::STATUS_VALIDATED and in_array($this->getData('type_de_piece'), array(self::OBJ_DEVIS, self::OBJ_FACTURE, self::OBJ_COMMANDE))) {
             return 1;
         } else {
             $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_ask'));
@@ -350,20 +350,18 @@ class DemandeValidComm extends BimpObject
                 else
                     $message_mail .= ', client inconnu ';;
                 $message_mail .= ' a été passé au statut ' . lcfirst(self::$status_list[(int) $value]['label']);
-                $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
+                $message_mail .= (($bimp_obj->isLabelFemale()) ? 'e' : '') . ' ';
 
                 switch ($this->getData('type')) {
                     case self::TYPE_COMMERCIAL:
                         $message_mail .= ' commercialement';
                         break;
                     case self::TYPE_ENCOURS:
-                        $message_mail .= ' malgré le dépassement d\'encours du client';
+                        $message_mail .= (((int) $value == self::STATUS_VALIDATED) ? 'malgré le'  : 'à cause du')  . ' dépassement d\'encours du client';
                         break;
                     case self::TYPE_IMPAYE:
-                        $message_mail .= ' malgré les retards de paiement du client';
-                        break;
+                        $message_mail .= (((int) $value == self::STATUS_VALIDATED) ? 'malgré les' : 'à cause des') . ' retards de paiement du client';
                 }
-
                 mailSyn2($subject, $user_ask->getData('email'), null, $message_mail);
             }
         }
@@ -505,11 +503,16 @@ class DemandeValidComm extends BimpObject
 
         // Valider cette demande
         // TODO faire contrat
-        if ((int) $this->getData('status') == self::STATUS_PROCESSING and $this->getData('type_de_piece') != self::OBJ_CONTRAT) {
+        if ((int) $this->getData('status') == self::STATUS_PROCESSING) {
             $buttons[] = array(
                 'label'   => 'Valider cette demande',
                 'icon'    => 'fas_check',
                 'onclick' => $this->getJsActionOnclick('validateDemande')
+            );
+            $buttons[] = array(
+                'label'   => 'Refus de validation',
+                'icon'    => 'fas_times',
+                'onclick' => $this->getJsActionOnclick('refuseDemande')
             );
         }
 
@@ -567,6 +570,65 @@ class DemandeValidComm extends BimpObject
                 'errors'   => $errors,
                 'warnings' => $warnings
             );
+    }
+    
+    public function actionRefuseDemande($data, &$success)
+    {
+        $errors = $warnings = array();
+        $success_callback = 'bimp_reloadPage();';
+
+        if (!$this->isLoaded()) 
+            $errors[] = "Objet non chargé";
+        else 
+            $errors = $this->refuseDemande();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+    
+    private function refuseDemande() {
+        global $user;
+        $errors = array();
+        $validateur = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+        $object = self::getObject($this->getData('type_de_piece'), $this->getData('id_piece'));
+        $type = (int) $this->getData('type');
+        $val_comm_validation = 0;
+
+        list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp) = $validateur->getObjectParams($object, $errors);
+        
+        if(count($errors))
+            return $errors;
+        
+        switch ($type) {
+            case self::TYPE_ENCOURS:
+                $can_validate = $validateur->userCanValidate((int) $user->id, $secteur, $type, $class, $val_euros, $object, $val_comm_validation);
+                break;
+            case self::TYPE_COMMERCIAL:
+                $can_validate = $validateur->userCanValidate((int) $user->id, $secteur, $type, $class, $percent_pv, $object, $val_comm_validation, array('sur_marge' => $percent_marge));
+                break;
+            case self::TYPE_IMPAYE:
+                $can_validate = $validateur->userCanValidate((int) $user->id, $secteur, $type, $class, $rtp, $object, $val_comm_validation);
+                break;
+            case 'default':
+                $errors[] = "Type de demande invalide";
+                break;
+        }
+        
+        if(!$can_validate) {
+            $errors[] = "Vous n'avez pas les droits requis pour refuser cette demande";
+            return $errors;
+        }
+        
+        $now = date('Y-m-d H:i:s');
+        $this->updateField('id_user_valid', $user->id);
+        $this->updateField('date_valid', $now);
+        $this->updateField('status', self::STATUS_REFUSED);
+        $this->updateField('val_comm_validation', $val_comm_validation);
+
+        return $errors;
     }
 
     public function renderValidComm()

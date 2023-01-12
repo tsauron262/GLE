@@ -2682,12 +2682,15 @@ class BimpCache
     {
         global $langs;
         if (!isset(self::$cache['cond_reglements_array'])) {
-            $rows = self::getBdb()->getRows('c_payment_term', '`active` > 0', null, 'array', array('rowid', 'libelle'), 'sortorder');
+            $rows = self::getBdb()->getRows('c_payment_term', '`active` > 0', null, 'array', array('rowid', 'libelle', 'code'), 'sortorder');
 
             self::$cache['cond_reglements_array'] = array();
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache['cond_reglements_array'][(int) $r['rowid']] = $langs->trans($r['libelle']);
+                    $label = $langs->transnoentities("PaymentCondition" . $r['code']) != ('PaymentCondition' . $r['code']) ? $langs->transnoentities("PaymentCondition" . $r['code']) : $r['libelle'];
+                    
+                    
+                    self::$cache['cond_reglements_array'][(int) $r['rowid']] = $label;
                 }
             }
         }

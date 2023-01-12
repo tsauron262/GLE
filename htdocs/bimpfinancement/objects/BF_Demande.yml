@@ -415,6 +415,7 @@ fields:
     loyer_mensuel_evo_ht: 
         label: Loyer mensuel HT (form. évo) 
         type: money
+        decimals: 3
         default_value: 0
         input: 
             extra_content: 
@@ -426,6 +427,7 @@ fields:
     loyer_mensuel_dyn_ht: 
         label: Loyer mensuel HT (form. dyn) 
         type: money
+        decimals: 3
         default_value: 0
         input: 
             extra_content: 
@@ -437,6 +439,7 @@ fields:
     loyer_mensuel_suppl_ht: 
         label: Loyer mensuel HT suppl. (form. dyn) 
         type: money
+        decimals: 3
         default_value: 0
         input: 
             extra_content: 

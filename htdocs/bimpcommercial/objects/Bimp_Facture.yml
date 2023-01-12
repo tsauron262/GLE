@@ -980,7 +980,6 @@ lists_cols:
         value:
             callback: displayClientsCommandes
         
-                   
 lists: 
     default: 
         total_row: 1

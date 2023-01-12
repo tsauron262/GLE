@@ -146,11 +146,14 @@ class BC_Filter extends BimpComponent
         } elseif ($this->object->config->isDefined('filters/' . $this->filter_name . '/input/type')) {
             $input_path = 'filters/' . $this->filter_name . '/input/type';
         }
-        $input_type = $this->object->getConf($input_path, '');
+        if(isset($input_path))
+            $input_type = $this->object->getConf($input_path, '');
+        else
+            $input_type = null;
 
         if ($input_type === 'search_user') {
             $this->params['type'] = 'user';
-        } elseif ($this->bc_field->params['type'] == 'id_object') {
+        } elseif (isset($this->bc_field) && $this->bc_field->params['type'] == 'id_object') {
             $field_child_name = BimpTools::getArrayValueFromPath($this->bc_field->params, 'object', '');
 
             if ($field_child_name) {

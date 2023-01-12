@@ -1841,28 +1841,30 @@ class BimpObject extends BimpCache
         if ($logo_prop && $dir) {
             $file = $this->getData($logo_prop);
 
-            $file_infos = pathinfo($file);
-            $ext = $file_infos['extension'];
-            $name = $file_infos['filename'];
+            if(!empty($file)){
+                $file_infos = pathinfo($file);
+                $ext = $file_infos['extension'];
+                $name = $file_infos['filename'];
 
-            $file_path = '';
+                $file_path = '';
 
-            if ($format) {
-                $file_path = 'thumbs/' . $name . '_' . $format . '.' . $ext;
-            } else {
-                $file_path = $file;
-            }
-
-            if ($ext && file_exists($dir . '/logos/' . $file_path)) {
-                $url = $this->getFileUrl('logos/' . $file_path, 'viewimage');
-
-                if (BimpCore::isContextPublic()) {
-                    $url .= '&hashp=1';
+                if ($format) {
+                    $file_path = 'thumbs/' . $name . '_' . $format . '.' . $ext;
+                } else {
+                    $file_path = $file;
                 }
 
+                if ($ext && file_exists($dir . '/logos/' . $file_path)) {
+                    $url = $this->getFileUrl('logos/' . $file_path, 'viewimage');
 
-                if ($url && $preview) {
-                    $url = 'javascript:document_preview(\'' . $url . '\', \'image/' . $ext . '\', \'Aperçu\');';
+                    if (BimpCore::isContextPublic()) {
+                        $url .= '&hashp=1';
+                    }
+
+
+                    if ($url && $preview) {
+                        $url = 'javascript:document_preview(\'' . $url . '\', \'image/' . $ext . '\', \'Aperçu\');';
+                    }
                 }
             }
         }
@@ -6820,7 +6822,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_inbox');
             $html .= '</span>';
-            if ($_GET['open'] == 'suivi_mail')
+            if (isset($_GET['open']) && $_GET['open'] == 'suivi_mail')
                 $html .= '<script>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
 
 

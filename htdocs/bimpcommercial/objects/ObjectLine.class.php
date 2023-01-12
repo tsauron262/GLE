@@ -55,6 +55,7 @@ class ObjectLine extends BimpObject
     public $remises = null;
     public $bimp_line_only = false;
     protected $remises_total_infos = null;
+    public $no_html = false;
 
     // Gestion des droits utilisateurs:
 
@@ -5760,7 +5761,7 @@ class ObjectLine extends BimpObject
     public function fetchExtraFields()
     {
         $extra = array();
-        if ($this->parent->dol_object->table_element_line != '') {
+        if (isset($this->parent) && $this->parent->dol_object->table_element_line != '') {
             $sql = 'SELECT (a___dol_line___product___product.duree_i * a___dol_line.qty) as tot
                         FROM ' . MAIN_DB_PREFIX . $this->parent->dol_object->table_element_line . ' a___dol_line
                         LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product

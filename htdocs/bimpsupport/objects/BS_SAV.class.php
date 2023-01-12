@@ -145,8 +145,6 @@ class BS_SAV extends BimpObject
     {
         parent::__construct("bimpsupport", get_class($this));
 
-        define("NOT_VERIF", true);
-
         $this->useCaisseForPayments = (int) BimpCore::getConf('use_caisse_for_payments');
     }
 
@@ -4806,8 +4804,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (count($errors)) {
             return array('errors' => $errors);
         }
-
-        define("NOT_VERIF", true);
 
 //        $errors = BimpTools::merge_array($errors, $this->createReservations());
 

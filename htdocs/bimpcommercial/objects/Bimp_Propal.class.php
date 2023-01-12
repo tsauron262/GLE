@@ -985,7 +985,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
                 if ($user->admin) { // Mettre ça dans canSetAction()
                     // Téléchargement des fichiers
-                    if (!BimpObject::objectLoaded($signature)) {
+                    if (!isset($signature) || !BimpObject::objectLoaded($signature)) {
                         $signature = $this->getChildObject('signature');
                     }
                 }

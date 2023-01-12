@@ -60,6 +60,8 @@ class BimpComm extends BimpDolObject
         self::BC_ZONE_HORS_UE => 'Hors UE'
     );
     protected $margins_infos = null;
+    
+    public $onChildSaveProcessed = false;
 
     public function __construct($module, $object_name)
     {
@@ -2084,6 +2086,7 @@ class BimpComm extends BimpDolObject
 
     public function renderMarginTableExtra($marginInfo)
     {
+        $html = '';
         if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande'))) {
             $remises_arrieres = 0;
 

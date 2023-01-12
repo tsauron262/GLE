@@ -29,7 +29,7 @@ class Bimp_ApporteurFilter extends BimpObject{
     }
     
     
-    public function getLabel($param= '', $ucfirst = false) {
+    public function getLabel($type= '', $ucfirst = false) {
         if($this->id > 0){
             $libelle = $this->getData('libelle');
             if($libelle != '') {

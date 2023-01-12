@@ -1133,6 +1133,7 @@ class BimpInput
         if (is_null($value)) {
             $value = '';
         }
+        $html = '';
 
         $table = isset($params['table']) ? $params['table'] : null;
         $join = isset($params['join']) ? $params['join'] : '';

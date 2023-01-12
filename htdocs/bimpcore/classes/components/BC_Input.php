@@ -456,7 +456,7 @@ class BC_Input extends BimpComponent
                     if (!is_null($object) && is_a($object, 'BimpObject')) {
                         $options['object'] = $object;
                     }
-                } elseif ($this->field_params['type'] === 'id_parent') {
+                } elseif (isset($this->field_params['type']) && $this->field_params['type'] === 'id_parent') {
                     $parent_module = $this->object->getParentModule();
                     $parent_obj_name = $this->object->getParentObjectName();
 

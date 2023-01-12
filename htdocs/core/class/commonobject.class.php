@@ -5464,7 +5464,7 @@ if($obj->up == null)
 				require_once $file;
 
 				$obj = new $classname($this->db);
-
+echo $classname.'rrr';
 				// If generator is ODT, we must have srctemplatepath defined, if not we set it.
 				if ($obj->type == 'odt' && empty($srctemplatepath)) {
 					$varfortemplatedir = $obj->scandir;

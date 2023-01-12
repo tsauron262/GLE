@@ -56,6 +56,7 @@ class BimpDocumentation {
         if ($text == '')
             $text = 'Doc : ' . $name;
 
+        $html = '';
         $html .= '<span  class="bs-popover" ' . BimpRender::renderPopoverData($text, 'right', true) . '>' . '<button type="button" onclick="' . $onClickInit . '" class="btn btn-default">';
         $html .= BimpRender::renderIcon('fas_info-circle');
         $html .= '</button></span>';

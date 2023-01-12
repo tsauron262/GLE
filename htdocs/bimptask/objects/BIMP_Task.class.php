@@ -3,28 +3,25 @@
 class BIMP_Task extends BimpObject
 {
 
-    public static $valSrc = array('task0001@bimp-groupe.net' => 'tache test', 
-        'validationcommande@bimp-groupe.net' => "Validation commande", 
-        'Synchro-8SENS' => "Synchro-8SENS", 
-        'supportyesss@bimp-groupe.net' => "Support YESS",
-        'supportcogedim@bimp-groupe.net' => "Support COGEDIM", 
-        'hotline@bimp-groupe.net'       => 'Hotline',
-        'consoles@bimp-groupe.net' => "CONSOLES", 
-        'licences@bimp-groupe.net' => "LICENCES", 
-        'vols@bimp-groupe.net' => "VOLS", 
-        'sms-apple@bimp-groupe.net' => "Code APPLE", 
-        'suivicontrat@bimp-groupe.net' => "Suivi contrat",
-        'facturation'                   => "Facturation",
-        'dispatch@bimp.fr'          => 'Dispatch',
-        'suivicontrat@bimp.fr'      => 'Suivi contrat',
-        'other' => 'Autre');
-    
+    public static $valSrc = array('task0001@bimp-groupe.net'           => 'tache test',
+        'validationcommande@bimp-groupe.net' => "Validation commande",
+        'Synchro-8SENS'                      => "Synchro-8SENS",
+        'supportyesss@bimp-groupe.net'       => "Support YESS",
+        'supportcogedim@bimp-groupe.net'     => "Support COGEDIM",
+        'hotline@bimp-groupe.net'            => 'Hotline',
+        'consoles@bimp-groupe.net'           => "CONSOLES",
+        'licences@bimp-groupe.net'           => "LICENCES",
+        'vols@bimp-groupe.net'               => "VOLS",
+        'sms-apple@bimp-groupe.net'          => "Code APPLE",
+        'suivicontrat@bimp-groupe.net'       => "Suivi contrat",
+        'facturation'                        => "Facturation",
+        'dispatch@bimp.fr'                   => 'Dispatch',
+        'suivicontrat@bimp.fr'               => 'Suivi contrat',
+        'other'                              => 'Autre');
     public static $types_manuel = array(
         'dev'        => 'Développement',
         'adminVente' => 'Administration des Ventes'
     );
-    
-    
     public static $srcNotAttribute = array('sms-apple@bimp-groupe.net');
     public static $nbNonLu = 0;
     public static $nbAlert = 0;
@@ -68,13 +65,14 @@ class BIMP_Task extends BimpObject
             parent::create();
         return array();
     }
-    
-    public function create(&$warnings = array(), $force_create = false) {
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
         $return = parent::create($warnings, $force_create);
-        
+
         $this->updateField('date_update', $this->getData('date_create'));
         $this->updateField('auto', ($this->getData('dst') != '') ? 1 : 0);
-        
+
         return $return;
     }
 
@@ -116,53 +114,50 @@ class BIMP_Task extends BimpObject
     {
         return self::$valPrio;
     }
-    
-    public function getType(){
+
+    public function getType()
+    {
         $type = 'other';
-        if($this->getData('auto')){
+        if ($this->getData('auto')) {
             $d = $this->getData("dst");
-            if(isset(self::$valSrc[$d]))
+            if (isset(self::$valSrc[$d]))
                 $type = $d;
-        }
-        else{
+        } else {
             $type = $this->getData('type_manuel');
         }
         return $type;
     }
-    
-    public function displayType(){
-        if($this->getData('auto'))
+
+    public function displayType()
+    {
+        if ($this->getData('auto'))
             return self::$valSrc[$this->getType()];
         else
             return $this->displayData('type_manuel');
     }
-    
 
     public function getTypeTacheSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         global $user;
-        
-        if(isset(static::$valSrc[$value])){
+
+        if (isset(static::$valSrc[$value])) {
             $filters['auto'] = 1;
-            if($value != 'other')
+            if ($value != 'other')
                 $filters['dst'] = $value;
-            else{
-                $tabsDroit =  self::getTableSqlDroitPasDroit($user);
-    //            print_r($tabsDroit);die;
-                $filters['dst'] = array("not_in"=> $tabsDroit[2]);
+            else {
+                $tabsDroit = self::getTableSqlDroitPasDroit($user);
+                //            print_r($tabsDroit);die;
+                $filters['dst'] = array("not_in" => $tabsDroit[2]);
             }
-        }
-        elseif(isset(static::$types_manuel[$value])){
+        } elseif (isset(static::$types_manuel[$value])) {
             $filters['auto'] = 0;
             $filters['type_manuel'] = $value;
+        } else {
+            BimpCore::addlog('Type de tache inconnue ' . $value);
         }
-        else{
-            BimpCore::addlog('Type de tache inconnue '.$value);
-        }
-        
+
         return self::$valStatus;
     }
-    
 
     public static function getStatus_list_taskArray()
     {
@@ -182,7 +177,7 @@ class BIMP_Task extends BimpObject
     public function getRight($right)
     {
         global $user;
-        if(!$this->isLoaded())
+        if (!$this->isLoaded())
             return 1;
         if ($this->getData("id_user_owner") == $user->id)
             return 1;
@@ -191,29 +186,29 @@ class BIMP_Task extends BimpObject
         $classRight = $this->getType();
         return $user->rights->bimptask->$classRight->$right;
     }
-    
-    public function getFiltreRightArray($user){
+
+    public function getFiltreRightArray($user)
+    {
         $filtre = array();
         $tabFiltre = self::getFiltreDstRight($user);
-        if (count($tabFiltre[1])){
+        if (count($tabFiltre[1])) {
             $filtre['dst_par_type'] = array(
-                    'or' => array(
-                        'mode_auto' => array(
-                            'and_fields' => array(
-                                        'auto' => 1, 
-                                        'dst' => array($tabFiltre[0] => $tabFiltre[1])
-                            )
-                        ),
-                        'mode_manu' => array(
-                            'and_fields' => array(
-                                        'auto' => 0, 
-                                        'type_manuel' => array($tabFiltre[0] => $tabFiltre[1])
-                            )
+                'or' => array(
+                    'mode_auto' => array(
+                        'and_fields' => array(
+                            'auto' => 1,
+                            'dst'  => array($tabFiltre[0] => $tabFiltre[1])
+                        )
+                    ),
+                    'mode_manu' => array(
+                        'and_fields' => array(
+                            'auto'        => 0,
+                            'type_manuel' => array($tabFiltre[0] => $tabFiltre[1])
+                        )
                     )
             ));
-        }
-        else
-            $filtre['id'] =array('operator' => '>', 'value' => '0');//toujours vraie
+        } else
+            $filtre['id'] = array('operator' => '>', 'value' => '0'); //toujours vraie
         return $filtre;
     }
 
@@ -222,8 +217,8 @@ class BIMP_Task extends BimpObject
         global $user;
         $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes tâches assignées' : ($type == "byMy" ? 'Mes tâches créées' : 'Toutes les tâches')));
         $list->addIdentifierSuffix($type);
-        
-        if($type == 'byMy')
+
+        if ($type == 'byMy')
             $list->addFieldFilterValue('user_create', (int) $user->id);
         elseif ($type == "my")
             $list->addFieldFilterValue('id_user_owner', (int) $user->id);
@@ -231,7 +226,7 @@ class BIMP_Task extends BimpObject
             $list->addFieldFilterValue('fgdg_dst', array(
                 ($type == "my" ? 'and_fields' : 'or') => BimpTools::merge_array(array(
                     'id_user_owner' => $user->id
-                ), $this->getFiltreRightArray($user))
+                        ), $this->getFiltreRightArray($user))
             ));
         return $list;
     }
@@ -242,7 +237,7 @@ class BIMP_Task extends BimpObject
         if ($this->isNotLoaded())
 //            foreach (self::$valSrc as $src => $nom)
 //                if ($user->rights->bimptask->$src->read)
-                    return 1;
+            return 1;
 
         return $this->getRight("read");
     }
@@ -251,8 +246,9 @@ class BIMP_Task extends BimpObject
     {
         return $this->getRight("write");
     }
-    
-    public function canEditAll(){
+
+    public function canEditAll()
+    {
         return 1; //todo
     }
 
@@ -273,12 +269,14 @@ class BIMP_Task extends BimpObject
             return $this->canAttribute();
         return parent::canEditField($field_name);
     }
-    
-    public static function getTypeArray(){
+
+    public static function getTypeArray()
+    {
         return BimpTools::merge_array(static::$valSrc, static::$types_manuel);
     }
-    
-    public static function getTableSqlDroitPasDroit($user){
+
+    public static function getTableSqlDroitPasDroit($user)
+    {
         $tabDroit = $tabPasDroit = $tabTous = array();
         foreach (self::getTypeArray() as $src => $nom) {
             if ($src != "other") {
@@ -287,10 +285,9 @@ class BIMP_Task extends BimpObject
                 else
                     $tabPasDroit[] = '' . $src . '';
                 $tabTous[] = '' . $src . '';
-                
             }
         }
-        return array($tabDroit,$tabPasDroit, $tabTous);
+        return array($tabDroit, $tabPasDroit, $tabTous);
     }
 
     public static function getFiltreDstRight($user)
@@ -310,11 +307,9 @@ class BIMP_Task extends BimpObject
         $idTask = "IDTASK:5467856456" . $this->getData("id");
         $data['email'] = str_replace("<br>", "<br/>", $data['email']);
 
-
         $notes = $this->getNotes();
 
         $msg = $data['email'];
-
 
         $msg .= "<br/>" . $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask . $sep;
 
@@ -350,9 +345,10 @@ class BIMP_Task extends BimpObject
             'warnings' => $warnings
         );
     }
-    
-    public function afterCreateNote($note){
-            $this->updateField ('date_update', $note->getData('date_create'));
+
+    public function afterCreateNote($note)
+    {
+        $this->updateField('date_update', $note->getData('date_create'));
     }
 
     public function actionClose($data, &$success)
@@ -360,12 +356,12 @@ class BIMP_Task extends BimpObject
         $errors = $warnings = array();
         $success = "Tâche fermée";
         $errors = $this->updateField("status", 4);
-        
+
         $success_callback = 'bn.notificationActive.notif_task.obj.remove(' . $this->id . ')';
-        
+
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
     }
@@ -374,31 +370,30 @@ class BIMP_Task extends BimpObject
     {
         global $user;
         $errors = $warnings = array();
-        
+
         $this->updateField("id_user_owner", $data['id_user_owner']);
 
         $instance_task = 'bn.notificationActive.notif_task.obj';
-        
+
         if ($data['id_user_owner'] > 0) {
             $success = "Attribué";
             // Attribuée à l'utilisateur courant
-            if((int) $data['id_user_owner'] == $user->id)
+            if ((int) $data['id_user_owner'] == $user->id)
                 $success_callback = $instance_task . '.move(' . $this->id . ', ' . $this->getData('prio') . ', ' . $this->getData('id_user_owner') . ')';
             // Attribuée à quelqu'un d'autre
             else
                 $success_callback = $instance_task . '.remove(' . $this->id . ')';
-   
         } else {
             $success = "Désattribué";
-            if($this->can('view'))
+            if ($this->can('view'))
                 $success_callback = $instance_task . '.move(' . $this->id . ', ' . $this->getData('prio') . ', ' . $this->getData('id_user_owner') . ')';
             else
                 $success_callback = $instance_task . '.remove(' . $this->id . ')';
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
     }
@@ -412,7 +407,7 @@ class BIMP_Task extends BimpObject
     {
         global $user;
         $buttons = array();
-        if ($this->isEditable() && !in_array($this->getType(),self::$srcNotAttribute)) {
+        if ($this->isEditable() && !in_array($this->getType(), self::$srcNotAttribute)) {
             if ($this->can("edit")) {
                 if (filter_var($this->getData("src"), FILTER_VALIDATE_EMAIL) && filter_var($this->getData("dst"), FILTER_VALIDATE_EMAIL))
                     $buttons[] = array(
@@ -447,83 +442,84 @@ class BIMP_Task extends BimpObject
         }
         return $buttons;
     }
-    
+
     public function getFilesListExtraBtn(BimpFile $file)
     {
         $buttons = array();
-        
+
         $buttons[] = array(
-            'label' => 'Déplacer',
-            'icon' => 'fas_file-export',
+            'label'   => 'Déplacer',
+            'icon'    => 'fas_file-export',
             'onclick' => $this->getJsActionOnclick('moveFile', array(
-                'id_file' => $file->id,
+                'id_file'             => $file->id,
                 'move_to_object_name' => 'client',
-                'keep_copy' => 0,
-                'create_link' => 1
-            ), array(
+                'keep_copy'           => 0,
+                'create_link'         => 1
+                    ), array(
                 'form_name' => 'move_file'
             ))
         );
-        
-        return  $buttons;
+
+        return $buttons;
     }
-    
-    public function getTaskForUser($id_user, $id_max, &$errors = array()) {
-        
+
+    public function getTaskForUser($id_user, $id_max, &$errors = array())
+    {
+
         $tasks = array();
         $nb_my = 0;
         $nb_unaffected = 0;
-        
+
         global $user;
-        
+
         $tasks['content'] = BimpTools::merge_array(
-            // Tâches affectées à l'utilisateur actuel        
-            self::getNewTasks(array(
-                'id' => array(
-                    'operator' => '>',
-                    'value' => $id_max
-                ),
-                'id_user_owner' => (int) $id_user,
-                'status' => array(
-                    'operator' => '<',
-                    'value' => 4
-            )), 'my_task', $nb_my),
-        
-            // Tâches non affectées
-            self::getNewTasks(BimpTools::merge_array(array(
-                'id' => array(
-                    'operator' => '>',
-                    'value' => $id_max
-                ),
-                'id_user_owner' => 0,
-                'status' => array(
-                    'operator' => '<',
-                    'value' => 4
-                )
-            ), $this->getFiltreRightArray($user)), 'unaffected_task', $nb_unaffected
+                        // Tâches affectées à l'utilisateur actuel        
+                        self::getNewTasks(array(
+                            'id'            => array(
+                                'operator' => '>',
+                                'value'    => $id_max
+                            ),
+                            'id_user_owner' => (int) $id_user,
+                            'status'        => array(
+                                'operator' => '<',
+                                'value'    => 4
+                            )), 'my_task', $nb_my),
+                        // Tâches non affectées
+                                          self::getNewTasks(BimpTools::merge_array(array(
+                                    'id'            => array(
+                                        'operator' => '>',
+                                        'value'    => $id_max
+                                    ),
+                                    'id_user_owner' => 0,
+                                    'status'        => array(
+                                        'operator' => '<',
+                                        'value'    => 4
+                                    )
+                                        ), $this->getFiltreRightArray($user)), 'unaffected_task', $nb_unaffected
         ));
-        
+
         $tasks['nb_my'] = $nb_my;
         $tasks['unaffected_task'] = $nb_unaffected;
         return $tasks;
     }
-    
-    private static function getNewTasks($filters, $user_type, &$nb) {
-        
+
+    private static function getNewTasks($filters, $user_type, &$nb)
+    {
+
         $tasks = array();
-        
+
         $max_task_view = 40;
         $i = $j = 0;
-        
+
         $sql = BimpTools::getSqlSelect(array('id'));
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy('prio', 'DESC', 'a', 'id', 'DESC');
 
         $rows = self::getBdb()->executeS($sql, 'array');
-        
+
         $l_tasks_user = array();
-        
+
         if (is_array($rows) and count($rows)) {
             $nb = count($rows);
             foreach ($rows as $r) {
@@ -533,33 +529,33 @@ class BIMP_Task extends BimpObject
             }
         }
 
-        
+
         foreach ($l_tasks_user as $t) {
             if ($t->can('view')) {
                 if ($j < $max_task_view) {
-                    
+
                     $notes = $t->getNotes();
                     $not_viewed = 0;
                     foreach ($notes as $note) {
                         if (!$note->getData('viewed'))
                             $not_viewed++;
                     }
-                    
+
                     $task = array(
                         'id'            => $t->getData('id'),
                         'user_type'     => $user_type,
                         'prio'          => $t->getData('prio'),
                         'subj'          => $t->getData('subj'),
                         'src'           => $t->getData('src'),
-//                        'txt' => $t->getData("txt"),
-                        'txt'           => dol_trunc($t->getData('txt'), 60),
+                        'txt'           => $t->getData("txt"),
+//                        'txt'           => dol_trunc($t->getData('txt'), 60),
                         'date_create'   => $t->getData('date_create'),
                         'url'           => DOL_URL_ROOT . '/bimptask/index.php?fc=task&id=' . $t->getData('id'),
                         'not_viewed'    => (int) $not_viewed,
                         'can_rep_mail'  => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
                         'can_close'     => (int) $t->can('edit'),
                         'can_attribute' => (int) ($t->can('edit') or $t->canAttribute())
-                            );
+                    );
 
                     $tasks[] = $task;
 
@@ -571,28 +567,27 @@ class BIMP_Task extends BimpObject
 
         return $tasks;
     }
-    
-    
-    
-    public static function majRight(){
+
+    public static function majRight()
+    {
         global $db;
-        $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."rights_def WHERE module = 'bimptask'");
-        while ($ln = $db->fetch_object($sql)){
-            $tabRights[] = $ln->perms.$ln->subperms;
+        $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "rights_def WHERE module = 'bimptask'");
+        while ($ln = $db->fetch_object($sql)) {
+            $tabRights[] = $ln->perms . $ln->subperms;
         }
-        foreach(static::getTypeArray() as $type => $label){
-            if($type != 'other'){
-                foreach(array('read' => 'Lire', 'write' => 'Modifié', 'delete' => 'Supprimé', 'attribute' => 'Attribué') as $subperms => $subLabel){
-                    if(!in_array($type.$subperms, $tabRights)){
-                        echo '<br/>'.$subLabel.' '.$label;
-                        $db->query("INSERT INTO ".MAIN_DB_PREFIX."rights_def (`libelle`, `module`, `entity`, `perms`, `subperms`, `type`, `bydefault`) VALUES ('".$subLabel.' '.$label."', 'bimptask', 1, '".$type."', '".$subperms."', 'w', 0);");
+        foreach (static::getTypeArray() as $type => $label) {
+            if ($type != 'other') {
+                foreach (array('read' => 'Lire', 'write' => 'Modifié', 'delete' => 'Supprimé', 'attribute' => 'Attribué') as $subperms => $subLabel) {
+                    if (!in_array($type . $subperms, $tabRights)) {
+                        echo '<br/>' . $subLabel . ' ' . $label;
+                        $db->query("INSERT INTO " . MAIN_DB_PREFIX . "rights_def (`libelle`, `module`, `entity`, `perms`, `subperms`, `type`, `bydefault`) VALUES ('" . $subLabel . ' ' . $label . "', 'bimptask', 1, '" . $type . "', '" . $subperms . "', 'w', 0);");
                     }
                 }
             }
         }
-        
-        
-        
+
+
+
 //        $right = 
 //        
 //        

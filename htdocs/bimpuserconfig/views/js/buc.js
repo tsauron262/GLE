@@ -219,7 +219,7 @@ function ListTableConfig() {
             module: 'bimpuserconfig',
             object_name: 'ListTableConfig',
             id_object: id_config
-        }, 'addCol', data, null, null, function (result) {
+        }, 'addCol', data, null, function (result) {
             if (typeof (result.col_html) !== 'undefined' && result.col_html) {
                 var $cols_list = $configContainer.find('.list_cols_list_container');
                 if ($.isOk($cols_list)) {
@@ -259,7 +259,7 @@ function ListTableConfig() {
             module: 'bimpuserconfig',
             object_name: 'ListTableConfig',
             id_object: id_config
-        }, 'saveColOptions', data, null, null, function (result) {
+        }, 'saveColOptions', data, null, function (result) {
             $('body').trigger($.Event('listTableColsChange', {
                 id_config: id_config
             }));
@@ -293,7 +293,7 @@ function ListTableConfig() {
                 module: 'bimpuserconfig',
                 object_name: 'ListTableConfig',
                 id_object: id_config
-            }, 'saveColsPositions', data, null, null, function (result) {
+            }, 'saveColsPositions', data, null, function (result) {
                 $('body').trigger($.Event('listTableColsChange', {
                     id_config: id_config
                 }));
@@ -323,7 +323,7 @@ function ListTableConfig() {
             module: 'bimpuserconfig',
             object_name: 'ListTableConfig',
             id_object: id_config
-        }, 'removeCol', data, null, null, function (result) {
+        }, 'removeCol', data, null, function (result) {
             var $tr = $button.findParentByClass('itemRow');
             if ($.isOk($tr)) {
                 var $parent = $tr.findParentByClass('list_cols_list_container');
@@ -360,7 +360,7 @@ function ListTableConfig() {
             module: 'bimpuserconfig',
             object_name: 'ListTableConfig',
             id_object: id_config
-        }, 'removeAllCols', {}, null, null, function (result) {
+        }, 'removeAllCols', {}, null, function (result) {
             var $rows = $configContainer.find('.inputMultipleValues').find('tbody.multipleValuesList').children('tr.itemRow');
 
             if ($rows.length) {
@@ -397,7 +397,7 @@ function ListTableConfig() {
             module: 'bimpuserconfig',
             object_name: 'ListTableConfig',
             id_object: id_config
-        }, 'useDefaultCols', {}, null, null, function (result) {
+        }, 'useDefaultCols', {}, null, function (result) {
             if (typeof (result.cols_html) !== 'undefined') {
                 var $listContainer = $configContainer.find('.list_cols_list_container');
 

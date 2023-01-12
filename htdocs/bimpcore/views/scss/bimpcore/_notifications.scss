@@ -19,17 +19,17 @@
             color: white !important;
             font-size: 16px;
         }
-        
+
         &:hover, &:hover i {
             text-decoration: none!important;
         }
     }
-    
+
     #allow_notif {
         margin: 0 10px 5px 0;
         display: inline-block;
         vertical-align: top;
-        
+
         i {
             color: #f5365c;
             font-size: 16px;
@@ -42,48 +42,76 @@
     width: 250px;
     max-height: 500px;
     overflow-y: scroll;
-    /*    border: 1px solid grey;
-        box-shadow: -5px -5px 2px teal;*/
-    /*    border: 2px solid rgb(127, 0, 0);
-        border: 5px solid rgba(255, 0, 0, .5);
-        -webkit-background-clip: padding-box;  for Safari 
-        background-clip: padding-box;  for IE9+, Firefox 4+, Opera, Chrome */
-    border: 1px solid rgb(204, 204, 204) !important;
-    box-shadow: 1px 1px 2px rgb(204, 204, 204), 0 0 5px rgb(217, 217, 217), 0 0 25px rgb(230, 230, 230);
+    border: 1px solid #999 !important;
 }
 
 .modifDropdown > a {
     margin-right: 10px;
-    /*margin-left: 15px;*/
 }
 
 a.nav-link.dropdown-toggle:not(.notif_white) > i {
     color: black !important;
 }
 
-.list_notification .list_part {
-    border-bottom: 1px solid #f4f4f4;
-    padding: 8px;
-}
-.list_notification .list_part:first-child {
-    border-top: 1px solid #f4f4f4;
-}
+.list_notification {
+    line-height: 22px;
+    font-size: 12px;
+    
+    .list_part {
+        border-bottom: 1px solid #ccc;
+        padding: 4px 10px 15px 10px;
+        min-width: 320px;
+        max-width: 800px;
 
-.list_notification .list_part:hover {
-    border-left: 5px solid $primary;
-    padding-left: 3px;
-    background-color: #f5f5f5;
-}
+        &:first-child {
+            border-top: 1px solid #ccc;
+        }
 
-.list_notification .list_part.notif_link:hover {
-    cursor: pointer;
-}
+        &:hover{
+            border-left: 5px solid $primary;
+            padding-left: 5px;
+            background-color: #f5f5f5;       
+        }
 
-.list_notification .list_part .date_notif {
-    color: #999;
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size: 0.7em;
-    text-align: left;
+        &.notif_link:hover {
+            cursor: pointer;
+        }
+
+        .part_list_header {
+            text-align: left;
+            background-color: #F7F7F7;
+            margin-top: -4px;
+            margin-left: -10px;
+            margin-right: -10px;
+            margin-bottom: 0;
+            padding: 0 10px;
+
+            span {
+                display: inline-block;
+                margin-right: 3px;
+            }
+        }
+
+        .date_notif {
+            color: #777;
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-size: 0.8em;
+            text-align: left;
+        }   
+
+        .hashtag_src {
+            font-weight: bold;
+        }
+
+        .hashtag_content {
+            margin: 5px;
+            padding: 5px;
+            background-color: #FFFFE1;
+            border-color: #FFFFE1;
+            border-radius: 8px;
+            box-shadow: 0 0 2px #787878;
+        }
+    }
 }
 
 /* Demande de validations */
@@ -110,18 +138,15 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_tas
 
 /* style general chat */
 .msg_cotainer {
-    /* margin-top: auto; */
-    /* margin-bottom: auto; */
-    /* margin-left: 10px; */
     border-radius: 25px;
     background-color: #E6E1E0;
+    color: #333;
     padding: 10px;
+    margin: 4px;
     position: relative;
-    margin-bottom: 1.5rem!important;
     min-width: 150px;
     max-width: 65%;
     text-align: center;
-
     font-size: 1.3em;
     line-height: normal;
 }
@@ -182,7 +207,6 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_tas
 }
 
 
-
 /* menu */
 .lnMsg{
     border-bottom: 1px dotted #B3A9A9;
@@ -206,15 +230,31 @@ div.tabs-animated {
     overflow-y: scroll;
 }
 
-div.task_panel{
-    white-space: nowrap;
+div.task_panel {
     max-height: auto;
     overflow-y: scroll;
     padding: 0px;
-}
+    line-height: 22px;
+    width: 800px;
 
-div.single_task {
-    text-align: right;
+    .task_src {
+        font-size: 11px;
+        font-style: italic;
+        color: #006AFF;
+    }
+
+    .task_subj {
+        font-weight: bold;
+    }
+
+    .task_txt {
+        margin: 5px;
+        padding: 5px;
+        background-color: #FFFFE1;
+        border-color: #FFFFE1;
+        border-radius: 8px;
+        box-shadow: 0 0 2px #787878;
+    }
 }
 
 /* Les onglets */

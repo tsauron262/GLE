@@ -538,7 +538,8 @@ class BimpDolObject extends BimpObject
                     $html .= BimpInput::renderInput('select', static::$dol_module . '_model_pdf', $this->getModelPdf(), array(
                                 'options' => $models
                     ));
-                    $onclick = 'var model = $(this).parent(\'.' . static::$dol_module . 'PdfGenerateContainer\').find(\'[name=' . static::$dol_module . '_model_pdf]\').val();setObjectAction($(this), ' . $this->getJsObjectData() . ', \'generatePdf\', {model: model}, null, null, null, null);';
+                    $onclick = 'var model = $(this).parent(\'.' . static::$dol_module . 'PdfGenerateContainer\').find(\'[name=' . static::$dol_module . '_model_pdf]\').val();';
+                    $onclick .= 'setObjectAction($(this), ' . $this->getJsObjectData() . ', \'generatePdf\', {model: model});';
                     $html .= '<button type="button" onclick="' . $onclick . '" class="btn btn-default">';
                     $html .= '<i class="fas fa5-sync iconLeft"></i>Générer';
                     $html .= '</button>';

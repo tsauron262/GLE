@@ -46,12 +46,14 @@ function addPackageEquipment($button) {
                     'id_object': id_package
                 }, 'addEquipment', {
                     'serial': serial
-                }, '', $resultContainer, function () {
+                }, $resultContainer, function () {
                     var $list = $container.findParentByClass('BE_Package_view_default').find('.Equipment_list_table_package');
                     if ($.isOk($list)) {
                         reloadObjectList($list.attr('id'));
                     }
-                }, null, null, true);
+                }, {
+                    no_triggers: true
+                });
             }
 
             return;
@@ -102,7 +104,7 @@ function addPackageProduct($button) {
         if ($input.length) {
             id_entrepot = parseInt($input.val());
         }
-        
+
         if (!id_entrepot) {
             bimp_msg('Veuillez sélectionner un entrepôt d\'origine', 'warning', null, true);
             return;
@@ -118,15 +120,18 @@ function addPackageProduct($button) {
             'id_product': id_product,
             'qty': qty,
             'id_entrepot': id_entrepot
-        }, '', $resultContainer, function () {
+        }, $resultContainer, function () {
             var $list = $container.findParentByClass('BE_Package_view_default').find('.BE_PackageProduct_list_table');
             if ($.isOk($list)) {
                 reloadObjectList($list.attr('id'));
             }
             $container.find('input[name="id_product"]').val(0).change();
             $container.find('input[name="search_id_product"]').val('');
-            $container.find('input[name="qty_product"]').val(1).change();;
-        }, null, null, true);
+            $container.find('input[name="qty_product"]').val(1).change();
+            ;
+        }, {
+            no_triggers: true
+        });
 
         return;
     }
@@ -176,9 +181,12 @@ function removeSelectedEquipmentsFromPackage(list_id, $button, ) {
         'id_object': id_package
     }, 'removeEquipment', {
         'equipments': equipments_list
-    }, 'remove_equipment', null, function () {
+    }, null, function () {
         reloadObjectList($list.attr('id'));
-    }, null, null, true);
+    }, {
+        form_name: 'remove_equipment',
+        no_triggers: true
+    });
 }
 
 function removeSelectedProductsFromPackage(list_id, $button) {
@@ -223,9 +231,12 @@ function removeSelectedProductsFromPackage(list_id, $button) {
         'id_object': id_package
     }, 'removeProduct', {
         'packageProducts': packageProducts
-    }, 'remove_product', null, function () {
+    }, null, function () {
         reloadObjectList($list.attr('id'));
-    }, null, null, true);
+    }, {
+        form_name: 'remove_product',
+        no_triggers: true
+    });
 }
 
 $(document).ready(function () {

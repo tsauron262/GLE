@@ -321,6 +321,13 @@ class Bimp_Menu extends BimpObject
         }
         if ($check_perms && isset($item['perms']) && $item['perms']) {
             if (!verifCond($item['perms'])) {
+                $allowed = BimpTools::getArrayValueFromPath($item, 'allowed_users', '');
+                if ($allowed) {
+                    global $user;
+                    if (strpos($allowed, '[' . $user->id . ']') !== false) {
+                        return true;
+                    }
+                }
                 return false;
             }
         }

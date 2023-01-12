@@ -3223,7 +3223,8 @@ class Bimp_Client extends Bimp_Societe
 
                 if (empty($cover)) {
                     $warnings[] = "Aucune couverture pour ce client.";
-                    return $errors;
+                    $cover['amount'] = 0;
+//                    return $errors;
                 }
 
                 if (is_array($cover) and!empty($cover)) {
@@ -3236,6 +3237,7 @@ class Bimp_Client extends Bimp_Societe
                                 self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
                             if ($this->getData('outstanding_limit_icba') > 0)
                                 self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_icba', 0);
+                            $success = 'Pas de couverture';
                         } else {
                             // Crédit Check
                             if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK) {

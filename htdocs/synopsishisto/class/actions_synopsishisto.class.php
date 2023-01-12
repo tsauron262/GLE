@@ -44,7 +44,6 @@ class ActionsSynopsisHisto
         $element_type = $tabElem[0];
         $element_id = $tabElem[1];
 
-
         if (isset($conf->global->MAIN_MODULE_SYNOPSISHISTO)) {
             histoNavigation::saveHisto($element_type, $element_id);
             $return .= histoNavigation::getBlocHisto($context);
@@ -132,7 +131,7 @@ class histoNavigation
         }
 
         return self::$mode_eco;
-        
+
         return false;
     }
 
@@ -175,7 +174,7 @@ class histoNavigation
         if (self::isModeEco()) {
             return '&nbsp;&nbsp;<span style="font-weight: bold; color: #E69900">Mode éco - historique désactivé</span>';
         }
-        
+
         global $conf;
         $tabResult = histoNavigation::getObjAndMenu($res->element_type);
         $obj = $tabResult[0];
@@ -185,14 +184,13 @@ class histoNavigation
             $conf->syslog->enabled = 0;
 //            print_r($obj);
 //            die($obj->module.' '. $obj->object_name);
-            if(is_a($obj, 'BimpObject')){
+            if (is_a($obj, 'BimpObject')) {
                 $bc = BimpCollection::getInstance($obj->module, $obj->object_name);
                 $obj = $bc->getObjectInstance($res->element_id);
                 $result = 1;
 //                $obj = BimpCache::getBimpObjectInstance($obj->module, $obj->object_name, $res->element_id);  
 //                $result = $obj->isLoaded();
-            }
-            else
+            } else
                 $result = $obj->fetch($res->element_id);
             $conf->syslog->enabled = $sysLogActive;
             if ($result > 0 && $obj->id > 0) {
@@ -282,19 +280,20 @@ class histoNavigation
             if (is_file(DOL_DOCUMENT_ROOT . $data['path'])) {
                 require_once DOL_DOCUMENT_ROOT . $data['path'];
                 $nomObj = $data['obj'];
-                if (class_exists($nomObj)) {
-                    if (stripos($nomObj, "bimp") !== false || stripos($nomObj, "equipment") !== false) {
-                        $obj = BimpObject::getInstance($data['module'], $nomObj);
-                    } else {
-                        $obj = new $nomObj($db);
-                    }
-                    if (!method_exists($obj, "getNomUrl")) {
-                        dol_syslog("Pas de methode getNomUrl dans la class " . $nomObj, 3);
-                        $obj = false;
-                    }
+                if (isset($data['module']) && strpos($data['module'], 'bimp') === 0) {
+                    $obj = BimpObject::getInstance($data['module'], $nomObj);
                 } else {
-                    dol_syslog("Impossible de charger l'object " . $nomObj, 3);
+                    if (class_exists($nomObj)) {
+                        $obj = new $nomObj($db);
+                        if (!method_exists($obj, "getNomUrl")) {
+                            dol_syslog("Pas de methode getNomUrl dans la class " . $nomObj, 3);
+                            $obj = false;
+                        }
+                    } else {
+                        dol_syslog("Impossible de charger l'object " . $nomObj, 3);
+                    }
                 }
+
                 $tabMenu[0] = $data['tabMenu1'];
                 $tabMenu[1] = $data['tabMenu2'];
             } else

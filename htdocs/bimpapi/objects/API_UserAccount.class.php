@@ -298,14 +298,6 @@ class API_UserAccount extends BimpObject
                     $html .= '<strong>Identifiant: </strong>' . $api->userData->getData('login') . '<br/>';
                     if ($api->is_default_user) {
                         $html .= '<strong>Mot de passe</strong>: ' . $api->userData->getData('pword');
-                        // Todo : gérer réception code de manière générique... 
-//                        $html .= '<script>'
-//                                . 'var idMaxMesg = 0;'
-//                                . 'function checkCode() {'
-//                                . ' setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
-//                                . '}'
-//                                . 'checkCode();'
-//                                . '</script>';
                     }
                 }
 

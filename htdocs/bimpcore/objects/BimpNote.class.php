@@ -60,10 +60,11 @@ class BimpNote extends BimpObject
             return 1;
         return 0;
     }
-    
-    public function getHisto(){
+
+    public function getHisto()
+    {
         $parent = $this->getParentInstance();
-        if($parent && is_object($parent)){
+        if ($parent && is_object($parent)) {
             return $parent->renderNotesList(false, 'chat', '', false, false);
         }
     }
@@ -335,9 +336,12 @@ class BimpNote extends BimpObject
 
     public function getLink($params = [], $forced_context = '')
     {
-        $parent = $this->getParentInstance();
-        if (is_object($parent) && method_exists($parent, 'getLink'))
-            return $parent->getLink($params, $forced_context);
+        if (!isset($params['parent_link']) || (int) $params['parent_link']) {
+            $parent = $this->getParentInstance();
+            if (is_object($parent) && method_exists($parent, 'getLink'))
+                return $parent->getLink($params, $forced_context);
+        }
+
         return parent::getLink($params, $forced_context);
     }
 
@@ -451,7 +455,7 @@ class BimpNote extends BimpObject
                 // Obj
 //                $obj = BimpCache::getBimpObjectInstance($c['obj_module'], $c['obj_name'], (int) $c['id_obj']);
                 $bc = BimpCollection::getInstance($c['obj_module'], $c['obj_name']);
-                $link = $bc->getLink((int) $c['id_obj'], array('modal_view' => 'false'));
+                $link = $bc->getLink((int) $c['id_obj']);
 
                 if ($link) {
                     $msg['obj']['nom_url'] = $link;
@@ -621,7 +625,7 @@ class BimpNote extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Marquer comme vue';
+        $success = 'Marquée comme vue';
 
         $this->i_view($errors, $warnings);
 

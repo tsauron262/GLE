@@ -338,7 +338,7 @@ fields:
         label: Taux de cession annuel
         type: percent
         default_value: 0
-        decimals: 3
+        decimals: 8
         input: 
             extra_content: 
                 callback: 
@@ -415,6 +415,7 @@ fields:
     loyer_mensuel_evo_ht: 
         label: Loyer mensuel HT (form. évo) 
         type: money
+        decimals: 3
         default_value: 0
         input: 
             extra_content: 
@@ -426,6 +427,7 @@ fields:
     loyer_mensuel_dyn_ht: 
         label: Loyer mensuel HT (form. dyn) 
         type: money
+        decimals: 3
         default_value: 0
         input: 
             extra_content: 
@@ -437,6 +439,7 @@ fields:
     loyer_mensuel_suppl_ht: 
         label: Loyer mensuel HT suppl. (form. dyn) 
         type: money
+        decimals: 3
         default_value: 0
         input: 
             extra_content: 
@@ -1055,6 +1058,8 @@ fields_tables:
         rows: 
             - field: id_user_resp
             - field: date_loyer
+              edit: 1
+            - field: agreement_number
               edit: 1
             - field: id_client
               display: card

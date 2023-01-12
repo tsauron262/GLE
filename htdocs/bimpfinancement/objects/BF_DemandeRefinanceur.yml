@@ -60,6 +60,7 @@ fields:
     rate:
         label: Taux de cession annuel
         type: percent
+        decimals: 8
         depends_on: id_refinanceur
             
     qty: 

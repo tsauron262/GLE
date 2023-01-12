@@ -3459,7 +3459,7 @@ class BF_Demande extends BimpObject
         }
 
         if (!count($errors)) {
-            $lines_errors = $this->addBimpCommObjectLines($facture);
+            $lines_errors = $this->addBimpCommObjectLines($facture, 7510.57);
 
             if (count($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture');
@@ -3473,11 +3473,16 @@ class BF_Demande extends BimpObject
         return $errors;
     }
 
-    protected function addBimpCommObjectLines($bimpcomm)
+    protected function addBimpCommObjectLines($bimpcomm, $total_attendu = 0)
     {
         $errors = array();
 
         $lines = $this->getLines();
+        
+        $pourcentage = 1;
+        if($total_attendu){
+            $pourcentage = $total_attendu / $this->getTotalDemandeHT();
+        }
 
         foreach ($lines as $line) {
             $line_type = (int) $line->getData('type');
@@ -3494,7 +3499,7 @@ class BF_Demande extends BimpObject
 
             if ($line_type !== BF_Line::TYPE_TEXT) {
                 $fac_line->qty = $line->getData('qty');
-                $fac_line->pu_ht = $line->getData('pu_ht');
+                $fac_line->pu_ht = $line->getData('pu_ht')*$pourcentage;
                 $fac_line->tva_tx = $line->getData('tva_tx');
                 $fac_line->pa_ht = $line->getData('pa_ht');
 //                $fac_line->remises = $line->getData('remise');
@@ -4651,8 +4656,8 @@ class BF_Demande extends BimpObject
             }
 
             $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fin_libelle', '');
-            $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_mode_reglement', 0);
-            $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_cond_reglement', 0);
+            $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_mode_reglement', 0);
+            $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_cond_reglement', 0);
 
             $fac_errors = $this->createFactureFin($libelle, $id_mode_reglement, $id_cond_reglement, $warnings);
 

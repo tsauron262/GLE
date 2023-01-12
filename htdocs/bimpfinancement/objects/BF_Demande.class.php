@@ -3497,7 +3497,7 @@ class BF_Demande extends BimpObject
                 $fac_line->pu_ht = $line->getData('pu_ht');
                 $fac_line->tva_tx = $line->getData('tva_tx');
                 $fac_line->pa_ht = $line->getData('pa_ht');
-                $fac_line->remises = $line->getData('remise');
+//                $fac_line->remises = $line->getData('remise');
                 $fac_line->product_type = ((int) $fac_line->getData('product_type') === BF_Line::PRODUIT ? 0 : 1);
             }
 
@@ -3510,12 +3510,25 @@ class BF_Demande extends BimpObject
 
             $line_warnings = array();
             $line_errors = $fac_line->create($line_warnings, true);
+            
+            
+            if (!count($line_errors)) {
+                if($line->getData('remise') > 0){
+                    BimpObject::createBimpObject('bimpcommercial', 'ObjectLineRemise', array(
+                                                        'id_object_line'           => (int) $fac_line->id,
+                                                        'object_type'              => $fac_line::$parent_comm_type,
+                                                        'linked_id_remise_globale' => (int) 0,
+                                                        'type'                     => ObjectLineRemise::OL_REMISE_PERCENT,
+                                                        'percent'                  => (float) $line->getData('remise')
+                                                            ), $errors, $errors);
+                }
+            }
 
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $line->getData('position'));
             }
         }
-
+        
         return $errors;
     }
 

@@ -144,11 +144,7 @@ class BF_DemandeRefinanceur extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if ($force_edit) {
-            return 1;
-        }
-
-        return $this->isCreatable($force_edit, $errors);
+        return 1;
     }
 
     public function isDeletable($force_delete = false, &$errors = array())
@@ -493,7 +489,7 @@ class BF_DemandeRefinanceur extends BimpObject
 
     // Traitements : 
 
-    public function setSelected(&$warings = array())
+    public function setSelected(&$warnings = array())
     {
         $errors = array();
 
@@ -515,9 +511,10 @@ class BF_DemandeRefinanceur extends BimpObject
                     $demande->set('periodicity', $values['periodicity']);
                     $demande->set('duration', $values['nb_mois']);
                     $demande->set('tx_cession', $this->getData('rate'));
-                    $demande->set('loyer_mensuel_evo_ht', $values['loyer_evo_mensuel'], 2);
-                    $demande->set('loyer_mensuel_dyn_ht', $values['loyer_dyn_mensuel'], 2);
-                    $demande->set('loyer_mensuel_suppl_ht', $values['loyer_dyn_suppl_mensuel'], 2);
+                    $demande->set('loyer_mensuel_evo_ht', $values['loyer_evo_mensuel']);
+                    $demande->set('loyer_mensuel_dyn_ht', $values['loyer_dyn_mensuel']);
+                    $demande->set('loyer_mensuel_suppl_ht', $values['loyer_dyn_suppl_mensuel']);
+                    $demande->set('agreement_number', $this->getData('num_accord'));
 
                     $up_warnings = array();
                     $up_errors = $demande->update($up_warnings, true);
@@ -613,6 +610,18 @@ class BF_DemandeRefinanceur extends BimpObject
     }
 
     // Overrides: 
+
+    public function onSave(&$errors = [], &$warnings = [])
+    {
+        if ((int) $this->getData('status') === self::STATUS_SELECTIONNEE) {
+            $demande = $this->getParentInstance();
+            if (BimpObject::objectLoaded($demande)) {
+                $demande->updateField('agreement_number', $this->getData('num_accord'));
+            }
+        }
+
+        parent::onSave($errors, $warnings);
+    }
 
     public function reset()
     {

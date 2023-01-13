@@ -622,6 +622,10 @@ class BimpCommDemandeFin extends BimpObject
                     }
                 }
 
+                if (isset($data['source_warning']) && $data['source_warning']) {
+                    $content .= BimpRender::renderAlerts($data['source_warning'], 'warning');
+                }
+
                 if (isset($data['ref']) && $data['ref']) {
                     $content .= '<b>Référence :</b> ' . $data['ref'] . '<br/>';
                 }
@@ -945,7 +949,7 @@ class BimpCommDemandeFin extends BimpObject
                 $errors[] = 'Nouveau statut invalide: ' . $new_status;
             } else {
                 $errors = $this->updateField($doc_type . '_status', $new_status);
-                
+
                 if ($new_status >= 10 && $new_status < 20) {
                     $this->updateField('status', self::DOC_STATUS_ACCEPTED);
                 }
@@ -954,6 +958,12 @@ class BimpCommDemandeFin extends BimpObject
                     $parent = $this->getParentInstance();
                     if (BimpObject::objectLoaded($parent)) {
                         $parent->addObjectLog(static::getDocTypeLabel($doc_type) . ' mis au statut : ' . self::$doc_status_list[$new_status]['label'], strtoupper($doc_type) . '_STATUS_' . $new_status);
+
+                        if (is_a($parent, 'Bimp_Propal') && $new_status == self::DOC_STATUS_ACCEPTED) {
+                            if ((int) $parent->getData('fk_statut') === 1) {
+                                $parent->updateField('fk_statut', 2);
+                            }
+                        }
                     }
                 }
             }

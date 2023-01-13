@@ -31,7 +31,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                 if ($this->object->mode_reglement_code == 'FIN_YC') {
                     $this->signature_bloc = true;
                 }
-                        
+
                 $this->bimpCommObject = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $this->object->id);
                 $this->facture = $this->object;
                 $this->facture->fetch_thirdparty();
@@ -82,15 +82,15 @@ class InvoicePDF extends BimpCommDocumentPDF
                 $this->shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
                             'id_facture' => (int) $this->facture->id
                 ));
-                if(empty($this->shipments) && $this->bimpCommObject->getData('fk_facture_source') > 0){
+                if (empty($this->shipments) && $this->bimpCommObject->getData('fk_facture_source') > 0) {
                     $this->shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
                                 'id_facture' => (int) $this->bimpCommObject->getData('fk_facture_source')
                     ));
                 }
-                if(empty($this->shipments) && !empty($this->commandes)){//on chereche tous les BL de la commande
-                    foreach($this->commandes as $commande){
+                if (empty($this->shipments) && !empty($this->commandes)) {//on chereche tous les BL de la commande
+                    foreach ($this->commandes as $commande) {
                         $this->shipments = BimpTools::merge_array($this->shipments, BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
-                                    'id_commande_client' => (int) $commande->id
+                                            'id_commande_client' => (int) $commande->id
                         )));
                     }
                 }
@@ -160,41 +160,39 @@ class InvoicePDF extends BimpCommDocumentPDF
                     }
                 }
 
-                $secteur = $this->bimpCommObject->getData('ef_type');
-                // SAV
-                if($secteur == 'S') {
-                    
-                    $code_centre = $this->bimpCommObject->getData('centre');
-                    if($code_centre == '') {
+                if (BimpCore::isEntity('bimp')) {
+                    $secteur = $this->bimpCommObject->getData('ef_type');
+                    // SAV
+                    if ($secteur == 'S') {
+                        $code_centre = $this->bimpCommObject->getData('centre');
+                        if ($code_centre == '') {
 //                        $this->errors[] = 'Centre absent pour ' . $this->bimpCommObject->getLabel('this');
-                    } else {
-                        
-                        $centres = BimpCache::getCentres();
-                        if(isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
-                            $centre = $centres[$code_centre];
-                            $this->fromCompany->address = $centre['address'];
-                            $this->fromCompany->zip     = $centre['zip'];
-                            $this->fromCompany->town    = $centre['town'];
-                            $this->fromCompany->phone   = $centre['tel'];
-                            $this->fromCompany->email   = $centre['mail'];
-
                         } else {
-                            $this->errors[] = 'Centre ayant pour code' . $code_centre . ' absent de la liste des centres';
+
+                            $centres = BimpCache::getCentres();
+                            if (isset($centres[$code_centre]) and is_array($centres[$code_centre])) {
+                                $centre = $centres[$code_centre];
+                                $this->fromCompany->address = $centre['address'];
+                                $this->fromCompany->zip = $centre['zip'];
+                                $this->fromCompany->town = $centre['town'];
+                                $this->fromCompany->phone = $centre['tel'];
+                                $this->fromCompany->email = $centre['mail'];
+                            } else {
+                                $this->errors[] = 'Centre ayant pour code' . $code_centre . ' absent de la liste des centres';
+                            }
                         }
+
+                        $this->fromCompany->name = "LDLC";
+
+                        // Éducation
+                    } elseif ($secteur == 'E') {
+                        $this->fromCompany->name = "BIMP.PRO";
+
+                        // PRO
+                    } elseif (!in_array($secteur, array('S', 'M'))) {
+                        $this->fromCompany->name = "BIMP.PRO";
                     }
-                    
-                    $this->fromCompany->name = "LDLC";
-                    
-                // Éducation
-                } elseif($secteur == 'E') {
-                    $this->fromCompany->name = "BIMP.PRO";
-                    
-                // PRO
-                } elseif(!in_array($secteur, array('S', 'M')) ) {
-                    $this->fromCompany->name = "BIMP.PRO";
                 }
-                
-                
             } else {
                 $this->errors[] = 'Facture invalide (ID absent)';
             }
@@ -227,7 +225,6 @@ class InvoicePDF extends BimpCommDocumentPDF
 //        if ($this->sitationinvoice) {
 //            $docName = $this->langs->transnoentities('InvoiceSituation');
 //        }
-
         // Réf facture: 
         $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->facture->ref);
         if ($this->facture->statut == Facture::STATUS_DRAFT) {
@@ -675,7 +672,7 @@ class InvoicePDF extends BimpCommDocumentPDF
 
         return $html;
     }
-    
+
     public function renderAnnexes()
     {
         $this->next_annexe_idx = 1;
@@ -769,7 +766,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                         }
 
                         $html .= '<span style="font-weight: bold">';
-                        $html .= pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (!is_null($contact)? $contact->dol_object : null), (!is_null($contact) ? 1 : 0), 'target');
+                        $html .= pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (!is_null($contact) ? $contact->dol_object : null), (!is_null($contact) ? 1 : 0), 'target');
                         $html .= '</span>';
 
                         $html .= '</td>';
@@ -784,9 +781,6 @@ class InvoicePDF extends BimpCommDocumentPDF
             $html .= '</tr>';
             $html .= '</table>';
             $html .= '</div>';
-
-
-
 
             $this->writeContent($html);
         }

@@ -88,7 +88,7 @@ fields:
             auto_expand: 1
             
     prix_cession_ht: 
-        label: Prix ce cession HT
+        label: Prix de cession total HT
         type: money
         default_value: 0
         

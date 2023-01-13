@@ -500,7 +500,13 @@ fields:
         label: Facture financeur
         type: id_object
         object: facture_fin
-        default_value: 0        
+        default_value: 0      
+        
+    merged_demandes: 
+        label: IDs des Demandes fusionnées
+        type: items_list
+        items_data_type: id
+        items_braces: 1
         
 forms: 
     default: 

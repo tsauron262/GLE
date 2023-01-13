@@ -814,11 +814,21 @@ class BimpCommDemandeFin extends BimpObject
         }
 
         if (isset($data['cessionnaire'])) {
+            $nom_cessionnaire = BimpTools::getArrayValueFromPath($data, 'cessionnaire/nom', '');
+            $fonction_cessionnaire = BimpTools::getArrayValueFromPath($data, 'cessionnaire/fonction', '');
+            
+            if (!$nom_cessionnaire) {
+                $nom_cessionnaire .= '<span class="danger">A saisir par le cessionnaire</span>';
+            }
+            if (!$fonction_cessionnaire) {
+                $fonction_cessionnaire .= '<span class="danger">A saisir par le cessionnaire</span>';
+            }
+            
             $html .= '<h4>Cessionnaire</h4>';
             $html .= '<div style="padding-left: 15px">';
-            $html .= '<b>Nom : </b>' . BimpTools::getArrayValueFromPath($data, 'cessionnaire/nom', '<span class="danger">Non spécifié</span>') . '<br/>';
+            $html .= '<b>Nom : </b>' . $nom_cessionnaire . '<br/>';
             $html .= '<b>Adresse e-mail : </b>' . BimpTools::getArrayValueFromPath($data, 'cessionnaire/email', '<span class="danger">Non spécifié</span>') . '<br/>';
-            $html .= '<b>Fonction : </b>' . BimpTools::getArrayValueFromPath($data, 'cessionnaire/fonction', '<span class="danger">Non spécifié</span>') . '<br/>';
+            $html .= '<b>Fonction : </b>' . $fonction_cessionnaire . '<br/>';
             $html .= '</div>';
         }
 
@@ -1984,9 +1994,9 @@ class BimpCommDemandeFin extends BimpObject
             $loueur_nom = BimpTools::getArrayValueFromPath($signataires_data, 'loueur/nom', '', $errors, true, 'Nom du loueur absent');
             $loueur_email = BimpTools::getArrayValueFromPath($signataires_data, 'loueur/email', '', $errors, true, 'Adresse e-mail du loueur absente');
             $loueur_fonction = BimpTools::getArrayValueFromPath($signataires_data, 'loueur/fonction', '', $errors, true, 'Qualité du loueur absente');
-            $cessionnaire_nom = BimpTools::getArrayValueFromPath($signataires_data, 'cessionnaire/nom', '', $errors, true, 'Nom du cessionnaire absent');
+            $cessionnaire_nom = BimpTools::getArrayValueFromPath($signataires_data, 'cessionnaire/nom');
             $cessionnaire_email = BimpTools::getArrayValueFromPath($signataires_data, 'cessionnaire/email', '', $errors, true, 'Adresse e-mail du cessionnaire absente');
-            $cessionnaire_fonction = BimpTools::getArrayValueFromPath($signataires_data, 'cessionnaire/fonction', '', $errors, true, 'Qualité du cessionnaire absente');
+            $cessionnaire_fonction = BimpTools::getArrayValueFromPath($signataires_data, 'cessionnaire/fonction');
 
             $allow_dist = (int) BimpCore::getConf('contrat_fin_signature_allow_dist', null, 'bimpcommercial');
             $allow_docusign = (int) BimpCore::getConf('contrat_fin_signature_allow_docusign', null, 'bimpcommercial');

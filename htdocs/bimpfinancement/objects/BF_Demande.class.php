@@ -3944,8 +3944,12 @@ class BF_Demande extends BimpObject
             $client_data['forme_juridique'] = BimpTools::getArrayValueFromPath($data, 'client_forme_juridique', '', $errors, true, ' absente');
             $client_data['capital'] = BimpTools::getArrayValueFromPath($data, 'client_capital', '', $errors, true, 'Capital social du client absent');
             $client_data['siren'] = BimpTools::getArrayValueFromPath($data, 'client_siren', '', $errors, true, 'N° SIREN du client absent');
-            $client_data['rcs'] = BimpTools::getArrayValueFromPath($data, 'client_rcs', '', $errors, true, 'Ville d\'enregistrement au RCS absente');
+            $client_data['insee'] = (int) BimpTools::getArrayValueFromPath($data, 'client_insee', 0);
             $client_data['repr_qualite'] = BimpTools::getArrayValueFromPath($data, 'client_repr_qualite', '', $errors, true, 'Qualité du représenant du client absente');
+
+            if (!$client_data['insee']) {
+                $client_data['rcs'] = BimpTools::getArrayValueFromPath($data, 'client_rcs', '', $errors, true, 'Ville d\'enregistrement au RCS absente');
+            }
         }
 
         $loueur_data = array(
@@ -3956,8 +3960,8 @@ class BF_Demande extends BimpObject
         $cessionnaire_data = array(
             'raison_social' => BimpTools::getArrayValueFromPath($data, 'cessionnaire_saison_sociale', '', $errors, true, 'Raison solicale du signataire cessionnaire absente'),
             'siren'         => BimpTools::getArrayValueFromPath($data, 'cessionnaire_siren', '', $errors, true, 'N° SIREN du signataire cessionnaire absent'),
-            'nom'           => BimpTools::getArrayValueFromPath($data, 'cessionnaire_nom', '', $errors, true, 'Nom du signataire cessionnaire absent'),
-            'qualite'       => BimpTools::getArrayValueFromPath($data, 'cessionnaire_qualite', '', $errors, true, 'Qualité du signataire cessionnaire absente')
+            'nom'           => BimpTools::getArrayValueFromPath($data, 'cessionnaire_nom', ''),
+            'qualite'       => BimpTools::getArrayValueFromPath($data, 'cessionnaire_qualite', '')
         );
 
         $loueur_email = BimpTools::getArrayValueFromPath($data, 'loueur_email', '', $errors, true, 'Adresse e-mail du signataire loueur absent');
@@ -4507,7 +4511,6 @@ class BF_Demande extends BimpObject
         $sc = '';
 
 //        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions', null);
-
 //        if ($use_db_transactions) {
 //            $this->db->db->commit();
 //        }

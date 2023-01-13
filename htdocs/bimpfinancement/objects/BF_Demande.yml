@@ -730,13 +730,25 @@ forms:
                   field_name: client_is_company
                   show_values: 1
             - custom: 1
+              label: Enregistré à L'INSEE
+              input_name: client_insee
+              input: 
+                  type: toggle
+              value: 0
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+            - custom: 1
               label: Ville d'enregistrement au RCS
               input_name: client_rcs
               input: 
                   type: text
               display_if: 
-                  field_name: client_is_company
-                  show_values: 1              
+                  fields_names: client_is_company,client_insee
+                  client_is_company: 
+                      show_values: 1
+                  client_insee: 
+                      hide_values: 1
             - custom: 1
               label: adresse / siège (si pro)
               input_name: client_address

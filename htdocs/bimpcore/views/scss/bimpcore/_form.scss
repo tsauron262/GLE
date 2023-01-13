@@ -714,15 +714,16 @@ input[type=text].large_input {
 .check_list_group_caption.selectable {
     margin: 0 0 5px 0;
     padding: 0 6px 0 24px;
-
+    line-height: 14px;
+    vertical-align: middle;
+    
     &:before {
         font-family: 'FA5R';
         margin-left: -24px;
-        margin-right: 16px;
+        margin-right: 10px;
         font-weight: normal;
-        content: '\f096';
+        content: '\f0c8';
         font-size: 14px;
-        vertical-align: middle;
     }
 }
 

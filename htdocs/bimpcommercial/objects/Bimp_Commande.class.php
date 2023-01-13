@@ -738,28 +738,28 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
 
             // Créer intervention
-            if ($conf->ficheinter->enabled) {
-                $langs->load("interventions");
-
-                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && $this->dol_object->getNbOfServicesLines() > 0) {
-                    if ($user->rights->ficheinter->creer) {
-                        $url = DOL_URL_ROOT . '/fichinter/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->id . '&amp;socid=' . $client->id;
-                        $buttons[] = array(
-                            'label'   => $langs->trans('AddIntervention'),
-                            'icon'    => 'plus-circle',
-                            'onclick' => 'window.location = \'' . $url . '\''
-                        );
-                    } else {
-                        $buttons[] = array(
-                            'label'    => $langs->trans('AddIntervention'),
-                            'icon'     => 'plus-circle',
-                            'onclick'  => '',
-                            'disabled' => 1,
-                            'popover'  => 'Vous n\'avez pas la permission'
-                        );
-                    }
-                }
-            }
+//            if ($conf->ficheinter->enabled) {
+//                $langs->load("interventions");
+//
+//                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && $this->dol_object->getNbOfServicesLines() > 0) {
+//                    if ($user->rights->ficheinter->creer) {
+//                        $url = DOL_URL_ROOT . '/fichinter/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->id . '&amp;socid=' . $client->id;
+//                        $buttons[] = array(
+//                            'label'   => $langs->trans('AddIntervention'),
+//                            'icon'    => 'plus-circle',
+//                            'onclick' => 'window.location = \'' . $url . '\''
+//                        );
+//                    } else {
+//                        $buttons[] = array(
+//                            'label'    => $langs->trans('AddIntervention'),
+//                            'icon'     => 'plus-circle',
+//                            'onclick'  => '',
+//                            'disabled' => 1,
+//                            'popover'  => 'Vous n\'avez pas la permission'
+//                        );
+//                    }
+//                }
+//            }
 //
 //            // Créer contrat
 //            if ($conf->contrat->enabled && ($status == Commande::STATUS_VALIDATED || $status == Commande::STATUS_ACCEPTED || $status == Commande::STATUS_CLOSED)) {
@@ -817,7 +817,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     );
                 } else {
                     $buttons[] = array(
-                        'label'    => $langs->trans('AddIntervention'),
+                        'label'    => 'Prendre en charge logistique',
                         'icon'     => 'plus-circle',
                         'onclick'  => '',
                         'disabled' => 1,

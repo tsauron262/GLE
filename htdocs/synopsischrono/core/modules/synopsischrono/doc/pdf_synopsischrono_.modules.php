@@ -286,7 +286,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         }
 
         $showaddress = $showadress;
-        $usecontact = ($object->model->hasContact && $object->contactid >0);
+        $usecontact = ($object->model->hasContact && $object->contact_id >0);
         $object->client = $object->societe;
         $default_font_size = 12;
 

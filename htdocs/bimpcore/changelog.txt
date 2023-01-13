@@ -1,7 +1,6 @@
 * All triggers with a name XXX_UPDATE have been renamed with name XXX_MODIFY for code consistency purpose.
 * Field "tva"   renamed into "total_tva" for llx_facture, table llx_propal, llx_supplier_proposal, llx_commande, llx_commande_fournisseur for better field name consistency
 * Removed deprecated substitution key  __REFCLIENT__  (replaced with __REF_CLIENT__)
-* All properties ->contactid have been renamed into ->contact_id
 * All properties ->titre have been renamed into ->title
 * Property 'num_paiement' has been renamed 'num_payment' everywhere for better code consistency.
 * The deprecated subsitution key __SIGNATURE__ has been removed. Replace it with __USER_SIGNATURE__ if you used the old syntax in your email templates.
@@ -33,3 +32,6 @@
   modulepart=mycompany that now works like others).
 * Hidden option MAIN_PDF_SHIPPING_DISPLAY_AMOUNT_HT has been renamed into SHIPPING_PDF_DISPLAY_AMOUNT_HT
 * Remove the no more used and deprecated dol_print_graph function
+
+*** TRAITES ***
+* All properties ->contactid have been renamed into ->contact_id

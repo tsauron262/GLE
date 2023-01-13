@@ -235,7 +235,7 @@ BP 2321
 //                $tabCentre
                 //client
                 $contact = "";
-                if ($chrono->contactid > 0) {
+                if ($chrono->contact_id > 0) {
                     $addr = $chrono->contact;
                     $contact = $addr->getFullName($langs, 0, 0);
                     $tel = ($addr->phone_mobile != "") ? $addr->phone_mobile : ($addr->phone_perso != "") ? $addr->phone_perso : ($addr->phone_pro != "") ? $addr->phone_pro : "";
@@ -436,7 +436,7 @@ BP 2321
         }
 
         $showaddress = $showadress;
-        $usecontact = ($object->model->hasContact && $object->contactid > 0);
+        $usecontact = ($object->model->hasContact && $object->contact_id > 0);
         $object->client = $object->societe;
         $default_font_size = 12;
 

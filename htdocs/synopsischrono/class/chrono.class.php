@@ -17,7 +17,7 @@ class Chrono extends CommonObject {
     public $model_refid;
     public $ref;
     public $file_path;
-    public $contactid;
+    public $contact_id;
     public $fk_user_author;
     public $date_modif;
     public $date;
@@ -74,11 +74,11 @@ class Chrono extends CommonObject {
                         $this->user_modif = $tmpUser;
                     }
 
-                    $this->contactid = $res->fk_socpeople;
-                    if ($this->contactid > 0 && $this->loadObject) {
+                    $this->contact_id = $res->fk_socpeople;
+                    if ($this->contact_id > 0 && $this->loadObject) {
                         require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
                         $contact = new Contact($this->db);
-                        $contact->fetch($this->contactid);
+                        $contact->fetch($this->contact_id);
                         $this->contact = $contact;
                     }
 //                    $this->file_path = $res->file_path;
@@ -325,7 +325,7 @@ class Chrono extends CommonObject {
         $this->id = $id;
         $description = $this->description;
         $socid = ($this->socid > 0 ? $this->socid : false);
-        $contactid = ($this->contactid > 0 ? $this->contactid : false);
+        $contact_id = ($this->contact_id > 0 ? $this->contact_id : false);
 
 
         $result = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $id);
@@ -355,8 +355,8 @@ class Chrono extends CommonObject {
             $requete .= ", fk_soc =  " . $socid;
         else
             $requete .= ", fk_soc = NULL ";
-        if ($contactid)
-            $requete .= ", fk_socpeople =  " . $contactid;
+        if ($contact_id)
+            $requete .= ", fk_socpeople =  " . $contact_id;
         else
             $requete .= ", fk_socpeople = NULL ";
         if ($this->note != "")
@@ -715,9 +715,9 @@ class Chrono extends CommonObject {
         $prop->cond_reglement_id = 0;
         $prop->mode_reglement_id = 0;
         $prop->create($user);
-        if ($this->contactid) {
-            $prop->add_contact($this->contactid, 40);
-            $prop->add_contact($this->contactid, 41);
+        if ($this->contact_id) {
+            $prop->add_contact($this->contact_id, 40);
+            $prop->add_contact($this->contact_id, 41);
         }
         $this->db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET propalid = '" . $prop->id . "' WHERE id = " . $this->id);
         $this->propalid = $prop->id;
@@ -739,7 +739,7 @@ class Chrono extends CommonObject {
         //$propid = $this->prop;
         //$propal = "SELECT rowid FROM ".MAIN_DB_PREFIX."propal WHERE ref=".$this->propalid;
         $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsischrono (date_create,ref,model_refid,description,fk_soc,fk_socpeople,propalid,projetid,fk_user_author)
-                          VALUES (now(),'" . $ref . "','" . $this->model_refid . "','" . addslashes($this->description) . "'," . ($this->socid > 0 ? $this->socid : 'NULL') . "," . ($this->contactid > 0 ? $this->contactid : 'NULL') . "," . ($this->propalid > 0 ? $this->propalid : 'NULL') . "," . ($this->projetid > 0 ? $this->projetid : 'NULL') . ", " . $user->id . ")";
+                          VALUES (now(),'" . $ref . "','" . $this->model_refid . "','" . addslashes($this->description) . "'," . ($this->socid > 0 ? $this->socid : 'NULL') . "," . ($this->contact_id > 0 ? $this->contact_id : 'NULL') . "," . ($this->propalid > 0 ? $this->propalid : 'NULL') . "," . ($this->projetid > 0 ? $this->projetid : 'NULL') . ", " . $user->id . ")";
         $sql = $this->db->query($requete);
         if ($sql) {
             $this->id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "synopsischrono");
@@ -772,7 +772,7 @@ class Chrono extends CommonObject {
                                   '" . $this->model_refid . "',
                                   '" . addslashes($this->description) . "',
                                   " . ($this->socid > 0 ? $this->socid : 'NULL') . ",
-                                  " . ($this->contactid > 0 ? $this->contactid : 'NULL') . ",
+                                  " . ($this->contact_id > 0 ? $this->contact_id : 'NULL') . ",
 				  '" . $this->propalid . "',
 				  '" . $this->projetid . "',
                                   " . $user->id . ",

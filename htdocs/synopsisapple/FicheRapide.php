@@ -153,7 +153,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
             $chrono->model_refid = 105;
             $chrono->description = ($descr != "" ? addslashes($descr) : "");
             $chrono->socid = $socid;
-            $chrono->contactid = $_REQUEST["contactSociete"];
+            $chrono->contact_id = $_REQUEST["contactSociete"];
             $chronoid = $chrono->create();
             if ($chronoid > 0) {
                 $dataArr = array(1051 => $_POST['contrat'], 1045 => date("Y/m/d H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre, 1066 => $numExt, 1068 => ($prio == "" ? 0 : 1), 1085 => ($pro == "" ? 0 : 1));

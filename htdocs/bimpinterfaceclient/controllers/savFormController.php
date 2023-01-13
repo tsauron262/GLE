@@ -2111,7 +2111,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             }
 
                             if (BimpObject::objectLoaded($contact)) {
-                                $ac->contactid = $contact->id;
+                                $ac->contact_id = $contact->id;
                             }
 
                             $ac->note = $note;

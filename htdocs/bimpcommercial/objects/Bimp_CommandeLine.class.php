@@ -299,7 +299,7 @@ class Bimp_CommandeLine extends ObjectLine
             if ($commande->isActionAllowed('linesFactureQties') && $commande->canSetAction('linesFactureQties')) {
                 $onclick = 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ';
                 $onclick .= $commande->id . ', ' . (int) $id_client_facture . ', ';
-                $onclick .= (($id_client_facture === (int) $commande->getData('fk_soc')) ? (int) $commande->dol_object->contactid : 0) . ', ';
+                $onclick .= (($id_client_facture === (int) $commande->getData('fk_soc')) ? (int) $commande->dol_object->contact_id : 0) . ', ';
                 $onclick .= (int) $commande->getData('fk_cond_reglement') . ',';
                 $onclick .= '\'' . addslashes(htmlentities($commande->getData('note_public'))) . '\', \'' . addslashes(htmlentities($commande->getData('note_private'))) . '\');';
 
@@ -3968,7 +3968,7 @@ class Bimp_CommandeLine extends ObjectLine
                         'id_client_facture' => (int) $commande->getData('fk_soc'),
                         'note_public'       => htmlentities($commande->getData('note_public')),
                         'note_private'      => htmlentities($commande->getData('note_private')),
-                        'id_contact'        => (int) $commande->dol_object->contactid,
+                        'id_contact'        => (int) $commande->dol_object->contact_id,
                         'id_cond_reglement' => (int) $commande->getData('fk_cond_reglement')
                             ), array(
                         'form_name'      => 'invoice',

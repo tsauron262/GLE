@@ -581,50 +581,104 @@ class Bimp_Product extends BimpObject
             return BimpCore::getConf('applecare_compte', null, 'bimptocegid');
         }
 
-        if ($force_type == -1) {
+        if ($force_type == -1) {//pas de forcage, code spécifique du produit si il existe
             if (!$this->isLoaded())
                 return '';
-            if ($this->getData('accountancy_code_sell') != '')
-                return $this->getData('accountancy_code_sell');
             $type = $this->getProductTypeCompta();
-        } else
+            
+            if ($zone_vente == 1)
+                $field = 'accountancy_code_sell';
+            elseif ($zone_vente == 2)
+                $field = 'accountancy_code_sell_intra';
+            elseif ($zone_vente == 3)
+                $field = 'accountancy_code_sell_export';
+            if(isset($field) && $this->getData($field) != '')
+                return $this->getData($field);
+            
+            
+            
+//            if ($zone_vente == 1 && $this->getData('accountancy_code_sell') != '')
+//                return $this->getData('accountancy_code_sell');
+//            elseif ($zone_vente == 2 && $this->getData('accountancy_code_sell_intra') != '')
+//                return $this->getData('accountancy_code_sell_intra');
+//            elseif ($zone_vente == 3 && $this->getData('accountancy_code_sell_export') != '')
+//                return $this->getData('accountancy_code_sell_export');
+        } else//on force un type on prend les compte généraux
             $type = $force_type;
-        if ($type == 0) {//Produit
-            if ($zone_vente == 1) {
-                if ($this->getData('tva_tx') == 0) {
-                    return BimpCore::getConf('vente_tva_null', null, "bimptocegid");
-                }
-                return BimpCore::getConf('vente_produit_fr', null, "bimptocegid");
-            } elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('vente_produit_ue', null, "bimptocegid");
-            elseif ($zone_vente == 3)
-                return BimpCore::getConf('vente_produit_ex', null, "bimptocegid");
-        } elseif ($type == 1) {//service
-            if ($zone_vente == 1) {
-                if ($this->getData('tva_tx') == 0) {
-                    return BimpCore::getConf('vente_tva_null', null, "bimptocegid");
-                }
-                return BimpCore::getConf('vente_service_fr', null, "bimptocegid");
-            } elseif ($zone_vente == 2 || $zone_vente == 4) {
-                return BimpCore::getConf('vente_service_ue', null, "bimptocegid");
-            } elseif ($zone_vente == 3)
-                return BimpCore::getConf('vente_service_ex', null, "bimptocegid");
-        } elseif ($type == 2) {//Port
-            if ($zone_vente == 1)
-                return BimpCore::getConf('frais_de_port_vente_fr', null, "bimptocegid");
-            elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('frais_de_port_vente_ue', null, "bimptocegid");
-            elseif ($zone_vente == 3)
-                return BimpCore::getConf('frais_de_port_vente_ex', null, "bimptocegid");
-        } elseif ($type == 3) {//commission
-            if ($zone_vente == 1)
-                return BimpCore::getConf('comissions_fr', null, "bimptocegid");
-            elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('comissions_ue', null, "bimptocegid");
-            elseif ($zone_vente == 3)
-                return BimpCore::getConf('comissions_ex', null, "bimptocegid");
+        
+        
+        if($type < 2 && $zone_vente == 1 && $this->getData('tva_tx') == 0){//produit ou service tva null vendu en france
+            $confName = 'vente_tva_null';
         }
-        return false;
+        else{
+            //debut du code
+            if ($type == 0) {//Produit
+                $confName = 'vente_produit_';
+            }
+            elseif ($type == 1) {//service
+                $confName = 'vente_service_';
+            }
+            elseif ($type == 2) {//Port
+                $confName = 'frais_de_port_vente_';
+            }
+            elseif ($type == 3) {//commission
+                $confName = 'comissions_';
+            }
+            //fin du code en fonction de la zone de vente
+            if ($zone_vente == 1) {
+                $confName .= 'fr';
+            }
+            elseif ($zone_vente == 2 || $zone_vente == 4){
+                $confName .= 'ue';
+            }
+            elseif ($zone_vente == 3){
+                $confName .= 'ex';
+            }
+        }
+        if(BimpCore::getConf($confName, null, "bimptocegid"))
+                return BimpCore::getConf($confName, null, "bimptocegid");
+        else{
+            mailSyn2('Probléme compta', 'dev@bimp.fr', null, 'Attention code compta inconnue '.$confName);
+            die;
+        }
+        
+        
+//        if ($type == 0) {//Produit
+//            if ($zone_vente == 1) {
+//                if ($this->getData('tva_tx') == 0) {
+//                    return BimpCore::getConf('vente_tva_null', null, "bimptocegid");
+//                }
+//                return BimpCore::getConf('vente_produit_fr', null, "bimptocegid");
+//            } elseif ($zone_vente == 2 || $zone_vente == 4)
+//                return BimpCore::getConf('vente_produit_ue', null, "bimptocegid");
+//            elseif ($zone_vente == 3)
+//                return BimpCore::getConf('vente_produit_ex', null, "bimptocegid");
+//        } elseif ($type == 1) {//service
+//            if ($zone_vente == 1) {
+//                if ($this->getData('tva_tx') == 0) {
+//                    return BimpCore::getConf('vente_tva_null', null, "bimptocegid");
+//                }
+//                return BimpCore::getConf('vente_service_fr', null, "bimptocegid");
+//            } elseif ($zone_vente == 2 || $zone_vente == 4) {
+//                return BimpCore::getConf('vente_service_ue', null, "bimptocegid");
+//            } elseif ($zone_vente == 3)
+//                return BimpCore::getConf('vente_service_ex', null, "bimptocegid");
+//        } elseif ($type == 2) {//Port
+//            if ($zone_vente == 1)
+//                return BimpCore::getConf('frais_de_port_vente_fr', null, "bimptocegid");
+//            elseif ($zone_vente == 2 || $zone_vente == 4)
+//                return BimpCore::getConf('frais_de_port_vente_ue', null, "bimptocegid");
+//            elseif ($zone_vente == 3)
+//                return BimpCore::getConf('frais_de_port_vente_ex', null, "bimptocegid");
+//        } elseif ($type == 3) {//commission
+//            if ($zone_vente == 1)
+//                return BimpCore::getConf('comissions_fr', null, "bimptocegid");
+//            elseif ($zone_vente == 2 || $zone_vente == 4)
+//                return BimpCore::getConf('comissions_ue', null, "bimptocegid");
+//            elseif ($zone_vente == 3)
+//                return BimpCore::getConf('comissions_ex', null, "bimptocegid");
+//        }
+//        return false;
     }
 
     public function getCodeComptableVenteTva($zone_vente = 1)

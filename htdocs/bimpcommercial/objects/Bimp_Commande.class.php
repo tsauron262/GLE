@@ -738,28 +738,23 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
 
             // Créer intervention
-//            if ($conf->ficheinter->enabled) {
-//                $langs->load("interventions");
-//
-//                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && $this->dol_object->getNbOfServicesLines() > 0) {
-//                    if ($user->rights->ficheinter->creer) {
-//                        $url = DOL_URL_ROOT . '/fichinter/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->id . '&amp;socid=' . $client->id;
-//                        $buttons[] = array(
-//                            'label'   => $langs->trans('AddIntervention'),
-//                            'icon'    => 'plus-circle',
-//                            'onclick' => 'window.location = \'' . $url . '\''
-//                        );
-//                    } else {
-//                        $buttons[] = array(
-//                            'label'    => $langs->trans('AddIntervention'),
-//                            'icon'     => 'plus-circle',
-//                            'onclick'  => '',
-//                            'disabled' => 1,
-//                            'popover'  => 'Vous n\'avez pas la permission'
-//                        );
-//                    }
-//                }
-//            }
+            if ($conf->ficheinter->enabled) {
+                $instance = BimpObject::getInstance('bimptechnique', 'BT_ficheInter');
+                if ($instance->canCreate()) {
+                    $buttons[] = array(
+                        'label'   => 'Nouvelle fiche intervention',
+                        'icon'    => $instance->params['icon'],
+                        'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle fiche intervention', array(
+                            'fields' => array(
+                                'fk_soc' => (int) $client->id,
+                                'commandes' => $this->id    
+                            )
+                                ), null, 'open')
+                    );
+                }
+            }
+                
+                
 //
 //            // Créer contrat
 //            if ($conf->contrat->enabled && ($status == Commande::STATUS_VALIDATED || $status == Commande::STATUS_ACCEPTED || $status == Commande::STATUS_CLOSED)) {

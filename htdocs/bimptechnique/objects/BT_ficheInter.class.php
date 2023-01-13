@@ -827,7 +827,7 @@ class BT_ficheInter extends BimpDolObject
         $factures = $instance->getList($filters);
 
         foreach ($factures as $object) {
-                $return[$object[0]] = ($object['statut'] == 2) ? '<span class=\'danger\'>' . $object['facnumber'] . '</span>' : $object['facnumber'];
+                $return[$object[0]] = ($object['statut'] == 2) ? '<span class=\'danger\'>' . $object['ref'] . '</span>' : $object['ref'];
         }
 
         return $return;

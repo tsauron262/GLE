@@ -97,7 +97,7 @@ class TRA extends BimpObject {
                         }
                     } else {
                         $refField = 'ref';
-                        if($object == 'Bimp_Facture') $refField = 'facnumber';
+                        if($object == 'Bimp_Facture') $refField = 'ref';
 
                         if($instance->find(Array($refField => $ref), 1)) {
                             $html .= BimpRender::renderPanel('<b>' . $instance->getref() . '</b>' . ' Ligne #' . ($index+1), $card->renderHtml(), '', Array('open' => 0));

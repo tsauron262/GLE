@@ -40,7 +40,7 @@ AcomptesFile($bdb);
 
 function correctSavDiscounts($bdb)
 {
-    $sql = 'SELECT f.rowid as id_fac, f.facnumber, f.datec as date_fac, fl.rowid as id_line, s.id as id_sav, s.id_discount, s.date_create as date_sav, sr.amount_ttc as discount_amount, fl.total_ttc as line_amount, sr.fk_facture as disc_id_fac, sr.fk_facture_line as disc_id_fac_line';
+    $sql = 'SELECT f.rowid as id_fac, f.ref, f.datec as date_fac, fl.rowid as id_line, s.id as id_sav, s.id_discount, s.date_create as date_sav, sr.amount_ttc as discount_amount, fl.total_ttc as line_amount, sr.fk_facture as disc_id_fac, sr.fk_facture_line as disc_id_fac_line';
     $sql .= ' FROM llx_facturedet fl, llx_facture f, llx_bs_sav s, llx_societe_remise_except sr';
     $sql .= ' WHERE f.rowid = fl.fk_facture AND fl.description LIKE \'Acompte%\' AND IFNULL(fl.fk_remise_except, 0) <= 0 AND f.type IN(0,2) AND f.fk_statut IN (0,1,2) AND (s.id_facture = f.rowid OR s.id_facture_avoir = f.rowid)';
     $sql .= ' AND sr.rowid = s.id_discount';
@@ -67,28 +67,28 @@ function correctSavDiscounts($bdb)
             if ((int) $r['disc_id_fac']) {
                 continue;
             } elseif ((int) $r['disc_id_fac_line']) {
-                $sql = 'SELECT f.rowid as id_fac, f.facnumber, f.fk_statut FROM llx_facture f, llx_facturedet fl WHERE fl.fk_facture = f.rowid AND fl.rowid = ' . (int) $r['disc_id_fac_line'];
+                $sql = 'SELECT f.rowid as id_fac, f.ref, f.fk_statut FROM llx_facture f, llx_facturedet fl WHERE fl.fk_facture = f.rowid AND fl.rowid = ' . (int) $r['disc_id_fac_line'];
                 $res = $bdb->executeS($sql, 'array');
 
                 if (isset($res[0])) {
                     if ((int) $res[0]['id_fac'] !== (int) $r['id_fac'] && in_array((int) $res[0]['fk_statut'], array(0, 1, 2))) {
-//                        $factures[] = 'SAV #' . $r['id_sav'] . ' (' . $dt_sav->format('d / m / Y') . ') - FAC #' . $r['id_fac'] . ' - ' . $r['facnumber'] . ' (' . $dt_fac->format('d / m / Y') . ') - LIGNE #' . $r['id_line'] . ' - REMISE #' . $r['id_discount'] . ': AJOUTEE A LA FACTURE #' . $res[0]['id_fac'] . ' ' . $res[0]['facnumber'] . ' (statut: ' . $res[0]['fk_statut'] . ')';
+//                        $factures[] = 'SAV #' . $r['id_sav'] . ' (' . $dt_sav->format('d / m / Y') . ') - FAC #' . $r['id_fac'] . ' - ' . $r['ref'] . ' (' . $dt_fac->format('d / m / Y') . ') - LIGNE #' . $r['id_line'] . ' - REMISE #' . $r['id_discount'] . ': AJOUTEE A LA FACTURE #' . $res[0]['id_fac'] . ' ' . $res[0]['ref'] . ' (statut: ' . $res[0]['fk_statut'] . ')';
                         continue;
                     }
                 }
             }
 
-            $sql = 'SELECT fl.fk_facture, f.facnumber, f.fk_statut FROM llx_facturedet fl, llx_facture f WHERE fl.fk_remise_except = ' . (int) $r['id_discount'] . ' AND f.rowid = fl.fk_facture AND f.fk_statut IN (0,1,2)';
+            $sql = 'SELECT fl.fk_facture, f.ref, f.fk_statut FROM llx_facturedet fl, llx_facture f WHERE fl.fk_remise_except = ' . (int) $r['id_discount'] . ' AND f.rowid = fl.fk_facture AND f.fk_statut IN (0,1,2)';
             $facs = $bdb->executeS($sql, 'array');
             if (is_array($facs) && !empty($facs)) {
                 foreach ($facs as $f) {
-//                    $factures[] = 'SAV #' . $r['id_sav'] . ' (' . $dt_sav->format('d / m / Y') . ') - FAC #' . $r['id_fac'] . ' - ' . $r['facnumber'] . ' (' . $dt_fac->format('d / m / Y') . ') - LIGNE #' . $r['id_line'] . ' - REMISE #' . $r['id_discount'] . ': AJOUTEE A LA FACTURE #' . $f['fk_facture'] . ' ' . $f['facnumber'] . ' (statut: ' . $f['fk_statut'] . ')';
+//                    $factures[] = 'SAV #' . $r['id_sav'] . ' (' . $dt_sav->format('d / m / Y') . ') - FAC #' . $r['id_fac'] . ' - ' . $r['ref'] . ' (' . $dt_fac->format('d / m / Y') . ') - LIGNE #' . $r['id_line'] . ' - REMISE #' . $r['id_discount'] . ': AJOUTEE A LA FACTURE #' . $f['fk_facture'] . ' ' . $f['ref'] . ' (statut: ' . $f['fk_statut'] . ')';
                 }
                 continue;
             }
 
             // C'est OK on fait le transfert: 
-//            echo 'SAV ' . $r['id_sav'] . ' (' . $dt_sav->format('d / m / Y') . ') ' . ' - FAC #' . $r['id_fac'] . ' - ' . $r['facnumber'] . ' (' . $dt_fac->format('d / m / Y') . ') - LIGNE #' . $r['id_line'] . '<br/>'; //. ': ';
+//            echo 'SAV ' . $r['id_sav'] . ' (' . $dt_sav->format('d / m / Y') . ') ' . ' - FAC #' . $r['id_fac'] . ' - ' . $r['ref'] . ' (' . $dt_fac->format('d / m / Y') . ') - LIGNE #' . $r['id_line'] . '<br/>'; //. ': ';
             echo 'SAV ' . $r['id_sav'] . ' - FAC #' . $r['id_fac'] . ' - LIGNE #' . $r['id_line'] . ': ';
             if ($bdb->update('facturedet', array(
                         'fk_remise_except' => (int) $r['id_discount']
@@ -156,22 +156,22 @@ function correctSavPropalDiscounts($bdb)
             if ((int) $r['disc_id_fac']) {
                 continue;
             } elseif ((int) $r['disc_id_fac_line']) {
-                $sql = 'SELECT f.rowid as id_fac, f.facnumber, f.fk_statut FROM llx_facture f, llx_facturedet fl WHERE fl.fk_facture = f.rowid AND fl.rowid = ' . (int) $r['disc_id_fac_line'];
+                $sql = 'SELECT f.rowid as id_fac, f.ref, f.fk_statut FROM llx_facture f, llx_facturedet fl WHERE fl.fk_facture = f.rowid AND fl.rowid = ' . (int) $r['disc_id_fac_line'];
                 $res = $bdb->executeS($sql, 'array');
 
                 if (isset($res[0])) {
                     if ((int) $res[0]['id_fac'] !== (int) $r['id_fac'] && in_array((int) $res[0]['fk_statut'], array(0, 1, 2))) {
-                        $factures[] = 'SAV #' . $r['id_sav'] . ' - FAC #' . $r['id_fac'] . ' - LIGNE #' . $r['id_line'] . ' - REMISE #' . $r['id_discount'] . ': AJOUTEE A LA FACTURE #' . $res[0]['id_fac'] . ' ' . $res[0]['facnumber'] . ' (statut: ' . $res[0]['fk_statut'] . ')';
+                        $factures[] = 'SAV #' . $r['id_sav'] . ' - FAC #' . $r['id_fac'] . ' - LIGNE #' . $r['id_line'] . ' - REMISE #' . $r['id_discount'] . ': AJOUTEE A LA FACTURE #' . $res[0]['id_fac'] . ' ' . $res[0]['ref'] . ' (statut: ' . $res[0]['fk_statut'] . ')';
                         continue;
                     }
                 }
             }
 
-            $sql = 'SELECT fl.fk_facture, f.facnumber, f.fk_statut FROM llx_facturedet fl, llx_facture f WHERE fl.fk_remise_except = ' . (int) $r['id_discount'] . ' AND f.rowid = fl.fk_facture AND f.fk_statut IN (0,1,2)';
+            $sql = 'SELECT fl.fk_facture, f.ref, f.fk_statut FROM llx_facturedet fl, llx_facture f WHERE fl.fk_remise_except = ' . (int) $r['id_discount'] . ' AND f.rowid = fl.fk_facture AND f.fk_statut IN (0,1,2)';
             $facs = $bdb->executeS($sql, 'array');
             if (is_array($facs) && !empty($facs)) {
                 foreach ($facs as $f) {
-                    $factures[] = 'SAV #' . $r['id_sav'] . ' - FAC #' . $r['id_fac'] . ' - LIGNE #' . $r['id_line'] . ' - REMISE #' . $r['id_discount'] . ': AJOUTEE A LA FACTURE #' . $f['fk_facture'] . ' ' . $f['facnumber'] . ' (statut: ' . $f['fk_statut'] . ')';
+                    $factures[] = 'SAV #' . $r['id_sav'] . ' - FAC #' . $r['id_fac'] . ' - LIGNE #' . $r['id_line'] . ' - REMISE #' . $r['id_discount'] . ': AJOUTEE A LA FACTURE #' . $f['fk_facture'] . ' ' . $f['ref'] . ' (statut: ' . $f['fk_statut'] . ')';
                 }
                 continue;
             }
@@ -228,9 +228,9 @@ function correctAcomptesFacs(BimpDb $bdb, $type = '', $sav_only = false)
     $select_in_lines .= '(SELECT COUNT(fl.rowid) FROM llx_facturedet fl LEFT JOIN llx_facture f ON f.rowid = fl.fk_facture WHERE fl.fk_remise_except = r4.rowid AND f.fk_statut > 0 AND f.datef >= \'2019-07-01\') > 0';
     $select_in_lines .= ')';
 
-    $select_avoir = 'SELECT COUNT(avoir.rowid) FROM llx_facture avoir WHERE avoir.facnumber = CONCAT(\'' . $ref_prefixe . '\', fa.rowid)';
+    $select_avoir = 'SELECT COUNT(avoir.rowid) FROM llx_facture avoir WHERE avoir.ref = CONCAT(\'' . $ref_prefixe . '\', fa.rowid)';
 
-    $sql = 'SELECT fa.rowid as id_acompte, fa.facnumber as ref_acompte, fa.datef as date_acompte, soc.code_client, soc.code_compta, fa.total_ht, fa.total_ttc';
+    $sql = 'SELECT fa.rowid as id_acompte, fa.ref as ref_acompte, fa.datef as date_acompte, soc.code_client, soc.code_compta, fa.total_ht, fa.total_ttc';
     $sql .= ' FROM llx_facture fa, llx_societe soc';
 
     if ($sav_only) {

@@ -115,7 +115,7 @@ function createFactures($refs, $is_avoir = false)
         BimpTools::cleanDolEventsMsgs();
         echo $ref . ' ';
         $fac = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array(
-                    'facnumber' => $ref
+                    'ref' => $ref
         ));
 
         if (!BimpObject::objectLoaded($fac)) {
@@ -321,7 +321,7 @@ function createAvoirsFromFactures($refs)
         BimpTools::cleanDolEventsMsgs();
         echo $ref . ': ';
         $fac = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array(
-                    'facnumber' => $ref
+                    'ref' => $ref
         ));
 
         if (!BimpObject::objectLoaded($fac)) {
@@ -330,7 +330,7 @@ function createAvoirsFromFactures($refs)
             if (!in_array($fac->getData('type'), array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT))) {
                 echo '<span class="warning">Type invalide (' . $fac->getData('type') . ')</span>';
             } else {
-                $ref_avoir = $bdb->getValue('facture', 'facnumber', 'fk_facture_source = ' . (int) $fac->id);
+                $ref_avoir = $bdb->getValue('facture', 'ref', 'fk_facture_source = ' . (int) $fac->id);
 
                 if ($ref_avoir) {
                     echo '<span class="warning">Avoir / Facture de correction déjà créé(e) : ' . $ref_avoir . '</span>';

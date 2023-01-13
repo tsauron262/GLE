@@ -59,7 +59,7 @@ $result = array();
 
 foreach ($refs as $ref) {
     $avoir = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array(
-                'facnumber' => $ref
+                'ref' => $ref
     ));
 
     if (!BimpObject::objectLoaded($avoir)) {

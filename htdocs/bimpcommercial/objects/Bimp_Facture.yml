@@ -863,13 +863,13 @@ filters_panels:
             ref: unset
             fk_availability: unset
             
-            facnumber: 
+            ref: 
             paiement_status: 
             date_lim_reglement:
             datef: 
                 
 lists_cols:
-    facnumber: 
+    ref: 
         object_link: 1
     ref: unset
     pdf: 
@@ -999,7 +999,7 @@ lists:
                     request: id_client
         delete_btn: 0
         cols: 
-            facnumber: 
+            ref: 
             type: 
             fk_statut: 
             paiement_status: 
@@ -1067,7 +1067,7 @@ lists:
         sort_way: desc
         delete_btn: 0
         cols: 
-            facnumber: 
+            ref: 
                 display: default
             type: 
             datef: 
@@ -1115,7 +1115,7 @@ searches:
     default: 
         fields_search: 
             - a.rowid
-            - a.facnumber
+            - a.ref
             - ef.libelle
             - s.nom
         joins:
@@ -1131,7 +1131,7 @@ searches:
             - a.ref
             - s.nom
             - ef.libelle
-        label_syntaxe: '<a.facnumber> - <ef.libelle> (Client: <s.nom>)'
+        label_syntaxe: '<a.ref> - <ef.libelle> (Client: <s.nom>)'
         
 stats_lists_cols: 
     marge:

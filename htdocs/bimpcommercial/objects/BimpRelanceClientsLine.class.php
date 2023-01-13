@@ -1287,7 +1287,7 @@ class BimpRelanceClientsLine extends BimpObject
                 $html .= '<tbody>';
 
                 $where = 'fk_soc = ' . $client->id . ' AND type IN (0,1,2,3) AND fk_statut = 1 AND paye = 0';
-                $fac_rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'facnumber', 'total_ttc', 'date_lim_reglement'), 'datef', 'asc');
+                $fac_rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'ref', 'total_ttc', 'date_lim_reglement'), 'datef', 'asc');
 
                 if (is_array($fac_rows)) {
                     $total_ttc = 0;
@@ -1295,7 +1295,7 @@ class BimpRelanceClientsLine extends BimpObject
                     foreach ($fac_rows as $r) {
                         $total_ttc += (float) $r['total_ttc'];
                         $html .= '<tr>';
-                        $html .= '<td style="padding: 8px">' . $r['facnumber'] . '</td>';
+                        $html .= '<td style="padding: 8px">' . $r['ref'] . '</td>';
                         $html .= '<td style="padding: 8px">' . date('d / m / Y', strtotime($r['date_lim_reglement'])) . '</td>';
 
                         $relances = array();

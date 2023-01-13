@@ -432,7 +432,7 @@ Preferred Field
                             if (isset($prod['factures']) && !empty($prod['factures'])) {
                                 foreach ($prod['factures'] as $id_fac => $fac_lines) {
                                     $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
-                                    $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'facnumber', 'datef'), 'array');
+                                    $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'ref', 'datef'), 'array');
 
                                     if (is_null($fac_data)) {
                                         continue;

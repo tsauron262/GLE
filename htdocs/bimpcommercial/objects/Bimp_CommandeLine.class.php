@@ -1173,7 +1173,7 @@ class Bimp_CommandeLine extends ObjectLine
                     $dateT = strtotime($facture->getData('datef'));
                     if ($dateT > $date) {
                         $date = $dateT;
-                        $ref = $facture->getData('facnumber');
+                        $ref = $facture->getData('ref');
                     }
                 }
             }
@@ -5611,10 +5611,10 @@ class Bimp_CommandeLine extends ObjectLine
                 $line_warnings = array();
                 $line_errors = $this->setFactureData((int) $facture->id, $qty, $equipments, $line_warnings, false);
                 if (count($line_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('facnumber') . '"');
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('ref') . '"');
                 }
                 if (count($line_warnings)) {
-                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('facnumber') . '"');
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('ref') . '"');
                 }
             }
         }

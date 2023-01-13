@@ -1592,7 +1592,7 @@ class Bimp_Societe extends BimpDolObject
                     $label = BimpTools::getRemiseExceptLabel($r['description']);
                     if ($r['fk_facture'] > 0) {
                         $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $r['fk_facture']);
-                        $label .= ' ' . $fact->getData('facnumber');
+                        $label .= ' ' . $fact->getData('ref');
                     }
                     $label .= ' (' . BimpTools::displayMoneyValue((float) $r['amount'], '') . ' TTC)' . ($disabled_label ? ' - ' . $disabled_label : '');
 

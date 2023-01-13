@@ -1820,11 +1820,11 @@ class Bimp_Facture extends BimpComm
         $fk_soc = (int) $this->getData('fk_soc');
 
         if ($fk_soc) {
-            $rows = $this->db->getRows('facture', 'fk_statut = 0 AND type = 0 AND fk_soc = ' . (int) $fk_soc, null, 'array', array('rowid', 'facnumber'));
+            $rows = $this->db->getRows('facture', 'fk_statut = 0 AND type = 0 AND fk_soc = ' . (int) $fk_soc, null, 'array', array('rowid', 'ref'));
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    $factures[(int) $r['rowid']] = $r['facnumber'];
+                    $factures[(int) $r['rowid']] = $r['ref'];
                 }
             }
         }
@@ -6412,7 +6412,7 @@ class Bimp_Facture extends BimpComm
 
                 foreach ($refs as $ref) {
                     $fac = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array(
-                                'facnumber' => $ref
+                                'ref' => $ref
                     ));
 
                     if (!BimpObject::objectLoaded($fac)) {

@@ -898,7 +898,7 @@ class BContract_echeancier extends BimpObject {
             
             if($periode['FACTURE'] != '') {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
-                $facture->find(Array('facnumber' => $periode['FACTURE']), 1);
+                $facture->find(Array('ref' => $periode['FACTURE']), 1);
                 if($facture->isLoaded()) {
                     $forDisplayReferenceFacture = $facture->getNomUrl();
                     if($facture->getData('paye')) {
@@ -1183,7 +1183,7 @@ class BContract_echeancier extends BimpObject {
                 );
                 
                 $tmpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
-                if($tmpFacture->find(Array('facnumber' => $factureStr), 1)) {
+                if($tmpFacture->find(Array('ref' => $factureStr), 1)) {
                     if($tmpFacture->getData('fk_facture_source')) {
                         $factureSource = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $tmpFacture->getData('fk_facture_source'));
                         $periodes['periodes'][] = Array(
@@ -1263,9 +1263,9 @@ class BContract_echeancier extends BimpObject {
             if ($instance->dol_object->delete($user) > 0) {
                     $this->onDeleteFacture($dateDebutFacture);
                 
-                $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
+                $success = "Facture " . $instance->getData('ref') . ' supprimée avec succès';
             } else {
-                $errors[] = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
+                $errors[] = "Facture " . $instance->getData('ref') . ' n\'à pas été supprimée';
                 ;
             }
 

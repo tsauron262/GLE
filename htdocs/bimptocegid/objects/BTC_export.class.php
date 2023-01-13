@@ -381,7 +381,7 @@ class BTC_export extends BimpObject {
                 }
                 $piece = $this->getInstance('bimpcommercial', 'Bimp_Facture', $facture->rowid);
                 if($error > 0) {
-                    $this->write_logs("**VENTE** | " . date('d/m/Y H:i:s') . " | " . $user->login . " | " . $facture->facnumber . "\n", false);
+                    $this->write_logs("**VENTE** | " . date('d/m/Y H:i:s') . " | " . $user->login . " | " . $facture->ref . "\n", false);
                     if(is_null($ref)) {
                         $piece->updateField('exported', 1);
                     }

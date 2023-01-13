@@ -107,9 +107,9 @@ class BTC_export_facture extends BTC_export
         }
         
         if($facture->getData('type') == 2 && $facture->getData('fk_facture_source') > 0) {
-            $ref_ext = $this->db->getValue('facture', 'facnumber', 'rowid = ' . $facture->getData('fk_facture_source'));
+            $ref_ext = $this->db->getValue('facture', 'ref', 'rowid = ' . $facture->getData('fk_facture_source'));
         } else {
-            $ref_ext = $facture->getData('facnumber');
+            $ref_ext = $facture->getData('ref');
         }
         
         $ref_libre = $facture->id;
@@ -126,7 +126,7 @@ class BTC_export_facture extends BTC_export
             'type_de_compte'    => ["X", 1],
             'code_auxiliaire'   => [$code_auxiliaire, 16],
             'next'              => ['', 1],
-            'ref_interne'       => [$facture->getData('facnumber'), 35],
+            'ref_interne'       => [$facture->getData('ref'), 35],
             'label'             => [$label, 35],
             'reglement'         => [($reglement->code == 'LIQ') ? 'ESP' : $reglement->code, 3],
             'echeance'          => [$date_echeance->format('dmY'), 8],
@@ -564,7 +564,7 @@ class BTC_export_facture extends BTC_export
                     'type_de_compte'    => ["X", 1],
                     'code_auxiliaire'   => [$code_auxiliaire, 16],
                     'next'              => ['', 1],
-                    'ref_interne'       => [$facture->getData('facnumber'), 35],
+                    'ref_interne'       => [$facture->getData('ref'), 35],
                     'label'             => [$label, 35],
                     'reglement'         => [($reglement->code == 'LIQ') ? 'ESP' : $reglement->code, 3],
                     'echeance'          => [$date_echeance->format('dmY'), 8],
@@ -580,7 +580,7 @@ class BTC_export_facture extends BTC_export
                     'etablissement'     => ['001', 3],
                     'axe'               => ['A1', 2],
                     'numero_echeance'   => ['1', 2],
-                    'ref_externe'       => [$facture->getData('facnumber'), 35],
+                    'ref_externe'       => [$facture->getData('ref'), 35],
                     'date_ref_externe'  => ['01011900', 8],
                     'date_creation'     => [$date_creation->format('dmY'), 8],
                     'societe'           => ['', 3],

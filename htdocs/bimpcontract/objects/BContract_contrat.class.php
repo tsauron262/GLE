@@ -813,7 +813,7 @@ class BContract_contrat extends BimpDolObject
             $acc = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $facture['rowid']);
             // Si l'accompte n'est pas déjà lier au contrat
             if (!count(getElementElement('contrat', 'facture', $this->id, $acc->id))) {
-                $array_acc[$acc->id] = $acc->getData('facnumber');
+                $array_acc[$acc->id] = $acc->getData('ref');
             }
         }
 

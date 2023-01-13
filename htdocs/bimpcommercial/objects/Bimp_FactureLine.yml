@@ -133,7 +133,7 @@ filters_panels:
     default: 
         filters: 
             parent:ref: unset
-            parent:facnumber:
+            parent:ref:
                 label: Ref. Facture
             parent:fk_statut: 
                 label: Statut facture
@@ -182,7 +182,7 @@ lists:
         cols:
             parent:datef:
             parent:ref_client:
-            parent:facnumber:
+            parent:ref:
             parent:client:nom:
             dol_line:product:ref_short:
             desc:

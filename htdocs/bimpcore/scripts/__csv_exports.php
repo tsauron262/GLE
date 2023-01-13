@@ -59,7 +59,7 @@ switch ($type) {
         $filename = 'factures_credits';
 
         $sql = '';
-        $fields = array('facnumber', 'type', 'datef', 'total_ht', 'fk_cond_reglement as cond');
+        $fields = array('ref', 'type', 'datef', 'total_ht', 'fk_cond_reglement as cond');
         $fields = array_merge($fields, array('fef.type as secteur', 'fef.zone_vente'));
         $fields = array_merge($fields, array('s.rowid as id_client', 's.nom', 's.code_client', 's.siren', 's.code_compta', 's.fk_pays', 's.outstanding_limit'));
         $fields = array_merge($fields, array('sef.secteuractivite as sa', 'sef.notecreditsafe'));
@@ -207,7 +207,7 @@ switch ($type) {
 //            ref / type / date / canal / zone / montant / conditions réglement
 
             $dt = new DateTime($r['datef']);
-            $clients[(int) $r['id_client']]['factures'] .= $r['facnumber'] . ' / ';
+            $clients[(int) $r['id_client']]['factures'] .= $r['ref'] . ' / ';
             $clients[(int) $r['id_client']]['factures'] .= (isset($types[$r['type']]) ? $types[$r['type']]['label'] : $r['type']) . ' / ';
             $clients[(int) $r['id_client']]['factures'] .= $dt->format('d.m.Y') . ' / ';
             $clients[(int) $r['id_client']]['factures'] .= (isset($secteurs[$r['secteur']]) ? $secteurs[$r['secteur']] : $r['secteur']) . ' / ';

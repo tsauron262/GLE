@@ -434,7 +434,7 @@ class Bimp_ImportPaiementLine extends BimpObject
         $return = array();
         $refs = $this->refs;
         foreach ($refs as $ref) {
-            $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('facnumber' => $ref));
+            $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('ref' => $ref));
             if ($obj && $obj->isLoaded()) {
                 $return[] = $obj;
             }
@@ -448,7 +448,7 @@ class Bimp_ImportPaiementLine extends BimpObject
         global $modeCSV;
         if (!$modeCSV) {
             foreach ($refs as $ref) {
-                $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('facnumber' => $ref));
+                $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('ref' => $ref));
                 if ($obj && $obj->isLoaded()) {
                     $html = $obj->getLink();
                     $html .= $this->getButtonAdd($obj->id);

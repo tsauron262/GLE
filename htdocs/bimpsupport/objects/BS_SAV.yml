@@ -1488,7 +1488,7 @@ filters_panels:
             id_facture_acompte:
             prestataire_number:
             sav_pro:
-            facture:facnumber:
+            facture:ref:
         
 lists_cols: 
     code_centre: 

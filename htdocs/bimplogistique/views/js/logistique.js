@@ -746,7 +746,7 @@ function saveCommandeLineFactures($button, id_line) {
                 if ($input.length) {
                     data.qty = parseFloat($row.find('input.line_facture_qty').val());
                     if (isNaN(data.qty)) {
-                        bimp_msg('Quantités invalides pour la facture "' + $row.data('facnumber') + '"<br/>Veuillez corriger', 'danger', null, true);
+                        bimp_msg('Quantités invalides pour la facture "' + $row.data('ref') + '"<br/>Veuillez corriger', 'danger', null, true);
                         has_errors = true;
                         return;
                     }
@@ -758,7 +758,7 @@ function saveCommandeLineFactures($button, id_line) {
                 if ($input.length) {
                     data.periods = parseFloat($row.find('input.line_facture_periods').val());
                     if (isNaN(data.periods)) {
-                        bimp_msg('Nombre de périodes invalides pour la facture "' + $row.data('facnumber') + '"<br/>Veuillez corriger', 'danger', null, true);
+                        bimp_msg('Nombre de périodes invalides pour la facture "' + $row.data('ref') + '"<br/>Veuillez corriger', 'danger', null, true);
                         has_errors = true;
                         return;
                     }

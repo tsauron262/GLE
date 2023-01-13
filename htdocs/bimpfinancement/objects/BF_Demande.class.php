@@ -2602,7 +2602,9 @@ class BF_Demande extends BimpObject
             $loyer_dyn_suppl = $this->getData('loyer_mensuel_suppl_ht');
 
             $html .= '<td style="text-align: left">Actuels</td>';
-            $html .= '<td></td>';
+            $html .= '<td>';
+            $html .= '<b>' . BimpTools::displayFloatValue($this->getData('tx_cession'), 3) . '</b>';
+            $html .= '</td>';
 
             $html .= '<td style="border-left: 2px solid #' . $primary_color . '">' . BimpTools::displayMoneyValue($loyer_evo) . '</td>';
             if ($periodicity > 1) {
@@ -2636,7 +2638,7 @@ class BF_Demande extends BimpObject
                 $html .= '<tr>';
 
                 $html .= '<td style="text-align: left">' . $refin_name . '</td>';
-                $html .= '<td>' . BimpTools::displayFloatValue($tx) . ' %</td>';
+                $html .= '<td>' . BimpTools::displayFloatValue($tx, 3) . ' %</td>';
 
                 if (count($refin_errors)) {
                     $html .= '<td colspan="' . ($periodicity > 1 ? '6' : '3') . '">';
@@ -2669,7 +2671,7 @@ class BF_Demande extends BimpObject
             $values = BFTools::getCalcValues($materiel, $services, $tx_moyen, $nb_mois, $marge / 100, $vr, $mode_calcul, $periodicity, $refin_errors);
 
             $html .= '<td style="text-align: left; background-color: #F0F0F0!important">Tx cession moyen</td>';
-            $html .= '<td style="background-color: #F0F0F0!important">' . BimpTools::displayFloatValue($tx_moyen) . ' %</td>';
+            $html .= '<td style="background-color: #F0F0F0!important">' . BimpTools::displayFloatValue($tx_moyen, 3) . ' %</td>';
 
             if (count($refin_errors)) {
                 $html .= '<td colspan="' . ($periodicity > 1 ? '6' : '3') . '">';
@@ -3344,7 +3346,7 @@ class BF_Demande extends BimpObject
                     if (empty($prod_serials)) {
                         break;
                     }
-                    
+
                     if ($id_source && (int) $id_source !== (int) $line->getData('id_source')) {
                         continue;
                     }

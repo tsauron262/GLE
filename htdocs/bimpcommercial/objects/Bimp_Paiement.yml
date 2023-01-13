@@ -57,7 +57,7 @@ fields:
         type: money
     num_paiement: 
         label: Num.
-        dol_prop: num_paiement
+        dol_prop: num_payment
         display_if: 
             field_name: id_mode_paiement
             show_values: CHQ,VIR

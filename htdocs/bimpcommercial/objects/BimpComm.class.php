@@ -3249,7 +3249,7 @@ class BimpComm extends BimpDolObject
                     $payement->ref = $refPaiement;
                     $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
                     $payement->paiementid = (int) $id_mode_paiement;
-                    $payement->num_paiement = $num_paiement;
+                    $payement->num_payment = $num_paiement;
                     if ($payement->create($user) <= 0) {
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
                     } else {

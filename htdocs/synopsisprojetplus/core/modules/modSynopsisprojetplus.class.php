@@ -164,7 +164,7 @@ class modSynopsisprojetplus extends DolibarrModules {
      *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
      *               Definit egalement les repertoires de donnees a creer pour ce module.
      */
-    function init() {
+    function init($options = '') {
         // Permissions
         $this->remove();
         

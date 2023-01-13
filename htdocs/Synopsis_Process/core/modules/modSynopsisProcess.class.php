@@ -415,7 +415,7 @@ class modSynopsisProcess extends DolibarrModules {
      *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
      *               Definit egalement les repertoires de donnees a creer pour ce module.
      */
-    function init() {
+    function init($options = '') {
         global $conf;
 
         // Permissions
@@ -1805,13 +1805,13 @@ class modSynopsisProcess extends DolibarrModules {
      *    \brief      Fonction appelee lors de la desactivation d'un module.
      *                Supprime de la base les constantes, boites et permissions du module.
      */
-    function remove() {
+    function remove($options = '') {
 //        $sql = array('DROP TABLE ' . MAIN_DB_PREFIX . 'Synopsis_Process, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_fct, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_global, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list_members, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_model, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_requete, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_src, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_class_value, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_prop, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_prop_value, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_style, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_style_value, ' . MAIN_DB_PREFIX . 'Synopsis_Process_rights, ' . MAIN_DB_PREFIX . 'Synopsis_Process_rights_def, ' . MAIN_DB_PREFIX . 'Synopsis_Process_type_element, ' . MAIN_DB_PREFIX . 'Synopsis_Process_type_element_trigger, '. MAIN_DB_PREFIX . 'Synopsis_revision_model, '. MAIN_DB_PREFIX .'Synopsis_trigger');
         $sql = array();
         include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/class/process.class.php");
         process::deleteTabsProcess($this->db);
 
-        return $this->_remove($sql);
+        return $this->_remove($sql, $options);
     }
 
 }

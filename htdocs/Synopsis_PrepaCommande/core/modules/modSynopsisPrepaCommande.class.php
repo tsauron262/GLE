@@ -297,7 +297,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
      *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
      *               Definit egalement les repertoires de donnees e creer pour ce module.
      */
-    function init() {
+    function init($options = '') {
         $sql = array("CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_total` (
   `catId` int(11) default NULL,
   KEY `catId` (`catId`)
@@ -403,7 +403,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
      *    \brief      Fonction appelee lors de la desactivation d'un module.
      *                Supprime de la base les constantes, boites et permissions du module.
      */
-    function remove() {
+    function remove($options = '') {
         $sql = array();
         $requete = "DELETE FROM " . MAIN_DB_PREFIX . "menu WHERE module='Prepacom'";
         $this->db->query($requete);

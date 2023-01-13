@@ -252,37 +252,37 @@ class mod_codeclient_elephantSV extends ModeleThirdPartyCode
 	function verif($db, &$code, $soc, $type)
 	{
 		global $conf;
-return '';
-		require_once DOL_DOCUMENT_ROOT .'/core/lib/functions2.lib.php';
-
-		$result=0;
-		$code = strtoupper(trim($code));
-
-		if (empty($code) && $this->code_null && empty($conf->global->MAIN_COMPANY_CODE_ALWAYS_REQUIRED))
-		{
-			$result=0;
-		}
-		else if (empty($code) && (! $this->code_null || ! empty($conf->global->MAIN_COMPANY_CODE_ALWAYS_REQUIRED)) )
-		{
-			$result=-2;
-		}
-		else
-		{
-			// Get Mask value
-			$mask = '';
-			if ($type==0) $mask = empty($conf->global->COMPANY_ELEPHANT_MASK_CUSTOMER)?'':$conf->global->COMPANY_ELEPHANT_MASK_CUSTOMER;
-			if ($type==1) $mask = empty($conf->global->COMPANY_ELEPHANT_MASK_SUPPLIER)?'':$conf->global->COMPANY_ELEPHANT_MASK_SUPPLIER;
-			if (! $mask)
-			{
-				$this->error='NotConfigured';
-				return '';
-			}
-
-			$result=check_value($mask,$code);
-		}
-
-		dol_syslog("mod_codeclient_elephant::verif type=".$type." result=".$result);
-		return $result;
+return 0;
+//		require_once DOL_DOCUMENT_ROOT .'/core/lib/functions2.lib.php';
+//
+//		$result=0;
+//		$code = strtoupper(trim($code));
+//
+//		if (empty($code) && $this->code_null && empty($conf->global->MAIN_COMPANY_CODE_ALWAYS_REQUIRED))
+//		{
+//			$result=0;
+//		}
+//		else if (empty($code) && (! $this->code_null || ! empty($conf->global->MAIN_COMPANY_CODE_ALWAYS_REQUIRED)) )
+//		{
+//			$result=-2;
+//		}
+//		else
+//		{
+//			// Get Mask value
+//			$mask = '';
+//			if ($type==0) $mask = empty($conf->global->COMPANY_ELEPHANT_MASK_CUSTOMER)?'':$conf->global->COMPANY_ELEPHANT_MASK_CUSTOMER;
+//			if ($type==1) $mask = empty($conf->global->COMPANY_ELEPHANT_MASK_SUPPLIER)?'':$conf->global->COMPANY_ELEPHANT_MASK_SUPPLIER;
+//			if (! $mask)
+//			{
+//				$this->error='NotConfigured';
+//				return '';
+//			}
+//
+//			$result=check_value($mask,$code);
+//		}
+//
+//		dol_syslog("mod_codeclient_elephant::verif type=".$type." result=".$result);
+//		return $result;
 	}
 
 

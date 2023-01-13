@@ -2032,9 +2032,9 @@ class BimpComm extends BimpDolObject
                     $html .= '<td>' . price($marginInfo['pa_products']) . '</td>';
                     $html .= '<td>' . price($marginInfo['margin_on_products']) . ' (';
                     if ($conf_tx_marque) {
-                        $html .= round($marginInfo['mark_rate_products'], 4);
+                        $html .= round((float) $marginInfo['mark_rate_products'], 4);
                     } else {
-                        $html .= round($marginInfo['margin_rate_products'], 4);
+                        $html .= round((float) $marginInfo['margin_rate_products'], 4);
                     }
                     $html .= ' %)</td>';
                     $html .= '</tr>';
@@ -2063,9 +2063,9 @@ class BimpComm extends BimpDolObject
                 $html .= '<td>' . price($marginInfo['pa_total']) . '</td>';
                 $html .= '<td>' . price($marginInfo['total_margin']) . ' (';
                 if ($conf_tx_marque) {
-                    $html .= round($marginInfo['total_mark_rate'], 4);
+                    $html .= round((float) $marginInfo['total_mark_rate'], 4);
                 } else {
-                    $html .= round($marginInfo['total_margin_rate'], 4);
+                    $html .= round((float) $marginInfo['total_margin_rate'], 4);
                 }
 
                 $html .= ' %)</td>';

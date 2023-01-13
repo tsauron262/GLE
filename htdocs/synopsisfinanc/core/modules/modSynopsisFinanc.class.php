@@ -180,7 +180,7 @@ class modSynopsisFinanc extends DolibarrModules
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
     *               Definit egalement les repertoires de donnees e creer pour ce module.
     */
-  function init()
+  function init($options = '')
   {
     $sql = array();
 //    $sql[]="CREATE TABLE IF NOT EXISTS ".MAIN_DB_PREFIX."synopsisfinancement ("
@@ -238,14 +238,14 @@ class modSynopsisFinanc extends DolibarrModules
     
     $sql[] = "INSERT INTO ".MAIN_DB_PREFIX."c_type_contact (`rowid`, `element`, `source`, `code`, `libelle`, `active`, `module`) VALUES ('780', 'propal', 'external', 'rapp', 'Rapporteur', '1', 'synopsisFinanc');";
     
-    return $this->_init($sql);
+    return $this->_init($sql, $options);
   }
 
   /**
    *    \brief      Fonction appelee lors de la desactivation d'un module.
    *                Supprime de la base les constantes, boites et permissions du module.
    */
-  function remove()
+  function remove($options = '')
   {
       $sql = array();
       
@@ -255,7 +255,7 @@ class modSynopsisFinanc extends DolibarrModules
       
       //$sql[]="DELETE FROM ".MAIN_DB_PREFIX."c_type_contact WHERE rowid=780;";
       
-    return $this->_remove($sql);
+    return $this->_remove($sql, $options);
   }
 }
 ?>

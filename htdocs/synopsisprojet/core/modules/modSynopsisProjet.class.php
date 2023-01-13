@@ -311,7 +311,7 @@ class modSynopsisProjet extends DolibarrModules {
      *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
      *               Definit egalement les repertoires de donnees a creer pour ce module.
      */
-    function init() {
+    function init($options = '') {
         // Permissions
         $this->remove();
         dolibarr_set_const($this->db, "PROJECT_HOUR_PER_DAY", 7);
@@ -781,7 +781,7 @@ class modSynopsisProjet extends DolibarrModules {
             
             );
 
-        return $this->_init($sql);
+        return $this->_init($sql, $options);
     }
 
     /**

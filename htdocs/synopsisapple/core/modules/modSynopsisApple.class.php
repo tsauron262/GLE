@@ -208,7 +208,7 @@ $this->menus = array();			// List of menus to add
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
     *               Definit egalement les repertoires de donnees e creer pour ce module.
     */
-  function init()
+  function init($options = '')
   {
         $sql = array();
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisapple_shipment` (
@@ -246,14 +246,14 @@ $this->menus = array();			// List of menus to add
         $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` (`rowid`, `nom`, `entity`, `type`, `libelle`, `description`) VALUES
 (null, 'appleretour', 1, 'synopsisapple', 'Doc retour', NULL);
 ";
-    return $this->_init($sql);
+    return $this->_init($sql, $options);
   }
 
   /**
    *    \brief      Fonction appelee lors de la desactivation d'un module.
    *                Supprime de la base les constantes, boites et permissions du module.
    */
-  function remove()
+  function remove($options = '')
   {
       $sql = array();
       
@@ -261,7 +261,7 @@ $this->menus = array();			// List of menus to add
         
         $sql[] = 'CREATE OR REPLACE VIEW '.MAIN_DB_PREFIX.'bimp_factSAV  as (SELECT el.fk_target as idFact, c5.id as idSav, c.ref as refSav, el.fk_source as idPropal, c5.Centre as centre, el2.fk_target as equipmentId FROM `'.MAIN_DB_PREFIX.'element_element` el, '.MAIN_DB_PREFIX.'synopsischrono c, '.MAIN_DB_PREFIX.'synopsischrono_chrono_105 c5,  '.MAIN_DB_PREFIX.'element_element el2 WHERE el.sourcetype = "propal" AND el.targettype = "facture" AND c.propalid = el.fk_source AND c.id = c5.id AND el2.sourcetype = "sav" AND el2.targettype = "productCli" AND el2.fk_source = c5.id)';
         
-    return $this->_remove($sql);
+    return $this->_remove($sql, $options);
   }
 }
 ?>

@@ -237,7 +237,7 @@ class modsynopsisfav extends DolibarrModules {
      * 		It also creates data directories.
      *      @return     int             1 if OK, 0 if KO
      */
-    function init() {
+    function init($options = '') {
         $sql = array("CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_Fav_User` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `soc_refid` int(11) DEFAULT NULL,
@@ -248,7 +248,7 @@ class modsynopsisfav extends DolibarrModules {
   PRIMARY KEY (`id`)
 )");
 
-        return $this->_init($sql);
+        return $this->_init($sql, $options);
     }
 
     /**
@@ -257,10 +257,10 @@ class modsynopsisfav extends DolibarrModules {
      * 		Data directories are not deleted.
      *      @return     int             1 if OK, 0 if KO
      */
-    function remove() {
+    function remove($options = '') {
         $sql = array();
 
-        return $this->_remove($sql);
+        return $this->_remove($sql, $options);
     }
 
     /**

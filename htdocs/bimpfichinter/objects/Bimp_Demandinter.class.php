@@ -161,7 +161,8 @@ class Bimp_Demandinter extends ObjectInter
             if($this->isLoaded() && is_a($this->dol_object, 'Synopsisdemandeinterv')){
                 $return = array();
                 require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
-                $tabAct = ActionComm::getActions($this->db->db, 0, $this->id, 'synopsisdemandeinterv');
+                $ActionComm = new ActionComm($this->db->db);
+                $tabAct = $ActionComm->getActions(0, $this->id, 'synopsisdemandeinterv');
                 foreach($tabAct as $action)
                     $return[] = $action->getNomUrl(1);
                 return implode("<br/>", $return);

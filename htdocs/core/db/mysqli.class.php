@@ -623,28 +623,28 @@ class DoliDBMysqli extends DoliDB
      * 	@return	string					XXX(field) or XXX('value') or field or 'value'
      *
      */
-    function encrypt($fieldorvalue, $withQuotes = 0)
+    public function encrypt($fieldorvalue, $withQuotes = 1)
     {
-        global $conf;
+            global $conf;
 
-        // Type of encryption (2: AES (recommended), 1: DES , 0: no encryption)
-        $cryptType = (!empty($conf->db->dolibarr_main_db_encryption) ? $conf->db->dolibarr_main_db_encryption : 0);
+            // Type of encryption (2: AES (recommended), 1: DES , 0: no encryption)
+            $cryptType = (!empty($conf->db->dolibarr_main_db_encryption) ? $conf->db->dolibarr_main_db_encryption : 0);
 
-        //Encryption key
-        $cryptKey = (!empty($conf->db->dolibarr_main_db_cryptkey) ? $conf->db->dolibarr_main_db_cryptkey : '');
+            //Encryption key
+            $cryptKey = (!empty($conf->db->dolibarr_main_db_cryptkey) ? $conf->db->dolibarr_main_db_cryptkey : '');
 
-        $return = ($withQuotes ? "'" : "") . $this->escape($fieldorvalue) . ($withQuotes ? "'" : "");
+            $escapedstringwithquotes = ($withQuotes ? "'" : "").$this->escape($fieldorvalue).($withQuotes ? "'" : "");
 
-        if ($cryptType && !empty($cryptKey)) {
-            if ($cryptType == 2) {
-                $return = 'AES_ENCRYPT(' . $return . ',\'' . $cryptKey . '\')';
-            } else if ($cryptType == 1) {
-                $return = 'DES_ENCRYPT(' . $return . ',\'' . $cryptKey . '\')';
+            if ($cryptType && !empty($cryptKey)) {
+                    if ($cryptType == 2) {
+                            $escapedstringwithquotes = "AES_ENCRYPT(".$escapedstringwithquotes.", '".$this->escape($cryptKey)."')";
+                    } elseif ($cryptType == 1) {
+                            $escapedstringwithquotes = "DES_ENCRYPT(".$escapedstringwithquotes.", '".$this->escape($cryptKey)."')";
+                    }
             }
-        }
 
-		return $escapedstringwithquotes;
-	}
+            return $escapedstringwithquotes;
+    }
 
     /**
      * 	Decrypt sensitive data in database

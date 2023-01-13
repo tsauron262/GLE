@@ -292,7 +292,7 @@ class modSynopsistools extends DolibarrModules
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
     *               Definit egalement les repertoires de donnees e creer pour ce module.
     */
-  function init()
+  function init($options = '')
   {
     $sql = array("CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsistools_fileInfo` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
@@ -535,17 +535,17 @@ class modSynopsistools extends DolibarrModules
 (200, 'PREPACOM_DISPO_PROD'),
 (199, 'PREPACOM_INDISPO_PROD'),
 (198, 'PREPACOM_UPDATE_STATUT');");
-    return $this->_init($sql);
+    return $this->_init($sql, $options);
   }
 
   /**
    *    \brief      Fonction appelee lors de la desactivation d'un module.
    *                Supprime de la base les constantes, boites et permissions du module.
    */
-  function remove()
+  function remove($options = '')
   {
       $sql = array();
-    return $this->_remove($sql);
+    return $this->_remove($sql, $options);
   }
 }
 ?>

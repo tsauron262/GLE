@@ -400,7 +400,7 @@ class modSynopsisFicheinter extends DolibarrModules {
      *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
      *               Definit egalement les repertoires de donnees a creer pour ce module.
      */
-    function init() {
+    function init($options = '') {
         global $conf;
  
         // Permissions
@@ -639,17 +639,17 @@ FROM ". MAIN_DB_PREFIX ."fichinterdet f  left join ".MAIN_DB_PREFIX."synopsisfic
 //        
 //        $sql[] = "CREATE VIEW ". MAIN_DB_PREFIX ."fichinter as (SELECT `rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `ref`, 1 as `entity`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, '' as `extraparams` FROM `". MAIN_DB_PREFIX ."synopsis_fichinter` WHERE 1);";
  
-        return $this->_init($sql);
+        return $this->_init($sql, $options);
     }
  
     /**
      *    \brief      Fonction appelee lors de la desactivation d'un module.
      *                Supprime de la base les constantes, boites et permissions du module.
      */
-    function remove() {
+    function remove($options = '') {
         $sql = array();
  
-        return $this->_remove($sql);
+        return $this->_remove($sql, $options);
     }
  
 }

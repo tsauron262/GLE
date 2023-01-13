@@ -119,7 +119,7 @@ class modSynopsisContrat extends DolibarrModules {
      *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
      *               Definit egalement les repertoires de donnees e creer pour ce module.
      */
-    function init() {
+    function init($options = '') {
         global $conf;
         $sql = array(
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (
@@ -261,14 +261,14 @@ $tabModel = array(
 ('method', 'Rappel tâche commerciaux', '', 'synopsiscontrat/class/remindendservice.class.php', 'RemindEndService', 'setTaskForService', '3', '', 'synopsiscontrat', 0, '2010-01-20 17:31:27', '2010-02-27 11:30:00', '2010-02-08 00:00:00', NULL, NULL, '', '', '3600', 1, 0, 1, 330, 330, 'Envoie une tâche aux commerciaux pour leurs rappeler qu\'un service arrive à terme.\r\nParamètre : nombre de jours qui séparent aujourd\'hui et la date de fin de validité des services.', NULL, 1, 0, 0, NULL, NULL, 0);";
         $sql [] = "INSERT INTO `" . MAIN_DB_PREFIX . "cronjob` (`jobtype`, `label`, `command`, `classesname`, `objectname`, `methodename`, `params`, `md5params`, `module_name`, `priority`, `datelastrun`, `datenextrun`, `datestart`, `dateend`, `datelastresult`, `lastresult`, `lastoutput`, `unitfrequency`, `frequency`, `nbrun`, `status`, `fk_user_author`, `fk_user_mod`, `note`, `libname`, `entity`, `maxrun`, `autodelete`, `fk_mailing`, `test`, `processing`) VALUES
 ('method', 'Rappel tâche commerciaux (service à activer)', '', 'synopsiscontrat/class/remindstartservice.class.php', 'RemindStartService', 'setTaskForService', '', '', 'synopsiscontrat', 0, '2019-05-27 14:56:09', '2019-05-28 00:00:00', '2019-05-21 00:00:00', NULL, '2019-05-27 14:56:10', '0', 'Nombre de tâche envoyé: 24. Erreurs: Aucune', '604800', 1, 24, 1, 330, 330, 'Envoie une tâche aux commerciaux pour leurs rappeler qu\'un service doit être activé.', NULL, 1, 50, 0, NULL, NULL, 0)";
-        return $this->_init($sql);
+        return $this->_init($sql, $options);
     }
 
     /**
      *    \brief      Fonction appelee lors de la desactivation d'un module.
      *                Supprime de la base les constantes, boites et permissions du module.
      */
-    function remove() {
+    function remove($options = '') {
         global $conf;
 //        $extrafields = new ExtraFields($this->db);
 //        $extrafields->update('tacite', 'Renouvellement tacite', 'select', 30, 'contrat', 0, 0, 40, array("options" => array(1 => "Tacite 1 fois",3 => "Tacite 2 fois",6 => "Tacite 3 fois",12 => "Sur proposition")), 1, '', 1);
@@ -282,7 +282,7 @@ $tabModel = array(
 //         $extrafields->delete('periodicity', 'contrat');
         $sql = array("DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE nom = '" . $this->const[0][2] . "' AND entity = " . $conf->entity);
         $sql[] = "DELETE FROM `".MAIN_DB_PREFIX."cronjob` WHERE `methodename` LIKE 'setTaskForService'";
-        return $this->_remove($sql);
+        return $this->_remove($sql, $options);
     }
 
 }

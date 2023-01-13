@@ -241,7 +241,7 @@ class modsynopsissignature extends DolibarrModules {
      * 		It also creates data directories.
      *      @return     int             1 if OK, 0 if KO
      */
-    function init() {
+    function init($options = '') {
         $sql = array("CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsissignature` (
   `code` varchar(30) NOT NULL,
   `type` varchar(50) NOT NULL,
@@ -251,7 +251,7 @@ class modsynopsissignature extends DolibarrModules {
   UNIQUE KEY `code` (`code`)
 )");
 
-        return $this->_init($sql);
+        return $this->_init($sql, $options);
     }
 
     /**
@@ -260,10 +260,10 @@ class modsynopsissignature extends DolibarrModules {
      * 		Data directories are not deleted.
      *      @return     int             1 if OK, 0 if KO
      */
-    function remove() {
+    function remove($options = '') {
         $sql = array();
 
-        return $this->_remove($sql);
+        return $this->_remove($sql, $options);
     }
 
     /**

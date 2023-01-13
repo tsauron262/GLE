@@ -120,7 +120,7 @@ $this->menus = array();			// List of menus to add
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
     *               Definit egalement les repertoires de donnees e creer pour ce module.
     */
-  function init()
+  function init($options = '')
   {
     $sql = array("CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsiscaldav_event` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
@@ -156,17 +156,17 @@ IF(fk_target, fk_target, '0') as ctag, 'Calendrier BIMP-ERP' as description, 0 a
     }
     
     
-    return $this->_init($sql);
+    return $this->_init($sql, $options);
   }
 
   /**
    *    \brief      Fonction appelee lors de la desactivation d'un module.
    *                Supprime de la base les constantes, boites et permissions du module.
    */
-  function remove()
+  function remove($options = '')
   {
       $sql = array();
-    return $this->_remove($sql);
+    return $this->_remove($sql, $options);
   }
 }
 

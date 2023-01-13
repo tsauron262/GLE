@@ -82,6 +82,13 @@ fields:
     date_end: 
         label: Fin
         type: datetime
+        
+                
+    product_type:
+        label: Type de ligne (pour les lignes libres)
+        values: 
+            0: Produit
+            1: Service
           
 
 lists: 

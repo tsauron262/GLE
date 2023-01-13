@@ -1375,9 +1375,99 @@ class BF_Demande extends BimpObject
                 }
                 return '';
 
+            // Génération factures: 
             case 'fac_fourn_libelle':
             case 'fac_fin_libelle':
                 return 'Contrat de location n° ' . str_replace('DF', '', $this->getRef());
+
+            case 'fac_fourn_id_fourn':
+                if ((int) $this->getData('id_main_source')) {
+                    $source = $this->getSource();
+                    if (BimpObject::objectLoaded($source)) {
+                        return (int) BimpCore::getConf('id_fourn_' . $source->getData('type'), null, 'bimpfinancement');
+                    }
+                    return 0;
+                }
+                return (int) $this->getData('id_supplier');
+
+            case 'fac_fourn_id_mode_reglement':
+            case 'fac_fourn_id_cond_reglement':
+                $id_fourn = 0;
+                if ((int) $this->getData('id_main_source')) {
+                    $source = $this->getSource();
+                    if (BimpObject::objectLoaded($source)) {
+                        $id_fourn = (int) BimpCore::getConf('id_fourn_' . $source->getData('type'), null, 'bimpfinancement');
+                    }
+                } else {
+                    $id_fourn = (int) $this->getData('id_supplier');
+                }
+
+                if ($id_fourn) {
+                    $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_fourn);
+                    if (BimpObject::objectLoaded($fourn)) {
+                        $id = 0;
+                        switch ($field_name) {
+                            case 'fac_fourn_id_mode_reglement':
+                                $id = (int) $fourn->getData('mode_reglement_supplier');
+                                if (!$id) {
+                                    $id = (int) BimpCore::getConf('fac_fourn_def_id_mode_reglement', null, 'bimpfinancement');
+                                }
+                                break;
+
+                            case 'fac_fourn_id_cond_reglement':
+                                $id = (int) $fourn->getData('cond_reglement_supplier');
+                                if (!$id) {
+                                    $id = (int) BimpCore::getConf('fac_fourn_def_id_cond_reglement', null, 'bimpfinancement');
+                                }
+                                break;
+                        }
+                        return $id;
+                    }
+                }
+                return 0;
+
+            case 'fac_fin_id_client':
+            case 'fac_fin_id_mode_reglement':
+            case 'fac_fin_id_cond_reglement':
+                $id_client = 0;
+                $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+                if ($id_refin) {
+                    $refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Refinanceur', $id_refin);
+                    if (BimpObject::objectLoaded($refin)) {
+                        $id_client = (int) $refin->getData('id_societe');
+                    }
+                }
+
+                if ($id_client) {
+                    switch ($field_name) {
+                        case 'fac_fin_id_client':
+                            return $id_client;
+
+                        case 'fac_fin_id_mode_reglement':
+                        case 'fac_fin_id_cond_reglement':
+                            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_client);
+                            if (BimpObject::objectLoaded($client)) {
+                                $id = 0;
+                                switch ($field_name) {
+                                    case 'fac_fin_id_mode_reglement':
+                                        $id = (int) $client->getData('mode_reglement');
+                                        if (!$id) {
+                                            $id = (int) BimpCore::getConf('fac_fin_def_id_mode_reglement', null, 'bimpfinancement');
+                                        }
+                                        break;
+
+                                    case 'fac_fin_id_cond_reglement':
+                                        $id = (int) $client->getData('cond_reglement');
+                                        if (!$id) {
+                                            $id = (int) BimpCore::getConf('fac_fin_def_id_cond_reglement', null, 'bimpfinancement');
+                                        }
+                                        break;
+                                }
+                                return $id;
+                            }
+                    }
+                }
+                return 0;
         }
 
         return $this->getData($field_name);
@@ -2602,7 +2692,9 @@ class BF_Demande extends BimpObject
             $loyer_dyn_suppl = $this->getData('loyer_mensuel_suppl_ht');
 
             $html .= '<td style="text-align: left">Actuels</td>';
-            $html .= '<td></td>';
+            $html .= '<td>';
+            $html .= '<b>' . BimpTools::displayFloatValue($this->getData('tx_cession'), 3) . ' %</b>';
+            $html .= '</td>';
 
             $html .= '<td style="border-left: 2px solid #' . $primary_color . '">' . BimpTools::displayMoneyValue($loyer_evo) . '</td>';
             if ($periodicity > 1) {
@@ -2636,7 +2728,7 @@ class BF_Demande extends BimpObject
                 $html .= '<tr>';
 
                 $html .= '<td style="text-align: left">' . $refin_name . '</td>';
-                $html .= '<td>' . BimpTools::displayFloatValue($tx) . ' %</td>';
+                $html .= '<td>' . BimpTools::displayFloatValue($tx, 3) . ' %</td>';
 
                 if (count($refin_errors)) {
                     $html .= '<td colspan="' . ($periodicity > 1 ? '6' : '3') . '">';
@@ -2669,7 +2761,7 @@ class BF_Demande extends BimpObject
             $values = BFTools::getCalcValues($materiel, $services, $tx_moyen, $nb_mois, $marge / 100, $vr, $mode_calcul, $periodicity, $refin_errors);
 
             $html .= '<td style="text-align: left; background-color: #F0F0F0!important">Tx cession moyen</td>';
-            $html .= '<td style="background-color: #F0F0F0!important">' . BimpTools::displayFloatValue($tx_moyen) . ' %</td>';
+            $html .= '<td style="background-color: #F0F0F0!important">' . BimpTools::displayFloatValue($tx_moyen, 3) . ' %</td>';
 
             if (count($refin_errors)) {
                 $html .= '<td colspan="' . ($periodicity > 1 ? '6' : '3') . '">';
@@ -3344,7 +3436,7 @@ class BF_Demande extends BimpObject
                     if (empty($prod_serials)) {
                         break;
                     }
-                    
+
                     if ($id_source && (int) $id_source !== (int) $line->getData('id_source')) {
                         continue;
                     }
@@ -3470,7 +3562,7 @@ class BF_Demande extends BimpObject
         return $errors;
     }
 
-    public function createFactureFin($libelle = '', $id_mode_reglement = 0, $id_cond_reglement = 0, &$warnings = array())
+    public function createFactureFin($id_client = 0, $libelle = '', $id_mode_reglement = 0, $id_cond_reglement = 0, &$warnings = array())
     {
         $errors = array();
 
@@ -3486,7 +3578,9 @@ class BF_Demande extends BimpObject
             return $errors;
         }
 
-        $id_client = (int) $refin->getData('id_societe');
+        if (!$id_client) {
+            $id_client = (int) $refin->getData('id_societe');
+        }
 
         if (!$id_client) {
             $errors[] = 'ID Client absent pour le refianceur ' . $refin->getLink();
@@ -4412,7 +4506,7 @@ class BF_Demande extends BimpObject
         $success = '';
         $sc = '';
 
-        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions', null);
+//        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions', null);
 
 //        if ($use_db_transactions) {
 //            $this->db->db->commit();
@@ -4459,11 +4553,12 @@ class BF_Demande extends BimpObject
 //                $this->db->db->begin();
 //            }
 
+            $id_client = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_client', 0);
             $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fin_libelle', '');
             $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_mode_reglement', 0);
             $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_cond_reglement', 0);
 
-            $fac_errors = $this->createFactureFin($libelle, $id_mode_reglement, $id_cond_reglement, $warnings);
+            $fac_errors = $this->createFactureFin($id_client, $libelle, $id_mode_reglement, $id_cond_reglement, $warnings);
 
             if (count($fac_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture client');

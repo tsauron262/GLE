@@ -940,16 +940,13 @@ forms:
             content: 
                 callback: renderCreateFacFournToggleInput
           - custom: 1
-            show: 
-                field_value: 
-                    field_name: id_main_source
-                    not: 1
             label: Fournisseur
             input_name: fac_fourn_id_fourn
             data_type: id_object
             object: fournisseur
             input: 
                 type: search_object
+                card: default
             display_if: 
                 field_name: create_fac_fourn
                 show_values: 1
@@ -973,11 +970,6 @@ forms:
             label: Mode de réglement
             input_name: fac_fourn_id_mode_reglement
             data_type: id
-            value: 
-                conf: 
-                    name: fac_fourn_def_id_mode_reglement
-                    module: bimpfinancement
-                    is_int: 1
             input: 
                 type: select
                 options: 
@@ -993,11 +985,6 @@ forms:
             label: Conditions de réglement
             input_name: fac_fourn_id_cond_reglement
             data_type: id
-            value: 
-                conf: 
-                    name: fac_fourn_def_id_cond_reglement
-                    module: bimpfinancement
-                    is_int: 1
             input: 
                 type: select
                 options: 
@@ -1013,6 +1000,17 @@ forms:
             content: 
                 callback: renderCreateFacFinToggleInput
           - custom: 1
+            label: Client
+            input_name: fac_fin_id_client
+            data_type: id_object
+            object: client
+            input: 
+                type: search_object
+                card: default
+            display_if: 
+                field_name: create_fac_fin
+                show_values: 1
+          - custom: 1
             label: Libellé
             input_name: fac_fin_libelle
             input: 
@@ -1024,11 +1022,6 @@ forms:
             label: Mode de réglement
             input_name: fac_fin_id_mode_reglement
             data_type: id
-            value: 
-                conf: 
-                    name: fac_fin_def_id_mode_reglement
-                    module: bimpfinancement
-                    is_int: 1
             input: 
                 type: select
                 options: 
@@ -1044,11 +1037,6 @@ forms:
             label: Conditions de réglement
             input_name: fac_fin_id_cond_reglement
             data_type: id
-            value: 
-                conf: 
-                    name: fac_fin_def_id_cond_reglement
-                    module: bimpfinancement
-                    is_int: 1
             input: 
                 type: select
                 options: 

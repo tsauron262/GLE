@@ -43,7 +43,7 @@ switch ($type) {
         break;
 
     case 'facture':
-        $sql = 'SELECT facnumber as ref FROM ' . MAIN_DB_PREFIX . 'facture WHERE rowid = ' . $id . ' LIMIT 1';
+        $sql = 'SELECT ref as ref FROM ' . MAIN_DB_PREFIX . 'facture WHERE rowid = ' . $id . ' LIMIT 1';
         break;
 }
 

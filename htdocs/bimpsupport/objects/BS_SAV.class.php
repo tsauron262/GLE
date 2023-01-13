@@ -153,7 +153,7 @@ class BS_SAV extends BimpObject
     public function canView()
     {
         global $user;
-        return (int) $user->rights->BimpSupport->read;
+        return (int) ($user->admin || $user->rights->BimpSupport->read);
     }
 
     public function canClientView()
@@ -247,11 +247,11 @@ class BS_SAV extends BimpObject
         $montant = 0;
         $factureAc = $this->getChildObject('facture_acompte');
         if ($factureAc->isLoaded()) {
-            $montant += $factureAc->getData('total');
+            $montant += $factureAc->getData('total_ht');
         }
         $propal = $this->getChildObject('propal');
         if ($propal->isLoaded()) {
-            $montant += $propal->getData('total');
+            $montant += $propal->getData('total_ht');
             $lines = $this->getChildrenObjects('propal_lines');
             foreach ($lines as $lineS) {
                 if ($lineS->getData('linked_object_name') == 'sav_garantie') {
@@ -3874,7 +3874,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case "commercialRefuse":
                 $subject = "Devis sav refusé par « " . $client->dol_object->getFullName($langs) . " »";
-                $text = "Notre client « " . $client->dol_object->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . price($propal->dol_object->total) . "€ »";
+                $text = "Notre client « " . $client->dol_object->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . price($propal->dol_object->total_ttc) . "€ »";
                 $id_user_tech = (int) $this->getData('id_user_tech');
                 if ($id_user_tech) {
                     $where = " (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'";

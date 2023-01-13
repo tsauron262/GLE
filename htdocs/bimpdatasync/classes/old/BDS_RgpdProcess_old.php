@@ -24,7 +24,7 @@ class BDS_RgpdProcess extends BDSProcess
             'object_name'       => 'Bimp_Propal',
             'date_field'        => 'datep',
             'date_create_field' => 'datec',
-            'total_field'       => 'total',
+            'total_field'       => 'total_ttc',
             'status_field'      => 'fk_statut',
             'client_field'      => 'fk_soc',
             'objects_defs_kw'   => 'Devis'

@@ -65,6 +65,7 @@ objects:
                 field_value: id_signature
                 
 fields:
+    # Attention : total est devenu total_ttc
     libelle: 
         required: 1
     datec:

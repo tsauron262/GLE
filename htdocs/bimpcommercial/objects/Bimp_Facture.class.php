@@ -2216,7 +2216,7 @@ class Bimp_Facture extends BimpComm
 
     public function getTx_marqueListTotal($filters, $joins)
     {
-        $sql = 'SELECT SUM(a.marge_finale_ok) as marge, SUM(a.total) as total';
+        $sql = 'SELECT SUM(a.marge_finale_ok) as marge, SUM(a.total_ht) as total';
         $sql .= BimpTools::getSqlFrom('facture', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
@@ -2277,7 +2277,7 @@ class Bimp_Facture extends BimpComm
     public function displayTxMarque()
     {
         $marge = (float) $this->getData('marge_finale_ok');
-        $total_ht = (float) $this->getData('total');
+        $total_ht = (float) $this->getData('total_ht');
 
         $tx = 0;
         if ($marge && $total_ht) {

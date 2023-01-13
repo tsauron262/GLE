@@ -649,10 +649,10 @@ class BContract_echeancier extends BimpObject {
 
 
 
-                    $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
+                    $html .= '<td style="text-align:center"><b>' . price($facture->getData('total_ht')) . ' €</b> </td>'
                             . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
                             . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
-                            . '<td style="text-align:center"><b>' . price($facture->getData('total') - $facture->getData('marge_finale_ok')) . ' €</b></td>'
+                            . '<td style="text-align:center"><b>' . price($facture->getData('total_ht') - $facture->getData('marge_finale_ok')) . ' €</b></td>'
                             . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                             . '<td style="text-align:center">' . $paye . '</td>'
                             . '<td style="text-align:center">' . $displayAppatenance . '</td>'
@@ -672,7 +672,7 @@ class BContract_echeancier extends BimpObject {
                     $current_number_facture++;
                 } else {
                    // $facture->getSumDiscountsUsed() . "<br />";
-                    $acomptes_ht += $facture->getData('total');
+                    $acomptes_ht += $facture->getData('total_ht');
                     $acomptes_ttc += $facture->getData('total_ttc');
                 }
             }
@@ -1021,7 +1021,7 @@ class BContract_echeancier extends BimpObject {
                 $laLigne = $facture->dol_object->lines[0];
                 $factures[] = Array(
                     'ref'       => $facture->getRef(),
-                    'ht'        => $facture->getData('total'),
+                    'ht'        => $facture->getData('total_ht'),
                     'tva'       => $facture->getData('tva'),
                     'ttc'       => $facture->getData('total_ttc'),
                     'dateStart' => $laLigne->date_start, 
@@ -1192,8 +1192,8 @@ class BContract_echeancier extends BimpObject {
                             'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDateStr : $startDateStr . ' ('.$factureStr.')',
                             'HT' => $resteAPayer,
                             'DUREE_MOIS' => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
-                            'PRICE' => $factureSource->getData('total'),
-                            'TVA' => $factureSource->getData('total') * 0.2,
+                            'PRICE' => $factureSource->getData('total_ht'),
+                            'TVA' => $factureSource->getData('total_ht') * 0.2,
                             'FACTURE' => $factureSource->getRef()
                         );
                     }

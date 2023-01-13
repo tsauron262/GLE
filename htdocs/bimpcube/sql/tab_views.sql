@@ -1071,7 +1071,7 @@ VIEW `llx_olap_view_facture` AS
 	`llx_facture`.`date_valid_quarter` AS `date_valid_quarter`,
 	`llx_facture`.`date_valid_month` AS `date_valid_month`,
 	`llx_facture`.`date_valid_day` AS `date_valid_day`,
-	`llx_facture`.`total` AS `total_ht`,
+	`llx_facture`.`total_ht` AS `total_ht`,
 	`llx_facture`.`type` AS `type`,
 	cast(`llx_facture_extrafields`.`entrepot` as unsigned) AS `id_entrepot`,
 	`llx_bs_sav`.`id_entrepot` AS `sav_entrepot`,

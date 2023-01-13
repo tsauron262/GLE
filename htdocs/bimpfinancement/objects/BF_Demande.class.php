@@ -2281,7 +2281,7 @@ class BF_Demande extends BimpObject
                         'nom_url'   => $facture->getNomUrl(0, true, true, 'full'),
                         'date'      => $facture->displayData('datef'),
                         'status'    => $facture->displayData('fk_statut'),
-                        'amount_ht' => $facture->displayData('total'),
+                        'amount_ht' => $facture->displayData('total_ht'),
                         'paid'      => $facture->displayPaid(),
                         'file'      => $facture->displayPDFButton(true, true)
                     );
@@ -2296,7 +2296,7 @@ class BF_Demande extends BimpObject
                         'nom_url'   => $facture->getNomUrl(0, true, true, 'full'),
                         'date'      => $facture->displayData('datef'),
                         'status'    => $facture->displayData('fk_statut'),
-                        'amount_ht' => $facture->displayData('total'),
+                        'amount_ht' => $facture->displayData('total_ht'),
                         'paid'      => $facture->displayPaid(),
                         'file'      => $facture->displayPDFButton(true, true)
                     );
@@ -2311,7 +2311,7 @@ class BF_Demande extends BimpObject
                         'nom_url'   => $facture->getNomUrl(0, true, true, 'full'),
                         'date'      => $facture->displayData('datef'),
                         'status'    => $facture->displayData('fk_statut'),
-                        'amount_ht' => $facture->displayData('total'),
+                        'amount_ht' => $facture->displayData('total_ht'),
                         'paid'      => $facture->displayPaid(),
                         'file'      => $facture->displayPDFButton(true, true)
                     );
@@ -2328,7 +2328,7 @@ class BF_Demande extends BimpObject
                         'nom_url'   => $facture->getNomUrl(0, true, true, 'full'),
                         'date'      => $facture->displayData('datef'),
                         'status'    => $facture->displayData('fk_statut'),
-                        'amount_ht' => $facture->displayData('total'),
+                        'amount_ht' => $facture->displayData('total_ht'),
                         'paid'      => $facture->displayPaid(),
                         'file'      => $facture->displayPDFButton(true, true)
                     );

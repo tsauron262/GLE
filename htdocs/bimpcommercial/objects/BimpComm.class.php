@@ -2615,10 +2615,8 @@ class BimpComm extends BimpDolObject
                 $totalHt += $dol_lines[$id_dol_line]->total_ht;
             }
 
-            if ($this->field_exists('total_ht'))
-                $tot = $this->getData('total_ht');
-            else
-                $tot = $this->getData('total');
+            $tot = $this->getData('total_ht');
+            
             if (round((float) $tot, 2) != round($totalHt, 2)) {
                 $this->erreurFatal++;
                 $msg = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($tot, 3);
@@ -4539,7 +4537,6 @@ class BimpComm extends BimpDolObject
             $dateStr = "UNIX_TIMESTAMP(datep)";
         elseif ($this->object_name == 'Bimp_Facture') {
             $dateStr = "UNIX_TIMESTAMP(datef)";
-            $fieldTotal = 'total';
         } else
             $dateStr = "UNIX_TIMESTAMP(date_commande)";
 

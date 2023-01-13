@@ -29,7 +29,7 @@
                         
             for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
                 if ($facture->dol_object->lines[$i]->desc == "Acompte" 
-                        && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
+                        && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total_ht')) {
                     $this->rapport['IGNORE'][$facture->getRef()] = "Facture d'accompte";
                     $facture->updateField('ignore_compta', 1);
                     $facture->updateField('exported',204);

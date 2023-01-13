@@ -982,7 +982,7 @@ class BimpRevalorisation extends BimpObject
                 $_POST['global'] = 0;
                 $amount = $this->getData('amount');
                 $fact = $this->getChildObject('facture');
-                $totalFact = $fact->getData('total');
+                $totalFact = $fact->getData('total_ht');
                 $lines = $fact->getLines();
                 $i = 1;
                 foreach ($lines as $line) {

@@ -456,10 +456,7 @@ class ValidComm extends BimpObject
 
         // Valeur €
         if (!is_a($object, 'BContract_contrat')) {
-            if ((int) $object->getData('total_ht') > 0)
-                $val = (float) $object->getData('total_ht');
-            else
-                $val = (float) $object->getData('total');
+            $val = (float) $object->getData('total_ht');
         } else {
             $val = (float) $object->getCurrentTotal();
         }

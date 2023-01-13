@@ -119,9 +119,9 @@ fields:
             field_name: ef_type
             show_values: S
         default_value: ''
+    # Anciennement "total"    
     total_ht: 
         label: Total HT
-        dol_prop: total_ht
         type: money
     total_ttc: 
         label: Total TTC

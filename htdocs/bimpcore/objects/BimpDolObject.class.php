@@ -602,7 +602,7 @@ class BimpDolObject extends BimpObject
                         break;
                     case 'facture':
                         $bc = BimpCollection::getInstance('bimpcommercial', 'Bimp_Facture');
-                        $bc->addFields(array('datef', 'total', 'fk_statut'));
+                        $bc->addFields(array('datef', 'total_ht', 'fk_statut'));
                         $bc->addItems($ids);
                         foreach ($ids as $id) {
                             $facture_instance = $bc->getObjectInstance((int) $id);
@@ -613,7 +613,7 @@ class BimpDolObject extends BimpObject
                                     'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_instance->getLabel()),
                                     'ref'      => $facture_instance->getNomUrl(0, true, true, null),
                                     'date'     => $facture_instance->displayData('datef'),
-                                    'total_ht' => $facture_instance->displayData('total'),
+                                    'total_ht' => $facture_instance->displayData('total_ht'),
                                     'status'   => $facture_instance->displayData('fk_statut')
                                 );
                             }

@@ -230,7 +230,7 @@ function correctAcomptesFacs(BimpDb $bdb, $type = '', $sav_only = false)
 
     $select_avoir = 'SELECT COUNT(avoir.rowid) FROM llx_facture avoir WHERE avoir.facnumber = CONCAT(\'' . $ref_prefixe . '\', fa.rowid)';
 
-    $sql = 'SELECT fa.rowid as id_acompte, fa.facnumber as ref_acompte, fa.datef as date_acompte, soc.code_client, soc.code_compta, fa.total as total_ht, fa.total_ttc';
+    $sql = 'SELECT fa.rowid as id_acompte, fa.facnumber as ref_acompte, fa.datef as date_acompte, soc.code_client, soc.code_compta, fa.total_ht, fa.total_ttc';
     $sql .= ' FROM llx_facture fa, llx_societe soc';
 
     if ($sav_only) {

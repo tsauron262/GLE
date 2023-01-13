@@ -3655,7 +3655,7 @@ class BContract_contrat extends BimpDolObject
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $infos['d']);
             if ($facture->getData('fk_statut') == 1 || $facture->getData('fk_statut') == 2) {
                 if ($facture->getData('type') == 0) {
-                    $total += $facture->getData('total');
+                    $total += $facture->getData('total_ht');
                 }
             }
         }
@@ -3691,7 +3691,7 @@ class BContract_contrat extends BimpDolObject
             foreach ($facture_delivred as $link) {
                 $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
                 if (/* $instance->getData('type') == 0 */1)
-                    $montant += $instance->getData('total');
+                    $montant += $instance->getData('total_ht');
             }
             $return = $this->getTotalContrat() - $montant;
         } else {
@@ -3879,7 +3879,7 @@ class BContract_contrat extends BimpDolObject
         return $montant;
     }
 
-    public function getTotalDejaPayer($paye_distinct = false, $field = 'total')
+    public function getTotalDejaPayer($paye_distinct = false, $field = 'total_ht')
     {
         $element_factures = getElementElement('contrat', 'facture', $this->id);
         $montant = 0;
@@ -3889,15 +3889,15 @@ class BContract_contrat extends BimpDolObject
                 if ($instance->getData('type') != 3) {
                     if ($paye_distinct) {
                         if ($instance->getData('paye')) {
-                            if ($field == 'total')
-                                $montant += $instance->getData('total');
+                            if ($field == 'total_ht')
+                                $montant += $instance->getData('total_ht');
                             elseif ($field == 'pa')
                                 $montant += $instance->getData('total_achat_reval_ok');
                         }
                     } else {
                         if (/* $instance->getData('type') == 0 */1) {
-                            if ($field == 'total')
-                                $montant += $instance->getData('total');
+                            if ($field == 'total_ht')
+                                $montant += $instance->getData('total_ht');
                             elseif ($field == 'pa')
                                 $montant += $instance->getData('total_achat_reval_ok');
                         }

@@ -3665,7 +3665,7 @@ class BF_Demande extends BimpObject
                 $fac_line->tva_tx = $line->getData('tva_tx');
                 $fac_line->pa_ht = $line->getData('pa_ht');
 //                $fac_line->remises = $line->getData('remise');
-                $fac_line->product_type = ((int) $fac_line->getData('product_type') === BF_Line::PRODUIT ? 0 : 1);
+                $fac_line->product_type = ((int) $line->getData('product_type') === BF_Line::PRODUIT ? 0 : 1);
             }
 
             if ($line_type === BF_Line::TYPE_PRODUCT) {

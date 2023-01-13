@@ -724,7 +724,7 @@ class Synopsisdemandeinterv extends CommonObject {
             if ($update)
                 $action->update($user);
             elseif ($createIfNot)
-                $action->add($user);
+                $action->create($user);
         }
     }
 

@@ -666,7 +666,7 @@ function traiteAction($object, $db, $actionStr = "insert"){
             $action->datef = strtotime(date('Y-m-d H:i:s', strtotime('+'.$attrib.' minutes', $action->datep)));
 
 
-            $action->add($user);
+            $action->create($user);
 
             //Jour suivant
             $nbMinPlan += $attrib;

@@ -1274,7 +1274,7 @@ if ($action == 'save_substitute') {
                 $actioncomm->userownerid = $substitute->id;
                 $note = $actioncomm->note;
                 $actioncomm->note = 'Remplacement de ' . $cpUser->firstname . ' ' . $cpUser->lastname . ($note ? ' - ' . $note : '');
-                if ($actioncomm->add($substitute) < 0)
+                if ($actioncomm->create($substitute) < 0)
                     $rdvErrors = true;
                 unset($actioncomm);
             }

@@ -6,7 +6,6 @@
 * The deprecated subsitution key __SIGNATURE__ has been removed. Replace it with __USER_SIGNATURE__ if you used the old syntax in your email templates.
 * If you have links in your code with '&action=add', '&action=update', '&action=delete' as a parameter, you must also add '&token='.newToken() as another parameter to avoid CSRF protection errors.
 * The method select_thirdparty(), deprecated since 3.8, into html.form.class.php has been removed.
-* Depreciate all methods with name ->valide(). Use instead methods ->validate().
 * Hidden constant COMMANDE_VALID_AFTER_CLOSE_PROPAL was renamed into ORDER_VALID_AFTER_CLOSE_PROPAL.
 * Removed deprecated method actioncomm->add(), use create() instead
 * The deprecated method get_OutstandingBill has been removed. You can use getOutstandingBills() instead.
@@ -35,3 +34,4 @@
 
 *** TRAITES ***
 * All properties ->contactid have been renamed into ->contact_id
+* Depreciate all methods with name ->valide(). Use instead methods ->validate().

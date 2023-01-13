@@ -19,7 +19,7 @@ if ($_REQUEST['id'] > 0) {
     if($_REQUEST['clone'] == "true"){
         $actioncomm->fetch_optionals($actioncomm->id);
 //        $actioncomm->array_options['options_uri'] = "";
-        $actioncomm->add($user);
+        $actioncomm->create($user);
     }
     else
         $actioncomm->update($user);

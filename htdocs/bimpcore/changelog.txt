@@ -1,0 +1,35 @@
+* All triggers with a name XXX_UPDATE have been renamed with name XXX_MODIFY for code consistency purpose.
+* Field "tva"   renamed into "total_tva" for llx_facture, table llx_propal, llx_supplier_proposal, llx_commande, llx_commande_fournisseur for better field name consistency
+* Removed deprecated substitution key  __REFCLIENT__  (replaced with __REF_CLIENT__)
+* All properties ->contactid have been renamed into ->contact_id
+* All properties ->titre have been renamed into ->title
+* Property 'num_paiement' has been renamed 'num_payment' everywhere for better code consistency.
+* The deprecated subsitution key __SIGNATURE__ has been removed. Replace it with __USER_SIGNATURE__ if you used the old syntax in your email templates.
+* If you have links in your code with '&action=add', '&action=update', '&action=delete' as a parameter, you must also add '&token='.newToken() as another parameter to avoid CSRF protection errors.
+* The method select_thirdparty(), deprecated since 3.8, into html.form.class.php has been removed.
+* Depreciate all methods with name ->valide(). Use instead methods ->validate().
+* Hidden constant COMMANDE_VALID_AFTER_CLOSE_PROPAL was renamed into ORDER_VALID_AFTER_CLOSE_PROPAL.
+* Removed deprecated method actioncomm->add(), use create() instead
+* The deprecated method get_OutstandingBill has been removed. You can use getOutstandingBills() instead.
+* Removed function dol_micro_time. Use native PHP microtime instead.
+* The trigger BON_PRELEVEMENT_CREATE has been renamed into DIRECT_DEBIT_ORDER_CREATE.
+* The constant INVOICE_SHOW_POS_IN_EXPORT has been renamed into INVOICE_SHOW_POS.
+* All properties 'libstatut', 'labelstatut', 'labelstatus' were renamed into 'labelStatus'.
+* All properties 'labelstatusshort' and 'labelstatut_short' were renamed into 'labelStatusShort'.
+* All properties 'type_libelle' were renamed into 'type_label'.
+* Renamed property of thirdparty "statut_commercial" into "status_prospect_label"
+* Method GetUrlTrackingStatus were renamed into getUrlTrackingStatus for consistency with naming rules.
+* All methods set_draft() were renamed into setDraft().
+* Removed deprecated function function test_sql_and_script_inject that was replaced with testSqlAndScriptInject.
+* Signatures of methods createFromClone() has been standardized. All methods requires the object User as first parameter.
+* API getListOfCivility has been renamed into getListOfCivilities for consistency with naming rules.
+* Method load_measuring_units were renamed into selectMeasuringUnits and select_measuring_units was deprecated.
+* Hidden option CHANGE_ORDER_CONCAT_DESCRIPTION were renamed into MAIN_CHANGE_ORDER_CONCAT_DESCRIPTION.
+* Method dolEscapeXML was moved from functions.lib.php into function2.lib.php (not used enough to be loaded by default).
+* Removed deprecated use of string in dol_print_date(). Only date allowed.
+* Deprecated property ->fk_departement is now ->state_id everywhere.
+* If you use some links like viewimages.php?modulepart=mycompany&file=... in your external modules, you must
+  replace them with links like viewimages.php?modulepart=mycompany&file=logos/... (note that link change only for
+  modulepart=mycompany that now works like others).
+* Hidden option MAIN_PDF_SHIPPING_DISPLAY_AMOUNT_HT has been renamed into SHIPPING_PDF_DISPLAY_AMOUNT_HT
+* Remove the no more used and deprecated dol_print_graph function

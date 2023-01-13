@@ -2603,7 +2603,7 @@ class BF_Demande extends BimpObject
 
             $html .= '<td style="text-align: left">Actuels</td>';
             $html .= '<td>';
-            $html .= '<b>' . BimpTools::displayFloatValue($this->getData('tx_cession'), 3) . '</b>';
+            $html .= '<b>' . BimpTools::displayFloatValue($this->getData('tx_cession'), 3) . ' %</b>';
             $html .= '</td>';
 
             $html .= '<td style="border-left: 2px solid #' . $primary_color . '">' . BimpTools::displayMoneyValue($loyer_evo) . '</td>';

@@ -150,16 +150,16 @@ class SynopsisProject extends CommonObject {
         $this->societe = new Societe($DB);
         global $langs;
         $langs->load("synopsisproject@synopsisprojet");
-        $this->labelstatut[0] = $langs->trans("ProjectStatusDraft");
-        $this->labelstatut[5] = $langs->trans("ProjectStatusPlanning");
-        $this->labelstatut[10] = $langs->trans("ProjectStatusRunning");
-        $this->labelstatut[50] = $langs->trans("ProjectStatusClose");
-        $this->labelstatut[999] = $langs->trans("ProjectStatusWaitingValidation");
-        $this->labelstatut_short[0] = $langs->trans("ProjectStatusDraftShort");
-        $this->labelstatut_short[5] = $langs->trans("ProjectStatusPlanningShort");
-        $this->labelstatut_short[10] = $langs->trans("ProjectStatusRunningShort");
-        $this->labelstatut_short[50] = $langs->trans("ProjectStatusCloseShort");
-        $this->labelstatut_short[999] = $langs->trans("ProjectStatusWaitingValidationShort");
+        $this->labelStatus[0] = $langs->trans("ProjectStatusDraft");
+        $this->labelStatus[5] = $langs->trans("ProjectStatusPlanning");
+        $this->labelStatus[10] = $langs->trans("ProjectStatusRunning");
+        $this->labelStatus[50] = $langs->trans("ProjectStatusClose");
+        $this->labelStatus[999] = $langs->trans("ProjectStatusWaitingValidation");
+        $this->labelStatusShort[0] = $langs->trans("ProjectStatusDraftShort");
+        $this->labelStatusShort[5] = $langs->trans("ProjectStatusPlanningShort");
+        $this->labelStatusShort[10] = $langs->trans("ProjectStatusRunningShort");
+        $this->labelStatusShort[50] = $langs->trans("ProjectStatusCloseShort");
+        $this->labelStatusShort[999] = $langs->trans("ProjectStatusWaitingValidationShort");
     }
 
     /*
@@ -2126,22 +2126,22 @@ class SynopsisProject extends CommonObject {
         global $langs;
         $langs->load("synopsisproject@synopsisprojet");
         if ($mode == 0) {
-            return $this->labelstatut[$statut];
+            return $this->labelStatus[$statut];
         }
         if ($mode == 1) {
-            return $this->labelstatut_short[$statut];
+            return $this->labelStatusShort[$statut];
         }
         if ($mode == 2) {
             if ($statut == 0)
-                return img_picto($langs->trans('ProjectStatusDraftShort'), 'statut0') . ' ' . $this->labelstatut_short[$statut];
+                return img_picto($langs->trans('ProjectStatusDraftShort'), 'statut0') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 5)
-                return img_picto($langs->trans('ProjectStatusPlanningShort'), 'statut1') . ' ' . $this->labelstatut_short[$statut];
+                return img_picto($langs->trans('ProjectStatusPlanningShort'), 'statut1') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 10)
-                return img_picto($langs->trans('ProjectStatusRunningShort'), 'statut3') . ' ' . $this->labelstatut_short[$statut];
+                return img_picto($langs->trans('ProjectStatusRunningShort'), 'statut3') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 50)
-                return img_picto($langs->trans('ProjectStatusCloseShort'), 'statut5') . ' ' . $this->labelstatut_short[$statut];
+                return img_picto($langs->trans('ProjectStatusCloseShort'), 'statut5') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 999)
-                return img_picto($langs->trans('ProjectStatusWaitingValidShort'), 'statut8', 'style="vertical-align:middle;"') . ' ' . $this->labelstatut_short[$statut];
+                return img_picto($langs->trans('ProjectStatusWaitingValidShort'), 'statut8', 'style="vertical-align:middle;"') . ' ' . $this->labelStatusShort[$statut];
         }
         if ($mode == 3) {
             if ($statut == 0)
@@ -2157,39 +2157,39 @@ class SynopsisProject extends CommonObject {
         }
         if ($mode == 4) {
             if ($statut == 0)
-                return img_picto($langs->trans('ProjectStatusDraft'), 'statut0') . ' ' . $this->labelstatut[$statut];
+                return img_picto($langs->trans('ProjectStatusDraft'), 'statut0') . ' ' . $this->labelStatus[$statut];
             if ($statut == 5)
-                return img_picto($langs->trans('ProjectStatusPlanning'), 'statut1') . ' ' . $this->labelstatut[$statut];
+                return img_picto($langs->trans('ProjectStatusPlanning'), 'statut1') . ' ' . $this->labelStatus[$statut];
             if ($statut == 10)
-                return img_picto($langs->trans('ProjectStatusRunning'), 'statut3') . ' ' . $this->labelstatut[$statut];
+                return img_picto($langs->trans('ProjectStatusRunning'), 'statut3') . ' ' . $this->labelStatus[$statut];
             if ($statut == 50)
-                return img_picto($langs->trans('ProjectStatusClose'), 'statut5') . ' ' . $this->labelstatut[$statut];
+                return img_picto($langs->trans('ProjectStatusClose'), 'statut5') . ' ' . $this->labelStatus[$statut];
             if ($statut == 999)
-                return img_picto($langs->trans('ProjectStatusWaitingValid'), 'statut8', 'style="vertical-align:middle;"') . ' ' . $this->labelstatut[$statut];
+                return img_picto($langs->trans('ProjectStatusWaitingValid'), 'statut8', 'style="vertical-align:middle;"') . ' ' . $this->labelStatus[$statut];
         }
         if ($mode == 5) {
             if ($statut == 0)
-                return $this->labelstatut_short[$statut] . ' ' . img_picto($langs->trans('ProjectStatusDraftShort'), 'statut0');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($langs->trans('ProjectStatusDraftShort'), 'statut0');
             if ($statut == 5)
-                return $this->labelstatut_short[$statut] . ' ' . img_picto($langs->trans('ProjectStatusPlanningShort'), 'statut1');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($langs->trans('ProjectStatusPlanningShort'), 'statut1');
             if ($statut == 10)
-                return $this->labelstatut_short[$statut] . ' ' . img_picto($langs->trans('ProjectStatusRunningShort'), 'statut3');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($langs->trans('ProjectStatusRunningShort'), 'statut3');
             if ($statut == 50)
-                return $this->labelstatut_short[$statut] . ' ' . img_picto($langs->trans('ProjectStatusCloseShort'), 'statut5');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($langs->trans('ProjectStatusCloseShort'), 'statut5');
             if ($statut == 999)
-                return $this->labelstatut_short[$statut] . ' ' . img_picto($langs->trans('ProjectStatusWaitingValidShort'), 'statut8', 'style="vertical-align:middle;"');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($langs->trans('ProjectStatusWaitingValidShort'), 'statut8', 'style="vertical-align:middle;"');
         }
         if ($mode == 6) {
             if ($statut == 0)
-                return $this->labelstatut[$statut] . ' ' . img_picto($langs->trans('ProjectStatusDraft'), 'statut0');
+                return $this->labelStatus[$statut] . ' ' . img_picto($langs->trans('ProjectStatusDraft'), 'statut0');
             if ($statut == 5)
-                return $this->labelstatut[$statut] . ' ' . img_picto($langs->trans('ProjectStatusPlanning'), 'statut1');
+                return $this->labelStatus[$statut] . ' ' . img_picto($langs->trans('ProjectStatusPlanning'), 'statut1');
             if ($statut == 10)
-                return $this->labelstatut[$statut] . ' ' . img_picto($langs->trans('ProjectStatusRunning'), 'statut3');
+                return $this->labelStatus[$statut] . ' ' . img_picto($langs->trans('ProjectStatusRunning'), 'statut3');
             if ($statut == 50)
-                return $this->labelstatut[$statut] . ' ' . img_picto($langs->trans('ProjectStatusClose'), 'statut5');
+                return $this->labelStatus[$statut] . ' ' . img_picto($langs->trans('ProjectStatusClose'), 'statut5');
             if ($statut == 999)
-                return $this->labelstatut[$statut] . ' ' . img_picto($langs->trans('ProjectStatusWaitingValid'), 'statut8', 'style="vertical-align:middle;"');
+                return $this->labelStatus[$statut] . ' ' . img_picto($langs->trans('ProjectStatusWaitingValid'), 'statut8', 'style="vertical-align:middle;"');
         }
     }
 
@@ -2295,17 +2295,17 @@ class SynopsisProjectTask extends commonObject {
     public $dateoFR;
     public $dateoFRFull;
     public $projet_id;
-    public $labelstatut = array();
-    public $labelstatut_short = array();
+    public $labelStatus = array();
+    public $labelStatusShort = array();
 
     public function __construct($db) {
         $this->db = $db;
         global $langs;
         $langs->load("synopsisproject@synopsisprojet");
-        $this->labelstatut['open'] = $langs->trans("Open");
-        $this->labelstatut["closed"] = $langs->trans("Closed");
-        $this->labelstatut_short["open"] = $langs->trans("Open");
-        $this->labelstatut_short["closed"] = $langs->trans("Closed");
+        $this->labelStatus['open'] = $langs->trans("Open");
+        $this->labelStatus["closed"] = $langs->trans("Closed");
+        $this->labelStatusShort["open"] = $langs->trans("Open");
+        $this->labelStatusShort["closed"] = $langs->trans("Closed");
     }
 
     public function fetch($id) {
@@ -2441,16 +2441,16 @@ class SynopsisProjectTask extends commonObject {
         global $langs;
         $langs->load("synopsisproject@synopsisprojet");
         if ($mode == 0) {
-            return $this->labelstatut[$statut];
+            return $this->labelStatus[$statut];
         }
         if ($mode == 1) {
-            return $this->labelstatut_short[$statut];
+            return $this->labelStatusShort[$statut];
         }
         if ($mode == 2) {
             if ($statut == 'open')
-                return img_picto($langs->trans('Open'), 'statut4') . ' ' . $this->labelstatut_short[$statut];
+                return img_picto($langs->trans('Open'), 'statut4') . ' ' . $this->labelStatusShort[$statut];
             if ($statut == 'closed')
-                return img_picto($langs->trans('Close'), 'statut5') . ' ' . $this->labelstatut_short[$statut];
+                return img_picto($langs->trans('Close'), 'statut5') . ' ' . $this->labelStatusShort[$statut];
         }
         if ($mode == 3) {
             if ($statut == 'open')
@@ -2460,15 +2460,15 @@ class SynopsisProjectTask extends commonObject {
         }
         if ($mode == 4) {
             if ($statut == 'open')
-                return img_picto($langs->trans('Open'), 'statut4') . ' ' . $this->labelstatut[$statut];
+                return img_picto($langs->trans('Open'), 'statut4') . ' ' . $this->labelStatus[$statut];
             if ($statut == 'closed')
-                return img_picto($langs->trans('Close'), 'statut5') . ' ' . $this->labelstatut[$statut];
+                return img_picto($langs->trans('Close'), 'statut5') . ' ' . $this->labelStatus[$statut];
         }
         if ($mode == 5) {
             if ($statut == 'open')
-                return $this->labelstatut_short[$statut] . ' ' . img_picto($langs->trans('Open'), 'statut4');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($langs->trans('Open'), 'statut4');
             if ($statut == 'closed')
-                return $this->labelstatut_short[$statut] . ' ' . img_picto($langs->trans('Close'), 'statut5');
+                return $this->labelStatusShort[$statut] . ' ' . img_picto($langs->trans('Close'), 'statut5');
         }
     }
 

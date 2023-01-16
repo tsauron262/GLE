@@ -1,6 +1,5 @@
 * All triggers with a name XXX_UPDATE have been renamed with name XXX_MODIFY for code consistency purpose.
 * Removed deprecated substitution key  __REFCLIENT__  (replaced with __REF_CLIENT__)
-* All properties ->titre have been renamed into ->title
 * The deprecated subsitution key __SIGNATURE__ has been removed. Replace it with __USER_SIGNATURE__ if you used the old syntax in your email templates.
 * If you have links in your code with '&action=add', '&action=update', '&action=delete' as a parameter, you must also add '&token='.newToken() as another parameter to avoid CSRF protection errors.
 * The method select_thirdparty(), deprecated since 3.8, into html.form.class.php has been removed.
@@ -9,9 +8,6 @@
 * Removed function dol_micro_time. Use native PHP microtime instead.
 * The trigger BON_PRELEVEMENT_CREATE has been renamed into DIRECT_DEBIT_ORDER_CREATE.
 * The constant INVOICE_SHOW_POS_IN_EXPORT has been renamed into INVOICE_SHOW_POS.
-* All properties 'libstatut', 'labelstatut', 'labelstatus' were renamed into 'labelStatus'.
-* All properties 'labelstatusshort' and 'labelstatut_short' were renamed into 'labelStatusShort'.
-* All properties 'type_libelle' were renamed into 'type_label'.
 * Renamed property of thirdparty "statut_commercial" into "status_prospect_label"
 * Method GetUrlTrackingStatus were renamed into getUrlTrackingStatus for consistency with naming rules.
 * All methods set_draft() were renamed into setDraft().
@@ -35,3 +31,7 @@
 * Removed deprecated method actioncomm->add(), use create() instead
 * Property 'num_paiement' has been renamed 'num_payment' everywhere for better code consistency.
 * Field "tva"   renamed into "total_tva" for llx_facture, table llx_propal, llx_supplier_proposal, llx_commande, llx_commande_fournisseur for better field name consistency
+* All properties ->titre have been renamed into ->title
+* All properties 'libstatut', 'labelstatut', 'labelstatus' were renamed into 'labelStatus'.
+* All properties 'labelstatusshort' and 'labelstatut_short' were renamed into 'labelStatusShort'.
+* All properties 'type_libelle' were renamed into 'type_label'.

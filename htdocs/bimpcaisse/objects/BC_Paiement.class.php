@@ -63,7 +63,7 @@ class BC_Paiement extends BimpObject
         $paiement = $this->getChildObject('paiement');
 
         if (BimpObject::objectLoaded($paiement)) {
-            return $paiement->dol_object->type_libelle;
+            return $paiement->dol_object->type_label;
         }
 
         return '';

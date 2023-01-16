@@ -246,10 +246,20 @@ class BWSApi_ExtEntity extends BWSApi
 
         if (!count($this->errors)) {
             $id_demande = (int) $this->getParam('id_demande', 0);
+            $id_init_demande = 0;
             $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
 
             if (!BimpObject::objectLoaded($demande)) {
-                $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
+                $demande = $this->getMergedDemande($id_demande);
+
+                if (BimpObject::objectLoaded($demande)) {
+                    $id_init_demande = $id_demande;
+                    $id_demande = $demande->id;
+                }
+            }
+
+            if (!BimpObject::objectLoaded($demande)) {
+                $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas - ' . $id_demande . ' - ' . $id_init_demande);
             } else {
                 $status = (int) $demande->getData('status');
                 $response = array(
@@ -308,10 +318,22 @@ class BWSApi_ExtEntity extends BWSApi
                     );
                 }
 
-                $contrat_status = (int) $demande->getData('contrat_status');
-//                if ($contrat_status >= 20 && $contrat_status < 30) {//TODO pourquoi ne pas authoriser tous les temps ?
-                    $response['missing_serials'] = $demande->getMissingSerials();
-//                }
+                $id_source = 0;
+                if ($id_init_demande) {
+                    $id_source = (int) BimpCache::getBdb()->getValue('bf_demande_source', 'id', 'id_init_demande = ' . $id_init_demande);
+                } else {
+                    $id_source = (int) $demande->getData('id_main_source');
+                }
+
+                $response['missing_serials'] = $demande->getMissingSerials(false, $id_source);
+
+                if ($id_init_demande && $id_init_demande != $id_demande) {
+                    $main_source = $demande->getSource('main');
+
+                    if (BimpObject::objectLoaded($main_source)) {
+                        $response['source_warning'] = 'Attention : cette demande de location doit être gérée sur ' . $main_source->displayOrigine(1, 0, 1);
+                    }
+                }
             }
         }
 
@@ -424,12 +446,29 @@ class BWSApi_ExtEntity extends BWSApi
 
         if (!count($this->errors)) {
             $id_demande = (int) $this->getParam('id_demande', 0);
+            $id_init_demande = 0;
             $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
+
+            if (!BimpObject::objectLoaded($demande)) {
+                $demande = $this->getMergedDemande($id_demande);
+
+                if (BimpObject::objectLoaded($demande)) {
+                    $id_init_demande = $id_demande;
+                    $id_demande = $demande->id;
+                }
+            }
 
             if (!BimpObject::objectLoaded($demande)) {
                 $this->addError('UNFOUND', 'La demande de location #' . $id_demande . ' n\'existe pas');
             } else {
-                $errors = $demande->setSerialsFromSource($this->getParam('serials', array()));
+                $id_source = 0;
+                if ($id_init_demande) {
+                    $id_source = (int) BimpCache::getBdb()->getValue('bf_demande_source', 'id', 'id_init_demande = ' . $id_init_demande);
+                } else {
+                    $id_source = (int) $demande->getData('id_main_source');
+                }
+
+                $errors = $demande->setSerialsFromSource($this->getParam('serials', array()), $id_source);
 
                 if (count($errors)) {
                     $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
@@ -443,5 +482,21 @@ class BWSApi_ExtEntity extends BWSApi
         }
 
         return $response;
+    }
+
+    // Outils: 
+
+    public function getMergedDemande($id_demande)
+    {
+        $id = (int) BimpCache::getBdb()->getValue('bf_demande', 'id', 'merged_demandes LIKE \'[' . $id_demande . ']\'');
+
+        if ($id) {
+            $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id);
+            if (BimpObject::objectLoaded($demande)) {
+                return $demande;
+            }
+        }
+
+        return null;
     }
 }

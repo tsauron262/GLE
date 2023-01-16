@@ -83,7 +83,7 @@ class modBimptocegid extends DolibarrModules {
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("autoliquidation_tva_711", 44571100, "bimptocegid")';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_tva_fr", 44571000, "bimptocegid")';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_tva_ue", 44571200, "bimptocegid")';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES (vente_tva_null", 70750100, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_tva_null", 70750100, "bimptocegid")';
         //$sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("vente_tva_null_service", 70650100)';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_fr", 44566100, "bimptocegid")';
         $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_null", 60780000, "bimptocegid")';

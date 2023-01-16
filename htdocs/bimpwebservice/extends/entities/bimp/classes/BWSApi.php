@@ -39,6 +39,18 @@ BWSApi::$requests['sendDocFinancement'] = array(
     )
 );
 
+BWSApi::$requests['setDocFinancementStatus'] = array(
+    'desc'   => 'Définir le statut du document d\'une demande de location',
+    'params' => array(
+        'demande_target' => array('label' => 'Destinataire de la demande de location', 'required' => 1),
+        'id_demande'     => array('label' => 'ID demande de location', 'data_type' => 'id', 'required' => 1),
+        'type_origine'   => array('label' => 'Type de pièce d\'origine', 'required' => 1),
+        'id_origine'     => array('label' => 'ID pièce d\'origine', 'data_type' => 'id', 'required' => 1),
+        'doc_type'       => array('label' => 'Type de document'),
+        'status'         => array('label' => 'Nouveau statut')
+    )
+);
+
 BWSApi::$requests['reopenDemandeFinancement'] = array(
     'demande_target' => array('label' => 'Destinataire de la demande de location', 'required' => 1),
     'id_demande'     => array('label' => 'ID demande de location', 'data_type' => 'id', 'required' => 1),
@@ -49,6 +61,7 @@ BWSApi::$requests['reopenDemandeFinancement'] = array(
 
 class BWSApi_ExtEntity extends BWSApi
 {
+
     // Requêtes: 
 
     protected function wsRequest_setDemandeFinancementStatus()
@@ -156,6 +169,41 @@ class BWSApi_ExtEntity extends BWSApi
         return $response;
     }
 
+    protected function wsRequest_setDocFinancementStatus()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $bcdf_class = '';
+            BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin', $bcdf_class);
+            $origine = $bcdf_class::getOrigineFromType($this->getParam('type_origine', ''), (int) $this->getParam('id_origine', 0));
+
+            if (!BimpObject::objectLoaded($origine)) {
+                $this->addError('UNFOUND', 'Pièce d\'origine non trouvée (Type: "' . $this->getParam('type_origine', '') . '" - ID: ' . $this->getParam('id_origine', 0) . ')');
+            } else {
+                $bcdf = BimpCache::findBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', array(
+                            'obj_module' => $origine->module,
+                            'obj_name'   => $origine->object_name,
+                            'id_obj'     => $origine->id,
+                            'target'     => $this->getParam('demande_target', ''),
+                            'id_ext_df'  => (int) $this->getParam('id_demande', 0)
+                ));
+
+                if (!BimpObject::objectLoaded($bcdf)) {
+                    $this->addError('UNFOUND', 'Aucune demande de location trouvée pour l\'ID externe ' . $this->getParam('id_demande', 0));
+                } else {
+                    $errors = $bcdf->setDocFinStatus($this->getParam('doc_type', '') . '_fin', (int) $this->getParam('status', ''));
+
+                    if (count($errors)) {
+                        $this->addError('FAIL', BimpTools::getMsgFromArray($errors, '', true));
+                    }
+                }
+            }
+        }
+
+        return $response;
+    }
+
     protected function wsRequest_getDemandeFinancementInfos()
     {
         $response = array();
@@ -249,26 +297,5 @@ class BWSApi_ExtEntity extends BWSApi
         }
 
         return $response;
-    }
-
-    protected function wsRequest_getPropositionLocation()
-    {
-        $errors = array();
-
-        $total_materiels = (float) $this->getParam('total_materiels_ht', 0);
-        $total_services = (float) $this->getParam('total_services_ht', 0);
-
-        if (($total_materiels + $total_services) == 0) {
-            $errors[] = 'Montant total invalide';
-        }
-        
-        if (count($errors)) {
-            $this->addError('INVALID_PARAMETER', BimpTools::getMsgFromArray($errors, '', true));
-        } else {
-            $duration = $this->getParam('duration', 0);
-            $periodicity = $this->getParam('periodicity', 0);
-            $mode_calcul = $this->getParam('mode_calcul', 0);
-            $file_content = BF_Demande::createPropositionPDF($total_materiels, $total_services, $duration, $periodicity, $mode_calcul, $errors);
-        }
     }
 }

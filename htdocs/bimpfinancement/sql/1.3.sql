@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bf_demande_refinanceur` ADD `prix_cession_ht` double(24,8) NOT NULL DEFAULT 0;

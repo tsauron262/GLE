@@ -677,6 +677,28 @@ class BimpSignature extends BimpObject
                             'fontSize'      => $font_size,
                         );
                     }
+                    
+                    if (isset($signature_params['nom'])) {
+                        $params['tabs']['fullNameTabs'] = array();
+                        $params['tabs']['fullNameTabs'][] = array(
+                            'name'          => "Nom signataire",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => BimpTools::getArrayValueFromPath($signature_params, 'nom/x', 0),
+                            'anchorYOffset' => BimpTools::getArrayValueFromPath($signature_params, 'nom/y', 0),
+                            'fontSize'      => $font_size,
+                        );
+                    }
+                    
+                    if (isset($signature_params['fonction'])) {
+                        $params['tabs']['titleTabs'] = array();
+                        $params['tabs']['titleTabs'][] = array(
+                            'name'          => "Qualité signataire",
+                            'anchorString'  => $anchor,
+                            'anchorXOffset' => BimpTools::getArrayValueFromPath($signature_params, 'fonction/x', 0),
+                            'anchorYOffset' => BimpTools::getArrayValueFromPath($signature_params, 'fonction/y', 0),
+                            'fontSize'      => $font_size,
+                        );
+                    }
 
                     $signers[] = $params;
                     $i++;
@@ -1270,11 +1292,11 @@ class BimpSignature extends BimpObject
 
             $is_company = (int) $signataire->isClientCompany();
             if ((int) BimpTools::getArrayValueFromPath($params, 'display_nom', $is_company)) {
-                $texts['nom'] = $signataire->getData('nom');
+                $texts['nom'] = utf8_decode($signataire->getData('nom'));
             }
 
             if ((int) BimpTools::getArrayValueFromPath($params, 'display_fonction', $is_company)) {
-                $texts['fonction'] = $signataire->getData('fonction');
+                $texts['fonction'] = utf8_decode($signataire->getData('fonction'));
             }
 
             $pdf = new BimpConcatPdf();

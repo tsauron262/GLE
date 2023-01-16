@@ -20,6 +20,11 @@ fields:
         label: Demande
         type: id_parent
         
+    id_init_demande: 
+        label: ID demande initiale
+        type: id
+        default_value: 0
+        
     type:
         label: Type
         values: 

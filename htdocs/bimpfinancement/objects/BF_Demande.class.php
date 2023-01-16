@@ -134,6 +134,9 @@ class BF_Demande extends BimpObject
 
         $status = (int) $this->getData('status');
         switch ($field) {
+            case 'agreement_number': // Editable uniquement via demande refin. 
+                return 0;
+
             case 'marge_souhaitee':
             case 'tx_cession':
             case 'loyer_mensuel_evo_ht':
@@ -230,7 +233,7 @@ class BF_Demande extends BimpObject
             return 0;
         }
 
-        if (in_array($action, array('submitDevis', 'submitContrat', 'submitRefuse', 'submitCancel'))) {
+        if (in_array($action, array('submitDevis', 'submitContrat'))) {
             if (!$this->getData('id_main_source')) {
                 $errors[] = 'Pas de source externe';
                 return 0;
@@ -271,6 +274,7 @@ class BF_Demande extends BimpObject
 
             case 'generateDevisFinancement':
             case 'uploadDevisFinancement':
+            case 'forceDevisSigned':
                 if ((int) $this->getData('status') !== self::STATUS_ACCEPTED) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut ' . self::$status_list[self::STATUS_ACCEPTED]['label'];
                 }
@@ -283,6 +287,7 @@ class BF_Demande extends BimpObject
 
             case 'generateContratFinancement':
             case 'uploadContratFinancement':
+            case 'forceContratSigned':
                 if ((int) $this->getData('status') !== self::STATUS_ACCEPTED) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut ' . self::$status_list[self::STATUS_ACCEPTED]['label'];
                 }
@@ -299,6 +304,7 @@ class BF_Demande extends BimpObject
                 return (count($errors) ? 0 : 1);
 
             case 'generatePVReception':
+            case 'forcePvrSigned':
                 if ((int) $this->getData('status') !== self::STATUS_ACCEPTED) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut ' . self::$status_list[self::STATUS_ACCEPTED]['label'];
                 }
@@ -465,7 +471,6 @@ class BF_Demande extends BimpObject
                     $errors[] = 'Refus déjà soumis à ' . $this->displaySourceName();
                     return 0;
                 }
-
                 return 1;
 
             case 'createFactures':
@@ -477,6 +482,12 @@ class BF_Demande extends BimpObject
 
                 if ((int) $this->getData('id_facture_fourn') && (int) $this->getData('id_facture_fin')) {
                     $errors[] = 'Toutes les factures ont été créées';
+                    return 0;
+                }
+
+                $missing_serials = $this->getMissingSerials();
+                if ($missing_serials['total'] > 0) {
+                    $errors[] = $missing_serials['total'] . 'n° de série absent(s)';
                     return 0;
                 }
                 return 1;
@@ -650,6 +661,19 @@ class BF_Demande extends BimpObject
                     'onclick' => $this->getJsLoadModalForm('upload_' . $doc_type, 'Déposer le ' . $doc_type . ' de location')
                 );
             }
+            $action = 'force' . ucfirst($doc_type) . 'Signed';
+            if ($this->isActionAllowed($action) && $this->canSetAction($action)) {
+                $label = 'Forcer ' . $doc_type . ' de location signé';
+                $confirm_msg = htmlentities('ATTENTION : le ' . $doc_type . ' de location ne sera pas généré et sera directement marqué "Signé"');
+
+                $buttons['force_' . $doc_type] = array(
+                    'label'   => $label,
+                    'icon'    => 'fas_check',
+                    'onclick' => $this->getJsActionOnclick($action, array(), array(
+                        'confirm_msg' => $confirm_msg
+                    ))
+                );
+            }
 
             $action = 'createSignature' . ucfirst($doc_type);
             if ($this->isActionAllowed($action) && $this->canSetAction($action)) {
@@ -669,6 +693,16 @@ class BF_Demande extends BimpObject
                 'icon'    => 'fas_cogs',
                 'onclick' => $this->getJsActionOnclick('generatePVReception', array(), array(
                     'form_name' => 'generate_pvr'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('forcePvrSigned') && $this->canSetAction('forcePvrSigned')) {
+            $buttons[] = array(
+                'label'   => 'Forcer PVR signé',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('forcePvrSigned', array(), array(
+                    'confirm_msg' => htmlentities('ATTENTION : le PVR de ne sera pas généré et sera directement marqué "Signé"')
                 ))
             );
         }
@@ -699,24 +733,6 @@ class BF_Demande extends BimpObject
                 'onclick' => $this->getJsActionOnclick('reopen', array(), array())
             );
         }
-
-//        if ((int) $this->getData('id_main_source')) {
-//            if (isset($buttons['generate_devis'])) {
-//                $buttons['generate_devis']['onclick'] = $this->getJsActionOnclick('generateDevisFinancement', array(
-//                    'create_signature' => 0
-//                        ), array(
-//                    'confirm_msg' => 'Veuillez confirmer'
-//                ));
-//            }
-//
-//            if (isset($buttons['generate_contrat'])) {
-//                $buttons['generate_contrat']['onclick'] = $this->getJsActionOnclick('generateContratFinancement', array(
-//                    'create_signature' => 0
-//                        ), array(
-//                    'confirm_msg' => 'Veuillez confirmer'
-//                ));
-//            }
-//        }
 
         if ($this->isActionAllowed('submitDevis') && $this->canSetAction('submitDevis')) {
             $buttons[] = array(
@@ -1358,6 +1374,100 @@ class BF_Demande extends BimpObject
                     }
                 }
                 return '';
+
+            // Génération factures: 
+            case 'fac_fourn_libelle':
+            case 'fac_fin_libelle':
+                return 'Contrat de location n° ' . str_replace('DF', '', $this->getRef());
+
+            case 'fac_fourn_id_fourn':
+                if ((int) $this->getData('id_main_source')) {
+                    $source = $this->getSource();
+                    if (BimpObject::objectLoaded($source)) {
+                        return (int) BimpCore::getConf('id_fourn_' . $source->getData('type'), null, 'bimpfinancement');
+                    }
+                    return 0;
+                }
+                return (int) $this->getData('id_supplier');
+
+            case 'fac_fourn_id_mode_reglement':
+            case 'fac_fourn_id_cond_reglement':
+                $id_fourn = 0;
+                if ((int) $this->getData('id_main_source')) {
+                    $source = $this->getSource();
+                    if (BimpObject::objectLoaded($source)) {
+                        $id_fourn = (int) BimpCore::getConf('id_fourn_' . $source->getData('type'), null, 'bimpfinancement');
+                    }
+                } else {
+                    $id_fourn = (int) $this->getData('id_supplier');
+                }
+
+                if ($id_fourn) {
+                    $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_fourn);
+                    if (BimpObject::objectLoaded($fourn)) {
+                        $id = 0;
+                        switch ($field_name) {
+                            case 'fac_fourn_id_mode_reglement':
+                                $id = (int) $fourn->getData('mode_reglement_supplier');
+                                if (!$id) {
+                                    $id = (int) BimpCore::getConf('fac_fourn_def_id_mode_reglement', null, 'bimpfinancement');
+                                }
+                                break;
+
+                            case 'fac_fourn_id_cond_reglement':
+                                $id = (int) $fourn->getData('cond_reglement_supplier');
+                                if (!$id) {
+                                    $id = (int) BimpCore::getConf('fac_fourn_def_id_cond_reglement', null, 'bimpfinancement');
+                                }
+                                break;
+                        }
+                        return $id;
+                    }
+                }
+                return 0;
+
+            case 'fac_fin_id_client':
+            case 'fac_fin_id_mode_reglement':
+            case 'fac_fin_id_cond_reglement':
+                $id_client = 0;
+                $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+                if ($id_refin) {
+                    $refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Refinanceur', $id_refin);
+                    if (BimpObject::objectLoaded($refin)) {
+                        $id_client = (int) $refin->getData('id_societe');
+                    }
+                }
+
+                if ($id_client) {
+                    switch ($field_name) {
+                        case 'fac_fin_id_client':
+                            return $id_client;
+
+                        case 'fac_fin_id_mode_reglement':
+                        case 'fac_fin_id_cond_reglement':
+                            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_client);
+                            if (BimpObject::objectLoaded($client)) {
+                                $id = 0;
+                                switch ($field_name) {
+                                    case 'fac_fin_id_mode_reglement':
+                                        $id = (int) $client->getData('mode_reglement');
+                                        if (!$id) {
+                                            $id = (int) BimpCore::getConf('fac_fin_def_id_mode_reglement', null, 'bimpfinancement');
+                                        }
+                                        break;
+
+                                    case 'fac_fin_id_cond_reglement':
+                                        $id = (int) $client->getData('cond_reglement');
+                                        if (!$id) {
+                                            $id = (int) BimpCore::getConf('fac_fin_def_id_cond_reglement', null, 'bimpfinancement');
+                                        }
+                                        break;
+                                }
+                                return $id;
+                            }
+                    }
+                }
+                return 0;
         }
 
         return $this->getData($field_name);
@@ -1492,9 +1602,9 @@ class BF_Demande extends BimpObject
         return $commFourns;
     }
 
-    public function getMissingSerials($recalculate = false)
+    public function getMissingSerials($recalculate = false, $id_source = 0)
     {
-        if (is_null($this->missing_serials) || $recalculate) {
+        if (is_null($this->missing_serials) || $recalculate || $id_source) {
             $lines = $this->getLines('not_text');
 
             $this->missing_serials = array(
@@ -1503,6 +1613,10 @@ class BF_Demande extends BimpObject
             );
 
             foreach ($lines as $line) {
+                if ($id_source && (int) $id_source !== (int) $line->getData('id_source')) {
+                    continue;
+                }
+
                 if ($line->isProductSerialisable()) {
                     $serials = $line->getData('serials');
                     $diff = (int) $line->getData('qty') - count($serials);
@@ -2578,7 +2692,9 @@ class BF_Demande extends BimpObject
             $loyer_dyn_suppl = $this->getData('loyer_mensuel_suppl_ht');
 
             $html .= '<td style="text-align: left">Actuels</td>';
-            $html .= '<td></td>';
+            $html .= '<td>';
+            $html .= '<b>' . BimpTools::displayFloatValue($this->getData('tx_cession'), 3) . ' %</b>';
+            $html .= '</td>';
 
             $html .= '<td style="border-left: 2px solid #' . $primary_color . '">' . BimpTools::displayMoneyValue($loyer_evo) . '</td>';
             if ($periodicity > 1) {
@@ -2612,7 +2728,7 @@ class BF_Demande extends BimpObject
                 $html .= '<tr>';
 
                 $html .= '<td style="text-align: left">' . $refin_name . '</td>';
-                $html .= '<td>' . BimpTools::displayFloatValue($tx) . ' %</td>';
+                $html .= '<td>' . BimpTools::displayFloatValue($tx, 3) . ' %</td>';
 
                 if (count($refin_errors)) {
                     $html .= '<td colspan="' . ($periodicity > 1 ? '6' : '3') . '">';
@@ -2645,7 +2761,7 @@ class BF_Demande extends BimpObject
             $values = BFTools::getCalcValues($materiel, $services, $tx_moyen, $nb_mois, $marge / 100, $vr, $mode_calcul, $periodicity, $refin_errors);
 
             $html .= '<td style="text-align: left; background-color: #F0F0F0!important">Tx cession moyen</td>';
-            $html .= '<td style="background-color: #F0F0F0!important">' . BimpTools::displayFloatValue($tx_moyen) . ' %</td>';
+            $html .= '<td style="background-color: #F0F0F0!important">' . BimpTools::displayFloatValue($tx_moyen, 3) . ' %</td>';
 
             if (count($refin_errors)) {
                 $html .= '<td colspan="' . ($periodicity > 1 ? '6' : '3') . '">';
@@ -3118,7 +3234,7 @@ class BF_Demande extends BimpObject
                             break;
                     }
 
-                    $api->sendDocFinancement($this->id, $type_origine, $id_origine, $doc_type, $doc_content, $signature_params, $signataires_data, $req_errors, $warnings);
+                    $api->sendDocFinancement($this->id, $type_origine, $id_origine, $doc_type, $doc_content, $signature_params, $signataires_data, $req_errors);
 
                     if (count($req_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la requête');
@@ -3173,17 +3289,17 @@ class BF_Demande extends BimpObject
                             $this->addObjectLog('Document "' . self::$doc_types[$doc_type] . '" signé', strtoupper($doc_type) . '_SIGNE');
                             $this->addNote('Document "' . self::$doc_types[$doc_type] . '" signé', null, 0, 0, '', BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, (int) $this->getData('id_user_resp'), 1);
                             $this->checkIsClosed();
-//                            $user_resp = $this->getChildObject('user_resp');
-//                            if (BimpObject::objectLoaded($user_resp)) {
-//                                $email = $user_resp->getData('email');
-//                                if ($email) {
-//                                    $doc_ref = $this->getSignatureDocRef($doc_type);
-//                                    $subject = ucfirst($doc_type) . ' de location ' . $doc_ref . ' signé par le client';
-//                                    $msg = 'Bonjour,<br/><br/>';
-//                                    $msg .= 'Le document signé est accessible sur la page de la demande de location ' . $this->getLink() . '<br/><br/>';
-//                                    mailSyn2($subject, $email, '', $msg);
-//                                }
-//                            }
+
+                            $sources = $this->getChildrenObjects('sources');
+
+                            BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin');
+                            foreach ($sources as $source) {
+                                if ((int) $this->getData('id_main_source') == $source->id) {
+                                    continue;
+                                }
+
+                                $source->setDocFinStatus($doc_type, BimpCommDemandeFin::DOC_STATUS_ACCEPTED);
+                            }
                         }
                     }
                 }
@@ -3201,7 +3317,6 @@ class BF_Demande extends BimpObject
             if (!array_key_exists($doc_type, static::$doc_types)) {
                 $errors[] = 'Type de document invalide: ' . $doc_type;
             } else {
-//                $this->set('closed', 1);
                 $this->set($doc_type . '_status', self::DOC_REFUSED);
 
                 $warnings = array();
@@ -3213,6 +3328,17 @@ class BF_Demande extends BimpObject
                     $this->addObjectLog($msg, strtoupper($doc_type) . '_REFUSED');
                     $this->addNote($msg, null, 0, 0, '', BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, (int) $this->getData('id_user_resp'), 1);
                     $this->checkIsClosed();
+
+                    $sources = $this->getChildrenObjects('sources');
+
+                    BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin');
+                    foreach ($sources as $source) {
+                        if ((int) $this->getData('id_main_source') == $source->id) {
+                            continue;
+                        }
+
+                        $source->setDocFinStatus($doc_type, BimpCommDemandeFin::DOC_STATUS_REFUSED);
+                    }
                 }
             }
         }
@@ -3258,6 +3384,17 @@ class BF_Demande extends BimpObject
                 }
                 $this->addObjectLog($msg, 'CANCELLED_BY_SOURCE');
                 $this->addNote($msg, null, 0, 0, '', BimpNote::BN_AUTHOR_USER, BImpNote::BN_DEST_USER, 0, (int) $this->getData('id_user_resp'), 1);
+
+                $sources = $this->getChildrenObjects('sources');
+
+                BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin');
+                foreach ($sources as $source) {
+                    if ((int) $this->getData('id_main_source') == $source->id) {
+                        continue;
+                    }
+
+                    $source->setDemandeFinancementStatus(BimpCommDemandeFin::DOC_STATUS_CANCELED, $note);
+                }
             }
         }
 
@@ -3285,7 +3422,7 @@ class BF_Demande extends BimpObject
         }
     }
 
-    public function setSerialsFromSource($serials)
+    public function setSerialsFromSource($serials, $id_source = 0)
     {
         $errors = array();
 
@@ -3298,6 +3435,10 @@ class BF_Demande extends BimpObject
                 foreach ($lines as $line) {
                     if (empty($prod_serials)) {
                         break;
+                    }
+
+                    if ($id_source && (int) $id_source !== (int) $line->getData('id_source')) {
+                        continue;
                     }
 
                     $ref = $line->getRefProduct();
@@ -3387,13 +3528,19 @@ class BF_Demande extends BimpObject
             return $errors;
         }
 
+        $note = '<b>Client Final : </b>' . strip_tags($this->displayClient());
+        if ($this->getData('agreement_number')) {
+            $note .= '<br/><b>N° D\'accord : </b>' . $this->getData('agreement_number');
+        }
+
         $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_FactureFourn', array(
                     'libelle'           => $libelle,
                     'ref_supplier'      => $ref_supplier,
                     'fk_soc'            => $fourn->id,
                     'fk_mode_reglement' => $id_mode_reglement,
                     'fk_cond_reglement' => $id_cond_reglement,
-                    'datef'             => date('Y-m-d')
+                    'datef'             => date('Y-m-d'),
+                    'note_public'       => $note
                         ), true, $errors, $warnings);
 
         if (!BimpObject::objectLoaded($facture) && empty($errors)) {
@@ -3415,7 +3562,7 @@ class BF_Demande extends BimpObject
         return $errors;
     }
 
-    public function createFactureFin($libelle = '', $id_mode_reglement = 0, $id_cond_reglement = 0, &$warnings = array())
+    public function createFactureFin($id_client = 0, $libelle = '', $id_mode_reglement = 0, $id_cond_reglement = 0, &$warnings = array())
     {
         $errors = array();
 
@@ -3431,7 +3578,9 @@ class BF_Demande extends BimpObject
             return $errors;
         }
 
-        $id_client = (int) $refin->getData('id_societe');
+        if (!$id_client) {
+            $id_client = (int) $refin->getData('id_societe');
+        }
 
         if (!$id_client) {
             $errors[] = 'ID Client absent pour le refianceur ' . $refin->getLink();
@@ -3444,6 +3593,18 @@ class BF_Demande extends BimpObject
             return $errors;
         }
 
+        $prix_cession = (float) $this->getSelectedDemandeRefinanceurData('prix_cession_ht');
+
+        if (!$prix_cession) {
+            $errors[] = 'Prix de cession total HT non défini pour la demande refinanceur sélectionnée';
+            return $errors;
+        }
+
+        $note = '<b>Client Final : </b>' . strip_tags($this->displayClient());
+        if ($this->getData('agreement_number')) {
+            $note .= '<br/><b>N° D\'accord : </b>' . $this->getData('agreement_number');
+        }
+
         $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
                     'libelle'           => $libelle,
                     'fk_soc'            => $client->id,
@@ -3451,7 +3612,8 @@ class BF_Demande extends BimpObject
                     'type'              => 0,
                     'fk_mode_reglement' => (int) $id_mode_reglement,
                     'fk_cond_reglement' => (int) $id_cond_reglement,
-                    'datef'             => date('Y-m-d')
+                    'datef'             => date('Y-m-d'),
+                    'note_public'       => $note
                         ), true, $errors, $warnings);
 
         if (!BimpObject::objectLoaded($facture) && empty($errors)) {
@@ -3459,7 +3621,7 @@ class BF_Demande extends BimpObject
         }
 
         if (!count($errors)) {
-            $lines_errors = $this->addBimpCommObjectLines($facture, 7510.57);
+            $lines_errors = $this->addBimpCommObjectLines($facture, $prix_cession);
 
             if (count($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture');
@@ -3478,9 +3640,9 @@ class BF_Demande extends BimpObject
         $errors = array();
 
         $lines = $this->getLines();
-        
+
         $pourcentage = 1;
-        if($total_attendu){
+        if ($total_attendu) {
             $pourcentage = $total_attendu / $this->getTotalDemandeHT();
         }
 
@@ -3499,11 +3661,11 @@ class BF_Demande extends BimpObject
 
             if ($line_type !== BF_Line::TYPE_TEXT) {
                 $fac_line->qty = $line->getData('qty');
-                $fac_line->pu_ht = $line->getData('pu_ht')*$pourcentage;
+                $fac_line->pu_ht = $line->getData('pu_ht') * $pourcentage;
                 $fac_line->tva_tx = $line->getData('tva_tx');
                 $fac_line->pa_ht = $line->getData('pa_ht');
 //                $fac_line->remises = $line->getData('remise');
-                $fac_line->product_type = ((int) $fac_line->getData('product_type') === BF_Line::PRODUIT ? 0 : 1);
+                $fac_line->product_type = ((int) $line->getData('product_type') === BF_Line::PRODUIT ? 0 : 1);
             }
 
             if ($line_type === BF_Line::TYPE_PRODUCT) {
@@ -3515,17 +3677,16 @@ class BF_Demande extends BimpObject
 
             $line_warnings = array();
             $line_errors = $fac_line->create($line_warnings, true);
-            
-            
+
             if (!count($line_errors)) {
-                if($line->getData('remise') > 0){
+                if ($line->getData('remise') > 0) {
                     BimpObject::createBimpObject('bimpcommercial', 'ObjectLineRemise', array(
-                                                        'id_object_line'           => (int) $fac_line->id,
-                                                        'object_type'              => $fac_line::$parent_comm_type,
-                                                        'linked_id_remise_globale' => (int) 0,
-                                                        'type'                     => ObjectLineRemise::OL_REMISE_PERCENT,
-                                                        'percent'                  => (float) $line->getData('remise')
-                                                            ), $errors, $errors);
+                        'id_object_line'           => (int) $fac_line->id,
+                        'object_type'              => $fac_line::$parent_comm_type,
+                        'linked_id_remise_globale' => 0,
+                        'type'                     => ObjectLineRemise::OL_REMISE_PERCENT,
+                        'percent'                  => (float) $line->getData('remise')
+                            ), $errors, $errors);
                 }
             }
 
@@ -3533,8 +3694,950 @@ class BF_Demande extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $line->getData('position'));
             }
         }
-        
+
         return $errors;
+    }
+
+    public function forceDocSigned($doc_type, &$warnings = array())
+    {
+        $errors = array();
+
+        $field_name = $doc_type . '_status';
+        $errors = $this->updateField($field_name, self::DOC_ACCEPTED);
+
+        if (!count($errors)) {
+            BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin');
+            $sources = $this->getChildrenObjects('sources');
+
+            foreach ($sources as $source) {
+                $src_errors = $source->setDocFinStatus($doc_type, BimpCommDemandeFin::DOC_STATUS_ACCEPTED);
+
+                if (count($src_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($src_errors, 'Source "' . $source->displayName() . '"');
+                }
+            }
+
+            if (!count($errors)) {
+                $this->addObjectLog(static::getDocTypeLabel($doc_type) . ' forcé au statut "Signé"', strtoupper($doc_type) . '_FORCED_SIGNED');
+            }
+        }
+
+        return $errors;
+    }
+
+    // Actions:
+
+    public function actionTakeCharge($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Prise en charge effectuée';
+
+        global $user;
+
+        if (!BimpObject::objectLoaded($user)) {
+            $errors[] = 'Aucun utilisateur connecté';
+        } else {
+            if ((int) $this->getData('status') < 0) {
+                $errors = $this->updateField('status', 0); // Pour éviter log auto
+            }
+
+            if (!count($errors)) {
+                $errors = $this->updateField('id_user_resp', $user->id);
+
+                if (!BimpObject::objectLoaded($errors)) {
+                    $this->addObjectLog('Prise en charge', 'PRIS_EN_CHARGE');
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCancel($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Demande de location abandonnée';
+
+        $reasons = BimpTools::getArrayValueFromPath($data, 'reasons', '');
+
+        if (!(int) $this->getData('id_main_source')) {
+            $this->set('closed', 1);
+        }
+        $this->set('status', self::STATUS_CANCELED);
+
+        $devis_status = (int) $this->getData('devis_status');
+        if ($devis_status > 0 && $devis_status < 10) {
+            $this->set('devis_status', self::DOC_CANCELLED);
+        }
+
+        $contrat_status = (int) $this->getData('contrat_status');
+        if ($contrat_status > 0 && $contrat_status < 10) {
+            $this->set('contrat_status', self::DOC_CANCELLED);
+        }
+
+        $pvr_status = (int) $this->getData('pvr_status');
+        if ($pvr_status > 0 && $pvr_status < 10) {
+            $this->set('pvr_status', self::DOC_CANCELLED);
+        }
+
+        $errors = $this->update($warnings, true);
+
+        if (!count($errors)) {
+            $this->addObjectLog('Demande de location abandonnée' . ($reasons ? '<br/><b>Raisons : <b/><br/>' . $reasons : ''), 'CANCELED');
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionReopen($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Demande de location réouverte';
+
+        if (!(int) $this->getData('id_user_resp')) {
+            $this->set('status', self::STATUS_NEW);
+        } else {
+            $this->set('status', self::STATUS_DRAFT);
+
+            if (!count($errors)) {
+                $this->addObjectLog('Demande de location réouverte', 'REOPEN');
+            }
+
+            $this->set('closed', 0);
+
+            $errors = $this->update($warnings, true);
+
+            if (!count($errors)) {
+                if (!count($errors)) {
+                    $sources = $this->getChildrenObjects('sources');
+                    if (!empty($sources)) {
+                        $source = $this->getSource();
+
+                        if (BimpObject::objectLoaded($source)) {
+                            $source->updateField('cancel_submitted', 0);
+                            $source->updateField('refuse_submitted', 0);
+                            $errors = $this->checkStatus($warnings);
+                        } else {
+                            $errors[] = 'Source principale absente';
+                        }
+
+                        if (!count($errors)) {
+                            foreach ($sources as $source) {
+                                $src_warnings = array();
+                                $src_errors = $source->reopenDemande((int) $this->getData('status'), $src_warnings);
+
+                                if (count($src_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($src_errors, 'Source "' . $source->displayName() . '"');
+                                }
+                            }
+                        }
+                    } else {
+                        $errors = $this->checkStatus($warnings);
+
+                        $devis_status = 0;
+                        $dir = $this->getFilesDir();
+                        $signature = $this->getChildObject('signature_contrat');
+                        if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
+                            $this->set('contrat_status', self::DOC_ACCEPTED);
+                            $devis_status = self::DOC_ACCEPTED;
+                        } else {
+                            $file = $this->getSignatureDocFileName('contrat');
+                            if (file_exists($dir . $file)) {
+                                $this->set('contrat_status', self::DOC_GENERATED);
+                                $devis_status = self::DOC_ACCEPTED;
+                            }
+                        }
+
+                        if (!$devis_status) {
+                            $signature = $this->getChildObject('signature_devis');
+                            if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
+                                $devis_status = self::DOC_ACCEPTED;
+                            } else {
+                                $file = $this->getSignatureDocFileName('devis');
+                                if (file_exists($dir . $file)) {
+                                    $devis_status = self::DOC_GENERATED;
+                                }
+                            }
+                        }
+                        $this->set('devis_status', $devis_status);
+                    }
+
+                    $signature = $this->getChildObject('signature_pvr');
+                    if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
+                        $this->set('pvr_status', self::DOC_ACCEPTED);
+                    } else {
+                        $file = $this->getSignatureDocFileName('pvr');
+                        if (file_exists($dir . $file)) {
+                            $this->set('pvr_status', self::DOC_GENERATED);
+                        }
+                    }
+                    $errors = $this->update($warnings, true);
+                    $this->checkIsClosed();
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionGenerateDevisFinancement($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $errors = $this->generateDocument('devis', $data, $warnings, $success);
+
+        if (!count($errors)) {
+            $file_name = $this->getSignatureDocFileName('devis');
+            $file = $this->getFilesDir() . $file_name;
+
+            if (file_exists($file)) {
+                $url = $this->getFileUrl($file_name);
+                if ($url) {
+                    $sc = 'window.open(\'' . $url . '\')';
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
+    public function actionGenerateContratFinancement($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Création du fichier PDF effectué avec succès';
+        $sc = '';
+
+        $formule = BimpTools::getArrayValueFromPath($data, 'formule', $this->getData('formule'));
+        if ($formule != $this->getData('formule')) {
+            $this->updateField('formule', $formule);
+        }
+
+        $is_company = (int) BimpTools::getArrayValueFromPath($data, 'client_is_company', 0);
+        $client_data = array(
+            'is_company'   => $is_company,
+            'nom'          => BimpTools::getArrayValueFromPath($data, 'client_name', '', $errors, true, 'Nom du client absent'),
+            'address'      => BimpTools::getArrayValueFromPath($data, 'client_address', '', $errors, true, 'Adresse du client absente'),
+            'representant' => BimpTools::getArrayValueFromPath($data, 'client_representant', '', $errors, true, 'Nom du représenant du client absent'),
+            'livraisons'   => BimpTools::getArrayValueFromPath($data, 'client_livraisons', '')
+        );
+
+        if ($is_company) {
+            $client_data['forme_juridique'] = BimpTools::getArrayValueFromPath($data, 'client_forme_juridique', '', $errors, true, ' absente');
+            $client_data['capital'] = BimpTools::getArrayValueFromPath($data, 'client_capital', '', $errors, true, 'Capital social du client absent');
+            $client_data['siren'] = BimpTools::getArrayValueFromPath($data, 'client_siren', '', $errors, true, 'N° SIREN du client absent');
+            $client_data['insee'] = (int) BimpTools::getArrayValueFromPath($data, 'client_insee', 0);
+            $client_data['repr_qualite'] = BimpTools::getArrayValueFromPath($data, 'client_repr_qualite', '', $errors, true, 'Qualité du représenant du client absente');
+
+            if (!$client_data['insee']) {
+                $client_data['rcs'] = BimpTools::getArrayValueFromPath($data, 'client_rcs', '', $errors, true, 'Ville d\'enregistrement au RCS absente');
+            }
+        }
+
+        $loueur_data = array(
+            'nom'     => BimpTools::getArrayValueFromPath($data, 'loueur_nom', '', $errors, true, 'Nom du signataire loueur absent'),
+            'qualite' => BimpTools::getArrayValueFromPath($data, 'loueur_qualite', '', $errors, true, 'Qualité du signataire loueur absente')
+        );
+
+        $cessionnaire_data = array(
+            'raison_social' => BimpTools::getArrayValueFromPath($data, 'cessionnaire_saison_sociale', '', $errors, true, 'Raison solicale du signataire cessionnaire absente'),
+            'siren'         => BimpTools::getArrayValueFromPath($data, 'cessionnaire_siren', '', $errors, true, 'N° SIREN du signataire cessionnaire absent'),
+            'nom'           => BimpTools::getArrayValueFromPath($data, 'cessionnaire_nom', ''),
+            'qualite'       => BimpTools::getArrayValueFromPath($data, 'cessionnaire_qualite', '')
+        );
+
+        $loueur_email = BimpTools::getArrayValueFromPath($data, 'loueur_email', '', $errors, true, 'Adresse e-mail du signataire loueur absent');
+        $cessionnaire_email = BimpTools::getArrayValueFromPath($data, 'cessionnaire_email', '', $errors, true, 'Adresse e-mail du signataire cessionnaire absent');
+
+        if (!count($errors)) {
+            $this->updateField('contrat_signataires_data', array(
+                'locataire'    => array(
+                    'nom'      => $client_data['representant'],
+                    'fonction' => $client_data['repr_qualite']
+                ),
+                'loueur'       => array(
+                    'nom'      => $loueur_data['nom'],
+                    'email'    => $loueur_email,
+                    'fonction' => $loueur_data['qualite']
+                ),
+                'cessionnaire' => array(
+                    'nom'      => $cessionnaire_data['nom'],
+                    'email'    => $cessionnaire_email,
+                    'fonction' => $cessionnaire_data['qualite']
+                )
+            ));
+            if ($this->isDemandeValid($errors)) {
+                global $db;
+                $files_dir = $this->getFilesDir();
+                $ref = $this->getRef();
+
+//            // PDF Consignes: 
+//            $file_name = 'consignes_' . $ref . '.pdf';
+//
+//            require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ConsignesContratFinancementPDF.php';
+//            $pdf = new ConsignesContratFinancementPDF($db, $this);
+//            if (!$pdf->render($files_dir . $file_name, 'F')) {
+//                $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF des consignes client');
+//            }
+                // PDF contrat de location: 
+                $file_name = $this->getSignatureDocFileName('contrat');
+                require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
+                $pdf = new ContratFinancementPDF($db, $this, $client_data, $loueur_data, $cessionnaire_data);
+
+                $pdf->render($files_dir . $file_name, 'F');
+
+                if (count($pdf->errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF du contrat de location');
+                } else {
+                    $up_errors = $this->updateField('contrat_status', self::DOC_GENERATED);
+                    if (count($up_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du nouveau statut du contrat de location');
+                    }
+
+                    if (file_exists($files_dir . $file_name)) {
+                        $url = $this->getFileUrl($file_name);
+                        if ($url) {
+                            $sc = 'window.open(\'' . $url . '\')';
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
+    public function actionGeneratePVReception($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Génération du PV de réception effectuée avec succès';
+
+        $errors = $this->generateDocument('pvr', $data, $warnings, $success);
+
+        if (!count($errors)) {
+            $signataires_data = array(
+                'locataire' => array(
+                    'nom'      => BimpTools::getArrayValueFromPath($data, 'client_representant', ''),
+                    'fonction' => BimpTools::getArrayValueFromPath($data, 'client_repr_qualite', '')
+                ),
+                'loueur'    => array(
+                    'nom'      => BimpTools::getArrayValueFromPath($data, 'loueur_nom', ''),
+                    'fonction' => BimpTools::getArrayValueFromPath($data, 'loueur_qualite'),
+                    'email'    => BimpTools::getArrayValueFromPath($data, 'loueur_email', '')
+                )
+            );
+
+            $err = $this->updateField('pvr_signataires_data', $signataires_data);
+
+            $file_name = $this->getSignatureDocFileName('pvr');
+            $file = $this->getFilesDir() . $file_name;
+
+            if (file_exists($file)) {
+                $url = $this->getFileUrl($file_name);
+                if ($url) {
+                    $sc = 'window.open(\'' . $url . '\')';
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
+    public function actionForceDevisSigned($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Devis de location marqué signé';
+
+        $errors = $this->forceDocSigned('devis', $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionForceContratSigned($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Contrat de location marqué signé';
+
+        $errors = $this->forceDocSigned('contrat', $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionForcePvrSigned($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'PVR de réception marqué signé';
+
+        $errors = $this->forceDocSigned('pvr', $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCreateSignatureDevis($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fiche signature du devis de location créée avec succès';
+
+        $signature_errors = $this->createSignature('devis', $data, $warnings);
+
+        if (count($signature_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
+        } else {
+            if ((int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0) ||
+                    (int) BimpTools::getArrayValueFromPath($data, 'init_docusign', 0)) {
+                $up_errors = $this->updateField('devis_status', self::DOC_SEND);
+                if (count($up_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du nouveau statut du devis');
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCreateSignatureContrat($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fiche signature du contrat de location créée avec succès';
+
+        $signature_errors = $this->createSignature('contrat', $data, $warnings);
+
+        if (count($signature_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
+        } else {
+            if ((int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0) ||
+                    (int) BimpTools::getArrayValueFromPath($data, 'init_docusign', 0)) {
+                $up_errors = $this->updateField('contrat_status', self::DOC_SEND);
+                if (count($up_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du nouveau statut du contrat');
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCreateSignaturePvr($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fiche signature du PV de réception créée avec succès';
+
+        $signature_errors = $this->createSignature('pvr', $data, $warnings);
+
+        if (count($signature_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
+        } else {
+            if ((int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0) ||
+                    (int) BimpTools::getArrayValueFromPath($data, 'init_docusign', 0)) {
+                $up_errors = $this->updateField('pvr_status', self::DOC_SEND);
+                if (count($up_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du nouveau statut du PVR');
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSubmitDevis($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Envoi du devis de location à ' . $this->displaySourceName() . ' effectué avec succès';
+
+        $errors = $this->submitDoc('devis');
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSubmitContrat($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Envoi du contrat de location à ' . $this->displaySourceName() . ' effectué avec succès';
+
+        $errors = $this->submitDoc('contrat');
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSubmitPvr($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Envoi du PV de réception à ' . $this->displaySourceName() . ' effectué avec succès';
+
+        $errors = $this->submitDoc('pvr');
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSubmitRefuse($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Soumission du refus auprès de ' . $this->displaySourceName() . ' effectuée avec succès';
+
+        $note = BimpTools::getArrayValueFromPath($data, 'note', '');
+        BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin');
+
+        $sources = $this->getChildrenObjects('sources');
+
+        foreach ($sources as $source) {
+            $src_errors = $source->setDemandeFinancementStatus(BimpCommDemandeFin::DOC_STATUS_REFUSED, $note);
+
+            if (count($src_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($src_errors, 'Source "' . $source->displayName() . '"');
+            } else {
+                $success .= ($success ? '<br/>' : '') . 'Soumission du refus auprès de ' . $source->displayName() . ' effectuée avec succès';
+            }
+        }
+
+        if (!count($errors)) {
+            $up_errors = $this->updateField('closed', 1);
+            if (count($up_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du statut "Fermé' . $this->e() . '"');
+            } else {
+                $this->addObjectLog('Refus définitif - Demande fermée' . ($note ? '<br/><b>Note : </b>' . $note : ''), 'CLOSED');
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSubmitCancel($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Soumission de l\'abandon auprès de ' . $this->displaySourceName() . ' effectuée avec succès';
+
+        $note = BimpTools::getArrayValueFromPath($data, 'note', '');
+        $sources = $this->getChildrenObjects('sources');
+        BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin');
+
+        foreach ($sources as $source) {
+            $src_errors = $source->setDemandeFinancementStatus(BimpCommDemandeFin::DOC_STATUS_CANCELED, $note);
+
+            if (count($src_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($src_errors, 'Source "' . $source->displayName() . '"');
+            } else {
+                $success .= ($success ? '<br/>' : '') . 'Soumission de l\'abandon auprès de ' . $source->displayName() . ' effectuée avec succès';
+            }
+        }
+
+        if (!count($errors)) {
+            $this->set('closed', 1);
+            $this->set('devis_status', self::DOC_CANCELLED);
+            $this->set('contrat_status', self::DOC_CANCELLED);
+            $this->set('pvr_status', self::DOC_CANCELLED);
+            $up_errors = $this->update($warnings, true);
+
+            if (count($up_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du statut "Fermé' . $this->e() . '"');
+            } else {
+                $this->addObjectLog('Annulation notifiée auprès de ' . $this->displaySourceName() . ' - Demande fermée' . ($note ? '<br/><b>Note : </b>' . $note : ''), 'CLOSED');
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionMergeDemandes($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Demandes fusionnées avec succès';
+
+        $demandes = array();
+        $id_demandes = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        $merged_demandes = array();
+
+        if (empty($id_demandes)) {
+            $errors[] = 'Aucune demande de location sélectionnée';
+        } else {
+            foreach ($id_demandes as $id_demande) {
+                $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
+
+                if (!BimpObject::objectLoaded($demande)) {
+                    $errors[] = 'La demande #' . $id_demande . ' n\'existe plus';
+                } else {
+                    $demande_errors = array();
+                    if (!$demande->isMergeable($demande_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Demande ' . $demande->getRef());
+                    } else {
+                        $demandes[$id_demande] = $demande;
+                    }
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            if (count($demandes) < 2) {
+                $errors[] = 'Veuillez sélectionner au moins deux demandes de financements brouillons à fusionner';
+            } else {
+                $main_source = null;
+                $id_main_source = (int) BimpTools::getArrayValueFromPath($data, 'id_main_source', 0);
+
+                if (!$id_main_source) {
+                    $errors[] = 'Aucune source principale sélectionnée';
+                } else {
+                    $main_source = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_DemandeSource', $id_main_source);
+
+                    if (!BimpObject::objectLoaded($main_source)) {
+                        $errors[] = 'La source #' . $id_main_source . ' n\'existe plus';
+                    }
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            $id_demande_to_keep = (int) $main_source->getData('id_demande');
+
+            if (!array_key_exists($id_demande_to_keep, $demandes)) {
+                $errors[] = 'La demande correspondant à la source principale sélectionnée ne correspond à aucune des demandes à fusionner sélectionnées';
+            } else {
+                $next_line_position = (int) $this->db->getMax('bf_demande_line', 'position', 'id_demande = ' . $id_demande_to_keep);
+                foreach ($demandes as $demande) {
+                    if ($demande->id == $id_demande_to_keep) {
+                        continue;
+                    }
+
+                    // Transfert des sources: 
+                    foreach ($demande->getChildrenObjects('sources') as $source) {
+                        $source_errors = $source->updateField('id_init_demande', $demande->id);
+                        $source_errors = $source->updateField('id_demande', $id_demande_to_keep);
+                        if (count($source_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($source_errors, 'Echec du transfert de la source "' . $source->displayOrigine(true) . '" vers la demande à conserver');
+                        }
+                    }
+
+                    // Transferts des lignes: 
+                    foreach ($demande->getLines() as $line) {
+                        if (BimpObject::objectLoaded($line)) {
+                            $next_line_position++;
+                            if ($this->db->update('bf_demande_line', array(
+                                        'id_demande' => $id_demande_to_keep,
+                                        'position'   => $next_line_position
+                                            ), 'id = ' . $line->id) <= 0) {
+                                $errors[] = 'Echec du transfert de la ligne "' . $line->displayDesc(1, 1) . '" - ' . $this->db->err();
+                            }
+                        }
+                    }
+
+                    $merged_demandes[] = (int) $demande->id;
+                    foreach ($demande->getData('merged_demandes') as $id_merged_demande) {
+                        if (!in_array((int) $id_merged_demande, $merged_demandes)) {
+                            $merged_demandes[] = (int) $id_merged_demande;
+                        }
+                    }
+
+                    // Suppression de la demande: 
+                    $demande_warnings = array();
+                    $demande_errors = $demande->delete($demande_warnings, true);
+
+                    if (count($demande_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de la suppression de la demande ' . $demande->getRef());
+                    }
+                }
+
+                if (!count($errors)) {
+                    $demande_to_keep = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande_to_keep);
+
+                    if (BimpObject::objectLoaded($demande_to_keep)) {
+                        foreach ($demande_to_keep->getData('merged_demandes') as $id_merged_demande) {
+                            if (!in_array((int) $id_merged_demande, $merged_demandes)) {
+                                $merged_demandes[] = (int) $id_merged_demande;
+                            }
+                        }
+
+                        $demande_to_keep->updateField('merged_demandes', $merged_demandes);
+
+                        // Recalcul totaux: 
+                        $demande_to_keep->calcLinesMontants();
+                    } else {
+                        $errors[] = 'Demande à conserver #' . $id_demande_to_keep . ' n\'existe plus';
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionResetDefaultValue($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if ($this->isLoaded($errors)) {
+            $field_name = BimpTools::getArrayValueFromPath($data, 'field_name', '');
+            if (!$field_name) {
+                $errors[] = 'Champ à mettre à jour absent';
+            } elseif (!$this->field_exists($field_name)) {
+                $errors[] = 'Le champ "' . $field_name . '" n\'existe pas';
+            } else {
+                $field_label = $this->getConf('fields/' . $field_name . '/label', $field_name);
+                if (!$this->isFieldEditable($field_name)) {
+                    $errors[] = 'Le champ "' . $field_label . '" n\'est plus modifiable';
+                } elseif (!$this->canEditField($field_name)) {
+                    $errors[] = 'Vous n\'avez pas la permission de modifier le champ "' . $field_label . '"';
+                } else {
+                    $def_values = $this->getDefaultValues();
+                    if (!isset($def_values[$field_name])) {
+                        $errors[] = 'Aucune valeur par défaut trouvée pour le champ "' . $field_label . '"';
+                    } else {
+                        $cur_val = (float) $this->getData($field_name);
+
+                        if (round($cur_val, 2) == round($def_values[$field_name], 2)) {
+                            $errors[] = 'Le champ "' . $field_label . '" est déjà à la valeur par défault';
+                        } else {
+                            $success = 'Mise à jour du chmap "' . $field_label . '" effectuée avec succès';
+                            $this->set($field_name, round($def_values[$field_name], 2));
+                            $errors = $this->update($warnings, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionGeneratePropositionLocation($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = '';
+
+        $file_name = self::createPropositionPDF($data, $errors);
+
+        if (!count($errors)) {
+            $dir = DOL_DATA_ROOT . '/bimpfinancement/';
+            $sub_dir = 'propositions/' . date('Y-m-d') . '/';
+            if (!file_exists($dir . $sub_dir . $file_name)) {
+                $errors[] = 'Echec de la création du document PDF pour une raison inconnue';
+            } else {
+                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpfinancement&file=' . urlencode($sub_dir . $file_name);
+                $sc = 'window.open(\'' . $url . '\');';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
+    public function actionCreateFactures($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = '';
+
+//        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions', null);
+//        if ($use_db_transactions) {
+//            $this->db->db->commit();
+//        }
+
+        if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fourn', 0)) {
+//            if ($use_db_transactions) {
+//                $this->db->db->begin();
+//            }
+
+            $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fourn_libelle', '');
+            $ref_supplier = BimpTools::getArrayValueFromPath($data, 'fac_fourn_ref_supplier', '');
+            $id_fourn = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_fourn', 0);
+            $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_mode_reglement', 0);
+            $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_cond_reglement', 0);
+
+            $fac_errors = $this->createFactureFournisseur($id_fourn, $id_mode_reglement, $id_cond_reglement, $ref_supplier, $libelle, $warnings);
+
+            if (count($fac_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture fournisseur');
+
+//                if ($use_db_transactions) {
+//                    $this->db->db->rollback();
+//                }
+            } else {
+//                if ($use_db_transactions) {
+//                    $this->db->db->commit();
+//                }
+
+                $success = 'Facture fournisseur créée avec succès';
+
+                $fac = $this->getChildObject('facture_fourn');
+                if (BimpObject::objectLoaded($fac)) {
+                    $url = $fac->getUrl();
+                    if ($url) {
+                        $sc .= 'window.open(\'' . $url . '\');';
+                    }
+                }
+            }
+        }
+
+        if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fin', 0)) {
+//            if ($use_db_transactions) {
+//                $this->db->db->begin();
+//            }
+
+            $id_client = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_client', 0);
+            $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fin_libelle', '');
+            $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_mode_reglement', 0);
+            $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_cond_reglement', 0);
+
+            $fac_errors = $this->createFactureFin($id_client, $libelle, $id_mode_reglement, $id_cond_reglement, $warnings);
+
+            if (count($fac_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture client');
+
+//                if ($use_db_transactions) {
+//                    $this->db->db->rollback();
+//                }
+            } else {
+//                if ($use_db_transactions) {
+//                    $this->db->db->commit();
+//                }
+
+                $success = 'Facture client créée avec succès';
+
+                $fac = $this->getChildObject('facture_fin');
+                if (BimpObject::objectLoaded($fac)) {
+                    $url = $fac->getUrl();
+                    if ($url) {
+                        $sc .= 'window.open(\'' . $url . '\');';
+                    }
+                }
+            }
+        }
+
+//        if ($use_db_transactions) {
+//            $this->db->db->begin();
+//        }
+
+        $this->checkIsClosed();
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
+    // Overrides:
+
+    public function reset()
+    {
+        $this->values = null;
+        $this->missing_serials = null;
+        $this->default_values = null;
+
+        parent::reset();
+    }
+
+    public function create(&$warnings = [], $force_create = false)
+    {
+        $errors = array();
+
+        $ref = $this->getNextRef();
+
+        if (!$ref) {
+            $errors[] = 'Echec de la génération de la référence';
+        } else {
+            $this->set('ref', $ref);
+        }
+
+        if (!count($errors)) {
+            return parent::create($warnings, $force_create);
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = [], $force_update = false)
+    {
+        if (BimpTools::isSubmit('updload_doc_type')) {
+            $doc_type = BimpTools::getValue('updload_doc_type');
+            unset($_POST['updload_doc_type']); // Pour éviter boucle infinie si nouvel appel à update()
+            return $this->uploadDocument($doc_type, $warnings);
+        }
+
+        return parent::update($warnings, $force_update);
     }
 
     // Gestion signatures : 
@@ -3881,864 +4984,7 @@ class BF_Demande extends BimpObject
         return 0;
     }
 
-    // Actions:
-
-    public function actionTakeCharge($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Prise en charge effectuée';
-
-        global $user;
-
-        if (!BimpObject::objectLoaded($user)) {
-            $errors[] = 'Aucun utilisateur connecté';
-        } else {
-            if ((int) $this->getData('status') < 0) {
-                $errors = $this->updateField('status', 0); // Pour éviter log auto
-            }
-
-            if (!count($errors)) {
-                $errors = $this->updateField('id_user_resp', $user->id);
-
-                if (!BimpObject::objectLoaded($errors)) {
-                    $this->addObjectLog('Prise en charge', 'PRIS_EN_CHARGE');
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionCancel($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Demande de location abandonnée';
-
-        $reasons = BimpTools::getArrayValueFromPath($data, 'reasons', '');
-
-        $this->set('closed', 1);
-        $this->set('status', self::STATUS_CANCELED);
-
-        $devis_status = (int) $this->getData('devis_status');
-        if ($devis_status > 0 && $devis_status < 10) {
-            $this->set('devis_status', self::DOC_CANCELLED);
-        }
-
-        $contrat_status = (int) $this->getData('contrat_status');
-        if ($contrat_status > 0 && $contrat_status < 10) {
-            $this->set('contrat_status', self::DOC_CANCELLED);
-        }
-
-        $pvr_status = (int) $this->getData('pvr_status');
-        if ($pvr_status > 0 && $pvr_status < 10) {
-            $this->set('pvr_status', self::DOC_CANCELLED);
-        }
-
-        $errors = $this->update($warnings, true);
-
-        if (!count($errors)) {
-            $this->addObjectLog('Demande de location abandonnée' . ($reasons ? '<br/><b>Raisons : <b/><br/>' . $reasons : ''), 'CANCELED');
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionReopen($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Demande de location réouverte';
-
-        if (!(int) $this->getData('id_user_resp')) {
-            $this->set('status', self::STATUS_NEW);
-        } else {
-            $this->set('status', self::STATUS_DRAFT);
-
-            if (!count($errors)) {
-                $this->addObjectLog('Demande de location réouverte', 'REOPEN');
-            }
-
-            $this->set('closed', 0);
-
-            $errors = $this->update($warnings, true);
-
-            if (!count($errors)) {
-                if (!count($errors)) {
-                    if ((int) $this->getData('id_main_source')) {
-                        $source = $this->getSource();
-                        $source->updateField('cancel_submitted', 0);
-                        $source->updateField('refuse_submitted', 0);
-
-                        $errors = $this->checkStatus($warnings);
-
-                        if (!count($errors)) {
-                            if (BimpObject::objectLoaded($source)) {
-                                $errors = $source->reopenDemande((int) $this->getData('status'), $warnings);
-                            }
-                        }
-                    } else {
-                        $errors = $this->checkStatus($warnings);
-
-                        $devis_status = 0;
-                        $dir = $this->getFilesDir();
-                        $signature = $this->getChildObject('signature_contrat');
-                        if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
-                            $this->set('contrat_status', self::DOC_ACCEPTED);
-                            $devis_status = self::DOC_ACCEPTED;
-                        } else {
-                            $file = $this->getSignatureDocFileName('contrat');
-                            if (file_exists($dir . $file)) {
-                                $this->set('contrat_status', self::DOC_GENERATED);
-                                $devis_status = self::DOC_ACCEPTED;
-                            }
-                        }
-
-                        if (!$devis_status) {
-                            $signature = $this->getChildObject('signature_devis');
-                            if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
-                                $devis_status = self::DOC_ACCEPTED;
-                            } else {
-                                $file = $this->getSignatureDocFileName('devis');
-                                if (file_exists($dir . $file)) {
-                                    $devis_status = self::DOC_GENERATED;
-                                }
-                            }
-                        }
-                        $this->set('devis_status', $devis_status);
-
-                        $signature = $this->getChildObject('signature_pvr');
-                        if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
-                            $this->set('pvr_status', self::DOC_ACCEPTED);
-                        } else {
-                            $file = $this->getSignatureDocFileName('pvr');
-                            if (file_exists($dir . $file)) {
-                                $this->set('pvr_status', self::DOC_GENERATED);
-                            }
-                        }
-
-                        $errors = $this->update($warnings, true);
-                        $this->checkIsClosed();
-                    }
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionGenerateDevisFinancement($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = '';
-
-        $errors = $this->generateDocument('devis', $data, $warnings, $success);
-
-        if (!count($errors)) {
-            $file_name = $this->getSignatureDocFileName('devis');
-            $file = $this->getFilesDir() . $file_name;
-
-            if (file_exists($file)) {
-                $url = $this->getFileUrl($file_name);
-                if ($url) {
-                    $sc = 'window.open(\'' . $url . '\')';
-                }
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $sc
-        );
-    }
-
-    public function actionGenerateContratFinancement($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Création du fichier PDF effectué avec succès';
-        $sc = '';
-
-        $formule = BimpTools::getArrayValueFromPath($data, 'formule', $this->getData('formule'));
-        if ($formule != $this->getData('formule')) {
-            $this->updateField('formule', $formule);
-        }
-
-        $is_company = (int) BimpTools::getArrayValueFromPath($data, 'client_is_company', 0);
-        $client_data = array(
-            'is_company'   => $is_company,
-            'nom'          => BimpTools::getArrayValueFromPath($data, 'client_name', '', $errors, true, 'Nom du client absent'),
-            'address'      => BimpTools::getArrayValueFromPath($data, 'client_address', '', $errors, true, 'Adresse du client absente'),
-            'representant' => BimpTools::getArrayValueFromPath($data, 'client_representant', '', $errors, true, 'Nom du représenant du client absent'),
-            'livraisons'   => BimpTools::getArrayValueFromPath($data, 'client_livraisons', '')
-        );
-
-        if ($is_company) {
-            $client_data['forme_juridique'] = BimpTools::getArrayValueFromPath($data, 'client_forme_juridique', '', $errors, true, ' absente');
-            $client_data['capital'] = BimpTools::getArrayValueFromPath($data, 'client_capital', '', $errors, true, 'Capital social du client absent');
-            $client_data['siren'] = BimpTools::getArrayValueFromPath($data, 'client_siren', '', $errors, true, 'N° SIREN du client absent');
-            $client_data['rcs'] = BimpTools::getArrayValueFromPath($data, 'client_rcs', '', $errors, true, 'Ville d\'enregistrement au RCS absente');
-            $client_data['repr_qualite'] = BimpTools::getArrayValueFromPath($data, 'client_repr_qualite', '', $errors, true, 'Qualité du représenant du client absente');
-        }
-
-        $loueur_data = array(
-            'nom'     => BimpTools::getArrayValueFromPath($data, 'loueur_nom', '', $errors, true, 'Nom du signataire loueur absent'),
-            'qualite' => BimpTools::getArrayValueFromPath($data, 'loueur_qualite', '', $errors, true, 'Qualité du signataire loueur absente')
-        );
-
-        $cessionnaire_data = array(
-            'raison_social' => BimpTools::getArrayValueFromPath($data, 'cessionnaire_saison_sociale', '', $errors, true, 'Raison solicale du signataire cessionnaire absente'),
-            'siren'         => BimpTools::getArrayValueFromPath($data, 'cessionnaire_siren', '', $errors, true, 'N° SIREN du signataire cessionnaire absent'),
-            'nom'           => BimpTools::getArrayValueFromPath($data, 'cessionnaire_nom', '', $errors, true, 'Nom du signataire cessionnaire absent'),
-            'qualite'       => BimpTools::getArrayValueFromPath($data, 'cessionnaire_qualite', '', $errors, true, 'Qualité du signataire cessionnaire absente')
-        );
-
-        $loueur_email = BimpTools::getArrayValueFromPath($data, 'loueur_email', '', $errors, true, 'Adresse e-mail du signataire loueur absent');
-        $cessionnaire_email = BimpTools::getArrayValueFromPath($data, 'cessionnaire_email', '', $errors, true, 'Adresse e-mail du signataire cessionnaire absent');
-
-        if (!count($errors)) {
-            $this->updateField('contrat_signataires_data', array(
-                'locataire'    => array(
-                    'nom'      => $client_data['representant'],
-                    'fonction' => $client_data['repr_qualite']
-                ),
-                'loueur'       => array(
-                    'nom'      => $loueur_data['nom'],
-                    'email'    => $loueur_email,
-                    'fonction' => $loueur_data['qualite']
-                ),
-                'cessionnaire' => array(
-                    'nom'      => $cessionnaire_data['nom'],
-                    'email'    => $cessionnaire_email,
-                    'fonction' => $cessionnaire_data['qualite']
-                )
-            ));
-            if ($this->isDemandeValid($errors)) {
-                global $db;
-                $files_dir = $this->getFilesDir();
-                $ref = $this->getRef();
-
-//            // PDF Consignes: 
-//            $file_name = 'consignes_' . $ref . '.pdf';
-//
-//            require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ConsignesContratFinancementPDF.php';
-//            $pdf = new ConsignesContratFinancementPDF($db, $this);
-//            if (!$pdf->render($files_dir . $file_name, 'F')) {
-//                $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF des consignes client');
-//            }
-                // PDF contrat de location: 
-                $file_name = $this->getSignatureDocFileName('contrat');
-                require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
-                $pdf = new ContratFinancementPDF($db, $this, $client_data, $loueur_data, $cessionnaire_data);
-
-                $pdf->render($files_dir . $file_name, 'F');
-
-                if (count($pdf->errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF du contrat de location');
-                } else {
-                    $up_errors = $this->updateField('contrat_status', self::DOC_GENERATED);
-                    if (count($up_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du nouveau statut du contrat de location');
-                    }
-
-                    if (file_exists($files_dir . $file_name)) {
-                        $url = $this->getFileUrl($file_name);
-                        if ($url) {
-                            $sc = 'window.open(\'' . $url . '\')';
-                        }
-                    }
-                }
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $sc
-        );
-    }
-
-    public function actionGeneratePVReception($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Génération du PV de réception effectuée avec succès';
-
-        $errors = $this->generateDocument('pvr', $data, $warnings, $success);
-
-        if (!count($errors)) {
-            $signataires_data = array(
-                'locataire' => array(
-                    'nom'      => BimpTools::getArrayValueFromPath($data, 'client_representant', ''),
-                    'fonction' => BimpTools::getArrayValueFromPath($data, 'client_repr_qualite', '')
-                ),
-                'loueur'    => array(
-                    'nom'      => BimpTools::getArrayValueFromPath($data, 'loueur_nom', ''),
-                    'fonction' => BimpTools::getArrayValueFromPath($data, 'loueur_qualite'),
-                    'email'    => BimpTools::getArrayValueFromPath($data, 'loueur_email', '')
-                )
-            );
-
-            $err = $this->updateField('pvr_signataires_data', $signataires_data);
-
-            $file_name = $this->getSignatureDocFileName('pvr');
-            $file = $this->getFilesDir() . $file_name;
-
-            if (file_exists($file)) {
-                $url = $this->getFileUrl($file_name);
-                if ($url) {
-                    $sc = 'window.open(\'' . $url . '\')';
-                }
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $sc
-        );
-    }
-
-    public function actionCreateSignatureDevis($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Fiche signature du devis de location créée avec succès';
-
-        $signature_errors = $this->createSignature('devis', $data, $warnings);
-
-        if (count($signature_errors)) {
-            $errors[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
-        } else {
-            if ((int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0) ||
-                    (int) BimpTools::getArrayValueFromPath($data, 'init_docusign', 0)) {
-                $up_errors = $this->updateField('devis_status', self::DOC_SEND);
-                if (count($up_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du nouveau statut du devis');
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionCreateSignatureContrat($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Fiche signature du contrat de location créée avec succès';
-
-        $signature_errors = $this->createSignature('contrat', $data, $warnings);
-
-        if (count($signature_errors)) {
-            $errors[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
-        } else {
-            if ((int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0) ||
-                    (int) BimpTools::getArrayValueFromPath($data, 'init_docusign', 0)) {
-                $up_errors = $this->updateField('contrat_status', self::DOC_SEND);
-                if (count($up_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du nouveau statut du contrat');
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionCreateSignaturePvr($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Fiche signature du PV de réception créée avec succès';
-
-        $signature_errors = $this->createSignature('pvr', $data, $warnings);
-
-        if (count($signature_errors)) {
-            $errors[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
-        } else {
-            if ((int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0) ||
-                    (int) BimpTools::getArrayValueFromPath($data, 'init_docusign', 0)) {
-                $up_errors = $this->updateField('pvr_status', self::DOC_SEND);
-                if (count($up_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du nouveau statut du PVR');
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionSubmitDevis($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Envoi du devis de location à ' . $this->displaySourceName() . ' effectué avec succès';
-
-        $errors = $this->submitDoc('devis');
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionSubmitContrat($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Envoi du contrat de location à ' . $this->displaySourceName() . ' effectué avec succès';
-
-        $errors = $this->submitDoc('contrat');
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionSubmitPvr($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Envoi du PV de réception à ' . $this->displaySourceName() . ' effectué avec succès';
-
-        $errors = $this->submitDoc('pvr');
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionSubmitRefuse($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Soumission du refus auprès de ' . $this->displaySourceName() . ' effectuée avec succès';
-
-        $source = $this->getSource('main', $errors);
-
-        if (!count($errors)) {
-            $type_origine = $source->getData('type_origine');
-            $id_origine = (int) $source->getData('id_origine');
-
-            if (!$type_origine) {
-                $errors[] = 'Type de la pièce d\'origine absent';
-            }
-
-            if (!$id_origine) {
-                $errors[] = 'ID de la pièce d\'origine absent';
-            }
-
-            if (!count($errors)) {
-                $api = $this->getMainSourceAPI($errors);
-
-                if (!count($errors)) {
-                    $req_errors = array();
-                    $note = BimpTools::getArrayValueFromPath($data, 'note', '');
-                    $api->setDemandeFinancementStatus($this->id, $type_origine, $id_origine, 20, $note, $req_errors, $warnings);
-
-                    if (count($req_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la requête');
-                    } else {
-                        $source->updateField('refuse_submitted', 1);
-                        $up_errors = $this->updateField('closed', 1);
-                        if (count($up_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du statut "Fermé' . $this->e() . '"');
-                        } else {
-                            $this->addObjectLog('Refus définitif - Demande fermée' . ($note ? '<br/><b>Note : </b>' . $note : ''), 'CLOSED');
-                        }
-                    }
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionSubmitCancel($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Soumission de l\'abandon auprès de ' . $this->displaySourceName() . ' effectuée avec succès';
-
-        $source = $this->getSource('main', $errors);
-
-        if (!count($errors)) {
-            $type_origine = $source->getData('type_origine');
-            $id_origine = (int) $source->getData('id_origine');
-
-            if (!$type_origine) {
-                $errors[] = 'Type de la pièce d\'origine absent';
-            }
-
-            if (!$id_origine) {
-                $errors[] = 'ID de la pièce d\'origine absent';
-            }
-
-            if (!count($errors)) {
-                $api = $this->getMainSourceAPI($errors);
-
-                if (!count($errors)) {
-                    $req_errors = array();
-                    $note = BimpTools::getArrayValueFromPath($data, 'note', '');
-                    $api->setDemandeFinancementStatus($this->id, $type_origine, $id_origine, 21, $note, $req_errors, $warnings);
-
-                    if (count($req_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la requête');
-                    } else {
-                        $source->updateField('cancel_submitted', 1);
-                        $this->set('closed', 1);
-                        $this->set('devis_status', self::DOC_CANCELLED);
-                        $this->set('contrat_status', self::DOC_CANCELLED);
-                        $this->set('pvr_status', self::DOC_CANCELLED);
-                        $up_errors = $this->update($warnings, true);
-
-                        if (count($up_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du statut "Fermé' . $this->e() . '"');
-                        } else {
-                            $this->addObjectLog('Annulation notifiée auprès de ' . $this->displaySourceName() . ' - Demande fermée' . ($note ? '<br/><b>Note : </b>' . $note : ''), 'CLOSED');
-                        }
-                    }
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionMergeDemandes($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Demandes fusionnées avec succès';
-
-        $demandes = array();
-        $id_demandes = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-
-        if (empty($id_demandes)) {
-            $errors[] = 'Aucune demande de location sélectionnée';
-        } else {
-            foreach ($id_demandes as $id_demande) {
-                $demande = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Demande', $id_demande);
-
-                if (!BimpObject::objectLoaded($demande)) {
-                    $errors[] = 'La demande #' . $id_demande . ' n\'existe plus';
-                } else {
-                    $demande_errors = array();
-                    if (!$demande->isMergeable($demande_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Demande ' . $demande->getRef());
-                    } else {
-                        $demandes[$id_demande] = $demande;
-                    }
-                }
-            }
-        }
-
-        if (!count($errors)) {
-            if (count($demandes) < 2) {
-                $errors[] = 'Veuillez sélectionner au moins deux demandes de financements brouillons à fusionner';
-            } else {
-                $main_source = null;
-                $id_main_source = (int) BimpTools::getArrayValueFromPath($data, 'id_main_source', 0);
-
-                if (!$id_main_source) {
-                    $errors[] = 'Aucune source principale sélectionnée';
-                } else {
-                    $main_source = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_DemandeSource', $id_main_source);
-
-                    if (!BimpObject::objectLoaded($main_source)) {
-                        $errors[] = 'La source #' . $id_main_source . ' n\'existe plus';
-                    }
-                }
-            }
-        }
-
-        if (!count($errors)) {
-            $id_demande_to_keep = (int) $main_source->getData('id_demande');
-
-            if (!array_key_exists($id_demande_to_keep, $demandes)) {
-                $errors[] = 'La demande correspondant à la source principale sélectionnée ne correspond à aucune des demandes à fusionner sélectionnées';
-            } else {
-                $next_line_position = (int) $this->db->getMax('bf_demande_line', 'position', 'id_demande = ' . $id_demande_to_keep);
-                foreach ($demandes as $demande) {
-                    if ($demande->id == $id_demande_to_keep) {
-                        continue;
-                    }
-
-                    // Transfert des sources: 
-                    foreach ($demande->getChildrenObjects('sources') as $source) {
-                        $source_errors = $source->updateField('id_demande', $id_demande_to_keep);
-                        if (count($source_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($source_errors, 'Echec du transfert de la source "' . $source->displayOrigine(true) . '" vers la demande à conserver');
-                        }
-                    }
-
-                    // Transferts des lignes: 
-                    foreach ($demande->getLines() as $line) {
-                        if (BimpObject::objectLoaded($line)) {
-                            $next_line_position++;
-                            if ($this->db->update('bf_demande_line', array(
-                                        'id_demande' => $id_demande_to_keep,
-                                        'position'   => $next_line_position
-                                            ), 'id = ' . $line->id) <= 0) {
-                                $errors[] = 'Echec du transfert de la ligne "' . $line->displayDesc(1, 1) . '" - ' . $this->db->err();
-                            }
-                        }
-                    }
-
-                    // Suppression de la demande: 
-                    $demande_warnings = array();
-                    $demande_errors = $demande->delete($demande_warnings, true);
-
-                    if (count($demande_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de la suppression de la demande ' . $demande->getRef());
-                    }
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionResetDefaultValue($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = '';
-
-        if ($this->isLoaded($errors)) {
-            $field_name = BimpTools::getArrayValueFromPath($data, 'field_name', '');
-            if (!$field_name) {
-                $errors[] = 'Champ à mettre à jour absent';
-            } elseif (!$this->field_exists($field_name)) {
-                $errors[] = 'Le champ "' . $field_name . '" n\'existe pas';
-            } else {
-                $field_label = $this->getConf('fields/' . $field_name . '/label', $field_name);
-                if (!$this->isFieldEditable($field_name)) {
-                    $errors[] = 'Le champ "' . $field_label . '" n\'est plus modifiable';
-                } elseif (!$this->canEditField($field_name)) {
-                    $errors[] = 'Vous n\'avez pas la permission de modifier le champ "' . $field_label . '"';
-                } else {
-                    $def_values = $this->getDefaultValues();
-                    if (!isset($def_values[$field_name])) {
-                        $errors[] = 'Aucune valeur par défaut trouvée pour le champ "' . $field_label . '"';
-                    } else {
-                        $cur_val = (float) $this->getData($field_name);
-
-                        if (round($cur_val, 2) == round($def_values[$field_name], 2)) {
-                            $errors[] = 'Le champ "' . $field_label . '" est déjà à la valeur par défault';
-                        } else {
-                            $success = 'Mise à jour du chmap "' . $field_label . '" effectuée avec succès';
-                            $this->set($field_name, round($def_values[$field_name], 2));
-                            $errors = $this->update($warnings, true);
-                        }
-                    }
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionGeneratePropositionLocation($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = '';
-        $sc = '';
-
-        $file_name = self::createPropositionPDF($data, $errors);
-
-        if (!count($errors)) {
-            $dir = DOL_DATA_ROOT . '/bimpfinancement/';
-            $sub_dir = 'propositions/' . date('Y-m-d') . '/';
-            if (!file_exists($dir . $sub_dir . $file_name)) {
-                $errors[] = 'Echec de la création du document PDF pour une raison inconnue';
-            } else {
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpfinancement&file=' . urlencode($sub_dir . $file_name);
-                $sc = 'window.open(\'' . $url . '\');';
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $sc
-        );
-    }
-
-    public function actionCreateFactures($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = '';
-        $sc = '';
-
-        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions', null);
-
-//        if ($use_db_transactions) {
-//            $this->db->db->commit();
-//        }
-
-        if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fourn', 0)) {
-//            if ($use_db_transactions) {
-//                $this->db->db->begin();
-//            }
-
-            $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fourn_libelle', '');
-            $ref_supplier = BimpTools::getArrayValueFromPath($data, 'fac_fourn_ref_supplier', '');
-            $id_fourn = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_fourn', 0);
-            $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_mode_reglement', 0);
-            $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_cond_reglement', 0);
-
-            $fac_errors = $this->createFactureFournisseur($id_fourn, $id_mode_reglement, $id_cond_reglement, $ref_supplier, $libelle, $warnings);
-
-            if (count($fac_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture fournisseur');
-
-//                if ($use_db_transactions) {
-//                    $this->db->db->rollback();
-//                }
-            } else {
-//                if ($use_db_transactions) {
-//                    $this->db->db->commit();
-//                }
-
-                $success = 'Facture fournisseur créée avec succès';
-
-                $fac = $this->getChildObject('facture_fourn');
-                if (BimpObject::objectLoaded($fac)) {
-                    $url = $fac->getUrl();
-                    if ($url) {
-                        $sc .= 'window.open(\'' . $url . '\');';
-                    }
-                }
-            }
-        }
-
-        if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fin', 0)) {
-//            if ($use_db_transactions) {
-//                $this->db->db->begin();
-//            }
-
-            $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fin_libelle', '');
-            $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_mode_reglement', 0);
-            $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_cond_reglement', 0);
-
-            $fac_errors = $this->createFactureFin($libelle, $id_mode_reglement, $id_cond_reglement, $warnings);
-
-            if (count($fac_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture client');
-
-//                if ($use_db_transactions) {
-//                    $this->db->db->rollback();
-//                }
-            } else {
-//                if ($use_db_transactions) {
-//                    $this->db->db->commit();
-//                }
-
-                $success = 'Facture client créée avec succès';
-
-                $fac = $this->getChildObject('facture_fin');
-                if (BimpObject::objectLoaded($fac)) {
-                    $url = $fac->getUrl();
-                    if ($url) {
-                        $sc .= 'window.open(\'' . $url . '\');';
-                    }
-                }
-            }
-        }
-
-//        if ($use_db_transactions) {
-//            $this->db->db->begin();
-//        }
-
-        $this->checkIsClosed();
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $sc
-        );
-    }
-
-    // Overrides:
-
-    public function reset()
-    {
-        $this->values = null;
-        $this->missing_serials = null;
-        $this->default_values = null;
-
-        parent::reset();
-    }
-
-    public function create(&$warnings = [], $force_create = false)
-    {
-        $errors = array();
-
-        $ref = $this->getNextRef();
-
-        if (!$ref) {
-            $errors[] = 'Echec de la génération de la référence';
-        } else {
-            $this->set('ref', $ref);
-        }
-
-        if (!count($errors)) {
-            return parent::create($warnings, $force_create);
-        }
-
-        return $errors;
-    }
-
-    public function update(&$warnings = [], $force_update = false)
-    {
-        if (BimpTools::isSubmit('updload_doc_type')) {
-            $doc_type = BimpTools::getValue('updload_doc_type');
-            unset($_POST['updload_doc_type']); // Pour éviter boucle infinie si nouvel appel à update()
-            return $this->uploadDocument($doc_type, $warnings);
-        }
-
-        return parent::update($warnings, $force_update);
-    }
-
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function createFromSource($data, &$errors = array(), &$warnings = array())
     {
@@ -4858,6 +5104,14 @@ class BF_Demande extends BimpObject
 
                         switch ((int) BimpTools::getArrayValueFromPath($line, 'type', BF_Line::TYPE_FREE)) {
                             case BF_Line::TYPE_FREE:
+                                $pu_ht = (float) BimpTools::getArrayValueFromPath($line, 'pu_ht', 0);
+                                $remise = (float) BimpTools::getArrayValueFromPath($line, 'remise', 0);
+                                $pa_ht = $pu_ht;
+
+                                if ($remise) {
+                                    $pa_ht -= ($pu_ht * ($remise / 100));
+                                }
+
                                 $line_data = array(
                                     'id_demande'      => $demande->id,
                                     'id_source'       => $source->id,
@@ -4868,10 +5122,10 @@ class BF_Demande extends BimpObject
                                     'description'     => BimpTools::getArrayValueFromPath($line, 'description', ''),
                                     'product_type'    => (int) BimpTools::getArrayValueFromPath($line, 'product_type', 0),
                                     'qty'             => (float) BimpTools::getArrayValueFromPath($line, 'qty', 0),
-                                    'pu_ht'           => (float) BimpTools::getArrayValueFromPath($line, 'pu_ht', 0),
+                                    'pu_ht'           => $pu_ht,
                                     'tva_tx'          => (float) BimpTools::getArrayValueFromPath($line, 'tva_tx', 0),
-                                    'remise'          => (float) BimpTools::getArrayValueFromPath($line, 'remise', 0),
-                                    'pa_ht'           => (float) BimpTools::getArrayValueFromPath($line, 'pa_ht', 0),
+                                    'remise'          => $remise,
+                                    'pa_ht'           => $pa_ht,
                                     'serialisable'    => (int) BimpTools::getArrayValueFromPath($line, 'serialisable', 0),
                                     'serials'         => BimpTools::getArrayValueFromPath($line, 'serials', '')
                                 );
@@ -4900,11 +5154,11 @@ class BF_Demande extends BimpObject
         }
 
         if (!count($errors)) {
-//            BimpCache::getBdb()->db->commit();
+            BimpCache::getBdb()->db->commit();
             $msg = 'Nouvelle demande de location de la part de ' . $source_label;
             $demande->addNotificationNote($msg, BimpNote::BN_AUTHOR_USER, '', 0, BimpNote::BN_MEMBERS, 1);
         } else {
-//            BimpCache::getBdb()->db->rollback();
+            BimpCache::getBdb()->db->rollback();
         }
 
         return $demande;

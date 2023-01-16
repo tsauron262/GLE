@@ -301,8 +301,8 @@ class Bimp_Client extends Bimp_Societe
                 );
             }
 
-            // Nouveau Prêt de matériel: 
-            $instance = BimpObject::getInstance('bimpfichinter', 'Bimp_Fichinter');
+            // Nouvelle fiche inter 
+            $instance = BimpObject::getInstance('bimptechnique', 'BT_ficheInter');
             if ($instance->canCreate()) {
                 $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle fiche intervention',

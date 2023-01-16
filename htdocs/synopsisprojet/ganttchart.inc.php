@@ -135,8 +135,8 @@ function constructGanttLine($tarr,$task,$project_dependencies,$level=0,$project_
     $start_date = $task["task_start_date"];
     $end_date = $task["task_end_date"];
     if (!$end_date) $end_date = $start_date;
-    $start_date = dol_print_date($start_date,"%m/%d/%Y");
-    $end_date = dol_print_date($end_date,"%m/%d/%Y");
+    $start_date = dol_print_date(strtotime($start_date),"%m/%d/%Y");
+    $end_date = dol_print_date(strtotime($end_date),"%m/%d/%Y");
     // Resources
     $resources = $task["task_resources"];
     // Define depend (ex: "", "4,13", ...)

@@ -295,10 +295,10 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
                 $pdf->MultiCell(50, 6, $interval->format('%a') . " jours", 0, 'L');
 
                 $pdf->SetXY('32', '46.7');
-                $pdf->MultiCell(50, 6, dol_print_date($chrono->valuesPlus[1076]->value), 0, 'L');
+                $pdf->MultiCell(50, 6, dol_print_date(strtotime($chrono->valuesPlus[1076]->value)), 0, 'L');
 
                 $pdf->SetXY('32', '50.4');
-                $pdf->MultiCell(50, 6, dol_print_date($chrono->valuesPlus[1077]->value), 0, 'L');
+                $pdf->MultiCell(50, 6, dol_print_date(strtotime($chrono->valuesPlus[1077]->value)), 0, 'L');
 
                 if ($chrono->fk_user_author > 0) {
                     $pdf->SetXY('57', '55.7');

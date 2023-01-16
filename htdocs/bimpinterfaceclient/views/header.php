@@ -110,8 +110,7 @@ $content_request = $_REQUEST['fc'];
                         </button>
                         <a class="navbar-brand" href="#">
                             <img src="<?php
-                            global $mysoc;
-                            echo DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=BIMP_RESEAUNANCE_PRO.png';
+                            echo BimpTools::getMyCompanyLogoUrl('BIMP_RESEAUNANCE_PRO.png');
                             ?>" style="width: 43%"> 
                         </a>
                     </div>

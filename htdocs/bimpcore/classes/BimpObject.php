@@ -1880,7 +1880,7 @@ class BimpObject extends BimpCache
                 case 'date':
                 case 'time':
                 case 'datetime':
-                    $value = BimpTools::getDateForDolDate($value);
+                    $value = BimpTools::getDateTms($value);
                     break;
 
                 case 'items_list':

@@ -175,7 +175,7 @@ function printOneDayOneUser($userId, $date, $printUser = false, $printDate = fal
     if ($printUser && $printDate)
         echo "<br/>";
     if ($printDate)
-        echo dol_print_date($date);
+        echo dol_print_date(strtotime($date));
     while ($result = $db->fetch_object($sql)) {
         $i++;
         $debuV = strtotime($result->datep);

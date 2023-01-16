@@ -294,7 +294,7 @@ class OrderPDF extends BimpCommDocumentPDF
         $html .= '<tr>';
         $html .= '<td colspan="2" style="font-size: 7px">';
         $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Date commande : </span>';
-        $html .= dol_print_date($this->commande->date);
+        $html .= dol_print_date(strtotime($this->commande->date));
         $html .= '</td>';
         $html .= '</tr>';
 
@@ -325,12 +325,12 @@ class OrderPDF extends BimpCommDocumentPDF
 
         if ($town) {
             if ($this->doc_type === 'bl' && isset($this->shipment) && BimpObject::objectLoaded($this->shipment)) {
-                $date = BimpTools::getDateForDolDate($this->shipment->getData('date_shipped'));
+                $date_tms = BimpTools::getDateTms($this->shipment->getData('date_shipped'));
             } else {
-                $date = dol_now();
+                $date_tms = dol_now();
             }
             $html .= '<div style="text-align: right; font-size: 9px;">';
-            $html .= BimpTools::ucfirst($town) . ', le ' . dol_print_date($date);
+            $html .= BimpTools::ucfirst($town) . ', le ' . dol_print_date($date_tms);
             $html .= '</div>';
         }
 

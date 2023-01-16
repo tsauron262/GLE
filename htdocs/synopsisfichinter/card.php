@@ -1232,7 +1232,7 @@ EOF;
         print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
         print '</form>';
     } else {
-        print dol_print_date($fichinter->date, 'day');
+        print dol_print_date(strtotime($fichinter->date), 'day');
     }
     $fichinter->info($fichinter->id);
     print '    </td>';

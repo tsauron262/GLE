@@ -1662,16 +1662,16 @@ class BT_ficheInter extends BimpDolObject
                         }
                         $html .= '</td>';
                         $html .= '<td align="center">';
-                        $html .= dol_print_date($action->datep, 'dayhour');
+                        $html .= dol_print_date(strtotime($action->datep), 'dayhour');
                         if ($action->datef) {
                             $tmpa = dol_getdate($action->datep);
                             $tmpb = dol_getdate($action->datef);
                             if ($tmpa['mday'] == $tmpb['mday'] && $tmpa['mon'] == $tmpb['mon'] && $tmpa['year'] == $tmpb['year']) {
                                 if ($tmpa['hours'] != $tmpb['hours'] || $tmpa['minutes'] != $tmpb['minutes'] && $tmpa['seconds'] != $tmpb['seconds']) {
-                                    $html .= '-' . dol_print_date($action->datef, 'hour');
+                                    $html .= '-' . dol_print_date(strtotime($action->datef), 'hour');
                                 }
                             } else {
-                                $html .= '-' . dol_print_date($action->datef, 'dayhour');
+                                $html .= '-' . dol_print_date(strtotime($action->datef), 'dayhour');
                             }
                         }
                         $html .= '</td>';

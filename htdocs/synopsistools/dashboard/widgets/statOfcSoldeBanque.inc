@@ -132,8 +132,8 @@ function widget_statOfcSoldeBanque() {
                 $societestatic->fetch($objp->socid);
 
 //                $table2 .=  "<tr $bc[$var]>";
-                $table2 .=  "<td nowrap>".dol_print_date($objp->do,"day")."</td>\n";
-                $table2 .=  "<td nowrap>&nbsp;".dol_print_date($objp->dv,"day")."</td>\n";
+                $table2 .=  "<td nowrap>".dol_print_date(strtotime($objp->do),"day")."</td>\n";
+                $table2 .=  "<td nowrap>&nbsp;".dol_print_date(strtotime($objp->dv),"day")."</td>\n";
                 $table2 .=  "<td nowrap>&nbsp;".$objp->fk_type." ".($objp->num_chq?$objp->num_chq:"")."</td>\n";
                 $table2 .=  '<td><a href="ligne.php?rowid='.$objp->rowid.'&amp;account='.$acct->id.'">';
                 if (preg_match('/^\((.*)\)$/i',$objp->label,$reg))

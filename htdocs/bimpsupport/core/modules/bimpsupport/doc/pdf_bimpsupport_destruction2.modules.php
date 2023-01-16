@@ -245,7 +245,7 @@ BP 2321
 
                 $pdf->SetXY('79', '147.3');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-                $pdf->MultiCell(50, 6, dol_print_date($sav->getData('date_create')), 0, 'L');
+                $pdf->MultiCell(50, 6, dol_print_date(strtotime($sav->getData('date_create'))), 0, 'L');
 
 //                //le prod
                 $product_label = $equipment->displayProduct('nom', true);

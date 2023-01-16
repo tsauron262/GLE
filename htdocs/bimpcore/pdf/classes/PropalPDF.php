@@ -94,11 +94,11 @@ class PropalPDF extends BimpCommDocumentPDF
 
         // Dates: 
         if (!empty($this->propal->date)) {
-            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('Date') . ' : </span>' . dol_print_date($this->propal->date, "day", false, $this->langs) . '<br/>';
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('Date') . ' : </span>' . dol_print_date(strtotime($this->propal->date), "day", false, $this->langs) . '<br/>';
         }
 
         if (!empty($this->propal->fin_validite)) {
-            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateEndPropal') . ' : </span>' . dol_print_date($this->propal->fin_validite, "day", false, $this->langs, true) . '<br/>';
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateEndPropal') . ' : </span>' . dol_print_date(strtotime($this->propal->fin_validite), "day", false, $this->langs, true) . '<br/>';
         }
 
         // Code client: 
@@ -137,7 +137,7 @@ class PropalPDF extends BimpCommDocumentPDF
         // Date de livraison
         if (!empty($this->object->date_livraison)) {
             $html .= '<tr><td>';
-            $html .= dol_print_date($this->object->date_livraison, "daytext", false, $this->langs, true) . '<br/>';
+            $html .= dol_print_date(strtotime($this->object->date_livraison), "daytext", false, $this->langs, true) . '<br/>';
             $html .= '</td></tr>';
         } elseif ($this->object->availability_code || (isset($this->object->availability) && $this->object->availability)) {
             $html .= '<tr><td>';

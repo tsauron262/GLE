@@ -4007,7 +4007,7 @@ class BContract_contrat extends BimpDolObject
 
     public function actionCreateAvenant($data, &$success)
     {
-
+        global $user;
         $avLetters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"];
 
         $contrat_source = ($this->getData('contrat_source') ? $this->getData('contrat_source') : $this->id);
@@ -4015,7 +4015,7 @@ class BContract_contrat extends BimpDolObject
         $explodeRef = explode("_", $this->getData('ref'));
         $next_ref = $explodeRef[0] . '_' . $avLetters[$count];
 
-        if ($clone = $this->dol_object->createFromClone($this->getData('fk_soc'))) {
+        if ($clone = $this->dol_object->createFromClone($user, $this->getData('fk_soc'))) {
             $next_contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $clone);
             addElementElement('contrat', 'contrat', $this->id, $next_contrat->id);
             $next_contrat->updateField('contrat_source', $contrat_source);

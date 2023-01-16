@@ -65,7 +65,7 @@ function widget_listCess() {
                 $table .= '<td align="right" nowrap>';
                 if ($res->cessionnaire == 1) $table .= $langs->trans("Cessionnaire");
                 $table .= "</td>";
-                $table .= '<td align="right" nowrap>'.dol_print_date($res->datec,'day')."</td>";
+                $table .= '<td align="right" nowrap>'.dol_print_date(strtotime($res->datec),'day')."</td>";
             }
             $table2 .= '<tr class="'.$cssClass[$bool].'">';
             $table2 .= '   <td style="overflow: hidden; white-space: nowrap;">';
@@ -73,7 +73,7 @@ function widget_listCess() {
             $table2 .= '<td align="right" nowrap>';
             if ($res->cessionnaire == 1) $table2 .= $langs->trans("Cessionnaire");
             $table2 .= "</td>";
-            $table2 .= '<td align="right" nowrap>'.dol_print_date($res->datec,'day')."</td>";
+            $table2 .= '<td align="right" nowrap>'.dol_print_date(strtotime($res->datec),'day')."</td>";
             $iter ++;
         }
         $table .= '</tbody></table></p>';

@@ -245,9 +245,9 @@ class BimpDolObject extends BimpObject
 
                     $content = str_replace('\n', "\n", $template['content']);
 
-                    if (dol_textishtml($content) && !dol_textishtml($formMail->substit['__SIGNATURE__'])) {
-                        $formMail->substit['__SIGNATURE__'] = dol_nl2br($formMail->substit['__SIGNATURE__']);
-                    } else if (!dol_textishtml($content) && dol_textishtml($formMail->substit['__SIGNATURE__'])) {
+                    if (dol_textishtml($content) && !dol_textishtml($formMail->substit['__USER_SIGNATURE__'])) {
+                        $formMail->substit['__USER_SIGNATURE__'] = dol_nl2br($formMail->substit['__USER_SIGNATURE__']);
+                    } else if (!dol_textishtml($content) && dol_textishtml($formMail->substit['__USER_SIGNATURE__'])) {
                         $content = dol_nl2br($content);
                     }
 

@@ -4812,7 +4812,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             global $user, $langs;
 
             $propal->updateField(('datep'), date('Y/m/d'));
-            $propal->updateField('fin_validite', BimpTools::getDateForDolDate($propal->getData('datep')) + ($propal->dol_object->duree_validite * 24 * 3600));
+            $propal->updateField('fin_validite', BimpTools::getDateTms($propal->getData('datep')) + ($propal->dol_object->duree_validite * 24 * 3600));
 
             $propal->lines_locked = 1;
 

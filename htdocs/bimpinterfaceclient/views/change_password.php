@@ -147,8 +147,7 @@
 
         <form action="" method="POST">
             <img src="<?php
-            global $mysoc;
-            echo DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=BIMP_RESEAUNANCE_PRO.png';
+            echo BimpTools::getMyCompanyLogoUrl('BIMP_RESEAUNANCE_PRO.png');
             ?>" style="width: 70%"> 
             <span>
                 <h4>Le changement de votre mot de passe est requis</h4>

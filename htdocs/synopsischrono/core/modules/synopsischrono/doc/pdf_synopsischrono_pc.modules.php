@@ -256,7 +256,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
                 $pdf->SetXY('16', '53.8');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-                $pdf->MultiCell(50, 6, dol_print_date($chrono->valuesPlus[1045]->value), 0, 'L');
+                $pdf->MultiCell(50, 6, dol_print_date(strtotime($chrono->valuesPlus[1045]->value)), 0, 'L');
 
                 if ($chrono->fk_user_author > 0) {
                     $pdf->SetXY('41', '53.5');

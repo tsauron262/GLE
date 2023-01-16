@@ -261,7 +261,7 @@ BP 2321
 
                 $pdf->SetXY('79', '147.3');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-                $pdf->MultiCell(50, 6, dol_print_date($chrono->date), 0, 'L');
+                $pdf->MultiCell(50, 6, dol_print_date(strtotime($chrono->date)), 0, 'L');
 
 //                if ($chrono->fk_user_author > 0) {
 //                    $pdf->SetXY('36', '48');

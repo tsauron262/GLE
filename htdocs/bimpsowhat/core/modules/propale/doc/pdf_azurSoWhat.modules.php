@@ -885,7 +885,7 @@ class pdf_azurSoWhat extends ModelePDFPropales
 			$pdf->MultiCell(80, 4, $titre, 0, 'L');
 			$pdf->SetFont('','', $default_font_size - 2);
 			$pdf->SetXY($posxval, $posy);
-			$dlp=dol_print_date($object->date_livraison,"daytext",false,$outputlangs,true);
+			$dlp=dol_print_date(strtotime($object->date_livraison),"daytext",false,$outputlangs,true);
 			$pdf->MultiCell(80, 4, $dlp, 0, 'L');
 
             $posy=$pdf->GetY()+1;
@@ -1514,12 +1514,12 @@ class pdf_azurSoWhat extends ModelePDFPropales
 		$posy+=4;
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
-		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("Date")." : " . dol_print_date($object->date,"day",false,$outputlangs,true), '', 'R');
+		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("Date")." : " . dol_print_date(strtotime($object->date),"day",false,$outputlangs,true), '', 'R');
 
 		$posy+=4;
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
-		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEndPropal")." : " . dol_print_date($object->fin_validite,"day",false,$outputlangs,true), '', 'R');
+		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEndPropal")." : " . dol_print_date(strtotime($object->fin_validite),"day",false,$outputlangs,true), '', 'R');
 
 		if ($object->thirdparty->code_client)
 		{

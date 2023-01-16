@@ -2484,8 +2484,8 @@ class ObjectLine extends BimpObject
             } elseif ($this->date_to < $now) {
                 $rate = 0;
             } else {
-                $from_tms = BimpTools::getDateForDolDate($this->date_from);
-                $to_tms = BimpTools::getDateForDolDate($this->date_to);
+                $from_tms = BimpTools::getDateTms($this->date_from);
+                $to_tms = BimpTools::getDateTms($this->date_to);
                 $now_tms = time();
 
                 $total = $to_tms - $from_tms;
@@ -2648,13 +2648,13 @@ class ObjectLine extends BimpObject
                 case self::LINE_PRODUCT:
                 case self::LINE_FREE:
                     if (!is_null($this->date_from)) {
-                        $date_from = BimpTools::getDateForDolDate($this->date_from);
+                        $date_from = BimpTools::getDateTms($this->date_from);
                     } else {
                         $date_from = '';
                     }
 
                     if (!is_null($this->date_to)) {
-                        $date_to = BimpTools::getDateForDolDate($this->date_to);
+                        $date_to = BimpTools::getDateTms($this->date_to);
                     } else {
                         $date_to = '';
                     }
@@ -2806,13 +2806,13 @@ class ObjectLine extends BimpObject
                 case self::LINE_PRODUCT:
                 case self::LINE_FREE:
                     if (!is_null($this->date_from)) {
-                        $date_from = BimpTools::getDateForDolDate($this->date_from);
+                        $date_from = BimpTools::getDateTms($this->date_from);
                     } else {
                         $date_from = '';
                     }
 
                     if (!is_null($this->date_to)) {
-                        $date_to = BimpTools::getDateForDolDate($this->date_to);
+                        $date_to = BimpTools::getDateTms($this->date_to);
                     } else {
                         $date_to = '';
                     }

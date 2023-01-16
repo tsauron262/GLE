@@ -389,7 +389,7 @@ class pdf_calamar extends ModeleNdfp
 		$pdf->SetFont('','', $default_font_size - 1);
 		$pdf->SetXY(100, $posy);
 		$pdf->SetTextColor(0, 0, 60);
-		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("CreationDate")." : " . dol_print_date($object->datec,"day",false,$outputlangs), '', 'R');        
+		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("CreationDate")." : " . dol_print_date(strtotime($object->datec),"day",false,$outputlangs), '', 'R');        
         
         
 		// Sender properties
@@ -437,12 +437,12 @@ class pdf_calamar extends ModeleNdfp
         // Start date
         if ($object->dates)
         {
-            $carac_note .= ($carac_note ? "\n" : '' ).$outputlangs->transnoentities("DateStart")." : ".$outputlangs->convToOutputCharset(dol_print_date($object->dates, "day", false, $outputlangs));
+            $carac_note .= ($carac_note ? "\n" : '' ).$outputlangs->transnoentities("DateStart")." : ".$outputlangs->convToOutputCharset(dol_print_date(strtotime($object->dates), "day", false, $outputlangs));
         }
         // End date
         if ($object->datee)
         {
-            $carac_note .= ($carac_note ? "\n" : '' ).$outputlangs->transnoentities("DateEnd")." : ".$outputlangs->convToOutputCharset(dol_print_date($object->datee, "day", false, $outputlangs));
+            $carac_note .= ($carac_note ? "\n" : '' ).$outputlangs->transnoentities("DateEnd")." : ".$outputlangs->convToOutputCharset(dol_print_date(strtotime($object->datee), "day", false, $outputlangs));
         }
         // Project
         if ($conf->projet->enabled && $object->fk_project > 0)

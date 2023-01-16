@@ -129,6 +129,7 @@ fields:
     fk_departement:
         label: Département / Canton
         type: int
+        dol_prop: state_id
         user_edit: 1
         input: 
             type: search_state

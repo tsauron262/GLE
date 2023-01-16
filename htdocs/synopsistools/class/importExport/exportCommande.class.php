@@ -182,7 +182,7 @@ class exportCommande extends export8sens {
 //            print_r($contact);
 //            
 //            die();
-            $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $PcvPAdpLib, "phone" => $societe->phone, "address" => $PcvPAdpRue1, "zip" => $PcvPAdpZip, "town" => $PcvPAdpCity, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label, "secteur" => $secteur, "CodeCli"=>"",
+            $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $PcvPAdpLib, "phone" => $societe->phone, "address" => $PcvPAdpRue1, "zip" => $PcvPAdpZip, "town" => $PcvPAdpCity, "ref" => $commande->ref, "date" => dol_print_date(strtotime($commande->date), "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label, "secteur" => $secteur, "CodeCli"=>"",
                 "PcvPAdpTitleEnu"=>$PcvPAdpTitleEnu,
                 "PcvLAdpTitleEnu"=>$PcvLAdpTitleEnu, "PcvLAdpLib" => $PcvLAdpLib, "PcvLAdpRue1"=> $PcvLAdpRue1, "PcvLAdpZip" => $PcvLAdpZip, "PcvLAdpCity" => $PcvLAdpCity);
             

@@ -15,7 +15,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * BIMP-ERP by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -26,7 +28,8 @@
   *
   * Infos on http://www.synopsis-erp.com
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
@@ -823,12 +826,12 @@ class pdf_propaleGA_azurGA extends ModelePDFPropalesGA
         $posy+=5;
         $pdf->SetXY(100,$posy);
         $pdf->SetTextColor(0,0,60);
-        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Date")." : " . dol_print_date($object->date,"day"), '', 'R');
+        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Date")." : " . dol_print_date(strtotime($object->date),"day"), '', 'R');
 
         $posy+=5;
         $pdf->SetXY(100,$posy);
         $pdf->SetTextColor(0,0,60);
-        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEndPropal")." : " . dol_print_date($object->fin_validite,"day"), '', 'R');
+        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEndPropal")." : " . dol_print_date(strtotime($object->fin_validite),"day"), '', 'R');
 
         $pdf->SetFont('Arial','B',13);
         $pdf->SetXY(100,$posy);
@@ -846,7 +849,7 @@ class pdf_propaleGA_azurGA extends ModelePDFPropalesGA
         $posy+=5;
         $pdf->SetXY(100,$posy);
         $pdf->SetTextColor(0,0,60);
-        $pdf->MultiCell(100, 3, "Du : " . dol_print_date($object->date_devis_fourn,"day"), '', 'R');
+        $pdf->MultiCell(100, 3, "Du : " . dol_print_date(strtotime($object->date_devis_fourn),"day"), '', 'R');
 
 
         if ($showadress)

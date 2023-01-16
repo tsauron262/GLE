@@ -203,7 +203,7 @@ class annexe {
 
 
             $annexe = preg_replace('/Contrat-date_contrat/', $contrat->date_contrat, $annexe);
-            $annexe = preg_replace('/Contrat-date_fin/', dol_print_date($val->date_fin_validite), $annexe);
+            $annexe = preg_replace('/Contrat-date_fin/', dol_print_date(strtotime($val->date_fin_validite)), $annexe);
             $annexe = preg_replace('/Contrat-ref/', $contrat->ref, $annexe);
             $annexe = preg_replace('/Contrat-note_public/', $contrat->note_public, $annexe);
         }

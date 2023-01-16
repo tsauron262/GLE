@@ -6,7 +6,8 @@ include_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpequipment/manageequipment/class/lignepanier.class.php';
 include_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 
-class BimpLivraison {
+class BimpLivraison
+{
 
     private $db;
     private $commande;
@@ -15,11 +16,13 @@ class BimpLivraison {
     public $ref;
     public $errors = array();
 
-    function __construct($db) {
+    function __construct($db)
+    {
         $this->db = $db;
     }
 
-    function fetch($orderId) {
+    function fetch($orderId)
+    {
         $this->orderId = $orderId;
         $doliFournOrder = new CommandeFournisseur($this->db);
         $doliFournOrder->fetch($orderId);
@@ -27,10 +30,10 @@ class BimpLivraison {
         $this->ref = "liv" . $doliFournOrder->ref;
         $this->commande = $doliFournOrder;
     }
-
     /* Get every line of the order */
 
-    function getLignesOrder() {
+    function getLignesOrder()
+    {
         $lignes = array();
         $staticproduct = new Product($this->db);
 
@@ -71,7 +74,8 @@ class BimpLivraison {
         return $lignes;
     }
 
-    function getAllMouvement() {
+    function getAllMouvement()
+    {
         $moveQty = array();
         $sql = 'SELECT fk_product, value';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'stock_mouvement';
@@ -87,10 +91,10 @@ class BimpLivraison {
         }
         return $moveQty;
     }
-
     /* Called by interface */
 
-    function getRemainingLignes() {
+    function getRemainingLignes()
+    {
         $lignes = $this->getLignesOrder();
 
         // StatusOrderValidated or StatusOrderApproved or StatusOrderOnProcess
@@ -116,7 +120,8 @@ class BimpLivraison {
         return array('init_fk_entrepot' => $this->getInitEntrepot(), 'lignes' => $lignes, 'deliveredLigne' => $deliveredLignes, 'errors' => $this->errors);
     }
 
-    function getInitEntrepot() {
+    function getInitEntrepot()
+    {
 
         $sql = 'SELECT e.entrepot as entrepot';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields as e';
@@ -135,7 +140,8 @@ class BimpLivraison {
         return false;
     }
 
-    function getDeliveredLignes($lignes) {
+    function getDeliveredLignes($lignes)
+    {
         $deliveredLignes = array();
         foreach ($lignes as $ligne) {
             if ($ligne->isEquipment) {
@@ -148,7 +154,8 @@ class BimpLivraison {
         return $deliveredLignes;
     }
 
-    function getDeliveredSerial($ligne) {
+    function getDeliveredSerial($ligne)
+    {
         $prodSerial = array();
         $sql = 'SELECT e.serial as serial, prix_achat';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment as e';
@@ -167,10 +174,10 @@ class BimpLivraison {
         }
         return $prodSerial;
     }
-
     /* Called by interface */
 
-    function addInStock($products, $entrepotId, $user, $isTotal) {
+    function addInStock($products, $entrepotId, $user, $isTotal)
+    {
         $now = dol_now();
         $labelmove = 'Reception commande bimp ' . $this->commande->ref . ' ' . dol_print_date($now, '%Y-%m-%d %H:%M');
         $codemove = $this->getcodeMove();
@@ -205,7 +212,8 @@ class BimpLivraison {
         return array('errors' => $this->errors);
     }
 
-    function checkDuplicateSerial($products) {
+    function checkDuplicateSerial($products)
+    {
         $newSerials = array();
         $newErrors = array();
         foreach ($products as $prod) {
@@ -225,21 +233,22 @@ class BimpLivraison {
         return $newErrors;
     }
 
-    function addEquipmentsLivraison($now, $prodId, $serial, $entrepotId, $price) {
+    function addEquipmentsLivraison($now, $prodId, $serial, $entrepotId, $price)
+    {
         $length = sizeof($this->errors);
         $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
 
         $equipement->validateArray(array(
-            'id_product' => $prodId, // ID du produit. 
-            'type' => 2, // cf $types
-            'serial' => $serial, // num série
-            'reserved' => 0, // réservé ou non
-            'warranty_type' => 0, // type de garantie (liste non définie actuellement)
-            'admin_login' => '',
-            'admin_pword' => '',
-            'prix_achat' => $price,
-            'note' => '',
-            'origin_element' => 3,
+            'id_product'        => $prodId, // ID du produit. 
+            'type'              => 2, // cf $types
+            'serial'            => $serial, // num série
+            'reserved'          => 0, // réservé ou non
+            'warranty_type'     => 0, // type de garantie (liste non définie actuellement)
+            'admin_login'       => '',
+            'admin_pword'       => '',
+            'prix_achat'        => $price,
+            'note'              => '',
+            'origin_element'    => 3,
             'origin_id_element' => $this->commande->id
         ));
 
@@ -249,22 +258,24 @@ class BimpLivraison {
 
         $emplacement->validateArray(array(
             'id_equipment' => $equipement->id,
-            'type' => 2, // cf $types
-            'id_entrepot' => $entrepotId, // si type = 2
-            'infos' => $this->getcodeMove(),
-            'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S'), // date et heure d'arrivée
-            'code_mvt' => $this->getcodeMove()
+            'type'         => 2, // cf $types
+            'id_entrepot'  => $entrepotId, // si type = 2
+            'infos'        => $this->getcodeMove(),
+            'date'         => dol_print_date($now, '%Y-%m-%d %H:%M:%S'), // date et heure d'arrivée
+            'code_mvt'     => $this->getcodeMove()
         ));
         $this->errors = BimpTools::merge_array($this->errors, $emplacement->create());
         if ($length != sizeof($this->errors))
             $this->errors[] = ' id : ' . $prodId . ' numéro de série : ' . $serial;
     }
 
-    private function getcodeMove() {
+    private function getcodeMove()
+    {
         return "BimpLivraison" . $this->orderId;
     }
 
-    public function getNomUrl($withpicto = 0) {
+    public function getNomUrl($withpicto = 0)
+    {
         $link = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commandeFourn&id=' . $this->orderId;
         if ($withpicto == 0)
             $name = $this->ref;
@@ -273,7 +284,8 @@ class BimpLivraison {
         return '<a href="' . $link . '">' . $name . '</a>';
     }
 
-    public function getOrders($fk_warehouse, $status_min, $status_max) {
+    public function getOrders($fk_warehouse, $status_min, $status_max)
+    {
 
         $orders = array();
 
@@ -308,11 +320,11 @@ class BimpLivraison {
                     $name_status = 'Inconnue';
 
                 $orders[] = array(
-                    'id' => $bl->orderId,
-                    'url_fourn' => $fourn->getNomUrl(1),
-                    'name_status' => $name_status,
-                    'url_ref' => $bl->commande->getNomUrl(1),
-                    'date_opening' => dol_print_date($bl->commande->date_commande),
+                    'id'            => $bl->orderId,
+                    'url_fourn'     => $fourn->getNomUrl(1),
+                    'name_status'   => $name_status,
+                    'url_ref'       => $bl->commande->getNomUrl(1),
+                    'date_opening'  => dol_print_date(strtotime($bl->commande->date_commande)),
                     'url_livraison' => $bl->getNomUrl(1)
                 );
             }
@@ -323,10 +335,10 @@ class BimpLivraison {
 
         return $orders;
     }
-
 }
 
-class LigneLivraison extends LignePanier {
+class LigneLivraison extends LignePanier
+{
 
     public $label;
     public $deliveredQty;
@@ -335,5 +347,4 @@ class LigneLivraison extends LignePanier {
     public $isEquipment;
     public $refurl;
     public $tabSerial;
-
 }

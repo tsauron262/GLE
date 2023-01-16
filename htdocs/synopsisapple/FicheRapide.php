@@ -239,7 +239,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         }
                         
                         $propal->valid($user);
-                        $propal->set_draft($user);
+                        $propal->setDraft($user);
 
                         $propal->fetch($propal->id);
 
@@ -391,7 +391,7 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
     echo "<br/>".$soc->email;
     echo "<br/>".$soc->phone;
     
-//    echo $form->select_thirdparty($socid, 'socid');
+//    echo $form->select_company($socid, 'socid');
     echo "<br />";
     echo "</td>";
    /* echo "</tr>";
@@ -674,7 +674,7 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
 
     echo "<p>";
     echo "<label for='client'>Client : </label>";
-    //echo $form->select_thirdparty($socid, 'socid');
+    //echo $form->select_company($socid, 'socid');
     print $form->select_company($socid, 'socid');
     echo "<span class='addSoc editable' style='float: left; padding : 3px 15px 0 0;'><img src='" . DOL_URL_ROOT . "/theme/eldy/img/filenew.png' border='0' alt='Create' title='Create'></span>";
     echo "</p>";

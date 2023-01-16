@@ -278,12 +278,12 @@ if ($id > 0 || ! empty($ref))
 
 			// Date start
 			print '<tr><td>'.$langs->trans("DateStart").'</td><td>';
-			print dol_print_date($projectstatic->date_start,'day');
+			print dol_print_date(strtotime($projectstatic->date_start),'day');
 			print '</td></tr>';
 
 			// Date end
 			print '<tr><td>'.$langs->trans("DateEnd").'</td><td>';
-			print dol_print_date($projectstatic->date_end,'day');
+			print dol_print_date(strtotime($projectstatic->date_end),'day');
 			print '</td></tr>';
 
 			print '</table>';
@@ -322,12 +322,12 @@ if ($id > 0 || ! empty($ref))
 
 		// Date start
 		print '<tr><td>'.$langs->trans("DateStart").'</td><td colspan="3">';
-		print dol_print_date($object->date_start,'dayhour');
+		print dol_print_date(strtotime($object->date_start),'dayhour');
 		print '</td></tr>';
 
 		// Date end
 		print '<tr><td>'.$langs->trans("DateEnd").'</td><td colspan="3">';
-		print dol_print_date($object->date_end,'dayhour');
+		print dol_print_date(strtotime($object->date_end),'dayhour');
 		print '</td></tr>';
 
 		// Planned workload

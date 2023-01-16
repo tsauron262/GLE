@@ -255,7 +255,7 @@ class pdf_synopsischrono_destruction extends ModeleSynopsischrono {
 
                 $pdf->SetXY('12', '48');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-                $pdf->MultiCell(50, 6, dol_print_date($chrono->date), 0, 'L');
+                $pdf->MultiCell(50, 6, dol_print_date(strtotime($chrono->date)), 0, 'L');
 
                 if ($chrono->fk_user_author > 0) {
                     $pdf->SetXY('36', '48');

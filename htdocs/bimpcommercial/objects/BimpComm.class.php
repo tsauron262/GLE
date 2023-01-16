@@ -2314,16 +2314,16 @@ class BimpComm extends BimpDolObject
                         }
                         $html .= '</td>';
                         $html .= '<td align="center">';
-                        $html .= dol_print_date($action->datep, 'dayhour');
+                        $html .= dol_print_date(strtotime($action->datep), 'dayhour');
                         if ($action->datef) {
                             $tmpa = dol_getdate($action->datep);
                             $tmpb = dol_getdate($action->datef);
                             if ($tmpa['mday'] == $tmpb['mday'] && $tmpa['mon'] == $tmpb['mon'] && $tmpa['year'] == $tmpb['year']) {
                                 if ($tmpa['hours'] != $tmpb['hours'] || $tmpa['minutes'] != $tmpb['minutes'] && $tmpa['seconds'] != $tmpb['seconds']) {
-                                    $html .= '-' . dol_print_date($action->datef, 'hour');
+                                    $html .= '-' . dol_print_date(strtotime($action->datef), 'hour');
                                 }
                             } else {
-                                $html .= '-' . dol_print_date($action->datef, 'dayhour');
+                                $html .= '-' . dol_print_date(strtotime($action->datef), 'dayhour');
                             }
                         }
                         $html .= '</td>';
@@ -3247,7 +3247,7 @@ class BimpComm extends BimpDolObject
                     $payement = new Paiement($this->db->db);
                     $payement->amounts = array($factureA->id => $amount);
                     $payement->ref = $refPaiement;
-                    $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
+                    $payement->datepaye = ($date_paiement ? BimpTools::getDateTms($date_paiement) : dol_now());
                     $payement->paiementid = (int) $id_mode_paiement;
                     $payement->num_payment = $num_paiement;
                     if ($payement->create($user) <= 0) {
@@ -4722,12 +4722,12 @@ class BimpComm extends BimpDolObject
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
         } elseif (!$this->can("edit")) {
             $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action';
-        } elseif (!method_exists($this->dol_object, 'set_draft')) {
+        } elseif (!method_exists($this->dol_object, 'setDraft')) {
             $errors[] = 'Erreur: cette action n\'est pas possible';
         } else {
             global $user;
             BimpTools::cleanDolEventsMsgs();
-            if ($this->dol_object->set_draft($user) <= 0) {
+            if ($this->dol_object->setDraft($user) <= 0) {
                 $obj_errors = BimpTools::getErrorsFromDolObject($this->dol_object);
                 $obj_errors = BimpTools::merge_array($obj_errors, BimpTools::getDolEventsMsgs(array('errors')));
                 $errors[] = BimpTools::getMsgFromArray($obj_errors, 'Echec de la remise au statut "Brouillon"');

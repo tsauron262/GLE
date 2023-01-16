@@ -336,7 +336,7 @@ function ndfp_meta_create($db, $id, $message="")
 		{
             
 			$meta = "REFERENCE=\"" . $ndfp->ref . "\"
-			DATE=\"" . dol_print_date($ndfp->datec,'') . "\"\n";
+			DATE=\"" . dol_print_date(strtotime($ndfp->datec),'') . "\"\n";
 
 		}
         

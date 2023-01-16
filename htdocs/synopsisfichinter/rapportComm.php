@@ -304,7 +304,7 @@ if ($resql) {
             print $tmpSoc->getNomUrl(1) . "</TD>\n";
         }
         print '<td>' . nl2br($objp->description) . '</td>';
-        print "<td>" . dol_print_date($objp->dp) . "</td>\n";
+        print "<td>" . dol_print_date(strtotime($objp->dp)) . "</td>\n";
         $durStr = convDur($objp->duree);
         if ($enJour)
             print '<td align="center">' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm</td>';

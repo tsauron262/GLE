@@ -43,6 +43,6 @@ while($result = $db->fetch_object($sql)){
             $objet2 = $soc->getNomUrl(1);
         }
     }
-    echo "<tr><td>".ucfirst($result->type)."</td><td>".$objet."</td><td>".$objet2."</td><td>".dol_print_date($result->dateProch)."</td></tr>";
+    echo "<tr><td>".ucfirst($result->type)."</td><td>".$objet."</td><td>".$objet2."</td><td>".dol_print_date(strtotime($result->dateProch))."</td></tr>";
 }
 echo "</table>";

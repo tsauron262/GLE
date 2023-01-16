@@ -81,7 +81,7 @@ function widget_listBordereauRemiseCheque() {
                     $table .= "<tr $bc[$var]>\n";
 
                     $table .= '<td>'.$checkdepositstatic->getNomUrl(1).'</td>';
-                    $table .= '<td>'.dol_print_date($objp->db,'day').'</td>';
+                    $table .= '<td>'.dol_print_date(strtotime($objp->db),'day').'</td>';
                     $table .= '<td>'.$accountstatic->getNomUrl(1).'</td>';
                     $table .= '<td align="right">'.$objp->nbcheque.'</td>';
                     $table .= '<td align="right">'.price($objp->amount).'</td>';
@@ -92,7 +92,7 @@ function widget_listBordereauRemiseCheque() {
                 $table2 .= "<tr $bc[$var]>\n";
 
                 $table2 .= '<td>'.$checkdepositstatic->getNomUrl(1).'</td>';
-                $table2 .= '<td>'.dol_print_date($objp->db,'day').'</td>';
+                $table2 .= '<td>'.dol_print_date(strtotime($objp->db),'day').'</td>';
                 $table2 .= '<td>'.$accountstatic->getNomUrl(1).'</td>';
                 $table2 .= '<td align="right">'.$objp->nbcheque.'</td>';
                 $table2 .= '<td align="right">'.price($objp->amount).'</td>';

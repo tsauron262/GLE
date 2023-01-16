@@ -583,7 +583,7 @@ class pdf_crabeCapsim extends ModelePDFFactures
 				$invoice->fetch($obj->fk_facture_source);
 
 				$pdf->SetXY($tab3_posx, $tab3_top+$y);
-				$pdf->MultiCell(20, 3, dol_print_date($obj->datef,'day',false,$outputlangs,true), 0, 'L', 0);
+				$pdf->MultiCell(20, 3, dol_print_date(strtotime($obj->datef),'day',false,$outputlangs,true), 0, 'L', 0);
 				$pdf->SetXY($tab3_posx+21, $tab3_top+$y);
 				$pdf->MultiCell(20, 3, price($obj->amount_ttc, 0, $outputlangs), 0, 'L', 0);
 				$pdf->SetXY($tab3_posx+40, $tab3_top+$y);
@@ -1319,14 +1319,14 @@ class pdf_crabeCapsim extends ModelePDFFactures
 		$posy+=4;
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
-		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateInvoice")." : " . dol_print_date($object->date,"day",false,$outputlangs), '', 'R');
+		$pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateInvoice")." : " . dol_print_date(strtotime($object->date),"day",false,$outputlangs), '', 'R');
 
 		if ($object->type != 2)
 		{
 			$posy+=3;
 			$pdf->SetXY($posx,$posy);
 			$pdf->SetTextColor(0,0,60);
-			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEcheance")." : " . dol_print_date($object->date_lim_reglement,"day",false,$outputlangs,true), '', 'R');
+			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEcheance")." : " . dol_print_date(strtotime($object->date_lim_reglement),"day",false,$outputlangs,true), '', 'R');
 		}
 
 //		if ($object->client->code_client)

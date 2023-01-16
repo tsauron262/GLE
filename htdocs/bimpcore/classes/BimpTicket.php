@@ -150,9 +150,9 @@ class BimpTicket
                 $tva[$vatrate] += $tva_line;
                 $i++;
             }
-            
+
             $i = 0;
-            if($this->avoir){
+            if ($this->avoir) {
                 foreach ($this->avoir->lines as $line) {
                     $html .= '<tr class="article_desc">';
                     if (is_null($line->desc) || !$line->desc) {
@@ -166,9 +166,9 @@ class BimpTicket
                         $desc = $line->desc;
                     }
 
-    //                if (strlen($desc) > 40) {
-    //                    $desc = substr($desc, 0, 38)."...";
-    //                }
+                    //                if (strlen($desc) > 40) {
+                    //                    $desc = substr($desc, 0, 38)."...";
+                    //                }
 
                     $html .= '<td colspan="5">' . $desc . '</td>';
                     $html .= '</tr>';
@@ -197,22 +197,22 @@ class BimpTicket
 
                     $vatrate = (string) $line->tva_tx;
 
-    //                if (!isset($this->tva[$vatrate])) {
-    //                    $tva_line = 0;
-    //                }
+                    //                if (!isset($this->tva[$vatrate])) {
+                    //                    $tva_line = 0;
+                    //                }
 
                     $tva[$vatrate] += $tva_line;
                     $i++;
                 }
             }
-            
+
             $html .= '</tbody>';
             $html .= '</table>';
 
             $total_ht = ($conf->multicurrency->enabled && $this->facture->mylticurrency_tx != 1 ? $this->facture->multicurrency_total_ht : $this->facture->total_ht);
             $total_ttc = ($conf->multicurrency->enabled && $this->facture->multicurrency_tx != 1) ? $this->facture->multicurrency_total_ttc : $this->facture->total_ttc;
 
-            if($this->avoir){
+            if ($this->avoir) {
                 $total_ht += ($conf->multicurrency->enabled && $this->avoir->mylticurrency_tx != 1 ? $this->avoir->multicurrency_total_ht : $this->avoir->total_ht);
                 $total_ttc += ($conf->multicurrency->enabled && $this->avoir->multicurrency_tx != 1) ? $this->avoir->multicurrency_total_ttc : $this->avoir->total_ttc;
             }
@@ -277,7 +277,7 @@ class BimpTicket
                     $html .= '</tbody>';
                     $html .= '</table>';
                 }
-                
+
                 if ($returned_rows_html) {
                     $html .= '<div class="bold">Rendus : </div>';
                     $html .= '<table id="ticket_rendus">';
@@ -353,12 +353,9 @@ class BimpTicket
                 $logo = $logo2;
         }
 
-
-        $url = DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $logo;
-
         $html .= '<div class="ticket_header">';
         $html .= '<div class="header_block">';
-        $html .= '<img src="' . $url . '"/>';
+        $html .= '<img src="' . BimpTools::getMyCompanyLogoUrl($logo) . '"/>';
         $html .= '</div>';
 
         $html .= '<div class="header_block">';
@@ -394,7 +391,6 @@ class BimpTicket
         $html .= '<p style="font-size: 20px; line-height: 22px; font-weight: bold; font-style: italic">Merci de votre fidélité</p>';
 
         $txt = '';
-
 
         $langs->load("companies");
 

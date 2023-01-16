@@ -5072,7 +5072,7 @@ class Bimp_Facture extends BimpComm
 
                 // On verifie si aucun paiement n'a ete effectue
                 if ($resteapayer == $this->dol_object->total_ttc && $this->dol_object->paye == 0 && $ventilExportCompta == 0) {
-                    if ($this->dol_object->set_draft($user, $id_entrepot) <= 0) {
+                    if ($this->dol_object->setDraft($user, $id_entrepot) <= 0) {
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la remise au statut "Brouillon"');
                     }
 

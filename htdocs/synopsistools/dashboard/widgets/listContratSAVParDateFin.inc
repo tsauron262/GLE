@@ -75,7 +75,7 @@ function widget_listContratSAVParDateFin() {
                     $staticcompany->fetch($staticcontrat->socid);
                     $table .=  $staticcompany->getNomUrl(1,'',20);
                     $table .=  '</td>';
-                    $table .=  '<td align="center">'.dol_print_date($obj->DateFin,'day').'</td>';
+                    $table .=  '<td align="center">'.dol_print_date(strtotime($obj->DateFin),'day').'</td>';
                     //$table .=  '<td align="left">'.$staticcontrat->LibStatut($obj->statut,2).'</td>';
                     $table .=  "</tr>\n";
                 }
@@ -92,7 +92,7 @@ function widget_listContratSAVParDateFin() {
 //                $staticcompany->nom=$obj->nom;
                 $table2 .=  $staticcompany->getNomUrl(1,'',20);
                 $table2 .=  '</td>';
-                $table2 .=  '<td align="center">'.dol_print_date($obj->DateFin,'day').'</td>';
+                $table2 .=  '<td align="center">'.dol_print_date(strtotime($obj->DateFin),'day').'</td>';
                 $table2 .=  "</tr>\n";
                 $i++;
             }

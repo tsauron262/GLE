@@ -1072,7 +1072,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $date_cloture = $this->db->getValue('propal', 'date_cloture', '`rowid` = ' . (int) $this->id);
                 if (!is_null($date_cloture) && $date_cloture) {
                     $html .= '<div class="object_header_infos">';
-                    $html .= 'Fermée le <strong>' . date('d / m / Y', BimpTools::getDateForDolDate($date_cloture)) . '</strong>';
+                    $html .= 'Fermée le <strong>' . date('d / m / Y', BimpTools::getDateTms($date_cloture)) . '</strong>';
 
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_close_id);
                     if (BimpObject::objectLoaded($user)) {
@@ -1499,13 +1499,13 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         $date_diff = 0;
         if (isset($new_data['date_livraison']) && $new_data['date_livraison'] !== $this->getData('date_livraison')) {
-            $date_diff = (int) BimpTools::getDateForDolDate($new_data['date_livraison']) - (int) BimpTools::getDateForDolDate($this->getData('date_livraison'));
+            $date_diff = (int) BimpTools::getDateTms($new_data['date_livraison']) - (int) BimpTools::getDateTms($this->getData('date_livraison'));
         }
 
         $now = date('Y-m-d H:i:s');
         $new_data['datep'] = $now;
         $new_data['datec'] = $now;
-        $fin_validite = BimpTools::getDateForDolDate($now) + ($this->dol_object->duree_validite * 24 * 3600);
+        $fin_validite = BimpTools::getDateTms($now) + ($this->dol_object->duree_validite * 24 * 3600);
         $new_data['fin_validite'] = BimpTools::getDateFromDolDate($fin_validite);
         $new_data['id_signature'] = 0;
         $new_data['signature_params'] = array();
@@ -1517,13 +1517,13 @@ class Bimp_Propal extends Bimp_PropalTemp
             foreach ($lines as $line) {
                 $update = false;
                 if (isset($line->date_from) && (string) $line->date_from) {
-                    $new_date_from = (BimpTools::getDateForDolDate($line->date_from) + $date_diff);
+                    $new_date_from = (BimpTools::getDateTms($line->date_from) + $date_diff);
                     $line->date_from = BimpTools::getDateFromDolDate($new_date_from);
                     $update = true;
                 }
 
                 if (isset($line->date_to) && (string) $line->date_to) {
-                    $new_date_to = (BimpTools::getDateForDolDate($line->date_to) + $date_diff);
+                    $new_date_to = (BimpTools::getDateTms($line->date_to) + $date_diff);
                     $line->date_to = BimpTools::getDateFromDolDate($new_date_to);
                     $update = true;
                 }
@@ -1963,12 +1963,12 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         // Date: 
         if ($this->getData('datep') != $this->getInitData('datep')) {
-            $this->updateField('fin_validite', BimpTools::getDateForDolDate($this->getData('datep')) + ($this->dol_object->duree_validite * 24 * 3600));
+            $this->updateField('fin_validite', BimpTools::getDateTms($this->getData('datep')) + ($this->dol_object->duree_validite * 24 * 3600));
         }
 
 
         if ((string) $this->getData('datep')) {
-            $date = BimpTools::getDateForDolDate($this->getData('datep'));
+            $date = BimpTools::getDateTms($this->getData('datep'));
         } else {
             $date = '';
         }
@@ -1983,7 +1983,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         // Date fin validité: 
         if ((string) $this->getData('fin_validite')) {
-            $date = BimpTools::getDateForDolDate($this->getData('fin_validite'));
+            $date = BimpTools::getDateTms($this->getData('fin_validite'));
         } else {
             $date = '';
         }
@@ -1998,7 +1998,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         // Date livraison: 
         if ((string) $this->getData('date_livraison')) {
-            $date = BimpTools::getDateForDolDate($this->getData('date_livraison'));
+            $date = BimpTools::getDateTms($this->getData('date_livraison'));
         } else {
             $date = '';
         }

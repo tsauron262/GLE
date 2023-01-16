@@ -221,7 +221,7 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
 
 
             $tabFact = $tabFactDet = array();
-            $tabFact[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name, "phone" => $societe->phone, "address" => $societe->address, "zip" => $societe->zip, "town" => $societe->town, "ref" => $facture->ref, "date" => dol_print_date($facture->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($facture->total_ht), "total_ttc" => price($facture->total_ttc), "id8Sens" => $this->id8sens);
+            $tabFact[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name, "phone" => $societe->phone, "address" => $societe->address, "zip" => $societe->zip, "town" => $societe->town, "ref" => $facture->ref, "date" => dol_print_date(strtotime($facture->date), "%d-%m-%Y"), "email" => $societe->email, "total" => price($facture->total_ht), "total_ttc" => price($facture->total_ttc), "id8Sens" => $this->id8sens);
             $facture->fetch_lines();
             foreach ($facture->lines as $line) {
                 $type = $this->getRef($line);

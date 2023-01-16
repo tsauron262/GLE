@@ -687,7 +687,7 @@ class BS_SAV extends BimpObject
                     'file_type' => 'europe',
                         ), array(
                     'success_callback' => $callback,
-                    'form_name' => 'europe'
+                    'form_name'        => 'europe'
                 ))
             );
 
@@ -1613,12 +1613,13 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
         return $code;
     }
-    
-    public function getEquipmentData($data) {
+
+    public function getEquipmentData($data)
+    {
         $equipment = $this->getChildObject('equipment');
         if (!BimpObject::objectLoaded($equipement))
             return $equipment->getData($data);
-        
+
         return '';
     }
 
@@ -5404,13 +5405,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                                 $cond_reglement = null;
 
-                                if (!$cond_reglement) {
-                                    if ((int) $propal->dol_object->cond_reglement_id) {
-                                        $cond_reglement = (int) $propal->dol_object->cond_reglement_id;
-                                    } else {
-                                        if (BimpObject::objectLoaded($client_fac)) {
-                                            $cond_reglement = (int) $client_fac->getData('cond_reglement');
-                                        }
+                                if ((int) $propal->dol_object->cond_reglement_id) {
+                                    $cond_reglement = (int) $propal->dol_object->cond_reglement_id;
+                                } else {
+                                    if (BimpObject::objectLoaded($client_fac)) {
+                                        $cond_reglement = (int) $client_fac->getData('cond_reglement');
                                     }
                                 }
 
@@ -5418,7 +5417,13 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                     $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
                                 }
 
-                                $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
+                                $mode_reglement = null;
+                                
+                                if ($payment_1_set) {
+                                    $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
+                                } else {
+                                    $mode_reglement = (int) $propal->dol_object->mode_reglement_id;
+                                }
 
                                 if (!$mode_reglement) {
                                     $mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', null, 'bimpsupport');
@@ -5917,13 +5922,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 $success = "Acompte créer avec succés.";
             }
-        }
-        else{
+        } else {
             $propal = $this->getChildObject('propal');
             $client = $this->getChildObject('client');
             $centre = $this->getCentreData();
             $return = $propal->actionAddAcompte($data, $success);
-            if(!count($return['errors'])){
+            if (!count($return['errors'])) {
                 mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 return $return;
             }

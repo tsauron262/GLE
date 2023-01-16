@@ -129,7 +129,7 @@ if ($socid > 0) {
 
         $sql = 'SELECT f.rowid as facid, f.ref, f.type, f.amount';
         $sql .= ', f.total_ht as total_ht';
-        $sql .= ', f.tva as total_tva';
+        $sql .= ', f.total_tva as total_tva';
         $sql .= ', f.total_ttc';
         $sql .= ', f.datef as df, f.datec as dc, f.paye as paye, f.fk_statut as statut';
         $sql .= ', s.nom, s.rowid as socid';

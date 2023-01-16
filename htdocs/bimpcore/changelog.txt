@@ -1,5 +1,4 @@
 * All triggers with a name XXX_UPDATE have been renamed with name XXX_MODIFY for code consistency purpose.
-* Field "tva"   renamed into "total_tva" for llx_facture, table llx_propal, llx_supplier_proposal, llx_commande, llx_commande_fournisseur for better field name consistency
 * Removed deprecated substitution key  __REFCLIENT__  (replaced with __REF_CLIENT__)
 * All properties ->titre have been renamed into ->title
 * The deprecated subsitution key __SIGNATURE__ has been removed. Replace it with __USER_SIGNATURE__ if you used the old syntax in your email templates.
@@ -35,3 +34,4 @@
 * Depreciate all methods with name ->valide(). Use instead methods ->validate().
 * Removed deprecated method actioncomm->add(), use create() instead
 * Property 'num_paiement' has been renamed 'num_payment' everywhere for better code consistency.
+* Field "tva"   renamed into "total_tva" for llx_facture, table llx_propal, llx_supplier_proposal, llx_commande, llx_commande_fournisseur for better field name consistency

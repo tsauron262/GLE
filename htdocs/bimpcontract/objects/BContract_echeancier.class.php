@@ -650,7 +650,7 @@ class BContract_echeancier extends BimpObject {
 
 
                     $html .= '<td style="text-align:center"><b>' . price($facture->getData('total_ht')) . ' €</b> </td>'
-                            . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
+                            . '<td style="text-align:center"><b>' . price($facture->getData('total_tva')) . ' € </b></td>'
                             . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
                             . '<td style="text-align:center"><b>' . price($facture->getData('total_ht') - $facture->getData('marge_finale_ok')) . ' €</b></td>'
                             . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
@@ -1022,7 +1022,7 @@ class BContract_echeancier extends BimpObject {
                 $factures[] = Array(
                     'ref'       => $facture->getRef(),
                     'ht'        => $facture->getData('total_ht'),
-                    'tva'       => $facture->getData('tva'),
+                    'tva'       => $facture->getData('total_tva'),
                     'ttc'       => $facture->getData('total_ttc'),
                     'dateStart' => $laLigne->date_start, 
                     'dateEnd'   => $laLigne->date_end

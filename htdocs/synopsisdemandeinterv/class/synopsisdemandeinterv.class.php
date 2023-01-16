@@ -1480,7 +1480,7 @@ class synopsisdemandeintervLigne {
 //            } else {
 //                $ligne->total_ht = floatval($ligne->duration) * floatval($pu_ht)/3600;
 //            }
-//Compute total tva / total_TTC
+//Compute total total_tva / total_TTC
         
         $this->traitePrice();
 

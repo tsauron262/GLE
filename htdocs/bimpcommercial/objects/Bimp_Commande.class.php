@@ -2164,9 +2164,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $html .= '<tr>';
         $html .= '<th>Total TVA</th>';
         $html .= '<td>';
-        $html .= $this->displayData('tva', 'default', false);
+        $html .= $this->displayData('total_tva', 'default', false);
 
-        if ($check_qty_modif && (float) $this->getData('tva') !== $total_tva_fq) {
+        if ($check_qty_modif && (float) $this->getData('total_tva') !== $total_tva_fq) {
             $html .= '<br/><span class="important">';
             $html .= BimpTools::displayMoneyValue($total_tva_fq, 'EUR', 0, 0, 0, 2, 1);
             $html .= '</span>';

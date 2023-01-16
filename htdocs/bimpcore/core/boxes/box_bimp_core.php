@@ -278,7 +278,7 @@ class box_bimp_core extends ModeleBoxes
 
             if(!$nocolor)
             $px1->SetDataColor($color);
-            $px1->SetPrecisionY(0);
+//            $px1->SetPrecisionY(0);
             $px1->SetLegend($legend);
             $px1->setShowLegend(0);
             $px1->setShowPointValue($showpointvalue);
@@ -289,7 +289,7 @@ class box_bimp_core extends ModeleBoxes
             //$px1->SetYLabel($langs->trans("NumberOfBills"));
             $px1->SetShading(3);
             $px1->SetHorizTickIncrement(1);
-            $px1->SetPrecisionY(0);
+//            $px1->SetPrecisionY(0);
             $px1->SetCssPrefix("cssboxes");
             //$px1->mode='depth';
             $px1->SetType(array('pie'));

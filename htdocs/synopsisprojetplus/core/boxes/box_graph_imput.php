@@ -146,7 +146,7 @@ class box_graph_imput extends ModeleBoxes
 				{
 					$px1->SetData($data1);
 					unset($data1);
-					$px1->SetPrecisionY(0);
+//					$px1->SetPrecisionY(0);
 					$i=$startyear;$legend=array();
 					while ($i <= $endyear)
 					{
@@ -160,7 +160,7 @@ class box_graph_imput extends ModeleBoxes
 					$px1->SetYLabel($langs->trans("NumberOfBills"));
 					$px1->SetShading(3);
 					$px1->SetHorizTickIncrement(1);
-					$px1->SetPrecisionY(0);
+//					$px1->SetPrecisionY(0);
 					$px1->SetCssPrefix("cssboxes");
 					$px1->mode='depth';
 					$px1->SetTitle($langs->trans("NumberOfBillsByMonth"));
@@ -194,7 +194,7 @@ for($i=0;$i<12;$i++){
 				    
 					$px2->SetData($data2);
 					unset($data2);
-					$px2->SetPrecisionY(0);
+//					$px2->SetPrecisionY(0);
 					$i=$startyear;$legend=array();
 					while ($i <= $endyear)
 					{
@@ -208,7 +208,7 @@ for($i=0;$i<12;$i++){
 					$px2->SetYLabel($langs->trans("AmountOfBillsHT"));
 					$px2->SetShading(3);
 					$px2->SetHorizTickIncrement(1);
-					$px2->SetPrecisionY(0);
+//					$px2->SetPrecisionY(0);
 					$px2->SetCssPrefix("cssboxes");
 					$px2->mode='depth';
 					$px2->SetTitle($langs->trans($this->titre));

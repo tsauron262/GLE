@@ -1603,7 +1603,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         } else {
             global $user;
             $note = isset($data['note']) ? $data['note'] : '';
-            if ($this->dol_object->cloture($user, (int) $data['new_status'], $note) <= 0) {
+            if ($this->dol_object->closeProposal($user, (int) $data['new_status'], $note) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la cloture de la proposition commerciale');
             } else {
                 if ((int) $this->getData('id_signature')) {
@@ -1655,7 +1655,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         $factures = $this->dol_object->getInvoiceArrayList();
         if ((is_array($factures) && count($factures)) ||
                 empty($conf->global->WORKFLOW_PROPAL_NEED_INVOICE_TO_BE_CLASSIFIED_BILLED)) {
-            if ($this->dol_object->cloture($user, 4, '') < 0) {
+            if ($this->dol_object->closeProposal($user, 4, '') < 0) {
                 $errors[] = BimpTools::getErrorsFromDolObject($this->dol_object);
             }
         }

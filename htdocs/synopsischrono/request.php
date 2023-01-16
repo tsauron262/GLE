@@ -91,7 +91,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Devis accepté le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
-        $chrono->propal->cloture($user, 2, "Auto via SAV");
+        $chrono->propal->closeProposal($user, 2, "Auto via SAV");
         $chrono->setDatas($chrono->id, array($idEtat => 3));
         $ok = true;
     }
@@ -181,9 +181,9 @@ if (isset($_REQUEST['actionEtat'])) {
 //            $facture->fetch($facture->id);
 //            facture_pdf_create($db, $facture, "crabeSav", $langs);
 //            link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
-//            $propal->cloture($user, 4, '');
+//            $propal->closeProposal($user, 4, '');
             $chrono->setDatas($chrono->id, array($idEtat => 9));
-            $chrono->propal->cloture($user, 2, "Auto via SAV");
+            $chrono->propal->closeProposal($user, 2, "Auto via SAV");
 
             if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
                 envoieMail("revPropRefu", $chrono, null, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
@@ -194,7 +194,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
 
 
-//        $chrono->propal->cloture($user, 5, "Auto via SAV");
+//        $chrono->propal->closeProposal($user, 5, "Auto via SAV");
         $ok = true;
     }
 
@@ -203,7 +203,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Devis refusé le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
-        $chrono->propal->cloture($user, 3, "Auto via SAV");
+        $chrono->propal->closeProposal($user, 3, "Auto via SAV");
         $chrono->setDatas($chrono->id, array($idEtat => 6));
         if ($chrono->extraValue[$chrono->id]['Technicien']['value'] > 0) {
             $req = "SELECT `nom` FROM `" . MAIN_DB_PREFIX . "usergroup` WHERE rowid IN (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $chrono->extraValue[$chrono->id]['Technicien']['value'] . ") ANd `nom` REGEXP 'Sav([0-9])'";
@@ -255,7 +255,7 @@ if (isset($_REQUEST['actionEtat'])) {
         }
 
 
-//        $propal->cloture($user, 3, '');
+//        $propal->closeProposal($user, 3, '');
         if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
             envoieMail("repOk", $chrono, null, $toMail, $fromMail, $tel, $nomMachine, $nomCentre);
     }
@@ -300,7 +300,7 @@ if (isset($_REQUEST['actionEtat'])) {
             if ($attentePiece != 1)//Sinon on vien de commander les piece sous garentie
                 $chrono->setDatas($chrono->id, array($idEtat => 3));
             $chrono->propal->valid($user);
-            $chrono->propal->cloture($user, 2, "Auto via SAV sous garentie");
+            $chrono->propal->closeProposal($user, 2, "Auto via SAV sous garentie");
             $chrono->propal->fetch($chrono->propal->id);
             $chrono->propal->generateDocument("azurSAV", $langs);
 //            propale_pdf_create($db, $chrono->propal, "azurSAV", $langs);
@@ -359,7 +359,7 @@ AND  `fk_c_type_contact` =40");
             }
 
 
-            $chrono->propal->cloture($user, 2, "Auto via SAV");
+            $chrono->propal->closeProposal($user, 2, "Auto via SAV");
 
 
 

@@ -9,8 +9,12 @@ $_REQUEST['bimp_context'] = 'public';
 $url = "https://";
 $url .= $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
+
+//print_r($_SERVER);
+//die;
+
 if (isset($_REQUEST['nav_not_compatible'])) {
-    echo '<h1>Votre navigateur n\'est pas compatible.</h1><h2> <a href="' . $url . '" target="popup">Merci de cliquer ici</a></h2>';
+    echo '<h1>mmVotre navigateur n\'est pas compatible.</h1><h2> <a href="' . $url . '" target="popup">Merci de cliquer ici</a></h2>';
     die;
 }
 
@@ -42,7 +46,7 @@ BimpCore::setContext("public");
 if (!isset($_REQUEST['ajax'])) {
     echo "<script>function testCookie(){"
     . "setTimeout(function() {"
-    . "if(document.cookie.match('DOLSESSID_')){ "
+    . "if(document.cookie.match('DOLSESSID_') || window.self === window.top){ "
     . "}else{ "
     . "window.open('" . $url . "', '_blank'); "
     . "if(window.location.href.indexOf('?') > 0 || window.location.href.indexOf('/b/') > 0) "

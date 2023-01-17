@@ -257,6 +257,7 @@ class PretPDF extends BimpDocumentPDF
             $html .= '<ul>';
             $html .= '<li>à assurer les matériels prêtés</li>';
             $html .= '<li>à prendre soin des matériels prêtés</li>';
+            $html .= '<li>à respecter les délais du prêt</li>';
             $html .= '<li>à accepter la facturation automatique du matériel si les produits faisaient l\'objet d\'une quelconque déterioration ou perte</li>';
 
             if ((int) $this->pret->getData('caution')) {

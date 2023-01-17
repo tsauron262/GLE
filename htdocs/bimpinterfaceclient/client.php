@@ -8,13 +8,14 @@ $_REQUEST['bimp_context'] = 'public';
 
 $url = "https://";
 $url .= $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$url = str_replace('nav_not_compatible', 'compatible', $url);
 
 
 //print_r($_SERVER);
 //die;
 
 if (isset($_REQUEST['nav_not_compatible'])) {
-    echo '<h1>mmVotre navigateur n\'est pas compatible.</h1><h2> <a href="' . $url . '" target="popup">Merci de cliquer ici</a></h2>';
+    echo '<h1>Votre navigateur n\'est pas compatible.</h1><h2> <a href="' . $url . '" target="popup">Merci de cliquer ici</a></h2>';
     die;
 }
 

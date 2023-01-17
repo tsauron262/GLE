@@ -39,6 +39,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $signature_bloc_label = '';
     public $signature_title = 'Signature';
     public $signature_pro_title = 'Signature + Cachet avec SIRET';
+    public $signature_mentions = '';
 
     public function __construct($db)
     {
@@ -470,11 +471,16 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '<td style="width: 50%">';
 
             $html .= '<table cellpadding="3">';
+            if ($this->signature_mentions) {
+                $html .= '<tr>';
+                $html .= '<td colspan="2" style="text-align: center">' . $this->signature_mentions . '</td>';
+                $html .= '</tr>';
+            }
             $html .= '<tr>';
             if ($this->isTargetCompany()) {
                 $html .= '<td style="text-align:center;"><i><b>' . $this->signature_bloc_label . '</b></i></td>';
 
-                $html .= '<td style="font-size: 6px">' . $this->signature_pro_title . ' :</td>';
+                $html .= '<td style="font-size: 6px">' . ($this->signature_pro_title ? $this->signature_pro_title . ' :' : '') . '</td>';
                 $html .= '</tr>';
 
                 $html .= '<tr>';
@@ -538,7 +544,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     );
                 }
             } else {
-                $html .= '<td style="text-align: right">' . $this->signature_title . ' :<br/>Date :</td>';
+                $html .= '<td style="text-align: right">' . ($this->signature_title ? $this->signature_title . ' :' : '') . '<br/>Date :</td>';
                 $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/><br/></td>';
 
                 $yPosOffset = 2;

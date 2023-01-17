@@ -298,7 +298,7 @@ Abstract class BimpModelPDF
         }
         $html .= '</span>';
 
-        if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY == 'bimp') {
+        if (BimpCore::isEntity('bimp')) {
             global $mysoc;
             if ($this->fromCompany->zip != $mysoc->zip || $this->fromCompany->town != $mysoc->town) {
                 $html .= '<span style="font-size: 6px; font-style: italic; color: #5A5959"><br/>';

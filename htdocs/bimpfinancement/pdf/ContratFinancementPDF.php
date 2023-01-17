@@ -28,7 +28,7 @@ class ContratFinancementPDF extends DocFinancementPDF
         $this->cessionnaire_data = $cessionnaire_data;
 
         parent::__construct($db, $demande);
-        
+
         $this->doc_name = 'Contrat de location';
         $this->concat_files[] = DOL_DOCUMENT_ROOT . 'bimpfinancement/pdf/cg_contrat.pdf';
         $this->concat_files[] = DOL_DOCUMENT_ROOT . 'bimpfinancement/pdf/mandat_sepa.pdf';
@@ -81,13 +81,19 @@ class ContratFinancementPDF extends DocFinancementPDF
             $forme_jur = BimpTools::getArrayValueFromPath($this->client_data, 'forme_juridique', '', $errors, true, 'Forme juridique du client absente');
             $capital = BimpTools::getArrayValueFromPath($this->client_data, 'capital', '', $errors, true, 'Capital social du client absent');
             $siren = BimpTools::getArrayValueFromPath($this->client_data, 'siren', '', $errors, true, 'N° SIREN du client absent');
-            $rcs = BimpTools::getArrayValueFromPath($this->client_data, 'rcs', '', $errors, true, 'Ville d\'enregistrement au RCS du client absente');
+            $rcs = BimpTools::getArrayValueFromPath($this->client_data, 'rcs', '');
             $representant = BimpTools::getArrayValueFromPath($this->client_data, 'representant', '', $errors, true, 'Représentant du client absent');
             $repr_qualité = BimpTools::getArrayValueFromPath($this->client_data, 'repr_qualite', '', $errors, true, 'Qualité du représentant du client absent');
 
             if (!count($errors)) {
                 $html .= '"' . $nom . '", ' . $forme_jur . ' au capital de ' . $capital . '.<br/>';
-                $html .= 'Entreprise immatriculée sous le numéro ' . $siren . ' au RCS de ' . $rcs . ' ';
+                $html .= 'Entreprise immatriculée sous le numéro ' . $siren;
+                if ((int) BimpTools::getArrayValueFromPath($this->client_data, 'insee', 0)) {
+                    $html .= ' à l\'INSEE ';
+                } elseif ($rcs) {
+                    $html .= ' au RCS de ' . $rcs . ' ';
+                }
+
                 $html .= 'dont le siège social est situé : ' . $address . ' - ';
                 $html .= 'Représentée par ' . $representant . ' en qualité de ' . $repr_qualité . '.';
             } else {
@@ -270,12 +276,15 @@ class ContratFinancementPDF extends DocFinancementPDF
             $html .= '</td>';
 
             // Signature cessionnaire:
+            $nom_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'nom', '');
+            $qualite_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'qualite', '');
+
             $html .= '<td style="width: 33%">';
             $html .= '<span style="font-size: 9px; font-weight: bold">Pour le cessionnaire :</span><br/>';
             $html .= BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'raison_social', '', $errors, true, 'Raison sociale du signataire cessionnaire absent') . '<br/>';
             $html .= 'SIREN : ' . BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'siren', '', $errors, true, 'N° SIREN du signataire cessionnaire absent') . '<br/>';
-            $html .= 'Représenté par : ' . BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'nom', '', $errors, true, 'Nom du signataire cessionnaire absent') . '<br/>';
-            $html .= 'En qualité de : ' . BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'qualite', '', $errors, true, 'Qualité du signataire cessionnaire absente');
+            $html .= 'Représenté par : ' . $nom_cessionnaire . '<br/>';
+            $html .= 'En qualité de : ' . $qualite_cessionnaire;
             $html .= '</td>';
             $html .= '</tr>';
             $html .= '<tr>';
@@ -334,6 +343,29 @@ class ContratFinancementPDF extends DocFinancementPDF
                     )
                 )
             );
+            if (!$nom_cessionnaire) {
+                $this->signature_params['cessionnaire']['elec']['display_nom'] = 1;
+                $this->signature_params['cessionnaire']['elec']['nom_x_offset'] = 21;
+                $this->signature_params['cessionnaire']['elec']['nom_y_offset'] = -17;
+
+                // Todo : Offsets à vérifier!
+                $this->signature_params['cessionnaire']['docusign']['nom'] = array(
+                    'x' => 44,
+                    'y' => 28
+                );
+            }
+            if (!$qualite_cessionnaire) {
+                $this->signature_params['cessionnaire']['elec']['display_fonction'] = 1;
+                $this->signature_params['cessionnaire']['elec']['fonction_x_offset'] = 18;
+                $this->signature_params['cessionnaire']['elec']['fonction_y_offset'] = -14;
+
+                // Todo : Offsets à vérifier!
+                $this->signature_params['cessionnaire']['docusign']['fonction'] = array(
+                    'x' => 36,
+                    'y' => 40
+                );
+            }
+
             $this->signature_params['loueur'] = array(
                 'elec'     => array(
                     'x_pos'            => 71,

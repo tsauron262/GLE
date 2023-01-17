@@ -1898,9 +1898,6 @@ class BimpSignataire extends BimpObject
                         $this->set('email', $client->getData('email'));
                     }
                 }
-//                else {
-//                    $errors[] = 'Contact signataire obligatoire pour les clients pros';
-//                }
                 break;
 
             case self::TYPE_USER:
@@ -1919,9 +1916,6 @@ class BimpSignataire extends BimpObject
                 break;
 
             case self::TYPE_CUSTOM:
-                if (!$this->getData('nom')) {
-                    $errors[] = 'Nom obligatoire';
-                }
                 if (!$this->getData('email')) {
                     $errors[] = 'Adresse e-mail obligatoire';
                 }

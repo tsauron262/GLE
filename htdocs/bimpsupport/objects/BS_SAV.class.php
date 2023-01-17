@@ -4853,7 +4853,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $client = $this->getChildObject('client');
 
                         $encoursActu = $client->getAllEncoursForSiret(true)['total'];
-                        $authorisation = $client->getData('outstanding_limit');
+                        $authorisation = $client->getData('outstanding_limit')*1.2;
                         $besoin = $encoursActu + $propal->dol_object->total_ht;
 
                         if ($besoin > ($authorisation + 1))
@@ -5195,7 +5195,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if ($impayee > 1) {
                 //on vérifie encours
                 $encoursActu = $client_fac->getAllEncoursForSiret(true)['total'];
-                $authorisation = $client_fac->getData('outstanding_limit');
+                $authorisation = $client_fac->getData('outstanding_limit')*1.2;
                 $besoin = $encoursActu + $impayee;
 
                 if ($besoin > $authorisation) {

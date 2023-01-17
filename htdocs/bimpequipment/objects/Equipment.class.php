@@ -999,11 +999,12 @@ class Equipment extends BimpObject
         }
         return '';
     }
-    
-    public function displayContrats(){
+
+    public function displayContrats()
+    {
         $return = array();
-        $sql = $this->db->db->query("SELECT fk_contrat FROM `".MAIN_DB_PREFIX."contratdet` WHERE `serials` LIKE '%".$this->getData('serial')."%' ORDER BY fk_contrat DESC ;");
-        while($ln = $this->db->db->fetch_object($sql)){
+        $sql = $this->db->db->query("SELECT fk_contrat FROM `" . MAIN_DB_PREFIX . "contratdet` WHERE `serials` LIKE '%" . $this->getData('serial') . "%' ORDER BY fk_contrat DESC ;");
+        while ($ln = $this->db->db->fetch_object($sql)) {
             $obj = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $ln->fk_contrat);
             $return[] = $obj->getLink();
         }
@@ -1569,7 +1570,7 @@ class Equipment extends BimpObject
                             foreach ($out['reasons'] as $reason) {
                                 if (isset($reason['messages'])) {
                                     foreach ($reason['messages'] as $msg) {
-                                        if(is_array($msg) && isset($msg['description']))
+                                        if (is_array($msg) && isset($msg['description']))
                                             $msg = $msg['description'];
                                         if (stripos($msg, 'Localiser mon ') !== false || stripos($msg, 'OP987') !== false)
                                             $identifiers['status_gsx'] = 3;
@@ -1656,7 +1657,8 @@ class Equipment extends BimpObject
 
         define('DONT_CHECK_SERIAL', true);
         $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '', 1);
-        return array('warnings' => $warnings, 'errors' => $errors);;
+        return array('warnings' => $warnings, 'errors' => $errors);
+        ;
     }
 
     public function actionUpdateInfosGsx($data, &$success)

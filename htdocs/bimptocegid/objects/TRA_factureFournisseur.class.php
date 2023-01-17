@@ -131,10 +131,20 @@
                         }elseif(in_array($produit->getRef(), self::$rfa)) {
                             $compteLigne = Bimpcore::getConf('rfa_fournisseur_fr', null, 'bimptocegid');
                         } else {
+                            if($produit->isLoaded()) {
+                                $compteProd = $produit->getCodeComptableAchat($facture->getData('zone_vente'));
+                                $debug['LOADED_PRODUCT_' . $line->id] = $produit->getRef();
+                            }
+                            else {
+                                $type = $line->product_type;
+                                $compteProd = $produit->getCodeComptableAchat($facture->getData('zone_vente'), $type).$line->product_type;
+                                $debug['LOADED_PRODUCT_' . $line->id] = 'NULL';
+                            }
+                            
                             if($interco) {
-                                $compteLigne = sizing(interco_code($produit->getCodeComptableAchat($facture->getData('zone_vente')), $this->compte_general), 8, false, true);
+                                $compteLigne = sizing(interco_code($compteProd, $this->compte_general), 8, false, true);
                             } else {
-                                $compteLigne = $produit->getCodeComptableAchat($facture->getData('zone_vente'));
+                                $compteLigne = $compteProd;
                             }
                         }
                         

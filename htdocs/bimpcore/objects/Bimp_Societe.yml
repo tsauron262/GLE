@@ -438,7 +438,7 @@ fields:
         depends_on: fk_typent,is_company
             
     mode_reglement_supplier:
-        label: Mode de réglement
+        label: Mode de réglement fournisseur
         dol_prop: mode_reglement_supplier_id
         type: id
         user_edit: 1
@@ -449,7 +449,7 @@ fields:
                     - 1
             
     cond_reglement_supplier:
-        label: Conditions de réglement
+        label: Conditions de réglement fournisseur
         dol_prop: cond_reglement_supplier_id
         type: id
         user_edit: 1
@@ -809,6 +809,10 @@ fields_tables:
             - field: mode_reglement
               edit: 1
             - field: cond_reglement
+              edit: 1
+            - field: mode_reglement_supplier
+              edit: 1
+            - field: cond_reglement_supplier
               edit: 1
             - field: relances_actives
               show: 

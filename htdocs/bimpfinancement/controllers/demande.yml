@@ -97,6 +97,23 @@ sections:
                               object: demande
                               children: demandes_refinanceurs
                               
+          - id: revente
+            title: Revente
+            icon: fas_euro-sign
+            show: 
+                callback: 
+                    method: showRevente
+                    object: demande
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view: 
+                              panel: 0
+                              name: revente
+                              object: demande
+                              
           - id: files
             title: Fichiers joints
             icon: fas_folder-open

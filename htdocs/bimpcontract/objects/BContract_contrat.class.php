@@ -1922,6 +1922,7 @@ class BContract_contrat extends BimpDolObject
 
     public function getCommandesClientArray()
     {
+        // ??? 
         $commandes = [];
 
         $list = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
@@ -2165,121 +2166,92 @@ class BContract_contrat extends BimpDolObject
         $html = '';
 
         if ($this->isLoaded()) {
+            $status = $this->getData('statut');
+            $now = date('Y-m-d');
+            
             if ($this->getData('ref_ext')) {
                 $html .= '<div style="margin-bottom: 8px">';
                 $html .= '<span class="warning" style="font-size: 15px">Annule et remplace ' . $this->getLabel('the') . ' "' . $this->getData('ref_ext') . '"</span>';
                 $html .= '</div>';
             }
 
-            if ($this->dol_object->element == 'contrat' && BimpTools::getContext() != 'public') {
-                $userCreationContrat = new User($this->db->db);
-                $userCreationContrat->fetch((int) $this->getData('fk_user_author'));
-                
+            // Date création : 
+            $user_create = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_author'));
+            $dt_create = new DateTime($this->getData('datec'));
+
+            $html .= '<div class="object_header_infos">';
+            $html .= 'Créé le <strong >' . $dt_create->format('d / m / Y') . '</strong>';
+            if (BimpObject::objectLoaded($user_create)) {
+                $html .= ' par ' . $user_create->getLink();
+            }
+            $html .= '</div>';
+
+            // Date Clôture: 
+            if ($this->getData('fk_user_cloture')) {
+                $dateCloture = new DateTime($this->getData('date_cloture'));
+                $userCloture = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_cloture'));
+
                 $html .= '<div class="object_header_infos">';
-                if ($this->getData('end_date_reel') && $this->getData('anticipate_close_note')) {
-                    $dateAnticipateClose = new DateTime($this->getData('end_date_reel'));
-
-                    $html .= "<strong class='danger' ><h3>Date de clôture anticipée pour ce contrat: <i>" . $dateAnticipateClose->format('d/m/Y') . "</i>"
-                            . " <span class='rowButton bs-popover' " . BimpRender::renderPopoverData($this->getData('anticipate_close_note'), 'right', true) . "> " . BimpRender::renderIcon('fas fa-info') . "</span></h3></strong>";
+                $html .= '<br />Clos le <strong >' . $dateCloture->format('d / m / Y') . '</strong>';
+                if (BimpObject::objectLoaded($userCloture)) {
+                    $html .= ' par ' . $userCloture->getLink();
                 }
-
-                $create = new DateTime($this->getData('datec'));
-                if ($this->getdata('statut') == self::CONTRAT_STATUS_ACTIVER) {
-                    $idAvenantActif = $this->getIdAvenantActif();
-                    if ($idAvenantActif > 0) {
-                        $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                        $msg .= 'Ce contrat fait l\'objet d\'avenant(s) actif(s) à prendre en compte pour toute mise à jour contractuelle ou intervention technique';
-                        $html .= BimpRender::renderAlerts($msg, 'warning');
-                    }
-                }
-                $html .= 'Créé le <strong >' . $create->format('d / m / Y') . '</strong>';
-                $html .= ' par <strong >' . $userCreationContrat->getNomUrl(1) . '</strong>';
-
-                if ($this->getData('fk_user_cloture')) {
-
-                    $dateCloture = new DateTime($this->getData('date_cloture'));
-                    $userCloture = new User($this->db->db);
-                    $userCloture->fetch($this->getData('fk_user_cloture'));
-
-                    $html .= '<br />Clos le <strong >' . $dateCloture->format('d / m / Y') . '</strong>';
-                    $html .= ' par <strong >' . $userCloture->getNomUrl(1) . '</strong>';
-                }
-
-                $client = $this->getChildObject('client');
-                $html .= '<div style="margin-top: 10px">';
-                $html .= '<strong>Client: </strong>';
-                $html .= BimpObject::getInstanceNomUrlWithIcons($client);
-                $html .= '</div>';
                 $html .= '</div>';
             }
-            if ($this->getData('statut') == self::CONTRAT_STATUS_VALIDE || $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
-                $intervale_days = $this->getJourRestantReel();
-                //$intervale_days = 14;
-                $renderAlert = true;
-                $hold = false;
 
-                $html .= '<div class="object_header_infos">';
-                if ($intervale_days > 0 || $intervale_days == 0) {
-                    $html .= '<strong>Ce contrat expire dans ' . $intervale_days . ' jours</strong>';
+            // Infos: 
+            $client = $this->getChildObject('client');
+            $html .= '<div style="margin-top: 10px">';
+            $html .= '<strong>Client: </strong>';
+            $html .= $client->getLink();
+            $html .= '</div>';
+
+            // Alertes: 
+
+            if ($this->getData('end_date_reel') && $this->getData('anticipate_close_note')) {
+                $dateAnticipateClose = new DateTime($this->getData('end_date_reel'));
+
+                $html .= "<strong class='danger' ><h3>Date de clôture anticipée pour ce contrat: <i>" . $dateAnticipateClose->format('d/m/Y') . "</i>"
+                        . " <span class='rowButton bs-popover' " . BimpRender::renderPopoverData($this->getData('anticipate_close_note'), 'right', true) . "> " . BimpRender::renderIcon('fas fa-info') . "</span></h3></strong>";
+            }
+
+            if (in_array($status, array(self::CONTRAT_STATUS_VALIDE, self::CONTRAT_STATUS_ACTIVER))) {
+                $jours_restant = $this->getJourRestantReel();
+
+                $html .= '<div style="margin-top: 10px">';
+                if ($jours_restant >= 0) {
+                    $html .= '<span class="info">Ce contrat expire dans ' . $jours_restant . ' jours</span>';
                 } else {
-                    $html .= BimpRender::renderAlerts("Ce contrat est expiré depuis " . abs($intervale_days) . " jour.s, merci de le clore", 'danger', false);
+                    $html .= '<span class="important">Ce contrat est expiré depuis ' . abs($jours_restant) . ' jour(s), merci de le clore</span>';
                 }
                 $html .= '</div>';
 
-                $dt_today = New DateTime();
-                $dt_start = New DateTime($this->getData('date_start'));
-
-                $tms_today = strtotime($dt_today->format('Y-m-d'));
-                $tms_start = strtotime($dt_start->format('Y-m-d'));
-
-                if ($tms_start > $tms_today && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
-                    $html .= '<div class="object_header_infos">';
-                    $html .= BimpRender::renderAlerts("<h4><b>Ce contrat a été activé par avance mais sa date de prise d'effet n'est pas encore atteinte</b><br />Date visible ci-dessous dans \"Information sur la durée de validité du contrat\"</h4>", 'danger', false);
-
-                    $html .= '</div>';
+                if ($status == self::CONTRAT_STATUS_ACTIVER) {
+                    if ($this->getData('date_start') > $now) {
+                        $msg = '<b>Ce contrat a été activé par avance mais sa date de prise d\'effet n\'est pas encore atteinte</b><br/>';
+                        $msg .= 'Date visible ci-dessous dans "Information sur la durée de validité du contrat"';
+                        $html .= BimpRender::renderAlerts($msg, 'warning', false);
+                    }
                 }
-
-
-
-//                if ($intervale_days < 365 && $interval->invert == 0) {
-//                    $html .= '<div class="object_header_infos">';
-//                    if ($intervale_days <= 365 && $intervale_days > 90) {
-//                        $renderAlert = false;
-//                        $alerte_type = 'info';
-//                    } elseif ($intervale_days <= 90 && $intervale_days > 30) {
-//                        $alerte_type = 'info';
-//                    } elseif ($intervale_days <= 30 && $intervale_days > 15) {
-//                        $alerte_type = 'warning';
-//                    } else {
-//                        $alerte_type = 'danger';
-//                    }
 //
                 if (!$this->getData('duree_mois') || !$this->getData('date_start')) {
                     $val = $this->db->getMax('contratdet', 'date_fin_validite', 'fk_contrat = ' . $this->id);
-
                     $date_fin = new DateTime($val);
-
-                    $html .= BimpRender::renderAlerts('Ceci est un ancien contrat dont la date d\'expiration est le : <b> ' . $date_fin->format('d / m / Y') . ' </b>', 'info', false);
-                    $renderAlert = false;
-                    $hold = true;
+                    $html .= BimpRender::renderAlerts('Ceci est un ancien contrat dont la date d\'expiration est le : <b> ' . $date_fin->format('d / m / Y') . ' </b>', 'info');
                 }
 
                 if (count($this->getChildrenList('avenant', ['statut' => 5])) > 0) {
-                    $html .= BimpRender::renderAlerts('ATTENTION : il y a un avenant en activation provisoire sur ce contrat', 'warning', false);
+                    $html .= BimpRender::renderAlerts('<b>ATTENTION : il y a un avenant en activation provisoire sur ce contrat</b>', 'warning');
                 }
-//
-//                    if ($renderAlert)
-//                        $html .= BimpRender::renderAlerts('Ce contrat expire dans <strong>' . $intervale_days . ' jours</strong>', $alerte_type, false);
-//                    elseif (!$hold)
-//                        $html .= 'Ce contrat expire dans <strong>' . $intervale_days . ' jours</strong>';
-//                    $html .= '</div>';
-//                } else {
-//                    if ($this->getData('statut') == 11 && $interval->invert == 1) {
-//                        $html .= '<div class="object_header_infos">';
-//                        $html .= BimpRender::renderAlerts("Ce contrat est expiré, merci de le clore", 'danger', false);
-//                        $html .= '</div>';
-//                    }
-//                }
+            }
+
+            if ($this->getdata('statut') == self::CONTRAT_STATUS_ACTIVER) {
+                $idAvenantActif = $this->getIdAvenantActif();
+                if ($idAvenantActif > 0) {
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                    $msg .= '<b>Ce contrat fait l\'objet d\'avenant(s) actif(s) à prendre en compte pour toute mise à jour contractuelle ou intervention technique</b>';
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                }
             }
         }
         return $html;
@@ -2824,7 +2796,7 @@ class BContract_contrat extends BimpDolObject
             return -1;
         }
     }
-    
+
     public function tryToValidate(&$errors)
     {
 
@@ -2883,7 +2855,7 @@ class BContract_contrat extends BimpDolObject
             }
         }
     }
-    
+
     public function closeContratChildWhenActivateRenewManual($fromCron = false): bool
     {
 
@@ -3319,8 +3291,6 @@ class BContract_contrat extends BimpDolObject
     {
         
     }
-
-    
 
     public function facturationIsDemainCron($heure_cron = 23)
     {

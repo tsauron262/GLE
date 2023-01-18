@@ -477,6 +477,11 @@ class BF_Demande extends BimpObject
                 return 1;
 
             case 'createFactures':
+                if ((int) $this->getData('no_fac_fourn') && (int) $this->getData('no_fac_fin')) {
+                    $errors[] = 'Les factures ont déjà été établies hors ERP';
+                    return 0;
+                }
+
                 $contrat_status = (int) $this->getData('contrat_status');
                 if ($contrat_status < 20 || $contrat_status >= 30) {
                     $errors[] = 'Le contrat de location n\'est pas encore signé';
@@ -595,7 +600,7 @@ class BF_Demande extends BimpObject
     {
         return (int) ($this->getData('id_facture_fourn_rev') || $this->getData('id_facture_cli_rev'));
     }
-    
+
     public function isMergeable(&$errors = array())
     {
         if (!$this->isLoaded($errors)) {
@@ -617,7 +622,7 @@ class BF_Demande extends BimpObject
         }
         return 1;
     }
-    
+
     public function showDemandesRefinanceurs()
     {
         if ($this->isLoaded() && (int) $this->getData('status') > 0) {
@@ -625,7 +630,7 @@ class BF_Demande extends BimpObject
         }
         return 0;
     }
-    
+
     public function showRevente()
     {
         if ($this->isLoaded() && (int) $this->getData('contrat_status') === self::DOC_ACCEPTED) {
@@ -2120,7 +2125,7 @@ class BF_Demande extends BimpObject
                 );
             }
         }
-        
+
         if ((int) $this->getData('id_facture_fin')) {
             $fac = $this->getChildObject('facture_fin');
             if (BimpObject::objectLoaded($fac)) {
@@ -2131,7 +2136,7 @@ class BF_Demande extends BimpObject
                 );
             }
         }
-        
+
         if ((int) $this->getData('id_facture_fourn_rev')) {
             $fac = $this->getChildObject('facture_fourn_rev');
             if (BimpObject::objectLoaded($fac)) {
@@ -2142,7 +2147,7 @@ class BF_Demande extends BimpObject
                 );
             }
         }
-        
+
         if ((int) $this->getData('id_facture_cli_rev')) {
             $fac = $this->getChildObject('facture_cli_rev');
             if (BimpObject::objectLoaded($fac)) {
@@ -3000,8 +3005,10 @@ class BF_Demande extends BimpObject
     public function renderCreateFacFournToggleInput()
     {
         $html = '';
-
-        if ((int) $this->getData('id_facture_fourn')) {
+        if ((int) $this->getData('no_fac_fourn')) {
+            $html .= BimpRender::renderAlerts('La facture fournisseur a été indiquée comme ayant été créée hors ERP', 'warning');
+            $html .= '<input type="hidden" value="0" name="create_fac_fourn"/>';
+        } elseif ((int) $this->getData('id_facture_fourn')) {
             $html .= BimpRender::renderAlerts('La facture fournisseur a déjà été créée', 'warning');
             $html .= '<input type="hidden" value="0" name="create_fac_fourn"/>';
         } else {
@@ -3015,7 +3022,10 @@ class BF_Demande extends BimpObject
     {
         $html = '';
 
-        if ((int) $this->getData('id_facture_fin')) {
+        if ((int) $this->getData('no_fac_fin')) {
+            $html .= BimpRender::renderAlerts('La facture client pour le financeur a été indiquée comme ayant été créée hors ERP', 'warning');
+            $html .= '<input type="hidden" value="0" name="create_fac_fourn"/>';
+        } elseif ((int) $this->getData('id_facture_fin')) {
             $html .= BimpRender::renderAlerts('La facture client pour le financeur a déjà été créée', 'warning');
             $html .= '<input type="hidden" value="0" name="create_fac_fin"/>';
         } else {
@@ -4013,7 +4023,7 @@ class BF_Demande extends BimpObject
         if (!$prix_cession_ht) {
             $errors[] = 'Prix de cession total HT non défini pour la demande refinanceur sélectionnée';
         }
-        
+
         $vr_vente = (float) $this->getData('vr_vente');
 
         if (!$vr_vente) {
@@ -4983,13 +4993,10 @@ class BF_Demande extends BimpObject
             }
 
             $up_errors = $this->validateArray(array(
-                'date_loyer'     => $date_loyer,
-                'status'         => self::STATUS_ACCEPTED,
-                'devis_status'   => self::DOC_ACCEPTED,
-                'contrat_status' => self::DOC_ACCEPTED,
-                'pvr_status'     => self::DOC_ACCEPTED,
-                'no_fac_fourn'   => (in_array('fac_fourn', $factures) ? 1 : 0),
-                'no_fac_fin'     => (in_array('fac_fin', $factures) ? 1 : 0),
+                'date_loyer'   => $date_loyer,
+                'status'       => self::STATUS_ACCEPTED,
+                'no_fac_fourn' => (in_array('fac_fourn', $factures) ? 1 : 0),
+                'no_fac_fin'   => (in_array('fac_fin', $factures) ? 1 : 0),
             ));
 
             if (!count($up_errors)) {
@@ -4997,6 +5004,28 @@ class BF_Demande extends BimpObject
 
                 if (count($up_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec mise à jour des données de la demande de location');
+                } else {
+                    if ((int) $this->getData('devis_status') !== self::DOC_ACCEPTED) {
+                        $err = $this->forceDocSigned('devis');
+
+                        if (count($err)) {
+                            $warnings[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la mise au statut signé du devis');
+                        }
+                    }
+                    if ((int) $this->getData('contrat_status') !== self::DOC_ACCEPTED) {
+                        $err = $this->forceDocSigned('contrat');
+
+                        if (count($err)) {
+                            $warnings[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la mise au statut signé du contrat');
+                        }
+                    }
+                    if ((int) $this->getData('pvr_status') !== self::DOC_ACCEPTED) {
+                        $err = $this->forceDocSigned('pvr');
+
+                        if (count($err)) {
+                            $warnings[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la mise au statut signé du PVR');
+                        }
+                    }
                 }
             }
         }

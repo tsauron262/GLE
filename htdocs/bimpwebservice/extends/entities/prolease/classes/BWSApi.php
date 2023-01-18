@@ -28,7 +28,7 @@ BWSApi::$requests['addDemandeFinancement'] = array(
                         'is_company'      => array('label' => 'Entreprise', 'data_type' => 'bool', 'default' => 0),
                         'siret'           => array('label' => 'N° SIRET', 'required_if' => 'data/client/is_company'),
                         'siren'           => array('label' => 'N° SIREN', 'required_if' => 'data/client/is_company'),
-                        'forme_juridique' => array('label' => 'Forme juridique', 'required_if' => 'data/client/is_company'),
+                        'forme_juridique' => array('label' => 'Forme juridique'),
                         'capital'         => array('label' => 'Capital social'),
                         'address'         => array('label'      => 'Adresse client (siège si pro)', 'data_type'  => 'array', 'sub_params' => array(
                                 'address' => array('label' => 'Lignes adresse', 'required' => 1),
@@ -69,9 +69,9 @@ BWSApi::$requests['editDemandeFinancementClientData'] = array(
                 'ref'             => array('label' => 'Reférence', 'required' => 1),
                 'nom'             => array('label' => 'Nom', 'required' => 1),
                 'is_company'      => array('label' => 'Entreprise', 'data_type' => 'bool', 'default' => 0),
-                'siret'           => array('label' => 'N° SIRET', 'required_if' => 'data/client/is_company'),
-                'siren'           => array('label' => 'N° SIREN', 'required_if' => 'data/client/is_company'),
-                'forme_juridique' => array('label' => 'Forme juridique', 'required_if' => 'data/client/is_company'),
+                'siret'           => array('label' => 'N° SIRET', 'required_if' => 'client_data/is_company'),
+                'siren'           => array('label' => 'N° SIREN', 'required_if' => 'client_data/is_company'),
+                'forme_juridique' => array('label' => 'Forme juridique'),
                 'capital'         => array('label' => 'Capital social'),
                 'address'         => array('label'      => 'Adresse client (siège si pro)', 'data_type'  => 'array', 'sub_params' => array(
                         'address' => array('label' => 'Lignes adresse', 'required' => 1),

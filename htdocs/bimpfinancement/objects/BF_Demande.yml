@@ -1201,7 +1201,7 @@ forms:
                 field_name: create_fac_fourn_rev
                 show_values: 1
             depends_on: fac_fourn_rev_id_fourn
-          - title: Facture de renvente au client
+          - title: Facture de revente au client
           - custom: 1
             label: Créer la facture client de revente
             input_name: create_fac_cli_rev

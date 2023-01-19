@@ -49,7 +49,7 @@ class Bimp_ImportPrelevementLine extends BimpObject
             $errors[] = 'date invalide';
         }
         if($ref != '') {
-            $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('facnumber' => $ref));
+            $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('ref' => $ref));
             if ($obj && $obj->isLoaded()) {
                 $facture = $obj->id;
             }

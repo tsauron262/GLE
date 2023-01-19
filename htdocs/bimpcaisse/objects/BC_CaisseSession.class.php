@@ -39,7 +39,7 @@ class BC_CaisseSession extends BimpObject
                 if (BimpObject::objectLoaded($obj)) {
                     if (!isset($infos[$obj->dol_object->type_code])) {
                         $infos[$obj->dol_object->type_code] = array(
-                            'label'  => $obj->dol_object->type_libelle,
+                            'label'  => $obj->dol_object->type_label,
                             'number' => 0,
                             'total'  => 0
                         );

@@ -27,11 +27,11 @@ if($zip->open($zipFile, ZipArchive::CREATE) === TRUE)
   echo $zipFile.' ouvert';
   
   
-    $req = "SELECT facnumber FROM llx_facture f, `llx_facture_extrafields` fe WHERE `fk_object` = f.rowid AND fe.`type` = 'M' AND fk_statut IN (1,2) AND `datef` >= '2021-01-26' LIMIT 0,".$limit;
+    $req = "SELECT ref FROM llx_facture f, `llx_facture_extrafields` fe WHERE `fk_object` = f.rowid AND fe.`type` = 'M' AND fk_statut IN (1,2) AND `datef` >= '2021-01-26' LIMIT 0,".$limit;
     $sql = $db->query($req);
 
     while ($ln = $db->fetch_object($sql)){
-        $dir = './facture/'.$ln->facnumber.'/'.$ln->facnumber.'.pdf';
+        $dir = './facture/'.$ln->ref.'/'.$ln->ref.'.pdf';
         if(is_dir($dir) || is_file($dir)){
             $zip->addFile($dir);
             if($debug)

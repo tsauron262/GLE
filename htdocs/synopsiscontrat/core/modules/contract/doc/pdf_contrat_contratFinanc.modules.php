@@ -536,7 +536,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetFont(''/* 'Arial' */, 'B', 9);
                 $pdf->Write(6, "Date d'installation: ");
                 $pdf->SetFont(''/* 'Arial' */, '', 8);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, dol_print_date($propal->date_livraison), 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, dol_print_date(strtotime($propal->date_livraison)), 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
                 //$pdf->Write(6, dol_print_date($propal->date_livraison));
                 //$Y = $Y + 6;
                 //$pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6,"", 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
@@ -552,7 +552,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
 
                 //$Y = $Y + 12;
                 //$pdf->Set($X);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Fait à Lyon le " . dol_print_date($contrat->date_contrat), 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Fait à Lyon le " . dol_print_date(strtotime($contrat->date_contrat)), 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
                 //$pdf->Write(6, "Fait à Lyon le " . dol_print_date($contrat->date_contrat));
                 //emplacement des signature
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 3;
@@ -904,7 +904,7 @@ class pdf_contrat_contratFinanc extends ModeleSynopsiscontrat {
                 $pdf->SetX($x);
                 $pdf->MultiCell($w, 6, "FAIT EN DOUBLE EXEMPLAIRE, UN POUR CHACUNE DES PARTIES", 0, 'L');
                 $pdf->SetX($x);
-                $pdf->MultiCell($w, 6, "Fait à Lyon le " . dol_print_date($contrat->date_contrat), 0, 'L');
+                $pdf->MultiCell($w, 6, "Fait à Lyon le " . dol_print_date(strtotime($contrat->date_contrat)), 0, 'L');
                 $W = $w / 2;
                 $y = $pdf->GetY();
                 $y+=6;

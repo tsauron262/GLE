@@ -222,7 +222,7 @@ if ($_GET["id"] > 0) {
 
                 // Date
                 print '<tr><td class=\'ui-widget-header ui-state-default\'>'.$langs->trans("Date").'</td>';
-                print "<td colspan=\"2\" class='ui-widget-content' >".dol_print_date($synopsisdemandeinterv->date,"day")."</td>\n";
+                print "<td colspan=\"2\" class='ui-widget-content' >".dol_print_date(strtotime($synopsisdemandeinterv->date),"day")."</td>\n";
                 print '</tr>';
 
                 print '</table>';

@@ -11,7 +11,7 @@ filters_panels:
         filters: 
             parent:id_obj:
                 label: Facture
-            parent:parent:facnumber:
+            parent:parent:ref:
                 label: Ref. facture
             equipment:serial:
                 label: N° de série équipement
@@ -41,7 +41,7 @@ lists:
         cols:
             parent:parent:datef:
             parent:parent:ref_client:
-            parent:parent:facnumber:
+            parent:parent:ref:
             parent:parent:client:nom:
             parent:dol_line:product:ref_short:
             parent:desc:

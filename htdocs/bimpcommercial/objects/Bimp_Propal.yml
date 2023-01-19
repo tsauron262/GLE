@@ -65,6 +65,7 @@ objects:
                 field_value: id_signature
                 
 fields:
+    # Attention : total est devenu total_ttc
     libelle: 
         required: 1
     datec:
@@ -630,7 +631,7 @@ fields_tables:
               value: 
                   callback: displayTotalRemises
             - field: total_ht
-            - field: tva
+            - field: total_tva
             - field: total_ttc
             - field: prime
             - field: prime2

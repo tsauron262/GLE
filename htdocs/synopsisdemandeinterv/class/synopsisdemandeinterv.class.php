@@ -468,7 +468,7 @@ class Synopsisdemandeinterv extends CommonObject {
 
                     $msg = "Bonjour " . $this->user_prisencharge->fullname . ",<br/><br/>";
                     $msg .= "Une nouvelle intervention est pr&eacute;vue chez " . $this->societe->getNomUrl(1, 6) . ".";
-                    $msg .= "<br/>Le " . dol_print_date($this->date);
+                    $msg .= "<br/>Le " . dol_print_date(strtotime($this->date));
                     $msg .= "<br/>";
                     $msg .= "<br/>";
                     $msg .= "Ref Demande Intervertion : " . $this->getNomUrl(1);
@@ -620,7 +620,7 @@ class Synopsisdemandeinterv extends CommonObject {
 
                     $msg = "Bonjour, <br/><br/>";
                     $msg .= "" . $this->user_prisencharge->fullname . " a bien pris en charge la DI " . $this->ref . " chez " . $this->societe->getNomUrl(1, 6) . ".";
-                    $msg .= "<br/>Le " . dol_print_date($this->date);
+                    $msg .= "<br/>Le " . dol_print_date(strtotime($this->date));
                     $msg .= "<br/>";
                     $msg .= "<br/>";
                     $msg .= "<br/>";
@@ -724,7 +724,7 @@ class Synopsisdemandeinterv extends CommonObject {
             if ($update)
                 $action->update($user);
             elseif ($createIfNot)
-                $action->add($user);
+                $action->create($user);
         }
     }
 
@@ -1480,7 +1480,7 @@ class synopsisdemandeintervLigne {
 //            } else {
 //                $ligne->total_ht = floatval($ligne->duration) * floatval($pu_ht)/3600;
 //            }
-//Compute total tva / total_TTC
+//Compute total total_tva / total_TTC
         
         $this->traitePrice();
 

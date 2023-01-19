@@ -214,9 +214,8 @@ fields:
     total_ht: 
         label: Total HT
         type: money
-    tva: 
+    total_tva: 
         label: Total TVA
-        dol_prop: total_tva
         type: money    
     model_pdf: 
         label: Modèle de document par défaut

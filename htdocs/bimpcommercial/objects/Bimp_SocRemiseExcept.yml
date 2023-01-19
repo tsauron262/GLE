@@ -210,7 +210,7 @@ searches:
     client: 
         fields_search: 
             - a.rowid
-            - fs.facnumber
+            - fs.ref
             - s.nom
             - s.name_alias
             - s.code_client
@@ -227,7 +227,7 @@ searches:
             - a.rowid
             - a.description as desc
             - REPLACE(ROUND(a.amount_ttc,2),'.',',') as price
-            - fs.facnumber as ref
+            - fs.ref
             - s.code_client as ref_cli
             - s.nom as nom_cli
         label_syntaxe: '<desc> #<rowid> - <ref> - <price> € TTC - Client: <ref_cli> <nom_cli>'

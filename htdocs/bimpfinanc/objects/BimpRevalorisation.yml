@@ -328,7 +328,7 @@ lists_cols:
     qty: 
         edit: 1
     total: 
-        label: total
+        label: Total
         value: 
             callback: displayTotal
     commissions: 

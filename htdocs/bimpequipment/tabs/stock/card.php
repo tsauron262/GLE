@@ -583,7 +583,7 @@ else
                         $sql = $db->query("SELECT datef FROM `".MAIN_DB_PREFIX."facture_fourn_det` fd, `".MAIN_DB_PREFIX."facture_fourn` f WHERE fk_statut > 0 AND `fk_product` = ".$productstatic->id." AND fd.`fk_facture_fourn` = f.rowid ORDER BY datef DESC");
                         if($db->num_rows($sql) > 0){
                             $ln = $db->fetch_object($sql);
-                            $date = dol_print_date($ln->datef, "%d/%m/%Y");
+                            $date = dol_print_date(strtotime($ln->datef), "%d/%m/%Y");
                         }
                         else{
 //                            $date = "01/04/2018";
@@ -595,7 +595,7 @@ else
                         $sql = $db->query("SELECT datef FROM `".MAIN_DB_PREFIX."facturedet` fd, `".MAIN_DB_PREFIX."facture` f WHERE fk_statut > 0 AND `fk_product` = ".$productstatic->id." AND fd.`fk_facture` = f.rowid ORDER BY datef DESC");
                         if($db->num_rows($sql) > 0){
                             $ln = $db->fetch_object($sql);
-                            $date2 = dol_print_date($ln->datef, "%d/%m/%Y");
+                            $date2 = dol_print_date(strtotime($ln->datef), "%d/%m/%Y");
                         }
                         
                         
@@ -604,7 +604,7 @@ else
                         if($db->num_rows($sql) > 0){
                             $ln = $db->fetch_object($sql);
                             $prix = price($ln->price);
-                            $date = dol_print_date($ln->tms, "%d/%m/%Y");
+                            $date = dol_print_date(strtotime($ln->tms), "%d/%m/%Y");
                         }
                         
                         $tabVente = array(3=>"",6=>"",12=>"", 'tot1An'=> 0);

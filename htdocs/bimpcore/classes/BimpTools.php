@@ -350,7 +350,7 @@ class BimpTools
         return $errors;
     }
 
-    public static function getDateForDolDate($date)
+    public static function getDateTms($date)
     {
         if (is_null($date) || !$date) {
             return '';
@@ -779,10 +779,10 @@ class BimpTools
         }
 
 
-        $nbCaractTotal = strlen($prefix)+$numCaractere;
+        $nbCaractTotal = strlen($prefix) + $numCaractere;
 //        $max = BimpCache::getBdb()->getMax($table, $field, $where);
-        if($numCaractere > 0)
-            $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = ".$nbCaractTotal);
+        if ($numCaractere > 0)
+            $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = " . $nbCaractTotal);
         else
             $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
 
@@ -3066,6 +3066,17 @@ class BimpTools
                 break;
             }
         }
+    }
+
+    public static function getMyCompanyLogoUrl($file = null)
+    {
+        if (is_null($file)) {
+            global $mysoc;
+            $file = $mysoc->logo;
+        }
+
+//        return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $file; => Selon changelog DOL16 (A vérifier) 
+        return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=logo/' . $file;
     }
 
     // Gestion des couleurs: 

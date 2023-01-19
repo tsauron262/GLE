@@ -225,7 +225,7 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport {
 
                 $pdf->SetXY('12', '48');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-                $pdf->MultiCell(50, 6, dol_print_date($sav->getData('date_create')), 0, 'L');
+                $pdf->MultiCell(50, 6, dol_print_date(strtotime($sav->getData('date_create'))), 0, 'L');
 
                 $user_create = $sav->getChildObject('user_create');
                 if (BimpObject::objectLoaded($user_create)) {
@@ -322,7 +322,7 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport {
         }
 
         $showaddress = $showadress;
-        $usecontact = ($object->model->hasContact && $object->contactid > 0);
+        $usecontact = ($object->model->hasContact && $object->contact_id > 0);
         $object->client = $object->societe;
         $default_font_size = 12;
 

@@ -2721,7 +2721,7 @@ class SynopsisHoliday extends Holiday {
             $ac->datep = $this->db->jdate($dateBegin->format('Y-m-d H:i:s'));
             $ac->datef = $this->db->jdate($dateEnd->format('Y-m-d H:i:s'));
             $ac->note = $this->LibStatut($this->statut) . ' - ' . (isset($substitute) ? 'Remplaçant: ' . $substitute->firstname . ' ' . $substitute->lastname : 'Aucun rempaçant désigné.');
-            $result = $ac->add($updateUser);
+            $result = $ac->create($updateUser);
             if ($result < 0)
                 $check = false;
             else

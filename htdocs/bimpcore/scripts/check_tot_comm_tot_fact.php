@@ -43,10 +43,10 @@ while ($ln = $db->fetch_object($sql)){
 
 
 
-$sql = $db->query("SELECT c.rowid as crowid, f.rowid as frowid, c.total_ht, f.total FROM `llx_element_element` el, llx_commande c, llx_facture f WHERE `sourcetype` LIKE 'commande' ANd targettype LIKE 'facture'
+$sql = $db->query("SELECT c.rowid as crowid, f.rowid as frowid, c.total_ht, f.total_ht FROM `llx_element_element` el, llx_commande c, llx_facture f WHERE `sourcetype` LIKE 'commande' ANd targettype LIKE 'facture'
 AND c.rowid = el.fk_source AND f.rowid = el.fk_target".
 " AND c.`date_creation` > '2019-10-01 00:00:00'".
-//" AND c.total_ht+0.10 < f.total".
+//" AND c.total_ht+0.10 < f.total_ht".
 //" AND f.type = 0 ".
 " ORDER BY `el`.`rowid`  DESC");
 
@@ -60,7 +60,7 @@ while ($ln = $db->fetch_object($sql)){
 
 
 
-//$sql34 = $db->query("SELECT rowid FROM `llx_facture` f1 WHERE `fk_soc` IN (SELECT `fk_soc` FROM llx_facture f2 WHERE f2.total = -f1.total)");
+//$sql34 = $db->query("SELECT rowid FROM `llx_facture` f1 WHERE `fk_soc` IN (SELECT `fk_soc` FROM llx_facture f2 WHERE f2.total_ht = -f1.total_ht)");
 //
 //$tabFactAvecAvoir = array();
 //while ($ln34 = $db->fetch_object($sql34)){

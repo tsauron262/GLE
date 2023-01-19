@@ -203,7 +203,7 @@ if ($_GET["id"] > 0) {
 
                 // Date
                 print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans("Date").'</td>';
-                print "<td  class=\"ui-widget-content\" colspan=\"2\">".dol_print_date($fichinter->date,"day")."</td>\n";
+                print "<td  class=\"ui-widget-content\" colspan=\"2\">".dol_print_date(strtotime($fichinter->date),"day")."</td>\n";
                 print '</tr>';
 
                 print '</table>';

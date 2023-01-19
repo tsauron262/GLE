@@ -58,7 +58,7 @@ foreach ($rows as $r) {
                                 'date_send'    => null,
                                 'id_user_send' => 0
                                     ), 'id = ' . (int) $r['id']);
-                            echo $prev_relance_idx + 1 . ' => Fac #' . $id_fac . ' - ' . $bdb->getValue('facture', 'facnumber', 'rowid = ' . $id_fac) . ' - date: ' . $prev_relance_date . ' <br/>';
+                            echo $prev_relance_idx + 1 . ' => Fac #' . $id_fac . ' - ' . $bdb->getValue('facture', 'ref', 'rowid = ' . $id_fac) . ' - date: ' . $prev_relance_date . ' <br/>';
                             break;
 
                         case 3:

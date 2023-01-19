@@ -651,7 +651,7 @@ class PDO extends AbstractBackend {
 
             //$action->userownerid = $calendarId;
             $action->percentage = -1;
-            if ($action->add($user) < 1)
+            if ($action->create($user) < 1)
                 $this->forbiden("Create.");
 
 

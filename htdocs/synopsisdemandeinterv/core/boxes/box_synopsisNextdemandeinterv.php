@@ -128,7 +128,7 @@ class box_synopsisNextdemandeinterv extends ModeleBoxes {
                         'url' => DOL_URL_ROOT . "/comm/card.php?socid=" . $objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
-                        'text' => dol_print_date($objp->datei, 'day'),
+                        'text' => dol_print_date(strtotime($objp->datei), 'day'),
                     );
 
                     $this->info_box_contents[$i][3] = array(

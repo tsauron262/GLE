@@ -262,7 +262,7 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
 //                $tabCentre
                 //client
                 $contact = "";
-                if ($chrono->contactid > 0) {
+                if ($chrono->contact_id > 0) {
                     $addr = $chrono->contact;
                     $contact = $addr->getFullName($langs, 0, 0);
                     $tel = ($addr->phone_mobile != "") ? $addr->phone_mobile : ($addr->phone_perso != "") ? $addr->phone_perso : ($addr->phone_pro != "") ? $addr->phone_pro : "";
@@ -295,10 +295,10 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
                 $pdf->MultiCell(50, 6, $interval->format('%a') . " jours", 0, 'L');
 
                 $pdf->SetXY('32', '46.7');
-                $pdf->MultiCell(50, 6, dol_print_date($chrono->valuesPlus[1076]->value), 0, 'L');
+                $pdf->MultiCell(50, 6, dol_print_date(strtotime($chrono->valuesPlus[1076]->value)), 0, 'L');
 
                 $pdf->SetXY('32', '50.4');
-                $pdf->MultiCell(50, 6, dol_print_date($chrono->valuesPlus[1077]->value), 0, 'L');
+                $pdf->MultiCell(50, 6, dol_print_date(strtotime($chrono->valuesPlus[1077]->value)), 0, 'L');
 
                 if ($chrono->fk_user_author > 0) {
                     $pdf->SetXY('57', '55.7');
@@ -492,7 +492,7 @@ class pdf_synopsischrono_pret extends ModeleSynopsischrono {
         }
 
         $showaddress = $showadress;
-        $usecontact = ($object->model->hasContact && $object->contactid > 0);
+        $usecontact = ($object->model->hasContact && $object->contact_id > 0);
         $object->client = $object->societe;
         $default_font_size = 12;
 

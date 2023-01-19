@@ -1996,7 +1996,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
             BimpTools::resetDolObjectErrors($this->dol_object);
 
-            if ($this->dol_object->commande($user, BimpTools::getDateForDolDate($data['date_commande']), (int) $data['fk_input_method']) <= 0) {
+            if ($this->dol_object->commande($user, BimpTools::getDateTms($data['date_commande']), (int) $data['fk_input_method']) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object));
             } elseif (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
                 $this->fetch($this->id);
@@ -2638,7 +2638,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
                 global $user;
                 $this->dol_object->error = '';
                 $this->dol_object->errors = array();
-                if ($this->dol_object->set_date_livraison($user, BimpTools::getDateForDolDate($this->getData('date_livraison'))) <= 0) {
+                if ($this->dol_object->set_date_livraison($user, BimpTools::getDateTms($this->getData('date_livraison'))) <= 0) {
                     $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement de la date de livraison');
                 }
             }

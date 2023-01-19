@@ -95,7 +95,7 @@ foreach ($panier->val as $id => $ligne){
     $filter[]=$id;
 }
 echo "<form method='post' action='?".$para."&action=add_element'>" ;
-echo $form->select_thirdparty('', 'addElement', "rowid not in(".implode(',',$filter).")")."<br />";
+echo $form->select_company('', 'addElement', "rowid not in(".implode(',',$filter).")")."<br />";
 echo "<input type='submit' class='butAction' value='Ajouter au Panier'/>";
 echo "<br/><br/>";
 echo "</form>";

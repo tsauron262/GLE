@@ -409,7 +409,7 @@ fields_tables:
                   callback: 
                       method: displayFullQtyValue
                       params: 
-                          - tva
+                          - total_tva
             - label: Total TTC
               value: 
                   callback: 

@@ -418,7 +418,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->MultiCell($col1, $hauteur_ligne, utf8_encodeRien("Date"), 0, 'C', 1);
                     $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
 //                    //Data Date
-                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien("Du " . dol_print_date($val->date_ouverture) . " au " . dol_print_date($val->date_fin_validite) . ($val->GMAO_Mixte['reconductionAuto'] > 0 ? " avec reconduction automatique" : "")), 0, 'L', 1);
+                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien("Du " . dol_print_date(strtotime($val->date_ouverture)) . " au " . dol_print_date(strtotime($val->date_fin_validite)) . ($val->GMAO_Mixte['reconductionAuto'] > 0 ? " avec reconduction automatique" : "")), 0, 'L', 1);
                     $nextY = $pdf->getY();
                     $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
 
@@ -573,7 +573,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $pdf->SetXY($init + $col + $col, $nextY);
                         $pdf->MultiCell($col - $decal_type, $hauteur_ligne, utf8_encodeRien($type), 0, 'C', 1);
                         $pdf->SetXY($init + $col + $col + $col - $decal_type, $nextY);
-                        $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Du " . dol_print_date($val->date_ouverture) . " au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
+                        $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Du " . dol_print_date(strtotime($val->date_ouverture)) . " au " . dol_print_date(strtotime($val->date_fin_validite))), 0, 'C', 1);
                         $nextY = $pdf->getY();
                     }
                     $this->_pagefoot($pdf, $contrat, $outputlangs);
@@ -813,8 +813,8 @@ echo
                         $pdf->SetXY($init + $col + $col + 10, $nextY);
                         $pdf->MultiCell($col - $decal_type - 5, $hauteur_ligne, utf8_encodeRien($type), 0, 'C', 1);
                         $pdf->SetXY($init + $col + $col + $col + 5 - $decal_type, $nextY);
-                        $pdf->MultiCell($col - 5, $hauteur_ligne, utf8_encodeRien("Du " . dol_print_date($val->date_ouverture) . "
-Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
+                        $pdf->MultiCell($col - 5, $hauteur_ligne, utf8_encodeRien("Du " . dol_print_date(strtotime($val->date_ouverture)) . "
+Au " . dol_print_date(strtotime($val->date_fin_validite))), 0, 'C', 1);
                         $pdf->SetXY($init + $col + $col + $col - $decal_type + $col, $nextY);
 
 //                    $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien(price($val->total_ht) . EURO . " pour " . $val->GMAO_Mixte['durVal'] . " mois"), 0, 'C', 1);                    $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien(price($val->total_ht) . EURO . " pour " . $val->GMAO_Mixte['durVal'] . " mois"), 0, 'C', 1);

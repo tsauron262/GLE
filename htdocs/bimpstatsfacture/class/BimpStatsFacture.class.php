@@ -185,9 +185,9 @@ class BimpStatsFacture {
             $sql .= ' f.date_valid as fact_date, ';
 
             if ($taxes == 'ttc')
-                $sql .= ' f.total_ttc as fac_total,  SUM(prop.total) as prop_total';
+                $sql .= ' f.total_ttc as fac_total,  SUM(prop.total_ttc) as prop_total';
             else    // ht
-                $sql .= ' f.total as fac_total,  SUM(prop.total_ht) as prop_total';
+                $sql .= ' f.total_ht as fac_total,  SUM(prop.total_ht) as prop_total';
             $sql .= ' FROM      ' . MAIN_DB_PREFIX . 'facture as f';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe             as s  ON f.fk_soc        = s.rowid';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture    as pf ON f.rowid         = pf.fk_facture';

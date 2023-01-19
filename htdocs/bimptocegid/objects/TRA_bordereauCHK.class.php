@@ -94,7 +94,7 @@
                     $structure['REF']               = sizing($paiement->ref, 35);
                     $structure['LABEL']             = sizing(suppr_accents(strtoupper('remise cheque ' . $cheque->num_chq)), 35);
                     $facture = $this->db->getRow('facture', 'rowid = ' . $paiementFacture->fk_facture);
-                    $structure['FACTURE']           = sizing($facture->facnumber, 35);
+                    $structure['FACTURE']           = sizing($facture->ref, 35);
                     $structure['MONTANT']           = sizing(abs(round($paiementFacture->amount, 2)), 20, true);
                     $ecriture .= implode('', $structure) . "\n";
                 }

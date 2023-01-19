@@ -57,7 +57,7 @@ $bdb = new BimpDb($db);
 
 foreach ($refs as $ref => $code_compta) {
     $acompte = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array(
-                'facnumber' => $ref
+                'ref' => $ref
     ));
 
     if (!BimpObject::objectLoaded($acompte)) {

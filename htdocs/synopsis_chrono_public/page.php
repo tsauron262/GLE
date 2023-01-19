@@ -153,7 +153,7 @@ if (count($chronos)) {
             $chronosList[] = array(
                 'id_chrono' => $idChrono,
                 'ref' => ((isset($chrono->ref) && !empty($chrono->ref)) ? $chrono->ref : 'inconnu'),
-                'date_create' => ((isset($chrono->date) && !empty($chrono->date)) ? dol_print_date($chrono->date) : 'inconnue'),
+                'date_create' => ((isset($chrono->date) && !empty($chrono->date)) ? dol_print_date(strtotime($chrono->date)) : 'inconnue'),
                 'symptom' => ((isset($chrono->values['Symptomes']) && !empty($chrono->values['Symptomes'])) ? $chrono->values['Symptomes'] : 'Non spécifié')
             );
         }

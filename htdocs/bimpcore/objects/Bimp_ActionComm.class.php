@@ -61,7 +61,7 @@ class Bimp_ActionComm extends BimpObject
                 break;
             case 'facture':
                 if ((int) $value) {
-                    return $this->db->getValue('facture', 'facnumber', 'rowid = ' . (int) $value);
+                    return $this->db->getValue('facture', 'ref', 'rowid = ' . (int) $value);
                 }
                 break;
         }

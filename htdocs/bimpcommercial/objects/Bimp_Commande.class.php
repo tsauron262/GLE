@@ -1970,7 +1970,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $onclick = $this->getJsActionOnclick('linesFactureQties', array(
                 'new_facture'       => 1,
                 'id_client_facture' => (int) (!is_null($client_facture) ? $client_facture->id : 0),
-                'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contactid : 0),
+                'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contact_id : 0),
                 'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
                 'note_public'       => addslashes(htmlentities($this->getData('note_public'))),
                 'note_private'      => addslashes(htmlentities($this->getData('note_private'))),
@@ -2164,9 +2164,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $html .= '<tr>';
         $html .= '<th>Total TVA</th>';
         $html .= '<td>';
-        $html .= $this->displayData('tva', 'default', false);
+        $html .= $this->displayData('total_tva', 'default', false);
 
-        if ($check_qty_modif && (float) $this->getData('tva') !== $total_tva_fq) {
+        if ($check_qty_modif && (float) $this->getData('total_tva') !== $total_tva_fq) {
             $html .= '<br/><span class="important">';
             $html .= BimpTools::displayMoneyValue($total_tva_fq, 'EUR', 0, 0, 0, 2, 1);
             $html .= '</span>';
@@ -2450,7 +2450,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         if (is_null($id_contact) || !(int) $id_contact) {
-            $id_contact = $this->dol_object->contactid;
+            $id_contact = $this->dol_object->contact_id;
         }
 
         if (is_null($id_entrepot) || !(int) $id_entrepot) {

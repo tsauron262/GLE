@@ -342,12 +342,12 @@ class BimpRevalorisation extends BimpObject
             $id_client = (int) $facture->getData('fk_soc');
             if ($id_client) {
                 $where = 'fk_soc = ' . $id_client . ' AND fk_statut IN (0,1,2) AND type IN (0,1,2)';
-                $facs = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'facnumber'));
+                $facs = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'ref'));
 
                 if (is_array($facs)) {
                     foreach ($facs as $f) {
                         $factures[(int) $f['rowid']] = array(
-                            'ref'   => $f['facnumber'],
+                            'ref'   => $f['ref'],
                             'prods' => array()
                         );
                     }
@@ -982,7 +982,7 @@ class BimpRevalorisation extends BimpObject
                 $_POST['global'] = 0;
                 $amount = $this->getData('amount');
                 $fact = $this->getChildObject('facture');
-                $totalFact = $fact->getData('total');
+                $totalFact = $fact->getData('total_ht');
                 $lines = $fact->getLines();
                 $i = 1;
                 foreach ($lines as $line) {

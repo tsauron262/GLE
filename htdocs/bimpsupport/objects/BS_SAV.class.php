@@ -153,7 +153,7 @@ class BS_SAV extends BimpObject
     public function canView()
     {
         global $user;
-        return (int) $user->rights->BimpSupport->read;
+        return (int) ($user->admin || $user->rights->BimpSupport->read);
     }
 
     public function canClientView()
@@ -247,11 +247,11 @@ class BS_SAV extends BimpObject
         $montant = 0;
         $factureAc = $this->getChildObject('facture_acompte');
         if ($factureAc->isLoaded()) {
-            $montant += $factureAc->getData('total');
+            $montant += $factureAc->getData('total_ht');
         }
         $propal = $this->getChildObject('propal');
         if ($propal->isLoaded()) {
-            $montant += $propal->getData('total');
+            $montant += $propal->getData('total_ht');
             $lines = $this->getChildrenObjects('propal_lines');
             foreach ($lines as $lineS) {
                 if ($lineS->getData('linked_object_name') == 'sav_garantie') {
@@ -593,7 +593,7 @@ class BS_SAV extends BimpObject
             if ($id_facture_account) {
                 $facture = $this->getChildObject('facture_acompte');
                 if (BimpObject::objectLoaded($facture)) {
-                    $ref = $facture->getData('facnumber');
+                    $ref = $facture->getData('ref');
                     if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
                         $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
                         $js .= 'window.open("' . $url . '");';
@@ -3660,7 +3660,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                 $this->addNote('Devis signé le "' . date('d / m / Y H:i'));
                 $propal = $this->getChildObject('propal');
-                $propal->dol_object->cloture($user, 2, "Auto via SAV");
+                $propal->dol_object->closeProposal($user, 2, "Auto via SAV");
                 $this->createReservations();
             }
         }
@@ -3874,7 +3874,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case "commercialRefuse":
                 $subject = "Devis sav refusé par « " . $client->dol_object->getFullName($langs) . " »";
-                $text = "Notre client « " . $client->dol_object->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . price($propal->dol_object->total) . "€ »";
+                $text = "Notre client « " . $client->dol_object->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . price($propal->dol_object->total_ttc) . "€ »";
                 $id_user_tech = (int) $this->getData('id_user_tech');
                 if ($id_user_tech) {
                     $where = " (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'";
@@ -4812,7 +4812,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             global $user, $langs;
 
             $propal->updateField(('datep'), date('Y/m/d'));
-            $propal->updateField('fin_validite', BimpTools::getDateForDolDate($propal->getData('datep')) + ($propal->dol_object->duree_validite * 24 * 3600));
+            $propal->updateField('fin_validite', BimpTools::getDateTms($propal->getData('datep')) + ($propal->dol_object->duree_validite * 24 * 3600));
 
             $propal->lines_locked = 1;
 
@@ -4828,7 +4828,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if ($propal->dol_object->valid($user) < 1)
                     $errors[] = "Echec de la validation du devis " . BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($propal->dol_object));
                 else {
-                    $propal->dol_object->cloture($user, 2, "Auto via SAV sous garantie");
+                    $propal->dol_object->closeProposal($user, 2, "Auto via SAV sous garantie");
                     $propal->fetch($propal->id);
                     $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
                 }
@@ -4919,7 +4919,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             $this->addNote('Devis accepté le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             $propal = $this->getChildObject('propal');
-            $propal->dol_object->cloture($user, 2, "Auto via SAV");
+            $propal->dol_object->closeProposal($user, 2, "Auto via SAV");
 
             $this->createReservations();
         }
@@ -4941,7 +4941,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             global $user, $langs;
             $this->addNote('Devis refusé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             $propal = $this->getChildObject('propal');
-            $propal->dol_object->cloture($user, 3, "Auto via SAV");
+            $propal->dol_object->closeProposal($user, 3, "Auto via SAV");
             $this->removeReservations();
             if (BimpTools::getValue('send_msg', 0))
                 $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'));
@@ -5077,7 +5077,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             $propal->dol_object->valid($user);
 
                             $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
-                            $propal->dol_object->cloture($user, 2, "Auto via SAV");
+                            $propal->dol_object->closeProposal($user, 2, "Auto via SAV");
                             $this->removeReservations();
                             //                        $apple_part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
                             //                        $apple_part->deleteBy(array(
@@ -5102,7 +5102,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $errors[] = 'Le champ "résolution" doit être complété';
                     } else {
                         $this->addNote('Réparation terminée le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
-                        $propal->dol_object->cloture($user, 2, "Auto via SAV");
+                        $propal->dol_object->closeProposal($user, 2, "Auto via SAV");
                         $msg_type = 'repOk';
 
                         $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
@@ -5577,7 +5577,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                                                 $bimpFacture->checkIsPaid();
 
-                                                $propal->dol_object->cloture($user, 4, "Auto via SAV");
+                                                $propal->dol_object->closeProposal($user, 4, "Auto via SAV");
 
                                                 //Generation
                                                 $up_errors = $this->updateField('id_facture', (int) $bimpFacture->id);

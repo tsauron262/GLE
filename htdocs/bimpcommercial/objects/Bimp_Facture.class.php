@@ -1820,11 +1820,11 @@ class Bimp_Facture extends BimpComm
         $fk_soc = (int) $this->getData('fk_soc');
 
         if ($fk_soc) {
-            $rows = $this->db->getRows('facture', 'fk_statut = 0 AND type = 0 AND fk_soc = ' . (int) $fk_soc, null, 'array', array('rowid', 'facnumber'));
+            $rows = $this->db->getRows('facture', 'fk_statut = 0 AND type = 0 AND fk_soc = ' . (int) $fk_soc, null, 'array', array('rowid', 'ref'));
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    $factures[(int) $r['rowid']] = $r['facnumber'];
+                    $factures[(int) $r['rowid']] = $r['ref'];
                 }
             }
         }
@@ -2216,7 +2216,7 @@ class Bimp_Facture extends BimpComm
 
     public function getTx_marqueListTotal($filters, $joins)
     {
-        $sql = 'SELECT SUM(a.marge_finale_ok) as marge, SUM(a.total) as total';
+        $sql = 'SELECT SUM(a.marge_finale_ok) as marge, SUM(a.total_ht) as total';
         $sql .= BimpTools::getSqlFrom('facture', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
@@ -2277,7 +2277,7 @@ class Bimp_Facture extends BimpComm
     public function displayTxMarque()
     {
         $marge = (float) $this->getData('marge_finale_ok');
-        $total_ht = (float) $this->getData('total');
+        $total_ht = (float) $this->getData('total_ht');
 
         $tx = 0;
         if ($marge && $total_ht) {
@@ -5072,7 +5072,7 @@ class Bimp_Facture extends BimpComm
 
                 // On verifie si aucun paiement n'a ete effectue
                 if ($resteapayer == $this->dol_object->total_ttc && $this->dol_object->paye == 0 && $ventilExportCompta == 0) {
-                    if ($this->dol_object->set_draft($user, $id_entrepot) <= 0) {
+                    if ($this->dol_object->setDraft($user, $id_entrepot) <= 0) {
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la remise au statut "Brouillon"');
                     }
 
@@ -6412,7 +6412,7 @@ class Bimp_Facture extends BimpComm
 
                 foreach ($refs as $ref) {
                     $fac = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array(
-                                'facnumber' => $ref
+                                'ref' => $ref
                     ));
 
                     if (!BimpObject::objectLoaded($fac)) {

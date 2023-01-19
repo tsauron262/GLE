@@ -2314,16 +2314,16 @@ class BimpComm extends BimpDolObject
                         }
                         $html .= '</td>';
                         $html .= '<td align="center">';
-                        $html .= dol_print_date($action->datep, 'dayhour');
+                        $html .= dol_print_date(strtotime($action->datep), 'dayhour');
                         if ($action->datef) {
                             $tmpa = dol_getdate($action->datep);
                             $tmpb = dol_getdate($action->datef);
                             if ($tmpa['mday'] == $tmpb['mday'] && $tmpa['mon'] == $tmpb['mon'] && $tmpa['year'] == $tmpb['year']) {
                                 if ($tmpa['hours'] != $tmpb['hours'] || $tmpa['minutes'] != $tmpb['minutes'] && $tmpa['seconds'] != $tmpb['seconds']) {
-                                    $html .= '-' . dol_print_date($action->datef, 'hour');
+                                    $html .= '-' . dol_print_date(strtotime($action->datef), 'hour');
                                 }
                             } else {
-                                $html .= '-' . dol_print_date($action->datef, 'dayhour');
+                                $html .= '-' . dol_print_date(strtotime($action->datef), 'dayhour');
                             }
                         }
                         $html .= '</td>';
@@ -2615,10 +2615,8 @@ class BimpComm extends BimpDolObject
                 $totalHt += $dol_lines[$id_dol_line]->total_ht;
             }
 
-            if ($this->field_exists('total_ht'))
-                $tot = $this->getData('total_ht');
-            else
-                $tot = $this->getData('total');
+            $tot = $this->getData('total_ht');
+            
             if (round((float) $tot, 2) != round($totalHt, 2)) {
                 $this->erreurFatal++;
                 $msg = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($tot, 3);
@@ -3249,9 +3247,9 @@ class BimpComm extends BimpDolObject
                     $payement = new Paiement($this->db->db);
                     $payement->amounts = array($factureA->id => $amount);
                     $payement->ref = $refPaiement;
-                    $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
+                    $payement->datepaye = ($date_paiement ? BimpTools::getDateTms($date_paiement) : dol_now());
                     $payement->paiementid = (int) $id_mode_paiement;
-                    $payement->num_paiement = $num_paiement;
+                    $payement->num_payment = $num_paiement;
                     if ($payement->create($user) <= 0) {
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
                     } else {
@@ -4539,7 +4537,6 @@ class BimpComm extends BimpDolObject
             $dateStr = "UNIX_TIMESTAMP(datep)";
         elseif ($this->object_name == 'Bimp_Facture') {
             $dateStr = "UNIX_TIMESTAMP(datef)";
-            $fieldTotal = 'total';
         } else
             $dateStr = "UNIX_TIMESTAMP(date_commande)";
 
@@ -4725,12 +4722,12 @@ class BimpComm extends BimpDolObject
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
         } elseif (!$this->can("edit")) {
             $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action';
-        } elseif (!method_exists($this->dol_object, 'set_draft')) {
+        } elseif (!method_exists($this->dol_object, 'setDraft')) {
             $errors[] = 'Erreur: cette action n\'est pas possible';
         } else {
             global $user;
             BimpTools::cleanDolEventsMsgs();
-            if ($this->dol_object->set_draft($user) <= 0) {
+            if ($this->dol_object->setDraft($user) <= 0) {
                 $obj_errors = BimpTools::getErrorsFromDolObject($this->dol_object);
                 $obj_errors = BimpTools::merge_array($obj_errors, BimpTools::getDolEventsMsgs(array('errors')));
                 $errors[] = BimpTools::getMsgFromArray($obj_errors, 'Echec de la remise au statut "Brouillon"');

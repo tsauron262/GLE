@@ -94,10 +94,6 @@ fields:
         label: Montant
         type: money
         default_value: 0
-    tva: 
-        label: TVA
-        dol_prop: tva
-        default_value: 0
     total_tva: 
         label: Total TVA
         type: money

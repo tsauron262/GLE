@@ -91,7 +91,7 @@ function widget_listProduit() {
             $table .= "</td>\n";
             $table .= '<td>'.dol_trunc($objp->label,32).'</td>';
             $table .= "<td>";
-            $table .= dol_print_date($objp->datem,'day');
+            $table .= dol_print_date(strtotime($objp->datem),'day');
             $table .= "</td>";
             $table .= '<td align="right" nowrap="nowrap">';
             $table .= $staticproduct->LibStatut($objp->tobuy,5);
@@ -107,7 +107,7 @@ function widget_listProduit() {
         $table2 .= "</td>\n";
         $table2 .= '<td>'.dol_trunc($objp->label,32).'</td>';
         $table2 .= "<td>";
-        $table2 .= dol_print_date($objp->datem,'day');
+        $table2 .= dol_print_date(strtotime($objp->datem),'day');
         $table2 .= "</td>";
         $table2 .= '<td align="right" nowrap="nowrap">';
         $table2 .= $staticproduct->LibStatut($objp->tobuy,5);

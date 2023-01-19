@@ -91,7 +91,7 @@ $mesg = $px1->isGraphKo();
 if (! $mesg)
 {
 	$px1->SetData($data);
-	$px1->SetPrecisionY(0);
+//	$px1->SetPrecisionY(0);
 	$i=$startyear;
 	while ($i <= $endyear)
 	{
@@ -105,7 +105,7 @@ if (! $mesg)
 	$px1->SetYLabel($langs->trans("NumberConsult"));
 	$px1->SetShading(3);
 	$px1->SetHorizTickIncrement(1);
-	$px1->SetPrecisionY(0);
+//	$px1->SetPrecisionY(0);
 	$px1->mode='depth';
 	$px1->SetTitle($langs->trans("NumberConsultByMonth"));
 
@@ -139,7 +139,7 @@ if (! $mesg)
 	$px2->SetYLabel($langs->trans("Amount"));
 	$px2->SetShading(3);
 	$px2->SetHorizTickIncrement(1);
-	$px2->SetPrecisionY(0);
+//	$px2->SetPrecisionY(0);
 	$px2->mode='depth';
 	$px2->SetTitle($langs->trans("AmountByMonth"));
 

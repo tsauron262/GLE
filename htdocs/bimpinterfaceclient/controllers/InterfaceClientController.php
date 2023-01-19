@@ -106,7 +106,7 @@ class InterfaceClientController extends BimpPublicController
 
         $html .= '<div class="navbar-header">';
         $html .= '<a class="navbar-brand" href="#">';
-        $html .= '<img src="' . DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=' . $mysoc->logo . '" style="width: auto; height: 50px"/>';
+        $html .= '<img src="' . BimpTools::getMyCompanyLogoUrl() . '" style="width: auto; height: 50px"/>';
         $html .= '</a>';
         $html .= '</div>';
 

@@ -50,7 +50,7 @@
 					$discount->fetch($line->fk_remise_except);
 					echo ($txt?' - ':'').$langs->transnoentities("DiscountFromDeposit",$discount->getNomUrl(0));
 					// Add date of deposit
-					if (! empty($conf->global->INVOICE_ADD_DEPOSIT_DATE)) echo ' ('.dol_print_date($discount->datec).')';
+					if (! empty($conf->global->INVOICE_ADD_DEPOSIT_DATE)) echo ' ('.dol_print_date(strtotime($discount->datec)).')';
 				}
 				else
 				{

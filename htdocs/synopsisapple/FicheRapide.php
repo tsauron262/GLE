@@ -153,7 +153,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
             $chrono->model_refid = 105;
             $chrono->description = ($descr != "" ? addslashes($descr) : "");
             $chrono->socid = $socid;
-            $chrono->contactid = $_REQUEST["contactSociete"];
+            $chrono->contact_id = $_REQUEST["contactSociete"];
             $chronoid = $chrono->create();
             if ($chronoid > 0) {
                 $dataArr = array(1051 => $_POST['contrat'], 1045 => date("Y/m/d H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre, 1066 => $numExt, 1068 => ($prio == "" ? 0 : 1), 1085 => ($pro == "" ? 0 : 1));
@@ -239,7 +239,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         }
                         
                         $propal->valid($user);
-                        $propal->set_draft($user);
+                        $propal->setDraft($user);
 
                         $propal->fetch($propal->id);
 
@@ -391,7 +391,7 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
     echo "<br/>".$soc->email;
     echo "<br/>".$soc->phone;
     
-//    echo $form->select_thirdparty($socid, 'socid');
+//    echo $form->select_company($socid, 'socid');
     echo "<br />";
     echo "</td>";
    /* echo "</tr>";
@@ -674,7 +674,7 @@ if ($socid != "" && $socid > 0 && $NoMachine) {
 
     echo "<p>";
     echo "<label for='client'>Client : </label>";
-    //echo $form->select_thirdparty($socid, 'socid');
+    //echo $form->select_company($socid, 'socid');
     print $form->select_company($socid, 'socid');
     echo "<span class='addSoc editable' style='float: left; padding : 3px 15px 0 0;'><img src='" . DOL_URL_ROOT . "/theme/eldy/img/filenew.png' border='0' alt='Create' title='Create'></span>";
     echo "</p>";

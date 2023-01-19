@@ -453,14 +453,14 @@ if (!empty($holiday->holiday)) {
         $date = $infos_CP['date_create'];
 
         $tabColor = array("16"=>"green", "17"=>"blue", "18"=>"orange", "19"=>"purple");
-        print '<tr ' . $bc[$var] . '  style=" color:'.$tabColor[dol_print_date($infos_CP['date_debut'], '%y')].'">';
+        print '<tr ' . $bc[$var] . '  style=" color:'.$tabColor[dol_print_date(strtotime($infos_CP['date_debut']), '%y')].'">';
         print '<td colspan="2">';
         $holidaystatic->id = $infos_CP['rowid'];
         $holidaystatic->ref = $infos_CP['rowid'];
         print $holidaystatic->getNomUrl(1);
 
         print '</td>';
-        print '<td style="text-align: center;">' . dol_print_date($date, 'day') . '</td>';
+        print '<td style="text-align: center;">' . dol_print_date(strtotime($date), 'day') . '</td>';
         print '<td>';
         
         
@@ -473,8 +473,8 @@ if (!empty($holiday->holiday)) {
             print $groupstatic->name;
         print '</td>';
         print '<td>' . $approbatorstatic->getNomUrl('1') . '</td>';
-        print '<td align="center">' . dol_print_date($infos_CP['date_debut'], 'day') . '</td>';
-        print '<td align="center">' . dol_print_date($infos_CP['date_fin'], 'day') . '</td>';
+        print '<td align="center">' . dol_print_date(strtotime($infos_CP['date_debut']), 'day') . '</td>';
+        print '<td align="center">' . dol_print_date(strtotime($infos_CP['date_fin']), 'day') . '</td>';
         print '<td align="right">';
         $nbopenedday = num_open_dayUser($infos_CP['fk_user'], $infos_CP['date_debut_gmt'], $infos_CP['date_fin_gmt'], 0, 1, $infos_CP['halfday']);
         print $nbopenedday . ' ' . $langs->trans('DurationDays');

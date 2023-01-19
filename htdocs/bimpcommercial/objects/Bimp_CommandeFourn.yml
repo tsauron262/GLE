@@ -583,7 +583,7 @@ fields_tables:
               value: 
                   callback: displayTotalRemises
             - field: total_ht
-            - field: tva
+            - field: total_tva
             - field: total_ttc
             
 views: 

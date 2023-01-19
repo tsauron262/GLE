@@ -123,7 +123,7 @@ class BimpProductMouvement extends BimpObject
                             'on'    => '((' . $main_alias . '.origintype = \'facture\' and ' . $main_alias . '.fk_origin = ' . $of_alias . '.rowid) OR (' . $main_alias . '.bimp_origin = \'facture\' and ' . $main_alias . '.bimp_id_origin = ' . $of_alias . '.rowid))'
                         );
 
-                        $or_origins[$of_alias . '.facnumber'] = array(
+                        $or_origins[$of_alias . '.ref'] = array(
                             'or_field' => $or_field
                         );
                     }

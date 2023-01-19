@@ -148,7 +148,7 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
             $table->addCol('remain', 'Reste à payer', 23, 'text-align: center;', '', 'text-align: center;');
 
             foreach ($this->factures as $facture) {
-                //                if(stripos($facture->getData('facnumber'), 'ACC') !== false){
+                //                if(stripos($facture->getData('ref'), 'ACC') !== false){
                 //                echo $facture->printData();die;}
                 if ($facture->getData('type') == 3) {
                     $this->total_acc += round((float) $facture->getData('total_ttc'), 2);
@@ -161,7 +161,7 @@ class InvoiceStatementPDF extends BimpCommDocumentPDF
                 $this->total_rap += $rap;
 
                 $row = array(
-                    'ref'       => $facture->getData('facnumber'),
+                    'ref'       => $facture->getData('ref'),
                     'libelle'   => $facture->displayData('libelle', 'default', false, true),
                     'date'      => $facture->displayData('datef', 'default', false, true),
                     'echeance'  => $facture->displayData('date_lim_reglement', 'default', false, true),

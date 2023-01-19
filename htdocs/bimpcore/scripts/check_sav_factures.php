@@ -27,7 +27,7 @@ BimpTools::loadDolClass('compta/facture', 'facture');
 
 $where = '`ref` LIKE \'FAS1901-%\' AND `datec` >= \'2019-01-17 00:00:00\' AND `datec` < \'2019-01-18 00:00:00\'';
 $rows = $bdb->getRows('facture', $where, null, 'array', array(
-    'rowid', 'ref', 'fk_soc', 'total'
+    'rowid', 'ref', 'fk_soc', 'total_ht'
         ));
 
 // Afficher marge pour process. 
@@ -52,7 +52,7 @@ $nProcess = 0;
 foreach ($rows as $r) {
     $sav_id = (int) $bdb->getValue('bs_sav', 'id', '`id_facture` = ' . (int) $r['rowid']);
     if (!$sav_id) {
-        if ((float) $r['total'] >= -0.01 && (float) $r['total'] <= 0.01) {
+        if ((float) $r['total_ht'] >= -0.01 && (float) $r['total_ht'] <= 0.01) {
             if (!isset($toDelete[(int) $r['fk_soc']])) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $r['fk_soc']);
                 if (BimpObject::objectLoaded($soc)) {
@@ -102,7 +102,7 @@ foreach ($toDelete as $id_soc => $soc_data) {
             $marge = $margin_infos['total_margin'];
         }
 
-        $delete_txt .= ' - ' . $r['rowid'] . ' => ' . $r['ref'] . ': ' . $r['total'] . '  -  MARGE : ' . $marge . "\n";
+        $delete_txt .= ' - ' . $r['rowid'] . ' => ' . $r['ref'] . ': ' . $r['total_ht'] . '  -  MARGE : ' . $marge . "\n";
     }
 }
 
@@ -127,7 +127,7 @@ foreach ($toProcess as $id_soc => $soc_data) {
             $marge = $margin_infos['total_margin'];
         }
 
-        $process_txt .= ' - ' . $r['rowid'] . ' => ' . $r['ref'] . ': ' . $r['total'] . '  -  MARGE : ' . $marge . "\n";
+        $process_txt .= ' - ' . $r['rowid'] . ' => ' . $r['ref'] . ': ' . $r['total_ht'] . '  -  MARGE : ' . $marge . "\n";
     }
 }
 

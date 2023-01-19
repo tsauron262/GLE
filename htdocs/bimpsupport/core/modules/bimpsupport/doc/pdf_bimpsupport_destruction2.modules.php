@@ -245,7 +245,7 @@ BP 2321
 
                 $pdf->SetXY('79', '147.3');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-                $pdf->MultiCell(50, 6, dol_print_date($sav->getData('date_create')), 0, 'L');
+                $pdf->MultiCell(50, 6, dol_print_date(strtotime($sav->getData('date_create'))), 0, 'L');
 
 //                //le prod
                 $product_label = $equipment->displayProduct('nom', true);
@@ -323,7 +323,7 @@ BP 2321
         }
 
         $showaddress = $showadress;
-        $usecontact = ($object->model->hasContact && $object->contactid > 0);
+        $usecontact = ($object->model->hasContact && $object->contact_id > 0);
         $object->client = $object->societe;
         $default_font_size = 12;
 

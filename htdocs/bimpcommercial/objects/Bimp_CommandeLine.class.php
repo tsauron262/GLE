@@ -299,7 +299,7 @@ class Bimp_CommandeLine extends ObjectLine
             if ($commande->isActionAllowed('linesFactureQties') && $commande->canSetAction('linesFactureQties')) {
                 $onclick = 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ';
                 $onclick .= $commande->id . ', ' . (int) $id_client_facture . ', ';
-                $onclick .= (($id_client_facture === (int) $commande->getData('fk_soc')) ? (int) $commande->dol_object->contactid : 0) . ', ';
+                $onclick .= (($id_client_facture === (int) $commande->getData('fk_soc')) ? (int) $commande->dol_object->contact_id : 0) . ', ';
                 $onclick .= (int) $commande->getData('fk_cond_reglement') . ',';
                 $onclick .= '\'' . addslashes(htmlentities($commande->getData('note_public'))) . '\', \'' . addslashes(htmlentities($commande->getData('note_private'))) . '\');';
 
@@ -1173,7 +1173,7 @@ class Bimp_CommandeLine extends ObjectLine
                     $dateT = strtotime($facture->getData('datef'));
                     if ($dateT > $date) {
                         $date = $dateT;
-                        $ref = $facture->getData('facnumber');
+                        $ref = $facture->getData('ref');
                     }
                 }
             }
@@ -3968,7 +3968,7 @@ class Bimp_CommandeLine extends ObjectLine
                         'id_client_facture' => (int) $commande->getData('fk_soc'),
                         'note_public'       => htmlentities($commande->getData('note_public')),
                         'note_private'      => htmlentities($commande->getData('note_private')),
-                        'id_contact'        => (int) $commande->dol_object->contactid,
+                        'id_contact'        => (int) $commande->dol_object->contact_id,
                         'id_cond_reglement' => (int) $commande->getData('fk_cond_reglement')
                             ), array(
                         'form_name'      => 'invoice',
@@ -5611,10 +5611,10 @@ class Bimp_CommandeLine extends ObjectLine
                 $line_warnings = array();
                 $line_errors = $this->setFactureData((int) $facture->id, $qty, $equipments, $line_warnings, false);
                 if (count($line_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('facnumber') . '"');
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('ref') . '"');
                 }
                 if (count($line_warnings)) {
-                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('facnumber') . '"');
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs lors de l\'enregistrement des données pour la facture "' . $facture->getData('ref') . '"');
                 }
             }
         }

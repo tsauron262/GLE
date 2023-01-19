@@ -191,7 +191,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
                 $addr = $sav->getChildObject('contact');
                 $addr = $addr->dol_object;
                 $contact = $addr->getFullName($langs, 0, 0);
-                $tel = ($addr->phone_mobile != "") ? $addr->phone_mobile : ($addr->phone_perso != "") ? $addr->phone_perso : ($addr->phone_pro != "") ? $addr->phone_pro : "";
+                $tel = (($addr->phone_mobile != "") ? $addr->phone_mobile : (($addr->phone_perso != "") ? $addr->phone_perso : (($addr->phone_pro != "") ? $addr->phone_pro : "")));
                 $mail = $addr->mail;
             } else {
                 $addr = $addr = $client;

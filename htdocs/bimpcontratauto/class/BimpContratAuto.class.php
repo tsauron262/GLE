@@ -191,8 +191,8 @@ class BimpContratAuto {
                     'ref' => $line->ref,
                     'duree' => $duree, // non utilisé pour le moment
                     'qty' => $line->qty, // duréee du service (en mois)
-                    'dateDebutService' => dol_print_date($date_ouverture),
-                    'dateFinService' => dol_print_date($date_fin),
+                    'dateDebutService' => dol_print_date(strtotime($date_ouverture)),
+                    'dateFinService' => dol_print_date(strtotime($date_fin)),
                     'prixUnitaire' => $line->price_ht,
                     'prixTotal' => $line->qty * $line->price_ht, // TODO prixTotal dépend de quantité et non pas de durée
                     'statut' => $statut); // if 0 => have to be closed if 1 => inactif if 2 => actif
@@ -214,7 +214,7 @@ class BimpContratAuto {
                 $contrats[$contratObj->id]['dateFinContrat'] = 'non définie';
             $contrats[$contratObj->id]['services'] = $services;
             $contrats[$contratObj->id]['prixTotalContrat'] = $prixTotalContrat;
-            $contrats[$contratObj->id]['dateDebutContrat'] = dol_print_date($contrats[$contratObj->id]['dateDebutContrat']);
+            $contrats[$contratObj->id]['dateDebutContrat'] = dol_print_date(strtotime($contrats[$contratObj->id]['dateDebutContrat']));
         }
         return $contrats;
     }

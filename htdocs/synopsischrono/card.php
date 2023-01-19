@@ -192,7 +192,7 @@ if ($action == 'modifier') {
     $chr->note .= "Modifié le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
     $chr->description = addslashes($_REQUEST['description']);
     $chr->socid = addslashes($_REQUEST['socid']);
-    $chr->contactid = addslashes($_REQUEST['contactid']);
+    $chr->contact_id = addslashes($_REQUEST['contactid']);
     $chr->propalid = addslashes($_REQUEST['prop']);
     $chr->projetid = addslashes($_REQUEST['projet']);
 

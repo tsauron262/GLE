@@ -2304,7 +2304,7 @@ if ($object->id && ($action == '' || $action == 'view') && $object->status) {
                     print '<td nowrap="nowrap">';
                     print "<a href=\"../comm/propal.php?id=" . $objp->propalid . "\">" . img_object($langs->trans("ShowPropal"), "propal") . " " . $objp->ref . "</a></td>\n";
                     print "<td><a href=\"../comm/card.php?socid=" . $objp->socid . "\">" . dol_trunc($objp->nom, 18) . "</a></td>\n";
-                    print "<td nowrap=\"nowrap\">" . dol_print_date($objp->dp, "%d %b") . "</td>\n";
+                    print "<td nowrap=\"nowrap\">" . dol_print_date(strtotime($objp->dp), "%d %b") . "</td>\n";
                     print '<td><input type="hidden" name="propalid" value="' . $objp->propalid . '">';
                     print '<input type="text" class="flat" name="qty" size="1" value="1"></td><td nowrap>' . $langs->trans("ReductionShort");
                     print '<input type="text" class="flat" name="remise_percent" size="1" value="0">%';

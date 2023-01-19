@@ -314,7 +314,7 @@ class Bimp_Paiement extends BimpObject
     public function displayType()
     {
         if ($this->isLoaded()) {
-            return $this->dol_object->type_libelle;
+            return $this->dol_object->type_label;
         }
     }
 

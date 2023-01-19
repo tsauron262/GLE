@@ -649,10 +649,10 @@ class BContract_echeancier extends BimpObject {
 
 
 
-                    $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
-                            . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
+                    $html .= '<td style="text-align:center"><b>' . price($facture->getData('total_ht')) . ' €</b> </td>'
+                            . '<td style="text-align:center"><b>' . price($facture->getData('total_tva')) . ' € </b></td>'
                             . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
-                            . '<td style="text-align:center"><b>' . price($facture->getData('total') - $facture->getData('marge_finale_ok')) . ' €</b></td>'
+                            . '<td style="text-align:center"><b>' . price($facture->getData('total_ht') - $facture->getData('marge_finale_ok')) . ' €</b></td>'
                             . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                             . '<td style="text-align:center">' . $paye . '</td>'
                             . '<td style="text-align:center">' . $displayAppatenance . '</td>'
@@ -672,7 +672,7 @@ class BContract_echeancier extends BimpObject {
                     $current_number_facture++;
                 } else {
                    // $facture->getSumDiscountsUsed() . "<br />";
-                    $acomptes_ht += $facture->getData('total');
+                    $acomptes_ht += $facture->getData('total_ht');
                     $acomptes_ttc += $facture->getData('total_ttc');
                 }
             }
@@ -898,7 +898,7 @@ class BContract_echeancier extends BimpObject {
             
             if($periode['FACTURE'] != '') {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
-                $facture->find(Array('facnumber' => $periode['FACTURE']), 1);
+                $facture->find(Array('ref' => $periode['FACTURE']), 1);
                 if($facture->isLoaded()) {
                     $forDisplayReferenceFacture = $facture->getNomUrl();
                     if($facture->getData('paye')) {
@@ -1021,8 +1021,8 @@ class BContract_echeancier extends BimpObject {
                 $laLigne = $facture->dol_object->lines[0];
                 $factures[] = Array(
                     'ref'       => $facture->getRef(),
-                    'ht'        => $facture->getData('total'),
-                    'tva'       => $facture->getData('tva'),
+                    'ht'        => $facture->getData('total_ht'),
+                    'tva'       => $facture->getData('total_tva'),
                     'ttc'       => $facture->getData('total_ttc'),
                     'dateStart' => $laLigne->date_start, 
                     'dateEnd'   => $laLigne->date_end
@@ -1183,7 +1183,7 @@ class BContract_echeancier extends BimpObject {
                 );
                 
                 $tmpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
-                if($tmpFacture->find(Array('facnumber' => $factureStr), 1)) {
+                if($tmpFacture->find(Array('ref' => $factureStr), 1)) {
                     if($tmpFacture->getData('fk_facture_source')) {
                         $factureSource = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $tmpFacture->getData('fk_facture_source'));
                         $periodes['periodes'][] = Array(
@@ -1192,8 +1192,8 @@ class BContract_echeancier extends BimpObject {
                             'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDateStr : $startDateStr . ' ('.$factureStr.')',
                             'HT' => $resteAPayer,
                             'DUREE_MOIS' => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
-                            'PRICE' => $factureSource->getData('total'),
-                            'TVA' => $factureSource->getData('total') * 0.2,
+                            'PRICE' => $factureSource->getData('total_ht'),
+                            'TVA' => $factureSource->getData('total_ht') * 0.2,
                             'FACTURE' => $factureSource->getRef()
                         );
                     }
@@ -1263,9 +1263,9 @@ class BContract_echeancier extends BimpObject {
             if ($instance->dol_object->delete($user) > 0) {
                     $this->onDeleteFacture($dateDebutFacture);
                 
-                $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
+                $success = "Facture " . $instance->getData('ref') . ' supprimée avec succès';
             } else {
-                $errors[] = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
+                $errors[] = "Facture " . $instance->getData('ref') . ' n\'à pas été supprimée';
                 ;
             }
 

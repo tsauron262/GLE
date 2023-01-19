@@ -43,7 +43,7 @@ class indexController extends BimpController
         $html .= '<div class="row bc_header">';
 
         $html .= '<div class="header_logo">';
-        $html .= '<img src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $mysoc->logo . '" alt="' . $mysoc->name . '"/>';
+        $html .= '<img src="' . BimpTools::getMyCompanyLogoUrl() . '" alt="' . $mysoc->name . '"/>';
         $html .= '</div>';
 
         $html .= $this->renderHeaderContent();
@@ -59,15 +59,14 @@ class indexController extends BimpController
         $html .= '>';
         $html .= '<i class="fa fa-window-maximize"></i>';
         $html .= '</span>';
-        
-        
-        if(BC_Caisse::$useYounited){
+
+        if (BC_Caisse::$useYounited) {
             $db = BimpCache::getBdb();
             $caisse = $this->getUserCaisse();
-            if($caisse && $caisse->isLoaded()){
-                $idLdlc = $db->getValue('entrepot', 'id_ldlc', 'rowid = '.$caisse->getData('id_entrepot'));
-                if($idLdlc){
-                    $html .= '<a class="headerCaisseButton bs-popover" href="https://sales-apple-bimp.services.younited-credit.com/?shopId='.$idLdlc.'" target="_blank"';
+            if ($caisse && $caisse->isLoaded()) {
+                $idLdlc = $db->getValue('entrepot', 'id_ldlc', 'rowid = ' . $caisse->getData('id_entrepot'));
+                if ($idLdlc) {
+                    $html .= '<a class="headerCaisseButton bs-popover" href="https://sales-apple-bimp.services.younited-credit.com/?shopId=' . $idLdlc . '" target="_blank"';
                     $html .= BimpRender::renderPopoverData('Younited', 'bottom');
                     $html .= '>';
                     $html .= '<i class="fa fa-bank"></i>';

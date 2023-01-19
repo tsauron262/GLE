@@ -22,6 +22,6 @@ print load_fiche_titre("Suivi des prêt SAV en cours");
             $chrono->fetch($ligne->idP);
             echo $chrono->getNomUrl(1);
             echo " Centre : ".$ligne->Centre;
-            echo " Date fin : ".dol_print_date($ligne->Fin_Pret).($red?" (Retard)":"");
+            echo " Date fin : ".dol_print_date(strtotime($ligne->Fin_Pret)).($red?" (Retard)":"");
             echo "</div>";
         }

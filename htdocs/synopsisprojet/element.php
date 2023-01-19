@@ -154,12 +154,12 @@ print '<tr><td>'.$langs->trans("Status").'</td><td>'.$object->getLibStatut(4).'<
 
 // Date start
 print '<tr><td>'.$langs->trans("DateStart").'</td><td>';
-print dol_print_date($object->date_start,'day');
+print dol_print_date(strtotime($object->date_start),'day');
 print '</td></tr>';
 
 // Date end
 print '<tr><td>'.$langs->trans("DateEnd").'</td><td>';
-print dol_print_date($object->date_end,'day');
+print dol_print_date(strtotime($object->date_end),'day');
 print '</td></tr>';
 
 // Opportunity status
@@ -683,7 +683,7 @@ foreach ($listofreferent as $key => $value)
 					if (empty($date)) $date=$element->date_contrat;
 					if (empty($date)) $date=$element->datev; //Fiche inter
 				}
-				print '<td align="center">'.dol_print_date($date,'day').'</td>';
+				print '<td align="center">'.dol_print_date(strtotime($date),'day').'</td>';
 
 				// Third party or user
                 print '<td align="left">';

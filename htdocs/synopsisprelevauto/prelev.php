@@ -45,7 +45,7 @@ if(isset($_REQUEST['valider'])){
 if(isset($_REQUEST['prelevOk'])){
     $db->query("UPDATE ".MAIN_DB_PREFIX."synopsisprelevauto set dateDeb='".convertirDate($_REQUEST['dateDeb'], false)."', "
             . "dateDern=now(), dateProch ='".date('Y-m-d H:i:s', strtotime('+'.$_REQUEST['periode'].' month',strtotime(date('Y-m-d'))))."',"
-            . "periode='".$_REQUEST['periode']."', nb=nb+1, note=concat(note, '<br/>Prélèvement fait le ". dol_print_date(date("Y-m-d H:i:s")) ." par ".$user->getFullName($langs)."') WHERE type='contrat' AND referent=".$id);
+            . "periode='".$_REQUEST['periode']."', nb=nb+1, note=concat(note, '<br/>Prélèvement fait le ". dol_print_date(dol_now()) ." par ".$user->getFullName($langs)."') WHERE type='contrat' AND referent=".$id);
 }
 
 
@@ -59,17 +59,17 @@ if(!$db->num_rows($sql) > 0){
 echo "<form method='POST'>";
 
 echo "Date debut :";
-echo "<input type='text' class='datePicker' name='dateDeb' value='".(isset($result)? dol_print_date($result->dateDeb, '%d/%m/%Y'): "")."'/></br>";
+echo "<input type='text' class='datePicker' name='dateDeb' value='".(isset($result)? dol_print_date(strtotime($result->dateDeb), '%d/%m/%Y'): "")."'/></br>";
 
 echo "Périodicité :";
 echo "<input type='text' class='' name='periode' value='".(isset($result)? $result->periode: "")."'/> mois</br>";
 
 
 echo "Date dernié prélèvement :";
-echo "<input type='text' class='datePicker' name='dateDern' value='".(isset($result)? dol_print_date($result->dateDern, '%d/%m/%Y'): "")."'/></br>";
+echo "<input type='text' class='datePicker' name='dateDern' value='".(isset($result)? dol_print_date(strtotime($result->dateDern), '%d/%m/%Y'): "")."'/></br>";
 
 echo "Date prochain prélèvement :";
-echo "<input type='text' class='datePicker' name='dateProch' value='".(isset($result)? dol_print_date($result->dateProch, '%d/%m/%Y'): "")."'/></br>";
+echo "<input type='text' class='datePicker' name='dateProch' value='".(isset($result)? dol_print_date(strtotime($result->dateProch), '%d/%m/%Y'): "")."'/></br>";
 
 
 echo "Nombre prélèvement effectué :";

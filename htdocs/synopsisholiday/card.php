@@ -444,8 +444,8 @@ if ($action == 'confirm_send') {
             if (!empty($conf->global->MAIN_APPLICATION_TITLE))
                 $societeName = $conf->global->MAIN_APPLICATION_TITLE;
 
-            $dateBegin = dol_print_date($cp->date_debut, 'day');
-            $dateEnd = dol_print_date($cp->date_fin, 'day');
+            $dateBegin = dol_print_date(strtotime($cp->date_debut), 'day');
+            $dateEnd = dol_print_date(strtotime($cp->date_fin), 'day');
             $typeCp = $cp->getTypeLabel(true);
 
             $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " a valider.";
@@ -496,7 +496,7 @@ if ($action == 'confirm_send') {
             }
             $message .= "\n";
             $message .= "- " . $langs->transnoentitiesnoconv("Name") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-            $message .= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
+            $message .= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date(strtotime($cp->date_debut), 'day') . " au " . dol_print_date(strtotime($cp->date_fin), 'day') . "\n";
             $message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
             $message .= "\n";
 //die($message);
@@ -537,8 +537,8 @@ if ($action == 'confirm_valid') {
             if (!empty($conf->global->MAIN_APPLICATION_TITLE))
                 $societeName = $conf->global->MAIN_APPLICATION_TITLE;
 
-            $dateBegin = dol_print_date($cp->date_debut, 'day');
-            $dateEnd = dol_print_date($cp->date_fin, 'day');
+            $dateBegin = dol_print_date(strtotime($cp->date_debut), 'day');
+            $dateEnd = dol_print_date(strtotime($cp->date_fin), 'day');
             $typeCp = $cp->getTypeLabel(true);
 
             $demandeur = new User($db);
@@ -578,7 +578,7 @@ if ($action == 'confirm_valid') {
                     $message .= "Attention, il ne s\'agit pas du responsable hiérarchique du demandeur.\n";
                 $message .= "\n";
                 $message .= "- " . $langs->transnoentitiesnoconv("Name") . " : " . dolGetFirstLastname($demandeur->firstname, $demandeur->lastname) . "\n";
-                $message .= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date(strtotime($cp->date_debut), 'day') . " au " . dol_print_date(strtotime($cp->date_fin), 'day') . "\n";
                 $message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
                 $message .= "\n";
                 $mail = new CMailFile($subject, $drhEmail, $validatorEmail, $message);
@@ -683,8 +683,8 @@ if ($action == 'drh_confirm_valid') {
                 $expediteur->fetch($drhUserId);
                 $emailFrom = $expediteur->email;
 
-                $dateBegin = dol_print_date($cp->date_debut, 'day');
-                $dateEnd = dol_print_date($cp->date_fin, 'day');
+                $dateBegin = dol_print_date(strtotime($cp->date_debut), 'day');
+                $dateEnd = dol_print_date(strtotime($cp->date_fin), 'day');
                 $typeCp = $cp->getTypeLabel(true);
                 $societeName = $conf->global->MAIN_INFO_SOCIETE_NOM;
                 if (!empty($conf->global->MAIN_APPLICATION_TITLE))
@@ -751,8 +751,8 @@ if ($action == 'drh_group_valid') {
 
             $destinataire = new User($db);
 
-            $dateBegin = dol_print_date($cp->date_debut, 'day');
-            $dateEnd = dol_print_date($cp->date_fin, 'day');
+            $dateBegin = dol_print_date(strtotime($cp->date_debut), 'day');
+            $dateEnd = dol_print_date(strtotime($cp->date_fin), 'day');
             $typeCp = $cp->getTypeLabel(true);
             $societeName = $conf->global->MAIN_INFO_SOCIETE_NOM;
             if (!empty($conf->global->MAIN_APPLICATION_TITLE))
@@ -940,8 +940,8 @@ if ($action == 'confirm_refuse') {
                 if (!empty($conf->global->MAIN_APPLICATION_TITLE))
                     $societeName = $conf->global->MAIN_APPLICATION_TITLE;
 
-                $dateBegin = dol_print_date($cp->date_debut, 'day');
-                $dateEnd = dol_print_date($cp->date_fin, 'day');
+                $dateBegin = dol_print_date(strtotime($cp->date_debut), 'day');
+                $dateEnd = dol_print_date(strtotime($cp->date_fin), 'day');
                 $typeCp = $cp->getTypeLabel(true);
                 $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " refusee par votre superviseur";
 
@@ -1005,8 +1005,8 @@ if ($action == 'drh_confirm_refuse') {
                 if (!empty($conf->global->MAIN_APPLICATION_TITLE))
                     $societeName = $conf->global->MAIN_APPLICATION_TITLE;
 
-                $dateBegin = dol_print_date($cp->date_debut, 'day');
-                $dateEnd = dol_print_date($cp->date_fin, 'day');
+                $dateBegin = dol_print_date(strtotime($cp->date_debut), 'day');
+                $dateEnd = dol_print_date(strtotime($cp->date_fin), 'day');
                 $typeCp = $cp->getTypeLabel(true);
 
                 $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . ' refusee par votre DRH';
@@ -1079,8 +1079,8 @@ if ($action == 'confirm_cancel' && GETPOST('confirm') == 'yes') {
             if (!empty($conf->global->MAIN_APPLICATION_TITLE))
                 $societeName = $conf->global->MAIN_APPLICATION_TITLE;
 
-            $dateBegin = dol_print_date($cp->date_debut, 'day');
-            $dateEnd = dol_print_date($cp->date_fin, 'day');
+            $dateBegin = dol_print_date(strtotime($cp->date_debut), 'day');
+            $dateEnd = dol_print_date(strtotime($cp->date_fin), 'day');
             $typeCp = $cp->getTypeLabel(true);
 
             $subject = $societeName . " - " . 'Demande de ' . str_replace('é', 'e', $typeCp) . ' annulee';
@@ -1138,8 +1138,8 @@ if ($action == 'confirm_group_cancel' && GETPOST('confirm') == 'yes') {
 
             $destinataire = new User($db);
 
-            $dateBegin = dol_print_date($cp->date_debut, 'day');
-            $dateEnd = dol_print_date($cp->date_fin, 'day');
+            $dateBegin = dol_print_date(strtotime($cp->date_debut), 'day');
+            $dateEnd = dol_print_date(strtotime($cp->date_fin), 'day');
             $typeCp = $cp->getTypeLabel(true);
             $societeName = $conf->global->MAIN_INFO_SOCIETE_NOM;
             if (!empty($conf->global->MAIN_APPLICATION_TITLE))
@@ -1216,8 +1216,8 @@ if ($action == 'save_substitute') {
         if (!empty($conf->global->MAIN_APPLICATION_TITLE))
             $societeName = $conf->global->MAIN_APPLICATION_TITLE;
 
-        $dateBegin = dol_print_date($cp->date_debut, 'day');
-        $dateEnd = dol_print_date($cp->date_fin, 'day');
+        $dateBegin = dol_print_date(strtotime($cp->date_debut), 'day');
+        $dateEnd = dol_print_date(strtotime($cp->date_fin), 'day');
 
         $mailErrors = array();
 
@@ -1274,7 +1274,7 @@ if ($action == 'save_substitute') {
                 $actioncomm->userownerid = $substitute->id;
                 $note = $actioncomm->note;
                 $actioncomm->note = 'Remplacement de ' . $cpUser->firstname . ' ' . $cpUser->lastname . ($note ? ' - ' . $note : '');
-                if ($actioncomm->add($substitute) < 0)
+                if ($actioncomm->create($substitute) < 0)
                     $rdvErrors = true;
                 unset($actioncomm);
             }
@@ -1837,7 +1837,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 if (!$edit) {
                     print '<tr>';
                     print '<td>' . $langs->trans('DateDebCP') . ' (' . $langs->trans("FirstDayOfHoliday") . ')</td>';
-                    print '<td>' . dol_print_date($cp->date_debut, 'day');
+                    print '<td>' . dol_print_date(strtotime($cp->date_debut), 'day');
                     print ' &nbsp; &nbsp; ';
                     print $langs->trans($listhalfday[$starthalfday]);
                     print '</td>';
@@ -1856,7 +1856,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 if (!$edit) {
                     print '<tr>';
                     print '<td>' . $langs->trans('DateFinCP') . ' (' . $langs->trans("LastDayOfHoliday") . ')</td>';
-                    print '<td>' . dol_print_date($cp->date_fin, 'day');
+                    print '<td>' . dol_print_date(strtotime($cp->date_fin), 'day');
                     print ' &nbsp; &nbsp; ';
                     print $langs->trans($listhalfday[$endhalfday]);
                     print '</td>';
@@ -1998,30 +1998,30 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
 
                 print '<tr>';
                 print '<td>' . $langs->trans('DateCreateCP') . '</td>';
-                print '<td>' . dol_print_date($cp->date_create, 'dayhour') . '</td>';
+                print '<td>' . dol_print_date(strtotime($cp->date_create), 'dayhour') . '</td>';
                 print '</tr>';
                 if ($cp->statut == 3 || $cp->statut == 6) {
                     print '<tr>';
                     print '<td>' . $langs->trans('DateValidCP') . '</td>';
-                    print '<td>' . dol_print_date($cp->date_valid, 'dayhour') . '</td>';
+                    print '<td>' . dol_print_date(strtotime($cp->date_valid), 'dayhour') . '</td>';
                     print '</tr>';
                 }
                 if ($cp->statut == 6) {
                     print '<tr>';
                     print '<td>Date d\'approbation par le DRH</td>';
-                    print '<td>' . dol_print_date($cp->date_drh_valid, 'dayhour') . '</td>';
+                    print '<td>' . dol_print_date(strtotime($cp->date_drh_valid), 'dayhour') . '</td>';
                     print '</tr>';
                 }
                 if ($cp->statut == 4) {
                     print '<tr>';
                     print '<td>' . $langs->trans('DateCancelCP') . '</td>';
-                    print '<td>' . dol_print_date($cp->date_cancel, 'dayhour') . '</td>';
+                    print '<td>' . dol_print_date(strtotime($cp->date_cancel), 'dayhour') . '</td>';
                     print '</tr>';
                 }
                 if ($cp->statut == 5) {
                     print '<tr>';
                     print '<td>' . $langs->trans('DateRefusCP') . '</td>';
-                    print '<td>' . dol_print_date($cp->date_refuse, 'dayhour') . '</td>';
+                    print '<td>' . dol_print_date(strtotime($cp->date_refuse), 'dayhour') . '</td>';
                     print '</tr>';
                 }
                 // Indication du remplaçant:

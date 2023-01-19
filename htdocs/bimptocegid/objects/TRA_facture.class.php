@@ -29,7 +29,7 @@
                         
             for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
                 if ($facture->dol_object->lines[$i]->desc == "Acompte" 
-                        && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
+                        && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total_ht')) {
                     $this->rapport['IGNORE'][$facture->getRef()] = "Facture d'accompte";
                     $facture->updateField('ignore_compta', 1);
                     $facture->updateField('exported',204);
@@ -73,7 +73,7 @@
             $structure['TYPE_DE_COMPTE']        = sizing("X", 1);
             $structure['CODE_AUXILIAIRE']       = sizing($code_compta, 16);
             $structure['NEXT']                  = sizing("", 1);
-            $structure['REF_INTERNE']           = sizing($facture->getData('facnumber'), 35);
+            $structure['REF_INTERNE']           = sizing($facture->getData('ref'), 35);
             $structure['LABEL']                 = sizing(strtoupper(suppr_accents($client->getData('nom'))), 35);
             $structure['REGLEMENT']             = sizing(($reglement->code == 'LIQ') ? 'ESP' : $reglement->code, 3);
             $structure['ECHEANCE']              = sizing($date_echeance->format('dmY'), 8);
@@ -89,7 +89,7 @@
             $structure['ETABLISSEMENT']         = sizing('001', 3);
             $structure['AXE']                   = sizing('A1',2);
             $structure['NUMRO_ECHEANCE']        = sizing("1", 2);
-            $structure['REF_EXTERNE']           = sizing($facture->getData('facnumber'), 35);
+            $structure['REF_EXTERNE']           = sizing($facture->getData('ref'), 35);
             $structure['DATE_REF_EXTERNE']      = sizing($date_facture_source->format('dmY'), 8);
             $structure['DATE_CREATION']         = sizing($date_creation->format('dmY'), 8);
             $structure['SOCIETE']               = sizing("",3);

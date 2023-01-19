@@ -1255,7 +1255,7 @@ EOF;
         print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
         print '</form>';
     } else {
-        print dol_print_date($synopsisdemandeinterv->date, 'day');
+        print dol_print_date(strtotime($synopsisdemandeinterv->date), 'day');
     }
     print '</td>';
     print '</tr>';

@@ -1565,7 +1565,7 @@ class BC_ListTable extends BC_List
                             break;
 
                         default:
-                            $html .= round($this->totals[$col_name]['value'], 4);
+                            $html .= round((float) $this->totals[$col_name]['value'], 4);
                             break;
                     }
                 }

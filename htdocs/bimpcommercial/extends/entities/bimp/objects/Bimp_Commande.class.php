@@ -24,7 +24,7 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
     public function isDemandeFinCreatable(&$errors = array())
     {
         global $user;
-        if($user->admin)
+        if($user->admin || $user->id == 1896 || $user->id == 1017)
             return 1;
         if (!parent::isDemandeFinCreatable($errors)) {
             return 0;

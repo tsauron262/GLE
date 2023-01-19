@@ -112,8 +112,7 @@ class BimpThemeLayout extends BimpLayout
         // todo: à refondre: 
 //        BimpObject::loadClass('bimpsupport', 'BS_SAV');
 //        $html .= BS_SAV::renderMenuQuickAccess();
-        // Define $bookmarks
-        // Execute hook printLeftBlock
+        
         $html .= '<div class="bimptheme_menu_extra_section">';
         global $hookmanager, $user, $db, $conf, $langs;
         if (!empty($conf->bookmark->enabled) && $user->rights->bookmark->lire) {
@@ -122,6 +121,7 @@ class BimpThemeLayout extends BimpLayout
 
             $html .= printDropdownBookmarksList($db, $langs);
         }
+        
         $parameters = array();
         $reshook = $hookmanager->executeHooks('printLeftBlock', $parameters);    // Note that $action and $object may have been modified by some hooks
         $html .= $hookmanager->resPrint;
@@ -145,12 +145,13 @@ class BimpThemeLayout extends BimpLayout
         global $langs;
 
         foreach ($items as $item_data) {
+            $titre = $item_data['titre'];
+            
             $language = BimpTools::getArrayValueFromPath($item_data, 'langs', '');
             if ($language) {
                 $langs->load($language);
+                $titre = $langs->trans($titre);
             }
-
-            $titre = $langs->trans($item_data['titre']);
 
             if (isset($item_data['sub_items']) && !empty($item_data['sub_items'])) {
                 $html .= '<div class="nav-item has-sub">';

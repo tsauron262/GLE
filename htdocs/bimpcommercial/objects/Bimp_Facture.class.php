@@ -1914,11 +1914,6 @@ class Bimp_Facture extends BimpComm
         return 0;
     }
 
-    public function getRef($withGeneric = true)
-    {
-        return $this->getData('ref');
-    }
-
     public function getPotentielRemise()
     {
         $return = array();
@@ -1930,12 +1925,6 @@ class Bimp_Facture extends BimpComm
             }
         }
         return $return;
-    }
-
-
-    public function getRefProperty()
-    {
-        return 'ref';
     }
 
     public function getModelPdf()
@@ -3414,13 +3403,10 @@ class Bimp_Facture extends BimpComm
             $type_extra = $this->displayTypeExtra();
 
             if ($type_extra) {
-                $html .= '<div style="font-size: 18px">' . $type_extra . '</div>';
+                $html .= '<div style="font-size: 15px; margin: 5px 0 10px">' . $type_extra . '</div>';
             }
 
-
-
             $html .= '<div class="object_header_infos">';
-//            $html .= 'Créée le <strong title="' . date('d/m/Y H:m:s', $this->dol_object->date_creation) . '">' . date('d / m / Y', $this->dol_object->date_creation) . '</strong>';
             $html .= 'Créée le ' . BimpTools::printDate($this->dol_object->date_creation, 'strong');
 
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author);

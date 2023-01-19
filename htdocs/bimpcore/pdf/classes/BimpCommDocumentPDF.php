@@ -388,7 +388,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                                 $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
                             }
                             $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
-                            $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
+                            $totalvat .= vatrate(abs((float) $tvakey), 1) . $tvacompl;
 
                             if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
                                 $tvaval /= $this->nbPeriods;
@@ -413,14 +413,14 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     }
 
                     foreach ($localtax_rate as $tvakey => $tvaval) {
-                        if ($tvakey != 0) {
+                        if ((float) $tvakey != 0) {
                             $tvacompl = '';
                             if (preg_match('/\*/', $tvakey)) {
                                 $tvakey = str_replace('*', '', $tvakey);
                                 $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
                             }
                             $totalvat = $this->langs->transcountrynoentities("TotalLT2", $this->fromCompany->country_code) . ' ';
-                            $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
+                            $totalvat .= vatrate(abs((float) $tvakey), 1) . $tvacompl;
 
                             if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
                                 $tvaval /= $this->nbPeriods;
@@ -492,7 +492,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                                 $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
                             }
                             $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
-                            $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
+                            $totalvat .= vatrate(abs((float)$tvakey), 1) . $tvacompl;
 
                             if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
                                 $tvaval /= $this->nbPeriods;
@@ -524,7 +524,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                                 $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
                             }
                             $totalvat = $this->langs->transcountrynoentities("TotalLT2", $this->fromCompany->country_code) . ' ';
-                            $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
+                            $totalvat .= vatrate(abs((float) $tvakey), 1) . $tvacompl;
 
                             if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
                                 $tvaval /= $this->nbPeriods;

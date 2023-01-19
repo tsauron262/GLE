@@ -256,6 +256,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 
             $html = '<table style="width: 95%;font-size: 8px;" cellpadding="3">';
             $html .= '<tr>';
+            
             // Signatue locataire: 
             $html .= '<td style="width: 33%">';
             $html .= '<span style="font-size: 9px; font-weight: bold">Pour le locataire :</span><br/>';
@@ -264,7 +265,6 @@ class ContratFinancementPDF extends DocFinancementPDF
             if ($is_company) {
                 $html .= BimpTools::ucfirst(BimpTools::getArrayValueFromPath($this->client_data, 'repr_qualite', '', $errors, true, 'Qualité du représentant du client absent')) . '<br/>';
             }
-//            $html .= '<span style="font-style: italic; font-size: 7px">Signature' . ($is_company ? ' + cachet' : '') . '</span><br/>';
             $html .= '<br/><span style="font-style: italic">"Lu et approuvé"</span>';
             $html .= '</td>';
 
@@ -312,12 +312,12 @@ class ContratFinancementPDF extends DocFinancementPDF
                 ),
                 'docusign' => array(
                     'anch' => 'Pour le locataire :',
-                    'fs'   => 'Size8',
+                    'fs'   => 'Size7',
                     'x'    => 5,
                     'y'    => 107,
                     'date' => array(
                         'x' => 22,
-                        'y' => 56
+                        'y' => 57
                     )
                 )
             );
@@ -334,12 +334,12 @@ class ContratFinancementPDF extends DocFinancementPDF
                 ),
                 'docusign' => array(
                     'anch' => 'Pour le cessionnaire :',
-                    'fs'   => 'Size8',
+                    'fs'   => 'Size7',
                     'x'    => 5,
                     'y'    => 107,
                     'date' => array(
                         'x' => 22,
-                        'y' => 56
+                        'y' => 57
                     )
                 )
             );
@@ -348,10 +348,14 @@ class ContratFinancementPDF extends DocFinancementPDF
                 $this->signature_params['cessionnaire']['elec']['nom_x_offset'] = 21;
                 $this->signature_params['cessionnaire']['elec']['nom_y_offset'] = -17;
 
-                // Todo : Offsets à vérifier!
-                $this->signature_params['cessionnaire']['docusign']['nom'] = array(
-                    'x' => 44,
-                    'y' => 28
+                $this->signature_params['cessionnaire']['docusign']['texts'] = array(
+                    'nom_cessionnaire' => array(
+                        'label' => 'Nom signataire',
+                        'x'     => 57,
+                        'y'     => 30,
+                        'w'     => 120,
+                        'h'     => 13
+                    )
                 );
             }
             if (!$qualite_cessionnaire) {
@@ -359,10 +363,11 @@ class ContratFinancementPDF extends DocFinancementPDF
                 $this->signature_params['cessionnaire']['elec']['fonction_x_offset'] = 18;
                 $this->signature_params['cessionnaire']['elec']['fonction_y_offset'] = -14;
 
-                // Todo : Offsets à vérifier!
                 $this->signature_params['cessionnaire']['docusign']['fonction'] = array(
-                    'x' => 36,
-                    'y' => 40
+                    'x' => 48,
+                    'y' => 39,
+                    'h' => 13,
+                    'w' => 120
                 );
             }
 
@@ -379,12 +384,12 @@ class ContratFinancementPDF extends DocFinancementPDF
                 ),
                 'docusign' => array(
                     'anch' => 'Pour le loueur :',
-                    'fs'   => 'Size8',
+                    'fs'   => 'Size7',
                     'x'    => 5,
                     'y'    => 107,
                     'date' => array(
                         'x' => 22,
-                        'y' => 56
+                        'y' => 57
                     )
                 )
             );

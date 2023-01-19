@@ -604,6 +604,11 @@ class BimpSignature extends BimpObject
 
             $i = 1;
             foreach ($signataires as $signataire) {
+                if (!$signataire->getData('nom')) {
+                    $errors[] = 'Nom absent pour le signataire "' . $signataire->getData('label') . '"';
+                    continue;
+                }
+
                 $signature_params = $this->getSignatureParams($signataire, 'docusign', $errors);
 
                 if (!empty($signature_params)) {
@@ -656,14 +661,24 @@ class BimpSignature extends BimpObject
                     if (isset($signature_params['texts'])) {
                         $params['tabs']['textTabs'] = array();
                         foreach ($signature_params['texts'] as $field_name => $text_params) {
-                            $params['tabs']['textTabs'][] = array(
+                            $textTab = array(
                                 'name'          => BimpTools::getArrayValueFromPath($text_params, 'label', ucfirst($field_name)),
                                 'anchorString'  => $anchor,
                                 'anchorXOffset' => BimpTools::getArrayValueFromPath($text_params, 'x', 0),
                                 'anchorYOffset' => BimpTools::getArrayValueFromPath($text_params, 'y', 0),
                                 'fontSize'      => $font_size,
-                                'value'         => $signataire->getData($field_name)
+                                'required'      => (bool) BimpTools::getArrayValueFromPath($text_params, 'req', true),
+                                'height'        => BimpTools::getArrayValueFromPath($text_params, 'h', 14),
+                                'width'         => BimpTools::getArrayValueFromPath($text_params, 'w', 60)
                             );
+
+                            if ($signataire->field_exists($field_name)) {
+                                $value = (string) $signataire->getData($field_name);
+                                if ($value) {
+                                    $textTab['value'] = $value;
+                                }
+                            }
+                            $params['tabs']['textTabs'][] = $textTab;
                         }
                     }
 
@@ -677,7 +692,9 @@ class BimpSignature extends BimpObject
                             'fontSize'      => $font_size,
                         );
                     }
-                    
+
+                    // Attention le nom sera automatiquement celui indiqué dans $params['name']
+                    // Pour demander à saisir un autre nom utiliser plutôt un textTab
                     if (isset($signature_params['nom'])) {
                         $params['tabs']['fullNameTabs'] = array();
                         $params['tabs']['fullNameTabs'][] = array(
@@ -686,9 +703,12 @@ class BimpSignature extends BimpObject
                             'anchorXOffset' => BimpTools::getArrayValueFromPath($signature_params, 'nom/x', 0),
                             'anchorYOffset' => BimpTools::getArrayValueFromPath($signature_params, 'nom/y', 0),
                             'fontSize'      => $font_size,
+                            'required'      => (bool) BimpTools::getArrayValueFromPath($signature_params, 'fonction/req', true),
+                            'height'        => BimpTools::getArrayValueFromPath($signature_params, 'nom/h', 14),
+                            'width'         => BimpTools::getArrayValueFromPath($signature_params, 'nom/w', 60)
                         );
                     }
-                    
+
                     if (isset($signature_params['fonction'])) {
                         $params['tabs']['titleTabs'] = array();
                         $params['tabs']['titleTabs'][] = array(
@@ -697,6 +717,9 @@ class BimpSignature extends BimpObject
                             'anchorXOffset' => BimpTools::getArrayValueFromPath($signature_params, 'fonction/x', 0),
                             'anchorYOffset' => BimpTools::getArrayValueFromPath($signature_params, 'fonction/y', 0),
                             'fontSize'      => $font_size,
+                            'required'      => (bool) BimpTools::getArrayValueFromPath($signature_params, 'fonction/req', true),
+                            'height'        => BimpTools::getArrayValueFromPath($signature_params, 'fonction/h', 14),
+                            'width'         => BimpTools::getArrayValueFromPath($signature_params, 'fonction/w', 60)
                         );
                     }
 

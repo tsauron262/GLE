@@ -513,6 +513,10 @@ class BF_Demande extends BimpObject
                     return 0;
                 }
 
+                if ((int) $this->getData('id_facture_fourn_rev') && (int) $this->getData('id_facture_cli_rev')) {
+                    $errors[] = 'Les 2 factures de revente ont déjà été créées';
+                    return 0;
+                }
                 return 1;
         }
 

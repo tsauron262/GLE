@@ -137,3 +137,23 @@ params:
         label: ID Conditions de réglement par défaut pour les factures client financeur
         cat: factures
         required: 1
+        
+    fac_fourn_rev_def_id_mode_reglement:
+        label: ID Mode de réglement par défaut pour les factures fournisseur de rachat
+        cat: factures
+        required: 1
+    
+    fac_fourn_rev_def_id_cond_reglement: 
+        label: ID Conditions de réglement par défaut pour les factures fournisseur de rachat
+        cat: factures
+        required: 1
+        
+    fac_cli_rev_def_id_mode_reglement:
+        label: ID Mode de réglement par défaut pour les factures client de revente
+        cat: factures
+        required: 1
+    
+    fac_cli_rev_def_id_cond_reglement: 
+        label: ID Conditions de réglement par défaut pour les factures client de revente
+        cat: factures
+        required: 1

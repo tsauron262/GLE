@@ -2153,7 +2153,6 @@ class BimpObject extends BimpCache
         }
 
         $use_db_transactions = (int) BimpCore::getConf('use_db_transactions') && !(int) $this->getConf('no_transaction_db', 0, false, 'bool');
-        ;
 
         if ($use_db_transactions) {
             $instance->db->db->begin();

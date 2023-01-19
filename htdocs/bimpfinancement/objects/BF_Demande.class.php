@@ -151,7 +151,6 @@ class BF_Demande extends BimpObject
             case 'periodicity':
             case 'mode_calcul':
             case 'vr_achat':
-            case 'vr_vente':
                 if ((int) $this->getData('devis_status') >= self::DOC_ACCEPTED) {
                     return 0;
                 }
@@ -159,6 +158,18 @@ class BF_Demande extends BimpObject
 
             case 'formule':
                 if ((int) $this->getData('contrat_status') >= self::DOC_ACCEPTED) {
+                    return 0;
+                }
+                return 1;
+
+            case 'vr_vente':
+                if ((int) $this->getData('id_facture_cli_rev')) {
+                    return 0;
+                }
+                return 1;
+
+            case 'total_rachat_ht':
+                if ((int) $this->getData('id_facture_fourn_rev')) {
                     return 0;
                 }
                 return 1;
@@ -177,14 +188,6 @@ class BF_Demande extends BimpObject
         }
 
         return 1;
-    }
-
-    public function showDemandesRefinanceurs()
-    {
-        if ($this->isLoaded() && (int) $this->getData('status') > 0) {
-            return 1;
-        }
-        return 0;
     }
 
     public function areDemandesRefinanceursEditable(&$errors = array())
@@ -474,6 +477,11 @@ class BF_Demande extends BimpObject
                 return 1;
 
             case 'createFactures':
+                if ((int) $this->getData('no_fac_fourn') && (int) $this->getData('no_fac_fin')) {
+                    $errors[] = 'Les factures ont déjà été établies hors ERP';
+                    return 0;
+                }
+
                 $contrat_status = (int) $this->getData('contrat_status');
                 if ($contrat_status < 20 || $contrat_status >= 30) {
                     $errors[] = 'Le contrat de location n\'est pas encore signé';
@@ -488,6 +496,25 @@ class BF_Demande extends BimpObject
                 $missing_serials = $this->getMissingSerials();
                 if ($missing_serials['total'] > 0) {
                     $errors[] = $missing_serials['total'] . 'n° de série absent(s)';
+                    return 0;
+                }
+                return 1;
+
+            case 'forceFinContrat':
+                if ((int) $this->getData('status') !== self::STATUS_VALIDATED) {
+                    $errors[] = 'Cette demande de location n\'est pas au statut "' . self::$status_list[self::STATUS_VALIDATED]['label'] . '"';
+                    return 0;
+                }
+                return 1;
+
+            case 'createFacturesRevente':
+                if ((int) $this->getData('contrat_status') !== self::DOC_ACCEPTED) {
+                    $errors[] = 'Le contrat n\'est pas accepté';
+                    return 0;
+                }
+
+                if ((int) $this->getData('id_facture_fourn_rev') && (int) $this->getData('id_facture_cli_rev')) {
+                    $errors[] = 'Les 2 factures de revente ont déjà été créées';
                     return 0;
                 }
                 return 1;
@@ -573,6 +600,11 @@ class BF_Demande extends BimpObject
         return (int) ($this->getData('id_facture_fourn') || $this->getData('id_facture_fin'));
     }
 
+    public function hasFactureRevente()
+    {
+        return (int) ($this->getData('id_facture_fourn_rev') || $this->getData('id_facture_cli_rev'));
+    }
+
     public function isMergeable(&$errors = array())
     {
         if (!$this->isLoaded($errors)) {
@@ -593,6 +625,22 @@ class BF_Demande extends BimpObject
             return 0;
         }
         return 1;
+    }
+
+    public function showDemandesRefinanceurs()
+    {
+        if ($this->isLoaded() && (int) $this->getData('status') > 0) {
+            return 1;
+        }
+        return 0;
+    }
+
+    public function showRevente()
+    {
+        if ($this->isLoaded() && (int) $this->getData('contrat_status') === self::DOC_ACCEPTED) {
+            return 1;
+        }
+        return 0;
     }
 
     // Getters Params: 
@@ -794,6 +842,25 @@ class BF_Demande extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('forceFinContrat') && $this->canSetAction('forceFinContrat')) {
+            $buttons[] = array(
+                'label'   => 'Forcer fin de contrat',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('forceFinContrat', array(), array(
+                    'form_name' => 'force_fin_contrat'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('createFacturesRevente') && $this->canSetAction('createFacturesRevente')) {
+            $buttons[] = array(
+                'label'   => 'Créer factures revente',
+                'icon'    => 'fas_file-invoice-dollar',
+                'onclick' => $this->getJsActionOnclick('createFacturesRevente', array(), array(
+                    'form_name' => 'factures_revente'
+                ))
+            );
+        }
         return $buttons;
     }
 
@@ -1035,6 +1102,12 @@ class BF_Demande extends BimpObject
         }
 
         return array();
+    }
+
+    public function getRefinanceursArray($include_empty = true, $active_only = true)
+    {
+        BimpObject::loadClass('bimpfinancement', 'BF_DemandeRefinanceur');
+        return BF_DemandeRefinanceur::getRefinanceursArray($include_empty, $active_only);
     }
 
     // Getters montants:
@@ -1465,6 +1538,87 @@ class BF_Demande extends BimpObject
                                 }
                                 return $id;
                             }
+                    }
+                }
+                return 0;
+
+            // Factures de revente: 
+            case 'fac_fourn_rev_id_fourn':
+                $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+                if ($id_refin) {
+                    $refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Refinanceur', $id_refin);
+                    if (BimpObject::objectLoaded($refin)) {
+                        return (int) $refin->getData('id_societe');
+                    }
+                }
+                return 0;
+
+            case 'fac_fourn_rev_libelle':
+                return 'Rachat fin de contrat de location n° ' . str_replace('DF', '', $this->getRef());
+
+            case 'fac_fourn_rev_id_mode_reglement':
+            case 'fac_fourn_rev_id_cond_reglement':
+                $id_fourn = BimpTools::getPostFieldValue('fac_fourn_rev_id_fourn', 0);
+                if ($id_fourn) {
+                    $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_fourn);
+                    if (BimpObject::objectLoaded($fourn)) {
+                        $id = 0;
+                        switch ($field_name) {
+                            case 'fac_fourn_rev_id_mode_reglement':
+                                $id = (int) $fourn->getData('mode_reglement_supplier');
+                                if (!$id) {
+                                    $id = (int) BimpCore::getConf('fac_fourn_rev_def_id_mode_reglement', null, 'bimpfinancement');
+                                }
+                                break;
+
+                            case 'fac_fourn_rev_id_cond_reglement':
+                                $id = (int) $fourn->getData('cond_reglement_supplier');
+                                if (!$id) {
+                                    $id = (int) BimpCore::getConf('fac_fourn_rev_def_id_cond_reglement', null, 'bimpfinancement');
+                                }
+                                break;
+                        }
+                        return $id;
+                    }
+                }
+                return 0;
+
+            case 'fac_cli_rev_id_client':
+                if ((int) $this->getData('id_main_source')) {
+                    $source = $this->getSource();
+                    if (BimpObject::objectLoaded($source)) {
+                        return (int) BimpCore::getConf('id_fourn_' . $source->getData('type'), null, 'bimpfinancement');
+                    }
+                    return 0;
+                }
+                return (int) $this->getData('id_client');
+
+            case 'fac_cli_rev_libelle':
+                return 'Revente fin de contrat de location n° ' . str_replace('DF', '', $this->getRef());
+
+            case 'fac_cli_rev_id_mode_reglement':
+            case 'fac_cli_rev_id_cond_reglement':
+                $id_client = BimpTools::getPostFieldValue('fac_cli_rev_id_client', 0);
+                if ($id_client) {
+                    $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_client);
+                    if (BimpObject::objectLoaded($client)) {
+                        $id = 0;
+                        switch ($field_name) {
+                            case 'fac_cli_rev_id_mode_reglement':
+                                $id = (int) $client->getData('mode_reglement');
+                                if (!$id) {
+                                    $id = (int) BimpCore::getConf('fac_cli_rev_def_id_mode_reglement', null, 'bimpfinancement');
+                                }
+                                break;
+
+                            case 'fac_cli_rev_id_cond_reglement':
+                                $id = (int) $client->getData('cond_reglement');
+                                if (!$id) {
+                                    $id = (int) BimpCore::getConf('fac_cli_rev_def_id_cond_reglement', null, 'bimpfinancement');
+                                }
+                                break;
+                        }
+                        return $id;
                     }
                 }
                 return 0;
@@ -1965,6 +2119,17 @@ class BF_Demande extends BimpObject
             }
         }
 
+        if ((int) $this->getData('id_facture_fourn')) {
+            $fac = $this->getChildObject('facture_fourn');
+            if (BimpObject::objectLoaded($fac)) {
+                $factures_buttons[] = array(
+                    'label'   => 'Facture fournisseur',
+                    'icon'    => 'fas_file-invoice-dollar',
+                    'onclick' => 'window.open(\'' . $fac->getUrl() . '\');'
+                );
+            }
+        }
+
         if ((int) $this->getData('id_facture_fin')) {
             $fac = $this->getChildObject('facture_fin');
             if (BimpObject::objectLoaded($fac)) {
@@ -1976,11 +2141,22 @@ class BF_Demande extends BimpObject
             }
         }
 
-        if ((int) $this->getData('id_facture_fourn')) {
-            $fac = $this->getChildObject('facture_fourn');
+        if ((int) $this->getData('id_facture_fourn_rev')) {
+            $fac = $this->getChildObject('facture_fourn_rev');
             if (BimpObject::objectLoaded($fac)) {
                 $factures_buttons[] = array(
-                    'label'   => 'Facture fournisseur',
+                    'label'   => 'Facture fourn rachat',
+                    'icon'    => 'fas_file-invoice-dollar',
+                    'onclick' => 'window.open(\'' . $fac->getUrl() . '\');'
+                );
+            }
+        }
+
+        if ((int) $this->getData('id_facture_cli_rev')) {
+            $fac = $this->getChildObject('facture_cli_rev');
+            if (BimpObject::objectLoaded($fac)) {
+                $factures_buttons[] = array(
+                    'label'   => 'Facture client revente',
                     'icon'    => 'fas_file-invoice-dollar',
                     'onclick' => 'window.open(\'' . $fac->getUrl() . '\');'
                 );
@@ -2833,8 +3009,10 @@ class BF_Demande extends BimpObject
     public function renderCreateFacFournToggleInput()
     {
         $html = '';
-
-        if ((int) $this->getData('id_facture_fourn')) {
+        if ((int) $this->getData('no_fac_fourn')) {
+            $html .= BimpRender::renderAlerts('La facture fournisseur a été indiquée comme ayant été créée hors ERP', 'warning');
+            $html .= '<input type="hidden" value="0" name="create_fac_fourn"/>';
+        } elseif ((int) $this->getData('id_facture_fourn')) {
             $html .= BimpRender::renderAlerts('La facture fournisseur a déjà été créée', 'warning');
             $html .= '<input type="hidden" value="0" name="create_fac_fourn"/>';
         } else {
@@ -2848,11 +3026,42 @@ class BF_Demande extends BimpObject
     {
         $html = '';
 
-        if ((int) $this->getData('id_facture_fin')) {
+        if ((int) $this->getData('no_fac_fin')) {
+            $html .= BimpRender::renderAlerts('La facture client pour le financeur a été indiquée comme ayant été créée hors ERP', 'warning');
+            $html .= '<input type="hidden" value="0" name="create_fac_fourn"/>';
+        } elseif ((int) $this->getData('id_facture_fin')) {
             $html .= BimpRender::renderAlerts('La facture client pour le financeur a déjà été créée', 'warning');
             $html .= '<input type="hidden" value="0" name="create_fac_fin"/>';
         } else {
             $html .= BimpInput::renderInput('toggle', 'create_fac_fin', 1);
+        }
+
+        return $html;
+    }
+
+    public function renderCreateFacFournReventeToggleInput()
+    {
+        $html = '';
+
+        if ((int) $this->getData('id_facture_fourn_rev')) {
+            $html .= BimpRender::renderAlerts('La facture fournisseur revente a déjà été créée', 'warning');
+            $html .= '<input type="hidden" value="0" name="create_fac_fourn_rev"/>';
+        } else {
+            $html .= BimpInput::renderInput('toggle', 'create_fac_fourn_rev', 1);
+        }
+
+        return $html;
+    }
+
+    public function renderCreateFacCliReventeToggleInput()
+    {
+        $html = '';
+
+        if ((int) $this->getData('id_facture_cli_rev')) {
+            $html .= BimpRender::renderAlerts('La facture client de revente a déjà été créée', 'warning');
+            $html .= '<input type="hidden" value="0" name="create_fac_cli_rev"/>';
+        } else {
+            $html .= BimpInput::renderInput('toggle', 'create_fac_cli_rev', 1);
         }
 
         return $html;
@@ -3635,15 +3844,15 @@ class BF_Demande extends BimpObject
         return $errors;
     }
 
-    protected function addBimpCommObjectLines($bimpcomm, $total_attendu = 0)
+    protected function addBimpCommObjectLines($bimpcomm, $total_attendu_ht = 0)
     {
         $errors = array();
 
         $lines = $this->getLines();
 
         $pourcentage = 1;
-        if ($total_attendu) {
-            $pourcentage = $total_attendu / $this->getTotalDemandeHT();
+        if ($total_attendu_ht) {
+            $pourcentage = $total_attendu_ht / $this->getTotalDemandeHT();
         }
 
         foreach ($lines as $line) {
@@ -3719,6 +3928,138 @@ class BF_Demande extends BimpObject
 
             if (!count($errors)) {
                 $this->addObjectLog(static::getDocTypeLabel($doc_type) . ' forcé au statut "Signé"', strtoupper($doc_type) . '_FORCED_SIGNED');
+            }
+        }
+
+        return $errors;
+    }
+
+    public function createFactureFournRevente($id_fourn = 0, $id_mode_reglement = 0, $id_cond_reglement = 0, $ref_supplier = '', $libelle = '', &$warnings = array())
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        $total_rachat_ht = (float) $this->getData('total_rachat_ht');
+
+        if (!$total_rachat_ht) {
+            $errors[] = 'Total Rachat HT non défini';
+            return $errors;
+        }
+
+        $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+        if (!$id_refin) {
+            $errors[] = 'Aucune demande refinanceur sélectionnée';
+            return $errors;
+        }
+
+        $refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Refinanceur', $id_refin);
+        if (!BimpObject::objectLoaded($refin)) {
+            $errors[] = 'Le refinanceur #' . $id_refin . ' n\'existe pas';
+            return $errors;
+        }
+
+        if (!$id_fourn) {
+            $id_fourn = (int) $refin->getData('id_societe');
+        }
+
+        if (!(int) $id_fourn) {
+            $errors[] = 'Fournisseur absent';
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $id_fourn);
+        if (!BimpObject::objectLoaded($fourn)) {
+            $errors[] = 'Le fournisseur #' . $id_fourn . ' n\'existe pas';
+            return $errors;
+        }
+
+        $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_FactureFourn', array(
+                    'libelle'           => $libelle,
+                    'ref_supplier'      => $ref_supplier,
+                    'fk_soc'            => $fourn->id,
+                    'fk_mode_reglement' => $id_mode_reglement,
+                    'fk_cond_reglement' => $id_cond_reglement,
+                    'datef'             => date('Y-m-d')
+                        ), true, $errors, $warnings);
+
+        if (!BimpObject::objectLoaded($facture) && empty($errors)) {
+            $errors[] = 'Echec de la création de la facture fournisseur de rachat pour une raison inconnue';
+        }
+
+        if (!count($errors)) {
+            $lines_errors = $this->addBimpCommObjectLines($facture, $total_rachat_ht);
+
+            if (count($lines_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture fournisseur');
+            }
+        }
+
+        if (!count($errors)) {
+            $this->updateField('id_facture_fourn_rev', $facture->id);
+        }
+
+        return $errors;
+    }
+
+    public function createFactureCliRevente($id_client = 0, $libelle = '', $id_mode_reglement = 0, $id_cond_reglement = 0, &$warnings = array())
+    {
+        $errors = array();
+
+        if (!$id_client) {
+            $errors[] = 'Aucun client sélectionné';
+            return $errors;
+        }
+
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+        if (!BimpObject::objectLoaded($client)) {
+            $errors[] = 'Le client #' . $id_client . ' n\'existe pas';
+            return $errors;
+        }
+
+        $prix_cession_ht = (float) $this->getSelectedDemandeRefinanceurData('prix_cession_ht');
+
+        if (!$prix_cession_ht) {
+            $errors[] = 'Prix de cession total HT non défini pour la demande refinanceur sélectionnée';
+        }
+
+        $vr_vente = (float) $this->getData('vr_vente');
+
+        if (!$vr_vente) {
+            $errors[] = 'VR vente absente';
+        }
+
+        if (!count($errors)) {
+            $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+                        'libelle'           => $libelle,
+                        'fk_soc'            => $client->id,
+                        'model_pdf'         => 'bimpfact',
+                        'type'              => 0,
+                        'fk_mode_reglement' => (int) $id_mode_reglement,
+                        'fk_cond_reglement' => (int) $id_cond_reglement,
+                        'datef'             => date('Y-m-d')
+                            ), true, $errors, $warnings);
+
+            if (!BimpObject::objectLoaded($facture) && empty($errors)) {
+                $errors[] = 'Echec de la création de la facture pour une raison inconnue';
+            }
+
+            if (!count($errors)) {
+                $total_attendu_ht = $prix_cession_ht * $vr_vente / 100;
+                $lines_errors = $this->addBimpCommObjectLines($facture, $total_attendu_ht);
+
+                if (count($lines_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture');
+                }
+            }
+
+            if (!count($errors)) {
+                $this->updateField('id_facture_cli_rev', $facture->id);
             }
         }
 
@@ -4511,84 +4852,306 @@ class BF_Demande extends BimpObject
         $sc = '';
 
 //        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions', null);
-//        if ($use_db_transactions) {
-//            $this->db->db->commit();
-//        }
+        $use_db_transactions = 0;
+        if ($use_db_transactions) {
+            $this->db->db->commit();
+        }
 
         if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fourn', 0)) {
-//            if ($use_db_transactions) {
-//                $this->db->db->begin();
-//            }
-
-            $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fourn_libelle', '');
-            $ref_supplier = BimpTools::getArrayValueFromPath($data, 'fac_fourn_ref_supplier', '');
-            $id_fourn = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_fourn', 0);
-            $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_mode_reglement', 0);
-            $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_cond_reglement', 0);
-
-            $fac_errors = $this->createFactureFournisseur($id_fourn, $id_mode_reglement, $id_cond_reglement, $ref_supplier, $libelle, $warnings);
-
-            if (count($fac_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture fournisseur');
-
-//                if ($use_db_transactions) {
-//                    $this->db->db->rollback();
-//                }
+            if ((int) $this->getData('id_facture_fourn')) {
+                $errors[] = 'La facture fournisseur a déjà été créée';
             } else {
-//                if ($use_db_transactions) {
-//                    $this->db->db->commit();
-//                }
+                if ($use_db_transactions) {
+                    $this->db->db->begin();
+                }
 
-                $success = 'Facture fournisseur créée avec succès';
+                $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fourn_libelle', '');
+                $ref_supplier = BimpTools::getArrayValueFromPath($data, 'fac_fourn_ref_supplier', '');
+                $id_fourn = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_fourn', 0);
+                $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_mode_reglement', 0);
+                $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_id_cond_reglement', 0);
 
-                $fac = $this->getChildObject('facture_fourn');
-                if (BimpObject::objectLoaded($fac)) {
-                    $url = $fac->getUrl();
-                    if ($url) {
-                        $sc .= 'window.open(\'' . $url . '\');';
+                $fac_errors = $this->createFactureFournisseur($id_fourn, $id_mode_reglement, $id_cond_reglement, $ref_supplier, $libelle, $warnings);
+
+                if (count($fac_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture fournisseur');
+
+                    if ($use_db_transactions) {
+                        $this->db->db->rollback();
+                    }
+                } else {
+                    if ($use_db_transactions) {
+                        $this->db->db->commit();
+                    }
+
+                    $success = 'Facture fournisseur créée avec succès';
+
+                    $fac = $this->getChildObject('facture_fourn');
+                    if (BimpObject::objectLoaded($fac)) {
+                        $url = $fac->getUrl();
+                        if ($url) {
+                            $sc .= 'window.open(\'' . $url . '\');';
+                        }
                     }
                 }
             }
         }
 
         if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fin', 0)) {
-//            if ($use_db_transactions) {
-//                $this->db->db->begin();
-//            }
-
-            $id_client = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_client', 0);
-            $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fin_libelle', '');
-            $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_mode_reglement', 0);
-            $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_cond_reglement', 0);
-
-            $fac_errors = $this->createFactureFin($id_client, $libelle, $id_mode_reglement, $id_cond_reglement, $warnings);
-
-            if (count($fac_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture client');
-
-//                if ($use_db_transactions) {
-//                    $this->db->db->rollback();
-//                }
+            if ((int) $this->getData('id_facture_fin')) {
+                $errors[] = 'La facture financeur a déjà été créée';
             } else {
-//                if ($use_db_transactions) {
-//                    $this->db->db->commit();
-//                }
+                if ($use_db_transactions) {
+                    $this->db->db->begin();
+                }
 
-                $success = 'Facture client créée avec succès';
+                $id_client = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_client', 0);
+                $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fin_libelle', '');
+                $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_mode_reglement', 0);
+                $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fin_id_cond_reglement', 0);
 
-                $fac = $this->getChildObject('facture_fin');
-                if (BimpObject::objectLoaded($fac)) {
-                    $url = $fac->getUrl();
-                    if ($url) {
-                        $sc .= 'window.open(\'' . $url . '\');';
+                $fac_errors = $this->createFactureFin($id_client, $libelle, $id_mode_reglement, $id_cond_reglement, $warnings);
+
+                if (count($fac_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture client');
+
+                    if ($use_db_transactions) {
+                        $this->db->db->rollback();
+                    }
+                } else {
+                    if ($use_db_transactions) {
+                        $this->db->db->commit();
+                    }
+
+                    $success = 'Facture client créée avec succès';
+
+                    $fac = $this->getChildObject('facture_fin');
+                    if (BimpObject::objectLoaded($fac)) {
+                        $url = $fac->getUrl();
+                        if ($url) {
+                            $sc .= 'window.open(\'' . $url . '\');';
+                        }
                     }
                 }
             }
         }
 
-//        if ($use_db_transactions) {
-//            $this->db->db->begin();
-//        }
+        if ($use_db_transactions) {
+            $this->db->db->begin();
+        }
+
+        $this->checkIsClosed();
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
+    public function actionForceFinContrat($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $date_loyer = BimpTools::getArrayValueFromPath($data, 'date_loyer', '');
+        if (!$date_loyer) {
+            $errors[] = 'Date de mise en loyer non spécifiée';
+        }
+
+        $id_refinanceur = (int) BimpTools::getArrayValueFromPath($data, 'id_refinanceur', 0);
+        $factures = BimpTools::getArrayValueFromPath($data, 'factures', array());
+        $prix_cession = (float) BimpTools::getArrayValueFromPath($data, 'prix_cession_ht', 0);
+
+        if (!$prix_cession) {
+            $errors[] = 'Prix de cession non spécifié';
+        }
+
+        if (!$id_refinanceur) {
+            $errors[] = 'Aucun refinanceur sélectionné';
+        }
+
+        if (!count($errors)) {
+            $df = BimpCache::findBimpObjectInstance('bimpfinancement', 'BF_DemandeRefinanceur', array(
+                        'id_demande'     => $this->id,
+                        'id_refinanceur' => $id_refinanceur
+                            ), true);
+
+            if (!BimpObject::objectLoaded($df)) {
+                BimpObject::loadClass('bimpfinancement', 'BF_Refinanceur');
+                $df = BimpObject::createBimpObject('bimpfinancement', 'BF_DemandeRefinanceur', array(
+                            'id_demande'      => $this->id,
+                            'id_refinanceur'  => $id_refinanceur,
+                            'status'          => BF_DemandeRefinanceur::STATUS_SELECTIONNEE,
+                            'qty'             => $this->getNbLoyers(),
+                            'periodicity'     => $this->getData('periodicity'),
+                            'rate'            => BF_Refinanceur::getTauxMoyen($this->getTotalDemandeHT()),
+                            'prix_cession_ht' => $prix_cession
+                                ), true, $errors);
+            }
+
+            if (BimpObject::objectLoaded($df)) {
+                $df->updateField('prix_cession_ht', $prix_cession);
+                $df->updateField('status', BF_DemandeRefinanceur::STATUS_SELECTIONNEE);
+            }
+
+            $up_errors = $this->validateArray(array(
+                'date_loyer'   => $date_loyer,
+                'status'       => self::STATUS_ACCEPTED,
+                'no_fac_fourn' => (in_array('fac_fourn', $factures) ? 1 : 0),
+                'no_fac_fin'   => (in_array('fac_fin', $factures) ? 1 : 0),
+            ));
+
+            if (!count($up_errors)) {
+                $up_errors = $this->update($warnings, true);
+
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec mise à jour des données de la demande de location');
+                } else {
+                    if ((int) $this->getData('devis_status') !== self::DOC_ACCEPTED) {
+                        $err = $this->forceDocSigned('devis');
+
+                        if (count($err)) {
+                            $warnings[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la mise au statut signé du devis');
+                        }
+                    }
+                    if ((int) $this->getData('contrat_status') !== self::DOC_ACCEPTED) {
+                        $err = $this->forceDocSigned('contrat');
+
+                        if (count($err)) {
+                            $warnings[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la mise au statut signé du contrat');
+                        }
+                    }
+                    if ((int) $this->getData('pvr_status') !== self::DOC_ACCEPTED) {
+                        $err = $this->forceDocSigned('pvr');
+
+                        if (count($err)) {
+                            $warnings[] = BimpTools::getMsgFromArray($err, 'Erreurs lors de la mise au statut signé du PVR');
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCreateFacturesRevente($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = '';
+
+//        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions', null);
+        $use_db_transactions = 0;
+        if ($use_db_transactions) {
+            $this->db->db->commit();
+        }
+
+        $total_rachat_ht = BimpTools::getArrayValueFromPath($data, 'total_rachat_ht', 0);
+        $vr_vente = BimpTools::getArrayValueFromPath($data, 'vr_vente', 0);
+
+        if (!$total_rachat_ht) {
+            $errors[] = 'Total rachat HT non défini';
+        } elseif ($total_rachat_ht !== (float) $this->getData('total_rachat_ht')) {
+            $this->updateField('total_rachat_ht', $total_rachat_ht);
+        }
+
+        if (!$vr_vente) {
+            $errors[] = 'VR Vente non défini';
+        } elseif ($vr_vente !== (float) $this->getData('vr_vente')) {
+            $this->updateField('vr_vente', $vr_vente);
+        }
+
+        if (!count($errors)) {
+            if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_fourn_rev', 0)) {
+                if ((int) $this->getData('id_facture_fourn_rev')) {
+                    $errors[] = 'La facture fournisseur de rachat existe déjà';
+                } else {
+                    if ($use_db_transactions) {
+                        $this->db->db->begin();
+                    }
+
+                    $libelle = BimpTools::getArrayValueFromPath($data, 'fac_fourn_rev_libelle', '');
+                    $ref_supplier = BimpTools::getArrayValueFromPath($data, 'fac_fourn_rev_ref_supplier', '');
+                    $id_fourn = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_rev_id_fourn', 0);
+                    $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_rev_id_mode_reglement', 0);
+                    $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_fourn_rev_id_cond_reglement', 0);
+
+                    $fac_errors = $this->createFactureFournRevente($id_fourn, $id_mode_reglement, $id_cond_reglement, $ref_supplier, $libelle, $warnings);
+
+                    if (count($fac_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture fournisseur de rachat');
+
+                        if ($use_db_transactions) {
+                            $this->db->db->rollback();
+                        }
+                    } else {
+                        if ($use_db_transactions) {
+                            $this->db->db->commit();
+                        }
+
+                        $success = 'Facture fournisseur de rachat créée avec succès';
+
+                        $fac = $this->getChildObject('facture_fourn_rev');
+                        if (BimpObject::objectLoaded($fac)) {
+                            $url = $fac->getUrl();
+                            if ($url) {
+                                $sc .= 'window.open(\'' . $url . '\');';
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ((int) BimpTools::getArrayValueFromPath($data, 'create_fac_cli_rev', 0)) {
+                if ((int) $this->getData('id_facture_cli_rev')) {
+                    $errors[] = 'La facture client de revente existe déjà';
+                } else {
+                    if ($use_db_transactions) {
+                        $this->db->db->begin();
+                    }
+
+                    $id_client = (int) BimpTools::getArrayValueFromPath($data, 'fac_cli_rev_id_client', 0);
+                    $libelle = BimpTools::getArrayValueFromPath($data, 'fac_cli_rev_libelle', '');
+                    $id_mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_cli_rev_id_mode_reglement', 0);
+                    $id_cond_reglement = (int) BimpTools::getArrayValueFromPath($data, 'fac_cli_rev_id_cond_reglement', 0);
+
+                    $fac_errors = $this->createFactureCliRevente($id_client, $libelle, $id_mode_reglement, $id_cond_reglement, $warnings);
+
+                    if (count($fac_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture client de revente');
+
+                        if ($use_db_transactions) {
+                            $this->db->db->rollback();
+                        }
+                    } else {
+                        if ($use_db_transactions) {
+                            $this->db->db->commit();
+                        }
+
+                        $success = 'Facture client créée avec succès';
+
+                        $fac = $this->getChildObject('facture_fin');
+                        if (BimpObject::objectLoaded($fac)) {
+                            $url = $fac->getUrl();
+                            if ($url) {
+                                $sc .= 'window.open(\'' . $url . '\');';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($use_db_transactions) {
+            $this->db->db->begin();
+        }
 
         $this->checkIsClosed();
 

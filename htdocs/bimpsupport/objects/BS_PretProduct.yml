@@ -18,8 +18,6 @@ fields:
         type: id_object
         object: product
         required: 1
-        input: 
-            type: search_product
             
     qty: 
         label: Quantité
@@ -29,6 +27,12 @@ fields:
         max: none
         default_value: 1
         
+forms: 
+    add: 
+        rows: 
+            - field: id_product
+              card: default
+            - field: qty
 lists: 
     default: 
         title: Produits prêtés
@@ -44,8 +48,8 @@ lists:
         delete_btn: 1
         update_btn: 1
         edit_btn: 1
-        add_object_row: 1
+        add_form_name: add
         cols: 
-            product: 
+            id_product: 
             qty: 
                 edit: 1

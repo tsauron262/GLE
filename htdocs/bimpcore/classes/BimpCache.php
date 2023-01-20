@@ -626,9 +626,9 @@ class BimpCache
                         $obj_module = $matches[1];
                         $obj_name = $matches[2];
 
-//                        if ($obj_name !== 'BS_SAV') {
-//                            continue;
-//                        }
+                        if ($obj_name !== 'BS_SAV') {
+                            continue;
+                        }
                         $obj = BimpObject::getInstance($obj_module, $obj_name);
                         foreach ($obj->config->getParams('objects') as $child_name => $child_params) {
                             if (isset($child_params['instance']['bimp_object']) && !empty($child_params['instance']['bimp_object'])) {

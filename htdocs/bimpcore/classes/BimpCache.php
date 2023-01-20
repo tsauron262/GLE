@@ -627,7 +627,7 @@ class BimpCache
                         $obj_name = $matches[2];
 
                         if ($obj_name !== 'BS_SAV') {
-                            continue;
+//                            continue;
                         }
                         $obj = BimpObject::getInstance($obj_module, $obj_name);
                         foreach ($obj->config->getParams('objects') as $child_name => $child_params) {
@@ -1071,6 +1071,17 @@ class BimpCache
                         !preg_match('/^bimp(.+)$/', $f)) {
                     continue;
                 }
+                
+                if(!self::isModuleActif($f)){
+                    global $conf;
+                    $name = 'MAIN_MODULE_'.strtoupper($f);
+                    if(isset($conf->global->$name))
+                        BimpCore::setConf ('module_version_'.$f, '1');
+                    else
+                        continue;
+                }
+                
+//                echo $f.'<br/>';
 
 
                 if (file_exists(DOL_DOCUMENT_ROOT . '/' . $f . '/objects') && is_dir(DOL_DOCUMENT_ROOT . '/' . $f . '/objects')) {
@@ -1344,7 +1355,7 @@ class BimpCache
                     continue;
                 }
 
-                if ($active_only && $file !== 'bimpcore' && !(float) BimpCore::getConf('module_version_' . $file, 0)) {
+                if ($active_only && !self::isModuleActif($file)) {
                     continue;
                 }
 
@@ -1353,6 +1364,12 @@ class BimpCache
         }
 
         return self::getCacheArray($cache_key, $include_empty, $empty_value, ($empty_label ? $empty_label : $empty_value));
+    }
+    
+    public static function isModuleActif($moduleName){
+        if($moduleName == 'bimpcore')
+            return 1;
+        return (float) BimpCore::getConf('module_version_' . $moduleName, 0);
     }
 
     public static function getBimpModuleObjectsArray($module, $include_empty = false, $empty_value = '', $empty_label = '')

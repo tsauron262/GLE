@@ -1377,36 +1377,40 @@ class Bimp_Client extends Bimp_Societe
         $tabs = array();
 
         // Propales
-        $tabs[] = array(
-            'id'            => 'client_propales_list_tab',
-            'title'         => BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Propositions commerciales',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_propales_list_tab .nav_tab_ajax_result\')', array('propales'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('propale'))
+            $tabs[] = array(
+                'id'            => 'client_propales_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Propositions commerciales',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_propales_list_tab .nav_tab_ajax_result\')', array('propales'), array('button' => ''))
+            ); 
 
         // Commandes client
-        $tabs[] = array(
-            'id'            => 'client_commandes_list_tab',
-            'title'         => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Commandes',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_commandes_list_tab .nav_tab_ajax_result\')', array('commandes'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('commande'))
+            $tabs[] = array(
+                'id'            => 'client_commandes_list_tab',
+                'title'         => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Commandes',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_commandes_list_tab .nav_tab_ajax_result\')', array('commandes'), array('button' => ''))
+            );
 
         // Livraisons
-        $tabs[] = array(
-            'id'            => 'client_shipments_list_tab',
-            'title'         => BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_shipments_list_tab .nav_tab_ajax_result\')', array('shipments'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('commande')&& $this->isModuleActif('bimplogistique'))
+            $tabs[] = array(
+                'id'            => 'client_shipments_list_tab',
+                'title'         => BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_shipments_list_tab .nav_tab_ajax_result\')', array('shipments'), array('button' => ''))
+            );
 
         // Factures
-        $tabs[] = array(
-            'id'            => 'client_factures_list_tab',
-            'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('facture'))
+            $tabs[] = array(
+                'id'            => 'client_factures_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
+            ); 
             
         // Contrats
         if($this->isModuleActif('bimpcontract'))
@@ -1418,20 +1422,22 @@ class Bimp_Client extends Bimp_Societe
             );
 
         // Avoirs client: 
-        $tabs[] = array(
-            'id'            => 'client_remises_except_list_tab',
-            'title'         => BimpRender::renderIcon('fas_money-check-alt', 'iconLeft') . 'Avoirs client',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_remises_except_list_tab .nav_tab_ajax_result\')', array('remises_except'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('facture'))
+            $tabs[] = array(
+                'id'            => 'client_remises_except_list_tab',
+                'title'         => BimpRender::renderIcon('fas_money-check-alt', 'iconLeft') . 'Avoirs client',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_remises_except_list_tab .nav_tab_ajax_result\')', array('remises_except'), array('button' => ''))
+            );
 
-        // Paiements non identifiés: 
-        $tabs[] = array(
-            'id'            => 'client_paiements_inc_list_tab',
-            'title'         => BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Paiements non identifiés',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_paiements_inc_list_tab .nav_tab_ajax_result\')', array('paiements_inc'), array('button' => ''))
-        );
+        // Paiements non identifiés:
+        if($this->isDolModuleActif('facture')) 
+            $tabs[] = array(
+                'id'            => 'client_paiements_inc_list_tab',
+                'title'         => BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Paiements non identifiés',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_paiements_inc_list_tab .nav_tab_ajax_result\')', array('paiements_inc'), array('button' => ''))
+            );
 
         // Relances paiements: 
         $tabs[] = array(

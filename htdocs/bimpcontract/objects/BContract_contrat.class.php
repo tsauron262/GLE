@@ -1505,7 +1505,7 @@ class BContract_contrat extends BimpDolObject
         if ($facture_delivred) {
             foreach ($facture_delivred as $link) {
                 $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
-                if (/* $instance->getData('type') == 0 */1)
+                if ( $instance->getData('type') != 3)
                     $montant += $instance->getData('total');
             }
             $return = $this->getTotalContrat() - $montant;

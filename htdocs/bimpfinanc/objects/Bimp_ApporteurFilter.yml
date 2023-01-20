@@ -39,7 +39,7 @@ fields:
         label: Sur marge
         type: bool
     contact_apporteur:
-        label: Contact Apporteur configuré
+        label: Contact Apporteur à enregistrer sur les factures clients
         type: bool
         default_value: 1
     

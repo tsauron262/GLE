@@ -1357,7 +1357,7 @@ class Bimp_Client extends Bimp_Societe
         
         require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
         $api = BimpAPI::getApiInstance('atradius');
-        if($api && $api->getData('active')){
+        if($api && $api->isApiOk()){
             $tabs[] = array(
                 'id'            => 'client_atradius_list_tab',
                 'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',

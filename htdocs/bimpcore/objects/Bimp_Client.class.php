@@ -1346,12 +1346,13 @@ class Bimp_Client extends Bimp_Societe
         }
 
         // Evénements: 
-        $tabs[] = array(
-            'id'            => 'client_events_list_tab',
-            'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_events_list_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('agenda'))
+            $tabs[] = array(
+                'id'            => 'client_events_list_tab',
+                'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_events_list_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
+            ); 
 
         // Atradius: 
         

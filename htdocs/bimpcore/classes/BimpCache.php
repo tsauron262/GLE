@@ -1144,6 +1144,15 @@ class BimpCache
                         !preg_match('/^bimp(.+)$/', $module)) {
                     continue;
                 }
+                
+                if(!self::isModuleActif($module)){
+                    global $conf;
+                    $name = 'MAIN_MODULE_'.strtoupper($module);
+                    if(isset($conf->global->$name))
+                        BimpCore::setConf ('module_version_'.$module, '1');
+                    else
+                        continue;
+                }
 
 
                 if (file_exists(DOL_DOCUMENT_ROOT . '/' . $module . '/objects') && is_dir(DOL_DOCUMENT_ROOT . '/' . $module . '/objects')) {

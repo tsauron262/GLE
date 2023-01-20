@@ -34,7 +34,7 @@ function getAllDuplicate(limit, s_min, s_name, s_email, s_address, s_zip, s_town
     doing_request = true;
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
+        url: DOL_URL_ROOT + "/bimpremoveduplicatev2/interface.php",
         data: {
             limit: limit,
             s_min: s_min,
@@ -142,7 +142,7 @@ function displayProgress(limit) {
     setTimeout(function () {
         $.ajax({
             type: "POST",
-            url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
+            url: DOL_URL_ROOT + "/bimpremoveduplicatev2/interface.php",
             data: {
                 action: 'get_progress'
             },
@@ -164,7 +164,7 @@ function mergeDuplicates(src_to_dest, ids_processed) {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
+        url: DOL_URL_ROOT + "/bimpremoveduplicatev2/interface.php",
         data: {
             action: 'merge_duplicates',
             src_to_dest: src_to_dest,
@@ -195,7 +195,7 @@ function initDuplicate() {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
+        url: DOL_URL_ROOT + "/bimpremoveduplicatev2/interface.php",
         data: {
             action: 'init_duplicate'
         },
@@ -238,7 +238,7 @@ function setAsProcessed(id) {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
+        url: DOL_URL_ROOT + "/bimpremoveduplicatev2/interface.php",
         data: {
             action: 'set_as_processed',
             id: id

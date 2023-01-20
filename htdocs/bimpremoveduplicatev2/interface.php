@@ -11,7 +11,7 @@ if ($_POST['action'] == 'get_progress') {
 }
 
 require '../main.inc.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpremovev2duplicate/class/BimpRemoveDuplicateV2.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpremoveduplicatev2/class/BimpRemoveDuplicateV2.class.php';
 $rd = new BimpRemoveDuplicateCustomerV2($db);
 session_start();
 

@@ -21,8 +21,8 @@
  */
 
 /**
- * 	\file       htdocs/bimpremovev2duplicate/class/BimpRemoveDuplicate.class.php
- * 	\ingroup    bimpremovev2duplicate
+ * 	\file       htdocs/bimpremoveduplicatev2/class/BimpRemoveDuplicate.class.php
+ * 	\ingroup    bimpremoveduplicatev2
  * 	\brief      Chose 
  */
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';

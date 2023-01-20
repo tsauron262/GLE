@@ -3149,7 +3149,16 @@ class BimpObject extends BimpCache
                     if ($this->field_exists($field_name)) {
                         $sqlKey = $this->getFieldSqlKey($field_name, $main_alias, null, $extra_filters, $joins);
                     } else {
-                        $sqlKey = $field;
+                        /*todo a verifier*/
+                        $tabTmp = explode(':', $field_name);
+                        if(isset($tabTmp[1])){
+                            $child = $tabTmp[0];
+                            $field_name = $tabTmp[1];
+                            $sqlKey = $this->getFieldSqlKey($field_name, $main_alias, $child, $extra_filters, $joins);
+                        }
+                        else
+                            /*todo fin a verifier*/
+                            $sqlKey = $field;
                     }
                 }
 

@@ -1326,20 +1326,24 @@ class Bimp_Client extends Bimp_Societe
         );
 
         // Utilisateurs: 
-        $tabs[] = array(
-            'id'            => 'client_users_list_tab',
-            'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Utilisateurs',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_users_list_tab .nav_tab_ajax_result\')', array('client_users'), array('button' => ''))
-        );
+        if($this->isModuleActif('bimpinterfaceclient')){
+            $tabs[] = array(
+                'id'            => 'client_users_list_tab',
+                'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Utilisateurs',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_users_list_tab .nav_tab_ajax_result\')', array('client_users'), array('button' => ''))
+            );
+        }
 
         // Equipements: 
-        $tabs[] = array(
-            'id'            => 'client_equipments_list_tab',
-            'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Equipements',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_equipments_list_tab .nav_tab_ajax_result\')', array('equipments'), array('button' => ''))
-        );
+        if($this->isModuleActif('bimpequipment')){
+            $tabs[] = array(
+                'id'            => 'client_equipments_list_tab',
+                'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Equipements',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_equipments_list_tab .nav_tab_ajax_result\')', array('equipments'), array('button' => ''))
+            );
+        }
 
         // Evénements: 
         $tabs[] = array(
@@ -1350,12 +1354,17 @@ class Bimp_Client extends Bimp_Societe
         );
 
         // Atradius: 
-        $tabs[] = array(
-            'id'            => 'client_atradius_list_tab',
-            'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
-        );
+        
+        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+        $api = BimpAPI::getApiInstance('atradius');
+        if($api && $api->getData('active')){
+            $tabs[] = array(
+                'id'            => 'client_atradius_list_tab',
+                'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
+            );
+        }
 
         $html = BimpRender::renderNavTabs($tabs, 'card_view');
         $html .= $this->renderNotesList();

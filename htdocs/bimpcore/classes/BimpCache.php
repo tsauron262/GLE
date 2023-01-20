@@ -620,15 +620,15 @@ class BimpCache
                     }
                 }
 
-                // Objets liés parents:
+                // Objets liés dont ont est le parent:
                 foreach (self::getBimpObjectsArray(false, false, false, false) as $obj_data => $obj_label) {
                     if (preg_match('/^(.+)\-(.+)$/', $obj_data, $matches)) {
                         $obj_module = $matches[1];
                         $obj_name = $matches[2];
 
-                        if ($obj_name !== 'BS_SAV') {
+//                        if ($obj_name !== 'BS_SAV') {
 //                            continue;
-                        }
+//                        }
                         $obj = BimpObject::getInstance($obj_module, $obj_name);
                         foreach ($obj->config->getParams('objects') as $child_name => $child_params) {
                             if (isset($child_params['instance']['bimp_object']) && !empty($child_params['instance']['bimp_object'])) {
@@ -1073,9 +1073,7 @@ class BimpCache
                 }
                 
                 if(!self::isModuleActif($f)){
-                    global $conf;
-                    $name = 'MAIN_MODULE_'.strtoupper($f);
-                    if(isset($conf->global->$name))
+                    if(self::isDolModuleActif($f))
                         BimpCore::setConf ('module_version_'.$f, '1');
                     else
                         continue;
@@ -1146,9 +1144,7 @@ class BimpCache
                 }
                 
                 if(!self::isModuleActif($module)){
-                    global $conf;
-                    $name = 'MAIN_MODULE_'.strtoupper($module);
-                    if(isset($conf->global->$name))
+                    if(self::isDolModuleActif($module))
                         BimpCore::setConf ('module_version_'.$module, '1');
                     else
                         continue;
@@ -1379,6 +1375,14 @@ class BimpCache
         if($moduleName == 'bimpcore')
             return 1;
         return (float) BimpCore::getConf('module_version_' . $moduleName, 0);
+    }
+    
+    public static function isDolModuleActif($moduleName){
+        global $conf;
+        $name = 'MAIN_MODULE_'.strtoupper($moduleName);
+        if(isset($conf->global->$name))
+            return 1;
+        return 0;
     }
 
     public static function getBimpModuleObjectsArray($module, $include_empty = false, $empty_value = '', $empty_label = '')

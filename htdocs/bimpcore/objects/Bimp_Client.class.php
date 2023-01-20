@@ -1407,14 +1407,15 @@ class Bimp_Client extends Bimp_Societe
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
         );
-
+            
         // Contrats
-        $tabs[] = array(
-            'id'            => 'client_contrats_list_tab',
-            'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
-        );
+        if($this->isModuleActif('bimpcontract'))
+            $tabs[] = array(
+                'id'            => 'client_contrats_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
+            );
 
         // Avoirs client: 
         $tabs[] = array(

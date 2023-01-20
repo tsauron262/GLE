@@ -22,12 +22,16 @@ while($ln = $db->fetch_object($sql)){
         $bimpfile = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_bimpfile);
         $date_file = filemtime($bimpfile->getFilePath());
         
-        if(0 < (int) $date_file)
-            echo $client->getNomUrl() . " date depot ICBA devient " . BimpTools::printDate($date_file) . '<br/>';
-        else
-            echo $client->getNomUrl() . ' date du fichier introuvale<br/>';
+        if(0 < (int) $date_file) {
+            echo $client->getNomUrl() . " date depot ICBA devient " . date('Y-m-d H:i:s', $date_file) . '<br/>';
+            $client->updateField('date_depot_icba', date('Y-m-d H:i:s', $date_file));
+        } else {
+            echo $client->getNomUrl() . ' date du fichier introuvale, on passe l\'encours ICBA à 0<br/>';
+            $client->updateField('outstanding_limit_icba', 0);
+        }
     } else {
         echo $client->getNomUrl() . ' pas de fichier ICBA, on passe l\'encours ICBA à 0<br/>';
+        $client->updateField('outstanding_limit_icba', 0);
     }
 }
 

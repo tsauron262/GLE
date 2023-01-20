@@ -421,7 +421,7 @@ class BContract_echeancier extends BimpObject
         }
         if ($parent->useEntrepot())
             $instance->set('entrepot', $parent->getData('entrepot'));
-        $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
+        $instance->set('fk_cond_reglement', ($parent->getData('condregl')) ? $parent->getData('condregl') : 2);
         $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
         $instance->set('datef', date('Y-m-d H:i:s'));
         $instance->set('ef_type', $ef_type);

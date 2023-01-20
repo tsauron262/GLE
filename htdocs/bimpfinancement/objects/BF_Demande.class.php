@@ -513,6 +513,10 @@ class BF_Demande extends BimpObject
                     return 0;
                 }
 
+                if ((int) $this->getData('id_facture_fourn_rev') && (int) $this->getData('id_facture_cli_rev')) {
+                    $errors[] = 'Les 2 factures de revente ont déjà été créées';
+                    return 0;
+                }
                 return 1;
         }
 
@@ -3431,7 +3435,17 @@ class BF_Demande extends BimpObject
                     $signataires_data = '';
                     switch ($doc_type) {
                         case 'contrat':
-                            $signataires_data = json_encode($this->getData('contrat_signataires_data'));
+                            $signataires_data = $this->getData('contrat_signataires_data');
+                            if (!BimpTools::getArrayValueFromPath($signataires_data, 'cessionnaire/nom', '')) {
+                                $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+                                if ($id_refin) {
+                                    $refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Refinanceur', $id_refin);
+                                    if (BimpObject::objectLoaded($refin)) {
+                                        
+                                    }
+                                }
+                            }
+                            $signataires_data = json_encode($signataires_data);
                             break;
 
                         case 'pvr':
@@ -4316,24 +4330,16 @@ class BF_Demande extends BimpObject
                     'fonction' => $loueur_data['qualite']
                 ),
                 'cessionnaire' => array(
-                    'nom'      => $cessionnaire_data['nom'],
-                    'email'    => $cessionnaire_email,
-                    'fonction' => $cessionnaire_data['qualite']
+                    'raison_social' => $cessionnaire_data['raison_social'],
+                    'nom'           => $cessionnaire_data['nom'],
+                    'email'         => $cessionnaire_email,
+                    'fonction'      => $cessionnaire_data['qualite']
                 )
             ));
             if ($this->isDemandeValid($errors)) {
                 global $db;
                 $files_dir = $this->getFilesDir();
-                $ref = $this->getRef();
 
-//            // PDF Consignes: 
-//            $file_name = 'consignes_' . $ref . '.pdf';
-//
-//            require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ConsignesContratFinancementPDF.php';
-//            $pdf = new ConsignesContratFinancementPDF($db, $this);
-//            if (!$pdf->render($files_dir . $file_name, 'F')) {
-//                $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF des consignes client');
-//            }
                 // PDF contrat de location: 
                 $file_name = $this->getSignatureDocFileName('contrat');
                 require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';

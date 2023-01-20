@@ -1873,7 +1873,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         // Mise à jour des extra_fields: 
         if ($this->dol_object->insertExtraFields('', $user) <= 0) {
-            $errors[] = 'Echec de la mise à jour des champs supplémentaires';
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour des champs supplémentaires');
         }
 
         $this->dol_object->fetch($this->id);

@@ -8,7 +8,7 @@ require_once __DIR__ . '/../Bimp_Lib.php';
 
 
 $sql = $db->query("SELECT rowid FROM `llx_societe` WHERE `outstanding_limit_icba` = '7000' AND date_depot_icba is null");
-echo '<pre>';
+echo 'Débbut du script: <br/><br/>';
 while($ln = $db->fetch_object($sql)){
     $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $ln->rowid);
     $files = $client->getFilesArray();

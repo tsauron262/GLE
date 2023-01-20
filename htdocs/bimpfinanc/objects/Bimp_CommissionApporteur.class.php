@@ -275,12 +275,13 @@ class Bimp_CommissionApporteur extends BimpObject
         }
 
         $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
-                            'type'     => ObjectLine::LINE_FREE,
+                            'type'     => ObjectLine::LINE_PRODUCT,
                             'id_obj'   => (int) $new_facture->getData('id'),
                             'editable' => 0,
         )));
 
         $new_line->pu_ht = $amount;
+        $new_line->id_product = 55918;
         $new_line->qty = $line->qty;
         $new_line->desc = $old_fac_parent->getRef() . " " . $label;
         $new_line->tva_tx = 20;

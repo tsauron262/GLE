@@ -26,17 +26,27 @@ class BimpClientForDol extends Bimp_Client
         $days += 365; // Valable 1 an
         $date_limit_expire = new DateTime();
         $date_limit_expire->modify('-' . $days . ' day');
+        
+        $now = dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S');
 
         $filters = array(
             'date_depot_icba' => array(
                 'and' => array(
                     array(
                         'operator' => '<',
-                        'value'    => $date_limit_expire->format('Y-m-d H:i:s')
+                        'value'    => $now
                     ),
                     'IS_NOT_NULL'
                 )
-            )
+            ),
+            'outstanding_limit_icba' => array(
+                'and' => array(
+                    array(
+                        'operator' => '>',
+                        'value'    => 0
+                    ),
+                )
+            ),
         );
 
         $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', $filters);
@@ -49,23 +59,30 @@ class BimpClientForDol extends Bimp_Client
         $nb_rappels = 0;
 
         if (!empty($clients)) {
-
-            if (!BimpObject::loadClass('bimpcore', 'BimpNote'))
-                $this->addError("Erreur lors du chargement de la classe BimpNote");
+            BimpObject::loadClass('bimpcore', 'BimpNote');
 
             foreach ($clients as $c) {
+                $date_validite = new DateTime($c->getData('date_depot_icba'));
+                $date_validite->add(new DateInterval('P1Y'));
+                $msg = "L'encours ICBA pour ce client ";
+                $msg .= " n'est valable que jusqu'au " . $date_validite->format("d/m/Y");
+                $msg .= "<br/>Son encours ICBA a été réinitialisé";
 
-                $date_validite_atra = new DateTime($c->getData('date_depot_icba'));
-                $date_validite_atra->add(new DateInterval('P1Y'));
-                $msg = "L'encours ICBA pour le client " . $c->getData('code_client') . ' ' . $c->getData('nom');
-                $msg .= " n'est valable que jusqu'au " . $date_validite_atra->format("d/m/Y");
-                $msg .= "<br/>Il convient de le renouveler avant cette date";
-
-                $this->addError(implode('', $c->addNote($msg,
-                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                                                        BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
-
-                $this->output .= $msg . '<br/>';
+                // Commercial
+                $commercial = $c->getCommercial();
+//                $this->addError(implode('', $c->addNote($msg,
+//                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+//                                                        BimpNote::BN_DEST_USER, 0, (int) $commercial->getData('id'))));
+//
+//                // Groupe Atradius
+//                $this->addError(implode('', $c->addNote($msg,
+//                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+//                                                        BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
+//
+//                $c->updateField('outstanding_limit_icba', 0);
+                
+                $this->output .= 'Note envoyé à ' . (int) $commercial->getData('id') . ' et ' . BimpCore::getUserGroupId('atradius');
+                $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';
                 $nb_rappels++;
             }
         }
@@ -153,7 +170,8 @@ class BimpClientForDol extends Bimp_Client
 
     private function addError($error_msg)
     {
-        $this->output .= '<br/><strong style="color: red">' . $error_msg . '</strong>';
+        if($error_msg != '')
+            $this->output .= '<br/><strong style="color: red">' . $error_msg . '</strong>';
     }
 
     // Vérifie si les demandes en cours (vérification manuelle) ont été traité

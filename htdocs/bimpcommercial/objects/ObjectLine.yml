@@ -288,7 +288,7 @@ forms:
                 field: hide_in_pdf
             pa_ht: 
                 custom: 1
-                label: Prix d'achat
+                label: Prix d'achat HT
                 input_name: pa_ht
                 data_type: money
                 content: 

@@ -1877,6 +1877,10 @@ class BimpObject extends BimpCache
         if ($this->field_exists($field)) {
             $data_type = $this->getConf('fields/' . $field . '/type', 'string');
             switch ($data_type) {
+                case 'id_object':
+                    if ($value == 0)
+                        $value = null;
+                    break;
                 case 'date':
                 case 'time':
                 case 'datetime':
@@ -1933,6 +1937,12 @@ class BimpObject extends BimpCache
 
     public function getDefaultTva()
     {
+        $idDef = $this->getTaxeIdDefault();
+        if ($idDef) {
+            return self::getBdb()->getValue('c_tva', 'taux', '`rowid` = ' . $idDef);
+        }
+
+
         global $mysoc;
         // If France, show VAT mention if not applicable
         if ($mysoc->tva_assuj)
@@ -2145,7 +2155,6 @@ class BimpObject extends BimpCache
         }
 
         $use_db_transactions = (int) BimpCore::getConf('use_db_transactions') && !(int) $this->getConf('no_transaction_db', 0, false, 'bool');
-        ;
 
         if ($use_db_transactions) {
             $instance->db->db->begin();
@@ -2599,6 +2608,9 @@ class BimpObject extends BimpCache
         }
 
         if ($type) {
+            if ($type == 'id_object' && $value == 0 && $this->isDolObject())
+                $value = null;
+
             // Ajustement du format des dates dans le cas des objets Dolibarr:
             if ($this->isDolField($field)) {
                 if (in_array($type, array('datetime', 'date'/* , 'time' */))) {
@@ -5635,8 +5647,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if ((int) $this->params['force_extrafields_update']) {
                 foreach ($this->dol_object->array_options as $key => $value) {
                     if ($this->dol_field_exists(str_replace('options_', '', $key))) {
-                        if ($this->dol_object->updateExtraField(str_replace('options_', '', $key), null, null) <= 0) {
-                            $warnings[] = 'Echec de l\'enregistrement de l\'attribut supplémentaire "' . str_replace('options_', '', $key) . '"';
+                        if ($this->dol_object->updateExtraField(str_replace('options_', '', $key), null, null) < 0) {
+                            $warnings[] = 'Echec de l\'enregistrement de l\'attribut supplémentaire "' . str_replace('options_', '', $key);
                         }
                     }
                 }
@@ -8123,7 +8135,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
     public function getJsActionOnclick($action, $data = array(), $params = array())
     {
         $options = '';
-    
+
         if (isset($params['form_name']) && $params['form_name']) {
             $options .= 'form_name: \'' . $params['form_name'] . '\'';
         }

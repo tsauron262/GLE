@@ -718,7 +718,6 @@ class ValidComm extends BimpObject
 
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
         foreach ($demandes as $d) {
-//            $d->db->db = $this->db2;
             $now = date('Y-m-d H:i:s');
             $d->updateField('id_user_valid', $id_user);
             $d->updateField('date_valid', $now);

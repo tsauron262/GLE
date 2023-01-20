@@ -53,7 +53,6 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     {
         if (!count($this->errors)) {
             if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
-
                 if (isset($this->object->array_options['options_pdf_hide_price'])) {
                     $this->hidePrice = true;
                     if ($this->typeObject != 'invoice')
@@ -120,14 +119,15 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                             $this->fromCompany->address = $entrepot->address;
                             $this->fromCompany->town = $entrepot->town;
 
-                            if ($this->fromCompany->name == "Bimp Groupe Olys")
-                                $this->fromCompany->name = "Bimp Olys SAS";
+                            if (BimpCore::isEntity('bimp')) {
+                                if ($this->fromCompany->name == "Bimp Groupe Olys")
+                                    $this->fromCompany->name = "Bimp Olys SAS";
 
-                            if ($entrepot->ref == "PR") {//patch new adresse
-//                                $this->fromCompany->fromCompany->zip = "69760";
-                                $this->fromCompany->address = "2 rue des Erables CS 21055  ";
-                                $this->fromCompany->town = "LIMONEST";
-                                $this->fromCompany->zip = "69760";
+                                if ($entrepot->ref == "PR") {
+                                    $this->fromCompany->address = "2 rue des Erables CS 21055  ";
+                                    $this->fromCompany->town = "LIMONEST";
+                                    $this->fromCompany->zip = "69760";
+                                }
                             }
                         }
                     }

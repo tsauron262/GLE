@@ -19,7 +19,6 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
-
 /**
   \class      pdf_panier_babel
   \brief      Classe permettant de generer les paniers au modele babel
@@ -72,6 +71,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
 
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -120,10 +120,10 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         if (!is_null($sav)) {
             $ref = sanitize_string($sav->getData('ref'));
         } else {
-            $ref = $pret->getRef();
+            $ref = ''; //$pret->getRef();
         }
 
-        $dir = DOL_DATA_ROOT . "/bimpcore/sav/" . (!is_null($sav)? $sav->id : 'no') . '/';
+        $dir = DOL_DATA_ROOT . "/bimpcore/sav/" . (!is_null($sav) ? $sav->id : 'no') . '/';
 
         if (!file_exists($dir)) {
             if (dol_mkdir($dir) < 0) {
@@ -132,7 +132,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             }
         }
 
-        $file = $dir . "Pret-" . $ref . "-" . $pret->getData('ref') . ".pdf";
+        $file = $dir . "Pret-" . ($ref ? $ref . '-' : '') . $pret->getData('ref') . ".pdf";
 
         if (file_exists($dir)) {
             $pdf = "";
@@ -148,7 +148,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                 $pdf1->setPrintHeader(false);
                 $pdf1->setPrintFooter(false);
             }
-            
+
             $pdf->SetAutoPageBreak(1, 0);
 //                if (class_exists('TCPDF')) {
 //                    $pdf->setPrintHeader(false);
@@ -395,7 +395,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                 $pdf->SetXY(25, 188.8);
                 $pdf->MultiCell(45, 4, $client->dol_object->getFullName($outputlangs), 0, 'C');
             }
-            
+
             $pdf->SetXY(4, 259);
             $pdf->MultiCell(200, 30, $pret->getData('note'), 0, 'L');
 
@@ -505,7 +505,6 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 2);
         $pdf->SetTextColor(0, 0, 60);
 
-
         if (!is_null($client) && $client->code_client) {
             $posy += 5;
             $pdf->SetXY($posx, $posy);
@@ -564,8 +563,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                     $socname = $client->nom;
                 $carac_client_name = $outputlangs->convToOutputCharset($socname);
                 $carac_client = pdf_build_address($outputlangs, $this->emetteur, $client, $contact->dol_object, 1, 'target');
-            }
-            else {
+            } else {
                 $carac_client_name = $outputlangs->convToOutputCharset($client->nom);
                 $carac_client = pdf_build_address($outputlangs, $this->emetteur, $client, '', 0, 'target');
             }
@@ -596,12 +594,9 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             $pdf->SetXY($posx + 2, $posy + 4 + (dol_nboflines_bis($carac_client_name, 50) * 4));
             $pdf->MultiCell($widthrecbox, 4, $carac_client, 0, 'L');
 
-
-
             $pdf->Rect($this->marge_gauche - 3, 89, $largCadre, 185);
             $pdf->SetXY($this->marge_gauche, 92);
-        }
-        else {
+        } else {
             $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 10);
             //Société
             if ($this->marge_gauche > 45) {

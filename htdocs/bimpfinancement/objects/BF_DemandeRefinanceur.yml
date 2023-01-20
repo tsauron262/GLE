@@ -60,13 +60,13 @@ fields:
     rate:
         label: Taux de cession annuel
         type: percent
+        decimals: 8
         depends_on: id_refinanceur
             
     qty: 
         label: Nombre de périodes
         type: qty
         min: 0
-        default_value: 0
         decimals: 0
         
     payment:
@@ -86,6 +86,14 @@ fields:
         input:
             rows: 3
             auto_expand: 1
+            
+    prix_cession_ht: 
+        label: Prix de cession total HT
+        type: money
+        default_value: 0
+        
+    num_accord: 
+        label: N° d'accord
 
 forms: 
     default: 
@@ -109,8 +117,10 @@ forms:
             - field: periodicity
             - field: qty
             - field: rate
-#            - field: amount_ht
+            - field: prix_cession_ht
+            - field: num_accord
             - field: comment
+            
              
     demande_done: 
         rows: 
@@ -130,8 +140,8 @@ forms:
             - field: periodicity
             - field: qty
             - field: rate
-#            - field: amount_ht
-            - field: payment
+            - field: prix_cession_ht
+            - field: num_accord
             - field: comment
 
     accepted: 
@@ -165,6 +175,8 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - field: prix_cession_ht
+            - field: num_accord
             - field: comment
             
     refused: 
@@ -197,8 +209,10 @@ fields_tables:
               edit: 1
             - field: rate
               edit: 1
-#            - field: payment
-#              edit: 1
+            - field: prix_cession_ht
+              edit: 1
+            - field: num_accord
+              edit: 1
             - field: comment
               edit: 1
               
@@ -263,6 +277,10 @@ lists:
             rate: 
                 edit: 1
             loyer_mensuel_ht: 
+            prix_cession_ht:
+              edit: 1
+            num_accord: 
+              edit: 1
             comment: 
             
             

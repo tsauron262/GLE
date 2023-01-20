@@ -92,6 +92,24 @@ objects:
             id_object: 
                 field_value: id_facture_fin
     
+    facture_fourn: 
+        extends: facture_fourn
+        instance: 
+            id_object: 
+                field_value: id_facture_fourn
+                
+    facture_fourn_rev: 
+        extends: facture_fourn
+        instance: 
+            id_object: 
+                field_value: id_facture_fourn_rev
+                
+    facture_cli_rev: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: id_facture_cli_rev
+    
     sources: 
         relation: hasMany
         delete: 1
@@ -338,7 +356,7 @@ fields:
         label: Taux de cession annuel
         type: percent
         default_value: 0
-        decimals: 3
+        decimals: 8
         input: 
             extra_content: 
                 callback: 
@@ -415,6 +433,7 @@ fields:
     loyer_mensuel_evo_ht: 
         label: Loyer mensuel HT (form. évo) 
         type: money
+        decimals: 3
         default_value: 0
         input: 
             extra_content: 
@@ -426,6 +445,7 @@ fields:
     loyer_mensuel_dyn_ht: 
         label: Loyer mensuel HT (form. dyn) 
         type: money
+        decimals: 3
         default_value: 0
         input: 
             extra_content: 
@@ -437,6 +457,7 @@ fields:
     loyer_mensuel_suppl_ht: 
         label: Loyer mensuel HT suppl. (form. dyn) 
         type: money
+        decimals: 3
         default_value: 0
         input: 
             extra_content: 
@@ -497,9 +518,42 @@ fields:
         label: Facture financeur
         type: id_object
         object: facture_fin
-        default_value: 0        
+        default_value: 0      
         
-forms: 
+    merged_demandes: 
+        label: IDs des Demandes fusionnées
+        type: items_list
+        items_data_type: id
+        items_braces: 1
+        
+    no_fac_fourn: 
+        label: Pas de facture fournisseur
+        type: bool
+        default_value: 0
+        
+    no_fac_fin: 
+        label: Pas de facture financeur
+        type: bool
+        default_value: 0
+        
+    id_facture_fourn_rev: 
+        label: Facture fournisseur de rachat
+        type: id_object
+        object: facture_fourn_rev
+        default_value: 0
+        
+    id_facture_cli_rev: 
+        label: Facture client de revente
+        type: id_object
+        object: facture_cli_rev
+        default_value: 0
+        
+    total_rachat_ht: 
+        label: Total rachat HT
+        type: money
+        default_value: 0
+        
+forms:
     default: 
         rows: 
             resp: 
@@ -721,13 +775,25 @@ forms:
                   field_name: client_is_company
                   show_values: 1
             - custom: 1
+              label: Enregistré à L'INSEE
+              input_name: client_insee
+              input: 
+                  type: toggle
+              value: 0
+              display_if: 
+                  field_name: client_is_company
+                  show_values: 1
+            - custom: 1
               label: Ville d'enregistrement au RCS
               input_name: client_rcs
               input: 
                   type: text
               display_if: 
-                  field_name: client_is_company
-                  show_values: 1              
+                  fields_names: client_is_company,client_insee
+                  client_is_company: 
+                      show_values: 1
+                  client_insee: 
+                      hide_values: 1
             - custom: 1
               label: adresse / siège (si pro)
               input_name: client_address
@@ -931,16 +997,13 @@ forms:
             content: 
                 callback: renderCreateFacFournToggleInput
           - custom: 1
-            show: 
-                field_value: 
-                    field_name: id_main_source
-                    not: 1
             label: Fournisseur
             input_name: fac_fourn_id_fourn
             data_type: id_object
             object: fournisseur
             input: 
                 type: search_object
+                card: default
             display_if: 
                 field_name: create_fac_fourn
                 show_values: 1
@@ -964,11 +1027,6 @@ forms:
             label: Mode de réglement
             input_name: fac_fourn_id_mode_reglement
             data_type: id
-            value: 
-                conf: 
-                    name: fac_fourn_def_id_mode_reglement
-                    module: bimpfinancement
-                    is_int: 1
             input: 
                 type: select
                 options: 
@@ -984,11 +1042,6 @@ forms:
             label: Conditions de réglement
             input_name: fac_fourn_id_cond_reglement
             data_type: id
-            value: 
-                conf: 
-                    name: fac_fourn_def_id_cond_reglement
-                    module: bimpfinancement
-                    is_int: 1
             input: 
                 type: select
                 options: 
@@ -1004,6 +1057,17 @@ forms:
             content: 
                 callback: renderCreateFacFinToggleInput
           - custom: 1
+            label: Client
+            input_name: fac_fin_id_client
+            data_type: id_object
+            object: client
+            input: 
+                type: search_object
+                card: default
+            display_if: 
+                field_name: create_fac_fin
+                show_values: 1
+          - custom: 1
             label: Libellé
             input_name: fac_fin_libelle
             input: 
@@ -1015,11 +1079,6 @@ forms:
             label: Mode de réglement
             input_name: fac_fin_id_mode_reglement
             data_type: id
-            value: 
-                conf: 
-                    name: fac_fin_def_id_mode_reglement
-                    module: bimpfinancement
-                    is_int: 1
             input: 
                 type: select
                 options: 
@@ -1035,11 +1094,6 @@ forms:
             label: Conditions de réglement
             input_name: fac_fin_id_cond_reglement
             data_type: id
-            value: 
-                conf: 
-                    name: fac_fin_def_id_cond_reglement
-                    module: bimpfinancement
-                    is_int: 1
             input: 
                 type: select
                 options: 
@@ -1048,6 +1102,160 @@ forms:
                 field_name: create_fac_fin
                 show_values: 1
                 
+    force_fin_contrat: 
+        rows: 
+            - field: date_loyer
+              required: 1
+            - custom: 1
+              label: Refinanceur
+              input_name: id_refinanceur
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      callback: getRefinanceursArray
+              required: 1
+            - custom: 1
+              label: Factures
+              input_name: factures
+              input: 
+                  type: check_list
+                  items: 
+                      fac_fourn: Facture fournisseur déjà établie
+                      fac_fin: Facture financeur déjà établie
+              value: fac_fourn,fac_fin
+            - custom: 1
+              label: Prix de cession total HT
+              input_name: prix_cession_ht
+              required: 1
+              data_type: money
+              input: 
+                  type: text                
+                  
+    factures_revente: 
+        title: Facturation revente
+        msgs: 
+            callback: getFacturesFormMsgs
+        rows:
+          - field: total_rachat_ht
+          - field: vr_vente
+          - title: Facture Fournisseur de rachat au financeur 
+          - custom: 1
+            label: Créer la facture fournisseur
+            input_name: create_fac_fourn_rev
+            data_type: bool
+            content: 
+                callback: renderCreateFacFournReventeToggleInput
+          - custom: 1
+            label: Fournisseur
+            input_name: fac_fourn_rev_id_fourn
+            data_type: id_object
+            object: fournisseur
+            input: 
+                type: search_object
+                card: default
+            display_if: 
+                field_name: create_fac_fourn_rev
+                show_values: 1
+          - custom: 1
+            label: Libellé
+            input_name: fac_fourn_rev_libelle
+            input: 
+                type: text
+            display_if: 
+                field_name: create_fac_fourn_rev
+                show_values: 1
+          - custom: 1
+            label: Ref. fournisseur
+            input_name: fac_fourn_rev_ref_supplier
+            input: 
+                type: text
+            display_if: 
+                field_name: create_fac_fourn_rev
+                show_values: 1
+          - custom: 1
+            label: Mode de réglement
+            input_name: fac_fourn_rev_id_mode_reglement
+            data_type: id
+            input: 
+                type: select
+                options: 
+                    callback: 
+                        method: getModeReglementsArray
+                        params: 
+                            - id
+                            - 1
+            display_if: 
+                field_name: create_fac_fourn_rev
+                show_values: 1
+            depends_on: fac_fourn_rev_id_fourn
+          - custom: 1
+            label: Conditions de réglement
+            input_name: fac_fourn_rev_id_cond_reglement
+            data_type: id
+            input: 
+                type: select
+                options: 
+                    callback: getCondReglementsArray
+            display_if: 
+                field_name: create_fac_fourn_rev
+                show_values: 1
+            depends_on: fac_fourn_rev_id_fourn
+          - title: Facture de revente au client
+          - custom: 1
+            label: Créer la facture client de revente
+            input_name: create_fac_cli_rev
+            data_type: bool
+            content: 
+                callback: renderCreateFacCliReventeToggleInput
+          - custom: 1
+            label: Client
+            input_name: fac_cli_rev_id_client
+            data_type: id_object
+            object: client
+            input: 
+                type: search_object
+                card: default
+            display_if: 
+                field_name: create_fac_cli_rev
+                show_values: 1
+          - custom: 1
+            label: Libellé
+            input_name: fac_cli_rev_libelle
+            input: 
+                type: text
+            display_if: 
+                field_name: create_fac_cli_rev
+                show_values: 1
+          - custom: 1
+            label: Mode de réglement
+            input_name: fac_cli_rev_id_mode_reglement
+            data_type: id
+            input: 
+                type: select
+                options: 
+                    callback: 
+                        method: getModeReglementsArray
+                        params: 
+                            - id
+                            - 1
+            display_if: 
+                field_name: create_fac_cli_rev
+                show_values: 1
+            depends_on: fac_cli_rev_id_client
+          - custom: 1
+            label: Conditions de réglement
+            input_name: fac_cli_rev_id_cond_reglement
+            data_type: id
+            input: 
+                type: select
+                options: 
+                    callback: getCondReglementsArray
+            display_if: 
+                field_name: create_fac_cli_rev
+                show_values: 1
+            depends_on: fac_cli_rev_id_client
+                
 fields_tables:
     infos: 
         title: Infos
@@ -1055,6 +1263,8 @@ fields_tables:
         rows: 
             - field: id_user_resp
             - field: date_loyer
+              edit: 1
+            - field: agreement_number
               edit: 1
             - field: id_client
               display: card
@@ -1086,8 +1296,6 @@ fields_tables:
             - field: mode_calcul
               edit: 1 
             - field: vr_achat
-              edit: 1
-            - field: vr_vente
               edit: 1
             - field: marge_souhaitee
               edit: 1
@@ -1146,6 +1354,24 @@ fields_tables:
             - field: id_facture_fourn
               display: card
             - field: id_facture_fin
+              display: card
+    
+    options_revente: 
+        title: Options revente
+        icon: fas_check-square
+        rows: 
+            - field: total_rachat_ht
+              edit: 1
+            - field: vr_vente
+              edit: 1
+              
+    factures_revente: 
+        title: Facturation revente
+        icon: fas_file-invoice-dollar
+        rows: 
+            - field: id_facture_fourn_rev
+              display: card
+            - field: id_facture_cli_rev
               display: card
         
 views:
@@ -1210,6 +1436,25 @@ views:
                   custom: 
                       callback: renderCalcValues
         
+    revente: 
+        panel: 0
+        objects_change_reload: BF_DemandeRefinanceur,BF_Line,BimpSignature
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_md: 6
+                  col_lg: 6
+                  fields_table: 
+                      name: options_revente
+                      
+                - type: fields_table
+                  col_md: 6
+                  col_lg: 6
+                  show: 
+                        callback: hasFactureRevente
+                  fields_table: 
+                      name: factures_revente
+            
 filters_panels: 
     default: 
         filters: 

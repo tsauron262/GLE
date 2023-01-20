@@ -392,29 +392,6 @@ class Bimp_Propal extends Bimp_PropalTemp
         return (int) parent::isActionAllowed($action, $errors);
     }
 
-    public function isNewStatusAllowed($new_status, &$errors = array())
-    {
-        switch ($new_status) {
-            case 2: // Signé / accepté
-                if ((int) $this->getData('fk_statut') !== 1) {
-                    $errors[] = 'Statut actuel doit être "validé' . $this->e() . '"';
-                    return 0;
-                }
-
-                if ((int) BimpCore::getConf('propal_signature_required', null, 'bimpcommercial')) {
-//                    $errors[] = 'Signature du devis obligatoire';
-//                    return 0;
-                }
-
-                if ((int) $this->getData('id_signature') && (int) BimpCore::getConf('propal_use_signatures', null, 'bimpcommercial')) {
-                    $errors[] = 'Utiliser la fiche signature';
-                    return 0;
-                }
-                return 1;
-        }
-        return parent::isNewStatusAllowed($new_status, $errors);
-    }
-
     public function iAmAdminRedirect()
     {
         global $user;

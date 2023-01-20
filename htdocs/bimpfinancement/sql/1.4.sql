@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bf_demande_refinanceur` ADD `num_accord` VARCHAR(255) NOT NULL DEFAULT '';

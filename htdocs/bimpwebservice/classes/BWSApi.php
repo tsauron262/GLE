@@ -217,7 +217,7 @@ class BWSApi
             $this->addError('INTERNAL_ERROR', 'Erreur interne - opération non disponible actuellement');
             return false;
         }
-        
+
         return true;
     }
 
@@ -279,9 +279,15 @@ class BWSApi
                 } else {
                     $required_if_param_name = BimpTools::getArrayValueFromPath($param_def, 'required_if', '');
                     if ($required_if_param_name) {
-                        $required_if_data_type = BimpTools::getArrayValueFromPath(self::$requests, $this->request_name . '/params/' . $required_if_param_name . '/data_type', 'string');
+                        $required_if_param_path = '';
+                        foreach (explode('/', $required_if_param_name) as $p) {
+                            $required_if_param_path .= ($required_if_param_path ? '/sub_params/' : '') . $p;
+                        }
+                        $required_if_data_type = BimpTools::getArrayValueFromPath(self::$requests, $this->request_name . '/params/' . $required_if_param_path . '/data_type', 'string');
                         $required_if_value = $this->getParam($required_if_param_name);
-                        if (is_null($required_if_value) || (in_array($required_if_data_type, BC_Field::$missing_if_empty_types) && empty($required_if_value))) {
+                        if (is_null($required_if_value) ||
+                                (in_array($required_if_data_type, BC_Field::$missing_if_empty_types) && empty($required_if_value)) ||
+                                ($required_if_data_type === 'bool' && (int) $required_if_value)) {
                             $required = true;
                         }
                     }

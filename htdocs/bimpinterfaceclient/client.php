@@ -1,23 +1,24 @@
 <?php
 
-header('x-frame-options: ALLOWALL',false);
+// Todo: test cookie uniquement si on est dans le contexte d'une i-frame (Ajouter un param URL ?) 
+
+header('x-frame-options: ALLOWALL', false);
 define('ALLOW_ALL_IFRAME', true);
 $_REQUEST['bimp_context'] = 'public';
 
+$url = "https://";
+$url .= $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$url = str_replace('nav_not_compatible', 'compatible', $url);
 
-//echo '<pre>';
+
 //print_r($_SERVER);
-//echo '</pre>';
+//die;
 
-$url = "https://";       
-$url.= $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];  
-
-
-if(isset($_REQUEST['nav_not_compatible'])){
-    
-    echo '<h1>Votre navigateur n\'est pas compatible.</h1><h2> <a href="'.$url.'" target="popup">Merci de cliquer ici</a></h2>';
+if (isset($_REQUEST['nav_not_compatible'])) {
+    echo '<h1>Votre navigateur n\'est pas compatible.</h1><h2> <a href="' . $url . '" target="popup">Merci de cliquer ici</a></h2>';
     die;
 }
+
 //if(isset($_SERVER['HTTP_REFERER'])){
 //    $result = parse_url($_SERVER['HTTP_REFERER']);
 //    if(isset($result['host']) && stripos($result['host'],'ldlc.com') !== false){
@@ -37,28 +38,27 @@ if(isset($_REQUEST['nav_not_compatible'])){
 require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-if(!isset($_COOKIE[$sessionname])){
-    setcookie($sessionname, session_id(), array('SameSite' => 'None', 'Secure'=>true));
+if (!isset($_COOKIE[$sessionname])) {
+    setcookie($sessionname, session_id(), array('SameSite' => 'None', 'Secure' => true));
 }
 
 BimpCore::setContext("public");
 
-if(!isset($_REQUEST['ajax'])){
+if (!isset($_REQUEST['ajax'])) {
     echo "<script>function testCookie(){"
     . "setTimeout(function() {"
-        . "if(document.cookie.match('DOLSESSID_')){ "
-        . "}else{ "
-                . "window.open('".$url."', '_blank'); "
-            . "if(window.location.href.indexOf('?') > 0) "
-                . "window.location.href = window.location.href + '&nav_not_compatible=true';"
-            . "else "
-                . "window.location.href = window.location.href + '?nav_not_compatible=true';"
-        . "}"
+    . "if(document.cookie.match('DOLSESSID_') || window.self === window.top){ "
+    . "}else{ "
+    . "window.open('" . $url . "', '_blank'); "
+    . "if(window.location.href.indexOf('?') > 0 || window.location.href.indexOf('/b/') > 0) "
+    . "window.location.href = window.location.href + '&nav_not_compatible=true';"
+    . "else "
+    . "window.location.href = window.location.href + '?nav_not_compatible=true';"
+    . "}"
     . "}, 500)}; "
     . "testCookie();"
     . "</script>";
 }
-
 
 $controllerName = BimpTools::getValue('fc', 'InterfaceClient');
 
@@ -91,6 +91,4 @@ switch ($controllerName) {
 
 $controller = BimpController::getInstance('bimpinterfaceclient', $controllerName);
 $controller->display();
-
-
 ?>

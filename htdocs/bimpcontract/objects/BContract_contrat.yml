@@ -355,7 +355,7 @@ fields:
         type: string
         values:
             array:
-                callback: getSecteursContrat
+                callback: getContratSecteursArray
     current_renouvellement:
         label: Numéro du renouvellement
         type: int

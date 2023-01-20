@@ -280,7 +280,7 @@ forms:
               value:
                   callback:
                       object: contrat
-                      method: showValueSecteurInPropal
+                      method: getValueSecteurInPropal
                       params:
                           0:
                               field_value: ef_type
@@ -289,7 +289,7 @@ forms:
                   options:
                       callback:
                             object: contrat
-                            method: getSecteursContrat
+                            method: getContratSecteursArray
                   
             - custom: 1
               label: Libellé du contrat

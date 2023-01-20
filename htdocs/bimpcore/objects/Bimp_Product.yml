@@ -365,6 +365,16 @@ fields:
         label: Code comptable Vente (Spécifique)
         type: string
         user_edit: 1
+    
+    accountancy_code_sell_intra:
+        label: Code comptable Vente intra (Spécifique)
+        type: string
+        user_edit: 1
+    
+    accountancy_code_sell_export:
+        label: Code comptable Vente export (Spécifique)
+        type: string
+        user_edit: 1
         
     accountancy_code_buy:
         label: Code comptable Achat (Spécifique)
@@ -608,6 +618,8 @@ forms:
             - field: customcode
             - field: accountancy_code_buy
             - field: accountancy_code_sell
+            - field: accountancy_code_sell_intra
+            - field: accountancy_code_sell_export
             - field: price
             - field: tva_tx
             - field: deee
@@ -820,6 +832,8 @@ fields_tables:
             - field: customcode
             - field: accountancy_code_buy
             - field: accountancy_code_sell
+            - field: accountancy_code_sell_intra
+            - field: accountancy_code_sell_export
             - field: description
             - field: note
             - field: url

@@ -111,7 +111,7 @@ class box_bimp_core extends ModeleBoxes
                 else{
                     if(count($this->camenberes)){
                         $htmlGraph = array();
-                        $WIDTH=(count(result['graphs']) >= 2 || ! empty($conf->dol_optimize_smallscreen))?'160':'320';
+                        $WIDTH=(($result['graphs'] && count($result['graphs']) >= 2) || ! empty($conf->dol_optimize_smallscreen))?'160':'320';
                         $HEIGHT='192';
                         $i = 0;
 

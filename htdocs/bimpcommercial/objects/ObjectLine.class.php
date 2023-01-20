@@ -5764,15 +5764,18 @@ class ObjectLine extends BimpObject
     {
         $extra = array();
         if ($this->parent->dol_object->table_element_line != '') {
-            $sql = 'SELECT (a___dol_line___product___product.duree_i * a___dol_line.qty) as tot
-                        FROM ' . MAIN_DB_PREFIX . $this->parent->dol_object->table_element_line . ' a___dol_line
-                        LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product
-                        WHERE a___dol_line.rowid = ' . $this->getData('id_line');
+            $prod = $this->getProduct();
+            if($prod && $prod->isDolExtraField('duree_i')){
+                $sql = 'SELECT (a___dol_line___product___product.duree_i * a___dol_line.qty) as tot
+                            FROM ' . MAIN_DB_PREFIX . $this->parent->dol_object->table_element_line . ' a___dol_line
+                            LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product
+                            WHERE a___dol_line.rowid = ' . $this->getData('id_line');
 
-            $result = $this->db->executeS($sql, 'array');
+                $result = $this->db->executeS($sql, 'array');
 
-            if (!is_null($result)) {
-                $extra['duree_tot'] = $result[0]['tot'];
+                if (!is_null($result)) {
+                    $extra['duree_tot'] = $result[0]['tot'];
+                }
             }
         }
         return $extra;

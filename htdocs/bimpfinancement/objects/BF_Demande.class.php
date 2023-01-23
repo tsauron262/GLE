@@ -1126,6 +1126,16 @@ class BF_Demande extends BimpObject
         $tot = $this->getData('montant_materiels') + (float) $this->getData('montant_services') + (float) $this->getData('montant_logiciels');
         return (float) $tot;
     }
+    
+    public function getTotalDemandeHTOnlyProd()
+    {
+        $totalHt = 0;
+        $lines = $this->getLines('only_prod');
+        foreach($lines as $line){
+            $totalHt += $line->getData('total_ht');
+        }
+        return $totalHt;
+    }
 
     public function getCalcValues($recalculate = false, &$errors = array())
     {
@@ -1654,14 +1664,33 @@ class BF_Demande extends BimpObject
                             $types[] = BF_Line::TYPE_PRODUCT;
                             $types[] = BF_Line::TYPE_FREE;
                             break;
+                        
+                        case 'only_prod':
+                            $filters['or_type_prod'] = array(
+                                'or' => array(
+                                    'free' => array('and_fields' => 
+                                        array(
+                                            'type'         => BF_Line::TYPE_FREE,
+                                            'product_type' => '1'
+                                        )
+                                    ),
+                                    'prod' => array('and_fields' => 
+                                        array(
+                                            'type'         => BF_Line::TYPE_PRODUCT,
+                                            'product:fk_product_type' => '0'
+                                        )
+                                    )
+                                )
+                            );
+                            
+                            break;
+                            
                     }
                 }
 
                 if (is_array($types) && !empty($types)) {
-                    $filters = array(
-                        'type' => array(
-                            'in' => $types
-                        )
+                    $filters['type'] = array(
+                        'in' => $types
                     );
                 }
             }
@@ -3435,7 +3464,17 @@ class BF_Demande extends BimpObject
                     $signataires_data = '';
                     switch ($doc_type) {
                         case 'contrat':
-                            $signataires_data = json_encode($this->getData('contrat_signataires_data'));
+                            $signataires_data = $this->getData('contrat_signataires_data');
+                            if (!BimpTools::getArrayValueFromPath($signataires_data, 'cessionnaire/nom', '')) {
+                                $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+                                if ($id_refin) {
+                                    $refin = BimpCache::getBimpObjectInstance('bimpfinancement', 'BF_Refinanceur', $id_refin);
+                                    if (BimpObject::objectLoaded($refin)) {
+                                        
+                                    }
+                                }
+                            }
+                            $signataires_data = json_encode($signataires_data);
                             break;
 
                         case 'pvr':
@@ -3844,16 +3883,23 @@ class BF_Demande extends BimpObject
         return $errors;
     }
 
-    protected function addBimpCommObjectLines($bimpcomm, $total_attendu_ht = 0)
+    protected function addBimpCommObjectLines($bimpcomm, $total_attendu_ht = 0, $onlyProd = false)
     {
         $errors = array();
 
-        $lines = $this->getLines();
+        if(!$onlyProd)
+            $lines = $this->getLines();
+        else
+            $lines = $this->getLines('only_prod');
 
         $pourcentage = 1;
         if ($total_attendu_ht) {
-            $pourcentage = $total_attendu_ht / $this->getTotalDemandeHT();
+            if(!$onlyProd)
+                $pourcentage = $total_attendu_ht / $this->getTotalDemandeHT();
+            else
+                $pourcentage = $total_attendu_ht / $this->getTotalDemandeHTOnlyProd();
         }
+        
 
         foreach ($lines as $line) {
             $line_type = (int) $line->getData('type');
@@ -3993,7 +4039,7 @@ class BF_Demande extends BimpObject
         }
 
         if (!count($errors)) {
-            $lines_errors = $this->addBimpCommObjectLines($facture, $total_rachat_ht);
+            $lines_errors = $this->addBimpCommObjectLines($facture, $total_rachat_ht, true);
 
             if (count($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture fournisseur');
@@ -4051,7 +4097,7 @@ class BF_Demande extends BimpObject
 
             if (!count($errors)) {
                 $total_attendu_ht = $prix_cession_ht * $vr_vente / 100;
-                $lines_errors = $this->addBimpCommObjectLines($facture, $total_attendu_ht);
+                $lines_errors = $this->addBimpCommObjectLines($facture, $total_attendu_ht, true);
 
                 if (count($lines_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture');
@@ -4320,24 +4366,16 @@ class BF_Demande extends BimpObject
                     'fonction' => $loueur_data['qualite']
                 ),
                 'cessionnaire' => array(
-                    'nom'      => $cessionnaire_data['nom'],
-                    'email'    => $cessionnaire_email,
-                    'fonction' => $cessionnaire_data['qualite']
+                    'raison_social' => $cessionnaire_data['raison_social'],
+                    'nom'           => $cessionnaire_data['nom'],
+                    'email'         => $cessionnaire_email,
+                    'fonction'      => $cessionnaire_data['qualite']
                 )
             ));
             if ($this->isDemandeValid($errors)) {
                 global $db;
                 $files_dir = $this->getFilesDir();
-                $ref = $this->getRef();
 
-//            // PDF Consignes: 
-//            $file_name = 'consignes_' . $ref . '.pdf';
-//
-//            require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ConsignesContratFinancementPDF.php';
-//            $pdf = new ConsignesContratFinancementPDF($db, $this);
-//            if (!$pdf->render($files_dir . $file_name, 'F')) {
-//                $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF des consignes client');
-//            }
                 // PDF contrat de location: 
                 $file_name = $this->getSignatureDocFileName('contrat');
                 require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';

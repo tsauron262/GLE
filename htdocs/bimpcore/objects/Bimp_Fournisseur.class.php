@@ -103,12 +103,13 @@ class Bimp_Fournisseur extends Bimp_Societe
         );
 
         // Réceptions: 
-        $tabs[] = array(
-            'id'            => 'fourn_receptions_list_tab',
-            'title'         => BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Réceptions',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#fourn_receptions_list_tab .nav_tab_ajax_result\')', array('receptions'), array('button' => ''))
-        );
+        if($this->isModuleActif('bimplogistique'))
+            $tabs[] = array(
+                'id'            => 'fourn_receptions_list_tab',
+                'title'         => BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Réceptions',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#fourn_receptions_list_tab .nav_tab_ajax_result\')', array('receptions'), array('button' => ''))
+            );
 
         // Factures fourn: 
         $tabs[] = array(

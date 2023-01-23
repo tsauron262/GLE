@@ -1,16 +1,16 @@
 <?php
 
 /**
- *  \file       htdocs/bimpremovev2duplicate/removeduplicatecustomer.php
- *  \ingroup    bimpremovev2duplicate
+ *  \file       htdocs/bimpremoveduplicatev2/removeduplicatecustomer.php
+ *  \ingroup    bimpremoveduplicatev2
  *  \brief      Page to remove duplicate in companies
  */
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 
-$arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpremovev2duplicate/css/styles.css');
-$arrayofjs = array('/bimpremovev2duplicate/js/removeduplicatecustomer.js');
+$arrayofcss = array('/includes/jquery/plugins/select2/select2.css', '/bimpremoveduplicatev2/css/styles.css');
+$arrayofjs = array('/bimpremoveduplicatev2/js/removeduplicatecustomer.js');
 
 
 $commerciaux = array();

@@ -3151,7 +3151,16 @@ class BimpObject extends BimpCache
                     if ($this->field_exists($field_name)) {
                         $sqlKey = $this->getFieldSqlKey($field_name, $main_alias, null, $extra_filters, $joins);
                     } else {
-                        $sqlKey = $field;
+                        /*todo a verifier*/
+                        $tabTmp = explode(':', $field_name);
+                        if(isset($tabTmp[1])){
+                            $child = $tabTmp[0];
+                            $field_name = $tabTmp[1];
+                            $sqlKey = $this->getFieldSqlKey($field_name, $main_alias, $child, $extra_filters, $joins);
+                        }
+                        else
+                            /*todo fin a verifier*/
+                            $sqlKey = $field;
                     }
                 }
 
@@ -9487,6 +9496,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $_POST = $list_data;
 
         $list = new BC_ListTable($this, $list_name);
+        if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint'))
+            $list->initForGraph();
         $nameGraph = $list->getParam('graph')[$data['idGraph']];
         $dataGraphe = $this->getInfoGraph($nameGraph);
 
@@ -9523,8 +9534,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
             if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint')) {//il faut charger chaque objet pour avoir ca valeur
-                $list->initForGraph();
-
                 $tmpData['dataPoints'] = $list->getPointsForGraph($dataGraphe['params'], $i);
             } elseif ($dataGraphe['mode_data'] == 'unique' && isset($tmpDatas[$i])) {//On apelle une seul methode pour tous les points
                 $tmpData['dataPoints'] = $tmpDatas[$i];

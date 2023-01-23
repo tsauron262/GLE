@@ -5829,7 +5829,10 @@ class Bimp_CommandeLine extends ObjectLine
                     // Diff:
                     $qty_billed_not_shipped = $billed_qty - $shipped_qty;
                     $qty_shipped_not_billed = $shipped_qty - $billed_qty;
-                    if ($fullQty < 0) {
+                    if ($fullQty == 0) {
+                        $qty_billed_not_shipped = 0;
+                        $qty_shipped_not_billed = 0;
+                    } elseif ($fullQty < 0) {
                         if ($qty_billed_not_shipped > 0)
                             $qty_billed_not_shipped = 0;
                         else
@@ -5840,7 +5843,6 @@ class Bimp_CommandeLine extends ObjectLine
                         else
                             $qty_shipped_not_billed = 0;
                     }
-
 
                     if ($shipped_qty !== (float) $this->getData('qty_shipped')) {
                         $this->updateField('qty_shipped', $shipped_qty, null, true);

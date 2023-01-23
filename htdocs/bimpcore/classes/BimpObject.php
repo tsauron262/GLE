@@ -23,7 +23,7 @@ class BimpObject extends BimpCache
     );
     public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent', 'bool', 'qty');
     public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
-    public static $ref_properties = array('ref', 'reference', 'code', 'ref');
+    public static $ref_properties = array('ref', 'reference', 'code');
     public static $status_properties = array('status', 'fk_statut', 'statut');
     public static $date_update_properties = array('date_update', 'tms');
     public static $allowedDbNullValueDataTypes = array('date', 'datetime', 'time');
@@ -1841,7 +1841,7 @@ class BimpObject extends BimpCache
         if ($logo_prop && $dir) {
             $file = $this->getData($logo_prop);
 
-            if(!empty($file)){
+            if (!empty($file)) {
                 $file_infos = pathinfo($file);
                 $ext = $file_infos['extension'];
                 $name = $file_infos['filename'];

@@ -156,14 +156,9 @@ class Bimp_User extends BimpObject
     {
         return $this->getInstanceName();
     }
-
-    public function getLink($params = array(), $forced_context = '')
-    {
-        if ($this->isLoaded() && $this->getData('statut') == 0) {
-            $params['disabled'] = true;
-        }
-
-        return parent::getLink($params, $forced_context);
+    
+    public function getActiveFields(){
+        return array('statut');
     }
 
     public function getGroupsRights()

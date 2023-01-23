@@ -25,7 +25,7 @@ class BIMP_Task extends BimpObject
     public static $srcNotAttribute = array('sms-apple@bimp-groupe.net');
     public static $nbNonLu = 0;
     public static $nbAlert = 0;
-    public static $valStatus = array(0 => array('label' => "A traité", 'classes' => array('error')), 1 => array('label' => "En cours", 'classes' => array('error')), 4 => array('label' => "Terminé", 'classes' => array('info')));
+    public static $valStatus = array(0 => array('label' => "A traiter", 'classes' => array('error')), 1 => array('label' => "En cours", 'classes' => array('error')), 4 => array('label' => "Terminé", 'classes' => array('info')));
     public static $valPrio = array(0 => array('label' => "Normal", 'classes' => array('info')), 20 => array('label' => "Urgent", 'classes' => array('error')));
 
 //    public function areNotesEditable()

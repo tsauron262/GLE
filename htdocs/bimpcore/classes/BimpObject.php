@@ -945,6 +945,13 @@ class BimpObject extends BimpCache
                         $search_filter .= ($search_filter ? ' AND ' : '') . '(' . $or_sql . ')';
                     }
                 }
+                
+                if ($options['active']){
+                    $fields = $this->getActiveFields();
+                    foreach($fields as $field){
+                        $filters[$field] = 1;
+                    }
+                }
 
                 if ($search_filter) {
                     $filters['search_custom'] = array(
@@ -8812,7 +8819,21 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         return $this->getLink($params);
     }
+    
+    public function getActiveFields(){
+        return array();
+    }
+    
+    public function isActif(){
+        $activeFields = $this->getActiveFields();
+        foreach($activeFields as $field){
+            if($this->getData($field) < 1)
+                return false;
+        }
+        return 1;
+    }
 
+    
     public function getLink($params = array(), $forced_context = '')
     {
         // $params peut éventuellement être utilisé pour surcharger les paramères "nom_url" de l'objet. 
@@ -8825,6 +8846,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (!$this->isLoaded()) {
             return '';
+        }
+        
+        
+        if (!$this->isActif()) {
+            $params['disabled'] = true;
         }
 
         $html = '';
@@ -10124,7 +10150,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                         $results = $instance->getSearchResults('all', $search, array(
                             'card'        => $card,
-                            'max_results' => 30
+                            'max_results' => 30,
+                            'active'      => 1
                         ));
 
                         foreach ($results as $id_object => $data) {

@@ -302,7 +302,6 @@ lists_cols:
     date_received: 
         label: Reçue le
     info: 
-        edit: 1
     parent:fk_soc: 
         label: Fournisseur
     parent:fk_statut:

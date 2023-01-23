@@ -6583,13 +6583,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $sup = '';
-            if ($withLinked && $withLinked !== 'false') {
+            if ($withLinked && $withLinked !== 'false' && !is_a($this, 'Bimp_Societe') && !is_a($this, 'Bimp_Product')) {
                 $linkedObjects = $this->getFullLinkedObjetsArray(false);
                 if (count($linkedObjects) > 0) {
                     $filterLinked = array('linked' => array('or' => array()));
                     foreach ($linkedObjects as $data_linked => $inut) {
                         $data_linked = json_decode($data_linked, true);
-                        if ($data_linked['object_name'] != 'BS_SAV') {
+                        if (!in_array($data_linked['object_name'], array('Equipment', 'BS_SAV'))) {
                             $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
                                     'obj_module' => $data_linked['module'],
                                     'obj_name'   => $data_linked['object_name'],

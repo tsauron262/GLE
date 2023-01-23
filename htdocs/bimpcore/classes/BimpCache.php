@@ -621,7 +621,7 @@ class BimpCache
                 }
 
                 // Objets liés dont ont est le parent:
-                if(!is_a($object, 'Bimp_Societe')){//sinon c'est rop lourd
+                if(!is_a($object, 'Bimp_Societe') && !is_a($object, 'Bimp_Product')){//sinon c'est rop lourd
                     foreach (self::getBimpObjectsArray(false, false, false, false) as $obj_data => $obj_label) {
                         if (preg_match('/^(.+)\-(.+)$/', $obj_data, $matches)) {
                             $obj_module = $matches[1];

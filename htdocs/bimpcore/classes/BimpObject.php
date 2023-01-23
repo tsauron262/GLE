@@ -1953,14 +1953,14 @@ class BimpObject extends BimpCache
 
     public function getInfoGraph($graphName = '')
     {
-        return array(
-            "data1"     => array("title" => "Nom Data1"),
-            "data2"     => array("title" => "Nom Data2"),
-            "axeX"      => array("title" => "X", "valueFormatString" => 'value type'),
-            "axeY"      => array("title" => "Y"), //Attention potentiellement plusiuers donné sur cette axe
-            'title'     => $this->getLabel(),
-            'params'    => array(), //tous les paramétre qui seront transmis a getGraphDataPoint ou a getGraphDatasPoints
-            'mode_data' => (method_exists($this, 'getGraphDataPoint')) ? 'objects' : 'unique'
+        return
+                array("data1"     => array("title" => "Nom Data1"),
+//                    "data2"     => array("title" => "Nom Data2"),
+                    "axeX"      => array("title" => "X", "valueFormatString" => 'value type'),
+                    "axeY"      => array("title" => "Y"), //Attention potentiellement plusiuers donné sur cette axe
+                    'title'     => $this->getLabel(),
+                    'params'    => array(), //tous les paramétre qui seront transmis a getGraphDataPoint ou a getGraphDatasPoints
+                    'mode_data' => (method_exists($this, 'getGraphDataPoint')) ? 'objects' : 'unique'
         );
     }
 

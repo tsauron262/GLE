@@ -621,34 +621,36 @@ class BimpCache
                 }
 
                 // Objets liés dont ont est le parent:
-                foreach (self::getBimpObjectsArray(false, false, false, false) as $obj_data => $obj_label) {
-                    if (preg_match('/^(.+)\-(.+)$/', $obj_data, $matches)) {
-                        $obj_module = $matches[1];
-                        $obj_name = $matches[2];
+                if(!is_a($object, 'Bimp_Societe')){//sinon c'est rop lourd
+                    foreach (self::getBimpObjectsArray(false, false, false, false) as $obj_data => $obj_label) {
+                        if (preg_match('/^(.+)\-(.+)$/', $obj_data, $matches)) {
+                            $obj_module = $matches[1];
+                            $obj_name = $matches[2];
 
-                        if ($obj_name !== 'BS_SAV') {
-                            continue;
-                        }
-                        $obj = BimpObject::getInstance($obj_module, $obj_name);
-                        foreach ($obj->config->getParams('objects') as $child_name => $child_params) {
-                            if (isset($child_params['instance']['bimp_object']) && !empty($child_params['instance']['bimp_object'])) {
-                                $field_name = BimpTools::getArrayValueFromPath($child_params, 'instance/id_object/field_value', '');
-                                if ($field_name && $obj->field_exists($field_name)) {
-                                    $child_module = BimpTools::getArrayValueFromPath($child_params, 'instance/bimp_object/module', $obj->module);
-                                    $child_object_name = BimpTools::getArrayValueFromPath($child_params, 'instance/bimp_object/name');
-                                    if ($child_module && $child_module === $object->module &&
-                                            $child_object_name && $child_object_name === $object->object_name) {
-                                        $linked_parents = BimpCache::getBimpObjectObjects($obj_module, $obj_name, array(
-                                                    $field_name => $object->id
-                                        ));
+//                            if ($obj_name !== 'BS_SAV') {
+//                                continue;
+//                            }
+                            $obj = BimpObject::getInstance($obj_module, $obj_name);
+                            foreach ($obj->config->getParams('objects') as $child_name => $child_params) {
+                                if (isset($child_params['instance']['bimp_object']) && !empty($child_params['instance']['bimp_object'])) {
+                                    $field_name = BimpTools::getArrayValueFromPath($child_params, 'instance/id_object/field_value', '');
+                                    if ($field_name && $obj->field_exists($field_name)) {
+                                        $child_module = BimpTools::getArrayValueFromPath($child_params, 'instance/bimp_object/module', $obj->module);
+                                        $child_object_name = BimpTools::getArrayValueFromPath($child_params, 'instance/bimp_object/name');
+                                        if ($child_module && $child_module === $object->module &&
+                                                $child_object_name && $child_object_name === $object->object_name) {
+                                            $linked_parents = BimpCache::getBimpObjectObjects($obj_module, $obj_name, array(
+                                                        $field_name => $object->id
+                                            ));
 
-                                        if (!empty($linked_parents)) {
-                                            foreach ($linked_parents as $linked_parent) {
-                                                self::$cache[$cache_key][json_encode(array(
-                                                            'module'      => $linked_parent->module,
-                                                            'object_name' => $linked_parent->object_name,
-                                                            'id_object'   => $linked_parent->id
-                                                        ))] = BimpTools::ucfirst($linked_parent->getLabel()) . ' ' . $linked_parent->display('ref_nom');
+                                            if (!empty($linked_parents)) {
+                                                foreach ($linked_parents as $linked_parent) {
+                                                    self::$cache[$cache_key][json_encode(array(
+                                                                'module'      => $linked_parent->module,
+                                                                'object_name' => $linked_parent->object_name,
+                                                                'id_object'   => $linked_parent->id
+                                                            ))] = BimpTools::ucfirst($linked_parent->getLabel()) . ' ' . $linked_parent->display('ref_nom');
+                                                }
                                             }
                                         }
                                     }

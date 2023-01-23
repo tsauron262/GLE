@@ -49,9 +49,11 @@ fields:
     txt:
         label: Description
         type: html
+        hashtags: 1
     comment:
         label: Commentaire
         type: text
+        hashtags: 1
     status:
         label: Statut
         type: int

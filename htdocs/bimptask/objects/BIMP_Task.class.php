@@ -59,10 +59,10 @@ class BIMP_Task extends BimpObject
         $to = implode(',', $mails);
         
         if($rappel){
-            $msg .= '<br/><br/><h1>'.$this->getData('subj').'</h1><br/>'.$this->getData('txt').'<br/><br/>'.$this->getData('comment');
+            $message .= '<br/><br/><h1>'.$this->displayData('subj').'</h1><br/>'.$this->displayData('txt').'<br/><br/>'.$this->displayData('comment');
         }
         
-//        die($to.'<br/>'.$subject.'<br/>'.$msg);
+//        echo($to.'<br/>'.$subject.'<br/>'.$message);
 //        
         mailSyn2($subject, $to, null, $message);
     }
@@ -493,6 +493,11 @@ class BIMP_Task extends BimpObject
     public function getInfosExtraBtn()
     {
         return $this->getButtons();
+    }
+    
+    public function getRefProperty()
+    {
+        return 'subj';
     }
 
     public function getButtons()

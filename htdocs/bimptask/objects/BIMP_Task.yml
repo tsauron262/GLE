@@ -8,6 +8,11 @@ header_btn:
 list_page_url: 
     controller: index
     
+    
+#nom_url: 
+#    with_status: 1
+#    syntaxe: #<id> : <a.subj>
+    
 #parent_id_property: id_task
 #parent_object: BIMP_Task
 #parent_module: bimptask
@@ -30,8 +35,8 @@ objects:
             bimp_object:
                 module: bimptask
                 name: BIMP_Task
-            id_object:
-                fiels_value: id_task
+#            id_object:
+#                fiels_value: id_task
                 
     user_owner:
         extends: user
@@ -152,6 +157,7 @@ forms:
             
     add:
         rows:
+            - field: id_task
             - field: type_manuel
             - field: prio
             - field: subj
@@ -170,7 +176,7 @@ forms:
     addUser:
         extends: add
         rows:
-            5: unset
+            6: unset
             
     newMail:
         rows:
@@ -265,7 +271,7 @@ lists:
 
 views:
     default: 
-        title: nom
+#        title: nom
         edit_form: default
         delete_btn: 1
         rows:    
@@ -302,7 +308,7 @@ views:
 #                              - files
 #                              - associates
     notes: 
-        title: nom
+#        title: nom
         edit_form: 0
         delete_btn: 0
         rows:    
@@ -317,11 +323,13 @@ searches:
             - a.id
             - u.firstname
             - u.lastname
+            - a.subj
         fields_return: 
             - a.id
             - u.firstname
             - u.lastname
-        label_syntaxe: 'Tâche #<a.id> (a.subj) - Utilisateur: <u.firstname> <u.lastname>'
+            - a.subj
+        label_syntaxe: 'Tâche #<a.id> (<a.subj>) - Utilisateur: <u.firstname> <u.lastname>'
         joins: 
             - table: user
               on: a.id_user_owner = u.rowid

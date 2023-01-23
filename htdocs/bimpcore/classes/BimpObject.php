@@ -9492,6 +9492,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $_POST = $list_data;
 
         $list = new BC_ListTable($this, $list_name);
+        if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint'))
+            $list->initForGraph();
         $nameGraph = $list->getParam('graph')[$data['idGraph']];
         $dataGraphe = $this->getInfoGraph($nameGraph);
 
@@ -9528,8 +9530,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
             if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint')) {//il faut charger chaque objet pour avoir ca valeur
-                $list->initForGraph();
-
                 $tmpData['dataPoints'] = $list->getPointsForGraph($dataGraphe['params'], $i);
             } elseif ($dataGraphe['mode_data'] == 'unique' && isset($tmpDatas)) {//On apelle une seul methode pour tous les points
                 $tmpData['dataPoints'] = $tmpDatas[$i];

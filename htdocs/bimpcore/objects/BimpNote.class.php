@@ -12,7 +12,7 @@ class BimpNote extends BimpObject
     const BN_ALL = 20;
 
     public static $visibilities = array(
-        self::BN_AUTHOR   => array('label' => 'Auteur seulement', 'classes' => array('danger')),
+        self::BN_AUTHOR   => array('label' => 'Auteur/Destinataire seulement', 'classes' => array('danger')),
         self::BN_ADMIN    => array('label' => 'Administrateurs seulement', 'classes' => array('important')),
         self::BN_MEMBERS  => array('label' => 'Membres', 'classes' => array('warning')),
         self::BN_PARTNERS => array('label' => 'Membres et partenaires', 'classes' => array('warning')),
@@ -281,18 +281,30 @@ class BimpNote extends BimpObject
                 'operator' => '>=',
                 'value'    => self::BN_ALL
             );
-        } elseif (!$user->admin) {
+        } elseif (/*!$user->admin*/1) {
             $filters['or_visibility'] = array(
                 'or' => array(
                     'visibility'  => array(
                         'operator' => '>=',
                         'value'    => self::BN_MEMBERS
                     ),
-                    'user_create' => $user->id
+                    'user_create' => $user->id,
+                    'and_user_dest' => array(
+                        'and_fields' => array(
+                            'fk_user_dest'=> $user->id,
+                            'type_dest'   => self::BN_DEST_USER
+                        )
+                    ),
+                    'and_group_dest' => array(
+                        'and_fields' => array(
+                            'fk_group_dest'=> self::getUserUserGroupsList($user->id),
+                            'type_dest'   => self::BN_DEST_GROUP
+                        )
+                    )
+                    
                 )
             );
         }
-
         return $filters;
     }
 

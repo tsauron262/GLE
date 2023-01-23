@@ -13,7 +13,7 @@
 class annexe {
     var $nbAnnexe = 0;
 
-    function annexe($pdf, $model, $outputlangs, $rang = 0) {
+    function __construct($pdf, $model, $outputlangs, $rang = 0) {
         $this->pdf = $pdf;
         $this->model = $model;
         $this->outputlangs = $outputlangs;

@@ -75,7 +75,7 @@ class Bimp_Log extends BimpObject
     
     public function getGraphDatasPoints($params, $numero_data = 1)
     {
-        $result = array();
+        $result = array(1=>array());
         $dataGraph = $this->getInfoGraph($graphName);
         $arrondirEnMinuteGraph = $params['minutes'];
         $dateStr = "FLOOR(UNIX_TIMESTAMP(date)/($arrondirEnMinuteGraph*60))*$arrondirEnMinuteGraph*60";

@@ -227,7 +227,8 @@ class BimpFile extends BimpObject
 
     public function getDateModif()
     {
-        return BimpTools::printDate(filemtime($this->getFilePath()));
+        if(is_file($this->getFilePath()))
+            return BimpTools::printDate(filemtime($this->getFilePath()));
     }
 
     public function getCreateJsCallback()

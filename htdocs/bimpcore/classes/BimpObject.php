@@ -1953,7 +1953,7 @@ class BimpObject extends BimpCache
     {
         return
                 array("data1"     => array("title" => "Nom Data1"),
-                    "data2"     => array("title" => "Nom Data2"),
+//                    "data2"     => array("title" => "Nom Data2"),
                     "axeX"      => array("title" => "X", "valueFormatString" => 'value type'),
                     "axeY"      => array("title" => "Y"), //Attention potentiellement plusiuers donné sur cette axe
                     'title'     => $this->getLabel(),

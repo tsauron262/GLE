@@ -4261,6 +4261,8 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'tva_tx':
+                if(!$this->isLoaded())
+                    $value = $this->getDefaultTva();
                 $parent = $this->getParentInstance();
 
                 if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {

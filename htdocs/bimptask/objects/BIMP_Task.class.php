@@ -28,6 +28,8 @@ class BIMP_Task extends BimpObject
     public static $valStatus = array(0 => array('label' => "A traiter", 'classes' => array('danger')), 1 => array('label' => "En cours", 'classes' => array('important')), 2 => array('label' => "Attente utilisateur", 'classes' => array('danger')), 3 => array('label' => "Attente technique", 'classes' => array('danger')), 4 => array('label' => "Terminé", 'classes' => array('success')));
     public static $valPrio = array(0 => array('label' => "Normal", 'classes' => array('info')), 20 => array('label' => "Urgent", 'classes' => array('error')));
     const MARQEUR_MAIL = "IDTASK:5467856456";
+//    public $mailReponse = 'reponse@bimp-groupe.net';
+    public $mailReponse = 'sms-apple@bimp-groupe.net';
 
 //    public function areNotesEditable()
 //    {
@@ -62,7 +64,7 @@ class BIMP_Task extends BimpObject
         
 //        echo($to.'<br/>'.$subject.'<br/>'.$message);
 //        
-        $this->sendMail('tommy@bimp.fr', 'reponse@bimp-groupe.net', $subject, $message, $rappel);
+        $this->sendMail('tommy@bimp.fr', $this->mailReponse, $subject, $message, $rappel);
 //        
 //        mailSyn2($subject, $to, null, $message);
     }

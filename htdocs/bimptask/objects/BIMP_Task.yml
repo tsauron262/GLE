@@ -31,18 +31,20 @@ objects:
                 name: BIMP_Task
 #                
     task_mere:
+        relation: hasOne
+        delete: 0
         instance:
             bimp_object:
                 module: bimptask
                 name: BIMP_Task
-#            id_object:
-#                fiels_value: id_task
+            id_object:
+                field_value: id_task
                 
     user_owner:
         extends: user
         instance:
             id_object:
-                fiels_value: id_user_owner
+                field_value: id_user_owner
                 
     files:
         instance:

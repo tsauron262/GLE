@@ -27,6 +27,7 @@ class BIMP_Task extends BimpObject
     public static $nbAlert = 0;
     public static $valStatus = array(0 => array('label' => "A traiter", 'classes' => array('danger')), 1 => array('label' => "En cours", 'classes' => array('important')), 2 => array('label' => "Attente utilisateur", 'classes' => array('danger')), 3 => array('label' => "Attente technique", 'classes' => array('danger')), 4 => array('label' => "Terminé", 'classes' => array('success')));
     public static $valPrio = array(0 => array('label' => "Normal", 'classes' => array('info')), 20 => array('label' => "Urgent", 'classes' => array('error')));
+    const MARQEUR_MAIL = "IDTASK:5467856456";
 
 //    public function areNotesEditable()
 //    {
@@ -58,13 +59,12 @@ class BIMP_Task extends BimpObject
         }
         $to = implode(',', $mails);
         
-        if($rappel){
-            $message .= '<br/><br/><h1>'.$this->displayData('subj').'</h1><br/>'.$this->displayData('txt').'<br/><br/>'.$this->displayData('comment');
-        }
         
 //        echo($to.'<br/>'.$subject.'<br/>'.$message);
 //        
-        mailSyn2($subject, $to, null, $message);
+        $this->sendMail('tommy@bimp.fr', 'reponse@bimp-groupe.net', $subject, $message, $rappel);
+//        
+//        mailSyn2($subject, $to, null, $message);
     }
     
     public function getUserNotif($excludeMy = false){
@@ -77,6 +77,10 @@ class BIMP_Task extends BimpObject
         $notes = $this->getNotes();
         foreach($notes as $note)
             $users = BimpTools::merge_array($users, BimpLink::getUsersLinked($note), true);
+        $parentTask = $this->getChildObject('task_mere');
+        if($parentTask && $parentTask->isLoaded())
+            $users = BimpTools::merge_array($users, $parentTask->getUserNotif($excludeMy), true);
+        
       if($excludeMy)
           unset($users[$user->id]);
 //            echo '<pre>';  print_r($users);
@@ -193,7 +197,7 @@ class BIMP_Task extends BimpObject
             $filters['auto'] = 0;
             $filters['type_manuel'] = $value;
         } else {
-            BimpCore::addlog('Type de tache inconnue ' . $value);
+            BimpCore::addlog('Type de tâche inconnue ' . $value);
         }
 
         return self::$valStatus;
@@ -363,37 +367,33 @@ class BIMP_Task extends BimpObject
         else
             return array("in", $tabT[0]);
     }
-
-    public function actionSendMail($data, &$success)
-    {
-        $success = "Message envoyé";
-        $errors = $warnings = array();
+    
+    public function sendMail($to, $from, $sujet, $msg, $rappel = true){
+        $errors = array();
         $sep = "<br/>---------------------<br/>";
-        $idTask = "IDTASK:5467856456" . $this->getData("id");
-        $data['email'] = str_replace("<br>", "<br/>", $data['email']);
+        $idTask =  self::MARQEUR_MAIL . $this->getData("id");
+        $msg = str_replace("<br>", "<br/>", $msg);
 
-        $notes = $this->getNotes();
 
-        $msg = $data['email'];
 
-        $msg .= "<br/>" . $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask . $sep;
+        $msg = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask . $sep.'<br/><br/>'.$msg;
 
-        if ($data['include_file']) {
-            $msg .= "<br/>Fil de discussion :";
+        if($rappel){
+            $msg .= '<br/><br/><h1>'.$this->displayData('subj').'</h1><br/>'.$this->displayData('txt').'<br/><br/>'.$this->displayData('comment');
+        
+            
+            
+            $notes = $this->getNotes();
+            $msg .= "<br/><br/>Fil de discussion :";
             foreach ($notes as $note) {
                 $msg .= $sep;
                 $msg .= $note->getData("content");
             }
-
-            $msg .= $sep . "Message original :";
-            $msg .= $sep;
-            $msg .= $this->getData("txt");
         }
 
-        $sujet = "Re:" . $this->getData("subj");
-        $to = $this->getData("src");
-        $from = $this->getData("dst");
-
+        if(is_null($sujet))
+            $sujet = "Re:" . $this->getData("subj");
+ 
 //        $msg = str_replace("<br />", "\n", $msg);
 //        $msg = str_replace("<br/>", "\n", $msg);
 //        $msg = str_replace("<br/>", "\n", $msg);
@@ -401,10 +401,18 @@ class BIMP_Task extends BimpObject
 
         if (!mailSyn2($sujet, $to, $from, $msg))
             $errors[] = "Envoi email impossible";
-        else {
-            $this->addNote($data['email'], BimpNote::BN_ALL, 1);
-        }
+        return $errors;
+    }
 
+    public function actionSendMail($data, &$success)
+    {
+        $success = "Message envoyé";
+        $errors = $warnings = array();
+        
+        $errors = $this->sendMail($this->getData("src"), $this->getData("dst"), null, $data['email'], (isset($data['include_file']) && $data['include_file']));
+
+        if(!count($errors))
+            $this->addNote($data['email'], BimpNote::BN_ALL, 1);
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -470,11 +478,11 @@ class BIMP_Task extends BimpObject
         $errors = $this->updateField("status", $data['status']);
 
         $msg = 'Statut passé à "'.$this->displayData('status').'" '.$data['text'];
-        $this->addNote($msg);
         
         if($data['notif']){
-            $this->notifier('Changement status tache "'.$this->getData('subj').'"', $msg, true);
+            $this->notifier('Changement statut tâche "'.$this->getData('subj').'"', $msg, true);
         }
+        $this->addNote($msg);
 
         return array(
             'errors'           => $errors,

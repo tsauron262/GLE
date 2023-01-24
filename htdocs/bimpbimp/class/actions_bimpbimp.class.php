@@ -22,7 +22,7 @@ class ActionsBimpbimp {
     
     function sendMail($parameters, &$object, &$action, $hookmanager){
         global $db;
-        $tabDomainValid = array('bimp.fr', 'ldlc.com');
+        $tabDomainValid = array('bimp.fr', 'ldlc.com', 'bimp-groupe.net');
         if ($object->sendmode == 'smtps' && !in_array($object->smtps->_msgFrom['host'], $tabDomainValid))
         {
             $add = $object->smtps->_msgFrom['user']."@".$object->smtps->_msgFrom['host'];

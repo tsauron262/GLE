@@ -996,9 +996,13 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
-    public function getAtradiusFileName($force = false, $show_ext = true)
+    public function getAtradiusFileName($force = false, $show_ext = true, $forced_date = null)
     {
-        $name = 'atradius';
+        if(is_null($forced_date))
+            $name = 'icba_' . date('Y-m-d', strtotime($this->getData('date_depot_icba')));
+        else
+            $name = 'icba_' . date('Y-m-d', strtotime($forced_date));
+
         $ext = '.pdf';
         if ($force || ($this->isLoaded() && file_exists($this->getFilesDir() . $name . $ext))) {
             if ($show_ext)
@@ -1217,19 +1221,19 @@ class Bimp_Client extends Bimp_Societe
         global $user, $langs;
         $html = '';
         $file = $this->getAtradiusFileName();
-        $buttons = array();
+        $buttons = array(
+            array(
+                'label'   => 'Ajouter PDF du Rapport Assurance crédit',
+                'icon'    => 'fas_comment-dollar',
+                'onclick' => $this->getJsLoadModalForm('atradius_file')
+            )
+        );
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         if (!is_null($file) && $file) {
             $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a><br/>';
         } elseif (!$only_loaded) {
 //            return BimpInput::renderInput('file_upload', 'atradius_file');
             // Demande encours altriadus
-
-            $buttons[] = array(
-                'label'   => 'Ajouter PDF du Rapport Assurance crédit',
-                'icon'    => 'fas_comment-dollar',
-                'onclick' => $this->getJsLoadModalForm('atradius_file')
-            );
 
             $list = BimpCache::getBimpObjectObjects('bimpcore', 'BimpNote', array('content'    => array(
                             'operator' => 'like',
@@ -3063,7 +3067,7 @@ class Bimp_Client extends Bimp_Societe
                 $values['parent_module'] = 'bimpcore';
                 $values['parent_object_name'] = 'Bimp_Societe';
                 $values['id_parent'] = $this->id;
-                $values['file_name'] = $this->getAtradiusFileName(true, false);
+                $values['file_name'] = $this->getAtradiusFileName(true, false, date('Y-m-d'));
                 $values['is_deletable'] = 0;
 
                 $file->validateArray($values);
@@ -3077,7 +3081,7 @@ class Bimp_Client extends Bimp_Societe
 
 
         if ($this->getData('outstanding_limit_icba') != $this->getInitData('outstanding_limit_icba') && $this->getData('outstanding_limit_icba') > 0 && !$this->getAtradiusFileName())
-            $errors[] = 'Il faut obligatoirement uploder le PDF avant de saisir une limite ICBA';
+            $errors[] = 'Il faut obligatoirement uploader le PDF avant de saisir une limite ICBA';
 
         if (count($errors))
             return $errors;

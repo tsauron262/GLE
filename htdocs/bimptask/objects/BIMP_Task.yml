@@ -7,6 +7,15 @@ header_btn:
     callback: getButtons
 list_page_url: 
     controller: index
+    
+    
+#nom_url: 
+#    with_status: 1
+#    syntaxe: #<id> : <a.subj>
+    
+#parent_id_property: id_task
+#parent_object: BIMP_Task
+#parent_module: bimptask
         
 labels:
     name: tâche
@@ -14,6 +23,21 @@ labels:
     is_female: 1    
 
 objects: 
+    task_fille:
+        relation: hasMany
+        instance:
+            bimp_object:
+                module: bimptask
+                name: BIMP_Task
+#                
+    task_mere:
+        instance:
+            bimp_object:
+                module: bimptask
+                name: BIMP_Task
+#            id_object:
+#                fiels_value: id_task
+                
     user_owner:
         extends: user
         instance:
@@ -49,9 +73,11 @@ fields:
     txt:
         label: Description
         type: html
+        hashtags: 1
     comment:
         label: Commentaire
         type: text
+        hashtags: 1
     status:
         label: Statut
         type: int
@@ -82,6 +108,11 @@ fields:
         type: text
         values: 
             array: types_manuel
+            
+    id_task:
+        label: Tache mére
+        type: id_object
+        object: task_mere
  
 fields_tables:
     default: 
@@ -91,9 +122,9 @@ fields_tables:
         icon: fas_tasks
         rows: 
             - field: status
-              edit: 1
             - field: prio
               edit: 0
+            - field: id_task
             - field: src
             - field: dst
             - label: Type de tâche
@@ -105,6 +136,9 @@ fields_tables:
               edit: 1
             - field: id_user_owner
               edit: 1
+            - label: Notifier
+              value:
+                callback: displayUserNotif
         
 forms:
     default: 
@@ -123,6 +157,7 @@ forms:
             
     add:
         rows:
+            - field: id_task
             - field: type_manuel
             - field: prio
             - field: subj
@@ -137,6 +172,11 @@ forms:
                       id_parent: 1
                   
               multiple: 1
+              
+    addUser:
+        extends: add
+        rows:
+            6: unset
             
     newMail:
         rows:
@@ -156,6 +196,29 @@ forms:
     attribute:
         rows:
             - field: id_user_owner
+            
+    changeStatut:
+        rows:
+            - custom: 1
+              input_name: status
+              input: 
+                  type: select
+              label: Statut
+              values:
+                  callback: getStatusPossible
+            - custom: 1
+              input_name: text
+              input: 
+                  type: textarea
+              hashtags: 1
+              label: Commentaire
+            - custom: 1
+              input_name: notif
+              data_type: bool
+              label: Notifier
+              input: 
+                  type: toggle
+              value: 1
            
 lists_cols: 
     typeTache:
@@ -173,6 +236,7 @@ lists_cols:
 lists:
     default:
         checkboxes: 1
+        configurable: 1
         bulk_actions:
             - label: supprimer les tâches sélectionnées
               icon: fas_trash-alt
@@ -188,6 +252,8 @@ lists:
         modal_view: default
         edit_form: default
         update_btn: 1
+        extra_btn: 
+            callback: getButtons
         cols:
             id:
             src:
@@ -199,10 +265,13 @@ lists:
             status:
                 edit: 1
             id_user_owner:
+                
+    sousTache:
+        extends: default
 
 views:
     default: 
-        title: nom
+#        title: nom
         edit_form: default
         delete_btn: 1
         rows:    
@@ -213,6 +282,11 @@ views:
                     col_sm: 12
                     fields_table:
                         name: default
+          
+            - cols:
+                - type: custom
+                  custom: 
+                      callback: displaySousTache
             - cols:
                   - type: custom
                     custom: 
@@ -221,16 +295,20 @@ views:
                 - type: list
                   list: 
                       children: files
-            - cols: 
-                - type: custom
-                  custom: 
-                      callback: 
-                          method: renderAssociatesList
-                          params: 
-                              - files
-                              - associates
+#            - cols: 
+#                - type: list
+#                  list: 
+#                      children: task_fille
+#            - cols: 
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderAssociatesList
+#                          params: 
+#                              - files
+#                              - associates
     notes: 
-        title: nom
+#        title: nom
         edit_form: 0
         delete_btn: 0
         rows:    
@@ -245,11 +323,13 @@ searches:
             - a.id
             - u.firstname
             - u.lastname
+            - a.subj
         fields_return: 
             - a.id
             - u.firstname
             - u.lastname
-        label_syntaxe: 'Tâche #<a.id> (a.subj) - Utilisateur: <u.firstname> <u.lastname>'
+            - a.subj
+        label_syntaxe: 'Tâche #<a.id> (<a.subj>) - Utilisateur: <u.firstname> <u.lastname>'
         joins: 
             - table: user
               on: a.id_user_owner = u.rowid

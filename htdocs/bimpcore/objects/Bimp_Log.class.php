@@ -75,8 +75,8 @@ class Bimp_Log extends BimpObject
     
     public function getGraphDatasPoints($params, $numero_data = 1)
     {
-        $result = array();
-        $dataGraph = $this->getInfoGraph($graphName);
+        $result = array(1=>array());
+        
         $arrondirEnMinuteGraph = $params['minutes'];
         $dateStr = "FLOOR(UNIX_TIMESTAMP(date)/($arrondirEnMinuteGraph*60))*$arrondirEnMinuteGraph*60";
         $sql = $this->db->db->query('SELECT count(*) as nb, '.$dateStr.' as timestamp FROM '.MAIN_DB_PREFIX.'bimpcore_log GROUP BY '.$dateStr);

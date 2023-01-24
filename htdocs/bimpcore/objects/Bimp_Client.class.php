@@ -1432,7 +1432,7 @@ class Bimp_Client extends Bimp_Societe
             );
 
         // Paiements non identifiés:
-        if($this->isDolModuleActif('facture')) 
+        if($this->isDolModuleActif('facture') && $this->isModuleActif('bimpfinanc')) 
             $tabs[] = array(
                 'id'            => 'client_paiements_inc_list_tab',
                 'title'         => BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Paiements non identifiés',
@@ -1441,20 +1441,22 @@ class Bimp_Client extends Bimp_Societe
             );
 
         // Relances paiements: 
-        $tabs[] = array(
-            'id'            => 'client_relances_list_tab',
-            'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Relances paiements',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_relances_list_tab .nav_tab_ajax_result\')', array('relances'), array('button' => ''))
-        );
+        if(BimpCore::getConf('use_relances_paiements_clients', false, 'bimpcommercial')){
+            $tabs[] = array(
+                'id'            => 'client_relances_list_tab',
+                'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Relances paiements',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_relances_list_tab .nav_tab_ajax_result\')', array('relances'), array('button' => ''))
+            );
 
-        // Contacts Relances paiements: 
-        $tabs[] = array(
-            'id'            => 'client_suivi_recouvrement_list_tab',
-            'title'         => BimpRender::renderIcon('fas_history', 'iconLeft') . 'Suivi Recouvrement',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_suivi_recouvrement_list_tab .nav_tab_ajax_result\')', array('suivi_recouvrement'), array('button' => ''))
-        );
+            // Contacts Relances paiements: 
+            $tabs[] = array(
+                'id'            => 'client_suivi_recouvrement_list_tab',
+                'title'         => BimpRender::renderIcon('fas_history', 'iconLeft') . 'Suivi Recouvrement',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_suivi_recouvrement_list_tab .nav_tab_ajax_result\')', array('suivi_recouvrement'), array('button' => ''))
+            );
+        }
 
         // stats par date: 
         $tabs[] = array(

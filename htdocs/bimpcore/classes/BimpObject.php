@@ -945,6 +945,13 @@ class BimpObject extends BimpCache
                         $search_filter .= ($search_filter ? ' AND ' : '') . '(' . $or_sql . ')';
                     }
                 }
+                
+                if ($options['active']){
+                    $fields = $this->getActiveFields();
+                    foreach($fields as $field){
+                        $filters[$field] = 1;
+                    }
+                }
 
                 if ($search_filter) {
                     $filters['search_custom'] = array(
@@ -1953,7 +1960,7 @@ class BimpObject extends BimpCache
     {
         return
                 array("data1"     => array("title" => "Nom Data1"),
-                    "data2"     => array("title" => "Nom Data2"),
+//                    "data2"     => array("title" => "Nom Data2"),
                     "axeX"      => array("title" => "X", "valueFormatString" => 'value type'),
                     "axeY"      => array("title" => "Y"), //Attention potentiellement plusiuers donné sur cette axe
                     'title'     => $this->getLabel(),
@@ -6583,13 +6590,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $sup = '';
-            if ($withLinked && $withLinked !== 'false') {
+            if ($withLinked && $withLinked !== 'false' && !is_a($this, 'Bimp_Societe') && !is_a($this, 'Bimp_Product')) {
                 $linkedObjects = $this->getFullLinkedObjetsArray(false);
                 if (count($linkedObjects) > 0) {
                     $filterLinked = array('linked' => array('or' => array()));
                     foreach ($linkedObjects as $data_linked => $inut) {
                         $data_linked = json_decode($data_linked, true);
-                        if ($data_linked['object_name'] != 'BS_SAV') {
+                        if (!in_array($data_linked['object_name'], array('Equipment', 'BS_SAV'))) {
                             $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
                                     'obj_module' => $data_linked['module'],
                                     'obj_name'   => $data_linked['object_name'],
@@ -8812,7 +8819,21 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         return $this->getLink($params);
     }
+    
+    public function getActiveFields(){
+        return array();
+    }
+    
+    public function isActif(){
+        $activeFields = $this->getActiveFields();
+        foreach($activeFields as $field){
+            if($this->getData($field) < 1)
+                return false;
+        }
+        return 1;
+    }
 
+    
     public function getLink($params = array(), $forced_context = '')
     {
         // $params peut éventuellement être utilisé pour surcharger les paramères "nom_url" de l'objet. 
@@ -8825,6 +8846,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (!$this->isLoaded()) {
             return '';
+        }
+        
+        
+        if (!$this->isActif()) {
+            $params['disabled'] = true;
         }
 
         $html = '';
@@ -9492,6 +9518,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $_POST = $list_data;
 
         $list = new BC_ListTable($this, $list_name);
+        if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint'))
+            $list->initForGraph();
         $nameGraph = $list->getParam('graph')[$data['idGraph']];
         $dataGraphe = $this->getInfoGraph($nameGraph);
 
@@ -9528,8 +9556,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
             if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint')) {//il faut charger chaque objet pour avoir ca valeur
-                $list->initForGraph();
-
                 $tmpData['dataPoints'] = $list->getPointsForGraph($dataGraphe['params'], $i);
             } elseif ($dataGraphe['mode_data'] == 'unique' && isset($tmpDatas)) {//On apelle une seul methode pour tous les points
                 $tmpData['dataPoints'] = $tmpDatas[$i];
@@ -10124,7 +10150,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                         $results = $instance->getSearchResults('all', $search, array(
                             'card'        => $card,
-                            'max_results' => 30
+                            'max_results' => 30,
+                            'active'      => 1
                         ));
 
                         foreach ($results as $id_object => $data) {

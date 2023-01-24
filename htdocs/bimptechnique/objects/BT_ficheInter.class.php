@@ -2104,10 +2104,10 @@ class BT_ficheInter extends BimpDolObject
                                 'test_ferme' => 'fichinter:rowid=' . $this->id . ' && (commandes != "" OR fk_contrat > 0 OR fk_facture > 0)',
                                 "txt"        => "Bonjour,Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur. " . $this->getNomUrl(),
                             );
-                            if ($email_comm != '')
-                                $data["dst"] .= ',' . $email_comm;
                             $errors = BimpTools::merge_array($errors, $task->validateArray($data));
                             $errors = BimpTools::merge_array($errors, $task->create());
+                            if ($email_comm != '')
+                                $data["dst"] .= ',' . $email_comm;
                             if (!count($errors)) {
                                 mailSyn2($data['subj'], $data['dst'], null, $data['txt']);
                             }

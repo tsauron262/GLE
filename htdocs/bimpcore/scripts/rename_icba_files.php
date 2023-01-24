@@ -6,7 +6,6 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
 
 $old_name = "atradius";
-$old_name = "icba_2023-01-24";
 
 $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
     'parent_module'      => 'bimpcore',

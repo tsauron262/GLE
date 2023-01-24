@@ -76,14 +76,14 @@ function traiteTask($dst, $src, $subj, $txt) {
     }
 
 
-    $const = "IDTASK:5467856456";
+    $const = BIMP_Task::MARQEUR_MAIL;
     preg_match("/" . $const . "[0-9]*/", $txt, $matches);
     if (isset($matches[0])) {
         $idTask = str_replace($const, "", $matches[0]);
     }
     
-    if($dst == "sms-apple@bimp-groupe.net")
-        $idTask= 25350;
+//    if($dst == "sms-apple@bimp-groupe.net")
+//        $idTask= 25350;
 
     $tabTxt = explode("-------------", $txt);
     $tabTxt = explode("\n> ", $tabTxt[0]);

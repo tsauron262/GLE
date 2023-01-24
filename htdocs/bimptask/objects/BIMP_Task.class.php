@@ -62,11 +62,7 @@ class BIMP_Task extends BimpObject
         $to = implode(',', $mails);
         
         
-//        echo($to.'<br/>'.$subject.'<br/>'.$message);
-//        
-        $this->sendMail('tommy@bimp.fr', $this->mailReponse, $subject, $message, $rappel);
-//        
-//        mailSyn2($subject, $to, null, $message);
+        $this->sendMail($to, $this->mailReponse, $subject, $message, $rappel);
     }
     
     public function getUserNotif($excludeMy = false){
@@ -118,6 +114,12 @@ class BIMP_Task extends BimpObject
 
         $this->updateField('date_update', $this->getData('date_create'));
         $this->updateField('auto', ($this->getData('dst') != '') ? 1 : 0);
+        
+        if($this->getData('id_task')){
+            $parent = $this->getChildObject('task_mere');
+            if($parent->getData('status') == 4)
+                $parent->updateField('status', 1);
+        }
 
         return $return;
     }

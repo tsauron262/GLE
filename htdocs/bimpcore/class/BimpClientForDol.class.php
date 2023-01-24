@@ -24,18 +24,18 @@ class BimpClientForDol extends Bimp_Client
             foreach($clients as $c) {
                 
                 // Commercial
-//                $commercial = $c->getCommercial();
-//                $this->addError(implode('', $c->addNote($msg,
-//                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-//                                                        BimpNote::BN_DEST_USER, 0, (int) $commercial->getData('id'))));
-//
-////                // Groupe Atradius
-//                $this->addError(implode('', $c->addNote($msg,
-//                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-//                                                        BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
-//                
-//                $c->updateField('outstanding_limit_icba', 0);
-//                $c->update();
+                $commercial = $c->getCommercial();
+                $this->addError(implode('', $c->addNote($msg,
+                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                                        BimpNote::BN_DEST_USER, 0, (int) $commercial->getData('id'))));
+
+//                // Groupe Atradius
+                $this->addError(implode('', $c->addNote($msg,
+                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                                        BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
+                
+                $c->updateField('outstanding_limit_icba', 0);
+                $c->update();
 
                 $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';
                 $nb_rappels++;
@@ -95,16 +95,16 @@ class BimpClientForDol extends Bimp_Client
                 $msg = "L'encours ICBA pour ce client n'est valable que jusqu'au " . $date_validite->format("d/m/Y");
                 
 //                // Commercial
-//                $commercial = $c->getCommercial();
-//                $this->addError(implode('', $c->addNote($msg,
-//                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-//                                                        BimpNote::BN_DEST_USER, 0, (int) $commercial->getData('id'))));
-//
+                $commercial = $c->getCommercial();
+                $this->addError(implode('', $c->addNote($msg,
+                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                                        BimpNote::BN_DEST_USER, 0, (int) $commercial->getData('id'))));
+
 //                // Groupe Atradius
-//                $this->addError(implode('', $c->addNote($msg,
-//                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-//                                                        BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
-//                
+                $this->addError(implode('', $c->addNote($msg,
+                                                        BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                                                        BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
+                
                 $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';
                 $nb_rappels++;
             }

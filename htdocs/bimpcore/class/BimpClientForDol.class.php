@@ -50,6 +50,7 @@ class BimpClientForDol extends Bimp_Client
         $jour_avant_rappel = 365 + $days_before;
         $date_depot = new DateTime();
         $date_depot->modify('-' . $jour_avant_rappel . ' day');
+        $this->output .= "Considère les clients qui expire le: " . $date_depot->format("d/m/Y") . '<br/><br/>';
 
         $filters = array(
             'date_depot_icba' => array(
@@ -108,7 +109,7 @@ class BimpClientForDol extends Bimp_Client
             }
         }
 
-        $this->output .= "<br/><br/>Nombre de rappels d'expiration ICBA envoyé: $nb_rappels";
+        $this->output .= "<br/><br/>Nombre de rappels d'expiration ICBA envoyé: $nb_rappels/" . count($clients) ;
         return 0;
     }
 

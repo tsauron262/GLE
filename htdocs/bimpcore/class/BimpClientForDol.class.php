@@ -14,7 +14,7 @@ class BimpClientForDol extends Bimp_Client
     public function updateICBA()
     {
         $this->error = '';
-        $clients = $this->getClientsFinValiditeICBA(-1);
+        $clients = $this->getClientsFinValiditeICBA(0);
         
         $nb_rappels = 0;
         $msg .= "Encours ICBA passé à 0 € (expiration après 1 an)";
@@ -35,8 +35,9 @@ class BimpClientForDol extends Bimp_Client
 //                                                        BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
 //                
 //                $c->updateField('outstanding_limit_icba', 0);
-//
-//                $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';
+//                $c->update();
+
+                $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';
                 $nb_rappels++;
             }
         }
@@ -77,7 +78,7 @@ class BimpClientForDol extends Bimp_Client
         return $clients;
     }
 
-    public function rappelCBA($days)
+    public function rappelICBA($days)
     {
         $this->error = '';
         $clients = $this->getClientsFinValiditeICBA($days);

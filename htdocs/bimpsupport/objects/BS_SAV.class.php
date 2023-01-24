@@ -5460,6 +5460,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
                                 $facture->array_options['options_centre'] = $this->getData('code_centre');
                                 $facture->array_options['options_expertise'] = 90;
+                                foreach($propal->getRibArray() as $idR => $inut){
+                                    $facture->array_options['options_rib_client'] = $idR;
+                                    break;
+                                }
+                                
+//                                $facture->array_options['options_rib_client'] = 
 
                                 $facture->linked_objects[$facture->origin] = $facture->origin_id;
                                 if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {

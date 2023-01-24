@@ -15,6 +15,8 @@ $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
 
 $nb_fichier_trouve = $nb_fichier_introuvable = 0;
 
+echo '<table>';
+
 foreach($files as $f) {
     $client = BimpCache::getBimpObjectInstance($f->getData('parent_module'), $f->getData('parent_object_name'), $f->getData('id_parent'));
     if(file_exists($f->getFilePath())) {

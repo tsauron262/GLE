@@ -584,17 +584,18 @@ class BimpDolObject extends BimpObject
                 switch ($type) {
                     case 'fichinter':
                         $bcInter = BimpCollection::getInstance('bimptechnique', 'BT_ficheInter');
-                        $bcInter->addFields(array('datec', 'fk_statut'));
+                        $bcInter->addFields(array('datec', 'fk_statut', 'datei'));
                         $bcInter->addItems($ids);
                         foreach ($ids as $id) {
                             $fi_instance = $bcInter->getObjectInstance((int) $id);
 
                             if (BimpObject::objectLoaded($fi_instance)) {
+                                $fi_instance->printData();
                                 $icon = $fi_instance->params['icon'];
                                 $objects[] = array(
                                     'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($fi_instance->getLabel()),
                                     'ref'    => $fi_instance->getNomUrl(0, true, true, null),
-                                    'date'   => $fi_instance->displayData('datec'),
+                                    'date'   => $fi_instance->displayData('datei'),
                                     'status' => $fi_instance->displayData('fk_statut')
                                 );
                             }

@@ -590,7 +590,6 @@ class BimpDolObject extends BimpObject
                             $fi_instance = $bcInter->getObjectInstance((int) $id);
 
                             if (BimpObject::objectLoaded($fi_instance)) {
-                                $fi_instance->printData();
                                 $icon = $fi_instance->params['icon'];
                                 $objects[] = array(
                                     'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($fi_instance->getLabel()),

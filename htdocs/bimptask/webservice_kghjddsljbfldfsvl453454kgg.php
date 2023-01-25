@@ -28,7 +28,6 @@ $subj = urldecode($_REQUEST['subj']);
 $txt = urldecode($_REQUEST['txt']); 
 
 
-$src = 'a.delauzun@bimp.fr';
 
 traiteTask($dst, $src, $subj, $txt);
 

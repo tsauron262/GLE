@@ -787,6 +787,12 @@ class BimpObject extends BimpCache
         return '';
     }
 
+    public function getIsObjectActiveFields()
+    {
+        // Fonction renommée car le nom ititial prête à confusion (getActiveFields = obtenir les champs actifs)
+        return array();
+    }
+    
     public function getSearchListFilters()
     {
         return array();
@@ -1199,6 +1205,16 @@ class BimpObject extends BimpCache
         return (int) ($this->isLoaded() ? 0 : 1);
     }
 
+    public function isActif()
+    {
+        $activeFields = $this->getActiveFields();
+        foreach ($activeFields as $field) {
+            if ($this->getData($field) < 1)
+                return false;
+        }
+        return 1;
+    }
+    
     public function field_exists($field_name)
     {
         if ($field_name === $this->getPrimary()) {
@@ -8828,21 +8844,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         return $this->getLink($params);
-    }
-
-    public function getActiveFields()
-    {
-        return array();
-    }
-
-    public function isActif()
-    {
-        $activeFields = $this->getActiveFields();
-        foreach ($activeFields as $field) {
-            if ($this->getData($field) < 1)
-                return false;
-        }
-        return 1;
     }
 
     public function getLink($params = array(), $forced_context = '')

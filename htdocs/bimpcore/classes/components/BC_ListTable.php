@@ -291,8 +291,8 @@ class BC_ListTable extends BC_List
         } else {
             $col_params = self::getObjectConfigColParams($this->object, $col_name, $this->name);
         }
-
-        if ($col_name == $this->object->getRefProperty())
+        
+        if($col_name == $this->object->getRefProperty() || $col_name == $this->object->getPrimary())
             $col_params['object_link'] = 1;
 
         if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {

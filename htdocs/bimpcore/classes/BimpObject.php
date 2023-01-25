@@ -2613,8 +2613,8 @@ class BimpObject extends BimpCache
         }
 
         if ($type) {
-            if ($type == 'id_object' && $value == 0 && $this->isDolObject())
-                $value = null;
+//            if ($type == 'id_object' && $value == 0 && $this->isDolObject())//todo pose probléme pour la suppression des obje liée quand il sont inexistant.
+//                $value = null;
 
             // Ajustement du format des dates dans le cas des objets Dolibarr:
             if ($this->isDolField($field)) {

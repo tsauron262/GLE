@@ -28,7 +28,8 @@ class BIMP_Task extends BimpObject
     public static $valStatus = array(0 => array('label' => "A traiter", 'classes' => array('danger')), 1 => array('label' => "En cours", 'classes' => array('important')), 2 => array('label' => "Attente utilisateur", 'classes' => array('danger')), 3 => array('label' => "Attente technique", 'classes' => array('danger')), 4 => array('label' => "Terminé", 'classes' => array('success')));
     public static $valPrio = array(0 => array('label' => "Normal", 'classes' => array('info')), 20 => array('label' => "Urgent", 'classes' => array('error')));
     const MARQEUR_MAIL = "IDTASK:5467856456";
-    public $mailReponse = 'reponse@bimp-groupe.net';
+    const ID_USER_DEF = 215;
+    public $mailReponse = 'Tâche ERP<reponse@bimp-groupe.net>';
 //    public $mailReponse = 'sms-apple@bimp-groupe.net';
 
 //    public function areNotesEditable()
@@ -330,6 +331,27 @@ class BIMP_Task extends BimpObject
         return 0;
     }
     
+    public function reouvrir(){
+        if($this->getData('status') == 4){
+            $this->updateField('status', 1);
+            $parentTask = $this->getChildObject('task_mere');
+            if($parentTask && $parentTask->isLoaded()){
+                $parentTask->reouvrir();
+            }
+        }
+    }
+    
+    public function addRepMail($user, $src, $txt){
+        if($this->getData('status') == 4){
+            $this->reouvrir();
+            $txt = 'Cettte tâche est réouverte a la suite d\'un messsage<br/><br/>'.$txt;
+        }
+        $this->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, ($user->id == self::ID_USER_DEF ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), null, null, null, 0);
+        foreach($this->getUserNotif(true) as $userT){
+            $this->addNote($txt, null, 0, 0, $src, ($user->id == self::ID_USER_DEF ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), BimpNote::BN_DEST_USER, null, (int) $userT->id, 1);
+        }
+    }   
+    
     public function displaySousTache(){
         $bc = new BC_ListTable(BimpObject::getInstance($this->module, $this->object_name), 'sousTache', 1, null, 'Sous Tâches');
         $bc->addFieldFilterValue('id_task', $this->id);
@@ -388,10 +410,12 @@ class BIMP_Task extends BimpObject
             
             
             $notes = $this->getNotes();
+            if(count($notes)){
             $msg .= "<br/><br/>Fil de discussion :";
-            foreach ($notes as $note) {
-                $msg .= $sep;
-                $msg .= $note->getData("content");
+                foreach ($notes as $note) {
+                    $msg .= $sep;
+                    $msg .= $note->getData("content");
+                }
             }
         }
 
@@ -481,7 +505,7 @@ class BIMP_Task extends BimpObject
         $success = "statut modifié";
         $errors = $this->updateField("status", $data['status']);
 
-        $msg = 'Statut passé à "'.$this->displayData('status').'" '.$data['text'];
+        $msg = 'Statut passé à "'.$this->displayData('status').'"<br/>'.$data['text'];
         
         if($data['notif']){
             $this->notifier('Changement statut tâche "'.$this->getData('subj').'"', $msg, true);

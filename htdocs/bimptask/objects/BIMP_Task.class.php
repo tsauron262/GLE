@@ -503,7 +503,7 @@ class BIMP_Task extends BimpObject
         $success = "statut modifié";
         $errors = $this->updateField("status", $data['status']);
 
-        $msg = 'Statut passé à "'.$this->displayData('status').'" '.$data['text'];
+        $msg = 'Statut passé à "'.$this->displayData('status').'"<br/>'.$data['text'];
         
         if($data['notif']){
             $this->notifier('Changement statut tâche "'.$this->getData('subj').'"', $msg, true);

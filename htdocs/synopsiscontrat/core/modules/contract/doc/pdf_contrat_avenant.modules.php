@@ -348,6 +348,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     "CMO" => ['label' => "Contrat de monitoring", 'classes' => [], 'icon' => 'terminal'],
                     "CSP" => ['label' => "Contrat de spare", 'classes' => [], 'icon' => 'share'],
                     "CDP" => ['label' => "Contrat de délégation du personnel", 'classes' => [], 'icon' => 'male'],
+                    "CMQ" => ['label' => "Contrat monétique", 'classes' => [], 'icon' => 'fas_file-invoice-dollar'],
                 ];
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->id);
                 $dateContrat = new DateTime($c->getData('date_start'));

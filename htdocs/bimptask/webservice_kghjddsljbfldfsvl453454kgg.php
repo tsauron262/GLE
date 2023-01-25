@@ -88,6 +88,9 @@ function traiteTask($dst, $src, $subj, $txt) {
 
     $tabTxt = explode("-------------", $txt);
     $tabTxt = explode("\n> ", $tabTxt[0]);
+    $tabTxt = explode("Ce message et éventuellement les pièces jointes ", $tabTxt[0]);
+    
+    
     
     $txt = rtrim($tabTxt[0]);
     

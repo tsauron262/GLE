@@ -29,7 +29,7 @@ class BIMP_Task extends BimpObject
     public static $valPrio = array(0 => array('label' => "Normal", 'classes' => array('info')), 20 => array('label' => "Urgent", 'classes' => array('error')));
     const MARQEUR_MAIL = "IDTASK:5467856456";
     const ID_USER_DEF = 215;
-    public $mailReponse = 'reponse@bimp-groupe.net';
+    public $mailReponse = 'Tâche ERP<reponse@bimp-groupe.net>';
 //    public $mailReponse = 'sms-apple@bimp-groupe.net';
 
 //    public function areNotesEditable()

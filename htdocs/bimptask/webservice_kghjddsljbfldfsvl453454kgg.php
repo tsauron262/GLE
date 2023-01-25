@@ -28,6 +28,9 @@ $subj = urldecode($_REQUEST['subj']);
 $txt = urldecode($_REQUEST['txt']); 
 
 
+if(stripos($subj, 'Réponse automatique') === 0){//on ne traite pas
+    die;
+}
 
 traiteTask($dst, $src, $subj, $txt);
 

@@ -274,6 +274,7 @@ lists:
 views:
     default: 
 #        title: nom
+        objects_change_reload: BIMP_Task,BimpNote
         edit_form: default
         delete_btn: 1
         rows:    

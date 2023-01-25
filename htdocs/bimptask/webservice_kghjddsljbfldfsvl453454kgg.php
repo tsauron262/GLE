@@ -21,7 +21,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 $controller = BimpController::getInstance('bimptask');
 
-define("ID_USER_DEF", 215);
 
 $dst = urldecode($_REQUEST['dst']); 
 $src = urldecode($_REQUEST['src']); 
@@ -59,6 +58,8 @@ if (!($dst != "" && $src != "" && $subj != "" && $txt != "")) {
 
 function traiteTask($dst, $src, $subj, $txt) {
     global $db, $user;
+    
+    BimpObject::loadClass('bimptask', 'BIMP_Task');
     
     $errors = array();
     echo "traite" . $subj;
@@ -98,7 +99,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         $user->fetch($ln->rowid);
     }
     else
-        $user->fetch(ID_USER_DEF);
+        $user->fetch(BIMP_Task::ID_USER_DEF);
     
 //    @$user->rights->bimptask->$dst->write = 1;
 //    @$user->rights->bimptask->other->write = 1;
@@ -116,11 +117,12 @@ function traiteTask($dst, $src, $subj, $txt) {
         $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
         $errors = BimpTools::merge_array($errors, $task->create());
     } else {
-        echo "<br/>Création note, task : ".$idTask;
-        $note = BimpObject::getInstance("bimpcore", "BimpNote");
-        $tab = array("obj_type" => "bimp_object", "obj_module" => "bimptask", "obj_name" => "BIMP_Task", "id_obj" => $idTask, "type_author" => "3", "email" => $src, "visibility" => 4, "content" => $txt);
-        $errors = BimpTools::merge_array($errors, $note->validateArray($tab));
-        $errors = BimpTools::merge_array($errors, $note->create());
+        $task = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', $idTask);
+        if($task && $task->isLoaded()){
+            $task->addRepMail($user, $src, $txt);
+        }
+        else
+            mailSyn2 ('Id task non existant', 'dev@bimp.fr', null, 'Un mail a était recu avec une tache inexistante : '.$idTask);
         
 //        $errors = BimpTools::merge_array($errors, $task->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, 3));
     }

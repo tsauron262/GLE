@@ -331,9 +331,19 @@ class BIMP_Task extends BimpObject
         return 0;
     }
     
-    public function addRepMail($user, $src, $txt){
+    public function reouvrir(){
         if($this->getData('status') == 4){
             $this->updateField('status', 1);
+            $parentTask = $this->getChildObject('task_mere');
+            if($parentTask && $parentTask->isLoaded()){
+                $parentTask->reouvrir();
+            }
+        }
+    }
+    
+    public function addRepMail($user, $src, $txt){
+        if($this->getData('status') == 4){
+            $this->reouvrir();
             $txt = 'Cettte tâche est réouverte a la suite d\'un messsage<br/><br/>'.$txt;
         }
         $this->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, ($user->id == self::ID_USER_DEF ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), null, null, null, 0);

@@ -787,6 +787,12 @@ class BimpObject extends BimpCache
         return '';
     }
 
+    public function getIsObjectActiveFields()
+    {
+        // Fonction renommée car le nom ititial prête à confusion (getActiveFields = obtenir les champs actifs)
+        return array();
+    }
+    
     public function getSearchListFilters()
     {
         return array();
@@ -945,10 +951,10 @@ class BimpObject extends BimpCache
                         $search_filter .= ($search_filter ? ' AND ' : '') . '(' . $or_sql . ')';
                     }
                 }
-                
-                if ($options['active']){
-                    $fields = $this->getActiveFields();
-                    foreach($fields as $field){
+
+                if ($options['active']) {
+                    $fields = $this->getIsObjectActiveFields();
+                    foreach ($fields as $field) {
                         $filters[$field] = 1;
                     }
                 }
@@ -1199,6 +1205,16 @@ class BimpObject extends BimpCache
         return (int) ($this->isLoaded() ? 0 : 1);
     }
 
+    public function isActif()
+    {
+        $activeFields = $this->getIsObjectActiveFields();
+        foreach ($activeFields as $field) {
+            if ($this->getData($field) < 1)
+                return false;
+        }
+        return 1;
+    }
+    
     public function field_exists($field_name)
     {
         if ($field_name === $this->getPrimary()) {
@@ -1588,9 +1604,10 @@ class BimpObject extends BimpCache
                 continue;
             }
 
-            $db_value = $this->getDbValue($field, $value);
+            $null_allowed = (int) $this->getConf('fields/' . $field . '/null_allowed', 0);
+            $db_value = $this->getDbValue($field, $value, $null_allowed);
 
-            if (!is_null($db_value) || (int) $this->getConf('fields/' . $field . '/null_allowed', 0)) {
+            if (!is_null($db_value) || $null_allowed) {
                 $this->checkFieldHistory($field, $value);
                 $data[$field] = $db_value;
             }
@@ -1599,7 +1616,7 @@ class BimpObject extends BimpCache
         return $data;
     }
 
-    public function getDbValue($field_name, $value)
+    public function getDbValue($field_name, $value, &$null_allowed = 0)
     {
         if ($this->field_exists($field_name)) {
             $this->checkFieldValueType($field_name, $value);
@@ -1636,6 +1653,17 @@ class BimpObject extends BimpCache
                     } elseif (is_array($value)) {
                         $delimiter = $this->getConf('fields/' . $field_name . '/items_delimiter', ',');
                         $value = implode($delimiter, $value);
+                    }
+                    break;
+
+                case 'id_object':
+                    if (!$value && $this->isDolObject()) {
+                        // Pour les ID = 0 des objets Dolibarr on enregistre NULL en base pour contourner les contraintes de clés étrangères.  
+                        $dol_prop = $this->getConf('fields/' . $field_name . '/dol_prop', $field_name);
+                        if (property_exists($this->dol_object, $dol_prop)) {
+                            $null_allowed = 1;
+                            $value = null;
+                        }
                     }
                     break;
             }
@@ -2613,9 +2641,6 @@ class BimpObject extends BimpCache
         }
 
         if ($type) {
-//            if ($type == 'id_object' && $value == 0 && $this->isDolObject())//todo pose probléme pour la suppression des obje liée quand il sont inexistant.
-//                $value = null;
-
             // Ajustement du format des dates dans le cas des objets Dolibarr:
             if ($this->isDolField($field)) {
                 if (in_array($type, array('datetime', 'date'/* , 'time' */))) {
@@ -3124,7 +3149,7 @@ class BimpObject extends BimpCache
 
     protected function checkSqlFilters($filters, &$joins = array(), $main_alias = '', &$extra_filters = null)
     {
-        // Vérifie les clés sql pour les champs filtrés (
+        // Vérifie les clés sql pour les champs filtrés
         $return = array();
         $add_extra_filters = false;
 
@@ -3144,7 +3169,17 @@ class BimpObject extends BimpCache
                 $sqlKey = '';
 
                 $field_name = '';
-                if ($main_alias && preg_match('/^(' . preg_quote($main_alias, '/') . '\.)(.+)$/', $field, $matches)) {
+                if (strpos($field, ':') !== false) {
+                    $child = null;
+                    $field_alias = '';
+                    $children = explode(':', $field);
+                    $child_field_name = array_pop($children);
+                    $col_errors = $this->getRecursiveChildrenJoins($children, $filters, $joins, $main_alias, $field_alias, $child);
+
+                    if (empty($col_errors) && is_a($child, 'bimpObject')) {
+                        $sqlKey = $child->getFieldSqlKey($child_field_name, $field_alias, null, $filters, $joins);
+                    }
+                } elseif ($main_alias && preg_match('/^(' . preg_quote($main_alias, '/') . '\.)(.+)$/', $field, $matches)) {
                     $field_name = $matches[2];
                 } elseif (!preg_match('/\./', $field)) {
                     $field_name = $field;
@@ -3156,16 +3191,7 @@ class BimpObject extends BimpCache
                     if ($this->field_exists($field_name)) {
                         $sqlKey = $this->getFieldSqlKey($field_name, $main_alias, null, $extra_filters, $joins);
                     } else {
-                        /*todo a verifier*/
-                        $tabTmp = explode(':', $field_name);
-                        if(isset($tabTmp[1])){
-                            $child = $tabTmp[0];
-                            $field_name = $tabTmp[1];
-                            $sqlKey = $this->getFieldSqlKey($field_name, $main_alias, $child, $extra_filters, $joins);
-                        }
-                        else
-                            /*todo fin a verifier*/
-                            $sqlKey = $field;
+                        $sqlKey = $field_name;
                     }
                 }
 
@@ -6596,7 +6622,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $filterLinked = array('linked' => array('or' => array()));
                     foreach ($linkedObjects as $data_linked => $inut) {
                         $data_linked = json_decode($data_linked, true);
-                        if (!in_array($data_linked['object_name'], array('Equipment', 'BS_SAV'))) {
+                        if (!in_array($data_linked['object_name'], array('Equipment', 'BS_SAV', 'BR_Reservation'))) {
                             $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
                                     'obj_module' => $data_linked['module'],
                                     'obj_name'   => $data_linked['object_name'],
@@ -8819,21 +8845,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         return $this->getLink($params);
     }
-    
-    public function getActiveFields(){
-        return array();
-    }
-    
-    public function isActif(){
-        $activeFields = $this->getActiveFields();
-        foreach($activeFields as $field){
-            if($this->getData($field) < 1)
-                return false;
-        }
-        return 1;
-    }
 
-    
     public function getLink($params = array(), $forced_context = '')
     {
         // $params peut éventuellement être utilisé pour surcharger les paramères "nom_url" de l'objet. 
@@ -8847,8 +8859,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!$this->isLoaded()) {
             return '';
         }
-        
-        
+
+
         if (!$this->isActif()) {
             $params['disabled'] = true;
         }

@@ -11,8 +11,9 @@ class BS_ApplePart extends BimpObject
     private static $tabRefCommenceBatterie = array("661-15741", "661-04577", "661-04576", "661-08917", "661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755", "661-08935", "661-8216", "661-04578"); //Prix a 59
     private static $tabRefCommenceBatterieX = array("661-08932", "661-10565", "661-10850", "661-11035", //X
         "661-13574", "661-13569", "661-13624", //11   Prix a 84
-        "661-17920");//12 pro
-    private static $tabRefCommencePrixEcran = array("661-04856" => array("229"), "661-13114" =>  array("338,99"), "661-07285" => array("185,00"), "661-07286" => array("185,00"), "661-07287" => array("185,00"), "661-07288" => array("185,00"), "661-07289" => array("209,00"), "661-07290" => array("209,00"), "661-07291" => array("209,00"), "661-07292" => array("209,00"), "661-07293" => array("185,00"), "661-07294" => array("185,00"), "661-07295" => array("185,00"), "661-07296" => array("185,00"), "661-07297" => array("209,00"), "661-07298" => array("209,00"), "661-07299" => array("209,00"), "661-07300" => array("209,00"), "661-08933" => array("185,00"), "661-08934" => array("185,00"), "661-09081" => array("185,00"), "661-10102" => array("185,00"), "661-09032" => array("209,00"), "661-09033" => array("209,00"), "661-09034" => array("209,00"), "661-10103" => array("209,00"), "661-09294" => array("338,99"), "661-10608" => array("338,99"), "661-11037" => array("405,00"), "661-11232 " => array("239,00"), "661-14098" => array("239,00"), "661-14096" => array("338,99"), "661-14099" => array("405,00"), "661-17940" => array("279,00"), "661-18503" => array("338,99"), "661-18504" => array("338,99"), "661-18466" => array("405,00"), "661-22311" => array("279,00"), "661-21988" => array("338,99"), "661-21993" => array("338,99"), "661-22309" => array("405,00"), "661-15743" => array("185,00"), "661-26353" => array("185,00"));
+        "661-17920"); //12 pro
+    private static $tabRefCommenceBatterie14 = array('661-30397', '661-30382', '661-30394', '661-30373'); // Iphone 14 prix à 119,00 TTC
+    private static $tabRefCommencePrixEcran = array("661-30401" => array("489,00"), "661-29370" => array("405,00"), "661-30366", array("338,99"), "661-04856" => array("229"), "661-13114" => array("338,99"), "661-07285" => array("185,00"), "661-07286" => array("185,00"), "661-07287" => array("185,00"), "661-07288" => array("185,00"), "661-07289" => array("209,00"), "661-07290" => array("209,00"), "661-07291" => array("209,00"), "661-07292" => array("209,00"), "661-07293" => array("185,00"), "661-07294" => array("185,00"), "661-07295" => array("185,00"), "661-07296" => array("185,00"), "661-07297" => array("209,00"), "661-07298" => array("209,00"), "661-07299" => array("209,00"), "661-07300" => array("209,00"), "661-08933" => array("185,00"), "661-08934" => array("185,00"), "661-09081" => array("185,00"), "661-10102" => array("185,00"), "661-09032" => array("209,00"), "661-09033" => array("209,00"), "661-09034" => array("209,00"), "661-10103" => array("209,00"), "661-09294" => array("338,99"), "661-10608" => array("338,99"), "661-11037" => array("405,00"), "661-11232 " => array("239,00"), "661-14098" => array("239,00"), "661-14096" => array("338,99"), "661-14099" => array("405,00"), "661-17940" => array("279,00"), "661-18503" => array("338,99"), "661-18504" => array("338,99"), "661-18466" => array("405,00"), "661-22311" => array("279,00"), "661-21988" => array("338,99"), "661-21993" => array("338,99"), "661-22309" => array("405,00"), "661-15743" => array("185,00"), "661-26353" => array("185,00"));
     public static $componentsTypes = array(
         0   => 'Général',
         1   => 'Visuel',
@@ -315,6 +316,11 @@ class BS_ApplePart extends BimpObject
             if (stripos($ref, $val) === 0)
                 $type = "battX";
 
+        // Batteries IPhone 14
+        foreach (self::$tabRefCommenceBatterie14 as $val)
+            if (stripos($ref, $val) === 0)
+                $type = "batt14";
+
 
         //troisieme cas les ecran
 
@@ -431,7 +437,9 @@ class BS_ApplePart extends BimpObject
         $constPrix = 0;
         $newPrix = 0;
         //Application des coef et constantes
-        if ($type == "batt" && $price_type == "EXCHANGE") {
+        if ($type == 'batt14' && $price_type == 'EXCHANGE') {
+            $newPrix = 119;
+        } elseif ($type == "batt" && $price_type == "EXCHANGE") {
             $newPrix = 49.16666666;
         } elseif ($type == "battX" && $price_type == "EXCHANGE") {
             $newPrix = 70;
@@ -439,7 +447,7 @@ class BS_ApplePart extends BimpObject
             foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
                 if ($ref == $refT)
                     $newPrix = str_replace(",", ".", $tabInfo[0]) / 1.2;
-        }  elseif ($type == 'rear'){
+        } elseif ($type == 'rear') {
             if ($prix > 400)
                 $constPrix = $prix * 0.1 + 24.17;
             elseif ($prix > 350)

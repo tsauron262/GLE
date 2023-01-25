@@ -1009,6 +1009,27 @@ class Bimp_Client extends Bimp_Societe
                 return $name . $ext;
             else
                 return $name;
+        // On check les fichiers avec des date de crétion mal définit
+        } elseif(is_null($forced_date)) {
+            $date_plus_recente = null;
+            $files = $this->getFilesArray();
+            foreach ($files as $f) {
+                if(substr($f, 6, 5) == 'icba_') {
+                    $date_a_tester = date(substr($f, 11, 10));
+                    if($date_plus_recente < $date_a_tester)
+                        $date_plus_recente = $date_a_tester;
+                }
+            }
+
+            if(!is_null($date_plus_recente)) {
+//                die($date_plus_recente);
+                if(file_exists($this->getFilesDir() . 'icba_' . $date_plus_recente . $ext)) {
+                    if ($show_ext)
+                        return 'icba_' . $date_plus_recente . $ext;
+                    else
+                        return 'icba_' . $date_plus_recente;
+                }
+            }
         }
         return 0;
     }
@@ -3081,7 +3102,7 @@ class Bimp_Client extends Bimp_Societe
 
 
         if ($this->getData('outstanding_limit_icba') != $this->getInitData('outstanding_limit_icba') && $this->getData('outstanding_limit_icba') > 0 && !$this->getAtradiusFileName())
-            $errors[] = 'Il faut obligatoirement uploader le PDF avant de saisir une limite ICBA';
+            $errors[] = 'Il faut obligatoirement uploa@der le PDF avant de saisir une limite ICBA';
 
         if (count($errors))
             return $errors;

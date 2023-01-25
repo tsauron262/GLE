@@ -332,6 +332,10 @@ class BIMP_Task extends BimpObject
     }
     
     public function addRepMail($user, $src, $txt){
+        if($this->getData('status') == 4){
+            $this->updateField('status', 1);
+            $txt = 'Cettte tâche est réouverte a la suite d\'un messsage<br/><br/>'.$txt;
+        }
         $this->addNote($txt, 4, 0, 0, $src, ($user->id == self::ID_USER_DEF ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), null, null, null, 0);
         foreach($this->getUserNotif(true) as $userT){
             $this->addNote($txt, 4, 0, 0, $src, ($user->id == self::ID_USER_DEF ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), BimpNote::BN_DEST_USER, null, $userT->id, 1);

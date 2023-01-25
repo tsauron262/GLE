@@ -4063,9 +4063,9 @@ class ObjectLine extends BimpObject
 
         $this->getIdProductFromPost();
 
-        if (BimpTools::isSubmit('new_values/' . $this->id . '/' . $field))
+        if (BimpTools::isSubmit('new_values/' . $this->id . '/' . $field)) {
             $value = BimpTools::getValue('new_values/' . $this->id . '/' . $field);
-        elseif ($field === 'id_product') {
+        } elseif ($field === 'id_product') {
             $value = (int) $this->id_product;
         } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'pa_ht', 'remisable', 'desc'))) {
             $value = $this->getValueByProduct($field);
@@ -4262,8 +4262,11 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'tva_tx':
-                if (!$this->isLoaded())
+                // ATTENTION $value contient la TVA du produit si celui-ci est sélectionné. 
+                if (is_null($value) && !$this->isLoaded()) {
                     $value = $this->getDefaultTva();
+                }
+
                 $parent = $this->getParentInstance();
 
                 if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {

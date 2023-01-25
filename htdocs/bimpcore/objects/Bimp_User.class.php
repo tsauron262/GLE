@@ -156,8 +156,9 @@ class Bimp_User extends BimpObject
     {
         return $this->getInstanceName();
     }
-    
-    public function getActiveFields(){
+
+    public function getIsObjectActiveFields()
+    {
         return array('statut');
     }
 
@@ -377,11 +378,10 @@ class Bimp_User extends BimpObject
             'icon_before' => 'fas_plus-circle',
             'attr'        => array(
                 'type'    => 'button',
-                'onclick' => "document.location.replace('".DOL_URL_ROOT."/user/card.php?leftmenu=users&action=create');"
+                'onclick' => "document.location.replace('" . DOL_URL_ROOT . "/user/card.php?leftmenu=users&action=create');"
             )
         );
-        
-        
+
         //        global $user;
         //
         //        if ($user->admin) {

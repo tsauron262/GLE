@@ -953,7 +953,7 @@ class BimpObject extends BimpCache
                 }
 
                 if ($options['active']) {
-                    $fields = $this->getActiveFields();
+                    $fields = $this->getIsObjectActiveFields();
                     foreach ($fields as $field) {
                         $filters[$field] = 1;
                     }
@@ -1207,7 +1207,7 @@ class BimpObject extends BimpCache
 
     public function isActif()
     {
-        $activeFields = $this->getActiveFields();
+        $activeFields = $this->getIsObjectActiveFields();
         foreach ($activeFields as $field) {
             if ($this->getData($field) < 1)
                 return false;

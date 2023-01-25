@@ -83,8 +83,8 @@ function traiteTask($dst, $src, $subj, $txt) {
         $idTask = str_replace($const, "", $matches[0]);
     }
     
-//    if($dst == "sms-apple@bimp-groupe.net")
-//        $idTask= 25350;
+    if($dst == "sms-apple@bimp-groupe.net")
+        $idTask= 25350;
 
     $tabTxt = explode("-------------", $txt);
     $tabTxt = explode("\n> ", $tabTxt[0]);
@@ -108,10 +108,10 @@ function traiteTask($dst, $src, $subj, $txt) {
 //    @$user->rights->bimptask->other->write = 1;
 
 
-    if ($idTask > 0) {
-        if(!$task->fetch($idTask) || $task->getData("status") > 3)
-            $idTask = 0;
-    }
+//    if ($idTask > 0) {
+//        if(!$task->fetch($idTask) || $task->getData("status") > 3)
+//            $idTask = 0;
+//    }
     
     if ($idTask < 1) {
         

@@ -114,8 +114,8 @@ function traiteTask($dst, $src, $subj, $txt) {
         if(!is_dir($dir))
             mkdir($dir);
         foreach($_FILES as $fileT){
-//            $dir = "/data/DOCUMENTS/bimp/societe/154049/";
-            $file = BimpTools::cleanStringForUrl($fileT['name']);
+            $replacePoint = '889jjjll';
+            $file = str_replace($replacePoint, '.', BimpTools::cleanStringForUrl(str_replace('.', $replacePoint, $fileT['name'])));
             
             
             move_uploaded_file($fileT['tmp_name'], $dir.$file);

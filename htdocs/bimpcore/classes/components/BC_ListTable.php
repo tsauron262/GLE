@@ -291,8 +291,8 @@ class BC_ListTable extends BC_List
         } else {
             $col_params = self::getObjectConfigColParams($this->object, $col_name, $this->name);
         }
-        
-        if($col_name == $this->object->getRefProperty())
+
+        if ($col_name == $this->object->getRefProperty())
             $col_params['object_link'] = 1;
 
         if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
@@ -1056,7 +1056,7 @@ class BC_ListTable extends BC_List
                 }
                 $content = BimpRender::renderAlerts($col_errors);
             } else {
-                if ($field_object->field_exists($field_name) && !$field_object->getConf('fields/'.$field_name.'/extra', 0, false, 'bool')) {
+                if ($field_object->field_exists($field_name) && !$field_object->getConf('fields/' . $field_name . '/extra', 0, false, 'bool')) {
                     $bc_field = new BC_Field($field_object, $field_name);
                     if (!$label) {
                         $label = $bc_field->getParam('label', $field_name);
@@ -1227,14 +1227,14 @@ class BC_ListTable extends BC_List
             $html .= '</div>';
         }
 
-        foreach($this->params['graph'] as $idGraph => $nomGraph){
+        foreach ($this->params['graph'] as $idGraph => $nomGraph) {
             $dataGraph = $this->object->getInfoGraph($idGraph);
-            $html .= '<div id="' . $this->identifier .'_'.$idGraph. '_chartContainer" style="height: 300px; width: 100%;"></div>';
+            $html .= '<div id="' . $this->identifier . '_' . $idGraph . '_chartContainer" style="height: 300px; width: 100%;"></div>';
             $html .= '<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>';
             $html .= '<script>';
-            $html .= '$("body").on("listLoaded", function(e){if(e.$list.attr("id") == \''.$this->identifier."')updateGraph('" . $this->identifier . "', ".$idGraph.", '" . $this->name . "');});";
-            if($dataGraph['mode_data'] == 'objects')
-                $html .= "$('#".$this->identifier."').on('listRefresh', function(){updateGraph('" . $this->identifier . "', ".$idGraph.", '" . $this->name . "');});";
+            $html .= '$("body").on("listLoaded", function(e){if(e.$list.attr("id") == \'' . $this->identifier . "')updateGraph('" . $this->identifier . "', " . $idGraph . ", '" . $this->name . "');});";
+            if ($dataGraph['mode_data'] == 'objects')
+                $html .= "$('#" . $this->identifier . "').on('listRefresh', function(){updateGraph('" . $this->identifier . "', " . $idGraph . ", '" . $this->name . "');});";
             $html .= '</script>';
         }
 
@@ -2092,14 +2092,14 @@ class BC_ListTable extends BC_List
                 $tools_html .= '</div>';
             }
 
-            foreach($this->params['graph'] as $idGraph => $nameGraph){
+            foreach ($this->params['graph'] as $idGraph => $nameGraph) {
                 $tools_html .= '<div style="text-align: center;">';
                 $tools_html .= BimpRender::renderButton(array(
                             'classes'     => array('btn', 'btn-default'),
-                            'label'       => 'Actualiser le graphique '.$nameGraph,
+                            'label'       => 'Actualiser le graphique ' . $nameGraph,
                             'icon_before' => 'fas_chart-pie',
                             'attr'        => array(
-                                'onclick' => "updateGraph('" . $this->identifier . "', ".$idGraph.", '" . $this->name . "');"
+                                'onclick' => "updateGraph('" . $this->identifier . "', " . $idGraph . ", '" . $this->name . "');"
                             )
                 ));
                 $tools_html .= '</div>';
@@ -2396,7 +2396,7 @@ class BC_ListTable extends BC_List
                 $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
 
                 if ($light_export) {
-                    if (!is_a($field_object, 'BimpObject') || ((!$field_object->field_exists($field_name)  ||  $field_object->getConf('fields/'.$field_name.'/extra', 0, false, 'bool')) && !method_exists($field_object, 'get' . ucfirst($field_name) . 'csvValue'))) {
+                    if (!is_a($field_object, 'BimpObject') || ((!$field_object->field_exists($field_name) || $field_object->getConf('fields/' . $field_name . '/extra', 0, false, 'bool')) && !method_exists($field_object, 'get' . ucfirst($field_name) . 'csvValue'))) {
                         continue;
                     }
                 }
@@ -2518,7 +2518,7 @@ class BC_ListTable extends BC_List
                 $base_col_name = $col_name;
                 $col_name = str_replace(':', '___', $col_name);
 
-                if (is_a($field_object, 'BimpObject') && $field_object->field_exists($field_name) && !$field_object->getConf('fields/'.$field_name.'/extra', 0, false, 'bool')) {
+                if (is_a($field_object, 'BimpObject') && $field_object->field_exists($field_name) && !$field_object->getConf('fields/' . $field_name . '/extra', 0, false, 'bool')) {
                     $sqlKey = '';
 
                     if (method_exists($this->object, 'get' . ucfirst($col_name) . 'SqlKey')) {

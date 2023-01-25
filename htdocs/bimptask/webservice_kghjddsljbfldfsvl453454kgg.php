@@ -114,7 +114,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         if(!is_dir($dir))
             mkdir($dir);
         foreach($_FILES as $fileT){
-            $file = BimpTools::cleanStringForUrl(str_replace('.'.pathinfo($fileT['tmp_name'], PATHINFO_EXTENSION), '', $fileT['name'])).'.'.pathinfo($fileT['tmp_name'], PATHINFO_EXTENSION);
+            $file = BimpTools::cleanStringForUrl(str_replace('.'.pathinfo($fileT['name'], PATHINFO_EXTENSION), '', $fileT['name'])) . '.' . pathinfo($fileT['name'], PATHINFO_EXTENSION);
             
             
             move_uploaded_file($fileT['tmp_name'], $dir.$file);

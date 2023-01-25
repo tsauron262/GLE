@@ -64,7 +64,6 @@ function traiteTask($dst, $src, $subj, $txt) {
     $errors = array();
     echo "traite" . $subj;
     $idTask = 0;
-    $task = BimpObject::getInstance("bimptask", "BIMP_Task");
 
 //    $dst = str_replace("bimp-groupe.net", "bimp.fr", $dst);
     $dst = str_replace("console@", "consoles@", $dst);
@@ -115,6 +114,7 @@ function traiteTask($dst, $src, $subj, $txt) {
     
     if ($idTask < 1) {
         
+        $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         echo "<br/>Création task";
         $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "");
         $errors = BimpTools::merge_array($errors, $task->validateArray($tab));

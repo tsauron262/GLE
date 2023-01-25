@@ -340,6 +340,7 @@ class BIMP_Task extends BimpObject
         foreach($this->getUserNotif(true) as $userT){
             $this->addNote($txt, 4, 0, 0, $src, ($user->id == self::ID_USER_DEF ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), BimpNote::BN_DEST_USER, null, $userT->id, 1);
         }
+        $this->addNote('fin');
     }   
     
     public function displaySousTache(){

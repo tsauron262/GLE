@@ -410,10 +410,12 @@ class BIMP_Task extends BimpObject
             
             
             $notes = $this->getNotes();
+            if(count($notes)){
             $msg .= "<br/><br/>Fil de discussion :";
-            foreach ($notes as $note) {
-                $msg .= $sep;
-                $msg .= $note->getData("content");
+                foreach ($notes as $note) {
+                    $msg .= $sep;
+                    $msg .= $note->getData("content");
+                }
             }
         }
 

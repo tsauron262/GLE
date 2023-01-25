@@ -97,9 +97,21 @@ class BimpCollection
             if ($this->isObjectInCache($id)) {
                 continue;
             }
-
-            if ($id && !isset($this->data[$id])) {
+            
+            if(!$id){
+                continue;
+            }
+            elseif(!isset($this->data[$id])) {
                 $ids[] = $id;
+            }
+            else{
+                foreach($this->fields_sup as $field){//objet deja dans collection mais avec chmp  en plus
+                    if(!isset($this->data[$id][$field])){
+                        $ids[] = $id;
+                        $this->object->id = 0;
+                        break;
+                    }
+                }
             }
         }
 

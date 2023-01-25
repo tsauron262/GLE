@@ -28,33 +28,8 @@ $subj = urldecode($_REQUEST['subj']);
 $txt = urldecode($_REQUEST['txt']); 
 
 
-if($_REQUEST["old"]){
-    $commande = new Commande($db);
-    $sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."commande` WHERE `validComm` > 0 AND (`validFin` < 1 || validFin is NULL) AND fk_statut = 0 ORDER BY `".MAIN_DB_PREFIX."commande`.`tms` DESC");
-    while($ln=$db->fetch_object($sql)){
-        $commande->fetch($ln->rowid);
-        $commande->valid($user);
-        echo "Validation ".$commande->getNomUrl(1);
-    }
-}
 
-
-
-
-
-
-if (!($dst != "" && $src != "" && $subj != "" && $txt != "")) {
-//    echo "Pas de données <pre>".print_r($_REQUEST,1);
-    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."bimp_task2");
-    while ($ln = $db->fetch_object($sql)) {
-        if (traiteTask($ln->dst, $ln->src, $ln->subj, $ln->txt)) {
-            $db->query("DELETE FROM ".MAIN_DB_PREFIX."bimp_task2 WHERE id =" . $ln->id);
-            echo "<br/>Tache 2 id : " . $ln->id;
-        }
-    }
-} else {
-    traiteTask($dst, $src, $subj, $txt);
-}
+traiteTask($dst, $src, $subj, $txt);
 
 function traiteTask($dst, $src, $subj, $txt) {
     global $db, $user;
@@ -87,7 +62,7 @@ function traiteTask($dst, $src, $subj, $txt) {
 
     $tabTxt = explode("-------------", $txt);
     $tabTxt = explode("\n> ", $tabTxt[0]);
-    $tabTxt = explode("Ce message et éventuellement les pièces jointes ", $tabTxt[0]);
+    $tabTxt = explode("Ce message et éventuellement les pièces jointes", $tabTxt[0]);
     
     
     

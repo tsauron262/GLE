@@ -140,7 +140,7 @@ function traiteTask($dst, $src, $subj, $txt) {
             mkdir($dir);
         foreach($_FILES as $fileT){
 //            $dir = "/data/DOCUMENTS/bimp/societe/154049/";
-            $file = $fileT['name'];
+            $file = BimpTools::cleanStringForUr($fileT['name']);
             
             
             move_uploaded_file($fileT['tmp_name'], $dir.$file);

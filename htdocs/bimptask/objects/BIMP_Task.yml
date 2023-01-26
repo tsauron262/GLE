@@ -5,17 +5,12 @@ icon: fas_tasks
 header_list_name: default
 header_btn:
     callback: getButtons
+    
+nom_url: 
+    modal_view: full
+    
 list_page_url: 
     controller: index
-    
-    
-#nom_url: 
-#    with_status: 1
-#    syntaxe: #<id> : <a.subj>
-    
-#parent_id_property: id_task
-#parent_object: BIMP_Task
-#parent_module: bimptask
         
 labels:
     name: tâche
@@ -66,43 +61,52 @@ fields:
     src:
         label: Source email
         type: text
+        
     dst:
         label: Destinataire email
         type: text
+        
     subj:
         label: Sujet
         type: text
+        
     txt:
         label: Description
         type: html
         hashtags: 1
+        
     comment:
         label: Commentaire
         type: text
         hashtags: 1
+        
     status:
         label: Statut
         type: int
         values: 
             array: status_list_task
+            
     prio:
         label: Priorité
         type: int
         values: 
             array: prio_list_task
+            
     sous_type:
         label: Sous Type
         type: int
         depends_on: type_manuel
         values: 
             array: sous_type_list_task
+            
     id_user_owner:
-        label: Attribuer à
+        label: Attribuée à
         type: id_object
         object: user_owner
         input:
             type: search_user
             include_empty: 1
+            
     test_ferme:
         label: Test pour Fermeture
         type: text
@@ -112,7 +116,7 @@ fields:
         type: bool
         
     type_manuel:
-        label: Type de tache manuel
+        label: Type de tâche manuel
         type: text
         values: 
             array: types_manuel
@@ -204,9 +208,11 @@ forms:
               input: 
                   type: toggle
               value: 1
+              
     attribute:
         rows:
             - field: id_user_owner
+            - field: comment
             
     changeStatut:
         rows:
@@ -242,7 +248,6 @@ lists_cols:
               options:
                 options:
                     callback: getTypeArray
-#                    array: valSrc
                             
 lists:
     default:
@@ -281,13 +286,17 @@ lists:
         extends: default
 
 views:
-    default: 
-#        title: nom
+    full: 
         objects_change_reload: BIMP_Task,BimpNote
         edit_form: default
         delete_btn: 1
         rows:    
-            - cols: 
+            header: 
+                cols: 
+                    - type: object_header
+                    
+            data: 
+                cols: 
                   - type: fields_table
                     col_lg: 12
                     col_md: 12
@@ -295,32 +304,28 @@ views:
                     fields_table:
                         name: default
           
-            - cols:
+            sous_taches: 
+                cols:
                 - type: custom
                   custom: 
-                      callback: displaySousTache
-            - cols:
+                      callback: renderSousTachesList
+            notes: 
+                cols:
                   - type: custom
                     custom: 
                         callback: renderNotesList
-            - cols: 
+            files: 
+                cols: 
                 - type: list
                   list: 
                       children: files
-#            - cols: 
-#                - type: list
-#                  list: 
-#                      children: task_fille
-#            - cols: 
-#                - type: custom
-#                  custom: 
-#                      callback: 
-#                          method: renderAssociatesList
-#                          params: 
-#                              - files
-#                              - associates
+                      
+    default: 
+        extends: full
+        rows: 
+            header: unset
+            
     notes: 
-#        title: nom
         edit_form: 0
         delete_btn: 0
         rows:    

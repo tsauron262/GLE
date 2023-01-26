@@ -54,7 +54,8 @@ function traiteTask($dst, $src, $subj, $txt) {
     }
 
 
-    $const = BIMP_Task::MARQEUR_MAIL;
+//    $const = BIMP_Task::MARQEUR_MAIL;
+    $const = BimpCore::getConf('marqueur_mail', null, 'bimptask');
     preg_match("/" . $const . "[0-9]*/", $txt, $matches);
     if (isset($matches[0])) {
         $idTask = str_replace($const, "", $matches[0]);
@@ -82,7 +83,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         $user->fetch($ln->rowid);
     }
     else
-        $user->fetch(BIMP_Task::ID_USER_DEF);
+        $user->fetch((int) BimpCore::getConf('id_user_def', null, 'bimptask'));
     
 //    @$user->rights->bimptask->$dst->write = 1;
 //    @$user->rights->bimptask->other->write = 1;

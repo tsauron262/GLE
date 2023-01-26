@@ -6585,7 +6585,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $list;
     }
 
-    public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false, $withLinked = true)
+    public function renderNotesList($filter_by_user = true, $list_name = "default", $suffixe = "", $archive = false, $withLinked = true)
     {
         if ($this->isLoaded()) {
             if ($archive) {
@@ -6594,7 +6594,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $note = BimpObject::getInstance('bimpcore', 'BimpNote');
             }
 
-            $list = new BC_ListTable($note, $list_model);
+            $list = new BC_ListTable($note, $list_name);
             $list->addIdentifierSuffix($suffixe);
             $list->addFieldFilterValue('obj_type', 'bimp_object');
             $list->addFieldFilterValue('obj_module', $this->module);

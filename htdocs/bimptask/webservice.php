@@ -19,8 +19,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 $controller = BimpController::getInstance('bimptask');
 
-define("ID_USER_DEF", 215);
-
 $dst = urldecode($_REQUEST['dst']); 
 $src = urldecode($_REQUEST['src']); 
 $subj = urldecode($_REQUEST['subj']); 
@@ -74,7 +72,8 @@ function traiteTask($dst, $src, $subj, $txt) {
     }
 
 
-    $const = "IDTASK:5467856456";
+    $const = BimpCore::getConf('marqueur_mail', null, 'bimptask');
+    
     preg_match("/" . $const . "[0-9]*/", $txt, $matches);
     if (isset($matches[0])) {
         $idTask = str_replace($const, "", $matches[0]);
@@ -96,7 +95,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         $user->fetch($ln->rowid);
     }
     else
-        $user->fetch(ID_USER_DEF);
+        $user->fetch((int) BimpCore::getConf('id_user_def', null, 'bimptask'));
     
     @$user->rights->bimptask->$dst->write = 1;
     @$user->rights->bimptask->other->write = 1;

@@ -973,7 +973,7 @@ class BimpCore
             return self::$context;
         }
 
-        return "ici";
+        return "private";
     }
 
     public static function setContext($context)

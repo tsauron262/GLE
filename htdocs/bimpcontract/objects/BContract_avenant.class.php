@@ -771,11 +771,11 @@ class BContract_avenant extends BContract_contrat {
     
     // Signature
     
-    public function getSignatureDocFileDir($doc_type) {
+    public function getSignatureDocFileDir($doc_type = '') {
 
     }
     
-    public function getSignatureDocFileName($doc_type, $signed = false) {
+    public function getSignatureDocFileName($doc_type = 'contrat', $signed = false) {
 
     }
     

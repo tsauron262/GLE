@@ -4057,8 +4057,24 @@ class BContract_contrat extends BimpDolObject
         $new_contrat->set('fk_statut', 1);
         $new_contrat->set('ref', '');
         $new_contrat->set('date_contrat', null);
+        
+        
+        if ($new_contrat->getData('objet_contrat') != 'CDP') {
+            $arrayServiceDelegation = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3');
+            $lines = $this->getChildrenObjects('lines');
+            foreach ($lines as $line) {
+                $product = $line->getChildObject('produit');
+                if ($product && $product->isLoaded()) {
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                    if (in_array($product->getRef(), $arrayServiceDelegation)) {
+                        $errors[] = 'Vous ne pouvez pas mettre le code service ' . $product->getRef() . ' dans un autre contrat que dans un contrat de délégation.';
+                    }
+                }
+            }
+        }
 
-        $errors = $new_contrat->create();
+        if(!count($errors))
+            $errors = $new_contrat->create();
 
         return Array(
             'success'  => $success,

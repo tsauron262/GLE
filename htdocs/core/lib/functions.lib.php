@@ -37,6 +37,14 @@
 
 include_once DOL_DOCUMENT_ROOT .'/core/lib/json.lib.php';
 
+        
+function dol_getprefix(){
+    $name = DOL_DOCUMENT_ROOT.DOL_URL_ROOT;
+    if(isset($_REQUEST['bimp_context']) && $_REQUEST['bimp_context'] == 'public')
+        $name .= 'espaceclient';
+    return dol_hash($name);
+}
+
 
 /**
  * Function to return value of a static property when class

@@ -343,7 +343,7 @@ class BIMP_Task extends BimpObject
     }
     
     public function reouvrir(){
-        if($this->getData('status') == 4){
+        if($this->getData('status') == 4 || $this->getData('status') == 2){
             $this->updateField('status', 1);
             $parentTask = $this->getChildObject('task_mere');
             if($parentTask && $parentTask->isLoaded()){

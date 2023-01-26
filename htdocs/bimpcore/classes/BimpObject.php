@@ -6631,7 +6631,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         }
                     }
                     $nb = count($filterLinked['linked']['or']);
-                    if ($nb > 60)
+                    if ($nb > 100)
                         BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')');
 
                     $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');

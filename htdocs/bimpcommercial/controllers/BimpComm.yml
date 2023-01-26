@@ -66,23 +66,24 @@ sections:
                                         object: bimp_comm
                           - id: files
                             title: Fichiers
-                            struct: 
-                                type: rows
-                                rows:                                                   
-                                    - cols: 
-                                        - type: list
-                                          list: 
-                                              title: Fichier joints
-                                              name: default
-                                              panel: 1
-                                              object: bimp_comm
-                                              children: files                                  
-                                    - cols: 
-                                        - type: custom
-                                          custom:
-                                            callback: 
-                                              method: renderExtraFile
-                                              object: bimp_comm
+#                            struct: 
+#                                type: rows
+#                                rows:                                                   
+#                                    - cols: 
+#                                        - type: list
+#                                          list: 
+#                                              title: Fichier joints
+#                                              name: default
+#                                              panel: 1
+#                                              object: bimp_comm
+#                                              children: files                                  
+#                                    - cols: 
+#                                        - type: custom
+#                                          custom:
+#                                            callback: 
+                            ajax_render_method:
+                                method: renderExtraFile
+                                object: bimp_comm
                           - id: divers
                             title: Divers (admin)
                             show: 

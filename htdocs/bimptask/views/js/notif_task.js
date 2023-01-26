@@ -38,7 +38,7 @@ class notif_task extends AbstractNotification {
             html += '<li role="presentation" class="reload"><a>' + this.getBoutonReload(this.dropdown_id) + '</a></li>';
 //            html +='<li role="presentation"><a href="#" aria-controls="' + nt.unaffected + '" role="tab" data-toggle="tab">' + this.getBoutonReload(this.dropdown_id)+'</a></li>';
             html += '</ul>';
-            html += '<h4><a style="float:right" onclick="loadModalForm($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: 0, form_name: \'addUser\'}, \'Nouvelle Tache\');"><i class="fas fa5-tasks iconLeft"></i>Nouvelle Tache</a></h4>';
+            html += '<h4><a style="float:right" onclick="loadModalForm($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: 0, form_name: \'addUser\'}, \'Nouvelle Tâche\');"><i class="fas fa5-tasks iconLeft"></i>Nouvelle Tâche</a></h4>';
 //                                                onclick="loadModalForm($(this), {module: "bimpcore", object_name: "Bimp_Client", id_object: "6782", id_parent: "0", form_name: "default", force_edit: 0}, 'Edition du client #6782', '', '', null, null)"
             // Tab panels 
             html += '<div class="tab-content task_panel">';

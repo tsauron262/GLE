@@ -2078,9 +2078,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return $html;
     }
 
-    public function renderExtraFile()
+    public function renderExtraFile($withThisObject = true)
     {
-        $html = parent::renderExtraFile();
+        $html = parent::renderExtraFile($withThisObject);
 
         if ($this->isLoaded()) {
             $sql = $this->db->db->query("SELECT rowid FROM `llx_synopsisdemandeinterv` WHERE `fk_commande` = " . $this->id);

@@ -151,6 +151,7 @@ fields_tables:
 forms:
     default: 
         rows: 
+            - field: id_task
             - field: status
             - field: sous_type
             - field: prio

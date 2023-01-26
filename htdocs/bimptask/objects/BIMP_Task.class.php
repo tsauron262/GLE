@@ -22,7 +22,7 @@ class BIMP_Task extends BimpObject
         'dev'        => 'Développement',
         'adminVente' => 'Administration des Ventes'
     );
-    public static $srcNotAttribute = array('sms-apple@bimp-groupe.net');
+    public static $srcNotAttribute = array(/*'sms-apple@bimp-groupe.net'*/);
     public static $nbNonLu = 0;
     public static $nbAlert = 0;
     public static $valStatus = array(0 => array('label' => "A traiter", 'classes' => array('danger')), 1 => array('label' => "En cours", 'classes' => array('important')), 2 => array('label' => "Attente utilisateur", 'classes' => array('danger')), 3 => array('label' => "Attente technique", 'classes' => array('danger')), 4 => array('label' => "Terminé", 'classes' => array('success')));

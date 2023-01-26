@@ -413,7 +413,7 @@ class BIMP_Task extends BimpObject
 
 
 
-        $msg = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask . $sep.'<br/><br/>'.$msg;
+        $msg = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask .'<br/>Attention ne pas inclure votre signature animée qui est beaucoup beaucoup trop lourde' . $sep.'<br/><br/>'.$msg;
 
         if($rappel){
             $msg .= '<br/><br/><h1>'.$this->displayData('subj').'</h1><br/>'.$this->displayData('txt').'<br/><br/>'.$this->displayData('comment');

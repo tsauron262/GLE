@@ -1,0 +1,19 @@
+bootstrap: 1
+title: BimpAlert
+
+objects: 
+    alert_produit:
+        instance:
+            bimp_object: AlertProduit
+
+            
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Alerte Produit
+            icon: danger
+            sections:
+                - type: list
+                  list: 
+                      object: alert_produit

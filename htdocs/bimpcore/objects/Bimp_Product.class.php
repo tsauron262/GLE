@@ -527,6 +527,13 @@ class Bimp_Product extends BimpObject
 
     public function getCodeComptableAchat($zone_vente = 1, $force_type = -1, $tvaTaux = 1)
     {
+        
+        if (preg_match('.(applecare).', strtolower($this->getData('label')))) {
+            return BimpCore::getConf('achat_tva_null', null, 'bimptocegid');
+        }
+        
+        
+        
         if ($force_type == -1) {
             if (!$this->isLoaded())//pas de type spécial et pas de produit loadé
                 return '';

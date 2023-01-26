@@ -64,6 +64,9 @@ function traiteTask($dst, $src, $subj, $txt) {
         $idTask= 25350;
 
     $tabTxt = explode("-------------", $txt);
+    if(trim($tabTxt[0]) == ''){
+        $tabTxt = array(0=>$tabTxt[2]);
+    }
     $tabTxt = explode("\n> ", $tabTxt[0]);
     $tabTxt = explode("Ce message et éventuellement les pièces jointes", $tabTxt[0]);
     

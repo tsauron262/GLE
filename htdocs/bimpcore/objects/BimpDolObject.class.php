@@ -553,9 +553,13 @@ class BimpDolObject extends BimpObject
 
     // Rendus: 
 
-    public function renderExtraFile()
+    public function renderExtraFile($withThisObject = true)
     {
         $html = "";
+        
+        if($withThisObject){
+            $html .= $this->renderListFileForObject($this);
+        }
 
         $objects = $this->getBimpObjectsLinked();
         foreach ($objects as $obj)

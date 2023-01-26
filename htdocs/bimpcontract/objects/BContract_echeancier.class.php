@@ -822,7 +822,7 @@ class BContract_echeancier extends BimpObject
             }
 
 
-            if (($user->rights->facture->creer && $reste_periodeEntier == 0 && round($parent->getCurrentTotal(), 2) - round($parent->getTotalDejaPayer(), 2) != 0) && $parent->getData('statut') == 11)
+            if (($user->rights->facture->creer && $reste_periodeEntier == 0 && round($parent->getTotalContrat(), 2) - round($parent->getTotalDejaPayer(), 2) != 0) && $parent->getData('statut') == 11)
                 $html .= '<div class="btn-group"><button type="button" class="btn btn-default bs-popover" ' . BimpRender::renderPopoverData('Facturation supplémentaire') . ' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick("createFacture", array('labelLn' => 'Facturation supplémentaire', 'label' => 'Complément à', 'total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '"><i class="fa fa-plus"></i> Facturation supplémentaire</button></div>';
             $html .= '</div>';
         }

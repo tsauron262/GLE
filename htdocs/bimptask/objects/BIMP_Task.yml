@@ -90,6 +90,12 @@ fields:
         type: int
         values: 
             array: prio_list_task
+    sous_type:
+        label: Sous Type
+        type: int
+        depends_on: type_manuel
+        values: 
+            array: sous_type_list_task
     id_user_owner:
         label: Attribuer à
         type: id_object
@@ -145,7 +151,9 @@ fields_tables:
 forms:
     default: 
         rows: 
+            - field: id_task
             - field: status
+            - field: sous_type
             - field: prio
             - field: src
               show: 
@@ -161,6 +169,7 @@ forms:
         rows:
             - field: id_task
             - field: type_manuel
+            - field: sous_type
             - field: prio
             - field: subj
             - field: txt

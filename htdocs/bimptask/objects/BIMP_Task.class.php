@@ -20,13 +20,16 @@ class BIMP_Task extends BimpObject
         'other'                              => 'Autre');
     public static $types_manuel = array(
         'dev'        => 'Développement',
-//        'adminVente' => 'Administration des Ventes'
+        'adminVente' => 'Administration des Ventes'
     );
-    public static $srcNotAttribute = array('sms-apple@bimp-groupe.net');
+    public static $srcNotAttribute = array(/*'sms-apple@bimp-groupe.net'*/);
     public static $nbNonLu = 0;
     public static $nbAlert = 0;
     public static $valStatus = array(0 => array('label' => "A traiter", 'classes' => array('danger')), 1 => array('label' => "En cours", 'classes' => array('important')), 2 => array('label' => "Attente utilisateur", 'classes' => array('danger')), 3 => array('label' => "Attente technique", 'classes' => array('danger')), 4 => array('label' => "Terminé", 'classes' => array('success')));
-    public static $valPrio = array(0 => array('label' => "Normal", 'classes' => array('info')), 20 => array('label' => "Urgent", 'classes' => array('error')));
+    public static $valPrio = array(0 => array('label' => "Normal (Niveau 3)", 'classes' => array('info')), 10 => array('label' => "Important (Niveau 2)", 'classes' => array('info')), 20 => array('label' => "Urgent (Niveau 1)", 'classes' => array('error')));
+    public static $sous_type = array(
+        'dev' => array(0 => array('label' => "Bug"), 1=> array('label' => 'Développement'))
+    );
     const MARQEUR_MAIL = "IDTASK:5467856456";
     const ID_USER_DEF = 215;
     public $mailReponse = 'Tâche ERP<reponse@bimp-groupe.net>';
@@ -162,6 +165,14 @@ class BIMP_Task extends BimpObject
     public static function getPrio_list_taskArray()
     {
         return self::$valPrio;
+    }
+
+    public function getSous_type_list_taskArray()
+    {
+        $type = BimpTools::getPostFieldValue('type_manuel', $this->getData('type_manuel'));
+        if(isset($type) && self::$sous_type[$type])
+            return self::$sous_type[$type];
+        return array();
     }
 
     public function getType()
@@ -332,7 +343,7 @@ class BIMP_Task extends BimpObject
     }
     
     public function reouvrir(){
-        if($this->getData('status') == 4){
+        if($this->getData('status') == 4 || $this->getData('status') == 2){
             $this->updateField('status', 1);
             $parentTask = $this->getChildObject('task_mere');
             if($parentTask && $parentTask->isLoaded()){
@@ -342,9 +353,9 @@ class BIMP_Task extends BimpObject
     }
     
     public function addRepMail($user, $src, $txt){
-        if($this->getData('status') == 4){
+        if($this->getData('status') == 4 || $this->getData('status') == 2){
             $this->reouvrir();
-            $txt = 'Cettte tâche est réouverte a la suite d\'un messsage<br/><br/>'.$txt;
+            $txt = 'Cettte tâche est réouverte a la suite du messsage : <br/><br/>'.$txt;
         }
         $this->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, ($user->id == self::ID_USER_DEF ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), null, null, null, 0);
         foreach($this->getUserNotif(true) as $userT){
@@ -402,7 +413,7 @@ class BIMP_Task extends BimpObject
 
 
 
-        $msg = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask . $sep.'<br/><br/>'.$msg;
+        $msg = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask .'<br/>Attention ne pas inclure votre signature animée qui est beaucoup beaucoup trop lourde' . $sep.'<br/><br/>'.$msg;
 
         if($rappel){
             $msg .= '<br/><br/><h1>'.$this->displayData('subj').'</h1><br/>'.$this->displayData('txt').'<br/><br/>'.$this->displayData('comment');

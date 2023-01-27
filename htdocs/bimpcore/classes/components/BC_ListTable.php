@@ -1423,8 +1423,6 @@ class BC_ListTable extends BC_List
             } else {
                 $row_errors[] = 'Aucune colonne configurée pour cette liste';
             }
-        } else {
-            die('ICI');
         }
 
         if (count($row_errors)) {

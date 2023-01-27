@@ -316,9 +316,9 @@ views:
                         callback: renderNotesList
             files: 
                 cols: 
-                - type: list
-                  list: 
-                      children: files
+                  - type: list
+                    list: 
+                        children: files
                       
     default: 
         extends: full

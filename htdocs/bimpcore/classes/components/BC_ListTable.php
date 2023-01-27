@@ -1421,11 +1421,10 @@ class BC_ListTable extends BC_List
 
                 $html .= '</tr>';
             } else {
-                echo $this->name . '<pre>';
-                print_r($this->params);
-                exit;
                 $row_errors[] = 'Aucune colonne configurée pour cette liste';
             }
+        } else {
+            die('ICI');
         }
 
         if (count($row_errors)) {

@@ -1,0 +1,10 @@
+
+params: 
+    marqueur_mail: 
+        label: Marqueur e-mails
+        required: 1
+        def: 'IDTASK:5467856456'
+        
+    id_user_def: 
+        label: ID utilisateur par défaut
+        required: 1

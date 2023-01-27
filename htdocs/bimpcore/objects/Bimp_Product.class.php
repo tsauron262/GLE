@@ -527,6 +527,13 @@ class Bimp_Product extends BimpObject
 
     public function getCodeComptableAchat($zone_vente = 1, $force_type = -1, $tvaTaux = 1)
     {
+        
+        if (preg_match('.(applecare).', strtolower($this->getData('label')))) {
+            return BimpCore::getConf('achat_tva_null', null, 'bimptocegid');
+        }
+        
+        
+        
         if ($force_type == -1) {
             if (!$this->isLoaded())//pas de type spécial et pas de produit loadé
                 return '';
@@ -2331,12 +2338,13 @@ class Bimp_Product extends BimpObject
         }
 
         // Evénements: 
-        $tabs[] = array(
-            'id'            => 'events_tab',
-            'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#events_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('agenda'))
+            $tabs[] = array(
+                'id'            => 'events_tab',
+                'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#events_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
+            );
 
         // Rapports processus: 
         if (BimpCore::isModuleActive('bimpdatasync')) {

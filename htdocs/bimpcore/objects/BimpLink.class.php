@@ -169,6 +169,15 @@ class BimpLink extends BimpObject
     }
 
     // Getters statiques: 
+    
+    public static function getUsersLinked($src_object){
+        $users = array();
+        $hashs = self::getLinksForSource($src_object, '', 'bimpcore', 'Bimp_User');
+        foreach($hashs as $hash){
+            $users[$hash->getData('linked_id')] = $hash->getLinkedObject();
+        }
+        return $users;
+    }
 
     public static function getLinksForSource($src_object, $field_name = '', $linked_module = '', $linked_name = '')
     {

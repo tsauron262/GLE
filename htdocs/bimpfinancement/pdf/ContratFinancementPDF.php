@@ -6,6 +6,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 {
 
     public static $doc_type = 'contrat';
+    public $type_pdf = '';
     public $signature_bloc = true;
     public $use_docsign = true;
     public $signature_bloc_label = '';
@@ -15,14 +16,19 @@ class ContratFinancementPDF extends DocFinancementPDF
     public $client_data;
     public $loueur_data;
     public $cessionnaire_data;
+    public $cg_file = DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/cg_contrat.pdf';
+    public $cg_page_start = 0;
+    public $cg_page_number = 4;
+    public $display_line_amounts = true;
 
     # Params:
     public static $full_blocs = array(
         'renderAfterLines' => 0
     );
 
-    public function __construct($db, $demande, $client_data = array(), $loueur_data = array(), $cessionnaire_data = array())
+    public function __construct($db, $demande, $client_data = array(), $loueur_data = array(), $cessionnaire_data = array(), $type = 'papier')
     {
+        $this->type_pdf = $type;
         $this->client_data = $client_data;
         $this->loueur_data = $loueur_data;
         $this->cessionnaire_data = $cessionnaire_data;
@@ -30,13 +36,10 @@ class ContratFinancementPDF extends DocFinancementPDF
         parent::__construct($db, $demande);
 
         $this->doc_name = 'Contrat de location';
-        $this->concat_files[] = DOL_DOCUMENT_ROOT . 'bimpfinancement/pdf/cg_contrat.pdf';
-        $this->concat_files[] = DOL_DOCUMENT_ROOT . 'bimpfinancement/pdf/mandat_sepa.pdf';
     }
 
     public function initData()
     {
-        
     }
 
     public function initHeader()
@@ -120,7 +123,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 
         $html .= '<p>';
         $html .= 'Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l’accepte, ';
-        $html .= 'aux Conditions Particulières et aux Conditions Générales composées de deux pages recto :';
+        $html .= 'aux Conditions Particulières et aux Conditions Générales composées de deux pages recto.';
         $html .= '</p>';
         $html .= '</div>';
 
@@ -247,6 +250,51 @@ class ContratFinancementPDF extends DocFinancementPDF
         $this->writeFullBlock($html);
     }
 
+    public function getSignatureBlocHtml(&$errors = array())
+    {
+        $html = '<table style="width: 95%;font-size: 8px;" cellpadding="3">';
+        $html .= '<tr>';
+
+        // Signatue locataire: 
+        $html .= '<td style="width: 33%">';
+        $html .= '<span style="font-size: 9px; font-weight: bold">Pour le locataire :</span><br/>';
+        $is_company = (int) BimpTools::getArrayValueFromPath($this->client_data, 'is_company', 0);
+        $html .= BimpTools::getArrayValueFromPath($this->client_data, 'representant', '', $errors, true, 'Représentant du client absent') . '<br/>';
+        if ($is_company) {
+            $html .= BimpTools::ucfirst(BimpTools::getArrayValueFromPath($this->client_data, 'repr_qualite', '', $errors, true, 'Qualité du représentant du client absent')) . '<br/>';
+        }
+        $html .= '<br/><span style="font-style: italic">"Lu et approuvé"</span>';
+        $html .= '</td>';
+
+        // Signature Loueur:
+        $html .= '<td style="width: 33%">';
+        $html .= '<span style="font-size: 9px; font-weight: bold">Pour le loueur :</span><br/>';
+        $html .= BimpTools::getArrayValueFromPath($this->loueur_data, 'nom', '', $errors, true, 'Nom du signataire loueur absent') . '<br/>';
+        $html .= BimpTools::getArrayValueFromPath($this->loueur_data, 'qualite', '', $errors, true, 'Qualité du signataire loueur absente');
+        $html .= '</td>';
+
+        // Signature cessionnaire:
+        $nom_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'nom', '');
+        $qualite_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'qualite', '');
+
+        $html .= '<td style="width: 33%">';
+        $html .= '<span style="font-size: 9px; font-weight: bold">Pour le cessionnaire :</span><br/>';
+        $html .= BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'raison_social', '', $errors, true, 'Raison sociale du signataire cessionnaire absent') . '<br/>';
+        $html .= 'SIREN : ' . BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'siren', '', $errors, true, 'N° SIREN du signataire cessionnaire absent') . '<br/>';
+        $html .= 'Représenté par : ' . $nom_cessionnaire . '<br/>';
+        $html .= 'En qualité de : ' . $qualite_cessionnaire;
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td>Date : <br/>Signature :<br/><br/><br/><br/><br/></td>';
+        $html .= '<td>Date : <br/>Signature :<br/><br/><br/><br/><br/></td>';
+        $html .= '<td>Date : <br/>Signature :<br/><br/><br/><br/><br/></td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        return $html;
+    }
+
     public function renderSignatureBloc()
     {
         // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique. 
@@ -254,45 +302,7 @@ class ContratFinancementPDF extends DocFinancementPDF
         if ($this->signature_bloc) {
             $errors = array();
 
-            $html = '<table style="width: 95%;font-size: 8px;" cellpadding="3">';
-            $html .= '<tr>';
-            // Signatue locataire: 
-            $html .= '<td style="width: 33%">';
-            $html .= '<span style="font-size: 9px; font-weight: bold">Pour le locataire :</span><br/>';
-            $is_company = (int) BimpTools::getArrayValueFromPath($this->client_data, 'is_company', 0);
-            $html .= BimpTools::getArrayValueFromPath($this->client_data, 'representant', '', $errors, true, 'Représentant du client absent') . '<br/>';
-            if ($is_company) {
-                $html .= BimpTools::ucfirst(BimpTools::getArrayValueFromPath($this->client_data, 'repr_qualite', '', $errors, true, 'Qualité du représentant du client absent')) . '<br/>';
-            }
-//            $html .= '<span style="font-style: italic; font-size: 7px">Signature' . ($is_company ? ' + cachet' : '') . '</span><br/>';
-            $html .= '<br/><span style="font-style: italic">"Lu et approuvé"</span>';
-            $html .= '</td>';
-
-            // Signature Loueur:
-            $html .= '<td style="width: 33%">';
-            $html .= '<span style="font-size: 9px; font-weight: bold">Pour le loueur :</span><br/>';
-            $html .= BimpTools::getArrayValueFromPath($this->loueur_data, 'nom', '', $errors, true, 'Nom du signataire loueur absent') . '<br/>';
-            $html .= BimpTools::getArrayValueFromPath($this->loueur_data, 'qualite', '', $errors, true, 'Qualité du signataire loueur absente');
-            $html .= '</td>';
-
-            // Signature cessionnaire:
-            $nom_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'nom', '');
-            $qualite_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'qualite', '');
-
-            $html .= '<td style="width: 33%">';
-            $html .= '<span style="font-size: 9px; font-weight: bold">Pour le cessionnaire :</span><br/>';
-            $html .= BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'raison_social', '', $errors, true, 'Raison sociale du signataire cessionnaire absent') . '<br/>';
-            $html .= 'SIREN : ' . BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'siren', '', $errors, true, 'N° SIREN du signataire cessionnaire absent') . '<br/>';
-            $html .= 'Représenté par : ' . $nom_cessionnaire . '<br/>';
-            $html .= 'En qualité de : ' . $qualite_cessionnaire;
-            $html .= '</td>';
-            $html .= '</tr>';
-            $html .= '<tr>';
-            $html .= '<td>Date : <br/>Signature :<br/><br/><br/><br/><br/></td>';
-            $html .= '<td>Date : <br/>Signature :<br/><br/><br/><br/><br/></td>';
-            $html .= '<td>Date : <br/>Signature :<br/><br/><br/><br/><br/></td>';
-            $html .= '</tr>';
-            $html .= '</table>';
+            $html = $this->getSignatureBlocHtml($errors);
 
             $page = 0;
             $yPos = 0;
@@ -312,12 +322,12 @@ class ContratFinancementPDF extends DocFinancementPDF
                 ),
                 'docusign' => array(
                     'anch' => 'Pour le locataire :',
-                    'fs'   => 'Size8',
+                    'fs'   => 'Size7',
                     'x'    => 5,
                     'y'    => 107,
                     'date' => array(
                         'x' => 22,
-                        'y' => 56
+                        'y' => 57
                     )
                 )
             );
@@ -334,24 +344,32 @@ class ContratFinancementPDF extends DocFinancementPDF
                 ),
                 'docusign' => array(
                     'anch' => 'Pour le cessionnaire :',
-                    'fs'   => 'Size8',
+                    'fs'   => 'Size7',
                     'x'    => 5,
                     'y'    => 107,
                     'date' => array(
                         'x' => 22,
-                        'y' => 56
+                        'y' => 57
                     )
                 )
             );
+
+            $nom_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'nom', '');
+            $qualite_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'qualite', '');
+
             if (!$nom_cessionnaire) {
                 $this->signature_params['cessionnaire']['elec']['display_nom'] = 1;
                 $this->signature_params['cessionnaire']['elec']['nom_x_offset'] = 21;
                 $this->signature_params['cessionnaire']['elec']['nom_y_offset'] = -17;
 
-                // Todo : Offsets à vérifier!
-                $this->signature_params['cessionnaire']['docusign']['nom'] = array(
-                    'x' => 44,
-                    'y' => 28
+                $this->signature_params['cessionnaire']['docusign']['texts'] = array(
+                    'nom_cessionnaire' => array(
+                        'label' => 'Nom signataire',
+                        'x'     => 57,
+                        'y'     => 30,
+                        'w'     => 120,
+                        'h'     => 13
+                    )
                 );
             }
             if (!$qualite_cessionnaire) {
@@ -359,10 +377,11 @@ class ContratFinancementPDF extends DocFinancementPDF
                 $this->signature_params['cessionnaire']['elec']['fonction_x_offset'] = 18;
                 $this->signature_params['cessionnaire']['elec']['fonction_y_offset'] = -14;
 
-                // Todo : Offsets à vérifier!
                 $this->signature_params['cessionnaire']['docusign']['fonction'] = array(
-                    'x' => 36,
-                    'y' => 40
+                    'x' => 48,
+                    'y' => 39,
+                    'h' => 13,
+                    'w' => 120
                 );
             }
 
@@ -379,12 +398,12 @@ class ContratFinancementPDF extends DocFinancementPDF
                 ),
                 'docusign' => array(
                     'anch' => 'Pour le loueur :',
-                    'fs'   => 'Size8',
+                    'fs'   => 'Size7',
                     'x'    => 5,
                     'y'    => 107,
                     'date' => array(
                         'x' => 22,
-                        'y' => 56
+                        'y' => 57
                     )
                 )
             );
@@ -395,5 +414,36 @@ class ContratFinancementPDF extends DocFinancementPDF
                 }
             }
         }
+    }
+
+    public function renderContent()
+    {
+        parent::renderContent();
+        $this->pdf->createHeader('');
+        $this->cg_page_start = $this->pdf->getPage() + 1;
+
+        $title = 'Conditions générales du contrat de location n°' . str_replace('DF', '', $this->demande->getRef());
+        for ($i = 1; $i < 5; $i++) {
+            $this->pdf->AddPage();
+            $this->pdf->SetXY(0, 10);
+            $this->pdf->Cell(0, 0, $title, 0, 2, 'C', 0);
+        }
+
+        if ($this->type_pdf === 'papier') {
+            $this->pdf->SetXY(10, 150);
+            $this->writeFullBlock($this->getSignatureBlocHtml());
+        }
+    }
+
+    public function render($file_name, $display, $display_only = false)
+    {
+        if (parent::render($file_name, $display, $display_only)) {
+            // Merge CGV:
+            $pdf = new BimpConcatPdf();
+            $pdf->mergeFiles($file_name, $this->cg_file, $file_name, $display, $this->cg_page_start, 1);
+            return 1;
+        }
+
+        return 0;
     }
 }

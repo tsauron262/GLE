@@ -333,6 +333,7 @@ lists:
         extends: default
         cols:
             parent:
+                
     linked:
         extends: default
         cols:

@@ -787,6 +787,12 @@ class BimpObject extends BimpCache
         return '';
     }
 
+    public function getIsObjectActiveFields()
+    {
+        // Fonction renommée car le nom ititial prête à confusion (getActiveFields = obtenir les champs actifs)
+        return array();
+    }
+    
     public function getSearchListFilters()
     {
         return array();
@@ -943,6 +949,13 @@ class BimpObject extends BimpCache
 
                     if ($or_sql) {
                         $search_filter .= ($search_filter ? ' AND ' : '') . '(' . $or_sql . ')';
+                    }
+                }
+
+                if ($options['active']) {
+                    $fields = $this->getIsObjectActiveFields();
+                    foreach ($fields as $field) {
+                        $filters[$field] = 1;
                     }
                 }
 
@@ -1192,6 +1205,16 @@ class BimpObject extends BimpCache
         return (int) ($this->isLoaded() ? 0 : 1);
     }
 
+    public function isActif()
+    {
+        $activeFields = $this->getIsObjectActiveFields();
+        foreach ($activeFields as $field) {
+            if ($this->getData($field) < 1)
+                return false;
+        }
+        return 1;
+    }
+    
     public function field_exists($field_name)
     {
         if ($field_name === $this->getPrimary()) {
@@ -1581,9 +1604,10 @@ class BimpObject extends BimpCache
                 continue;
             }
 
-            $db_value = $this->getDbValue($field, $value);
+            $null_allowed = (int) $this->getConf('fields/' . $field . '/null_allowed', 0);
+            $db_value = $this->getDbValue($field, $value, $null_allowed);
 
-            if (!is_null($db_value) || (int) $this->getConf('fields/' . $field . '/null_allowed', 0)) {
+            if (!is_null($db_value) || $null_allowed) {
                 $this->checkFieldHistory($field, $value);
                 $data[$field] = $db_value;
             }
@@ -1592,7 +1616,7 @@ class BimpObject extends BimpCache
         return $data;
     }
 
-    public function getDbValue($field_name, $value)
+    public function getDbValue($field_name, $value, &$null_allowed = 0)
     {
         if ($this->field_exists($field_name)) {
             $this->checkFieldValueType($field_name, $value);
@@ -1629,6 +1653,17 @@ class BimpObject extends BimpCache
                     } elseif (is_array($value)) {
                         $delimiter = $this->getConf('fields/' . $field_name . '/items_delimiter', ',');
                         $value = implode($delimiter, $value);
+                    }
+                    break;
+
+                case 'id_object':
+                    if (!$value && $this->isDolObject()) {
+                        // Pour les ID = 0 des objets Dolibarr on enregistre NULL en base pour contourner les contraintes de clés étrangères.  
+                        $dol_prop = $this->getConf('fields/' . $field_name . '/dol_prop', $field_name);
+                        if (property_exists($this->dol_object, $dol_prop)) {
+                            $null_allowed = 1;
+                            $value = null;
+                        }
                     }
                     break;
             }
@@ -1953,7 +1988,7 @@ class BimpObject extends BimpCache
     {
         return
                 array("data1"     => array("title" => "Nom Data1"),
-                    "data2"     => array("title" => "Nom Data2"),
+//                    "data2"     => array("title" => "Nom Data2"),
                     "axeX"      => array("title" => "X", "valueFormatString" => 'value type'),
                     "axeY"      => array("title" => "Y"), //Attention potentiellement plusiuers donné sur cette axe
                     'title'     => $this->getLabel(),
@@ -2606,9 +2641,6 @@ class BimpObject extends BimpCache
         }
 
         if ($type) {
-            if ($type == 'id_object' && $value == 0 && $this->isDolObject())
-                $value = null;
-
             // Ajustement du format des dates dans le cas des objets Dolibarr:
             if ($this->isDolField($field)) {
                 if (in_array($type, array('datetime', 'date'/* , 'time' */))) {
@@ -3117,7 +3149,7 @@ class BimpObject extends BimpCache
 
     protected function checkSqlFilters($filters, &$joins = array(), $main_alias = '', &$extra_filters = null)
     {
-        // Vérifie les clés sql pour les champs filtrés (
+        // Vérifie les clés sql pour les champs filtrés
         $return = array();
         $add_extra_filters = false;
 
@@ -3137,7 +3169,17 @@ class BimpObject extends BimpCache
                 $sqlKey = '';
 
                 $field_name = '';
-                if ($main_alias && preg_match('/^(' . preg_quote($main_alias, '/') . '\.)(.+)$/', $field, $matches)) {
+                if (strpos($field, ':') !== false) {
+                    $child = null;
+                    $field_alias = '';
+                    $children = explode(':', $field);
+                    $child_field_name = array_pop($children);
+                    $col_errors = $this->getRecursiveChildrenJoins($children, $filters, $joins, $main_alias, $field_alias, $child);
+
+                    if (empty($col_errors) && is_a($child, 'bimpObject')) {
+                        $sqlKey = $child->getFieldSqlKey($child_field_name, $field_alias, null, $filters, $joins);
+                    }
+                } elseif ($main_alias && preg_match('/^(' . preg_quote($main_alias, '/') . '\.)(.+)$/', $field, $matches)) {
                     $field_name = $matches[2];
                 } elseif (!preg_match('/\./', $field)) {
                     $field_name = $field;
@@ -3149,7 +3191,7 @@ class BimpObject extends BimpCache
                     if ($this->field_exists($field_name)) {
                         $sqlKey = $this->getFieldSqlKey($field_name, $main_alias, null, $extra_filters, $joins);
                     } else {
-                        $sqlKey = $field;
+                        $sqlKey = $field_name;
                     }
                 }
 
@@ -3625,6 +3667,9 @@ class BimpObject extends BimpCache
             $extra_order_by = 'a.' . $primary;
         }
 
+        if(!count($fields))
+            $fields[] = 'a.*';
+        
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -6543,7 +6588,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $list;
     }
 
-    public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false, $withLinked = true)
+    public function renderNotesList($filter_by_user = true, $list_name = "default", $suffixe = "", $archive = false, $withLinked = true)
     {
         if ($this->isLoaded()) {
             if ($archive) {
@@ -6552,7 +6597,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $note = BimpObject::getInstance('bimpcore', 'BimpNote');
             }
 
-            $list = new BC_ListTable($note, $list_model);
+            $list = new BC_ListTable($note, $list_name);
             $list->addIdentifierSuffix($suffixe);
             $list->addFieldFilterValue('obj_type', 'bimp_object');
             $list->addFieldFilterValue('obj_module', $this->module);
@@ -6574,13 +6619,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $sup = '';
-            if ($withLinked && $withLinked !== 'false') {
+            if ($withLinked && $withLinked !== 'false' && !is_a($this, 'Bimp_Societe') && !is_a($this, 'Bimp_Product')) {
                 $linkedObjects = $this->getFullLinkedObjetsArray(false);
                 if (count($linkedObjects) > 0) {
                     $filterLinked = array('linked' => array('or' => array()));
                     foreach ($linkedObjects as $data_linked => $inut) {
                         $data_linked = json_decode($data_linked, true);
-                        if ($data_linked['object_name'] != 'BS_SAV') {
+                        if (!in_array($data_linked['object_name'], array('Equipment', 'BS_SAV', 'BR_Reservation'))) {
                             $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
                                     'obj_module' => $data_linked['module'],
                                     'obj_name'   => $data_linked['object_name'],
@@ -6589,7 +6634,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         }
                     }
                     $nb = count($filterLinked['linked']['or']);
-                    if ($nb > 60)
+                    if ($nb > 180)
                         BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')');
 
                     $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');
@@ -8818,6 +8863,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             return '';
         }
 
+
+        if (!$this->isActif()) {
+            $params['disabled'] = true;
+        }
+
         $html = '';
         $html .= '<span class="objectLink">';
 
@@ -9483,6 +9533,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $_POST = $list_data;
 
         $list = new BC_ListTable($this, $list_name);
+        if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint'))
+            $list->initForGraph();
         $nameGraph = $list->getParam('graph')[$data['idGraph']];
         $dataGraphe = $this->getInfoGraph($nameGraph);
 
@@ -9519,8 +9571,6 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
             if ($dataGraphe['mode_data'] == 'objects' && method_exists($this, 'getGraphDataPoint')) {//il faut charger chaque objet pour avoir ca valeur
-                $list->initForGraph();
-
                 $tmpData['dataPoints'] = $list->getPointsForGraph($dataGraphe['params'], $i);
             } elseif ($dataGraphe['mode_data'] == 'unique' && isset($tmpDatas)) {//On apelle une seul methode pour tous les points
                 $tmpData['dataPoints'] = $tmpDatas[$i];
@@ -10115,7 +10165,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                         $results = $instance->getSearchResults('all', $search, array(
                             'card'        => $card,
-                            'max_results' => 30
+                            'max_results' => 30,
+                            'active'      => 1
                         ));
 
                         foreach ($results as $id_object => $data) {

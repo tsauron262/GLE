@@ -736,10 +736,11 @@ class GSX_v2 extends GSX_Const
 
         $shipto = BimpTools::addZeros($shipto, 10);
         $this->setShipTo($shipto);
+        $head = array();
         return $this->exec('returnsLookup', array(
-                    'returnStatusType' => 'PENDING',
+//                    'returnStatusType' => 'REGISTERED',
                     'shipTo'           => $shipto
-        ));
+        ), $head, array('url_params'=>array('pageSize'=>100)));
     }
 
     public function createReturn($shipTo, $shipmentDetails, $parts)
@@ -835,11 +836,12 @@ class GSX_v2 extends GSX_Const
 
         $shipTo = BimpTools::addZeros($shipTo, 10);
         $this->setShipTo($shipto);
+        $head = array();
         return $this->exec('returnsLookup', array(
                     'returnStatusType' => 'RETURN_REPORT',
                     'shipTo'           => $shipTo,
                     'bulkReturnId'     => $returnId
-        ));
+        ), $head, array('url_params'=>array('pageSize'=>100)));
     }
 
     public function getPartReturnLabel($shipTo, $parts)
@@ -1039,7 +1041,7 @@ class GSX_v2 extends GSX_Const
         $total = $head['X-Apple-Total-Count'];
         while(count($return) < $total && $page < 10){
             $page++;
-            $return = BimpTools::merge_array($return, $this->exec('consignmentOrderLookup', $params, $head, array('url_params'=>array('pageNumber'=>$page))));
+            $return = BimpTools::merge_array($return, $this->exec('consignmentOrderLookup', $params, $head, array('url_params'=>array('pageNumber'=>2))));
         }
         return $return;
     }

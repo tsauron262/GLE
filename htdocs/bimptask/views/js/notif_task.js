@@ -29,14 +29,33 @@ class notif_task extends AbstractNotification {
             html += '<div class="notifications-wrap list_notification ' + this.nom + '">';
             html += '</div>';
 
+            html += '<div class="header" style="padding: 5px 15px">';
+
+            html += '<table style="width: 100%; sont-size: 15px">';
+            html += '<tr>';
+            html += '<td style="width: 30%">';
+            html += 'Tâches en cours';
+            html += this.getBoutonReload(this.dropdown_id);
+            html += '</td>';
+            html += '<td style="width: 70%; text-align: right">';
+            html += '<a href="' + DOL_URL_ROOT + '/bimpcore/index.php?fc=user&id=' + id_user + '&navtab-maintabs=tasks&navtab-tasks=my_tasks"><i class="fas fa5-tasks iconLeft"></i>Toutes mes tâches</a>';
+
+            var onclick = 'loadModalForm($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: 0, form_name: \'addUser\'}, \'Nouvelle Tâche\')';
+            html += '<span class="btn btn-default" onclick="' + onclick + '" style="margin-left: 15px">';
+            html += '<i class="fas fa5-plus-circle iconLeft"></i>Nouvelle Tâche';
+            html += '</span>';
+            html += '</td>';
+            html += '</tr>';
+            html += '</table>';
+
+            html += '</div>';
+
             html += '<div class="tabs-animated">';
 
             // Nav tabs 
             html += '<ul id="nav_task" class="nav nav-tabs" role="tablist">';
             html += '<li role="presentation" class="active"><a href="#' + nt.my + '" aria-controls="' + nt.my + '" role="tab" data-toggle="tab">Mes tâches</a></li>';
             html += '<li role="presentation"><a href="#' + nt.unaffected + '" aria-controls="' + nt.unaffected + '" role="tab" data-toggle="tab">Tâches non attribuées</a></li>';
-            html += '<li role="presentation" class="reload"><a>' + this.getBoutonReload(this.dropdown_id) + '</a></li>';
-//            html +='<li role="presentation"><a href="#" aria-controls="' + nt.unaffected + '" role="tab" data-toggle="tab">' + this.getBoutonReload(this.dropdown_id)+'</a></li>';
             html += '</ul>';
 
             // Tab panels 
@@ -99,31 +118,27 @@ class notif_task extends AbstractNotification {
     getbuttonSendMail(id_object) {
         var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
         onclick += ', \'sendMail\', {}, null, null, {form_name: \'newMail\'})';
-        return '<button name="rep_mail" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fa fa-send iconLeft"></i>Rep Mail</button>';
+        return '<button name="rep_mail" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-paper-plane iconLeft"></i>Rep Mail</button>';
     }
 
     getbuttonClose(id_object) {
         var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
         onclick += ', \'close\', {}, null, null, {confirm_msg: \'Terminer la tâche ?\'})';
-        return '<button name="close" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fa fa-close iconLeft"></i>Terminer</button>';
+        return '<button name="close" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-check iconLeft"></i>Terminer</button>';
     }
 
     getButtonAttribute(id_object) {
         var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
         onclick += ', \'attribute\', {}, null, null, {form_name: \'attribute\'})';
-        return '<button name="attribute" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fa fa-user iconLeft"></i>Attribuer</button>';
+        return '<button name="attribute" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-user iconLeft"></i>Attribuer</button>';
     }
 
     getButtonRefuseAttribute(id_object) {
         var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
         onclick += ', \'attribute\', {id_user_owner: 0}, null, null, {confirm_msg: \'Refuser cette attribution ?\'})';
-        return '<button name="refuse_attribute" class="btn btn-default  btn-small" type="button" onclick="' + onclick + '"><i class="fa fa-window-close iconLeft"></i>Refuser l\'attribution</button>';
+        return '<button name="refuse_attribute" class="btn btn-default  btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-times-circle iconLeft"></i>Refuser l\'attribution</button>';
     }
 
-//<button class="btn  btn-danger" type="button"
-//onclick="loadModalView('bimptask', 'BIMP_Task',
-//29686, 'notes', $(this), 'Infos')"><i class="fa fa-fas fa-comments iconLeft">
-//</i>1 Info(s) 1 Non lue(s)</button>
     getButtonNotViewed(id_object, not_viewed) {
 
         if (not_viewed == 0)
@@ -135,7 +150,7 @@ class notif_task extends AbstractNotification {
 
         return '<button not_viewed=' + not_viewed + ' class="btn  btn-danger btn-small" type="button" onclick="loadModalView('
                 + '\'bimptask\', \'BIMP_Task\', ' + id_object + ', \'notes\', $(this), '
-                + '\'Infos\')"><i class="fa fa-fas fa-comments iconLeft"></i>' + not_viewed + ' Info' + s + ' ' + not_viewed + ' Non lue ' + s + '</button>';
+                + '\'Infos\')"><i class="fa fa-fas fa-comments iconLeft"></i>' + not_viewed + ' Info' + s + ' ' + not_viewed + ' Non lue' + s + '</button>';
     }
 
     getKey(element) {
@@ -202,6 +217,10 @@ class notif_task extends AbstractNotification {
                 html += this.getButtonAttribute(element.id);
         }
 
+        if (element.id) {
+            html += '<span class="rowButton" onclick="loadModalView(\'bimptask\', \'BIMP_Task\', ' + element.id + ', \'full\', $(this))">';
+            html += '<i class="fas fa5-eye"></i></span>';
+        }
         return html;
     }
 
@@ -252,9 +271,9 @@ class notif_task extends AbstractNotification {
         $nav.attr('nb_msg', 0);
 
         if (user_type === this.my)
-            var to_print = 'tâche 0 en attente 0';
+            var to_print = 'tâche 0 en attente';
         else
-            var to_print = 'tâche 0 non attribuée 0';
+            var to_print = 'tâche 0 non attribuée';
 
         $nav.text(to_print);
 

@@ -27,7 +27,7 @@ Abstract class BimpModelPDF
     public $footerCompany = null; // Pied de page
     public $object_conf = null;
 
-    # Contenu: 
+    # Contenu:
     public $text = '';
     public $result = array();
     public $header_vars = array();
@@ -38,6 +38,8 @@ Abstract class BimpModelPDF
     public $concat_files = array();
 
     # Paramètres: 
+    public $add_header = true;
+    public $add_footer = true;
     public $typeObject = '';
     public $primary = '000000';
     public $maxLogoWidth = 120; // px
@@ -114,43 +116,50 @@ Abstract class BimpModelPDF
             $this->init(null);
         }
 
-        if (is_null($this->header)) {
-            if (file_exists(static::$tpl_dir . '/' . static::$type . '/header.html')) {
-                $this->header = $this->renderTemplate(static::$tpl_dir . '/' . static::$type . '/header.html', $this->header_vars);
-            } else {
-                $this->header = $this->renderTemplate(static::$tpl_dir . '/header.html', $this->header_vars);
-            }
-        }
-        
         if (count($this->errors)) {
             setEventMessages('Probléme génération PDF', $this->errors, 'errors');
             return 0;
         }
 
-        $this->pdf->createHeader($this->header);
-
-        if (is_null($this->footer)) {
-            if (file_exists(static::$tpl_dir . '/' . static::$type . '/footer.html')) {
-                $this->footer = $this->renderTemplate(static::$tpl_dir . '/' . static::$type . '/footer.html', $this->footer_vars);
-            } else {
-                $this->footer = $this->renderTemplate(static::$tpl_dir . '/footer.html', $this->footer_vars);
+        if ($this->add_header) {
+            if (is_null($this->header)) {
+                if (file_exists(static::$tpl_dir . '/' . static::$type . '/header.html')) {
+                    $this->header = $this->renderTemplate(static::$tpl_dir . '/' . static::$type . '/header.html', $this->header_vars);
+                } else {
+                    $this->header = $this->renderTemplate(static::$tpl_dir . '/header.html', $this->header_vars);
+                }
             }
+
+            $this->pdf->createHeader($this->header);
         }
 
-        $this->pdf->createFooter($this->footer);
+        if ($this->add_footer) {
+            if (is_null($this->footer)) {
+                if (file_exists(static::$tpl_dir . '/' . static::$type . '/footer.html')) {
+                    $this->footer = $this->renderTemplate(static::$tpl_dir . '/' . static::$type . '/footer.html', $this->footer_vars);
+                } else {
+                    $this->footer = $this->renderTemplate(static::$tpl_dir . '/footer.html', $this->footer_vars);
+                }
+            }
+
+            $this->pdf->createFooter($this->footer);
+        }
+
         $this->pdf->newPage();
         $this->renderContent();
 
         if (!empty($this->concat_files)) {
             $this->pdf->extra_concat_files = $this->concat_files;
         }
-        
+
         return $this->pdf->render($file_name, $display, $display_only, $this->watermark, $this->errors);
     }
 
     protected function renderContent()
     {
-        $this->writeContent($this->text);
+        if ($this->text) {
+            $this->writeContent($this->text);
+        }
     }
 
     public function writeContent($content)

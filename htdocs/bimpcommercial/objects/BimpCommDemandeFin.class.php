@@ -814,18 +814,23 @@ class BimpCommDemandeFin extends BimpObject
         }
 
         if (isset($data['cessionnaire'])) {
+            $societe_cessionnaire = BimpTools::getArrayValueFromPath($data, 'cessionnaire/raison_social', '');
             $nom_cessionnaire = BimpTools::getArrayValueFromPath($data, 'cessionnaire/nom', '');
             $fonction_cessionnaire = BimpTools::getArrayValueFromPath($data, 'cessionnaire/fonction', '');
-            
+
+            if (!$societe_cessionnaire) {
+                $societe_cessionnaire = '<span class="danger">Non spécifiée</span>';
+            }
             if (!$nom_cessionnaire) {
-                $nom_cessionnaire .= '<span class="danger">A saisir par le cessionnaire</span>';
+                $nom_cessionnaire = '<span class="danger">A saisir par le cessionnaire</span>';
             }
             if (!$fonction_cessionnaire) {
-                $fonction_cessionnaire .= '<span class="danger">A saisir par le cessionnaire</span>';
+                $fonction_cessionnaire = '<span class="danger">A saisir par le cessionnaire</span>';
             }
-            
+
             $html .= '<h4>Cessionnaire</h4>';
             $html .= '<div style="padding-left: 15px">';
+            $html .= '<b>Raison sociale : </b>' . $societe_cessionnaire . '<br/>';
             $html .= '<b>Nom : </b>' . $nom_cessionnaire . '<br/>';
             $html .= '<b>Adresse e-mail : </b>' . BimpTools::getArrayValueFromPath($data, 'cessionnaire/email', '<span class="danger">Non spécifié</span>') . '<br/>';
             $html .= '<b>Fonction : </b>' . $fonction_cessionnaire . '<br/>';
@@ -1568,16 +1573,40 @@ class BimpCommDemandeFin extends BimpObject
                                     } elseif ($product->isTypeService()) {
                                         $product_type = 2; // Service
                                     }
+
+                                    $desc = '';
+                                    if (!(int) $line->getData('hide_product_label')) {
+                                        $desc .= $product->getName();
+                                    }
+                                    if ((string) $line->desc) {
+                                        $desc .= ($desc ? '<br/>' : '') . $line->desc;
+                                    }
+
+                                    $full_qty = $qty = $line->getFullQty();
+                                    $pu_ht = $line->pu_ht;
+                                    $pa_ht = $line->pa_ht;
+
+                                    if ((int) $line->getData('force_qty_1')) {
+                                        if ($full_qty < 0) {
+                                            $qty = -1;
+                                        } else {
+                                            $qty = 1;
+                                        }
+
+                                        $pu_ht *= $full_qty;
+                                        $pa_ht *= $full_qty;
+                                    }
+
                                     $demande_data['lines'][] = array(
                                         'id'           => $line->id,
                                         'type'         => 2,
                                         'ref'          => $product->getRef(),
-                                        'label'        => $product->getName(),
+                                        'label'        => $desc,
                                         'product_type' => $product_type,
-                                        'qty'          => $line->getFullQty(),
-                                        'pu_ht'        => $line->pu_ht,
+                                        'qty'          => $qty,
+                                        'pu_ht'        => $pu_ht,
                                         'tva_tx'       => $line->tva_tx,
-                                        'pa_ht'        => $line->pa_ht,
+                                        'pa_ht'        => $pa_ht,
                                         'remise'       => $line->remise,
                                         'serialisable' => $serialisable,
                                         'serials'      => ($serialisable ? implode(',', $line->getSerials()) : '')
@@ -1589,7 +1618,7 @@ class BimpCommDemandeFin extends BimpObject
                                 $demande_data['lines'][] = array(
                                     'id'           => $line->id,
                                     'type'         => 2,
-                                    'label'        => $line->description,
+                                    'label'        => $line->desc,
                                     'qty'          => $line->getFullQty(),
                                     'pu_ht'        => $line->pu_ht,
                                     'tva_tx'       => $line->tva_tx,
@@ -2007,6 +2036,10 @@ class BimpCommDemandeFin extends BimpObject
             $open_dist_access = (int) BimpTools::getArrayValueFromPath($data, 'open_dist_access', 0);
             $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getSignatureEmailContent($init_docusign && $allow_docusign ? 'docusign' : 'elec'));
 
+            if (!$cessionnaire_nom && $init_docusign && $allow_docusign) {
+                $cessionnaire_nom = BimpTools::getArrayValueFromPath($signataires_data, 'cessionnaire/raison_social', '');
+            }
+
             if (!count($errors)) {
                 $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
                             'obj_module'       => $this->module,
@@ -2024,8 +2057,9 @@ class BimpCommDemandeFin extends BimpObject
                     if (count($up_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la fiche signature');
                     } else {
-                        $signataire_errors = array();
                         BimpObject::loadClass('bimpcore', 'BimpSignataire');
+
+                        $signataire_errors = array();
                         $signataire = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
                                     'id_signature'   => $signature->id,
                                     'type'           => BimpSignataire::TYPE_CLIENT,

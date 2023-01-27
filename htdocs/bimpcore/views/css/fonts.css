@@ -15,7 +15,7 @@
   font-style: normal;
   font-variant: normal;
   text-rendering: auto;
-  line-height: 1; }
+  /*line-height: 1;*/ }
 
 /* line 5, ../scss/fontawesome5/_larger.scss */
 .fa5-lg {

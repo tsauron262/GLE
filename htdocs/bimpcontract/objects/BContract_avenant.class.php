@@ -27,6 +27,9 @@ class BContract_avenant extends BContract_contrat {
         self::AVENANT_STATUT_PROVISOIR      => ['label' => 'Activation provisoire', 'icon' => 'retweet', 'classes' => ['important']]
     ];
     
+    public static $default_signature_params = array();
+
+    
     public function getTypeAvenantArray() {
         $parent = $this->getParentInstance();
         
@@ -765,5 +768,65 @@ class BContract_avenant extends BContract_contrat {
         return $html;
         
     }
+    
+    // Signature
+    
+    public function getSignatureDocFileDir($doc_type = '') {
+
+    }
+    
+    public function getSignatureDocFileName($doc_type = 'contrat', $signed = false) {
+
+    }
+    
+    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false) {
+
+    }
+    
+    public function getSignatureDocRef($doc_type) {
+
+    }
+    
+    public function getSignatureParams($doc_type) {
+
+    }
+    
+    public function onSigned($bimpSignature) {
+
+    }
+    
+    public function onSignatureCancelled($bimpSignature) {
+
+    }
+    
+    public function isSignatureReopenable($doc_type, &$errors = array()) {
+
+    }
+    
+    public function onSignatureReopened($bimpSignature) {
+
+    }
+        
+    
+//     * +- Ajouter les champs "id_signature" et "signature_params" dans l'objet (+ définitions de l'objet BimpSignature) 
+//     * +- Ajouter le tableau static $default_signature_params
+//     * - Ajouter une procédure pour créer la signature (action/fonction etc.)
+//     * - Ajouter les méthodes: 
+//     *      - getSignatureDocFileDir($doc_type): dossier fichier signé ou à signer
+//     *      - getSignatureDocFileName($doc_type, $signed = false): nom fichier signé ou à signer
+//     *      - getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false): URL fichier
+//     *      - getSignatureDocRef($doc_type): Reférence document
+//     *      - getSignatureParams($doc_type): Paramètres position signature sur PDF
+//     *      - onSigned($bimpSignature): Traitement post signature effectuée
+//     *      - onSignatureCancelled($bimpSignature): Traitement post signature annulée
+//     *      - isSignatureReopenable($doc_type, &$errors = array()): la signature peut-elle être réouverte (suite annulation) 
+//     *      - onSignatureReopened($bimpSignature): Traitement post réouverture signature
+//     * 
+//     * - Gérer l'enregistrement des paramètres de position de la signature sur le PDF au moment de sa génération (Si besoin) / ou régler par défaut pour les PDF fixes
+//     * - Intégrer selon le context: marqueur signé (champ booléen ou statut) / indicateur signature dans l'en-tête / etc. 
+//     * - Gérer Annulation signature si besoin
+//     * - Gérer Duplication / Révision / Etc. 
+//     * - Gérer la visualisation du docuement sur l'interface publique (bimpinterfaceclient > docController) 
+//     * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
     
 }

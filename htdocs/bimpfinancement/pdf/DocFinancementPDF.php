@@ -13,8 +13,8 @@ class DocFinancementPDF extends BimpDocumentPDF
     public $values = array();
     public $extra_data = array();
     public $options = array();
-    
     public $target_label = 'Destinataire';
+    public $display_line_amounts = false;
 
     public function __construct($db, $demande, $extra_data = array(), $options = array())
     {
@@ -139,9 +139,18 @@ class DocFinancementPDF extends BimpDocumentPDF
     {
         $table = new BimpPDF_Table($this->pdf);
         $table->addCol('desc', 'Désignation', 0, '', '', '');
-        $table->addCol('qte', 'Quantité', 25, 'text-align: center', '', 'text-align: center');
+        $table->addCol('qte', 'Quantité', 20, 'text-align: center', '', 'text-align: center');
+
+        if ($this->display_line_amounts) {
+            $table->addCol('pu_ht', 'PU HT', 20, 'text-align: center', '', 'text-align: center');
+            $table->addCol('remise', 'Remise', 20, 'text-align: center', '', 'text-align: center');
+            $table->addCol('tva_tx', 'TVA', 20, 'text-align: center', '', 'text-align: center');
+            $table->addCol('total_ttc', 'Total TTC', 20, 'text-align: center', '', 'text-align: center');
+        }
 
         $lines = $this->demande->getLines();
+
+        $total_ttc = 0;
 
         foreach ($lines as $line) {
             $row = array();
@@ -150,22 +159,50 @@ class DocFinancementPDF extends BimpDocumentPDF
             if ((int) $line->getData('type') === BF_Line::TYPE_TEXT) {
                 $row['desc'] = array(
                     'colspan' => 99,
-                    'style'   => ' background-color: #F5F5F5;',
+                    'style'   => 'background-color: #F5F5F5;',
                     'content' => $desc
                 );
             } else {
                 $row['desc'] = $desc;
                 $row['qte'] = $line->getData('qty');
+
+                if ($this->display_line_amounts) {
+                    $row['pu_ht'] = BimpTools::displayFloatValue($line->getData('pu_ht'));
+                    $row['remise'] = BimpTools::displayFloatValue($line->getData('remise')) . ' %';
+                    $row['tva_tx'] = BimpTools::displayFloatValue($line->getData('tva_tx')) . ' %';
+                    $row['total_ttc'] = BimpTools::displayFloatValue($line->getData('total_ttc'));
+                }
+
+                $total_ttc += (float) $line->getData('total_ttc');
             }
 
             $table->rows[] = $row;
         }
+
+        if ($this->display_line_amounts) {
+            $table->rows[] = array(
+                'desc'      => array(
+                    'colspan' => 5,
+                    'style'   => 'background-color: #F0EFEF; font-weight: bold; font-size: 8px; text-align: right',
+                    'content' => 'TOTAL TTC'
+                ),
+                'total_ttc' => array(
+                    'style'   => 'background-color: #F0EFEF; font-weight: bold; font-size: 8px',
+                    'content' => BimpTools::displayFloatValue($total_ttc)
+                )
+            );
+        }
+
 
         if (count($table->rows)) {
             $this->writeContent('<div style="font-weight: bold; font-size: 9px;">Description des équipements et quantités :</div>');
             $this->pdf->addVMargin(1);
             $table->write();
         }
+        
+//        die('');
+
+
 
         unset($table);
     }

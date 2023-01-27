@@ -996,15 +996,40 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
-    public function getAtradiusFileName($force = false, $show_ext = true)
+    public function getAtradiusFileName($force = false, $show_ext = true, $forced_date = null)
     {
-        $name = 'atradius';
+        if(is_null($forced_date))
+            $name = 'icba_' . date('Y-m-d', strtotime($this->getData('date_depot_icba')));
+        else
+            $name = 'icba_' . date('Y-m-d', strtotime($forced_date));
+
         $ext = '.pdf';
         if ($force || ($this->isLoaded() && file_exists($this->getFilesDir() . $name . $ext))) {
             if ($show_ext)
                 return $name . $ext;
             else
                 return $name;
+        // On check les fichiers avec des date de crétion mal définit
+        } elseif(is_null($forced_date)) {
+            $date_plus_recente = null;
+            $files = $this->getFilesArray();
+            foreach ($files as $f) {
+                if(substr($f, 6, 5) == 'icba_') {
+                    $date_a_tester = date(substr($f, 11, 10));
+                    if($date_plus_recente < $date_a_tester)
+                        $date_plus_recente = $date_a_tester;
+                }
+            }
+
+            if(!is_null($date_plus_recente)) {
+//                die($date_plus_recente);
+                if(file_exists($this->getFilesDir() . 'icba_' . $date_plus_recente . $ext)) {
+                    if ($show_ext)
+                        return 'icba_' . $date_plus_recente . $ext;
+                    else
+                        return 'icba_' . $date_plus_recente;
+                }
+            }
         }
         return 0;
     }
@@ -1217,19 +1242,19 @@ class Bimp_Client extends Bimp_Societe
         global $user, $langs;
         $html = '';
         $file = $this->getAtradiusFileName();
-        $buttons = array();
+        $buttons = array(
+            array(
+                'label'   => 'Ajouter PDF du Rapport Assurance crédit',
+                'icon'    => 'fas_comment-dollar',
+                'onclick' => $this->getJsLoadModalForm('atradius_file')
+            )
+        );
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         if (!is_null($file) && $file) {
             $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a><br/>';
         } elseif (!$only_loaded) {
 //            return BimpInput::renderInput('file_upload', 'atradius_file');
             // Demande encours altriadus
-
-            $buttons[] = array(
-                'label'   => 'Ajouter PDF du Rapport Assurance crédit',
-                'icon'    => 'fas_comment-dollar',
-                'onclick' => $this->getJsLoadModalForm('atradius_file')
-            );
 
             $list = BimpCache::getBimpObjectObjects('bimpcore', 'BimpNote', array('content'    => array(
                             'operator' => 'like',
@@ -1326,36 +1351,46 @@ class Bimp_Client extends Bimp_Societe
         );
 
         // Utilisateurs: 
-        $tabs[] = array(
-            'id'            => 'client_users_list_tab',
-            'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Utilisateurs',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_users_list_tab .nav_tab_ajax_result\')', array('client_users'), array('button' => ''))
-        );
+        if($this->isModuleActif('bimpinterfaceclient')){
+            $tabs[] = array(
+                'id'            => 'client_users_list_tab',
+                'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Utilisateurs',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_users_list_tab .nav_tab_ajax_result\')', array('client_users'), array('button' => ''))
+            );
+        }
 
         // Equipements: 
-        $tabs[] = array(
-            'id'            => 'client_equipments_list_tab',
-            'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Equipements',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_equipments_list_tab .nav_tab_ajax_result\')', array('equipments'), array('button' => ''))
-        );
+        if($this->isModuleActif('bimpequipment')){
+            $tabs[] = array(
+                'id'            => 'client_equipments_list_tab',
+                'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Equipements',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_equipments_list_tab .nav_tab_ajax_result\')', array('equipments'), array('button' => ''))
+            );
+        }
 
         // Evénements: 
-        $tabs[] = array(
-            'id'            => 'client_events_list_tab',
-            'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_events_list_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('agenda'))
+            $tabs[] = array(
+                'id'            => 'client_events_list_tab',
+                'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_events_list_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
+            ); 
 
         // Atradius: 
-        $tabs[] = array(
-            'id'            => 'client_atradius_list_tab',
-            'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
-        );
+        
+        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+        $api = BimpAPI::getApiInstance('atradius');
+        if($api && $api->isApiOk()){
+            $tabs[] = array(
+                'id'            => 'client_atradius_list_tab',
+                'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
+            );
+        }
 
         $html = BimpRender::renderNavTabs($tabs, 'card_view');
         $html .= $this->renderNotesList();
@@ -1368,76 +1403,85 @@ class Bimp_Client extends Bimp_Societe
         $tabs = array();
 
         // Propales
-        $tabs[] = array(
-            'id'            => 'client_propales_list_tab',
-            'title'         => BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Propositions commerciales',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_propales_list_tab .nav_tab_ajax_result\')', array('propales'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('propale'))
+            $tabs[] = array(
+                'id'            => 'client_propales_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Propositions commerciales',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_propales_list_tab .nav_tab_ajax_result\')', array('propales'), array('button' => ''))
+            ); 
 
         // Commandes client
-        $tabs[] = array(
-            'id'            => 'client_commandes_list_tab',
-            'title'         => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Commandes',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_commandes_list_tab .nav_tab_ajax_result\')', array('commandes'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('commande'))
+            $tabs[] = array(
+                'id'            => 'client_commandes_list_tab',
+                'title'         => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Commandes',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_commandes_list_tab .nav_tab_ajax_result\')', array('commandes'), array('button' => ''))
+            );
 
         // Livraisons
-        $tabs[] = array(
-            'id'            => 'client_shipments_list_tab',
-            'title'         => BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_shipments_list_tab .nav_tab_ajax_result\')', array('shipments'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('commande')&& $this->isModuleActif('bimplogistique'))
+            $tabs[] = array(
+                'id'            => 'client_shipments_list_tab',
+                'title'         => BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_shipments_list_tab .nav_tab_ajax_result\')', array('shipments'), array('button' => ''))
+            );
 
         // Factures
-        $tabs[] = array(
-            'id'            => 'client_factures_list_tab',
-            'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
-        );
-
+        if($this->isDolModuleActif('facture'))
+            $tabs[] = array(
+                'id'            => 'client_factures_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
+            ); 
+            
         // Contrats
-        $tabs[] = array(
-            'id'            => 'client_contrats_list_tab',
-            'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
-        );
+        if($this->isModuleActif('bimpcontract'))
+            $tabs[] = array(
+                'id'            => 'client_contrats_list_tab',
+                'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
+            );
 
         // Avoirs client: 
-        $tabs[] = array(
-            'id'            => 'client_remises_except_list_tab',
-            'title'         => BimpRender::renderIcon('fas_money-check-alt', 'iconLeft') . 'Avoirs client',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_remises_except_list_tab .nav_tab_ajax_result\')', array('remises_except'), array('button' => ''))
-        );
+        if($this->isDolModuleActif('facture'))
+            $tabs[] = array(
+                'id'            => 'client_remises_except_list_tab',
+                'title'         => BimpRender::renderIcon('fas_money-check-alt', 'iconLeft') . 'Avoirs client',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_remises_except_list_tab .nav_tab_ajax_result\')', array('remises_except'), array('button' => ''))
+            );
 
-        // Paiements non identifiés: 
-        $tabs[] = array(
-            'id'            => 'client_paiements_inc_list_tab',
-            'title'         => BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Paiements non identifiés',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_paiements_inc_list_tab .nav_tab_ajax_result\')', array('paiements_inc'), array('button' => ''))
-        );
+        // Paiements non identifiés:
+        if($this->isDolModuleActif('facture') && $this->isModuleActif('bimpfinanc')) 
+            $tabs[] = array(
+                'id'            => 'client_paiements_inc_list_tab',
+                'title'         => BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Paiements non identifiés',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_paiements_inc_list_tab .nav_tab_ajax_result\')', array('paiements_inc'), array('button' => ''))
+            );
 
         // Relances paiements: 
-        $tabs[] = array(
-            'id'            => 'client_relances_list_tab',
-            'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Relances paiements',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_relances_list_tab .nav_tab_ajax_result\')', array('relances'), array('button' => ''))
-        );
+        if(BimpCore::getConf('use_relances_paiements_clients', false, 'bimpcommercial')){
+            $tabs[] = array(
+                'id'            => 'client_relances_list_tab',
+                'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Relances paiements',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_relances_list_tab .nav_tab_ajax_result\')', array('relances'), array('button' => ''))
+            );
 
-        // Contacts Relances paiements: 
-        $tabs[] = array(
-            'id'            => 'client_suivi_recouvrement_list_tab',
-            'title'         => BimpRender::renderIcon('fas_history', 'iconLeft') . 'Suivi Recouvrement',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_suivi_recouvrement_list_tab .nav_tab_ajax_result\')', array('suivi_recouvrement'), array('button' => ''))
-        );
+            // Contacts Relances paiements: 
+            $tabs[] = array(
+                'id'            => 'client_suivi_recouvrement_list_tab',
+                'title'         => BimpRender::renderIcon('fas_history', 'iconLeft') . 'Suivi Recouvrement',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_suivi_recouvrement_list_tab .nav_tab_ajax_result\')', array('suivi_recouvrement'), array('button' => ''))
+            );
+        }
 
         // stats par date: 
         $tabs[] = array(
@@ -3044,7 +3088,7 @@ class Bimp_Client extends Bimp_Societe
                 $values['parent_module'] = 'bimpcore';
                 $values['parent_object_name'] = 'Bimp_Societe';
                 $values['id_parent'] = $this->id;
-                $values['file_name'] = $this->getAtradiusFileName(true, false);
+                $values['file_name'] = $this->getAtradiusFileName(true, false, date('Y-m-d'));
                 $values['is_deletable'] = 0;
 
                 $file->validateArray($values);
@@ -3058,7 +3102,7 @@ class Bimp_Client extends Bimp_Societe
 
 
         if ($this->getData('outstanding_limit_icba') != $this->getInitData('outstanding_limit_icba') && $this->getData('outstanding_limit_icba') > 0 && !$this->getAtradiusFileName())
-            $errors[] = 'Il faut obligatoirement uploder le PDF avant de saisir une limite ICBA';
+            $errors[] = 'Il faut obligatoirement uploa@der le PDF avant de saisir une limite ICBA';
 
         if (count($errors))
             return $errors;
@@ -3232,7 +3276,8 @@ class Bimp_Client extends Bimp_Societe
 
                     if (isset($cover['amount'])) {
                         if ($cover['amount'] == 0) {
-                            self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', 0);
+                            if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK || $this->getData('outstanding_limit_credit_check') > 0)
+                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', 0);
                             if ($cover['cover_type'] == 'credit-limit' || $this->getData('outstanding_limit_atradius') > 0)
                                 self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
                             if ($this->getData('outstanding_limit_icba') > 0)

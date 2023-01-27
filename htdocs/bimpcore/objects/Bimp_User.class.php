@@ -157,13 +157,9 @@ class Bimp_User extends BimpObject
         return $this->getInstanceName();
     }
 
-    public function getLink($params = array(), $forced_context = '')
+    public function getIsObjectActiveFields()
     {
-        if ($this->isLoaded() && $this->getData('statut') == 0) {
-            $params['disabled'] = true;
-        }
-
-        return parent::getLink($params, $forced_context);
+        return array('statut');
     }
 
     public function getGroupsRights()
@@ -382,11 +378,10 @@ class Bimp_User extends BimpObject
             'icon_before' => 'fas_plus-circle',
             'attr'        => array(
                 'type'    => 'button',
-                'onclick' => "document.location.replace('".DOL_URL_ROOT."/user/card.php?leftmenu=users&action=create');"
+                'onclick' => "document.location.replace('" . DOL_URL_ROOT . "/user/card.php?leftmenu=users&action=create');"
             )
         );
-        
-        
+
         //        global $user;
         //
         //        if ($user->admin) {

@@ -93,9 +93,9 @@ a.nav-link.dropdown-toggle:not(.notif_white) > i {
         }
 
         .date_notif {
-            color: #777;
+            color: #4D4C4C;
             font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-            font-size: 0.8em;
+            font-size: 11px;
             text-align: left;
         }   
 
@@ -127,14 +127,6 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_bimp_note
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_task"] {
     min-width: 800px!important;
 }
-
-
-/* special iframe */
-
-.ajax-modal .BimpNote_list_table_container .headerRow, .ajax-modal .BimpNote_list_table_container td.buttons{
-    display: none;
-}
-
 
 /* style general chat */
 .msg_cotainer {

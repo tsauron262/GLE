@@ -216,7 +216,7 @@ class modBimpRemoveDuplicateV2 extends DolibarrModules {
             'titre' => 'Bimp doublons avancé',
             'mainmenu' => 'companies',
             'leftmenu' => 'thirdparties',
-            'url' => '/bimpremovev2duplicate/removeduplicatecustomer.php',
+            'url' => '/bimpremoveduplicatev2/removeduplicatecustomer.php',
             'langs' => '', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'position' => 12,
             'enabled' => '1', // Define condition to show or hide menu entry. Use '$conf->monmodule->enabled' if entry must be visible if module is enabled.

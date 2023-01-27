@@ -553,9 +553,13 @@ class BimpDolObject extends BimpObject
 
     // Rendus: 
 
-    public function renderExtraFile()
+    public function renderExtraFile($withThisObject = true)
     {
         $html = "";
+        
+        if($withThisObject){
+            $html .= $this->renderListFileForObject($this);
+        }
 
         $objects = $this->getBimpObjectsLinked();
         foreach ($objects as $obj)
@@ -584,7 +588,7 @@ class BimpDolObject extends BimpObject
                 switch ($type) {
                     case 'fichinter':
                         $bcInter = BimpCollection::getInstance('bimptechnique', 'BT_ficheInter');
-                        $bcInter->addFields(array('datec', 'fk_statut'));
+                        $bcInter->addFields(array('datec', 'fk_statut', 'datei'));
                         $bcInter->addItems($ids);
                         foreach ($ids as $id) {
                             $fi_instance = $bcInter->getObjectInstance((int) $id);
@@ -594,7 +598,7 @@ class BimpDolObject extends BimpObject
                                 $objects[] = array(
                                     'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($fi_instance->getLabel()),
                                     'ref'    => $fi_instance->getNomUrl(0, true, true, null),
-                                    'date'   => $fi_instance->displayData('datec'),
+                                    'date'   => $fi_instance->displayData('datei'),
                                     'status' => $fi_instance->displayData('fk_statut')
                                 );
                             }

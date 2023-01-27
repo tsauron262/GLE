@@ -820,21 +820,54 @@ class BContract_contrat extends BimpDolObject
 
         $arrayHeuresVendues = $this->getTotalHeureDelegation(true);
 
+        $instanceFiDet = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
+        $debug = false;
         if (count($arrayHeuresVendues) > 0) {
             foreach ($arrayHeuresVendues as $code => $time) {
 
                 $infoLigne = explode(':::::', $code);
 
-                $instanceFiDet = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
                 $list = $instanceFiDet->getList(array('id_line_contrat' => $infoLigne[1]));
                 if (count($list) > 0) {
+                    if($debug)
+                        echo '<h2>Services</h2>';
                     foreach ($list as $det) {
+                        
+                        if($debug){
+//                            print_r($det);
+                            $instanceFiDetDebug = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det', $det['rowid']);
+                            $fi = $instanceFiDetDebug->getParentInstance();
+                            echo '<br/>'.$fi->getNomUrl().' '.($det['duree'] / 3600) .'<br/>';
+                        }
                         $totalHeuresFaites += $det['duree'] / 3600;
                     }
                 }
 
                 $totalHeuresVendues += $time;
             }
+            
+            $list = $instanceFiDet->getList(array('parent:fk_contrat' => $this->id, 'type'=> 5));
+            if (count($list) > 0) {
+                if($debug)
+                    echo '<h2>Déplacements</h2>';
+                foreach ($list as $det) {
+
+                    if($debug){
+//                            print_r($det);
+//                        $instanceFiDetDebug = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det', $det['rowid']);
+//                        $instanceFiDetDebug->printData();
+//                        $fi = $instanceFiDetDebug->getParentInstance();
+                        $fi = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $det['fk_fichinter']);
+                        echo '<br/>'.$fi->getNomUrl().' '.($det['duree'] / 3600) .'<br/>';
+                    }
+                    $totalHeuresFaites += $det['duree'] / 3600;
+                }
+            }
+        }
+        
+        if($debug){
+            echo '<br/>Heure délégation vendue : '.$totalHeuresVendues.'<br/>';
+            echo '<br/>Heure délégation faite : '.$totalHeuresFaites.'<br/>';
         }
 
         $reste = $totalHeuresVendues - $totalHeuresFaites;
@@ -855,7 +888,7 @@ class BContract_contrat extends BimpDolObject
             $child = $this->getChildObject('lines', $id_child);
             $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $child->getData('fk_product'));
             //if(in_array($instance->getRef(), $services)) {
-            $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $instance->getData('duree_i') / 3600;
+            $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $instance->getData('duree_i') / 3600 * $this->getRatioWithAvProlongation();
             //}
         }
 
@@ -922,6 +955,7 @@ class BContract_contrat extends BimpDolObject
             $prod = $line->getChildObject('produit');
             $tot += $prod->getData('duree_i') * $line->getData('qty');
         }
+        $tot = $tot * $this->getRatioWithAvProlongation();
         return $tot;
     }
 
@@ -1505,7 +1539,7 @@ class BContract_contrat extends BimpDolObject
         if ($facture_delivred) {
             foreach ($facture_delivred as $link) {
                 $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
-                if (/* $instance->getData('type') == 0 */1)
+                if ( $instance->getData('type') != 3)
                     $montant += $instance->getData('total');
             }
             $return = $this->getTotalContrat() - $montant;
@@ -1626,33 +1660,47 @@ class BContract_contrat extends BimpDolObject
 
     public function getAddAmountAvenantProlongation($idAvenant = 0, $taxe = 0)
     {
+        $total = $this->getCurrentTotal($taxe) * ($this->getRatioWithAvProlongation($idAvenant, 0)-1);
 
-        $now = new DateTime();
+        return $total;
+    }
+    
+    public function getRatioWithAvProlongation($idAvenant = 0, $ratioTotalOrRatioInitDuree = 1){//si 0 tous les avenant validée, sinon l'avenant en question
 
-        $total = 0;
+//        $now = new DateTime();
+
+        $ratio = 1;
 
         $filters = [
             'type'          => 1,
-            'want_end_date' => [
-                'operator' => '>=',
-                'value'    => $now->format('Y-m-d')
-            ]
+//            'want_end_date' => [
+//                'operator' => '>=',
+//                'value'    => $now->format('Y-m-d')
+//            ]
         ];
         if ($idAvenant == 0)//veut le total des valide
             $filters['statut'] = 2;
 
         $children = $this->getChildrenList('avenant', $filters);
+        
+        $dureeContratSansProlongation = $this->getData('duree_mois');
 
         $dureePrlong = 0;
-
         foreach ($children as $id_child) {
             $av = $this->getChildObject('avenant', $id_child);
-            $dureePrlong += $av->getNbMois();
+            if($av->getData('statut') == 2)
+                $dureeContratSansProlongation -= $av->getNbMois();
+            
             if (!$idAvenant || $idAvenant == $id_child)
-                $total += $this->getCurrentTotal($taxe) * $av->getNbMois() / ($this->getDureeInitial());
+                $dureePrlong += $av->getNbMois();
         }
+        
+        if($ratioTotalOrRatioInitDuree)
+            $ratio += $dureePrlong / $dureeContratSansProlongation;
+        else
+            $ratio += $dureePrlong / $this->getDureeInitial();
 
-        return $total;
+        return $ratio;
     }
 
     public function getAddAmountAvenantModification($idAvenant = 0)
@@ -2376,8 +2424,11 @@ class BContract_contrat extends BimpDolObject
         if ($in_contrat) {
 
             $html .= "Nombre de FI: " . count($fis) . '<br />';
-            $html .= "Nombre d'heures dans le contrat: " . $ficheInter->timestamp_to_time($total_tms) . '<br />';
-            $html .= "Nombre d'heures hors du contrat: " . $ficheInter->timestamp_to_time($total_tms_not_contrat) . ' (non pris en compte)<br />';
+            $html .= "Nombre d'heures vendue : " . $ficheInter->timestamp_to_time($this->getDurreeVendu()).'<br/>';
+//            $html .= "Nombre d'heures de délégation vendue : ".print_r($this->getTotalHeureDelegation(true),true).'<br/>';
+            $html .= "Nombre d'heures FI dans le contrat : " . $ficheInter->timestamp_to_time($total_tms) . '<br />';
+            $html .= "Nombre d'heures FI hors du contrat : " . $ficheInter->timestamp_to_time($total_tms_not_contrat) . ' (non pris en compte)<br />';
+            $html .= "Nombre d'heures de délégations restante : ".$this->getHeuresRestantesDelegation().'<br/>';
             $html .= "Coût technique: " . price($total_fis) . " € (" . BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique') . " €/h * " . $ficheInter->timestamp_to_time($total_tms) . ")<br />";
             $html .= "Coût prévisionel: " . price($previsionelle) . " €<br />";
             $html .= "Vendu: " . "<strong class='warning'>" . price($this->getTotalContrat()) . "€</strong><br />";
@@ -3908,7 +3959,7 @@ class BContract_contrat extends BimpDolObject
             }
             $callback = 'window.open("' . DOL_URL_ROOT . '/bimpcommercial/index.php?fc=propal&id=' . $propal->id . '")';
             $propal->copyContactsFromOrigin($this);
-            setElementElement('contrat', 'propal', $this->id, $propal->id);
+//            setElementElement('contrat', 'propal', $this->id, $propal->id);
             $success = "Creation du devis de renouvellement avec succès";
         }
 
@@ -4057,8 +4108,24 @@ class BContract_contrat extends BimpDolObject
         $new_contrat->set('fk_statut', 1);
         $new_contrat->set('ref', '');
         $new_contrat->set('date_contrat', null);
+        
+        
+        if ($new_contrat->getData('objet_contrat') != 'CDP') {
+            $arrayServiceDelegation = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3');
+            $lines = $this->getChildrenObjects('lines');
+            foreach ($lines as $line) {
+                $product = $line->getChildObject('produit');
+                if ($product && $product->isLoaded()) {
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                    if (in_array($product->getRef(), $arrayServiceDelegation)) {
+                        $errors[] = 'Vous ne pouvez pas mettre le code service ' . $product->getRef() . ' dans un autre contrat que dans un contrat de délégation.';
+                    }
+                }
+            }
+        }
 
-        $errors = $new_contrat->create();
+        if(!count($errors))
+            $errors = $new_contrat->create();
 
         return Array(
             'success'  => $success,

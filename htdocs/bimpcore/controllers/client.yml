@@ -55,6 +55,12 @@ sections:
                     callback: 
                         method: renderSupportView
                         object: client
+            show: 
+                callback:
+                    object: client
+                    method: isModuleActif
+                    params:
+                        - bimpsupport
           - id: inters
             title: Interventions
             struct: 
@@ -63,6 +69,12 @@ sections:
                     callback: 
                         method: renderIntersView
                         object: client
+            show: 
+                callback:
+                    object: client
+                    method: isModuleActif
+                    params:
+                        - bimptechnique
           - id: contrat
             title: Creation contrat
             show: 

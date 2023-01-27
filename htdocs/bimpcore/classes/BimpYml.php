@@ -69,39 +69,41 @@ class BimpYml
                 }
 
                 if ($type === 'all' || $type === 'objects') {
-                    foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects') as $f) {
-                        if (in_array($f, array('.', '..'))) {
-                            continue;
-                        }
+                    if(is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects'))
+                        foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects') as $f) {
+                            if (in_array($f, array('.', '..'))) {
+                                continue;
+                            }
 
-                        if (preg_match('/^(.+)\.yml$/', $f, $matches)) {
-                            $value = htmlentities(json_encode(array(
-                                'type'   => 'object',
-                                'module' => $m,
-                                'name'   => $matches[1]
-                            )));
+                            if (preg_match('/^(.+)\.yml$/', $f, $matches)) {
+                                $value = htmlentities(json_encode(array(
+                                    'type'   => 'object',
+                                    'module' => $m,
+                                    'name'   => $matches[1]
+                                )));
 
-                            $files[$value] = $m . ' - Objet: [bold]' . $matches[1] . '[/bold]';
+                                $files[$value] = $m . ' - Objet: [bold]' . $matches[1] . '[/bold]';
+                            }
                         }
-                    }
                 }
 
                 if ($type === 'all' || $type === 'controllers') {
-                    foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers') as $f) {
-                        if (in_array($f, array('.', '..'))) {
-                            continue;
-                        }
+                    if(is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers'))
+                        foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers') as $f) {
+                            if (in_array($f, array('.', '..'))) {
+                                continue;
+                            }
 
-                        if (preg_match('/^(.+)\.yml$/', $f, $matches)) {
-                            $value = htmlentities(json_encode(array(
-                                'type'   => 'controller',
-                                'module' => $m,
-                                'name'   => $matches[1]
-                            )));
+                            if (preg_match('/^(.+)\.yml$/', $f, $matches)) {
+                                $value = htmlentities(json_encode(array(
+                                    'type'   => 'controller',
+                                    'module' => $m,
+                                    'name'   => $matches[1]
+                                )));
 
-                            $files[$value] = $m . ' - Controller: [bold]' . $matches[1] . '[/bold]';
-                        }
-                    }
+                                $files[$value] = $m . ' - Controller: [bold]' . $matches[1] . '[/bold]';
+                            }
+                        } 
                 }
 
                 if ($type === 'all' || $type === 'configs') {

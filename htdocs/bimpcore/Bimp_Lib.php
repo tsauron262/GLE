@@ -63,6 +63,9 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpMailCore.php';
     require_once $dir . 'BimpModuleConf.php';
     require_once $dir . 'BimpLayout.php';
+    
+    
+    require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
     BimpCore::setMaxExecutionTime(600);
     BimpCore::setMemoryLimit(256);

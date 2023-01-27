@@ -735,6 +735,15 @@ forms:
         msgs: 
             callback: getContratFormMsgs
         rows: 
+            - custom: 1
+              label: Modèle
+              input_name: type_pdf
+              input: 
+                  type: select
+                  options: 
+                      papier: Signature papier
+                      elec: Signature électronique
+              value: papier
             - field: formule
               required: 1
               
@@ -743,6 +752,11 @@ forms:
             - custom: 1
               label: Nom Client locataire
               input_name: client_name
+              input: 
+                  type: text
+            - custom: 1
+              label: Adresse e-mail du client
+              input_name: client_email
               input: 
                   type: text
             - custom: 1
@@ -1201,7 +1215,7 @@ forms:
                 field_name: create_fac_fourn_rev
                 show_values: 1
             depends_on: fac_fourn_rev_id_fourn
-          - title: Facture de renvente au client
+          - title: Facture de revente au client
           - custom: 1
             label: Créer la facture client de revente
             input_name: create_fac_cli_rev

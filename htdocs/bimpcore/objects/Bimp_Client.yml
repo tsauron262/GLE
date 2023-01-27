@@ -387,10 +387,11 @@ lists:
         title: Liste des Clients
         icon: fas_user-circle
         list_filters:
-            - name: client
-              filter: 
-                  operator: '>'
-                  value: 0
+            client: 
+                name: client
+                filter: 
+                    operator: '>'
+                    value: 0
         add_btn_label: Nouveau client
         header_buttons: 
             callback: getDefaultListExtraHeaderButtons

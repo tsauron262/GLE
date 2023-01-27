@@ -1,0 +1,14 @@
+bootstrap: 1
+title: Tous les tiers
+    
+objects: 
+    societe: 
+        instance: 
+            bimp_object: Bimp_Societe
+                
+sections: 
+    - type: list
+      list: 
+          object: societe
+          name: all_tiers
+                  

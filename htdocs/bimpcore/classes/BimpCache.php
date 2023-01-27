@@ -79,11 +79,12 @@ class BimpCache
     {
         return static::$cache[$key];
     }
-    
-    public static function eraseCacheServer($echo = false){
-        $version = (int) BimpCore::getConf('git_version', 1)+1;
-        if($echo)
-            echo 'version '.$version;
+
+    public static function eraseCacheServer($echo = false)
+    {
+        $version = (int) BimpCore::getConf('git_version', 1) + 1;
+        if ($echo)
+            echo 'version ' . $version;
         BimpCore::setConf('git_version', $version);
     }
 
@@ -621,7 +622,7 @@ class BimpCache
                 }
 
                 // Objets liés dont ont est le parent:
-                if(1){//sinon c'est rop lourd
+                if (1) {//sinon c'est rop lourd
                     foreach (self::getBimpObjectsArray(false, false, false, false) as $obj_data => $obj_label) {
                         if (preg_match('/^(.+)\-(.+)$/', $obj_data, $matches)) {
                             $obj_module = $matches[1];
@@ -640,7 +641,6 @@ class BimpCache
                                                         $field_name => $object->id
                                             ));
 
-                                            
                                             if (!empty($linked_parents)) {
                                                 foreach ($linked_parents as $linked_parent) {
 //                                            echo $obj_module.' '.$obj_name.' '.$linked_parent.'<br/>';
@@ -648,7 +648,7 @@ class BimpCache
                                                                 'module'      => $obj_module,
                                                                 'object_name' => $obj_name,
                                                                 'id_object'   => $linked_parent
-                                                            ))] = $obj_module.' '.$obj_name.' '.$linked_parent;//BimpTools::ucfirst($linked_parent->getLabel()) . ' ' . $linked_parent->display('ref_nom');
+                                                            ))] = $obj_module . ' ' . $obj_name . ' ' . $linked_parent; //BimpTools::ucfirst($linked_parent->getLabel()) . ' ' . $linked_parent->display('ref_nom');
                                                 }
                                             }
                                         }
@@ -730,7 +730,7 @@ class BimpCache
                 }
 
                 // lists_col: 
-                $lists_cols = $object->config->getCompiledParams('lists_cols');                
+                $lists_cols = $object->config->getCompiledParams('lists_cols');
                 if (is_array($lists_cols)) {
                     foreach ($lists_cols as $col_name => $params) {
                         $label = BimpTools::getArrayValueFromPath($params, 'label', '');
@@ -1072,14 +1072,14 @@ class BimpCache
                         !preg_match('/^bimp(.+)$/', $f)) {
                     continue;
                 }
-                
-                if(!self::isModuleActif($f)){
-                    if(self::isDolModuleActif($f))
-                        BimpCore::setConf ('module_version_'.$f, '1');
+
+                if (!self::isModuleActif($f)) {
+                    if (self::isDolModuleActif($f))
+                        BimpCore::setConf('module_version_' . $f, '1');
                     else
                         continue;
                 }
-                
+
 //                echo $f.'<br/>';
 
 
@@ -1143,10 +1143,10 @@ class BimpCache
                         !preg_match('/^bimp(.+)$/', $module)) {
                     continue;
                 }
-                
-                if(!self::isModuleActif($module)){
-                    if(self::isDolModuleActif($module))
-                        BimpCore::setConf ('module_version_'.$module, '1');
+
+                if (!self::isModuleActif($module)) {
+                    if (self::isDolModuleActif($module))
+                        BimpCore::setConf('module_version_' . $module, '1');
                     else
                         continue;
                 }
@@ -1371,17 +1371,19 @@ class BimpCache
 
         return self::getCacheArray($cache_key, $include_empty, $empty_value, ($empty_label ? $empty_label : $empty_value));
     }
-    
-    public static function isModuleActif($moduleName){
-        if($moduleName == 'bimpcore')
+
+    public static function isModuleActif($moduleName)
+    {
+        if ($moduleName == 'bimpcore')
             return 1;
         return (float) BimpCore::getConf('module_version_' . $moduleName, 0);
     }
-    
-    public static function isDolModuleActif($moduleName){
+
+    public static function isDolModuleActif($moduleName)
+    {
         global $conf;
-        $name = 'MAIN_MODULE_'.strtoupper($moduleName);
-        if(isset($conf->global->$name))
+        $name = 'MAIN_MODULE_' . strtoupper($moduleName);
+        if (isset($conf->global->$name))
             return 1;
         return 0;
     }
@@ -1824,6 +1826,49 @@ class BimpCache
         }
 
         return self::$cache[$cache_key];
+    }
+
+    public static function getSocieteRibsArray($id_societe, $include_empty = false)
+    {
+        if (!(int) $id_societe) {
+            return ($include_empty ? array(0 => '') : array());
+        }
+
+
+        $key = 'societe_' . $id_societe . '_ribs_array';
+
+        if (!isset(self::$cache[$key])) {
+            self::$cache[$key] = array();
+            $result = $this->db->getRows('societe_rib', '`fk_soc` =' . $id_societe, null, 'object', null, 'default_rib', 'DESC');
+
+            foreach ($result as $row) {
+                if ($row->default_rib) {
+                    $include_empty = false;
+                }
+
+                $label = ($row->label && $row->label != 'default' ? $row->label : '');
+
+                if ($row->bank) {
+                    if ($label) {
+                        $label .= ' (' . $row->bank . ')';
+                    } else {
+                        $label .= $row->bank;
+                    }
+                }
+
+                if ($row->number) {
+                    $label .= ($label ? ' - ' : '') . $row->number;
+                }
+
+                if (!$label) {
+                    $label .= 'Compte par défaut (num absent)';
+                }
+
+                self::$cache[$key][$row->rowid] = $label;
+            }
+        }
+
+        return self::getCacheArray($key, $include_empty);
     }
 
     public static function getTypesSocietesArray($include_empty = false, $active_only = false)
@@ -2720,8 +2765,7 @@ class BimpCache
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     $label = $langs->transnoentities("PaymentCondition" . $r['code']) != ('PaymentCondition' . $r['code']) ? $langs->transnoentities("PaymentCondition" . $r['code']) : $r['libelle'];
-                    
-                    
+
                     self::$cache['cond_reglements_array'][(int) $r['rowid']] = $label;
                 }
             }
@@ -3151,7 +3195,7 @@ class BimpCache
 
         if (!isset(self::$cache[$cache_key])) {
             $where = '';
-            
+
             if ($active_only) {
                 $where .= '`active` = 1';
             }

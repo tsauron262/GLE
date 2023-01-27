@@ -274,23 +274,6 @@ fields:
         type: datetime
     fk_mode_reglement: 
         history: 1
-#    rib_client:
-#        label: Rib Client
-#        dol_extra_field: 1
-#        type: id_object
-#        object: rib_client 
-#        create_form: default
-#        create_form_label: Ajouter
-#        create_form_values:
-#            fields:
-#                fk_soc:
-#                    field_value: fk_soc
-#        depends_on: fk_soc
-#        input:
-#            type: select
-#            options:
-#                callback: getRibArray
-#        default_value: 0
         
     ref: unset
     fk_availability: unset

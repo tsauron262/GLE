@@ -1497,12 +1497,13 @@ lists:
     default: 
         configurable: 1
         checkboxes: 1
-        title: Liste des Sociétés
+        title: Liste des tiers
         icon: fas_building
         filters_panel: default
         list_filters:
-            - name: fournisseur
-              filter: 0
+            anon: 
+                name: is_anonymized
+                filter: 0
         bulk_actions:
             - label: supprimer les société sélectionnées
               icon: fas_trash-alt
@@ -1524,7 +1525,15 @@ lists:
             code_compta: 
             full_address: 
             infos_contact: 
-            fk_typent:             
+            fk_typent:         
+                
+    all_tiers: 
+        extends: default
+        page_btn: 0
+        modal_view: unset
+        edit_btn: 0
+        extra_btn: 
+            callback: getAllTiersListExtraButtons
        
 cards: 
     default: 

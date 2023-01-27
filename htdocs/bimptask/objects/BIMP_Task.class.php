@@ -52,6 +52,7 @@ class BIMP_Task extends BimpObject
 
         if ($this->getData("user_create") == $user->id && $right == 'read')
             return 1;
+        
         return $user->rights->bimptask->$classRight->$right;
     }
 

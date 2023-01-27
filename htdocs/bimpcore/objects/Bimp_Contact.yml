@@ -55,7 +55,7 @@ fields:
                 callback: 
                     method: getCivilitiesArray
                 params: 
-                    - 0
+                    - 1
                     - 1
         default_value: 0
     lastname:
@@ -151,7 +151,7 @@ fields:
         user_edit: 1
         dol_prop: phone_pro
     phone_perso: 
-        label: Tél. perso
+        label: Ligne directe
         user_edit: 1
     phone_mobile:
         label: Tél. portable

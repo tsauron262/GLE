@@ -3150,7 +3150,12 @@ class BimpCache
         }
 
         if (!isset(self::$cache[$cache_key])) {
-            $rows = self::getBdb()->getRows('c_civility', '`active` = 1', null, 'array', array('code', 'label', 'code'), 'label', 'DESC');
+            $where = '';
+            
+            if ($active_only) {
+                $where .= '`active` = 1';
+            }
+            $rows = self::getBdb()->getRows('c_civility', $where, null, 'array', array('code', 'label', 'code'), 'label', 'DESC');
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {

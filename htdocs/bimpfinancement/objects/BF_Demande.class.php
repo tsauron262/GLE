@@ -1126,12 +1126,12 @@ class BF_Demande extends BimpObject
         $tot = $this->getData('montant_materiels') + (float) $this->getData('montant_services') + (float) $this->getData('montant_logiciels');
         return (float) $tot;
     }
-    
+
     public function getTotalDemandeHTOnlyProd()
     {
         $totalHt = 0;
         $lines = $this->getLines('only_prod');
-        foreach($lines as $line){
+        foreach ($lines as $line) {
             $totalHt += $line->getData('total_ht');
         }
         return $totalHt;
@@ -1274,6 +1274,7 @@ class BF_Demande extends BimpObject
 
             // Génération contrat: 
             case 'client_name':
+            case 'client_email':
             case 'client_is_company':
             case 'client_forme_juridique':
             case 'client_capital':
@@ -1289,6 +1290,9 @@ class BF_Demande extends BimpObject
                         switch ($field_name) {
                             case 'client_name':
                                 return BimpTools::getArrayValueFromPath($client_data, 'nom', 0);
+
+                            case 'client_email':
+                                return BimpTools::getArrayValueFromPath($client_data, 'contact/email', 0);
 
                             case 'client_is_company':
                                 return (int) BimpTools::getArrayValueFromPath($client_data, 'is_company', 0);
@@ -1329,7 +1333,17 @@ class BF_Demande extends BimpObject
                             if (BimpObject::objectLoaded($client)) {
                                 return $client->getName();
                             }
-                            return 'FAIL';
+                            return '';
+
+                        case 'client_email':
+                            $email = '';
+                            if (BimpObject::objectLoaded($contact)) {
+                                $email = $contact->getData('email');
+                            }
+                            if (!$email && BimpObject::objectLoaded($client)) {
+                                $email = $client->getData('email');
+                            }
+                            return $email;
 
                         case 'client_is_company':
                             return $is_company;
@@ -1664,27 +1678,26 @@ class BF_Demande extends BimpObject
                             $types[] = BF_Line::TYPE_PRODUCT;
                             $types[] = BF_Line::TYPE_FREE;
                             break;
-                        
+
                         case 'only_prod':
                             $filters['or_type_prod'] = array(
                                 'or' => array(
-                                    'free' => array('and_fields' => 
+                                    'free' => array('and_fields' =>
                                         array(
                                             'type'         => BF_Line::TYPE_FREE,
                                             'product_type' => '1'
                                         )
                                     ),
-                                    'prod' => array('and_fields' => 
+                                    'prod' => array('and_fields' =>
                                         array(
-                                            'type'         => BF_Line::TYPE_PRODUCT,
+                                            'type'                    => BF_Line::TYPE_PRODUCT,
                                             'product:fk_product_type' => '0'
                                         )
                                     )
                                 )
                             );
-                            
+
                             break;
-                            
                     }
                 }
 
@@ -3887,19 +3900,19 @@ class BF_Demande extends BimpObject
     {
         $errors = array();
 
-        if(!$onlyProd)
+        if (!$onlyProd)
             $lines = $this->getLines();
         else
             $lines = $this->getLines('only_prod');
 
         $pourcentage = 1;
         if ($total_attendu_ht) {
-            if(!$onlyProd)
+            if (!$onlyProd)
                 $pourcentage = $total_attendu_ht / $this->getTotalDemandeHT();
             else
                 $pourcentage = $total_attendu_ht / $this->getTotalDemandeHTOnlyProd();
         }
-        
+
 
         foreach ($lines as $line) {
             $line_type = (int) $line->getData('type');
@@ -4313,6 +4326,11 @@ class BF_Demande extends BimpObject
         $success = 'Création du fichier PDF effectué avec succès';
         $sc = '';
 
+        $type_pdf = BimpTools::getArrayValueFromPath($data, 'type_pdf', '');
+        if (!$type_pdf) {
+            $errors[] = 'Aucun modèle de PDF sélectionné';
+        }
+
         $formule = BimpTools::getArrayValueFromPath($data, 'formule', $this->getData('formule'));
         if ($formule != $this->getData('formule')) {
             $this->updateField('formule', $formule);
@@ -4333,6 +4351,7 @@ class BF_Demande extends BimpObject
             $client_data['siren'] = BimpTools::getArrayValueFromPath($data, 'client_siren', '', $errors, true, 'N° SIREN du client absent');
             $client_data['insee'] = (int) BimpTools::getArrayValueFromPath($data, 'client_insee', 0);
             $client_data['repr_qualite'] = BimpTools::getArrayValueFromPath($data, 'client_repr_qualite', '', $errors, true, 'Qualité du représenant du client absente');
+            $client_data['email'] = BimpTools::getArrayValueFromPath($data, 'client_email', '', $errors, true, 'Adresse e-mail du client absente');
 
             if (!$client_data['insee']) {
                 $client_data['rcs'] = BimpTools::getArrayValueFromPath($data, 'client_rcs', '', $errors, true, 'Ville d\'enregistrement au RCS absente');
@@ -4375,17 +4394,61 @@ class BF_Demande extends BimpObject
             if ($this->isDemandeValid($errors)) {
                 global $db;
                 $files_dir = $this->getFilesDir();
-
-                // PDF contrat de location: 
+                $ref = $this->getRef();
                 $file_name = $this->getSignatureDocFileName('contrat');
-                require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
-                $pdf = new ContratFinancementPDF($db, $this, $client_data, $loueur_data, $cessionnaire_data);
 
-                $pdf->render($files_dir . $file_name, 'F');
+                switch ($type_pdf) {
+                    case 'papier':
+                        // PDF Consignes: 
+                        $consignes_file_name = 'consignes_' . $ref . '.pdf';
+                        require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ConsignesContratFinancementPDF.php';
+                        $pdf = new ConsignesContratFinancementPDF($db, $this);
+                        if (!$pdf->render($files_dir . $consignes_file_name, 'F')) {
+                            $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF des consignes client');
+                        }
 
-                if (count($pdf->errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF du contrat de location');
-                } else {
+                        $contrat_file_name = $this->getSignatureDocFileName('contrat') . '_tmp';
+                        require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
+                        $pdf = new ContratFinancementPDF($db, $this, $client_data, $loueur_data, $cessionnaire_data, 'papier');
+                        $pdf->render($files_dir . $contrat_file_name, 'F');
+                        if (count($pdf->errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF du contrat de location');
+                        }
+
+                        $mandat_file_name = 'mandat_sepa_' . $ref . '.pdf';
+                        require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/MandatSepaFinancementPDF.php';
+                        $pdf = new MandatSepaFinancementPDF($db, $client_data);
+                        if (!$pdf->render($files_dir . $mandat_file_name, 'F')) {
+                            $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF des consignes client');
+                        }
+
+                        if (!count($errors)) {
+                            $pdf = new BimpConcatPdf();
+                            $pdf->concatFiles($files_dir . $file_name, array(
+                                $files_dir . $consignes_file_name,
+                                $files_dir . $contrat_file_name,
+                                $files_dir . $contrat_file_name,
+                                $files_dir . $contrat_file_name,
+                                $files_dir . $mandat_file_name
+                                    ), 'F');
+                        }
+                        unlink($files_dir . $consignes_file_name);
+                        unlink($files_dir . $contrat_file_name);
+                        unlink($files_dir . $mandat_file_name);
+                        break;
+
+                    case 'elec':
+                        // PDF contrat de location: 
+                        require_once DOL_DOCUMENT_ROOT . '/bimpfinancement/pdf/ContratFinancementPDF.php';
+                        $pdf = new ContratFinancementPDF($db, $this, $client_data, $loueur_data, $cessionnaire_data, 'elec');
+                        $pdf->render($files_dir . $file_name, 'F');
+                        if (count($pdf->errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier PDF du contrat de location');
+                        }
+                        break;
+                }
+
+                if (!count($errors)) {
                     $up_errors = $this->updateField('contrat_status', self::DOC_GENERATED);
                     if (count($up_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du nouveau statut du contrat de location');

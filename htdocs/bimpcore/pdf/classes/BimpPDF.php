@@ -56,7 +56,7 @@ class BimpPDF extends TCPDF
     public function render($filename, $display = true, $display_only = false, $watermark = '', &$errors = array())
     {
         $extra_concat_files = $this->extra_concat_files;
-        
+
         $this->lastPage();
 
         if (stripos($filename, ".pdf") === false)
@@ -120,7 +120,7 @@ class BimpPDF extends TCPDF
             $fpdfi = new BimpConcatPdf();
             $fpdfi->addWatermark($filename, $watermark, $output);
         }
-        
+
         if ($extra_concat_files) {
             $fpdfi = new BimpConcatPdf();
             $fpdfi->addFiles($filename, $extra_concat_files, $output);
@@ -186,11 +186,54 @@ class BimpConcatPdf extends Fpdi
         }
 
         foreach ($files_to_add as $file_to_add) {
-            $pagecount = $this->setSourceFile($file_to_add);
-            for ($i = 0; $i < $pagecount; $i++) {
+            $file_path = '';
+
+            if (is_string($file_to_add)) {
+                $file_path = $file_to_add;
+            } elseif (isset($file_to_add['file'])) {
+                $file_path = $file_to_add['file'];
+            }
+
+            $pagecount = $this->setSourceFile($file_path);
+            for ($i = 1; $i <= $pagecount; $i++) {
                 $this->AddPage();
-                $tplidx = $this->importPage($i + 1, '/MediaBox');
+                $tplidx = $this->importPage($i, '/MediaBox');
                 $this->useTemplate($tplidx);
+
+                if (isset($file_to_add['inserts'])) {
+                    foreach ($file_to_add['inserts'] as $insert) {
+                        if (!isset($insert['page']) || $insert['page'] == 'all' || $insert['page'] == $i) {
+                            $font = BimpTools::getArrayValueFromPath($insert, 'font', 'Arial');
+                            $style = BimpTools::getArrayValueFromPath($insert, 'style', '');
+                            $size = BimpTools::getArrayValueFromPath($insert, 'style', 12);
+                            $color = BimpTools::getArrayValueFromPath($insert, 'color', array(0, 0, 0));
+                            $x = BimpTools::getArrayValueFromPath($insert, 'x', 0);
+                            $y = BimpTools::getArrayValueFromPath($insert, 'y', 0);
+                            $align = BimpTools::getArrayValueFromPath($insert, 'align', 'L');
+
+                            $this->SetFont($font, $style, $size);
+                            $this->SetTextColor($color[0], $color[1], $color[2]);
+
+                            if (isset($insert['texts'])) {
+                                foreach ($insert['texts'] as $t) {
+                                    if (is_array($t)) {
+                                        $x = BimpTools::getArrayValueFromPath($t, 'x', $x);
+                                        $y = BimpTools::getArrayValueFromPath($t, 'y', $y);
+                                        $text = $t['text'];
+                                    } else {
+                                        $text = $t;
+                                    }
+
+                                    $this->SetXY($x, $y);
+                                    $this->Cell(0, 0, utf8_decode($text), 0, 2, $align, 0);
+                                }
+                            } elseif (isset($insert['text'])) {
+                                $this->SetXY($x, $y);
+                                $this->Cell(0, 0, utf8_decode($insert['text']), 0, 2, $align, 0);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -206,6 +249,41 @@ class BimpConcatPdf extends Fpdi
                 $tplidx = $this->importPage($i + 1, '/MediaBox');
                 $this->useTemplate($tplidx);
             }
+        }
+
+        $this->Output($fileName, $output);
+    }
+
+    public function mergeFiles($fileName, $file1, $file2, $output = 'F', $file1_page_start = 1, $file2_page_start = 1)
+    {
+        for ($i = 1; $i < $file1_page_start; $i++) {
+            $this->AddPage();
+        }
+
+        $this->AddPage();
+        $this->page = $file1_page_start;
+        
+        $pagecount1 = $this->setSourceFile($file1);
+        for ($i = 1; $i <= $pagecount1; $i++) {
+            if ($i > 1) {
+                $this->AddPage();
+            }
+            $tplidx = $this->importPage($i, '/MediaBox');
+            $this->useTemplate($tplidx);
+        }
+
+        $pagecount1 += ($file1_page_start - 1);
+
+        $this->page = $file2_page_start - 1;
+        $pagecount2 = $this->setSourceFile($file2);
+        for ($i = 1; $i <= $pagecount2; $i++) {
+            if ($i > $pagecount1) {
+                $this->AddPage();
+            } else {
+                $this->page++;
+            }
+            $tplidx = $this->importPage($i, '/MediaBox');
+            $this->useTemplate($tplidx);
         }
 
         $this->Output($fileName, $output);

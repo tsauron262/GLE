@@ -174,7 +174,7 @@ class BimpPDF_Table
                             $content = $row[$key]['content'];
                         }
                         if (isset($row[$key]['style'])) {
-                            $style .= ($style ? ' ' : '') . $row[$key]['style'];
+                            $style .= ($style ? '; ' : '') . $row[$key]['style'];
                         }
                         if (isset($row[$key]['class'])) {
                             $class .= ($class ? ' ' : '') . $row[$key]['class'];
@@ -215,6 +215,8 @@ class BimpPDF_Table
         $html .= '</tr>';
         $html .= '</table>';
 
+//        echo htmlentities($html) .'<br/><br/>';
+        
         $pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html . "", false, false, true, false, '');
     }
 
@@ -236,8 +238,6 @@ class BimpPDF_Table
             $content .= $htmlAv . price($eco * $qty) . $htmlAp;
         if ($key == "total_ttc" && $eco > 0 && $qty)
             $content .= $htmlAv . price($eco * $qty * $coefTaxe) . $htmlAp;
-
-
 
         $rpcp = 0;
         if (isset($object->array_options['options_rpcp']) && $object->array_options['options_rpcp'] > 0)

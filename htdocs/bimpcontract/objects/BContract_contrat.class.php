@@ -820,21 +820,54 @@ class BContract_contrat extends BimpDolObject
 
         $arrayHeuresVendues = $this->getTotalHeureDelegation(true);
 
+        $instanceFiDet = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
+        $debug = false;
         if (count($arrayHeuresVendues) > 0) {
             foreach ($arrayHeuresVendues as $code => $time) {
 
                 $infoLigne = explode(':::::', $code);
 
-                $instanceFiDet = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
                 $list = $instanceFiDet->getList(array('id_line_contrat' => $infoLigne[1]));
                 if (count($list) > 0) {
+                    if($debug)
+                        echo '<h2>Services</h2>';
                     foreach ($list as $det) {
+                        
+                        if($debug){
+//                            print_r($det);
+                            $instanceFiDetDebug = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det', $det['rowid']);
+                            $fi = $instanceFiDetDebug->getParentInstance();
+                            echo '<br/>'.$fi->getNomUrl().' '.($det['duree'] / 3600) .'<br/>';
+                        }
                         $totalHeuresFaites += $det['duree'] / 3600;
                     }
                 }
 
                 $totalHeuresVendues += $time;
             }
+            
+            $list = $instanceFiDet->getList(array('parent:fk_contrat' => $this->id, 'type'=> 5));
+            if (count($list) > 0) {
+                if($debug)
+                    echo '<h2>Déplacements</h2>';
+                foreach ($list as $det) {
+
+                    if($debug){
+//                            print_r($det);
+//                        $instanceFiDetDebug = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det', $det['rowid']);
+//                        $instanceFiDetDebug->printData();
+//                        $fi = $instanceFiDetDebug->getParentInstance();
+                        $fi = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $det['fk_fichinter']);
+                        echo '<br/>'.$fi->getNomUrl().' '.($det['duree'] / 3600) .'<br/>';
+                    }
+                    $totalHeuresFaites += $det['duree'] / 3600;
+                }
+            }
+        }
+        
+        if($debug){
+            echo '<br/>Heure délégation vendue : '.$totalHeuresVendues.'<br/>';
+            echo '<br/>Heure délégation faite : '.$totalHeuresFaites.'<br/>';
         }
 
         $reste = $totalHeuresVendues - $totalHeuresFaites;

@@ -306,9 +306,9 @@ views:
           
             sous_taches: 
                 cols:
-                - type: custom
-                  custom: 
-                      callback: renderSousTachesList
+                  - type: custom
+                    custom: 
+                        callback: renderSousTachesList
             notes: 
                 cols:
                   - type: custom

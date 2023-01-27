@@ -106,6 +106,7 @@ fields:
         input:
             type: search_user
             include_empty: 1
+        depends_on: type_manuel
             
     test_ferme:
         label: Test pour Fermeture
@@ -125,6 +126,7 @@ fields:
         label: Tache mére
         type: id_object
         object: task_mere
+        depends_on: type_manuel
  
 fields_tables:
     default: 

@@ -39,16 +39,19 @@ class BIMP_Task extends BimpObject
     public function getUserRight($right)
     {
         global $user;
-        if (!$this->isLoaded())
-            return 1;
+        if (!$this->isLoaded()){
+            $classRight = BimpTools::getPostFieldValue ('type_manuel', null);
+            if(is_null($classRight))
+                return 1;
+        }
+        else
+            $classRight = $this->getType();
 
         if ($this->getData("id_user_owner") == $user->id)
             return 1;
 
         if ($this->getData("user_create") == $user->id && $right == 'read')
             return 1;
-
-        $classRight = $this->getType();
         return $user->rights->bimptask->$classRight->$right;
     }
 
@@ -85,7 +88,8 @@ class BIMP_Task extends BimpObject
     {
         switch ($field_name) {
             case 'id_user_owner':
-                return $this->canAttribute();
+            case 'id_task':
+                return 0;//$this->canAttribute();
         }
 
         return parent::canEditField($field_name);

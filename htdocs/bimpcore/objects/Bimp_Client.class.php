@@ -3276,7 +3276,8 @@ class Bimp_Client extends Bimp_Societe
 
                     if (isset($cover['amount'])) {
                         if ($cover['amount'] == 0) {
-                            self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', 0);
+                            if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK || $this->getData('outstanding_limit_credit_check') > 0)
+                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', 0);
                             if ($cover['cover_type'] == 'credit-limit' || $this->getData('outstanding_limit_atradius') > 0)
                                 self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
                             if ($this->getData('outstanding_limit_icba') > 0)

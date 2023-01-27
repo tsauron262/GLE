@@ -1839,7 +1839,7 @@ class BimpCache
 
         if (!isset(self::$cache[$key])) {
             self::$cache[$key] = array();
-            $result = $this->db->getRows('societe_rib', '`fk_soc` =' . $id_societe, null, 'object', null, 'default_rib', 'DESC');
+            $result = self::getBdb()->getRows('societe_rib', '`fk_soc` =' . $id_societe, null, 'object', null, 'default_rib', 'DESC');
 
             foreach ($result as $row) {
                 if ($row->default_rib) {

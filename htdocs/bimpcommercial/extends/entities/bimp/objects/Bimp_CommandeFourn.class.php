@@ -148,9 +148,13 @@ class Bimp_CommandeFourn_ExtEntity extends Bimp_CommandeFourn
                     }
                 }
             }
+            else
+                $errors[] = 'Login impossible';
 
             ftp_close($conn);
         }
+        else
+            $errors[] = 'Connexion impossible';;
         return $errors;
     }
 
@@ -314,7 +318,7 @@ class Bimp_CommandeFourn_ExtEntity extends Bimp_CommandeFourn
                         }
                     }
                 } else
-                    $errors[] = 'Probléme de connexion LDLC';
+                    $errors[] = 'Probléme de login LDLC';
             } else
                 $errors[] = 'Probléme de connexion LDLC';
 

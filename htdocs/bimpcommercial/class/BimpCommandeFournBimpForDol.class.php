@@ -13,9 +13,9 @@ class BimpCommandeFournBimpForDol extends Bimp_CommandeFourn_ExtEntity{
     public function cronVerifMajLdlc(){
         $msg = '';
         $errors = $this->verifMajLdlc($msg);
-        $this->output = $msg;
         if(count($errors))
             $msg .= '<br/>Erreurs : <br/>'.implode('<br/>', $errors);
+        $this->output = $msg;
         return 0;
     }
 }

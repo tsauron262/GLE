@@ -3667,6 +3667,9 @@ class BimpObject extends BimpCache
             $extra_order_by = 'a.' . $primary;
         }
 
+        if(!count($fields))
+            $fields[] = 'a.*';
+        
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -6631,7 +6634,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         }
                     }
                     $nb = count($filterLinked['linked']['or']);
-                    if ($nb > 100)
+                    if ($nb > 180)
                         BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')');
 
                     $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');

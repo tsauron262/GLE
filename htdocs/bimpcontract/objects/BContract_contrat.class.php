@@ -855,7 +855,7 @@ class BContract_contrat extends BimpDolObject
             $child = $this->getChildObject('lines', $id_child);
             $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $child->getData('fk_product'));
             //if(in_array($instance->getRef(), $services)) {
-            $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $instance->getData('duree_i') / 3600;
+            $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $instance->getData('duree_i') / 3600 * $this->getRatioWithAvProlongation();
             //}
         }
 
@@ -922,6 +922,7 @@ class BContract_contrat extends BimpDolObject
             $prod = $line->getChildObject('produit');
             $tot += $prod->getData('duree_i') * $line->getData('qty');
         }
+        $tot = $tot * $this->getRatioWithAvProlongation();
         return $tot;
     }
 
@@ -1626,33 +1627,47 @@ class BContract_contrat extends BimpDolObject
 
     public function getAddAmountAvenantProlongation($idAvenant = 0, $taxe = 0)
     {
+        $total = $this->getCurrentTotal($taxe) * ($this->getRatioWithAvProlongation($idAvenant, 0)-1);
 
-        $now = new DateTime();
+        return $total;
+    }
+    
+    public function getRatioWithAvProlongation($idAvenant = 0, $ratioTotalOrRatioInitDuree = 1){//si 0 tous les avenant validée, sinon l'avenant en question
 
-        $total = 0;
+//        $now = new DateTime();
+
+        $ratio = 1;
 
         $filters = [
             'type'          => 1,
-            'want_end_date' => [
-                'operator' => '>=',
-                'value'    => $now->format('Y-m-d')
-            ]
+//            'want_end_date' => [
+//                'operator' => '>=',
+//                'value'    => $now->format('Y-m-d')
+//            ]
         ];
         if ($idAvenant == 0)//veut le total des valide
             $filters['statut'] = 2;
 
         $children = $this->getChildrenList('avenant', $filters);
+        
+        $dureeContratSansProlongation = $this->getData('duree_mois');
 
         $dureePrlong = 0;
-
         foreach ($children as $id_child) {
             $av = $this->getChildObject('avenant', $id_child);
-            $dureePrlong += $av->getNbMois();
+            if($av->getData('statut') == 2)
+                $dureeContratSansProlongation -= $av->getNbMois();
+            
             if (!$idAvenant || $idAvenant == $id_child)
-                $total += $this->getCurrentTotal($taxe) * $av->getNbMois() / ($this->getDureeInitial());
+                $dureePrlong += $av->getNbMois();
         }
+        
+        if($ratioTotalOrRatioInitDuree)
+            $ratio += $dureePrlong / $dureeContratSansProlongation;
+        else
+            $ratio += $dureePrlong / $this->getDureeInitial();
 
-        return $total;
+        return $ratio;
     }
 
     public function getAddAmountAvenantModification($idAvenant = 0)
@@ -2376,8 +2391,11 @@ class BContract_contrat extends BimpDolObject
         if ($in_contrat) {
 
             $html .= "Nombre de FI: " . count($fis) . '<br />';
-            $html .= "Nombre d'heures dans le contrat: " . $ficheInter->timestamp_to_time($total_tms) . '<br />';
-            $html .= "Nombre d'heures hors du contrat: " . $ficheInter->timestamp_to_time($total_tms_not_contrat) . ' (non pris en compte)<br />';
+            $html .= "Nombre d'heures vendue : " . $ficheInter->timestamp_to_time($this->getDurreeVendu()).'<br/>';
+//            $html .= "Nombre d'heures de délégation vendue : ".print_r($this->getTotalHeureDelegation(true),true).'<br/>';
+            $html .= "Nombre d'heures FI dans le contrat : " . $ficheInter->timestamp_to_time($total_tms) . '<br />';
+            $html .= "Nombre d'heures FI hors du contrat : " . $ficheInter->timestamp_to_time($total_tms_not_contrat) . ' (non pris en compte)<br />';
+            $html .= "Nombre d'heures de délégations restante : ".$this->getHeuresRestantesDelegation().'<br/>';
             $html .= "Coût technique: " . price($total_fis) . " € (" . BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique') . " €/h * " . $ficheInter->timestamp_to_time($total_tms) . ")<br />";
             $html .= "Coût prévisionel: " . price($previsionelle) . " €<br />";
             $html .= "Vendu: " . "<strong class='warning'>" . price($this->getTotalContrat()) . "€</strong><br />";
@@ -3908,7 +3926,7 @@ class BContract_contrat extends BimpDolObject
             }
             $callback = 'window.open("' . DOL_URL_ROOT . '/bimpcommercial/index.php?fc=propal&id=' . $propal->id . '")';
             $propal->copyContactsFromOrigin($this);
-            setElementElement('contrat', 'propal', $this->id, $propal->id);
+//            setElementElement('contrat', 'propal', $this->id, $propal->id);
             $success = "Creation du devis de renouvellement avec succès";
         }
 

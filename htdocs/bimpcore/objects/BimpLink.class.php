@@ -3,22 +3,9 @@
 class BimpLink extends BimpObject
 {
 
-    // Getters booléens: 
+    // Getters booléens:
 
-    public function i_view()
-    {
-        if (!$this->getData("viewed") && $this->i_am_dest()) {
-            $this->set('viewed', 1);
-            $warn = array();
-            if (empty($this->update($warn, true))) {
-                return 1;
-            }
-        }
-
-        return 0;
-    }
-
-    public function i_am_dest()
+    public function isUserDest()
     {
         return 1;
     }
@@ -149,7 +136,7 @@ class BimpLink extends BimpObject
                 $new_demande = array(
                     'id'             => $d->id,
                     'is_viewed'      => (int) $d->getData('viewed'),
-                    'can_set_viewed' => (int) $this->i_view(),
+                    'can_set_viewed' => (int) $this->isUserDest(),
                     'obj_link'       => $bimp_object->getLink(),
                     'src'            => $d->getSourceFieldLabel(),
                     'content'        => $d->displaySourceFieldContent()
@@ -169,11 +156,12 @@ class BimpLink extends BimpObject
     }
 
     // Getters statiques: 
-    
-    public static function getUsersLinked($src_object){
+
+    public static function getUsersLinked($src_object)
+    {
         $users = array();
         $hashs = self::getLinksForSource($src_object, '', 'bimpcore', 'Bimp_User');
-        foreach($hashs as $hash){
+        foreach ($hashs as $hash) {
             $users[$hash->getData('linked_id')] = $hash->getLinkedObject();
         }
         return $users;
@@ -415,10 +403,11 @@ class BimpLink extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Note marquée comme vue';
+        $success = 'Marquée comme vue';
 
-        if (!$this->i_view()) {
-            $errors[] = 'Impossible';
+        if (!$this->getData("viewed") && $this->isUserDest()) {
+            $this->set('viewed', 1);
+            $errors = $this->update($warnings, true);
         }
 
         return array(

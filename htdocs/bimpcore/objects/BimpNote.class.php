@@ -257,6 +257,7 @@ class BimpNote extends BimpObject
     }
 
     // Getters:
+
     public static function getFiltersByUser($id_user = null)
     {
         $filters = array();
@@ -369,6 +370,20 @@ class BimpNote extends BimpObject
         }
 
         return $buttons;
+    }
+
+    public function getListsExtraBulkActions()
+    {
+        return array(
+            array(
+                'label'   => 'Marquer vues',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsBulkActionOnclick('setAsViewed', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer (Attention certaines notes sont supprimées après lecture)'
+                        )
+                )
+            )
+        );
     }
 
     public function getListExtraBtn()

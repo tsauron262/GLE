@@ -171,6 +171,8 @@ class BimpDb
     public function getRows($table, $where = '1', $limit = null, $return = 'object', $fields = null, $order_by = null, $order_way = null, $joins = array())
     {
         $sql = 'SELECT ';
+        if($where == '')
+            $where = '1';
 
         if (!is_null($fields)) {
             $fl = true;

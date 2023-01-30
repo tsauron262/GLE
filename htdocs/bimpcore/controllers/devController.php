@@ -27,9 +27,7 @@ class devController extends BimpController
         if (!$this->can('view')) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu', 'danger');
         }
-
-        $entity = BimpCore::getEntity();
-
+        
         $html = '';
 
         // ToolsBar:
@@ -54,20 +52,6 @@ class devController extends BimpController
             $html .= '<a class="btn btn-info" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_all.php" target="_blank">';
             $html .= 'GIT PULL ALL' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
-//                    
-//            switch ($entity) {
-//                case 'bimp':
-//                    $html .= '<a class="btn btn-info" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_bimp.php?mainmenu=home" target="_blank">';
-//                    $html .= 'GIT PULL ALL (BIMP)' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
-//                    $html .= '</a>';
-//                    break;
-//
-//                case 'mymu':
-//                    $html .= '<a class="btn btn-info" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_bimp.php?mainmenu=home" target="_blank">';
-//                    $html .= 'GIT PULL ALL (MyMu)' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
-//                    $html .= '</a>';
-//                    break;
-//            }
         }
         $html .= '</div>';
 
@@ -110,6 +94,16 @@ class devController extends BimpController
         $html .= BimpRender::renderPanel('Liens utiles', $content);
 
         $html .= '</div>';
+        $html .= '</div>';
+
+        $html .= '<div class="row">';
+        $html .= '<h3>' . BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Tâches</h3>';
+        
+        $content = '';
+        
+        $content .= '<table class="bimp_list_table">';
+        $content .= '</table>';
+
         $html .= '</div>';
 
         return $html;

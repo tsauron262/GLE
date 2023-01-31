@@ -5015,6 +5015,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $success = 'Statut du SAV enregistré avec succès';
         $errors = array();
         $warnings = array();
+        $succesCallback = '';
 
         $msg_type = '';
 
@@ -5124,6 +5125,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                     $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
                                 }
                                 if (count($rep_errors)) {
+                                    $succesCallback .= 'setTimeout(function(){bimpModal.newContent("Erreur GSX", "'.implode('\n', $rep_errors).'");}, 500);';
                                     $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation (2) d\'ID ' . $item['id']);
                                 }
                             }
@@ -5150,7 +5152,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => $succesCallback
         );
     }
 

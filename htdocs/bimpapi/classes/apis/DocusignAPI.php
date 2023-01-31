@@ -445,6 +445,7 @@ class DocusignAPI extends BimpAPI
             } else {
                 $error = 'Echec de la connexion';
                 if($result['error_description'] == 'expired_client_token'){
+                    $url = $this->getBaseUrl('auth') . "/oauth/auth?response_type=code&scope=signature&client_id=" . $client_id . "&redirect_uri=" . urlencode($url_redirect);
                     $errors[] = $this->userAccount->getData('name') . " n'est pas connecté à DocuSign <a target='_blank' href='" . $url . "'>cliquez ici</a>";
                 }
                 else{

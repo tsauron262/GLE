@@ -349,7 +349,7 @@ class Bimp_Log extends BimpObject
         $panel1 = '';
         $panel2 = '';
 
-        // Logs à traités non attribués:  
+        // Logs à traiter non attribués:  
         $sql = 'SELECT a.type,';
         $sql .= ' SUM(' . BimpTools::getSqlCase(array(
                     'a.level' => 1

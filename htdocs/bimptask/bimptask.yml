@@ -8,3 +8,8 @@ params:
     id_user_def: 
         label: ID utilisateur par défaut
         required: 1
+        
+    allow_bug_task: 
+        label: Autoriser la création de tâche pour le signalement des bugs
+        type: bool
+        def: 0

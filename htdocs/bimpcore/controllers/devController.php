@@ -27,7 +27,7 @@ class devController extends BimpController
         if (!$this->can('view')) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu', 'danger');
         }
-        
+
         $html = '';
 
         // ToolsBar:
@@ -81,6 +81,7 @@ class devController extends BimpController
         $html .= '</div>';
 
         $html .= '<div class="col-sm-12 col-md-4">';
+        
         // Liens: 
         $content = '';
         foreach (self::$dev_links as $link) {
@@ -97,13 +98,18 @@ class devController extends BimpController
         $html .= '</div>';
 
         $html .= '<div class="row">';
+        $html .= '<div class="col-sm-12 col-md-6">';
         $html .= '<h3>' . BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Tâches</h3>';
-        
-        $content = '';
-        
-        $content .= '<table class="bimp_list_table">';
-        $content .= '</table>';
+        BimpObject::loadClass('bimptask', 'BIMP_Task');
+        $html .= BIMP_Task::renderCounts('dev');
+        $html .= '</div>';
+        $html .= '</div>';
 
+        $html .= '<div class="row">';
+        $list = new BC_ListTable(BimpObject::getInstance('bimptask', 'BIMP_Task'), 'main', 1, null, 'Tâches dév');
+        $list->addFieldFilterValue('id_task', 0);
+        $list->addFieldFilterValue('type_manuel', 'dev');
+        $html .= $list->renderHtml();
         $html .= '</div>';
 
         return $html;

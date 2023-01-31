@@ -95,10 +95,13 @@ fields:
             
     sous_type:
         label: Sous Type
-        type: int
         depends_on: type_manuel
         values: 
-            array: sous_type_list_task
+            array: allSousTypes
+        input: 
+            type: select
+            options: 
+                array: sous_type_list_task
             
     id_user_owner:
         label: Attribuée à
@@ -188,7 +191,6 @@ forms:
               form_values: 
                   fields: 
                       id_parent: 1
-                  
               multiple: 1
               
     addUser:
@@ -239,6 +241,30 @@ forms:
               input: 
                   type: toggle
               value: 1
+              
+    bug: 
+        title: Signaler un bug
+        rows: 
+            - field: type_manuel
+              hidden: 1
+              value: dev
+            - field: sous_type
+              hidden: 1
+              value: bug
+            - field: prio
+              value: 20
+            - field: subj
+            - field: txt
+            - field: comment
+              value: 
+                  callback: getDefaultBugCommentInputValue
+            - object: files
+              form_name: upload_light
+              form_label: Ajouter
+              form_values: 
+                  fields: 
+                      id_parent: 1
+              multiple: 1
            
 lists_cols: 
     typeTache:
@@ -252,6 +278,11 @@ lists_cols:
                 options:
                     callback: getTypeArray
                             
+    nb_sous_taches: 
+        label: Sous-tâches
+        value: 
+            callback: displaySousTachesCounts
+        
 lists:
     default:
         checkboxes: 1
@@ -274,19 +305,28 @@ lists:
         extra_btn: 
             callback: getButtons
         cols:
-            id:
+            date_create:
+            prio: 
+            status:
+                edit: 1
+            id_task:
             src:
             dst:
             typeTache:                    
             subj:
             txt:
-            comment:
-            status:
-                edit: 1
             id_user_owner:
+            nb_sous_taches:
+                
+    main: 
+        extends: default
+        cols: 
+            id_task: unset
                 
     sousTache:
         extends: default
+        cols: 
+            nb_sous_taches: unset
 
 views:
     full: 

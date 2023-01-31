@@ -5,7 +5,7 @@ class BimpTheme
 
     public static $files = array(
         'css' => array(
-            'iconkit'   => '/bimpcore/views/css/iconkit.min.css'
+            'iconkit' => '/bimpcore/views/css/iconkit.min.css'
         ),
         'js'  => array(
             'theme'      => '/bimptheme/views/js/theme.js',
@@ -184,7 +184,19 @@ class BimpTheme
         $nbMessage = count($note_instance->getList(["fk_user_dest" => $user->id, "viewed" => 0, "auto" => 0]));
 
         $html = '';
+
         $html .= '<div class="dropdown modifDropdown login_block_other">';
+
+        if (BimpCore::isModuleActive('bimptask') && BimpCore::getConf('allow_bug_task', null, 'bimptask')) {
+            $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
+            $html .= '<span class="bs-popover header-icon"';
+            $html .= BimpRender::renderPopoverData('Signaler un bug', 'bottom');
+            $html .= ' onclick="' . $task->getJsLoadModalForm('bug', 'Signaler un bug') . '"';
+            $html .= '>';
+            $html .= BimpRender::renderIcon('fas_bug');
+            $html .= '</span>';
+        }
+
         $html .= '<a class="nav-link dropdown-toggle" href="#" id="notiDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
         $html .= BimpRender::renderIcon('fas_comments');
 

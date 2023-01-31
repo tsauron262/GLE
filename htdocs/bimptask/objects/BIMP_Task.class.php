@@ -25,8 +25,8 @@ class BIMP_Task extends BimpObject
     );
     public static $sous_types = array(
         'dev' => array(
-            0 => array('label' => "Bug"),
-            1 => array('label' => 'Développement')
+            'bug' => array('label' => 'Bug'),
+            'dev' => array('label' => 'Développement')
         )
     );
 //    const MARQEUR_MAIL = "IDTASK:5467856456"; => Remplacé par BimpCore::getConf('marqueur_mail', null, 'bimptask')
@@ -39,12 +39,11 @@ class BIMP_Task extends BimpObject
     public function getUserRight($right)
     {
         global $user;
-        if (!$this->isLoaded()){
-            $classRight = BimpTools::getPostFieldValue ('type_manuel', null);
-            if(is_null($classRight))
+        if (!$this->isLoaded()) {
+            $classRight = BimpTools::getPostFieldValue('type_manuel', null);
+            if (is_null($classRight))
                 return 1;
-        }
-        else
+        } else
             $classRight = $this->getType();
 
         if ($this->getData("id_user_owner") == $user->id)
@@ -52,7 +51,7 @@ class BIMP_Task extends BimpObject
 
         if ($this->getData("user_create") == $user->id && $right == 'read')
             return 1;
-        
+
         return $user->rights->bimptask->$classRight->$right;
     }
 
@@ -90,7 +89,7 @@ class BIMP_Task extends BimpObject
         switch ($field_name) {
             case 'id_user_owner':
             case 'id_task':
-                return 0;//$this->canAttribute();
+                return 0; //$this->canAttribute();
         }
 
         return parent::canEditField($field_name);
@@ -253,6 +252,19 @@ class BIMP_Task extends BimpObject
             return self::$sous_types[$type];
 
         return array();
+    }
+
+    public function getAllSousTypesArray()
+    {
+        $types = array();
+
+        foreach (self::$sous_types as $type => $sousTypes) {
+            foreach ($sousTypes as $sous_type => $data) {
+                $types[$sous_type] = $data['label'];
+            }
+        }
+
+        return $types;
     }
 
     public static function getTypeArray()
@@ -489,6 +501,11 @@ class BIMP_Task extends BimpObject
         return $status;
     }
 
+    public function getDefaultBugCommentInputValue()
+    {
+        return 'URL: ' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    }
+
     // Affichages: 
 
     public function displayUserNotif()
@@ -509,12 +526,177 @@ class BIMP_Task extends BimpObject
             return $this->displayData('type_manuel');
     }
 
+    public function displaySousTachesCounts()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $sql = 'SELECT ';
+            $sql .= ' SUM(' . BimpTools::getSqlCase(array(
+                        'a.status' => 0
+                            ), 1, 0) . ') as a_traiter';
+            $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                        'a.status' => 1
+                            ), 1, 0) . ') as en_cours';
+            $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                        'a.status' => array('in' => array(2, 3))
+                            ), 1, 0) . ') as en_attentes';
+            $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                        'a.status' => 4
+                            ), 1, 0) . ') as terminees';
+
+            $sql .= BimpTools::getSqlFrom('bimp_task');
+
+            $sql .= BimpTools::getSqlWhere(array(
+                        'a.id_task' => $this->id
+                            )
+            );
+
+            $rows = self::getBdb()->executeS($sql, 'array');
+
+            if (!empty($rows)) {
+                $row = $rows[0];
+
+                if ((int) $row['a_traiter'] > 0) {
+                    $html .= ($html ? '&nbsp;' : '') . '<span class="badge badge-important">' . (int) $row['a_traiter'] . '</span>';
+                }
+                if ((int) $row['en_cours'] > 0) {
+                    $html .= ($html ? '&nbsp;' : '') . '<span class="badge badge-info">' . (int) $row['en_cours'] . '</span>';
+                }
+                if ((int) $row['en_attentes'] > 0) {
+                    $html .= ($html ? '&nbsp;' : '') . '<span class="badge badge-warning">' . (int) $row['en_attentes'] . '</span>';
+                }
+                if ((int) $row['terminees'] > 0) {
+                    $html .= ($html ? '&nbsp;' : '') . '<span class="badge badge-success">' . (int) $row['terminees'] . '</span>';
+                }
+            }
+        }
+
+        return $html;
+    }
+
     // Rendus HTML: 
 
     public function renderHeaderStatusExtra()
     {
         if ($this->hasFilleEnCours())
             return ' (action en cours sur des sous Tache)';
+    }
+
+    public static function renderCounts($type = '')
+    {
+        $html = '';
+
+        // Tâches à traiter: 
+
+        $sql = 'SELECT a.sous_type, a.id_user_owner';
+        $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                    'a.status' => 20
+                        ), 1, 0) . ') as nb_niv1';
+        $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                    'a.prio' => 10
+                        ), 1, 0) . ') as nb_niv2';
+        $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                    'a.prio' => 0
+                        ), 1, 0) . ') as nb_niv3';
+
+        $sql .= BimpTools::getSqlFrom('bimp_task');
+
+        $count_st_key = '(SELECT COUNT(DISTINCT st.id) FROM ' . MAIN_DB_PREFIX . 'bimp_task st WHERE st.id_task = a.id)';
+        $sql .= BimpTools::getSqlWhere(array(
+                    'a.status'      => array(
+                        'operator' => '<',
+                        'value'    => 4
+                    ),
+                    'a.type_manuel' => $type,
+                    $count_st_key   => 0 // On exclue les tâches comportant des sous-tâches
+                        )
+        );
+        $sql .= ' GROUP BY a.sous_type, a.id_user_owner';
+
+        $rows = self::getBdb()->executeS($sql, 'array');
+
+        // Trie: 
+        if (!empty($rows)) {
+
+            $counts = array();
+            $sous_types = array();
+            $users = array();
+
+            foreach ($rows as $r) {
+                if (!in_array($r['sous_type'], $sous_types)) {
+                    $sous_types[] = $r['sous_type'];
+                }
+                if (!in_array((int) $r['id_user_owner'], $users)) {
+                    $users[] = (int) $r['id_user_owner'];
+                }
+                if (!isset($counts[(int) $r['id_user_owner']])) {
+                    $counts[$r['id_user_owner']] = array();
+                }
+                if (!isset($types[(int) $r['id_user_owner']][$r['sous_type']])) {
+                    $counts[$r['id_user_owner']][$r['sous_type']] = array();
+                }
+
+                $counts[(int) $r['id_user_owner']][$r['sous_type']] = $r;
+            }
+
+            $html = '<table class="bimp_list_table">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th></th>';
+
+            foreach ($sous_types as $sous_type) {
+                $label = '';
+                if ($sous_type) {
+                    $label = self::$sous_types['dev'][$sous_type]['label'];
+//                    $label = BimpTools::getArrayValueFromPath(self::$sous_types, $type . '/' . $sous_type . '/label', $sous_type);
+                } else {
+                    $label = 'Non défini';
+                }
+                $html .= '<th style="text-align: center">' . $label . '</th>';
+            }
+
+            $html .= '</tr>';
+            $html .= '</thead>';
+
+            $html .= '<tbody class="headers_col">';
+
+            ksort($users);
+
+            foreach ($users as $id_user) {
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+                $html .= '<tr>';
+                $html .= '<th>' . (BimpObject::objectLoaded($user) ? $user->getData('firstname') : ($id_user ? 'Utilisateur #' . $id_user : 'Non attrbuée')) . '</th>';
+                foreach ($sous_types as $sous_type) {
+                    $html .= '<td style="text-align: center">';
+                    $nb_niv3 = (int) BimpTools::getArrayValueFromPath($counts, $id_user . '/' . $sous_type . '/nb_niv3', 0);
+                    if ($nb_niv3) {
+                        $html .= '<span class="badge badge-info">' . $nb_niv3 . '</span>';
+                    }
+
+                    $nb_niv2 = (int) BimpTools::getArrayValueFromPath($counts, $id_user . '/' . $sous_type . '/nb_niv2', 0);
+                    if ($nb_niv2) {
+                        $html .= '&nbsp;<span class="badge badge-warning">' . $nb_niv2 . '</span>';
+                    }
+
+                    $nb_niv1 = (int) BimpTools::getArrayValueFromPath($counts, $id_user . '/' . $sous_type . '/nb_niv1', 0);
+                    if ($nb_niv1) {
+                        $html .= '&nbsp;<span class="badge badge-danger">' . $nb_niv1 . '</span>';
+                    }
+                    $html .= '</td>';
+                }
+                $html .= '</tr>';
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+
+            return BimpRender::renderPanel('Tâches à traiter', $html, '', array(
+                        'type' => 'secondary'
+            ));
+        }
+
+        return $html;
     }
 
     public function renderLight()

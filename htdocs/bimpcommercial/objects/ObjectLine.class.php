@@ -4011,7 +4011,7 @@ class ObjectLine extends BimpObject
 
             if ($remise_crt) {
                 if (isset($this->no_remises_arrieres_auto_create) && $this->no_remises_arrieres_auto_create) {
-                    return;
+                    return array();
                 }
 
                 if (!BimpObject::objectLoaded($ra)) {

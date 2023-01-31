@@ -257,8 +257,6 @@ forms:
             - field: subj
             - field: txt
             - field: comment
-              value: 
-                  callback: getDefaultBugCommentInputValue
             - object: files
               title: Fichiers
               form_name: upload_light

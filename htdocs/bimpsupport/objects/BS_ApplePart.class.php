@@ -438,7 +438,7 @@ class BS_ApplePart extends BimpObject
         $newPrix = 0;
         //Application des coef et constantes
         if ($type == 'batt14' && $price_type == 'EXCHANGE') {
-            $newPrix = 119;
+            $newPrix = 119/1.2;
         } elseif ($type == "batt" && $price_type == "EXCHANGE") {
             $newPrix = 49.16666666;
         } elseif ($type == "battX" && $price_type == "EXCHANGE") {
@@ -494,7 +494,6 @@ class BS_ApplePart extends BimpObject
             $prix = $newPrix;
         else
             $prix = (($prix + $constPrix) / $coefPrix);
-
 
         return $prix;
     }

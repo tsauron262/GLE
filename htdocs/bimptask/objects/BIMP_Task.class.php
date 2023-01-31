@@ -89,7 +89,7 @@ class BIMP_Task extends BimpObject
         switch ($field_name) {
             case 'id_user_owner':
             case 'id_task':
-                return 0; //$this->canAttribute();
+                return $this->canAttribute();
         }
 
         return parent::canEditField($field_name);

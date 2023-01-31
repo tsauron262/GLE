@@ -40,6 +40,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 
     public function initData()
     {
+        
     }
 
     public function initHeader()
@@ -148,6 +149,7 @@ class ContratFinancementPDF extends DocFinancementPDF
 
         switch ($this->demande->getData('formule')) {
             case 'evo':
+            case 'evo_afs':
                 $nb_loyers = $this->demande->getNbLoyers();
                 $periodicity = (int) $this->demande->getData('periodicity');
                 $periodicity_label = $this->demande->displayData('periodicity', 'default', 0, 1);

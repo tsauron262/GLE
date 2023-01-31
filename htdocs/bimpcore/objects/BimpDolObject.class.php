@@ -556,8 +556,8 @@ class BimpDolObject extends BimpObject
     public function renderExtraFile($withThisObject = true)
     {
         $html = "";
-        
-        if($withThisObject){
+
+        if ($withThisObject) {
             $html .= $this->renderListFileForObject($this);
         }
 
@@ -641,6 +641,26 @@ class BimpDolObject extends BimpObject
                             }
                         }
                         break;
+
+                    case 'bf_demande':
+                        $bc = BimpCollection::getInstance('bimpfinancement', 'BF_Demande');
+                        $bc->addFields(array('date_create', 'montant_materiels', 'montant_services', 'montant_logiciels', 'status'));
+                        $bc->addItems($ids);
+                        foreach ($ids as $id) {
+                            $demande_instance = $bc->getObjectInstance((int) $id);
+                            if ($demande_instance->isLoaded()) {
+                                $icon = $demande_instance->params['icon'];
+                                $objects[] = array(
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($demande_instance->getLabel()),
+                                    'ref'      => $demande_instance->getLink(),
+                                    'date'     => $demande_instance->displayData('date_create', 'default', false),
+                                    'total_ht' => BimpTools::displayMoneyValue($demande_instance->getTotalDemandeHT(), 'EUR', 0, 0, 0, 2, 1),
+                                    'status'   => $demande_instance->displayData('status', 'default', false)
+                                );
+                            }
+                        }
+                        break;
+
                     default:
                         foreach ($ids as $id) {//TODO a traduire au dessus en collection
                             $item['id_object'] = $id;
@@ -728,6 +748,7 @@ class BimpDolObject extends BimpObject
                                 case 'fichinter':
                                     $collection['fichinter'][] = $item['id_object'];
                                     break;
+
                                 case 'synopsisdemandeinterv':
                                     $di_instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_demandeInter', (int) $item['id_object']);
                                     if (BimpObject::objectLoaded($di_instance)) {

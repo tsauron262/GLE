@@ -319,9 +319,9 @@ class DocusignAPI extends BimpAPI
     {
         $return = $response_body;
         switch ($response_code) {
-            case '400':
-                $errors[] = 'Requête incorrecte';
-                break;
+//            case '400':
+//                $errors[] = 'Requête incorrecte';
+//                break;
 
             case '401':
                 $errors[] = 'Non autentifié';
@@ -444,16 +444,21 @@ class DocusignAPI extends BimpAPI
                 $this->saveToken('access', $result['access_token'], $dt_now->format('Y-m-d H:i:s'));
             } else {
                 $error = 'Echec de la connexion';
-                if (is_string($result) && $result) {
-                    $error .= ' - ' . $result;
-                } elseif (isset($result['error']) && $result['error']) {
-                    $error .= ' - ' . $result['error'];
-                } elseif (isset($result['error_description']) && $result['error_description']) {
-                    $error .= ' - ' . $result['error_description'];
-                } else {
-                    $error .= ' pour une raison inconnue (Aucune réponse)';
+                if($result['error_description'] == 'expired_client_token'){
+                    $errors[] = $this->userAccount->getData('name') . " n'est pas connecté à DocuSign <a target='_blank' href='" . $url . "'>cliquez ici</a>";
                 }
-                $errors[] = $error;
+                else{
+                    if (is_string($result) && $result) {
+                        $error .= ' - ' . $result;
+                    } elseif (isset($result['error']) && $result['error']) {
+                        $error .= ' - ' . $result['error'];
+                    } elseif (isset($result['error_description']) && $result['error_description']) {
+                        $error .= ' - ' . $result['error_description'];
+                    } else {
+                        $error .= ' pour une raison inconnue (Aucune réponse)';
+                    }
+                    $errors[] = $error;
+                }
             }
         }
 

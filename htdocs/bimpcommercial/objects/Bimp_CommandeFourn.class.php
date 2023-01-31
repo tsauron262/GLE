@@ -1403,38 +1403,6 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
         return array();
     }
-
-    public function traitePdfFactureFtp($conn, $facNumber)
-    {
-        $folder = "/FTP-BIMP-ERP/invoices";
-        $tab = ftp_nlist($conn, $folder);
-        $errors = array();
-
-        $list = $this->getFilesArray();
-        $ok = false;
-        foreach ($list as $nom) {
-            if (stripos($nom, (string) $facNumber))
-                $ok = true;
-        }
-        if (!$ok) {
-            $newName = (string) $facNumber . ".pdf";
-            foreach ($tab as $fileEx) {
-                if (!$ok && stripos($fileEx, (string) $facNumber) !== false) {
-                    ftp_get($conn, $this->getFilesDir() . "/" . $newName, $fileEx, FTP_BINARY);
-                    $this->addObjectLog('Le fichier PDF fournisseur ' . $newName . ' à été ajouté.');
-                    $ok = true;
-                    if ($this->getData('entrepot') == 164) {
-                        mailSyn2("Nouvelle facture LDLC", 'AchatsBimp@bimp.fr', null, "Bonjour la facture " . $facNumber . " de la commande : " . $this->getLink() . " en livraison direct a été téléchargé");
-                    }
-                }
-            }
-            if (!$ok) {
-                $errors[] = "Fichier " . $newName . ' introuvable';
-            }
-        }
-        return $errors;
-    }
-
     // Actions:
 
     public function actionValidate($data, &$success)

@@ -186,6 +186,7 @@ forms:
             - field: comment
             - field: id_user_owner
             - object: files
+              title: Fichiers
               form_name: upload
               form_label: Ajouter
               form_values: 
@@ -259,6 +260,7 @@ forms:
               value: 
                   callback: getDefaultBugCommentInputValue
             - object: files
+              title: Fichiers
               form_name: upload_light
               form_label: Ajouter
               form_values: 

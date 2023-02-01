@@ -601,7 +601,7 @@ class BIMP_Task extends BimpObject
     public function renderHeaderStatusExtra()
     {
         if ($this->hasFilleEnCours())
-            return ' (action en cours sur des sous Tache)';
+            return ' (action en cours sur des sous Tâches)';
     }
 
     public static function renderCounts($type = '')

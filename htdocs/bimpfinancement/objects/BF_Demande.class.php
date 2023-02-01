@@ -69,9 +69,10 @@ class BF_Demande extends BimpObject
         50001 => 10
     );
     public static $formules = array(
-        'none' => 'Non définie',
-        'evo'  => 'Formule évolutive',
-        'dyn'  => 'Formule dynamique'
+        'none'    => 'Non définie',
+        'evo'     => 'Formule évolutive',
+        'evo_afs' => 'Formule évolutive (AFS)',
+        'dyn'     => 'Formule dynamique'
     );
     protected $values = null;
     protected $default_values = null;
@@ -3818,6 +3819,7 @@ class BF_Demande extends BimpObject
 
         if (!count($errors)) {
             $this->updateField('id_facture_fourn', $facture->id);
+            $facture->dol_object->add_object_linked('bf_demande', $this->id);
         }
 
         return $errors;
@@ -3891,12 +3893,13 @@ class BF_Demande extends BimpObject
 
         if (!count($errors)) {
             $this->updateField('id_facture_fin', $facture->id);
+            $facture->dol_object->add_object_linked('bf_demande', $this->id);
         }
 
         return $errors;
     }
 
-    protected function addBimpCommObjectLines($bimpcomm, $total_attendu_ht = 0, $onlyProd = false)
+    protected function addBimpCommObjectLines($bimpcomm, $total_attendu_ht = 0, $onlyProd = false, $total_achat_attendu = 0)
     {
         $errors = array();
 
@@ -3913,6 +3916,18 @@ class BF_Demande extends BimpObject
                 $pourcentage = $total_attendu_ht / $this->getTotalDemandeHTOnlyProd();
         }
 
+        $pourcentage_achat = 1;
+        if ($total_achat_attendu) {
+            $total_achat = 0;
+
+            foreach ($lines as $line) {
+                $total_achat += ($line->getData('pa_ht') * $line->getData('qty'));
+            }
+
+            if ($total_achat) {
+                $pourcentage_achat = $total_achat_attendu / $total_achat;
+            }
+        }
 
         foreach ($lines as $line) {
             $line_type = (int) $line->getData('type');
@@ -3931,8 +3946,7 @@ class BF_Demande extends BimpObject
                 $fac_line->qty = $line->getData('qty');
                 $fac_line->pu_ht = $line->getData('pu_ht') * $pourcentage;
                 $fac_line->tva_tx = $line->getData('tva_tx');
-                $fac_line->pa_ht = $line->getData('pa_ht');
-//                $fac_line->remises = $line->getData('remise');
+                $fac_line->pa_ht = $line->getData('pa_ht') * $pourcentage_achat;
                 $fac_line->product_type = ((int) $line->getData('product_type') === BF_Line::PRODUIT ? 0 : 1);
             }
 
@@ -4061,6 +4075,7 @@ class BF_Demande extends BimpObject
 
         if (!count($errors)) {
             $this->updateField('id_facture_fourn_rev', $facture->id);
+            $facture->dol_object->add_object_linked('bf_demande', $this->id);
         }
 
         return $errors;
@@ -4092,6 +4107,12 @@ class BF_Demande extends BimpObject
         if (!$vr_vente) {
             $errors[] = 'VR vente absente';
         }
+        
+        $total_rachat_ht = (float) $this->getData('total_rachat_ht');
+
+        if (!$total_rachat_ht) {
+            $errors[] = 'Total Rachat HT non défini';
+        }        
 
         if (!count($errors)) {
             $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
@@ -4110,7 +4131,7 @@ class BF_Demande extends BimpObject
 
             if (!count($errors)) {
                 $total_attendu_ht = $prix_cession_ht * $vr_vente / 100;
-                $lines_errors = $this->addBimpCommObjectLines($facture, $total_attendu_ht, true);
+                $lines_errors = $this->addBimpCommObjectLines($facture, $total_attendu_ht, true, $total_rachat_ht);
 
                 if (count($lines_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture');
@@ -4119,6 +4140,7 @@ class BF_Demande extends BimpObject
 
             if (!count($errors)) {
                 $this->updateField('id_facture_cli_rev', $facture->id);
+                $facture->dol_object->add_object_linked('bf_demande', $this->id);
             }
         }
 

@@ -4812,21 +4812,27 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    public function checkMargin($recalculate_revals = false)
+    public function checkMargin($recalculate_revals = false, $check_base_marge = false)
     {
         $errors = array();
 
         if ($this->isLoaded()) {
-            $margin = (float) $this->getSavedData('marge');
-            $revals = $this->getTotalRevalorisations($recalculate_revals);
+            if ($check_base_marge) {
+                $errors = $this->checkMarge();
+            }
 
-            $marge_finale = $margin + (float) $revals['accepted'];
+            if (!count($errors)) {
+                $margin = (float) $this->getData('marge');
+                $revals = $this->getTotalRevalorisations($recalculate_revals);
 
-            if ($marge_finale != (float) $this->getData('marge_finale_ok')) {
-                $up_errors = $this->updateField('marge_finale_ok', $marge_finale);
+                $marge_finale = $margin + (float) $revals['accepted'];
 
-                if (count($up_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du champ "Marge + reval OK"');
+                if ($marge_finale != (float) $this->getData('marge_finale_ok')) {
+                    $up_errors = $this->updateField('marge_finale_ok', $marge_finale);
+
+                    if (count($up_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du champ "Marge + reval OK"');
+                    }
                 }
             }
         }
@@ -5735,7 +5741,7 @@ class Bimp_Facture extends BimpComm
         $warnings = array();
         $success = 'Total achats / Marge (reval OK) vérifiés';
 
-        $errors = $this->checkMargin(true);
+        $errors = $this->checkMargin(true, true);
         $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true));
 
         return array(

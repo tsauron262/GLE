@@ -301,7 +301,7 @@ fields:
         default_value: 0
         
     duration:
-        label: Durée totale
+        label: Durée (hors périodes suppl.)
         type: int
         values: 
             array: durations

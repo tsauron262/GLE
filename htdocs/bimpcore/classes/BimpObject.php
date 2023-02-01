@@ -792,7 +792,7 @@ class BimpObject extends BimpCache
         // Fonction renommée car le nom ititial prête à confusion (getActiveFields = obtenir les champs actifs)
         return array();
     }
-    
+
     public function getSearchListFilters()
     {
         return array();
@@ -1214,7 +1214,7 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
-    
+
     public function field_exists($field_name)
     {
         if ($field_name === $this->getPrimary()) {
@@ -3667,9 +3667,9 @@ class BimpObject extends BimpCache
             $extra_order_by = 'a.' . $primary;
         }
 
-        if(!count($fields))
+        if (!count($fields))
             $fields[] = 'a.*';
-        
+
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -7970,6 +7970,42 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (count($errors)) {
             $html .= BimpRender::renderAlerts($errors, 'danger');
+        }
+
+        return $html;
+    }
+
+    public function renderImages()
+    {
+        $html = '';
+
+        $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
+                    'parent_module'      => $this->module,
+                    'parent_object_name' => $this->object_name,
+                    'id_parent'          => $this->id,
+                    'file_ext'           => array(
+                        'in' => array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif')
+                    )
+        ));
+
+        if (!empty($files)) {
+            $html .= '<div class="row">';
+
+            foreach ($files as $file) {
+                $url = $file->getUrl();
+
+                if ($url) {
+                    $onclick = 'loadImageModal($(this), \'' . $url . '\', \'' . $file->getData('file_name') . '\')';
+                    $html .= '<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" onclick="' . $onclick . '" style="height: 200px; cursor: pointer; margin: 5px; overflow-x: scroll">';
+                    $html .= '<div style="font-size: 11px; font-style: italic">';
+                    $html .= $file->getData('file_name');
+                    $html .= '</div>';
+                    $html .= '<img src="' . $url . '" style="height: 100%; width: auto; margin: auto"/>';
+                    $html .= '</div>';
+                }
+            }
+
+            $html .= '</div>';
         }
 
         return $html;

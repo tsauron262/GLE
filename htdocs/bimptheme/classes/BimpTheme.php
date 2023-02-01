@@ -191,7 +191,11 @@ class BimpTheme
             $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
             $html .= '<span class="bs-popover header-icon"';
             $html .= BimpRender::renderPopoverData('Signaler un bug', 'bottom');
-            $html .= ' onclick="' . $task->getJsLoadModalForm('bug', 'Signaler un bug') . '"';
+            $html .= ' onclick="' . $task->getJsLoadModalForm('bug', 'Signaler un bug', array(
+                        'fields' => array(
+                            'comment' => $task->getDefaultBugCommentInputValue()
+                        )
+                    )) . '"';
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_bug');
             $html .= '</span>';

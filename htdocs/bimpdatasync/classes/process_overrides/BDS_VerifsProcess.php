@@ -71,7 +71,7 @@ class BDS_VerifsProcess extends BDSProcess
                         $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
 
                         if (BimpObject::objectLoaded($fac)) {
-                            $fac_errors = $fac->checkMargin(false);
+                            $fac_errors = $fac->checkMargin(true, true);
                             $fac_errors = BimpTools::merge_array($fac_errors, $fac->checkTotalAchat(false));
                         } else {
                             $fac_errors[] = 'Fac #' . $id_fac . ' non trouvée';

@@ -7996,7 +7996,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                 if ($url) {
                     $onclick = 'loadImageModal($(this), \'' . $url . '\', \'' . $file->getData('file_name') . '\')';
-                    $html .= '<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" onclick="' . $onclick . '" style="height: 200px; cursor: pointer; margin: 5px">';
+                    $html .= '<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" onclick="' . $onclick . '" style="height: 200px; cursor: pointer; margin: 5px; overflow-x: scroll">';
                     $html .= '<div style="font-size: 11px; font-style: italic">';
                     $html .= $file->getData('file_name');
                     $html .= '</div>';

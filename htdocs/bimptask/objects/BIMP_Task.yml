@@ -157,6 +157,9 @@ fields_tables:
             - label: Notifier
               value:
                 callback: displayUserNotif
+            - label: Images liées
+              value: 
+                  callback: renderImages
         
 forms:
     default: 

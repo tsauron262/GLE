@@ -245,6 +245,11 @@ class BimpFile extends BimpObject
             return $onclick; //"<a onclick=\"".$onclick."\">Cliquer ici pour envopyé un mail au service facturation.</a>";
         }
     }
+    
+    public function getUrl($forced_context = '')
+    {
+        return $this->getFileUrl();
+    }
 
     // Getters - Overrides BimpObject: 
 
@@ -361,11 +366,6 @@ class BimpFile extends BimpObject
             }
         }
         return $errors;
-    }
-
-    public function getUrl($forced_context = '')
-    {
-        return $this->getFileUrl();
     }
 
     public function checkObjectFiles($module, $object_name, $id_object)

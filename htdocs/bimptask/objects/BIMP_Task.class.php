@@ -117,15 +117,21 @@ class BIMP_Task extends BimpObject
 
     public function hasFilleEnCours()
     {
-        $filles = $this->getChildrenObjects('task_fille', array(
-            'status'  => array(
-                'operator' => '<',
-                'value'    => '4'),
-            'id_task' => $this->id)
-        );
+        if ($this->isLoaded()) {
+            if ((int) $this->db->getCount($this->getTable(), 'id_task = ' . $this->id . ' AND status < 4')) {
+                return 1;
+            }
+        }
 
-        foreach ($filles as $fille) {
-            return 1;
+        return 0;
+    }
+
+    public function hasSousTaches()
+    {
+        if ($this->isLoaded()) {
+            if ((int) $this->db->getCount($this->getTable(), 'id_task = ' . $this->id)) {
+                return 1;
+            }
         }
 
         return 0;
@@ -137,6 +143,20 @@ class BIMP_Task extends BimpObject
     {
         global $user;
         $buttons = array();
+
+        if ($this->hasSousTaches()) {
+            $buttons[] = array(
+                'label'   => 'Liste des sous-tâches',
+                'icon'    => 'fas_bars',
+                'onclick' => $this->getJsLoadModalList('sousTache', array(
+                    'title'         => $this->getData('subj') . ' : sous-tâches',
+                    'extra_filters' => array(
+                        'id_task' => $this->id
+                    )
+                ))
+            );
+        }
+
         if ($this->isEditable() && !in_array($this->getType(), self::$srcNotAttribute)) {
             if ($this->can("edit")) {
                 if (filter_var($this->getData("src"), FILTER_VALIDATE_EMAIL) && filter_var($this->getData("dst"), FILTER_VALIDATE_EMAIL)) {
@@ -184,6 +204,7 @@ class BIMP_Task extends BimpObject
                 );
             }
         }
+
         return $buttons;
     }
 

@@ -32,7 +32,7 @@ class BIMP_Task extends BimpObject
 //    const MARQEUR_MAIL = "IDTASK:5467856456"; => Remplacé par BimpCore::getConf('marqueur_mail', null, 'bimptask')
 //    const ID_USER_DEF = 215;  => Remplacé par BimpCore::getConf('id_user_def', null, 'bimptask')
 
-    public $mailReponse = 'Tâche ERP<reponse@bimp-groupe.net>';
+    public $mailReponse = 'reponse@bimp-groupe.net';
 
     // Droits users: 
 
@@ -606,7 +606,7 @@ class BIMP_Task extends BimpObject
     public function renderHeaderStatusExtra()
     {
         if ($this->hasFilleEnCours())
-            return ' (action en cours sur des sous Tache)';
+            return ' (action en cours sur des sous Tâches)';
     }
 
     public static function renderCounts($type = '')
@@ -785,7 +785,7 @@ class BIMP_Task extends BimpObject
         }
         $to = implode(',', $mails);
 
-        $this->sendMail($to, $this->mailReponse, $subject, $message, $rappel);
+        $this->sendMail($to, 'Tâche ERP<'.$this->mailReponse.'>', $subject, $message, $rappel);
     }
 
     public function sendMail($to, $from, $sujet, $msg, $rappel = true)

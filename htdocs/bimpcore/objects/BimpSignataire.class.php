@@ -1323,6 +1323,10 @@ class BimpSignataire extends BimpObject
                             $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification (Adresse(s): ' . $emails . ')');
                         } else {
                             $success .= ( $success ? '<br/>' : '') . 'E-mail de notification envoyé avec succès pour ' . $nOk . ' utilisateur(s)';
+                            $msg = 'Ouverture de l\'accès à la signature électroniqe à distance effectuée pour le signataire "';
+                            $msg .= $this->getData('nom') . '"' . ($this->getData('code') !== 'default' ? ' (' . $this->getData('label') . ')' : '');
+                            $msg .= ' avec envoi d\'un e-mail de notification à ce signataire';
+                            $signature->addObjectLog($msg, 'SIGN_DIST_OPEN_' . strtoupper($this->getData('code')));
                         }
                     }
                 }
@@ -1484,6 +1488,55 @@ class BimpSignataire extends BimpObject
                 }
             }
         }
+    }
+
+    public function sendEmail($content, $subject = '')
+    {
+        $errors = array();
+
+        $signature = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($signature)) {
+            $errors[] = 'Signature liée absente pour ce signataire';
+        } else {
+            if (!$subject) {
+                $subject = 'Signature en attente - Document: ' . $signature->displayDocTitle(true);
+            }
+
+            $content = $signature->replaceEmailContentLabels($content);
+
+            $email = $this->getData('email');
+            if (!$email) {
+                $errors[] = 'Adresse e-mail absente pour ce signataire';
+            } else {
+                $email = BimpTools::cleanEmailsStr($email);
+            }
+
+            if (!count($errors)) {
+                $filePath = $signature->getDocumentFilePath();
+                $fileName = $signature->getDocumentFileName();
+
+                if (file_exists($filePath)) {
+                    $bimpMail = new BimpMail($signature->getObj(), $subject, $email, '', $content);
+                    $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
+
+                    $mail_errors = array();
+                    $bimpMail->send($mail_errors);
+
+                    if (count($mail_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification (Adresse(s): ' . $email . ')');
+                    } else {
+                        $msg = 'Document envoyé par e-mail au signataire "';
+                        $msg .= $this->getData('nom') . '"' . ($this->getData('code') !== 'default' ? ' (' . $this->getData('label') . ')' : '');
+                        $signature->addObjectLog($msg, 'EMAIL_SENT_' . strtoupper($this->getData('code')));
+                    }
+                } else {
+                    $errors[] = 'Document PDF à signer absent';
+                }
+            }
+        }
+
+        return $errors;
     }
 
     // Actions: 
@@ -1890,7 +1943,7 @@ class BimpSignataire extends BimpObject
                     if (!$this->getData('fonction') && $this->isClientCompany()) {
                         $this->set('fonction', $contact->displayData('poste', 'default', false, true));
                     }
-                } else/* if (!$client->isCompany()) */ {
+                } else {
                     if (!$this->getData('nom')) {
                         $this->set('nom', $client->getName());
                     }
@@ -1914,11 +1967,6 @@ class BimpSignataire extends BimpObject
                     }
                 }
                 break;
-
-            case self::TYPE_CUSTOM:
-                if (!$this->getData('email')) {
-                    $errors[] = 'Adresse e-mail obligatoire';
-                }
         }
 
         if (!count($errors)) {

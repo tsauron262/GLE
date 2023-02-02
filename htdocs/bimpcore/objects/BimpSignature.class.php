@@ -402,6 +402,9 @@ class BimpSignature extends BimpObject
             default:
                 $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
                 break;
+
+            case 'papier':
+                $message .= 'Merci d\'imprimer ce document et de nous le retourner signé.<br/><br/>';
         }
 
         $message .= 'Vous en remerciant par avance, nous restons à votre disposition pour tout complément d\'information..<br/><br/>';
@@ -1492,6 +1495,8 @@ class BimpSignature extends BimpObject
                     foreach ($signataires as $signataire) {
                         $signataire->updateField('status', BimpSignataire::STATUS_ATT_DOCUSIGN);
                     }
+
+                    $this->addObjectLog('Demande de signature via DocuSign effectuée', 'DOCUSIGN_INIT');
                 } else {
                     $errors[] = 'Aucun ID DocuSign reçu';
                 }

@@ -9456,7 +9456,7 @@ body.modal-open ul.ui-autocomplete {
     .fieldRow .formRowInput .select2,
     .formRow .fieldRowInput .select2,
     .formRow .formRowInput .select2 {
-      min-width: 160px; }
+      min-width: 300px; }
 
 @media (max-width: 1000px) {
   /* line 132, ../scss/bimpcore/_form.scss */

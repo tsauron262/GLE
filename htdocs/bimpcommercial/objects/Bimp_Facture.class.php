@@ -1958,8 +1958,22 @@ class Bimp_Facture extends BimpComm
     {
         return BimpTools::getValue('id_facture_to_correct', BimpTools::getValue('param_values/fields/id_facture_to_correct', 0));
     }
+    
+    /*
+     * type reval = tableau des type accepté
+     * statut reval si null tous
+     */
+    public function getTotalMargeWithReval($type_reval = array(), $statut_reval = null){
+        $tot = $this->getData('total') - $this->getData('marge');
+        $tabReval = $this->getTotalRevalorisations(false, false, $type_reval);
+        if(is_null($statut_reval)){
+            foreach($tabReval as $reval)
+                $tot -= $reval;
+        }
+        return $tot;
+    }
 
-    public function getTotalRevalorisations($recalculate = false, $with_product_type_details = false)
+    public function getTotalRevalorisations($recalculate = false, $with_product_type_details = false, $type_reval = array())
     {
         $clef = "bimp_facture_" . $this->id . '_total_revalorisations';
 
@@ -1999,9 +2013,12 @@ class Bimp_Facture extends BimpComm
         }
 
         if ($this->isLoaded()) {
-            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+            $filtre = array(
                         'id_facture' => (int) $this->id
-            ));
+            );
+            if(count($type_reval))
+                $filtre['type'] = $type_reval;
+            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', $filtre);
 
             foreach ($revals as $reval) {
                 $total = $reval->getTotal();

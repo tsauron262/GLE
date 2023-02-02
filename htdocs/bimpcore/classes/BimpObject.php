@@ -6858,8 +6858,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= BimpRender::renderIcon('fas_hashtag');
             $html .= '</span>';
 
-            // Historique objet: 
-
+            // Historique objet:
             $onclick = $this->getJsLoadModalCustomContent('renderLogsList', 'Historique');
             $html .= '<span class="btn btn-default bs-popover"';
             $html .= ' onclick="' . $onclick . '"';
@@ -6878,9 +6877,29 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_inbox');
             $html .= '</span>';
-            if ($_GET['open'] == 'suivi_mail')
-                $html .= '<script>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
 
+            if (BimpTools::getValue('open', '') == 'suivi_mail') {
+                $html .= '<script>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
+            }
+
+            // Logs objet:
+            if (BimpCore::isUserDev()) {
+                $log_instance = BimpObject::getInstance('bimpcore', 'Bimp_Log');
+                $onclick = $log_instance->getJsLoadModalList('object', array(
+                    'title'         => 'Logs ' . $this->getLabel('of_the') . ' ' . $this->getRef(),
+                    'extra_filters' => array(
+                        'obj_module' => $this->module,
+                        'obj_name'   => $this->object_name,
+                        'id_object'  => $this->id
+                    )
+                ));
+                $html .= '<span class="btn btn-default bs-popover"';
+                $html .= ' onclick="' . $onclick . '"';
+                $html .= BimpRender::renderPopoverData('Logs objet');
+                $html .= '>';
+                $html .= BimpRender::renderIcon('fas_book-medical');
+                $html .= '</span>';
+            }
 
             $html .= '</div>';
             $html .= '</div>';

@@ -76,6 +76,7 @@ fields:
         search: 
             input: 
                 type: text
+                
     id_erp: 
         label: ID ERP
         type: int

@@ -779,10 +779,10 @@ class BimpTools
         }
 
 
-        $nbCaractTotal = strlen($prefix)+$numCaractere;
+        $nbCaractTotal = strlen($prefix) + $numCaractere;
 //        $max = BimpCache::getBdb()->getMax($table, $field, $where);
-        if($numCaractere > 0)
-            $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = ".$nbCaractTotal);
+        if ($numCaractere > 0)
+            $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = " . $nbCaractTotal);
         else
             $max = BimpCache::getBdb()->getMax($table, $field, $where . "  AND LENGTH(" . $field . ") = (SELECT MAX(LENGTH(" . $field . ")) as max FROM `" . MAIN_DB_PREFIX . $table . "`   WHERE " . $where . ")");
 
@@ -2257,7 +2257,6 @@ class BimpTools
                 if (preg_match('/^(.+)\[.+\]$/', $email, $matches)) {
                     $email = $matches[1];
                 }
-
                 if ($name) {
                     $emails_str .= ($emails_str ? ', ' : '') . $name . ' <' . $email . '>';
                 } else {

@@ -1191,8 +1191,8 @@ class BimpDolObject extends BimpObject
                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($interface), 'Echec de l\'enregistrement de l\'envoi du mail dans la liste des événements');
                         }
                     }
-                } else {
-                    $errors[] = 'Echec envoi de l\'e-mail';
+                } elseif (!count($errors)) {
+                    $errors[] = 'Echec envoi de l\'e-mail pour une raison inconnue';
                 }
             }
         }

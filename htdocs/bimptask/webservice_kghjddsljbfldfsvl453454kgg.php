@@ -102,6 +102,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         if($dst == $task->mailReponse){
             $tab['auto'] = 0;
             $tab['type_manuel'] = 'dev';
+            $tab['dst'] = '';
         }
         $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
         $errors = BimpTools::merge_array($errors, $task->create());

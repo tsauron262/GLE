@@ -199,10 +199,6 @@ class DocFinancementPDF extends BimpDocumentPDF
             $this->pdf->addVMargin(1);
             $table->write();
         }
-        
-//        die('');
-
-
 
         unset($table);
     }

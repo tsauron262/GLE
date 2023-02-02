@@ -61,6 +61,11 @@ class BIMP_Task extends BimpObject
             return 1;
         }
 
+        global $user;
+        if ($user->admin) {
+            return 1;
+        }
+        
         return $this->getUserRight("read");
     }
 
@@ -612,7 +617,7 @@ class BIMP_Task extends BimpObject
 
         $sql = 'SELECT a.sous_type, a.id_user_owner';
         $sql .= ', SUM(' . BimpTools::getSqlCase(array(
-                    'a.status' => 20
+                    'a.prio' => 20
                         ), 1, 0) . ') as nb_niv1';
         $sql .= ', SUM(' . BimpTools::getSqlCase(array(
                     'a.prio' => 10
@@ -635,6 +640,7 @@ class BIMP_Task extends BimpObject
         );
         $sql .= ' GROUP BY a.sous_type, a.id_user_owner';
 
+//        die($sql);
         $rows = self::getBdb()->executeS($sql, 'array');
 
         // Trie: 

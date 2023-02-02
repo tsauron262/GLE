@@ -99,9 +99,10 @@ function traiteTask($dst, $src, $subj, $txt) {
         $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         echo "<br/>Création task";
         $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "", 'auto' => 0, );
-        if($dst == "repondre@bimp-groupe.net"){
+        if($dst == $task->mailReponse){
             $tab['auto'] = 0;
             $tab['type_manuel'] = 'dev';
+            $tab['dst'] = '';
         }
         $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
         $errors = BimpTools::merge_array($errors, $task->create());

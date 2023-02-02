@@ -4107,12 +4107,12 @@ class BF_Demande extends BimpObject
         if (!$vr_vente) {
             $errors[] = 'VR vente absente';
         }
-        
+
         $total_rachat_ht = (float) $this->getData('total_rachat_ht');
 
         if (!$total_rachat_ht) {
             $errors[] = 'Total Rachat HT non défini';
-        }        
+        }
 
         if (!count($errors)) {
             $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
@@ -4393,8 +4393,12 @@ class BF_Demande extends BimpObject
         );
 
         $loueur_email = BimpTools::getArrayValueFromPath($data, 'loueur_email', '', $errors, true, 'Adresse e-mail du signataire loueur absent');
-        $cessionnaire_email = BimpTools::getArrayValueFromPath($data, 'cessionnaire_email', '', $errors, true, 'Adresse e-mail du signataire cessionnaire absent');
+        $cessionnaire_email = BimpTools::getArrayValueFromPath($data, 'cessionnaire_email', '');
 
+        if (!$cessionnaire_email && $type_pdf !== 'papier') {
+            $errors[] = 'Adresse e-mail du signataire cessionnaire absent (obligatoire pour signature électronique)';
+        }
+        
         if (!count($errors)) {
             $this->updateField('contrat_signataires_data', array(
                 'locataire'    => array(

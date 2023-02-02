@@ -108,7 +108,7 @@ class devController extends BimpController
         $html .= '<div class="row">';
         $list = new BC_ListTable(BimpObject::getInstance('bimptask', 'BIMP_Task'), 'main', 1, null, 'Tâches dév');
         $list->addFieldFilterValue('id_task', 0);
-        $list->addFieldFilterValue('type_manuel', 'dev');
+//        $list->addFieldFilterValue('type_manuel', 'dev');
         $html .= $list->renderHtml();
         $html .= '</div>';
 

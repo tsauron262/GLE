@@ -10,7 +10,6 @@ class BTC_export extends BimpObject {
     //public $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
     //public $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
     private $project_directory = 'exportCegid/';
-    private $dir_synch_compta = '';
     //private $imported_log = '/data/synchro/bimp/exportCegid/imported.log';
     //private $directory_logs_file = '/data2/exportCegid/export.log';
     public $type_ecriture = "N"; // S: Simulation, N: Normal

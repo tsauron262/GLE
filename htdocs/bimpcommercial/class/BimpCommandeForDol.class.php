@@ -40,7 +40,7 @@ class BimpCommandeForDol extends Bimp_Commande{
                     'alias' => 'c',
                     'on'    => 'a.fk_commande = c.rowid')
                 ));    
-        $sql .= ' WHERE a.date_end != "" AND a.date_end < "' . $date_limit_expire->format('Y-m-d H:i:s') . '" AND c.rappel_service_expire = 1';
+        $sql .= ' WHERE a.date_end != "" AND a.date_end < "' . $date_limit_expire->format('Y-m-d H:i:s') . '" AND c.rappel_service_expire > 0';
         $sql .= BimpTools::getSqlOrderBy("a.date_end", 'ASC');
         $rows = $this->db->executeS($sql);
         
@@ -50,6 +50,7 @@ class BimpCommandeForDol extends Bimp_Commande{
                 
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $r->id_c);
                 $id_commercial = $commande->getCommercialId();
+                $commande->updateField('rappel_service_expire', $commande->getData('rappel_service_expire') - 1);
                 
                 if($id_commercial)
                     $id_user = $id_commercial;

@@ -2359,6 +2359,7 @@ class BT_ficheInter extends BimpDolObject
         $success = 'Mise à jour effectuée';
 
         $this->addLog("Le client à signé la FI et le fichier est déposé");
+        $this->setSigned();
         $this->updateField('fk_statut', 1);
 
         return [

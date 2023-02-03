@@ -452,6 +452,7 @@ class BIMP_Task extends BimpObject
                             $not_viewed++;
                     }
 
+                    $user_author = $t->getChildObject('user_create');
                     $task = array(
                         'id'            => $t->getData('id'),
                         'user_type'     => $user_type,
@@ -464,7 +465,8 @@ class BIMP_Task extends BimpObject
                         'not_viewed'    => (int) $not_viewed,
                         'can_rep_mail'  => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
                         'can_close'     => (int) $t->can('edit'),
-                        'can_attribute' => (int) ($t->can('edit') or $t->canAttribute())
+                        'can_attribute' => (int) ($t->can('edit') or $t->canAttribute()),
+                        'author' => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : '')
                     );
 
                     $tasks[] = $task;

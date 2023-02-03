@@ -172,6 +172,8 @@ class notif_task extends AbstractNotification {
 
         if (element.src) {
             html += '<div class="task_src">' + element.src + '</div>';
+        } else if (element.author) {
+            html += '<div class="task_src">' + element.author + '</div>';
         }
 
         if (element.subj) {

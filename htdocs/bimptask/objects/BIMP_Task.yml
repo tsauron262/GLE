@@ -302,7 +302,7 @@ lists:
         delete_btn: 1
         page_btn: 1
         edit_btn: 1
-        modal_view: default
+        modal_view: full
         edit_form: default
         update_btn: 1
         extra_btn: 

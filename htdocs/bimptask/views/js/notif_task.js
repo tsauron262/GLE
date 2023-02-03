@@ -172,6 +172,8 @@ class notif_task extends AbstractNotification {
 
         if (element.src) {
             html += '<div class="task_src">' + element.src + '</div>';
+        } else if (element.author) {
+            html += '<div class="task_src">' + element.author + '</div>';
         }
 
         if (element.subj) {
@@ -220,6 +222,12 @@ class notif_task extends AbstractNotification {
         if (element.id) {
             html += '<span class="rowButton" onclick="loadModalView(\'bimptask\', \'BIMP_Task\', ' + element.id + ', \'full\', $(this))">';
             html += '<i class="fas fa5-eye"></i></span>';
+
+            if (element.can_edit) {
+                var data = '{module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + element.id + ', form_name: \'default\'}';
+                html += '<span class="rowButton" onclick="loadModalForm($(this), ' + data + ')">';
+                html += '<i class="fas fa5-edit"></i></span>';
+            }
         }
         return html;
     }

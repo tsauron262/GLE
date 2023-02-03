@@ -5987,6 +5987,8 @@ class Bimp_Facture extends BimpComm
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $new_data['datec'] = date('Y-m-d H:i:s');
+        $new_data['date_valid'] = null;
+        $new_data['date_valid'] = null;
         $new_data['fk_user_author'] = 0;
         $new_data['fk_user_valid'] = 0;
         $new_data['id_user_commission'] = 0;
@@ -6013,6 +6015,14 @@ class Bimp_Facture extends BimpComm
 
         // Autre: 
         $new_data['prelevement'] = 0;
+        $new_data['date_cfr'] = null;
+
+        // CHORUS: 
+        $new_data['chorus_status'] = -1;
+        $new_data['chorus_data'] = array();
+
+        $new_data['chorus_status'] = -1;
+        $new_data['chorus_status'] = -1;
 
         return parent::duplicate($new_data, $warnings, $force_create);
     }

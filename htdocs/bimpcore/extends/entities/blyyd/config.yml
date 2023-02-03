@@ -10,10 +10,10 @@ colors:
     selection: 5897FB
         
 pdf:
-    primary: '4C91B3'
+    primary: 'E94E1A'
 
 interface_client: 
     primary: '4C91B3'
     
 public_email: 
-    primary: '4C91B3'
+    primary: 'E94E1A'

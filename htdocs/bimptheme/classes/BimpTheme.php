@@ -189,7 +189,7 @@ class BimpTheme
 
         if (BimpCore::isModuleActive('bimptask') && BimpCore::getConf('allow_bug_task', null, 'bimptask')) {
             $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
-            $html .= '<span class="bs-popover header-icon"';
+            $html .= '<span class="bs-popover header-icon" style="margin: 0 6px"';
             $html .= BimpRender::renderPopoverData('Signaler un bug', 'bottom');
             $html .= ' onclick="' . $task->getJsLoadModalForm('bug', 'Signaler un bug', array(
                         'fields' => array(

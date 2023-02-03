@@ -50,7 +50,6 @@ class BimpCommandeForDol extends Bimp_Commande{
                 
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $r->id_c);
                 $id_commercial = $commande->getCommercialId();
-                $commande->updateField('rappel_service_expire', $commande->getData('rappel_service_expire') - 1);
                 
                 if($id_commercial)
                     $id_user = $id_commercial;
@@ -152,13 +151,17 @@ class BimpCommandeForDol extends Bimp_Commande{
                 
                 $m .= '<br/>';
                 $l_user += $nb_l;
+                
+//                echo $commande->getInitData('rappel_service_expire').'<br/>';
+                $commande->updateField('rappel_service_expire', ($commande->getInitData('rappel_service_expire') - 1));
+//                die('fff'.$commande->id);
             }
             
             $subject = $l_user . " ligne" . (($l_user > 1) ? 's' : '') . " de commande arrivant à expiration";
             
             $this->output .= 'Sujet:' . $subject . '<br/>' . $m;
             
-//            mailSyn2($subject, $u_a->getData('email'), '', $m);
+            mailSyn2($subject, $u_a->getData('email'), '', $m);
             $tot_l += $l_user;
         }
         

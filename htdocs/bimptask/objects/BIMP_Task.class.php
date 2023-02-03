@@ -65,7 +65,7 @@ class BIMP_Task extends BimpObject
         if ($user->admin) {
             return 1;
         }
-        
+
         return $this->getUserRight("read");
     }
 
@@ -466,7 +466,8 @@ class BIMP_Task extends BimpObject
                         'can_rep_mail'  => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
                         'can_close'     => (int) $t->can('edit'),
                         'can_attribute' => (int) ($t->can('edit') or $t->canAttribute()),
-                        'author' => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : '')
+                        'can_edit'      => (int) $t->can('edit'),
+                        'author'        => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : '')
                     );
 
                     $tasks[] = $task;
@@ -787,7 +788,7 @@ class BIMP_Task extends BimpObject
         }
         $to = implode(',', $mails);
 
-        $this->sendMail($to, 'Tâche ERP<'.$this->mailReponse.'>', $subject, $message, $rappel);
+        $this->sendMail($to, 'Tâche ERP<' . $this->mailReponse . '>', $subject, $message, $rappel);
     }
 
     public function sendMail($to, $from, $sujet, $msg, $rappel = true)

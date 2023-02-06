@@ -52,7 +52,7 @@ class BimpFactureFournForDol extends Bimp_FactureFourn{
         $facts = array();
         $html = '';
         
-        $sql = $db->query("SELECT (a.total_ht / a.qty) - (buy_price_ht * a.qty / ABS(a.qty)) as marge, a.* FROM llx_facturedet a LEFT JOIN llx_facture f ON a.fk_facture = f.rowid LEFT JOIN llx_product_extrafields p ON p.fk_object = a.fk_product WHERE ((a.total_ht / a.qty)+0.01) < (buy_price_ht * a.qty / ABS(a.qty)) AND f.datef > '2022-04-01' AND p.type_compta NOT IN (3) AND a.fk_facture = 1171749;");
+        $sql = $db->query("SELECT (a.total_ht / a.qty) - (buy_price_ht * a.qty / ABS(a.qty)) as marge, a.* FROM llx_facturedet a LEFT JOIN llx_facture f ON a.fk_facture = f.rowid LEFT JOIN llx_product_extrafields p ON p.fk_object = a.fk_product WHERE ((a.total_ht / a.qty)+0.01) < (buy_price_ht * a.qty / ABS(a.qty)) AND f.datef > '2022-04-01' AND p.type_compta NOT IN (3);");
         while($ln = $db->fetch_object($sql)){
             $factLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array('id_line'=>$ln->rowid));
             $margeF = $factLine->getTotalMarge();

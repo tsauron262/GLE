@@ -33,7 +33,7 @@ class BimpCache
     {
         global $db;
 
-        if (0 && $mode_archive == 1) {
+        if ($mode_archive == 1) {
             if (is_null(self::$bdb_archive)) {
                 $dolibarr_main_db_port = '3306';
                 $dolibarr_main_db_host = '10.192.20.11';
@@ -1102,6 +1102,8 @@ class BimpCache
 
                         if (preg_match('/^(.+)\.yml$/', $objFile, $matches)) {
                             $object_name = $matches[1];
+                            if(stripos($object_name, 'Archive') !== false)
+                                continue;
                             $instance = BimpObject::getInstance($f, $object_name);
                             if (is_a($instance, 'BimpObject')) {
                                 if ($instance->getConf('abstract', 0, false, 'bool')) {
@@ -1164,6 +1166,8 @@ class BimpCache
 
                         if (preg_match('/^(.+)\.yml$/', $objFile, $matches)) {
                             $object_name = $matches[1];
+                            if(stripos($object_name, 'Archive') !== false)
+                                continue;
                             self::$cache[$cache_key][$module][] = $object_name;
                         }
                     }

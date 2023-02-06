@@ -85,7 +85,7 @@ class BContract_contrat extends BimpDolObject
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT        => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_BROUILLON    => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
-        self::CONTRAT_STATUS_VALIDE       => Array('label' => 'Attente signature (ou envoi signature)', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
+        self::CONTRAT_STATUS_VALIDE       => Array('label' => 'Attente signatures', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_CLOS         => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_REFUSE       => Array('label' => 'Refusé', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUT_WAIT_ACTIVER => Array('label' => 'Attente d\'activation', 'classes' => Array('important'), 'icon' => 'fas_retweet'),
@@ -4670,6 +4670,9 @@ class BContract_contrat extends BimpDolObject
         //verif des vieux fichiers joints
         $dir = DOL_DATA_ROOT . "/bimpcore/bimpcontract/BContract_contrat/" . $this->id . "/";
         $newdir = DOL_DATA_ROOT . "/contract/" . str_replace("/", "_", $this->getData('ref')) . "/";
+        if($this->getChildObject('signature')->isLoaded()){
+            self::$status_list[self::CONTRAT_STATUS_VALIDE]['label'] = 'A envoyer à la signature';
+        }
         if (!is_dir($newdir))
             mkdir($newdir);
 

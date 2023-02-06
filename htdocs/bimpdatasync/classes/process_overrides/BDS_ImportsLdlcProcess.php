@@ -143,7 +143,23 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 $this->DebugData($file_data, 'Données fichier');
 
                 if (!count($errors) && !empty($file_data)) {
-                    $this->processFournPrices($file_data, $errors, true);
+//                    $this->processFournPrices($file_data, $errors, true);
+                    
+                    $i=0;
+                    $tabHtml = array();
+                    foreach($file_data as $line){
+                        if($line['pa_ht'] > $line['pu_ht']){
+                            $i++;
+//                            echo '<pre>';
+//                            print_r($line);
+//                            die('fin');
+                            $tabHtml[$line['code']] = $line['ref_fourn'].' : '.$line['code'].'  PV : '.round($line['pu_ht'],2).' € PA : '.round($line['pa_ht'], 2).' €';
+                        }
+                    }
+                    if(count($tabHtml)){
+                        ksort($tabHtml);
+                        mailSyn2('Produit LDLC marge négative', null, 'tommy@bimp.fr', '<h3>Bonjour, voici la liste des produits avec une marge négative ('.$i.')</h3><br/><br/>'.implode('<br/>', $tabHtml));
+                    }
                 }
                 break;
         }

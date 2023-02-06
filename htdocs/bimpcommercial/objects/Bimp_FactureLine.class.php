@@ -29,21 +29,19 @@ class Bimp_FactureLine extends ObjectLine
         $total_reval = 0;
 
         $done = false;
-        if ($this->object_name === 'Bimp_FactureLine') {
-            $facture = $this->getParentInstance();
+        $facture = $this->getParentInstance();
 
-            if (BimpObject::objectLoaded($facture)) {
-                if ((int) $facture->getData('fk_statut')) {
-                    $done = true;
-                    $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
-                                'id_facture_line' => (int) $this->id
-                    ));
+        if (BimpObject::objectLoaded($facture)) {
+            if ((int) $facture->getData('fk_statut')) {
+                $done = true;
+                $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                            'id_facture_line' => (int) $this->id
+                ));
 
-                    foreach ($revals as $reval) {
-                        if (in_array((int) $reval->getData('status'), array(0, 1))) {
-                            $reval_amount = $reval->getTotal();
-                            $margin += $reval_amount;
-                        }
+                foreach ($revals as $reval) {
+                    if (in_array((int) $reval->getData('status'), array(0, 1))) {
+                        $reval_amount = $reval->getTotal();
+                        $margin += $reval_amount;
                     }
                 }
             }

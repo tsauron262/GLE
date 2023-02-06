@@ -128,6 +128,12 @@ class modBimpEquipment extends DolibarrModules {
         $this->rights[$r][4] = 'inventory';
         $this->rights[$r][5] = 'close';
         $r++;
+        
+        $this->rights[$r][0] = 88158;
+        $this->rights[$r][1] = 'Créer mouvement manuel';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'mouvement';
+        $r++;
         // Array to add new pages in new tabs
         // Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
         //                              'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@mymodule:$user->rights->othermodule->read:/mymodule/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.

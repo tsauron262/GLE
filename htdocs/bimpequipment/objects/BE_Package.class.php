@@ -9,7 +9,8 @@ class BE_Package extends BimpObject
 
     public function canCreate()
     {
-        return 1;
+        global $user;
+        return $user->rights->bimpequipment->mouvement;
     }
 
     public function canEdit()

@@ -158,7 +158,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                     }
                     if(count($tabHtml)){
                         ksort($tabHtml);
-                        mailSyn2('Produit LDLC marge négative', 'tommy@bimp.fr'/*, a.pfeffer@ldlc.com, j.viales@ldlc.com'*/, null, '<h3>Bonjour, voici la liste des produits avec une marge négative ('.$i.')</h3><br/><br/>'.implode('<br/><br/><br/>', $tabHtml));
+                        mailSyn2('Produit LDLC marge négative', 'tommy@bimp.fr'/*, a.pfeffer@ldlc.com, j.viales@ldlc.com'*/, null, '<h3>Bonjour, voici la liste des produits avec une marge négative ('.$i.')</h3><br/><br/>'.implode('<br/><br/><br/>------------------------- ', $tabHtml));
                     }
                 }
                 break;

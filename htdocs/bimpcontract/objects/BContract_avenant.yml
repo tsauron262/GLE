@@ -38,6 +38,17 @@ objects:
                 name: Bimp_User
             id_object:
                 field_value: user_create
+                
+                
+    signature: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
 
 fields:
     label:
@@ -95,6 +106,15 @@ fields:
     by_month:
         label: Prolongtion par mois ?
         type: int
+    id_signature:
+        label: Signature
+        type: id_object
+        object: signature
+
+                
+    signature_params: 
+        label: Paramètres incrustation signature
+        type: json
 
 lists:
     default:
@@ -273,6 +293,25 @@ forms:
                   items: 
                       callback: getAllSerialsContrat
                       
+    create_signature:
+        title: Créer signature
+        rows:
+            contact_signature: 
+                custom: 1
+                label: Contact signataire
+                data_type: id_object
+                input_name: id_contact_signature
+                object: contact
+                input:
+                    type: select
+                    help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+                    options: 
+                        callback: 
+                            method: getClientContactsArray
+                            params: 
+                                - field_value: fk_soc
+                value: 
+                    callback: getDefaultSignatureContact
                       
 fields_tables:
     infos:
@@ -290,9 +329,13 @@ views:
         rows:
             - cols:      
                 - type: fields_table
-                  col_lg: 12
+                  col_lg: 6
                   fields_table: 
                       name: infos
+                - type: custom
+                  col_lg: 6
+                  custom:
+                      callback: renderSignature
                 - type: rows
                   col_lg: 12
                   col_md: 12

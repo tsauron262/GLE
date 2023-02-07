@@ -47,7 +47,9 @@ abstract class BDSImportProcess extends BDSProcess
                     'report_success'         => true,
                     'report_warning'         => true,
                     'report_error'           => true,
-                    'success_display_fields' => array()
+                    'success_display_fields' => array(),
+                    'fields_find_exist'      => array(),
+                    'constante_fields'        => array()
                         ), $params);
 
         $instance = BimpObject::getInstance($module, $object_name);
@@ -63,6 +65,10 @@ abstract class BDSImportProcess extends BDSProcess
             foreach ($objects_data as $idx => $data) {
                 $obj = null;
                 $this->incProcessed();
+                
+                foreach($params['constante_fields'] as $field => $value){
+                    $data[$field] = $value;
+                }
 
                 if ($ref_prop) {
                     $ref = BimpTools::getArrayValueFromPath($data, $ref_prop, '');
@@ -82,30 +88,41 @@ abstract class BDSImportProcess extends BDSProcess
                         }
                     }
                 }
-
-                if (!BimpObject::objectLoaded($obj) && $params['check_refs'] && $ref_prop) {
-                    if (isset($data[$ref_prop]) && !empty($data[$ref_prop])) {
-                        $obj = BimpCache::findBimpObjectInstance($module, $object_name, array(
-                                    $ref_prop => $data[$ref_prop]
-                                        ), true);
-
-                        if (BimpObject::objectLoaded($obj)) {
-                            if (!$params['update_if_exists']) {
-                                $msg = BimpTools::ucfirst($obj->getLabel('a')) . ' existe déjà pour la référence "' . $data[$ref_prop] . '":<br/>' . $obj->getLink();
-                                if ($params['report_warning']) {
-                                    $this->Alert($msg, $instance, $data[$ref_prop]);
-                                }
-                                $this->incIgnored($instance);
-                                continue;
-                            }
+                
+                $filtreExist = array();
+                if(!BimpObject::objectLoaded($obj) && count($params['fields_find_exist'])){
+                    foreach($params['fields_find_exist'] as $field){
+                        if(isset($data[$field])){
+                            $filtreExist[$field] = $data[$field];
                         }
-                    } else {
-                        $msg = 'Ligne n°' . ($idx + 1) . ': référence absente';
+                    }
+                }
+                elseif (!BimpObject::objectLoaded($obj) && $params['check_refs'] && $ref_prop) {
+                    if (isset($data[$ref_prop]) && !empty($data[$ref_prop])) {
+                        $filtreExist[$ref_prop] = $data[$ref_prop];
+                    }
+                    else {
+                        $msg = 'Ligne n°' . ((int) $idx + 1) . ': référence absente';
                         if ($params['report_warning']) {
                             $this->Alert($msg, $instance, '');
                         }
                         $this->incIgnored();
                         continue;
+                    }
+                }
+
+                if (!BimpObject::objectLoaded($obj) && count($filtreExist)) {
+                    $obj = BimpCache::findBimpObjectInstance($module, $object_name, $filtreExist, true);
+
+                    if (BimpObject::objectLoaded($obj)) {
+                        if (!$params['update_if_exists']) {
+                            $msg = BimpTools::ucfirst($obj->getLabel('a')) . ' existe déjà pour la référence "' . $data[$ref_prop] . '":<br/>' . $obj->getLink();
+                            if ($params['report_warning']) {
+                                $this->Alert($msg, $instance, $data[$ref_prop]);
+                            }
+                            $this->incIgnored($instance);
+                            continue;
+                        }
                     }
                 }
 

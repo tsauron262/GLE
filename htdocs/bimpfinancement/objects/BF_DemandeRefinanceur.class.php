@@ -509,13 +509,13 @@ class BF_DemandeRefinanceur extends BimpObject
                 if (BimpObject::objectLoaded($demande)) {
                     $values = $this->getCalcValues();
                     $demande->set('periodicity', $values['periodicity']);
-                    $demande->set('duration', $values['nb_mois']);
+                    $demande->set('duration', (int) $values['nb_mois']);
                     $demande->set('tx_cession', $this->getData('rate'));
                     $demande->set('loyer_mensuel_evo_ht', $values['loyer_evo_mensuel']);
                     $demande->set('loyer_mensuel_dyn_ht', $values['loyer_dyn_mensuel']);
                     $demande->set('loyer_mensuel_suppl_ht', $values['loyer_dyn_suppl_mensuel']);
                     $demande->set('agreement_number', $this->getData('num_accord'));
-
+                    
                     $up_warnings = array();
                     $up_errors = $demande->update($up_warnings, true);
 

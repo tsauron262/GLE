@@ -74,6 +74,14 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             }
         }
 
+        if (isset($data['steps']['import_products']) && isset(array_values($file_data)[0]['crt'])) {
+            $data['steps']['crt_products'] = array(
+                'label'    => 'Traitement des CRT produits',
+                'on_error' => 'continue',
+                'elements' => $data['steps']['import_products']['elements']
+            );
+        }
+
         if (isset($data['steps']['import_products']) && (int) $this->options['validate_products']) {
             $data['steps']['validate_products'] = array(
                 'label'    => 'Validation des produits',
@@ -99,12 +107,31 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         switch ($step_name) {
             case 'import_products':
             case 'validate_products':
+            case 'crt_products':
                 $file_data = $this->getFileData('products', $this->options['products_file'], $errors);
 
                 $this->DebugData($file_data, 'Données fichier');
 
                 if (!count($errors)) {
                     switch ($step_name) {
+                        case 'crt_products':
+                            foreach ($file_data as $idx => $prod_data) {
+                                if (isset($prod_data['ref']) && (string) $prod_data['ref']) {
+                                    $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                                                'ref' => $prod_data['ref']
+                                    ));
+                                    if (BimpObject::objectLoaded($product)) {
+                                        $file_data[$idx]['id_product'] = $product->id;
+                                        $file_data[$idx]['value'] = $prod_data['crt'];
+                                        continue;
+                                    }
+                                }
+                                unset($file_data[$idx]);
+                            }
+                            $this->createBimpObjects('bimpcore', 'Bimp_ProductRA', $file_data, $errors, array('update_if_exists' => true, 'fields_find_exist' => array('id_product', 'type'), 'constante_fields' => array('type' => 'crt', 'nom' => 'CRT', 'active' => '1')));
+                            break;
+                        
+                        
                         case 'import_products':
                             $this->createBimpObjects('bimpcore', 'Bimp_Product', $file_data, $errors, array('update_if_exists' => true));
                             break;

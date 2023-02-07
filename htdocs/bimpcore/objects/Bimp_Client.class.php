@@ -996,15 +996,40 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
-    public function getAtradiusFileName($force = false, $show_ext = true)
+    public function getAtradiusFileName($force = false, $show_ext = true, $forced_date = null)
     {
-        $name = 'atradius';
+        if(is_null($forced_date))
+            $name = 'icba_' . date('Y-m-d', strtotime($this->getData('date_depot_icba')));
+        else
+            $name = 'icba_' . date('Y-m-d', strtotime($forced_date));
+
         $ext = '.pdf';
         if ($force || ($this->isLoaded() && file_exists($this->getFilesDir() . $name . $ext))) {
             if ($show_ext)
                 return $name . $ext;
             else
                 return $name;
+        // On check les fichiers avec des date de crétion mal définit
+        } elseif(is_null($forced_date)) {
+            $date_plus_recente = null;
+            $files = $this->getFilesArray();
+            foreach ($files as $f) {
+                if(substr($f, 6, 5) == 'icba_') {
+                    $date_a_tester = date(substr($f, 11, 10));
+                    if($date_plus_recente < $date_a_tester)
+                        $date_plus_recente = $date_a_tester;
+                }
+            }
+
+            if(!is_null($date_plus_recente)) {
+//                die($date_plus_recente);
+                if(file_exists($this->getFilesDir() . 'icba_' . $date_plus_recente . $ext)) {
+                    if ($show_ext)
+                        return 'icba_' . $date_plus_recente . $ext;
+                    else
+                        return 'icba_' . $date_plus_recente;
+                }
+            }
         }
         return 0;
     }
@@ -1217,19 +1242,19 @@ class Bimp_Client extends Bimp_Societe
         global $user, $langs;
         $html = '';
         $file = $this->getAtradiusFileName();
-        $buttons = array();
+        $buttons = array(
+            array(
+                'label'   => 'Ajouter PDF du Rapport Assurance crédit',
+                'icon'    => 'fas_comment-dollar',
+                'onclick' => $this->getJsLoadModalForm('atradius_file')
+            )
+        );
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         if (!is_null($file) && $file) {
             $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a><br/>';
         } elseif (!$only_loaded) {
 //            return BimpInput::renderInput('file_upload', 'atradius_file');
             // Demande encours altriadus
-
-            $buttons[] = array(
-                'label'   => 'Ajouter PDF du Rapport Assurance crédit',
-                'icon'    => 'fas_comment-dollar',
-                'onclick' => $this->getJsLoadModalForm('atradius_file')
-            );
 
             $list = BimpCache::getBimpObjectObjects('bimpcore', 'BimpNote', array('content'    => array(
                             'operator' => 'like',
@@ -3063,7 +3088,7 @@ class Bimp_Client extends Bimp_Societe
                 $values['parent_module'] = 'bimpcore';
                 $values['parent_object_name'] = 'Bimp_Societe';
                 $values['id_parent'] = $this->id;
-                $values['file_name'] = $this->getAtradiusFileName(true, false);
+                $values['file_name'] = $this->getAtradiusFileName(true, false, date('Y-m-d'));
                 $values['is_deletable'] = 0;
 
                 $file->validateArray($values);
@@ -3077,7 +3102,7 @@ class Bimp_Client extends Bimp_Societe
 
 
         if ($this->getData('outstanding_limit_icba') != $this->getInitData('outstanding_limit_icba') && $this->getData('outstanding_limit_icba') > 0 && !$this->getAtradiusFileName())
-            $errors[] = 'Il faut obligatoirement uploder le PDF avant de saisir une limite ICBA';
+            $errors[] = 'Il faut obligatoirement uploa@der le PDF avant de saisir une limite ICBA';
 
         if (count($errors))
             return $errors;
@@ -3251,7 +3276,8 @@ class Bimp_Client extends Bimp_Societe
 
                     if (isset($cover['amount'])) {
                         if ($cover['amount'] == 0) {
-                            self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', 0);
+                            if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK || $this->getData('outstanding_limit_credit_check') > 0)
+                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', 0);
                             if ($cover['cover_type'] == 'credit-limit' || $this->getData('outstanding_limit_atradius') > 0)
                                 self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
                             if ($this->getData('outstanding_limit_icba') > 0)

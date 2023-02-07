@@ -66,15 +66,16 @@ class BimpCore
         if (!self::$is_init) {
             self::$is_init = true;
 
-            global $noBootstrap, $conf;
+            global $noBootstrap;
 
             if (BimpDebug::isActive()) {
                 BimpDebug::addDebugTime('Début affichage page');
             }
 
-            if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {
-                self::setContext("private"); // Todo: trouver meilleure solution (Le contexte privé / public doit être indépendant du module) 
-            }
+            // Commenté car pose problème
+//            if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {
+//                self::setContext("private"); // Todo: trouver meilleure solution (Le contexte privé / public doit être indépendant du module) 
+//            }
 
             if ($noBootstrap) {
                 self::$files['js'] = BimpTools::unsetArrayValue(self::$files['js'], '/bimpcore/views/js/bootstrap.min.js');
@@ -972,17 +973,12 @@ class BimpCore
             return self::$context;
         }
 
-//        if (isset($_SESSION['bimp_context'])) {
-//            return $_SESSION['bimp_context'];
-//        }
-
-        return "";
+        return "private";
     }
 
     public static function setContext($context)
     {
         self::$context = $context;
-//        $_SESSION['bimp_context'] = $context;
     }
 
     public static function isContextPublic()

@@ -542,7 +542,7 @@ class ValidComm extends BimpObject
 
             switch ($type) {
                 case self::TYPE_COMMERCIAL:
-                    $val_nom = 'remise de ' . $val . '%';
+                    $val_nom = 'remise de ' . $val . '%' . ' '.print_r($options,1);
                     $type_nom = 'commercialement';
                     break;
                 case self::TYPE_ENCOURS:

@@ -22,6 +22,39 @@ class Bimp_FactureLine extends ObjectLine
 
         return 0;
     }
+    
+    
+    public function getTotalMarge(){
+        $margin = (float) $this->getMargin();
+        $total_reval = 0;
+
+        $done = false;
+        $facture = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($facture)) {
+            if ((int) $facture->getData('fk_statut')) {
+                $done = true;
+                $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                            'id_facture_line' => (int) $this->id
+                ));
+
+                foreach ($revals as $reval) {
+                    if (in_array((int) $reval->getData('status'), array(0, 1))) {
+                        $reval_amount = $reval->getTotal();
+                        $margin += $reval_amount;
+                    }
+                }
+            }
+        }
+
+        if (!$done) {
+            $remises_arrieres = $this->getTotalRemisesArrieres(false);
+
+            $total_reval += $remises_arrieres;
+            $margin += $remises_arrieres;
+        }
+        return $margin;
+    }
 
     public function canSetAction($action)
     {

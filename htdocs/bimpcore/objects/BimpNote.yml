@@ -257,6 +257,8 @@ lists:
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this));
               btn_class: deleteSelectedObjects
+        extra_bulk_actions: 
+            callback: getListsExtraBulkActions
         sort_field: date_create
         sort_way: desc
         n: 50
@@ -333,6 +335,7 @@ lists:
         extends: default
         cols:
             parent:
+                
     linked:
         extends: default
         cols:

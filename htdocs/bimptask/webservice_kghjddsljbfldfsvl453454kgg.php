@@ -21,7 +21,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 $controller = BimpController::getInstance('bimptask');
 
-define("ID_USER_DEF", 215);
 
 $dst = urldecode($_REQUEST['dst']); 
 $src = urldecode($_REQUEST['src']); 
@@ -29,41 +28,20 @@ $subj = urldecode($_REQUEST['subj']);
 $txt = urldecode($_REQUEST['txt']); 
 
 
-if($_REQUEST["old"]){
-    $commande = new Commande($db);
-    $sql = $db->query("SELECT rowid FROM `".MAIN_DB_PREFIX."commande` WHERE `validComm` > 0 AND (`validFin` < 1 || validFin is NULL) AND fk_statut = 0 ORDER BY `".MAIN_DB_PREFIX."commande`.`tms` DESC");
-    while($ln=$db->fetch_object($sql)){
-        $commande->fetch($ln->rowid);
-        $commande->valid($user);
-        echo "Validation ".$commande->getNomUrl(1);
-    }
+if(stripos($subj, 'Réponse automatique') === 0){//on ne traite pas
+    die;
 }
 
-
-
-
-
-
-if (!($dst != "" && $src != "" && $subj != "" && $txt != "")) {
-//    echo "Pas de données <pre>".print_r($_REQUEST,1);
-    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."bimp_task2");
-    while ($ln = $db->fetch_object($sql)) {
-        if (traiteTask($ln->dst, $ln->src, $ln->subj, $ln->txt)) {
-            $db->query("DELETE FROM ".MAIN_DB_PREFIX."bimp_task2 WHERE id =" . $ln->id);
-            echo "<br/>Tache 2 id : " . $ln->id;
-        }
-    }
-} else {
-    traiteTask($dst, $src, $subj, $txt);
-}
+traiteTask($dst, $src, $subj, $txt);
 
 function traiteTask($dst, $src, $subj, $txt) {
     global $db, $user;
     
+    BimpObject::loadClass('bimptask', 'BIMP_Task');
+    
     $errors = array();
     echo "traite" . $subj;
     $idTask = 0;
-    $task = BimpObject::getInstance("bimptask", "BIMP_Task");
 
 //    $dst = str_replace("bimp-groupe.net", "bimp.fr", $dst);
     $dst = str_replace("console@", "consoles@", $dst);
@@ -76,7 +54,8 @@ function traiteTask($dst, $src, $subj, $txt) {
     }
 
 
-    $const = "IDTASK:5467856456";
+//    $const = BIMP_Task::MARQEUR_MAIL;
+    $const = BimpCore::getConf('marqueur_mail', null, 'bimptask');
     preg_match("/" . $const . "[0-9]*/", $txt, $matches);
     if (isset($matches[0])) {
         $idTask = str_replace($const, "", $matches[0]);
@@ -86,7 +65,13 @@ function traiteTask($dst, $src, $subj, $txt) {
         $idTask= 25350;
 
     $tabTxt = explode("-------------", $txt);
+    if(trim($tabTxt[0]) == ''){
+        $tabTxt = array(0=>$tabTxt[2]);
+    }
     $tabTxt = explode("\n> ", $tabTxt[0]);
+    $tabTxt = explode("Ce message et éventuellement les pièces jointes", $tabTxt[0]);
+    
+    
     
     $txt = rtrim($tabTxt[0]);
     
@@ -98,29 +83,36 @@ function traiteTask($dst, $src, $subj, $txt) {
         $user->fetch($ln->rowid);
     }
     else
-        $user->fetch(ID_USER_DEF);
+        $user->fetch((int) BimpCore::getConf('id_user_def', null, 'bimptask'));
     
 //    @$user->rights->bimptask->$dst->write = 1;
 //    @$user->rights->bimptask->other->write = 1;
 
 
-    if ($idTask > 0) {
-        if(!$task->fetch($idTask) || $task->getData("status") > 3)
-            $idTask = 0;
-    }
+//    if ($idTask > 0) {
+//        if(!$task->fetch($idTask) || $task->getData("status") > 3)
+//            $idTask = 0;
+//    }
     
     if ($idTask < 1) {
         
+        $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         echo "<br/>Création task";
-        $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "");
+        $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "", 'auto' => 0, );
+        if($dst == $task->mailReponse){
+            $tab['auto'] = 0;
+            $tab['type_manuel'] = 'dev';
+            $tab['dst'] = '';
+        }
         $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
         $errors = BimpTools::merge_array($errors, $task->create());
     } else {
-        echo "<br/>Création note, task : ".$idTask;
-        $note = BimpObject::getInstance("bimpcore", "BimpNote");
-        $tab = array("obj_type" => "bimp_object", "obj_module" => "bimptask", "obj_name" => "BIMP_Task", "id_obj" => $idTask, "type_author" => "3", "email" => $src, "visibility" => 4, "content" => $txt);
-        $errors = BimpTools::merge_array($errors, $note->validateArray($tab));
-        $errors = BimpTools::merge_array($errors, $note->create());
+        $task = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', $idTask);
+        if($task && $task->isLoaded()){
+            $task->addRepMail($user, $src, $txt);
+        }
+        else
+            mailSyn2 ('Id task non existant', 'dev@bimp.fr', null, 'Un mail a était recu avec une tache inexistante : '.$idTask);
         
 //        $errors = BimpTools::merge_array($errors, $task->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, 3));
     }
@@ -134,9 +126,9 @@ function traiteTask($dst, $src, $subj, $txt) {
         if(!is_dir($dir))
             mkdir($dir);
         foreach($_FILES as $fileT){
-//            $dir = "/data/DOCUMENTS/bimp/societe/154049/";
-            $file = $fileT['name'];
-            
+            $nameFile = $fileT['name'];
+            $file = BimpTools::cleanStringForUrl(str_replace('.'.pathinfo($nameFile, PATHINFO_EXTENSION), '', $nameFile)) . '.' . pathinfo($nameFile, PATHINFO_EXTENSION);
+
             
             move_uploaded_file($fileT['tmp_name'], $dir.$file);
         }

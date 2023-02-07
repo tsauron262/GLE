@@ -160,7 +160,7 @@ class Bimp_CommissionApporteur extends BimpObject
 
                             if ($amount != 0) {
                                 $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $amount));
-                                $errors = BimpTools::merge_array($errors, $this->createRevalorisation($line, $amount));
+                                $errors = BimpTools::merge_array($errors, $this->createRevalorisation($line, -$amount));
                             }
                         }
                     }

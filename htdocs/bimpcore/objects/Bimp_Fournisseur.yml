@@ -79,8 +79,9 @@ lists:
         title: Liste des Fournisseurs
         icon: fas_building
         list_filters:
-            - name: fournisseur
-              filter: 1
+            fourn: 
+                name: fournisseur
+                filter: 1
         add_btn_label: Nouveau fournisseur
         bulk_actions:
             0: 

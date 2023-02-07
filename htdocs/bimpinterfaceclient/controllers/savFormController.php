@@ -40,7 +40,7 @@ class savFormController extends BimpPublicController
         if ($res_id) {
 
             if (!$shipto) {
-                $errors[] = 'Identifiant du centre BIMP absent';
+                $errors[] = 'Identifiant du centre LDLC Apple absent';
             } elseif (!count($errors)) {
                 $shipto = BimpTools::addZeros($shipto, 10);
                 $centres = BimpCache::getCentres();
@@ -865,13 +865,13 @@ class savFormController extends BimpPublicController
         if (is_null($reservation)) {
             $html .= '<div style="display: none" id="SlotNotAvailableNotif">';
             $msg = 'Le créneau horaire sélectionné semble avoir été réservé par quelqu\'un d\'autre entre temps.<br/>';
-            $msg .= 'Veuillez sélectionner un autre créneau horaire ou cliquez sur "Ouvrir le SAV sans Rendez-vous" (dans ce dernier cas, vous pourrez déposer votre matériel au centre SAV BIMP sélectionné quand vous le souhaitez).<br/>';
+            $msg .= 'Veuillez sélectionner un autre créneau horaire ou cliquez sur "Ouvrir le SAV sans Rendez-vous" (dans ce dernier cas, vous pourrez déposer votre matériel au centre SAV LDLC Apple sélectionné quand vous le souhaitez).<br/>';
             $html .= BimpRender::renderAlerts($msg, 'warning');
             $html .= '</div>';
 
             $html .= '<div style="display: none" id="reservationErrorNotif">';
             $msg = 'Une erreur est survenue. Il n\'est pas possible de réserver le créneau horaire sélectionné pour le moment.<br/>';
-            $msg .= 'Veuillez réessayer ultérieurement ou cliquer sur "Ouvrir le SAV sans Rendez-vous" (dans ce dernier cas, vous pourrez déposer votre matériel au centre SAV BIMP sélectionné quand vous le souhaitez).';
+            $msg .= 'Veuillez réessayer ultérieurement ou cliquer sur "Ouvrir le SAV sans Rendez-vous" (dans ce dernier cas, vous pourrez déposer votre matériel au centre SAV LDLC Apple sélectionné quand vous le souhaitez).';
             $html .= BimpRender::renderAlerts($msg, 'warning');
             $html .= '</div>';
 
@@ -1041,11 +1041,11 @@ class savFormController extends BimpPublicController
         } elseif (BimpObject::objectLoaded($sav)) {
             $msg .= 'Nous vous confirmons l\'enregistrement de votre dossier SAV dans notre centre de Services Agrée Apple.' . "\n";
             $msg .= 'Aucun rendez-vous n\'a été fixé.' . "\n";
-            $msg .= 'Vous pouvez donc déposer votre matériel dans notre centre BIMP quand vous le souhaitez.' . "\n";
+            $msg .= 'Vous pouvez donc déposer votre matériel dans notre centre LDLC Apple quand vous le souhaitez.' . "\n";
         } else {
             $msg .= 'En raison d\'un problème technique, votre dossier SAV n\'a pas pu être enregistré.' . "\n";
-            $msg .= 'Toutefois, les techniciens du centre BIMP de ' . $centre['town'] . ' ont été alertés par e-mail de votre demande.' . "\n";
-            $msg .= 'Vous pouvez donc passer à notre agence BIMP quand vous le souhaitez pour déposer votre matériel.' . "\n";
+            $msg .= 'Toutefois, les techniciens du centre LDLC Apple de ' . $centre['town'] . ' ont été alertés par e-mail de votre demande.' . "\n";
+            $msg .= 'Vous pouvez donc passer à notre agence LDLC Apple quand vous le souhaitez pour déposer votre matériel.' . "\n";
         }
 
         $msg .= "\n";
@@ -1079,7 +1079,7 @@ class savFormController extends BimpPublicController
 //                $msg .= '<p style="font-size: 10px; font-style: italic;">Présentez ce QR Code le jour de votre rendez-vous pour faciliter la prise en charge de votre matériel.</p>';
             }
         }
-        $msg .= '<b>Adresse du centre BIMP : </b>' . "\n";
+        $msg .= '<b>Adresse du centre LDLC Apple : </b>' . "\n";
         $msg .= $centre['address'] . "\n";
         $msg .= $centre['zip'] . ' ' . $centre['town'] . "\n\n";
 
@@ -1137,7 +1137,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         $msg .= '<p style="font-size: 10px; font-style: italic;">Présentez le QR Code en pièce-jointe le jour de votre rendez-vous pour faciliter la prise en charge de votre matériel:</p>' . "\n";
 
 //        $email = BimpTools::cleanEmailsStr($email);
-//        return mailSyn2('RDV SAV BIMP - Confirmation', $email, '', $msg, $tabFile, $tabFile2, $tabFile3);
+//        return mailSyn2('RDV SAV LDLC Apple - Confirmation', $email, '', $msg, $tabFile, $tabFile2, $tabFile3);
         $bimpMail = new BimpMail($sav, 'Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
         $bimpMail->addFiles($files);
         return $bimpMail->send();
@@ -2246,8 +2246,8 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         }
                     } else {
                         $success_html = '<h3>En raison d\'une erreur technique, votre dossier SAV n\'a pas pu être créé.</h3>';
-                        $success_html .= '<p>Toutefois, les techniciens du centre BIMP de ' . $centre['town'] . ' ont été alertés par e-mail de votre demande.<br/>';
-                        $success_html .= 'Vous pouvez donc passer à notre agence BIMP quand vous le souhaitez pour déposer votre matériel.</p><br/>';
+                        $success_html .= '<p>Toutefois, les techniciens du centre LDLC Apple de ' . $centre['town'] . ' ont été alertés par e-mail de votre demande.<br/>';
+                        $success_html .= 'Vous pouvez donc passer à notre agence LDLC Apple quand vous le souhaitez pour déposer votre matériel.</p><br/>';
                     }
 
                     $success_html .= '<br/>';

@@ -316,6 +316,7 @@ forms:
                         method: getSignatureEmailContent
                         params: 
                             - elec
+                            - devis_fin
                             
     signature_doc_fin: 
         rows:
@@ -326,44 +327,14 @@ forms:
                 content: 
                     callback: 
                         method: renderDocFinSignatairesInfos
-            sign_dist:
+                        
+            signature_type: 
                 custom: 1
-                label: Demander une signature à distance
-                data_type: bool
-                input_name: sign_dist
-                input: 
-                    type: toggle
-                value: 1
-                display_if: 
-                    field_name: create_signature
-                    show_values: 1
-                    
-            init_docusign: 
-                custom: 1
-                label: Envoyer immédiatement le document pour signature via DocuSign
-                data_type: bool
-                input_name: init_docusign
-                content: 
+                label: Type de signature
+                input_name: signature_type
+                content:
                     callback: 
-                        method: renderDocFinSignatureInitDocuSignInput
-                display_if: 
-                    field_name: sign_dist
-                    hide_values: 0
-                    
-            open_public_access: 
-                custom: 1 
-                label: Ouvrir immédiatement l'accès à la signature électronique à distance
-                data_type: bool
-                input_name: open_public_access
-                content: 
-                    callback: 
-                        method: renderDocFinSignatureOpenDistAccessInput
-                display_if: 
-                    fields_names: init_docusign,sign_dist
-                    init_docusign: 
-                        hide_values: 1
-                    sign_dist:
-                        hide_values: 0
+                        method: renderSignatureTypeSelect
                         
             email_content: 
                 custom: 1
@@ -373,11 +344,9 @@ forms:
                     type: html
                     help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
                 value: 
-                    callback: getSignatureEmailContent
-                display_if: 
-                    field_name: sign_dist
-                    hide_values: 0
-                depends_on: init_docusign,open_public_access
+                    callback: 
+                        method: getSignatureEmailContent
+                depends_on: signature_type
                 
     signature_contrat_fin: 
         extends: signature_doc_fin
@@ -388,16 +357,18 @@ forms:
                     callback: 
                         params: 
                             - contrat_fin
-            init_docusign: 
-                content: 
+            signature_type: 
+                content:
                     callback: 
                         params: 
                             - contrat_fin
-            open_public_access: 
-                content: 
+            email_content: 
+                value: 
                     callback: 
                         params: 
+                            - ''
                             - contrat_fin
+                
                             
     signature_pvr_fin: 
         extends: signature_doc_fin
@@ -408,15 +379,17 @@ forms:
                     callback: 
                         params: 
                             - pvr_fin
-            init_docusign: 
-                content: 
+                            
+            signature_type: 
+                content:
                     callback: 
                         params: 
                             - pvr_fin
-            open_public_access: 
-                content: 
+            email_content: 
+                value: 
                     callback: 
                         params: 
+                            - ''
                             - pvr_fin
        
 signatures: 

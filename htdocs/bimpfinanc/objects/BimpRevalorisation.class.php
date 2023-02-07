@@ -48,7 +48,7 @@ class BimpRevalorisation extends BimpObject
     {
         global $user;
 
-        return (int) ($user->admin ? 1 : 0);
+        return (int) ($user->admin || $this->canEdit() ? 1 : 0);
     }
 
     public function canSetAction($action)
@@ -224,12 +224,12 @@ class BimpRevalorisation extends BimpObject
     public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array('id_facture', 'id_facture_line', 'qty'))) {
-            if ((int) $this->getData('status') !== 0) {
+            if ((int) $this->getData('status') !== 0 && $this->getData('status') !== 20) {
                 return 0;
             }
         }
         if (in_array($field, array('amount'))) {
-            if ((int) $this->getData('status') !== 0 && (int) $this->getData('status') !== 10) {
+            if ((int) $this->getData('status') !== 0 && (int) $this->getData('status') !== 10 && $this->getData('status') !== 20) {
                 return 0;
             }
         }

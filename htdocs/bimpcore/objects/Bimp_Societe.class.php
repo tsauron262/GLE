@@ -603,6 +603,35 @@ class Bimp_Societe extends BimpDolObject
         return $buttons;
     }
 
+    public function getAllTiersListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded() && $this->can('view')) {
+            if ($this->isClient()) {
+                $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=client&id=' . $this->id;
+
+                $buttons[] = array(
+                    'label'   => 'Fiche Client',
+                    'icon'    => 'fas_user-circle',
+                    'onclick' => 'window.open(\'' . $url . '\');'
+                );
+            }
+            
+            if ($this->isFournisseur()) {
+                $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=fournisseur&id=' . $this->id;
+
+                $buttons[] = array(
+                    'label'   => 'Fiche Fournisseur',
+                    'icon'    => 'fas_building',
+                    'onclick' => 'window.open(\'' . $url . '\');'
+                );
+            }
+        }
+
+        return $buttons;
+    }
+
     public function getDolObjectUpdateParams()
     {
         if ($this->isLoaded()) {

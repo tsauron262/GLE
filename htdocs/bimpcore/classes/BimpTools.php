@@ -1396,7 +1396,7 @@ class BimpTools
                     }
                 } else {
                     if (is_array($filter) && count($filter) > 0) {
-                        $sql .= ' IN (' . implode(',', $filter) . ')';
+                        $sql .= ' IN ("' . implode('","', $filter) . '")';
                     } elseif ((is_array($filter) && count($filter) == 0) || $filter == '') {
                         $sql .= ' = 0 AND 0';
                     } else {
@@ -2257,7 +2257,6 @@ class BimpTools
                 if (preg_match('/^(.+)\[.+\]$/', $email, $matches)) {
                     $email = $matches[1];
                 }
-
                 if ($name) {
                     $emails_str .= ($emails_str ? ', ' : '') . $name . ' <' . $email . '>';
                 } else {

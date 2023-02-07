@@ -2013,6 +2013,20 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $html .= '</div>';
             }
         }
+        
+        
+        $margeMini = 15;
+        foreach($propal->getLines('product') as $line){
+            $dol_line = $line->getChildObject('dol_line');
+            if($dol_line->getData('buy_price_ht') > 0){
+                $pu = $dol_line->getData('total_ht') / $dol_line->getData('qty');
+                $marge = ($pu - $dol_line->getData('buy_price_ht')) / $pu * 100;
+                if($marge < $margeMini){
+                    $pro = $line->getChildObject('product');
+                    $html .= BimpRender::renderAlerts('Attention le ligne avec le produit '.$pro->getLink().' à une marge de '.price($marge).' %');
+                }
+            }
+        }
 
 
         return $html;
@@ -5011,6 +5025,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $success = 'Statut du SAV enregistré avec succès';
         $errors = array();
         $warnings = array();
+        $succesCallback = '';
 
         $msg_type = '';
 
@@ -5120,6 +5135,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                     $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
                                 }
                                 if (count($rep_errors)) {
+                                    $succesCallback .= 'setTimeout(function(){bimpModal.newContent("Erreur GSX", "'.implode('\n', $rep_errors).'");}, 500);';
                                     $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation (2) d\'ID ' . $item['id']);
                                 }
                             }
@@ -5146,7 +5162,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => $succesCallback
         );
     }
 
@@ -5456,6 +5473,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
                                 $facture->array_options['options_centre'] = $this->getData('code_centre');
                                 $facture->array_options['options_expertise'] = 90;
+                                foreach($propal->getRibArray() as $idR => $inut){
+                                    $facture->array_options['options_rib_client'] = $idR;
+                                    break;
+                                }
+                                
+//                                $facture->array_options['options_rib_client'] = 
 
                                 $facture->linked_objects[$facture->origin] = $facture->origin_id;
                                 if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {

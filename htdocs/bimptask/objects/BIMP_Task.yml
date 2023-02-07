@@ -3,8 +3,13 @@ controller: task
 
 icon: fas_tasks
 header_list_name: default
+header_edit_form: default
 header_btn:
     callback: getButtons
+    
+nom_url: 
+    modal_view: full
+    
 list_page_url: 
     controller: index
         
@@ -14,11 +19,28 @@ labels:
     is_female: 1    
 
 objects: 
+    task_fille:
+        relation: hasMany
+        instance:
+            bimp_object:
+                module: bimptask
+                name: BIMP_Task
+#                
+    task_mere:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimptask
+                name: BIMP_Task
+            id_object:
+                field_value: id_task
+                
     user_owner:
         extends: user
         instance:
             id_object:
-                fiels_value: id_user_owner
+                field_value: id_user_owner
                 
     files:
         instance:
@@ -40,35 +62,56 @@ fields:
     src:
         label: Source email
         type: text
+        
     dst:
         label: Destinataire email
         type: text
+        
     subj:
         label: Sujet
         type: text
+        
     txt:
         label: Description
         type: html
+        hashtags: 1
+        
     comment:
         label: Commentaire
         type: text
+        hashtags: 1
+        
     status:
         label: Statut
         type: int
         values: 
             array: status_list_task
+            
     prio:
         label: Priorité
         type: int
         values: 
             array: prio_list_task
+            
+    sous_type:
+        label: Sous Type
+        depends_on: type_manuel
+        values: 
+            array: allSousTypes
+        input: 
+            type: select
+            options: 
+                array: sous_type_list_task
+            
     id_user_owner:
-        label: Attribuer à
+        label: Attribuée à
         type: id_object
         object: user_owner
         input:
             type: search_user
             include_empty: 1
+        depends_on: type_manuel
+            
     test_ferme:
         label: Test pour Fermeture
         type: text
@@ -78,10 +121,16 @@ fields:
         type: bool
         
     type_manuel:
-        label: Type de tache manuel
+        label: Type de tâche manuel
         type: text
         values: 
             array: types_manuel
+            
+    id_task:
+        label: Tache mére
+        type: id_object
+        object: task_mere
+        depends_on: type_manuel
  
 fields_tables:
     default: 
@@ -91,9 +140,9 @@ fields_tables:
         icon: fas_tasks
         rows: 
             - field: status
-              edit: 1
             - field: prio
               edit: 0
+            - field: id_task
             - field: src
             - field: dst
             - label: Type de tâche
@@ -105,11 +154,19 @@ fields_tables:
               edit: 1
             - field: id_user_owner
               edit: 1
+            - label: Notifier
+              value:
+                callback: displayUserNotif
+            - label: Images liées
+              value: 
+                  callback: renderImages
         
 forms:
     default: 
         rows: 
+            - field: id_task
             - field: status
+            - field: sous_type
             - field: prio
             - field: src
               show: 
@@ -123,20 +180,27 @@ forms:
             
     add:
         rows:
+            - field: id_task
             - field: type_manuel
+            - field: sous_type
             - field: prio
             - field: subj
             - field: txt
             - field: comment
             - field: id_user_owner
             - object: files
+              title: Fichiers
               form_name: upload
               form_label: Ajouter
               form_values: 
                   fields: 
                       id_parent: 1
-                  
               multiple: 1
+              
+    addUser:
+        extends: add
+        rows:
+            6: unset
             
     newMail:
         rows:
@@ -153,9 +217,57 @@ forms:
               input: 
                   type: toggle
               value: 1
+              
     attribute:
         rows:
             - field: id_user_owner
+            - field: comment
+            
+    changeStatut:
+        rows:
+            - custom: 1
+              input_name: status
+              input: 
+                  type: select
+              label: Statut
+              values:
+                  callback: getStatusPossible
+            - custom: 1
+              input_name: text
+              input: 
+                  type: textarea
+              hashtags: 1
+              label: Commentaire
+            - custom: 1
+              input_name: notif
+              data_type: bool
+              label: Notifier
+              input: 
+                  type: toggle
+              value: 1
+              
+    bug: 
+        title: Signaler un bug
+        rows: 
+            - field: type_manuel
+              hidden: 1
+              value: dev
+            - field: sous_type
+              hidden: 1
+              value: bug
+            - field: prio
+              value: 20
+            - field: subj
+            - field: txt
+            - field: comment
+            - object: files
+              title: Fichiers
+              form_name: upload_light
+              form_label: Ajouter
+              form_values: 
+                  fields: 
+                      id_parent: 1
+              multiple: 1
            
 lists_cols: 
     typeTache:
@@ -168,11 +280,16 @@ lists_cols:
               options:
                 options:
                     callback: getTypeArray
-#                    array: valSrc
                             
+    nb_sous_taches: 
+        label: Sous-tâches
+        value: 
+            callback: displaySousTachesCounts
+        
 lists:
     default:
         checkboxes: 1
+        configurable: 1
         bulk_actions:
             - label: supprimer les tâches sélectionnées
               icon: fas_trash-alt
@@ -185,52 +302,76 @@ lists:
         delete_btn: 1
         page_btn: 1
         edit_btn: 1
-        modal_view: default
+        modal_view: full
         edit_form: default
         update_btn: 1
+        extra_btn: 
+            callback: getButtons
         cols:
-            id:
+            date_create:
+            prio: 
+            status:
+                edit: 1
+            id_task:
             src:
             dst:
             typeTache:                    
             subj:
             txt:
-            comment:
-            status:
-                edit: 1
             id_user_owner:
+            nb_sous_taches:
+                
+    main: 
+        extends: default
+        cols: 
+            id_task: unset
+                
+    sousTache:
+        extends: default
+        cols: 
+            nb_sous_taches: unset
 
 views:
-    default: 
-        title: nom
+    full: 
+        objects_change_reload: BIMP_Task,BimpNote
         edit_form: default
         delete_btn: 1
         rows:    
-            - cols: 
+            header: 
+                cols: 
+                    - type: object_header
+                    
+            data: 
+                cols: 
                   - type: fields_table
                     col_lg: 12
                     col_md: 12
                     col_sm: 12
                     fields_table:
                         name: default
-            - cols:
+          
+            sous_taches: 
+                cols:
+                  - type: custom
+                    custom: 
+                        callback: renderSousTachesList
+            notes: 
+                cols:
                   - type: custom
                     custom: 
                         callback: renderNotesList
-            - cols: 
-                - type: list
-                  list: 
-                      children: files
-            - cols: 
-                - type: custom
-                  custom: 
-                      callback: 
-                          method: renderAssociatesList
-                          params: 
-                              - files
-                              - associates
+            files: 
+                cols: 
+                  - type: list
+                    list: 
+                        children: files
+                      
+    default: 
+        extends: full
+        rows: 
+            header: unset
+            
     notes: 
-        title: nom
         edit_form: 0
         delete_btn: 0
         rows:    
@@ -245,11 +386,13 @@ searches:
             - a.id
             - u.firstname
             - u.lastname
+            - a.subj
         fields_return: 
             - a.id
             - u.firstname
             - u.lastname
-        label_syntaxe: 'Tâche #<a.id> (a.subj) - Utilisateur: <u.firstname> <u.lastname>'
+            - a.subj
+        label_syntaxe: 'Tâche #<a.id> (<a.subj>) - Utilisateur: <u.firstname> <u.lastname>'
         joins: 
             - table: user
               on: a.id_user_owner = u.rowid

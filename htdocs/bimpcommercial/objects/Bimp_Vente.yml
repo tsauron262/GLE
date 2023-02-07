@@ -335,7 +335,7 @@ lists:
 
 stats_lists_cols: 
     nb_secteurs: 
-        label: Nb Secteurs
+        label: Nb Canaux de vente
         type: count_distinct
         field: secteur
     tot_qty: 

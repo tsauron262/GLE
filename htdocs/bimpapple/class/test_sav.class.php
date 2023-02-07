@@ -97,9 +97,6 @@ class test_sav
 
         $this->fetchEquipmentsImei(100);
 
-        if ($this->nbImei) {
-            $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
-        }
 
         global $user;
         $user->fetch(1);
@@ -434,7 +431,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
             if($nb > 5){//sinon c'est un test de reconnexion
 //                $filtre['status_gsx'] = array(0,3);
                 if(!$modeLabel)
-                    $filtre['custom'] = array('custom'=>'(status_gsx = 0 || (status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0))))');
+                    $filtre['custom'] = array('custom'=>'(status_gsx = 0 || (status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0,1,2,3,4,5,6,7))))');
                 $rows = $equipment->getList($filtre, $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
             }
             else{
@@ -497,6 +494,10 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                     $this->nbImei++;
                 }
             }
+        }
+    
+        if ($this->nbImei) {
+            $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
         }
     }
 }

@@ -2,6 +2,13 @@
     // Thème: 
     .header-top { background-color: #ffffff; z-index: 9951; position: relative; padding: 15px 0; position: fixed; top: 0; width: 100%; left: 0; padding-left: 240px; -webkit-box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2), 0 1px 6px rgba(0, 0, 0, 0.04); -moz-box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2), 0 1px 6px rgba(0, 0, 0, 0.04); box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2), 0 1px 6px rgba(0, 0, 0, 0.04); }
     .header-top .top-menu .dropdown { margin-left: 10px; }
+    .header-top .top-menu .dropdown .dropdown-toggle { 
+        @include transition (all 0.3s ease);
+        cursor: pointer; 
+        &:hover {
+            color: $primary;
+        }
+    }
     .header-top .top-menu .dropdown .dropdown-menu { margin-top: 10px; }
     .header-top .top-menu .dropdown .dropdown-menu.menu-grid { width: 182px; }
     .header-top .top-menu .dropdown .dropdown-menu.menu-grid .dropdown-item { display: inline-block; width: 40px; height: 40px; text-align: center; padding: 0; line-height: 40px; font-size: 18px; color: #5A5A5A; }

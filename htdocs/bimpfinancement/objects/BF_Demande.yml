@@ -301,7 +301,7 @@ fields:
         default_value: 0
         
     duration:
-        label: Durée totale
+        label: Durée (hors périodes suppl.)
         type: int
         values: 
             array: durations
@@ -626,25 +626,15 @@ forms:
                     help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
                 value: 
                     callback: getDefaultSignatureContact
-            init_docusign: 
+                    
+            signature_type: 
                 custom: 1
-                label: Envoyer immédiatement le document pour signature via DocuSign
-                data_type: bool
-                input_name: init_docusign
-                content: 
+                label: Type de signature
+                input_name: signature_type
+                content:
                     callback: 
-                        method: renderSignatureInitDocuSignInput
-            open_public_access: 
-                custom: 1 
-                label: Ouvrir immédiatement l'accès à la signature électronique à distance
-                data_type: bool
-                input_name: open_public_access
-                content: 
-                    callback: 
-                        method: renderSignatureOpenDistAccessInput
-                display_if: 
-                    field_name: init_docusign
-                    hide_values: 1
+                        method: renderSignatureTypeSelect
+                        
             email_content: 
                 custom: 1
                 label: Contenu e-mail client pour la signature à distance
@@ -655,39 +645,30 @@ forms:
                 value: 
                     callback: 
                         method: getSignatureEmailContent
-                depends_on: init_docusign,open_public_access
+                depends_on: signature_type
     
     create_signature_devis: 
         extends: create_signature
         title: Création de la signature du devis
         rows: 
-            init_docusign: 
-                content: 
+            signature_type: 
+                content:
                     callback: 
                         params: 
-                            - devis
-            open_public_access: 
-                content: 
-                    callback: 
-                        params: 
-                            - devis
+                            - devis                            
             email_content:
                 value: 
                     callback: 
                         params: 
+                            - ''
                             - devis
                             
     create_signature_contrat: 
         extends: create_signature
         title: Création de la signature du contrat
         rows: 
-            init_docusign: 
-                content: 
-                    callback: 
-                        params: 
-                            - contrat
-            open_public_access: 
-                content: 
+            signature_type: 
+                content:
                     callback: 
                         params: 
                             - contrat
@@ -695,19 +676,15 @@ forms:
                 value: 
                     callback: 
                         params: 
+                            - ''
                             - contrat
             
     create_signature_pvr: 
         extends: create_signature
         title: Création de la signature du PV de réception
         rows: 
-            init_docusign: 
-                content: 
-                    callback: 
-                        params: 
-                            - pvr
-            open_public_access: 
-                content: 
+            signature_type: 
+                content:
                     callback: 
                         params: 
                             - pvr
@@ -715,6 +692,7 @@ forms:
                 value: 
                     callback: 
                         params: 
+                            - ''
                             - pvr
         
     generate_devis: 
@@ -735,6 +713,15 @@ forms:
         msgs: 
             callback: getContratFormMsgs
         rows: 
+            - custom: 1
+              label: Modèle
+              input_name: type_pdf
+              input: 
+                  type: select
+                  options: 
+                      papier: Signature papier
+                      elec: Signature électronique
+              value: papier
             - field: formule
               required: 1
               
@@ -743,6 +730,11 @@ forms:
             - custom: 1
               label: Nom Client locataire
               input_name: client_name
+              input: 
+                  type: text
+            - custom: 1
+              label: Adresse e-mail du client
+              input_name: client_email
               input: 
                   type: text
             - custom: 1

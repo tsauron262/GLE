@@ -2104,10 +2104,10 @@ class BT_ficheInter extends BimpDolObject
                                 'test_ferme' => 'fichinter:rowid=' . $this->id . ' && (commandes != "" OR fk_contrat > 0 OR fk_facture > 0)',
                                 "txt"        => "Bonjour,Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur. " . $this->getNomUrl(),
                             );
-                            if ($email_comm != '')
-                                $data["dst"] .= ',' . $email_comm;
                             $errors = BimpTools::merge_array($errors, $task->validateArray($data));
                             $errors = BimpTools::merge_array($errors, $task->create());
+                            if ($email_comm != '')
+                                $data["dst"] .= ',' . $email_comm;
                             if (!count($errors)) {
                                 mailSyn2($data['subj'], $data['dst'], null, $data['txt']);
                             }
@@ -2359,6 +2359,7 @@ class BT_ficheInter extends BimpDolObject
         $success = 'Mise à jour effectuée';
 
         $this->addLog("Le client à signé la FI et le fichier est déposé");
+        $this->setSigned();
         $this->updateField('fk_statut', 1);
 
         return [
@@ -2882,7 +2883,7 @@ class BT_ficheInter extends BimpDolObject
                             $new_factureLine->qty = $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
                         $new_factureLine->id_product = $product->id;
                         $new_factureLine->tva_tx = 20;
-                        $paBase = BimpCore::getConf('cout_horaire_technicien', $product->getData('cur_pa_ht'), 'bimptechnique');
+                        $paBase = /*BimpCore::getConf('cout_horaire_technicien', */$product->getData('cur_pa_ht')/*, 'bimptechnique')*/;
                         $new_factureLine->pa_ht = ($this->time_to_qty($this->timestamp_to_time($child->getData('duree')))) * (float) $paBase / $new_factureLine->qty;
 
                         $line_errors = $new_factureLine->create($warnings, true);
@@ -2919,7 +2920,7 @@ class BT_ficheInter extends BimpDolObject
                     $new_factureLine->qty = $qty;
                     $new_factureLine->id_product = $dep_de_reference->id;
                     $new_factureLine->tva_tx = 20;
-                    $new_factureLine->pa_ht = $qty * (float) BimpCore::getConf('cout_horaire_technicien', $dep_de_reference->getData('cur_pa_ht'), 'bimptechnique');
+                    $new_factureLine->pa_ht = $qty * (float) /*BimpCore::getConf('cout_horaire_technicien', */$dep_de_reference->getData('cur_pa_ht')/*, 'bimptechnique')*/;
                     $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));
                 }
             }

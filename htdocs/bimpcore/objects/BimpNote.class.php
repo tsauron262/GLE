@@ -12,7 +12,7 @@ class BimpNote extends BimpObject
     const BN_ALL = 20;
 
     public static $visibilities = array(
-        self::BN_AUTHOR   => array('label' => 'Auteur seulement', 'classes' => array('danger')),
+        self::BN_AUTHOR   => array('label' => 'Auteur/Destinataire seulement', 'classes' => array('danger')),
         self::BN_ADMIN    => array('label' => 'Administrateurs seulement', 'classes' => array('important')),
         self::BN_MEMBERS  => array('label' => 'Membres', 'classes' => array('warning')),
         self::BN_PARTNERS => array('label' => 'Membres et partenaires', 'classes' => array('warning')),
@@ -86,7 +86,28 @@ class BimpNote extends BimpObject
         return 0;
     }
 
+    public function canSetAction($action)
+    {
+        switch ($action) {
+            case '':
+                global $user;
+                if ($this->getData('user_create') == $user->id) {
+                    $errors[] = 'L\'utilisateur connecté est l\'auteur';
+                    return 0;
+                }
+
+                if (!$this->isUserDest()) {
+                    $errors[] = 'Vous ne faites pas partie des destinataires';
+                    return 0;
+                }
+                return 1;
+        }
+
+        return parent::canSetAction($action);
+    }
+
     // Getters booléens:
+
     public function isFieldEditable($field, $force_edit = false)
     {
         if ($field == "viewed") {
@@ -159,37 +180,28 @@ class BimpNote extends BimpObject
                     return 0;
                 }
 
-                global $user;
-                if ($this->getData('user_create') == $user->id) {
-                    $errors[] = 'L\'utilisateur connecté est l\'auteur';
-                    return 0;
-                }
-
-                if (!$this->i_am_dest()) {
-                    $errors[] = 'Vous ne faites pas partie des destinataires';
-                    return 0;
-                }
-
                 return 1;
         }
         return parent::isActionAllowed($action, $errors);
     }
 
-    public function i_am_dest()
+    public function isUserDest()
     {
         global $user;
-        if ($this->getData("type_dest") == self::BN_DEST_USER && $this->getData("fk_user_dest") == $user->id)
+        if ($this->getData("type_dest") == self::BN_DEST_USER && $this->getData("fk_user_dest") == $user->id) {
             return 1;
+        }
 
         $listIdGr = self::getUserUserGroupsList($user->id);
 
-        if ($this->getData("type_dest") == self::BN_DEST_GROUP && in_array($this->getData("fk_group_dest"), $listIdGr))
+        if ($this->getData("type_dest") == self::BN_DEST_GROUP && in_array($this->getData("fk_group_dest"), $listIdGr)) {
             return 1;
+        }
 
         return 0;
     }
 
-    public function i_am_author()
+    public function isUserAuthor()
     {
         global $user;
         if ($this->getData("type_author") == self::BN_AUTHOR_USER && $this->getData("user_create") == $user->id)
@@ -198,26 +210,7 @@ class BimpNote extends BimpObject
         return 0;
     }
 
-    public function i_view(&$errors = array(), &$warnings = array())
-    {
-        if ((int) $this->getData('viewed')) {
-            $errors[] = 'Cette note est déjà marquée comme vue';
-        } elseif (!$this->i_am_dest()) {
-            $errors[] = 'Vous n\'êtes pas le destinataire de cette note';
-        } else {
-            if ((int) $this->getData('delete_on_view')) {
-                $errors = $this->delete($warnings, true);
-            } else {
-                $this->set('viewed', 1);
-                $errors = $this->update($warnings, true);
-            }
-            return (count($errors) ? 0 : 1);
-        }
-
-        return 0;
-    }
-
-    // Getters Overrides BimpObject: 
+    // Getters Overrides BimpObject:
 
     public function getParentInstance()
     {
@@ -264,6 +257,7 @@ class BimpNote extends BimpObject
     }
 
     // Getters:
+
     public static function getFiltersByUser($id_user = null)
     {
         $filters = array();
@@ -281,18 +275,29 @@ class BimpNote extends BimpObject
                 'operator' => '>=',
                 'value'    => self::BN_ALL
             );
-        } elseif (!$user->admin) {
+        } elseif (/* !$user->admin */1) {
             $filters['or_visibility'] = array(
                 'or' => array(
-                    'visibility'  => array(
+                    'visibility'     => array(
                         'operator' => '>=',
                         'value'    => self::BN_MEMBERS
                     ),
-                    'user_create' => $user->id
+                    'user_create'    => $user->id,
+                    'and_user_dest'  => array(
+                        'and_fields' => array(
+                            'fk_user_dest' => $user->id,
+                            'type_dest'    => self::BN_DEST_USER
+                        )
+                    ),
+                    'and_group_dest' => array(
+                        'and_fields' => array(
+                            'fk_group_dest' => self::getUserUserGroupsList($user->id),
+                            'type_dest'     => self::BN_DEST_GROUP
+                        )
+                    )
                 )
             );
         }
-
         return $filters;
     }
 
@@ -365,6 +370,20 @@ class BimpNote extends BimpObject
         }
 
         return $buttons;
+    }
+
+    public function getListsExtraBulkActions()
+    {
+        return array(
+            array(
+                'label'   => 'Marquer vues',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsBulkActionOnclick('setAsViewed', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer (Attention certaines notes sont supprimées après lecture)'
+                        )
+                )
+            )
+        );
     }
 
     public function getListExtraBtn()
@@ -443,8 +462,8 @@ class BimpNote extends BimpObject
                 $msg['is_user'] = (int) $note->getData('type_dest') == self::BN_DEST_USER;
                 $msg['is_grp'] = (int) $note->getData('type_dest') == self::BN_DEST_GROUP;
                 $msg['type_author'] = $this->getData('type_author') == self::BN_AUTHOR_USER;
-                $msg['i_am_dest'] = (int) $note->i_am_dest();
-                $msg['i_am_author'] = (int) $note->i_am_author();
+                $msg['is_user_dest'] = (int) $note->isUserDest();
+                $msg['is_user_author'] = (int) $note->isUserAuthor();
 
                 $msg['obj_type'] = $note->getData('obj_type');
                 $msg['obj_module'] = $note->getData('obj_module');
@@ -549,7 +568,8 @@ class BimpNote extends BimpObject
         $html = "";
 
         $author = $this->displayAuthor(false, true);
-        $html .= '<div class="d-flex justify-content-' . ($this->i_am_dest() ? "start" : ($this->i_am_author() ? "end" : "")) . ($style == "petit" ? ' petit' : '') . ' mb-4">';
+
+        $html .= '<div class="d-flex justify-content-' . ($this->isUserDest() ? "start" : ($this->isUserAuthor() ? "end" : "")) . ($style == "petit" ? ' petit' : '') . ' mb-4">';
         $html .= BimpTools::getBadge($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? '55C1E7' : '5500E7'), $author);
         $html .= '<div class="msg_cotainer">' . $this->displayData("content");
         if ($style != "petit" && $this->getData('user_create') != $user->id)
@@ -566,8 +586,8 @@ class BimpNote extends BimpObject
 
         $html .= '</div>';
 
-        if ($checkview) {
-            $this->i_view();
+        if ($checkview && !(int) $this->getData('viewed') && $this->isUserDest()) {
+            $this->updateField('viewed', 1);
         }
         return $html;
     }
@@ -599,7 +619,7 @@ class BimpNote extends BimpObject
 
         global $user;
 
-        if ($this->getData('viewed') == 0 && $this->i_am_dest()) {
+        if ($this->getData('viewed') == 0 && $this->isUserDest()) {
             $this->updateField('viewed', 1);
         }
 
@@ -625,9 +645,43 @@ class BimpNote extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Marquée comme vue';
+        $success = '';
 
-        $this->i_view($errors, $warnings);
+        if (isset($data['id_objects'])) {
+            $nOk = 0;
+            $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+            foreach ($ids as $id_note) {
+                $note = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Note', $id_note);
+                if (BimpObject::objectLoaded($note)) {
+                    if ($note->isActionAllowed($note) && $note->canSetAction($note)) {
+                        $note_errors = array();
+                        if ((int) $this->getData('delete_on_view')) {
+                            $note_errors = $note->delete($warnings, true);
+                        } else {
+                            $note_errors = $note->updateField('viewed', 1);
+                        }
+                        if (!count($note_errors)) {
+                            $nOk++;
+                        }
+                    }
+                }
+            }
+
+            if ($nOk > 1) {
+                $success = $nOk . ' notes marquées vues avec succès';
+            } else {
+                $success = $nOk . ' note marquée vue avec succès';
+            }
+        } if ($this->isLoaded($errors)) {
+            $success = 'Marquée comme vue';
+
+            if ((int) $this->getData('delete_on_view')) {
+                $errors = $this->delete($warnings, true);
+            } else {
+                $errors = $this->updateField('viewed', 1);
+            }
+        }
 
         return array(
             'errors'           => $errors,

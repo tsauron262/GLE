@@ -319,9 +319,9 @@ class DocusignAPI extends BimpAPI
     {
         $return = $response_body;
         switch ($response_code) {
-            case '400':
-                $errors[] = 'Requête incorrecte';
-                break;
+//            case '400':
+//                $errors[] = 'Requête incorrecte';
+//                break;
 
             case '401':
                 $errors[] = 'Non autentifié';
@@ -444,16 +444,32 @@ class DocusignAPI extends BimpAPI
                 $this->saveToken('access', $result['access_token'], $dt_now->format('Y-m-d H:i:s'));
             } else {
                 $error = 'Echec de la connexion';
-                if (is_string($result) && $result) {
-                    $error .= ' - ' . $result;
-                } elseif (isset($result['error']) && $result['error']) {
-                    $error .= ' - ' . $result['error'];
-                } elseif (isset($result['error_description']) && $result['error_description']) {
-                    $error .= ' - ' . $result['error_description'];
-                } else {
-                    $error .= ' pour une raison inconnue (Aucune réponse)';
+                if($result['error_description'] == 'expired_client_token'){
+                    // Code absent, on redirige l'utilisateur pour qu'il puisse se connecter
+                    $client_id = BimpTools::getArrayValueFromPath($this->params, $this->options['mode'] . '_oauth_client_id', '');
+
+                    if (BimpCore::isModeDev()) {
+                        $url_redirect = 'https://erp2.bimp.fr/bimpinv01072020/bimpapi/retour/DocusignAuthentificationSuccess.php?mode_dev=1';
+                    } else {
+                        $url_redirect = 'https://' . $_SERVER['HTTP_HOST'] . DOL_URL_ROOT . '/bimpapi/retour/DocusignAuthentificationSuccess.php';
+                    }
+
+                    $_SESSION['id_user_docusign'] = $this->userAccount->id;
+                    $url = $this->getBaseUrl('auth') . "/oauth/auth?response_type=code&scope=signature&client_id=" . $client_id . "&redirect_uri=" . urlencode($url_redirect);
+                    $errors[] = $this->userAccount->getData('name') . " n'est pas connecté à DocuSign <a target='_blank' href='" . $url . "'>cliquez ici</a>";
                 }
-                $errors[] = $error;
+                else{
+                    if (is_string($result) && $result) {
+                        $error .= ' - ' . $result;
+                    } elseif (isset($result['error']) && $result['error']) {
+                        $error .= ' - ' . $result['error'];
+                    } elseif (isset($result['error_description']) && $result['error_description']) {
+                        $error .= ' - ' . $result['error_description'];
+                    } else {
+                        $error .= ' pour une raison inconnue (Aucune réponse)';
+                    }
+                    $errors[] = $error;
+                }
             }
         }
 

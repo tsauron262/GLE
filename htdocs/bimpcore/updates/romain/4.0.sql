@@ -1,1 +1,1 @@
-ALTER TABLE `llx_commande` ADD `rappel_service_expire` INT NOT NULL DEFAULT '1' AFTER `paiement_comptant`;
+ALTER TABLE `llx_commande` ADD `rappel_service_expire` INT NOT NULL DEFAULT '5' AFTER `paiement_comptant`;

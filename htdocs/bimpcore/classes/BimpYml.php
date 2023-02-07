@@ -69,7 +69,7 @@ class BimpYml
                 }
 
                 if ($type === 'all' || $type === 'objects') {
-                    if (is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects')) {
+                    if(is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects'))
                         foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects') as $f) {
                             if (in_array($f, array('.', '..'))) {
                                 continue;
@@ -85,11 +85,10 @@ class BimpYml
                                 $files[$value] = $m . ' - Objet: [bold]' . $matches[1] . '[/bold]';
                             }
                         }
-                    }
                 }
 
                 if ($type === 'all' || $type === 'controllers') {
-                    if (is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers')) {
+                    if(is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers'))
                         foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers') as $f) {
                             if (in_array($f, array('.', '..'))) {
                                 continue;
@@ -104,8 +103,7 @@ class BimpYml
 
                                 $files[$value] = $m . ' - Controller: [bold]' . $matches[1] . '[/bold]';
                             }
-                        }
-                    }
+                        } 
                 }
 
                 if ($type === 'all' || $type === 'configs') {

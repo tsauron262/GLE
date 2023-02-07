@@ -80,13 +80,13 @@ class EquipmentPDF extends BimpEtiquettePDF
                 $html .= '<td style="text-align: left;font-size: 11px;font-weight: bold;color: #000000">N/S: ' . $serial . '</td>';
                 $html .= '</tr>';
             }
-            
+
             $html .= '</table>';
 
             $this->writeContent($html);
 
             if ($serial) {
-                 $this->pdf->setY(0);
+                $this->pdf->setY(0);
                 $this->pdf->write1DBarcode($serial, 'C128', 19, 22, 50, 10, '', array('text' => false));
             }
         }

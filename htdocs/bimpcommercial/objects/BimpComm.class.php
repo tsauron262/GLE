@@ -43,7 +43,8 @@ class BimpComm extends BimpDolObject
         ''  => "",
         10  => "Arts graphiques",
         20  => "Constructions",
-        30  => "Education et Administrations",
+        30  => "Education & Administration (CRT)",
+        35  => "Administration",
         40  => "Infrastructure",
         50  => "Marketing",
         60  => "Mobilité",
@@ -481,20 +482,14 @@ class BimpComm extends BimpDolObject
 
     // Getters array: 
 
-    public function getRibArray()
+    public function getRibArray($include_empty = true)
     {
-        $return = array(0 => '');
         $client = $this->getClientFacture();
-        if ($client && $client->isLoaded()) {
-            $result = $this->db->getRows('societe_rib', '`fk_soc` =' . $client->id, null, 'object', null, 'default_rib', 'DESC');
-
-            foreach ($result as $row) {
-                if ($row->default_rib)
-                    unset($return[0]);
-                $return[$row->rowid] = $row->label;
-            }
+        if (BimpObject::objectLoaded($client)) {
+            return BimpCache::getSocieteRibsArray($client->id, $include_empty);
         }
-        return $return;
+
+        return ($include_empty ? array(0 => '') : array());
     }
 
     public function getClientContactsArray()
@@ -4493,7 +4488,7 @@ class BimpComm extends BimpDolObject
                 $region_data['tx_marque'] = 'Inf.';
             }
         }
-        
+
         foreach ($data['secteurs'] as $secteur => &$secteur_data) {
             if (isset($secteur_data['ca_ht']) && (float) $secteur_data['ca_ht']) {
                 $secteur_data['tx_marque'] = ($secteur_data['marges'] / $secteur_data['ca_ht']) * 100;

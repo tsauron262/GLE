@@ -40,7 +40,7 @@ class BimpCommandeForDol extends Bimp_Commande{
                     'alias' => 'c',
                     'on'    => 'a.fk_commande = c.rowid')
                 ));    
-        $sql .= ' WHERE a.date_end != "" AND a.date_end < "' . $date_limit_expire->format('Y-m-d H:i:s') . '" AND c.rappel_service_expire = 1';
+        $sql .= ' WHERE a.date_end != "" AND a.date_end < "' . $date_limit_expire->format('Y-m-d H:i:s') . '" AND c.rappel_service_expire > 0';
         $sql .= BimpTools::getSqlOrderBy("a.date_end", 'ASC');
         $rows = $this->db->executeS($sql);
         
@@ -151,13 +151,17 @@ class BimpCommandeForDol extends Bimp_Commande{
                 
                 $m .= '<br/>';
                 $l_user += $nb_l;
+                
+//                echo $commande->getInitData('rappel_service_expire').'<br/>';
+                $commande->updateField('rappel_service_expire', ($commande->getInitData('rappel_service_expire') - 1));
+//                die('fff'.$commande->id);
             }
             
             $subject = $l_user . " ligne" . (($l_user > 1) ? 's' : '') . " de commande arrivant à expiration";
             
             $this->output .= 'Sujet:' . $subject . '<br/>' . $m;
             
-//            mailSyn2($subject, $u_a->getData('email'), '', $m);
+            mailSyn2($subject, $u_a->getData('email'), '', $m);
             $tot_l += $l_user;
         }
         

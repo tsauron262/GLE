@@ -879,9 +879,9 @@ class BF_Line extends BimpObject
                 break;
 
             case self::TYPE_TEXT:
-                if (!$this->getData('description')) {
-                    $errors[] = 'Description obligatoire pour ce type de ligne';
-                }
+//                if (!$this->getData('description')) {
+//                    $errors[] = 'Description obligatoire pour ce type de ligne';
+//                }
 
                 $this->set('id_product', 0);
                 $this->set('id_fourn_price', 0);

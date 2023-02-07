@@ -4064,9 +4064,9 @@ class ObjectLine extends BimpObject
 
         $this->getIdProductFromPost();
 
-        if (BimpTools::isSubmit('new_values/' . $this->id . '/' . $field))
+        if (BimpTools::isSubmit('new_values/' . $this->id . '/' . $field)) {
             $value = BimpTools::getValue('new_values/' . $this->id . '/' . $field);
-        elseif ($field === 'id_product') {
+        } elseif ($field === 'id_product') {
             $value = (int) $this->id_product;
         } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'pa_ht', 'remisable', 'desc'))) {
             $value = $this->getValueByProduct($field);
@@ -4221,9 +4221,10 @@ class ObjectLine extends BimpObject
                     }
 
                     if ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1')) {
-                        $html .= '<br/>';
+                        $html .= '<div style="margin-top: 6px">';
                         $msg = 'L\'option "Forcer qté à 1" est activée. Une seule unité sera inscrite dans le PDF et le total de la ligne sera utilisé comme prix unitaire';
                         $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+                        $html .= '</div>';
                     }
                 }
 
@@ -4262,6 +4263,11 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'tva_tx':
+                // ATTENTION $value contient la TVA du produit si celui-ci est sélectionné. 
+                if (is_null($value) && !$this->isLoaded()) {
+                    $value = $this->getDefaultTva();
+                }
+
                 $parent = $this->getParentInstance();
 
                 if (BimpObject::objectLoaded($parent) && !$parent->isTvaActive()) {
@@ -4286,7 +4292,7 @@ class ObjectLine extends BimpObject
                         ));
                     } else {
                         $tva_rates = BimpCache::getTaxesByRates(1);
-                        if(is_null($value)){
+                        if (is_null($value)) {
                             $value = $this->getDefaultTva();
                         }
                         $html = BimpInput::renderInput('select', $prefixe . 'tva_tx', (float) $value, array(
@@ -5766,7 +5772,7 @@ class ObjectLine extends BimpObject
         $extra = array();
         if ($this->parent->dol_object->table_element_line != '') {
             $prod = $this->getProduct();
-            if($prod && $prod->isDolExtraField('duree_i')){
+            if ($prod && $prod->isDolExtraField('duree_i')) {
                 $sql = 'SELECT (a___dol_line___product___product.duree_i * a___dol_line.qty) as tot
                             FROM ' . MAIN_DB_PREFIX . $this->parent->dol_object->table_element_line . ' a___dol_line
                             LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product

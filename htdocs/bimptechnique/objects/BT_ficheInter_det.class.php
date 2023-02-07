@@ -359,19 +359,19 @@ class BT_ficheInter_det extends BimpDolObject
         }
 
         switch ($field) {
-            case 'arrived':
-            case 'arriverd_am':
-                return '08:00';
-
-            case 'departure':
-            case 'departure_pm':
-                return '18:00';
-
-            case 'departure_am':
-                return '12:00';
-
-            case 'arriverd_pm':
-                return '14:00';
+//            case 'arrived':
+//            case 'arriverd_am':
+//                return '08:00';
+//
+//            case 'departure':
+//            case 'departure_pm':
+//                return '18:00';
+//
+//            case 'departure_am':
+//                return '12:00';
+//
+//            case 'arriverd_pm':
+//                return '14:00';
         }
 
         return '';

@@ -22,9 +22,9 @@ class ConsignesContratFinancementPDF extends DocFinancementPDF
 
         $html .= '<p>Bonjour,</p>';
 
-        $html .= '<p>Vous venez de recevoir le dossier qui va vous permettre de mettre en place un contrat de location longue- durée, pour le financement de votre nouvel équipement informatique.</p>';
+        $html .= '<p>Vous venez de recevoir le dossier qui va vous permettre de mettre en place un contrat de location longue-durée, pour le financement de votre nouvel équipement informatique.</p>';
         $html .= '<p>Afin de compléter au mieux ce document, nous vous serions reconnaissants de suivre toutes les indications qui suivent.</p>';
-        $html .= '<p>1 – Imprimez l’ensemble de ce document en recto-verso (8 feuilles). Dans le cas où vous rencontreriez un problème d’impression, en mode page / page.</p>';
+        $html .= '<p>1 – Imprimez l’ensemble de ce document en recto-verso (ou page par page dans le cas où vous rencontreriez un problème d’impression).</p>';
 
         $html .= '<p>';
         $html .= '2 – Relisez soigneusement le contenu de ce contrat, en vérifiant qu’il n’y ait pas d’erreur sur :';

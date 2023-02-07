@@ -215,7 +215,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
         on_form_submit: null, // callback traitement du formulaire
         no_triggers: false, // Ne pas déclencher le trigger "objectChange"
         modal_format: 'medium', // Format modal (small / medium / large) 
-        modal_scroll_bottom: false, // Auto scroll vers le bas de la modal du formulaire (à la validation) 
+        modal_scroll_bottom: true, // Auto scroll vers le bas de la modal du formulaire (à la validation) 
         use_bimpdatasync: false, // Utiliser BimpDataSync
         display_processing: true,
         processing_msg: 'Traitement en cours'

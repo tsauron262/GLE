@@ -172,6 +172,10 @@ class BimpDb
     {
         $sql = 'SELECT ';
 
+        if ($where == '') {
+            $where = '1';
+        }
+
         if (!is_null($fields)) {
             $fl = true;
             foreach ($fields as $field) {
@@ -249,8 +253,6 @@ class BimpDb
 //        if ($table == 'stock_mouvement') {
 //            die($sql);
 //        }
-
-
 
         $result = $this->db->query($sql);
         if ($result && $this->db->num_rows($result)) {

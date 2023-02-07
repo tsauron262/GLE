@@ -838,7 +838,7 @@ if ($step == 4 && $datatoimport) {
 
 	// Load targets fields in database
 	$fieldstarget = $objimport->array_import_fields[0];
-	$minpos = min(count($fieldssource), count($fieldstarget));
+	$minpos = max(count($fieldssource), count($fieldstarget));
 	//var_dump($array_match_file_to_database);
 
 
@@ -1080,7 +1080,7 @@ if ($step == 4 && $datatoimport) {
 		$lefti++;
 
 		if ($lefti > count($fieldstarget)) {
-			break; // Other fields are in the not imported area
+//			break; // Other fields are in the not imported area
 		}
 	}
 	//var_dump($valforsourcefieldnb);

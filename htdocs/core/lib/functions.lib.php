@@ -71,6 +71,14 @@ if (!function_exists('utf8_decode')) {
 	}
 }
 
+        
+function dol_getprefix(){
+    $name = DOL_DOCUMENT_ROOT.DOL_URL_ROOT;
+    if(isset($_REQUEST['bimp_context']) && $_REQUEST['bimp_context'] == 'public')
+        $name .= 'espaceclient';
+    return dol_hash($name);
+}
+
 
 /**
  * Return dolibarr global constant string value

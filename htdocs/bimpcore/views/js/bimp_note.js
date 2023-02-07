@@ -52,11 +52,11 @@ class bimp_note extends AbstractNotification {
 
         // User courant est l'auteur
         if (id_user == element.author.id)
-            var i_am_author = 1;
+            var is_user_author = 1;
         else
-            var i_am_author = 0;
+            var is_user_author = 0;
 
-//        if(i_am_author === 1 || element.viewed === 1)
+//        if(is_user_author === 1 || element.viewed === 1)
         element.is_new = this.isNew(element);
 
         var style = 'petit';
@@ -73,12 +73,12 @@ class bimp_note extends AbstractNotification {
             html += element.obj.nom_url;
         }
 
-        html += '<div class="d-flex justify-content-' + (element.i_am_dest ? "start" : (i_am_author ? "end" : "")) + (style == "petit" ? ' petit' : '') + ' mb-4">';
+        html += '<div class="d-flex justify-content-' + (element.is_user_dest ? "start" : (is_user_author ? "end" : "")) + (style == "petit" ? ' petit' : '') + ' mb-4">';
 
         // Author
         html += '<span data-toggle="tooltip" data-placement="top" title="' + element.author.nom + '" class="chat-img pull-left">';
 //        html += '<img src="https://placehold.it/' + (style === "petit" ? '35' : '55') + '/' + (element.type_author ? '55C1E7' : '5500E7') + '/fff&amp;text=' + author_initiale + '" alt="User Avatar" class="img-circle">';
-        html += getBadge(author_initiale, (style === "petit" ? '25' : '45'), (element.i_am_author ? 'warning' : 'info'));
+        html += getBadge(author_initiale, (style === "petit" ? '25' : '45'), (element.is_user_author ? 'warning' : 'info'));
         html += '</span>';
 
         // Content
@@ -94,9 +94,9 @@ class bimp_note extends AbstractNotification {
         // Dest
         if (element.is_user_or_grp) {
             html += '<span data-toggle="tooltip" data-placement="top" title="' + element.dest.nom + '"';
-            html += ' class="chat-img pull-left ' + (element.is_viewed ? "" : "nonLu") + (element.i_am_dest ? " my" : "") + '">';
+            html += ' class="chat-img pull-left ' + (element.is_viewed ? "" : "nonLu") + (element.is_user_dest ? " my" : "") + '">';
 //            html += '<img src="https://placehold.it/' + (style == "petit" ? '28' : '45') + '/' + (element.is_user ? '55C1E7' : '5500E7') + '/fff&amp;text=' + dest_initiale + '" alt="User Avatar" class="img-circle">';
-            html += getBadge(dest_initiale, (style === "petit" ? '25' : '45'), (element.i_am_dest ? 'warning' : 'info'));
+            html += getBadge(dest_initiale, (style === "petit" ? '25' : '45'), (element.is_user_dest ? 'warning' : 'info'));
             html += '</span>';
         }
 

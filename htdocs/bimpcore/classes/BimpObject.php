@@ -787,6 +787,12 @@ class BimpObject extends BimpCache
         return '';
     }
 
+    public function getIsObjectActiveFields()
+    {
+        // Fonction renommée car le nom ititial prête à confusion (getActiveFields = obtenir les champs actifs)
+        return array();
+    }
+
     public function getSearchListFilters()
     {
         return array();
@@ -943,6 +949,13 @@ class BimpObject extends BimpCache
 
                     if ($or_sql) {
                         $search_filter .= ($search_filter ? ' AND ' : '') . '(' . $or_sql . ')';
+                    }
+                }
+
+                if ($options['active']) {
+                    $fields = $this->getIsObjectActiveFields();
+                    foreach ($fields as $field) {
+                        $filters[$field] = 1;
                     }
                 }
 
@@ -1190,6 +1203,16 @@ class BimpObject extends BimpCache
     public function isNotLoaded()
     {
         return (int) ($this->isLoaded() ? 0 : 1);
+    }
+
+    public function isActif()
+    {
+        $activeFields = $this->getIsObjectActiveFields();
+        foreach ($activeFields as $field) {
+            if ($this->getData($field) < 1)
+                return false;
+        }
+        return 1;
     }
 
     public function field_exists($field_name)
@@ -1581,9 +1604,10 @@ class BimpObject extends BimpCache
                 continue;
             }
 
-            $db_value = $this->getDbValue($field, $value);
+            $null_allowed = (int) $this->getConf('fields/' . $field . '/null_allowed', 0);
+            $db_value = $this->getDbValue($field, $value, $null_allowed);
 
-            if (!is_null($db_value) || (int) $this->getConf('fields/' . $field . '/null_allowed', 0)) {
+            if (!is_null($db_value) || $null_allowed) {
                 $this->checkFieldHistory($field, $value);
                 $data[$field] = $db_value;
             }
@@ -1592,7 +1616,7 @@ class BimpObject extends BimpCache
         return $data;
     }
 
-    public function getDbValue($field_name, $value)
+    public function getDbValue($field_name, $value, &$null_allowed = 0)
     {
         if ($this->field_exists($field_name)) {
             $this->checkFieldValueType($field_name, $value);
@@ -1629,6 +1653,17 @@ class BimpObject extends BimpCache
                     } elseif (is_array($value)) {
                         $delimiter = $this->getConf('fields/' . $field_name . '/items_delimiter', ',');
                         $value = implode($delimiter, $value);
+                    }
+                    break;
+
+                case 'id_object':
+                    if (!$value && $this->isDolObject()) {
+                        // Pour les ID = 0 des objets Dolibarr on enregistre NULL en base pour contourner les contraintes de clés étrangères.  
+                        $dol_prop = $this->getConf('fields/' . $field_name . '/dol_prop', $field_name);
+                        if (property_exists($this->dol_object, $dol_prop)) {
+                            $null_allowed = 1;
+                            $value = null;
+                        }
                     }
                     break;
             }
@@ -2608,9 +2643,6 @@ class BimpObject extends BimpCache
         }
 
         if ($type) {
-            if ($type == 'id_object' && $value == 0 && $this->isDolObject())
-                $value = null;
-
             // Ajustement du format des dates dans le cas des objets Dolibarr:
             if ($this->isDolField($field)) {
                 if (in_array($type, array('datetime', 'date'/* , 'time' */))) {
@@ -3119,7 +3151,7 @@ class BimpObject extends BimpCache
 
     protected function checkSqlFilters($filters, &$joins = array(), $main_alias = '', &$extra_filters = null)
     {
-        // Vérifie les clés sql pour les champs filtrés (
+        // Vérifie les clés sql pour les champs filtrés
         $return = array();
         $add_extra_filters = false;
 
@@ -3139,7 +3171,17 @@ class BimpObject extends BimpCache
                 $sqlKey = '';
 
                 $field_name = '';
-                if ($main_alias && preg_match('/^(' . preg_quote($main_alias, '/') . '\.)(.+)$/', $field, $matches)) {
+                if (strpos($field, ':') !== false) {
+                    $child = null;
+                    $field_alias = '';
+                    $children = explode(':', $field);
+                    $child_field_name = array_pop($children);
+                    $col_errors = $this->getRecursiveChildrenJoins($children, $filters, $joins, $main_alias, $field_alias, $child);
+
+                    if (empty($col_errors) && is_a($child, 'bimpObject')) {
+                        $sqlKey = $child->getFieldSqlKey($child_field_name, $field_alias, null, $filters, $joins);
+                    }
+                } elseif ($main_alias && preg_match('/^(' . preg_quote($main_alias, '/') . '\.)(.+)$/', $field, $matches)) {
                     $field_name = $matches[2];
                 } elseif (!preg_match('/\./', $field)) {
                     $field_name = $field;
@@ -3151,16 +3193,7 @@ class BimpObject extends BimpCache
                     if ($this->field_exists($field_name)) {
                         $sqlKey = $this->getFieldSqlKey($field_name, $main_alias, null, $extra_filters, $joins);
                     } else {
-                        /*todo a verifier*/
-                        $tabTmp = explode(':', $field_name);
-                        if(isset($tabTmp[1])){
-                            $child = $tabTmp[0];
-                            $field_name = $tabTmp[1];
-                            $sqlKey = $this->getFieldSqlKey($field_name, $main_alias, $child, $extra_filters, $joins);
-                        }
-                        else
-                            /*todo fin a verifier*/
-                            $sqlKey = $field;
+                        $sqlKey = $field_name;
                     }
                 }
 
@@ -3635,6 +3668,9 @@ class BimpObject extends BimpCache
         if (!$extra_order_by && $order_by != 'a.' . $primary) {
             $extra_order_by = 'a.' . $primary;
         }
+
+        if (!count($fields))
+            $fields[] = 'a.*';
 
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
@@ -6554,7 +6590,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $list;
     }
 
-    public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false, $withLinked = true)
+    public function renderNotesList($filter_by_user = true, $list_name = "default", $suffixe = "", $archive = false, $withLinked = true)
     {
         if ($this->isLoaded()) {
             if ($archive) {
@@ -6563,7 +6599,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $note = BimpObject::getInstance('bimpcore', 'BimpNote');
             }
 
-            $list = new BC_ListTable($note, $list_model);
+            $list = new BC_ListTable($note, $list_name);
             $list->addIdentifierSuffix($suffixe);
             $list->addFieldFilterValue('obj_type', 'bimp_object');
             $list->addFieldFilterValue('obj_module', $this->module);
@@ -6585,13 +6621,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $sup = '';
-            if ($withLinked && $withLinked !== 'false') {
+            if ($withLinked && $withLinked !== 'false' && !is_a($this, 'Bimp_Societe') && !is_a($this, 'Bimp_Product')) {
                 $linkedObjects = $this->getFullLinkedObjetsArray(false);
                 if (count($linkedObjects) > 0) {
                     $filterLinked = array('linked' => array('or' => array()));
                     foreach ($linkedObjects as $data_linked => $inut) {
                         $data_linked = json_decode($data_linked, true);
-                        if ($data_linked['object_name'] != 'BS_SAV') {
+                        if (!in_array($data_linked['object_name'], array('Equipment', 'BS_SAV', 'BR_Reservation'))) {
                             $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
                                     'obj_module' => $data_linked['module'],
                                     'obj_name'   => $data_linked['object_name'],
@@ -6600,7 +6636,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         }
                     }
                     $nb = count($filterLinked['linked']['or']);
-                    if ($nb > 60)
+                    if ($nb > 180)
                         BimpCore::addlog('Attention de trop nombreux objets liées pour l\'affichage des notes ' . $this->getLink() . '(' . $nb . ')');
 
                     $list2 = new BC_ListTable($note, 'linked', 1, null, 'Toutes les notes liées (' . $nb . ' objects)');
@@ -6824,8 +6860,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= BimpRender::renderIcon('fas_hashtag');
             $html .= '</span>';
 
-            // Historique objet: 
-
+            // Historique objet:
             $onclick = $this->getJsLoadModalCustomContent('renderLogsList', 'Historique');
             $html .= '<span class="btn btn-default bs-popover"';
             $html .= ' onclick="' . $onclick . '"';
@@ -6845,10 +6880,28 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= BimpRender::renderIcon('fas_inbox');
             $html .= '</span>';
 
-            if (BimpTools::getValue('open') == 'suivi_mail') {
+            if (BimpTools::getValue('open', '') == 'suivi_mail') {
                 $html .= '<script>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
             }
 
+            // Logs objet:
+            if (BimpCore::isUserDev()) {
+                $log_instance = BimpObject::getInstance('bimpcore', 'Bimp_Log');
+                $onclick = $log_instance->getJsLoadModalList('object', array(
+                    'title'         => 'Logs ' . $this->getLabel('of_the') . ' ' . $this->getRef(),
+                    'extra_filters' => array(
+                        'obj_module' => $this->module,
+                        'obj_name'   => $this->object_name,
+                        'id_object'  => $this->id
+                    )
+                ));
+                $html .= '<span class="btn btn-default bs-popover"';
+                $html .= ' onclick="' . $onclick . '"';
+                $html .= BimpRender::renderPopoverData('Logs objet');
+                $html .= '>';
+                $html .= BimpRender::renderIcon('fas_book-medical');
+                $html .= '</span>';
+            }
 
             $html .= '</div>';
             $html .= '</div>';
@@ -7943,6 +7996,42 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $html;
     }
 
+    public function renderImages()
+    {
+        $html = '';
+
+        $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
+                    'parent_module'      => $this->module,
+                    'parent_object_name' => $this->object_name,
+                    'id_parent'          => $this->id,
+                    'file_ext'           => array(
+                        'in' => array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif')
+                    )
+        ));
+
+        if (!empty($files)) {
+            $html .= '<div class="row">';
+
+            foreach ($files as $file) {
+                $url = $file->getUrl();
+
+                if ($url) {
+                    $onclick = 'loadImageModal($(this), \'' . $url . '\', \'' . $file->getData('file_name') . '\')';
+                    $html .= '<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" onclick="' . $onclick . '" style="height: 200px; cursor: pointer; margin: 5px; overflow-x: scroll">';
+                    $html .= '<div style="font-size: 11px; font-style: italic">';
+                    $html .= $file->getData('file_name');
+                    $html .= '</div>';
+                    $html .= '<img src="' . $url . '" style="height: 100%; width: auto; margin: auto"/>';
+                    $html .= '</div>';
+                }
+            }
+
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
     // Générations javascript: 
 
     public function getJsObjectData()
@@ -8829,6 +8918,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (!$this->isLoaded()) {
             return '';
+        }
+
+
+        if (!$this->isActif()) {
+            $params['disabled'] = true;
         }
 
         $html = '';
@@ -10125,7 +10219,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                         $results = $instance->getSearchResults('all', $search, array(
                             'card'        => $card,
-                            'max_results' => 30
+                            'max_results' => 30,
+                            'active'      => 1
                         ));
 
                         foreach ($results as $id_object => $data) {

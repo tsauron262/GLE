@@ -5,6 +5,8 @@ require_once("../../main.inc.php");
 ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
 
+echo "Script désactiver";
+return;
 
 
 $sql = $db->query("SELECT rowid FROM `llx_societe` WHERE `outstanding_limit_icba` = '7000' AND date_depot_icba is null");

@@ -24,7 +24,7 @@ class modBimpinterfaceclient extends DolibarrModules
 		// Module label (no space allowed), used if translation string 'ModuleMyModuleName' not found (MyModue is name of module).
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		// Module description, used if translation string 'ModuleMyModuleDesc' not found (MyModue is name of module).
-		$this->description = "Bimp Interface Client";
+		$this->description = "LDLC Apple Interface Client";
 		// Used only if file README.md and README-LL.md not found.
 		
                 

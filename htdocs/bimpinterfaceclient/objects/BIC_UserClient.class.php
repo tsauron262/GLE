@@ -772,7 +772,7 @@ class BIC_UserClient extends BimpObject
 
         if (!count($errors)) {
             $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
-            $subject = 'Espace client BIMP - Vos identifiants';
+            $subject = 'Espace client LDLC Apple - Vos identifiants';
 
             $msg .= 'Bonjour,<br/><br/>';
             $msg .= 'Voici vos identifiants pour votre accès à votre <a href="' . $url . '"></a> sur notre site www.bimp.fr <br/><br/>';
@@ -848,10 +848,10 @@ class BIC_UserClient extends BimpObject
                 if ($this->use_email && (int) BimpTools::getPostFieldValue('send_mail', 1)) {
                     $url = BimpObject::getPublicBaseUrl(false) . 'email=' . $this->getData('email');
 
-                    $sujet = "Mot de passe BIMP ERP Interface Client";
+                    $sujet = "Mot de passe Interface Client LDLC Apple";
 
                     $message = "Bonjour, <br /><br />";
-                    $message .= "Bienvenue sur le service d’assistante de BIMP.<br />";
+                    $message .= "Bienvenue sur le service d’assistante LDLC Apple.<br />";
                     $message .= "Cet espace vous est directement dédié. Il est là pour vous garantir les meilleures prestations possibles.<br /><br/>";
 
                     $contrats = $this->getContratsVisibles(true);
@@ -877,8 +877,8 @@ class BIC_UserClient extends BimpObject
                         $message .= '<b>Mot de passe (Généré automatiquement) :</b> ' . $mdp_clear;
                     }
                     $message .= '<br /><br /><br />';
-                    $url_notice = "https://r.emailing.bimp-groupe.fr/mk/cl/f/fjaJDCZiyHn3ixmdjVfLHPUSzRBzlYjsfpssdw_dklmhgN7Rlm7ztqBEXLbIKJtMnEQgq_c8PnFXMmE7kB1jjsugCTsEJ7RQFNYG0t5Ks3vd_8ZYmKBoRLUFdzaJ0xHmKqyZtY7pQaJAMxOhD1AEEmrWT3yc660gskTYZLe8VetnKI-LyDzSgxOPfNV9sML4h-Y_0mMwr1V8ltNqeEzbtdlUajs02Fnek4SHgHsktedp4Qn40gRovH788YIpeD1SdAb7Oav0KBONH487Exm1-FiwSDTsmzbKE3DrrrHG0mgmuisHe4F04sEhyWZZIyfXSfasmhwq1TEd33NhdA5aizTj9oXJnYW-JM3Ph5e1oavhKYsMEu2bAJBggH0e1w";
-                    $message .= "<a href='" . $url_notice . "'>Notice d'utilisation</a>";
+//                    $url_notice = "https://www.bimp-pro.fr/wp-content/uploads/2020/06/notice-utilisateur-tech.pdf";
+//                    $message .= "<a href='" . $url_notice . "'>Notice d'utilisation</a>";
 
 //                    mailSyn2($sujet, BimpTools::cleanEmailsStr($email), '', $message);
                     $bimpMail = new BimpMail($this->getChildObject('client'), $sujet, $this->getData('email'), '', $message);

@@ -328,7 +328,7 @@ class BContract_avenant extends BContract_contrat {
         $parent->dol_object->pdf_avenant = $this->id;
         $parent->dol_object->generateDocument('contrat_avenant', $langs);
         
-        $file = $parent->getRef().'/'.$this->getRefAv().'_Ex_OLYS.pdf';
+        $file = $parent->getRef().'/'.$this->getRefAv().'.pdf';
         $url = DOL_URL_ROOT.'/document.php?modulepart=contract&file='.$file;
         
         $success_callback = 'window.open(\'' . $url . '\');';
@@ -386,13 +386,12 @@ class BContract_avenant extends BContract_contrat {
         );
     }
     
-    public function actionSigned($data, &$success) {
+    public function signed($date, &$success) {
         $errors = [];
-        $warnings = [];
         $success = "";
         $parent = $this->getParentInstance();
         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parent->getData('fk_soc'));
-        $errors = $this->updateField('date_signed', $data['date_signed']);
+        $errors = $this->updateField('date_signed', $date);
         if(!count($errors)) {
             $errors = $this->updateField('signed', 1);
             if(!count($errors)) {
@@ -486,19 +485,24 @@ class BContract_avenant extends BContract_contrat {
             
             mailSyn2($objet, 'contrat@bimp.fr', null, $message);
         }
-            
         
+        return $errors;
+    }
+    
+    public function actionSigned($data, &$success) {
+        $warnings = [];
+        $errors = $this->signed($data['date_signed'], $success);
+            
         return [
             'errors' => $errors,
             'warnings' => $warnings,
-            'success' => ""
+            'success' => $success
         ];
     }
-
-    public function actionSignedProlongation($data, &$success) {
+    
+    public function signedProlongation($date, &$success) {
         
         $errors = [];
-        $warnings = [];
         
         $parent = $this->getParentInstance();
         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parent->getData('fk_soc'));
@@ -513,7 +517,7 @@ class BContract_avenant extends BContract_contrat {
                 $success = "Avenant signé et pris en compte avec succès";
                 $ref = $this->getRefAv();
 
-                $dateS = new DateTime($data['date_signed']);
+                $dateS = new DateTime($date);
                 $objet      = 'Signature avenant n°' . 'AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' client ' . $client->getData('code_client') . ' ' . $client->getName();
                 $message    = 'L\'avenant n°AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' a été signé le ' . $dateS->format('d/m/Y');
 
@@ -521,6 +525,11 @@ class BContract_avenant extends BContract_contrat {
                 mailSyn2($objet, 'contrat@bimp.fr', null, $message);
             }
         }
+    }
+
+    public function actionSignedProlongation($data, &$success) {
+        $warnings = [];        
+        $errors = $this->signedProlongation($data['date_signed'], $success);
 
         return ['errors' => $errors, 'warnings' => $warnings, 'success' => $success];
         
@@ -580,6 +589,15 @@ class BContract_avenant extends BContract_contrat {
                 'onclick' => $this->getJsActionOnclick('validate', array(), array(
                 ))
             );
+        }
+        
+        if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN) {
+            $buttons[] = array(
+                'label'   => 'Créer signature',
+                'icon'    => 'fas_signature',
+                'onclick' => $this->getJsActionOnclick('createSignatureDocusign', array(), array('form_name' => 'create_signature'))
+                );
+
         }
         
         if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN || $this->getData('statut') == self::AVENANT_STATUT_PROVISOIR) {
@@ -772,15 +790,23 @@ class BContract_avenant extends BContract_contrat {
     // Signature
     
     public function getSignatureDocFileDir($doc_type = '') {
-
+        return $this->getParentInstance()->getFilesDir();
     }
     
-    public function getSignatureDocFileName($doc_type = 'contrat', $signed = false) {
-
+    public function getSignatureDocFileName($doc_type = 'avenant', $signed = false) {
+        if($signed)
+            return $this->getRefAv() . '_signed.pdf';
+        else
+            return $this->getRefAv() . '.pdf';
     }
     
     public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false) {
-
+        if($signed)
+            $file = $this->getParentInstance()->getRef() . '/' . $this->getRefAv() . '_signed.pdf';
+        else
+            $file = $this->getParentInstance()->getRef() . '/' . $this->getRefAv() . '.pdf';
+        
+        return DOL_URL_ROOT . '/document.php?modulepart=contract&file=' . $file;
     }
     
     public function getSignatureDocRef($doc_type) {
@@ -788,45 +814,214 @@ class BContract_avenant extends BContract_contrat {
     }
     
     public function getSignatureParams($doc_type) {
-
+        return self::$default_signature_params;
     }
     
     public function onSigned($bimpSignature) {
-
+        $success = '';
+        $this->actionActivation(array('dateSignature' => date('Y-m-d'), 'haveSignature' => 1), $success);
     }
     
     public function onSignatureCancelled($bimpSignature) {
-
+        return 0;
     }
     
     public function isSignatureReopenable($doc_type, &$errors = array()) {
-
+        return 0;
     }
     
     public function onSignatureReopened($bimpSignature) {
-
+        return 0;
     }
+    
+    public function actionCreateSignatureDocusign($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
         
+        if (!count($errors)) {
+            $success_callback = '';
+            
+            $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
+            if (!$id_contact) {
+                $errors[] = 'Veuillez renseigner un contact';
+            }
+             
+            if(!count($this->getData('signature_params')))
+                $errors[] = "Merci de regénérer le PDF de l'avenant avant de créer la signature";
+            
+            
+            if(!count($errors)) {
+                $errors_signature = $this->createSignature($id_contact, $warnings, $success);
+                $errors = BimpTools::merge_array($errors, $errors_signature);
+            }
+            
+            if (!count($errors)) {
+                $signature = $this->getChildObject('signature');
+                $success = "Enveloppe envoyée avec succès<br/>";
+                $success .= $signature->getNomUrl() . ' créée avec succès';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
     
-//     * +- Ajouter les champs "id_signature" et "signature_params" dans l'objet (+ définitions de l'objet BimpSignature) 
-//     * +- Ajouter le tableau static $default_signature_params
-//     * - Ajouter une procédure pour créer la signature (action/fonction etc.)
-//     * - Ajouter les méthodes: 
-//     *      - getSignatureDocFileDir($doc_type): dossier fichier signé ou à signer
-//     *      - getSignatureDocFileName($doc_type, $signed = false): nom fichier signé ou à signer
-//     *      - getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false): URL fichier
-//     *      - getSignatureDocRef($doc_type): Reférence document
-//     *      - getSignatureParams($doc_type): Paramètres position signature sur PDF
-//     *      - onSigned($bimpSignature): Traitement post signature effectuée
-//     *      - onSignatureCancelled($bimpSignature): Traitement post signature annulée
-//     *      - isSignatureReopenable($doc_type, &$errors = array()): la signature peut-elle être réouverte (suite annulation) 
-//     *      - onSignatureReopened($bimpSignature): Traitement post réouverture signature
-//     * 
-//     * - Gérer l'enregistrement des paramètres de position de la signature sur le PDF au moment de sa génération (Si besoin) / ou régler par défaut pour les PDF fixes
-//     * - Intégrer selon le context: marqueur signé (champ booléen ou statut) / indicateur signature dans l'en-tête / etc. 
-//     * - Gérer Annulation signature si besoin
-//     * - Gérer Duplication / Révision / Etc. 
-//     * - Gérer la visualisation du docuement sur l'interface publique (bimpinterfaceclient > docController) 
-//     * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
+    public function getSignatureContactCreateFormValues() {
+        return $this->getParentInstance()->getSignatureContactCreateFormValues();
+    }
     
+    public function getDefaultSignatureContact() {
+        return $this->getParentInstance()->getDefaultSignatureContact();
+    }
+    
+    public  function getClientContactsArray() {
+        return $this->getParentInstance()->getClientContactsArray();
+    }
+    
+    public function createSignature($id_contact = 0, &$warnings = array(), &$success = '')
+    {
+        $errors = array();
+        
+        $contrat = $this->getParentInstance();
+
+        if ($this->isLoaded($errors)) {
+
+            if ((int) $this->getData('id_signature')) {
+                $errors[] = 'La signature a déjà été créée pour ' . $this->getLabel('this');
+                return $errors;
+            }
+
+            $id_client = (int) $contrat->getData('fk_soc');
+
+            if (!$id_client) {
+                $errors[] = 'Client absent';
+                return $errors;
+            }
+            
+            if (count($errors))
+                return $errors;
+
+            $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
+                        'obj_module' => 'bimpcontract',
+                        'obj_name'   => 'BContract_avenant',
+                        'id_obj'     => $this->id,
+                        'doc_type'   => 'avenant'
+                            ), true, $errors, $warnings);
+
+            if (!count($errors) && BimpObject::objectLoaded($signature)) {
+                $errors = $this->updateField('id_signature', (int) $signature->id);
+
+                if (!count($errors)) {
+                    $success .= '<br/>Fiche signature créée avec succès';
+                    $signataire_errors = array();
+
+                    // Client
+                    $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $id_contact);
+                    if (!BimpObject::objectLoaded($contact)) {
+                        $errors[] = "Contact client absent, merci de le définir";
+                    } else {
+                        BimpObject::loadClass('bimpcore', 'BimpSignataire');
+                        $signataire_client = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
+                                    'id_signature'   => $signature->id,
+                                    'label'          => 'Client',
+                                    'id_client'      => $id_client,
+                                    'id_contact'     => $id_contact,
+                                    'allow_dist'     => 0,
+                                    'allow_docusign' => 1,
+                                    'allow_refuse'   => 0,
+                                    'type'           => BimpSignataire::TYPE_CLIENT,
+                                    'nom'            => $contact->getData('firstname') . ' ' . $contact->getData('lastname'),
+                                    'code'           => 'client',
+                                        ), true, $signataire_errors, $warnings);
+                    }
+
+                    if (!BimpObject::objectLoaded($signataire_client)) {
+                        $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
+                    } else {
+                        // Responsable
+                        if ($this->getTotalCoup() < 8000) {
+                            if ($contrat->getData('secteur') == 'CTE') {
+                                $id_user = BimpCore::getConf('id_responsable_education', null, 'bimpcontract');
+                            } else {
+                                $id_user = BimpCore::getConf('id_responsable_commercial', null, 'bimpcontract');
+                            }
+                        } else {
+                            $id_user = BimpCore::getConf('id_responsable_general', null, 'bimpcontract');
+                        }
+
+                        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+
+                        if (0 < $id_user) {
+                            $signataire_user = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
+                                        'id_signature'   => $signature->id,
+                                        'label'          => 'Responsable',
+                                        'id_user'        => $id_user,
+                                        'type'           => BimpSignataire::TYPE_USER,
+                                        'nom'            => $user->getData('firstname') . ' ' . $user->getData('lastname'),
+                                        'allow_dist'     => 0,
+                                        'allow_docusign' => 1,
+                                        'allow_refuse'   => 0,
+                                        'code'           => 'user',
+                                            ), true, $signataire_errors, $warnings);
+
+                            if (!BimpObject::objectLoaded($signataire_user)) {
+                                $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
+                            } else {
+                                $docusign_success = '';
+                                $docusign_result = $signature->setObjectAction('initDocuSign', 0, array(
+                                    'email_content' => $email_content
+                                        ), $docusign_success, true);
+
+                                if (count($docusign_result['errors'])) {
+                                    $warnings[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
+                                } else {
+                                    $success .= '<br/>' . $docusign_success;
+                                }
+                                if (!empty($docusign_result['warnings'])) {
+                                    $warnings[] = BimpTools::getMsgFromArray($docusign_result['warnings'], 'Envoi de la demande de signature via DocuSign');
+                                }
+                            }
+                        } else {
+                            $errors[] = 'Responsable inconnu pour le secteur ' . $this->getData('secteur');
+                        }
+                    }
+                }
+            }
+        }
+                
+        return $errors;
+    }
+    
+    public function renderSignature() {
+
+        $id_signature = $this->getData('id_signature');
+        if($id_signature) {
+            $signature = $this->getChildObject('signature');
+            $html = $signature->getNomUrl();
+        } else {
+            if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN) {
+                $html .= BimpRender::renderButton(array(
+                    'classes'     => array('btn', 'btn-default'),
+                    'label'   => 'Créer signature',
+                    'icon'    => 'fas_signature',
+                    'attr'        => array(
+                        'onclick' => $this->getJsActionOnclick('createSignatureDocusign', array(), array('form_name' => 'create_signature'))
+                    )
+                        ), "a");
+            
+            } else {
+                $html = BimpRender::renderAlerts("Le statut de l'avenant doit être \"Attente de signature\"");
+            }
+        }
+                
+        return BimpRender::renderPanel("Signature", $html, '', array(
+            'icon'     => 'fas_file',
+            'type'     => 'secondary',
+            'foldable' => true
+            ));
+    }
 }

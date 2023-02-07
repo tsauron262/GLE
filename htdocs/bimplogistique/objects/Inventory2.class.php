@@ -8,13 +8,6 @@ require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 BimpCore::setMaxExecutionTime(2400);
 BimpCore::setMemoryLimit(2048);
 
-/**
- * Requete test
- * SELECT * FROM `llx_bl_inventory_expected` where `qty_scanned` != IFNULL((SELECT SUM(`qty`) FROM `llx_bl_inventory_det_2` WHERE `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product`), 0) 
-
-  ORDER BY `llx_bl_inventory_expected`.`id_inventory`  DESC
- * 
- */
 class Inventory2 extends BimpObject
 {
 
@@ -149,9 +142,6 @@ HAVING scan_exp != scan_det";
         $this->data['fk_warehouse'] = (int) $w_main;
         $this->data['type'] = (int) $t_main;
 
-//        $this->data['id_package_vol'] = 0;
-//        $this->data['id_package_nouveau'] = 0;
-
         if (!empty($errors))
             return $errors;
 
@@ -258,10 +248,6 @@ HAVING scan_exp != scan_det";
             else
                 $pack_prod_eq = $wt->getEquipmentStock(2, 0, $in_or_not_in);
 
-//            echo 'fezfefe<pre>';
-//            print_r($pack_prod_eq);
-//            die();
-
 
             foreach ($pack_prod_eq as $id_package => $prod_eq) {
 
@@ -366,19 +352,6 @@ HAVING scan_exp != scan_det";
                 );
             }
         }
-
-//        if ($user->rights->bimpequipment->inventory->close) {
-//            $onclick = $this->getJsActionOnclick('test22');
-//            $buttons[] = array(
-//                'label'   => 'Editer les filtre',
-////                'icon'    => 'fas_check',
-////                'type'    => 'danger',
-//                'onclick' => $this->getJsActionOnclick('change_filter', array(), array(
-//                        'form_name'        => 'confirm_close',
-//                        'success_callback' => 'function(result) {bimp_reloadPage();}'
-//                ))
-//            );
-//        }
 
         return $buttons;
     }
@@ -874,82 +847,6 @@ HAVING scan_exp != scan_det";
                                 if ($quantity_input < 0 and empty($errors))
                                     $warnings[] = "Vous venez d'insérer une quantité négative.";
                             }
-
-
-//                        $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
-//                                    'ref' => $ref
-//                                        ), true);
-//
-//                        if (!BimpObject::objectLoaded($prod)) {
-//                            $errors[] = 'Ligne n° ' . $i . ': aucun produit trouvé pour la réf "' . $ref . '"';
-//                        } else {
-//                            if ($prod->isSerialisable()) {
-//                                if ($recup_serials) {
-//                                    $sql = BimpTools::getSqlSelect(array('a.id', 'a.serial'));
-//                                    $sql .= BimpTools::getSqlFrom('be_equipment', array(
-//                                                'p' => array(
-//                                                    'alias' => 'p',
-//                                                    'table' => 'be_equipment_place',
-//                                                    'on'    => 'p.id_equipment = a.id'
-//                                                )
-//                                    ));
-//                                    $sql .= BimpTools::getSqlWhere(array(
-//                                                'a.id_product'  => $prod->id,
-//                                                'p.position'    => 1,
-//                                                'p.id_entrepot' => $id_entrepot
-//                                    ));
-//
-//                                    $rows = $this->db->executeS($sql, 'array');
-//
-//                                    if (is_array($rows) && !empty($rows)) {
-//                                        if (count($rows) != $qty) {
-//                                            $warnings[] = 'Ligne n°' . $i . ': le nombre d\'équipements en stock ne correspond pas (attendu: ' . $qty . ' / en stock: ' . count($rows) . ')';
-//                                        } else {
-//                                            foreach ($rows as $r) {
-//                                                if (!$test_only) {
-//                                                    if ($this->db->insert('bt_transfer_det', array(
-//                                                                'id_transfer'   => $this->id,
-//                                                                'id_product'    => $prod->id,
-//                                                                'id_equipment'  => $r['id'],
-//                                                                'quantity_sent' => 1,
-//                                                                'user_create'   => $user->id,
-//                                                                'user_update'   => $user->id,
-//                                                                'date_create'   => $now,
-//                                                                'date_update'   => $now
-//                                                            )) <= 0) {
-//                                                        $errors[] = 'Ligne n° ' . $i . ': échec ajout serial "' . $r['serial'] . '" - ' . $this->db->err();
-//                                                    }
-//                                                }
-//                                            }
-//                                        }
-//                                    } else {
-//                                        $warnings[] = 'Ligne n° ' . $i . ': aucun équipement trouvé - ' . $prod->getLink();
-//                                    }
-//                                } else {
-//                                    // todo (3è colonne serials) 
-//                                }
-//                            } else {
-//                                // recherche d'une ligne existante pour le produit: 
-//                                if ((int) $this->db->getCount('bt_transfer_det', 'id_transfer = ' . $this->id . ' AND id_product = ' . (int) $prod->id) > 0) {
-//                                    $warnings[] = 'Ligne n° ' . $i . ': il y a déjà une ligne de transfert pour le produit "' . $ref . '"';
-//                                    continue;
-//                                } else {
-//                                    if (!$test_only) {
-//                                        if ($this->db->insert('bt_transfer_det', array(
-//                                                    'id_transfer'   => $this->id,
-//                                                    'id_product'    => $prod->id,
-//                                                    'quantity_sent' => $qty,
-//                                                    'user_create'   => $user->id,
-//                                                    'user_update'   => $user->id,
-//                                                    'date_create'   => $now,
-//                                                    'date_update'   => $now
-//                                                )) <= 0) {
-//                                            $errors[] = 'Ligne n° ' . $i . ': échec ajout - ' . $this->db->err();
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
                         }
                     }
                 }
@@ -1351,14 +1248,6 @@ HAVING scan_exp != scan_det";
 
         $result = $this->db->db->query($sql);
         return $result;
-//        if ($result) {
-//            $this->db->db->commit();
-//            return true;
-//        } else {
-//            dol_print_error($this->db->db);
-//            $this->db->db->rollback();
-//            return false;
-//        }
     }
 
     public function close()

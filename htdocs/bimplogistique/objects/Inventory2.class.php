@@ -482,7 +482,7 @@ HAVING scan_exp != scan_det";
                 } else {
 
                     self::loadClass('bimpcore', 'Bimp_Product');
-                    $select_options = Bimp_Product::getValues8sens($radical);
+                    $select_options = Bimp_Product::getProductsTagsByTypeArray($radical);
 
                     foreach ($inter as $id_option)
                         $errors[] = "L'entrée " . $select_options[$id_option]
@@ -660,7 +660,7 @@ HAVING scan_exp != scan_det";
     {
 
         self::loadClass('bimpcore', 'Bimp_Product');
-        $options = Bimp_Product::getValues8sens($type);
+        $options = Bimp_Product::getProductsTagsByTypeArray($type);
 
         $html = '';
 
@@ -1882,7 +1882,7 @@ AND i.id=' . (int) $this->id;
 
         self::loadClass('bimpcore', 'Bimp_Product');
 
-        $id_label = Bimp_Product::getValues8sens($type);
+        $id_label = Bimp_Product::getProductsTagsByTypeArray($type);
         $list = $this->getSerializeValue($field);
 
         if (is_array($list)) {

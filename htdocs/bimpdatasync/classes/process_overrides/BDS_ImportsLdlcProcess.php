@@ -143,7 +143,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 $this->DebugData($file_data, 'Données fichier');
 
                 if (!count($errors) && !empty($file_data)) {
-//                    $this->processFournPrices($file_data, $errors, true);
+                    $this->processFournPrices($file_data, $errors, true);
                     
                     $i=0;
                     $tabHtml = array();

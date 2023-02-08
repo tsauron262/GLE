@@ -300,6 +300,10 @@ class BimpObject extends BimpCache
                 }
                 return true;
             }
+        } elseif (class_exists($object_name . '_ExtEntity')) {
+            $final_class_name = $object_name . '_ExtEntity';
+        } elseif (class_exists($object_name . '_ExtVersion')) {
+            $final_class_name = $object_name . '_ExtVersion';
         }
 
         return false;

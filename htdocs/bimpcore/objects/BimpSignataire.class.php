@@ -781,49 +781,86 @@ class BimpSignataire extends BimpObject
 
             if ($signature->isObjectValid()) {
                 if ($this->can('view')) {
-                    if (method_exists($obj, 'getSignatureDocFileUrl') && method_exists($obj, 'getSignatureDocFileName')) {
-                        if (method_exists($obj, 'getSignatureDocFileDir')) {
-                            $dir = $obj->getSignatureDocFileDir($signature->getData('doc_type'));
-                        } elseif (method_exists($obj, 'getFilesDir')) {
-                            $dir = $obj->getFilesDir();
+                    $dir = $signature->getDocumentFileDir();
+
+                    if ($dir) {
+                        $buttons = array();
+                        $files = array();
+
+                        if ($this->isSigned()) {
+                            $files[] = $signature->getDocumentFileName(true);
+                            ;
+                        } else {
+                            $files = $signature->getUnsignedFilesNames();
                         }
 
-                        if ($dir) {
-                            $file_name = $obj->getSignatureDocFileName($signature->getData('doc_type'), $this->isSigned());
-                            $file = $dir . $file_name;
+                        $right = false;
+                        if (BimpCore::isContextPublic()) {
+                            global $userClient;
 
-                            if ($file && file_exists($file)) {
-                                $url = $obj->getSignatureDocFileUrl($signature->getData('doc_type'), 'public', $this->isSigned());
-
-                                if ($url) {
-                                    $check = false;
-                                    if (BimpCore::isContextPublic()) {
-                                        global $userClient;
-
-                                        if (BimpObject::objectLoaded($userClient)) {
-                                            $allowed = $this->getData('allowed_users_client');
-                                            if ($userClient->isAdmin() || (is_array($allowed) && in_array($userClient->id, $allowed))) {
-                                                $check = true;
-                                            }
-                                        }
-                                    } else {
-                                        $check = true;
-                                    }
-
-                                    if ($check) {
-                                        $html = '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
-                                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . $label;
-                                        $html .= '</span>';
-                                    } else {
-                                        $html = '<span class="btn btn-default disabled bs-popover" onclick=""';
-                                        $html .= BimpRender::renderPopoverData('Vous n\'avez pas la permission de voir ce document');
-                                        $html .= '>';
-                                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . $label;
-                                        $html .= '</span>';
-                                    }
-                                    return $html;
+                            if (BimpObject::objectLoaded($userClient)) {
+                                $allowed = $this->getData('allowed_users_client');
+                                if ($userClient->isAdmin() || (is_array($allowed) && in_array($userClient->id, $allowed))) {
+                                    $right = true;
                                 }
                             }
+                        } else {
+                            $right = true;
+                        }
+
+                        $nb_files = count($files);
+                        $i = 0;
+                        $pathinfo = pathinfo($signature->getDocumentFileName(false));
+                        foreach ($files as $file) {
+                            if (file_exists($dir . $file)) {
+                                $file_idx = 0;
+
+                                if ($nb_files > 1) {
+                                    if (preg_match('/^' . preg_quote($pathinfo['filename'], '/') . '(\-(\d+))?\.' . $pathinfo['extension'] . '$/', $file, $matches)) {
+                                        $file_idx = (int) $matches[2];
+                                    }
+                                }
+
+                                $url = $obj->getSignatureDocFileUrl($signature->getData('doc_type'), 'public', $this->isSigned(), $file_idx);
+                                if ($url) {
+                                    $i++;
+
+                                    if ($right) {
+                                        $buttons[] = array(
+                                            'label'   => ($nb_files > 1 ? 'Document n°' . $i . ' (' . $file . ')' : $label),
+                                            'icon'    => 'fas_file-pdf',
+                                            'onclick' => 'window.open(\'' . $url . '\')'
+                                        );
+                                    } else {
+                                        $buttons[] = array(
+                                            'label'    => ($nb_files > 1 ? 'Document n°' . $i . ' (' . $file . ')' : $label),
+                                            'icon'     => 'fas_file-pdf',
+                                            'onclick'  => '',
+                                            'disabled' => 1,
+                                            'popover'  => 'Vous n\'avez pas la permission de voir ce document'
+                                        );
+                                    }
+                                }
+                            }
+                        }
+
+                        if (count($buttons) > 1) {
+                            return BimpRender::renderButtonsGroups(array(
+                                        array(
+                                            'label'   => 'Documents PDF',
+                                            'icon'    => 'fas_file-pdf',
+                                            'buttons' => $buttons
+                                        )
+                                            ), array(
+                                        'max'                 => 1,
+                                        'dropdown_menu_right' => 1
+                            ));
+                        } else {
+                            $html = '';
+                            foreach ($buttons as $button) {
+                                $html .= BimpRender::renderButton($button);
+                            }
+                            return $html;
                         }
                     }
                 }
@@ -1307,14 +1344,9 @@ class BimpSignataire extends BimpObject
                         $email_content = $signature->replaceEmailContentLabels($email_content);
 
                         $from = ($use_comm_email_as_from ? $comm_email : '');
+
                         $bimpMail = new BimpMail($obj, $subject, BimpTools::cleanEmailsStr($emails), $from, $email_content, $comm_email);
-
-                        $filePath = $signature->getDocumentFilePath();
-                        $fileName = $signature->getDocumentFileName();
-
-                        if (file_exists($filePath)) {
-                            $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
-                        }
+                        $bimpMail->addFiles($signature->getMailFiles());
 
                         $mail_errors = array();
                         $bimpMail->send($mail_errors);
@@ -1339,10 +1371,17 @@ class BimpSignataire extends BimpObject
     public function sendRelanceEmail(&$errors = array(), &$warnings = array())
     {
         $users = $this->getData('allowed_users_client');
+        $signature = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($signature)) {
+            $errors[] = 'Signature liée absente';
+        }
 
         if (empty($users)) {
             $errors[] = 'Aucun utilisateur client autorisé pour signature';
-        } else {
+        }
+
+        if (!count($errors)) {
             $emails = '';
 
             $client = $this->getChildObject('client');
@@ -1396,9 +1435,6 @@ class BimpSignataire extends BimpObject
                 $msg .= 'Cordialement,<br/><br/>';
                 $msg .= 'L\'équipe BIMP';
 
-                $filePath = $this->getDocumentFilePath();
-                $fileName = $this->getDocumentFileName();
-
                 $from = ($use_comm_email_as_from ? $commercial_email : '');
 
                 $obj = $this->getObj();
@@ -1409,10 +1445,7 @@ class BimpSignataire extends BimpObject
                     }
                 }
                 $bimpMail = new BimpMail($obj, $subject, $emails, $from, $msg, $commercial_email, $commercial_email);
-
-                if (file_exists($filePath)) {
-                    $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
-                }
+                $bimpMail->addFiles($signature->getMailFiles());
 
                 return $bimpMail->send($errors, $warnings);
             }
@@ -1513,12 +1546,11 @@ class BimpSignataire extends BimpObject
             }
 
             if (!count($errors)) {
-                $filePath = $signature->getDocumentFilePath();
-                $fileName = $signature->getDocumentFileName();
+                $files = $signature->getMailFiles();
 
-                if (file_exists($filePath)) {
+                if (!empty($files)) {
                     $bimpMail = new BimpMail($signature->getObj(), $subject, $email, '', $content);
-                    $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
+                    $bimpMail->addFiles($files);
 
                     $mail_errors = array();
                     $bimpMail->send($mail_errors);
@@ -1608,6 +1640,19 @@ class BimpSignataire extends BimpObject
 
                 if (!$fonction && $fonction_required) {
                     $errors[] = 'Veuillez saisir la fonction du signataire';
+                }
+
+                if ($signature->hasMultipleFiles()) {
+                    $selected_file = BimpTools::getArrayValueFromPath($data, 'selected_file', '');
+                    if (!$selected_file) {
+                        $errors[] = 'Veuillez sélectionner le document que vous souhaitez signer';
+                    } else {
+                        $file_errors = $signature->setSelectedFile($selected_file, $this, true);
+                        if (count($file_errors)) {
+                            $msg = 'Signature électronique non possible pour le document sélectionné. Veuillez enregistrer la signature sous la forme d\'un scan papier';
+                            $errors[] = BimpTools::getMsgFromArray($file_errors, $msg);
+                        }
+                    }
                 }
 
                 if (!count($errors)) {
@@ -1744,6 +1789,22 @@ class BimpSignataire extends BimpObject
                             $errors[] = 'Code SMS invalide';
                         } else {
                             $code_sms_infos['dt_confirmed'] = date('Y-m-d H:i:s');
+                        }
+                    }
+
+                    if ($signature->hasMultipleFiles()) {
+                        $selected_file = BimpTools::getArrayValueFromPath($data, 'selected_file', '');
+                        if (!$selected_file) {
+                            $errors[] = 'Veuillez sélectionner le document que vous souhaitez signer';
+                        } else {
+                            $file_errors = $signature->setSelectedFile($selected_file, $this, true);
+
+                            if (count($file_errors)) {
+                                $msg = 'La signature électronique du document que vous avez sélectionné n\'est pas possible.';
+                                $msg .= '<br/>Nous vous remercions de bien vouloir nous excuser pour ce désagrément ';
+                                $msg .= 'et de nous retourner le document signé par e-mail ou par courrier';
+                                $errors[] = $msg;
+                            }
                         }
                     }
 

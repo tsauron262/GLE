@@ -252,6 +252,16 @@ class BimpSignature extends BimpObject
         return 0;
     }
 
+    public function hasMultipleFiles()
+    {
+        if (!(int) $this->getData('allow_multiple_files')) {
+            return 0;
+        }
+
+        $files = $this->getUnsignedFilesNames();
+        return (count($files) > 1 ? 1 : 0);
+    }
+
     // Getters params: 
 
     public function getActionsButtons($include_link = false)
@@ -385,6 +395,19 @@ class BimpSignature extends BimpObject
         return $signataires;
     }
 
+    public function getUnsignedFilesArray($include_empty = true)
+    {
+        $files = ($include_empty ? array('' => '') : array());
+
+        $i = 0;
+        foreach ($this->getUnsignedFilesNames() as $file_name) {
+            $i++;
+            $files[$file_name] = 'Document n°' . $i . ' (' . $file_name . ')';
+        }
+
+        return $files;
+    }
+
     // Getters defaults: 
 
     public static function getDefaultSignDistEmailContent($type = 'elec')
@@ -500,7 +523,7 @@ class BimpSignature extends BimpObject
         return $api;
     }
 
-    public function getSignatureParams($signataire, $type_params = 'docusign', &$errors = array())
+    public function getSignatureParams($signataire, $type_params = 'docusign', &$errors = array(), $file_idx = 0)
     {
         $obj = $this->getObj();
 
@@ -522,46 +545,56 @@ class BimpSignature extends BimpObject
                 $errors[] = 'Aucun paramètre trouvé pour cette signature';
             }
 
-            $code_signataire = $signataire->getData('code');
-
-            if (!isset($params[$code_signataire])) {
-                if ($code_signataire === 'default') {
-                    if (isset($params[$type_params])) {
-                        return $params[$type_params];
-                    }
-                    if ($type_params === 'elec') {
-                        if (isset($params['x_pos'])) {
-                            return $params;
-                        }
-                    }
-                }
-            } else {
-                if (!isset($params[$code_signataire][$type_params])) {
-                    if ($type_params === 'elec') {
-                        if (isset($params[$code_signataire]['x_pos'])) {
-                            return $params[$code_signataire];
-                        }
-                    }
+            if ($file_idx > 0) {
+                if (!isset($params[$file_idx])) {
+                    $errors[] = 'Paramètres absents pour la signature électronique du document sélectionné';
+                } else {
+                    $params = $params[$file_idx];
                 }
             }
 
-            if (!isset($params[$code_signataire])) {
-                $errors[] = 'Aucun paramètre trouvé pour le signataire "' . $signataire->getData('label') . '"';
-            } elseif (!isset($params[$code_signataire][$type_params])) {
-                $msg = 'Aucun paramètre ';
-                switch ($type_params) {
-                    case 'elec':
-                        $msg .= 'd\'incrustation de la signature éléctronique';
-                        break;
+            if (!count($errors)) {
+                $code_signataire = $signataire->getData('code');
 
-                    case 'docusign':
-                        $msg .= 'DocuSign';
-                        break;
+                if (!isset($params[$code_signataire])) {
+                    if ($code_signataire === 'default') {
+                        if (isset($params[$type_params])) {
+                            return $params[$type_params];
+                        }
+                        if ($type_params === 'elec') {
+                            if (isset($params['x_pos'])) {
+                                return $params;
+                            }
+                        }
+                    }
+                } else {
+                    if (!isset($params[$code_signataire][$type_params])) {
+                        if ($type_params === 'elec') {
+                            if (isset($params[$code_signataire]['x_pos'])) {
+                                return $params[$code_signataire];
+                            }
+                        }
+                    }
                 }
-                $msg .= ' trouvé pour le signataire "' . $signataire->getData('label') . '"';
-                $errors[] = $msg;
-            } else {
-                return $params[$code_signataire][$type_params];
+
+                if (!isset($params[$code_signataire])) {
+                    $errors[] = 'Aucun paramètre trouvé pour le signataire "' . $signataire->getData('label') . '"';
+                } elseif (!isset($params[$code_signataire][$type_params])) {
+                    $msg = 'Aucun paramètre ';
+                    switch ($type_params) {
+                        case 'elec':
+                            $msg .= 'd\'incrustation de la signature éléctronique';
+                            break;
+
+                        case 'docusign':
+                            $msg .= 'DocuSign';
+                            break;
+                    }
+                    $msg .= ' trouvé pour le signataire "' . $signataire->getData('label') . '"';
+                    $errors[] = $msg;
+                } else {
+                    return $params[$code_signataire][$type_params];
+                }
             }
         }
 
@@ -751,6 +784,18 @@ class BimpSignature extends BimpObject
         return '';
     }
 
+    public function getFileIdx($file_name)
+    {
+        $file_idx = 0;
+
+        $file_name_base = pathinfo($this->getDocumentFileName(false), PATHINFO_FILENAME);
+        if (preg_match('/^' . preg_quote($file_name_base, '/') . '\-(\d+)\.pdf$/', $file_name, $matches)) {
+            $file_idx = (int) $matches[1];
+        }
+
+        return $file_idx;
+    }
+
     // Getters Doc infos: 
 
     public function getDocumentFileName($signed = false)
@@ -853,6 +898,56 @@ class BimpSignature extends BimpObject
         }
 
         return '';
+    }
+
+    public function getUnsignedFilesNames()
+    {
+        if (!$this->isLoaded()) {
+            return array();
+        }
+
+        $key = 'bimp_signature_' . $this->id . '_unsigned_files';
+
+        if (!isset(self::$cache[$key])) {
+            $files = array();
+
+            $dir = $this->getDocumentFileDir();
+            $file_name = $this->getDocumentFileName();
+
+            if (file_exists($dir . $file_name)) {
+                $files[] = $file_name;
+            } elseif ((int) $this->getData('allow_multiple_files')) {
+                if (is_dir($dir)) {
+                    $pathinfo = pathinfo($file_name);
+                    foreach (scandir($dir) as $f) {
+                        if (in_array($f, array('.', '..'))) {
+                            continue;
+                        }
+
+                        if (preg_match('/^' . preg_quote($pathinfo['filename'], '/') . '(\-\d+)?\.' . $pathinfo['extension'] . '$/', $f)) {
+                            $files[] = $f;
+                        }
+                    }
+                }
+            }
+
+            sort($files, SORT_NATURAL);
+            self::$cache[$key] = $files;
+        }
+
+        return self::$cache[$key];
+    }
+
+    public function getMailFiles()
+    {
+        $files = array();
+
+        $dir = $this->getDocumentFileDir();
+        foreach ($this->getUnsignedFilesNames() as $file_name) {
+            $files[] = array($dir . $file_name, 'application/' . pathinfo($file_name, PATHINFO_EXTENSION), $file_name);
+        }
+
+        return $files;
     }
 
     // Affichages: 
@@ -1273,21 +1368,38 @@ class BimpSignature extends BimpObject
     public function writeSignatureOnDoc($signataire = null, $params_overrides = array())
     {
         $errors = array();
+        $file_idx = 0;
 
-        $docusign_file = $this->getFilesDir() . 'docusign.pdf';
-        if (file_exists($docusign_file)) {
-            $srcFile = $docusign_file;
+        if ($this->hasMultipleFiles()) {
+            $selected_file = $this->getData('selected_file');
+
+            if (!$selected_file) {
+                $errors[] = 'Aucun document sélectionné parmi les choix possibles';
+            } else {
+                $srcFile = $this->getDocumentFileDir() . $selected_file;
+                $file_idx = $this->getFileIdx($selected_file);
+
+                if (!$file_idx) {
+                    $errors[] = 'Index du fichier sélectionné absent';
+                }
+            }
         } else {
-            $signed_file = $this->getDocumentFilePath(true);
+            $docusign_file = $this->getFilesDir() . 'docusign.pdf';
+            if (file_exists($docusign_file)) {
+                $srcFile = $docusign_file;
+            } else {
+                $signed_file = $this->getDocumentFilePath(true);
 
-            if (file_exists($signed_file)) {
-                $srcFile = $signed_file;
+                if (file_exists($signed_file)) {
+                    $srcFile = $signed_file;
+                }
+            }
+
+            if (!$srcFile) {
+                $srcFile = $this->getDocumentFilePath(false);
             }
         }
 
-        if (!$srcFile) {
-            $srcFile = $this->getDocumentFilePath(false);
-        }
 
         $destFile = $this->getDocumentFilePath(true);
 
@@ -1302,31 +1414,33 @@ class BimpSignature extends BimpObject
         }
 
         if (!count($errors)) {
-            $params = $this->getSignatureParams($signataire, 'elec');
+            $params = $this->getSignatureParams($signataire, 'elec', $errors, $file_idx);
 
-            if (!empty($params_overrides)) {
-                $params = BimpTools::overrideArray($params, $params_overrides, true);
+            if (!count($errors)) {
+                if (!empty($params_overrides)) {
+                    $params = BimpTools::overrideArray($params, $params_overrides, true);
+                }
+
+                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
+
+                $texts = array();
+
+                if ((int) BimpTools::getArrayValueFromPath($params, 'display_date', 1)) {
+                    $texts['date'] = date('d/m/Y', strtotime($signataire->getData('date_signed')));
+                }
+
+                $is_company = (int) $signataire->isClientCompany();
+                if ((int) BimpTools::getArrayValueFromPath($params, 'display_nom', $is_company)) {
+                    $texts['nom'] = utf8_decode($signataire->getData('nom'));
+                }
+
+                if ((int) BimpTools::getArrayValueFromPath($params, 'display_fonction', $is_company)) {
+                    $texts['fonction'] = utf8_decode($signataire->getData('fonction'));
+                }
+
+                $pdf = new BimpConcatPdf();
+                $errors = $pdf->insertSignatureImage($srcFile, $image, $destFile, $params, $texts);
             }
-
-            require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
-
-            $texts = array();
-
-            if ((int) BimpTools::getArrayValueFromPath($params, 'display_date', 1)) {
-                $texts['date'] = date('d/m/Y', strtotime($signataire->getData('date_signed')));
-            }
-
-            $is_company = (int) $signataire->isClientCompany();
-            if ((int) BimpTools::getArrayValueFromPath($params, 'display_nom', $is_company)) {
-                $texts['nom'] = utf8_decode($signataire->getData('nom'));
-            }
-
-            if ((int) BimpTools::getArrayValueFromPath($params, 'display_fonction', $is_company)) {
-                $texts['fonction'] = utf8_decode($signataire->getData('fonction'));
-            }
-
-            $pdf = new BimpConcatPdf();
-            $errors = $pdf->insertSignatureImage($srcFile, $image, $destFile, $params, $texts);
         }
 
         return $errors;
@@ -1451,6 +1565,11 @@ class BimpSignature extends BimpObject
         $errors = array();
 
         if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if ($this->hasMultipleFiles()) {
+            $errors[] = 'Signature via DocuSign non possible car plusieurs documents sont proposés à la signature';
             return $errors;
         }
 
@@ -1715,6 +1834,148 @@ class BimpSignature extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function setSelectedFile($selected_file, $signataire = null, $check_signature_params = false)
+    {
+        $errors = array();
+
+        if (!$selected_file) {
+            $errors[] = 'Aucun fichier sélectionné';
+        } else {
+            $files = $this->getUnsignedFilesArray(false);
+
+            if (!array_key_exists($selected_file, $files)) {
+                $errors[] = 'Document sélectionné invalide';
+            } else {
+                if (BimpObject::objectLoaded($signataire) && $check_signature_params) {
+                    $file_idx = $this->getFileIdx($selected_file);
+                    if (!$file_idx) {
+                        $errors[] = 'Index du fichier sélectionné absent';
+                    } else {
+                        $this->getSignatureParams($signataire, 'elec', $errors, $file_idx);
+                    }
+                }
+
+                if (!count($errors)) {
+                    $this->updateField('selected_file', $selected_file);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    // Traitements statiques: 
+
+    public static function checkMultipleFiles($files, $object, $dir, $file_name_base, $params_field_name, &$next_file_idx = 1, $force_new_next_file = false)
+    {
+        if (!empty($files)) {
+            sort($files, SORT_NATURAL);
+            $signatures_params = $object->getData($params_field_name);
+
+            if (count($files) > 1) {
+                $idx = 1;
+                $up_signature_params = false;
+                foreach ($files as $f) {
+                    if ($f !== $file_name_base . '-' . $idx . '.pdf') {
+                        $file_idx = 0;
+
+                        if (preg_match('/^' . preg_quote($file_name_base, '/') . '(\-(\d+))?\.pdf$/', $f, $matches)) {
+                            $file_idx = (int) $matches[2];
+                        }
+
+                        if ($file_idx) {
+                            if (isset($signatures_params[$file_idx])) {
+                                $signatures_params[$idx] = $signatures_params[$file_idx];
+                                unset($signatures_params[$file_idx]);
+                                $up_signature_params = true;
+                            }
+                        } elseif (!empty($signatures_params)) {
+                            $signatures_params[$idx] = $signatures_params;
+                            $up_signature_params = true;
+                        }
+
+                        BimpTools::renameFile($dir, $f, $file_name_base . '-' . $idx . '.pdf');
+                        $bimpfile = BimpCache::findBimpObjectInstance('bimpcore', 'BimpFile', array(
+                                    'parent_module'      => $object->module,
+                                    'parent_object_name' => $object->object_name,
+                                    'id_parent'          => $object->id,
+                                    'file_name'          => pathinfo($f, PATHINFO_FILENAME),
+                                    'file_ext'           => 'pdf'
+                                        ), true);
+
+                        if (BimpObject::objectLoaded($bimpfile)) {
+                            $bimpfile->updateField('file_name', $file_name_base . '-' . $idx);
+                        }
+                    }
+
+                    $idx++;
+                }
+
+                if ($up_signature_params) {
+                    $object->updateField($params_field_name, $signatures_params);
+                }
+
+                $next_file_idx = $idx;
+            } else {
+                $file_idx = 0;
+                foreach ($files as $f) {
+                    if (preg_match('/^' . preg_quote($file_name_base, '/') . '(\-(\d+))?\.pdf$/', $f, $matches)) {
+                        $file_idx = (int) $matches[2];
+
+                        if ($force_new_next_file) {
+                            if ($file_idx !== 1) {
+                                if ($file_idx) {
+                                    if (isset($signatures_params[$file_idx])) {
+                                        $object->updateField($params_field_name, array(1 => $signatures_params[$file_idx]));
+                                    }
+                                } elseif (isset($signatures_params['default'])) {
+                                    $object->updateField($params_field_name, array(1 => $signatures_params));
+                                }
+
+                                BimpTools::renameFile($dir, $f, $file_name_base . '-1.pdf');
+
+                                $bimpfile = BimpCache::findBimpObjectInstance('bimpcore', 'BimpFile', array(
+                                            'parent_module'      => $object->module,
+                                            'parent_object_name' => $object->object_name,
+                                            'id_parent'          => $object->id,
+                                            'file_name'          => pathinfo($f, PATHINFO_FILENAME),
+                                            'file_ext'           => 'pdf'
+                                                ), true);
+
+                                if (BimpObject::objectLoaded($bimpfile)) {
+                                    $bimpfile->updateField('file_name', $file_name_base . '-1');
+                                }
+                            }
+                        } else {
+                            if ($file_idx) {
+                                if (isset($signatures_params[$file_idx])) {
+                                    $object->updateField($params_field_name, $signatures_params[$file_idx]);
+                                }
+
+                                BimpTools::renameFile($dir, $f, $file_name_base . '.pdf');
+
+                                $bimpfile = BimpCache::findBimpObjectInstance('bimpcore', 'BimpFile', array(
+                                            'parent_module'      => $object->module,
+                                            'parent_object_name' => $object->object_name,
+                                            'id_parent'          => $object->id,
+                                            'file_name'          => pathinfo($f, PATHINFO_FILENAME),
+                                            'file_ext'           => 'pdf'
+                                                ), true);
+
+                                if (BimpObject::objectLoaded($bimpfile)) {
+                                    $bimpfile->updateField('file_name', $file_name_base);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                }
+
+                $next_file_idx = 2;
+            }
+        }
     }
 
     // Actions: 

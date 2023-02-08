@@ -93,6 +93,11 @@ class BF_DemandeRefinanceur extends BimpObject
                     $errors[] = 'Cette demande n\'est pas sélectionnable';
                     return 0;
                 }
+                
+                if ($status === self::STATUS_SELECTIONNEE) {
+                    $errors[] = 'Cette demande est déjà sélectionnée';
+                    return 0;
+                }
 
                 $demande = $this->getParentInstance();
                 if (!BimpObject::objectLoaded($demande)) {
@@ -100,8 +105,8 @@ class BF_DemandeRefinanceur extends BimpObject
                     return 0;
                 }
 
-                if ((int) $demande->getData('status') >= 10) {
-                    $errors[] = 'Le statut de la demande de location ne permet pas cette opération';
+                if ((int) $demande->getData('devis_status') >= 20) {
+                    $errors[] = 'Le devis de location a été signé ou refusé';
                     return 0;
                 }
                 return 1;
@@ -246,7 +251,7 @@ class BF_DemandeRefinanceur extends BimpObject
 
         if ($this->isActionAllowed('selected') && $this->canSetAction('selected')) {
             $buttons[] = array(
-                'label'   => 'Sélectionner (validation définitive)',
+                'label'   => 'Sélectionner cette demande',
                 'icon'    => 'fas_check-double',
                 'onclick' => $this->getJsActionOnclick('selected', array(), array(
                     'confirm_msg' => 'Veuillez confirmer'

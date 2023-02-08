@@ -379,7 +379,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderButtonsGroups($groups, $params)
+    public static function renderButtonsGroups($groups, $params = array())
     {
         $html = '';
 

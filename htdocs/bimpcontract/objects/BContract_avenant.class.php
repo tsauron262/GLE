@@ -793,18 +793,18 @@ class BContract_avenant extends BContract_contrat {
         return $this->getParentInstance()->getFilesDir();
     }
     
-    public function getSignatureDocFileName($doc_type = 'avenant', $signed = false) {
+    public function getSignatureDocFileName($doc_type = 'avenant', $signed = false, $file_idx = 0) {
         if($signed)
             return $this->getRefAv() . '_signed.pdf';
         else
-            return $this->getRefAv() . '.pdf';
+            return $this->getRefAv() . ($file_idx ? '-' . $file_idx : '') . '.pdf';
     }
     
-    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false) {
+    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false, $file_idx = 0) {
         if($signed)
             $file = $this->getParentInstance()->getRef() . '/' . $this->getRefAv() . '_signed.pdf';
         else
-            $file = $this->getParentInstance()->getRef() . '/' . $this->getRefAv() . '.pdf';
+            $file = $this->getParentInstance()->getRef() . '/' . $this->getRefAv() . ($file_idx ? '-' . $file_idx : '') . '.pdf';
         
         return DOL_URL_ROOT . '/document.php?modulepart=contract&file=' . $file;
     }

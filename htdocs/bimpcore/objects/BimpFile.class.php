@@ -72,6 +72,10 @@ class BimpFile extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
+        if (isset($this->true_delete) && $this->true_delete) {
+            return 1;
+        }
+
         if (!$force_delete && !(int) $this->getData('is_deletable')) {
             return 0;
         }
@@ -201,16 +205,21 @@ class BimpFile extends BimpObject
 
     public function getFilterListInterfaceClient()
     {
+        $filters = array(
+            array(
+                'name'   => 'deleted',
+                'filter' => 0
+            )
+        );
+
         if (BimpCore::isContextPublic()) {
-            return Array(
-                Array(
-                    'name'   => 'visibility',
-                    'filter' => 1
-                )
+            $filters[] = Array(
+                'name'   => 'visibility',
+                'filter' => 1
             );
         }
 
-        return array();
+        return $filters;
     }
 
     public function currentContext($default_value = null)
@@ -227,7 +236,7 @@ class BimpFile extends BimpObject
 
     public function getDateModif()
     {
-        if(is_file($this->getFilePath()))
+        if (is_file($this->getFilePath()))
             return BimpTools::printDate(filemtime($this->getFilePath()));
     }
 
@@ -245,7 +254,7 @@ class BimpFile extends BimpObject
             return $onclick; //"<a onclick=\"".$onclick."\">Cliquer ici pour envopyé un mail au service facturation.</a>";
         }
     }
-    
+
     public function getUrl($forced_context = '')
     {
         return $this->getFileUrl();
@@ -502,7 +511,9 @@ class BimpFile extends BimpObject
                     if (!in_array($file_name, $files)) {
                         if ($this->fetch((int) $id_file)) {
                             $warnings = array();
-                            $this->delete($warnings, true);
+                            $this->true_delete = true;
+                            $err = $this->delete($warnings, true);
+                            $this->true_delete = false;
                             $this->reset();
                         }
                     }
@@ -744,6 +755,10 @@ class BimpFile extends BimpObject
 
     public function delete(&$warnings = array(), $force_delete = false)
     {
+        if (isset($this->true_delete) && $this->true_delete) {
+            return parent::delete($warnings, $force_delete);
+        }
+
         if (!$this->isLoaded()) {
             return array('ID ' . $this->getLabel('of_the') . ' absent');
         }
@@ -771,8 +786,16 @@ class BimpFile extends BimpObject
             $dir = $this->getFileDir();
             $file = $this->getData('file_name') . '.' . $this->getData('file_ext');
 
-            if (file_exists($dir . $file . 'TO')) {
-                BimpTools::renameFile($dir, $file, $this->getData('file_name') . $this->id . '_deleted.' . $this->getData('file_ext'));
+            if (file_exists($dir . $file)) {
+                BimpTools::renameFile($dir, $file, $this->getData('file_name') . '_' . $this->id . '_deleted.' . $this->getData('file_ext'));
+            }
+
+            $parent = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($parent)) {
+                if (method_exists($parent, 'onChildDelete')) {
+                    $parent->onChildDelete($this, $this->id);
+                }
             }
         }
 

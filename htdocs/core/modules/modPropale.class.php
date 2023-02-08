@@ -441,6 +441,12 @@ class modPropale extends DolibarrModules
 				'file'=>'/comm/propal/class/propal.class.php',
 				'class'=>'Propal',
 				'method'=>'fetch'
+			),
+                        'cd.fk_product' => array(
+				'rule'=>'fetchidfromref',
+				'file'=>'/product/class/product.class.php',
+				'class'=>'Product',
+				'method'=>'fetch'
 			)
 		);
 	}

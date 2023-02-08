@@ -197,10 +197,10 @@ class BF_Demande extends BimpObject
             return 0;
         }
 
-        $status = (int) $this->getData('status');
+        $devis_status = (int) $this->getData('devis_status');
 
-        if ($status <= 0 || in_array($status, array(BF_Demande::STATUS_ACCEPTED, BF_Demande::STATUS_CANCELED))) {
-            $errors[] = 'Le statut actuel de la demande de location ne permet pas d\'ajouter des demandes refinanceurs';
+        if ($devis_status >= self::DOC_ACCEPTED) {
+            $errors[] = 'le devis a été signé ou refusé';
             return 0;
         }
 

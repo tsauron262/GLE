@@ -13,7 +13,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         'ShortDesignation'  => 'lib',
         'Brand'             => 'brand',
         'ManufacturerRef'   => 'ref_manuf',
-        /* 'IsAsleep'          => 'is_sleep', */
+        'IsAsleep'          => 'is_sleep2', 
         'IsDeleted'         => 'is_delete',
         'PriceVatOff'       => 'pu_ht',
         'PriceVatOn'        => 'pu_ttc',
@@ -148,6 +148,8 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                     $i=0;
                     $tabHtml = array();
                     foreach($file_data as $line){
+                        if($line['is_sleep2'] == 'true' || !$line['is_actif'])
+                            continue;
                         if($line['pa_ht'] > $line['pu_ht']){
                             $i++;
 //                            echo '<pre>';

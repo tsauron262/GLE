@@ -1487,7 +1487,7 @@ AND i.id=' . (int) $this->id;
     {
 
         if (self::STATUS_CLOSED == $this->getData('status')) {
-            $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=products&search=1&object=BimpProductMouvement&sall=inventory2-' . $this->getData('id') . '';
+            $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=stocks&tab=mouvement&search=1&object=BimpProductMouvement&sall=inventory2-' . $this->getData('id') . '';
             return '<a target="_blank" href="' . $url . '">Voir</a>';
         }
 

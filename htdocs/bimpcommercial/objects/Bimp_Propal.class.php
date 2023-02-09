@@ -2037,19 +2037,19 @@ class Bimp_Propal extends Bimp_PropalTemp
         return $this->getFilesDir();
     }
 
-    public function getSignatureDocFileName($doc_type = 'devis', $signed = false)
+    public function getSignatureDocFileName($doc_type = 'devis', $signed = false, $file_idx = 0)
     {
         $ext = $this->getSignatureDocFileExt($doc_type, $signed);
 
         switch ($doc_type) {
             case 'devis':
-                return dol_sanitizeFileName($this->getRef()) . ($signed ? '_signe' : '') . '.' . $ext;
+                return dol_sanitizeFileName($this->getRef()) . ($signed ? '_signe' : ($file_idx ? '-' . $file_idx : '')) . '.' . $ext;
         }
 
         return '';
     }
 
-    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false)
+    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false, $file_idx = 0)
     {
         if (!$this->isLoaded()) {
             return '';
@@ -2060,11 +2060,11 @@ class Bimp_Propal extends Bimp_PropalTemp
             $context = $forced_context;
         }
 
-        $fileName = $this->getSignatureDocFileName($doc_type, $signed);
+        $fileName = $this->getSignatureDocFileName($doc_type, $signed, $file_idx);
 
         if ($fileName) {
             if ($context === 'public') {
-                return self::getPublicBaseUrl() . 'fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
+                return self::getPublicBaseUrl() . 'fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . urlencode($this->getRef()) . ($file_idx ? '&file_idx=' . $file_idx : '');
             } else {
                 return $this->getFileUrl($fileName);
             }

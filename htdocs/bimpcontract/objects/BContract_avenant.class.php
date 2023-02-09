@@ -591,7 +591,7 @@ class BContract_avenant extends BContract_contrat {
             );
         }
         
-        if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN) {
+        if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN and (int) $this->getData('id_signature') == 0) {
             $buttons[] = array(
                 'label'   => 'Créer signature',
                 'icon'    => 'fas_signature',
@@ -617,13 +617,15 @@ class BContract_avenant extends BContract_contrat {
                     'label'   => 'Abandonner',
                     'icon'    => 'fas_stop-circle',
                     'onclick' => $this->getJsActionOnclick('abort', array(), array(
-
+                        'confirm_msg' => 'Veuillez confirmer: abandon avenant'
                     ))
                 );
-                $buttons[] = array(
+            
+            $buttons[] = array(
                     'label'   => 'Clore',
                     'icon'    => 'fas_times',
                     'onclick' => $this->getJsActionOnclick('close', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer: cloture avenant'
 
                     ))
                 );
@@ -793,18 +795,18 @@ class BContract_avenant extends BContract_contrat {
         return $this->getParentInstance()->getFilesDir();
     }
     
-    public function getSignatureDocFileName($doc_type = 'avenant', $signed = false) {
+    public function getSignatureDocFileName($doc_type = 'avenant', $signed = false, $file_idx = 0) {
         if($signed)
             return $this->getRefAv() . '_signed.pdf';
         else
-            return $this->getRefAv() . '.pdf';
+            return $this->getRefAv() . ($file_idx ? '-' . $file_idx : '') . '.pdf';
     }
     
-    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false) {
+    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false, $file_idx = 0) {
         if($signed)
             $file = $this->getParentInstance()->getRef() . '/' . $this->getRefAv() . '_signed.pdf';
         else
-            $file = $this->getParentInstance()->getRef() . '/' . $this->getRefAv() . '.pdf';
+            $file = $this->getParentInstance()->getRef() . '/' . $this->getRefAv() . ($file_idx ? '-' . $file_idx : '') . '.pdf';
         
         return DOL_URL_ROOT . '/document.php?modulepart=contract&file=' . $file;
     }
@@ -852,7 +854,7 @@ class BContract_avenant extends BContract_contrat {
             
             
             if(!count($errors)) {
-                $errors_signature = $this->createSignature($id_contact, $warnings, $success);
+                $errors_signature = $this->createSignature(false, true, $id_contact, '', $warnings, $success);
                 $errors = BimpTools::merge_array($errors, $errors_signature);
             }
             
@@ -881,8 +883,9 @@ class BContract_avenant extends BContract_contrat {
     public  function getClientContactsArray() {
         return $this->getParentInstance()->getClientContactsArray();
     }
+
     
-    public function createSignature($id_contact = 0, &$warnings = array(), &$success = '')
+    public function createSignature($init_docu_sign = false, $open_public_acces = true, $id_contact = 0, $email_content = '', &$warnings = array(), &$success = '')
     {
         $errors = array();
         

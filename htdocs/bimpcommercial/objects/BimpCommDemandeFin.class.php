@@ -62,6 +62,29 @@ class BimpCommDemandeFin extends BimpObject
         return parent::canSetAction($action);
     }
 
+    public function canClientView()
+    {
+        global $userClient;
+
+        if (!BimpObject::objectLoaded($userClient)) {
+            return 0;
+        }
+
+        if ($this->isLoaded()) {
+            $origine = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($origine)) {
+                if ((int) $userClient->getData('id_client') == (int) $origine->getData('fk_soc')) {
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+
+        return 1;
+    }
+
     // Getters booléens: 
 
     public function isActionAllowed($action, &$errors = array())
@@ -92,9 +115,9 @@ class BimpCommDemandeFin extends BimpObject
                 return 1;
 
             case 'createDevisFinSignature':
-                $file = $this->getFilesDir() . $this->getSignatureDocFileName('devis_fin');
-                if (!file_exists($file)) {
-                    $errors[] = 'Le devis de location n\'a pas été reçu';
+                $devis_files = $this->getDevisFilesArray();
+                if (empty($devis_files)) {
+                    $errors[] = 'Aucun devis de location n\'a encore été reçu';
                     return 0;
                 }
 
@@ -195,8 +218,15 @@ class BimpCommDemandeFin extends BimpObject
         }
 
         if ($this->isActionAllowed('createDevisFinSignature') && $this->canSetAction('createDevisFinSignature')) {
+            $devis_files = $this->getDevisFilesArray();
+
+            if (count($devis_files) > 1) {
+                $label = 'Envoyer les ' . count($devis_files) . ' devis de location pour signature';
+            } else {
+                $label = 'Envoyer le devis de location pour signature';
+            }
             $buttons[] = array(
-                'label'   => 'Envoyer le devis de location pour signature',
+                'label'   => $label,
                 'icon'    => 'fas_arrow-circle-right',
                 'onclick' => $this->getJsActionOnclick('createDevisFinSignature', array(), array(
                     'form_name' => 'signature_devis_fin'
@@ -352,7 +382,51 @@ class BimpCommDemandeFin extends BimpObject
         return array();
     }
 
+    public function getDevisFilesArray($include_empty = false)
+    {
+        if (!$this->isLoaded()) {
+            return ($include_empty ? array('' => '') : array());
+        }
+
+        $key = 'BimpCommDemandeFin_' . $this->id . '_devis_files_array';
+
+        if (!isset(self::$cache[$key])) {
+            $files = array();
+            $dir = $this->getFilesDir();
+
+            $file_name_base = pathinfo($this->getSignatureDocFileName('devis_fin'), PATHINFO_FILENAME);
+
+            if (is_dir($dir)) {
+                foreach (scandir($dir) as $f) {
+                    if (in_array($f, array('.', '..'))) {
+                        continue;
+                    }
+
+                    if (preg_match('/^' . preg_quote($file_name_base, '/') . '(\-\d+)?\.pdf$/', $f)) {
+                        $files[$f] = $f;
+                    }
+                }
+            }
+
+            ksort($files, SORT_NATURAL);
+            self::$cache[$key] = $files;
+        }
+
+        return self::getCacheArray($key, $include_empty, '', '');
+    }
+
     // Getters données: 
+
+    public function getRef($withGeneric = true)
+    {
+        $origine = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($origine)) {
+            return $origine->getRef();
+        }
+
+        return '';
+    }
 
     public function getInputValue($input_name)
     {
@@ -535,26 +609,60 @@ class BimpCommDemandeFin extends BimpObject
 
     public function renderDocsButtons()
     {
-        $html = '';
+        $buttons = array();
 
         $dir = $this->getFilesDir();
         foreach (array('devis_fin', 'contrat_fin', 'pvr_fin') as $doc_type) {
             foreach (array(1, 0) as $signed) {
+                if (!$signed && $doc_type === 'devis_fin') {
+                    $files = $this->getDevisFilesArray();
+                    if (count($files) > 1) {
+                        $i = 0;
+                        foreach ($files as $file_name) {
+                            $i++;
+                            $url = $this->getFileUrl($file_name);
+                            if ($url) {
+                                $buttons[] = array(
+                                    'label'   => $this->getDocTypeLabel($doc_type) . ' n°' . $i,
+                                    'icon'    => 'fas_file-pdf',
+                                    'onclick' => 'window.open(\'' . $url . '\')'
+                                );
+                            }
+                        }
+                        continue;
+                    }
+                }
+
                 $file = $dir . $this->getSignatureDocFileName($doc_type, $signed);
                 if (file_exists($file)) {
                     $url = $this->getSignatureDocFileUrl($doc_type, '', $signed);
 
                     if ($url) {
-                        $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
-                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . $this->getDocTypeLabel($doc_type) . ($signed ? ' (signé)' : '');
-                        $html .= '</span>';
+                        $buttons[] = array(
+                            'label'   => $this->getDocTypeLabel($doc_type) . ($signed ? ' (signé)' : ''),
+                            'icon'    => 'fas_file-pdf',
+                            'onclick' => 'window.open(\'' . $url . '\')'
+                        );
                     }
                     break;
                 }
             }
         }
 
-        return $html;
+        if (!empty($buttons)) {
+            return BimpRender::renderButtonsGroups(array(
+                        array(
+                            'label'   => 'Docs location',
+                            'icon'    => 'fas_file-pdf',
+                            'buttons' => $buttons
+                        )
+                            ), array(
+                        'max'                 => 1,
+                        'dropdown_menu_right' => 1
+            ));
+        }
+
+        return '';
     }
 
     public function renderDemandeInfos()
@@ -874,7 +982,7 @@ class BimpCommDemandeFin extends BimpObject
         return $this->df_data;
     }
 
-    public function onDocFinReceived($doc_type, $doc_content, $signature_params, $signataires_data = array())
+    public function onDocFinReceived($doc_type, $docs_content, $signature_params, $signataires_data = array())
     {
         $errors = array();
 
@@ -889,13 +997,24 @@ class BimpCommDemandeFin extends BimpObject
             }
 
             if (!count($errors)) {
-                $file = $dir . $this->getSignatureDocFileName($doc_type);
-                if (!$file) {
+                $file_name = $this->getSignatureDocFileName($doc_type);
+                if (!$file_name) {
                     $errors[] = 'Type de document invalide: ' . $doc_type;
                 } else {
-                    if (!file_put_contents($file, base64_decode($doc_content))) {
-                        $errors[] = 'Echec de l\'enregistrement du fichier';
-                    } else {
+                    $file = $dir . $file_name;
+                    $i = 0;
+                    foreach ($docs_content as $doc_content) {
+                        $i++;
+                        if (count($docs_content) > 1) {
+                            $file = $dir . pathinfo($file_name, PATHINFO_FILENAME) . '-' . $i . '.' . pathinfo($file_name, PATHINFO_EXTENSION);
+                        }
+
+                        if (!file_put_contents($file, base64_decode($doc_content))) {
+                            $errors[] = 'Echec de l\'enregistrement du fichier n°' . $i;
+                        }
+                    }
+
+                    if (!count($errors)) {
                         if (!empty($signature_params)) {
                             switch ($doc_type) {
                                 case 'devis_fin':
@@ -920,7 +1039,7 @@ class BimpCommDemandeFin extends BimpObject
                         $parent = $this->getParentInstance();
                         if (BimpObject::objectLoaded($parent)) {
                             $parent->addObjectLog(static::getDocTypeLabel($doc_type) . ' reçu', strtoupper($doc_type) . '_RECEIVED');
-                            $this->addParentNoteForCommercial('Document reçu : ' . $this->getDocTypeLabel($doc_type));
+                            $this->addParentNoteForCommercial('Document reçu : ' . $this->getDocTypeLabel($doc_type) . ($i > 1 ? ' (' . $i . ' fichiers)' : ''));
                         }
                     }
                 }
@@ -1922,11 +2041,12 @@ class BimpCommDemandeFin extends BimpObject
 
             if (!count($errors)) {
                 $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
-                            'obj_module'       => $this->module,
-                            'obj_name'         => $this->object_name,
-                            'id_obj'           => $this->id,
-                            'doc_type'         => 'devis_fin',
-                            'obj_params_field' => 'signature_df_params'
+                            'obj_module'           => $this->module,
+                            'obj_name'             => $this->object_name,
+                            'id_obj'               => $this->id,
+                            'doc_type'             => 'devis_fin',
+                            'obj_params_field'     => 'signature_df_params',
+                            'allow_multiple_files' => 1
                                 ), true, $errors, $warnings);
 
                 if (!count($errors) && BimpObject::objectLoaded($signature)) {
@@ -2438,33 +2558,60 @@ class BimpCommDemandeFin extends BimpObject
 
         if ($signature_type) {
             $message = 'Bonjour, <br/><br/>';
-            $message .= 'Le document "{NOM_DOCUMENT}" est en attente de validation.<br/><br/>';
 
-            switch ($signature_type) {
-                case 'docusign':
-                    $message .= 'Merci de bien vouloir le signer électroniquement en suivant les instructions DocuSign.<br/><br/>';
-                    break;
+            $nb_files = 1;
 
-                case 'elec':
-                default:
-                    $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé';
-                    if ($doc_type == 'contrat_fin') {
-                        $message .= ' <b>(par courrier uniquement)</b>';
-                    } else {
+            if ($doc_type === 'devis_fin') {
+                $files = $this->getDevisFilesArray();
+                $nb_files = count($files);
+            }
+
+            if ($nb_files > 1) {
+                $message .= 'Vous trouverez ci-joint ' . $nb_files . ' propositions de location pour votre matériel informatique.<br/><br/>';
+
+                switch ($signature_type) {
+                    case 'elec':
+                    default:
+                        $message .= 'Vous pouvez effectuer la signature électronique du document correspondant à la proposition que aurez choisie depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner ce document signé';
                         $message .= ' par courrier ou par e-mail';
-                    }
-                    $message .= '.<br/><br/>';
-                    break;
+                        $message .= '.<br/><br/>';
+                        break;
 
-                case 'papier':
-                    $message .= 'Merci d\'imprimer ce document et de nous le retourner signé';
-                    if ($doc_type == 'contrat_fin') {
-                        $message .= ' <b>par courrier uniquement</b>';
-                    } else {
+                    case 'papier':
+                        $message .= 'Merci d\'imprimer le document correspondant à la proposition que vous aurez choise et de nous le retourner signé';
                         $message .= ' par courrier ou par e-mail';
-                    }
-                    $message .= '.<br/><br/>';
-                    break;
+                        $message .= '.<br/><br/>';
+                        break;
+                }
+            } else {
+                $message .= 'Le document "{NOM_DOCUMENT}" est en attente de validation.<br/><br/>';
+
+                switch ($signature_type) {
+                    case 'docusign':
+                        $message .= 'Merci de bien vouloir le signer électroniquement en suivant les instructions DocuSign.<br/><br/>';
+                        break;
+
+                    case 'elec':
+                    default:
+                        $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé';
+                        if ($doc_type == 'contrat_fin') {
+                            $message .= ' <b>(par courrier uniquement)</b>';
+                        } else {
+                            $message .= ' par courrier ou par e-mail';
+                        }
+                        $message .= '.<br/><br/>';
+                        break;
+
+                    case 'papier':
+                        $message .= 'Merci d\'imprimer ce document et de nous le retourner signé';
+                        if ($doc_type == 'contrat_fin') {
+                            $message .= ' <b>par courrier uniquement</b>';
+                        } else {
+                            $message .= ' par courrier ou par e-mail';
+                        }
+                        $message .= '.<br/><br/>';
+                        break;
+                }
             }
 
             $message .= 'Vous en remerciant par avance, nous restons à votre disposition pour tout complément d\'information.<br/><br/>';
@@ -2501,19 +2648,19 @@ class BimpCommDemandeFin extends BimpObject
         return '';
     }
 
-    public function getSignatureDocFileName($doc_type, $signed = false)
+    public function getSignatureDocFileName($doc_type, $signed = false, $file_idx = 0)
     {
         $ext = $this->getSignatureDocFileExt($doc_type, $signed);
         $ref = $this->getSignatureDocRef($doc_type);
 
         if ($ref) {
-            return $ref . ($signed ? '_signe' : '') . '.' . $ext;
+            return $ref . ($signed ? '_signe' : ($file_idx ? '-' . $file_idx : '')) . '.' . $ext;
         }
 
         return '';
     }
 
-    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false)
+    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false, $file_idx = 0)
     {
         if (!$this->isLoaded()) {
             return '';
@@ -2524,11 +2671,11 @@ class BimpCommDemandeFin extends BimpObject
             $context = $forced_context;
         }
 
-        $fileName = $this->getSignatureDocFileName($doc_type, $signed);
+        $fileName = $this->getSignatureDocFileName($doc_type, $signed, $file_idx);
 
         if ($fileName) {
             if ($context === 'public') {
-                return self::getPublicBaseUrl() . 'fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
+                return self::getPublicBaseUrl() . 'fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . urlencode($this->getRef()) . ($file_idx ? '&file_idx=' . $file_idx : '');
             } else {
                 return $this->getFileUrl($fileName);
             }

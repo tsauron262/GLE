@@ -293,9 +293,6 @@ class AtradiusAPI extends BimpAPI {
     }
 
     public function getBuyerIdBySiren($siren, &$errors = array()) {
-        
-//        $this->connect($errors);
-//        die('rr');
         // Définir id atra pour le client
         $params_get = array(
             'country' => 'FRA',
@@ -335,25 +332,13 @@ class AtradiusAPI extends BimpAPI {
     // Interface:
     
     public function setCovers($params, &$errors = array(), &$warnings = array(), &$success = '') {
-        
-        $decisions = array();
-        $now = new DateTime();
-        
-//        print_r($params);
-//        die();
-        
-        // Override des paramètres
-//        $params = BimpTools::overrideArray(array(
-//            'coverType' => (string) self::CREDIT_CHECK,
-//            'buyerId'   => (int) $params['buyerId']
-//        ), $params, false, true);
-        
+                
         if((int) $params['creditLimitAmount'] < 7000) 
             $params['creditLimitAmount'] = 7000;
         
         
         // Crédit check
-        if((int) $params['creditLimitAmount'] <= 12000) {
+        if((int) $params['creditLimitAmount'] <= 7000) {
             
             $params_cc = array(
                 'coverType' => (string) $params_cc['coverType'] = self::CREDIT_CHECK,
@@ -363,7 +348,7 @@ class AtradiusAPI extends BimpAPI {
             
             $new_cover = $this->setCover($params_cc, $errors, $warnings, $success);
             if(count($new_cover))
-                $decisions[] = $new_cover;
+                return array($new_cover);
         }
         
         // Limit de crédit
@@ -378,12 +363,10 @@ class AtradiusAPI extends BimpAPI {
             
             $new_cover = $this->setCover($params_cl, $errors, $warnings, $success);
             if(count($new_cover))
-                $decisions[] = $new_cover;
+                return array($new_cover);
         }
         
-
-        
-        return $decisions;
+        return array();
     }
     
     private function setCover($params, &$errors = array(), &$warnings = array(), &$success = '') {
@@ -400,11 +383,6 @@ class AtradiusAPI extends BimpAPI {
         
         $cover = $this->getCover($params_get, $errors, $warnings);
         
-//        if(count($warnings)) {
-//            
-//            return array();
-//        }
-
         if((string) $cover['cover_type'] == self::CREDIT_LIMIT and (string) $params['coverType'] == self::CREDIT_CHECK and 0 < (int) $cover['creditLimitAmount']) {
             $warnings[] = "Il y a déjà une limite de crédit pour ce client, on ignore la création de crédit check";
             return array();

@@ -197,10 +197,10 @@ class BF_Demande extends BimpObject
             return 0;
         }
 
-        $status = (int) $this->getData('status');
+        $devis_status = (int) $this->getData('devis_status');
 
-        if ($status <= 0 || in_array($status, array(BF_Demande::STATUS_ACCEPTED, BF_Demande::STATUS_CANCELED))) {
-            $errors[] = 'Le statut actuel de la demande de location ne permet pas d\'ajouter des demandes refinanceurs';
+        if ($devis_status >= self::DOC_ACCEPTED) {
+            $errors[] = 'le devis a été signé ou refusé';
             return 0;
         }
 
@@ -389,6 +389,13 @@ class BF_Demande extends BimpObject
                 }
                 if ((int) $this->getData('devis_status') !== self::DOC_GENERATED) {
                     $errors[] = 'Le devis de location n\'est pas en attente d\'envoi à ' . $this->displaySourceName();
+                    return 0;
+                }
+
+                $files = $this->getDevisFilesArray(false);
+                if (empty($files)) {
+                    $this->updateField('devis_status', self::DOC_NONE);
+                    $errors[] = 'Aucun devis de location généré';
                     return 0;
                 }
                 return 1;
@@ -726,8 +733,16 @@ class BF_Demande extends BimpObject
 
             $action = 'createSignature' . ucfirst($doc_type);
             if ($this->isActionAllowed($action) && $this->canSetAction($action)) {
+                $label = 'Envoyer le ' . $doc_type . ' de location pour signature';
+
+                if ($doc_type == 'devis') {
+                    $files = $this->getDevisFilesArray(false);
+                    if (count($files) > 1) {
+                        $label = 'Envoyer les ' . count($files) . ' devis de location pour signature';
+                    }
+                }
                 $buttons['create_signature_' . $doc_type] = array(
-                    'label'   => 'Envoyer le ' . $doc_type . ' de location pour signature',
+                    'label'   => $label,
                     'icon'    => 'fas_signature',
                     'onclick' => $this->getJsActionOnclick($action, array(), array(
                         'form_name' => 'create_signature_' . $doc_type
@@ -785,8 +800,15 @@ class BF_Demande extends BimpObject
         }
 
         if ($this->isActionAllowed('submitDevis') && $this->canSetAction('submitDevis')) {
+            $files = $this->getDevisFilesArray(false);
+
+            if (count($files) > 1) {
+                $label = 'Envoyer les ' . count($files) . ' devis à ' . $this->displaySourceName();
+            } else {
+                $label = 'Envoyer le devis à ' . $this->displaySourceName();
+            }
             $buttons[] = array(
-                'label'   => 'Envoyer le devis à ' . $this->displaySourceName(),
+                'label'   => $label,
                 'icon'    => 'fas_arrow-circle-right',
                 'onclick' => $this->getJsActionOnclick('submitDevis', array(), array(
                     'confirm_msg' => 'Veuillez confirmer'
@@ -1110,6 +1132,39 @@ class BF_Demande extends BimpObject
     {
         BimpObject::loadClass('bimpfinancement', 'BF_DemandeRefinanceur');
         return BF_DemandeRefinanceur::getRefinanceursArray($include_empty, $active_only);
+    }
+
+    public function getDevisFilesArray($include_empty = true)
+    {
+        if (!$this->isLoaded()) {
+            return ($include_empty ? array('' => '') : array());
+        }
+
+        $key = 'BF_Demande_' . $this->id . '_devis_files_array';
+
+        if (!isset(self::$cache[$key])) {
+            $files = array();
+            $dir = $this->getFilesDir();
+
+            $file_name_base = pathinfo($this->getSignatureDocFileName('devis'), PATHINFO_FILENAME);
+
+            if (is_dir($dir)) {
+                foreach (scandir($dir) as $f) {
+                    if (in_array($f, array('.', '..'))) {
+                        continue;
+                    }
+
+                    if (preg_match('/^' . preg_quote($file_name_base, '/') . '(\-\d+)?\.pdf$/', $f)) {
+                        $files[$f] = $f;
+                    }
+                }
+            }
+
+            ksort($files, SORT_NATURAL);
+            self::$cache[$key] = $files;
+        }
+
+        return self::getCacheArray($key, $include_empty, '', '');
     }
 
     // Getters montants:
@@ -2139,6 +2194,20 @@ class BF_Demande extends BimpObject
 
         $docs_buttons = array();
         $factures_buttons = array();
+
+        $idx = 1;
+        $file_name_base = pathinfo($this->getSignatureDocFileName('devis', 0), PATHINFO_FILENAME);
+        while (file_exists($dir . $file_name_base . '-' . $idx . '.pdf')) {
+            $url = $this->getFileUrl($file_name_base . '-' . $idx . '.pdf');
+            if ($url) {
+                $docs_buttons[] = array(
+                    'label'   => 'Devis n°' . $idx,
+                    'icon'    => 'fas_file-pdf',
+                    'onclick' => 'window.open(\'' . $url . '\');'
+                );
+            }
+            $idx++;
+        }
 
         foreach (array('devis', 'contrat', 'pvr') as $doc_type) {
             foreach (array(1, 0) as $signed) {
@@ -3332,9 +3401,28 @@ class BF_Demande extends BimpObject
                 }
                 $this->updateField('id_main_source', $id_main_source);
             }
+        } elseif (is_a($child, 'BimpFile')) {
+            $this->checkDevisFiles();
         }
 
         return array();
+    }
+
+    public function checkDevisFiles(&$next_file_idx = 1, $force_new_next_file = false)
+    {
+        if (!$this->isLoaded()) {
+            return;
+        }
+
+        $files = $this->getDevisFilesArray(false);
+
+        if (!empty($files)) {
+            $signatureClassName = '';
+            BimpObject::loadClass('bimpcore', 'BimpSignature', $signatureClassName);
+            $dir = $this->getFilesDir();
+            $file_name_base = pathinfo($this->getSignatureDocFileName('devis'), PATHINFO_FILENAME);
+            $signatureClassName::checkMultipleFiles($files, $this, $dir, $file_name_base, 'signature_devis_params', $next_file_idx, $force_new_next_file);
+        }
     }
 
     public function generateDocument($doc_type, $data = array(), &$warnings = array(), &$success = '')
@@ -3360,8 +3448,37 @@ class BF_Demande extends BimpObject
 
             $pdf = new $pdfClassName($db, $this, $data, $options);
 
+            $file_dir = $this->getFilesDir();
             $file_name = $this->getSignatureDocFileName($doc_type);
-            $file_path = $this->getFilesDir() . $file_name;
+            $file_idx = 0;
+
+            if ($doc_type == 'devis') {
+                if (BimpTools::getArrayValueFromPath($data, 'replace_devis', 0)) {
+                    $file_name_base = pathinfo($file_name, PATHINFO_FILENAME);
+                    $file_name = BimpTools::getArrayValueFromPath($data, 'replaced_devis', '');
+
+                    if (!$file_name) {
+                        $errors[] = 'Devis à remplacé non sélectionné';
+                        return $errors;
+                    }
+
+                    if (preg_match('/^' . preg_quote($file_name_base, '/') . '(\-(\d+))\.pdf$/', $file_name, $matches)) {
+                        $file_idx = (int) $matches[2];
+                    }
+                } else {
+                    $this->checkDevisFiles($file_idx, true);
+
+                    if ($file_idx > 1) {
+                        $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '-' . $file_idx . '.pdf';
+                    }
+                }
+            }
+
+            if ($file_idx) {
+                $pdf->signature_file_idx = $file_idx;
+            }
+
+            $file_path = $file_dir . $file_name;
 
             if (!$pdf->render($file_path, 'F')) {
                 $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la création du fichier');
@@ -3414,6 +3531,41 @@ class BF_Demande extends BimpObject
                 $file_name = $this->getSignatureDocFileName($doc_type);
                 $dir = $this->getFilesDir();
 
+                if ($doc_type == 'devis') {
+                    if ((int) BimpTools::getPostFieldValue('replace_devis', 0)) {
+                        $file_name_base = pathinfo($file_name, PATHINFO_FILENAME);
+                        $file_name = BimpTools::getPostFieldValue('replaced_devis', '');
+
+                        if (!$file_name) {
+                            $errors[] = 'Devis à remplacé non sélectionné';
+                            return $errors;
+                        }
+
+                        if (preg_match('/^' . preg_quote($file_name_base, '/') . '(\-(\d+))?\.pdf$/', $file_name, $matches)) {
+                            $file_idx = (int) $matches[2];
+
+                            if ($file_idx) {
+                                $signature_params = $this->getData('signature_devis_params');
+
+                                if (isset($signature_params[$file_idx])) {
+                                    unset($signature_params[$file_idx]);
+                                    $this->updateField('signature_devis_params', $signature_params);
+                                }
+                            } else {
+                                $this->updateField('signature_devis_params', array());
+                            }
+                        }
+
+                        unlink($dir . $file_name);
+                    } else {
+                        $this->checkDevisFiles($file_idx, true);
+
+                        if ($file_idx > 1) {
+                            $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '-' . $file_idx . '.pdf';
+                        }
+                    }
+                }
+
                 $_FILES['doc_file']['name'] = $file_name;
 
                 $result = dol_add_file_process($dir, 0, 0, 'doc_file');
@@ -3439,7 +3591,7 @@ class BF_Demande extends BimpObject
         return $errors;
     }
 
-    public function submitDoc($doc_type)
+    public function submitDoc($doc_type, &$warnings = array())
     {
         $errors = array();
 
@@ -3455,9 +3607,15 @@ class BF_Demande extends BimpObject
             $type_origine = $source->getData('type_origine');
             $id_origine = (int) $source->getData('id_origine');
 
-            $file = $this->getFilesDir() . $this->getSignatureDocFileName($doc_type);
+            $dir = $this->getFilesDir();
+            $file = $dir . $this->getSignatureDocFileName($doc_type);
+            $devis_files = array();
 
-            if (!file_exists($file)) {
+            if ($doc_type === 'devis') {
+                $devis_files = $this->getDevisFilesArray(false);
+            }
+
+            if (!file_exists($file) && ($doc_type !== 'devis' || empty($devis_files))) {
                 $errors[] = 'PDF du ' . $this->getDocTypeLabel($doc_type) . ' trouvé';
             }
 
@@ -3474,7 +3632,17 @@ class BF_Demande extends BimpObject
 
                 if (!count($errors)) {
                     $req_errors = array();
-                    $doc_content = base64_encode(file_get_contents($file));
+                    if ($doc_type == 'devis') {
+                        $docs_content = array();
+                        foreach ($devis_files as $devis_file) {
+                            $docs_content[] = base64_encode(file_get_contents($dir . $devis_file));
+                        }
+                    } else {
+                        $docs_content = array(base64_encode(file_get_contents($file)));
+                    }
+
+                    $docs_content = json_encode($docs_content);
+
                     $signature_params = json_encode($this->getData('signature_' . $doc_type . '_params'));
                     $signataires_data = '';
                     switch ($doc_type) {
@@ -3497,7 +3665,8 @@ class BF_Demande extends BimpObject
                             break;
                     }
 
-                    $api->sendDocFinancement($this->id, $type_origine, $id_origine, $doc_type, $doc_content, $signature_params, $signataires_data, $req_errors);
+
+                    $api->sendDocFinancement($this->id, $type_origine, $id_origine, $doc_type, $docs_content, $signature_params, $signataires_data, $req_errors);
 
                     if (count($req_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la requête');
@@ -4656,7 +4825,7 @@ class BF_Demande extends BimpObject
         $warnings = array();
         $success = 'Envoi du devis de location à ' . $this->displaySourceName() . ' effectué avec succès';
 
-        $errors = $this->submitDoc('devis');
+        $errors = $this->submitDoc('devis', $warnings);
 
         return array(
             'errors'   => $errors,
@@ -4670,7 +4839,7 @@ class BF_Demande extends BimpObject
         $warnings = array();
         $success = 'Envoi du contrat de location à ' . $this->displaySourceName() . ' effectué avec succès';
 
-        $errors = $this->submitDoc('contrat');
+        $errors = $this->submitDoc('contrat', $warnings);
 
         return array(
             'errors'   => $errors,
@@ -4684,7 +4853,7 @@ class BF_Demande extends BimpObject
         $warnings = array();
         $success = 'Envoi du PV de réception à ' . $this->displaySourceName() . ' effectué avec succès';
 
-        $errors = $this->submitDoc('pvr');
+        $errors = $this->submitDoc('pvr', $warnings);
 
         return array(
             'errors'   => $errors,
@@ -5459,11 +5628,12 @@ class BF_Demande extends BimpObject
                     $errors[] = 'Client absent';
                 } else {
                     $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
-                                'obj_module'       => 'bimpfinancement',
-                                'obj_name'         => 'BF_Demande',
-                                'id_obj'           => $this->id,
-                                'doc_type'         => $doc_type,
-                                'obj_params_field' => 'signature_' . $doc_type . '_params'
+                                'obj_module'           => 'bimpfinancement',
+                                'obj_name'             => 'BF_Demande',
+                                'id_obj'               => $this->id,
+                                'doc_type'             => $doc_type,
+                                'obj_params_field'     => 'signature_' . $doc_type . '_params',
+                                'allow_multiple_files' => ($doc_type === 'devis' ? 1 : 0)
                                     ), true, $errors, $warnings);
 
                     if (!count($errors) && BimpObject::objectLoaded($signature)) {
@@ -5602,33 +5772,60 @@ class BF_Demande extends BimpObject
 
         if ($signature_type) {
             $message = 'Bonjour, <br/><br/>';
-            $message .= 'Le document "{NOM_DOCUMENT}" est en attente de validation.<br/><br/>';
 
-            switch ($signature_type) {
-                case 'docusign':
-                    $message .= 'Merci de bien vouloir le signer électroniquement en suivant les instructions DocuSign.<br/><br/>';
-                    break;
+            $nb_files = 1;
 
-                case 'elec':
-                default:
-                    $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé';
-                    if ($doc_type == 'contrat') {
-                        $message .= ' <b>(par courrier uniquement)</b>';
-                    } else {
+            if ($doc_type === 'devis') {
+                $files = $this->getDevisFilesArray(false);
+                $nb_files = count($files);
+            }
+
+            if ($nb_files > 1) {
+                $message .= 'Vous trouverez ci-joint ' . $nb_files . ' propositions de location pour votre matériel informatique.<br/><br/>';
+
+                switch ($signature_type) {
+                    case 'elec':
+                        $message .= 'Vous pouvez effectuer la signature électronique du document correspondant à la proposition que aurez choisie depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner ce document signé';
                         $message .= ' par courrier ou par e-mail';
-                    }
-                    $message .= '.<br/><br/>';
-                    break;
+                        $message .= '.<br/><br/>';
+                        break;
 
-                case 'papier':
-                    $message .= 'Merci d\'imprimer ce document et de nous le retourner signé';
-                    if ($doc_type == 'contrat') {
-                        $message .= ' <b>par courrier uniquement</b>';
-                    } else {
+                    case 'papier':
+                    default:
+                        $message .= 'Merci d\'imprimer le document correspondant à la proposition que vous aurez choise et de nous le retourner signé';
                         $message .= ' par courrier ou par e-mail';
-                    }
-                    $message .= '.<br/><br/>';
-                    break;
+                        $message .= '.<br/><br/>';
+                        break;
+                }
+            } else {
+                $message .= 'Le document "{NOM_DOCUMENT}" est en attente de validation.<br/><br/>';
+
+                switch ($signature_type) {
+                    case 'docusign':
+                        $message .= 'Merci de bien vouloir le signer électroniquement en suivant les instructions DocuSign.<br/><br/>';
+                        break;
+
+                    case 'elec':
+                    default:
+                        $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé';
+                        if ($doc_type == 'contrat') {
+                            $message .= ' <b>(par courrier uniquement)</b>';
+                        } else {
+                            $message .= ' par courrier ou par e-mail';
+                        }
+                        $message .= '.<br/><br/>';
+                        break;
+
+                    case 'papier':
+                        $message .= 'Merci d\'imprimer ce document et de nous le retourner signé';
+                        if ($doc_type == 'contrat') {
+                            $message .= ' <b>par courrier uniquement</b>';
+                        } else {
+                            $message .= ' par courrier ou par e-mail';
+                        }
+                        $message .= '.<br/><br/>';
+                        break;
+                }
             }
 
             $message .= 'Vous en remerciant par avance, nous restons à votre disposition pour tout complément d\'information.<br/><br/>';
@@ -5660,18 +5857,18 @@ class BF_Demande extends BimpObject
         return '';
     }
 
-    public function getSignatureDocFileName($doc_type, $signed = false)
+    public function getSignatureDocFileName($doc_type, $signed = false, $file_idx = 0)
     {
         $ext = $this->getSignatureDocFileExt($doc_type, $signed);
 
         if ($this->isLoaded()) {
-            return $this->getSignatureDocRef($doc_type) . ($signed ? '_signe' : '') . '.' . $ext;
+            return $this->getSignatureDocRef($doc_type) . ($signed ? '_signe' : ($file_idx ? '-' . $file_idx : '')) . '.' . $ext;
         }
 
         return '';
     }
 
-    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false)
+    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false, $file_idx = 0)
     {
         if (!$this->isLoaded()) {
             return '';
@@ -5682,11 +5879,11 @@ class BF_Demande extends BimpObject
             $context = $forced_context;
         }
 
-        $fileName = $this->getSignatureDocFileName($doc_type, $signed);
+        $fileName = $this->getSignatureDocFileName($doc_type, $signed, $file_idx);
 
         if ($fileName) {
             if ($context === 'public') {
-                return self::getPublicBaseUrl() . 'fc=doc&doc=' . $doc_type . '_financement' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
+                return self::getPublicBaseUrl() . 'fc=doc&doc=' . $doc_type . '_financement' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef() . ($file_idx ? '&file_idx=' . $file_idx : '');
             } else {
                 return $this->getFileUrl($fileName);
             }

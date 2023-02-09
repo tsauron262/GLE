@@ -40,11 +40,6 @@
 require '../../main.inc.php';
 
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_Propal", $_REQUEST['id']);
-$htmlRedirect = $bObj->processRedirect();
-
-
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formpropal.class.php';

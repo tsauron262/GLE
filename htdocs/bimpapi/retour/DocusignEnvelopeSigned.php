@@ -3,6 +3,7 @@
 define('NOREQUIREHTML', 1);
 define('NOCSRFCHECK', 1);
 define('NO_REDIRECT_LOGIN', 1);
+define('NOLOGIN', 1);
 require_once("../../main.inc.php");
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 

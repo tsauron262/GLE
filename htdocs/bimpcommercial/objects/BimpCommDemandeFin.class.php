@@ -2232,7 +2232,7 @@ class BimpCommDemandeFin extends BimpObject
                                             ), $docusign_success, true);
 
                                     if (count($docusign_result['errors'])) {
-                                        $warnings[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
+                                        $errors[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
                                     } else {
                                         $success .= '<br/>' . $docusign_success;
                                     }
@@ -2390,7 +2390,7 @@ class BimpCommDemandeFin extends BimpObject
                                             ), $docusign_success, true);
 
                                     if (count($docusign_result['errors'])) {
-                                        $warnings[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
+                                        $errors[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
                                     } else {
                                         $success .= '<br/>' . $docusign_success;
                                     }

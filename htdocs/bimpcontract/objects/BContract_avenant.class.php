@@ -1027,4 +1027,10 @@ class BContract_avenant extends BContract_contrat {
             'foldable' => true
             ));
     }
+    
+    public function getLink($params = array(), $forced_context = '') {
+        
+        return $this->getParentInstance()->getLink(array('after_link' => '&navtab-maintabs=avenant'));
+    }
+    
 }

@@ -2286,7 +2286,7 @@ function top_menu_user($hideloginname = 0, $urllogout = '')
 	if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
 		$btnUser = '<!-- div for user link -->
 	    <div id="topmenu-login-dropdown" class="userimg atoplogin dropdown user user-menu inline-block">
-	        <a href="'.DOL_URL_ROOT.'/user/card.php?id='.$user->id.'" class="dropdown-toggle login-dropdown-a" data-toggle="dropdown">
+	        <a href="'.DOL_URL_ROOT.'/user/card.php?id='.$user->id.'" class="dropdown-toggle login-dropdown-a" data-toggle="dropdownDoli">
 	            '.$userImage.(empty($user->photo) ? '<span class="hidden-xs maxwidth200 atoploginusername hideonsmartphone paddingleft">'.dol_trunc($user->firstname ? $user->firstname : $user->login, 10).'</span>' : '').'
 	        </a>
 	        <div class="dropdown-menu">
@@ -2392,7 +2392,7 @@ function top_menu_quickadd()
 
 	$html .= '<!-- div for quick add link -->
     <div id="topmenu-quickadd-dropdown" class="atoplogin dropdown inline-block">
-        <a class="dropdown-toggle login-dropdown-a" data-toggle="dropdown" href="#" title="'.$langs->trans('QuickAdd').' ('.$langs->trans('QuickAddMenuShortCut').')"><i class="fa fa-plus-circle"></i></a>
+        <a class="dropdown-toggle login-dropdown-a" data-toggle="dropdownDoli" href="#" title="'.$langs->trans('QuickAdd').' ('.$langs->trans('QuickAddMenuShortCut').')"><i class="fa fa-plus-circle"></i></a>
         <div class="dropdown-menu">'.printDropdownQuickadd().'</div>
     </div>';
 	$html .= '
@@ -2618,7 +2618,7 @@ function top_menu_bookmark()
 		} else {
 			$html .= '<!-- div for bookmark link -->
 	        <div id="topmenu-bookmark-dropdown" class="dropdown inline-block">
-	            <a class="dropdown-toggle login-dropdown-a" data-toggle="dropdown" href="#" title="'.$langs->trans('Bookmarks').' ('.$langs->trans('BookmarksMenuShortCut').')"><i class="fa fa-star"></i></a>
+	            <a class="dropdown-toggle login-dropdown-a" data-toggle="dropdownDoli" href="#" title="'.$langs->trans('Bookmarks').' ('.$langs->trans('BookmarksMenuShortCut').')"><i class="fa fa-star"></i></a>
 	            <div class="dropdown-menu">
 	                '.printDropdownBookmarksList().'
 	            </div>
@@ -2716,7 +2716,7 @@ function top_menu_search()
 
 	$html .= '<!-- div for Global Search -->
     <div id="topmenu-global-search-dropdown" class="atoplogin dropdown inline-block">
-        <a class="dropdown-toggle login-dropdown-a" data-toggle="dropdown" href="#" title="'.$langs->trans('Search').' ('.$langs->trans('SearchMenuShortCut').')">
+        <a class="dropdown-toggle login-dropdown-a" data-toggle="dropdownDoli" href="#" title="'.$langs->trans('Search').' ('.$langs->trans('SearchMenuShortCut').')">
             <i class="fa fa-search" ></i>
         </a>
         <div class="dropdown-menu dropdown-search">

@@ -160,9 +160,9 @@ class BimpSignature extends BimpObject
                 return 1;
 
             case 'refreshDocuSign':
-                if (!$this->isAttenteDocuSign()) {
-                    $errors[] = 'Aucune signature DocuSign en attente';
-                    return 0;
+                if (!$this->isAttenteDocuSign()) {//pouruoi
+//                    $errors[] = 'Aucune signature DocuSign en attente';
+//                    return 0;
                 }
                 return 1;
 
@@ -1629,9 +1629,9 @@ class BimpSignature extends BimpObject
     {
         $errors = array();
 
-        if (!$this->isAttenteDocuSign()) {
-            $errors[] = 'Aucune signature DocuSign en attente';
-            return $errors;
+        if (!$this->isAttenteDocuSign()) {//pourquoi
+//            $errors[] = 'Aucune signature DocuSign en attente';
+//            return $errors;
         }
 
         $id_envelope = $this->getData('id_envelope_docu_sign');

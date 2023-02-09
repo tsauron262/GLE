@@ -174,7 +174,7 @@ class BContract_avenant extends BContract_contrat {
          $errors = parent::validatePost();
          $parent = $this->getParentInstance();
          
-         if($this->getData('statut') != 0) $errors[] = 'Cet avenant n\'est plus au statut brouillon';
+         if($this->isLoaded() && $this->getData('statut') != 0) $errors[] = 'Cet avenant n\'est plus au statut brouillon';
          
          $conserne_date_end_avp = false;
          
@@ -980,7 +980,7 @@ class BContract_avenant extends BContract_contrat {
                                         ), $docusign_success, true);
 
                                 if (count($docusign_result['errors'])) {
-                                    $warnings[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
+                                    $errors[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
                                 } else {
                                     $success .= '<br/>' . $docusign_success;
                                 }

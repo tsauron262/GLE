@@ -68,7 +68,9 @@ class CSMSFile
 	 */
 	public function __construct($to, $from, $msg, $deliveryreceipt = 0, $deferred = 0, $priority = 3, $class = 1)
 	{
-		global $conf;
+		global $conf, $db;
+                
+                $this->db = $db;
 
 		// On definit fin de ligne
 		$this->eol = "\n";

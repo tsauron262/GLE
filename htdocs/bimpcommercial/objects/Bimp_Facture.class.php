@@ -3945,6 +3945,7 @@ class Bimp_Facture extends BimpComm
             $this->dol_object->fetch_lines();
             $this->dol_object->update_price();
             $this->dol_object->fetch((int) $this->id);
+            $this->dol_object->fetch_thirdparty();
             $this->hydrateFromDolObject();
 
 //            if (!$this->isValidatable($errors)) {

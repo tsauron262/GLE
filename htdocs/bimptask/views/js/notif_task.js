@@ -31,7 +31,7 @@ class notif_task extends AbstractNotification {
 
             html += '<div class="header" style="padding: 5px 15px">';
 
-            html += '<table style="width: 100%; sont-size: 15px">';
+            html += '<table style="width: 100%; font-size: 15px;">';
             html += '<tr>';
             html += '<td style="width: 30%">';
             html += 'Tâches en cours';

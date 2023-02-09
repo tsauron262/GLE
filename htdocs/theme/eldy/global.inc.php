@@ -2940,7 +2940,7 @@ div.login_block span.aversion {
 	filter: contrast(0.7);
 }
 div.login_block table {
-	display: inline;
+	/*moddrsi display: inline;*/
 }
 div.login {
 	white-space:nowrap;
@@ -2970,7 +2970,7 @@ div.login_block_other {
 	padding-top: 0;
 	text-align: right;
 	margin-right: 8px;
-	max-width: 200px;
+	/*moddrsi max-width: 200px;*/
 }
 
 .login_block_elem {

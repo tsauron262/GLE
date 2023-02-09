@@ -591,7 +591,7 @@ class BContract_avenant extends BContract_contrat {
             );
         }
         
-        if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN) {
+        if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN and (int) $this->getData('id_signature') == 0) {
             $buttons[] = array(
                 'label'   => 'Créer signature',
                 'icon'    => 'fas_signature',
@@ -617,13 +617,15 @@ class BContract_avenant extends BContract_contrat {
                     'label'   => 'Abandonner',
                     'icon'    => 'fas_stop-circle',
                     'onclick' => $this->getJsActionOnclick('abort', array(), array(
-                        'confirm_msg' => "L'abandon de l'avenant est irréversible, continuer ?",
+                        'confirm_msg' => 'Veuillez confirmer: abandon avenant'
                     ))
                 );
-                $buttons[] = array(
+            
+            $buttons[] = array(
                     'label'   => 'Clore',
                     'icon'    => 'fas_times',
                     'onclick' => $this->getJsActionOnclick('close', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer: cloture avenant'
 
                     ))
                 );

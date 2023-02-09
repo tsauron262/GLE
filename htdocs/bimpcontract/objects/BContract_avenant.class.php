@@ -617,7 +617,7 @@ class BContract_avenant extends BContract_contrat {
                     'label'   => 'Abandonner',
                     'icon'    => 'fas_stop-circle',
                     'onclick' => $this->getJsActionOnclick('abort', array(), array(
-
+                        'confirm_msg' => "L'abandon de l'avenant est irréversible, continuer ?",
                     ))
                 );
                 $buttons[] = array(

@@ -126,9 +126,9 @@ class BimpThemeLayout extends BimpLayout
         $reshook = $hookmanager->executeHooks('printLeftBlock', $parameters);    // Note that $action and $object may have been modified by some hooks
         $html .= $hookmanager->resPrint;
 
-        $parameters = array();
-        $reshook = $hookmanager->executeHooks('printMenuAfter', $parameters);    // Note that $action and $object may have been modified by some hooks
-        $html .= $hookmanager->resPrint;
+//        $parameters = array();
+//        $reshook = $hookmanager->executeHooks('printMenuAfter', $parameters);    // Note that $action and $object may have been modified by some hooks
+//        $html .= $hookmanager->resPrint;
         $html .= '</div>';
 
         $html .= ' </nav><!-- End #main-menu-navigation -->' . "\n";

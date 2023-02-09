@@ -44,12 +44,6 @@ require '../main.inc.php';
 
 
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcore", "Bimp_Product", $_REQUEST['id']);
-$htmlRedirect = $bObj->processRedirect();
-
-
-
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/canvas.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';

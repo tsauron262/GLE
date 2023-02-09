@@ -152,6 +152,7 @@ class HookManager
 	 */
 	public function executeHooks($method, $parameters = array(), &$object = '', &$action = '')
 	{
+//            echo('hook '.$method.'<br/>');
 		if (!is_array($this->hooks) || empty($this->hooks)) {
 			return 0; // No hook available, do nothing.
 		}

@@ -78,6 +78,56 @@ class ActionsBimpcore
 
         return 0;
     }
+    
+    function printMainArea(){
+        $this->resprints = '';
+        $this->resprints .= $this->getBtnRedirectHoldToNew();
+        return 0;
+    }
+    
+    function getBtnRedirectHoldToNew(){
+        $url = $_SERVER['REQUEST_URI']; 
+        
+        if(stripos($url, 'comm/propal'))
+                $tabObj = array("bimpcommercial", "Bimp_Propal");
+        if(stripos($url, '/commande/'))
+                $tabObj = array("bimpcommercial", "Bimp_Commande");
+        if(stripos($url, '/compta/facture/'))
+                $tabObj = array("bimpcommercial", "Bimp_Facture");
+        if(stripos($url, '/contrat/'))
+                $tabObj = array("bimpcontract", "BContract_contrat");
+        if(stripos($url, '/comm/') || stripos($url, '/societe/')){
+            if(BimpTools::getValue('type', 's') == 'f')
+                $tabObj = array("bimpcore", "Bimp_Fournisseur");
+            else
+                $tabObj = array("bimpcore", "Bimp_Client");
+        }
+        
+        
+        if(stripos($url, '/fourn/commande/'))
+                $tabObj = array("bimpcommercial", "Bimp_CommandeFourn");
+        elseif(stripos($url, '/fourn/facture/'))
+                $tabObj = array("bimpcommercial", "Bimp_FactureFourn", 'facid');
+        elseif(stripos($url, '/fourn/'))
+                $tabObj = array("bimpcore", "Bimp_Fournisseur");
+        
+        
+        if(stripos($url, '/product/'))
+                $tabObj = array("bimpcore", "Bimp_Product");
+        
+        if(stripos($url, '/synopsisdemandeinterv/') || stripos($url, '/synopsisfichinter/'))
+                $tabObj = array("bimptechnique", "BT_ficheInter");
+        
+        if(stripos($url, '/user/'))
+                $tabObj = array("bimpcore", "Bimp_User");
+        
+        
+        
+        if(isset($tabObj)){
+            $bObj = BimpObject::getInstance($tabObj[0], $tabObj[1], $_REQUEST[(isset($tabObj[2])? $tabObj[2] : 'id')]);
+            return $bObj->processRedirect();
+        }
+    }
 
     function initBimpLayout($parameters, &$object, &$action, $hookmanager)
     {

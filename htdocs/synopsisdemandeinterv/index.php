@@ -42,10 +42,6 @@
 require("./pre.inc.php");
 
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpfichinter", "Bimp_Demandinter");
-$htmlRedirect = $bObj->processRedirect();
-
 
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
@@ -57,7 +53,7 @@ $langs->load("interventions");
 $sortorder = isset($_GET["sortorder"]) ? $_GET["sortorder"] : "DESC";
 $sortfield = isset($_GET["sortfield"]) ? $_GET["sortfield"] : "fk_statut asc, f.datei ";
 $socid = isset($_GET["socid"]) ? $_GET["socid"] : "";
-$page = isset($_GET["page"]) ? $_GET["page"] : "";
+$page = isset($_GET["page"]) ? (int)$_GET["page"] : 0;
 
 // Security check
 $synopsisdemandeintervid = isset($_GET["id"]) ? $_GET["id"] : '';
@@ -73,8 +69,8 @@ if ($page == -1) {
     $page = 0;
 }
 
-$limit = $conf->liste_limit;
-$offset = $limit * $page;
+$limit = (int)$conf->liste_limit;
+$offset = (int)$limit * (int)$page;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 
@@ -86,7 +82,6 @@ $filtreUser = (isset($_REQUEST['filtreUser']) && $_REQUEST['filtreUser']);
 
 llxHeader();
 
-echo $htmlRedirect; 
 
 $sql = "SELECT s.nom,s.rowid as socid, f.ref, f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";
 if (!$user->rights->societe->client->voir && !$socid)

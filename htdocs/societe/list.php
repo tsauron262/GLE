@@ -38,13 +38,6 @@ require_once '../main.inc.php';
 
 
 
-if(isset($_REQUEST['type']) && $_REQUEST['type'] == 'c'){
-    require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-    $bObj = BimpObject::getInstance("bimpcore", "Bimp_Client", $_REQUEST['id']);
-    $htmlRedirect = $bObj->processRedirect();
-}
-
-
 
 include_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';

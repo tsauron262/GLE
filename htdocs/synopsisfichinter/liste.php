@@ -42,10 +42,6 @@
 require("./pre.inc.php");
 
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpfichinter", "Bimp_Demandinter", $_REQUEST['id']);
-$htmlRedirect = $bObj->processRedirect();
-
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
@@ -87,7 +83,6 @@ $pagenext = $page + 1;
  */
 
 llxHeader("", "Liste des FI");
-echo $htmlRedirect;
 
 
 $sql = "SELECT s.nom,s.rowid as socid, f.fk_user_author, f.ref,f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";

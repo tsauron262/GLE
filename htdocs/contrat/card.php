@@ -33,10 +33,6 @@
 
 require ("../main.inc.php");
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcontract", "BContract_contrat", $_REQUEST['id']);
-$htmlRedirect = $bObj->processRedirect();
-
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/contract.lib.php';
@@ -1007,7 +1003,6 @@ $help_url = 'EN:Module_Contracts|FR:Module_Contrat';
 
 llxHeader('', $langs->trans("Contract"), $help_url);
 
-echo $htmlRedirect;
 
 $form = new Form($db);
 $formfile = new FormFile($db);

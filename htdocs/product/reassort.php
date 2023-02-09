@@ -29,11 +29,6 @@
 require '../main.inc.php';
 
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_Product_Entrepot", $_REQUEST['id']);
-$htmlRedirect = $bObj->processRedirect();
-
-
 
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
@@ -315,7 +310,6 @@ if ($resql) {
 	}
 
 	llxHeader("", $texte, $helpurl);
-echo $htmlRedirect;
 
 	print '<form action="'.$_SERVER["PHP_SELF"].'" method="post" name="formulaire">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';

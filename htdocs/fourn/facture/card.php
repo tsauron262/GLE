@@ -36,10 +36,6 @@
 require '../../main.inc.php';
 
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_FactureFourn", ($_REQUEST['facid'] > 0? $_REQUEST['facid'] : $_REQUEST['id']));
-$htmlRedirect = $bObj->processRedirect();
-
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.class.php';
@@ -1905,7 +1901,6 @@ $title = $langs->trans('SupplierInvoice')." - ".$langs->trans('Card');
 $help_url = 'EN:Module_Suppliers_Invoices|FR:Module_Fournisseurs_Factures|ES:Módulo_Facturas_de_proveedores|DE:Modul_Lieferantenrechnungen';
 llxHeader('', $title, $help_url);
 
-echo $htmlRedirect;
 
 // Mode creation
 if ($action == 'create') {

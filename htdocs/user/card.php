@@ -36,15 +36,6 @@
  */
 
 require '../main.inc.php';
-
-
-if(!isset($_REQUEST['action']) || ($_REQUEST['action'] != 'create' && $_REQUEST['action'] != 'add' && $_REQUEST['action'] != 'adduserldap')){
-    require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-    $bObj = BimpObject::getInstance("bimpcore", "Bimp_User", $_REQUEST['id']);
-    $htmlRedirect = $bObj->processRedirect();
-}
-
-
 require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
@@ -129,8 +120,7 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 $socialnetworks = getArrayOfSocialNetworks();
 
 // Initialize technical object to manage hooks. Note that conf->hooks_modules contains array
-$contextpage=array('usercard','globalcard');
-$hookmanager->initHooks($contextpage);
+$hookmanager->initHooks(array('usercard', 'globalcard'));
 
 $error = 0;
 
@@ -380,7 +370,6 @@ if (empty($reshook)) {
 			$editgroup->oldcopy = clone $editgroup;
 
 			$object->fetch($id);
-			$object->oldcopy=clone $object;
 			if ($action == 'addgroup') {
 				$result = $object->SetInGroup($group, $editgroup->entity);
 			}
@@ -626,13 +615,11 @@ if (empty($reshook)) {
 				if (GETPOST("password", "none")) {	// If pass is empty, we do not change it.
 					$object->oldcopy = clone $object;
 
-                                if(GETPOST("password") != ""){
-                                    $ret = $object->setPassword($user, GETPOST("password"));
-                                    if ($ret < 0)
-                                    {
-                                            setEventMessages($object->error, $object->errors, 'errors');
-                                    }
-                                }
+					$ret = $object->setPassword($user, GETPOST("password", "none"));
+					if ($ret < 0) {
+						setEventMessages($object->error, $object->errors, 'errors');
+					}
+				}
 			}
 		}
 	}
@@ -743,8 +730,7 @@ if (!empty($conf->stock->enabled)) {
 	$formproduct = new FormProduct($db);
 }
 
-llxHeader('',$langs->trans("UserCard"));
-echo $htmlRedirect;
+llxHeader('', $langs->trans("UserCard"));
 
 if ($action == 'create' || $action == 'adduserldap') {
 	print load_fiche_titre($langs->trans("NewUser"), '', 'user');

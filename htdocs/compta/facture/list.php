@@ -36,12 +36,6 @@
  */
 
 require '../../main.inc.php';
-
-
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_Facture", $_REQUEST['id']);
-$htmlRedirect = $bObj->processRedirect();
-
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
@@ -302,7 +296,7 @@ if (!GETPOST('confirmmassaction', 'alpha') && $massaction != 'presend' && $massa
 	$massaction = '';
 }
 
-$parameters = array('socid'=>$socid);
+$parameters = array('socid'=>$socid, 'arrayfields'=>&$arrayfields);
 $reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
@@ -558,9 +552,6 @@ $bankaccountstatic = new Account($db);
 $facturestatic = new Facture($db);
 $formcompany = new FormCompany($db);
 $companystatic = new Societe($db);
-
-llxHeader('',$langs->trans('CustomersInvoices'),'EN:Customers_Invoices|FR:Factures_Clients|ES:Facturas_a_clientes');
-echo $htmlRedirect;
 
 $sql = 'SELECT';
 if ($sall || $search_product_category > 0 || $search_user > 0) {
@@ -911,10 +902,7 @@ if ($limit) {
 	$sql .= $db->plimit($limit + 1, $offset);
 }
 
-$listfield=explode(',', $sortfield);
-$listorder=explode(',', $sortorder);
-foreach ($listfield as $key => $value) $sql.= $listfield[$key].' '.($listorder[$key]?$listorder[$key]:'DESC').',';
-$sql.= ' f.rowid DESC ';
+$resql = $db->query($sql);
 
 if ($resql) {
 	$num = $db->num_rows($resql);
@@ -2475,5 +2463,3 @@ if ($resql) {
 // End of page
 llxFooter();
 $db->close();
-$resql = $db->query($sql);
-

@@ -61,10 +61,6 @@ header("Location: " . DOL_URL_ROOT . '/bimptechnique/?fc=fi&id=' . $_REQUEST['id
 die;
 
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpfichinter", "Bimp_Fichinter", $_REQUEST['id']);
-header("Location: " . DOL_URL_ROOT . '/bimptechnique/?fc=fi&id=' . $_REQUEST['id']);
-$htmlRedirect = $bObj->processRedirect();
 
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
@@ -588,7 +584,6 @@ launchRunningProcess($db, 'Fichinter', $_GET['id']);
 
 llxHeader($js, "Fiche intervention");
 
-echo $htmlRedirect;
 
 if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
     /*

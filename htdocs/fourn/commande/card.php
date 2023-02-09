@@ -36,11 +36,6 @@
 require '../../main.inc.php';
 
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_CommandeFourn", $_REQUEST['id']);
-$htmlRedirect = $bObj->processRedirect();
-
-
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formorder.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/modules/supplier_order/modules_commandefournisseur.php';

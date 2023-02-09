@@ -39,10 +39,6 @@
 
 require '../../main.inc.php';
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_Facture", ($_REQUEST['facid'] > 0? $_REQUEST['facid'] : $_REQUEST['id']));
-$htmlRedirect = $bObj->processRedirect();
-
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture-rec.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';

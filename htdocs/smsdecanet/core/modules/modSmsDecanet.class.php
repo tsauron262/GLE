@@ -35,7 +35,7 @@ class modSmsDecanet extends DolibarrModules
 	 *   \brief      Constructor. Define names, constants, directories, boxes, permissions
 	 *   \param      DB      Database handler
 	 */
-	function modSmsDecanet($DB)
+	function __construct($DB)
 	{
 		$this->db = $DB;
 

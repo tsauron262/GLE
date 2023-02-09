@@ -71,6 +71,11 @@ fields:
         type: bool
         default_value: 0
         
+    allow_multiple_files: 
+        label: Fichiers multiples autorisés
+        type: bool
+        default_value: 0
+        
     signed_doc_ext: 
         label: Extension fichier signé
         default_value: pdf
@@ -80,6 +85,9 @@ fields:
     
     id_account_docu_sign:
         label: Id du compte utilisateur DocuSign
+        
+    selected_file: 
+        label: Fichier sélectionné
         
 forms: 
     sign_papier: 

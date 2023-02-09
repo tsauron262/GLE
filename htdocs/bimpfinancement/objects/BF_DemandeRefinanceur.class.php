@@ -93,6 +93,11 @@ class BF_DemandeRefinanceur extends BimpObject
                     $errors[] = 'Cette demande n\'est pas sélectionnable';
                     return 0;
                 }
+                
+                if ($status === self::STATUS_SELECTIONNEE) {
+                    $errors[] = 'Cette demande est déjà sélectionnée';
+                    return 0;
+                }
 
                 $demande = $this->getParentInstance();
                 if (!BimpObject::objectLoaded($demande)) {
@@ -100,8 +105,8 @@ class BF_DemandeRefinanceur extends BimpObject
                     return 0;
                 }
 
-                if ((int) $demande->getData('status') >= 10) {
-                    $errors[] = 'Le statut de la demande de location ne permet pas cette opération';
+                if ((int) $demande->getData('devis_status') >= 20) {
+                    $errors[] = 'Le devis de location a été signé ou refusé';
                     return 0;
                 }
                 return 1;
@@ -246,7 +251,7 @@ class BF_DemandeRefinanceur extends BimpObject
 
         if ($this->isActionAllowed('selected') && $this->canSetAction('selected')) {
             $buttons[] = array(
-                'label'   => 'Sélectionner (validation définitive)',
+                'label'   => 'Sélectionner cette demande',
                 'icon'    => 'fas_check-double',
                 'onclick' => $this->getJsActionOnclick('selected', array(), array(
                     'confirm_msg' => 'Veuillez confirmer'
@@ -509,13 +514,13 @@ class BF_DemandeRefinanceur extends BimpObject
                 if (BimpObject::objectLoaded($demande)) {
                     $values = $this->getCalcValues();
                     $demande->set('periodicity', $values['periodicity']);
-                    $demande->set('duration', $values['nb_mois']);
+                    $demande->set('duration', (int) $values['nb_mois']);
                     $demande->set('tx_cession', $this->getData('rate'));
                     $demande->set('loyer_mensuel_evo_ht', $values['loyer_evo_mensuel']);
                     $demande->set('loyer_mensuel_dyn_ht', $values['loyer_dyn_mensuel']);
                     $demande->set('loyer_mensuel_suppl_ht', $values['loyer_dyn_suppl_mensuel']);
                     $demande->set('agreement_number', $this->getData('num_accord'));
-
+                    
                     $up_warnings = array();
                     $up_errors = $demande->update($up_warnings, true);
 

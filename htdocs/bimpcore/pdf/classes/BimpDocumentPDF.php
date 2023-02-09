@@ -40,6 +40,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $signature_title = 'Signature';
     public $signature_pro_title = 'Signature + Cachet avec SIRET';
     public $signature_mentions = '';
+    public $signature_file_idx = 0;
 
     public function __construct($db)
     {
@@ -597,7 +598,17 @@ class BimpDocumentPDF extends BimpModelPDF
 
             if (is_a($this->bimpObject, 'BimpObject')) {
                 if ($this->bimpObject->field_exists($this->object_signature_params_field_name)) {
-                    $this->bimpObject->updateField($this->object_signature_params_field_name, $this->signature_params);
+                    if ((int) $this->signature_file_idx) {
+                        $signature_params = $this->bimpObject->getData($this->object_signature_params_field_name);
+                        
+                        if (!is_array($signature_params)) {
+                            $signature_params = array();
+                        }
+                        $signature_params[$this->signature_file_idx] = $this->signature_params;
+                    } else {
+                        $signature_params = $this->signature_params;
+                    }
+                    $this->bimpObject->updateField($this->object_signature_params_field_name, $signature_params);
                 }
             }
         }

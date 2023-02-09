@@ -259,6 +259,21 @@ forms:
         icon: fas_file-signature
         rows: 
             - custom: 1
+              label: Document sélectionné
+              input_name: selected_file
+              required: 1
+              show: 
+                  callback: 
+                      object: parent
+                      method: hasMultipleFiles
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          object: parent
+                          method: getUnsignedFilesArray
+                  extra_content: '<div style="margin-top: 10px" class="warning">ATTENTION : veuillez vous assurer que le fichier sélectionné correspond bien au choix du client</div>'
+            - custom: 1
               label: Récapitulatif
               input_name: doc_infos
               content: 
@@ -284,6 +299,21 @@ forms:
         icon: fas_file-signature
         rows: 
             - custom: 1
+              label: Document sélectionné
+              input_name: selected_file
+              required: 1
+              show: 
+                  callback: 
+                      object: parent
+                      method: hasMultipleFiles
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          object: parent
+                          method: getUnsignedFilesArray
+                  extra_content: '<div style="margin-top: 10px" class="warning">ATTENTION : veuillez vous assurer que le fichier sélectionné correspond bien à votre choix</div>'
+            - custom: 1
               label: Document
               input_name: doc_title
               content: 
@@ -307,7 +337,6 @@ forms:
               input_name: signature
               input: 
                   type: signature_pad
-                  
               required: 1
                   
     signature_params: 

@@ -835,10 +835,10 @@ class Equipment extends BimpObject
     public function getPlaceByDate($date, &$errors)
     {
         $dt = DateTime::createFromFormat('Y-m-d H:i:s', $date);
-        if ($dt == false or array_sum($dt::getLastErrors())) {
+        if ($dt == false or (is_array($dt::getLastErrors()) and array_sum($dt::getLastErrors()))) {
             $date .= ' 00:00:00';
             $dt = DateTime::createFromFormat('Y-m-d H:i:s', $date);
-            if ($dt == false or array_sum($dt::getLastErrors()))
+            if ($dt == false or (is_array($dt::getLastErrors()) and array_sum($dt::getLastErrors())))
                 $errors[] = "Equipement::getPlaceByDate() Format de date incorrect " . $date;
         }
 

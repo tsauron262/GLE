@@ -3271,7 +3271,7 @@ class BL_CommandeShipment extends BimpObject
         return $this->getFilesDir();
     }
 
-    public function getSignatureDocFileName($doc_type, $signed = false)
+    public function getSignatureDocFileName($doc_type, $signed = false, $file_idx = 0)
     {
         $ext = $this->getSignatureDocFileExt($doc_type, $signed);
 
@@ -3284,7 +3284,7 @@ class BL_CommandeShipment extends BimpObject
         return '';
     }
 
-    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false)
+    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false, $file_idx = 0)
     {
         if (!$this->isLoaded()) {
             return '';

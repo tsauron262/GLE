@@ -112,6 +112,41 @@ class docController extends BimpPublicController
                     }
                     break;
 
+                case 'devis_fin':
+                case 'devis_fin_signed':
+                case 'contrat_fin':
+                case 'contrat_fin_signed':
+                case 'pvr_fin':
+                case 'pvr_fin_signed':
+                    $bcdf = BimpCache::getBimpObjectInstance('bimpcommercial', 'BimpCommDemandeFin', $id);
+                    $bcdf_ref = $bcdf->getRef();
+
+                    if (!BimpObject::objectLoaded($bcdf)) {
+                        $this->errors[] = 'Identifiant du document invalide';
+                    } elseif ($bcdf_ref != $ref) {
+                        $this->errors[] = 'Référence du document invalide';
+                    } elseif (!$bcdf->can('view')) {
+                        $this->errors[] = 'Vous n\'avez pas la permission de voir ce document';
+                    }
+
+                    $origine = $bcdf->getParentInstance();
+
+                    if (!BimpObject::objectLoaded($origine)) {
+                        $this->errors[] = 'Ce document n\'existe plus';
+                    }
+
+                    $dir = $bcdf->getFilesDir();
+                    $doc_type = str_replace('_signed', '', $doc);
+                    $file_name = $bcdf->getSignatureDocFileName($doc_type, ($doc != $doc_type ? true : false), (int) BimpTools::getValue('file_idx', 0));
+
+                    if (!file_exists($dir . $file_name)) {
+                        $this->errors[] = 'Ce document n\'existe pas (' . $file_name . ')';
+                    } else {
+                        $module_part = 'propal';
+                        $file_name = dol_sanitizeFileName($bcdf_ref) . '/' . $file_name;
+                    }
+                    break;
+
                 case 'devis_financement':
                 case 'devis_financement_signed':
                 case 'contrat_financement':
@@ -197,9 +232,6 @@ class docController extends BimpPublicController
         // Security: Delete string ../ into $original_file
         $original_file = str_replace("../", "/", $original_file);
 
-        // Find the subdirectory name as the reference
-//        $refname = basename(dirname($original_file) . "/");
-
         $check_access = dol_check_secure_access_document($modulepart, $original_file, 0);
         $fullpath_original_file = $check_access['original_file'];               // $fullpath_original_file is now a full path name
         // On interdit les remontees de repertoire ainsi que les pipe dans les noms de fichiers.
@@ -219,7 +251,6 @@ class docController extends BimpPublicController
         $filename = basename($fullpath_original_file);
 
         // Output file on browser
-        dol_syslog("document.php download $fullpath_original_file filename=$filename content-type=$type");
         $fullpath_original_file_osencoded = dol_osencode($fullpath_original_file); // New file name encoded in OS encoding charset
         // This test if file exists should be useless. We keep it to find bug more easily
         if (!file_exists($fullpath_original_file_osencoded)) {

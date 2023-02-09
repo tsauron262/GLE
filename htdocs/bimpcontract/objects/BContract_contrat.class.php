@@ -4913,7 +4913,7 @@ class BContract_contrat extends BimpDolObject
 
     // Signature DocuSign
 
-    public function getSignatureDocFileName($doc_type = 'contrat', $signed = false)
+    public function getSignatureDocFileName($doc_type = 'contrat', $signed = false, $file_idx = 0)
     {
         $ext = $this->getSignatureDocFileExt($doc_type, $signed);
 
@@ -4926,7 +4926,7 @@ class BContract_contrat extends BimpDolObject
         return '';
     }
 
-    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false)
+    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false, $file_idx = 0)
     {
         if (!$this->isLoaded()) {
             return '';

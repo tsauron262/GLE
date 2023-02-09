@@ -74,7 +74,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             }
         }
 
-        if (isset($data['steps']['import_products'])) {
+        if (isset($data['steps']['import_products']) && isset(array_values($file_data)[0]['crt'])) {
             $data['steps']['crt_products'] = array(
                 'label'    => 'Traitement des CRT produits',
                 'on_error' => 'continue',

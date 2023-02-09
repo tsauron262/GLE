@@ -699,6 +699,27 @@ forms:
         title: Création du devis de location
         rows: 
             - custom: 1
+              label: Remplacer le (ou un des) devis généré(s)
+              input_name: replace_devis
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              show: 
+                  field_value: devis_status
+            - custom: 1
+              label: Devis à remplacer
+              input_name: replaced_devis
+              input: 
+                  type: select
+                  options: 
+                      callback: getDevisFilesArray
+              show: 
+                  field_value: devis_status
+              display_if: 
+                  field_name: replace_devis
+                  show_values: 1
+            - custom: 1
               label: Formules à proposer
               input_name: formules
               input: 
@@ -924,6 +945,27 @@ forms:
                 input_name: updload_doc_type
                 input: 
                     type: hidden
+            replace: 
+                custom: 1
+                label: Remplacer le (ou un des) devis généré(s)
+                input_name: replace_devis
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 0
+                show: 
+                    field_value: devis_status
+            replaced: 
+                custom: 1
+                label: Devis à remplacer
+                input_name: replaced_devis
+                input: 
+                    type: select
+                    options: 
+                        callback: getDevisFilesArray
+                display_if: 
+                    field_name: replace_devis
+                    show_values: 1
         
     upload_devis: 
         extends: upload_document
@@ -1370,7 +1412,7 @@ views:
     default: 
         title: nom
         edit_form: default
-        objects_change_reload: BF_DemandeRefinanceur,BF_Line,BimpSignature
+        objects_change_reload: BF_DemandeRefinanceur,BF_Line,BimpSignature,BimpFile
         rows:
             0: 
                 cols: 

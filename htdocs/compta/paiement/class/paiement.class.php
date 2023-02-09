@@ -323,6 +323,14 @@ class Paiement extends CommonObject
 
 		$this->ref = $this->getNextNumRef(is_object($thirdparty) ? $thirdparty : '');
 
+                /*moddrsi*/
+                // A intégrer? 
+//                if($this->ref == ''){
+//                    BimpTools::lockNum("numPay");
+//                    $this->ref = $this->getNextNumRef('');
+//                }
+                /*fmoddrsi*/
+                
 		if (empty($this->ref_ext)) {
 			$this->ref_ext = '';
 		}

@@ -49,10 +49,9 @@ class DoliDBMysqli extends DoliDB
     private $_results;
 
 
-    /* moddrsi */
+    /*moddrsi */
     public $countReq = 0;
     public $countReq2 = 0;
-
     /* fmoddrsi */
 
     /**

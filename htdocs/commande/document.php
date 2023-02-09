@@ -189,6 +189,41 @@ if ($id > 0 || !empty($ref)) {
 		$permtoedit = $user->rights->commande->creer;
 		$param = '&id='.$object->id.'&entity='.(!empty($object->entity) ? $object->entity : $conf->entity);
 		include DOL_DOCUMENT_ROOT.'/core/tpl/document_actions_post_headers.tpl.php';
+                
+                /*moddrsi*/
+                // A intégrer ? 
+//                $oldObj = $object;
+//                $object->fetchObjectLinked();
+//                foreach ($oldObj->linkedObjects['propal'] as $object) {
+//                    echo "<h3>".$object->getNomUrl(1)."</h3>";
+//                    $upload_dir = $conf->propal->dir_output.'/'.dol_sanitizeFileName($object->ref);
+//                    $formfile=new FormFile($db);
+//
+//                    $filearray=dol_dir_list($upload_dir,"files",0,'','(\.meta|_preview.*\.png)$',$sortfield,(strtolower($sortorder)=='desc'?SORT_DESC:SORT_ASC),1);
+//                    $modulepart = 'propal';
+//                    $formfile->list_of_documents(
+//                        $filearray,
+//                        $object,
+//                        $modulepart,
+//                        "",
+//                        0,
+//                        '',		// relative path with no file. For example "0/1"
+//                        0,
+//                        0,
+//                        '',
+//                        0,
+//                        '',
+//                        '',
+//                        0,
+//                        0,
+//                        $upload_dir,
+//                        $sortfield,
+//                        $sortorder,
+//                        $disablemove
+//                    );
+//                }
+//                $object = $oldObj;
+                /*fmoddrsi*/
 	} else {
 		dol_print_error($db);
 	}

@@ -6249,7 +6249,7 @@ if($obj->up == null)
 						 break;*/
 					case 'password':
 						$algo = '';
-						if ($this->array_options[$key] != '' && is_array($extrafields->attributes[$this->table_element]['param'][$attributeKey]['options'])) {
+						if ($this->array_options[$key] != '' /*moddrsi*//*&& isset($extrafields->attributes[$this->table_element]['param'][$attributeKey]['options']) *//*fmoddrsi*/&& is_array($extrafields->attributes[$this->table_element]['param'][$attributeKey]['options'])) {
 							// If there is an encryption choice, we use it to crypt data before insert
 							$tmparrays = array_keys($extrafields->attributes[$this->table_element]['param'][$attributeKey]['options']);
 							$algo = reset($tmparrays);
@@ -6349,7 +6349,11 @@ if($obj->up == null)
 				$attributeKey = substr($key, 8); // Remove 'options_' prefix
 				// Add field of attribute
 				if ($extrafields->attributes[$this->table_element]['type'][$attributeKey] != 'separate') { // Only for other type than separator)
-					if ($new_array_options[$key] != '' || $new_array_options[$key] == '0') {
+                                        /*moddrsi*/
+                                        // A switcher? 
+					if ($new_array_options[$key] != '' || $new_array_options[$key] == '0') { // Version Dol16
+//                                        if (isset($new_array_options[$key]) && !is_null($new_array_options[$key])) { // => version Master 
+                                        /*fmoddrsi*/
 						$sql .= ",'".$this->db->escape($new_array_options[$key])."'";
 					} else {
 						$sql .= ",null";

@@ -30,6 +30,13 @@
 function printDropdownBookmarksList()
 {
 	global $conf, $user, $db, $langs, $sortfield, $sortorder;
+        
+        /*moddrsi*/
+        if ($conf->theme == "BimpTheme") {
+            $init_MAIN_OPTIMIZEFORTEXTBROWSER = $conf->global->MAIN_OPTIMIZEFORTEXTBROWSER;
+            $conf->global->MAIN_OPTIMIZEFORTEXTBROWSER = 1;
+        }
+        /*fmoddrsi*/
 
 	require_once DOL_DOCUMENT_ROOT.'/bookmarks/class/bookmark.class.php';
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
@@ -219,5 +226,11 @@ function printDropdownBookmarksList()
 				</script>';
 	}
 
+        /*moddrsi*/
+        if ($conf->theme == "BimpTheme") {
+            $conf->global->MAIN_OPTIMIZEFORTEXTBROWSER = $init_MAIN_OPTIMIZEFORTEXTBROWSER;
+        }
+        /*fmoddrsi*/
+        
 	return $html;
 }

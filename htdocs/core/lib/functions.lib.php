@@ -417,6 +417,11 @@ function getBrowserInfo($user_agent)
  */
 function dol_shutdown()
 {
+        /*moddrsi*/
+        if(class_exists('BimpController'))
+            BimpController::bimp_shutdown();
+        /*fmoddrsi*/
+    
 	global $conf, $user, $langs, $db;
 	$disconnectdone = false;
 	$depth = 0;

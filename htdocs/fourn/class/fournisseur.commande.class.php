@@ -640,6 +640,9 @@ class CommandeFournisseur extends CommonOrder
 
 				// Check if object has a temporary ref
 			if (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref)) { // empty should not happened, but when it occurs, the test save life
+                                /* moddrsi*/
+                                BimpTools::lockNum("numCommandeFourn");
+                                /*fmoddrsi*/
 				$num = $this->getNextNumRef($soc);
 			} else {
 				$num = $this->ref;

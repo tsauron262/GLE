@@ -830,6 +830,42 @@ class ExtraFields
 		$array_name_label = array();
 
 		// We should not have several time this request. If we have, there is some optimization to do by calling a simple $extrafields->fetch_optionals() in top of code and not into subcode
+                
+                /*moddrsi*/
+                if ($elementtype && defined('BIMP_LIB') && (int) BimpCore::getConf('use_cache_for_extrafields')) {
+                    $cache_key = 'dol_object_' . $elementtype . '_extrafields_' . $conf->entity;
+                    
+                    $result = BimpCache::getCacheServeur($cache_key);
+                    
+                    if (is_array($result) /*&& count($result) > 0*/) {                    
+                        $labels = array();
+                        
+                        foreach ($result as $name => $fields) {
+                            
+                            foreach (array(
+//                                'type', 'label', 'size', 'elementtype', 'default', 'computed', 'unique', 'required', 'param', 'pos', 'alwayseditable', 'perms', 'langfile', 'list', 'entityid', 'entitylabel'
+                                'type', 'label', 'size', 'elementtype', 'default', 'computed', 'unique', 'required', 'param', 'pos', 'alwayseditable', 'perms', 'langfile', 'list', 'entityid', 'printable', 'totalizable', 'enabled', 'help', 'css', 'cssview', 'csslist' // => Maj Dol16
+                            ) as $field_name) {
+                                if (isset($fields[$field_name])) {
+                                    $this->attributes[$elementtype][$field_name][$name] = $fields[$field_name];
+                                    
+                                    if (in_array($field_name, array('type', 'label'))) {
+                                        $prop_name = 'attribute_' . $field_name;
+                                        $this->{$prop_name}[$name] = $fields[$field_name];   
+                                    }
+                                }
+                            }
+                            
+                            if (BimpTools::getArrayValueFromPath($fields, 'type', $name) != 'separate') {
+                                $labels[$name] = BimpTools::getArrayValueFromPath($fields, 'label', $name);
+                            }
+                        }
+                        
+                        return $labels;
+                    }
+                }
+                /*fmoddrsi*/
+                
 		$sql = "SELECT rowid, name, label, type, size, elementtype, fieldunique, fieldrequired, param, pos, alwayseditable, perms, langs, list, printable, totalizable, fielddefault, fieldcomputed, entity, enabled, help,";
 		$sql .= " css, cssview, csslist";
 		$sql .= " FROM ".$this->db->prefix()."extrafields";
@@ -889,6 +925,27 @@ class ExtraFields
 			}
 			if ($elementtype) {
 				$this->attributes[$elementtype]['loaded'] = 1; // If nothing found, we also save tag 'loaded'
+                                
+                                /*moddrsi*/
+                                if (isset($this->attributes[$elementtype]) && defined('BIMP_LIB') && (int) BimpCore::getConf('use_cache_for_extrafields')) {
+                                    if (!BimpCache::cacheServerExists($cache_key)) {
+                                        $rows = array(); 
+                                        if (is_array($this->attributes[$elementtype]) && !empty($this->attributes[$elementtype])) {
+                                            foreach ($this->attributes[$elementtype] as $field_name => $extrafields) {
+                                                if ($field_name != 'loaded') {
+                                                    foreach ($extrafields as $name => $value) {
+                                                        if (!isset($rows[$name])) {
+                                                            $rows[$name] = array();
+                                                        }
+                                                        $rows[$name][$field_name] = $value;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        BimpCache::setCacheServeur($cache_key, $rows);
+                                    }
+                                }
+                                /*fmoddrsi*/
 			}
 		} else {
 			$this->error = $this->db->lasterror();

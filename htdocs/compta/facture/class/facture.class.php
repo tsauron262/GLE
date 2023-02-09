@@ -3165,7 +3165,7 @@ class Facture extends CommonInvoice
 			}
                         
                         
-                        /* moddrsi*/
+                        /*moddrsi*/
                         BimpTools::lockNum("numFact");
                         /*fmoddrsi*/
 			$num = $this->getNextNumRef($this->thirdparty);

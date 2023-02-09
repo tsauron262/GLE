@@ -1374,15 +1374,15 @@ class BContract_contrat extends BimpDolObject
         return $html;
     }
 
-    public function getName($withGeneric = true)
-    {
-        // getName() doit renvoyer le nom sans aucun formatage html
-        $objet = $this->getData('objet_contrat');
-//        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
-        return "<span><i class='fas fa-" . self::$objet_contrat[$objet]['icon'] . "' ></i> " . self::$objet_contrat[$objet]['label'] . "</span>";
-
-//        return self::$objet_contrat[$this->getData('objet_contrat')];
-    }
+//    public function getName($withGeneric = true)
+//    {
+//        // getName() doit renvoyer le nom sans aucun formatage html
+//        $objet = $this->getData('objet_contrat');
+////        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+//        return "<span><i class='fas fa-" . self::$objet_contrat[$objet]['icon'] . "' ></i> " . self::$objet_contrat[$objet]['label'] . "</span>";
+//
+////        return self::$objet_contrat[$this->getData('objet_contrat')];
+//    }
 
     public function getIndiceSyntec()
     {
@@ -3309,7 +3309,7 @@ class BContract_contrat extends BimpDolObject
                                             ), $docusign_success, true);
 
                                     if (count($docusign_result['errors'])) {
-                                        $warnings[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
+                                        $errors[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
                                     } else {
                                         $success .= '<br/>' . $docusign_success;
                                     }

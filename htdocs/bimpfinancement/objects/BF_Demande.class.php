@@ -5712,12 +5712,12 @@ class BF_Demande extends BimpObject
                                             ), $docusign_success, true);
 
                                     if (count($docusign_result['errors'])) {
-                                        $warnings[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
+                                        $errors[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
                                     } else {
                                         $success .= '<br/>' . $docusign_success;
                                     }
                                     if (!empty($docusign_result['warnings'])) {
-                                        $errors[] = BimpTools::getMsgFromArray($docusign_result['warnings'], 'Envoi de la demande de signature via DocuSign');
+                                        $warnings[] = BimpTools::getMsgFromArray($docusign_result['warnings'], 'Envoi de la demande de signature via DocuSign');
                                     }
                                     break;
 

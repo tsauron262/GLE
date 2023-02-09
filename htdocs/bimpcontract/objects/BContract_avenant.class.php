@@ -854,7 +854,7 @@ class BContract_avenant extends BContract_contrat {
             
             
             if(!count($errors)) {
-                $errors_signature = $this->createSignature($id_contact, $warnings, $success);
+                $errors_signature = $this->createSignature(false, true, $id_contact, '', $warnings, $success);
                 $errors = BimpTools::merge_array($errors, $errors_signature);
             }
             
@@ -883,8 +883,9 @@ class BContract_avenant extends BContract_contrat {
     public  function getClientContactsArray() {
         return $this->getParentInstance()->getClientContactsArray();
     }
+
     
-    public function createSignature($id_contact = 0, &$warnings = array(), &$success = '')
+    public function createSignature($init_docu_sign = false, $open_public_acces = true, $id_contact = 0, $email_content = '', &$warnings = array(), &$success = '')
     {
         $errors = array();
         

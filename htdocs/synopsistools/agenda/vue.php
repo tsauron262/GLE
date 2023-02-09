@@ -443,7 +443,9 @@ function printMenu($tabUser) {
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup ORDER BY nom");
     while ($result = $db->fetch_object($sql)) {
         $select .= "<option value='" . $result->rowid . "'>" . $result->nom;
-        $select .= "   [" . count($tabGroup[$result->rowid]) . "]";
+        if (is_array($tabGroup[$result->rowid])) {
+            $select .= "   [" . count($tabGroup[$result->rowid]) . "]";    
+        }
         $select .= "</option>";
     }
     

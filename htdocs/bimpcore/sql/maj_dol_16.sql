@@ -21,3 +21,5 @@ from (((`llx_facture` left join `llx_facture_extrafields` on(`llx_facture_extraf
 		left join `llx_facturedet` on(`llx_facturedet`.`fk_facture` = `llx_facture`.`rowid`)) 
 		left join `llx_bs_sav` on(`llx_bs_sav`.`id_facture` = `llx_facture`.`rowid`)) 
 group by `llx_facture`.`ref`);
+
+INSERT INTO `llx_const` (`name`, `value`) VALUES ('MAIN_PRINT_DISABLELINK', '1'),('MAIN_HELP_DISABLELINK', '1');

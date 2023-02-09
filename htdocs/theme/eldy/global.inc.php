@@ -2925,7 +2925,9 @@ div.login_block {
 	text-align: <?php print $right; ?>;
 	<?php print $right; ?>: 0;
 	top: <?php print $disableimages ? '4px' : '0'; ?>;
-	line-height: 10px;
+        /*moddrsi*/
+	line-height: 52px; /*10px;*/
+        /*fmoddrsi*/
 	<?php // echo (empty($disableimages) && $maxwidthloginblock)?'max-width: '.$maxwidthloginblock.'px;':''; ?>
 	<?php if (GETPOST('optioncss', 'aZ09') == 'print') { ?>
 	display: none;

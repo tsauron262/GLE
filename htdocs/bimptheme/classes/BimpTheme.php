@@ -125,54 +125,7 @@ class BimpTheme
 
     public static function initTopAccountHtml(BimpThemeLayout $layout)
     {
-        global $user;
-        $label = Form::showphoto('userphoto', $user, 28, 28, 0, '', 'mini', 0);
-//        $label = '<img class="avatar" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=userphoto&entity=1&file=' . $user->photo . '" alt="" style="display: inline-block; margin-right: 12px">';
-        $label .= '<span class="mobile-hidden">' . $user->firstname . ' ' . $user->lastname . '</span>';
-
-        $content = '';
-        $content .= '<div style="padding: 15px;">';
-
-        // Mon profile: 
-        $content .= '<div style="margin-bottom: 12px">';
-        $content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=' . $user->id . '">';
-        $content .= BimpRender::renderIcon('fas_user', 'iconLeft') . 'Mon profil';
-        $content .= '</a>';
-        $content .= '</div>';
-
-        // Mon agenda: 
-        $content .= '<div style="margin-bottom: 12px">';
-        $content .= '<a href="' . DOL_URL_ROOT . '/synopsistools/agenda/vue.php">';
-        $content .= BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Mon Agenda';
-        $content .= '</a>';
-        $content .= '</div>';
-
-        // Ma messagerie: 
-        $content .= '<div style="margin-bottom: 12px">';
-        $content .= '<a href="' . DOL_URL_ROOT . '/bimpmsg/index.php?fc=bal">';
-        $content .= BimpRender::renderIcon('fas_envelope-open-text', 'iconLeft') . 'Ma messagerie';
-        $content .= '</a>';
-        $content .= '</div>';
-
-        // Toutes mes tâches:
-        $content .= '<div style="margin-bottom: 12px">';
-        $content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=' . $user->id . '&navtab-maintabs=tasks&navtab-tasks=my_tasks">';
-        $content .= BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Toutes mes tâches';
-        $content .= '</a>';
-        $content .= '</div>';
-
-        // Logout: 
-        $content .= '<div style="margin-top: 10px; text-align: center">';
-        $content .= '<a class="btn btn-danger" href="' . DOL_URL_ROOT . '/user/logout.php">';
-        $content .= BimpRender::renderIcon('fas_power-off', 'iconLeft') . 'Se déconnecter';
-        $content .= '</a>';
-        $content .= '</div>';
-
-        $content .= '</div>';
-        $layout->top_account_html .= BimpRender::renderDropDownContent('userDropdown', $label, $content, array(
-                    'type'        => 'span',
-                    'extra_class' => 'dropdown-profile modifDropdown'
-        ));
+        $layout->top_account_html .= BimpCore::renderUserTopAccountHtml();
     }
 
     // Rendus HTML: 

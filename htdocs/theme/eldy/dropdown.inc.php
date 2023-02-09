@@ -131,7 +131,7 @@ div#topmenu-quickadd-dropdown a::after, div#topmenu-bookmark-dropdown a::after {
 }
 
 
-.dropdown-toggle::after {
+/*moddrsi .dropdown-toggle::after {
 	font-family: "Font Awesome 5 Free";
 	font-size: 0.7em;
 	font-weight: 900;
@@ -153,7 +153,7 @@ div#topmenu-quickadd-dropdown a::after, div#topmenu-bookmark-dropdown a::after {
 
 .open>.dropdown-toggle::after {
 	transform: rotate(180deg);
-}
+} fmoddrsi*/
 
 /*
 * MENU Dropdown

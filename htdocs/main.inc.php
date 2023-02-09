@@ -1947,19 +1947,20 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 		print "</div>\n";
 
 		// Define link to login card
-		$appli = constant('DOL_APPLICATION_TITLE');
-		if (!empty($conf->global->MAIN_APPLICATION_TITLE)) {
-			$appli = $conf->global->MAIN_APPLICATION_TITLE;
-			if (preg_match('/\d\.\d/', $appli)) {
-				if (!preg_match('/'.preg_quote(DOL_VERSION).'/', $appli)) {
-					$appli .= " (".DOL_VERSION.")"; // If new title contains a version that is different than core
-				}
-			} else {
-				$appli .= " ".DOL_VERSION;
-			}
-		} else {
-			$appli .= " ".DOL_VERSION;
-		}
+                // moddrsi
+//		$appli = constant('DOL_APPLICATION_TITLE');
+//		if (!empty($conf->global->MAIN_APPLICATION_TITLE)) {
+//			$appli = $conf->global->MAIN_APPLICATION_TITLE;
+//			if (preg_match('/\d\.\d/', $appli)) {
+//				if (!preg_match('/'.preg_quote(DOL_VERSION).'/', $appli)) {
+//					$appli .= " (".DOL_VERSION.")"; // If new title contains a version that is different than core
+//				}
+//			} else {
+//				$appli .= " ".DOL_VERSION;
+//			}
+//		} else {
+//			$appli .= " ".DOL_VERSION;
+//		}
 
 		if (getDolGlobalInt('MAIN_FEATURES_LEVEL')) {
 			$appli .= "<br>".$langs->trans("LevelOfFeature").': '.getDolGlobalInt('MAIN_FEATURES_LEVEL');
@@ -2084,36 +2085,42 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 			$toprightmenu .= $form->textwithtooltip('', $appli, 2, 1, $text, 'login_block_elem', 2);
 		}
 
-		// Logout link
-		$toprightmenu .= $form->textwithtooltip('', $logouthtmltext, 2, 1, $logouttext, 'login_block_elem logout-btn', 2);
+                /*moddrsi*/
+//                if (class_exists('BimpCore')) {
+//                    $toprightmenu .= BimpCore::renderUserTopAccountHtml();
+//                } else {
+                    // Logout link
+                    $toprightmenu .= $form->textwithtooltip('', $logouthtmltext, 2, 1, $logouttext, 'login_block_elem logout-btn', 2);
 
-		$toprightmenu .= '</div>'; // end div class="login_block_other"
+                    $toprightmenu .= '</div>'; // end div class="login_block_other"
 
 
-		// Add login user link
-		$toprightmenu .= '<div class="login_block_user">';
+                    // Add login user link
+                    $toprightmenu .= '<div class="login_block_user">';
 
-		// Login name with photo and tooltip
-		$mode = -1;
-		$toprightmenu .= '<div class="inline-block nowrap"><div class="inline-block login_block_elem login_block_elem_name" style="padding: 0px;">';
+                    // Login name with photo and tooltip
+                    $mode = -1;
+                    $toprightmenu .= '<div class="inline-block nowrap"><div class="inline-block login_block_elem login_block_elem_name" style="padding: 0px;">';
 
-		if (!empty($conf->global->MAIN_USE_TOP_MENU_SEARCH_DROPDOWN)) {
-			// Add search dropdown
-			$toprightmenu .= top_menu_search();
-		}
+                    if (!empty($conf->global->MAIN_USE_TOP_MENU_SEARCH_DROPDOWN)) {
+                            // Add search dropdown
+                            $toprightmenu .= top_menu_search();
+                    }
 
-		if (!empty($conf->global->MAIN_USE_TOP_MENU_QUICKADD_DROPDOWN)) {
-			// Add search dropdown
-			$toprightmenu .= top_menu_quickadd();
-		}
+                    if (!empty($conf->global->MAIN_USE_TOP_MENU_QUICKADD_DROPDOWN)) {
+                            // Add search dropdown
+                            $toprightmenu .= top_menu_quickadd();
+                    }
 
-		// Add bookmark dropdown
-		$toprightmenu .= top_menu_bookmark();
+                    // Add bookmark dropdown
+                    $toprightmenu .= top_menu_bookmark();
 
-		// Add user dropdown
-		$toprightmenu .= top_menu_user();
+                    // Add user dropdown
+                    $toprightmenu .= top_menu_user();
 
-		$toprightmenu .= '</div></div>';
+                    $toprightmenu .= '</div></div>';
+//                }
+                /*fmoddrsi*/
 
 		$toprightmenu .= '</div>'."\n";
 

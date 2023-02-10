@@ -174,7 +174,7 @@ class BContract_avenant extends BContract_contrat {
          $errors = parent::validatePost();
          $parent = $this->getParentInstance();
          
-         if($this->getData('statut') != 0) $errors[] = 'Cet avenant n\'est plus au statut brouillon';
+         if($this->isLoaded() && $this->getData('statut') != 0) $errors[] = 'Cet avenant n\'est plus au statut brouillon';
          
          $conserne_date_end_avp = false;
          
@@ -591,7 +591,7 @@ class BContract_avenant extends BContract_contrat {
             );
         }
         
-        if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN) {
+        if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN and (int) $this->getData('id_signature') == 0) {
             $buttons[] = array(
                 'label'   => 'Créer signature',
                 'icon'    => 'fas_signature',
@@ -617,13 +617,15 @@ class BContract_avenant extends BContract_contrat {
                     'label'   => 'Abandonner',
                     'icon'    => 'fas_stop-circle',
                     'onclick' => $this->getJsActionOnclick('abort', array(), array(
-
+                        'confirm_msg' => 'Veuillez confirmer: abandon avenant'
                     ))
                 );
-                $buttons[] = array(
+            
+            $buttons[] = array(
                     'label'   => 'Clore',
                     'icon'    => 'fas_times',
                     'onclick' => $this->getJsActionOnclick('close', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer: cloture avenant'
 
                     ))
                 );
@@ -852,7 +854,7 @@ class BContract_avenant extends BContract_contrat {
             
             
             if(!count($errors)) {
-                $errors_signature = $this->createSignature($id_contact, $warnings, $success);
+                $errors_signature = $this->createSignature(false, true, $id_contact, '', $warnings, $success);
                 $errors = BimpTools::merge_array($errors, $errors_signature);
             }
             
@@ -881,8 +883,9 @@ class BContract_avenant extends BContract_contrat {
     public  function getClientContactsArray() {
         return $this->getParentInstance()->getClientContactsArray();
     }
+
     
-    public function createSignature($id_contact = 0, &$warnings = array(), &$success = '')
+    public function createSignature($init_docu_sign = false, $open_public_acces = true, $id_contact = 0, $email_content = '', &$warnings = array(), &$success = '')
     {
         $errors = array();
         
@@ -977,7 +980,7 @@ class BContract_avenant extends BContract_contrat {
                                         ), $docusign_success, true);
 
                                 if (count($docusign_result['errors'])) {
-                                    $warnings[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
+                                    $errors[] = BimpTools::getMsgFromArray($docusign_result['errors'], 'Echec de l\'envoi de la demande de signature via DocuSign');
                                 } else {
                                     $success .= '<br/>' . $docusign_success;
                                 }

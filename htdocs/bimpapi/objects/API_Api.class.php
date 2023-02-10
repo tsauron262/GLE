@@ -171,18 +171,18 @@ class API_Api extends BimpObject
         return self::getCacheArray($cache_key, $include_empty, '');
     }
 
-    public function getUsersAccountsArray($include_empty = false)
+    public function getUsersAccountsArray($include_empty = false, $mode = 'prod')
     {
         if (!$this->isLoaded()) {
             return array();
         }
 
-        $cache_key = 'bimpapi_' . $this->id . '_users_accounts_array';
+        $cache_key = 'bimpapi_' . $this->id . '_' . $mode . '_users_accounts_array';
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $rows = $this->db->getRows('bimpapi_user_account', 'id_api = \'' . $this->id . '\'', null, 'array', array('id', 'name'));
+            $rows = $this->db->getRows('bimpapi_user_account', 'id_api = \'' . $this->id . '\' AND mode = \'' . $mode . '\'', null, 'array', array('id', 'name'));
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {

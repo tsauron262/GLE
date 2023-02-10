@@ -44,6 +44,21 @@ fields:
                         params: 
                             - 1
                             
+    mode: 
+        label: Mode
+        values: 
+            test: 
+                label: Test
+                icon: fas_exclamation-circle
+                classes: 
+                    - info
+            prod: 
+                label: Production
+                icon: fas_check
+                classes: 
+                    - success
+        default_value: prod
+        
     users: 
         label: Utilisateurs liés
         type: items_list
@@ -180,7 +195,8 @@ lists:
             callback: getListExtraButtons
         cols:             
             id_api: 
-            name:    
+            name:   
+            mode: 
             users: 
             tokens_light:
             logged:

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpapi_user_account` ADD `mode` VARCHAR (10) NOT NULL DEFAULT 'prod';

@@ -164,7 +164,7 @@ class BimpModuleConf
         $html .= '</div>';
         $html .= '</div>';
 
-        if (is_null($module_version)) {
+        if (!BimpCore::isModuleActive($this->module)) {
             $html .= BimpRender::renderAlerts('Ce module n\'est pas installé');
         } else {
             if (!$this->canView()) {
@@ -235,7 +235,7 @@ class BimpModuleConf
         $html = '';
 
         if (!empty($params)) {
-            $html .= '<table class="bimp_list_table module_conf_params">';
+            $html .= '<table class="bimp_list_table module_conf_params" data-module="' . $module . '">';
             $html .= '<tbody>';
 
             $can_edit = BimpCore::isUserDev();

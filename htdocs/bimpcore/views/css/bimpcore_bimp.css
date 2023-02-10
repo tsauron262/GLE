@@ -1,5 +1,13 @@
 @charset "UTF-8";
 /* Couleurs principales */
+/*$bimp_headers_color: #fff;
+$bimp_headers_bk_color: $primary;*/
+/*$bimp_list_header_color: #fff;
+$bimp_list_header_bk_color: $primary;
+$bimp_list_header_border: none;
+$bimp_list_header_icons_color: #fff;
+$bimp_list_header_icons_hover_color: $primary;
+$bimp_list_header_icons_hover_bk_color: #fff;*/
 /*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
  * Copyright 2011-2016 Twitter, Inc.
@@ -3877,8 +3885,8 @@ a.btn.disabled, fieldset[disabled] a.btn {
 /* line 86, ../scss/bootstrap/_buttons.scss */
 .btn-default-secondary:hover {
   color: #fff !important;
-  background-color: #636363 !important;
-  border-color: #636363 !important; }
+  background-color: #3E4859 !important;
+  border-color: #3E4859 !important; }
 
 /* line 91, ../scss/bootstrap/_buttons.scss */
 .btn-default-success:hover {
@@ -3944,38 +3952,38 @@ a.btn.disabled, fieldset[disabled] a.btn {
 /* line 115, ../scss/bootstrap/_buttons.scss */
 .btn-secondary {
   color: #fff !important;
-  background-color: #636363 !important;
-  border-color: #565656 !important; }
+  background-color: #3E4859 !important;
+  border-color: #343c4a !important; }
   /* line 11, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary:focus, .btn-secondary.focus {
     color: #fff !important;
-    background-color: #4a4a4a !important;
-    border-color: #171717 !important; }
+    background-color: #29303b !important;
+    border-color: black !important; }
   /* line 17, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary:hover {
     color: #fff;
-    background-color: #4a4a4a !important;
-    border-color: #383838 !important; }
+    background-color: #29303b !important;
+    border-color: #1a1f26 !important; }
   /* line 22, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary:active, .btn-secondary.active, .open > .btn-secondary.dropdown-toggle {
     color: #fff !important;
-    background-color: #4a4a4a !important;
-    border-color: #383838 !important; }
+    background-color: #29303b !important;
+    border-color: #1a1f26 !important; }
     /* line 29, ../scss/bootstrap/mixins/_buttons.scss */
     .btn-secondary:active:hover, .btn-secondary:active:focus, .btn-secondary:active.focus, .btn-secondary.active:hover, .btn-secondary.active:focus, .btn-secondary.active.focus, .open > .btn-secondary.dropdown-toggle:hover, .open > .btn-secondary.dropdown-toggle:focus, .open > .btn-secondary.dropdown-toggle.focus {
       color: #fff !important;
-      background-color: #383838 !important;
-      border-color: #171717 !important; }
+      background-color: #1a1f26 !important;
+      border-color: black !important; }
   /* line 37, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary:active, .btn-secondary.active, .open > .btn-secondary.dropdown-toggle {
     background-image: none; }
   /* line 45, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary.disabled:hover, .btn-secondary.disabled:focus, .btn-secondary.disabled.focus, .btn-secondary[disabled]:hover, .btn-secondary[disabled]:focus, .btn-secondary[disabled].focus, fieldset[disabled] .btn-secondary:hover, fieldset[disabled] .btn-secondary:focus, fieldset[disabled] .btn-secondary.focus {
-    background-color: #636363 !important;
-    border-color: #565656 !important; }
+    background-color: #3E4859 !important;
+    border-color: #343c4a !important; }
   /* line 53, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary .badge {
-    color: #636363 !important;
+    color: #3E4859 !important;
     background-color: #fff !important; }
 
 /* line 119, ../scss/bootstrap/_buttons.scss */
@@ -6321,7 +6329,7 @@ button.list-group-item-danger {
   display: inline-block;
   margin-top: 0;
   margin-bottom: 0;
-  font-size: 15px;
+  font-size: 14px;
   color: inherit; }
   /* line 49, ../scss/bootstrap/_panels.scss */
   .panel-title i {
@@ -6564,26 +6572,26 @@ button.list-group-item-danger {
 /* line 272, ../scss/bootstrap/_panels.scss */
 .panel-secondary,
 .panel-secondary-forced {
-  border-color: #636363; }
+  border-color: #3E4859; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
   .panel-secondary > .panel-heading,
   .panel-secondary-forced > .panel-heading {
     color: #fff;
-    background-color: #636363;
-    border-color: #636363; }
+    background-color: #3E4859;
+    border-color: #3E4859; }
     /* line 11, ../scss/bootstrap/mixins/_panels.scss */
     .panel-secondary > .panel-heading + .panel-collapse > .panel-body,
     .panel-secondary-forced > .panel-heading + .panel-collapse > .panel-body {
-      border-top-color: #636363; }
+      border-top-color: #3E4859; }
     /* line 14, ../scss/bootstrap/mixins/_panels.scss */
     .panel-secondary > .panel-heading .badge,
     .panel-secondary-forced > .panel-heading .badge {
-      color: #636363;
+      color: #3E4859;
       background-color: #fff; }
   /* line 20, ../scss/bootstrap/mixins/_panels.scss */
   .panel-secondary > .panel-footer + .panel-collapse > .panel-body,
   .panel-secondary-forced > .panel-footer + .panel-collapse > .panel-body {
-    border-bottom-color: #636363; }
+    border-bottom-color: #3E4859; }
 
 /* line 276, ../scss/bootstrap/_panels.scss */
 .panel-primary {
@@ -6937,7 +6945,7 @@ button.close {
     /* line 237, ../scss/bootstrap/_datetimepicker.scss */
     .bootstrap-datetimepicker-widget table thead tr:first-child th {
       cursor: pointer;
-      background-color: #636363;
+      background-color: #3E4859;
       color: #fff; }
       /* line 242, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table thead tr:first-child th:hover {
@@ -7106,7 +7114,7 @@ button.close {
 /* line 79, ../scss/bootstrap/_modals.scss */
 .modal-header {
   padding: 15px;
-  background-color: #636363;
+  background-color: #3E4859;
   color: #fff; }
   /* line 14, ../scss/bootstrap/mixins/_clearfix.scss */
   .modal-header:before, .modal-header:after {
@@ -8249,28 +8257,28 @@ body.has_fullscreen .select2-dropdown {
 
 /* line 183, ../scss/bimpcore/_styles.scss */
 .success {
-  font-weight: bold;
-  color: #348C41; }
+  font-weight: bold !important;
+  color: #348C41 !important; }
 
 /* line 187, ../scss/bimpcore/_styles.scss */
 .info {
-  font-weight: bold;
-  color: #3B6EA0; }
+  font-weight: bold !important;
+  color: #3B6EA0 !important; }
 
 /* line 191, ../scss/bimpcore/_styles.scss */
 .warning {
-  font-weight: bold;
-  color: #E69900; }
+  font-weight: bold !important;
+  color: #E69900 !important; }
 
 /* line 195, ../scss/bimpcore/_styles.scss */
 .danger {
-  font-weight: bold;
-  color: #A00000; }
+  font-weight: bold !important;
+  color: #A00000 !important; }
 
 /* line 199, ../scss/bimpcore/_styles.scss */
 .important {
-  font-weight: bold;
-  color: #963E96; }
+  font-weight: bold !important;
+  color: #963E96 !important; }
 
 /* line 204, ../scss/bimpcore/_styles.scss */
 div.alert {
@@ -8548,7 +8556,7 @@ i.iconRight {
   color: white; }
 /* line 511, ../scss/bimpcore/_styles.scss */
 .panel.panel-secondary .panel_header_icon i {
-  color: #a3a3a3; }
+  color: #7786a0; }
 /* line 517, ../scss/bimpcore/_styles.scss */
 .panel.panel-primary .panel_header_icon i {
   color: #ffbb70; }
@@ -8743,7 +8751,7 @@ i.iconRight {
   width: 38px;
   height: 38px;
   line-height: 38px;
-  background-color: #636363;
+  background-color: #3E4859;
   cursor: pointer;
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -8777,7 +8785,7 @@ i.iconRight {
   transition: all 0.3s ease; }
   /* line 771, ../scss/bimpcore/_styles.scss */
   #openDebugModalBtn i {
-    color: #636363;
+    color: #3E4859;
     font-size: 16px; }
   /* line 776, ../scss/bimpcore/_styles.scss */
   #openDebugModalBtn:hover i {
@@ -9090,7 +9098,7 @@ i.iconRight {
 /* line 1159, ../scss/bimpcore/_styles.scss */
 .bimp_timer {
   background-color: #fff;
-  border: 1px solid #636363; }
+  border: 1px solid #3E4859; }
   /* line 1163, ../scss/bimpcore/_styles.scss */
   .bimp_timer .bimp_timer_header {
     padding: 5px 8px;
@@ -9412,8 +9420,8 @@ body.modal-open ul.ui-autocomplete {
   /* line 91, ../scss/bimpcore/_form.scss */
   .fieldRow .inputLabel,
   .formRow .inputLabel {
-    color: #fff;
-    background-color: #EF7D00;
+    color: #1F304D;
+    background-color: #DBDFE6;
     border-bottom: 1px solid #fff;
     font-weight: bold;
     text-align: right;
@@ -9423,7 +9431,7 @@ body.modal-open ul.ui-autocomplete {
   .fieldRow .formRowInput,
   .formRow .fieldRowInput,
   .formRow .formRowInput {
-    color: #636363;
+    color: #3E4859;
     background-color: #fff;
     border-bottom: 1px solid #DCDCDC;
     padding: 10px 15px; }
@@ -9774,7 +9782,7 @@ select.switch {
   .optionsContainer .optionsButton {
     display: inline-block;
     margin: 5px;
-    color: #636363;
+    color: #3E4859;
     font-weight: normal;
     margin: 0 3px;
     padding: 4px 6px;
@@ -10086,10 +10094,10 @@ input[type=text].large_input {
   .freeForm .freeFormContent {
     padding: 15px;
     background-color: #fff;
-    border: 1px solid #636363; }
+    border: 1px solid #3E4859; }
   /* line 811, ../scss/bimpcore/_form.scss */
   .freeForm .freeFormTitle {
-    background-color: #636363;
+    background-color: #3E4859;
     color: #fff;
     font-size: 18px;
     padding: 10px 15px; }
@@ -10341,9 +10349,9 @@ table.objectlistTable {
   table.objectlistTable > thead > tr > th {
     padding: 10px 6px;
     margin-bottom: 8px;
-    color: #fff;
-    background-color: #EF7D00;
-    border-bottom: none;
+    color: #1F304D;
+    background-color: #e7eaee;
+    border-bottom: 1px solid #1F304D;
     text-align: left;
     font-weight: bold;
     min-width: 80px; }
@@ -10367,8 +10375,8 @@ table.objectlistTable {
     table.bimp_list_table > tbody > tr > th,
     table.objectlistTable > tbody > tr > th {
       padding: 5px 12px 5px 6px;
-      color: #fff;
-      background-color: #EF7D00;
+      color: #1F304D;
+      background-color: #DBDFE6;
       border-bottom: 1px solid #fff;
       text-align: right; }
       /* line 44, ../scss/bimpcore/_list.scss */
@@ -10542,8 +10550,8 @@ table.objectlistTable {
   /* line 208, ../scss/bimpcore/_list.scss */
   table.bimp_list_table > tfoot > tr > th,
   table.objectlistTable > tfoot > tr > th {
-    color: #fff;
-    background-color: #EF7D00;
+    color: #1F304D;
+    background-color: #DBDFE6;
     text-align: right;
     padding: 5px 12px 5px 6px;
     vertical-align: top; }
@@ -10696,7 +10704,7 @@ table.objectSubList {
     font-family: 'FA5S';
     margin-left: 8px;
     opacity: 0;
-    color: #fff;
+    color: #1F304D;
     transition: all 0.15s ease;
     -webkit-transition: all 0.15s ease; }
   /* line 391, ../scss/bimpcore/_list.scss */
@@ -10804,7 +10812,7 @@ th.th_tools {
   .headerTools .headerButton {
     display: inline-block;
     margin: 5px;
-    color: #fff;
+    color: #1F304D;
     font-weight: normal;
     margin: 0 3px;
     padding: 4px 6px;
@@ -10816,7 +10824,7 @@ th.th_tools {
     /* line 530, ../scss/bimpcore/_list.scss */
     .headerTools .headerButton:hover {
       color: #EF7D00;
-      background-color: #fff; }
+      background-color: transparent; }
     /* line 534, ../scss/bimpcore/_list.scss */
     .headerTools .headerButton:before, .headerTools .headerButton:after {
       font-family: 'FA5S'; }
@@ -10845,7 +10853,7 @@ th.th_tools {
   .headerTools .loadingIcon {
     display: inline-block;
     margin: 5px;
-    color: #fff;
+    color: #1F304D;
     font-weight: bold;
     margin: 0 3px;
     padding: 2px 6px;
@@ -11219,9 +11227,9 @@ td.buttons {
   /*border-color: #c8c8c8;*/ }
   /* line 4, ../scss/bimpcore/_view.scss */
   .panel-secondary .panel-secondary .panel-heading {
-    background-color: #c8c8c8;
-    color: #282828;
-    border-color: #c8c8c8; }
+    background-color: #DBDFE6;
+    border-color: #DBDFE6;
+    color: #282828; }
 
 /* line 12, ../scss/bimpcore/_view.scss */
 .object_view_content {
@@ -11233,7 +11241,7 @@ td.buttons {
 /* line 20, ../scss/bimpcore/_view.scss */
 .objectFieldsTableContainer {
   width: 100%;
-  border: 1px solid #636363;
+  border: 1px solid #3E4859;
   margin: 5px 0; }
 
 /* line 26, ../scss/bimpcore/_view.scss */
@@ -11252,8 +11260,8 @@ td.buttons {
   .bimp_fields_table > thead > tr.col_headers > th,
   .objectFieldsTable > thead > tr.col_headers > th {
     padding: 5px 8px;
-    background-color: #EF7D00;
-    color: #fff;
+    background-color: #DBDFE6;
+    color: #1F304D;
     font-size: 13px;
     font-weight: bold; }
   /* line 48, ../scss/bimpcore/_view.scss */
@@ -11277,8 +11285,8 @@ td.buttons {
     .objectFieldsTable > tbody > tr > th {
       width: 20%;
       min-width: 90px;
-      background-color: #EF7D00;
-      color: #fff;
+      background-color: #DBDFE6;
+      color: #1F304D;
       font-weight: bold;
       vertical-align: top;
       text-align: right;
@@ -11525,7 +11533,7 @@ td.buttons {
       min-width: 90px;
       text-align: right;
       vertical-align: top;
-      background-color: #636363; }
+      background-color: #3E4859; }
     /* line 332, ../scss/bimpcore/_view.scss */
     .object_common_fields table tbody tr td {
       color: #282828;

@@ -2,9 +2,9 @@
     .panel-secondary {
         /*border-color: #c8c8c8;*/
         .panel-heading {
-            background-color: #c8c8c8;
+            background-color: $bimp_bk_light;
+            border-color: $bimp_bk_light;
             color: $gray_darker;
-            border-color: #c8c8c8
         }
     }
 }

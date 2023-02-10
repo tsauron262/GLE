@@ -133,7 +133,7 @@ body {
 
 .thumbstat { font-weight: bold !important; }
 th a { font-weight: <?php echo ($useboldtitle ? 'bold' : 'normal'); ?> !important; }
-a.tab { font-weight: 500 !important; }
+a.tab { font-weight: 800 !important; }
 
 a:link, a:visited, a:hover, a:active, .classlink { color: var(--colortextlink); text-decoration: none;  }
 a:hover { text-decoration: underline; color: var(--colortextlink); }
@@ -6052,8 +6052,12 @@ span#select2-taskid-container[title^='--'] {
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
-	background-color: var(--colorbackhmenu1);
-	color: var(--colortextbackhmenu);
+    /*moddrsi*/
+/*	background-color: var(--colorbackhmenu1);
+	color: var(--colortextbackhmenu);*/
+        background-color: #5897FB;
+        color: #fff;
+    /*fmoddrsi*/
 }
 .select2-container--default .select2-results__option--highlighted[aria-selected] span {
 	color: #fff !important;

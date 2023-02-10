@@ -800,7 +800,7 @@ function setDisplayPopupButtonEvents($button) {
 
     var $popup = $button.parent().find('#' + $button.data('popup_id'));
     if ($popup.length) {
-        $popup.addClass('hideOnClickOut');
+//        $popup.addClass('hideOnClickOut'); // Fait bugguer les dropdowns inclus dans le popup
         $button.add($popup).mouseover(function () {
             $popup.show();
         }).mouseout(function () {

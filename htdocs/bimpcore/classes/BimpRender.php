@@ -238,7 +238,7 @@ class BimpRender
         }
         $html .= '">';
         $html .= '<button type="button" class="btn btn-' . $params['type'] . ' dropdown-toggle"';
-        $html .= ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+        $html .= ' aria-haspopup="true" data-toggle="dropdown" aria-expanded="false" role="button">';
         if (isset($params['icon'])) {
             $html .= self::renderIcon($params['icon'], $label ? 'iconLeft' : '');
         }

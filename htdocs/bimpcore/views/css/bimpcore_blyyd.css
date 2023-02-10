@@ -1,5 +1,4 @@
 @charset "UTF-8";
-/* Entité prolease */
 /* Couleurs principales */
 /*$bimp_headers_color: #fff;
 $bimp_headers_bk_color: $primary;*/
@@ -6330,7 +6329,7 @@ button.list-group-item-danger {
   display: inline-block;
   margin-top: 0;
   margin-bottom: 0;
-  font-size: 15px;
+  font-size: 14px;
   color: inherit; }
   /* line 49, ../scss/bootstrap/_panels.scss */
   .panel-title i {
@@ -8258,28 +8257,28 @@ body.has_fullscreen .select2-dropdown {
 
 /* line 183, ../scss/bimpcore/_styles.scss */
 .success {
-  font-weight: bold;
-  color: #348C41; }
+  font-weight: bold !important;
+  color: #348C41 !important; }
 
 /* line 187, ../scss/bimpcore/_styles.scss */
 .info {
-  font-weight: bold;
-  color: #3B6EA0; }
+  font-weight: bold !important;
+  color: #3B6EA0 !important; }
 
 /* line 191, ../scss/bimpcore/_styles.scss */
 .warning {
-  font-weight: bold;
-  color: #E69900; }
+  font-weight: bold !important;
+  color: #E69900 !important; }
 
 /* line 195, ../scss/bimpcore/_styles.scss */
 .danger {
-  font-weight: bold;
-  color: #A00000; }
+  font-weight: bold !important;
+  color: #A00000 !important; }
 
 /* line 199, ../scss/bimpcore/_styles.scss */
 .important {
-  font-weight: bold;
-  color: #963E96; }
+  font-weight: bold !important;
+  color: #963E96 !important; }
 
 /* line 204, ../scss/bimpcore/_styles.scss */
 div.alert {
@@ -11229,8 +11228,8 @@ td.buttons {
   /* line 4, ../scss/bimpcore/_view.scss */
   .panel-secondary .panel-secondary .panel-heading {
     background-color: #c8c8c8;
-    color: #282828;
-    border-color: #c8c8c8; }
+    border-color: #c8c8c8;
+    color: #282828; }
 
 /* line 12, ../scss/bimpcore/_view.scss */
 .object_view_content {

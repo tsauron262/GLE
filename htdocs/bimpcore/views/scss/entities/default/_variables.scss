@@ -1,3 +1,7 @@
+// **************
+// ENTITE : default
+// **************
+
 /* Couleurs principales */
 
 $gray-base:              #000 !default;
@@ -22,6 +26,12 @@ $warning: $brand-warning;
 $danger: $brand-danger;
 $important: #963E96 !default;
 $selection: #5897FB !default;
+
+$bimp_bk_light: #c8c8c8;
+$bimp_bk_dark: $secondary;
+
+$bimp_bk_light: #c8c8c8;
+$bimp_bk_dark: $secondary;
 
 // En-têtes généraux: 
 $bimp_headers_color: $primary;

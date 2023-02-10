@@ -69,19 +69,20 @@ function BimpModuleConf() {
 
         if ($form.length) {
             $form.each(function () {
-                var $curForm = $(this);
-
-                if (!parseInt($curForm.data('module_params_form_events_init'))) {
-                    $curForm.find('input.cur_module_search_input').keyup(function (e) {
-                        bmc.searchInCurModule();
-                    });
-                    $curForm.find('.module_conf_input').each(function () {
-                        $(this).change(function () {
-                            BimpModuleConf.onParamChange($(this));
+                $(this).find('table.module_conf_params').each(function () {
+                    var $curForm = $(this);
+                    if (!parseInt($curForm.data('module_params_form_events_init'))) {
+                        $curForm.find('input.cur_module_search_input').keyup(function (e) {
+                            bmc.searchInCurModule();
                         });
-                    });
-                    $form.data('module_params_form_events_init', 1);
-                }
+                        $curForm.find('.module_conf_input').each(function () {
+                            $(this).change(function () {
+                                BimpModuleConf.onParamChange($(this));
+                            });
+                        });
+                        $form.data('module_params_form_events_init', 1);
+                    }
+                });
             });
         }
     };
@@ -95,7 +96,14 @@ function BimpModuleConf() {
             return;
         }
 
+
         var module_name = $form.data('module_name');
+
+        var $table = $input.findParentByClass('module_conf_params');
+        if ($.isOk($table)) {
+            module_name = $table.data('module');
+        }
+
         var param_name = $input.attr('name');
         var value = $input.val();
 

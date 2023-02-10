@@ -291,8 +291,8 @@ class BC_ListTable extends BC_List
         } else {
             $col_params = self::getObjectConfigColParams($this->object, $col_name, $this->name);
         }
-        
-        if($col_name == $this->object->getRefProperty() || $col_name == $this->object->getPrimary())
+
+        if ($col_name == $this->object->getRefProperty() || $col_name == $this->object->getPrimary())
             $col_params['object_link'] = 1;
 
         if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
@@ -1183,7 +1183,7 @@ class BC_ListTable extends BC_List
             $html .= '</div>';
             $html .= '</div>';
         }
-
+        
         $html .= '<table class="objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
         $html .= '<thead class="listTableHead">';
 
@@ -2045,10 +2045,12 @@ class BC_ListTable extends BC_List
                             $items[] = '<span class="btn btn-light-default" onclick="loadListConfig($(this), ' . $id_config . ');">' . $config_label . '</span>';
                         }
 
+                        $content .= '<div>';
                         $content .= BimpRender::renderDropDownButton('Charger une configuration', $items, array(
                                     'icon'       => 'fas_user-cog',
                                     'menu_right' => 1
-                                )) . '<br/>';
+                        ));
+                        $content .= '</div>';
                     }
 
                     $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');

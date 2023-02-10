@@ -181,24 +181,24 @@ body.has_fullscreen {
 }
 
 .success {
-    font-weight: bold;
-    color: $success;
+    font-weight: bold!important;
+    color: $success!important;
 }
 .info {
-    font-weight: bold;
-    color: $info;
+    font-weight: bold!important;
+    color: $info!important;
 }
 .warning {
-    font-weight: bold;
-    color: $warning;
+    font-weight: bold!important;
+    color: $warning!important;
 }
 .danger {
-    font-weight: bold;
-    color: $danger;
+    font-weight: bold!important;
+    color: $danger!important;
 }
 .important {
-    font-weight: bold;
-    color: $important;
+    font-weight: bold!important;
+    color: $important!important;
 }
 
 div.alert {

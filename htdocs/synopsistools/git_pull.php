@@ -17,15 +17,17 @@ if(defined('ID_ERP'))
 curl_init();
 
 $ok = (isset($_REQUEST['go']) && $_REQUEST['go']);
+$branche = (isset($_REQUEST['branche'])?$_REQUEST['branche'] : 'master') ;
 
-echo '<form><input type="submit" value="Go"/><input type="hidden" name="go" value="1"/></form>';
+echo '<form><input type="hidden" name="go" value="1"/><input type="text" name="branche" value="'.$branche.'"/><br/><input type="submit" value="Go"/></form>';
 
-if($ok){
+if($ok && $branche != ''){
     $tabHook = array();
     $tabHook[] = array(
         'url' => WEBHOOK_SERVER.WEBHOOK_PATH_GIT_PULL,
         'data'=> array(
-            'secret' => WEBHOOK_SECRET_GIT_PULL
+            'secret' => WEBHOOK_SECRET_GIT_PULL,
+            'branch' => $branche
         )
     );
     //$tabHook[] = array(

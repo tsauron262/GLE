@@ -345,6 +345,12 @@
                 text-decoration: underline!important;
             }
         }
+        
+        select.boxcombo,
+        .select2-container, 
+        {
+            width: 210px!important;
+        }
     }
 
     #showDetailChrono2 {

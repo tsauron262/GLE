@@ -8,8 +8,9 @@ llxHeader();
 
 
 $ok = (isset($_REQUEST['go']) && $_REQUEST['go']);
+$branche = (isset($_REQUEST['branche'])?$_REQUEST['branche'] : 'master') ;
 
-echo '<form><input type="submit" value="Go"/><input type="hidden" name="go" value="1"/></form>';
+echo '<form><input type="hidden" name="go" value="1"/><input type="text" name="branche" value="'.$branche.'"/><br/><input type="submit" value="Go"/></form>';
 
 if($ok){
     $lien = '/synopsistools/git_pull.php?no_menu=1&nolog=ujgjhkhkfghgkvgkfdkshfiohf5453FF454FFDzelef&go=1';

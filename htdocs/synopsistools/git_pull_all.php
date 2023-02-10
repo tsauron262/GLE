@@ -6,26 +6,20 @@ llxHeader();
 
 
 
+$lien = '/synopsistools/git_pull.php?no_menu=1&nolog=ujgjhkhkfghgkvgkfdkshfiohf5453FF454FFDzelef';
 
-$ok = (isset($_REQUEST['go']) && $_REQUEST['go']);
-
-echo '<form><input type="submit" value="Go"/><input type="hidden" name="go" value="1"/></form>';
-
-if($ok){
-    $lien = '/synopsistools/git_pull.php?no_menu=1&nolog=ujgjhkhkfghgkvgkfdkshfiohf5453FF454FFDzelef&go=1';
-
-    $array = array("erp1", "erp2", /*"erp3",*/ "erp4", /*"erp5",*/ "erp6");
+$array = array("erp1", "erp2", /*"erp3",*/ "erp4", /*"erp5",*/ "erp6");
 
 
-    foreach($array as $erp){
-        echo '<h1>Serveur '.$erp.'</h1>';
-        $lienF = 'https://'.$erp.'.bimp.fr/'.DOL_URL_ROOT.$lien;
-        echo $lienF;
-        echo '<iframe style="width: 100%; height: 400px;" src="'.$lienF.'"></iframe>';
-    }
-
-
-    echo '<iframe style="width: 100%; height: 400px;" src="'.DOL_URL_ROOT.'/synopsistools/git_maj_version.php'.'"></iframe>';
+foreach($array as $erp){
+    echo '<h1>Serveur '.$erp.'</h1>';
+    $lienF = 'https://'.$erp.'.bimp.fr/'.DOL_URL_ROOT.$lien;
+    echo $lienF;
+    echo '<iframe style="width: 100%; height: 400px;" src="'.$lienF.'"></iframe>';
 }
+
+
+echo '<iframe style="width: 100%; height: 400px;" src="'.DOL_URL_ROOT.'/synopsistools/git_maj_version.php'.'"></iframe>';
+
 llxFooter();
 

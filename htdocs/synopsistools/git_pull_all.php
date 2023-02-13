@@ -8,7 +8,7 @@ llxHeader();
 
 
 $ok = (isset($_REQUEST['go']) && $_REQUEST['go']);
-$branche = (isset($_REQUEST['branche'])?$_REQUEST['branche'] : 'master') ;
+$branche = (isset($_REQUEST['branche'])?$_REQUEST['branche'] : BimpCore::getConf('git_branch', 'master')) ;
 
 echo '<form><input type="hidden" name="go" value="1"/><input type="text" name="branche" value="'.$branche.'"/><br/><input type="submit" value="Go"/></form>';
 

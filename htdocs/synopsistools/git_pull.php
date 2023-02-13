@@ -5,7 +5,6 @@ if(isset($_REQUEST['nolog']) && $_REQUEST['nolog'] == 'ujgjhkhkfghgkvgkfdkshfioh
     header('x-frame-options: ALLOWALL',true);
 }
 
-require_once('../main.inc.php');
 
 if(!isset($_REQUEST['no_menu'])){
     require_once('../main.inc.php');

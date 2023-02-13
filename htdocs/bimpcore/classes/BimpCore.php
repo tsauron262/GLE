@@ -1046,7 +1046,7 @@ class BimpCore
             $html .= 'Backtrace: <br/>';
             $html .= BimpRender::renderBacktrace(BimpTools::getBacktraceArray($bt));
 
-            die($html);
+//            die($html);
 //            }
 
             if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('mode_eco')) {

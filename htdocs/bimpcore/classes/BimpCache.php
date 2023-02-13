@@ -34,17 +34,15 @@ class BimpCache
         global $db;
         
         if ($mode_archive == 1) {
-            if (is_null(self::$bdb_archive)) {
-                $dolibarr_main_db_port = '3306';
-                $dolibarr_main_db_host = '10.192.20.11';
-                $dolibarr_main_db_pass = 'llkjfvklfdvgukfdvfppdz';
-                $dolibarr_main_db_name = 'ERP_PROD_BIMP_ARCHIVE';
-                $dolibarr_main_db_user = 'archive';
-                $dolibarr_main_db_type = 'mysqli';
-                $db2 = getDoliDBInstance($dolibarr_main_db_type, $dolibarr_main_db_host, $dolibarr_main_db_user, $dolibarr_main_db_pass, $dolibarr_main_db_name, $dolibarr_main_db_port);
-                self::$bdb_archive = new BimpDb($db2);
+            if(defined('ARCHIVE_DB_TYPE')){
+                if (is_null(self::$bdb_archive)) {
+                    $db2 = getDoliDBInstance(ARCHIVE_DB_TYPE, ARCHIVE_DB_HOST, ARCHIVE_DB_USER, ARCHIVE_DB_PASSWORD, ARCHIVE_DB_NAME, ARCHIVE_DB_PORT);
+                    self::$bdb_archive = new BimpDb($db2);
+                }
+                return self::$bdb_archive;
             }
-            return self::$bdb_archive;
+            else
+                BimpCore::addlog ('Config base arichive BAD');
         }
 
         if (!$no_transactions) {

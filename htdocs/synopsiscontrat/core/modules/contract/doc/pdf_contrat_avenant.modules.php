@@ -781,7 +781,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', 'I', 10);
                 
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "* Les signataires confirment avoir lu et approuvé le descriptif et la tarification", 0, 'C');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "de ce contrat et en accepter les Conditions Particulières et Générale", 0, 'C');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "de ce contrat et en accepter les Conditions Particulières et Générales", 0, 'C');
 
           
                 $pdf->setColor('fill', 255, 255, 255);

@@ -251,7 +251,6 @@ class synopsisHook {//FA1506-0369
                 if($ip == $ipUser)
                     $admin =true;
             }
-            define('CLOSE_DATE', $CLOSE_DATE);
         }
 
         if (defined("CLOSE_DATE") && !stripos($_SERVER['REQUEST_URI'], 'close.php') && !$admin) {

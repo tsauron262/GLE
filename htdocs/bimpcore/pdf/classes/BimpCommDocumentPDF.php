@@ -906,9 +906,12 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                         $modeDecimal = $this->object->array_options['options_pdf_nb_decimal'];
                         $modeDecimalTotal = $this->object->array_options['options_pdf_nb_decimal'];
                     } else {
-                        $nbDecimalPu = BimpTools::getDecimalesNumber($pu_ht);
-                        $modeDecimal = ($nbDecimalPu > 3 ? 'full' : 2);
-                        $modeDecimalTotal = 2;
+                        $modeDecimal = (int) BimpCore::getConf('pdf_pu_nb_decimales', null, 'bimpcommercial');
+                        if (!$modeDecimal) {
+                            $nbDecimalPu = BimpTools::getDecimalesNumber($pu_ht);
+                            $modeDecimal = ($nbDecimalPu > 3 ? 'full' : 2);
+                        }
+                        $modeDecimalTotal = (int) BimpCore::getConf('pdf_total_nb_decimales', null, 'bimpcommercial');
                     }
 
                     $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, $modeDecimal);

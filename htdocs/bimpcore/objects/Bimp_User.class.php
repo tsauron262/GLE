@@ -647,11 +647,12 @@ class Bimp_User extends BimpObject
                 );
             }
 
-            $tabs[] = array(
-                'id'      => 'tasks',
-                'title'   => BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Mes tâches',
-                'content' => $this->renderTasksView()
-            );
+            if(BimpCore::isModuleActive('BIMPTASK'))
+                $tabs[] = array(
+                    'id'      => 'tasks',
+                    'title'   => BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Mes tâches',
+                    'content' => $this->renderTasksView()
+                );
         }
 
         if ($isAdmin || $isItself || $this->canViewUserCommissions()) {

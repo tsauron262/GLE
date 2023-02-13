@@ -67,6 +67,11 @@ class API_UserAccount extends BimpObject
                         $errors[] = 'API non installée ou inactive';
                         return 0;
                     }
+
+                    if ($api->getData('mode') != $this->getData('mode')) {
+                        $errors[] = 'L\'API n\'est pas en mode ' . $this->displayData('mode', 'default', false, true);
+                        return 0;
+                    }
                 }
                 return 1;
         }

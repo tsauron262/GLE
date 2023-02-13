@@ -76,6 +76,10 @@ abstract class BimpAPI
             return 0;
         }
 
+        if ((int) $this->userAccount->getData('mode') != $this->getOption('mode', 'test')) {
+            $errors[] = 'Mode incorrect (' . $this->userAccount->displayData('mode', 'default', false, true) . ') pour ce compte utilisateur';
+            return 0;
+        }
         return 1;
     }
 
@@ -151,10 +155,12 @@ abstract class BimpAPI
             }
         } else {
             global $user;
+            $mode = $this->getOption('mode', 'test');
 
             if (BimpObject::objectLoaded($user)) {
                 $userAccount = BimpCache::findBimpObjectInstance('bimpapi', 'API_UserAccount', array(
                             'id_api' => $this->apiObject->id,
+                            'mode'   => $mode,
                             'users'  => array(
                                 'part_type' => 'middle',
                                 'part'      => '[' . $user->id . ']'
@@ -615,7 +621,7 @@ abstract class BimpAPI
         }
 
         $this->addDebug($infos);
-        
+
         return $return;
     }
 

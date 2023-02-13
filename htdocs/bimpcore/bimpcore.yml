@@ -280,3 +280,5 @@ params:
         label: Date de fermeture (si présente ERP fermé)
     IP_ADMIN:
         label: Ip Admin (pour fermeture ERP)
+    git_branch:
+        label: Branche GIT

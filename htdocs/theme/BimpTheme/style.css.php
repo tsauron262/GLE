@@ -331,3 +331,10 @@ require __DIR__.'/../eldy/global.inc.php';
 if (is_object($db)) {
 	$db->close();
 }
+
+
+?>
+
+div.blockvmenupair, div.blockvmenuimpair, div.blockvmenubookmarks, div.blockvmenuend{
+    background: none;
+}

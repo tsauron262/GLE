@@ -2047,7 +2047,7 @@ class DoliDBMysqliC extends DoliDB
     
     /* moddrsi */
 
-    public function begin()
+    public function begin($textinlog = '')
     {
         if(!$this->connected && ! $this->transaction_opened)
             $this->connect_server (2);

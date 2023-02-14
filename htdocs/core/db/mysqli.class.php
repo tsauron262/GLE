@@ -393,7 +393,7 @@ class DoliDBMysqli extends DoliDB
         }
 
         if (defined('BIMP_LIB') && BimpDebug::isActive() && !in_array($query, array('BEGIN', 'COMMIT', 'ROLLBACK'))) {
-            BimpDebug::addSqlDebug($query);
+            BimpDebug::addSqlDebug($query, $this->noTransaction);
 
             $content = BimpRender::renderDebugInfo($query);
             BimpDebug::addDebug('sql', 'Requête #' . $this->countReq . ' - ' . $difference_ms . ' s', $content, array(

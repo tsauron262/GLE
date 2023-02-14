@@ -342,6 +342,7 @@ class BimpDebug
         if (!(float) $bimp_start_time) {
             $html .= BimpRender::renderAlerts('Variable bimp_start_time absente du fichier index.php');
         } else {
+            $html .= 'Time debut '.date('m/d/Y H:i:s', $bimp_start_time);
             $html .= '<table class="bimp_list_table">';
             $html .= '<thead>';
             $html .= '<tr>';
@@ -377,6 +378,7 @@ class BimpDebug
 
             $html .= '</tbody>';
             $html .= '</table>';
+            $html .= 'Time fin '.date('m/d/Y H:i:s');
         }
 
         $html .= '</div>';
@@ -782,7 +784,7 @@ class BimpDebug
 
     // SQL: 
 
-    public static function addSqlDebug($sql)
+    public static function addSqlDebug($sql, $noTransaction = false)
     {
         $time = self::getTime();
 
@@ -794,7 +796,7 @@ class BimpDebug
         }
 
         self::$sql_count[] = array(
-            'sql'   => $sql,
+            'sql'   => ($noTransaction? '(noTransaction)' : '').$sql,
             'times' => array(
                 $time
             )

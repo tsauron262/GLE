@@ -219,3 +219,6 @@ params:
         label: Liste des comptes spécifique pour les imports de paiements
         required: 1
         cat: autre
+    default_end_code_j:
+        label: Dernier caractére du code journal
+        def: P

@@ -7,17 +7,15 @@ function code_journal($secteur, $AouV, $isInterco) {
             $endCode = "E"; 
             break;
         case 'S': $endCode = "S"; break;
+        case 'M': $endCode = "B"; break;
         case 'C': 
         case 'CO':
         case 'CTC':
         case 'I':
         case 'BP':
         case 'X':
-            $endCode = "P"; 
-            break;
-        case 'M': $endCode = "B"; break;
         default:
-            $endCode = "P";
+            $endCode = BimpCore::getConf('default_end_code_j', 'P', 'bimptocegid'); 
             break;
     }
     if($isInterco) {

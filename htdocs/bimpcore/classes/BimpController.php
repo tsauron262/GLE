@@ -1052,7 +1052,7 @@ $bimpLogPhpWarnings = false;
                     $errors = $result['errors'];
                 }
 
-                BimpCore::unlockObject($object_module, $object_name, $id_object);
+                $errors = BimpTools::merge_array($errors, BimpCore::unlockObject($object_module, $object_name, $id_object));
             }
         }
 

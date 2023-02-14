@@ -31,11 +31,11 @@ llxHeader("", "Fichier de log");
 dol_fiche_head('', 'SynopsisTools', $langs->trans("Voir les fichiers de log"));
 
 
-if ($user->rights->SynopsisTools->Global->fileInfo != 1) {
-    print "Ce module ne vous est pas accessible";
-    llxFooter();
-    exit(0);
-}
+//if ($user->rights->SynopsisTools->Global->fileInfo != 1) {
+//    print "Ce module ne vous est pas accessible";
+//    llxFooter();
+//    exit(0);
+//}
 
 $prefixe = (isset($_REQUEST['prefixe']) ? $_REQUEST['prefixe'] : "");
 

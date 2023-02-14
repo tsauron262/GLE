@@ -1420,19 +1420,20 @@ textarea {
   font-size: inherit;
   line-height: inherit; }
 
-/* line 48, ../scss/bootstrap/_scaffolding.scss */
-a {
-  color: #C11F2A;
-  text-decoration: none; }
-  /* line 52, ../scss/bootstrap/_scaffolding.scss */
-  a:hover, a:focus {
-    color: #7f141c;
-    text-decoration: underline; }
-  /* line 58, ../scss/bootstrap/_scaffolding.scss */
-  a:focus {
-    outline: 5px auto -webkit-focus-ring-color;
-    outline-offset: -2px; }
+/*a {
+    color: $link-color;
+    text-decoration: none!important;
 
+    &:hover,
+        &:focus {
+        color: $link-hover-color;
+        text-decoration: $link-hover-decoration;
+    }
+
+    &:focus {
+        @include tab-focus;
+    }
+}*/
 /* line 69, ../scss/bootstrap/_scaffolding.scss */
 figure {
   margin: 0; }
@@ -6336,6 +6337,9 @@ button.list-group-item-danger {
   .panel-title i {
     margin-right: 12px; }
   /* line 53, ../scss/bootstrap/_panels.scss */
+  .panel-title .objectIcon i {
+    margin-right: 0; }
+  /* line 57, ../scss/bootstrap/_panels.scss */
   .panel-title > a,
   .panel-title > small,
   .panel-title > .small,
@@ -6343,7 +6347,7 @@ button.list-group-item-danger {
   .panel-title > .small > a {
     color: inherit; }
 
-/* line 63, ../scss/bootstrap/_panels.scss */
+/* line 67, ../scss/bootstrap/_panels.scss */
 .panel-footer {
   padding: 10px 15px;
   background-color: #f5f5f5;
@@ -6351,64 +6355,64 @@ button.list-group-item-danger {
   border-bottom-right-radius: -1;
   border-bottom-left-radius: -1; }
 
-/* line 77, ../scss/bootstrap/_panels.scss */
+/* line 81, ../scss/bootstrap/_panels.scss */
 .panel > .list-group,
 .panel > .panel-collapse > .list-group {
   margin-bottom: 0; }
-  /* line 81, ../scss/bootstrap/_panels.scss */
+  /* line 85, ../scss/bootstrap/_panels.scss */
   .panel > .list-group .list-group-item,
   .panel > .panel-collapse > .list-group .list-group-item {
     border-width: 1px 0;
     border-radius: 0; }
-  /* line 88, ../scss/bootstrap/_panels.scss */
+  /* line 92, ../scss/bootstrap/_panels.scss */
   .panel > .list-group:first-child .list-group-item:first-child,
   .panel > .panel-collapse > .list-group:first-child .list-group-item:first-child {
     border-top: 0;
     border-top-right-radius: -1;
     border-top-left-radius: -1; }
-  /* line 96, ../scss/bootstrap/_panels.scss */
+  /* line 100, ../scss/bootstrap/_panels.scss */
   .panel > .list-group:last-child .list-group-item:last-child,
   .panel > .panel-collapse > .list-group:last-child .list-group-item:last-child {
     border-bottom: 0;
     border-bottom-right-radius: -1;
     border-bottom-left-radius: -1; }
-/* line 103, ../scss/bootstrap/_panels.scss */
+/* line 107, ../scss/bootstrap/_panels.scss */
 .panel > .panel-heading + .panel-collapse > .list-group .list-group-item:first-child {
   border-top-right-radius: 0;
   border-top-left-radius: 0; }
 
-/* line 110, ../scss/bootstrap/_panels.scss */
+/* line 114, ../scss/bootstrap/_panels.scss */
 .panel-heading + .list-group .list-group-item:first-child {
   border-top-width: 0; }
 
-/* line 114, ../scss/bootstrap/_panels.scss */
+/* line 118, ../scss/bootstrap/_panels.scss */
 .list-group + .panel-footer {
   border-top-width: 0; }
 
-/* line 124, ../scss/bootstrap/_panels.scss */
+/* line 128, ../scss/bootstrap/_panels.scss */
 .panel > .table,
 .panel > .table-responsive > .table,
 .panel > .panel-collapse > .table {
   margin-bottom: 0; }
-  /* line 129, ../scss/bootstrap/_panels.scss */
+  /* line 133, ../scss/bootstrap/_panels.scss */
   .panel > .table caption,
   .panel > .table-responsive > .table caption,
   .panel > .panel-collapse > .table caption {
     padding-left: 8px;
     padding-right: 8px; }
-/* line 135, ../scss/bootstrap/_panels.scss */
+/* line 139, ../scss/bootstrap/_panels.scss */
 .panel > .table:first-child,
 .panel > .table-responsive:first-child > .table:first-child {
   border-top-right-radius: -1;
   border-top-left-radius: -1; }
-  /* line 141, ../scss/bootstrap/_panels.scss */
+  /* line 145, ../scss/bootstrap/_panels.scss */
   .panel > .table:first-child > thead:first-child > tr:first-child,
   .panel > .table:first-child > tbody:first-child > tr:first-child,
   .panel > .table-responsive:first-child > .table:first-child > thead:first-child > tr:first-child,
   .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child {
     border-top-left-radius: -1;
     border-top-right-radius: -1; }
-    /* line 145, ../scss/bootstrap/_panels.scss */
+    /* line 149, ../scss/bootstrap/_panels.scss */
     .panel > .table:first-child > thead:first-child > tr:first-child td:first-child,
     .panel > .table:first-child > thead:first-child > tr:first-child th:first-child,
     .panel > .table:first-child > tbody:first-child > tr:first-child td:first-child,
@@ -6418,7 +6422,7 @@ button.list-group-item-danger {
     .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child td:first-child,
     .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child th:first-child {
       border-top-left-radius: -1; }
-    /* line 149, ../scss/bootstrap/_panels.scss */
+    /* line 153, ../scss/bootstrap/_panels.scss */
     .panel > .table:first-child > thead:first-child > tr:first-child td:last-child,
     .panel > .table:first-child > thead:first-child > tr:first-child th:last-child,
     .panel > .table:first-child > tbody:first-child > tr:first-child td:last-child,
@@ -6428,19 +6432,19 @@ button.list-group-item-danger {
     .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child td:last-child,
     .panel > .table-responsive:first-child > .table:first-child > tbody:first-child > tr:first-child th:last-child {
       border-top-right-radius: -1; }
-/* line 157, ../scss/bootstrap/_panels.scss */
+/* line 161, ../scss/bootstrap/_panels.scss */
 .panel > .table:last-child,
 .panel > .table-responsive:last-child > .table:last-child {
   border-bottom-right-radius: -1;
   border-bottom-left-radius: -1; }
-  /* line 163, ../scss/bootstrap/_panels.scss */
+  /* line 167, ../scss/bootstrap/_panels.scss */
   .panel > .table:last-child > tbody:last-child > tr:last-child,
   .panel > .table:last-child > tfoot:last-child > tr:last-child,
   .panel > .table-responsive:last-child > .table:last-child > tbody:last-child > tr:last-child,
   .panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child {
     border-bottom-left-radius: -1;
     border-bottom-right-radius: -1; }
-    /* line 167, ../scss/bootstrap/_panels.scss */
+    /* line 171, ../scss/bootstrap/_panels.scss */
     .panel > .table:last-child > tbody:last-child > tr:last-child td:first-child,
     .panel > .table:last-child > tbody:last-child > tr:last-child th:first-child,
     .panel > .table:last-child > tfoot:last-child > tr:last-child td:first-child,
@@ -6450,7 +6454,7 @@ button.list-group-item-danger {
     .panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child td:first-child,
     .panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child th:first-child {
       border-bottom-left-radius: -1; }
-    /* line 171, ../scss/bootstrap/_panels.scss */
+    /* line 175, ../scss/bootstrap/_panels.scss */
     .panel > .table:last-child > tbody:last-child > tr:last-child td:last-child,
     .panel > .table:last-child > tbody:last-child > tr:last-child th:last-child,
     .panel > .table:last-child > tfoot:last-child > tr:last-child td:last-child,
@@ -6460,21 +6464,21 @@ button.list-group-item-danger {
     .panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child td:last-child,
     .panel > .table-responsive:last-child > .table:last-child > tfoot:last-child > tr:last-child th:last-child {
       border-bottom-right-radius: -1; }
-/* line 178, ../scss/bootstrap/_panels.scss */
+/* line 182, ../scss/bootstrap/_panels.scss */
 .panel > .panel-body + .table,
 .panel > .panel-body + .table-responsive,
 .panel > .table + .panel-body,
 .panel > .table-responsive + .panel-body {
   border-top: 1px solid #ddd; }
-/* line 184, ../scss/bootstrap/_panels.scss */
+/* line 188, ../scss/bootstrap/_panels.scss */
 .panel > .table > tbody:first-child > tr:first-child th,
 .panel > .table > tbody:first-child > tr:first-child td {
   border-top: 0; }
-/* line 188, ../scss/bootstrap/_panels.scss */
+/* line 192, ../scss/bootstrap/_panels.scss */
 .panel > .table-bordered,
 .panel > .table-responsive > .table-bordered {
   border: 0; }
-  /* line 195, ../scss/bootstrap/_panels.scss */
+  /* line 199, ../scss/bootstrap/_panels.scss */
   .panel > .table-bordered > thead > tr > th:first-child,
   .panel > .table-bordered > thead > tr > td:first-child,
   .panel > .table-bordered > tbody > tr > th:first-child,
@@ -6488,7 +6492,7 @@ button.list-group-item-danger {
   .panel > .table-responsive > .table-bordered > tfoot > tr > th:first-child,
   .panel > .table-responsive > .table-bordered > tfoot > tr > td:first-child {
     border-left: 0; }
-  /* line 199, ../scss/bootstrap/_panels.scss */
+  /* line 203, ../scss/bootstrap/_panels.scss */
   .panel > .table-bordered > thead > tr > th:last-child,
   .panel > .table-bordered > thead > tr > td:last-child,
   .panel > .table-bordered > tbody > tr > th:last-child,
@@ -6502,7 +6506,7 @@ button.list-group-item-danger {
   .panel > .table-responsive > .table-bordered > tfoot > tr > th:last-child,
   .panel > .table-responsive > .table-bordered > tfoot > tr > td:last-child {
     border-right: 0; }
-  /* line 208, ../scss/bootstrap/_panels.scss */
+  /* line 212, ../scss/bootstrap/_panels.scss */
   .panel > .table-bordered > thead > tr:first-child > td,
   .panel > .table-bordered > thead > tr:first-child > th,
   .panel > .table-bordered > tbody > tr:first-child > td,
@@ -6512,7 +6516,7 @@ button.list-group-item-danger {
   .panel > .table-responsive > .table-bordered > tbody > tr:first-child > td,
   .panel > .table-responsive > .table-bordered > tbody > tr:first-child > th {
     border-bottom: 0; }
-  /* line 217, ../scss/bootstrap/_panels.scss */
+  /* line 221, ../scss/bootstrap/_panels.scss */
   .panel > .table-bordered > tbody > tr:last-child > td,
   .panel > .table-bordered > tbody > tr:last-child > th,
   .panel > .table-bordered > tfoot > tr:last-child > td,
@@ -6522,36 +6526,36 @@ button.list-group-item-danger {
   .panel > .table-responsive > .table-bordered > tfoot > tr:last-child > td,
   .panel > .table-responsive > .table-bordered > tfoot > tr:last-child > th {
     border-bottom: 0; }
-/* line 224, ../scss/bootstrap/_panels.scss */
+/* line 228, ../scss/bootstrap/_panels.scss */
 .panel > .table-responsive {
   border: 0;
   margin-bottom: 0; }
 
-/* line 236, ../scss/bootstrap/_panels.scss */
+/* line 240, ../scss/bootstrap/_panels.scss */
 .panel-group {
   margin-bottom: 18px; }
-  /* line 240, ../scss/bootstrap/_panels.scss */
+  /* line 244, ../scss/bootstrap/_panels.scss */
   .panel-group .panel {
     margin-bottom: 0;
     border-radius: 0; }
-    /* line 244, ../scss/bootstrap/_panels.scss */
+    /* line 248, ../scss/bootstrap/_panels.scss */
     .panel-group .panel + .panel {
       margin-top: 5px; }
-  /* line 249, ../scss/bootstrap/_panels.scss */
+  /* line 253, ../scss/bootstrap/_panels.scss */
   .panel-group .panel-heading {
     border-bottom: 0; }
-    /* line 252, ../scss/bootstrap/_panels.scss */
+    /* line 256, ../scss/bootstrap/_panels.scss */
     .panel-group .panel-heading + .panel-collapse > .panel-body,
     .panel-group .panel-heading + .panel-collapse > .list-group {
       border-top: 1px solid #ddd; }
-  /* line 258, ../scss/bootstrap/_panels.scss */
+  /* line 262, ../scss/bootstrap/_panels.scss */
   .panel-group .panel-footer {
     border-top: 0; }
-    /* line 260, ../scss/bootstrap/_panels.scss */
+    /* line 264, ../scss/bootstrap/_panels.scss */
     .panel-group .panel-footer + .panel-collapse .panel-body {
       border-bottom: 1px solid #ddd; }
 
-/* line 269, ../scss/bootstrap/_panels.scss */
+/* line 273, ../scss/bootstrap/_panels.scss */
 .panel-default {
   border-color: #ddd; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -6559,18 +6563,21 @@ button.list-group-item-danger {
     color: #636363;
     background-color: #f5f5f5;
     border-color: #ddd; }
-    /* line 11, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 12, ../scss/bootstrap/mixins/_panels.scss */
+    .panel-default > .panel-heading > .panel-title a, .panel-default > .panel-heading > .panel-title i {
+      color: #636363; }
+    /* line 17, ../scss/bootstrap/mixins/_panels.scss */
     .panel-default > .panel-heading + .panel-collapse > .panel-body {
       border-top-color: #ddd; }
-    /* line 14, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 20, ../scss/bootstrap/mixins/_panels.scss */
     .panel-default > .panel-heading .badge {
       color: #f5f5f5;
       background-color: #636363; }
-  /* line 20, ../scss/bootstrap/mixins/_panels.scss */
+  /* line 26, ../scss/bootstrap/mixins/_panels.scss */
   .panel-default > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #ddd; }
 
-/* line 272, ../scss/bootstrap/_panels.scss */
+/* line 276, ../scss/bootstrap/_panels.scss */
 .panel-secondary,
 .panel-secondary-forced {
   border-color: #272D36; }
@@ -6580,21 +6587,26 @@ button.list-group-item-danger {
     color: #fff;
     background-color: #272D36;
     border-color: #272D36; }
-    /* line 11, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 12, ../scss/bootstrap/mixins/_panels.scss */
+    .panel-secondary > .panel-heading > .panel-title a, .panel-secondary > .panel-heading > .panel-title i,
+    .panel-secondary-forced > .panel-heading > .panel-title a,
+    .panel-secondary-forced > .panel-heading > .panel-title i {
+      color: #fff; }
+    /* line 17, ../scss/bootstrap/mixins/_panels.scss */
     .panel-secondary > .panel-heading + .panel-collapse > .panel-body,
     .panel-secondary-forced > .panel-heading + .panel-collapse > .panel-body {
       border-top-color: #272D36; }
-    /* line 14, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 20, ../scss/bootstrap/mixins/_panels.scss */
     .panel-secondary > .panel-heading .badge,
     .panel-secondary-forced > .panel-heading .badge {
       color: #272D36;
       background-color: #fff; }
-  /* line 20, ../scss/bootstrap/mixins/_panels.scss */
+  /* line 26, ../scss/bootstrap/mixins/_panels.scss */
   .panel-secondary > .panel-footer + .panel-collapse > .panel-body,
   .panel-secondary-forced > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #272D36; }
 
-/* line 276, ../scss/bootstrap/_panels.scss */
+/* line 280, ../scss/bootstrap/_panels.scss */
 .panel-primary {
   border-color: #C11F2A; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -6602,18 +6614,21 @@ button.list-group-item-danger {
     color: #fff;
     background-color: #C11F2A;
     border-color: #C11F2A; }
-    /* line 11, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 12, ../scss/bootstrap/mixins/_panels.scss */
+    .panel-primary > .panel-heading > .panel-title a, .panel-primary > .panel-heading > .panel-title i {
+      color: #fff; }
+    /* line 17, ../scss/bootstrap/mixins/_panels.scss */
     .panel-primary > .panel-heading + .panel-collapse > .panel-body {
       border-top-color: #C11F2A; }
-    /* line 14, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 20, ../scss/bootstrap/mixins/_panels.scss */
     .panel-primary > .panel-heading .badge {
       color: #C11F2A;
       background-color: #fff; }
-  /* line 20, ../scss/bootstrap/mixins/_panels.scss */
+  /* line 26, ../scss/bootstrap/mixins/_panels.scss */
   .panel-primary > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #C11F2A; }
 
-/* line 279, ../scss/bootstrap/_panels.scss */
+/* line 283, ../scss/bootstrap/_panels.scss */
 .panel-success {
   border-color: #d6e9c6; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -6621,18 +6636,21 @@ button.list-group-item-danger {
     color: #1C823E;
     background-color: #dff0d8;
     border-color: #d6e9c6; }
-    /* line 11, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 12, ../scss/bootstrap/mixins/_panels.scss */
+    .panel-success > .panel-heading > .panel-title a, .panel-success > .panel-heading > .panel-title i {
+      color: #1C823E; }
+    /* line 17, ../scss/bootstrap/mixins/_panels.scss */
     .panel-success > .panel-heading + .panel-collapse > .panel-body {
       border-top-color: #d6e9c6; }
-    /* line 14, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 20, ../scss/bootstrap/mixins/_panels.scss */
     .panel-success > .panel-heading .badge {
       color: #dff0d8;
       background-color: #1C823E; }
-  /* line 20, ../scss/bootstrap/mixins/_panels.scss */
+  /* line 26, ../scss/bootstrap/mixins/_panels.scss */
   .panel-success > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #d6e9c6; }
 
-/* line 282, ../scss/bootstrap/_panels.scss */
+/* line 286, ../scss/bootstrap/_panels.scss */
 .panel-info {
   border-color: #bce8f1; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -6640,18 +6658,21 @@ button.list-group-item-danger {
     color: #00678C;
     background-color: #d9edf7;
     border-color: #bce8f1; }
-    /* line 11, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 12, ../scss/bootstrap/mixins/_panels.scss */
+    .panel-info > .panel-heading > .panel-title a, .panel-info > .panel-heading > .panel-title i {
+      color: #00678C; }
+    /* line 17, ../scss/bootstrap/mixins/_panels.scss */
     .panel-info > .panel-heading + .panel-collapse > .panel-body {
       border-top-color: #bce8f1; }
-    /* line 14, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 20, ../scss/bootstrap/mixins/_panels.scss */
     .panel-info > .panel-heading .badge {
       color: #d9edf7;
       background-color: #00678C; }
-  /* line 20, ../scss/bootstrap/mixins/_panels.scss */
+  /* line 26, ../scss/bootstrap/mixins/_panels.scss */
   .panel-info > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #bce8f1; }
 
-/* line 285, ../scss/bootstrap/_panels.scss */
+/* line 289, ../scss/bootstrap/_panels.scss */
 .panel-warning {
   border-color: #faebcc; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -6659,18 +6680,21 @@ button.list-group-item-danger {
     color: #AA6300;
     background-color: #fcf8e3;
     border-color: #faebcc; }
-    /* line 11, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 12, ../scss/bootstrap/mixins/_panels.scss */
+    .panel-warning > .panel-heading > .panel-title a, .panel-warning > .panel-heading > .panel-title i {
+      color: #AA6300; }
+    /* line 17, ../scss/bootstrap/mixins/_panels.scss */
     .panel-warning > .panel-heading + .panel-collapse > .panel-body {
       border-top-color: #faebcc; }
-    /* line 14, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 20, ../scss/bootstrap/mixins/_panels.scss */
     .panel-warning > .panel-heading .badge {
       color: #fcf8e3;
       background-color: #AA6300; }
-  /* line 20, ../scss/bootstrap/mixins/_panels.scss */
+  /* line 26, ../scss/bootstrap/mixins/_panels.scss */
   .panel-warning > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #faebcc; }
 
-/* line 288, ../scss/bootstrap/_panels.scss */
+/* line 292, ../scss/bootstrap/_panels.scss */
 .panel-danger {
   border-color: #ebccd1; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
@@ -6678,19 +6702,22 @@ button.list-group-item-danger {
     color: #AA0000;
     background-color: #f2dede;
     border-color: #ebccd1; }
-    /* line 11, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 12, ../scss/bootstrap/mixins/_panels.scss */
+    .panel-danger > .panel-heading > .panel-title a, .panel-danger > .panel-heading > .panel-title i {
+      color: #AA0000; }
+    /* line 17, ../scss/bootstrap/mixins/_panels.scss */
     .panel-danger > .panel-heading + .panel-collapse > .panel-body {
       border-top-color: #ebccd1; }
-    /* line 14, ../scss/bootstrap/mixins/_panels.scss */
+    /* line 20, ../scss/bootstrap/mixins/_panels.scss */
     .panel-danger > .panel-heading .badge {
       color: #f2dede;
       background-color: #AA0000; }
-  /* line 20, ../scss/bootstrap/mixins/_panels.scss */
+  /* line 26, ../scss/bootstrap/mixins/_panels.scss */
   .panel-danger > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #ebccd1; }
 
 /*Ajouts Bimp*/
-/* line 293, ../scss/bootstrap/_panels.scss */
+/* line 297, ../scss/bootstrap/_panels.scss */
 .panel.panel-secondary,
 .panel.panel-default {
   margin-bottom: 10px; }
@@ -11231,25 +11258,28 @@ td.buttons {
     background-color: #c8c8c8;
     border-color: #c8c8c8;
     color: #282828; }
+    /* line 10, ../scss/bimpcore/_view.scss */
+    .panel-secondary .panel-secondary .panel-heading .panel-title a, .panel-secondary .panel-secondary .panel-heading .panel-title i {
+      color: #282828; }
 
-/* line 12, ../scss/bimpcore/_view.scss */
+/* line 18, ../scss/bimpcore/_view.scss */
 .object_view_content {
   padding: 0 !important; }
-  /* line 15, ../scss/bimpcore/_view.scss */
+  /* line 21, ../scss/bimpcore/_view.scss */
   .object_view_content .row:not(:first-child) {
     margin-top: 15px; }
 
-/* line 20, ../scss/bimpcore/_view.scss */
+/* line 26, ../scss/bimpcore/_view.scss */
 .objectFieldsTableContainer {
   width: 100%;
   border: 1px solid #272D36;
   margin: 5px 0; }
 
-/* line 26, ../scss/bimpcore/_view.scss */
+/* line 32, ../scss/bimpcore/_view.scss */
 .bimp_fields_table,
 .objectFieldsTable {
   width: 100%; }
-  /* line 30, ../scss/bimpcore/_view.scss */
+  /* line 36, ../scss/bimpcore/_view.scss */
   .bimp_fields_table > thead > tr > th,
   .objectFieldsTable > thead > tr > th {
     padding: 8px 12px;
@@ -11257,7 +11287,7 @@ td.buttons {
     color: #282828;
     font-size: 15px;
     font-weight: normal; }
-  /* line 38, ../scss/bimpcore/_view.scss */
+  /* line 44, ../scss/bimpcore/_view.scss */
   .bimp_fields_table > thead > tr.col_headers > th,
   .objectFieldsTable > thead > tr.col_headers > th {
     padding: 5px 8px;
@@ -11265,23 +11295,23 @@ td.buttons {
     color: #C11F2A;
     font-size: 13px;
     font-weight: bold; }
-  /* line 48, ../scss/bimpcore/_view.scss */
+  /* line 54, ../scss/bimpcore/_view.scss */
   .bimp_fields_table > tbody > tr:last-child > th, .bimp_fields_table > tbody > tr:last-child > td,
   .objectFieldsTable > tbody > tr:last-child > th,
   .objectFieldsTable > tbody > tr:last-child > td {
     border-bottom: none; }
-  /* line 53, ../scss/bimpcore/_view.scss */
+  /* line 59, ../scss/bimpcore/_view.scss */
   .bimp_fields_table > tbody > tr,
   .objectFieldsTable > tbody > tr {
     -webkit-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
     transition: all 0.3s ease; }
-    /* line 55, ../scss/bimpcore/_view.scss */
+    /* line 61, ../scss/bimpcore/_view.scss */
     .bimp_fields_table > tbody > tr > th, .bimp_fields_table > tbody > tr > td,
     .objectFieldsTable > tbody > tr > th,
     .objectFieldsTable > tbody > tr > td {
       padding: 5px 10px; }
-    /* line 58, ../scss/bimpcore/_view.scss */
+    /* line 64, ../scss/bimpcore/_view.scss */
     .bimp_fields_table > tbody > tr > th,
     .objectFieldsTable > tbody > tr > th {
       width: 20%;
@@ -11292,17 +11322,17 @@ td.buttons {
       vertical-align: top;
       text-align: right;
       border-bottom: 1px solid #fff; }
-    /* line 68, ../scss/bimpcore/_view.scss */
+    /* line 74, ../scss/bimpcore/_view.scss */
     .bimp_fields_table > tbody > tr > td,
     .objectFieldsTable > tbody > tr > td {
       border-bottom: 1px solid #DCDCDC; }
-      /* line 71, ../scss/bimpcore/_view.scss */
+      /* line 77, ../scss/bimpcore/_view.scss */
       .bimp_fields_table > tbody > tr > td .inputContainer,
       .bimp_fields_table > tbody > tr > td .inputGroupContainer,
       .objectFieldsTable > tbody > tr > td .inputContainer,
       .objectFieldsTable > tbody > tr > td .inputGroupContainer {
         margin-right: 10px; }
-        /* line 75, ../scss/bimpcore/_view.scss */
+        /* line 81, ../scss/bimpcore/_view.scss */
         .bimp_fields_table > tbody > tr > td .inputContainer textarea, .bimp_fields_table > tbody > tr > td .inputContainer input[type=text],
         .bimp_fields_table > tbody > tr > td .inputGroupContainer textarea,
         .bimp_fields_table > tbody > tr > td .inputGroupContainer input[type=text],
@@ -11311,7 +11341,7 @@ td.buttons {
         .objectFieldsTable > tbody > tr > td .inputGroupContainer textarea,
         .objectFieldsTable > tbody > tr > td .inputGroupContainer input[type=text] {
           width: 100%; }
-        /* line 78, ../scss/bimpcore/_view.scss */
+        /* line 84, ../scss/bimpcore/_view.scss */
         .bimp_fields_table > tbody > tr > td .inputContainer select, .bimp_fields_table > tbody > tr > td .inputContainer .select2,
         .bimp_fields_table > tbody > tr > td .inputGroupContainer select,
         .bimp_fields_table > tbody > tr > td .inputGroupContainer .select2,
@@ -11321,38 +11351,38 @@ td.buttons {
         .objectFieldsTable > tbody > tr > td .inputGroupContainer .select2 {
           min-width: 160px;
           max-width: 350px !important; }
-      /* line 83, ../scss/bimpcore/_view.scss */
+      /* line 89, ../scss/bimpcore/_view.scss */
       .bimp_fields_table > tbody > tr > td .form-control,
       .objectFieldsTable > tbody > tr > td .form-control {
         width: auto !important; }
-    /* line 88, ../scss/bimpcore/_view.scss */
+    /* line 94, ../scss/bimpcore/_view.scss */
     .bimp_fields_table > tbody > tr.modified,
     .objectFieldsTable > tbody > tr.modified {
       background-color: #E1F5FF !important;
       border-color: #A9C5D2 !important; }
-      /* line 92, ../scss/bimpcore/_view.scss */
+      /* line 98, ../scss/bimpcore/_view.scss */
       .bimp_fields_table > tbody > tr.modified > td,
       .objectFieldsTable > tbody > tr.modified > td {
         background-color: #E1F5FF !important;
         border-color: #A9C5D2 !important; }
-  /* line 100, ../scss/bimpcore/_view.scss */
+  /* line 106, ../scss/bimpcore/_view.scss */
   .bimp_fields_table > tfoot > tr > td,
   .objectFieldsTable > tfoot > tr > td {
     text-align: right;
     padding: 5px 10px;
     background-color: #F5F5F5; }
-  /* line 107, ../scss/bimpcore/_view.scss */
+  /* line 113, ../scss/bimpcore/_view.scss */
   .bimp_fields_table.center-align > thead > tr.col_headers > th, .bimp_fields_table.center-align > tbody > tr > td, .bimp_fields_table.center-align > tfoot > tr > td,
   .objectFieldsTable.center-align > thead > tr.col_headers > th,
   .objectFieldsTable.center-align > tbody > tr > td,
   .objectFieldsTable.center-align > tfoot > tr > td {
     text-align: center; }
-  /* line 114, ../scss/bimpcore/_view.scss */
+  /* line 120, ../scss/bimpcore/_view.scss */
   .bimp_fields_table > tbody > tr.strong > td,
   .objectFieldsTable > tbody > tr.strong > td {
     font-weight: bold;
     background-color: #F0F0F0; }
-  /* line 119, ../scss/bimpcore/_view.scss */
+  /* line 125, ../scss/bimpcore/_view.scss */
   .bimp_fields_table > tbody > tr.title > td,
   .objectFieldsTable > tbody > tr.title > td {
     font-weight: bold;
@@ -11360,57 +11390,57 @@ td.buttons {
     background-color: #C8C8C8 !important;
     border-top-color: #C8C8C8 !important;
     border-bottom-color: #C8C8C8 !important; }
-  /* line 128, ../scss/bimpcore/_view.scss */
+  /* line 134, ../scss/bimpcore/_view.scss */
   .bimp_fields_table tr.total_row > td,
   .objectFieldsTable tr.total_row > td {
     font-weight: bold;
     background-color: #F0F0F0 !important; }
 
-/* line 135, ../scss/bimpcore/_view.scss */
+/* line 141, ../scss/bimpcore/_view.scss */
 .object_header {
   padding: 15px 15px 0 15px;
   background-color: #fff; }
-  /* line 138, ../scss/bimpcore/_view.scss */
+  /* line 144, ../scss/bimpcore/_view.scss */
   .object_header h1, .object_header h2 {
     margin-top: 0; }
-  /* line 142, ../scss/bimpcore/_view.scss */
+  /* line 148, ../scss/bimpcore/_view.scss */
   .object_header .object_header_logo {
     width: 80px;
     float: left;
     margin-right: 20px; }
-    /* line 147, ../scss/bimpcore/_view.scss */
+    /* line 153, ../scss/bimpcore/_view.scss */
     .object_header .object_header_logo img {
       width: 100%;
       height: auto; }
-  /* line 153, ../scss/bimpcore/_view.scss */
+  /* line 159, ../scss/bimpcore/_view.scss */
   .object_header .object_header_title {
     display: inline-block; }
-  /* line 157, ../scss/bimpcore/_view.scss */
+  /* line 163, ../scss/bimpcore/_view.scss */
   .object_header .object_header_infos {
     margin: 3px 0 0 0;
     font-style: italic;
     color: #787878;
     font-size: 11px; }
-    /* line 163, ../scss/bimpcore/_view.scss */
+    /* line 169, ../scss/bimpcore/_view.scss */
     .object_header .object_header_infos .hashtag {
       display: inline-block;
       margin-right: 12px;
       font-size: 12px; }
-  /* line 170, ../scss/bimpcore/_view.scss */
+  /* line 176, ../scss/bimpcore/_view.scss */
   .object_header .header_status {
     display: inline-block;
     font-size: 15px;
     margin: 5px 10px; }
-    /* line 175, ../scss/bimpcore/_view.scss */
+    /* line 181, ../scss/bimpcore/_view.scss */
     .object_header .header_status span {
       display: inline-block;
       margin-left: 15px; }
-  /* line 181, ../scss/bimpcore/_view.scss */
+  /* line 187, ../scss/bimpcore/_view.scss */
   .object_header .header_tools {
     display: inline-block;
     margin-left: 15px;
     vertical-align: top; }
-  /* line 187, ../scss/bimpcore/_view.scss */
+  /* line 193, ../scss/bimpcore/_view.scss */
   .object_header .headerIconButton {
     -webkit-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
@@ -11419,22 +11449,22 @@ td.buttons {
     cursor: pointer;
     font-size: 18px;
     margin-left: 5px; }
-    /* line 194, ../scss/bimpcore/_view.scss */
+    /* line 200, ../scss/bimpcore/_view.scss */
     .object_header .headerIconButton:hover {
       color: #C11F2A; }
-  /* line 199, ../scss/bimpcore/_view.scss */
+  /* line 205, ../scss/bimpcore/_view.scss */
   .object_header .header_button {
     vertical-align: top;
     display: inline-block;
     margin: 2px 25px 6px 0; }
-  /* line 205, ../scss/bimpcore/_view.scss */
+  /* line 211, ../scss/bimpcore/_view.scss */
   .object_header .header_buttons {
     text-align: right;
     margin-top: 10px; }
-    /* line 209, ../scss/bimpcore/_view.scss */
+    /* line 215, ../scss/bimpcore/_view.scss */
     .object_header .header_buttons .btn {
       margin: 3px 5px; }
-  /* line 214, ../scss/bimpcore/_view.scss */
+  /* line 220, ../scss/bimpcore/_view.scss */
   .object_header .header_bottom {
     margin-top: 10px;
     padding: 5px;
@@ -11443,7 +11473,7 @@ td.buttons {
 /*.object_page_header {
     @include transition(all 0.3s ease);    
 }*/
-/* line 225, ../scss/bimpcore/_view.scss */
+/* line 231, ../scss/bimpcore/_view.scss */
 .object_page_header.fixed {
   position: fixed;
   top: 48px;
@@ -11455,50 +11485,50 @@ td.buttons {
           padding-top: 5px;
           padding-bottom: 5px;
       }*/ }
-  /* line 233, ../scss/bimpcore/_view.scss */
+  /* line 239, ../scss/bimpcore/_view.scss */
   .object_page_header.fixed .object_header {
     padding-top: 5px; }
-  /* line 237, ../scss/bimpcore/_view.scss */
+  /* line 243, ../scss/bimpcore/_view.scss */
   .object_page_header.fixed .object_header_infos {
     display: none; }
-  /* line 241, ../scss/bimpcore/_view.scss */
+  /* line 247, ../scss/bimpcore/_view.scss */
   .object_page_header.fixed .header_buttons {
     margin-top: 0; }
-  /* line 244, ../scss/bimpcore/_view.scss */
+  /* line 250, ../scss/bimpcore/_view.scss */
   .object_page_header.fixed h1 {
     font-size: 18px;
     display: inline-block;
     margin-bottom: 5px; }
-  /* line 250, ../scss/bimpcore/_view.scss */
+  /* line 256, ../scss/bimpcore/_view.scss */
   .object_page_header.fixed h2 {
     font-size: 15px;
     display: inline-block;
     margin-left: 15px;
     margin-bottom: 5px; }
-  /* line 257, ../scss/bimpcore/_view.scss */
+  /* line 263, ../scss/bimpcore/_view.scss */
   .object_page_header.fixed .header_bottom {
     padding: 0;
     margin-top: 0; }
 
-/* line 269, ../scss/bimpcore/_view.scss */
+/* line 275, ../scss/bimpcore/_view.scss */
 .object_card {
   margin-top: 0; }
-  /* line 272, ../scss/bimpcore/_view.scss */
+  /* line 278, ../scss/bimpcore/_view.scss */
   .object_card .object_card_status {
     display: inline-block;
     text-align: right;
     float: right;
     margin-left: 15px; }
 
-/* line 280, ../scss/bimpcore/_view.scss */
+/* line 286, ../scss/bimpcore/_view.scss */
 .object_card_table {
   width: 100%;
   margin-top: 5px; }
-  /* line 285, ../scss/bimpcore/_view.scss */
+  /* line 291, ../scss/bimpcore/_view.scss */
   .object_card_table > tbody > tr > th, .object_card_table > tbody > tr > td {
     padding: 0 5px;
     border-bottom: 1px solid #fff; }
-  /* line 290, ../scss/bimpcore/_view.scss */
+  /* line 296, ../scss/bimpcore/_view.scss */
   .object_card_table > tbody > tr > th {
     width: 20%;
     min-width: 120px;
@@ -11507,25 +11537,25 @@ td.buttons {
     vertical-align: top;
     background-color: #fff;
     color: #282828; }
-  /* line 300, ../scss/bimpcore/_view.scss */
+  /* line 306, ../scss/bimpcore/_view.scss */
   .object_card_table > tbody > tr > td {
     color: #282828;
     background-color: #fff; }
 
-/* line 306, ../scss/bimpcore/_view.scss */
+/* line 312, ../scss/bimpcore/_view.scss */
 .object_common_fields {
   margin: 5px 0;
   background-color: #F5F5F5; }
-  /* line 310, ../scss/bimpcore/_view.scss */
+  /* line 316, ../scss/bimpcore/_view.scss */
   .object_common_fields table {
     width: 100%;
     border: none; }
-    /* line 315, ../scss/bimpcore/_view.scss */
+    /* line 321, ../scss/bimpcore/_view.scss */
     .object_common_fields table tbody tr th, .object_common_fields table tbody tr td {
       padding: 3px 5px;
       font-size: 12px;
       border-bottom: 1px solid #fff; }
-    /* line 321, ../scss/bimpcore/_view.scss */
+    /* line 327, ../scss/bimpcore/_view.scss */
     .object_common_fields table tbody tr th {
       font-weight: normal;
       color: #DCDCDC;
@@ -11535,22 +11565,22 @@ td.buttons {
       text-align: right;
       vertical-align: top;
       background-color: #272D36; }
-    /* line 332, ../scss/bimpcore/_view.scss */
+    /* line 338, ../scss/bimpcore/_view.scss */
     .object_common_fields table tbody tr td {
       color: #282828;
       border-bottom: 1px solid #DCDCDC;
       vertical-align: middle; }
 
-/* line 340, ../scss/bimpcore/_view.scss */
+/* line 346, ../scss/bimpcore/_view.scss */
 .multiple_values_items_list {
   padding: 5px; }
-  /* line 343, ../scss/bimpcore/_view.scss */
+  /* line 349, ../scss/bimpcore/_view.scss */
   .multiple_values_items_list .multiple_values_item {
     margin: 5px 0;
     border: 1px solid #B4B4B4;
     padding: 10px; }
 
-/* line 351, ../scss/bimpcore/_view.scss */
+/* line 357, ../scss/bimpcore/_view.scss */
 table.objectFieldHistoryTable > tbody > tr > td {
   padding: 2px 3px; }
 

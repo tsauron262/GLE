@@ -427,10 +427,10 @@ table.objectSubList {
 }
 
 tr.listSearchRow {
-    background-color: #DCDCDC;
+    background-color: $gray-light;
 
     & > td {
-        background-color: #DCDCDC;    
+        background-color: $gray-light;    
     }
 
     i.fa-search {

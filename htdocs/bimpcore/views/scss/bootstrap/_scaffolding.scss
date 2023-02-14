@@ -45,9 +45,9 @@ textarea {
 
 // Links
 
-a {
+/*a {
     color: $link-color;
-    text-decoration: none;
+    text-decoration: none!important;
 
     &:hover,
         &:focus {
@@ -58,7 +58,7 @@ a {
     &:focus {
         @include tab-focus;
     }
-}
+}*/
 
 
 // Figures

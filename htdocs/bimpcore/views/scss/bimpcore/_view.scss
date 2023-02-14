@@ -5,6 +5,12 @@
             background-color: $bimp_bk_light;
             border-color: $bimp_bk_light;
             color: $gray_darker;
+            
+            .panel-title {
+                a, i {
+                    color: $gray_darker;
+                }
+            }
         }
     }
 }
@@ -149,7 +155,7 @@
             height: auto;
         }
     }
-    
+
     .object_header_title {
         display: inline-block;
     }
@@ -159,7 +165,7 @@
         font-style: italic;
         color: #787878;
         font-size: 11px;
-        
+
         .hashtag {
             display: inline-block;
             margin-right: 12px;
@@ -282,7 +288,7 @@
     margin-top: 5px;
 
     & > tbody > tr {
-       & > th, & > td {
+        & > th, & > td {
             padding: 0 5px;
             border-bottom: 1px solid #fff;
         }

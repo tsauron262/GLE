@@ -1440,7 +1440,7 @@ class DoliDBMysqliC extends DoliDB
      * 	@return	string					XXX(field) or XXX('value') or field or 'value'
      *
      */
-    function encrypt($fieldorvalue, $withQuotes=0)
+    function encrypt($fieldorvalue, $withQuotes=1)
     {
         global $conf;
 

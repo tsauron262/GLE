@@ -342,7 +342,8 @@ class BimpDebug
         if (!(float) $bimp_start_time) {
             $html .= BimpRender::renderAlerts('Variable bimp_start_time absente du fichier index.php');
         } else {
-            $html .= 'Time debut '.date('m/d/Y H:i:s', $bimp_start_time);
+            $html .= 'ID ERP : '.ID_ERP.'<br/>';
+            $html .= 'Time debut : '.date('m/d/Y H:i:s', $bimp_start_time);
             $html .= '<table class="bimp_list_table">';
             $html .= '<thead>';
             $html .= '<tr>';
@@ -378,7 +379,7 @@ class BimpDebug
 
             $html .= '</tbody>';
             $html .= '</table>';
-            $html .= 'Time fin '.date('m/d/Y H:i:s');
+            $html .= 'Time fin : '.date('m/d/Y H:i:s');
         }
 
         $html .= '</div>';

@@ -784,7 +784,7 @@ class BimpDebug
 
     // SQL: 
 
-    public static function addSqlDebug($sql)
+    public static function addSqlDebug($sql, $noTransaction = false)
     {
         $time = self::getTime();
 
@@ -796,7 +796,7 @@ class BimpDebug
         }
 
         self::$sql_count[] = array(
-            'sql'   => $sql,
+            'sql'   => ($noTransaction? '(noTransaction)' : '').$sql,
             'times' => array(
                 $time
             )

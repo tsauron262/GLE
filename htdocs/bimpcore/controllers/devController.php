@@ -97,20 +97,22 @@ class devController extends BimpController
         $html .= '</div>';
         $html .= '</div>';
 
-        $html .= '<div class="row">';
-        $html .= '<div class="col-sm-12 col-md-6">';
-        $html .= '<h3>' . BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Tâches</h3>';
-        BimpObject::loadClass('bimptask', 'BIMP_Task');
-        $html .= BIMP_Task::renderCounts('dev');
-        $html .= '</div>';
-        $html .= '</div>';
+        if(BimpTools::isModuleDoliActif('BIMPTASK')){
+            $html .= '<div class="row">';
+            $html .= '<div class="col-sm-12 col-md-6">';
+            $html .= '<h3>' . BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Tâches</h3>';
+            BimpObject::loadClass('bimptask', 'BIMP_Task');
+            $html .= BIMP_Task::renderCounts('dev');
+            $html .= '</div>';
+            $html .= '</div>';
 
-        $html .= '<div class="row">';
-        $list = new BC_ListTable(BimpObject::getInstance('bimptask', 'BIMP_Task'), 'main', 1, null, 'Tâches dév');
-        $list->addFieldFilterValue('id_task', 0);
-//        $list->addFieldFilterValue('type_manuel', 'dev');
-        $html .= $list->renderHtml();
-        $html .= '</div>';
+            $html .= '<div class="row">';
+            $list = new BC_ListTable(BimpObject::getInstance('bimptask', 'BIMP_Task'), 'main', 1, null, 'Tâches dév');
+            $list->addFieldFilterValue('id_task', 0);
+    //        $list->addFieldFilterValue('type_manuel', 'dev');
+            $html .= $list->renderHtml();
+            $html .= '</div>';
+        }
 
         return $html;
     }

@@ -154,7 +154,7 @@ class BIMP_Task extends BimpObject
                 'label'   => 'Liste des sous-tâches',
                 'icon'    => 'fas_bars',
                 'onclick' => $this->getJsLoadModalList('sousTache', array(
-                    'title'         => $this->getData('subj') . ' : sous-tâches',
+                    'title'         => htmlentities($this->getData('subj')) . ' : sous-tâches',
                     'extra_filters' => array(
                         'id_task' => $this->id
                     )
@@ -304,6 +304,25 @@ class BIMP_Task extends BimpObject
 
         return $status;
     }
+    
+    public function getListFiltre($type = "normal")
+    {
+        global $user;
+        $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes tâches assignées' : ($type == "byMy" ? 'Mes tâches créées' : 'Toutes les tâches')));
+        $list->addIdentifierSuffix($type);
+
+        if ($type == 'byMy')
+            $list->addFieldFilterValue('user_create', (int) $user->id);
+        elseif ($type == "my")
+            $list->addFieldFilterValue('id_user_owner', (int) $user->id);
+        else
+            $list->addFieldFilterValue('fgdg_dst', array(
+                ($type == "my" ? 'and_fields' : 'or') => BimpTools::merge_array(array(
+                    'id_user_owner' => $user->id
+                        ), $this->getFiltreRightArray($user))
+            ));
+        return $list;
+    }
 
     // Getters données: 
 
@@ -369,25 +388,6 @@ class BIMP_Task extends BimpObject
         $tasks['nb_my'] = $nb_my;
         $tasks['unaffected_task'] = $nb_unaffected;
         return $tasks;
-    }
-
-    public function getListFiltre($type = "normal")
-    {
-        global $user;
-        $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes tâches assignées' : ($type == "byMy" ? 'Mes tâches créées' : 'Toutes les tâches')));
-        $list->addIdentifierSuffix($type);
-
-        if ($type == 'byMy')
-            $list->addFieldFilterValue('user_create', (int) $user->id);
-        elseif ($type == "my")
-            $list->addFieldFilterValue('id_user_owner', (int) $user->id);
-        else
-            $list->addFieldFilterValue('fgdg_dst', array(
-                ($type == "my" ? 'and_fields' : 'or') => BimpTools::merge_array(array(
-                    'id_user_owner' => $user->id
-                        ), $this->getFiltreRightArray($user))
-            ));
-        return $list;
     }
 
     public static function getTableSqlDroitPasDroit($user)

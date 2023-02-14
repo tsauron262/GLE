@@ -1380,10 +1380,7 @@ views:
                       children: prets
                       
     infos:
-        title: 
-            callback: getRef
-        delete_btn: 1
-        edit_form: edit
+        panel: 0
         objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement,BimpSignature,BimpSignataire
         rows:
             - cols:                       

@@ -26,7 +26,8 @@ if (isset($_REQUEST['ajax']) && $_REQUEST['ajax']) {
         } else {
             die(json_encode(array(
                 'request_id' => $request_id,
-                'nologged'   => 1
+                'nologged'   => 1,
+                'test'       => 111
             )));
         }
     }

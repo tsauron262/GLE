@@ -719,7 +719,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
             }
             
             if (class_exists('BimpCore')) {
-                $ip = BimpCache::getIpFromDns($mailfile->smtps->_smtpsHost);
+                $ip = BimpCache::getIpFromDns($mailfile->smtps->getHost());
                 BimpCore::addlog('Echec envoi email '.$mailfile->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
                     'Ip'    => $ip,
                     'Destinataire' => $to,

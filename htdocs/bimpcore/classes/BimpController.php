@@ -185,6 +185,11 @@ class BimpController
             case E_ERROR:
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
+                if(stripos($msg, 'mysql')){
+                    global $db;
+                    $msg = 'Derniére req : '.$db->lastquery.'<br/><br/>'.$msg;
+                }
+                
                 if (!BimpCore::isModeDev()) {
                     global $user, $langs;
                     $txt = '';

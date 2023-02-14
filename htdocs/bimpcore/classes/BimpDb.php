@@ -264,7 +264,8 @@ class BimpDb
             $this->db->free($result);
             return $obj;
         }
-        $this->db->free($result);
+        if($result)
+            $this->db->free($result);
         return null;
     }
 

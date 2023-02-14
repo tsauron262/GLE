@@ -160,7 +160,7 @@ class ActionsBimpcore
 
     function replaceThirdparty($parameters, &$object, &$action, $hookmanager)
     {
-        ini_set('display_errors', 1);
+//        ini_set('display_errors', 1);
 
 //        global $db;
 //        $db->query("UPDATE ".MAIN_DB_PREFIX."bs_sav SET id_client = ".$parameters['soc_dest']." WHERE id_client = ".$parameters['soc_origin']);

@@ -177,7 +177,8 @@ abstract class DoliDB implements Database
 	 */
 	public function begin($textinlog = '')
 	{
-		if (!$this->transaction_opened) {
+		if (! $this->transaction_opened && !$this->noTransaction)
+		{
 			$ret = $this->query("BEGIN");
 			if ($ret) {
 				$this->transaction_opened++;

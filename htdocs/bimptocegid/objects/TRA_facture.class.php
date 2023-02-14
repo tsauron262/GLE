@@ -126,7 +126,7 @@
             if(count($facture->dol_object->lines)) {
                 $count_lines = count($facture->dol_object->lines);
                 $compte_le_plus_grand = '';
-                $montant_le_plus_grand = '';
+                $montant_le_plus_grand = 0;
                 
                 foreach($facture->dol_object->lines as $line) {
                     

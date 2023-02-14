@@ -318,6 +318,15 @@ if (!empty($_COOKIE[$sessiontimeout])) {
 	ini_set('session.gc_maxlifetime', $_COOKIE[$sessiontimeout]);
 }
 
+
+
+// Init the 5 global objects, this include will make the 'new Xxx()' and set properties for: $conf, $db, $langs, $user, $mysoc
+require_once 'master.inc.php';
+/* Mod drsi */
+include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
+$synopsisHook = new synopsisHook();
+global $synopsisHook; //Pour vision global de l'objet
+
 // This create lock, released by session_write_close() or end of page.
 // We need this lock as long as we read/write $_SESSION ['vars']. We can remove lock when finished.
 if (!defined('NOSESSION')) {
@@ -335,18 +344,36 @@ if (!defined('NOSESSION')) {
 		);
 		session_set_cookie_params($sessioncookieparams);
 	}
+        
+        
+        if(defined('USE_BDD_FOR_SESSION')){
+            global $db;
+
+
+            require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpSession.php';
+        // Démarrage de la session
+            if(class_exists('BimpCache')){
+                $bdb = BimpCache::getBdb(true);
+                $dbNoTransac = $bdb->db;
+            }
+            else{
+                $dbNoTransac = $db;
+            }
+
+
+            $session = new Session($dbNoTransac);
+        }
+        
+        
+        
+        
+        
+        
 	session_name($sessionname);
 	session_start();	// This call the open and read of session handler
 	//exit;	// this exist generates a call to write and close
 }
 
-
-// Init the 5 global objects, this include will make the 'new Xxx()' and set properties for: $conf, $db, $langs, $user, $mysoc
-require_once 'master.inc.php';
-/* Mod drsi */
-include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
-$synopsisHook = new synopsisHook();
-global $synopsisHook; //Pour vision global de l'objet
 /* FMod Drsi */
 
 // If software has been locked. Only login $conf->global->MAIN_ONLY_LOGIN_ALLOWED is allowed.

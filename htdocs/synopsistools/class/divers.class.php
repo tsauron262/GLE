@@ -242,8 +242,18 @@ class synopsisHook {//FA1506-0369
             elseif(IP_ADMIN2 == $ipUser)
                 $admin = true;
         }
+        
+        
+        $ipAdmin = BimpCore::getConf('IP_ADMIN', null);
+        if($ipAdmin){
+            $tabIpAdmion = explode(',', $ipAdmin);
+            foreach($tabIpAdmion as $ip){
+                if($ip == $ipUser)
+                    $admin =true;
+            }
+        }
 
-        if (defined("CLOSE_DATE") && !stripos($_SERVER['REQUEST_URI'], 'close.php') && !$admin) {
+        if (defined("CLOSE_DATE") && CLOSE_DATE != '' && !stripos($_SERVER['REQUEST_URI'], 'close.php') && !$admin) {
             if(is_object($langs))
                 $langs->load("main");
             require (DOL_DOCUMENT_ROOT . "/synopsistools/public/close.php");

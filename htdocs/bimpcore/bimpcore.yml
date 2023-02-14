@@ -276,3 +276,9 @@ params:
         label: ID Groupe Atradius
         cat: groups
         def: 0
+    CLOSE_DATE:
+        label: Date de fermeture (si présente ERP fermé)
+    IP_ADMIN:
+        label: Ip Admin (pour fermeture ERP)
+    git_branch:
+        label: Branche GIT

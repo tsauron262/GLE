@@ -5,10 +5,17 @@ if(isset($_REQUEST['nolog']) && $_REQUEST['nolog'] == 'ujgjhkhkfghgkvgkfdkshfioh
     header('x-frame-options: ALLOWALL',true);
 }
 
-require_once('../main.inc.php');
 
-if(!isset($_REQUEST['no_menu']))
+if(!isset($_REQUEST['no_menu'])){
+    require_once('../main.inc.php');
     llxHeader();
+}
+else
+    require_once('../conf/conf.php');
+
+
+error_reporting(E_ALL);
+ini_set("display_errors", 1);
 
 
 if(defined('ID_ERP'))

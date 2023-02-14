@@ -5595,7 +5595,7 @@ div.tabsElem a.tab {
  
 /* nboftopmenuentries = <?php echo $nbtopmenuentries ?>, fontsize=<?php echo is_numeric($fontsize)?$fontsize.'px':$fontsize ?> */
 /* rule to reduce top menu - 1st reduction */
-@media only screen and (max-width: <?php echo round($nbtopmenuentries * 91, 0) + 24; ?>px)    /* reduction 1 */
+@media only screen and (max-width: <?php echo round($nbtopmenuentries * 95, 0) + 24; ?>px)    /* reduction 1 */
 {
     div.tmenucenter {
         width: <?php echo round(52); ?>px;    /* size of viewport */

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_note` ADD `id_parent_note` int(11) NOT NULL DEFAULT 0 AFTER `id_obj`;

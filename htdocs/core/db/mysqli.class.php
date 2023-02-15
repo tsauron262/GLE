@@ -409,7 +409,9 @@ class DoliDBMysqli extends DoliDB
             BimpDebug::addSqlDebug($query, $this->noTransaction);
 
             $content = BimpRender::renderDebugInfo($query);
-            BimpDebug::addDebug('sql', 'Requête #' . $this->countReq . ' - ' . $difference_ms . ' s', $content, array(
+            $title = ($this->noTransaction ? '[HORS TRANSAC]' : '[TRANSAC '.$this->transaction_opened.']');
+            $title .= ' - Requête #' . $this->countReq . ' - ' . $difference_ms . ' s';
+            BimpDebug::addDebug('sql', $title, $content, array(
                 'open' => false
             ));
 

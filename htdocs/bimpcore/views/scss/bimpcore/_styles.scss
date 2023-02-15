@@ -652,8 +652,8 @@ i.iconRight {
 
             &.disabled, &.disbaled:hover {
                 cursor: default;
-                background-color: lighten($secondary, 10%);
-                color: lighten($secondary, 20%);
+                background-color: lighten($secondary, 5%);
+                color: lighten($secondary, 10%);
             }
         }
 
@@ -681,7 +681,7 @@ i.iconRight {
                 }
 
                 &.disabled, &.disabled:hover {
-                    color: lighten($secondary, 20%);
+                    color: lighten($secondary, 10%);
                     cursor: default;
                 }
             }

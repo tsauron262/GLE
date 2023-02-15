@@ -1,13 +1,52 @@
 @charset "UTF-8";
+/* ***** VERSION FLASHY (ORANGE) ***** */
+/* ***** VERSION CLAIRE ***** */
 /* Couleurs principales */
-/*$bimp_headers_color: #fff;
-$bimp_headers_bk_color: $primary;*/
-/*$bimp_list_header_color: #fff;
-$bimp_list_header_bk_color: $primary;
-$bimp_list_header_border: none;
-$bimp_list_header_icons_color: #fff;
+/*$gray-base:              #000 !default;
+$gray-darker:            #272829 !default;
+$gray-dark:              #636466 !default;
+$gray:                   #ADAFB3 !default;
+$gray-light:             #C5C8CC !default;
+$gray-lighter:           #F5F5F5 !default; // #eee
+
+$brand-primary:         #D97102 !default;
+$brand-secondary:       #3E4859 !default; // old: 636363
+$brand-success:         #348C41 !default;
+$brand-info:            #3B6EA0 !default;
+$brand-warning:         #E69900 !default;
+$brand-danger:          #A00000 !default;
+
+$primary: $brand-primary;
+$secondary: $brand-secondary;
+$success: $brand-success;
+$info: $brand-info;
+$warning: $brand-warning;
+$danger: $brand-danger;
+$important: #963E96 !default;
+$selection: #5897FB !default;
+
+$bimp_headers_color: #1F304D;
+
+// Backgrounds gris clair / obscurs! 
+$bimp_bk_light: #DBDFE6;
+$bimp_bk_dark: $secondary;
+
+// En-têtes généraux: 
+$bimp_headers_color: $bimp_headers_color;
+$bimp_headers_bk_color: $bimp_bk_light;
+
+// Listes: 
+$bimp_list_header_color: $bimp_headers_color;
+$bimp_list_header_bk_color: lighten($bimp_bk_light, 4%);
+$bimp_list_header_border: 1px solid #1F304D;
+$bimp_list_header_icons_color: $bimp_headers_color;
 $bimp_list_header_icons_hover_color: $primary;
-$bimp_list_header_icons_hover_bk_color: #fff;*/
+$bimp_list_header_icons_hover_bk_color: transparent;
+
+// Panels: 
+$bimp_panel_padding: 8px;
+$bimp_panel_v_margin: 8px;
+$bimp_panel_h_margin: 8px;*/
 /*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
  * Copyright 2011-2016 Twitter, Inc.
@@ -1524,7 +1563,7 @@ h1, h2, h3, h4, h5, h6,
   .h6 .small {
     font-weight: normal;
     line-height: 1;
-    color: #C5C8CC; }
+    color: #DCDCDC; }
 
 /* line 24, ../scss/bootstrap/_type.scss */
 h1, .h1,
@@ -1646,16 +1685,16 @@ mark,
 
 /* line 102, ../scss/bootstrap/_type.scss */
 .text-muted {
-  color: #C5C8CC; }
+  color: #DCDCDC; }
 
 /* line 5, ../scss/bootstrap/mixins/_text-emphasis.scss */
 .text-primary {
-  color: #D97102; }
+  color: #EF7D00; }
 
 /* line 8, ../scss/bootstrap/mixins/_text-emphasis.scss */
 a.text-primary:hover,
 a.text-primary:focus {
-  color: #a65702; }
+  color: #bc6200; }
 
 /* line 5, ../scss/bootstrap/mixins/_text-emphasis.scss */
 .text-success {
@@ -1699,12 +1738,12 @@ a.text-danger:focus {
 
 /* line 5, ../scss/bootstrap/mixins/_background-variant.scss */
 .bg-primary {
-  background-color: #D97102; }
+  background-color: #EF7D00; }
 
 /* line 8, ../scss/bootstrap/mixins/_background-variant.scss */
 a.bg-primary:hover,
 a.bg-primary:focus {
-  background-color: #a65702; }
+  background-color: #bc6200; }
 
 /* line 5, ../scss/bootstrap/mixins/_background-variant.scss */
 .bg-success {
@@ -1819,7 +1858,7 @@ dd {
 abbr[title],
 abbr[data-original-title] {
   cursor: help;
-  border-bottom: 1px dotted #C5C8CC; }
+  border-bottom: 1px dotted #DCDCDC; }
 
 /* line 235, ../scss/bootstrap/_type.scss */
 .initialism {
@@ -1843,7 +1882,7 @@ blockquote {
     display: block;
     font-size: 80%;
     line-height: 1.4;
-    color: #C5C8CC; }
+    color: #DCDCDC; }
     /* line 265, ../scss/bootstrap/_type.scss */
     blockquote footer:before,
     blockquote small:before,
@@ -1920,7 +1959,7 @@ pre {
   line-height: 1.4;
   word-break: break-all;
   word-wrap: break-word;
-  color: #636466;
+  color: #636363;
   background-color: #f5f5f5;
   border: 1px solid #ccc;
   border-radius: 0; }
@@ -2837,7 +2876,7 @@ table {
 caption {
   padding-top: 8px;
   padding-bottom: 8px;
-  color: #C5C8CC;
+  color: #DCDCDC;
   text-align: left; }
 
 /* line 15, ../scss/bootstrap/_tables.scss */
@@ -3079,7 +3118,7 @@ legend {
   margin-bottom: 18px;
   font-size: 19.5px;
   line-height: inherit;
-  color: #636466;
+  color: #636363;
   border: 0;
   border-bottom: 1px solid #e5e5e5; }
 
@@ -3172,7 +3211,7 @@ output {
     background-color: transparent; }
   /* line 146, ../scss/bootstrap/_forms.scss */
   .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
-    background-color: #ADAFB3;
+    background-color: #B4B4B4;
     opacity: 1; }
   /* line 153, ../scss/bootstrap/_forms.scss */
   .form-control[disabled], fieldset[disabled] .form-control {
@@ -3675,7 +3714,7 @@ select[multiple].input-lg,
     outline-offset: -2px; }
   /* line 33, ../scss/bootstrap/_buttons.scss */
   .btn:hover, .btn:focus, .btn.focus {
-    color: #272829;
+    color: #282828;
     text-decoration: none; }
   /* line 40, ../scss/bootstrap/_buttons.scss */
   .btn:active, .btn.active {
@@ -3702,7 +3741,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
 .btn-default-info,
 .btn-default-warning,
 .btn-default-danger {
-  color: #272829 !important;
+  color: #282828 !important;
   background-color: #fff !important;
   border-color: #ccc !important; }
   /* line 11, ../scss/bootstrap/mixins/_buttons.scss */
@@ -3717,7 +3756,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
   .btn-default-warning.focus,
   .btn-default-danger:focus,
   .btn-default-danger.focus {
-    color: #272829 !important;
+    color: #282828 !important;
     background-color: #e6e6e6 !important;
     border-color: #8c8c8c !important; }
   /* line 17, ../scss/bootstrap/mixins/_buttons.scss */
@@ -3727,7 +3766,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
   .btn-default-info:hover,
   .btn-default-warning:hover,
   .btn-default-danger:hover {
-    color: #272829;
+    color: #282828;
     background-color: #e6e6e6 !important;
     border-color: #adadad !important; }
   /* line 22, ../scss/bootstrap/mixins/_buttons.scss */
@@ -3747,7 +3786,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
   .btn-default-danger:active,
   .btn-default-danger.active, .open >
   .btn-default-danger.dropdown-toggle {
-    color: #272829 !important;
+    color: #282828 !important;
     background-color: #e6e6e6 !important;
     border-color: #adadad !important; }
     /* line 29, ../scss/bootstrap/mixins/_buttons.scss */
@@ -3797,7 +3836,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
     .btn-default-danger.dropdown-toggle:hover, .open >
     .btn-default-danger.dropdown-toggle:focus, .open >
     .btn-default-danger.dropdown-toggle.focus {
-      color: #272829 !important;
+      color: #282828 !important;
       background-color: #d4d4d4 !important;
       border-color: #8c8c8c !important; }
   /* line 37, ../scss/bootstrap/mixins/_buttons.scss */
@@ -3875,19 +3914,19 @@ a.btn.disabled, fieldset[disabled] a.btn {
   .btn-default-warning .badge,
   .btn-default-danger .badge {
     color: #fff !important;
-    background-color: #272829 !important; }
+    background-color: #282828 !important; }
 
 /* line 81, ../scss/bootstrap/_buttons.scss */
 .btn-default:hover {
   color: #fff !important;
-  background-color: #D97102 !important;
-  border-color: #D97102 !important; }
+  background-color: #EF7D00 !important;
+  border-color: #EF7D00 !important; }
 
 /* line 86, ../scss/bootstrap/_buttons.scss */
 .btn-default-secondary:hover {
   color: #fff !important;
-  background-color: #3E4859 !important;
-  border-color: #3E4859 !important; }
+  background-color: #636363 !important;
+  border-color: #636363 !important; }
 
 /* line 91, ../scss/bootstrap/_buttons.scss */
 .btn-default-success:hover {
@@ -3916,75 +3955,75 @@ a.btn.disabled, fieldset[disabled] a.btn {
 /* line 112, ../scss/bootstrap/_buttons.scss */
 .btn-primary {
   color: #fff !important;
-  background-color: #D97102 !important;
-  border-color: #c06402 !important; }
+  background-color: #EF7D00 !important;
+  border-color: #d67000 !important; }
   /* line 11, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-primary:focus, .btn-primary.focus {
     color: #fff !important;
-    background-color: #a65702 !important;
-    border-color: #412201 !important; }
+    background-color: #bc6200 !important;
+    border-color: #562d00 !important; }
   /* line 17, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-primary:hover {
     color: #fff;
-    background-color: #a65702 !important;
-    border-color: #834401 !important; }
+    background-color: #bc6200 !important;
+    border-color: #985000 !important; }
   /* line 22, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-primary:active, .btn-primary.active, .open > .btn-primary.dropdown-toggle {
     color: #fff !important;
-    background-color: #a65702 !important;
-    border-color: #834401 !important; }
+    background-color: #bc6200 !important;
+    border-color: #985000 !important; }
     /* line 29, ../scss/bootstrap/mixins/_buttons.scss */
     .btn-primary:active:hover, .btn-primary:active:focus, .btn-primary:active.focus, .btn-primary.active:hover, .btn-primary.active:focus, .btn-primary.active.focus, .open > .btn-primary.dropdown-toggle:hover, .open > .btn-primary.dropdown-toggle:focus, .open > .btn-primary.dropdown-toggle.focus {
       color: #fff !important;
-      background-color: #834401 !important;
-      border-color: #412201 !important; }
+      background-color: #985000 !important;
+      border-color: #562d00 !important; }
   /* line 37, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-primary:active, .btn-primary.active, .open > .btn-primary.dropdown-toggle {
     background-image: none; }
   /* line 45, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-primary.disabled:hover, .btn-primary.disabled:focus, .btn-primary.disabled.focus, .btn-primary[disabled]:hover, .btn-primary[disabled]:focus, .btn-primary[disabled].focus, fieldset[disabled] .btn-primary:hover, fieldset[disabled] .btn-primary:focus, fieldset[disabled] .btn-primary.focus {
-    background-color: #D97102 !important;
-    border-color: #c06402 !important; }
+    background-color: #EF7D00 !important;
+    border-color: #d67000 !important; }
   /* line 53, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-primary .badge {
-    color: #D97102 !important;
+    color: #EF7D00 !important;
     background-color: #fff !important; }
 
 /* line 115, ../scss/bootstrap/_buttons.scss */
 .btn-secondary {
   color: #fff !important;
-  background-color: #3E4859 !important;
-  border-color: #343c4a !important; }
+  background-color: #636363 !important;
+  border-color: #565656 !important; }
   /* line 11, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary:focus, .btn-secondary.focus {
     color: #fff !important;
-    background-color: #29303b !important;
-    border-color: black !important; }
+    background-color: #4a4a4a !important;
+    border-color: #171717 !important; }
   /* line 17, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary:hover {
     color: #fff;
-    background-color: #29303b !important;
-    border-color: #1a1f26 !important; }
+    background-color: #4a4a4a !important;
+    border-color: #383838 !important; }
   /* line 22, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary:active, .btn-secondary.active, .open > .btn-secondary.dropdown-toggle {
     color: #fff !important;
-    background-color: #29303b !important;
-    border-color: #1a1f26 !important; }
+    background-color: #4a4a4a !important;
+    border-color: #383838 !important; }
     /* line 29, ../scss/bootstrap/mixins/_buttons.scss */
     .btn-secondary:active:hover, .btn-secondary:active:focus, .btn-secondary:active.focus, .btn-secondary.active:hover, .btn-secondary.active:focus, .btn-secondary.active.focus, .open > .btn-secondary.dropdown-toggle:hover, .open > .btn-secondary.dropdown-toggle:focus, .open > .btn-secondary.dropdown-toggle.focus {
       color: #fff !important;
-      background-color: #1a1f26 !important;
-      border-color: black !important; }
+      background-color: #383838 !important;
+      border-color: #171717 !important; }
   /* line 37, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary:active, .btn-secondary.active, .open > .btn-secondary.dropdown-toggle {
     background-image: none; }
   /* line 45, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary.disabled:hover, .btn-secondary.disabled:focus, .btn-secondary.disabled.focus, .btn-secondary[disabled]:hover, .btn-secondary[disabled]:focus, .btn-secondary[disabled].focus, fieldset[disabled] .btn-secondary:hover, fieldset[disabled] .btn-secondary:focus, fieldset[disabled] .btn-secondary.focus {
-    background-color: #3E4859 !important;
-    border-color: #343c4a !important; }
+    background-color: #636363 !important;
+    border-color: #565656 !important; }
   /* line 53, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-secondary .badge {
-    color: #3E4859 !important;
+    color: #636363 !important;
     background-color: #fff !important; }
 
 /* line 119, ../scss/bootstrap/_buttons.scss */
@@ -4137,27 +4176,27 @@ a.btn.disabled, fieldset[disabled] a.btn {
 
 /* line 135, ../scss/bootstrap/_buttons.scss */
 .btn-light-default {
-  color: #272829 !important;
+  color: #282828 !important;
   background-color: #fff !important;
   border-color: #fff !important; }
   /* line 11, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-light-default:focus, .btn-light-default.focus {
-    color: #272829 !important;
+    color: #282828 !important;
     background-color: #e6e6e6 !important;
     border-color: #bfbfbf !important; }
   /* line 17, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-light-default:hover {
-    color: #272829;
+    color: #282828;
     background-color: #e6e6e6 !important;
     border-color: #e0e0e0 !important; }
   /* line 22, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-light-default:active, .btn-light-default.active, .open > .btn-light-default.dropdown-toggle {
-    color: #272829 !important;
+    color: #282828 !important;
     background-color: #e6e6e6 !important;
     border-color: #e0e0e0 !important; }
     /* line 29, ../scss/bootstrap/mixins/_buttons.scss */
     .btn-light-default:active:hover, .btn-light-default:active:focus, .btn-light-default:active.focus, .btn-light-default.active:hover, .btn-light-default.active:focus, .btn-light-default.active.focus, .open > .btn-light-default.dropdown-toggle:hover, .open > .btn-light-default.dropdown-toggle:focus, .open > .btn-light-default.dropdown-toggle.focus {
-      color: #272829 !important;
+      color: #282828 !important;
       background-color: #d4d4d4 !important;
       border-color: #bfbfbf !important; }
   /* line 37, ../scss/bootstrap/mixins/_buttons.scss */
@@ -4170,23 +4209,23 @@ a.btn.disabled, fieldset[disabled] a.btn {
   /* line 53, ../scss/bootstrap/mixins/_buttons.scss */
   .btn-light-default .badge {
     color: #fff !important;
-    background-color: #272829 !important; }
+    background-color: #282828 !important; }
   /* line 137, ../scss/bootstrap/_buttons.scss */
   .btn-light-default:hover {
-    color: #D97102 !important;
+    color: #EF7D00 !important;
     background-color: #fff !important;
     border-color: #fff !important; }
 
 /* line 143, ../scss/bootstrap/_buttons.scss */
 .btn-light-primary {
-  color: #D97102 !important;
+  color: #EF7D00 !important;
   background-color: #fff !important;
   border-color: #fff !important; }
   /* line 148, ../scss/bootstrap/_buttons.scss */
   .btn-light-primary:hover {
     color: #fff !important;
-    background-color: #D97102 !important;
-    border-color: #D97102 !important; }
+    background-color: #EF7D00 !important;
+    border-color: #EF7D00 !important; }
 
 /* line 154, ../scss/bootstrap/_buttons.scss */
 .btn-light-success {
@@ -4249,7 +4288,7 @@ a.btn.disabled, fieldset[disabled] a.btn {
 
 /* line 218, ../scss/bootstrap/_buttons.scss */
 .btn-link {
-  color: #D97102;
+  color: #EF7D00;
   font-weight: normal;
   border-radius: 0; }
   /* line 223, ../scss/bootstrap/_buttons.scss */
@@ -4262,12 +4301,12 @@ a.btn.disabled, fieldset[disabled] a.btn {
     border-color: transparent; }
   /* line 237, ../scss/bootstrap/_buttons.scss */
   .btn-link:hover, .btn-link:focus {
-    color: #8d4a01;
+    color: #a35500;
     text-decoration: underline;
     background-color: transparent; }
   /* line 245, ../scss/bootstrap/_buttons.scss */
   .btn-link[disabled]:hover, .btn-link[disabled]:focus, fieldset[disabled] .btn-link:hover, fieldset[disabled] .btn-link:focus {
-    color: #C5C8CC;
+    color: #DCDCDC;
     text-decoration: none; }
 
 /* line 257, ../scss/bootstrap/_buttons.scss */
@@ -4402,13 +4441,13 @@ tbody.collapse.in {
     clear: both;
     font-weight: normal;
     line-height: 1.4;
-    color: #636466;
+    color: #636363;
     white-space: nowrap; }
 
 /* line 78, ../scss/bootstrap/_dropdowns.scss */
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
   text-decoration: none;
-  color: #565759;
+  color: #565656;
   background-color: #f5f5f5; }
 
 /* line 88, ../scss/bootstrap/_dropdowns.scss */
@@ -4416,11 +4455,11 @@ tbody.collapse.in {
   color: #fff;
   text-decoration: none;
   outline: 0;
-  background-color: #D97102; }
+  background-color: #EF7D00; }
 
 /* line 103, ../scss/bootstrap/_dropdowns.scss */
 .dropdown-menu > .disabled > a, .dropdown-menu > .disabled > a:hover, .dropdown-menu > .disabled > a:focus {
-  color: #C5C8CC; }
+  color: #DCDCDC; }
 /* line 110, ../scss/bootstrap/_dropdowns.scss */
 .dropdown-menu > .disabled > a:hover, .dropdown-menu > .disabled > a:focus {
   text-decoration: none;
@@ -4452,7 +4491,7 @@ tbody.collapse.in {
   padding: 3px 20px;
   font-size: 12px;
   line-height: 1.4;
-  color: #C5C8CC;
+  color: #DCDCDC;
   white-space: nowrap; }
 
 /* line 163, ../scss/bootstrap/_dropdowns.scss */
@@ -4847,17 +4886,17 @@ tbody.collapse.in {
         background-color: #F5F5F5; }
     /* line 31, ../scss/bootstrap/_navs.scss */
     .nav > li.disabled > a {
-      color: #C5C8CC; }
+      color: #DCDCDC; }
       /* line 34, ../scss/bootstrap/_navs.scss */
       .nav > li.disabled > a:hover, .nav > li.disabled > a:focus {
-        color: #C5C8CC;
+        color: #DCDCDC;
         text-decoration: none;
         background-color: transparent;
         cursor: not-allowed; }
   /* line 46, ../scss/bootstrap/_navs.scss */
   .nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
     background-color: #F5F5F5;
-    border-color: #D97102; }
+    border-color: #EF7D00; }
   /* line 59, ../scss/bootstrap/_navs.scss */
   .nav .nav-divider {
     height: 1px;
@@ -4881,7 +4920,7 @@ tbody.collapse.in {
       -webkit-transition: all 0.3s ease;
       -o-transition: all 0.3s ease;
       transition: all 0.3s ease;
-      color: #636466 !important;
+      color: #636363 !important;
       margin-right: 2px;
       line-height: 1.4;
       border: 1px solid transparent;
@@ -4889,13 +4928,13 @@ tbody.collapse.in {
       font-weight: bold; }
       /* line 93, ../scss/bootstrap/_navs.scss */
       .nav-tabs > li > a:hover {
-        color: #272829 !important;
+        color: #282828 !important;
         background-color: #e8e8e8 !important;
         border-color: #F5F5F5 #F5F5F5 #B4B4B4; }
     /* line 102, ../scss/bootstrap/_navs.scss */
     .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
       color: #fff !important;
-      background-color: #D97102 !important;
+      background-color: #EF7D00 !important;
       border: 1px solid #fff;
       border-bottom-color: transparent;
       cursor: default; }
@@ -4912,7 +4951,7 @@ tbody.collapse.in {
   /* line 137, ../scss/bootstrap/_navs.scss */
   .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
     color: #fff;
-    background-color: #D97102; }
+    background-color: #EF7D00; }
 
 /* line 150, ../scss/bootstrap/_navs.scss */
 .nav-stacked > li {
@@ -5417,17 +5456,17 @@ tbody.collapse.in {
   border-color: #090909; }
   /* line 535, ../scss/bootstrap/_navbar.scss */
   .navbar-inverse .navbar-brand {
-    color: #eeeff0; }
+    color: white; }
     /* line 537, ../scss/bootstrap/_navbar.scss */
     .navbar-inverse .navbar-brand:hover, .navbar-inverse .navbar-brand:focus {
       color: #fff;
       background-color: transparent; }
   /* line 544, ../scss/bootstrap/_navbar.scss */
   .navbar-inverse .navbar-text {
-    color: #eeeff0; }
+    color: white; }
   /* line 549, ../scss/bootstrap/_navbar.scss */
   .navbar-inverse .navbar-nav > li > a {
-    color: #eeeff0; }
+    color: white; }
     /* line 552, ../scss/bootstrap/_navbar.scss */
     .navbar-inverse .navbar-nav > li > a:hover, .navbar-inverse .navbar-nav > li > a:focus {
       color: #fff;
@@ -5466,7 +5505,7 @@ tbody.collapse.in {
       background-color: #090909; }
     /* line 613, ../scss/bootstrap/_navbar.scss */
     .navbar-inverse .navbar-nav .open .dropdown-menu > li > a {
-      color: #eeeff0; }
+      color: white; }
       /* line 615, ../scss/bootstrap/_navbar.scss */
       .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover, .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:focus {
         color: #fff;
@@ -5481,13 +5520,13 @@ tbody.collapse.in {
       background-color: transparent; } }
   /* line 641, ../scss/bootstrap/_navbar.scss */
   .navbar-inverse .navbar-link {
-    color: #eeeff0; }
+    color: white; }
     /* line 643, ../scss/bootstrap/_navbar.scss */
     .navbar-inverse .navbar-link:hover {
       color: #fff; }
   /* line 648, ../scss/bootstrap/_navbar.scss */
   .navbar-inverse .btn-link {
-    color: #eeeff0; }
+    color: white; }
     /* line 650, ../scss/bootstrap/_navbar.scss */
     .navbar-inverse .btn-link:hover, .navbar-inverse .btn-link:focus {
       color: #fff; }
@@ -5512,7 +5551,7 @@ tbody.collapse.in {
       color: #ccc; }
   /* line 25, ../scss/bootstrap/_breadcrumbs.scss */
   .breadcrumb > .active {
-    color: #C5C8CC; }
+    color: #DCDCDC; }
 
 /* line 4, ../scss/bootstrap/_pagination.scss */
 .pagination {
@@ -5531,7 +5570,7 @@ tbody.collapse.in {
       padding: 6px 12px;
       line-height: 1.4;
       text-decoration: none;
-      color: #D97102;
+      color: #EF7D00;
       background-color: #fff;
       border: 1px solid #ddd;
       margin-left: -1px; }
@@ -5551,7 +5590,7 @@ tbody.collapse.in {
   .pagination > li > span:hover,
   .pagination > li > span:focus {
     z-index: 2;
-    color: #8d4a01;
+    color: #a35500;
     background-color: #F5F5F5;
     border-color: #ddd; }
   /* line 52, ../scss/bootstrap/_pagination.scss */
@@ -5561,8 +5600,8 @@ tbody.collapse.in {
   .pagination > .active > span:focus {
     z-index: 3;
     color: #fff;
-    background-color: #D97102;
-    border-color: #D97102;
+    background-color: #EF7D00;
+    border-color: #EF7D00;
     cursor: default; }
   /* line 64, ../scss/bootstrap/_pagination.scss */
   .pagination > .disabled > span,
@@ -5571,7 +5610,7 @@ tbody.collapse.in {
   .pagination > .disabled > a,
   .pagination > .disabled > a:hover,
   .pagination > .disabled > a:focus {
-    color: #C5C8CC;
+    color: #DCDCDC;
     background-color: #fff;
     border-color: #ddd;
     cursor: not-allowed; }
@@ -5652,7 +5691,7 @@ tbody.collapse.in {
   .pager .disabled > a:hover,
   .pager .disabled > a:focus,
   .pager .disabled > span {
-    color: #C5C8CC;
+    color: #DCDCDC;
     background-color: #fff;
     cursor: not-allowed; }
 
@@ -5684,17 +5723,17 @@ a.label:hover, a.label:focus {
 
 /* line 44, ../scss/bootstrap/_labels.scss */
 .label-default {
-  background-color: #C5C8CC; }
+  background-color: #DCDCDC; }
   /* line 7, ../scss/bootstrap/mixins/_labels.scss */
   .label-default[href]:hover, .label-default[href]:focus {
-    background-color: #aaaeb4; }
+    background-color: #c3c3c3; }
 
 /* line 48, ../scss/bootstrap/_labels.scss */
 .label-primary {
-  background-color: #D97102; }
+  background-color: #EF7D00; }
   /* line 7, ../scss/bootstrap/mixins/_labels.scss */
   .label-primary[href]:hover, .label-primary[href]:focus {
-    background-color: #a65702; }
+    background-color: #bc6200; }
 
 /* line 52, ../scss/bootstrap/_labels.scss */
 .label-success {
@@ -5736,7 +5775,7 @@ a.label:hover, a.label:focus {
   vertical-align: middle;
   white-space: nowrap;
   text-align: center;
-  background-color: #636466;
+  background-color: #636363;
   border-radius: 10px; }
   /* line 22, ../scss/bootstrap/_badges.scss */
   .badge:empty {
@@ -5751,7 +5790,7 @@ a.label:hover, a.label:focus {
     padding: 1px 5px; }
   /* line 41, ../scss/bootstrap/_badges.scss */
   .list-group-item.active > .badge, .nav-pills > .active > a > .badge {
-    color: #D97102;
+    color: #EF7D00;
     background-color: #fff; }
   /* line 47, ../scss/bootstrap/_badges.scss */
   .list-group-item > .badge {
@@ -5784,7 +5823,7 @@ a.label:hover, a.label:focus {
     color: #fff !important; }
   /* line 84, ../scss/bootstrap/_badges.scss */
   .badge.badge-primary {
-    background-color: #D97102 !important;
+    background-color: #EF7D00 !important;
     color: #fff !important; }
 
 /* line 92, ../scss/bootstrap/_badges.scss */
@@ -5863,7 +5902,7 @@ a.badge:hover, a.badge:focus {
 a.thumbnail:hover,
 a.thumbnail:focus,
 a.thumbnail.active {
-  border-color: #D97102; }
+  border-color: #EF7D00; }
 
 /* line 9, ../scss/bootstrap/_alerts.scss */
 .alert {
@@ -5975,7 +6014,7 @@ a.thumbnail.active {
   line-height: 18px;
   color: #fff;
   text-align: center;
-  background-color: #D97102;
+  background-color: #EF7D00;
   -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
   -webkit-transition: width 0.6s ease;
@@ -6139,20 +6178,20 @@ button.list-group-item {
 /* line 70, ../scss/bootstrap/_list-group.scss */
 .list-group-item.disabled, .list-group-item.disabled:hover, .list-group-item.disabled:focus {
   background-color: #F5F5F5;
-  color: #C5C8CC;
+  color: #DCDCDC;
   cursor: not-allowed; }
   /* line 78, ../scss/bootstrap/_list-group.scss */
   .list-group-item.disabled .list-group-item-heading, .list-group-item.disabled:hover .list-group-item-heading, .list-group-item.disabled:focus .list-group-item-heading {
     color: inherit; }
   /* line 81, ../scss/bootstrap/_list-group.scss */
   .list-group-item.disabled .list-group-item-text, .list-group-item.disabled:hover .list-group-item-text, .list-group-item.disabled:focus .list-group-item-text {
-    color: #C5C8CC; }
+    color: #DCDCDC; }
 /* line 87, ../scss/bootstrap/_list-group.scss */
 .list-group-item.active, .list-group-item.active:hover, .list-group-item.active:focus {
   z-index: 2;
   color: #fff;
-  background-color: #D97102;
-  border-color: #D97102; }
+  background-color: #EF7D00;
+  border-color: #EF7D00; }
   /* line 96, ../scss/bootstrap/_list-group.scss */
   .list-group-item.active .list-group-item-heading,
   .list-group-item.active .list-group-item-heading > small,
@@ -6164,7 +6203,7 @@ button.list-group-item {
     color: inherit; }
   /* line 101, ../scss/bootstrap/_list-group.scss */
   .list-group-item.active .list-group-item-text, .list-group-item.active:hover .list-group-item-text, .list-group-item.active:focus .list-group-item-text {
-    color: #fed5a9; }
+    color: #ffdfbc; }
 
 /* line 4, ../scss/bootstrap/mixins/_list-group.scss */
 .list-group-item-success {
@@ -6559,19 +6598,19 @@ button.list-group-item-danger {
   border-color: #ddd; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
   .panel-default > .panel-heading {
-    color: #636466;
+    color: #636363;
     background-color: #f5f5f5;
     border-color: #ddd; }
     /* line 12, ../scss/bootstrap/mixins/_panels.scss */
     .panel-default > .panel-heading > .panel-title a, .panel-default > .panel-heading > .panel-title i {
-      color: #636466; }
+      color: #636363; }
     /* line 17, ../scss/bootstrap/mixins/_panels.scss */
     .panel-default > .panel-heading + .panel-collapse > .panel-body {
       border-top-color: #ddd; }
     /* line 20, ../scss/bootstrap/mixins/_panels.scss */
     .panel-default > .panel-heading .badge {
       color: #f5f5f5;
-      background-color: #636466; }
+      background-color: #636363; }
   /* line 26, ../scss/bootstrap/mixins/_panels.scss */
   .panel-default > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #ddd; }
@@ -6579,13 +6618,13 @@ button.list-group-item-danger {
 /* line 276, ../scss/bootstrap/_panels.scss */
 .panel-secondary,
 .panel-secondary-forced {
-  border-color: #3E4859; }
+  border-color: #636363; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
   .panel-secondary > .panel-heading,
   .panel-secondary-forced > .panel-heading {
     color: #fff;
-    background-color: #3E4859;
-    border-color: #3E4859; }
+    background-color: #636363;
+    border-color: #636363; }
     /* line 12, ../scss/bootstrap/mixins/_panels.scss */
     .panel-secondary > .panel-heading > .panel-title a, .panel-secondary > .panel-heading > .panel-title i,
     .panel-secondary-forced > .panel-heading > .panel-title a,
@@ -6594,38 +6633,38 @@ button.list-group-item-danger {
     /* line 17, ../scss/bootstrap/mixins/_panels.scss */
     .panel-secondary > .panel-heading + .panel-collapse > .panel-body,
     .panel-secondary-forced > .panel-heading + .panel-collapse > .panel-body {
-      border-top-color: #3E4859; }
+      border-top-color: #636363; }
     /* line 20, ../scss/bootstrap/mixins/_panels.scss */
     .panel-secondary > .panel-heading .badge,
     .panel-secondary-forced > .panel-heading .badge {
-      color: #3E4859;
+      color: #636363;
       background-color: #fff; }
   /* line 26, ../scss/bootstrap/mixins/_panels.scss */
   .panel-secondary > .panel-footer + .panel-collapse > .panel-body,
   .panel-secondary-forced > .panel-footer + .panel-collapse > .panel-body {
-    border-bottom-color: #3E4859; }
+    border-bottom-color: #636363; }
 
 /* line 280, ../scss/bootstrap/_panels.scss */
 .panel-primary {
-  border-color: #D97102; }
+  border-color: #EF7D00; }
   /* line 6, ../scss/bootstrap/mixins/_panels.scss */
   .panel-primary > .panel-heading {
     color: #fff;
-    background-color: #D97102;
-    border-color: #D97102; }
+    background-color: #EF7D00;
+    border-color: #EF7D00; }
     /* line 12, ../scss/bootstrap/mixins/_panels.scss */
     .panel-primary > .panel-heading > .panel-title a, .panel-primary > .panel-heading > .panel-title i {
       color: #fff; }
     /* line 17, ../scss/bootstrap/mixins/_panels.scss */
     .panel-primary > .panel-heading + .panel-collapse > .panel-body {
-      border-top-color: #D97102; }
+      border-top-color: #EF7D00; }
     /* line 20, ../scss/bootstrap/mixins/_panels.scss */
     .panel-primary > .panel-heading .badge {
-      color: #D97102;
+      color: #EF7D00;
       background-color: #fff; }
   /* line 26, ../scss/bootstrap/mixins/_panels.scss */
   .panel-primary > .panel-footer + .panel-collapse > .panel-body {
-    border-bottom-color: #D97102; }
+    border-bottom-color: #EF7D00; }
 
 /* line 283, ../scss/bootstrap/_panels.scss */
 .panel-success {
@@ -6956,7 +6995,7 @@ button.close {
       /* line 213, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table th.disabled, .bootstrap-datetimepicker-widget table th.disabled:hover {
         background: none;
-        color: #C5C8CC;
+        color: #DCDCDC;
         cursor: not-allowed; }
       /* line 220, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table th.prev::after {
@@ -6967,16 +7006,16 @@ button.close {
     /* line 231, ../scss/bootstrap/_datetimepicker.scss */
     .bootstrap-datetimepicker-widget table thead tr th {
       cursor: normal;
-      background-color: #D97102;
+      background-color: #EF7D00;
       color: #fff; }
     /* line 237, ../scss/bootstrap/_datetimepicker.scss */
     .bootstrap-datetimepicker-widget table thead tr:first-child th {
       cursor: pointer;
-      background-color: #3E4859;
+      background-color: #636363;
       color: #fff; }
       /* line 242, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table thead tr:first-child th:hover {
-        background: #D97102;
+        background: #EF7D00;
         color: #fff; }
     /* line 248, ../scss/bootstrap/_datetimepicker.scss */
     .bootstrap-datetimepicker-widget table td {
@@ -6988,7 +7027,7 @@ button.close {
         font-size: .8em;
         height: 20px;
         line-height: 20px;
-        color: #C5C8CC; }
+        color: #DCDCDC; }
       /* line 260, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table td.day {
         height: 20px;
@@ -6996,12 +7035,12 @@ button.close {
         width: 20px; }
       /* line 266, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table td.day:hover, .bootstrap-datetimepicker-widget table td.hour:hover, .bootstrap-datetimepicker-widget table td.minute:hover, .bootstrap-datetimepicker-widget table td.second:hover {
-        background: #636466;
+        background: #636363;
         color: #fff;
         cursor: pointer; }
       /* line 275, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table td.old, .bootstrap-datetimepicker-widget table td.new {
-        color: #C5C8CC; }
+        color: #DCDCDC; }
       /* line 280, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table td.today {
         position: relative; }
@@ -7011,14 +7050,14 @@ button.close {
           display: inline-block;
           border: solid transparent;
           border-width: 0 0 7px 7px;
-          border-bottom-color: #D97102;
+          border-bottom-color: #EF7D00;
           border-top-color: rgba(0, 0, 0, 0.2);
           position: absolute;
           bottom: 4px;
           right: 4px; }
       /* line 296, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table td.active, .bootstrap-datetimepicker-widget table td.active:hover {
-        background-color: #D97102;
+        background-color: #EF7D00;
         color: #fff;
         text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25); }
       /* line 303, ../scss/bootstrap/_datetimepicker.scss */
@@ -7027,7 +7066,7 @@ button.close {
       /* line 307, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table td.disabled, .bootstrap-datetimepicker-widget table td.disabled:hover {
         background: none;
-        color: #C5C8CC;
+        color: #DCDCDC;
         cursor: not-allowed; }
       /* line 314, ../scss/bootstrap/_datetimepicker.scss */
       .bootstrap-datetimepicker-widget table td span {
@@ -7040,20 +7079,20 @@ button.close {
         border-radius: 0; }
         /* line 323, ../scss/bootstrap/_datetimepicker.scss */
         .bootstrap-datetimepicker-widget table td span:hover {
-          background: #636466;
+          background: #636363;
           color: #fff; }
         /* line 328, ../scss/bootstrap/_datetimepicker.scss */
         .bootstrap-datetimepicker-widget table td span.active {
-          background-color: #D97102;
+          background-color: #EF7D00;
           color: #fff;
           text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25); }
         /* line 334, ../scss/bootstrap/_datetimepicker.scss */
         .bootstrap-datetimepicker-widget table td span.old {
-          color: #C5C8CC; }
+          color: #DCDCDC; }
         /* line 338, ../scss/bootstrap/_datetimepicker.scss */
         .bootstrap-datetimepicker-widget table td span.disabled, .bootstrap-datetimepicker-widget table td span.disabled:hover {
           background: none;
-          color: #C5C8CC;
+          color: #DCDCDC;
           cursor: not-allowed; }
   /* line 349, ../scss/bootstrap/_datetimepicker.scss */
   .bootstrap-datetimepicker-widget.usetwentyfour td.hour {
@@ -7141,7 +7180,7 @@ button.close {
 /* line 79, ../scss/bootstrap/_modals.scss */
 .modal-header {
   padding: 15px;
-  background-color: #3E4859;
+  background-color: #636363;
   color: #fff; }
   /* line 14, ../scss/bootstrap/mixins/_clearfix.scss */
   .modal-header:before, .modal-header:after {
@@ -7171,7 +7210,7 @@ button.close {
 .modal-footer {
   padding: 15px;
   text-align: right;
-  border-top: 1px solid #C5C8CC;
+  border-top: 1px solid #DCDCDC;
   background-color: #F5F5F5; }
   /* line 14, ../scss/bootstrap/mixins/_clearfix.scss */
   .modal-footer:before, .modal-footer:after {
@@ -8097,16 +8136,16 @@ button.close {
 /* line 52, ../scss/bimpcore/_helpers.scss */
 span.hover {
   cursor: pointer;
-  color: #636466;
+  color: #636363;
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease; }
   /* line 57, ../scss/bimpcore/_helpers.scss */
   span.hover:hover, span.hover.hover-default:hover {
-    color: #272829; }
+    color: #282828; }
   /* line 61, ../scss/bimpcore/_helpers.scss */
   span.hover.hover-primary:hover {
-    color: #D97102; }
+    color: #EF7D00; }
   /* line 64, ../scss/bimpcore/_helpers.scss */
   span.hover.hover-success:hover {
     color: #348C41; }
@@ -8191,7 +8230,7 @@ span.hover {
     display: none; } }
 /* line 78, ../scss/bimpcore/_styles.scss */
 .bimp_controller_content {
-  color: #272829; }
+  color: #282828; }
 
 /* line 82, ../scss/bimpcore/_styles.scss */
 .page_content {
@@ -8201,7 +8240,7 @@ span.hover {
   .page_content .page_title {
     padding-bottom: 15px;
     margin-bottom: 15px;
-    border-bottom: 2px solid #272829; }
+    border-bottom: 2px solid #282828; }
     /* line 87, ../scss/bimpcore/_styles.scss */
     .page_content .page_title .header_button {
       display: inline-block;
@@ -8339,7 +8378,7 @@ div.alert {
 .historyPopoverButton {
   margin: 0 6px;
   font-weight: normal;
-  color: #ADAFB3;
+  color: #B4B4B4;
   cursor: pointer;
   font-size: 15px;
   -webkit-transition: all 0.3s ease;
@@ -8351,7 +8390,7 @@ div.alert {
     content: '\f1da'; }
   /* line 246, ../scss/bimpcore/_styles.scss */
   .historyPopoverButton:hover {
-    color: #D97102; }
+    color: #EF7D00; }
 
 /* line 251, ../scss/bimpcore/_styles.scss */
 .objectIcon {
@@ -8362,10 +8401,10 @@ div.alert {
   cursor: pointer;
   display: inline-block;
   font-size: 10px;
-  color: #636466; }
+  color: #636363; }
   /* line 261, ../scss/bimpcore/_styles.scss */
   .objectIcon:hover {
-    color: #D97102; }
+    color: #EF7D00; }
 
 /* line 266, ../scss/bimpcore/_styles.scss */
 .infoIcon {
@@ -8378,7 +8417,7 @@ div.alert {
   font-size: 13px;
   font-weight: bold;
   text-align: center;
-  color: #ADAFB3; }
+  color: #B4B4B4; }
   /* line 277, ../scss/bimpcore/_styles.scss */
   .infoIcon:hover {
     color: #3B6EA0; }
@@ -8388,8 +8427,8 @@ div.alert {
   display: block;
   margin: 10px 0;
   padding: 0 10px 10px 10px;
-  border-bottom: 1px solid #ADAFB3;
-  color: #272829;
+  border-bottom: 1px solid #B4B4B4;
+  color: #282828;
   font-weight: bold;
   font-size: 12px; }
 
@@ -8560,7 +8599,7 @@ i.iconRight {
   cursor: pointer; }
   /* line 479, ../scss/bimpcore/_styles.scss */
   .small-action:hover {
-    color: #D97102; }
+    color: #EF7D00; }
   /* line 483, ../scss/bimpcore/_styles.scss */
   .small-action i.iconLeft {
     margin-right: 6px; }
@@ -8583,10 +8622,10 @@ i.iconRight {
   color: white; }
 /* line 511, ../scss/bimpcore/_styles.scss */
 .panel.panel-secondary .panel_header_icon i {
-  color: #7786a0; }
+  color: #a3a3a3; }
 /* line 517, ../scss/bimpcore/_styles.scss */
 .panel.panel-primary .panel_header_icon i {
-  color: #feb05d; }
+  color: #ffbb70; }
 /* line 523, ../scss/bimpcore/_styles.scss */
 .panel.panel-success .panel_header_icon i {
   color: white; }
@@ -8685,8 +8724,8 @@ i.iconRight {
     margin: 0 2px;
     cursor: pointer;
     font-size: 18px;
-    background-color: #687995;
-    color: #e0e3e9;
+    background-color: #969696;
+    color: #fcfcfc;
     border-radius: 50%;
     -webkit-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
@@ -8703,15 +8742,15 @@ i.iconRight {
     /* line 648, ../scss/bimpcore/_styles.scss */
     .modal .modal-nav-buttons .modal-nav-prev:hover,
     .modal .modal-nav-buttons .modal-nav-next:hover {
-      color: #3E4859;
+      color: #636363;
       background-color: #fff; }
     /* line 653, ../scss/bimpcore/_styles.scss */
     .modal .modal-nav-buttons .modal-nav-prev.disabled, .modal .modal-nav-buttons .modal-nav-prev.disbaled:hover,
     .modal .modal-nav-buttons .modal-nav-next.disabled,
     .modal .modal-nav-buttons .modal-nav-next.disbaled:hover {
       cursor: default;
-      background-color: #536077;
-      color: #687995; }
+      background-color: #707070;
+      color: #7d7d7d; }
   /* line 660, ../scss/bimpcore/_styles.scss */
   .modal .modal-nav-buttons .modal-nav-prev i {
     margin-right: 2px; }
@@ -8722,7 +8761,7 @@ i.iconRight {
     /* line 668, ../scss/bimpcore/_styles.scss */
     .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle {
       display: inline-block;
-      color: #e0e3e9;
+      color: #fcfcfc;
       font-size: 16px;
       cursor: pointer; }
       /* line 674, ../scss/bimpcore/_styles.scss */
@@ -8734,7 +8773,7 @@ i.iconRight {
         color: #fff; }
       /* line 683, ../scss/bimpcore/_styles.scss */
       .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle.disabled, .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle.disabled:hover {
-        color: #687995;
+        color: #7d7d7d;
         cursor: default; }
 /* line 691, ../scss/bimpcore/_styles.scss */
 .modal .modal-titles_container {
@@ -8772,7 +8811,7 @@ i.iconRight {
   width: 38px;
   height: 38px;
   line-height: 38px;
-  background-color: #3E4859;
+  background-color: #636363;
   cursor: pointer;
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -8785,7 +8824,7 @@ i.iconRight {
     margin-right: 1px; }
   /* line 742, ../scss/bimpcore/_styles.scss */
   #openModalBtn:hover {
-    background-color: #D97102; }
+    background-color: #EF7D00; }
   /* line 746, ../scss/bimpcore/_styles.scss */
   #openModalBtn.closed {
     margin-right: -40px; }
@@ -8806,11 +8845,11 @@ i.iconRight {
   transition: all 0.3s ease; }
   /* line 763, ../scss/bimpcore/_styles.scss */
   #openDebugModalBtn i {
-    color: #3E4859;
+    color: #636363;
     font-size: 16px; }
   /* line 768, ../scss/bimpcore/_styles.scss */
   #openDebugModalBtn:hover i {
-    color: #D97102; }
+    color: #EF7D00; }
   /* line 772, ../scss/bimpcore/_styles.scss */
   #openDebugModalBtn.closed {
     margin-left: -40px; }
@@ -8824,7 +8863,7 @@ i.iconRight {
   font-size: 12px;
   font-weight: bold;
   font-style: italic;
-  color: #636466 !important;
+  color: #636363 !important;
   cursor: pointer; }
   /* line 788, ../scss/bimpcore/_styles.scss */
   .openCloseButton:hover {
@@ -8902,7 +8941,7 @@ i.iconRight {
 .foldable_container.offset_left > .foldable_content {
   padding-left: 10px;
   margin-left: 10px;
-  border-left: 1px dotted #ADAFB3; }
+  border-left: 1px dotted #B4B4B4; }
 /* line 870, ../scss/bimpcore/_styles.scss */
 .foldable_container > .foldable_caption {
   font-weight: bold;
@@ -9075,7 +9114,7 @@ i.iconRight {
     font-size: 12px; }
   /* line 1096, ../scss/bimpcore/_styles.scss */
   .tinyPopup .btn:hover {
-    background-color: #D97102;
+    background-color: #EF7D00;
     color: #fff; }
 
 /*Info Card*/
@@ -9085,8 +9124,8 @@ i.iconRight {
   min-width: 200px;
   margin: 5px;
   padding: 12px 8px;
-  border-left: 4px solid #272829;
-  border-top: 1px solid #272829;
+  border-left: 4px solid #282828;
+  border-top: 1px solid #282828;
   border-radius: 4px;
   vertical-align: top;
   background-color: #F8F8F8;
@@ -9119,11 +9158,11 @@ i.iconRight {
 /* line 1151, ../scss/bimpcore/_styles.scss */
 .bimp_timer {
   background-color: #fff;
-  border: 1px solid #3E4859; }
+  border: 1px solid #636363; }
   /* line 1155, ../scss/bimpcore/_styles.scss */
   .bimp_timer .bimp_timer_header {
     padding: 5px 8px;
-    background-color: #D97102;
+    background-color: #EF7D00;
     color: #fff; }
     /* line 1160, ../scss/bimpcore/_styles.scss */
     .bimp_timer .bimp_timer_header .title {
@@ -9136,13 +9175,13 @@ i.iconRight {
   /* line 1171, ../scss/bimpcore/_styles.scss */
   .bimp_timer .bimp_timer_time {
     text-align: center;
-    color: #272829;
+    color: #282828;
     padding: 10px 16px;
     font-weight: bold; }
     /* line 1177, ../scss/bimpcore/_styles.scss */
     .bimp_timer .bimp_timer_time .title {
       font-size: 13px;
-      color: #636466;
+      color: #636363;
       text-align: left;
       margin-bottom: 8px; }
     /* line 1184, ../scss/bimpcore/_styles.scss */
@@ -9150,7 +9189,7 @@ i.iconRight {
       margin: 0 8px; }
     /* line 1188, ../scss/bimpcore/_styles.scss */
     .bimp_timer .bimp_timer_time.bimp_timer_current_time {
-      color: #595b5d; }
+      color: #5b5b5b; }
       /* line 1190, ../scss/bimpcore/_styles.scss */
       .bimp_timer .bimp_timer_time.bimp_timer_current_time .bimp_timer_value {
         font-size: 22px; }
@@ -9159,7 +9198,7 @@ i.iconRight {
         font-size: 16px; }
     /* line 1197, ../scss/bimpcore/_styles.scss */
     .bimp_timer .bimp_timer_time.bimp_timer_total_time {
-      color: #272829; }
+      color: #282828; }
       /* line 1199, ../scss/bimpcore/_styles.scss */
       .bimp_timer .bimp_timer_time.bimp_timer_total_time .bimp_timer_value {
         font-size: 32px; }
@@ -9168,7 +9207,7 @@ i.iconRight {
         font-size: 24px; }
   /* line 1208, ../scss/bimpcore/_styles.scss */
   .bimp_timer .bimp_timer_footer {
-    background-color: #C5C8CC;
+    background-color: #DCDCDC;
     padding: 5px 8px;
     text-align: right; }
     /* line 1213, ../scss/bimpcore/_styles.scss */
@@ -9200,7 +9239,7 @@ i.iconRight {
     width: 340px;
     margin: 15px;
     border-radius: 4px;
-    box-shadow: 3px 3px 6px #636466;
+    box-shadow: 3px 3px 6px #636363;
     margin-left: 370px; }
   /* line 1252, ../scss/bimpcore/_styles.scss */
   #page_notifications #notifications_tools {
@@ -9265,13 +9304,13 @@ i.iconRight {
   /* line 1322, ../scss/bimpcore/_styles.scss */
   .productStocksContainer .stockSearchContainer {
     margin: 10px 0;
-    color: #636466; }
+    color: #636363; }
   /* line 1327, ../scss/bimpcore/_styles.scss */
   .productStocksContainer .productStockTable > thead > tr > th {
     background-color: #fff;
-    color: #272829;
+    color: #282828;
     padding: 5px;
-    border-bottom: 2px solid #272829;
+    border-bottom: 2px solid #282828;
     text-align: center; }
     /* line 1334, ../scss/bimpcore/_styles.scss */
     .productStocksContainer .productStockTable > thead > tr > th:first-child {
@@ -9376,7 +9415,7 @@ body.modal-open ul.ui-autocomplete {
   .select2-search--dropdown:after {
     font-family: 'FA5S';
     content: '\f002';
-    color: #636466;
+    color: #636363;
     position: absolute;
     top: 9px;
     right: 8px;
@@ -9385,7 +9424,7 @@ body.modal-open ul.ui-autocomplete {
 /* line 25, ../scss/bimpcore/_form.scss */
 .formInputGroup {
   padding-left: 25px;
-  border-left: 3px solid #ADAFB3;
+  border-left: 3px solid #B4B4B4;
   margin: 30px 0; }
   /* line 30, ../scss/bimpcore/_form.scss */
   .formInputGroup .dataInputTemplate {
@@ -9441,8 +9480,8 @@ body.modal-open ul.ui-autocomplete {
   /* line 91, ../scss/bimpcore/_form.scss */
   .fieldRow .inputLabel,
   .formRow .inputLabel {
-    color: #1F304D;
-    background-color: #DBDFE6;
+    color: #fff;
+    background-color: #EF7D00;
     border-bottom: 1px solid #fff;
     font-weight: bold;
     text-align: right;
@@ -9452,9 +9491,9 @@ body.modal-open ul.ui-autocomplete {
   .fieldRow .formRowInput,
   .formRow .fieldRowInput,
   .formRow .formRowInput {
-    color: #3E4859;
+    color: #636363;
     background-color: #fff;
-    border-bottom: 1px solid #C5C8CC;
+    border-bottom: 1px solid #DCDCDC;
     padding: 10px 15px; }
     /* line 108, ../scss/bimpcore/_form.scss */
     .fieldRow .fieldRowInput .inputContainer select,
@@ -9540,7 +9579,7 @@ body.modal-open ul.ui-autocomplete {
 .inputHelp {
   font-size: 12px;
   font-style: italic;
-  color: #85888e;
+  color: #8e8e8e;
   margin: 8px 0;
   padding-left: 15px; }
 
@@ -9613,7 +9652,7 @@ input, select {
   .inputContainer .help {
     font-size: 12px;
     font-style: italic;
-    color: #ADAFB3;
+    color: #B4B4B4;
     margin: 8px 0;
     padding-left: 15px; }
   /* line 261, ../scss/bimpcore/_form.scss */
@@ -9681,13 +9720,13 @@ select.switch {
     vertical-align: top;
     line-height: 20px;
     margin: 0 6px;
-    color: #ADAFB3;
+    color: #B4B4B4;
     -webkit-transition: all 0.5s ease;
     -o-transition: all 0.5s ease;
     transition: all 0.5s ease; }
   /* line 331, ../scss/bimpcore/_form.scss */
   .toggle + span {
-    color: #636466; }
+    color: #636363; }
   /* line 335, ../scss/bimpcore/_form.scss */
   .toggle + span + .toggle-slider {
     position: relative;
@@ -9738,7 +9777,7 @@ select.switch {
     display: none; }
   /* line 390, ../scss/bimpcore/_form.scss */
   .toggle:checked + span {
-    color: #ADAFB3; }
+    color: #B4B4B4; }
   /* line 393, ../scss/bimpcore/_form.scss */
   .toggle:checked + span + label + span {
     color: #2fa04b; }
@@ -9776,7 +9815,7 @@ select.switch {
 /* line 434, ../scss/bimpcore/_form.scss */
 .search_input_selected_label {
   font-weight: bold;
-  color: #636466; }
+  color: #636363; }
   /* line 438, ../scss/bimpcore/_form.scss */
   .search_input_selected_label i.fa-check {
     color: #348C41; }
@@ -9803,7 +9842,7 @@ select.switch {
   .optionsContainer .optionsButton {
     display: inline-block;
     margin: 5px;
-    color: #3E4859;
+    color: #636363;
     font-weight: normal;
     margin: 0 3px;
     padding: 4px 6px;
@@ -9815,14 +9854,14 @@ select.switch {
     /* line 477, ../scss/bimpcore/_form.scss */
     .optionsContainer .optionsButton:hover {
       color: #fff;
-      background-color: #D97102; }
+      background-color: #EF7D00; }
       /* line 481, ../scss/bimpcore/_form.scss */
       .optionsContainer .optionsButton:hover:before {
         color: #fff; }
     /* line 486, ../scss/bimpcore/_form.scss */
     .optionsContainer .optionsButton:before {
       font-size: 14px;
-      color: #D97102;
+      color: #EF7D00;
       font-family: 'FA5S';
       content: '\f013';
       margin-right: 8px; }
@@ -9840,7 +9879,7 @@ select.switch {
   /* line 504, ../scss/bimpcore/_form.scss */
   .inputMultipleValues > table > tbody > tr.itemRow {
     background-color: #fff;
-    border: 1px solid #ADAFB3;
+    border: 1px solid #B4B4B4;
     width: 100%; }
     /* line 508, ../scss/bimpcore/_form.scss */
     .inputMultipleValues > table > tbody > tr.itemRow > td {
@@ -9860,7 +9899,7 @@ select.switch {
           font-size: 11px;
           font-weight: bold;
           font-style: italic;
-          color: #636466;
+          color: #636363;
           margin-bottom: 3px;
           padding-bottom: 3px;
           border-bottom: 1px solid #DCDCDC; }
@@ -9897,7 +9936,7 @@ select.switch {
     width: 25px;
     height: 25px;
     line-height: 23px;
-    color: #636466; }
+    color: #636363; }
     /* line 570, ../scss/bimpcore/_form.scss */
     .qtyInputContainer .qtyDown i,
     .qtyInputContainer .qtyUp i {
@@ -9906,7 +9945,7 @@ select.switch {
     /* line 575, ../scss/bimpcore/_form.scss */
     .qtyInputContainer .qtyDown:hover,
     .qtyInputContainer .qtyUp:hover {
-      background-color: #636466;
+      background-color: #636363;
       color: #fff; }
     /* line 580, ../scss/bimpcore/_form.scss */
     .qtyInputContainer .qtyDown.disabled, .qtyInputContainer .qtyDown.disabled:hover,
@@ -9953,7 +9992,7 @@ input[type=text].large_input {
   padding: 8px;
   font-size: 15px;
   font-weight: bold;
-  border: 1px solid #636466; }
+  border: 1px solid #636363; }
   /* line 627, ../scss/bimpcore/_form.scss */
   input[type=text].large_input:focus {
     box-shadow: 0 0 4px #0087B4;
@@ -10023,7 +10062,7 @@ input[type=text].large_input {
     margin-left: 0 !important;
     font-weight: bold;
     background-color: #fff;
-    color: #787b82;
+    color: #818181;
     cursor: pointer; }
 
 /* line 708, ../scss/bimpcore/_form.scss */
@@ -10051,13 +10090,13 @@ input[type=text].large_input {
 /* line 730, ../scss/bimpcore/_form.scss */
 .check_list_item > input[type=checkbox]:checked + label,
 .check_list_group > input[type=checkbox]:checked + .check_list_group_caption.selectable {
-  color: #272829; }
+  color: #282828; }
   /* line 734, ../scss/bimpcore/_form.scss */
   .check_list_item > input[type=checkbox]:checked + label:before,
   .check_list_group > input[type=checkbox]:checked + .check_list_group_caption.selectable:before {
     font-size: 16px;
     content: '\f14a';
-    color: #D97102; }
+    color: #EF7D00; }
 
 /* line 741, ../scss/bimpcore/_form.scss */
 .check_list_group_caption > .check_list_group_title {
@@ -10115,17 +10154,17 @@ input[type=text].large_input {
   .freeForm .freeFormContent {
     padding: 15px;
     background-color: #fff;
-    border: 1px solid #3E4859; }
+    border: 1px solid #636363; }
   /* line 811, ../scss/bimpcore/_form.scss */
   .freeForm .freeFormTitle {
-    background-color: #3E4859;
+    background-color: #636363;
     color: #fff;
     font-size: 18px;
     padding: 10px 15px; }
   /* line 818, ../scss/bimpcore/_form.scss */
   .freeForm .freeFormRow {
     padding: 10px 0;
-    border-bottom: 1px solid #ADAFB3; }
+    border-bottom: 1px solid #B4B4B4; }
   /* line 823, ../scss/bimpcore/_form.scss */
   .freeForm .freeFormLabel {
     font-size: 15px;
@@ -10370,9 +10409,9 @@ table.objectlistTable {
   table.objectlistTable > thead > tr > th {
     padding: 10px 6px;
     margin-bottom: 8px;
-    color: #1F304D;
-    background-color: #e7eaee;
-    border-bottom: 1px solid #1F304D;
+    color: #fff;
+    background-color: #EF7D00;
+    border-bottom: none;
     text-align: left;
     font-weight: bold;
     min-width: 80px; }
@@ -10396,8 +10435,8 @@ table.objectlistTable {
     table.bimp_list_table > tbody > tr > th,
     table.objectlistTable > tbody > tr > th {
       padding: 5px 12px 5px 6px;
-      color: #1F304D;
-      background-color: #DBDFE6;
+      color: #fff;
+      background-color: #EF7D00;
       border-bottom: 1px solid #fff;
       text-align: right; }
       /* line 44, ../scss/bimpcore/_list.scss */
@@ -10469,7 +10508,7 @@ table.objectlistTable {
       /* line 105, ../scss/bimpcore/_list.scss */
       table.bimp_list_table > tbody > tr > td .popover,
       table.objectlistTable > tbody > tr > td .popover {
-        color: #272829; }
+        color: #282828; }
       /* line 109, ../scss/bimpcore/_list.scss */
       table.bimp_list_table > tbody > tr > td .toggle-label-off,
       table.bimp_list_table > tbody > tr > td .toggle-label-on,
@@ -10571,8 +10610,8 @@ table.objectlistTable {
   /* line 208, ../scss/bimpcore/_list.scss */
   table.bimp_list_table > tfoot > tr > th,
   table.objectlistTable > tfoot > tr > th {
-    color: #1F304D;
-    background-color: #DBDFE6;
+    color: #fff;
+    background-color: #EF7D00;
     text-align: right;
     padding: 5px 12px 5px 6px;
     vertical-align: top; }
@@ -10581,7 +10620,7 @@ table.objectlistTable {
   table.objectlistTable > tfoot > tr > td {
     background-color: #E6E6E6;
     font-weight: bold;
-    color: #272829;
+    color: #282828;
     padding: 5px 6px; }
   /* line 223, ../scss/bimpcore/_list.scss */
   table.bimp_list_table tr.margin_row,
@@ -10640,11 +10679,11 @@ table.objectSubList {
   table.objectSubList > thead > tr > th {
     padding: 4px 10px;
     margin-bottom: 4px;
-    color: #272829;
+    color: #282828;
     background-color: #F5F5F5;
     text-align: left;
     font-weight: bold;
-    border-bottom: 1px solid #D97102; }
+    border-bottom: 1px solid #EF7D00; }
   /* line 288, ../scss/bimpcore/_list.scss */
   table.objectSubList > tbody > tr.selected {
     background-color: #FFF5E1 !important; }
@@ -10699,15 +10738,15 @@ table.objectSubList {
   /* line 355, ../scss/bimpcore/_list.scss */
   table.objectSubList > tbody > tr > td {
     padding: 4px 10px;
-    border-bottom: 1px solid #C5C8CC;
+    border-bottom: 1px solid #DCDCDC;
     background-color: #fff;
-    color: #636466; }
+    color: #636363; }
   /* line 363, ../scss/bimpcore/_list.scss */
   table.objectSubList > tfoot > tr > td, table.objectSubList > tfoot > tr > th {
     padding: 4px 10px;
     border: none;
     background-color: #F0F0F0;
-    color: #272829;
+    color: #282828;
     font-weight: bold; }
   /* line 370, ../scss/bimpcore/_list.scss */
   table.objectSubList > tfoot > tr > th {
@@ -10725,7 +10764,7 @@ table.objectSubList {
     font-family: 'FA5S';
     margin-left: 8px;
     opacity: 0;
-    color: #1F304D;
+    color: #fff;
     transition: all 0.15s ease;
     -webkit-transition: all 0.15s ease; }
   /* line 391, ../scss/bimpcore/_list.scss */
@@ -10761,10 +10800,10 @@ table.objectSubList {
 
 /* line 429, ../scss/bimpcore/_list.scss */
 tr.listSearchRow {
-  background-color: #C5C8CC; }
+  background-color: #DCDCDC; }
   /* line 432, ../scss/bimpcore/_list.scss */
   tr.listSearchRow > td {
-    background-color: #C5C8CC; }
+    background-color: #DCDCDC; }
   /* line 436, ../scss/bimpcore/_list.scss */
   tr.listSearchRow i.fa-search {
     font-size: 16px;
@@ -10833,7 +10872,7 @@ th.th_tools {
   .headerTools .headerButton {
     display: inline-block;
     margin: 5px;
-    color: #1F304D;
+    color: #fff;
     font-weight: normal;
     margin: 0 3px;
     padding: 4px 6px;
@@ -10844,8 +10883,8 @@ th.th_tools {
     -webkit-transition: all 0.3s ease; }
     /* line 530, ../scss/bimpcore/_list.scss */
     .headerTools .headerButton:hover {
-      color: #D97102;
-      background-color: transparent; }
+      color: #EF7D00;
+      background-color: #fff; }
     /* line 534, ../scss/bimpcore/_list.scss */
     .headerTools .headerButton:before, .headerTools .headerButton:after {
       font-family: 'FA5S'; }
@@ -10874,7 +10913,7 @@ th.th_tools {
   .headerTools .loadingIcon {
     display: inline-block;
     margin: 5px;
-    color: #1F304D;
+    color: #fff;
     font-weight: bold;
     margin: 0 3px;
     padding: 2px 6px;
@@ -10900,7 +10939,7 @@ td.buttons {
 
 /* line 592, ../scss/bimpcore/_list.scss */
 .rowButton {
-  color: #272829 !important;
+  color: #282828 !important;
   text-align: center;
   width: 28px;
   height: 28px;
@@ -10917,7 +10956,7 @@ td.buttons {
   /* line 609, ../scss/bimpcore/_list.scss */
   .rowButton:hover {
     color: #fff !important;
-    background-color: #D97102;
+    background-color: #EF7D00;
     text-decoration: none; }
     /* line 614, ../scss/bimpcore/_list.scss */
     .rowButton:hover i {
@@ -10939,7 +10978,7 @@ td.buttons {
     content: '\f06e'; }
   /* line 634, ../scss/bimpcore/_list.scss */
   .rowButton i {
-    color: #272829 !important; }
+    color: #282828 !important; }
 
 /* line 639, ../scss/bimpcore/_list.scss */
 .ajaxResultContainer {
@@ -10957,7 +10996,7 @@ td.buttons {
   background-color: #fff;
   padding: 10px;
   margin: 10px 0;
-  border-top: 1px solid #C5C8CC; }
+  border-top: 1px solid #DCDCDC; }
   /* line 651, ../scss/bimpcore/_list.scss */
   .listPagination:empty {
     display: none; }
@@ -10980,7 +11019,7 @@ td.buttons {
     vertical-align: middle; }
     /* line 679, ../scss/bimpcore/_list.scss */
     .listPagination span.navButton:hover, .listPagination span.navButton.selected {
-      color: #D97102; }
+      color: #EF7D00; }
     /* line 683, ../scss/bimpcore/_list.scss */
     .listPagination span.navButton:before, .listPagination span.navButton:after {
       font-family: 'FA5S';
@@ -11016,7 +11055,7 @@ td.buttons {
         color: #505050; }
       /* line 722, ../scss/bimpcore/_list.scss */
       .listPagination .pages .pageBtn.active, .listPagination .pages .pageBtn.active:hover {
-        color: #D97102;
+        color: #EF7D00;
         cursor: default; }
       /* line 728, ../scss/bimpcore/_list.scss */
       .listPagination .pages .pageBtn.processing {
@@ -11027,7 +11066,7 @@ td.buttons {
 .filters_toolbar {
   padding-bottom: 5px;
   margin-bottom: 5px;
-  border-bottom: 1px solid #272829; }
+  border-bottom: 1px solid #282828; }
 
 /* line 743, ../scss/bimpcore/_list.scss */
 .bimp_filter_container {
@@ -11035,7 +11074,7 @@ td.buttons {
   /* line 746, ../scss/bimpcore/_list.scss */
   .bimp_filter_container .bimp_filter_caption {
     font-weight: bold;
-    color: #272829;
+    color: #282828;
     padding: 6px 24px 6px 6px;
     margin-bottom: 5px;
     background-color: #DCDCDC; }
@@ -11241,19 +11280,19 @@ td.buttons {
 .subStatsListContent {
   margin-left: 10px;
   padding-left: 0;
-  border-left: 3px solid #636466; }
+  border-left: 3px solid #636363; }
 
 /* line 2, ../scss/bimpcore/_view.scss */
 .panel-secondary .panel-secondary {
   /*border-color: #c8c8c8;*/ }
   /* line 4, ../scss/bimpcore/_view.scss */
   .panel-secondary .panel-secondary .panel-heading {
-    background-color: #DBDFE6;
-    border-color: #DBDFE6;
-    color: #272829; }
+    background-color: #E6E6E6;
+    border-color: #E6E6E6;
+    color: #282828; }
     /* line 10, ../scss/bimpcore/_view.scss */
     .panel-secondary .panel-secondary .panel-heading .panel-title a, .panel-secondary .panel-secondary .panel-heading .panel-title i {
-      color: #272829; }
+      color: #282828; }
 
 /* line 18, ../scss/bimpcore/_view.scss */
 .object_view_content {
@@ -11265,7 +11304,7 @@ td.buttons {
 /* line 26, ../scss/bimpcore/_view.scss */
 .objectFieldsTableContainer {
   width: 100%;
-  border: 1px solid #3E4859;
+  border: 1px solid #636363;
   margin: 5px 0; }
 
 /* line 32, ../scss/bimpcore/_view.scss */
@@ -11277,15 +11316,15 @@ td.buttons {
   .objectFieldsTable > thead > tr > th {
     padding: 8px 12px;
     background-color: #c8c8c8;
-    color: #272829;
+    color: #282828;
     font-size: 15px;
     font-weight: normal; }
   /* line 44, ../scss/bimpcore/_view.scss */
   .bimp_fields_table > thead > tr.col_headers > th,
   .objectFieldsTable > thead > tr.col_headers > th {
     padding: 5px 8px;
-    background-color: #DBDFE6;
-    color: #1F304D;
+    background-color: #EF7D00;
+    color: #fff;
     font-size: 13px;
     font-weight: bold; }
   /* line 54, ../scss/bimpcore/_view.scss */
@@ -11309,8 +11348,8 @@ td.buttons {
     .objectFieldsTable > tbody > tr > th {
       width: 20%;
       min-width: 90px;
-      background-color: #DBDFE6;
-      color: #1F304D;
+      background-color: #EF7D00;
+      color: #fff;
       font-weight: bold;
       vertical-align: top;
       text-align: right;
@@ -11318,7 +11357,7 @@ td.buttons {
     /* line 74, ../scss/bimpcore/_view.scss */
     .bimp_fields_table > tbody > tr > td,
     .objectFieldsTable > tbody > tr > td {
-      border-bottom: 1px solid #C5C8CC; }
+      border-bottom: 1px solid #DCDCDC; }
       /* line 77, ../scss/bimpcore/_view.scss */
       .bimp_fields_table > tbody > tr > td .inputContainer,
       .bimp_fields_table > tbody > tr > td .inputGroupContainer,
@@ -11444,7 +11483,7 @@ td.buttons {
     margin-left: 5px; }
     /* line 200, ../scss/bimpcore/_view.scss */
     .object_header .headerIconButton:hover {
-      color: #D97102; }
+      color: #EF7D00; }
   /* line 205, ../scss/bimpcore/_view.scss */
   .object_header .header_button {
     vertical-align: top;
@@ -11461,7 +11500,7 @@ td.buttons {
   .object_header .header_bottom {
     margin-top: 10px;
     padding: 5px;
-    border-top: 2px solid #636466; }
+    border-top: 2px solid #636363; }
 
 /*.object_page_header {
     @include transition(all 0.3s ease);    
@@ -11529,10 +11568,10 @@ td.buttons {
     text-align: right;
     vertical-align: top;
     background-color: #fff;
-    color: #272829; }
+    color: #282828; }
   /* line 306, ../scss/bimpcore/_view.scss */
   .object_card_table > tbody > tr > td {
-    color: #272829;
+    color: #282828;
     background-color: #fff; }
 
 /* line 312, ../scss/bimpcore/_view.scss */
@@ -11551,17 +11590,17 @@ td.buttons {
     /* line 327, ../scss/bimpcore/_view.scss */
     .object_common_fields table tbody tr th {
       font-weight: normal;
-      color: #C5C8CC;
-      border-bottom: 1px solid #C5C8CC;
+      color: #DCDCDC;
+      border-bottom: 1px solid #DCDCDC;
       width: 30%;
       min-width: 90px;
       text-align: right;
       vertical-align: top;
-      background-color: #3E4859; }
+      background-color: #636363; }
     /* line 338, ../scss/bimpcore/_view.scss */
     .object_common_fields table tbody tr td {
-      color: #272829;
-      border-bottom: 1px solid #C5C8CC;
+      color: #282828;
+      border-bottom: 1px solid #DCDCDC;
       vertical-align: middle; }
 
 /* line 346, ../scss/bimpcore/_view.scss */
@@ -11570,7 +11609,7 @@ td.buttons {
   /* line 349, ../scss/bimpcore/_view.scss */
   .multiple_values_items_list .multiple_values_item {
     margin: 5px 0;
-    border: 1px solid #ADAFB3;
+    border: 1px solid #B4B4B4;
     padding: 10px; }
 
 /* line 357, ../scss/bimpcore/_view.scss */
@@ -11617,7 +11656,7 @@ table.objectFieldHistoryTable > tbody > tr > td {
   table.objectlistTable > thead > tr > th,
   table.objectlistTable > tbody > tr > th {
     background-color: #DCDCDC !important;
-    color: #272829 !important; }
+    color: #282828 !important; }
   /* line 46, ../scss/bimpcore/_print.scss */
   table.bimp_list_table > thead > tr > th, table.bimp_list_table > thead > tr > td, table.bimp_list_table > tbody > tr > th, table.bimp_list_table > tbody > tr > td, table.bimp_list_table > tfoot > tr > th, table.bimp_list_table > tfoot > tr > td,
   table.objectlistTable > thead > tr > th,
@@ -11633,7 +11672,7 @@ table.objectFieldHistoryTable > tbody > tr > td {
   .objectFieldsTable > thead > tr.col_headers > th,
   .objectFieldsTable > tbody > tr > th {
     background-color: #DCDCDC !important;
-    color: #272829 !important; }
+    color: #282828 !important; }
   /* line 64, ../scss/bimpcore/_print.scss */
   .bimp_fields_table > thead > tr > th, .bimp_fields_table > thead > tr > td, .bimp_fields_table > tbody > tr > th, .bimp_fields_table > tbody > tr > td, .bimp_fields_table > tfoot > tr > th, .bimp_fields_table > tfoot > tr > td,
   .objectFieldsTable > thead > tr > th,
@@ -11715,7 +11754,7 @@ a.nav-link.dropdown-toggle:not(.notif_white) > i {
       border-top: 1px solid #ccc; }
     /* line 82, ../scss/bimpcore/_notifications.scss */
     .list_notification .list_part:hover {
-      border-left: 5px solid #D97102;
+      border-left: 5px solid #EF7D00;
       padding-left: 5px;
       background-color: #f5f5f5; }
     /* line 88, ../scss/bimpcore/_notifications.scss */
@@ -11946,7 +11985,7 @@ ul#nav_task > li.reload {
     cursor: pointer; }
     /* line 8, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .header-top .top-menu .dropdown .dropdown-toggle:hover {
-      color: #D97102; }
+      color: #EF7D00; }
   /* line 12, ../scss/bimpcore/_bimptheme.scss */
   #BimpThemeWrapper .header-top .top-menu .dropdown .dropdown-menu {
     margin-top: 10px; }
@@ -13016,7 +13055,7 @@ ul#nav_task > li.reload {
     #BimpThemeWrapper .header-top .top-menu .header-icon:hover, #BimpThemeWrapper .header-top .top-menu .header-icon:hover > i, #BimpThemeWrapper .header-top .top-menu .header-icon > a:hover, #BimpThemeWrapper .header-top .top-menu .header-icon > a:hover > i {
       background-color: transparent;
       text-decoration: none !important;
-      color: #D97102; }
+      color: #EF7D00; }
     /* line 231, ../scss/bimpcore/_bimptheme.scss */
     #BimpThemeWrapper .header-top .top-menu .header-icon .bg-danger, #BimpThemeWrapper .header-top .top-menu .header-icon:hover .bg-danger, #BimpThemeWrapper .header-top .top-menu .header-icon > a .bg-danger, #BimpThemeWrapper .header-top .top-menu .header-icon > a:hover .bg-danger {
       color: #fff !important;

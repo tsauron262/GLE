@@ -8710,8 +8710,8 @@ i.iconRight {
     .modal .modal-nav-buttons .modal-nav-next.disabled,
     .modal .modal-nav-buttons .modal-nav-next.disbaled:hover {
       cursor: default;
-      background-color: #3c4654;
-      color: #525e71; }
+      background-color: #323945;
+      color: #3c4654; }
   /* line 660, ../scss/bimpcore/_styles.scss */
   .modal .modal-nav-buttons .modal-nav-prev i {
     margin-right: 2px; }
@@ -8734,7 +8734,7 @@ i.iconRight {
         color: #fff; }
       /* line 683, ../scss/bimpcore/_styles.scss */
       .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle.disabled, .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle.disabled:hover {
-        color: #525e71;
+        color: #3c4654;
         cursor: default; }
 /* line 691, ../scss/bimpcore/_styles.scss */
 .modal .modal-titles_container {

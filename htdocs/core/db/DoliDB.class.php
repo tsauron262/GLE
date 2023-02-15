@@ -177,14 +177,32 @@ abstract class DoliDB implements Database
 	 */
 	public function begin($textinlog = '')
 	{
-		if (! $this->transaction_opened && !$this->noTransaction)
+                /*moddrsi*/
+                if (!$this->noTransaction && defined('BIMP_LIB') && BimpDebug::isActive()) {
+                    $content = '<span class="info">BEGIN #' . ($this->transaction_opened + 1). '</span><br/><br/>';
+                    BimpDebug::addDebug('sql', '', $content, array(
+                        'foldable' => false
+                    ));
+                }
+                /*fmoddrsi*/
+                
+		if (!$this->transaction_opened && !$this->noTransaction)
 		{
 			$ret = $this->query("BEGIN");
 			if ($ret) {
 				$this->transaction_opened++;
 				dol_syslog("BEGIN Transaction".($textinlog ? ' '.$textinlog : ''), LOG_DEBUG);
 				dol_syslog('', 0, 1);
-			}
+			} else {
+                            /*moddrsi*/
+                            if (defined('BIMP_LIB') && BimpDebug::isActive()) {
+                                $content = BimpRender::renderAlerts('Echec BEGIN - ' . $this->lasterror());
+                                BimpDebug::addDebug('sql', '', $content, array(
+                                    'foldable' => false
+                                ));
+                            }
+                            /*fmoddrsi*/
+                        }
 			return $ret;
 		} else {
 			$this->transaction_opened++;
@@ -218,6 +236,15 @@ abstract class DoliDB implements Database
 //			return 1;
 //		}
                 
+            /*moddrsi*/
+            if (!$this->noTransaction && defined('BIMP_LIB') && BimpDebug::isActive()) {
+                $content = '<span class="success">COMMIT #' . ($this->transaction_opened). '</span><br/><br/>';
+                BimpDebug::addDebug('sql', '', $content, array(
+                    'foldable' => false
+                ));
+            }
+            /*fmoddrsi*/
+                
             if ($this->transaction_opened==1 && !$this->noTransaction) {
                 if ($this->has_rollback) {
                     if (!defined('BIMP_LIB')) {
@@ -233,7 +260,7 @@ abstract class DoliDB implements Database
                 if (class_exists('BimpTools')) {
                     BimpTools::deloqueAll ();
                 }
-                        
+        
                 if ($ret) {
                         $this->transaction_opened=0;
                         dol_syslog("COMMIT Transaction".($log?' '.$log:''),LOG_DEBUG);
@@ -252,14 +279,14 @@ abstract class DoliDB implements Database
                         ));
                     }
                     return 0;
-                    }   
-		} elseif($this->transaction_opened > 1 || $this->noTransaction) {
-                    $this->transaction_opened--;
-                    return 1;
-		} else {
-                    BimpCore::addlog('Tentative de COMMIT transaction deja fermée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore');
-                    return 0;
                 }
+            } elseif($this->transaction_opened > 1 || $this->noTransaction) {
+                $this->transaction_opened--;
+                return 1;
+            } else {
+                BimpCore::addlog('Tentative de COMMIT transaction deja fermée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore');
+                return 0;
+            }
                 /*fmoddrsi*/
 	}
 

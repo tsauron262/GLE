@@ -607,27 +607,27 @@ if ((!defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && getDolGlobalInt(
 
 	$sessiontokenforthisurl = (empty($_SESSION['token']) ? '' : $_SESSION['token']);
 	// TODO Get the sessiontokenforthisurl into an array of session token (one array per base URL so we can use the CSRF per page and we keep ability for several tabs per url in a browser)
-	if (GETPOSTISSET('token') && GETPOST('token') != 'notrequired' && GETPOST('token', 'alpha') != $sessiontokenforthisurl) {
-		dol_syslog("--- Access to ".(empty($_SERVER["REQUEST_METHOD"]) ? '' : $_SERVER["REQUEST_METHOD"].' ').$_SERVER["PHP_SELF"]." refused by CSRF protection (invalid token), so we disable POST and some GET parameters - referer=".(empty($_SERVER['HTTP_REFERER'])?'':$_SERVER['HTTP_REFERER']).", action=".GETPOST('action', 'aZ09').", _GET|POST['token']=".GETPOST('token', 'alpha'), LOG_WARNING);
-		//dol_syslog("_SESSION['token']=".$sessiontokenforthisurl, LOG_DEBUG);
-		// Do not output anything on standard output because this create problems when using the BACK button on browsers. So we just set a message into session.
-		setEventMessages('SecurityTokenHasExpiredSoActionHasBeenCanceledPleaseRetry', null, 'warnings');
-		$savid = null;
-		if (isset($_POST['id'])) {
-			$savid = ((int) $_POST['id']);
-		}
-		unset($_POST);
-		//unset($_POST['action']); unset($_POST['massaction']);
-		//unset($_POST['confirm']); unset($_POST['confirmmassaction']);
-		unset($_GET['confirm']);
-		unset($_GET['action']);
-		unset($_GET['confirmmassaction']);
-		unset($_GET['massaction']);
-		unset($_GET['token']);			// TODO Make a redirect if we have a token in url to remove it ?
-		if (isset($savid)) {
-			$_POST['id'] = ((int) $savid);
-		}
-	}
+//	if (GETPOSTISSET('token') && GETPOST('token') != 'notrequired' && GETPOST('token', 'alpha') != $sessiontokenforthisurl) {
+//		dol_syslog("--- Access to ".(empty($_SERVER["REQUEST_METHOD"]) ? '' : $_SERVER["REQUEST_METHOD"].' ').$_SERVER["PHP_SELF"]." refused by CSRF protection (invalid token), so we disable POST and some GET parameters - referer=".(empty($_SERVER['HTTP_REFERER'])?'':$_SERVER['HTTP_REFERER']).", action=".GETPOST('action', 'aZ09').", _GET|POST['token']=".GETPOST('token', 'alpha'), LOG_WARNING);
+//		//dol_syslog("_SESSION['token']=".$sessiontokenforthisurl, LOG_DEBUG);
+//		// Do not output anything on standard output because this create problems when using the BACK button on browsers. So we just set a message into session.
+//		setEventMessages('SecurityTokenHasExpiredSoActionHasBeenCanceledPleaseRetry', null, 'warnings');
+//		$savid = null;
+//		if (isset($_POST['id'])) {
+//			$savid = ((int) $_POST['id']);
+//		}
+//		unset($_POST);
+//		//unset($_POST['action']); unset($_POST['massaction']);
+//		//unset($_POST['confirm']); unset($_POST['confirmmassaction']);
+//		unset($_GET['confirm']);
+//		unset($_GET['action']);
+//		unset($_GET['confirmmassaction']);
+//		unset($_GET['massaction']);
+//		unset($_GET['token']);			// TODO Make a redirect if we have a token in url to remove it ?
+//		if (isset($savid)) {
+//			$_POST['id'] = ((int) $savid);
+//		}
+//	}
 
 	// Note: There is another CSRF protection into the filefunc.inc.php
 }

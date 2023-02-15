@@ -8,7 +8,7 @@ function top_htmlheadPerso($head, $title = '', $disablejs = 0, $disablehead = 0,
     
     top_httphead();
     
-    ini_set('display_errors', 1);
+//    ini_set('display_errors', 1);
 
     if (empty($conf->css))
         $conf->css = '/theme/eldy/style.css.php';

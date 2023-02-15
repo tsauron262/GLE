@@ -337,10 +337,7 @@ fields_tables:
                     params:
                         - external
                         - SHIPPING
-                  
-            
-                  
-                  
+                              
     payment:
         rows:
             - field: fk_cond_reglement

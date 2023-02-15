@@ -36,12 +36,12 @@
 }
 
 .divClikable:hover {
-    background-color: #EF7D00;
+    background-color: #D97102;
     cursor: pointer;  
 }
 
 .divClikable:active {
-    background-color: #EF7D00;
+    background-color: #D97102;
 }
 
 .fillTheDiv {

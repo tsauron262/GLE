@@ -1547,7 +1547,6 @@ class gsxController extends BimpController
     protected function gsxFetchRepairEligibility($params)
     {
         // Appellé via le formulaire de création d'une réparation. 
-        ini_set('display_errors', 1);
 
         $errors = array();
         $warnings = array();

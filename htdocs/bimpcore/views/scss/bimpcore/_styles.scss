@@ -631,8 +631,8 @@ i.iconRight {
             margin: 0 2px;
             cursor: pointer;
             font-size: 18px;
-            background-color: #636363;
-            color: #B4B4B4;
+            background-color: lighten($secondary, 20%);
+            color: lighten($secondary, 60%);
             border-radius: 50%;
             @include transition(all 0.3s ease);
             text-align: center;
@@ -646,18 +646,14 @@ i.iconRight {
             }
 
             &:hover {
-                color: #636363;
+                color: $secondary;
                 background-color: #fff;
             }
 
-            &.disabled {
+            &.disabled, &.disbaled:hover {
                 cursor: default;
-                color: #787878;
-
-                &:hover {
-                    background-color: #636363;
-                    color: #787878;
-                }
+                background-color: lighten($secondary, 10%);
+                color: lighten($secondary, 20%);
             }
         }
 
@@ -671,7 +667,7 @@ i.iconRight {
 
             .dropdown-toggle {
                 display: inline-block;
-                color: #B4B4B4;
+                color: lighten($secondary, 60%);
                 font-size: 16px;
                 cursor: pointer;
 
@@ -684,13 +680,9 @@ i.iconRight {
                     color: #fff;
                 }
 
-                &.disabled {
-                    color: #787878;
+                &.disabled, &.disabled:hover {
+                    color: lighten($secondary, 20%);
                     cursor: default;
-
-                    &:hover {
-                        color: #787878;
-                    }
                 }
             }
         }

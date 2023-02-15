@@ -3178,8 +3178,6 @@ class Bimp_Societe extends BimpDolObject
                         // Renommage dossier: 
                         global $bimp_errors_handle_locked;
                         $bimp_errors_handle_locked = true;
-                        error_reporting(E_ALL);
-                        ini_set('display_errors', 1);
 
                         error_clear_last();
                         if (!rename($dir, $dir . '_anonymized')) {

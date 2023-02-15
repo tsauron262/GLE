@@ -180,7 +180,7 @@ class BimpController
 
         ini_set('display_errors', 0); // Par précaution. 
 //        if(!in_array($level, array(E_NOTICE, E_DEPRECATED)))
-//            die('iiiii'.$level.$msg.$file.$line);
+//        die('ERR : ' . $level . ' - ' . $msg . ' - ' . $file . ' - ' . $line);
         switch ($level) {
             case E_ERROR:
             case E_CORE_ERROR:
@@ -260,7 +260,7 @@ class BimpController
             case E_WARNING:
             case E_USER_WARNING:
                 global $bimpLogPhpWarnings;
-$bimpLogPhpWarnings = false;
+                $bimpLogPhpWarnings = false;
                 if (is_null($bimpLogPhpWarnings) || $bimpLogPhpWarnings) {
                     BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
                         'Fichier' => $file,
@@ -415,9 +415,6 @@ $bimpLogPhpWarnings = false;
         $display_footer = false;
 
         if (!defined('BIMP_CONTROLLER_INIT')) {
-            ini_set('display_errors', 1);
-            error_reporting(E_ALL);
-
             define('BIMP_CONTROLLER_INIT', 1);
 
             if (!(int) $this->config->get('content_only', 0, false, 'bool')) {
@@ -778,36 +775,33 @@ $bimpLogPhpWarnings = false;
     }
 
     // Traitements Ajax:
-    
+
     public function ajaxProcessNotificationAction()
     {
         $errors = array();
         $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification', BimpTools::getvalue('id_notification'));
-        if(is_object($notif) && $notif->isLoaded()){
+        if (is_object($notif) && $notif->isLoaded()) {
             $obj = $notif->getObject(BimpTools::getvalue('id'));
-            if(is_object($obj) && $obj->isLoaded()){
-                $methode = 'action'. ucfirst(BimpTools::getvalue('actionNotif'));
-                if(method_exists($obj, $methode)){
+            if (is_object($obj) && $obj->isLoaded()) {
+                $methode = 'action' . ucfirst(BimpTools::getvalue('actionNotif'));
+                if (method_exists($obj, $methode)) {
                     $success = '';
                     $return = $obj->$methode($_REQUEST, $success);
                     $return['success'] = $success;
                     return $return;
+                } else {
+                    $errors[] = 'Methode ' . $methode . ' n\'existe pas dans ' . get_class($obj);
+                    BimpCore::addlog('Methode ' . $methode . ' n\'existe pas dans ' . get_class($obj));
                 }
-                else{
-                    $errors[] = 'Methode '.$methode.' n\'existe pas dans '.get_class ($obj);
-                    BimpCore::addlog('Methode '.$methode.' n\'existe pas dans '.get_class ($obj));
-                }
+            } else {
+                $errors[] = 'Objet introuvable pour notification ' . BimpTools::getvalue('id_notification') . ' id ' . BimpTools::getvalue('id');
+                BimpCore::addlog('Objet introuvable pour notification ' . BimpTools::getvalue('id_notification') . ' id ' . BimpTools::getvalue('id'));
             }
-            else{
-                $errors[] = 'Objet introuvable pour notification '.BimpTools::getvalue('id_notification').' id '.BimpTools::getvalue('id');
-                BimpCore::addlog('Objet introuvable pour notification '.BimpTools::getvalue('id_notification').' id '.BimpTools::getvalue('id'));
-            }
+        } else {
+            $errors[] = 'Notification introuvable ' . BimpTools::getvalue('id_notification');
+            BimpCore::addlog('Notification introuvable ' . BimpTools::getvalue('id_notification'));
         }
-        else{
-                $errors[] = 'Notification introuvable '.BimpTools::getvalue('id_notification');
-            BimpCore::addlog('Notification introuvable '.BimpTools::getvalue('id_notification'));
-        }
-        return array('errors'=>$errors);
+        return array('errors' => $errors);
     }
 
     protected function ajaxProcess()
@@ -3278,7 +3272,7 @@ $bimpLogPhpWarnings = false;
 
         $notifs = BimpTools::getPostFieldValue('notificationActive');
 
-        if(is_array($notifs)){
+        if (is_array($notifs)) {
             $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
             $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
         }
@@ -3302,14 +3296,14 @@ $bimpLogPhpWarnings = false;
         global $db;
         $lastError = error_get_last();
         $asErrorFatal = (is_array($lastError) && $lastError['type'] == 1);
-        if ($db->transaction_opened > 0){
+        if ($db->transaction_opened > 0) {
             $db->transaction_opened = 0;
-            if(!$asErrorFatal)
+            if (!$asErrorFatal)
                 BimpCore::addlog('Fin de script Transaction non fermée');
         }
         $file = array();
         $nb = BimpTools::deloqueAll($file);
         if ($nb > 0 && !$asErrorFatal)
-            BimpCore::addlog('Fin de script fichier non debloqué ' . $nb.' '.print_r($file,1), Bimp_Log::BIMP_LOG_ALERTE);
+            BimpCore::addlog('Fin de script fichier non debloqué ' . $nb . ' ' . print_r($file, 1), Bimp_Log::BIMP_LOG_ALERTE);
     }
 }

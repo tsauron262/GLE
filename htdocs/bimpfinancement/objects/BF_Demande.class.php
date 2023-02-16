@@ -184,7 +184,11 @@ class BF_Demande extends BimpObject
             return 0;
         }
 
-        if ((int) $this->getData('status')) {
+        if ((int) $this->getData('status') == self::STATUS_ACCEPTED) {
+            return 0;
+        }
+
+        if ((int) $this->getData('contrat_status') >= self::DOC_ACCEPTED) {
             return 0;
         }
 
@@ -1055,11 +1059,11 @@ class BF_Demande extends BimpObject
 
         $filters['or_client'] = array(
             'or' => array(
-                $alias . '.code_client'    => array(
+                $alias . '.code_client'         => array(
                     'part_type' => 'middle',
                     'part'      => $value
                 ),
-                $alias . '.nom'            => array(
+                $alias . '.nom'                 => array(
                     'part_type' => 'middle',
                     'part'      => $value
                 ),

@@ -1042,6 +1042,34 @@ class BF_Demande extends BimpObject
         );
     }
 
+    public function getClientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        $where_source = 'source.ref_client LIKE \'%' . $this->db->db->escape((string) $value) . '%\' OR source.client_data LIKE \'%' . $this->db->db->escape((string) $value) . '%\'';
+
+        $alias = $main_alias . '___client';
+        $joins[$alias] = array(
+            'alias' => $alias,
+            'table' => 'societe',
+            'on'    => $main_alias . '.id_client = ' . $alias . '.rowid'
+        );
+
+        $filters['or_client'] = array(
+            'or' => array(
+                $alias . '.code_client'    => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                $alias . '.nom'            => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                $main_alias . '.id_main_source' => array(
+                    'in' => 'SELECT source.id FROM ' . MAIN_DB_PREFIX . 'bf_demande_source source WHERE ' . $where_source
+                )
+            )
+        );
+    }
+
     // Getters array: 
 
     public function getClientContactsArray($include_empty = true, $active_only = true)

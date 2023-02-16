@@ -143,9 +143,9 @@ class GSX_v2 extends GSX_Const
                 'Token absent'
             );
         }
-        if($login != '')
+        if ($login != '')
             $this->appleId = $login;
-        
+
         $this->acti_token = $token;
 
         if ($this->reauthenticate()) {
@@ -215,55 +215,51 @@ class GSX_v2 extends GSX_Const
                 BimpTools::sendSmsAdmin('Attention Compte admin.gle déconnecté de GSX');
                 $gsx_logout_mail_send = true;
             }
-        }
-        else
-            static::debug($this->appleId, 'deconnexion GSX de '.$this->appleId.' sans reconnexion possible');
+        } else
+            static::debug($this->appleId, 'deconnexion GSX de ' . $this->appleId . ' sans reconnexion possible');
 
         $this->logged = false;
         $this->saveToken('acti', '');
 
         return 0;
     }
-    
-    public static function debug($appleId, $msg){
-        if($appleId == self::$default_ids['apple_id']){
-            BimpCore::addlog ($msg);
+
+    public static function debug($appleId, $msg)
+    {
+        if ($appleId == self::$default_ids['apple_id']) {
+            BimpCore::addlog($msg);
         }
-        
     }
-    
-    public static function phantomAuth($login, $mdp){
-        if(function_exists('ssh2_connect')){
+
+    public static function phantomAuth($login, $mdp)
+    {
+        if (function_exists('ssh2_connect')) {
             BimpCore::addlog('Tentative de connexion Apple en auto.');
             $connection = ssh2_connect('10.192.20.152', 22);
-            $key1 = DOL_DOCUMENT_ROOT.'bimpapple/phantom/cert/phantomjs.pub';
-            $key2 = DOL_DOCUMENT_ROOT.'bimpapple/phantom/cert/phantomjs';
-            
+            $key1 = DOL_DOCUMENT_ROOT . 'bimpapple/phantom/cert/phantomjs.pub';
+            $key2 = DOL_DOCUMENT_ROOT . 'bimpapple/phantom/cert/phantomjs';
+
 //            $key1 = '/usr/local/data2/bimp8/keys/phantomjs.pub';
 //            $key2 = '/usr/local/data2/bimp8/keys/phantomjs';
-            
-
 //            $commande = '/usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://google.com';
-            $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js '.$login.' '.$mdp;
-            
-            if(!ssh2_auth_pubkey_file($connection,'phantomjs', $key1, $key2))
-                    die('Pas dauth<br/>ssh -i '.$key2.' phantomjs@10.192.20.152 '.$commande);
-            
+            $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js ' . $login . ' ' . $mdp;
+
+            if (!ssh2_auth_pubkey_file($connection, 'phantomjs', $key1, $key2))
+                die('Pas dauth<br/>ssh -i ' . $key2 . ' phantomjs@10.192.20.152 ' . $commande);
+
 //            die('<br/>ssh -i '.$key2.' phantomjs@10.192.20.152 '.$commande);
             $stream = ssh2_exec($connection, $commande);
-
 
             $retour = '';
             $stderr_stream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
             stream_set_blocking($stream, true);
-            while($line = fgets($stream)) {
-                    flush();
-                    $retour .= $line."<br />";
+            while ($line = fgets($stream)) {
+                flush();
+                $retour .= $line . "<br />";
             }
             return $retour;
-        }
-        else
-            mailSyn2 ('Pas de fonction ssh2_connect', 'debugerp@bimp.fr', null, 'Attention la fonction ssh2_connect n\'existe pas '.(defined('ID_ERP') ? 'sur erp'.ID_ERP : ''));
+        } else
+            mailSyn2('Pas de fonction ssh2_connect', 'debugerp@bimp.fr', null, 'Attention la fonction ssh2_connect n\'existe pas ' . (defined('ID_ERP') ? 'sur erp' . ID_ERP : ''));
     }
 
     public function reauthenticate()
@@ -280,7 +276,7 @@ class GSX_v2 extends GSX_Const
 
     public function saveToken($type, $token)
     {
-        static::debug($this->appleId, 'enregistrement token '.$type. ' : '.$token);
+        static::debug($this->appleId, 'enregistrement token ' . $type . ' : ' . $token);
         $field = '';
         switch ($type) {
             case 'acti':
@@ -402,7 +398,7 @@ class GSX_v2 extends GSX_Const
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($this->ch, CURLOPT_HEADER, true);
-        
+
         return 1;
     }
 
@@ -589,9 +585,9 @@ class GSX_v2 extends GSX_Const
                 )
             )
         );
-        if(is_array($desc))
+        if (is_array($desc))
             $params['partDescriptions'] = $desc;
-        elseif($desc != '')
+        elseif ($desc != '')
             $params['partDescriptions'] = array($desc);
 
         if (BimpObject::objectLoaded($issue) && (string) $issue->getData('category_code')) {
@@ -739,8 +735,8 @@ class GSX_v2 extends GSX_Const
         $head = array();
         return $this->exec('returnsLookup', array(
 //                    'returnStatusType' => 'REGISTERED',
-                    'shipTo'           => $shipto
-        ), $head, array('url_params'=>array('pageSize'=>100)));
+                    'shipTo' => $shipto
+                        ), $head, array('url_params' => array('pageSize' => 100)));
     }
 
     public function createReturn($shipTo, $shipmentDetails, $parts)
@@ -841,7 +837,7 @@ class GSX_v2 extends GSX_Const
                     'returnStatusType' => 'RETURN_REPORT',
                     'shipTo'           => $shipTo,
                     'bulkReturnId'     => $returnId
-        ), $head, array('url_params'=>array('pageSize'=>100)));
+                        ), $head, array('url_params' => array('pageSize' => 100)));
     }
 
     public function getPartReturnLabel($shipTo, $parts)
@@ -918,13 +914,12 @@ class GSX_v2 extends GSX_Const
         $response_headers = array();
 
         return $this->exec('getFile', array(
-            "identifiers" => array(
-                array('repairId' => $g)
-              )   
-            ), $response_headers, array('url_params' => array('documentType' => 'depotShipper'))
+                    "identifiers" => array(
+                        array('repairId' => $g)
+                    )
+                        ), $response_headers, array('url_params' => array('documentType' => 'depotShipper'))
         );
     }
-    
 
     // Requêtes - Réservations: 
 
@@ -1035,13 +1030,16 @@ class GSX_v2 extends GSX_Const
             $params['createdFromDate'] = $from;
             $params['createdToDate'] = $to;
         }
-        
+
         $head = array();
-        $return = $this->exec('consignmentOrderLookup', $params, $head, array('url_params'=>array('pageNumber'=>$page)));
+        $return = $this->exec('consignmentOrderLookup', $params, $head, array('url_params' => array('pageNumber' => $page)));
         $total = $head['X-Apple-Total-Count'];
-        while(count($return) < $total && $page < 10){
-            $page++;
-            $return = BimpTools::merge_array($return, $this->exec('consignmentOrderLookup', $params, $head, array('url_params'=>array('pageNumber'=>2))));
+
+        if (is_array($return)) {
+            while (count($return) < $total && $page < 10) {
+                $page++;
+                $return = BimpTools::merge_array($return, $this->exec('consignmentOrderLookup', $params, $head, array('url_params' => array('pageNumber' => 2))));
+            }
         }
         return $return;
     }

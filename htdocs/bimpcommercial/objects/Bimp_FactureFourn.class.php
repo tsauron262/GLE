@@ -512,6 +512,12 @@ class Bimp_FactureFourn extends BimpCommAchat
 
         return '';
     }
+    
+    public function displayInfoDateF(){
+        $dateMin = BimpCore::getConf('last_export_date', null, 'bimptocegid');
+        if($dateMin && date($dateMin) > date($this->getData('datef')))
+            return 'Attention la date vas être remplacé par '.$dateMin;
+    }
 
     public function displayPaidStatus($icon = true, $short_label = false)
     {
@@ -951,6 +957,11 @@ class Bimp_FactureFourn extends BimpCommAchat
                 // Maj des données d'achat des équipements:
                 $line->onFactureValidate();
             }
+            
+            //verif date
+            $dateMin = BimpCore::getConf('last_export_date', null, 'bimptocegid');
+            if($dateMin && date($dateMin) > date($this->getData('datef')))
+                $this->updateField('datef', $dateMin);
 
             // Maj des prix d'achat courants des produits: 
             $products = array();

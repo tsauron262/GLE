@@ -1508,6 +1508,8 @@ lists_cols:
         label: Client
         value: 
             callback: displayClient
+        search: 
+            type: value_part
         
 lists:
     default:

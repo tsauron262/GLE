@@ -53,6 +53,10 @@ fields:
         label: ID objet
         input: 
             type: hidden
+    id_parent_note: 
+        label: Note Parente
+        type: id
+        default_value: 0
     type_author: 
         label: Type Auteur
         type: int

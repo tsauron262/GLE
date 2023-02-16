@@ -121,6 +121,9 @@ fields:
         label: Date facturation
         dol_prop: date
         type: date
+        input: 
+            help: 
+                callback: displayInfoDateF
     date_lim_reglement: 
         label: Date d'échéance
         dol_prop: date_echeance

@@ -125,8 +125,8 @@ class BC_Display extends BimpComponent
         'time'        => array(
             'format' => array('default' => 'H:i:s', 'values' => array())
         ),
-        'timer'        => array(
-            'with_day' => array('data_type'=>'bool', 'default' => 1)
+        'timer'       => array(
+            'with_day' => array('data_type' => 'bool', 'default' => 1)
         ),
         'datetime'    => array(
             'format'    => array('default' => 'd / m / Y H:i:s', 'values' => array()),
@@ -750,7 +750,7 @@ class BC_Display extends BimpComponent
                     if ($this->no_html) {
                         $html .= BimpTools::replaceBr($this->value);
                     } else {
-                        if(stripos($this->value, '/>') === false && stripos($this->value, '</') === false)
+                        if (stripos($this->value, '/>') === false && stripos($this->value, '</') === false)
                             $this->value = nl2br($this->value);
                         $html .= $this->value;
                     }
@@ -791,9 +791,16 @@ class BC_Display extends BimpComponent
                             return $this->object->{$method}();
                         } else {
                             $current_bc = $prev_bc;
+
+                            // Pour enlever les éventuelles clés associatives (erreur fatale depuis PHP8)
+                            $args = array();
+                            foreach ($params as $key => $value) {
+                                $args[] = $value;
+                            }
+
                             return call_user_func_array(array(
                                 $this->object, $method
-                                    ), $params);
+                                    ), $args);
                         }
                     } else {
                         $current_bc = $prev_bc;

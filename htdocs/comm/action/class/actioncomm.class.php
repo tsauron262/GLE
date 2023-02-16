@@ -293,7 +293,7 @@ class ActionComm extends CommonObject
         $this->db->begin();
         
         
-        /*Moddrsi*/
+        /*moddrsi*/
         if(!defined('USER_EXTERNE_ID'))
             define('USER_EXTERNE_ID',  326);
         if(!defined('USER_SYNCHRO'))
@@ -318,7 +318,7 @@ class ActionComm extends CommonObject
             $this->userassigned[$userownerid]['answer_status'] = 1;
         
         
-        /*fmdodrsi*/
+        /*fmoddrsi*/
         
         
         

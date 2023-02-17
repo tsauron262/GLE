@@ -1059,8 +1059,9 @@ class BIMP_Task extends BimpObject
 
         if ($this->getData('id_task')) {
             $parent = $this->getChildObject('task_mere');
-            if ($parent->getData('status') == 4)
-                $parent->updateField('status', 1);
+            $parent->reouvrir();
+//            if ($parent->getData('status') == 4)
+//                $parent->updateField('status', 1);
         }
 
         return $return;

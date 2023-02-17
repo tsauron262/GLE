@@ -89,6 +89,11 @@ class BimpNote extends BimpObject
     public function canSetAction($action)
     {
         switch ($action) {
+            case 'setAsViewed':
+                if($this->isUserDest())
+                    return 1;
+                return 0;
+                break;
             case '':
                 global $user;
                 if ($this->getData('user_create') == $user->id) {

@@ -27,7 +27,7 @@ class BimpNote extends BimpObject
 
     public static $types_author = array(
         self::BN_AUTHOR_USER  => 'Utilisateur',
-        self::BN_AUTHOR_GROUP => 'Group',
+        self::BN_AUTHOR_GROUP => 'Groupe',
         self::BN_AUTHOR_SOC   => 'Tiers',
         self::BN_AUTHOR_FREE  => 'Libre'
     );
@@ -89,16 +89,18 @@ class BimpNote extends BimpObject
     public function canSetAction($action)
     {
         switch ($action) {
-            case '':
-                global $user;
-                if ($this->getData('user_create') == $user->id) {
-                    $errors[] = 'L\'utilisateur connecté est l\'auteur';
-                    return 0;
-                }
+            case 'setAsViewed':
+                if ($this->isLoaded()) {
+                    global $user;
+                    if ($this->getData('user_create') == $user->id) {
+                        $errors[] = 'L\'utilisateur connecté est l\'auteur';
+                        return 0;
+                    }
 
-                if (!$this->isUserDest()) {
-                    $errors[] = 'Vous ne faites pas partie des destinataires';
-                    return 0;
+                    if (!$this->isUserDest()) {
+                        $errors[] = 'Vous ne faites pas partie des destinataires';
+                        return 0;
+                    }
                 }
                 return 1;
         }
@@ -106,12 +108,23 @@ class BimpNote extends BimpObject
         return parent::canSetAction($action);
     }
 
+    public function canEditField($field_name)
+    {
+        switch ($field_name) {
+            case 'viewed':
+                if (!$this->isLoaded()) {
+                    return 0;
+                }
+                return $this->canSetAction('setAsViewed');
+        }
+        return parent::canEditField($field_name);
+    }
+
     // Getters booléens:
 
     public function isFieldEditable($field, $force_edit = false)
     {
         if ($field == "viewed") {
-//            $this->getMyConversations();
             if ($this->getData("type_dest") != self::BN_DEST_NO)
                 return 0;
         }
@@ -306,7 +319,7 @@ class BimpNote extends BimpObject
         global $user;
         $listIdGr = self::getUserUserGroupsList($user->id);
         $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
-                . "WHERE auto = 0 AND ";
+                . "WHERE ";//auto = 0 AND ";
         $where = "(type_dest = 1 AND fk_user_dest = " . $user->id . ") "
                 . "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))"
                 . "         ";
@@ -356,7 +369,7 @@ class BimpNote extends BimpObject
         if ($this->isActionAllowed('repondre') && $this->canSetAction('repondre')) {
             $buttons[] = array(
                 'label'   => 'Répondre',
-                'icon'    => 'far fa-paper-plane',
+                'icon'    => 'fas_share',
                 'onclick' => $this->getJsRepondre()
             );
         }
@@ -654,7 +667,7 @@ class BimpNote extends BimpObject
             foreach ($ids as $id_note) {
                 $note = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Note', $id_note);
                 if (BimpObject::objectLoaded($note)) {
-                    if ($note->isActionAllowed($note) && $note->canSetAction($note)) {
+                    if ($note->isActionAllowed('setAsViewed') && $note->canSetAction('setAsViewed')) {
                         $note_errors = array();
                         if ((int) $this->getData('delete_on_view')) {
                             $note_errors = $note->delete($warnings, true);
@@ -831,7 +844,7 @@ class BimpNote extends BimpObject
         $listIdGr = self::getUserUserGroupsList($idUser);
         $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
-                . "WHERE auto = 0 AND id>" . $id_max . ' AND ';
+                . "WHERE id>" . $id_max . ' AND ';
         $where = "(type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
         if (count($listIdGr) > 0)
             $where .= "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";

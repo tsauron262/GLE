@@ -3102,7 +3102,7 @@ class Bimp_Client extends Bimp_Societe
 
 
         if ($this->getData('outstanding_limit_icba') != $this->getInitData('outstanding_limit_icba') && $this->getData('outstanding_limit_icba') > 0 && !$this->getAtradiusFileName())
-            $errors[] = 'Il faut obligatoirement uploa@der le PDF avant de saisir une limite ICBA';
+            $errors[] = 'Il faut obligatoirement uploader le PDF avant de saisir une limite ICBA';
 
         if (count($errors))
             return $errors;
@@ -3280,8 +3280,8 @@ class Bimp_Client extends Bimp_Societe
                                 self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', 0);
                             if ($cover['cover_type'] == 'credit-limit' || $this->getData('outstanding_limit_atradius') > 0)
                                 self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
-                            if ($this->getData('outstanding_limit_icba') > 0)
-                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_icba', 0);
+//                            if ($this->getData('outstanding_limit_icba') > 0)
+//                                self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_icba', 0);
                             $success = 'Pas de couverture';
                         } else {
                             // Crédit Check

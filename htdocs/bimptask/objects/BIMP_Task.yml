@@ -245,6 +245,29 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - custom: 1
+              label: Fichiers joints
+              input_name: join_files
+              data_type: id_object
+              input: 
+                  type: check_list
+                  items: 
+                      callback: 
+                          method: getAllFiles
+                          params: 
+                              - 0
+              depends_on: id_model
+              object: files
+              create_form: upload
+              create_form_label: Ajouter
+              create_form_values: 
+                  fields: 
+                      parent_module: 
+                          prop: module
+                      parent_object_name: 
+                          prop: object_name
+                      id_parent: 
+                          prop: id
               
     bug: 
         title: Signaler un bug

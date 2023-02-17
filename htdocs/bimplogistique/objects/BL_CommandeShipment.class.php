@@ -2199,7 +2199,7 @@ class BL_CommandeShipment extends BimpObject
         }
 
         if (!count($errors)) {
-            $commande->addNote('Bonjour, le BL : ' . $this->getSignatureDocRef('bl') . ' est expédié.', null, 0, 1, '', 1, 2, 'achat');
+//            $commande->addNote('Bonjour, le BL : ' . $this->getSignatureDocRef('bl') . ' est expédié.', null, 0, 1, '', 1, 2, 'achat');
 
             if ($commande->field_exists('id_demande_fin')) {
                 $id_demande_fin = (int) $commande->getData('id_demande_fin');

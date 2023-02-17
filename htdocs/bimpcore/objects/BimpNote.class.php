@@ -27,7 +27,7 @@ class BimpNote extends BimpObject
 
     public static $types_author = array(
         self::BN_AUTHOR_USER  => 'Utilisateur',
-        self::BN_AUTHOR_GROUP => 'Group',
+        self::BN_AUTHOR_GROUP => 'Groupe',
         self::BN_AUTHOR_SOC   => 'Tiers',
         self::BN_AUTHOR_FREE  => 'Libre'
     );
@@ -90,20 +90,17 @@ class BimpNote extends BimpObject
     {
         switch ($action) {
             case 'setAsViewed':
-                if($this->isUserDest())
-                    return 1;
-                return 0;
-                break;
-            case '':
-                global $user;
-                if ($this->getData('user_create') == $user->id) {
-                    $errors[] = 'L\'utilisateur connecté est l\'auteur';
-                    return 0;
-                }
+                if ($this->isLoaded()) {
+                    global $user;
+                    if ($this->getData('user_create') == $user->id) {
+                        $errors[] = 'L\'utilisateur connecté est l\'auteur';
+                        return 0;
+                    }
 
-                if (!$this->isUserDest()) {
-                    $errors[] = 'Vous ne faites pas partie des destinataires';
-                    return 0;
+                    if (!$this->isUserDest()) {
+                        $errors[] = 'Vous ne faites pas partie des destinataires';
+                        return 0;
+                    }
                 }
                 return 1;
         }
@@ -111,12 +108,23 @@ class BimpNote extends BimpObject
         return parent::canSetAction($action);
     }
 
+    public function canEditField($field_name)
+    {
+        switch ($field_name) {
+            case 'viewed':
+                if (!$this->isLoaded()) {
+                    return 0;
+                }
+                return $this->canSetAction('setAsViewed');
+        }
+        return parent::canEditField($field_name);
+    }
+
     // Getters booléens:
 
     public function isFieldEditable($field, $force_edit = false)
     {
         if ($field == "viewed") {
-//            $this->getMyConversations();
             if ($this->getData("type_dest") != self::BN_DEST_NO)
                 return 0;
         }
@@ -361,7 +369,7 @@ class BimpNote extends BimpObject
         if ($this->isActionAllowed('repondre') && $this->canSetAction('repondre')) {
             $buttons[] = array(
                 'label'   => 'Répondre',
-                'icon'    => 'far fa-paper-plane',
+                'icon'    => 'fas_share',
                 'onclick' => $this->getJsRepondre()
             );
         }
@@ -659,7 +667,7 @@ class BimpNote extends BimpObject
             foreach ($ids as $id_note) {
                 $note = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Note', $id_note);
                 if (BimpObject::objectLoaded($note)) {
-                    if ($note->isActionAllowed($note) && $note->canSetAction($note)) {
+                    if ($note->isActionAllowed('setAsViewed') && $note->canSetAction('setAsViewed')) {
                         $note_errors = array();
                         if ((int) $this->getData('delete_on_view')) {
                             $note_errors = $note->delete($warnings, true);

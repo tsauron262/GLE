@@ -395,6 +395,7 @@ class BimpDolObject extends BimpObject
         }
 
         $values = BimpTools::getPostFieldValue('join_files', array());
+        $list = $this->getAllFiles();
 
         $id_main_pdf_file = (int) $this->getDocumentFileId();
 
@@ -405,7 +406,6 @@ class BimpDolObject extends BimpObject
             $values[] = $id_main_pdf_file;
         }
 
-        $list = $this->getAllFiles();
         $idSepa = 0;
         $idSepaSigne = 0;
         foreach ($list as $id => $elem)

@@ -350,9 +350,9 @@ lists:
             id_task: unset
                 
     sousTache:
-        extends: default
-        cols: 
-            nb_sous_taches: unset
+        extends: main
+#        cols: 
+#            nb_sous_taches: unset
 
 views:
     full: 

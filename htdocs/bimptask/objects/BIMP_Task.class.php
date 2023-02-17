@@ -65,8 +65,17 @@ class BIMP_Task extends BimpObject
         if ($user->admin) {
             return 1;
         }
+        
+        if($this->getUserRight("read"))
+            return 1;
+        
+        $users = $this->getUserNotif();
+        foreach($users as $userT){
+            if($userT->id == $user->id)
+                    return 1;
+        }
 
-        return $this->getUserRight("read");
+        return 0;
     }
 
     public function canEdit()

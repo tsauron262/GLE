@@ -319,7 +319,7 @@ class BimpNote extends BimpObject
         global $user;
         $listIdGr = self::getUserUserGroupsList($user->id);
         $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
-                . "WHERE auto = 0 AND ";
+                . "WHERE ";//auto = 0 AND ";
         $where = "(type_dest = 1 AND fk_user_dest = " . $user->id . ") "
                 . "         OR (type_dest = 4 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))"
                 . "         ";

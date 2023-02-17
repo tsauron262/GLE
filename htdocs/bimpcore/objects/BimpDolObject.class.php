@@ -300,88 +300,6 @@ class BimpDolObject extends BimpObject
         return $topic;
     }
 
-    public function getBimpObjectsLinked($not_for = '')
-    {
-        $objects = array();
-        if ($this->isLoaded()) {
-            if ($this->isDolObject()) {
-                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
-                    $id = $item['id_object'];
-                    $class = "";
-                    $label = "";
-                    $module = "bimpcommercial";
-                    switch ($item['type']) {
-                        case 'propal':
-                            $class = "Bimp_Propal";
-                            break;
-                        case 'facture':
-                            $class = "Bimp_Facture";
-                            break;
-                        case 'commande':
-                            $class = "Bimp_Commande";
-                            break;
-                        case 'order_supplier':
-                            $class = "Bimp_CommandeFourn";
-                            break;
-                        case 'invoice_supplier':
-                            $class = "Bimp_FactureFourn";
-                            break;
-                        case 'contrat':
-                            $module = 'bimpcontract';
-                            $class = 'BContract_contrat';
-                            break;
-//                        case 'fichinter':
-//                            $class = 'BimpFi_fiche';
-//                            $module = "bimpfi";
-//                            break;
-                        case 'synopsisdemandeinterv':
-                            $class = "BT_demandeInter";
-                            $module = "bimptechnique";
-                            break;
-                        default:
-                            break;
-                    }
-                    if ($class != "") {
-                        $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
-                        if (BimpObject::objectLoaded($objT)) {
-                            $clef = $item['type'] . $objT->id;
-                            if ($not_for != $clef) {
-                                $objects[$clef] = $objT;
-                                if ($item['type'] == 'commande') {
-                                    $objects = BimpTools::merge_array($objects, $objT->getBimpObjectsLinked((isset($this->dol_object->element) ? $this->dol_object->element . $this->id : '')));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            $client = $this->getChildObject('client');
-
-            if ($client->isLoaded()) {
-                $objects['client' . $client->id] = $client;
-            }
-        }
-
-
-        return $objects;
-    }
-
-    public function getDocumentFileId()
-    {
-        if (!$this->isLoaded()) {
-            return 0;
-        }
-
-        $ref = dol_sanitizeFileName($this->getRef());
-        $ref = BimpTools::cleanStringForUrl($ref);
-
-        $where = '`parent_module` = \'' . $this->module . '\' AND `parent_object_name` = \'' . $this->object_name . '\' AND `id_parent` = ' . (int) $this->id;
-        $where .= ' AND `file_name` = \'' . $ref . '\' AND `file_ext` = \'pdf\'';
-
-        return (int) $this->db->getValue('bimpcore_file', 'id', $where);
-    }
-
     public function getJoinFilesValues()
     {
         $id_model = (int) BimpTools::getPostFieldValue('id_model', 0);
@@ -434,20 +352,7 @@ class BimpDolObject extends BimpObject
 
         return $values;
     }
-
-    public function getAllFiles($withLink = true)
-    {
-        $list = $this->getFilesArray(0);
-        if ($withLink) {
-            $objects = $this->getBimpObjectsLinked();
-//           echo '<pre>'; print_r($objects);
-            foreach ($objects as $object) {
-                $list = $list + $object->getFilesArray(0);
-            }
-        }
-        return $list;
-    }
-
+    
     public function getDirOutput()
     {
         return '';

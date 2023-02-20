@@ -76,7 +76,7 @@ abstract class BimpAPI
             return 0;
         }
 
-        if ((int) $this->userAccount->getData('mode') != $this->getOption('mode', 'test')) {
+        if ($this->userAccount->getData('mode') != $this->getOption('mode', 'test')) {
             $errors[] = 'Mode incorrect (' . $this->userAccount->displayData('mode', 'default', false, true) . ') pour ce compte utilisateur';
             return 0;
         }

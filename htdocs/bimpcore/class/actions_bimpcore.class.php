@@ -88,8 +88,6 @@ class ActionsBimpcore
     function getBtnRedirectHoldToNew(){
         $url = $_SERVER['REQUEST_URI']; 
         
-        if(stripos($url, 'comm/propal'))
-                $tabObj = array("bimpcommercial", "Bimp_Propal");
         if(stripos($url, '/commande/'))
                 $tabObj = array("bimpcommercial", "Bimp_Commande");
         if(stripos($url, '/compta/facture/'))
@@ -102,6 +100,8 @@ class ActionsBimpcore
             else
                 $tabObj = array("bimpcore", "Bimp_Client");
         }
+        if(stripos($url, 'comm/propal'))
+                $tabObj = array("bimpcommercial", "Bimp_Propal");
         
         
         if(stripos($url, '/fourn/commande/'))

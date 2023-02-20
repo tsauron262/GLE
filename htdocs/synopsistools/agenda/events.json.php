@@ -152,6 +152,41 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
     /* fmod Drsi(momo) */
 }
 
+$g = 0;
+if(class_exists('Bimp_user')){
+    while ($g < count($newTabUser)) {
+        $bUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $newTabUser2[$g]);
+        $date = $start;
+        $i = 0;
+        while($date < $fin){
+            $i++;
+            if($i > 100)
+                die('ooo');
+            
+            foreach($bUser->getData('day_off') as $idDayOff){
+                if(date('W', $date)%2==0 && date('w', $date)+7 == $idDayOff ||
+                        date('W', $date)%2==1 && date('w', $date) == $idDayOff){
+                    $date1 = new DateTime();
+                    $date1->setTimestamp($date);
+                    $date1->setTime(8, 0);
+                    $date2 = new DateTime(date('Y-m-d 23:59:59', $date));
+                    $eventsStr[] = '{"start":"' . $date1->format('c') . '", "end":"' . $date2->format('c') . '", "title":"Jour OFF" ,"userId": ' . $g . ', "color":"grey" }';
+                }
+            }
+            $date += 60*60*24;
+        }
+        
+        
+//die(print_r($bUser->getData('day_off')));
+        
+
+
+
+//        $eventsStr[] = '{"start":"2023-02-15T08:00:00+01:00", "end":"2023-02-15T23:59:59+01:00", "title":"Jour OFF" ,"userId": ' . $g . ', "color":"grey" }';
+        $g = $g + 1;
+    }
+}
+
 echo "[";
 
 echo implode(",", $eventsStr);

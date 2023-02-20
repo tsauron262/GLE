@@ -35,21 +35,6 @@ objects:
         delete: 
             callback: isAdmin
            
-            
-#    list_filters:
-#        relation: hasOne
-#        delete: 0
-#        instance: 
-#            bimp_object: 
-#                module: bimpcore
-#                name: ListFilters
-#            id_object:
-#                field_value: id_filter_product
-            
-#    product:
-#        instance: 
-#            bimp_object: Bimp_Product
-#            module: bimpcore
     entrepot: 
         instance: 
             id_object: 
@@ -133,108 +118,41 @@ fields:
         label: Categorie inclu
         type: items_list
 
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - incl_categorie
-#                    - categorie
-                    
-                    
     excl_categorie:
         label: Categorie exclu
         type: items_list
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - excl_categorie
-#                    - categorie
-                    
+
     incl_collection:
         label: Collection inclu
         type: items_list
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - incl_collection
-#                    - collection
-                    
-                    
+
     excl_collection:
         label: Collection exclu
         type: items_list
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - excl_collection
-#                    - collection
-                    
+
     incl_nature:
         label: Nature inclu
         type: items_list
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - incl_nature
-#                    - nature
-                    
                     
     excl_nature:
         label: Nature exclu
         type: items_list
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - excl_nature
-#                    - nature
                     
     incl_famille:
         label: Famille inclu
         type: items_list
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - incl_famille
-#                    - famille
-                    
                     
     excl_famille:
         label: Famille exlu
         type: items_list
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - excl_famille
-#                    - famille
                     
     incl_gamme:
         label: Gamme inclu
         type: items_list
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - incl_gamme
-#                    - gamme
-                    
                     
     excl_gamme:
         label: Gamme exclu
         type: items_list
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - excl_gamme
-#                    - gamme
-                   
                    
     incl_product:
         label: Produit inclu
@@ -243,44 +161,7 @@ fields:
     excl_product:
         label: Produit exclu
         type: items_list
-        
-#    id_filter_product: 
-#        label: Filtre produit
-#        type: id_object
-#        object: list_filters
-#
-#        input: 
-#            type: select
-#            options: 
-#                array: productFilters
 
-                
-#ids_prods: 
-#	type: items_list
-#        items_data_type: id_object
-#        object: product
-#	items_braces: 1 // => Encadre chaque ID dans une paire de crochet (en base), ce qui permet de pouvoir vérifier la présence d’un ID dans une req SQL.
-#	input_type: search_object
-                
-#    incl_categorie:
-#        label: Categorie
-#        type: items_list
-#        values:
-#            callback: 
-#                method: renderCats
-#                params:
-#                    - incl_categorie
-#                    - categorie
-                    
-#    collection:
-#        label: Collection
-#        dol_extra_field: 1
-#        type: int
-#        values:
-#            callback: 
-#                method: getValues8sens
-#                params:
-#                    - collection
         
 fields_tables: 
     default: 
@@ -412,38 +293,6 @@ fields_tables:
                       method: displayProduct
                       params:
                           - excl_product
-
-#                  
-#            - label: Gamme(s)
-#              value: 
-#                    callback: 
-#                        method: renderCateg
-#                        params: 
-#                            - GAMME
-#            - label: Catégorie(s)
-#              value: 
-#                    callback: 
-#                        method: renderCateg
-#                        params: 
-#                            - CATEGORIE
-#            - label: Nature(s)
-#              value: 
-#                    callback: 
-#                        method: renderCateg
-#                        params: 
-#                            - NATURE
-#            - label: Collection(s)
-#              value: 
-#                    callback: 
-#                        method: renderCateg
-#                        params: 
-#                            - COLLECTION
-#            - label: Famille(s)
-#              value: 
-#                    callback: 
-#                        method: renderCateg
-#                        params: 
-#                            - FAMILLE
             
 views:
     default:
@@ -526,12 +375,6 @@ forms:
               display_if:
                   field_name: filter_inventory
                   show_values: 1
-# Fonctionne pas
-#              values: 
-#                  array: filterssssss
-# Affichage OK mais prends ni l'input du select ni la valeur selectionnée
-#              value: 
-#                  callback: retrieveFilters
                   
             excl_categorie :
               custom: 1
@@ -739,13 +582,6 @@ forms:
               value: ';'
               input: 
                   type: text
-#            - custom: 1
-#              label: Récupérer automatiquement les N° de série (les quantités doivent correspondre à l'ensemble du stock)
-#              input_name: recup_serials
-#              data_type: bool
-#              input: 
-#                  type: toggle
-#              value: 1
             - custom: 1
               label: Tester seulement le fichier (aucune insertion en base)
               input_name: test_only
@@ -766,9 +602,6 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-#        list_filters: 
-#            callback:
-#                method: getListFilters
         add_form_name: default
         view_btn: 1
         page_btn: 1

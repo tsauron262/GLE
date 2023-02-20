@@ -65,8 +65,17 @@ class BIMP_Task extends BimpObject
         if ($user->admin) {
             return 1;
         }
+        
+        if($this->getUserRight("read"))
+            return 1;
+        
+        $users = $this->getUserNotif();
+        foreach($users as $userT){
+            if($userT->id == $user->id)
+                    return 1;
+        }
 
-        return $this->getUserRight("read");
+        return 0;
     }
 
     public function canEdit()
@@ -780,7 +789,7 @@ class BIMP_Task extends BimpObject
         return array();
     }
 
-    public function notifier($subject, $message, $rappel = false)
+    public function notifier($subject, $message, $rappel = false, $files = array())
     {
         $mails = array();
         foreach ($this->getUserNotif(true) as $userN) {
@@ -788,10 +797,10 @@ class BIMP_Task extends BimpObject
         }
         $to = implode(',', $mails);
 
-        $this->sendMail($to, 'Tâche ERP<' . $this->mailReponse . '>', $subject, $message, $rappel);
+        $this->sendMail($to, 'Tâche ERP<' . $this->mailReponse . '>', $subject, $message, $rappel, $files);
     }
 
-    public function sendMail($to, $from, $sujet, $msg, $rappel = true)
+    public function sendMail($to, $from, $sujet, $msg, $rappel = true, $files = array())
     {
         $errors = array();
         $sep = "<br/>---------------------<br/>";
@@ -820,10 +829,16 @@ class BIMP_Task extends BimpObject
 //        $msg = str_replace("<br />", "\n", $msg);
 //        $msg = str_replace("<br/>", "\n", $msg);
 //        $msg = str_replace("<br/>", "\n", $msg);
+        
+        
 
+        
+        $bimpMail = new BimpMail($this, $sujet, $to, $from, $msg);
+        $bimpMail->addFiles($files);
+        if ($bimpMail->send($errors));
 
-        if (!mailSyn2($sujet, $to, $from, $msg))
-            $errors[] = "Envoi email impossible";
+//        if (!mailSyn2($sujet, $to, $from, $msg))
+//            $errors[] = "Envoi email impossible";
         return $errors;
     }
 
@@ -964,9 +979,31 @@ class BIMP_Task extends BimpObject
         $errors = $this->updateField("status", $data['status']);
 
         $msg = 'Statut passé à "' . $this->displayData('status') . '"<br/>' . $data['text'];
+        
+        $files = array();
+        // Fichiers joints: 
+        if (isset($data['join_files']) && is_array($data['join_files'])) {
+            foreach ($data['join_files'] as $id_file) {
+                $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);
+                if ($file->isLoaded()) {
+                    $file_path = $file->getFilePath();
+                    $file_name = $file->getData('file_name') . '.' . $file->getData('file_ext');
+                    if (!file_exists($file_path)) {
+                        $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
+                    } else {
+                        $files[] = array($file_path, dol_mimetype($file_name), $file_name);
+//                            $filename_list[] = $file_path;
+//                            $mimetype_list[] = dol_mimetype($file_name);
+//                            $mimefilename_list[] = $file_name;
+                    }
+                } else {
+                    $errors[] = 'Le fichier d\'ID ' . $id_file . ' n\'existe pas';
+                }
+            }
+        }
 
         if ($data['notif']) {
-            $this->notifier('Changement statut tâche "' . $this->getData('subj') . '"', $msg, true);
+            $this->notifier('Changement statut tâche "' . $this->getData('subj') . '"', $msg, true, $files);
         }
         $this->addNote($msg);
 
@@ -1022,8 +1059,9 @@ class BIMP_Task extends BimpObject
 
         if ($this->getData('id_task')) {
             $parent = $this->getChildObject('task_mere');
-            if ($parent->getData('status') == 4)
-                $parent->updateField('status', 1);
+            $parent->reouvrir();
+//            if ($parent->getData('status') == 4)
+//                $parent->updateField('status', 1);
         }
 
         return $return;

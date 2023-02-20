@@ -14,7 +14,7 @@ llxHeader();
     <!--013409004309660-->
     <!--C2QMDSAVFH00-->
     <input type="text" name="serialInput" id="gsx_equipment_serial" value="C02ZMDAKMD6M" onfocus="this.value = ''"/>
-    <button id="gsx_button" onclick="loadGSXView($(this));">&nbsp;&nbsp;OK&nbsp;&nbsp;</button>
+    <button id="gsx_button" onclick="loadGSXView($(this), 'none');">&nbsp;&nbsp;OK&nbsp;&nbsp;</button>
 </div>
 <div id="gsxResultContainer"></div>
 <div id="requestResult"></div>

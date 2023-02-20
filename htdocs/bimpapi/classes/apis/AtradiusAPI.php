@@ -215,6 +215,8 @@ class AtradiusAPI extends BimpAPI {
         
         if(!isset($params['currencyCode']) and $params['coverType'] != self::CREDIT_CHECK)
             $params['currencyCode'] = 'EUR';
+        if(isset($params['creditLimitAmount']) and $params['coverType'] == self::CREDIT_CHECK)
+            unset($params['creditLimitAmount']);
 
         $data = $this->execCurlCustom('createCover', array(
             'fields' => $params,
@@ -257,13 +259,15 @@ class AtradiusAPI extends BimpAPI {
             $errors[] = "Vous n'avez pas le droit de mettre à jour les assurances Atradius";
         
         
-        if($params['coverType'] == self::CREDIT_CHECK) {
-            $errors[] = "Tentative de mise à jour de crédit check impossible";
-            return array();
-        }
+//        if($params['coverType'] == self::CREDIT_CHECK) {
+//            $errors[] = "Tentative de mise à jour de crédit check impossible";
+//            return array();
+//        }
             
-        if(!isset($params['currencyCode']))
+        if(!isset($params['currencyCode']) and $params['coverType'] != self::CREDIT_CHECK)
             $params['currencyCode'] = 'EUR';
+        if(isset($params['creditLimitAmount']) and $params['coverType'] == self::CREDIT_CHECK)
+            unset($params['creditLimitAmount']);
 
         $data = $this->execCurlCustom('updateCover', array(
             'fields' => $params,
@@ -333,7 +337,7 @@ class AtradiusAPI extends BimpAPI {
     
     public function setCovers($params, &$errors = array(), &$warnings = array(), &$success = '') {
                 
-        if((int) $params['creditLimitAmount'] < 7000) 
+        if(!isset($params['creditLimitAmount']) || (int) $params['creditLimitAmount'] < 7000) 
             $params['creditLimitAmount'] = 7000;
         
         
@@ -343,6 +347,7 @@ class AtradiusAPI extends BimpAPI {
             $params_cc = array(
                 'coverType' => (string) $params_cc['coverType'] = self::CREDIT_CHECK,
                 'buyerId'   => (int)    $params['buyerId'],
+                'creditLimitAmount' => 7000,
                 'customerRefNumber' => $params['customerRefNumber']
             );
             
@@ -390,12 +395,9 @@ class AtradiusAPI extends BimpAPI {
         
         // Il n'y a pas encore d'assurance pour ce client, on le créer
         if(empty($cover) /* bloque lorsqu'il y a une assaurance retiré or (int) $cover['amount'] < 1*/) {
-            
             return $this->createCover($params, $errors);
-            
-        
         // Augmentation de la limite
-        } elseif($params['coverType'] != self::CREDIT_CHECK and (int) $cover['amount'] < $params['creditLimitAmount']) {
+        } elseif(/*$params['coverType'] != self::CREDIT_CHECK and*/ (int) $cover['amount'] < $params['creditLimitAmount']) {
             
             $params_cl = array(
                 'action'            => 'supersede',
@@ -426,6 +428,7 @@ class AtradiusAPI extends BimpAPI {
             else
                 $warnings[] = "Tentative de changer la limite de crédit pour la même somme";
         }
+        return array();
                 
     }
     

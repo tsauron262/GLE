@@ -277,14 +277,14 @@ class InvoicePDF extends BimpCommDocumentPDF
         }
 
         // Dates: 
-        $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateInvoice') . ' : </span>' . dol_print_date(strtotime($this->facture->date), "day", false, $this->langs) . '<br/>';
+        $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateInvoice') . ' : </span>' . dol_print_date($this->facture->date, "day", false, $this->langs) . '<br/>';
 
         if (!empty($conf->global->INVOICE_POINTOFTAX_DATE)) {
-            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DatePointOfTax') . ' : </span>' . dol_print_date(strtotime($this->facture->date_pointoftax), "day", false, $this->langs) . '<br/>';
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DatePointOfTax') . ' : </span>' . dol_print_date($this->facture->date_pointoftax, "day", false, $this->langs) . '<br/>';
         }
 
         if ($this->facture->type != 2) {
-            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateDue') . ' : </span>' . dol_print_date(strtotime($this->facture->date_lim_reglement), "day", false, $this->langs) . '<br/>';
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateDue') . ' : </span>' . dol_print_date($this->facture->date_lim_reglement, "day", false, $this->langs) . '<br/>';
         }
 
         // Code client: 

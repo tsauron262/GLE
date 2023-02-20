@@ -948,7 +948,7 @@ class BimpObject extends BimpCache
                     $or_sql = '';
 
                     foreach ($params['fields_search'] as $field) {
-                        $or_sql .= ($or_sql ? ' OR ' : '') . 'LOWER(' . $field . ') LIKE \'%' . $search . '%\'';
+                        $or_sql .= ($or_sql ? ' OR ' : '') . '' . $field . ' LIKE \'%' . $search . '%\'';
                     }
 
                     if ($or_sql) {

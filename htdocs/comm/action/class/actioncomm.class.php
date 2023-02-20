@@ -1390,6 +1390,8 @@ class ActionComm extends CommonObject
 	 */
 	public function load_board($user, $load_state_board = 0)
 	{
+            /*todo trop long*/
+            return 0;
 		// phpcs:enable
 		global $conf, $langs;
 

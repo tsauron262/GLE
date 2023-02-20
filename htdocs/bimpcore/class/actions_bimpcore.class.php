@@ -87,6 +87,8 @@ class ActionsBimpcore
     
     function getBtnRedirectHoldToNew(){
         $url = $_SERVER['REQUEST_URI']; 
+        if(isset($_REQUEST['facid']))
+            $_REQUEST['id'] = $_REQUEST['facid'];
         
         if(stripos($url, '/commande/'))
                 $tabObj = array("bimpcommercial", "Bimp_Commande");
@@ -120,7 +122,6 @@ class ActionsBimpcore
         
         if(stripos($url, '/user/'))
                 $tabObj = array("bimpcore", "Bimp_User");
-        
         
         
         if(isset($tabObj)){

@@ -759,139 +759,6 @@ class BimpConfig
         return $value;
     }
 
-    protected function getInstanceOld($params, $path)
-    {
-        $instance = null;
-
-        if (is_array($params)) {
-            if (isset($params['object'])) {
-                $instance = $this->getObject($path . '/object');
-            } elseif (isset($params['bimp_object'])) {
-                $module_name = null;
-                $object_name = null;
-                if (is_string($params['bimp_object'])) {
-                    if (!is_null($this->instance)) {
-                        if (is_a($this->instance, 'BimpObject')) {
-                            $module_name = $this->instance->module;
-                        } elseif (is_a($this->instance, 'BimpController')) {
-                            $module_name = $this->instance->module;
-                        }
-                    }
-                    $object_name = $params['bimp_object'];
-                } elseif (is_array($params['bimp_object'])) {
-                    $module_name = $this->get($path . '/bimp_object/module', null, true);
-                    $object_name = $this->get($path . '/bimp_object/name', null, true);
-                }
-
-                if (is_null($module_name) || is_null($object_name)) {
-                    return null;
-                }
-                $instance = BimpObject::getInstance($module_name, $object_name);
-            } elseif (isset($params['dol_object'])) {
-                $module = null;
-                $file = null;
-                $className = null;
-
-                if (is_string($params['dol_object'])) {
-                    $module = $file = $params['dol_object'];
-                    $className = ucfirst($file);
-                } elseif (is_array($params['dol_object'])) {
-                    $module = $this->get($path . '/dol_object/module', null, true);
-                    if (is_null($module)) {
-                        return null;
-                    }
-                    $file = $this->get($path . '/dol_object/file', $module, false);
-                    $className = $this->get($path . '/dol_object/class', ucfirst($file), false);
-                }
-                if (!is_null($module) && !is_null($file) && !is_null($className)) {
-                    if (!class_exists($className)) {
-                        $file_path = DOL_DOCUMENT_ROOT . '/' . $module . '/class/' . $file . '.class.php';
-
-                        if (file_exists($file_path)) {
-                            require_once $file_path;
-                        }
-
-                        if (!class_exists($className)) {
-                            $this->logConfigError('Class "' . $className . '" inexistante');
-                            return null;
-                        }
-                    }
-
-
-                    global $db;
-                    $instance = new $className($db);
-                }
-            } elseif (isset($params['custom_object'])) {
-                $class_name = $this->get($path . '/class_name', null, true);
-                if (is_null($class_name)) {
-                    return null;
-                }
-
-                if (!class_exists($class_name)) {
-                    $class_path = $this->get($path . '/class_path', null, true);
-
-                    if (is_null($class_path)) {
-                        return null;
-                    }
-
-                    if (file_exists($class_path)) {
-                        require_once DOL_DOCUMENT_ROOT . '/' . $class_path;
-                    }
-
-                    if (!class_exists($class_name)) {
-                        $this->logConfigError('Classe "' . $class_name . '" inexistante');
-                        return null;
-                    }
-                }
-
-                $construct_params = $this->get($path . '/construct_params', array(), false);
-
-                $args = '';
-                $first = true;
-                foreach ($construct_params as $key => $value) {
-                    if (!$first) {
-                        $args .= ', ';
-                    } else {
-                        $first = false;
-                    }
-                    $args .= '$construct_params[' . $key . ']';
-                }
-
-                eval('$instance = new $class_name(' . $args . ');
-                        ');
-            } else {
-                $instance = null;
-                $this->logConfigUndefinedValue($path);
-            }
-
-            if (!is_null($instance)) {
-                if (isset($params['fetch'])) {
-                    $fetch_params = $this->get($path . '/fetch', array());
-                    if (!is_null($fetch_params) && is_array($fetch_params)) {
-                        if ($result = call_user_func_array(array(
-                                    $instance, 'fetch'
-                                        ), $fetch_params) <= 0) {
-                            $this->logConfigError('Echec de fetch() sur l\'objet "' . get_class($instance) . '" - Paramètres: <pre>' . print_r($fetch_params, 1) . '</pre>');
-                        }
-                    }
-                } elseif (isset($params['id_object'])) {
-                    $id_object = $this->get($path . '/id_object', null, true, 'int');
-                    if (!is_null($id_object) && $id_object) {
-                        if (method_exists($instance, 'fetch')) {
-                            if ($result = $instance->fetch((int) $id_object) <= 0) {
-                                $this->logConfigError('Echec de fetch() sur l\'objet "' . get_class($instance) . '" - ID: ' . $id_object);
-                            }
-                        } else {
-                            $this->logConfigError('La méthode "fetch()" n\'existe pas pour l\'objet "' . get_class($instance) . '"');
-                        }
-                    }
-                }
-            }
-        }
-
-        return $instance;
-    }
-
     protected function getInstance($params, $path, $id_object = null)
     {
         if (is_array($params)) {
@@ -1304,9 +1171,14 @@ class BimpConfig
                         $instance, $method
                             ), $params);
                 } else {
+                    // Pour enlever les éventuelles clés associatives (erreur fatale depuis PHP8)
+                    $args = array();
+                    foreach ($params as $key => $value) {
+                        $args[] = $value;
+                    }
                     return call_user_func_array(array(
                         $instance, $method
-                            ), $params);
+                            ), $args);
                 }
             }
         }

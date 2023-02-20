@@ -5610,7 +5610,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $create_method_name = $this->getConf('dol_create_method', 'create');
 
-            $result = call_user_func_array(array($this->dol_object, $create_method_name), $params);
+            // Pour enlever les éventuelles clés associatives (erreur fatale depuis PHP8)
+            $args = array();
+            foreach ($params as $key => $value) {
+                $args[] = $value;
+            }
+
+            $result = call_user_func_array(array($this->dol_object, $create_method_name), $args);
             if ($result <= 0) {
                 if (isset($this->dol_object->error) && $this->dol_object->error) {
                     $errors[] = $this->dol_object->error;
@@ -5691,7 +5697,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $params = array($user);
             }
 
-            $result = call_user_func_array(array($this->dol_object, 'update'), $params);
+            // Pour enlever les éventuelles clés associatives (erreur fatale depuis PHP8)
+            $args = array();
+            foreach ($params as $key => $value) {
+                $args[] = $value;
+            }
+
+            $result = call_user_func_array(array($this->dol_object, 'update'), $args);
 
             if ((int) $this->params['force_extrafields_update']) {
                 foreach ($this->dol_object->array_options as $key => $value) {
@@ -5769,7 +5781,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $params = array($id);
         }
 
-        $result = call_user_func_array(array($this->dol_object, 'fetch'), $params);
+        // Pour enlever les éventuelles clés associatives (erreur fatale depuis PHP8)
+        $args = array();
+        foreach ($params as $key => $value) {
+            $args[] = $value;
+        }
+
+        $result = call_user_func_array(array($this->dol_object, 'fetch'), $args);
 
         if ($result <= 0) {
             if (isset($this->dol_object->error) && $this->dol_object->error) {
@@ -5837,7 +5855,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $delete_method = $this->getConf('dol_delete_method', 'delete');
 
         if (method_exists($this->dol_object, $delete_method)) {
-            $result = call_user_func_array(array($this->dol_object, $delete_method), $params);
+            // Pour enlever les éventuelles clés associatives (erreur fatale depuis PHP8)
+            $args = array();
+            foreach ($params as $key => $value) {
+                $args[] = $value;
+            }
+
+            $result = call_user_func_array(array($this->dol_object, $delete_method), $args);
         } else {
             $errors[] = 'La méthode "' . $delete_method . '" n\'existe pas dans l\'objet "' . get_class($this->dol_object) . '"';
             return 0;

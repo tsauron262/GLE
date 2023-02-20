@@ -1702,9 +1702,14 @@ class BimpController
                 if (empty($params)) {
                     $html = $object->{$method}();
                 } else {
+                    // Pour enlever les clés associatives (erreur fatale depuis PHP8)
+                    $args = array();
+                    foreach ($params as $key => $value) {
+                        $args[] = $value;
+                    }
                     $html = call_user_func_array(array(
                         $object, $method
-                            ), $params);
+                            ), $args);
                 }
             }
         }

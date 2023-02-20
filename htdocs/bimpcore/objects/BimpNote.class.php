@@ -913,7 +913,7 @@ class BimpNote extends BimpObject
 //                $htmlTitre = '<h2>User : ' . $userT->getFullName($langs) . '</h3><br/>';
                 $html .= 'Bonjour vous avez ' . count($notes) . ' message(s) non lu : <br/>';
                 if (count($data) >= $maxForMail)
-                    $html .= 'Voici les ' . count($data) . ' dérniéres<br/>';
+                    $html .= 'Voici les ' . count($data) . ' derniers<br/>';
                 $html .= '<br/>Pour désactiver cette relance, vous pouvez : <br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.<br/><br/>';
 
                 $html .= implode('<br/><br/>', $data);

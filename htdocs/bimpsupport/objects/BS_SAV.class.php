@@ -707,7 +707,7 @@ class BS_SAV extends BimpObject
     public function getListFilters()
     {
         $filters = array();
-        if (BimpTools::isSubmit('id_entrepot')) {
+        if (BimpTools::isSubmit('id_entrepot') && BimpTools::getValue('id_entrepot') != '') {
             $entrepots = explode('-', BimpTools::getValue('id_entrepot'));
 
             $filters[] = array('name'   => 'id_entrepot', 'filter' => array(

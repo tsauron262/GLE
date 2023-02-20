@@ -364,12 +364,12 @@ HAVING scan_exp != scan_det";
 
         return 0;
     }
+    
     /*
-     * Requiere de faire
+     * Requiert de faire
      * $init_filters = $this->getFiltersValue();
      * avant de modifier les filtres
      */
-
     public function resetFilters($init_filters, $init_has_filter)
     {
         foreach ($init_filters as $field => $value)
@@ -673,17 +673,6 @@ HAVING scan_exp != scan_det";
         return $html;
     }
 
-    public function retrieveFilters()
-    {
-        if ((int) $this->id > 0)
-            return array(2851 => 'DEPLACEMENT PRO');
-    }
-
-    public function filterssssss()
-    {
-        return array(2851 => 'DEPLACEMENT PRO');
-    }
-
     public function renderInputs()
     {
         $html = '';
@@ -738,7 +727,6 @@ HAVING scan_exp != scan_det";
         // Open
         if ($status == self::STATUS_OPEN) {
             $errors = BimpTools::merge_array($errors, $this->createExpected());
-//            $errors = BimpTools::merge_array($errors, $this->createScanNegative());
             if (empty($errors)) {
                 $this->updateField("date_opening", date("Y-m-d H:i:s"));
                 $success = "Inventaire ouvert avec succès";

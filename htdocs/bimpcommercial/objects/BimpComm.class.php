@@ -1507,22 +1507,24 @@ class BimpComm extends BimpDolObject
         $line = $this->getLineInstance();
 
         if (is_a($line, 'ObjectLine')) {
-            $line_alias = $main_alias . '___det';
-            $joins[$line_alias] = array(
-                'table' => $line::$dol_line_table,
-                'alias' => $line_alias,
-                'on'    => $main_alias . '.rowid = ' . $line_alias . '.' . $line::$dol_line_parent_field
-            );
-
-            $sql = 'SELECT SUM(' . $line_alias . '.qty * ' . $line_alias . '.buy_price_ht) as total';
-            $sql .= BimpTools::getSqlFrom($this->getTable(), $joins, $main_alias);
-            $sql .= BimpTools::getSqlWhere($filters);
-
-            $result = $this->db->executeS($sql, 'array');
-
-            if (isset($result[0]['total'])) {
-                $return['value'] = (float) $result[0]['total'];
-            }
+            return 'n/c';
+//            TODO fait bloqué le serveur 
+//            $line_alias = $main_alias . '___det';
+//            $joins[$line_alias] = array(
+//                'table' => $line::$dol_line_table,
+//                'alias' => $line_alias,
+//                'on'    => $main_alias . '.rowid = ' . $line_alias . '.' . $line::$dol_line_parent_field
+//            );
+//
+//            $sql = 'SELECT SUM(' . $line_alias . '.qty * ' . $line_alias . '.buy_price_ht) as total';
+//            $sql .= BimpTools::getSqlFrom($this->getTable(), $joins, $main_alias);
+//            $sql .= BimpTools::getSqlWhere($filters);
+//
+//            $result = $this->db->executeS($sql, 'array');
+//
+//            if (isset($result[0]['total'])) {
+//                $return['value'] = (float) $result[0]['total'];
+//            }
         }
 
         return $return;

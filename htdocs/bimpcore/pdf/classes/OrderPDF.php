@@ -294,7 +294,7 @@ class OrderPDF extends BimpCommDocumentPDF
         $html .= '<tr>';
         $html .= '<td colspan="2" style="font-size: 7px">';
         $html .= '<span style="font-weight: bold; color: #' . $this->primary . '">Date commande : </span>';
-        $html .= dol_print_date(strtotime($this->commande->date));
+        $html .= dol_print_date($this->commande->date);
         $html .= '</td>';
         $html .= '</tr>';
 

@@ -3139,9 +3139,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $asso->addObjectAssociation((int) $new_id_propal);
 
                     // Copie des lignes: 
-                    $warnings = BimpTools::merge_array($warnings, $new_propal->createLinesFromOrigin($propal, array(
-                                        'is_review' => true
-                    )));
+                    // Maintenant géré dans propal.class.php (maj Dol16) 
+//                    $warnings = BimpTools::merge_array($warnings, $new_propal->createLinesFromOrigin($propal, array(
+//                                        'is_review' => true
+//                    )));
 
                     // Check des AppleParts: 
                     $new_apple_parts_lines = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SavPropalLine', array(

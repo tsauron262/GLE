@@ -44,6 +44,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function __construct($db)
     {
+        unset($_SERVER['DOCUMENT_ROOT']);
         parent::__construct($db, 'P', 'A4');
     }
 
@@ -105,7 +106,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $this->pdf->topMargin = 44;
-unset($_SERVER['DOCUMENT_ROOT']);
+        
         $this->header_vars = array(
             'primary_color' => $this->primary,
             'logo_img'      => $logo_file,

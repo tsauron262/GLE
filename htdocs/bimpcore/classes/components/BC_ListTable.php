@@ -948,7 +948,12 @@ class BC_ListTable extends BC_List
             if (empty($col_errors) && $field_name && is_a($field_object, 'BimpObject')) {
                 $method_name = 'get' . ucfirst($field_name) . 'ListTotal';
                 if (method_exists($field_object, $method_name)) {
-                    $this->totals[$col_name]['value'] = $field_object->{$method_name}($filters, $joins, $field_alias);
+                    $value = $field_object->{$method_name}($filters, $joins, $field_alias);
+                    if (is_array($value) && isset($value['value'])) {
+                        $this->totals[$col_name] = $value;
+                    } else {
+                        $this->totals[$col_name]['value'] = $value;
+                    }
                 } elseif (method_exists($field_object, 'get' . ucfirst($field_name) . 'SqlKey')) {
                     BimpCore::addlog('Appel à getxxxSqlKey pour total - intégrer field_alias', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $field_object, array(
                         'Champ' => $field_name
@@ -2778,3 +2783,4 @@ class BC_ListTable extends BC_List
         return $rows;
     }
 }
+                                            

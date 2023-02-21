@@ -1230,9 +1230,10 @@ class Bimp_Propal extends Bimp_PropalTemp
         $newPropal->addObjectLog('Révision de la proposition: ' . $this->getRef());
 
         // Copie des lignes: 
-        $warnings = BimpTools::merge_array($warnings, $newPropal->createLinesFromOrigin($this, array(
-                            'is_review' => true
-        )));
+        // Maintenant géré dans propal.class.php (maj dol16)
+//        $warnings = BimpTools::merge_array($warnings, $newPropal->createLinesFromOrigin($this, array(
+//                            'is_review' => true
+//        )));
 
         // Copie des contacts: 
         $newPropal->copyContactsFromOrigin($this, $warnings);

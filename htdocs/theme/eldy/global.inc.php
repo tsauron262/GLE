@@ -4905,7 +4905,11 @@ div#card-errors {
 .ui-dialog-content {
 }
 .ui-dialog.ui-corner-all.ui-widget.ui-widget-content.ui-front.ui-draggable {
-	z-index: 1002 !important;		/* Default 101 with ui-jquery, top menu have a z-index of 1000 */
+	/*z-index: 1002 !important;		 Default 101 with ui-jquery, top menu have a z-index of 1000 */
+        
+        /*moddrsi important pour compatibilité avec les modales*/
+        z-index: 12000 !important; 
+        /*fmoddrsi*/
 }
 
 

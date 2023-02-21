@@ -505,6 +505,10 @@ div.tabsElem div{
     z-index: 11252!important;
 }
 
+.ui-dialog {
+    z-index: 12000!important;
+}
+
 .fullScreen{
     z-index: 10002!important;
 }

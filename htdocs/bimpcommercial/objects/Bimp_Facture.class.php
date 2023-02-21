@@ -1954,7 +1954,7 @@ class Bimp_Facture extends BimpComm
      * statut reval si null tous
      */
     public function getTotalMargeWithReval($type_reval = array(), $statut_reval = null){
-        $tot = $this->getData('total') - $this->getData('marge');
+        $tot = $this->getData('total_ht') - $this->getData('marge');
         $tabReval = $this->getTotalRevalorisations(false, false, $type_reval);
         if(is_null($statut_reval)){
             foreach($tabReval as $reval)

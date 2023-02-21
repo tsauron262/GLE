@@ -89,6 +89,8 @@ class ActionsBimpcore
         $url = $_SERVER['REQUEST_URI']; 
         if(isset($_REQUEST['facid']))
             $_REQUEST['id'] = $_REQUEST['facid'];
+        if(isset($_REQUEST['socid']))
+            $_REQUEST['id'] = $_REQUEST['socid'];
         
         if(stripos($url, '/commande/'))
                 $tabObj = array("bimpcommercial", "Bimp_Commande");

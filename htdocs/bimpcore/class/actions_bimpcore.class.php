@@ -127,7 +127,7 @@ class ActionsBimpcore
                 $tabObj = array("bimpcore", "Bimp_User");
 
 
-        if(isset($tabObj)){
+        if(isset($tabObj) && stripos($url, 'ajax') === false){
             $bObj = BimpObject::getInstance($tabObj[0], $tabObj[1], $_REQUEST[(isset($tabObj[2])? $tabObj[2] : 'id')]);
             return $bObj->processRedirect();
         }

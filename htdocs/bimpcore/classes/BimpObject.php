@@ -10536,6 +10536,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             if (BimpTools::getValue("search_status") != "") {
                 $url .= "&fk_statut=" . BimpTools::getValue("search_status");
             }
+            if (BimpTools::getValue("mainmenu") != "") {
+                $url .= "&mainmenu=" . BimpTools::getValue("mainmenu");
+            }
+            if (BimpTools::getValue("leftmenu") != "") {
+                $url .= "&leftmenu=" . BimpTools::getValue("leftmenu");
+            }
 
 //            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         } else {

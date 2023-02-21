@@ -213,6 +213,8 @@ if(stripos($search_boxvalue, "cf") === 0 && isset($arrayresult["searchintosuppli
 	$arrayresult=array_merge(array($arrayresult["searchintosupplierorder"]), $arrayresult);
 if(stripos($search_boxvalue, "ct") === 0 && isset($arrayresult["searchintocontract"]))
         $arrayresult=array_merge(array($arrayresult['searchintocontract']), $arrayresult);
+if(stripos($search_boxvalue, "cst") === 0 && isset($arrayresult["searchintocontract"]))
+        $arrayresult=array_merge(array($arrayresult['searchintocontract']), $arrayresult);
 if(stripos($search_boxvalue, "fi") === 0 && isset($arrayresult["searchintointervention"]))
         $arrayresult=array_merge(array($arrayresult['searchintointervention']), $arrayresult);
 if(stripos($search_boxvalue, "sac") === 0 && isset($arrayresult["searchintosac"]))

@@ -75,6 +75,7 @@ class ActionsBimpcore
 
             define('BIMPCORE_INIT', 1);
         }
+        $this->resprints .= $this->getBtnRedirectHoldToNew();
 
         return 0;
     }
@@ -91,7 +92,7 @@ class ActionsBimpcore
             $_REQUEST['id'] = $_REQUEST['facid'];
         if(isset($_REQUEST['socid']))
             $_REQUEST['id'] = $_REQUEST['socid'];
-        
+
         if(stripos($url, '/commande/'))
                 $tabObj = array("bimpcommercial", "Bimp_Commande");
         if(stripos($url, '/compta/facture/'))
@@ -106,26 +107,26 @@ class ActionsBimpcore
         }
         if(stripos($url, 'comm/propal'))
                 $tabObj = array("bimpcommercial", "Bimp_Propal");
-        
-        
+
+
         if(stripos($url, '/fourn/commande/'))
                 $tabObj = array("bimpcommercial", "Bimp_CommandeFourn");
         elseif(stripos($url, '/fourn/facture/'))
                 $tabObj = array("bimpcommercial", "Bimp_FactureFourn", 'facid');
         elseif(stripos($url, '/fourn/'))
                 $tabObj = array("bimpcore", "Bimp_Fournisseur");
-        
-        
+
+
         if(stripos($url, '/product/'))
                 $tabObj = array("bimpcore", "Bimp_Product");
-        
+
         if(stripos($url, '/synopsisdemandeinterv/') || stripos($url, '/synopsisfichinter/'))
                 $tabObj = array("bimptechnique", "BT_ficheInter");
-        
+
         if(stripos($url, '/user/'))
                 $tabObj = array("bimpcore", "Bimp_User");
-        
-        
+
+
         if(isset($tabObj)){
             $bObj = BimpObject::getInstance($tabObj[0], $tabObj[1], $_REQUEST[(isset($tabObj[2])? $tabObj[2] : 'id')]);
             return $bObj->processRedirect();

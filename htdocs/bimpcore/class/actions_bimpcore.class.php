@@ -99,7 +99,7 @@ class ActionsBimpcore
                 $tabObj = array("bimpcommercial", "Bimp_Facture");
         if(stripos($url, '/contrat/'))
                 $tabObj = array("bimpcontract", "BContract_contrat");
-        if(stripos($url, '/comm/action') === false && stripos($url, 'admin') === false && stripos($url, '/comm/') || stripos($url, '/societe/')){
+        if(stripos($url, '/comm/action') === false && stripos($url, 'admin') === false && (stripos($url, '/comm/') || stripos($url, '/societe/'))){
             if(BimpTools::getValue('type', 's') == 'f')
                 $tabObj = array("bimpcore", "Bimp_Fournisseur");
             else

@@ -1239,7 +1239,7 @@ class BE_Package extends BimpObject
         if ($this->isLoaded()) {
             $pp = BimpObject::getInstance('bimpequipment', 'BE_PackageProduct');
 
-            $list = new BC_ListTable($pp, 'default', 1, $this->id, 'Produits non sérialisés inclus', 'fas_box');
+            $list = new BC_ListTable($pp, 'package', 1, $this->id, 'Produits non sérialisés inclus', 'fas_box');
             return $list->renderHtml();
         }
 

@@ -2462,7 +2462,7 @@ class Bimp_Societe extends BimpDolObject
                         'FactureFournisseur'  => '/fourn/class/fournisseur.facture.class.php',
                         'SupplierProposal'    => '/supplier_proposal/class/supplier_proposal.class.php',
                         'ProductFournisseur'  => '/fourn/class/fournisseur.product.class.php',
-                        'Livraison'           => '/livraison/class/livraison.class.php',
+//                        'Livraison'           => '/livraison/class/livraison.class.php',
                         'Product'             => '/product/class/product.class.php',
                         'Project'             => '/projet/class/project.class.php',
                         'User'                => '/user/class/user.class.php',

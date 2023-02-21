@@ -1568,6 +1568,7 @@ searches:
             - a.rowid
             - a.nom
             - a.name_alias
+            - a.code_client
         fields_return: 
             0: a.nom
             1: a.name_alias

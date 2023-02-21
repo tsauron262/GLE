@@ -533,4 +533,21 @@ abstract class DoliDB implements Database
 
 		return false;
 	}
+        
+        
+    
+    static function stopAll(){
+        $errors = array('Problème réseau, merci de relancer l\'opération');
+        if (BimpTools::isSubmit('ajax')) {
+            echo json_encode(array(
+                'errors'           => $errors,
+                'request_id'       => BimpTools::getValue('request_id', 0)
+            ));
+        }
+        else{
+            echo 'Oupppps   '.print_r($errors,1);
+        }
+        die();
+        exit;
+    }
 }

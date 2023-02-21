@@ -2879,6 +2879,9 @@ function left_menu($menu_array_before, $helppagename = '', $notused = '', $menu_
 			$form = new Form($db);
 		}
 		$selected = -1;
+                /*mod drsi*/
+                $searchform.=$form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT . '/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
+                /*
 		if (empty($conf->global->MAIN_USE_TOP_MENU_SEARCH_DROPDOWN)) {
 			$usedbyinclude = 1;
 			$arrayresult = null;
@@ -2919,6 +2922,8 @@ function left_menu($menu_array_before, $helppagename = '', $notused = '', $menu_
 				$searchform .= '</div>';
 			}
 		}
+                 * Fmoddrsi
+                 */
 
 		// Left column
 		print '<!-- Begin left menu -->'."\n";

@@ -7453,7 +7453,9 @@ button.close {
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 6px;
   -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); }
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  word-wrap: break-word; }
   /* line 27, ../scss/bootstrap/_popovers.scss */
   .popover.top {
     margin-top: -10px; }
@@ -7467,7 +7469,7 @@ button.close {
   .popover.left {
     margin-left: -10px; }
 
-/* line 33, ../scss/bootstrap/_popovers.scss */
+/* line 36, ../scss/bootstrap/_popovers.scss */
 .popover-title {
   margin: 0;
   padding: 8px 14px;
@@ -7476,14 +7478,14 @@ button.close {
   border-bottom: 1px solid #ebebeb;
   border-radius: 5px 5px 0 0; }
 
-/* line 42, ../scss/bootstrap/_popovers.scss */
+/* line 45, ../scss/bootstrap/_popovers.scss */
 .popover-content {
   padding: 9px 14px; }
-  /* line 45, ../scss/bootstrap/_popovers.scss */
+  /* line 48, ../scss/bootstrap/_popovers.scss */
   .popover-content .cardButtons {
     display: none; }
 
-/* line 56, ../scss/bootstrap/_popovers.scss */
+/* line 59, ../scss/bootstrap/_popovers.scss */
 .popover > .arrow, .popover > .arrow:after {
   position: absolute;
   display: block;
@@ -7492,16 +7494,16 @@ button.close {
   border-color: transparent;
   border-style: solid; }
 
-/* line 66, ../scss/bootstrap/_popovers.scss */
+/* line 69, ../scss/bootstrap/_popovers.scss */
 .popover > .arrow {
   border-width: 11px; }
 
-/* line 69, ../scss/bootstrap/_popovers.scss */
+/* line 72, ../scss/bootstrap/_popovers.scss */
 .popover > .arrow:after {
   border-width: 10px;
   content: ""; }
 
-/* line 75, ../scss/bootstrap/_popovers.scss */
+/* line 78, ../scss/bootstrap/_popovers.scss */
 .popover.top > .arrow {
   left: 50%;
   margin-left: -11px;
@@ -7509,14 +7511,14 @@ button.close {
   border-top-color: #999999;
   border-top-color: rgba(0, 0, 0, 0.25);
   bottom: -11px; }
-  /* line 82, ../scss/bootstrap/_popovers.scss */
+  /* line 85, ../scss/bootstrap/_popovers.scss */
   .popover.top > .arrow:after {
     content: " ";
     bottom: 1px;
     margin-left: -10px;
     border-bottom-width: 0;
     border-top-color: #fff; }
-/* line 90, ../scss/bootstrap/_popovers.scss */
+/* line 93, ../scss/bootstrap/_popovers.scss */
 .popover.right > .arrow {
   top: 50%;
   left: -11px;
@@ -7524,14 +7526,14 @@ button.close {
   border-left-width: 0;
   border-right-color: #999999;
   border-right-color: rgba(0, 0, 0, 0.25); }
-  /* line 97, ../scss/bootstrap/_popovers.scss */
+  /* line 100, ../scss/bootstrap/_popovers.scss */
   .popover.right > .arrow:after {
     content: " ";
     left: 1px;
     bottom: -10px;
     border-left-width: 0;
     border-right-color: #fff; }
-/* line 105, ../scss/bootstrap/_popovers.scss */
+/* line 108, ../scss/bootstrap/_popovers.scss */
 .popover.bottom > .arrow {
   left: 50%;
   margin-left: -11px;
@@ -7539,14 +7541,14 @@ button.close {
   border-bottom-color: #999999;
   border-bottom-color: rgba(0, 0, 0, 0.25);
   top: -11px; }
-  /* line 112, ../scss/bootstrap/_popovers.scss */
+  /* line 115, ../scss/bootstrap/_popovers.scss */
   .popover.bottom > .arrow:after {
     content: " ";
     top: 1px;
     margin-left: -10px;
     border-top-width: 0;
     border-bottom-color: #fff; }
-/* line 121, ../scss/bootstrap/_popovers.scss */
+/* line 124, ../scss/bootstrap/_popovers.scss */
 .popover.left > .arrow {
   top: 50%;
   right: -11px;
@@ -7554,7 +7556,7 @@ button.close {
   border-right-width: 0;
   border-left-color: #999999;
   border-left-color: rgba(0, 0, 0, 0.25); }
-  /* line 128, ../scss/bootstrap/_popovers.scss */
+  /* line 131, ../scss/bootstrap/_popovers.scss */
   .popover.left > .arrow:after {
     content: " ";
     right: 1px;

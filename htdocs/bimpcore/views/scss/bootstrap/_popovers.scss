@@ -28,6 +28,9 @@
     &.right   { margin-left: $popover-arrow-width; }
     &.bottom  { margin-top: $popover-arrow-width; }
     &.left    { margin-left: -$popover-arrow-width; }
+    
+    overflow: hidden;
+    word-wrap: break-word;
 }
 
 .popover-title {

@@ -62,7 +62,6 @@ class BimpComm extends BimpDolObject
         self::BC_ZONE_HORS_UE => 'Hors UE'
     );
     protected $margins_infos = null;
-    
     public $onChildSaveProcessed = false;
 
     public function __construct($module, $object_name)
@@ -2614,7 +2613,7 @@ class BimpComm extends BimpDolObject
             }
 
             $tot = $this->getData('total_ht');
-            
+
             if (round((float) $tot, 2) != round($totalHt, 2)) {
                 $this->erreurFatal++;
                 $msg = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($tot, 3);
@@ -2779,12 +2778,13 @@ class BimpComm extends BimpDolObject
         $errors = array();
 
         $params = BimpTools::overrideArray(array(
-                    'inverse_prices'        => false,
-                    'inverse_qty'           => false,
-                    'pa_editable'           => true,
-                    'is_clone'              => false,
-                    'is_review'             => false,
-                    'copy_remises_globales' => false,
+                    'inverse_prices'            => false,
+                    'inverse_qty'               => false,
+                    'pa_editable'               => true,
+                    'is_clone'                  => false,
+                    'is_review'                 => false,
+                    'copy_remises_globales'     => false,
+                    'qty_to_zero_sauf_acomptes' => false
                         ), $params);
 
         if (!BimpObject::objectLoaded($origin) || !is_a($origin, 'BimpComm')) {
@@ -2889,6 +2889,16 @@ class BimpComm extends BimpDolObject
                 $qty *= -1;
             }
 
+            if ($params['qty_to_zero_sauf_acomptes']) {
+                $ref_prod = '';
+                if ((int) $line->id_product) {
+                    $ref_prod = $this->db->getValue('product', 'ref', 'rowid = ' . $line->id_product);
+                }
+                if (!$line->id_remise_except && $ref_prod !== 'SAV-PCU' && stripos($line->desc, "Urgence") === false) {
+                    $qty = 0;
+                }
+            }
+
             if ($line->id_product) {
                 $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->id_product);
                 if (!static::$achat && !$prod->getData('tosell'))
@@ -2947,19 +2957,21 @@ class BimpComm extends BimpDolObject
             $lines_new[(int) $line->id] = (int) $new_line->id;
 
             // Attribution des équipements si nécessaire: 
-            if (!$params['is_clone'] && $line->equipment_required && $new_line->equipment_required && $line->isProductSerialisable()) {
-                $equipmentlines = $line->getEquipmentLines();
+            if ($line->isProductSerialisable()) {
+                if (!$params['is_clone'] && $line->equipment_required && $new_line->equipment_required) {
+                    $equipmentlines = $line->getEquipmentLines();
 
-                foreach ($equipmentlines as $equipmentLine) {
-                    $data = $equipmentLine->getDataArray();
+                    foreach ($equipmentlines as $equipmentLine) {
+                        $data = $equipmentLine->getDataArray();
 
-                    if ($params['inverse_prices']) {
-                        $data['pu_ht'] *= -1;
-                        $data['id_fourn_price'] = 0;
-                        $data['pa_ht'] *= -1;
+                        if ($params['inverse_prices']) {
+                            $data['pu_ht'] *= -1;
+                            $data['id_fourn_price'] = 0;
+                            $data['pa_ht'] *= -1;
+                        }
+
+                        $new_line->attributeEquipment($data['id_equipment']);
                     }
-
-                    $new_line->attributeEquipment($data['id_equipment']);
                 }
             }
 

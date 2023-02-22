@@ -18,7 +18,7 @@ class BimpConfig
         'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf', 'dol_conf', 'is_module_active'
     );
     public $cache_key = '';
-    protected static $params = array();
+    public static $params = array();
     public static $cache_mode = 'per_file'; // per_file / full
     public static $params_cache = array();
     public static $values_cache = array();

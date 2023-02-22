@@ -1184,7 +1184,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
     // Traitements: 
 
-    public function review($check = true, &$errors = array(), &$warnings = array())
+    public function review($check = true, &$errors = array(), &$warnings = array(), $is_refus = false)
     {
         global $user, $langs;
 
@@ -1195,55 +1195,113 @@ class Bimp_Propal extends Bimp_PropalTemp
             }
         }
 
-        require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpRevision.php");
-
-        $revision = new BimpRevisionPropal($this->dol_object);
-        $new_id_propal = (int) $revision->reviserPropal(false, true, $this->getData('model_pdf'), $errors);
-
-        if (!$new_id_propal) {
+        $client = $this->getChildObject('client');
+        if (!BimpObject::objectLoaded($client)) {
+            $errors[] = 'Client absent';
             return 0;
         }
 
+        $old_ref = $this->getRef();
+        $new_propal = BimpObject::getInstance($this->module, $this->object_name);
 
+        $dt = new DateTime();
+        $new_data = $this->getDataArray(false, false);
+        $new_data['ref'] = '';
+        $new_data['fk_statut'] = 0;
+        $new_data['datec'] = $dt->format('Y-m-d H:i:s');
+        $new_data['datep'] = $dt->format('Y-m-d');
+        $new_data['date_valid'] = null;
+        $new_data['logs'] = '';
 
-        $newPropal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $new_id_propal);
+        if ((int) $this->dol_object->duree_validite > 0) {
+            $dt->add(new DateInterval('P' . (int) $this->dol_object->duree_validite . 'D'));
+            $new_data['fin_validite'] = $dt->format('Y-m-d');
+        }
 
-        if (!BimpObject::objectLoaded($newPropal)) {
+        $new_data['fk_user_author'] = $user->id;
+        $new_data['fk_user_valid'] = 0;
+        $new_data['fk_user_cloture'] = 0;
+        $new_data['id_signature'] = 0;
+        $new_data['signature_params'] = array();
+
+        foreach ($new_data as $field => $value) {
+            $new_propal->set($field, $value);
+        }
+
+        $new_propal->dol_object->duree_validite = $this->dol_object->duree_validite;
+        $new_propal->dol_object->entity = $this->dol_object->entity;
+
+        $errors = $new_propal->create($warnings, true);
+
+        if (!count($errors) && !BimpObject::objectLoaded($new_propal)) {
             $errors[] = 'Echec de la création de la révision pour une raison inconnue';
+        }
+
+        if (count($errors)) {
             return 0;
         }
 
+        require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpRevision.php';
+
+        // Maj Ref: 
+        $new_ref = BimpRevision::convertRef($old_ref, "propal");
+        BimpRevisionPropal::setLienRevision($old_ref, $this->id, $new_propal->id, $new_ref);
+
+        // Ajout objets liés: 
+        $elements = getElementElement("propal", null, $this->id);
+        foreach ($elements as $item) {
+            addElementElement($item['ts'], $item['td'], $new_propal->id, $item['d']);
+        }
+
+        $elements = getElementElement("propal", null, $this->id, null, 0);
+        foreach ($elements as $item) {
+            addElementElement($item['ts'], $item['td'], $new_propal->id, $item['d'], 0);
+        }
+
+        // Copie fichiers: 
+        $dir = DOL_DATA_ROOT . '/propale/' . $old_ref . "/";
+        $dir2 = DOL_DATA_ROOT . '/propale/' . $new_ref . "/";
+
+        if (is_dir($dir)) {
+            $cdir = scandir($dir);
+            foreach ($cdir as $key => $value) {
+                if (!is_dir($dir2))
+                    mkdir($dir2);
+
+                if (!in_array($value, array(".", "..")) && stripos($value, "/") !== false) {
+                    link($dir . $value, $dir2 . $value);
+                }
+            }
+        }
+
+        // Annulation signature: 
         $signature = $this->getChildObject('signature');
 
         if (BimpObject::objectLoaded($signature)) {
             $signature->cancelAllSignatures();
         }
 
-        $newPropal->set('zone_vente', $this->getData('zone_vente'));
-        $pw = array();
-        $newPropal->update($pw, true);
-
-        $totHt = (float) $this->dol_object->total_ht;
-
         // Ajout des notes: 
-        $this->addObjectLog('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $newPropal->getRef());
-        $newPropal->addObjectLog('Révision de la proposition: ' . $this->getRef());
+        $this->addObjectLog('Proposition commerciale mise en révision le ' . date('d / m / Y') . ' par ' . $user->getFullName($langs) . "\n" . 'Révision: ' . $new_propal->getRef());
+        $new_propal->addObjectLog('Révision de la proposition: ' . $this->getRef());
 
         // Copie des lignes: 
-        // Maintenant géré dans propal.class.php (maj dol16)
-//        $warnings = BimpTools::merge_array($warnings, $newPropal->createLinesFromOrigin($this, array(
-//                            'is_review' => true
-//        )));
+        $errors = BimpTools::merge_array($errors, $new_propal->createLinesFromOrigin($this, array(
+                            'is_review'                 => true,
+                            'qty_to_zero_sauf_acomptes' => $is_refus
+        )));
 
         // Copie des contacts: 
-        $newPropal->copyContactsFromOrigin($this, $warnings);
+        $new_propal->copyContactsFromOrigin($this, $warnings);
 
         // Copie des remises globales:
-        $newPropal->copyRemisesGlobalesFromOrigin($this, $warnings);
+        $new_propal->copyRemisesGlobalesFromOrigin($this, $warnings);
 
-        // Ajout de la ligne "Proposition commerciale révisée" dans la propale actuelle: 
+        // Ajout de la ligne "Proposition commerciale révisée / refusée" dans la révision: 
+        $totHt = (float) $this->dol_object->total_ht;
+
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
-        $line->desc = 'Proposition commerciale révisée';
+        $line->desc = ucfirst($this->getLabel() . ($is_refus ? 'refusé' : ' révisé') . $this->e());
         $line->tva_tx = (($this->dol_object->total_ttc / ($totHt != 0 ? $totHt : 1) - 1) * 100);
         $line->pu_ht = -$totHt;
         $line->pa_ht = -$totHt;
@@ -1268,7 +1326,10 @@ class Bimp_Propal extends Bimp_PropalTemp
             $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Erreurs suite à la création de la ligne "révision"');
         }
 
-        return $new_id_propal;
+        $this->checkLines();
+        $new_propal->checkLines();
+
+        return $new_propal->id;
     }
 
     public function createSignature($init_docu_sign = false, $open_public_acces = true, $id_contact = 0, $email_content = '', &$warnings = array(), &$success = '')

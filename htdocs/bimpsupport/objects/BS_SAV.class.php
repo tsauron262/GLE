@@ -2013,17 +2013,17 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $html .= '</div>';
             }
         }
-        
-        
+
+
         $margeMini = 15;
-        foreach($propal->getLines('product') as $line){
+        foreach ($propal->getLines('product') as $line) {
             $dol_line = $line->getChildObject('dol_line');
-            if($dol_line->getData('buy_price_ht') > 0){
+            if ($dol_line->getData('buy_price_ht') > 0 && $dol_line->getData('qty') > 0) {
                 $pu = $dol_line->getData('total_ht') / $dol_line->getData('qty');
                 $marge = ($pu - $dol_line->getData('buy_price_ht')) / $pu * 100;
-                if($marge < $margeMini){
+                if ($marge < $margeMini) {
                     $pro = $line->getChildObject('product');
-                    $html .= BimpRender::renderAlerts('Attention le ligne avec le produit '.$pro->getLink().' à une marge de '.price($marge).' %');
+                    $html .= BimpRender::renderAlerts('Attention la ligne avec le produit ' . $pro->getLink() . ' a une marge de ' . price($marge) . ' %');
                 }
             }
         }
@@ -3082,7 +3082,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $errors;
     }
 
-    public function reviewPropal(&$warnings = array())
+    public function reviewPropal_old(&$warnings = array())
     {
         $errors = array();
 
@@ -3140,9 +3140,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                     // Copie des lignes: 
                     // Maintenant géré dans propal.class.php (maj Dol16) 
-//                    $warnings = BimpTools::merge_array($warnings, $new_propal->createLinesFromOrigin($propal, array(
-//                                        'is_review' => true
-//                    )));
+                    $warnings = BimpTools::merge_array($warnings, $new_propal->createLinesFromOrigin($propal, array(
+                                        'is_review' => true
+                    )));
 
                     // Check des AppleParts: 
                     $new_apple_parts_lines = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SavPropalLine', array(
@@ -3172,6 +3172,75 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     // Copie des remises globales: 
                     $new_propal->copyRemisesGlobalesFromOrigin($propal, $warnings);
 
+                    // Traitement de la garantie: 
+                    $this->processPropalGarantie();
+                } else {
+                    $errors[] = 'Echec de la mise en révision du devis';
+                }
+            } else {
+                $errors[] = 'Le devis n\'a pas besoin d\'être révisé car il est toujours au statut "Brouillon"';
+            }
+        }
+
+        return $errors;
+    }
+
+    public function reviewPropal(&$warnings = array())
+    {
+        $errors = array();
+
+        $old_propal = $this->getChildObject('propal');
+        $client = $this->getChildObject('client');
+
+        if (!in_array((int) $this->getData('status'), self::$propal_reviewable_status)) {
+            $errors[] = 'Le devis ne peux pas être révisé selon le statut actuel du SAV';
+        } elseif (!(int) $this->getData('id_propal')) {
+            $errors[] = 'Proposition commerciale absente';
+        } elseif (is_null($client) || !$client->isLoaded()) {
+            $errors[] = 'Client absent';
+        } else {
+            if ($old_propal->dol_object->statut > 0) {
+
+                // Création de la révision: 
+                $new_id_propal = $old_propal->review(false, $errors, $warnings);
+
+                $new_propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', (int) $new_id_propal);
+                if (!BimpObject::objectLoaded($new_propal)) {
+                    $errors[] = 'Le nouveau devis d\'ID ' . $new_id_propal . ' n\'existe pas';
+                }
+
+                if (!count($errors) && BimpObject::objectLoaded($new_propal)) {
+                    $errors = BimpTools::merge_array($errors, $this->setNewStatus(self::BS_SAV_EXAM_EN_COURS));
+                    global $user, $langs;
+                    $this->addNote('Devis mis en révision le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+                    $warnings = BimpTools::merge_array($warnings, $this->removeReservations());
+
+                    $this->updateField('id_propal', (int) $new_id_propal, null, true);
+
+                    $asso = new BimpAssociation($this, 'propales');
+                    $asso->addObjectAssociation((int) $new_id_propal);
+
+                    // Check des AppleParts: 
+                    $new_apple_parts_lines = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SavPropalLine', array(
+                                'id_obj'             => (int) $new_id_propal,
+                                'linked_object_name' => 'sav_apple_part'
+                    ));
+
+                    if (!empty($new_apple_parts_lines)) {
+                        foreach ($new_apple_parts_lines as $line) {
+                            $apple_part = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_ApplePart', (int) $line->getData('linked_id_object'));
+                            if (!BimpObject::objectLoaded($apple_part)) {
+                                $line->set('deletable', 1);
+                                $line->set('editable', 1);
+                                $line->set('remisable', 1);
+                                $line->set('linked_id_object', 0);
+                                $line->set('linked_object_name', '');
+
+                                $w = array();
+                                $line->update($w, true);
+                            }
+                        }
+                    }
                     // Traitement de la garantie: 
                     $this->processPropalGarantie();
                 } else {
@@ -4864,7 +4933,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $client = $this->getChildObject('client');
 
                         $encoursActu = $client->getAllEncoursForSiret(true)['total'];
-                        $authorisation = $client->getData('outstanding_limit')*1.2;
+                        $authorisation = $client->getData('outstanding_limit') * 1.2;
                         $besoin = $encoursActu + $propal->dol_object->total_ht;
 
                         if ($besoin > ($authorisation + 1))
@@ -5055,55 +5124,35 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if (is_null($propal) || !$propal->isLoaded()) {
                     $errors[] = 'Proposition commerciale absente';
                 } else {
-                    require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpRevision.php");
+                    $new_id_propal = $propal->review(false, $errors, $warnings, true);
 
-                    $old_id_propal = $propal->id;
-                    $revision = new BimpRevisionPropal($propal->dol_object);
-                    $new_id_propal = $revision->reviserPropal(array(null, null), true, self::$propal_model_pdf, $errors);
+                    if (!$new_id_propal && !count($errors)) {
+                        $errors[] = 'Echec de la fermeture de la proposition commerciale';
+                    }
 
-                    $this->addNote('Devis fermé après refus par le client le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
-
-                    if ($new_id_propal && !count($errors)) {
+                    if (!count($errors)) {
+                        $this->addNote('Devis fermé après refus par le client le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                         $client = $this->getChildObject('client');
 
                         if (is_null($client) || !$client->isLoaded()) {
                             $errors[] = 'Client absent';
                         } else {
-                            //Anulation du montant de la propal
-                            $totHt = $propal->dol_object->total_ht;
-                            $totTtc = $propal->dol_object->total_ttc;
-                            if ($totHt == 0)
-                                $tTva = 0;
-                            else {
-                                $tTva = (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100);
-                            }
-                            $propal->fetch($old_id_propal);
-
-                            $propal->dol_object->statut = 0;
-                            $propal->dol_object->addline("Devis refusé", -($totHt) / (100 - $client->dol_object->remise_percent) * 100, 1, $tTva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, 0); //-$totPa);
-
-                            $this->set('id_propal', $new_id_propal);
-                            $propal->fetch($new_id_propal);
+                            $this->updateField('id_propal', $new_id_propal);
+                            $new_propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $new_id_propal);
 
                             $frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
-                            $propal->dol_object->addline(
+                            $new_propal->dol_object->addline(
                                     "Machine(s) : " . $this->getNomMachine() .
                                     "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, 3470, $client->dol_object->remise_percent, 'HT', null, null, 1);
 
-                            $propal->fetch($propal->id);
-                            $propal->dol_object->valid($user);
+                            $new_propal->fetch($new_propal->id);
+                            $new_propal->dol_object->valid($user);
 
-                            $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
-                            $propal->dol_object->closeProposal($user, 2, "Auto via SAV");
+                            $new_propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
+                            $new_propal->dol_object->closeProposal($user, 2, "Auto via SAV");
                             $this->removeReservations();
-                            //                        $apple_part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
-                            //                        $apple_part->deleteBy(array(
-                            //                            'id_sav' => (int) $this->id
-                            //                        ));
                             $msg_type = 'revPropRefu';
                         }
-                    } else {
-                        $errors[] = 'Echec de la fermeture de la proposition commerciale';
                     }
                 }
             } else {
@@ -5136,7 +5185,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                     $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
                                 }
                                 if (count($rep_errors)) {
-                                    $succesCallback .= 'setTimeout(function(){bimpModal.newContent("Erreur GSX", "'.implode('\n', $rep_errors).'");}, 500);';
+                                    $succesCallback .= 'setTimeout(function(){bimpModal.newContent("Erreur GSX", "' . implode('\n', $rep_errors) . '");}, 500);';
                                     $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation (2) d\'ID ' . $item['id']);
                                 }
                             }
@@ -5162,8 +5211,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => $succesCallback
         );
     }
@@ -5209,7 +5258,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if ($impayee > 1) {
                 //on vérifie encours
                 $encoursActu = $client_fac->getAllEncoursForSiret(true)['total'];
-                $authorisation = $client_fac->getData('outstanding_limit')*1.2;
+                $authorisation = $client_fac->getData('outstanding_limit') * 1.2;
                 $besoin = $encoursActu + $impayee;
 
                 if ($besoin > $authorisation) {
@@ -5432,7 +5481,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 }
 
                                 $mode_reglement = null;
-                                
+
                                 if ($payment_1_set) {
                                     $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
                                 } else {
@@ -5474,11 +5523,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
                                 $facture->array_options['options_centre'] = $this->getData('code_centre');
                                 $facture->array_options['options_expertise'] = 90;
-                                foreach($propal->getRibArray() as $idR => $inut){
+                                foreach ($propal->getRibArray() as $idR => $inut) {
                                     $facture->array_options['options_rib_client'] = $idR;
                                     break;
                                 }
-                                
+
 //                                $facture->array_options['options_rib_client'] = 
 
                                 $facture->linked_objects[$facture->origin] = $facture->origin_id;

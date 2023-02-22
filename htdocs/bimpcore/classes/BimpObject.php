@@ -222,7 +222,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if (is_a($instance, 'BimpObject')) {
+        if (is_a($instance, 'BimpObject')) {            
             if (!is_null($id_object)) {
                 $instance->fetch($id_object, $parent);
             } else {
@@ -354,6 +354,8 @@ class BimpObject extends BimpCache
 
             if (is_object($this->dol_object)) {
                 $this->dol_object->db = $this->db->db;
+            } else {
+                die('FAIL - ' . $this->object_name);
             }
             $this->use_commom_fields = 0;
         }

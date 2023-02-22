@@ -3,7 +3,7 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 
 class BimpComm extends BimpDolObject
- {
+{
 
     const BC_ZONE_FR = 1;
     const BC_ZONE_UE = 2;
@@ -2975,7 +2975,7 @@ class BimpComm extends BimpDolObject
                         }
 
                         if (!count($err)) {
-                            $err = $new_line->attributeEquipment($data['id_equipment'], 0, true, false );
+                            $err = $new_line->attributeEquipment($data['id_equipment'], 0, true, false);
                         }
                     }
                 }
@@ -3006,6 +3006,9 @@ class BimpComm extends BimpDolObject
     {
         if ($this->isLoaded($errors)) {
             if (BimpObject::objectLoaded($origin) && is_a($origin, 'BimpComm')) {
+                $cache_key = $this->object_name . '_' . $this->id . '_remises_globales';
+                BimpCache::unsetCacheKey($cache_key);
+
                 // Conversion des remises globales externes: 
                 $lines = $origin->getLines('not_text');
                 $ext_rgs = array();

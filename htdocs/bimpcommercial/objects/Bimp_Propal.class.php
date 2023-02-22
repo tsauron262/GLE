@@ -1301,7 +1301,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         $totHt = (float) $this->dol_object->total_ht;
 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine');
-        $line->desc = ucfirst($this->getLabel() . ($is_refus ? 'refusé' : ' révisé') . $this->e());
+        $line->desc = ucfirst($this->getLabel() . ($is_refus ? ' refusé' : ' révisé') . $this->e());
         $line->tva_tx = (($this->dol_object->total_ttc / ($totHt != 0 ? $totHt : 1) - 1) * 100);
         $line->pu_ht = -$totHt;
         $line->pa_ht = -$totHt;

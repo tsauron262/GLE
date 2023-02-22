@@ -3,7 +3,7 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 
 class BimpComm extends BimpDolObject
-{
+ {
 
     const BC_ZONE_FR = 1;
     const BC_ZONE_UE = 2;
@@ -2970,7 +2970,13 @@ class BimpComm extends BimpDolObject
                             $data['pa_ht'] *= -1;
                         }
 
-                        $new_line->attributeEquipment($data['id_equipment']);
+                        if ($params['is_review']) {
+                            $err = $equipmentLine->delete($warnings, true);
+                        }
+
+                        if (!count($err)) {
+                            $err = $new_line->attributeEquipment($data['id_equipment'], 0, true, false );
+                        }
                     }
                 }
             }

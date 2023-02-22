@@ -178,7 +178,7 @@ class BTC_export_facture extends BTC_export
         $total_lignes = 0;
         $ignore = false;
         for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
-            if ($facture->dol_object->lines[$i]->desc == "Acompte" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
+            if ($facture->dol_object->lines[$i]->desc == "Acompte" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total_ht')) {
                 $ignore = true;
 //                $force706 = true;
             }
@@ -499,7 +499,7 @@ class BTC_export_facture extends BTC_export
         // Vérifi si ue ligne de la facture contien le mot : Acompte et est le total de la facture
         if (!$ignore_compta) {
             for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
-                if ($facture->dol_object->lines[$i]->desc == "Acompte" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
+                if ($facture->dol_object->lines[$i]->desc == "Acompte" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total_ht')) {
                     $ignore_compta = true;
                 }
             }

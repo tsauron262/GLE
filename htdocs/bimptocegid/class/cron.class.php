@@ -102,6 +102,7 @@
                         $db->commit();
                         $this->FTP();
                         $this->send_rapport(2);
+                        return 0;
                     } else {
                         //if($this->export_class->rollBack) {
                             $db->rollback(); // Annule la transaction

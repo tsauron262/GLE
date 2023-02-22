@@ -32,6 +32,12 @@ objects:
             bimp_object: 
                 module: bimpequipment
                 name: BE_Package
+                
+    productPackage:
+        instance:
+            bimp_object:
+                module: bimpequipment
+                name: BE_PackageProduct
             
     immos: 
         instance: 
@@ -105,6 +111,15 @@ sections:
                 - type: list
                   list: 
                       object: package  
+                      
+        productPackage:
+            label: Produit en Package
+            show: 
+                is_module_active: bimpequipment
+            sections: 
+                - type: list
+                  list: 
+                      object: productPackage
         immos:
             label: Equipements + Package
             show: 

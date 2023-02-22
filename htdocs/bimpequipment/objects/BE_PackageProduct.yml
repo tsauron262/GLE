@@ -54,6 +54,8 @@ filters_panel:
     default: 
         filters: 
             id_product: 
+            package:places:type:
+            package:places:position:
             
 lists: 
     default: 
@@ -72,6 +74,18 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         cols: 
+            id_package:
+            id_product: 
+            qty:
+            infos:
+            place: 
+                label: Emplacement
+                value: 
+                    callback: displayCurrentPlace
+                
+    package:
+        extends: default
+        cols:
             id_product: 
             qty:
             infos:

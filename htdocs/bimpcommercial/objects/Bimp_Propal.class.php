@@ -2213,7 +2213,8 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         if (BimpObject::objectLoaded($client)) {
             $fields = array(
-                'email' => $client->getData('email')
+                'fk_soc' => $client->id,
+                'email'  => $client->getData('email')
             );
 
             if (!$client->isCompany()) {

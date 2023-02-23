@@ -49,7 +49,7 @@
             $this->facturation_auto();
             $this->notifDemainFacturation();
             $this->relanceAvenantProvisoir();
-            return "OK";
+            return 0;
         }
         
         public function relanceAvenantProvisoir() {

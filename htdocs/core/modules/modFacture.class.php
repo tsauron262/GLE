@@ -490,6 +490,204 @@ class modFacture extends DolibarrModules
 				'method' => 'fetch',
 				'element' => 'facture'
 			),
+                        'fd.fk_product' => array(
+				'rule'=>'fetchidfromref',
+				'file'=>'/product/class/product.class.php',
+				'class'=>'Product',
+				'method'=>'fetch'
+			)
+		);
+                
+                
+                // Import Paiement
+		$r++;
+		$this->import_code[$r] = $this->rights_class.'_'.$r;
+		$this->import_label[$r] = "Paiement"; // Translation key
+		$this->import_icon[$r] = $this->picto;
+		$this->import_entities_array[$r] = array(); // We define here only fields that use another icon that the one defined into import_icon
+		$this->import_tables_array[$r] = array('p' => MAIN_DB_PREFIX.'paiement');
+                $this->import_tables_creator_array[$r] = array('p' => 'fk_user_creat'); // Fields to store import user id
+		$this->import_fields_array[$r] = array(
+			'p.ref' => 'Ref Paiement*',
+			'p.datec' => 'datecreation',
+			'p.datep' => 'Date Paiement',
+			'p.amount' => 'Total',
+			'p.fk_paiement' => 'Type paiement',
+			
+		);
+		
+		$import_sample = array(
+//			'fd.fk_facture' => '(PROV00001)',
+//			'fd.fk_parent_line' => '',
+//			'fd.fk_product' => '',
+//			'fd.label' => '',
+//			'fd.description' => 'Test product',
+//			'fd.vat_src_code' => '',
+//			'fd.tva_tx' => '21',
+//			// localtax1_tx
+//			// localtax1_type
+//			// localtax2_tx
+//			// localtax2_type
+//			'fd.qty' => '1',
+//			'fd.remise_percent' => '0',
+//			// remise
+//			// fk_remise_except
+//			// subprice
+//			// price
+//			'fd.total_ht' => '100',
+//			'fd.total_tva' => '21',
+//			// total_localtax1
+//			// total_localtax2
+//			'fd.total_ttc' => '121',
+//			'fd.product_type' => '0',
+//			'fd.date_start' => '',
+//			'fd.date_end' => '',
+//			// info_bits
+//			// buy_price_ht
+//			// fk_product_fournisseur_price
+//			// specia_code
+//			// rang
+//			// fk_contract_line
+//			'fd.fk_unit' => '',
+//			// fk_code_ventilation
+//			// situation_percent
+//			// fk_prev_id
+//			// fk_user_author
+//			// fk_user_modif
+//			// ref_ext
+//			'fd.multicurrency_code' => 'EUR',
+//			'fd.multicurrency_tx' => '21',
+//			'fd.multicurrency_total_ht' => '100',
+//			'fd.multicurrency_total_tva' => '21',
+//			'fd.multicurrency_total_ttc' => '121'
+		);
+		$this->import_examplevalues_array[$r] = array_merge($import_sample, $import_extrafield_sample);
+		$this->import_updatekeys_array[$r] = array(
+			'p.ref' => 'Réf',
+//			'fd.fk_facture' => 'Invoice Id'
+		);
+		$this->import_convertvalue_array[$r] = array(
+			'p.fk_paiement' => array(
+				'rule' => 'fetchidfromref',
+				'file' => '/compta/paiement/class/cpaiement.class.php',
+				'class' => 'Cpaiement',
+				'method' => 'fetch',
+				'element' => 'c_paiement'
+			),
+//			'fd.fk_facture' => array(
+//				'rule' => 'fetchidfromref',
+//				'file' => '/compta/facture/class/facture.class.php',
+//				'class' => 'Facture',
+//				'method' => 'fetch',
+//				'element' => 'facture'
+//			),
+//			'fd.fk_projet' => array(
+//				'rule' => 'fetchidfromref',
+//				'file' => '/projet/class/project.class.php',
+//				'class' => 'Project',
+//				'method' => 'fetch',
+//				'element' => 'facture'
+//			),
+//                        'fd.fk_product' => array(
+//				'rule'=>'fetchidfromref',
+//				'file'=>'/product/class/product.class.php',
+//				'class'=>'Product',
+//				'method'=>'fetch'
+//			)
+		);
+                // Import Paiement fact
+		$r++;
+		$this->import_code[$r] = $this->rights_class.'_'.$r;
+		$this->import_label[$r] = "Paiement Facture"; // Translation key
+		$this->import_icon[$r] = $this->picto;
+		$this->import_entities_array[$r] = array(); // We define here only fields that use another icon that the one defined into import_icon
+		$this->import_tables_array[$r] = array('pf' => MAIN_DB_PREFIX.'paiement_facture');
+//                $this->import_tables_creator_array[$r] = array('p' => 'fk_user_creat'); // Fields to store import user id
+		$this->import_fields_array[$r] = array(
+			'pf.fk_paiement' => 'Id Paiement*',
+			'pf.fk_facture' => 'Id Facture*',
+			'pf.amount' => 'montant',
+			
+		);
+		
+		$import_sample = array(
+//			'fd.fk_facture' => '(PROV00001)',
+//			'fd.fk_parent_line' => '',
+//			'fd.fk_product' => '',
+//			'fd.label' => '',
+//			'fd.description' => 'Test product',
+//			'fd.vat_src_code' => '',
+//			'fd.tva_tx' => '21',
+//			// localtax1_tx
+//			// localtax1_type
+//			// localtax2_tx
+//			// localtax2_type
+//			'fd.qty' => '1',
+//			'fd.remise_percent' => '0',
+//			// remise
+//			// fk_remise_except
+//			// subprice
+//			// price
+//			'fd.total_ht' => '100',
+//			'fd.total_tva' => '21',
+//			// total_localtax1
+//			// total_localtax2
+//			'fd.total_ttc' => '121',
+//			'fd.product_type' => '0',
+//			'fd.date_start' => '',
+//			'fd.date_end' => '',
+//			// info_bits
+//			// buy_price_ht
+//			// fk_product_fournisseur_price
+//			// specia_code
+//			// rang
+//			// fk_contract_line
+//			'fd.fk_unit' => '',
+//			// fk_code_ventilation
+//			// situation_percent
+//			// fk_prev_id
+//			// fk_user_author
+//			// fk_user_modif
+//			// ref_ext
+//			'fd.multicurrency_code' => 'EUR',
+//			'fd.multicurrency_tx' => '21',
+//			'fd.multicurrency_total_ht' => '100',
+//			'fd.multicurrency_total_tva' => '21',
+//			'fd.multicurrency_total_ttc' => '121'
+		);
+		$this->import_examplevalues_array[$r] = array_merge($import_sample, $import_extrafield_sample);
+		$this->import_updatekeys_array[$r] = array(
+//			'p.ref' => 'Réf',
+//			'fd.fk_facture' => 'Invoice Id'
+		);
+		$this->import_convertvalue_array[$r] = array(
+			'pf.fk_paiement' => array(
+				'rule' => 'fetchidfromref', 
+				'file' => '/compta/paiement/class/paiement.class.php',
+				'class' => 'Paiement',
+				'method' => 'fetch',
+				'element' => 'paiement'
+			),
+			'pf.fk_facture' => array(
+				'rule' => 'fetchidfromref',
+				'file' => '/compta/facture/class/facture.class.php',
+				'class' => 'Facture',
+				'method' => 'fetch',
+				'element' => 'facture'
+			),
+//			'fd.fk_projet' => array(
+//				'rule' => 'fetchidfromref',
+//				'file' => '/projet/class/project.class.php',
+//				'class' => 'Project',
+//				'method' => 'fetch',
+//				'element' => 'facture'
+//			),
+//                        'fd.fk_product' => array(
+//				'rule'=>'fetchidfromref',
+//				'file'=>'/product/class/product.class.php',
+//				'class'=>'Product',
+//				'method'=>'fetch'
+//			)
 		);
 
 

@@ -426,6 +426,12 @@ class modCommande extends DolibarrModules
 				'method'  => 'fetch',
 				'element' => 'commande'
 			],
+                        'cd.fk_product' => array(
+				'rule'=>'fetchidfromref',
+				'file'=>'/product/class/product.class.php',
+				'class'=>'Product',
+				'method'=>'fetch'
+			)
 		];
 	}
 

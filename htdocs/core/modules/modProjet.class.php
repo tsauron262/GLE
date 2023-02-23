@@ -295,6 +295,31 @@ class modProjet extends DolibarrModules
 		// Import list of tasks
 		if (empty($conf->global->PROJECT_HIDE_TASKS)) {
 			$r++;
+			$this->import_code[$r] = 'projects';
+			$this->import_label[$r] = 'Projet';
+			$this->import_icon[$r] = 'project';
+//			$this->import_entities_array[$r] = array('t.fk_projet'=>'project'); // We define here only fields that use another icon that the one defined into import_icon
+			$this->import_tables_array[$r] = array('t'=>MAIN_DB_PREFIX.'projet'/*, 'extra'=>MAIN_DB_PREFIX.'projet_task_extrafields'*/); // List of tables to insert into (insert done in same order)
+                        $this->import_tables_creator_array[$r] = array('t' => 'fk_user_creat'); // Fields to store import user id
+			$this->import_fields_array[$r] = array('t.fk_soc'=>'Societe', 't.datec'=>'Date create', 't.ref'=>'Ref*', 't.title'=>"Titre", 't.description'=>"Desc", 't.fk_statut'=>"Statut");
+                        $this->import_updatekeys_array[$r] = array('t.ref' => 'Ref');
+                        $this->import_convertvalue_array[$r] = array(
+                            't.fk_soc' => array(
+                                    'rule' => 'fetchidfromref',
+                                    'file' => '/societe/class/societe.class.php',
+                                    'class' => 'Societe',
+                                    'method' => 'fetch',
+                                    'element' => 'ThirdParty'
+                            ),
+                        );
+			//$this->import_convertvalue_array[$r]=array('s.fk_soc'=>array('rule'=>'lastrowid',table='t');
+//			$this->import_regex_array[$r] = array('t.dateo'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$', 't.datee'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$', 't.datec'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]( [0-9][0-9]:[0-9][0-9]:[0-9][0-9])?$');
+			$this->import_examplevalues_array[$r] = array('t.fk_projet'=>'MyProjectRef', 't.ref'=>"auto or TK2010-1234", 't.label'=>"My task", 't.progress'=>"0 (not started) to 100 (finished)", 't.datec'=>'1972-10-10', 't.note_private'=>"My private note", 't.note_public'=>"My public note");
+		}
+
+		// Import list of tasks
+		if (empty($conf->global->PROJECT_HIDE_TASKS)) {
+			$r++;
 			$this->import_code[$r] = 'tasksofprojects';
 			$this->import_label[$r] = 'ImportDatasetTasks';
 			$this->import_icon[$r] = 'task';
@@ -317,6 +342,30 @@ class modProjet extends DolibarrModules
 				't.fk_projet'=>array('rule'=>'fetchidfromref', 'classfile'=>'/projet/class/project.class.php', 'class'=>'Project', 'method'=>'fetch', 'element'=>'Project'),
 				't.ref'=>array('rule'=>'getrefifauto', 'class'=>(empty($conf->global->PROJECT_TASK_ADDON) ? 'mod_task_simple' : $conf->global->PROJECT_TASK_ADDON), 'path'=>"/core/modules/project/task/".(empty($conf->global->PROJECT_TASK_ADDON) ? 'mod_task_simple' : $conf->global->PROJECT_TASK_ADDON).'.php')
 			);
+			//$this->import_convertvalue_array[$r]=array('s.fk_soc'=>array('rule'=>'lastrowid',table='t');
+			$this->import_regex_array[$r] = array('t.dateo'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$', 't.datee'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$', 't.datec'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]( [0-9][0-9]:[0-9][0-9]:[0-9][0-9])?$');
+			$this->import_examplevalues_array[$r] = array('t.fk_projet'=>'MyProjectRef', 't.ref'=>"auto or TK2010-1234", 't.label'=>"My task", 't.progress'=>"0 (not started) to 100 (finished)", 't.datec'=>'1972-10-10', 't.note_private'=>"My private note", 't.note_public'=>"My public note");
+		}
+                
+                // Import time of tasks
+		if (empty($conf->global->PROJECT_HIDE_TASKS)) {
+			$r++;
+			$this->import_code[$r] = 'timetask';
+			$this->import_label[$r] = 'Temps sur tache';
+			$this->import_icon[$r] = 'task';
+//			$this->import_entities_array[$r] = array('t.fk_task'=>'task'); // We define here only fields that use another icon that the one defined into import_icon
+			$this->import_tables_array[$r] = array('t'=>MAIN_DB_PREFIX.'projet_task_time'); // List of tables to insert into (insert done in same order)
+			$this->import_fields_array[$r] = array('t.task_date'=>'Date', 't.task_duration'=>'Duree', 't.note'=>'Note', 'fk_task' => 'Tache');
+		
+                        $this->import_convertvalue_array[$r] = array(
+                            't.fk_task' => array(
+                                    'rule' => 'fetchidfromref',
+                                    'file' => '/projet/class/task.class.php',
+                                    'class' => 'Task',
+                                    'method' => 'fetch',
+                                    'element' => 'projet_task'
+                            ),
+                        );
 			//$this->import_convertvalue_array[$r]=array('s.fk_soc'=>array('rule'=>'lastrowid',table='t');
 			$this->import_regex_array[$r] = array('t.dateo'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$', 't.datee'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$', 't.datec'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]( [0-9][0-9]:[0-9][0-9]:[0-9][0-9])?$');
 			$this->import_examplevalues_array[$r] = array('t.fk_projet'=>'MyProjectRef', 't.ref'=>"auto or TK2010-1234", 't.label'=>"My task", 't.progress'=>"0 (not started) to 100 (finished)", 't.datec'=>'1972-10-10', 't.note_private'=>"My private note", 't.note_public'=>"My public note");

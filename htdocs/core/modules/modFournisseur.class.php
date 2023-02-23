@@ -578,7 +578,7 @@ class modFournisseur extends DolibarrModules
 		}
 		// End add extra fields
 		$this->import_fieldshidden_array[$r] = array('extra.fk_object' => 'lastrowid-'.MAIN_DB_PREFIX.'facture_fourn');
-		$this->import_regex_array[$r] = array('f.ref' => '(SI\d{4}-\d{4}|PROV.{1,32}$)', 'f.multicurrency_code' => 'code@'.MAIN_DB_PREFIX.'multicurrency');
+		$this->import_regex_array[$r] = array(/*'f.ref' => '(SI\d{4}-\d{4}|PROV.{1,32}$)',*/ 'f.multicurrency_code' => 'code@'.MAIN_DB_PREFIX.'multicurrency');
 		$import_sample = array(
 			'f.ref' => '(PROV001)',
 			'f.ref_supplier' => 'Supplier1',
@@ -668,6 +668,24 @@ class modFournisseur extends DolibarrModules
 				$import_extrafield_sample[$fieldname] = $fieldlabel;
 			}
 		}
+                
+		$this->import_convertvalue_array[$r] = array(
+                    'fd.fk_facture_fourn' => array(
+                            'rule' => 'fetchidfromref',
+                            'file' => '/fourn/class/fournisseur.facture.class.php',
+                            'class' => 'FactureFournisseur',
+                            'method' => 'fetch',
+                            'element' => 'facture'
+                    ),
+
+                    'fd.fk_product' => array(
+                            'rule'=>'fetchidfromref',
+                            'file'=>'/product/class/product.class.php',
+                            'class'=>'Product',
+                            'method'=>'fetch'
+                    )
+                );
+                
 		// End add extra fields
 		$this->import_fieldshidden_array[$r] = array('extra.fk_object' => 'lastrowid-'.MAIN_DB_PREFIX.'facture_fourn_det');
 		$this->import_regex_array[$r] = array('fd.product_type' => '[0|1]$', 'fd.fk_product' => 'rowid@'.MAIN_DB_PREFIX.'product', 'fd.multicurrency_code' => 'code@'.MAIN_DB_PREFIX.'multicurrency');

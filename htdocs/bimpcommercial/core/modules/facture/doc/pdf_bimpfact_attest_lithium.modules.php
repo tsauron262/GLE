@@ -53,7 +53,7 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
         $pdf->AddPage();
         $pdf->AddFont('Helvetica');
 
-        $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpcommercial/core/modules/facture/doc/' . $modele .'.pdf');
+        $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpcommercial/core/modules/facture/doc/' . $modele . '.pdf');
         $tplidx1 = $pdf->importPage(1, "/MediaBox");
         $pdf->useTemplate($tplidx1, 0, 0, 0, 0, true);
 
@@ -64,7 +64,6 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
         
         $i = 0 ;
         $max_row = 5;
-        $max_col = 3;
         $init_x = 119;
         $init_y = 48.8;
         $dy = -3;
@@ -152,18 +151,17 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
     public function getCommandesFournisseur($commande, $facture) {
         // Obtention des lignes de la facture
         $fact_lines = $facture->getChildrenObjects('lines');
-
+return array();
         // Commandes fournisseur avec équipement
         $cfs_eq = array();
         // Boucle sur toutes les lignes de facture AVEC équipement
         foreach($fact_lines as $fact_line) {
             if ((int) $fact_line->id_product) {
                 $product = $fact_line->getProduct();
-//                $this->warnings[] = "<b>Eq Ligne considérée </b>" . $product->getNomUrl();
+
                 if(!$product->isTypeService()) {
                     if (BimpObject::objectLoaded($product)) {
                         if ($product->isSerialisable()) {
-//                            $fact_lines_equipment = $fact_line->getChildrenObjects('equipment_lines');
                             $fact_lines_equipment = $fact_line->getEquipmentLines();
                             if(count($fact_lines_equipment)) {
                                 $display_eq = '';
@@ -191,7 +189,6 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                                     if(!$origine_trouvee)
                                         $this->errors[] = 'ID de la commande fournisseur associé à ' . $equipment->getNomUrl() . ' inconnu.';
                                 }
-//                                $this->warnings[] = "<b>Eq trouvé pour " . $product->getNomUrl() . "</b>" . $display_eq;
                             } else {
                                 $this->errors[] = 'La ligne de facture ' . $product->getNomUrl() . ' ne contient aucun équipement';
                             }
@@ -201,9 +198,6 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                     }
                 }
             }
-//            else {
-//                $this->warnings[] = "<b>Eq Ligne ignorée </b>" . $fact_line->desc;
-//            }
         }
         
         // Obtention de toutes les lignes des commandes fournisseur associé à la commande de cette facture
@@ -235,7 +229,6 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
             $origine_trouvee = 0;
             if ((int) $fact_line->id_product) {
                 $product = $fact_line->getProduct();
-//                $this->warnings[] = "<b>Prod Ligne considérée </b>" . $product->getNomUrl();
                     if(!$product->isTypeService()) {
 
                     if (BimpObject::objectLoaded($product)) {
@@ -268,9 +261,6 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
                     }
                 }
             }
-//            else {
-//                $this->warnings[] = "<b>Prod Ligne ignorée </b>" . $fact_line->desc;
-//            }
         }
         
         $cfs = array();

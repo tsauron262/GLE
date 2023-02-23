@@ -1570,6 +1570,7 @@ searches:
             - a.name_alias
             - a.code_client
             - a.siret
+            - a.phone
         fields_return: 
             0: a.nom
             1: a.name_alias

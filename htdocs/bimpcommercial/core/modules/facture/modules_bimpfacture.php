@@ -30,10 +30,10 @@ function createFactureAttachment($db, $object, $obj_type, $modele = '', &$warnin
                 if(isset($obj->warnings) and is_array($obj->warnings))
                     $warnings = BimpTools::merge_array ($warnings, $obj->warnings);
                 
-                $errors = BimpTools::merge_array($errors, $obj->errors);
-//                    }
-            } else {
-                $errors[] = "Méthode \"write_file\" inexistante";
+                    $errors = BimpTools::merge_array($errors, $obj->errors);
+
+                } else {
+                    $errors[] = "Méthode \"write_file\" inexistante";
             }
         } else {
             $errors[] = "Classe : " . $class_name . ' inexsistante';

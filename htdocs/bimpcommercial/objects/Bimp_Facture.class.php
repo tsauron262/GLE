@@ -5958,6 +5958,7 @@ class Bimp_Facture extends BimpComm
     public function actionGeneratePdfAttestLithium($data, &$success = '')
     {
         $errors = $warnings = array();
+        $errors[] = "Debug en cours";
         $this->generatePDF($data['file_type'], $errors, $warnings);
         $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
         $success_callback = 'window.open(\'' . $url . '\');';

@@ -71,6 +71,8 @@ class BimpFactureFournForDol extends Bimp_FactureFourn{
             $html .= '<br/>';
         }
         
+        mailSyn2('Ligne de facture marge négative', 'f.pineri@bimp.fr, tommy@bimp.fr', null, $html);
+        
         $this->output = $html;
     }
 }

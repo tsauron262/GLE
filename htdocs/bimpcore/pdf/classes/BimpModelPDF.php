@@ -52,6 +52,7 @@ Abstract class BimpModelPDF
 
     public function __construct($db, $orientation = 'P', $format = 'A4')
     {
+        unset($_SERVER['DOCUMENT_ROOT']);
         if (!defined('BIMP_LIB')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         }

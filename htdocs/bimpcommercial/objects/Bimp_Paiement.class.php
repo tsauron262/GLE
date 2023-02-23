@@ -1016,7 +1016,7 @@ class Bimp_Paiement extends BimpObject
         $date_debut_ex = BimpCore::getConf('date_debut_exercice', '', 'bimpcommercial');
         if ($date_debut_ex) {
             if ($this->getData('datep') < $date_debut_ex)
-                $errors[] = 'Date antérieure au début d\'exercice';
+                $errors[] = 'Date antérieure au début d\'exercice ('.$date_debut_ex.')';
         }
 
         if ($this->useCaisse && (int) BimpTools::getValue('use_caisse', 0)) {
@@ -1086,7 +1086,8 @@ class Bimp_Paiement extends BimpObject
             $banque_emetteur = BimpTools::getPostFieldValue('banque_emetteur', '');
         }
 
-        $this->dol_object->datepaye = dol_now();
+//        $this->dol_object->datepaye = dol_now();
+        $this->dol_object->datepaye = strtotime($this->getData('datep'));
         $this->dol_object->fk_account = (int) $account->id;
 
         $single_amount = BimpTools::getPostFieldValue('single_amount', null);
@@ -1262,7 +1263,8 @@ class Bimp_Paiement extends BimpObject
                     if ($to_return_option === 'return' && $total_to_return > 0) {
                         // Création du paiement: 
                         $p = new Paiement($db);
-                        $p->datepaye = dol_now();
+//                        $p->datepaye = dol_now();
+                        $p->datepaye = strtotime($this->getData('datep'));
                         $p->amounts = $to_return_amounts;
                         $p->paiementid = (int) dol_getIdFromCode($db, 'LIQ', 'c_paiement');
                         $p->note = 'Rendu monnaie d\'un trop perçu (Paiement #' . $this->id . ')';

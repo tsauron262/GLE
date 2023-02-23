@@ -32,17 +32,16 @@ class BimpCache
     public static function getBdb($no_transactions = false, $mode_archive = -1, $force_new = false)
     {
         global $db;
-        
+
         if ($mode_archive == 1) {
-            if(defined('ARCHIVE_DB_TYPE')){
+            if (defined('ARCHIVE_DB_TYPE')) {
                 if (is_null(self::$bdb_archive)) {
                     $db2 = getDoliDBInstance(ARCHIVE_DB_TYPE, ARCHIVE_DB_HOST, ARCHIVE_DB_USER, ARCHIVE_DB_PASSWORD, ARCHIVE_DB_NAME, ARCHIVE_DB_PORT);
                     self::$bdb_archive = new BimpDb($db2);
                 }
                 return self::$bdb_archive;
-            }
-            else
-                BimpCore::addlog ('Config base arichive BAD');
+            } else
+                BimpCore::addlog('Config base arichive BAD');
         }
 
         if (!$no_transactions) {
@@ -115,6 +114,14 @@ class BimpCache
         }
 
         return 0;
+    }
+
+    public static function unsetCacheKey($cache_key)
+    {
+        if (self::cacheExists($cache_key)) {
+            self::$cache[$cache_key] = null;
+            unset(self::$cache[$cache_key]);
+        }
     }
 
     // Gestion cache serveur: 
@@ -1100,7 +1107,7 @@ class BimpCache
 
                         if (preg_match('/^(.+)\.yml$/', $objFile, $matches)) {
                             $object_name = $matches[1];
-                            if(stripos($object_name, 'Archive') !== false)
+                            if (stripos($object_name, 'Archive') !== false)
                                 continue;
                             $instance = BimpObject::getInstance($f, $object_name);
                             if (is_a($instance, 'BimpObject')) {
@@ -1164,7 +1171,7 @@ class BimpCache
 
                         if (preg_match('/^(.+)\.yml$/', $objFile, $matches)) {
                             $object_name = $matches[1];
-                            if(stripos($object_name, 'Archive') !== false)
+                            if (stripos($object_name, 'Archive') !== false)
                                 continue;
                             self::$cache[$cache_key][$module][] = $object_name;
                         }
@@ -1203,8 +1210,6 @@ class BimpCache
         if (!is_a($instance, 'BimpObject')) {
             return array();
         }
-
-
 
         $use_cache_serveur = $instance->getConf('in_cache_serveur', 0, false, 'bool');
         $cacheKey = 'BimpObjectObjects_' . $module . '_' . $object_name . '_' . json_encode($filters) . '_' . $n . '_' . $order_by . '_' . $sortorder;
@@ -3092,7 +3097,7 @@ class BimpCache
         $cache_key = 'ipFromDns' . $host;
         if (!isset(self::$cache[$cache_key])) {
             $dnsData = dns_get_record($host);
-            if(is_array($dnsData)){
+            if (is_array($dnsData)) {
                 $i = rand(0, count($dnsData) - 1);
                 $ip = $dnsData[$i]['ip'];
                 self::$cache[$cache_key] = $ip;

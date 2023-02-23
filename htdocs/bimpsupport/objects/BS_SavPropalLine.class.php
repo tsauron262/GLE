@@ -104,15 +104,12 @@ class BS_SavPropalLine extends Bimp_PropalLine
         }
 
         $sav = $propal->getSav();
+        if (BimpObject::objectLoaded($sav)) {
+            $error = $sav->processPropalGarantie();
 
-        if (!BimpObject::objectLoaded($sav)) {
-            return array('ID du SAV invalide');
-        }
-
-        $error = $sav->processPropalGarantie();
-
-        if ($error) {
-            return array($error);
+            if ($error) {
+                return array($error);
+            }
         }
 
         return array();
@@ -260,11 +257,10 @@ class BS_SavPropalLine extends Bimp_PropalLine
             return array('ID du devis Absent');
         }
 
-        $sav = $propal->getSav();
-
-        if (!BimpObject::objectLoaded($sav)) {
-            return array('ID du SAV invalide');
-        }
+//        $sav = $propal->getSav();
+//        if (!BimpObject::objectLoaded($sav)) {
+//            return array('ID du SAV invalide');
+//        }
 
         $errors = parent::validate();
 

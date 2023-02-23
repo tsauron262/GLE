@@ -94,6 +94,8 @@ class BimpRevisionPropal extends BimpRevision
 
     function reviserPropal($ajoutLigne = true, $qteZeroSaufAccomte = false, $pdfModel = 'azurSAV', &$errors = array(), $socid = 0)
     {
+        // Pour Bimp_Propal, cf Bimp_Propal::review().
+      
         global $langs, $db, $user;
         $propal = $this->propal;
         if($socid < 1)

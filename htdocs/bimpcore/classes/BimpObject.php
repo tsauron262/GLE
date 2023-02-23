@@ -222,7 +222,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if (is_a($instance, 'BimpObject')) {
+        if (is_a($instance, 'BimpObject')) {            
             if (!is_null($id_object)) {
                 $instance->fetch($id_object, $parent);
             } else {

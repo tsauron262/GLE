@@ -5959,9 +5959,9 @@ class Bimp_Facture extends BimpComm
     {
         $errors = $warnings = array();
         $errors[] = "Debug en cours";
-        $this->generatePDF($data['file_type'], $errors, $warnings);
-        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
-        $success_callback = 'window.open(\'' . $url . '\');';
+//        $this->generatePDF($data['file_type'], $errors, $warnings);
+//        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
+//        $success_callback = 'window.open(\'' . $url . '\');';
 
         return array(
             'errors'           => $errors,

@@ -151,7 +151,7 @@ class pdf_bimpfact_attest_lithium extends CommonDocGenerator {
     public function getCommandesFournisseur($commande, $facture) {
         // Obtention des lignes de la facture
         $fact_lines = $facture->getChildrenObjects('lines');
-return array();
+
         // Commandes fournisseur avec équipement
         $cfs_eq = array();
         // Boucle sur toutes les lignes de facture AVEC équipement

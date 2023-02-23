@@ -362,6 +362,8 @@ if (!defined('NOSESSION')) {
 
 
             $session = new Session($dbNoTransac);
+            if(defined('EVEN_IF_ONLY_LOGIN_ALLOWED'))
+                session_destroy();
         }
         
         

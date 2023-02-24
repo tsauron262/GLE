@@ -9,3 +9,8 @@ params:
         label: Utiliser GSX V2 pour les réservations
         type: bool
         def: 1
+        
+    use_gsx_def_id:
+        label: Utiliser l'id par default si pas de token
+        type: bool
+        def: 0

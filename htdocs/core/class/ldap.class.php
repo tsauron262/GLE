@@ -1148,6 +1148,12 @@ class Ldap
 	 */
 	public function getObjectSid($ldapUser)
 	{
+                $ldapUserTab = explode('@', $ldapUser);
+                if(isset($ldapUserTab[1]))
+                    $ldapUser = $ldapUserTab[0];
+            
+            
+            
 		$criteria = '('.$this->getUserIdentifier().'='.$ldapUser.')';
 		$justthese = array("objectsid");
 

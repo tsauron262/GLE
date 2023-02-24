@@ -147,7 +147,8 @@ class GSX
         $this->shipTo = GSX_Const::$default_ids['ship_to'];
 
         if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_service']) &&
-                $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_service'] != "") {
+                $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_service'] != ""
+                && ($user->array_options['options_gsx_acti_token'] != "" || !BimpCore::getConf('use_gsx_def_id', false, 'bimpapple'))) {
             $userId = $user->array_options['options_apple_id'];
             $serviceAccountNo = $user->array_options['options_apple_service'];
             $this->shipTo = $user->array_options['options_apple_shipto'];

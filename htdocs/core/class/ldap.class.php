@@ -784,7 +784,17 @@ class Ldap
 		*/
 
 		// Use the method fsockopen to test tcp connect. No way to ignore ssl certificate errors with this method !
+                /*moddrsi
 		$op = @fsockopen($host, $port, $errno, $errstr, $timeout);
+                */
+                $context = stream_context_create([
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false
+                    ]
+                ]);
+                $op = stream_socket_client($host.':'.$port, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $context);
+                /*fmod drsi*/
 
 		//var_dump($op);
 		if (!$op) {

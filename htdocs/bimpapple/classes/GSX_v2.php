@@ -72,7 +72,7 @@ class GSX_v2 extends GSX_Const
         }
         
         
-        if(/*$user->array_options['options_gsx_acti_token'] == "" && */BimpCore::getConf('use_gsx_def_id', false, 'bimpapple')){
+        if($user->array_options['options_gsx_acti_token'] == "" && BimpCore::getConf('use_gsx_def_id', false, 'bimpapple')){
             //passage sur les id de base
             $userT = new User(BimpCache::getBdb()->db);
             $userT->fetch(242);

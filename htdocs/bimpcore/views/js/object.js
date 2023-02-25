@@ -194,7 +194,6 @@ function setObjectNewStatus($button, object_data, new_status, extra_data, $resul
     });
 }
 
-//function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit, no_triggers, modal_format, modal_scroll_bottom, modal_title, use_bimpdatasync) {
 function setObjectAction($button, object_data, action, extra_data, $resultContainer, successCallback, options) {
     if (typeof (extra_data) === 'undefined' || !extra_data) {
         extra_data = {};
@@ -300,9 +299,9 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
                         var nbFileOk = 0;
                         var button = $(this);
                         $form.find('input[type=file]').each(function () {
-                            var id = $(this).attr('id');
+                            if ($(this).val() != '') {
+                                var id = $(this).attr('id');
                             var name = $(this).attr('name');
-                            if ($('#' + id).val() != '') {
                                 nbFile++;
                                 button.addClass('disabled');
                                 $('#' + id).simpleUpload(DOL_URL_ROOT + "/bimpcore/ajax/upload.php?id=" + name, {

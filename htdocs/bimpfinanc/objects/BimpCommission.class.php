@@ -152,6 +152,16 @@ class BimpCommission extends BimpObject
 //            )
 //        );
 
+        if (BimpCore::isEntity('bimp')) {
+//            $buttons[] = array(
+//                'label'   => 'Générer facture de commissionnement',
+//                'icon'    => 'fas_file-pdf',
+//                'onclick' => $this->getJsActionOnclick('generateFactureCommissions', array(), array(
+//                    'form_name' => 'facture_commissions'
+//                ))
+//            );
+        }
+
         return $buttons;
     }
 
@@ -791,6 +801,17 @@ class BimpCommission extends BimpObject
         );
     }
 
+    public function actionGenerateFactureCommissions($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Facture générée avec succès';
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
     // Overrides: 
 
     public function create(&$warnings = array(), $force_create = false)

@@ -35,3 +35,25 @@
 * Removed deprecated use of string in dol_print_date(). Only date allowed.
 * Deprecated property ->fk_departement is now ->state_id everywhere.
 * If you have links in your code with '&action=add', '&action=update', '&action=delete' as a parameter, you must also add '&token='.newToken() as another parameter to avoid CSRF protection errors.
+
+
+table: 
+    - nom d'origine => nouveau nom
+
+llx_propal: 
+    - tva => total_tva
+    - total => total_ttc
+
+llx_commande: 
+    - tva => total_tva
+
+llx_facture: 
+    - tva => total_tva
+    - total => total_ht
+    - facnumber => ref
+
+llx_commande_fournisseur: 
+    - tva => total_tva
+
+llx_paiement: 
+    - paiement => num_payment

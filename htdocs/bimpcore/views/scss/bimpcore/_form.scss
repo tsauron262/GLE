@@ -30,7 +30,7 @@
     .dataInputTemplate {
         display: none;
     }
-    
+
     .formGroupHeading {
         margin-bottom: 5px;
 
@@ -229,7 +229,7 @@ input, select {
     background-color: #fff;
     color: #3C3C3C;
     @include transition(all 0.5s ease);
-    
+
     &.error {
         border: 1px solid #ff0000;
         box-shadow: 0 0 2px #780000
@@ -716,7 +716,7 @@ input[type=text].large_input {
     padding: 0 6px 0 24px;
     line-height: 14px;
     vertical-align: middle;
-    
+
     &:before {
         font-family: 'FA5R';
         margin-left: -24px;
@@ -1093,6 +1093,132 @@ input[type=text].large_input {
 
             textarea {
                 min-width: 300px;
+            }
+        }
+    }
+}
+
+/*Drop Files*/
+
+.bimp_drop_files_container {
+    padding: 10px;
+    
+    .add_file_input {
+        display: none;
+    }
+    .bimp_drop_files_area {
+        @include transition(all 0.3s ease);
+        padding: 20px 10px;
+        margin: 15px 0 5px 0;
+        border: 2px dotted $gray;
+        background-color: $gray-lighter;
+
+        .drop_infos {
+            text-align: center;
+            font-size: 12px;
+            font-style: italic;
+            font-weight: bold;
+            color: darken($gray, 10%);
+        }
+
+        .drop_files {
+            padding: 10px;
+            min-height: 40px;
+
+            .file_item {
+                position: relative;
+                display: inline-block;
+                padding: 5px;
+                border: 1px solid $gray-dark;
+                margin-right: 5px;
+                margin-bottom: 5px;
+                vertical-align: top;
+
+                .file_check {
+                    color: $success;
+                    font-weight: bold;
+                    text-shadow: 1px 1px 3px $gray-dark;
+                    position: absolute;
+                    margin-left: -13px;
+                    margin-top: -15px;
+                    font-size: 19px;
+                }
+
+                .file_name {
+                    font-size: 11px;
+                    font-style: italic;
+                    color: $gray-darker;
+                }
+
+                img {
+                    height: 80px;
+                    width: auto;
+                }
+
+                .file_icon {
+                    display: inline-block;
+                    height: 80px;
+                    line-height: 60px;
+                    text-align: center;
+                    width: 100%;
+
+                    i {
+                        font-size: 32px;
+                        font-weight: bold;
+                        vertical-align: middle;
+                    }
+                }
+
+                .delete_file_zone {
+                    @include transition(all 0.3s ease);
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    left: 0;
+                    bottom: 0;
+
+                    line-height: 100px;
+                    text-align: center;
+                    background-color: rgba(60, 60, 60, 0.7);
+                    opacity: 0;
+                    cursor: pointer;
+
+
+                    i {
+                        color: #fff;
+                        vertical-align: middle;
+                        font-size: 32px;
+                    }
+
+                    &:hover {
+                        opacity: 1;
+                        
+                        i {
+                            opacity: 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        .content-loading {
+            padding: 5px!important;
+
+            .loading-spin {
+                margin: 10px;
+            }
+
+            .loading-text {
+                font-size: 12px;
+            }
+        }
+
+        &.hightlight {
+            border-color: #005AB4;
+            background-color: #DDE9F5;
+
+            .drop_infos {
+                color: #005AB4;
             }
         }
     }

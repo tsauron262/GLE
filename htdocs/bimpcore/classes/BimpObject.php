@@ -8144,7 +8144,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $html .= '<div style="font-size: 11px; font-style: italic">';
                     $html .= $file->getData('file_name');
                     $html .= '</div>';
-                    $html .= '<img src="' . $url . '" style="height: 100%; width: auto; margin: auto"/>';
+                    $html .= '<img src="' . $url . '" style="height: 92%; width: auto; margin: auto"/>';
                     $html .= '</div>';
                 }
             }

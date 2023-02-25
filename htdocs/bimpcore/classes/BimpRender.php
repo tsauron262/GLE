@@ -806,7 +806,9 @@ class BimpRender
     {
         $html = '<div class="content-loading">';
         $html .= '<div class="loading-spin"><i class="fa fa-spinner fa-spin"></i></div>';
-        $html .= '<p class="loading-text">' . $loading_text . '</p>';
+        if ($loading_text) {
+            $html .= '<p class="loading-text">' . $loading_text . '</p>';
+        }
         $html .= '</div>';
         return $html;
     }

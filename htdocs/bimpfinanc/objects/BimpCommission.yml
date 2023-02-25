@@ -271,6 +271,25 @@ forms:
               data_type: bool
               input: 
                   type: toggle
+                  
+    facture_commissions: 
+        title: Générer une facture de commission
+        icon: fas_file-pdf
+        rows: 
+            - custom: 1
+              label: Fournisseur
+              input_name: fourn
+              input: 
+                  type: select
+                  options: 
+                      techdata: TechData
+                      ingram: Ingram
+            - custom: 1
+              label: Fichier
+              input_name: file
+              input: 
+                  type: drop_files
+                  max_items: 1
     
 filters_panel: 
     default: 
@@ -318,7 +337,7 @@ lists:
             callback: getListHeaderButtons
         extra_btn: 
             callback: getListExtraBtn
-        cols: 
+        cols:
             date: 
             owner: 
             total_marges: 

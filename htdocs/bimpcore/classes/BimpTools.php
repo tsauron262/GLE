@@ -152,25 +152,89 @@ class BimpTools
         return $default_value;
     }
 
+    public static function getTmpFilesDir()
+    {
+        // On utilise un dossier par jour pour permettre de nettoyer les fichiers non déplacés. 
+        return 'bimpcore/tmp_files/' . date('Ymd');
+    }
+
     public static function getAjaxFileName($field_name)
     {
         return str_replace("C:fakepath", '', BimpTools::getPostFieldValue($field_name));
     }
 
-    public static function mouveAjaxFile(&$errors, $field_name, $dir_dest, $name_dest = null)
-    {//pas d'extension elle est géré en auto
+    public static function moveAjaxFile(&$errors, $field_name, $dir_dest, $name_dest = null)
+    {
+        // Pas d'extension elle est géré en auto
         global $user;
         if (!is_dir($dir_dest))
             mkdir($dir_dest);
-        $dir = DOL_DATA_ROOT . '/bimpcore/tmpFile/';
-        $file = $user->id . "_" . $field_name . "_" . BimpTools::getAjaxFileName($field_name);
-        if ($name_dest == null)
+
+        $dir = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir();
+        $file = $user->id . "_" . BimpTools::getAjaxFileName($field_name);
+
+        if ($name_dest == null) {
             $name_dest = BimpTools::getAjaxFileName($field_name);
+        }
+
         if (pathinfo($name_dest, PATHINFO_EXTENSION) == '') {
-            $extension = pathinfo($dir . $file, PATHINFO_EXTENSION);
+            $extension = pathinfo($file, PATHINFO_EXTENSION);
             $name_dest .= '.' . $extension;
         }
-        rename($dir . $file, $dir_dest . '/' . $name_dest);
+
+        if (!file_exists($dir . '/' . $file)) {
+            $errors[] = 'Le fichier "' . $file . '" n\'existe pas';
+        } elseif (!rename($dir . '/' . $file, $dir_dest . '/' . $name_dest)) {
+            $errors[] = 'Echec du déplacement du fichier "' . $name_dest . '" dans le dossier de destination';
+        }
+    }
+
+    public static function moveTmpFiles(&$errors, $files, $dir_dest, $name_dest = null)
+    {
+        if (!is_dir($dir_dest)) {
+            $err = BimpTools::makeDirectories($dir_dest);
+            if ($err) {
+                $errors[] = $err;
+                return false;
+            }
+        }
+
+        $dir = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir() . '/';
+
+        $i = 0;
+        foreach ($files as $file_name) {
+            $i++;
+            if (!file_exists($dir . $file_name)) {
+                $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas dans le dossier de téléchargement temporaire';
+            } else {
+                $file_dest = $dir_dest . '/';
+                if ($name_dest) {
+                    if (count($files) > 1) {
+                        $file_dest .= pathinfo($name_dest, PATHINFO_FILENAME) . '_' . $i . '.' . pathinfo($name_dest, PATHINFO_EXTENSION);
+                    } else {
+                        $file_dest .= $name_dest;
+                    }
+                } else {
+                    if (preg_match('/^(.+)_tms[0-9]+(\..+)$/', $file_name, $matches)) {
+                        $file_dest .= $matches[1] . $matches[2];
+                    } else {
+                        $file_dest .= $file_name;
+                    }
+                }
+
+                $i = 0;
+                $file_dest_tmp = $file_dest;
+                while (file_exists($file_dest_tmp)) {
+                    $i++;
+                    $file_dest_tmp = pathinfo($file_dest, PATHINFO_DIRNAME) . '/' . pathinfo($file_dest, PATHINFO_FILENAME) . '_' . $i . '.' . pathinfo($file_dest, PATHINFO_EXTENSION);
+                }
+                $file_dest = $file_dest_tmp;
+
+                if (!rename($dir . $file_name, $file_dest)) {
+                    $errors[] = 'Echec du déplacement du fichier "' . $file_name . '" dans le dossier de destination';
+                }
+            }
+        }
     }
 
     // Gestion des objects Dolibarr:

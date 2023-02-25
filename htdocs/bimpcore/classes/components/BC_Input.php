@@ -162,6 +162,11 @@ class BC_Input extends BimpComponent
         'signature_pad'               => array(
             'expand'         => array('data_type' => 'bool', 'default' => 0),
             'check_mentions' => array('data_type' => 'array', 'compile' => true, 'default' => array())
+        ),
+        'drop_files'                  => array(
+            'max_items'   => array('data_type' => 'int', 'default' => 0),
+            'files_dir'   => array('default' => ''),
+            'allowed_ext' => array()
         )
     );
 
@@ -558,6 +563,12 @@ class BC_Input extends BimpComponent
             case 'signature_pad':
                 $options['expand'] = isset($this->params['expand']) ? (int) $this->params['expand'] : 0;
                 $options['check_mentions'] = isset($this->params['check_mentions']) ? $this->params['check_mentions'] : array();
+                break;
+
+            case 'drop_files':
+                $options['max_items'] = isset($this->params['max_items']) ? (int) $this->params['max_items'] : 0;
+                $options['files_dir'] = isset($this->params['files_dir']) ? $this->params['check_mentions'] : '';
+                $options['allowed_ext'] = isset($this->params['allowed_ext']) ? $this->params['allowed_ext'] : '';
                 break;
         }
 

@@ -682,7 +682,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     ))
                 );
 
-//            // Valider
+            // Valider
             if ($status === 0) {
                 $errors = array();
                 if ($this->isActionAllowed('validate', $errors)) {
@@ -3906,10 +3906,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function actionPreuvePaiment($data, &$success)
     {
         $errors = $warnings = array();
+        
         if (isset($data['file']) && $data['file'] != '')
-            BimpTools::mouveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
+            BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
         else
             $errors[] = 'Aucun fichier uploadé';
+        
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

@@ -10412,6 +10412,115 @@ input[type=text].large_input {
     #bih_autocomplete_modal #bihAddHastagFormContainer .singleLineForm textarea {
       min-width: 300px; }
 
+/*Drop Files*/
+/* line 1103, ../scss/bimpcore/_form.scss */
+.bimp_drop_files_container {
+  padding: 10px; }
+  /* line 1106, ../scss/bimpcore/_form.scss */
+  .bimp_drop_files_container .add_file_input {
+    display: none; }
+  /* line 1109, ../scss/bimpcore/_form.scss */
+  .bimp_drop_files_container .bimp_drop_files_area {
+    -webkit-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    padding: 20px 10px;
+    margin: 15px 0 5px 0;
+    border: 2px dotted #B4B4B4;
+    background-color: #F5F5F5; }
+    /* line 1116, ../scss/bimpcore/_form.scss */
+    .bimp_drop_files_container .bimp_drop_files_area .drop_infos {
+      text-align: center;
+      font-size: 12px;
+      font-style: italic;
+      font-weight: bold;
+      color: #9b9b9b; }
+    /* line 1124, ../scss/bimpcore/_form.scss */
+    .bimp_drop_files_container .bimp_drop_files_area .drop_files {
+      padding: 10px;
+      min-height: 40px; }
+      /* line 1128, ../scss/bimpcore/_form.scss */
+      .bimp_drop_files_container .bimp_drop_files_area .drop_files .file_item {
+        position: relative;
+        display: inline-block;
+        padding: 5px;
+        border: 1px solid #636363;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        vertical-align: top; }
+        /* line 1137, ../scss/bimpcore/_form.scss */
+        .bimp_drop_files_container .bimp_drop_files_area .drop_files .file_item .file_check {
+          color: #348C41;
+          font-weight: bold;
+          text-shadow: 1px 1px 3px #636363;
+          position: absolute;
+          margin-left: -13px;
+          margin-top: -15px;
+          font-size: 19px; }
+        /* line 1147, ../scss/bimpcore/_form.scss */
+        .bimp_drop_files_container .bimp_drop_files_area .drop_files .file_item .file_name {
+          font-size: 11px;
+          font-style: italic;
+          color: #282828; }
+        /* line 1153, ../scss/bimpcore/_form.scss */
+        .bimp_drop_files_container .bimp_drop_files_area .drop_files .file_item img {
+          height: 80px;
+          width: auto; }
+        /* line 1158, ../scss/bimpcore/_form.scss */
+        .bimp_drop_files_container .bimp_drop_files_area .drop_files .file_item .file_icon {
+          display: inline-block;
+          height: 80px;
+          line-height: 60px;
+          text-align: center;
+          width: 100%; }
+          /* line 1165, ../scss/bimpcore/_form.scss */
+          .bimp_drop_files_container .bimp_drop_files_area .drop_files .file_item .file_icon i {
+            font-size: 32px;
+            font-weight: bold;
+            vertical-align: middle; }
+        /* line 1172, ../scss/bimpcore/_form.scss */
+        .bimp_drop_files_container .bimp_drop_files_area .drop_files .file_item .delete_file_zone {
+          -webkit-transition: all 0.3s ease;
+          -o-transition: all 0.3s ease;
+          transition: all 0.3s ease;
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+          bottom: 0;
+          line-height: 100px;
+          text-align: center;
+          background-color: rgba(60, 60, 60, 0.7);
+          opacity: 0;
+          cursor: pointer; }
+          /* line 1187, ../scss/bimpcore/_form.scss */
+          .bimp_drop_files_container .bimp_drop_files_area .drop_files .file_item .delete_file_zone i {
+            color: #fff;
+            vertical-align: middle;
+            font-size: 32px; }
+          /* line 1193, ../scss/bimpcore/_form.scss */
+          .bimp_drop_files_container .bimp_drop_files_area .drop_files .file_item .delete_file_zone:hover {
+            opacity: 1; }
+            /* line 1196, ../scss/bimpcore/_form.scss */
+            .bimp_drop_files_container .bimp_drop_files_area .drop_files .file_item .delete_file_zone:hover i {
+              opacity: 1; }
+    /* line 1204, ../scss/bimpcore/_form.scss */
+    .bimp_drop_files_container .bimp_drop_files_area .content-loading {
+      padding: 5px !important; }
+      /* line 1207, ../scss/bimpcore/_form.scss */
+      .bimp_drop_files_container .bimp_drop_files_area .content-loading .loading-spin {
+        margin: 10px; }
+      /* line 1211, ../scss/bimpcore/_form.scss */
+      .bimp_drop_files_container .bimp_drop_files_area .content-loading .loading-text {
+        font-size: 12px; }
+    /* line 1216, ../scss/bimpcore/_form.scss */
+    .bimp_drop_files_container .bimp_drop_files_area.hightlight {
+      border-color: #005AB4;
+      background-color: #DDE9F5; }
+      /* line 1220, ../scss/bimpcore/_form.scss */
+      .bimp_drop_files_container .bimp_drop_files_area.hightlight .drop_infos {
+        color: #005AB4; }
+
 /* line 1, ../scss/bimpcore/_list.scss */
 table.bimp_list_table,
 table.objectlistTable {

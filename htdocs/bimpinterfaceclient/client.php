@@ -40,9 +40,9 @@ if (isset($_REQUEST['nav_not_compatible'])) {
 require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-//if (!isset($_COOKIE[$sessionname])) {
-//    setcookie($sessionname, session_id(), array('SameSite' => 'None', 'Secure' => true, 'path' => '/'));
-//}
+if (!isset($_COOKIE[$sessionname])) {
+    setcookie($sessionname, session_id(), array('SameSite' => 'None', 'Secure' => true, 'path' => '/'));
+}
 
 BimpCore::setContext("public");
 

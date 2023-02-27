@@ -295,6 +295,8 @@ if (!empty($_POST["DOL_AUTOSET_COOKIE"])) {
 			'httponly' => true,
 			'samesite' => 'Lax'	// None || Lax  || Strict
 		);
+                $cookieparams['SameSite'] = 'None';
+                $cookieparams['Secure'] = true;
 		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, $cookieparams);
 	}
 	if (empty($cookievalue)) {

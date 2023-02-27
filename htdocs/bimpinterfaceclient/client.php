@@ -5,8 +5,6 @@
 $fc = (isset($_GET['fc']) ? $_GET['fc'] : '');
 $_REQUEST['bimp_context'] = 'public';
 
-define('XFRAMEOPTIONS_ALLOWALL', true);
-
 if ($fc !== 'doc') { // Nécessaire pour l'affichage des docs PDF. 
     header('x-frame-options: ALLOWALL', false);
     define('ALLOW_ALL_IFRAME', true);
@@ -40,9 +38,9 @@ if (isset($_REQUEST['nav_not_compatible'])) {
 require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-if (!isset($_COOKIE[$sessionname])) {
-    setcookie($sessionname, session_id(), array('SameSite' => 'None', 'Secure' => true, 'path' => '/'));
-}
+//if (!isset($_COOKIE[$sessionname])) {
+//    setcookie($sessionname, session_id(), array('SameSite' => 'None', 'Secure' => true));
+//}
 
 BimpCore::setContext("public");
 
@@ -50,7 +48,7 @@ if ($fc !== 'doc') {
     if (!isset($_REQUEST['ajax'])) {
         echo "<script>function testCookie(){"
         . "setTimeout(function() {"
-        . "if(document.cookie.match('DOLSESSID_') || window.self === window.top){ "
+        . "if(document.cookie.match('publicerp') || window.self === window.top){ "
         . "}else{ "
         . "window.open('" . $url . "', '_blank'); "
         . "if(window.location.href.indexOf('?') > 0 || window.location.href.indexOf('/b/') > 0) "

@@ -3,7 +3,7 @@
 $context = (isset($_REQUEST['bimp_context']) && $_REQUEST['bimp_context'] ? $_REQUEST['bimp_context'] : '');
 
 if ($context == 'public') {
-    define("NO_REDIRECT_LOGIN", 1);
+    define("NOLOGIN",1);
 }
 
 if (isset($_REQUEST['ajax']) && $_REQUEST['ajax']) {

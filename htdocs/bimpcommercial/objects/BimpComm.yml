@@ -109,7 +109,7 @@ fields:
     ref: 
         label: Référence
     fk_statut: 
-        label: Statutmmm
+        label: Statut
         type: int
         dol_prop: statut
         values: 
@@ -203,10 +203,6 @@ fields:
     date_valid:
         type: datetime
         label: Date Validation
-#    total: 
-#        label: Total TTC
-#        dol_prop: total_ttc
-#        type: money
     total_ttc: 
         label: Total TTC
         dol_prop: total_ttc

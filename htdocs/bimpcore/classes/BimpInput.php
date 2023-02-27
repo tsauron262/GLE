@@ -886,7 +886,9 @@ class BimpInput
             case 'drop_files':
                 $html = '<div class="bimp_drop_files_container"';
                 $html .= ' data-max_items="' . (int) BimpTools::getArrayValueFromPath($options, 'max_items', 0) . '"';
-                $html .= ' data-files_dir="' . (int) BimpTools::getArrayValueFromPath($options, 'files_dir', '') . '"';
+                $html .= ' data-files_dir="' . BimpTools::getArrayValueFromPath($options, 'files_dir', '') . '"';
+                $html .= ' data-allowed_ext="' . BimpTools::getArrayValueFromPath($options, 'allowed_ext', '') . '"';
+                $html .= ' data-allowed_types="' . BimpTools::getArrayValueFromPath($options, 'allowed_types', '') . '"';
                 $html .= '>';
                 $html .= '<input type="file" class="add_file_input" id="' . $field_name . '_file_input"/>';
                 $html .= '<label class="btn btn-default" for="' . $field_name . '_file_input">';
@@ -902,6 +904,12 @@ class BimpInput
 
                 if (isset($options['max_items']) && (int) $options['max_items'] > 0) {
                     $html .= '<p class="small info">' . $options['max_items'] . ' fichier' . ($options['max_items'] > 1 ? 's' : '') . ' max</p>';
+                }
+                if (isset($options['allowed_types']) && (string) $options['allowed_types']) {
+                    $html .= '<p class="small">Extension(s) autorisée(s) : <b>'.$options['allowed_types'].'</b></p>';
+                }
+                if (isset($options['allowed_ext']) && (string) $options['allowed_ext']) {
+                    $html .= '<p class="small">Extension(s) autorisée(s) : <b>'.$options['allowed_ext'].'</b></p>';
                 }
 
                 $html .= '</div>';

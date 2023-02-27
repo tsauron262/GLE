@@ -1948,16 +1948,17 @@ class Bimp_Facture extends BimpComm
     {
         return BimpTools::getValue('id_facture_to_correct', BimpTools::getValue('param_values/fields/id_facture_to_correct', 0));
     }
-    
     /*
      * type reval = tableau des type accepté
      * statut reval si null tous
      */
-    public function getTotalMargeWithReval($type_reval = array(), $statut_reval = null){
+
+    public function getTotalMargeWithReval($type_reval = array(), $statut_reval = null)
+    {
         $tot = $this->getData('total_ht') - $this->getData('marge');
         $tabReval = $this->getTotalRevalorisations(false, false, $type_reval);
-        if(is_null($statut_reval)){
-            foreach($tabReval as $reval)
+        if (is_null($statut_reval)) {
+            foreach ($tabReval as $reval)
                 $tot -= $reval;
         }
         return $tot;
@@ -2004,9 +2005,9 @@ class Bimp_Facture extends BimpComm
 
         if ($this->isLoaded()) {
             $filtre = array(
-                        'id_facture' => (int) $this->id
+                'id_facture' => (int) $this->id
             );
-            if(count($type_reval))
+            if (count($type_reval))
                 $filtre['type'] = $type_reval;
             $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', $filtre);
 
@@ -6296,6 +6297,28 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $id = $this->id;
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors) && (int) $id) {
+            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                        'id_facture' => $id
+            ));
+
+            if (!empty($revals)) {
+                foreach ($revals as $reval) {
+                    $w = array();
+                    $reval->delete($w, true);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Méthodes statiques: 
 
     public function sendInvoiceDraftWhithMail()
@@ -6639,6 +6662,15 @@ class Bimp_Facture extends BimpComm
         $boxObj->addIndicateur('Nb impayée', ($ln->nbIP), null, null, $ln->nbRetard, null, 'ayant dépecé l\'échéance');
         $boxObj->addIndicateur('Total Impayée', BimpTools::displayMoneyValue($ln->totIP, null, null, true), null, null, BimpTools::displayMoneyValue($ln->totRetard, null, null, true), null, 'ayant dépecé l\'échéance');
         return 1;
+    }
+
+    public static function checkBilledApplecareReval($id_facture = null)
+    {
+//        $filters = array(
+//            'type'        => 'fac_ac',
+//            'status'      => 0,
+//            'f.fk_statut' => array(1, 2)
+//        );
     }
 
     public function dataGraphSecteur($boxObj, $context)

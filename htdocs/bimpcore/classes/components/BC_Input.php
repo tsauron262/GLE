@@ -164,9 +164,10 @@ class BC_Input extends BimpComponent
             'check_mentions' => array('data_type' => 'array', 'compile' => true, 'default' => array())
         ),
         'drop_files'                  => array(
-            'max_items'   => array('data_type' => 'int', 'default' => 0),
-            'files_dir'   => array('default' => ''),
-            'allowed_ext' => array()
+            'max_items'     => array('data_type' => 'int', 'default' => 0),
+            'files_dir'     => array('default' => ''),
+            'allowed_types' => array('default' => ''),
+            'allowed_ext'   => array('default' => '')
         )
     );
 
@@ -568,6 +569,7 @@ class BC_Input extends BimpComponent
             case 'drop_files':
                 $options['max_items'] = isset($this->params['max_items']) ? (int) $this->params['max_items'] : 0;
                 $options['files_dir'] = isset($this->params['files_dir']) ? $this->params['check_mentions'] : '';
+                $options['allowed_types'] = isset($this->params['allowed_types']) ? $this->params['allowed_types'] : '';
                 $options['allowed_ext'] = isset($this->params['allowed_ext']) ? $this->params['allowed_ext'] : '';
                 break;
         }

@@ -290,6 +290,7 @@ forms:
               input: 
                   type: drop_files
                   max_items: 1
+                  allowed_ext: csv
     
 filters_panel: 
     default: 

@@ -264,7 +264,7 @@ class BimpDb
             $this->db->free($result);
             return $obj;
         }
-        if($result)
+        if ($result)
             $this->db->free($result);
         return null;
     }
@@ -299,7 +299,10 @@ class BimpDb
             $this->db->free($result);
             return $obj->$field;
         }
-        $this->db->free($result);
+
+        if (is_object($result)) {
+            $this->db->free($result);
+        }
         return null;
     }
 

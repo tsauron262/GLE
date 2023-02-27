@@ -3,7 +3,35 @@
 $context = (isset($_REQUEST['bimp_context']) && $_REQUEST['bimp_context'] ? $_REQUEST['bimp_context'] : '');
 
 if ($context == 'public') {
-    define("NO_REDIRECT_LOGIN", 1);
+    define("NOLOGIN",1);
+    define("NOSESSION", 1);
+    
+    define('XFRAMEOPTIONS_ALLOWALL', true);
+    
+    $sessionname = 'publicerp';
+        session_set_cookie_params(array('SameSite' => 'None', 'Secure' => true, 'path' => '/'));
+	session_name($sessionname);
+        
+        $test = session_id();
+        
+//        echo '<pre>'.$test;
+//        print_r($_COOKIE);
+        
+//        echo '<br/>'.session_id().' finfinfin';
+//        session_id('testssessionid');
+//        session_id($test);
+	session_start();
+        
+        
+//        if(isset($_COOKIE[$sessionname]) && $_COOKIE[$sessionname] != $test && $test != ''){
+//            $_COOKIE[$sessionname] = $test;
+//            echo 'oui';
+//        }
+        
+//        echo '<pre>';
+//        echo session_id().'<br/>fin<br/>';
+//        print_r($_COOKIE);
+//        print_r($_SESSION);
 }
 
 if (isset($_REQUEST['ajax']) && $_REQUEST['ajax']) {

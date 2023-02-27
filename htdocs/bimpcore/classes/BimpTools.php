@@ -3139,7 +3139,7 @@ class BimpTools
         }
 
 //        return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $file; => Selon changelog DOL16 (A vérifier) 
-        return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=logo/' . $file;
+        return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=logos/' . $file;
     }
 
     // Gestion des couleurs: 

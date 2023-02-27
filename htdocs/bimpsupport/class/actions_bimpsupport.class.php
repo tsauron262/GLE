@@ -125,8 +125,8 @@ class ActionsBimpsupport
 
             $urlAcces = DOL_URL_ROOT . '/bimpsupport/?tab=sav';
             if (count($centreUser) > 1) {
-                $tabGroupe = array(array('label' => "Tous", 'valeur' => 'Tous', 'forUrl' => ($allCentre ? '' : implode($centreUser, "-"))));
-                $urlAcces = DOL_URL_ROOT . "/bimpsupport/?fc=index&tab=sav" . ($allCentre ? '' : '&code_centre='.implode($centreUser, "-"));
+                $tabGroupe = array(array('label' => "Tous", 'valeur' => 'Tous', 'forUrl' => ($allCentre ? '' : implode("-", $centreUser))));
+                $urlAcces = DOL_URL_ROOT . "/bimpsupport/?fc=index&tab=sav" . ($allCentre ? '' : '&code_centre='.implode("-", $centreUser));
             }
 
 

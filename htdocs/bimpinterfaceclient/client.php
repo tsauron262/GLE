@@ -5,9 +5,10 @@
 $fc = (isset($_GET['fc']) ? $_GET['fc'] : '');
 $_REQUEST['bimp_context'] = 'public';
 
-if ($fc !== 'doc') { // Nécessaire pour l'affichage des docs PDF. 
     header('x-frame-options: ALLOWALL', false);
     define('ALLOW_ALL_IFRAME', true);
+
+if ($fc !== 'doc') { // Nécessaire pour l'affichage des docs PDF. 
 
     $url = "https://";
     $url .= $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];

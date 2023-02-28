@@ -152,7 +152,7 @@ class BF_Demande extends BimpObject
             case 'periodicity':
             case 'mode_calcul':
             case 'vr_achat':
-                if ((int) $this->getData('devis_status') >= self::DOC_ACCEPTED) {
+                if ((int) $this->getData('contrat_status') >= self::DOC_ACCEPTED) {
                     return 0;
                 }
                 return 1;

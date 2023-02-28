@@ -185,11 +185,11 @@ class BimpController
             case E_ERROR:
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
-                if(stripos($msg, 'mysql')){
+                if (stripos($msg, 'mysql')) {
                     global $db;
-                    $msg = 'Derniére req : '.$db->lastquery.'<br/><br/>'.$msg;
+                    $msg = 'Derniére req : ' . $db->lastquery . '<br/><br/>' . $msg;
                 }
-                
+
                 if (!BimpCore::isModeDev()) {
                     global $user, $langs;
                     $txt = '';
@@ -1005,7 +1005,7 @@ class BimpController
     // Enregistrements BimpObjects: 
 
     protected function ajaxProcessSaveObject()
-    {
+    {        
         $errors = array();
         $url = '';
 
@@ -1054,7 +1054,7 @@ class BimpController
                 $errors = BimpTools::merge_array($errors, BimpCore::unlockObject($object_module, $object_name, $id_object));
             }
         }
-
+        
         return array(
             'errors'           => $errors,
             'warnings'         => $result['warnings'],
@@ -2126,6 +2126,84 @@ class BimpController
         return array(
             'obj_kw'     => $obj_kw,
             'choices'    => $choices,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessUploadFiles()
+    {
+        $errors = array();
+        $warnings = array();
+
+        $field_name = BimpTools::getValue('field_name', '');
+
+        $files_dir = BimpTools::getValue('files_dir', '');
+        if (!$files_dir) {
+            $files_dir = BimpTools::getTmpFilesDir();
+        } elseif (strpos($files_dir, '/') === 0) {
+            substr($files_dir, 1);
+        }
+
+        if (!is_dir(DOL_DATA_ROOT . '/' . $files_dir)) {
+            BimpTools::makeDirectories($files_dir);
+        }
+
+        $files = array();
+
+        foreach ($_FILES as $file) {
+            $file_name = $file['name'];
+            $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
+
+            // Ajout d'un tms pour éviter un potentiel conflit de nom
+            $new_file_name = pathinfo($file_name, PATHINFO_FILENAME) . '_tms' . time() . '.' . $file_ext;
+
+            if (!move_uploaded_file($file['tmp_name'], DOL_DATA_ROOT . '/' . $files_dir . '/' . $new_file_name)) {
+                $warnings[] = 'Echec de l\'enregistrement du fichier "' . $file_name . '"';
+            } else {
+                $url = '';
+                $item = '';
+
+                if (preg_match('/^\/?([^\/]+)\/?(.*)$/', $files_dir, $matches)) {
+                    $is_image = in_array($file_ext, array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif'));
+                    $url = DOL_URL_ROOT . '/' . ($is_image ? 'viewimage' : 'document') . '.php?modulepart=' . $matches[1] . '&file=' . urlencode(($matches[2] ? $matches[2] . '/' : '') . $new_file_name);
+
+                    $item = '<div class="file_item" data-file_name="' . $new_file_name . '">';
+                    if ($field_name) {
+                        $item .= '<input type="hidden" class="file_name" name="' . $field_name . '[]" value="' . $new_file_name . '"/>';
+                    }
+                    $item .= '<div class="file_name">';
+                    $item .= $file_name;
+                    $item .= '</div>';
+
+                    if ($is_image) {
+                        $item .= '<img src="' . $url . '"/>';
+                    } else {
+                        $item .= '<div class="file_icon">';
+                        $icon = BimpTools::getFileIcon($file_name);
+                        $item .= BimpRender::renderIcon($icon);
+                        $item .= '</div>';
+                    }
+
+                    $item .= '<div class="delete_file_zone" onclick="BFU.removeItem($(this))">';
+                    $item .= BimpRender::renderIcon('fas_trash-alt');
+                    $item .= '</div>';
+
+                    $item .= '</div>';
+                }
+
+                $files[] = array(
+                    'path' => '',
+                    'name' => $new_file_name,
+                    'url'  => $url,
+                    'item' => $item
+                );
+            }
+        }
+
+        return array(
+            'errors'     => $errors,
+            'warnings'   => $warnings,
+            'files'      => $files,
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }

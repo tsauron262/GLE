@@ -65,14 +65,14 @@ class BIMP_Task extends BimpObject
         if ($user->admin) {
             return 1;
         }
-        
-        if($this->getUserRight("read"))
+
+        if ($this->getUserRight("read"))
             return 1;
-        
+
         $users = $this->getUserNotif();
-        foreach($users as $userT){
-            if($userT->id == $user->id)
-                    return 1;
+        foreach ($users as $userT) {
+            if ($userT->id == $user->id)
+                return 1;
         }
 
         return 0;
@@ -313,7 +313,7 @@ class BIMP_Task extends BimpObject
 
         return $status;
     }
-    
+
     public function getListFiltre($type = "normal")
     {
         global $user;
@@ -829,13 +829,14 @@ class BIMP_Task extends BimpObject
 //        $msg = str_replace("<br />", "\n", $msg);
 //        $msg = str_replace("<br/>", "\n", $msg);
 //        $msg = str_replace("<br/>", "\n", $msg);
-        
-        
 
-        
+
+
+
         $bimpMail = new BimpMail($this, $sujet, $to, $from, $msg);
         $bimpMail->addFiles($files);
-        if ($bimpMail->send($errors));
+        if ($bimpMail->send($errors))
+            ;
 
 //        if (!mailSyn2($sujet, $to, $from, $msg))
 //            $errors[] = "Envoi email impossible";
@@ -979,7 +980,7 @@ class BIMP_Task extends BimpObject
         $errors = $this->updateField("status", $data['status']);
 
         $msg = 'Statut passé à "' . $this->displayData('status') . '"<br/>' . $data['text'];
-        
+
         $files = array();
         // Fichiers joints: 
         if (isset($data['join_files']) && is_array($data['join_files'])) {
@@ -1052,18 +1053,25 @@ class BIMP_Task extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        $return = parent::create($warnings, $force_create);
+        $errors = parent::create($warnings, $force_create);
 
-        $this->updateField('date_update', $this->getData('date_create'));
-        $this->updateField('auto', ($this->getData('dst') != '') ? 1 : 0);
+        if (!count($errors)) {
+            $this->updateField('date_update', $this->getData('date_create'));
+            $this->updateField('auto', ($this->getData('dst') != '') ? 1 : 0);
 
-        if ($this->getData('id_task')) {
-            $parent = $this->getChildObject('task_mere');
-            $parent->reouvrir();
-//            if ($parent->getData('status') == 4)
-//                $parent->updateField('status', 1);
+            if ($this->getData('id_task')) {
+                $parent = $this->getChildObject('task_mere');
+                $parent->reouvrir();
+            }
+
+            $files = BimpTools::getPostFieldValue('task_files', array());
+
+            if (!empty($files)) {
+                $files_dir = $this->getFilesDir();
+                BimpTools::moveTmpFiles($warnings, $files, $files_dir);
+            }
         }
 
-        return $return;
+        return $errors;
     }
 }

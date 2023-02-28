@@ -16,6 +16,7 @@ class BimpRevalorisation extends BimpObject
         'achat_sup'      => 'Achat complémentaire',
         'commission_app' => 'Commission Apporteur',
         'applecare'      => 'Commission AppleCare',
+        'fac_ac'         => 'Facturation commission AC',
         'oth'            => 'Autre'
     );
 

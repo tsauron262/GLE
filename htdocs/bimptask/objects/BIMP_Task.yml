@@ -188,14 +188,11 @@ forms:
             - field: txt
             - field: comment
             - field: id_user_owner
-            - object: files
-              title: Fichiers
-              form_name: upload
-              form_label: Ajouter
-              form_values: 
-                  fields: 
-                      id_parent: 1
-              multiple: 1
+            - custom: 1
+              label: Fichiers
+              input_name: task_files
+              input: 
+                  type: drop_files
               
     addUser:
         extends: add
@@ -283,14 +280,12 @@ forms:
             - field: subj
             - field: txt
             - field: comment
-            - object: files
-              title: Fichiers
-              form_name: upload_light
-              form_label: Ajouter
-              form_values: 
-                  fields: 
-                      id_parent: 1
-              multiple: 1
+            - custom: 1
+              label: Fichiers
+              input_name: task_files
+              input: 
+                  type: drop_files
+                  
            
 lists_cols: 
     typeTache:

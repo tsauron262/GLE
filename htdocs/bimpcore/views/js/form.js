@@ -138,10 +138,9 @@ function prepareFormSubmit($form) {
                         } else {
                             $input.val('');
                         }
-                    }
-                    else
+                    } else
                         $input.remove();
-                    
+
                 } else {
                     switch (data_type) {
                         case 'json':
@@ -1128,23 +1127,38 @@ function getInputValue($inputContainer) {
             }
         }
     } else {
-        if (field_name && $inputContainer.find('.signaturePadContainer').length) {
-            var $signatureContainer = $inputContainer.find('.signaturePadContainer');
-            var $input = $inputContainer.find('input[name="' + field_name + '"]');
-            var pad_id = $signatureContainer.data('pad_id');
+        if (field_name) {
+            if ($inputContainer.find('.signaturePadContainer').length) {
+                var $signatureContainer = $inputContainer.find('.signaturePadContainer');
+                var $input = $inputContainer.find('input[name="' + field_name + '"]');
+                var pad_id = $signatureContainer.data('pad_id');
 
-            if (pad_id && $input.length) {
-                if (typeof (bimpSignaturePads[pad_id]) !== 'undefined') {
-                    value = bimpSignaturePads[pad_id].toDataURL('image/png');
-                    $input.val(value);
-                } else {
-                    value = '';
-                    $input.val('');
-                    bimp_msg('Erreur: bloc signature non trouvé pour le champ "' + field_name + '"', 'danger');
+                if (pad_id && $input.length) {
+                    if (typeof (bimpSignaturePads[pad_id]) !== 'undefined') {
+                        value = bimpSignaturePads[pad_id].toDataURL('image/png');
+                        $input.val(value);
+                    } else {
+                        value = '';
+                        $input.val('');
+                        bimp_msg('Erreur: bloc signature non trouvé pour le champ "' + field_name + '"', 'danger');
+                    }
                 }
+                return value;
             }
-            return value;
+
+            if ($inputContainer.find('.bimp_drop_files_container').length) {
+                value = [];
+                $inputContainer.find('.file_item').each(function () {
+                    var $input = $(this).find('input.file_name');
+                    if ($input.length) {
+                        value.push($input.val());
+                    }
+                });
+
+                return value;
+            }
         }
+
 
         if ($inputContainer.find('.cke').length) {
             var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
@@ -1159,6 +1173,7 @@ function getInputValue($inputContainer) {
             case 'json':
                 value = getJsonInputSubValues($inputContainer, field_name, false);
                 break;
+
             default:
                 value = $inputContainer.find('[name="' + field_name + '"]').val();
                 break;
@@ -3528,6 +3543,9 @@ function setInputsEvents($container) {
             }
         }
     });
+    $container.find('.bimp_drop_files_container').each(function () {
+        BFU.initEvents($(this));
+    });
 }
 
 function setInputEvents($form, $input) {
@@ -4354,11 +4372,11 @@ function BimpInputHashtags() {
 //                val = val.replace("\n", "<br/>");
                 var reg = new RegExp(/^(.* )?#(.*)$/, 'm');
                 if (reg.test(val)) {
-                    
-                    valN = val.replace(reg, '$1'+'{{' + bih.curValue + '}} '+'$2');
-                    
-                    
-                    
+
+                    valN = val.replace(reg, '$1' + '{{' + bih.curValue + '}} ' + '$2');
+
+
+
 //                    var newValBegin = val.replace(reg, '$1');
 //                    console.log(newValBegin);
 //                    newValBegin += '{{' + bih.curValue + '}} ';
@@ -4386,8 +4404,7 @@ function BimpInputHashtags() {
                     bih.$modal.modal('hide');
 
                     bih.reset();
-                }
-                else
+                } else
                     console.log('trouve pas #');
             }
         }
@@ -4709,8 +4726,232 @@ function BimpInputScanner() {
     };
 }
 
+function BimpFileUploader() {
+    var ptr = this;
+    this.initEvents = function ($container) {
+        if ($.isOk($container)) {
+            $container.find('input.add_file_input[type=file]').each(function () {
+                if (!parseInt($(this).data('add_file_event_init'))) {
+                    $(this).change(function (e) {
+                        var $inputContainer = $(this).findParentByClass('inputContainer');
+                        var $container = $(this).findParentByClass('bimp_drop_files_container');
+                        var $area = null;
+                        var field_name = '';
+
+                        if ($.isOk($inputContainer)) {
+                            field_name = $inputContainer.data('field_name');
+                        }
+                        if ($.isOk($container)) {
+                            $area = $container.find('.bimp_drop_files_area');
+                        }
+
+                        ptr.updloadFiles(this.files, $area, field_name);
+                        this.val('');
+                    });
+                    $(this).data('add_file_event_init', 1);
+                }
+            });
+            $container.find('.bimp_drop_files_area').each(function () {
+                if (!parseInt($(this).data('drop_area_events_init'))) {
+                    $(window).on('dragover', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }).on('drop', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    });
+
+                    $(this).on('dragover', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        $(this).addClass('hightlight');
+                    });
+                    $(this).on('dragleave', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        $(this).removeClass('hightlight');
+                    });
+
+                    $(this).on('drop', function (e) {
+                        var files = e.originalEvent.dataTransfer.files;
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        $(this).removeClass('hightlight');
+
+                        if (!files.length) {
+                            bimp_msg('Aucun fichier valide déposé', 'danger', null, true);
+                        } else {
+                            var field_name = '';
+
+                            var $inputContainer = $(this).findParentByClass('inputContainer');
+                            if ($.isOk($inputContainer)) {
+                                field_name = $inputContainer.data('field_name');
+                            }
+
+                            ptr.updloadFiles(files, $(this), field_name);
+                        }
+                    });
+                    $(this).data('drop_area_events_init', 1);
+                }
+            });
+        }
+    };
+
+    this.checkFiles = function ($area, new_files) {
+        var $container = $area.findParentByClass('bimp_drop_files_container');
+
+        if (!$.isOk($container)) {
+            bimp_msg('Une erreur est survenue - ajout de fichiers impossible', 'danger');
+            console.error('BimpFileUploader::checkFiles() - $container absent');
+            return false;
+        }
+
+        // Check du nombre max de fichiers: 
+        var max_items = $container.data('max_items');
+
+        if (typeof (max_items) !== 'undefined') {
+            max_items = parseInt(max_items);
+            var nb_files = new_files.length + $area.find('.file_item').length;
+
+            if (max_items && nb_files > max_items) {
+                var msg = 'Vous ne pouvez déposer ';
+                if (max_items === 1) {
+                    msg += 'qu\'un seul fichier';
+                } else {
+                    msg += 'que ' + max_items + ' fichiers';
+                }
+                bimp_msg(msg, 'warning', null, true);
+                return false;
+            }
+        }
+
+        // Check du type de fichier
+        var type_check = true;
+
+        var allowed_types = $container.data('allowed_types');
+        if (allowed_types) {
+            allowed_types = allowed_types.split(',');
+
+            for (var i in new_files) {
+                var file_ok = false;
+                if (typeof (new_files[i].type) !== 'undefined') {
+                    var file_data = new_files[i].type.split('/');
+                    var file_type = file_data[0];
+
+                    for (var j in allowed_types) {
+                        if (file_type == allowed_types[j]) {
+                            file_ok = true;
+                            break;
+                        }
+                    }
+
+                    if (!file_ok) {
+                        bimp_msg('Type de fichier non autorisé pour le fichier "' + new_files[i].name + '"', 'danger', null, true);
+                        type_check = false;
+                    }
+                }
+            }
+        }
+
+        // Check de l'extension: 
+        var ext_check = true;
+        var allowed_ext = $container.data('allowed_ext');
+        if (allowed_ext) {
+            allowed_ext = allowed_ext.split(',');
+
+            for (var i in new_files) {
+                var file_ok = false;
+                if (typeof (new_files[i].type) !== 'undefined') {
+                    var file_data = new_files[i].type.split('/');
+                    var ext = file_data[1];
+
+                    for (var j in allowed_ext) {
+                        if (ext == allowed_ext[j]) {
+                            file_ok = true;
+                            break;
+                        }
+                    }
+
+                    if (!file_ok) {
+                        bimp_msg('Extension non autorisée pour le fichier "' + new_files[i].name + '"', 'danger', null, true);
+                        ext_check = false;
+                    }
+                }
+            }
+        }
+
+        if (!type_check || !ext_check) {
+            return false;
+        }
+
+        return true;
+    }
+
+    this.updloadFiles = function (files, $area, field_name) {
+        if (!ptr.checkFiles($area, files)) {
+            return;
+        }
+        
+        var files_dir = '';
+
+        if ($.isOk($area)) {
+            var $container = $area.findParentByClass('bimp_drop_files_container');
+            if ($.isOk($container)) {
+                files_dir = $container.data('files_dir');
+            }
+
+            $area.find('.content-loading').show();
+        }
+
+        var formData = new FormData();
+        for (var i in files) {
+            formData.append('file_' + i, files[i]);
+        }
+
+        formData.append('field_name', field_name);
+        formData.append('files_dir', files_dir);
+
+        BimpAjax('uploadFiles', formData, null, {
+            $area: $area,
+            processData: false,
+            contentType: false,
+            display_success: false,
+            success: function (result, bimpAjax) {
+                if ($.isOk(bimpAjax.$area)) {
+                    bimpAjax.$area.find('.content-loading').hide();
+
+                    if (result.files.length) {
+                        for (var i in result.files) {
+                            if (result.files[i].item) {
+                                bimpAjax.$area.find('.drop_files').append(result.files[i].item);
+                            }
+                        }
+                    }
+                }
+            },
+            error: function (result, bimpAjax) {
+                if ($.isOk(bimpAjax.$area)) {
+                    bimpAjax.$area.find('.content-loading').hide();
+                }
+            }
+        });
+    };
+
+    this.removeItem = function ($button) {
+        var $item = $button.findParentByClass('file_item');
+
+        if ($.isOk($item)) {
+            $item.remove();
+        }
+    };
+}
+
 var BIH = new BimpInputHashtags();
 var BIS = new BimpInputScanner();
+var BFU = new BimpFileUploader();
 
 $(document).ready(function () {
     $('.object_form').each(function () {

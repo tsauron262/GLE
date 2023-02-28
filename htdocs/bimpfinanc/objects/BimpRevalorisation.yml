@@ -146,7 +146,7 @@ fields:
             auto_expand: 1
             
     serial:
-        label: Serial
+        label: N° de série
         type: text
         
     equipments: 
@@ -377,6 +377,7 @@ lists:
             status: 
             commissions: 
             equipments: 
+            serial: 
         
     commission: 
         configurable: 1
@@ -441,3 +442,4 @@ lists:
             status:  
             commissions:
             equipments: 
+            serial: 

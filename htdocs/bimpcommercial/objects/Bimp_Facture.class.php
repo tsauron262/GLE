@@ -1948,16 +1948,17 @@ class Bimp_Facture extends BimpComm
     {
         return BimpTools::getValue('id_facture_to_correct', BimpTools::getValue('param_values/fields/id_facture_to_correct', 0));
     }
-    
     /*
      * type reval = tableau des type accepté
      * statut reval si null tous
      */
-    public function getTotalMargeWithReval($type_reval = array(), $statut_reval = null){
+
+    public function getTotalMargeWithReval($type_reval = array(), $statut_reval = null)
+    {
         $tot = $this->getData('total_ht') - $this->getData('marge');
         $tabReval = $this->getTotalRevalorisations(false, false, $type_reval);
-        if(is_null($statut_reval)){
-            foreach($tabReval as $reval)
+        if (is_null($statut_reval)) {
+            foreach ($tabReval as $reval)
                 $tot -= $reval;
         }
         return $tot;
@@ -2004,9 +2005,9 @@ class Bimp_Facture extends BimpComm
 
         if ($this->isLoaded()) {
             $filtre = array(
-                        'id_facture' => (int) $this->id
+                'id_facture' => (int) $this->id
             );
-            if(count($type_reval))
+            if (count($type_reval))
                 $filtre['type'] = $type_reval;
             $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', $filtre);
 
@@ -6296,6 +6297,28 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $id = $this->id;
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors) && (int) $id) {
+            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                        'id_facture' => $id
+            ));
+
+            if (!empty($revals)) {
+                foreach ($revals as $reval) {
+                    $w = array();
+                    $reval->delete($w, true);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Méthodes statiques: 
 
     public function sendInvoiceDraftWhithMail()
@@ -6639,6 +6662,108 @@ class Bimp_Facture extends BimpComm
         $boxObj->addIndicateur('Nb impayée', ($ln->nbIP), null, null, $ln->nbRetard, null, 'ayant dépecé l\'échéance');
         $boxObj->addIndicateur('Total Impayée', BimpTools::displayMoneyValue($ln->totIP, null, null, true), null, null, BimpTools::displayMoneyValue($ln->totRetard, null, null, true), null, 'ayant dépecé l\'échéance');
         return 1;
+    }
+
+    public static function checkBilledApplecareReval($id_facture = null)
+    {
+        $errors = array();
+
+        $filters = array(
+            'a.type'      => 'fac_ac',
+            'a.status'    => 0,
+            'f.fk_statut' => array(1, 2)
+        );
+
+        if ($id_facture) {
+            $filters['a.id_facture'] = $id_facture;
+        }
+
+        $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', $filters, 'id', 'asc', array(
+                    'f' => array(
+                        'alias' => 'f',
+                        'table' => 'facture',
+                        'on'    => 'f.rowid = a.id_facture'
+                    )
+        ));
+
+        if (!empty($revals)) {
+            $bdb = BimpCache::getBdb();
+            foreach ($revals as $reval) {
+                $serial = $reval->getData('serial');
+
+                $id_eq = (int) $bdb->getValue('be_equipment', 'id', 'serial = \'' . $serial . '\' OR serial = \'' . $serial . '\'');
+
+                if (!$id_eq) {
+                    continue;
+                }
+
+                $fac_reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
+                            'type'      => 'applecare',
+                            'or_serial' => array(
+                                'or' => array(
+                                    'equipments' => array(
+                                        'part_type' => 'middle',
+                                        'part'      => '[' . $id_eq . ']'
+                                    ),
+                                    'and'        => array(
+                                        'serial' => array($serial, 'S' . $serial),
+                                        'qty'    => 1
+                                    )
+                                )
+                            )
+                                ), true);
+
+                if (BimpObject::objectLoaded($fac_reval)) {
+                    $reval_errors = array();
+                    $bdb->db->begin();
+
+                    $facture = $reval->getChildObject('facture');
+                    if ((int) $fac_reval->getData('status') !== 1) {
+                        if ((int) $fac_reval->getData('qty') > 1) {
+                            // Création d'une nouvelle reval: 
+                            $data = $fac_reval->getDataArray();
+                            $data['qty'] = 1;
+                            $data['status'] = 1;
+                            $data['equipments'] = array($id_eq);
+                            $data['date_processed'] = date('Y-m-d');
+                            $data['note'] .= ($data['note'] ? "\n\n" : '') . 'Validée en auto' . (BimpObject::objectLoaded($facture) ? ' via facture ' . $facture->getRef() : '');
+
+                            BimpObject::createBimpObject('bimpfinanc', 'BimpRevalorisation', $data, true, $reval_errors);
+
+                            if (!count($reval_errors)) {
+                                $eqs = $fac_reval->getData('equipments');
+                                $eqs = BimpTools::unsetArrayValue($eqs, $id_eq);
+                                $fac_reval->set('qty', (int) $fac_reval->getData('qty') - 1);
+                                $fac_reval->set('equipments', $eqs);
+                                $reval_errors = $fac_reval->update($w, true);
+                            }
+                        } else {
+                            $fac_reval->set('status', 1);
+                            $note = $fac_reval->getData('note');
+                            $note .= ($note ? "\n\n" : '') . 'Validée en auto' . (BimpObject::objectLoaded($facture) ? ' via facture ' . $facture->getRef() : '');
+                            $fac_reval->set('note', $note);
+                            $fac_reval->set('date_processed', date('Y-m-d'));
+                            $reval_errors = $fac_reval->update($w, true);
+                        }
+                    }
+
+                    if (!count($reval_errors)) {
+                        $reval->set('status', 1);
+                        $reval->set('date_processed', date('Y-m-d'));
+                        $reval_errors = $reval->update($w, true);
+                    }
+                    
+                    if (count($reval_errors)) {
+                        $bdb->db->rollback();
+                        $errors[] = BimpTools::getMsgFromArray($reval_errors, $serial);
+                    } else {
+                        $bdb->db->commit();
+                    }
+                }
+            }
+        }
+        
+        return $errors;
     }
 
     public function dataGraphSecteur($boxObj, $context)

@@ -883,6 +883,38 @@ class BimpInput
                 $html = '<input type="file" name="' . $field_name . '" id="' . $input_id . '"' . $data . '/>';
                 break;
 
+            case 'drop_files':
+                $html = '<div class="bimp_drop_files_container"';
+                $html .= ' data-max_items="' . (int) BimpTools::getArrayValueFromPath($options, 'max_items', 0) . '"';
+                $html .= ' data-files_dir="' . BimpTools::getArrayValueFromPath($options, 'files_dir', '') . '"';
+                $html .= ' data-allowed_ext="' . BimpTools::getArrayValueFromPath($options, 'allowed_ext', '') . '"';
+                $html .= ' data-allowed_types="' . BimpTools::getArrayValueFromPath($options, 'allowed_types', '') . '"';
+                $html .= '>';
+                $html .= '<input type="file" class="add_file_input" id="' . $field_name . '_file_input"/>';
+                $html .= '<label class="btn btn-default" for="' . $field_name . '_file_input">';
+                $html .= BimpRender::renderIcon('fas_folder-open', 'iconLeft') . 'Sélectionner un fichier</label>';
+
+                $html .= '<p class="inputHelp">Ou faites glisser un fichier dans la zone ci-dessous: </p>';
+                
+                $html .= '<div class="bimp_drop_files_area">';
+                $html .= '<div class="drop_infos">Déposez vos fichiers ici</div>';
+                $html .= '<div class="drop_files"></div>';
+                $html .= BimpRender::rendercontentLoading('Envoi des fichiers en cours');
+                $html .= '</div>';
+
+                if (isset($options['max_items']) && (int) $options['max_items'] > 0) {
+                    $html .= '<p class="small info">' . $options['max_items'] . ' fichier' . ($options['max_items'] > 1 ? 's' : '') . ' max</p>';
+                }
+                if (isset($options['allowed_types']) && (string) $options['allowed_types']) {
+                    $html .= '<p class="small">Extension(s) autorisée(s) : <b>'.$options['allowed_types'].'</b></p>';
+                }
+                if (isset($options['allowed_ext']) && (string) $options['allowed_ext']) {
+                    $html .= '<p class="small">Extension(s) autorisée(s) : <b>'.$options['allowed_ext'].'</b></p>';
+                }
+
+                $html .= '</div>';
+                break;
+
             case 'object_filters':
                 $obj_input_name = BimpTools::getArrayValueFromPath($options, 'obj_input_name', '');
                 $obj_module = BimpTools::getArrayValueFromPath($options, 'obj_module', '');

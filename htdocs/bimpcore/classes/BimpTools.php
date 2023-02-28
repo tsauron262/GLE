@@ -152,6 +152,8 @@ class BimpTools
         return $default_value;
     }
 
+    // Gestion des fichiers uploadés: 
+    
     public static function getTmpFilesDir()
     {
         // On utilise un dossier par jour pour permettre de nettoyer les fichiers non déplacés. 

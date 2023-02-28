@@ -35,7 +35,7 @@ class BDS_ObjectsActionsProcess extends BDSProcess
                 $object->initBdsAction($action, $data, $errors, $extra_data, $force_action);
 
                 if (!count($errors)) {
-                    // On a été jusqu'au bout: on empêche le forçage du déblocage du lock (de lock doit être maintenu durant les éxécutions en ajax)
+                    // On a été jusqu'au bout: on empêche le forçage du déblocage du lock (le lock doit être maintenu durant les éxécutions en ajax)
                     global $no_force_current_object_unlock;
                     $no_force_current_object_unlock = true;
                 }

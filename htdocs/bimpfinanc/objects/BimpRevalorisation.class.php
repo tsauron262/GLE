@@ -20,7 +20,7 @@ class BimpRevalorisation extends BimpObject
         'oth'            => 'Autre'
     );
 
-    // Gestion des droits user: 
+    // Gestion des droits user:
 
     public function canCreate()
     {

@@ -1948,13 +1948,8 @@ class Bimp_User extends BimpObject
             $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
 
             if (BimpObject::objectLoaded($group)) {
-                if (!$this->db->insert('usergroup_user', array(
-                            'entity'       => 1,
-                            'fk_user'      => $this->id,
-                            'fk_usergroup' => $id_group
-                        ))) {
-
-                    $errors[] = 'Echec de l\'ajout de l\'utilisateur ' . $this->getName() . ' au groupe "' . $group->getName() . '" - ' . $this->db->err();
+                if ($this->dol_object->SetInGroup($id_group, 1) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout de l\'utilisateur ' . $this->getName());
                 } else {
                     $success = 'Ajout de l\'utilisateur ' . $this->getName() . ' au groupe ' . $group->getName() . ' effectué avec succès';
                 }

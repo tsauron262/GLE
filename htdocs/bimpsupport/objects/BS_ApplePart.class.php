@@ -444,9 +444,9 @@ class BS_ApplePart extends BimpObject
         if ($type == 'batt14' && $price_type == 'EXCHANGE') {
             $newPrix = 119/1.2;
         } elseif ($type == "batt" && $price_type == "EXCHANGE") {
-            $newPrix = 49.16666666;
+            $newPrix = 79/1.2;
         } elseif ($type == "battX" && $price_type == "EXCHANGE") {
-            $newPrix = 70;
+            $newPrix = 99/1.2;
         } elseif ($type == "ecran" && $price_type == "EXCHANGE") {
             foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
                 if ($ref == $refT)

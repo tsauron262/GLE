@@ -4930,8 +4930,6 @@ function BimpFileUploader() {
                             }
                         }
                     }
-                } else {
-                    bimp_msg('NO AREA');
                 }
             },
             error: function (result, bimpAjax) {

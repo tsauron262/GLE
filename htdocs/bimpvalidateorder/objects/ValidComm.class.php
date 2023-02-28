@@ -175,17 +175,21 @@ class ValidComm extends BimpObject
 
         // Validation encours
         if ($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS and in_array(self::TYPE_ENCOURS, $validations)) {
-
-            if ($bimp_object->field_exists('paiement_comptant') and $bimp_object->getData('paiement_comptant')) {
-                $success[] = "Validation encours forcée par le champ \"Paiement comptant\".";
+            
+            if($val_euros < 0)
                 $valid_encours = 1;
-            } else {
-
-                if (!$client->getData('validation_financiere')) {
-                    $success[] = "Validation encours forcée par le champ \"Validation encours\".";
+            else{
+                if ($bimp_object->field_exists('paiement_comptant') and $bimp_object->getData('paiement_comptant')) {
+                    $success[] = "Validation encours forcée par le champ \"Paiement comptant\".";
                     $valid_encours = 1;
-                } else
-                    $valid_encours = (int) $this->tryValidateByType($user, self::TYPE_ENCOURS, $secteur, $class, $val_euros, $bimp_object, $errors);
+                } else {
+
+                    if (!$client->getData('validation_financiere')) {
+                        $success[] = "Validation encours forcée par le champ \"Validation encours\".";
+                        $valid_encours = 1;
+                    } else
+                        $valid_encours = (int) $this->tryValidateByType($user, self::TYPE_ENCOURS, $secteur, $class, $val_euros, $bimp_object, $errors);
+                }
             }
         }
 

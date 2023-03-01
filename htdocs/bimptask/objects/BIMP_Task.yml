@@ -68,8 +68,9 @@ fields:
         type: text
         
     subj:
-        label: Sujet
-        type: text
+        label: Titre
+        input: 
+            help: Merci d'indiquer un titre court. Utliser le champ "Description" pour les détails
         
     txt:
         label: Description

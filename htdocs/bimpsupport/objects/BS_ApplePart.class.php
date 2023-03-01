@@ -411,19 +411,23 @@ class BS_ApplePart extends BimpObject
     {
         if ($prix < 1)
             return 0;
-        //xception 
-//        $tabException1 = array("F661", "AB661", "SF661","B661",  "J661", "E661");
-//        foreach($tabException1 as $exception1){
-        if (/* stripos($ref, $exception1) !== false && */ $prix == 143.12)
-            return (229 / 1.2);
-//        }
-        if ($prix == 93.13)
-            return (149 / 1.2);
-        if ($prix == 40.62)
-            return (70);
 
-        if ($prix == 65.87)
-            return 82.5;
+        if ($prix == 180.62) {
+            return (289 / 1.2);
+        }
+
+        if ($prix == 143.12) {
+            return (229 / 1.2);
+        }
+
+        if ($prix == 130.63) {
+            // return (229 / 1.2); old
+            return (185 / 1.2);
+        }
+
+        if ($prix == 93.13) {
+            return (149 / 1.2);
+        }
 
         if ($prix == 86.29) { // Batterie IPad
             return 107.5;
@@ -432,9 +436,13 @@ class BS_ApplePart extends BimpObject
         if ($prix == 76.72) {
             return 99.16667;
         }
-        
-        if($prix == 130.63) {
-            return (229 / 1.2);
+
+        if ($prix == 65.87) {
+            return 82.5;
+        }
+
+        if ($prix == 40.62) {
+            return 70;
         }
 
         $coefPrix = 1;
@@ -442,11 +450,11 @@ class BS_ApplePart extends BimpObject
         $newPrix = 0;
         //Application des coef et constantes
         if ($type == 'batt14' && $price_type == 'EXCHANGE') {
-            $newPrix = 119/1.2;
+            $newPrix = 119 / 1.2;
         } elseif ($type == "batt" && $price_type == "EXCHANGE") {
-            $newPrix = 79/1.2;
+            $newPrix = 79 / 1.2;
         } elseif ($type == "battX" && $price_type == "EXCHANGE") {
-            $newPrix = 99/1.2;
+            $newPrix = 99 / 1.2;
         } elseif ($type == "ecran" && $price_type == "EXCHANGE") {
             foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
                 if ($ref == $refT)

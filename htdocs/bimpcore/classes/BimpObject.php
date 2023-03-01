@@ -2265,7 +2265,7 @@ class BimpObject extends BimpCache
         return $result;
     }
 
-    public function initBdsAction($action, &$action_data = array(), &$errors = array(), $extra_data = array(), $force_action = false)
+    public function initBdsAction($process, $action, &$action_data = array(), &$errors = array(), $extra_data = array(), $force_action = false)
     {
         $method = 'initBdsAction' . ucfirst($action);
 
@@ -2279,12 +2279,12 @@ class BimpObject extends BimpCache
             }
 
             if (!count($errors)) {
-                $this->{$method}($action_data, $errors, $extra_data);
+                $this->{$method}($process, $action_data, $errors, $extra_data);
             }
         }
     }
 
-    public function executeBdsAction($action, $step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array(), $force_action = false)
+    public function executeBdsAction($process, $action, $step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array(), $force_action = false)
     {
         $method = 'executeBdsAction' . ucfirst($action);
 
@@ -2298,7 +2298,7 @@ class BimpObject extends BimpCache
             }
 
             if (!count($errors)) {
-                $this->{$method}($step_name, $elements, $errors, $operation_extra_data, $action_extra_data);
+                $this->{$method}($process, $step_name, $elements, $errors, $operation_extra_data, $action_extra_data);
             }
         }
     }
@@ -8377,7 +8377,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $options .= ($options ? ', ' : '') . 'on_form_submit: ' . $params['on_form_submit'];
         }
 
-        if (isset($params['no_triggers']) && $params['no_triggers']) {
+        if (isset($params['no_triggers'])) {
             $options .= ($options ? ', ' : '') . 'no_triggers: ' . ((int) $params['no_triggers'] ? 1 : 0);
         }
 
@@ -8385,11 +8385,15 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $options .= ($options ? ', ' : '') . 'modal_scroll_bottom: ' . ((int) $params['modal_scroll_bottom'] ? 1 : 0);
         }
 
-        if (isset($params['use_bimpdatasync']) && $params['use_bimpdatasync']) {
+        if (isset($params['use_bimpdatasync'])) {
             $options .= ($options ? ', ' : '') . 'use_bimpdatasync: ' . ((int) $params['use_bimpdatasync'] ? 1 : 0);
         }
+        
+        if (isset($params['use_report'])) {
+            $options .= ($options ? ', ' : '') . 'use_report: ' . ((int) $params['use_report'] ? 1 : 0);
+        }
 
-        if (isset($params['display_processing']) && $params['display_processing']) {
+        if (isset($params['display_processing'])) {
             $options .= ($options ? ', ' : '') . 'display_processing: ' . ((int) $params['display_processing'] ? 1 : 0);
         }
 

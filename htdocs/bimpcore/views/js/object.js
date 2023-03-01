@@ -216,6 +216,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
         modal_format: 'medium', // Format modal (small / medium / large) 
         modal_scroll_bottom: true, // Auto scroll vers le bas de la modal du formulaire (à la validation) 
         use_bimpdatasync: false, // Utiliser BimpDataSync
+        use_report: false,
         display_processing: true,
         processing_msg: 'Traitement en cours'
     };
@@ -301,7 +302,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
                         $form.find('input[type=file]').each(function () {
                             if ($(this).val() != '') {
                                 var id = $(this).attr('id');
-                            var name = $(this).attr('name');
+                                var name = $(this).attr('name');
                                 nbFile++;
                                 button.addClass('disabled');
                                 $('#' + id).simpleUpload(DOL_URL_ROOT + "/bimpcore/ajax/upload.php?id=" + name, {
@@ -366,6 +367,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
             object_name: object_data.object_name,
             id_object: object_data.id_object,
             object_action: action,
+            use_report: options.use_report,
             extra_data: extra_data
         };
 

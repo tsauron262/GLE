@@ -45,9 +45,8 @@ abstract class BDSProcess
         BimpCore::setMemoryLimit(static::$memory_limit);
 
         global $db, $user;
-
         $this->options = BimpTools::overrideArray($this->options, $options);
-
+        
         if (self::$debug) {
             $this->options['debug'] = true;
         }
@@ -158,7 +157,11 @@ abstract class BDSProcess
                 $errors[] = 'L\'opération d\'ID ' . $id_operation . ' n\'existe plus';
             } else {
                 $data['operation_title'] = $operation->getData('title');
-                $data['use_report'] = (int) $operation->getData('use_report');
+                if (isset($this->options['force_use_report'])) {
+                    $data['use_report'] = (int) $this->options['force_use_report'];
+                } else {
+                    $data['use_report'] = (int) $operation->getData('use_report');
+                }
 
                 // Vérification des options: 
                 $options = $operation->getAssociatesObjects('options');

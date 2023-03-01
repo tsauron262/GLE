@@ -159,7 +159,9 @@ class BimpCommission extends BimpObject
                     'label'   => 'Générer facture de commissionnement',
                     'icon'    => 'fas_file-pdf',
                     'onclick' => $this->getJsActionOnclick('generateFactureCommissions', array(), array(
-                        'form_name' => 'facture_commissions'
+                        'form_name'        => 'facture_commissions',
+                        'use_bimpdatasync' => 1,
+                        'use_report'       => 1
                     ))
                 );
             }
@@ -885,12 +887,13 @@ class BimpCommission extends BimpObject
                                 ), true, $errors, $warnings);
 
                 if (BimpObject::objectLoaded($facture)) {
+
                     $i = 0;
                     $nOk = 0;
                     $fac_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                     foreach ($lines as $line) {
                         $i++;
-                        
+
                         $line_data = str_getcsv($line, ';');
                         $serial = $line_data[$keys['serial']];
 
@@ -967,6 +970,228 @@ class BimpCommission extends BimpObject
             'warnings'         => $warnings,
             'success_callback' => $sc
         );
+    }
+
+    // Actions BDS: 
+
+    public function initBdsActionGenerateFactureCommissions($process, &$action_data = array(), &$errors = array(), $extra_data = array())
+    {
+        $warnings = array();
+        $action_data['operation_title'] = 'Facturation AppleCare';
+
+        $file_name = BimpTools::getArrayValueFromPath($extra_data, 'file/0', '');
+        $fourn = BimpTools::getArrayValueFromPath($extra_data, 'fourn', '');
+        $fourn_label = '';
+        $id_fourn = 0;
+
+        switch ($fourn) {
+            case 'techdata':
+                $fourn_label = 'TECHDATA';
+                $id_fourn = 229890;
+                break;
+
+            case 'ingram':
+                $fourn_label = 'INGRAM MICRO';
+                $id_fourn = 230496;
+                break;
+
+            default:
+                $errors[] = 'Fournisseur sélectionné invalide';
+                break;
+        }
+
+        if (!$file_name) {
+            $errors[] = 'Fichier absent';
+        } else {
+            $file = DOL_DATA_ROOT . '/' . BimpTools::getTmpFilesDir() . '/' . $file_name;
+
+            if (!file_exists($file)) {
+                $errors[] = 'Le fichier semble ne pas avoir été téléchargé correctement';
+            }
+        }
+
+        if (!count($errors)) {
+            $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+            $elements = array();
+            $i = 0;
+            foreach ($lines as $line) {
+                if (!$i) {
+                    $line_data = str_getcsv($line, ';');
+
+                    if ($line_data[0] == 'Billing document') {
+                        continue;
+                    }
+                    $i++;
+                }
+
+                $elements[] = $i . ';' . $line;
+                $i++;
+            }
+
+            if (empty($elements)) {
+                $errors[] = 'Le fichier fourni est vide';
+            }
+
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_fourn);
+
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Fiche client de ' . $fourn_label . ' absente';
+            }
+
+            if (!count($errors)) {
+                if ((int) BimpCore::getConf('use_db_transactions')) {
+                    $this->db->db->begin();
+                }
+
+                $process->setCurrentObjectData('bimpcommercial', 'Bimp_Facture');
+                $process->incProcessed();
+
+                // Création facture: 
+                $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+                            'libelle'   => 'Commissions AppleCare ' . $fourn_label,
+                            'fk_soc'    => $id_fourn,
+                            'model_pdf' => 'bimpfact',
+                            'datef'     => date('Y-m-d'),
+                            'type'      => 0,
+                            'entrepot'  => 50,
+                            'ef_type'   => 'C'
+                                ), true, $errors, $warnings);
+
+                if (BimpObject::objectLoaded($facture)) {
+                    $process->incCreated();
+                    $process->Success('Facture créée avec succès', $facture);
+                    $action_data['steps'] = array(
+                        'process_lines' => array(
+                            'label'                  => 'Ajout des lignes de facture',
+                            'on_error'               => 'continue',
+                            'elements'               => $elements,
+                            'nbElementsPerIteration' => 10
+                        )
+                    );
+                    $action_data['data'] = array(
+                        'id_facture' => $facture->id,
+                        'id_fourn'   => $id_fourn
+                    );
+                } else {
+                    $process->incIgnored();
+                    $process->Error('Echec de création de la facture');
+                }
+            }
+        }
+
+        if ((int) BimpCore::getConf('use_db_transactions')) {
+            if (count($errors)) {
+                $this->db->db->rollback();
+            } else {
+                $this->db->db->commit();
+            }
+        }
+    }
+
+    public function executeBdsActionGenerateFactureCommissions($process, $step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array())
+    {
+        switch ($step_name) {
+            case 'process_lines':
+                $id_facture = (int) BimpTools::getArrayValueFromPath($operation_extra_data, 'operation/id_facture', 0);
+                if (!$id_facture) {
+                    $errors[] = 'ID de la facture absent';
+                } else {
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                    if (!BimpObject::objectLoaded($facture)) {
+                        $errors[] = 'La facture #' . $id_facture . ' n\'existe pas';
+                    } else {
+                        if (!empty($elements)) {
+                            $keys = array(
+                                'num'           => 0,
+                                'ref_fac_fourn' => 1,
+                                'desc'          => 2,
+                                'ref_commande'  => 3,
+                                'serial'        => 4,
+                                'price'         => 5
+                            );
+
+                            $fac_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                            foreach ($elements as $line) {
+                                $process->setCurrentObjectData('bimpcommercial', 'Bimp_FactureLine');
+                                $process->incProcessed();
+                                $line_data = str_getcsv($line, ';');
+                                $i = $line_data[$keys['num']];
+                                $serial = $line_data[$keys['serial']];
+
+                                if (!$serial) {
+                                    $process->Alert('Ligne n° ' . $i . ' : numéro de série absent', $facture);
+                                    $process->incIgnored();
+                                    continue;
+                                }
+
+                                $id_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND serial = \'' . $serial . '\'');
+                                if ($id_fac) {
+                                    $fac_instance->id = $id_fac;
+                                    $process->Alert('Ligne n° ' . $i . ' : une facturation de commissionnement existe déjà pour ce numéro de série - Facture ' . $fac_instance->getLink(), $facture, $serial);
+                                    $process->incIgnored();
+                                    continue;
+                                }
+
+                                // Création ligne de facture
+                                $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                                $fac_line->validateArray(array(
+                                    'id_obj'      => (int) $facture->id,
+                                    'type'        => 3,
+                                    'pa_editable' => 1
+                                ));
+
+                                $price = (float) str_replace(',', '.', $line_data[$keys['price']]);
+                                $fac_line->desc = '<b>' . $line_data[$keys['desc']] . '</b><br/>';
+                                $fac_line->desc .= 'Ref facture fournisseur : ' . $line_data[$keys['ref_fac_fourn']] . '<br/>';
+                                $fac_line->desc .= 'Ref commande : ' . $line_data[$keys['ref_commande']] . '<br/>';
+                                $fac_line->qty = 1;
+                                $fac_line->pu_ht = $price;
+                                $fac_line->tva_tx = 0;
+                                $fac_line->pa_ht = 0;
+
+                                $line_warnings = array();
+                                $line_errors = $fac_line->create($line_warnings, true);
+
+                                if (count($line_errors)) {
+                                    $process->incIgnored();
+                                    $process->Error(BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne n° ' . $i), $facture, $serial);
+                                    break;
+                                } else {
+                                    $process->incCreated();
+                                    $process->Success('Ajout de la ligne n° ' . $i . ' OK', $facture, $serial);
+
+                                    // Création revalorisation: 
+                                    $process->setCurrentObjectData('bimpfinanc', 'BimpRevalorisation');
+                                    $process->incProcessed();
+
+                                    $reval_errors = array();
+                                    BimpObject::createBimpObject('bimpfinanc', 'BimpRevalorisation', array(
+                                        'id_facture'      => $facture->id,
+                                        'id_facture_line' => $fac_line->id,
+                                        'type'            => 'fac_ac',
+                                        'qty'             => 1,
+                                        'amount'          => -$price,
+                                        'serial'          => $serial,
+                                        'date'            => date('Y-m-d')
+                                            ), true, $reval_errors);
+
+                                    if (count($reval_errors)) {
+                                        $process->incIgnored();
+                                        $process->Error(BimpTools::getMsgFromArray($reval_errors, 'Ligne n°' . $i . ' - échec de la création de la revalorisation'), $facture, $serial);
+                                    } else {
+                                        $process->incCreated();
+                                        $process->Success('Ligne n°' . $i . ' - Création de la revalorisation OK', $facture, $serial);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                break;
+        }
     }
 
     // Overrides: 

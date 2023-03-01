@@ -417,6 +417,10 @@ class BS_ApplePart extends BimpObject
         if (/* stripos($ref, $exception1) !== false && */ $prix == 143.12)
             return (229 / 1.2);
 //        }
+//        if ($prix == 93.13)
+//            return (149 / 1.2);
+        if($prix == 130.63) 
+            return (185 / 1.2);
         if ($prix == 93.13)
             return (149 / 1.2);
         if ($prix == 40.62)
@@ -433,8 +437,11 @@ class BS_ApplePart extends BimpObject
             return 99.16667;
         }
         
-        if($prix == 130.63) {
-            return (229 / 1.2);
+//        if($prix == 130.63) {
+//            return (229 / 1.2);
+//        }
+        if($prix == 180.62) {
+            return (289 / 1.2);
         }
 
         $coefPrix = 1;

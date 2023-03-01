@@ -39,7 +39,6 @@ class processController extends BimpController
 
         if (!count($errors)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
-
             $bds_process = BDSProcess::createProcessById($id_process, $errors, $options);
 
             if (!is_null($bds_process)) {
@@ -91,7 +90,7 @@ class processController extends BimpController
             'action_extra_data' => BimpTools::getValue('extra_data', ''),
             'mode'              => 'ajax',
             'debug'             => BimpCore::isUserDev(),
-            'process_token'     => ''
+            'force_use_report'     => (int) BimpTools::getValue('use_report')
         );
 
         require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';

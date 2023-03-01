@@ -24,7 +24,7 @@ class BL_CommandeFournReception extends BimpObject
     {
         return 1;
     }
-    
+
     public function canCreate()
     {
         global $user;
@@ -1886,7 +1886,7 @@ class BL_CommandeFournReception extends BimpObject
 
     // Validation via BimpDataSync
 
-    public function initBdsActionValidateReception(&$action_data = array(), &$errors = array(), $extra_data = array())
+    public function initBdsActionValidateReception($process, &$action_data = array(), &$errors = array(), $extra_data = array())
     {
         $action_data['operation_title'] = 'Validation de la réception';
 
@@ -2090,7 +2090,7 @@ class BL_CommandeFournReception extends BimpObject
         return $steps;
     }
 
-    public function executeBdsActionValidateReception($step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array())
+    public function executeBdsActionValidateReception($process, $step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array())
     {
         if ((int) BimpCore::getConf('use_db_transactions')) {
             $this->db->db->begin();
@@ -2176,7 +2176,7 @@ class BL_CommandeFournReception extends BimpObject
                     $line_prod = $line->getProduct();
                     if (BimpObject::objectLoaded($line_prod) && $line_prod->isTypeProduct()) {
                         $r_data = $line->getReceptionData($this->id);
-                        
+
                         if (!isset($r_data['qty']) || !(int) $r_data['qty']) {
                             continue;
                         }

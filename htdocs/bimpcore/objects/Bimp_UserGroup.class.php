@@ -633,26 +633,13 @@ class Bimp_UserGroup extends BimpObject
         if (!is_array($ids_users) || empty($ids_users)) {
             $errors[] = 'Aucun utilisateur sélectionné';
         } else {
-            foreach ($ids_users as $id_user) {
-                $id = (int) $this->db->getValue('usergroup_user', 'rowid', 'fk_user = ' . $id_user . ' AND fk_usergroup = ' . $this->id);
-
-                if ($id) {
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-                    $errors[] = 'L\'utilisateur ' . (BimpObject::objectLoaded($user) ? '"' . $user->getName() . '"' : '#' . $id_user) . ' a déjà été ajouté à ce groupe';
-                }
-            }
-        }
-
-        if (!count($errors)) {
             $nOk = 0;
             foreach ($ids_users as $id_user) {
-                if (!$this->db->insert('usergroup_user', array(
-                            'entity'       => 1,
-                            'fk_user'      => $id_user,
-                            'fk_usergroup' => $this->id
-                        ))) {
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-                    $errors[] = 'Echec de l\'ajout de l\'utilisateur ' . (BimpObject::objectLoaded($user) ? '"' . $user->getName() : '#' . $id_user) . '" - ' . $this->db->err();
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+                if (!BimpObject::objectLoaded($user)) {
+                    $warnings[] = 'L\'utilisateur #' . $id_user . ' n\'existe pas';
+                } elseif ($user->dol_object->SetInGroup($this->id, 1) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($user->dol_object), 'Echec de l\'ajout de l\'utilisateur ' . $user->getName());
                 } else {
                     $nOk++;
                 }
@@ -683,9 +670,9 @@ class Bimp_UserGroup extends BimpObject
             $nOk = 0;
 
             foreach ($ids_users as $id_user) {
-                if ($this->db->delete('usergroup_user', 'fk_user = ' . (int) $id_user . ' AND fk_usergroup = ' . $this->id) <= 0) {
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-                    $errors[] = 'Echec du retrait de l\'utilisateur ' . (BimpObject::objectLoaded($user) ? '"' . $user->getName() . '"' : '#' . $id_user) . ' - ' . $this->db->err();
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+                if ($user->dol_object->RemoveFromGroup($this->id, 1) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($user->dol_object), 'Echec du retrait de l\'utilisateur ' . $user->getName());
                 } else {
                     $nOk++;
                 }

@@ -926,7 +926,7 @@ function bds_initProcessOperation($button, id_process, id_operation) {
     });
 }
 
-function bds_initObjectActionProcess($button, data, modal_title, $resultContainer) {
+function bds_initObjectActionProcess($button, data, modal_title, $resultContainer) {    
     var success_callback = function (result, bimpAjax) {
         if (typeof (result.process_html) !== 'undefined' && result.process_html) {
             var $container = bimpAjax.$resultContainer;
@@ -977,7 +977,7 @@ function bds_initObjectActionProcess($button, data, modal_title, $resultContaine
     } else {
         // Sinon: 
         bimpModal.loadAjaxContent($button, 'bds_initObjectActionProcess', data, modal_title, 'Initialisation de l\'opération en cours', success_callback, {
-            url: bds_process_url
+            url: bds_process_url,
         });
     }
 }

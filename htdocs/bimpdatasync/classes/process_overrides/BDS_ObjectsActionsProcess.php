@@ -32,10 +32,10 @@ class BDS_ObjectsActionsProcess extends BDSProcess
                 $this->options['process_token'] = $token;
                 $extra_data = $this->getOption('action_extra_data', array());
                 $force_action = (int) $this->getOption('force_action', 0);
-                $object->initBdsAction($action, $data, $errors, $extra_data, $force_action);
+                $object->initBdsAction($this, $action, $data, $errors, $extra_data, $force_action);
 
                 if (!count($errors)) {
-                    // On a été jusqu'au bout: on empêche le forçage du déblocage du lock (de lock doit être maintenu durant les éxécutions en ajax)
+                    // On a été jusqu'au bout: on empêche le forçage du déblocage du lock (le lock doit être maintenu durant les éxécutions en ajax)
                     global $no_force_current_object_unlock;
                     $no_force_current_object_unlock = true;
                 }
@@ -71,7 +71,7 @@ class BDS_ObjectsActionsProcess extends BDSProcess
 
                 $action_extra_data = $this->getOption('action_extra_data', array());
                 $force_action = (int) $this->getOption('force_action', 0);
-                $result = $object->executeBdsAction($action, $step_name, $this->references, $errors, $operation_extra_data, $action_extra_data, $force_action);
+                $result = $object->executeBdsAction($this, $action, $step_name, $this->references, $errors, $operation_extra_data, $action_extra_data, $force_action);
 
                 if (count($errors)) {
                     if (BimpObject::objectLoaded($object)) {
@@ -251,16 +251,16 @@ class BDS_ObjectsActionsProcess extends BDSProcess
                 $options[] = (int) $opt->id;
             }
 
-            // opérations: 
-
+            // Opérations: 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
-                        'id_process'  => (int) $process->id,
-                        'title'       => 'Exécuter l\'action objet',
-                        'name'        => 'ObjectAction',
-                        'description' => '',
-                        'warning'     => '',
-                        'active'      => 1,
-                        'use_report'  => 0,
+                        'id_process'    => (int) $process->id,
+                        'title'         => 'Exécuter l\'action objet',
+                        'name'          => 'ObjectAction',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 30
                             ), true, $warnings, $warnings);
 
             if (BimpObject::objectLoaded($op)) {

@@ -1063,6 +1063,9 @@ if (!defined('NOLOGIN')) {
 		// New session for this login has started.
 		$error = 0;
 
+echo '<pre>';
+echo '<h1>Liste des cookies</h1>';
+        print_r($_COOKIE);
 		// Store value into session (values always stored)
 		$_SESSION["dol_login"] = $user->login;
 		$_SESSION["dol_authmode"] = isset($dol_authmode) ? $dol_authmode : '';

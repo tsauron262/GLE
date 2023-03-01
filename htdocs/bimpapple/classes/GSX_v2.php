@@ -42,7 +42,7 @@ class GSX_v2 extends GSX_Const
 
             case 'prod':
                 if (isset($user->array_options['options_apple_id']) && (string) $user->array_options['options_apple_id']) {
-                    $this->appleId = BimpTools::addZeros($user->array_options['options_apple_id'], self::$numbersNumChars);
+                    $this->appleId = $user->array_options['options_apple_id'];
                 } else {
                     $this->appleId = self::$default_ids['apple_id'];
                 }

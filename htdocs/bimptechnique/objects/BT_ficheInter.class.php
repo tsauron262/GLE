@@ -1620,7 +1620,8 @@ class BT_ficheInter extends BimpDolObject
 
             $fk_soc = (int) $this->getData('fk_soc');
 
-            $list = ActionComm::getActions($this->db->db, $fk_soc, $this->id, static::$dol_module, '', 'a.id', 'ASC');
+            $ac = new ActionComm($this->db->db);
+            $list = $ac->getActions($fk_soc, $this->id, static::$dol_module, '', 'a.id', 'ASC');
 
             if (!is_array($list)) {
                 $html .= BimpRender::renderAlerts('Echec de la récupération de la liste des événements');

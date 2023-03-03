@@ -198,6 +198,9 @@ class BContract_contrat extends BimpDolObject
     public function canEditField($field_name)
     {
         global $user;
+        
+        if($field_name == 'expertise')
+            return 1;
 
         if ($this->getData('statut') == self::CONTRAT_STATUS_REFUSE)
             return 0;
@@ -3775,6 +3778,7 @@ class BContract_contrat extends BimpDolObject
         $facture->set('ef_type', $this->getData('secteur'));
         $facture->set('model_pdf', 'bimpfact');
         $facture->set('ref_client', $this->getData('ref_customer'));
+        $facture->set('expertise', $this->getData('expertise'));
         $errors = $facture->create($warnings, true);
 
         if (!count($errors)) {

@@ -15,6 +15,24 @@ class BimpDolObject extends BimpObject
     public static $email_type = '';
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
+    
+    
+    public static $expertise = [
+        ''  => "",
+        10  => "Arts graphiques",
+        20  => "Constructions",
+        30  => "Education & Administration (CRT)",
+        35  => "Administration",
+        40  => "Infrastructure",
+        50  => "Marketing",
+        60  => "Mobilité",
+        70  => "Partner",
+        80  => "Santé",
+        90  => "SAV",
+        14  => "Bureautique",
+        15  => "Formation",
+        100 => "Autre (ne pas utiliser)"
+    ];
 
     // Droits user: 
 

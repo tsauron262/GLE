@@ -66,6 +66,8 @@ class BContract_avenantdet extends BContract_avenant {
             $coup = $coupUp - $coupDown;
             $class = "warning";
             $icon = "arrow-right";
+            $parent = $this->getParentInstance();
+            $coup *= $parent->getProataDays(false);
 
             if($coup > 0) {
                 $class = "success";

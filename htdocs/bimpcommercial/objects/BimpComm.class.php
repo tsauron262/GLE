@@ -4533,7 +4533,7 @@ class BimpComm extends BimpDolObject
 
     public function getGraphDatasPoints($params)
     {
-        $result = array();
+        $result = array(1=>array(), 2=> array());
 
         $fieldTotal = 'total_ht';
         if ($this->object_name == 'Bimp_Propal')

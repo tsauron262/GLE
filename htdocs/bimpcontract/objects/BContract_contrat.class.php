@@ -17,6 +17,12 @@ require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php
  * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
  */
 
+
+/*
+ * req maj expertise : 
+ * SELECT f.* FROM llx_contrat_extrafields c, llx_element_element e, llx_facture_extrafields f WHERE e.sourcetype = 'contrat' AND e.fk_source = c.fk_object AND e.targettype = 'facture' AND e.fk_target = f.fk_object AND c.expertise != '' AND f.expertise = '';
+ */
+
 class BContract_contrat extends BimpDolObject
 {
 

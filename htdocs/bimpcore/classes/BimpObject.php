@@ -10497,9 +10497,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($newVersion) {
             if ($redirect)
                 unset($_SESSION['oldVersion']);
-            if ($this->id > 0)
-                $url = $this->getUrl();
-            else
+            if ($this->id > 0){
+                if($this->getConf('controller', null))
+                    $url = $this->getUrl();
+            }
+            elseif($this->getConf('list_page_url', null))
                 $url = $this->getListUrl();
             $texteBtn .= "Nouvelle version";
             if ($redirectMode == 4)

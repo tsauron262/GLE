@@ -87,6 +87,7 @@ class ActionsBimpcore
     }
     
     function getBtnRedirectHoldToNew(){
+//        return '';
         $url = $_SERVER['REQUEST_URI']; 
         if(isset($_REQUEST['facid']))
             $_REQUEST['id'] = $_REQUEST['facid'];
@@ -118,8 +119,12 @@ class ActionsBimpcore
                     $tabObj = array("bimpcore", "Bimp_Fournisseur");
 
 
-            if(stripos($url, '/product/'))
+            if(stripos($url, '/product/')){
+                if(stripos($url, '/stock/'))
+                    $tabObj = array("bimpcore", "Bimp_Entrepot");
+                else
                     $tabObj = array("bimpcore", "Bimp_Product");
+            }
 
             if(stripos($url, '/synopsisdemandeinterv/') || stripos($url, '/synopsisfichinter/'))
                     $tabObj = array("bimptechnique", "BT_ficheInter");

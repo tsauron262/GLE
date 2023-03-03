@@ -2,6 +2,7 @@
 
 class Bimp_Entrepot extends BimpObject
 {
+    public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
     public static $status_list = array(
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -23,10 +24,10 @@ class Bimp_Entrepot extends BimpObject
         return (isset($user->rights->stock->supprimer) && $user->rights->stock->supprimer);
     }
 
-    public function iAmAdminRedirect()
-    {
-        return $this->canEdit();
-    }
+//    public function iAmAdminRedirect()
+//    {
+//        return $this->canEdit();
+//    }
 
     // Getters: 
 

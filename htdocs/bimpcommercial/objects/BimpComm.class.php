@@ -39,22 +39,6 @@ class BimpComm extends BimpDolObject
         102 => ['label' => 'Comptabilisation suspendue', 'classes' => ['important'], 'icon' => 'refresh'],
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
-    public static $expertise = [
-        ''  => "",
-        10  => "Arts graphiques",
-        20  => "Constructions",
-        30  => "Education & Administration (CRT)",
-        35  => "Administration",
-        40  => "Infrastructure",
-        50  => "Marketing",
-        60  => "Mobilité",
-        70  => "Partner",
-        80  => "Santé",
-        90  => "SAV",
-        14  => "Bureautique",
-        15  => "Formation",
-        100 => "Autre (ne pas utiliser)"
-    ];
     public static $zones_vente = array(
         self::BC_ZONE_FR      => 'France',
         self::BC_ZONE_UE      => 'Union Européenne',

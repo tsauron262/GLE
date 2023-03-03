@@ -5848,13 +5848,14 @@ class Bimp_Facture extends BimpComm
         if (!count($errors) && isset($data['files_compl']) && is_array($data['files_compl']) && count($data['files_compl'])) {
             $api = BimpAPI::getApiInstance('piste');
             $chorus_data = $this->getData('chorus_data');
-            foreach ($data['files_compl'] as $idF) {
+            $files = BimpTools::merge_array($data['join_files'], $data['files_compl']);
+            foreach ($files as $idF) {
                 $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $idF);
 
                 $name = $file->getData('file_name') . '.' . $file->getData('file_ext');
                 $id = $api->uploadFile($file->getFileDir(), $name, $errors);
                 if ($id > 0)
-                    $chorus_data['pj'][$id] = $file->getData('file_name') . $file->getData('file_ext');
+                    $chorus_data['pj'][$id] = $name;
                 else
                     $errors[] = 'Fichier ' . $name . ' non envoyé vers Chorus';
             }

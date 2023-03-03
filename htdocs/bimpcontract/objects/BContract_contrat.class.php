@@ -161,20 +161,6 @@ class BContract_contrat extends BimpDolObject
         'facture_fourn' => 'Facture fournisseur',
             //'propal' => 'Proposition commercial'
     ];
-    public static $expertise = [
-        ''  => "",
-        10  => "Arts graphiques",
-        20  => "Constructions",
-        30  => "Education et Administrations",
-        40  => "Infrastructure",
-        50  => "Marketing",
-        60  => "Mobilité",
-        70  => "Partner",
-        80  => "Santé",
-        90  => "SAV",
-        14  => "Bureautique-Formation",
-        100 => "Autre (ne pas utiliser)"
-    ];
     private $totalContrat = null;
 
     function __construct($module, $object_name)

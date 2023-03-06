@@ -14,4 +14,16 @@ class Bimp_Facture_ExtEntity extends Bimp_Facture
             return 1;
         return parent::isFieldEditable($field, $force_edit);
     }
+    
+    
+    public function getProdWithFactureType(){
+        switch($this->getData('type_vente')){
+            case 1:
+//                return 
+                break;
+            case 2:
+                
+                break;
+        }
+    }
 }

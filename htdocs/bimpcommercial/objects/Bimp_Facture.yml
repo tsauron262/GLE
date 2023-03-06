@@ -142,6 +142,11 @@ fields:
                 params: 
                     - 0
                     - 1
+        show:
+            callback:
+                method: getGeneralConf
+                params:
+                    - use_payments
     pdf_hide_pu: 
         label: Masquer les prix unitaires dans le PDF
         dol_extra_field: 1
@@ -221,6 +226,11 @@ fields:
         values: 
             array: paiement_status
         default_value: 0
+        show:
+            callback:
+                method: getGeneralConf
+                params:
+                    - use_payments
     remain_to_pay: 
         label: Reste à payer
         type: money

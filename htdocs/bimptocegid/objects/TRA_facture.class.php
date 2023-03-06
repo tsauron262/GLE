@@ -154,7 +154,11 @@
                     if($this->sens_facture == "C") { //c'est un avoir
                         $sens = ($line->multicurrency_total_ht > 0) ? "D" : "C";
                     }
-                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                    if(!$line->fk_product && method_exists($facture, 'getProdWithFactureType'))
+                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $facture->getProdWithFactureType());    
+                    else
+                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                    
                     if($line->multicurrency_total_ht != 0) {
                         $debug['ZONE_VENTE_' . $line->id] = $facture->getData('zone_vente');
                         $current_montant = round($line->multicurrency_total_ht, 2);

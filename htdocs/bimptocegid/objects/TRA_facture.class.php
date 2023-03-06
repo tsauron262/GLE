@@ -184,7 +184,6 @@
                         $structure['TYPE_DE_COMPTE']        = sizing("", 1);
                         $structure['CODE_AUXILIAIRE']       = sizing("", 16);
                         $structure['MONTANT']               = sizing(abs(round($current_montant,2)), 20, true);
-                        $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
                         if(Bimpcore::getConf('mode_detail')){
                             $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
                             $structure['REF_LIBRE']             = sizing(($product->isLoaded()) ? $product->getRef() : 'Ligne ' . $line->id,35);

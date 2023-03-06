@@ -575,7 +575,7 @@ class BimpObject extends BimpCache
     // Getters configuation:
     
     public function getGeneralConf($name, $default = null, $module = null){
-        BimpCore::getConf($name, $default, $module);
+        return BimpCore::getConf($name, $default, $module);
     }
 
     public function getConf($path, $default_value = null, $required = false, $data_type = 'string')

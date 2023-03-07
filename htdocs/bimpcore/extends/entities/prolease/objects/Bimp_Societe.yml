@@ -1,8 +1,8 @@
 # Entité: prolease
 
 fields: 
-    exported: 
-        unused: 1
+#    exported: 
+#        unused: 1
     id_atradius: 
         unused: 1
     id_ldlc: 

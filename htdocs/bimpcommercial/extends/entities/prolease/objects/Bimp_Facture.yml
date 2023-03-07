@@ -1,17 +1,14 @@
-<?php
-require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
-
-class Bimp_Facture_ExtEntity extends BimpComm
-{
-    public static $types_vente = array(
-        1      => 'Cession',
-        2      => 'Union Européenne',
-        3      => 'Hors UE'
-    );
-    
-    public function isFieldEditable($field, $force_edit = false) {
-        if($field == 'type_vente')
-            return 1;
-        return parent::isFieldEditable($field, $force_edit);
-    }
-}
+fields:
+    type_vente: 
+        label: Type de vente
+        type: int
+        values: 
+            array: types_vente
+        dol_extra_field: 1
+        default_value: 10     
+fields_tables: 
+    infos:
+        rows: 
+            type_vente:
+                field: type_vente
+                edit: 1

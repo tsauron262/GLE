@@ -4,9 +4,10 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_Facture.class.php
 class Bimp_Facture_ExtEntity extends Bimp_Facture
 {
     public static $types_vente = array(
-        1      => 'Cession',
-        2      => 'Union Européenne',
-        3      => 'Hors UE'
+        1      => 'Contrat de location',
+        2      => 'Indemnité dépassement contrat ',
+        3      => 'Cession final du produit',
+        10     => 'Autre'
     );
     
     public function isFieldEditable($field, $force_edit = false) {
@@ -19,10 +20,13 @@ class Bimp_Facture_ExtEntity extends Bimp_Facture
     public function getProdWithFactureType(){
         switch($this->getData('type_vente')){
             case 1:
-//                return 
+                return 6;
                 break;
             case 2:
-                
+                return 9;
+                break;
+            case 3:
+                return 12;
                 break;
         }
     }

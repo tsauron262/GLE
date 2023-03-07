@@ -1,0 +1,17 @@
+objects:
+    bimp_entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+fields: 
+    entrepot_spare:
+        label: Entrepot SPARE
+        type: id_object
+        object: bimp_entrepot
+        
+fields_tables: 
+    identity:
+        rows: 
+            entrepot_spare:
+                field: entrepot_spare
+        

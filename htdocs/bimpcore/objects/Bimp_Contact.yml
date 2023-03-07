@@ -40,7 +40,7 @@ fields:
         default_value: 1
     civility:
         label: Titre civilité
-        dol_prop: civility_id
+        dol_prop: civility_code
         user_edit: 1
         values: 
             callback: 

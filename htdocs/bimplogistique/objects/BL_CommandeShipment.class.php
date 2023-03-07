@@ -602,7 +602,8 @@ class BL_CommandeShipment extends BimpObject
                                     ), null, null, 'id', 'asc', 'array', array('serial', 'imei', 'imei2'));
 
                             foreach ($equipments as $eq) {
-                                $line_qties['serials'][] = $eq['serial'].($eq['imei'] != '' ? ' '.$eq['imei'] : '').($eq['imei2'] != '' ? ' '.$eq['imei2'] : '');
+                                $numNonInteressent = array('', 'n/a');
+                                $line_qties['serials'][] = $eq['serial'].(!in_array($eq['imei'], $numNonInteressent) ? ' '.$eq['imei'] : '').(!in_array($eq['imei2'], $numNonInteressent) ? ' '.$eq['imei2'] : '');
                             }
                         }
                     } elseif (in_array($id_shipment, $prev_shipments)) {

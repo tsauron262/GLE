@@ -573,6 +573,10 @@ class BimpObject extends BimpCache
     }
 
     // Getters configuation:
+    
+    public function getGeneralConf($name, $default = null, $module = null){
+        return BimpCore::getConf($name, $default, $module);
+    }
 
     public function getConf($path, $default_value = null, $required = false, $data_type = 'string')
     {
@@ -10497,9 +10501,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($newVersion) {
             if ($redirect)
                 unset($_SESSION['oldVersion']);
-            if ($this->id > 0)
-                $url = $this->getUrl();
-            else
+            if ($this->id > 0){
+                if($this->getConf('controller', null))
+                    $url = $this->getUrl();
+            }
+            elseif($this->getConf('list_page_url', null))
                 $url = $this->getListUrl();
             $texteBtn .= "Nouvelle version";
             if ($redirectMode == 4)

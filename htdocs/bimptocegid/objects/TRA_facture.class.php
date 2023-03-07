@@ -87,8 +87,14 @@
             $structure['MONTANT_2']             = sizing("", 20);
             $structure['MONTANT_3']             = sizing("", 20);
             $structure['ETABLISSEMENT']         = sizing('001', 3);
-            $structure['AXE']                   = sizing('A1',2);
-            $structure['NUMRO_ECHEANCE']        = sizing("1", 2);
+            if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+                $structure['AXE']                   = sizing('A1',2);
+                $structure['NUMRO_ECHEANCE']        = sizing("1", 2);
+            }
+            else{
+                $structure['AXE']                   = sizing('',2);
+                $structure['NUMRO_ECHEANCE']        = sizing("", 2);
+            }
             $structure['REF_EXTERNE']           = sizing($facture->getData('ref'), 35);
             $structure['DATE_REF_EXTERNE']      = sizing($date_facture_source->format('dmY'), 8);
             $structure['DATE_CREATION']         = sizing($date_creation->format('dmY'), 8);
@@ -100,10 +106,21 @@
             $structure['QUANTITE_2']            = sizing("",20);
             $structure['QUANTITE_QUALIF_1']     = sizing("",3);
             $structure['QUANTITE_QUALIF_2']     = sizing("",3);
-            $structure['REF_LIBRE']             = sizing(suppr_accents($facture->getData('libelle')),35);
+            
+            if(Bimpcore::getConf('mode_detail', null, 'bimptocegid'))
+                $structure['REF_LIBRE']             = sizing(suppr_accents($facture->getData('libelle')),35);
+            else
+                $structure['REF_LIBRE']             = sizing('',35);
+            
             $structure['TVA_ENCAISSEMENT']      = sizing("-",1);
-            $structure['REGIME_TVA']            = sizing("CEE",3);
-            $structure['TVA']                   = sizing("T",3);
+            if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+                $structure['REGIME_TVA']            = sizing("CEE",3);
+                $structure['TVA']                   = sizing("T",3);
+            }
+            else{
+                $structure['REGIME_TVA']            = sizing("",3);
+                $structure['TVA']                   = sizing("",3);
+            }
             $structure['TPF']                   = sizing("",3);
             $structure['CONTRE_PARTIE']         = sizing("",17);
             $structure['VIDE']                  = sizing("",606);
@@ -137,7 +154,11 @@
                     if($this->sens_facture == "C") { //c'est un avoir
                         $sens = ($line->multicurrency_total_ht > 0) ? "D" : "C";
                     }
-                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                    if(!$line->fk_product && method_exists($facture, 'getProdWithFactureType'))
+                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $facture->getProdWithFactureType());    
+                    else
+                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                    
                     if($line->multicurrency_total_ht != 0) {
                         $debug['ZONE_VENTE_' . $line->id] = $facture->getData('zone_vente');
                         $current_montant = round($line->multicurrency_total_ht, 2);
@@ -167,8 +188,10 @@
                         $structure['TYPE_DE_COMPTE']        = sizing("", 1);
                         $structure['CODE_AUXILIAIRE']       = sizing("", 16);
                         $structure['MONTANT']               = sizing(abs(round($current_montant,2)), 20, true);
-                        $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
-                        $structure['REF_LIBRE']             = sizing(($product->isLoaded()) ? $product->getRef() : 'Ligne ' . $line->id,35);
+                        if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+                            $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
+                            $structure['REF_LIBRE']             = sizing(($product->isLoaded()) ? $product->getRef() : 'Ligne ' . $line->id,35);
+                        }
                         $ecriture .= implode('', $structure) . "\n";
                         
                         if(abs($current_montant) > abs($montant_le_plus_grand)) {
@@ -186,8 +209,10 @@
                     $structure['TYPE_DE_COMPTE']        = sizing("", 1);
                     $structure['CODE_AUXILIAIRE']       = sizing("", 16);
                     $structure['MONTANT']               = sizing(abs($total_deee), 20, true);
-                    $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
-                    $structure['REF_LIBRE']             = sizing("DEEE",35);
+                    if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+                        $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
+                        $structure['REF_LIBRE']             = sizing("DEEE",35);
+                    }
                     $ecriture .= implode('', $structure);
                     if(abs($total_tva) > 0) $ecriture .= "\n";
                     
@@ -200,10 +225,11 @@
                         $this->compte_general = '44571000';
                     $structure['COMPTE_GENERAL']        = sizing($this->compte_general , 17);
                     $structure['SENS']                  = sizing($this->getSens($total_tva),1);
-                    $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
                     $structure['MONTANT']               = sizing(abs(round($facture->getData('multicurrency_total_tva'), 2)), 20, true);
-                    $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
-                    $structure['REF_LIBRE']             = sizing("TVA",35);
+                    if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+                        $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
+                        $structure['REF_LIBRE']             = sizing("TVA",35);
+                    }
                     $ecriture .= implode('', $structure) . "\n";
                 }
                 
@@ -216,7 +242,9 @@
                     $structure['COMPTE_GENERAL']        = sizing($compte_le_plus_grand, 17);
                     $structure['SENS']                  = sizing($this->getSens($reste),1);
                     $structure['MONTANT']               = sizing(abs($reste), 20, true);
-                    $structure['REF_LIBRE']             = sizing($facture->getRef(),35);
+                    if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+                        $structure['REF_LIBRE']             = sizing($facture->getRef(),35);
+                    }
                     $ecriture .= implode('', $structure) . "\n";
                 }
                 

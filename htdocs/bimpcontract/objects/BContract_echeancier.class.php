@@ -427,6 +427,7 @@ class BContract_echeancier extends BimpObject
         $instance->set('ef_type', $ef_type);
         $instance->set('model_pdf', 'bimpfact');
         $instance->set('ref_client', $parent->getData('ref_customer'));
+        $instance->set('expertise', $parent->getData('expertise'));
 
         $errors = $instance->create($warnings, true);
         $instance->copyContactsFromOrigin($parent);

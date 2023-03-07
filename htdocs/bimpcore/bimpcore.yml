@@ -82,6 +82,10 @@ params:
         label: Utiliser les secteurs
         type: bool
         def: 0
+    use_payments: 
+        label: Utiliser les paiements
+        type: bool
+        def: 1
     use_caisse_for_payments: 
         label: Utiliser la caisse pour les paiements
         type: bool

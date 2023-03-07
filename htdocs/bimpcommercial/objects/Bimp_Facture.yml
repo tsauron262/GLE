@@ -142,6 +142,11 @@ fields:
                 params: 
                     - 0
                     - 1
+        show:
+            callback:
+                method: getGeneralConf
+                params:
+                    - use_payments
     pdf_hide_pu: 
         label: Masquer les prix unitaires dans le PDF
         dol_extra_field: 1
@@ -221,6 +226,11 @@ fields:
         values: 
             array: paiement_status
         default_value: 0
+        show:
+            callback:
+                method: getGeneralConf
+                params:
+                    - use_payments
     remain_to_pay: 
         label: Reste à payer
         type: money
@@ -666,6 +676,29 @@ forms:
               content: 
                   callback: renderClientSelectChorusServicesInput
               depends_on: id_structure
+            - custom: 1
+              label: Fichiers joints
+              input_name: join_files
+              data_type: id_object
+              input: 
+                  type: check_list
+                  items: 
+                      callback: 
+                          method: getAllFiles
+                          params: 
+                              - 0
+              depends_on: id_model
+              object: files
+              create_form: upload
+              create_form_label: Ajouter
+              create_form_values: 
+                  fields: 
+                      parent_module: 
+                          prop: module
+                      parent_object_name: 
+                          prop: object_name
+                      id_parent: 
+                          prop: id
             - custom: 1
               label: Fichier a joindre
               input_name: files_compl

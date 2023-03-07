@@ -560,7 +560,7 @@ class BimpRevalorisation extends BimpObject
                         ))
                     );
                 }
-                if ($this->getData('status') == 0 || $this->getData('status') == 10) {
+                if ($this->getData('status') == 0 || $this->getData('status') == 10 || $this->getData('status') == 20) {
                     $buttons[] = array(
                         'label'   => 'Refuser',
                         'icon'    => 'fas_times',
@@ -816,6 +816,8 @@ class BimpRevalorisation extends BimpObject
                 case 'refuse':
                     $success = 'Refus de la revalorisation effectué avec succès';
                     $this->set('status', 2);
+                    $facture = $this->getChildObject('facture');
+                    $facture->addNoteToCommercial('Une revalorisation a été refusée');
                     break;
                 case 'setSerial':
                     $success = 'Saisie du serial OK';

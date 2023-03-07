@@ -133,18 +133,34 @@
             $structure['TABLE_8']         = sizing('', 17);
             $structure['TABLE_9']         = sizing('', 17);
             $structure['TABLE_10']        = sizing('', 17);
-            $structure['ADRESSE']         = sizing(strtoupper($this->cleanString($this->tier->getData('address'))), 35);
-            $structure['VIDE']            = sizing('', 70);
-            $structure['CODE_POSTAL']     = sizing($this->tier->getData('zip'), 9);
-            $structure['VILLE']           = sizing(strtoupper($this->cleanString($this->tier->getData('town'))), 35);
-            $structure['VIDE_2']          = sizing('', 47);
-            $structure['PAYS']            = sizing($country->code_iso, 3);
+            if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+                $structure['ADRESSE']         = sizing(strtoupper($this->cleanString($this->tier->getData('address'))), 35);
+                $structure['VIDE']            = sizing('', 70);
+                $structure['CODE_POSTAL']     = sizing($this->tier->getData('zip'), 9);
+                $structure['VILLE']           = sizing(strtoupper($this->cleanString($this->tier->getData('town'))), 35);
+                $structure['VIDE_2']          = sizing('', 47);
+                $structure['PAYS']            = sizing($country->code_iso, 3);
+            }
+            else{
+                $structure['ADRESSE']         = sizing('', 35);
+                $structure['VIDE']            = sizing('', 70);
+                $structure['CODE_POSTAL']     = sizing('', 9);
+                $structure['VILLE']           = sizing('', 35);
+                $structure['VIDE_2']          = sizing('', 47);
+                $structure['PAYS']            = sizing('', 3);
+            }
             $structure['NOM_ABREGE']      = sizing(strtoupper($this->cleanString(str_replace(' ', '', $this->tier->getName()))), 17);
             $structure['LANGUE']          = sizing(strtoupper($country->code), 3);
             $structure['MULTI_DEVICE']    = sizing(($field == 'code_compta') ? '-' : '', 1);
             $structure['DEVICE_TIER']     = sizing('EUR', 3);
-            $structure['TELEPHONE']       = sizing($this->cleanString($this->tier->getData('phone')), 25);
-            $structure['FAX']             = sizing('', 25);
+            if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+                $structure['TELEPHONE']       = sizing($this->cleanString($this->tier->getData('phone')), 25);
+                $structure['FAX']             = sizing('', 25);
+            }
+            else{
+                $structure['TELEPHONE']       = sizing('', 25);
+                $structure['FAX']             = sizing('', 25);
+            }
             $structure['REGIME_TVA']      = sizing(($country->in_ue) ? $country->code_iso : '', 3);
             $structure['MODE_REGLEMENT']  = sizing('', 3);
             $structure['VIDE_3']          = sizing('', 52);
@@ -153,7 +169,12 @@
             $structure['PRENOM']          = sizing('', 35);
             $structure['VIDE_4']          = sizing('', 70);
             $structure['VIDE_5']          = sizing('', 75);
-            $structure['ADRESSE_EMAIL']   = sizing(suppr_accents($this->tier->getData('email')), 54);
+            if(Bimpcore::getConf('mode_detail', null, 'bimptocegid')){
+                $structure['ADRESSE_EMAIL']   = sizing(suppr_accents($this->tier->getData('email')), 54);
+            }
+            else{
+                $structure['ADRESSE_EMAIL']   = sizing('', 54);
+            }
             $structure['STATUT_JURIDIQUE']= sizing(suppr_accents($this->tier->displayJuridicalStatus()), 3);
             $structure['RIB']             = sizing('-', 1);
             $structure['TVA_ENCAISSEMENT']= sizing('TM', 3);

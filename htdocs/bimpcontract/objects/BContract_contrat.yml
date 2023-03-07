@@ -1179,6 +1179,7 @@ forms:
             - field: ref_ext
             - field: ref_customer
             - field: objet_contrat
+            - field: expertise
             - field: entrepot
             - field: fk_soc
               edit: 0

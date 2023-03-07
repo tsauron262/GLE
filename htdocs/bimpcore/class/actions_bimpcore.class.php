@@ -87,44 +87,51 @@ class ActionsBimpcore
     }
     
     function getBtnRedirectHoldToNew(){
+//        return '';
         $url = $_SERVER['REQUEST_URI']; 
         if(isset($_REQUEST['facid']))
             $_REQUEST['id'] = $_REQUEST['facid'];
         if(isset($_REQUEST['socid']))
             $_REQUEST['id'] = $_REQUEST['socid'];
 
-        if(stripos($url, '/commande/'))
-                $tabObj = array("bimpcommercial", "Bimp_Commande");
-        if(stripos($url, '/compta/facture/'))
-                $tabObj = array("bimpcommercial", "Bimp_Facture");
-        if(stripos($url, '/contrat/'))
-                $tabObj = array("bimpcontract", "BContract_contrat");
-        if(stripos($url, '/comm/action') === false && stripos($url, '/comm/index.php') === false && stripos($url, 'admin') === false && (stripos($url, '/comm/') || stripos($url, '/societe/'))){
-            if(BimpTools::getValue('type', 's') == 'f')
-                $tabObj = array("bimpcore", "Bimp_Fournisseur");
-            else
-                $tabObj = array("bimpcore", "Bimp_Client");
+        if(stripos($url, '/admin/') === false){
+            if(stripos($url, '/commande/'))
+                    $tabObj = array("bimpcommercial", "Bimp_Commande");
+            if(stripos($url, '/compta/facture/'))
+                    $tabObj = array("bimpcommercial", "Bimp_Facture");
+            if(stripos($url, '/contrat/'))
+                    $tabObj = array("bimpcontract", "BContract_contrat");
+            if(stripos($url, '/comm/action') === false && stripos($url, '/comm/index.php') === false && stripos($url, 'admin') === false && (stripos($url, '/comm/') || stripos($url, '/societe/'))){
+                if(BimpTools::getValue('type', 's') == 'f')
+                    $tabObj = array("bimpcore", "Bimp_Fournisseur");
+                else
+                    $tabObj = array("bimpcore", "Bimp_Client");
+            }
+            if(stripos($url, 'comm/propal'))
+                    $tabObj = array("bimpcommercial", "Bimp_Propal");
+
+
+            if(stripos($url, '/fourn/commande/'))
+                    $tabObj = array("bimpcommercial", "Bimp_CommandeFourn");
+            elseif(stripos($url, '/fourn/facture/'))
+                    $tabObj = array("bimpcommercial", "Bimp_FactureFourn", 'facid');
+            elseif(stripos($url, '/fourn/'))
+                    $tabObj = array("bimpcore", "Bimp_Fournisseur");
+
+
+            if(stripos($url, '/product/')){
+                if(stripos($url, '/stock/'))
+                    $tabObj = array("bimpcore", "Bimp_Entrepot");
+                else
+                    $tabObj = array("bimpcore", "Bimp_Product");
+            }
+
+            if(stripos($url, '/synopsisdemandeinterv/') || stripos($url, '/synopsisfichinter/'))
+                    $tabObj = array("bimptechnique", "BT_ficheInter");
+
+            if(stripos($url, '/user/'))
+                    $tabObj = array("bimpcore", "Bimp_User");
         }
-        if(stripos($url, 'comm/propal'))
-                $tabObj = array("bimpcommercial", "Bimp_Propal");
-
-
-        if(stripos($url, '/fourn/commande/'))
-                $tabObj = array("bimpcommercial", "Bimp_CommandeFourn");
-        elseif(stripos($url, '/fourn/facture/'))
-                $tabObj = array("bimpcommercial", "Bimp_FactureFourn", 'facid');
-        elseif(stripos($url, '/fourn/'))
-                $tabObj = array("bimpcore", "Bimp_Fournisseur");
-
-
-        if(stripos($url, '/product/'))
-                $tabObj = array("bimpcore", "Bimp_Product");
-
-        if(stripos($url, '/synopsisdemandeinterv/') || stripos($url, '/synopsisfichinter/'))
-                $tabObj = array("bimptechnique", "BT_ficheInter");
-
-        if(stripos($url, '/user/'))
-                $tabObj = array("bimpcore", "Bimp_User");
 
 
         if(isset($tabObj) && stripos($url, 'ajax') === false){

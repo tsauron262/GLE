@@ -222,3 +222,7 @@ params:
     default_end_code_j:
         label: Dernier caractére du code journal
         def: P
+    mode_detail:
+        label: Detail dans TRA
+        type: bool
+        def: 1

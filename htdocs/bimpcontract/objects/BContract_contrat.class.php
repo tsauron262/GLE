@@ -17,6 +17,12 @@ require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php
  * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
  */
 
+
+/*
+ * req maj expertise : 
+ * SELECT f.* FROM llx_contrat_extrafields c, llx_element_element e, llx_facture_extrafields f WHERE e.sourcetype = 'contrat' AND e.fk_source = c.fk_object AND e.targettype = 'facture' AND e.fk_target = f.fk_object AND c.expertise != '' AND f.expertise = '';
+ */
+
 class BContract_contrat extends BimpDolObject
 {
 
@@ -161,20 +167,6 @@ class BContract_contrat extends BimpDolObject
         'facture_fourn' => 'Facture fournisseur',
             //'propal' => 'Proposition commercial'
     ];
-    public static $expertise = [
-        ''  => "",
-        10  => "Arts graphiques",
-        20  => "Constructions",
-        30  => "Education et Administrations",
-        40  => "Infrastructure",
-        50  => "Marketing",
-        60  => "Mobilité",
-        70  => "Partner",
-        80  => "Santé",
-        90  => "SAV",
-        14  => "Bureautique-Formation",
-        100 => "Autre (ne pas utiliser)"
-    ];
     private $totalContrat = null;
 
     function __construct($module, $object_name)
@@ -198,6 +190,9 @@ class BContract_contrat extends BimpDolObject
     public function canEditField($field_name)
     {
         global $user;
+        
+        if($field_name == 'expertise')
+            return 1;
 
         if ($this->getData('statut') == self::CONTRAT_STATUS_REFUSE)
             return 0;
@@ -3775,6 +3770,7 @@ class BContract_contrat extends BimpDolObject
         $facture->set('ef_type', $this->getData('secteur'));
         $facture->set('model_pdf', 'bimpfact');
         $facture->set('ref_client', $this->getData('ref_customer'));
+        $facture->set('expertise', $this->getData('expertise'));
         $errors = $facture->create($warnings, true);
 
         if (!count($errors)) {

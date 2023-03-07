@@ -4187,7 +4187,7 @@ class BimpComm extends BimpDolObject
         $fields = array(
             'f.rowid as id_fac',
             'f.total_ttc',
-            'f.total as total_ht',
+            'f.total_ht',
             'f.marge_finale_ok',
             'f.total_achat_reval_ok',
             'fef.expertise',

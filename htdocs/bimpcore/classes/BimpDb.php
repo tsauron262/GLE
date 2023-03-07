@@ -130,11 +130,11 @@ class BimpDb
                         break;
                 }
             }
+            
+            $this->db->free($result);
         } else {
             $this->logSqlError($sql);
         }
-
-        $this->db->free($result);
 
         return $rows;
     }

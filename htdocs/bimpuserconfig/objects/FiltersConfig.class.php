@@ -21,7 +21,7 @@ class FiltersConfig extends BCUserConfig
     {
         return $this->getJsLoadFiltersConfig();
     }
-    
+
     public function getListTitle()
     {
         global $user, $langs;
@@ -360,7 +360,7 @@ class FiltersConfig extends BCUserConfig
                 $html .= $this->renderFilterItem($obj, $filter_name, $label, $open);
             }
         }
-        
+
         return $html;
     }
 
@@ -429,6 +429,8 @@ class FiltersConfig extends BCUserConfig
                     ), 'id_default_filters_config = ' . $id
             );
         }
+
+        return $errors;
     }
 
     // Actions: 

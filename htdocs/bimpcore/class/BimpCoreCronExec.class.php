@@ -105,18 +105,15 @@ class BimpCoreCronExec
             }
         }
 
-        // Vérifs des RDV SAV à annuler: 
-
+        // Vérifs des RDV SAV à annuler:
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         BS_SAV::checkSavToCancel();
         
         // Vérifs des notifs relances client désactivées. 
-        
         BimpObject::loadClass('bimpcore', 'Bimp_Client');
         Bimp_Client::checkRelancesDeactivatedToNotify();
 
         // Vérifs des licenses arrivées à échéance: 
-         
         BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
         Bimp_Commande::checkLinesEcheances();
         

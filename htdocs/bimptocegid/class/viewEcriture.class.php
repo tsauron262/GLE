@@ -79,7 +79,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_tiers.class.php';
                 default: return BimpRender::renderAlerts('Erreur lors du chargement de l\'écriture TRA', 'danger', false); break;
             }
 
-            return $tra->constructTra(self::$bimpObject, false);;
+            $tra->justView  = true;
+            return $tra->constructTra(self::$bimpObject, false);
         }
         
     }

@@ -26,12 +26,12 @@
             $this->TRA_tiers = new TRA_tiers($bimp_db, $tiers_file);
         }
         
-        public function constructTra(Bimp_FactureFourn $facture) {
+        public function constructTra(Bimp_FactureFourn $facture, $createTiers = true) {
             
             $fournisseur            = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
             $interco                = ($fournisseur->getData('is_subsidiary')) ? true : false;
             $this->compte_general   = ($fournisseur->getData('is_subsidiary')) ? $fournisseur->getData('accounting_account_fournisseur') : '40100000';
-            $code_compta            = $this->TRA_tiers->getCodeComptable($fournisseur, 'code_compta_fournisseur');
+            $code_compta            = $this->TRA_tiers->getCodeComptable($fournisseur, 'code_compta_fournisseur', $createTiers);
             $use_autoliquidation    = ($facture->getData('zone_vente') == 2 || $facture->getData('zone_vente') == 4) ? true : false;
             $datec                  = new DateTime($facture->getData('datec'));
             $datef                  = new DateTime($facture->getData('datef'));
@@ -115,13 +115,13 @@
                 $total_ht  = 0;
                 
                 $compte_le_plus_grand = '';
-                $montant_le_plus_grand = '';
+                $montant_le_plus_grand = 0;
                 foreach($facture->dol_object->lines as $line) {
                     
                     if($line->total_ht != 0) {
                         $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                         if($line->tva_tx > 0)
-                            $total_tva += $line->tva;
+                            $total_tva += $line->total_tva;
                         if($facture->getData('zone_vente') == $this->zoneAchat['france']){
                             $total_d3e += $produit->getData('deee') * $line->qty;
                         }

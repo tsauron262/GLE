@@ -12,9 +12,9 @@
         private static $startChar_alignementTiers           = 877;
         private static $numbChar_alignementTiers            = 2;
         private static $mustInChar_alignementTiers          = '--';
-        private static $startChar_alignementFacture         = 385;
-        private static $numbChar_alignementFacture          = 5;
-        private static $mustInChar_alignementFacture        = '-CEET';
+        private static $startChar_alignementFacture         = 1018;
+        private static $numbChar_alignementFacture          = 4;
+        private static $mustInChar_alignementFacture        = '-XAL';
         private static $startChar_alignementPaiement        = 446;
         private static $numbChar_alignementPaiement         = 24;
         private static $mustInChar_alignementPaiement       = '010119000101190001011900';
@@ -65,6 +65,7 @@
             $startTraCharAmout = 130;
             $charRefFacture = 48;
             $charControleSens = 129;
+            $return = Array();
             
             $factures = Array();
             
@@ -84,33 +85,37 @@
                         } else {
                             $htControle = (float) (substr($line, $startTraCharAmout, 20));
                             
+                            $value = 0;
                             if(substr($line, 0, 1) == 'A') {                                
                                 if($sens == 'D') {
                                     if(substr($line, $charControleSens, 1) == 'D') {
-                                        $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] -= abs($htControle);
+                                        $value -= abs($htControle);
                                     } else {
-                                        $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] += abs($htControle);
+                                        $value += abs($htControle);
                                     }
                                 } else {
                                     if(substr($line, $charControleSens, 1) == 'D') {
-                                        $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] += abs($htControle);
+                                        $value += abs($htControle);
                                     } else {
-                                        $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] -= abs($htControle);
+                                        $value -= abs($htControle);
                                     }
                                 }
                             } else {
                                 if(substr($line, $charRefFacture, 1) == 'A') {
                                     if(substr($line, $charControleSens, 1) == 'C') {
-                                    $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] += abs($htControle);
-                                } else {
-                                    $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] -= abs($htControle);
-                                }
+                                        $value += abs($htControle);
+                                    } else {
+                                        $value -= abs($htControle);
+                                    }
                                 }elseif(substr($line, $charControleSens, 1) == 'C') {
-                                    $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] += $htControle;
+                                    $value += $htControle;
                                 } else {
-                                    $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] -= $htControle;
+                                    $value -= $htControle;
                                 }
                             }
+                            if(!isset($factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)]))
+                                    $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] = 0;
+                            $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] += $value;
                         }
                     }
                 }
@@ -119,7 +124,6 @@
 //                    echo '<pre>'; die(print_r($factures, 1));
 //                }
                 
-                $return = Array();
                 
                 foreach($factures as $field => $infos) {
                     $controle = 0;
@@ -189,7 +193,7 @@
                                 if(self::$justeLineNumber) {
                                     $errors[] = ($index + 1);
                                 } else {
-                                    $errors[] = '<b>Ligne #' . ($index + 1) . '</b>';
+                                    $errors[] = '<b>Ligne #' . ($index + 1) . ' chaine attendu '.$equal.' au caractére '.$start.' d\'une longeur de '.$strlen.' trouvée : '.substr($line, $start, $strlen).'</b>';
                                 }
                             }
 

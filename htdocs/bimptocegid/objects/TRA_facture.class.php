@@ -69,7 +69,7 @@
             $structure['JOURNAL']               = sizing(code_journal($facture->getData('ef_type'), "V", $is_client_interco), 3);
             $structure['DATE']                  = sizing($date_facture->format('dmY'), 8);
             $structure['TYPE_PIECE']            = sizing("FC", 2);
-            $structure['COMPTE_GENERAL']        = sizing($this->compte_general, 17);
+            $structure['COMPTE_GENERAL']        = sizing(sizing($this->compte_general, 8, false, true) , 17);
             $structure['TYPE_DE_COMPTE']        = sizing("X", 1);
             $structure['CODE_AUXILIAIRE']       = sizing($code_compta, 16);
             $structure['NEXT']                  = sizing("", 1);

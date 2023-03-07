@@ -49,7 +49,7 @@
             global $db;
             $errors = Array();
             
-            $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datef   > "'.$this->lastDateExported->format('Y-m-d').' 00:00:00")');
+            $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datef   >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00")');
             
             $file = PATH_TMP . $this->dir . $this->getMyFile("achats");
             if(count($list) > 0) {
@@ -72,7 +72,7 @@
         public function exportFacture($ref = ""):void {
             global $db;
             $errors = [];
-            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef > "'.$this->lastDateExported->format('Y-m-d').'")');
+            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef >= "'.$this->lastDateExported->format('Y-m-d').'")');
                                     
             $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
             if(count($list) > 0) {
@@ -144,7 +144,7 @@
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile('deplacementPaiements');
             
-            $list = $this->bdb->getRows('mvt_paiement', 'traite = 0 AND date > "'.$this->lastDateExported->format('Y-m-d').'"');
+            $list = $this->bdb->getRows('mvt_paiement', 'traite = 0 AND date >= "'.$this->lastDateExported->format('Y-m-d').'"');
             
             if(count($list) > 0)  {
                 foreach ($list as $line)  {
@@ -196,7 +196,7 @@
             global $db;
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile("paiements");
-            $list = $this->bdb->getRows('paiement', 'exported = 0 AND datec > "'.$this->lastDateExported->format('Y-m-d').' 00:00:00"');
+            $list = $this->bdb->getRows('paiement', 'exported = 0 AND datep >= "'.$this->lastDateExported->format('Y-m-d').' 00:00:00"');
 
             foreach($list as $pay) {
                 $reglement = $this->bdb->getRow('c_paiement', 'id = ' . $pay->fk_paiement);

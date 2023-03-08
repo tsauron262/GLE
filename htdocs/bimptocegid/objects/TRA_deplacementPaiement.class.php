@@ -15,7 +15,7 @@
         public $rapport = [];
         public $caisse;
         private $TRA_tiers;
-        public $rapportTier;
+        public $rapportTier = array();
         protected $compteCheque = '51124000';
         
         

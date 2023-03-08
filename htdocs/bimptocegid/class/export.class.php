@@ -54,6 +54,7 @@
             $file = PATH_TMP . $this->dir . $this->getMyFile("achats");
             if(count($list) > 0) {
                 foreach($list as $facture) {
+                    $ecriture = "";
                     $instance= BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_FactureFourn", $facture->rowid);
                     $ecriture .= $this->TRA_factureFournisseur->constructTra($instance);
                     if($this->write_tra($ecriture, $file)) {
@@ -62,7 +63,6 @@
                     } else {
                         $this->fails['ACHATS'][$instance->getRef()] = "Non écrit dans le TRA " . $file;
                     }
-                    $ecriture = "";
                 }
             } else {
                 $this->warn['ACHATS']['bimptocegid'] = "Pas de nouvelles factures à exportés";
@@ -77,6 +77,7 @@
             $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
             if(count($list) > 0) {
                 foreach($list as $facture) {
+                    $ecriture = "";
                     $instance= BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Facture", $facture->rowid); 
                     $ecriture .= $this->TRA_facture->constructTra($instance);
                     
@@ -106,7 +107,6 @@
                     } else {
                         $this->fails['VENTES'][$instance->getRef()] = "Non écrit dans le TRA " . $file;
                     }
-                    $ecriture = "";
                 }
                 $this->tiers = $this->TRA_facture->rapportTier;
             } else {

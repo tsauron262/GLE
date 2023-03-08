@@ -4,7 +4,9 @@
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';    
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/controle.class.php';
-    
+//    ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
+//error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
     class Cron {
         
         protected $modeTest      = false;
@@ -42,6 +44,7 @@
         private $export_importPaiement  = true;
         private $export_deplacementPay  = true;
         private $export_bordereauCHK    = true;
+        public $output = '';
         
         public function manualSendTRA() {
             $errors = $warnings = Array();
@@ -76,6 +79,10 @@
                         
             if(((defined('ID_ERP') && ID_ERP == 1) || $this->modeTest)) {
                 $this->export_class = new export($db);
+                if(!is_dir($this->local_path))
+                    mkdir($this->local_path);
+                if(!is_dir($this->local_path))
+                    die($this->local_path.' introuvable');
                 if(!count(array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire))) {
                     $db->begin(); //Ouvre la transaction
 
@@ -144,8 +151,9 @@
                     }
                 }
                 
+                $mustSend = false;
+                $message = '';
                 if(count($checkControle) > 0)  {
-                    $mustSend = false;
                     foreach($checkControle as $fileName => $controle) {                       
                         $error = 0;
                         
@@ -230,6 +238,7 @@
             $sujet = "Rapport export comptable du " . date('d/m/Y');
             $to = BimpCore::getConf('devs_email');
             $from = null;
+            $logs = '';
             
             if($mode == 1){
                 // Message type de pièce automatique
@@ -444,6 +453,8 @@
             $this->output .= $logs;
             
             $filePath = PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/';
+            if(!is_dir($filePath))
+                mkdir($filePath);
             $fileName = date('d_m_Y') . '_'.$this->export_class->moment.'.log';
             $log_file = fopen($filePath . $fileName, 'a');
             if(!fwrite($log_file, $logs . "\n\n"))
@@ -457,18 +468,18 @@
         protected function getFilesArrayForTranfert():array {
             $files = [];
                         
-            if($this->auto_tiers)       $files[] = "0_" . $this->entitie . '_(TIERS)_' . '*' . '_' . $this->version_tra . '.tra';
-            if($this->auto_ventes)      $files[] = "1_" . $this->entitie . '_(VENTES)_' . '*' . '_' . $this->version_tra . '.tra';
-            if($this->auto_paiements)   $files[] = "2_" . $this->entitie . '_(PAIEMENTS)_' . '*' . '_' . $this->version_tra . '.tra';
-            if($this->auto_achats)      $files[] = "3_" . $this->entitie . '_(ACHATS)_' . '*' . '_' . $this->version_tra . '.tra';
+            if($this->auto_tiers)       $files[] = "0_" . $this->entitie . '_(TIERS)_' . '*'   . $this->version_tra . '.tra';
+            if($this->auto_ventes)      $files[] = "1_" . $this->entitie . '_(VENTES)_' . '*' .  $this->version_tra . '.tra';
+            if($this->auto_paiements)   $files[] = "2_" . $this->entitie . '_(PAIEMENTS)_' . '*' .  $this->version_tra . '.tra';
+            if($this->auto_achats)      $files[] = "3_" . $this->entitie . '_(ACHATS)_' . '*' .  $this->version_tra . '.tra';
             if($this->auto_rib_mandats) {
-                $files[] = "4_" . $this->entitie . '_(RIBS)_' . '*' . '_' . $this->version_tra . '.tra';
-                $files[] = "5_" . $this->entitie . '_(MANDATS)_' . '*' . '_' . $this->version_tra . '.tra';
+                $files[] = "4_" . $this->entitie . '_(RIBS)_' . '*'  . $this->version_tra . '.tra';
+                $files[] = "5_" . $this->entitie . '_(MANDATS)_' . '*'  . $this->version_tra . '.tra';
             }
-            if($this->auto_payni)                                                   $files[] = "6_" . $this->entitie . '_(PAYNI)_' . '*' . '_' . $this->version_tra . '.tra';
+            if($this->auto_payni)                                                   $files[] = "6_" . $this->entitie . '_(PAYNI)_' . '*'  . $this->version_tra . '.tra';
             if($this->auto_importPaiement)                                          $files[] = 'IP*.tra';
-            if($this->auto_deplacementPay)                                          $files[] = "7_" . $this->entitie . '_(DEPLACEMENTPAIEMENTS)' . '*' . '_' . $this->version_tra . '.tra';
-            if($this->auto_bordereauCHK)                                            $files[] = "8_" . $this->entitie . '_(BORDEREAUXCHK)' . '*' . '_' . $this->version_tra . '.tra';
+            if($this->auto_deplacementPay)                                          $files[] = "7_" . $this->entitie . '_(DEPLACEMENTPAIEMENTS)' . '*' .  $this->version_tra . '.tra';
+            if($this->auto_bordereauCHK)                                            $files[] = "8_" . $this->entitie . '_(BORDEREAUXCHK)' . '*'  . $this->version_tra . '.tra';
             
             $this->rapport['FILES_FTP'] = 'Liste des fichiers transférés automatiquement sur le FTP de LDLC' . "\n"
                     . implode("\n", $files) . "\n";
@@ -519,6 +530,8 @@
                             if(filesize($file_path) > $this->size_vide_tra) {
                                 if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {
                                     $this->rapport['FTP'][] = $filename . " transféré avec succès sur le FTP de LDLC";
+                                    if(!is_dir($this->local_path . 'imported_auto/'))
+                                            mkdir($this->local_path . 'imported_auto/');
                                     if(copy($file_path, $this->local_path . 'imported_auto/' . $filename)) {
                                         unlink($file_path);
                                     } else {

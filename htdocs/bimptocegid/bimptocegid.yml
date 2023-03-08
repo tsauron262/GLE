@@ -226,3 +226,5 @@ params:
         label: Detail dans TRA
         type: bool
         def: 1
+    applecare_compte:
+        label: Vente AppleCare

@@ -1281,7 +1281,7 @@ class BimpRevalorisation extends BimpObject
 
                             if (count($reval_errors)) {
                                 $bdb->db->rollback();
-                                $errors[] = BimpTools::getMsgFromArray($reval_errors, $serial);
+                                $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation #' . $reval->id);
                             } else {
                                 $bdb->db->commit();
                             }

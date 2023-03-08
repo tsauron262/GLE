@@ -1,7 +1,6 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-
 require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 class BimpCoreCronExec

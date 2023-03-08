@@ -1223,7 +1223,6 @@ class BimpRevalorisation extends BimpObject
                     )
         ));
 
-        echo count($revals) . 'revals <br/>';
         if (!empty($revals)) {
             $bdb = BimpCache::getBdb();
             foreach ($revals as $reval) {
@@ -1232,7 +1231,6 @@ class BimpRevalorisation extends BimpObject
                     $id_eq = (int) $equipments[0];
 
                     if ($id_eq) {
-                        echo 'TEST #' . $id_eq .'<br/>';
                         $fac_reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
                                     'type'       => 'applecare',
                                     'equipments' => array(
@@ -1242,7 +1240,6 @@ class BimpRevalorisation extends BimpObject
                                         ), true);
 
                         if (BimpObject::objectLoaded($fac_reval)) {
-                            echo 'Reval #' . $fac_reval->id . ' pour eq #' . $id_eq . '<br/>';
                             $reval_errors = array();
                             $bdb->db->begin();
 

@@ -57,6 +57,8 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
         on_save = $form.data('on_save');
     }
 
+    console.log(data);
+
     BimpAjax('saveObject', data, $resultContainer, {
         $form: $form,
         form_id: form_id,
@@ -1944,6 +1946,20 @@ function checkCheckList($container) {
             $container.find('.check_list_max_alert').stop().slideDown(250);
         } else {
             $container.find('.check_list_max_alert').stop().slideUp(250);
+        }
+
+        if (!$selected.length) {
+            if (!$container.find('input.check_list_no_selected').length) {
+                var $inputContainer = $container.findParentByClass('inputContainer');
+                if ($.isOk($inputContainer)) {
+                    var field_name = $inputContainer.data('field_name');
+                    if (field_name) {
+                        $container.append('<input type="hidden" value="" name="' + field_name + '" class="check_list_no_selected"/>');
+                    }
+                }
+            }
+        } else {
+            $container.find('input.check_list_no_selected').remove();
         }
     }
 
@@ -4894,7 +4910,7 @@ function BimpFileUploader() {
         if (!ptr.checkFiles($area, files)) {
             return;
         }
-        
+
         var files_dir = '';
 
         if ($.isOk($area)) {

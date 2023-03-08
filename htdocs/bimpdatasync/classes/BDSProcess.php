@@ -225,7 +225,7 @@ abstract class BDSProcess
         return $data;
     }
 
-    public function finalizeOperation($id_operation, $id_report, &$errors, $extra_data = array())
+    public function finalizeOperation($id_operation, $id_report, $extra_data = array(), &$errors = array())
     {
         $result = array();
 
@@ -269,7 +269,7 @@ abstract class BDSProcess
         }
 
         if (count($errors)) {
-            $this->Error(BimpTools::getMsgFromArray($errors, 'Erreur(s) technique(s)'));
+            $this->Error(BimpTools::getMsgFromArray($errors, 'Erreur(s) technique(sss)'));
         }
 
         $this->end();

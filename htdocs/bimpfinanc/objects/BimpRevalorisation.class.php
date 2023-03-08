@@ -334,6 +334,7 @@ class BimpRevalorisation extends BimpObject
         $items = array();
         $factures = array();
         $facture = $this->getChildObject('facture');
+        $all_eqs = array();
 
         if (BimpObject::objectLoaded($facture)) {
             $factures[$facture->id] = array(
@@ -354,8 +355,6 @@ class BimpRevalorisation extends BimpObject
                     }
                 }
             }
-
-            $all_eqs = array();
 
             foreach ($factures as $id_fac => $fac_data) {
                 $prods = array();
@@ -455,6 +454,36 @@ class BimpRevalorisation extends BimpObject
                 }
             }
         }
+
+        $other_eqs = array();
+        $cur_eqs = $this->getData('equipments');
+        foreach ($cur_eqs as $id_cur_eq) {
+            if (!in_array((int) $id_cur_eq, $all_eqs)) {
+                $other_eqs[] = $id_cur_eq;
+            }
+        }
+
+        if (!empty($other_eqs)) {
+            $other_item = array(
+                'label'      => 'Autre(s) client(s)',
+                'selectable' => 0,
+                'open'       => 1,
+                'children'   => array()
+            );
+
+            foreach ($other_eqs as $id_other_eq) {
+                $serial = $this->db->getValue('be_equipment', 'serial', 'id = ' . $id_other_eq);
+
+                if ($serial) {
+                    $other_item['children'][$id_other_eq] = $serial;
+                }
+            }
+
+            if (!empty($other_item['children'])) {
+                $items[] = $other_item;
+            }
+        }
+
 
         return $items;
     }
@@ -732,9 +761,10 @@ class BimpRevalorisation extends BimpObject
 
     // Traitements: 
 
-    public function checkSerials($update = true)
+    public function checkSerials($update = false)
     {
-        if (!in_array($this->getData('type'), array('applecare', 'fac_ac'))) {
+        $type = $this->getData('type');
+        if (!in_array($type, array('applecare', 'fac_ac'))) {
             return array();
         }
 
@@ -752,8 +782,12 @@ class BimpRevalorisation extends BimpObject
 
         $new_serials = array();
         foreach ($serials as $serial) {
+            $serial = trim($serial);
+            if (!$serial) {
+                continue;
+            }
             if (!preg_match('/^[a-zA-Z0-9\-_\/]+$/', $serial)) {
-                $errors[] = 'N° de série incorrect: "' . $serial . '"';
+                $errors[] = 'Format du n° de série incorrect: "' . $serial . '"';
                 $new_serials[] = $serial;
                 continue;
             }
@@ -767,6 +801,27 @@ class BimpRevalorisation extends BimpObject
             $id_eq = (int) $this->db->getValue('be_equipment', 'id', $where);
 
             if ($id_eq) {
+                $where = 'equipments LIKE \'%[' . $id_eq . ']%\' AND type = \'' . $type . '\'';
+
+                if ($this->isLoaded()) {
+                    $where .= ' AND id != ' . $this->id;
+                }
+
+                $id = $this->db->getValue('bimp_revalorisation', 'id', $where);
+                if ($id) {
+                    $id_facture = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'id = ' . $id);
+                    $msg = 'Le n° de série "' . $serial . '" est déjà attribué à une autre revalorisation du même type';
+
+                    if ($id_facture) {
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                        if (BimpObject::objectLoaded($facture)) {
+                            $msg .= ' - Facture: ' . $facture->getLink();
+                        }
+                    }
+                    $errors[] = $msg;
+                    continue;
+                }
+
                 if (!in_array($id_eq, $equipments)) {
                     $equipments[] = $id_eq;
                 }
@@ -775,11 +830,27 @@ class BimpRevalorisation extends BimpObject
             }
         }
 
-        $this->set('equipments', $equipments);
-        $this->set('serial', implode("\n", $new_serials));
+        $status = (int) $this->getData('status');
+        if ($this->getData('type') === 'applecare') {
+            if ($status == 20 && count($equipments) == (int) $this->getData('qty')) {
+                $status = 0;
+            } elseif ($status == 0) {
+                $status = 20;
+            }
+        }
 
-        if ($update) {
-            $this->update($w, true);
+        $this->set('status', $status);
+        $this->set('equipments', $equipments);
+        $this->set('serial', implode(' ', $new_serials));
+
+        if ($update && $this->isLoaded()) {
+            if ($this->db->update($this->getTable(), array(
+                        'equipments' => $this->getDbValue('equipments', $equipments),
+                        'serial'     => implode(' ', $new_serials),
+                        'status'     => $status
+                            ), 'id = ' . $this->id) <= 0) {
+                $errors[] = 'Echec de la mise à jour - ' . $this->db->err();
+            }
         }
 
         return $errors;
@@ -995,11 +1066,18 @@ class BimpRevalorisation extends BimpObject
         if ($serials) {
             $serial_errors = $this->checkSerials(false);
             if (count($serial_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($serial_errors, 'Le format de certain  n° de série est incorrect - Veuillez utiliser de préférence le saut de ligne comme séparateur');
+                $errors = BimpTools::merge_array($errors, $serial_errors);
             }
         }
 
-        $serials = explode("\n", $this->getData('serial'));
+        $serials = $this->getData('serial');
+
+        if ($serials) {
+            $serials = explode(' ', $serials);
+        } else {
+            $serials = array();
+        }
+
         $eqs = $this->getData('equipments');
         $nb_eqs = count($eqs) + count($serials);
         if ($nb_eqs > (int) abs($this->getData('qty'))) {
@@ -1042,10 +1120,11 @@ class BimpRevalorisation extends BimpObject
 
         $isGlobal = BimpTools::getValue('global', 0);
         if ($isGlobal) {
-            if ($this->getData('type') == 'crt') {
+            $type = $this->getData('type');
+            if ($type == 'crt') {
                 $errors = array('Type CRT non valable pour les revalorisations globales');
-            }if ($this->getData('applecare') == 'crt') {
-                $errors = array('Type commition AppleCare non valable pour les revalorisations globales');
+            }if ($type == 'applecare') {
+                $errors = array('Type commission AppleCare non valable pour les revalorisations globales');
             } else {
                 $_POST['global'] = 0;
                 $amount = $this->getData('amount');
@@ -1099,7 +1178,7 @@ class BimpRevalorisation extends BimpObject
     public static function checkAppleCareSerials()
     {
         $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
-                    'type'   => 'applecare',
+                    'type'   => array('applecare', 'fac_ac'),
                     'serial' => array(
                         'operator' => '!=',
                         'value'    => ''
@@ -1111,7 +1190,7 @@ class BimpRevalorisation extends BimpObject
 
         if (is_array($revals)) {
             foreach ($revals as $reval) {
-                $reval_errors = $reval->checkSerials();
+                $reval_errors = $reval->checkSerials(true);
 
                 if (count($reval_errors)) {
                     BimpCore::addlog('Reval Applecare : erreur serial', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $reval, array(
@@ -1144,14 +1223,16 @@ class BimpRevalorisation extends BimpObject
                     )
         ));
 
+        echo count($revals) . 'revals <br/>';
         if (!empty($revals)) {
             $bdb = BimpCache::getBdb();
             foreach ($revals as $reval) {
-                $equipments = $reval->getData('equipmments');
+                $equipments = $reval->getData('equipments');
                 if (!empty($equipments)) {
                     $id_eq = (int) $equipments[0];
 
                     if ($id_eq) {
+                        echo 'TEST #' . $id_eq .'<br/>';
                         $fac_reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
                                     'type'       => 'applecare',
                                     'equipments' => array(
@@ -1161,6 +1242,7 @@ class BimpRevalorisation extends BimpObject
                                         ), true);
 
                         if (BimpObject::objectLoaded($fac_reval)) {
+                            echo 'Reval #' . $fac_reval->id . ' pour eq #' . $id_eq . '<br/>';
                             $reval_errors = array();
                             $bdb->db->begin();
 

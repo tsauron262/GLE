@@ -4408,6 +4408,9 @@ class BimpObject extends BimpCache
                 $missing = true;
             }
         } elseif ($type === 'items_list') {
+            if ($value === '') {
+                $value = array();
+            }
             if (!is_array($value)) {
                 $delimiter = $this->getCurrentConf('items_delimiter', ',');
                 $value = explode($delimiter, $value);

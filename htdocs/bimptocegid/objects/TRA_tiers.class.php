@@ -139,7 +139,6 @@
                 $structure['CODE_POSTAL']     = sizing($this->tier->getData('zip'), 9);
                 $structure['VILLE']           = sizing(strtoupper($this->cleanString($this->tier->getData('town'))), 35);
                 $structure['VIDE_2']          = sizing('', 47);
-                $structure['PAYS']            = sizing($country->code_iso, 3);
             }
             else{
                 $structure['ADRESSE']         = sizing('', 35);
@@ -147,8 +146,8 @@
                 $structure['CODE_POSTAL']     = sizing('', 9);
                 $structure['VILLE']           = sizing('', 35);
                 $structure['VIDE_2']          = sizing('', 47);
-                $structure['PAYS']            = sizing('', 3);
             }
+            $structure['PAYS']            = sizing($country->code_iso, 3);
             $structure['NOM_ABREGE']      = sizing(strtoupper($this->cleanString(str_replace(' ', '', $this->tier->getName()))), 17);
             $structure['LANGUE']          = sizing(strtoupper($country->code), 3);
             $structure['MULTI_DEVICE']    = sizing(($field == 'code_compta') ? '-' : '', 1);
@@ -162,7 +161,10 @@
                 $structure['FAX']             = sizing('', 25);
             }
             $structure['REGIME_TVA']      = sizing(($country->in_ue) ? $country->code_iso : '', 3);
-            $structure['MODE_REGLEMENT']  = sizing('', 3);
+            $id_reglement        = ($this->tier->getData('mode_reglement') > 0) ? $this->tier->getData('mode_reglement') : 6;
+            $reglement           = $this->db->getRow('c_paiement', 'id = ' . $id_reglement);
+//            $structure['MODE_REGLEMENT']  = sizing('', 3);
+            $structure['MODE_REGLEMENT']  = sizing(($reglement->code == 'LIQ') ? 'ESP' : $reglement->code, 3);
             $structure['VIDE_3']          = sizing('', 52);
             $structure['SIRET']           = sizing(($country->code == 'FR') ? $this->tier->getData('siret') : $this->tier->getData('idprof4'), 17);
             $structure['APE']             = sizing($this->tier->getData('ape'), 5);

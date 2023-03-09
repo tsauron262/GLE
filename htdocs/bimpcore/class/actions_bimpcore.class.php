@@ -131,6 +131,8 @@ class ActionsBimpcore
 
             if(stripos($url, '/user/'))
                     $tabObj = array("bimpcore", "Bimp_User");
+            if(stripos($url, '/user/group/'))
+                    $tabObj = array("bimpcore", "Bimp_UserGroup");
         }
 
 

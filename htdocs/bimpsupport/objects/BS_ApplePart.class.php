@@ -420,7 +420,7 @@ class BS_ApplePart extends BimpObject
             return (229 / 1.2);
         }
 
-        if ($prix == 130.63) {
+        if ($prix == 130.63 || $prix == 115.63) {
             // return (229 / 1.2); old
             return (185 / 1.2);
         }

@@ -726,7 +726,7 @@ class BimpComm extends BimpDolObject
                 );
                 $productFourn = BimpObject::getInstance('bimpcore', 'Bimp_Product_Ldlc');
                 $buttons[] = array(
-                    'label'       => 'Produit Fournisseur',
+                    'label'       => 'Import Fournisseur',
                     'icon_before' => 'fas_box',
                     'classes'     => array('btn', 'btn-default'),
                     'attr'        => array(

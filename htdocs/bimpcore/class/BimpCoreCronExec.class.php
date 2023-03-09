@@ -104,7 +104,7 @@ class BimpCoreCronExec
         }
 
         // Nettoyages des fichiers temporaires
-//        BimpTools::cleanTempFiles();
+        BimpTools::cleanTempFiles();
         
         // Vérifs des RDV SAV à annuler:
         BimpObject::loadClass('bimpsupport', 'BS_SAV');

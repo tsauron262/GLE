@@ -247,8 +247,6 @@ class BimpTools
         $dt->sub(new DateInterval('P2D'));
         $dt_str = $dt->format('Ymd');
 
-        echo 'TEST: ' . $dt_str . '<br/>';
-
         $files = scandir($dir);
 
         foreach ($files as $file) {
@@ -261,8 +259,6 @@ class BimpTools
             }
 
             if (is_dir($dir . $file) && $file <= $dt_str) {
-                echo '<br/>RM DIR ' . $file . '<br/>';
-
                 self::removeAllFilesRecursively($dir . $file . '/', true);
             }
         }
@@ -1160,25 +1156,12 @@ class BimpTools
                 if (is_dir($dir . $f)) {
                     self::removeAllFilesRecursively($dir . $f, true);
                 } else {
-                    echo 'rm ' . $dir . $f;
-                    if (unlink($dir . $f)) {
-                        echo ' ok';
-                    } else {
-                        echo ' fail - ' . print_r(error_get_last());
-                    }
-                    echo '<br/>';
+                    unlink($dir . $f);
                 }
             }
 
             if ($remove_dir) {
-                echo 'rm ' . $dir;
-                    if (rmdir($dir)) {
-                        echo ' ok';
-                    } else {
-                        echo ' fail - ' . print_r(error_get_last());
-                    }
-                    echo '<br/><br/>';
-//                rmdir($dir);
+                rmdir($dir);
             }
         }
     }

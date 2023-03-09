@@ -154,7 +154,7 @@ class BDS_ProcessCron extends BimpObject
                 $cronJob->status = 0;
             }
 
-            $cronJob->datenextrun = '';
+            $cronJob->datenextrun = $this->db->db->jdate($this->getData('start'));;
             $cronJob->unitfrequency = self::$frequency_units[$this->getData('freq_type')];
             $cronJob->frequency = (int) $this->getData('freq_val');
             $cronJob->maxrun = '';

@@ -743,7 +743,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     if (!$accepted) {
                         // Refuser
                         if ($this->isActionAllowed('close')) {
-                            if ($this->canSetAction('close')) {
+//                            if ($this->canSetAction('close')) {
                                 $clientFact = $this->getClientFacture();
                                 $buttons[] = array(
                                     'label'   => 'Devis Refusé',
@@ -754,7 +754,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                         'form_name' => 'close'
                                     ))
                                 );
-                            }
+//                            }
                         }
 
                         if ($no_signature || !$use_signature || $signature_cancelled) {

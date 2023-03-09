@@ -85,10 +85,10 @@ associations:
                 
 fields: 
     fk_cond_reglement:
-        depends_on: fk_soc,id_client_facture
+        depends_on: fk_soc,id_client_facture,origin,origin_id
         
     fk_mode_reglement: 
-        depends_on: fk_soc,id_client_facture
+        depends_on: fk_soc,id_client_facture,origin,origin_id
         
 #    validComm:
 #        label: Validation Commerciale

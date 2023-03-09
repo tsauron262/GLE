@@ -406,7 +406,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $client_facture->canBuy($errors);
             }
 
-            if (!count($errors)/* && !defined('NOT_VERIF')*/) {
+            if (!count($errors)/* && !defined('NOT_VERIF') */) {
                 if ($this->getData('ef_type') !== 'M' && (int) BimpCore::getConf('contact_facturation_required_for_commandes', null, 'bimpcommercial')) {
                     // Vérif du contact facturation: 
                     $tabConatact = $this->dol_object->getIdContact('external', 'BILLING2');
@@ -746,15 +746,15 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         'icon'    => $instance->params['icon'],
                         'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle fiche intervention', array(
                             'fields' => array(
-                                'fk_soc' => (int) $client->id,
-                                'commandes' => $this->id    
+                                'fk_soc'    => (int) $client->id,
+                                'commandes' => $this->id
                             )
                                 ), null, 'open')
                     );
                 }
             }
-                
-                
+
+
 //
 //            // Créer contrat
 //            if ($conf->contrat->enabled && ($status == Commande::STATUS_VALIDATED || $status == Commande::STATUS_ACCEPTED || $status == Commande::STATUS_CLOSED)) {
@@ -1077,6 +1077,14 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function getCondReglementBySociete()
     {
+        $origin = BimpTools::getPostFieldValue('origin', '');
+        $origin_id = (int) BimpTools::getPostFieldValue('origin_id', 0);
+
+        $id_soc_propal = 0;
+        if ($origin == 'propal' && $origin_id) {
+            $id_soc_propal = (int) $this->db->getValue('propal', 'fk_soc', 'rowid = ' . $origin_id);
+        }
+
         $id_soc = (int) BimpTools::getPostFieldValue('id_client_facture', 0);
         if (!$id_soc) {
             if ((int) $this->getData('id_client_facture')) {
@@ -1090,6 +1098,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $id_soc = $this->getData('fk_soc');
                 }
             }
+        }
+
+        if ($id_soc_propal && $id_soc_propal == $id_soc) {
+            return (int) $this->db->getValue('propal', 'fk_cond_reglement', 'rowid = ' . $origin_id);
         }
 
         if ($id_soc) {
@@ -1108,6 +1120,14 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function getModeReglementBySociete()
     {
+        $origin = BimpTools::getPostFieldValue('origin', '');
+        $origin_id = (int) BimpTools::getPostFieldValue('origin_id', 0);
+
+        $id_soc_propal = 0;
+        if ($origin == 'propal' && $origin_id) {
+            $id_soc_propal = (int) $this->db->getValue('propal', 'fk_soc', 'rowid = ' . $origin_id);
+        }
+
         $id_soc = (int) BimpTools::getPostFieldValue('id_client_facture', 0);
         if (!$id_soc) {
             if ((int) $this->getData('id_client_facture')) {
@@ -1121,6 +1141,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $id_soc = $this->getData('fk_soc');
                 }
             }
+        }
+
+        if ($id_soc_propal && $id_soc_propal == $id_soc) {
+            return (int) $this->db->getValue('propal', 'fk_mode_reglement', 'rowid = ' . $origin_id);
         }
 
         if ($id_soc) {
@@ -3906,12 +3930,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
     public function actionPreuvePaiment($data, &$success)
     {
         $errors = $warnings = array();
-        
+
         if (isset($data['file']) && $data['file'] != '')
             BimpTools::moveAjaxFile($errors, 'file', $this->getFilesDir(), 'Paiement');
         else
             $errors[] = 'Aucun fichier uploadé';
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

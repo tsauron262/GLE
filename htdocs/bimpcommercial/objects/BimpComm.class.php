@@ -724,6 +724,15 @@ class BimpComm extends BimpDolObject
                         'onclick' => $product->getJsLoadModalForm('lightFourn', 'Nouveau produit')
                     )
                 );
+                $productFourn = BimpObject::getInstance('bimpcore', 'Bimp_Product_Ldlc');
+                $buttons[] = array(
+                    'label'       => 'Catalogue fournisseur',
+                    'icon_before' => 'fas_box',
+                    'classes'     => array('btn', 'btn-default'),
+                    'attr'        => array(
+                        'onclick' => $productFourn->getJsLoadModalList()
+                    )
+                );
 
                 global $user;
 

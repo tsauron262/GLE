@@ -1353,6 +1353,17 @@ class BimpCore
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/libs/PHPExcel-1.8/Classes/PHPExcel.php';
     }
 
+    public static function loadPhpSpreadsheet()
+    {
+        if (!defined('PHPEXCELNEW_PATH')) {
+            define('PHPEXCELNEW_PATH', DOL_DOCUMENT_ROOT . '/includes/phpoffice/phpspreadsheet/src/PhpSpreadsheet/');
+        }
+
+        require_once DOL_DOCUMENT_ROOT.'/includes/phpoffice/phpspreadsheet/src/autoloader.php';
+        require_once DOL_DOCUMENT_ROOT.'/includes/Psr/autoloader.php';
+        require_once PHPEXCELNEW_PATH . 'Spreadsheet.php';
+    }
+
     public static function LoadHtmlPurifier()
     {
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/libs/htmlpurifier-4.13.0/HTMLPurifier.auto.php';
@@ -1391,9 +1402,9 @@ class BimpCore
     {
         require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
     }
-    
+
     // Rendus HTML Globaux: 
-    
+
     public static function renderUserTopAccountHtml()
     {
         global $user;

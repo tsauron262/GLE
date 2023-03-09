@@ -532,8 +532,8 @@ class ListConfig extends BCUserConfig
 
             $file_path = DOL_DATA_ROOT . '/bimpcore/lists_excel/' . $file_name . '.xlsx';
 
-            BimpCore::loadPhpExcel();
-            $excel = new PHPExcel();
+            BimpCore::loadPhpSpreadsheet();
+            $excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 
             $fl = true;
 
@@ -604,7 +604,7 @@ class ListConfig extends BCUserConfig
                 $row = 1;
 
                 foreach ($rows as $r) {
-                    $col = 0;
+                    $col = 1;
                     $cols = explode(';', $r);
 
                     foreach ($cols as $cell) {
@@ -616,7 +616,7 @@ class ListConfig extends BCUserConfig
                 }
             }
 
-            $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
             $writer->save($file_path);
 
             $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('lists_excel/' . $file_name . '.xlsx');

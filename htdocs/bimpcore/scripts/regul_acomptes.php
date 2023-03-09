@@ -411,6 +411,7 @@ function correctAcomptesFacs(BimpDb $bdb, $type = '', $sav_only = false)
 
 function AcomptesFile($bdb)
 {
+    die('PHPExcel n\'est plus supporté');
     BimpCore::loadPhpExcel();
     $excel = new PHPExcel();
 

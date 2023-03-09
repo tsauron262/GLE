@@ -113,7 +113,7 @@ class BContract_avenant extends BContract_contrat {
             $nombre_months = BimpTools::getPostFieldValue('years') * 12;
             $end = new DateTime($this->getData('date_end'));
             $end->add(new DateInterval('P' . $nombre_months . 'M'));
-            $end->sub(new DateInterval('P1D'));
+//            $end->sub(new DateInterval('P1D'));//comprendre
             
             $errors = $this->updateField('want_end_date', $end->format('Y-m-d'));
             BimpTools::merge_array($errors, $this->updateField('added_month', $nombre_months));

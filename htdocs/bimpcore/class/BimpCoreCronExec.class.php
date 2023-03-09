@@ -1,8 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-
- require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 class BimpCoreCronExec
 {
@@ -13,22 +12,21 @@ class BimpCoreCronExec
     {
         $this->db = $db;
     }
-    
+
     public function mailCronErreur()
     {
         $bdb = new BimpDb($this->db);
 
-
         $rows = $bdb->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
 
-        $i=0;
+        $i = 0;
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 $i++;
-                mailSyn2('Cron en erreur', 'dev@bimp.fr', null, 'Attention, le cron '.$r['label'].' d\id '.$r['rowid'].' est en erreur...');
+                mailSyn2('Cron en erreur', 'dev@bimp.fr', null, 'Attention, le cron ' . $r['label'] . ' d\id ' . $r['rowid'] . ' est en erreur...');
             }
         }
-        $this->output = $i. ' erreurs';
+        $this->output = $i . ' erreurs';
         return 0;
     }
 
@@ -108,7 +106,7 @@ class BimpCoreCronExec
         // Vérifs des RDV SAV à annuler:
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         BS_SAV::checkSavToCancel();
-        
+
         // Vérifs des notifs relances client désactivées. 
         BimpObject::loadClass('bimpcore', 'Bimp_Client');
         Bimp_Client::checkRelancesDeactivatedToNotify();
@@ -116,7 +114,7 @@ class BimpCoreCronExec
         // Vérifs des licenses arrivées à échéance: 
         BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
         Bimp_Commande::checkLinesEcheances();
-        
+
         return 'OK';
     }
 
@@ -185,7 +183,7 @@ class BimpCoreCronExec
                     }
                 }
             }
-            
+
             ftp_close($ftp);
         }
 
@@ -193,18 +191,19 @@ class BimpCoreCronExec
             BimpCore::addlog('Echec de l\'envoi FTP des rapports Apple', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', null, array(
                 'Erreurs' => $errors
             ));
-            
+
             return 'Echec envoi ftp (cf log)';
         }
 
         return 'OK';
     }
-    
-    public function mailMessageNote(){
+
+    public function mailMessageNote()
+    {
         BimpObject::loadClass('bimpcore', 'BimpNote');
 
         echo BimpNote::cronNonLu();
-        
+
         return 'OK';
     }
 }

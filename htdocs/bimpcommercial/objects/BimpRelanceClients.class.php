@@ -595,12 +595,12 @@ class BimpRelanceClients extends BimpObject
                 $errors[] = 'Aucune facture impayée trouvée pour la période indiquée';
             } else {
 
-                BimpCore::loadPhpExcel();
-                $excel = new PHPExcel();
+                BimpCore::loadPhpSpreadsheet();
+                $excel = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
                 $sheet = $excel->getActiveSheet();
 
                 $row = 1;
-                $col = 0;
+                $col = 1;
 
                 $sheet->setCellValueByColumnAndRow($col, $row, 'Nom client');
                 $col++;
@@ -754,7 +754,7 @@ class BimpRelanceClients extends BimpObject
                             }
 
                             $row++;
-                            $col = 0;
+                            $col = 1;
 
                             $sheet->setCellValueByColumnAndRow($col, $row, $name);
                             $col++;
@@ -827,7 +827,7 @@ class BimpRelanceClients extends BimpObject
 
                 if (!count($errors)) {
                     $file_path = DOL_DATA_ROOT . '/' . $dir . '/' . $file_name . '.xlsx';
-                    $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+                    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
                     $writer->save($file_path);
 
                     $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode('factures_impayees/' . date('Y') . '/' . date('m_d') . '/' . $file_name . '.xlsx');

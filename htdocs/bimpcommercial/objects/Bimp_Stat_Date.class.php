@@ -116,19 +116,18 @@ class Bimp_Stat_Date extends BimpObject
             $xValueFormatString = 'MMM, YYYY';
         else
             $xValueFormatString = 'YYYY';
-        
-        
-        
+
+
+
         $data = parent::getInfoGraph($graphName);
-        $data["data1"] = array("name"=>'Facture HT');
-        $data["data2"] = array("name"=>'Commande HT', 'visible'=>0);
-        $data["data3"] = array("name"=>'Devis HT', 'visible'=>0);
+        $data["data1"] = array("name" => 'Facture HT');
+        $data["data2"] = array("name" => 'Commande HT', 'visible' => 0);
+        $data["data3"] = array("name" => 'Devis HT', 'visible' => 0);
         if (static::$modeDateGraph != 'year')
-            $data["data4"] = array("name"=>'Facture HT a 1an', 'color'=> "#F08080", 'lineDashType' =>"dash");
+            $data["data4"] = array("name" => 'Facture HT a 1an', 'color' => "#F08080", 'lineDashType' => "dash");
         $data["axeX"] = array("title" => "Date", "valueFormatString" => $xValueFormatString);
         $data["axeY"] = array("title" => 'K €', "suffix" => "", "minimum" => 30, "valueFormatString" => "#,##0 €");
-        
-        
+
         $data["title"] = 'Factures Commandes et Devis par ';
         if (static::$modeDateGraph == 'day')
             $data["title"] .= 'Jour';
@@ -165,8 +164,8 @@ class Bimp_Stat_Date extends BimpObject
         elseif ($numero_data == 4)
             $y = str_replace(",", ".", $this->displayOldValue('facture_total', 12));
 
-        $y = (float)$y;
-        return array("x"=> $x, "y" => $y);
+        $y = (float) $y;
+        return array("x" => $x, "y" => $y);
     }
 
     public function traiteFilters(&$filters)
@@ -435,8 +434,8 @@ class Bimp_Stat_Date extends BimpObject
         }
 
         if (!count($errors)) {
-            BimpCore::loadPhpExcel();
-            $excel = new PHPExcel();
+            BimpCore::loadPhpSpreadsheet();
+            $spread_sheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 
             $file_name = 'rapport_commercial_' . $date_from . '_' . $date_to;
             $dir = DOL_DATA_ROOT . '/bimpcommercial/reports';
@@ -470,26 +469,26 @@ class Bimp_Stat_Date extends BimpObject
 
                 if (!count($errors)) {
                     // Données globales: 
-                    $sheet = $excel->getActiveSheet();
+                    $sheet = $spread_sheet->getActiveSheet();
                     $sheet->setTitle('Données globales');
 
-                    $sheet->setCellValueByColumnAndRow(0, 1, 'Donnée');
-                    $sheet->setCellValueByColumnAndRow(1, 1, 'Valeur');
+                    $sheet->setCellValue('A1', 'Donnée');
+                    $sheet->setCellValue('B1', 'Valeur');
 
                     $row = 1;
                     foreach ($data_types as $name => $label) {
                         $row++;
-                        $sheet->setCellValueByColumnAndRow(0, $row, $label);
-                        $sheet->setCellValueByColumnAndRow(1, $row, (isset($data['total'][$name]) ? $data['total'][$name] : ''));
+                        $sheet->setCellValueByColumnAndRow(1, $row, $label);
+                        $sheet->setCellValueByColumnAndRow(2, $row, (isset($data['total'][$name]) ? $data['total'][$name] : ''));
                     }
 
                     unset($data_types['nb_new_clients_by_commerciaux']);
 
                     // Données par utilisateurs: 
-                    $sheet = $excel->createSheet();
+                    $sheet = $spread_sheet->createSheet();
                     $sheet->setTitle('Commerciaux');
 
-                    $col = 0;
+                    $col = 1;
                     $row = 1;
                     $sheet->setCellValueByColumnAndRow($col, $row, 'Commercial');
 
@@ -533,7 +532,7 @@ class Bimp_Stat_Date extends BimpObject
 
                     foreach ($data['users'] as $id_user => $user_data) {
                         $row++;
-                        $col = 0;
+                        $col = 1;
 
                         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
                         $user_name = '';
@@ -564,10 +563,10 @@ class Bimp_Stat_Date extends BimpObject
                     );
 
                     // Données par métiers: 
-                    $sheet = $excel->createSheet();
+                    $sheet = $spread_sheet->createSheet();
                     $sheet->setTitle('Métiers');
 
-                    $col = 0;
+                    $col = 1;
                     $row = 1;
                     $sheet->setCellValueByColumnAndRow($col, $row, 'Métier');
 
@@ -578,7 +577,7 @@ class Bimp_Stat_Date extends BimpObject
 
                     foreach ($data['metiers'] as $metier => $metier_data) {
                         $row++;
-                        $col = 0;
+                        $col = 1;
 
                         $metier_name = '';
                         if ($metier) {
@@ -600,10 +599,10 @@ class Bimp_Stat_Date extends BimpObject
                     }
 
                     // Données par région: 
-                    $sheet = $excel->createSheet();
+                    $sheet = $spread_sheet->createSheet();
                     $sheet->setTitle('Régions');
 
-                    $col = 0;
+                    $col = 1;
                     $row = 1;
                     $sheet->setCellValueByColumnAndRow($col, $row, 'Région');
 
@@ -614,7 +613,7 @@ class Bimp_Stat_Date extends BimpObject
 
                     foreach ($data['regions'] as $region => $region_data) {
                         $row++;
-                        $col = 0;
+                        $col = 1;
 
                         $sheet->setCellValueByColumnAndRow($col, $row, $region);
 
@@ -625,10 +624,10 @@ class Bimp_Stat_Date extends BimpObject
                     }
 
                     // Données par secteur: 
-                    $sheet = $excel->createSheet();
+                    $sheet = $spread_sheet->createSheet();
                     $sheet->setTitle('Secteurs');
 
-                    $col = 0;
+                    $col = 1;
                     $row = 1;
                     $sheet->setCellValueByColumnAndRow($col, $row, 'Secteur');
 
@@ -639,7 +638,7 @@ class Bimp_Stat_Date extends BimpObject
 
                     foreach ($data['secteurs'] as $secteur => $secteur_data) {
                         $row++;
-                        $col = 0;
+                        $col = 1;
 
                         $sheet->setCellValueByColumnAndRow($col, $row, $secteur);
 
@@ -648,8 +647,8 @@ class Bimp_Stat_Date extends BimpObject
                             $sheet->setCellValueByColumnAndRow($col, $row, (isset($secteur_data[$name]) ? $secteur_data[$name] : ''));
                         }
                     }
-                    
-                    $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+
+                    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spread_sheet);
                     $writer->save($file_path);
 
                     $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcommercial&file=' . htmlentities('reports/' . $file_name . '.xlsx');

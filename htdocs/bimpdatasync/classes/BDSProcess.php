@@ -225,7 +225,7 @@ abstract class BDSProcess
         return $data;
     }
 
-    public function finalizeOperation($id_operation, $id_report, &$errors, $extra_data = array())
+    public function finalizeOperation($id_operation, $id_report, $extra_data = array(), &$errors = array())
     {
         $result = array();
 
@@ -655,26 +655,6 @@ abstract class BDSProcess
                 return null;
             }
             return $XML;
-        }
-        return null;
-    }
-
-    protected function openXLS($fileSubDir, $file)
-    {
-        if (!isset($file) || empty($file) || ($file === '')) {
-            $this->Error('Aucun nom spécifié pour le fichier Excel');
-        } elseif (!file_exists($this->filesDir . $fileSubDir . $file)) {
-            $this->Error('Fichier Excel non trouvé: "' . $this->filesDir . $fileSubDir . $file . '"');
-        } else {
-            if (!defined('PHPEXCEL_ROOT')) {
-                BimpCore::loadPhpExcel();
-            }
-            $XLS = PHPExcel_IOFactory::load($this->filesDir . $fileSubDir . $file);
-            if (is_null($XLS) || !$XLS) {
-                $this->Error('Echec du chargement du fichier "' . $file . '"');
-                return null;
-            }
-            return $XLS;
         }
         return null;
     }

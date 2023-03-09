@@ -9,10 +9,6 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
 
     public function isDemandeFinAllowed(&$errors = array())
     {
-        if (BimpCore::isUserDev()) {
-            return 1;
-        }
-
         if (!(int) BimpCore::getConf('allow_df_from_commande', null, 'bimpcommercial')) {
             $errors[] = 'Demandes de location à partir des commandes désactivées';
             return 0;

@@ -4073,6 +4073,7 @@ class BF_Demande extends BimpObject
         $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
                     'libelle'           => $libelle,
                     'fk_soc'            => $client->id,
+                    'type_vente'        => 1,
                     'model_pdf'         => 'bimpfact',
                     'type'              => 0,
                     'fk_mode_reglement' => (int) $id_mode_reglement,
@@ -4319,6 +4320,7 @@ class BF_Demande extends BimpObject
         if (!count($errors)) {
             $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
                         'libelle'           => $libelle,
+                        'type_vente'        => 3,
                         'fk_soc'            => $client->id,
                         'model_pdf'         => 'bimpfact',
                         'type'              => 0,

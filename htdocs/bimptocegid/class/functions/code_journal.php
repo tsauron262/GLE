@@ -19,7 +19,7 @@ function code_journal($secteur, $AouV, $isInterco) {
             break;
     }
     if($isInterco) {
-        $middleCode = "I";
+        $middleCode = BimpCore::getConf('midle_journal_interco', null, 'bimptocegid');//"I";
     } else  {
         if($AouV == "A") {
             $middleCode  = "C";

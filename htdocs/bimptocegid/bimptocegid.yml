@@ -228,3 +228,6 @@ params:
         def: 1
     applecare_compte:
         label: Vente AppleCare
+    midle_journal_interco:
+        label: Caractére milieu du code journal
+        def: I

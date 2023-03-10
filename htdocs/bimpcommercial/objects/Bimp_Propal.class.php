@@ -102,9 +102,6 @@ class Bimp_Propal extends Bimp_PropalTemp
                 }
                 return 0;
 
-            case 'close':
-                return 1;
-                
             case 'reopen':
             case 'classifyBilled':
                 if (!empty($user->rights->propal->cloturer)) {
@@ -122,6 +119,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return (int) $user->admin;
 
             case 'review':
+            case 'close':
                 return $this->can("edit");
 
             case 'createOrder':
@@ -745,7 +743,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                     if (!$accepted) {
                         // Refuser
                         if ($this->isActionAllowed('close')) {
-//                            if ($this->canSetAction('close')) {
+                            if ($this->canSetAction('close')) {
                                 $clientFact = $this->getClientFacture();
                                 $buttons[] = array(
                                     'label'   => 'Devis Refusé',
@@ -756,7 +754,7 @@ class Bimp_Propal extends Bimp_PropalTemp
                                         'form_name' => 'close'
                                     ))
                                 );
-//                            }
+                            }
                         }
 
                         if ($no_signature || !$use_signature || $signature_cancelled) {

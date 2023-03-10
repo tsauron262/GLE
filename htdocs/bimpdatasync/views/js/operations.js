@@ -747,11 +747,29 @@ function BDS_ProcessOperation(data, options) {
                         setCommonEvents($content);
                     }
                 }
+                
+                if (typeof(result.result.success_callback) === 'string') {
+                    eval(result.result.success_callback);
+                }
 
                 operation.setSuccess('Opération terminée');
             },
             error: function (result, bimpAjax) {
-                operation.setError('Echec de la finalisation');
+                bimpAjax.operation.refreshReport();
+
+                var msg = '';
+                if (typeof (result.errors) !== 'undefined' && result.errors.length) {
+                    msg = '<br/></br>';
+                    msg += '<ul>';
+                    for (var i in result.errors) {
+                        msg += '<li>' + result.errors[i] + '</li>';
+                    }
+                    msg += '</ul>';
+
+                    bimp_msg(msg, 'danger', operation.$notification);
+                }
+
+                operation.setError('Erreur(s) lors de la finalisation' + msg);
             }
         });
     };
@@ -826,14 +844,20 @@ function BDS_ProcessOperation(data, options) {
         operation.buttons.$back.show();
     };
 
-    this.setError = function (msg) {
+    this.setError = function (msg, retry) {
+        if (typeof (retry) === 'undefined') {
+            retry = false;
+        }
         var html = '<div class="alert alert-danger">';
         html += msg;
         html += '</div>';
         operation.$notification.html(html).show();
         operation.hideButtons();
         operation.buttons.$back.show();
-        operation.buttons.$retry.show();
+
+        if (retry) {
+            operation.buttons.$retry.show();
+        }
     };
 
     this.hideButtons = function () {
@@ -926,7 +950,7 @@ function bds_initProcessOperation($button, id_process, id_operation) {
     });
 }
 
-function bds_initObjectActionProcess($button, data, modal_title, $resultContainer) {    
+function bds_initObjectActionProcess($button, data, modal_title, $resultContainer) {
     var success_callback = function (result, bimpAjax) {
         if (typeof (result.process_html) !== 'undefined' && result.process_html) {
             var $container = bimpAjax.$resultContainer;

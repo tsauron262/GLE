@@ -5,6 +5,37 @@ class BimpReport extends BimpObject
 
     public static $types = array();
 
+    // Getters: 
+
+    public function getNbLinesByType($type = 'danger')
+    {
+        if ($this->isLoaded()) {
+            return (int) $this->db->getCount($this->getTable() . '_line', 'id_report = ' . $this->id . ' AND type = \'' . $type . '\'');
+        }
+
+        return 0;
+    }
+
+    public function getNbSuccesses()
+    {
+        return $this->getNbLinesByType('success');
+    }
+
+    public function getNbInfos()
+    {
+        return $this->getNbLinesByType('info');
+    }
+
+    public function getNbWarnings()
+    {
+        return $this->getNbLinesByType('warning');
+    }
+
+    public function getNbErrors()
+    {
+        return $this->getNbLinesByType('danger');
+    }
+
     // Affichages: 
 
     public function displayBadgeNumber($field)

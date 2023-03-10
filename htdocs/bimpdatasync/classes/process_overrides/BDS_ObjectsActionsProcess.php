@@ -91,21 +91,32 @@ class BDS_ObjectsActionsProcess extends BDSProcess
 
     public function finalizeObjectAction(&$errors = array(), $extra_data = array())
     {
-        $object = $this->getObjectInstance($errors);
+        $result = array();
+        $action = $this->getOption('action', '');
 
-        if (!count($errors)) {
-            if (BimpObject::objectLoaded($object)) {
-                $token = $this->getOption('process_token', '');
-                if (!$token) {
-                    $errors[] = 'Token absent';
-                    return array();
+        if (!$action) {
+            $errors[] = 'Nom de l\'action absent';
+        } else {
+            $object = $this->getObjectInstance($errors);
+
+            if (!count($errors)) {
+                if (BimpObject::objectLoaded($object)) {
+                    $token = $this->getOption('process_token', '');
+                    if (!$token) {
+                        $errors[] = 'Token absent';
+                        return array();
+                    }
+
+                    $errors = BimpCore::unlockObject($object->module, $object->object_name, $object->id, $token);
                 }
 
-                $errors = BimpCore::unlockObject($object->module, $object->object_name, $object->id, $token);
+                $action_extra_data = $this->getOption('action_extra_data', array());
+                $force_action = (int) $this->getOption('force_action', 0);
+                $result = $object->finalizeBdsAction($this, $action, $errors, $extra_data, $action_extra_data, $force_action);
             }
         }
 
-        return array();
+        return $result;
     }
 
     public function cancelObjectAction(&$errors = array(), $extra_data = array())

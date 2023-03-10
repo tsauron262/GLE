@@ -848,22 +848,42 @@ class BimpCommission extends BimpObject
             $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
             $elements = array();
+            $line_errors = array();
             $i = 0;
-            foreach ($lines as $line) {
-                if (!$i) {
-                    $line_data = str_getcsv($line, ';');
+            $facs_refs = array();
+            $serial_key = 3;
 
-                    if ($line_data[0] == 'Billing document') {
-                        continue;
-                    }
-                    $i++;
+            foreach ($lines as $line) {
+                $i++;
+                $line_data = str_getcsv($line, ';');
+
+                if ($line_data[0] == 'Billing document') {
+                    continue;
                 }
 
+//                $serial = $line_data[$serial_key];
+//
+//                if (!$serial) {
+//                    $line_errors[] = 'Ligne n° ' . $i . ' : numéro de série absent';
+//                    continue;
+//                }
+//
+//                $id_eq = (int) $this->db->getValue('be_equipment', 'id', 'serial = \'' . $serial . '\' OR serial = \'S' . $serial . '\'');
+//                $id_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND (serial = \'' . $serial . '\'' . ($id_eq ? ' OR equipments = \'[' . $id_eq . ']\'' : '') . ')');
+//                if ($id_fac) {
+//                    if (!isset($facs_refs[$id_fac])) {
+//                        $facs_refs[$id_fac] = $this->db->getValue('facture', 'ref', 'rowid = ' . $id_fac);
+//                    }
+//                    $line_errors[] = 'Ligne n° ' . $i . ' : une facturation de commissionnement existe déjà pour le numéro de série "' . $serial . '" - Facture ' . $facs_refs[$id_fac];
+//                    continue;
+//                }
+
                 $elements[] = $i . ';' . $line;
-                $i++;
             }
 
-            if (empty($elements)) {
+            if (count($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Il n\'est pas possible de créer la facture');
+            } elseif (empty($elements)) {
                 $errors[] = 'Le fichier fourni est vide';
             }
 
@@ -945,7 +965,7 @@ class BimpCommission extends BimpObject
                                 'price'         => 5
                             );
 
-                            $fac_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                            $facs_refs = array();
                             foreach ($elements as $line) {
                                 $process->setCurrentObjectData('bimpcommercial', 'Bimp_FactureLine');
                                 $process->incProcessed();
@@ -959,10 +979,13 @@ class BimpCommission extends BimpObject
                                     continue;
                                 }
 
-                                $id_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND serial = \'' . $serial . '\'');
+                                $id_eq = (int) $this->db->getValue('be_equipment', 'id', 'serial = \'' . $serial . '\' OR serial = \'S' . $serial . '\'');
+                                $id_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND (serial = \'' . $serial . '\'' . ($id_eq ? ' OR equipments = \'[' . $id_eq . ']\'' : '') . ')');
                                 if ($id_fac) {
-                                    $fac_instance->id = $id_fac;
-                                    $process->Alert('Ligne n° ' . $i . ' : une facturation de commissionnement existe déjà pour ce numéro de série - Facture ' . $fac_instance->getLink(), $facture, $serial);
+                                    if (!isset($facs_refs[$id_fac])) {
+                                        $facs_refs[$id_fac] = $this->db->getValue('facture', 'ref', 'rowid = ' . $id_fac);
+                                    }
+                                    $process->Error('Ligne n° ' . $i . ' : une facturation de commissionnement existe déjà pour ce numéro de série - Facture ' . $facs_refs[$id_fac], $facture, $serial);
                                     $process->incIgnored();
                                     continue;
                                 }
@@ -1022,10 +1045,44 @@ class BimpCommission extends BimpObject
                         }
                     }
                 }
-
-
                 break;
         }
+    }
+
+    public function finalizeBdsActionGenerateFactureCommissions($process, &$errors = array(), $operation_extra_data = array(), $action_extra_data = array())
+    {
+        $result = array();
+        
+        $id_facture = (int) BimpTools::getArrayValueFromPath($operation_extra_data, 'id_facture', 0);
+        if ($id_facture) {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+            if (BimpObject::objectLoaded($facture)) {
+                $report = $process->report;
+
+                if (BimpObject::objectLoaded($report)) {
+                    $nb_errors = $report->getNbErrors();
+
+                    if ($nb_errors) {
+                        if ($nb_errors == 1) {
+                            $errors[] = 'Une erreur est survenue. Facture supprimée';
+                        } else {
+                            $errors[] = $nb_errors . ' erreurs sont survenues. Facture supprimée';
+                        }
+
+                        $facture->delete($w, true);
+                    } else {
+                        $url = $facture->getUrl();
+
+                        if ($url) {
+                            $result['success_callback'] = 'window.open(\'' . $url . '\');';
+                        }
+                    }
+                }
+            }
+        }
+
+        return $result;
     }
 
     // Overrides: 

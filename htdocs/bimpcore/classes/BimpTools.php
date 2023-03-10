@@ -153,7 +153,7 @@ class BimpTools
     }
 
     // Gestion des fichiers uploadés: 
-    
+
     public static function getTmpFilesDir()
     {
         // On utilise un dossier par jour pour permettre de nettoyer les fichiers non déplacés. 
@@ -235,6 +235,31 @@ class BimpTools
                 if (!rename($dir . $file_name, $file_dest)) {
                     $errors[] = 'Echec du déplacement du fichier "' . $file_name . '" dans le dossier de destination';
                 }
+            }
+        }
+    }
+
+    public static function cleanTempFiles()
+    {
+        $dir = DOL_DATA_ROOT . '/bimpcore/tmp_files/';
+
+        $dt = new DateTime();
+        $dt->sub(new DateInterval('P2D'));
+        $dt_str = $dt->format('Ymd');
+
+        $files = scandir($dir);
+
+        foreach ($files as $file) {
+            if (in_array($file, array('.', '..'))) {
+                continue;
+            }
+
+            if (!preg_match('/^\d{8}$/', $file)) {
+                continue;
+            }
+
+            if (is_dir($dir . $file) && $file <= $dt_str) {
+                self::removeAllFilesRecursively($dir . $file . '/', true);
             }
         }
     }
@@ -1113,6 +1138,32 @@ class BimpTools
         }
 
         return false;
+    }
+
+    public static function removeAllFilesRecursively($dir, $remove_dir = false)
+    {
+        ini_set('display_errors', 1);
+
+        if (is_dir($dir)) {
+            if (!preg_match('/^.+\/$/', $dir)) {
+                $dir .= '/';
+            }
+            foreach (scandir($dir) as $f) {
+                if (in_array($f, array('.', '..'))) {
+                    continue;
+                }
+
+                if (is_dir($dir . $f)) {
+                    self::removeAllFilesRecursively($dir . $f, true);
+                } else {
+                    unlink($dir . $f);
+                }
+            }
+
+            if ($remove_dir) {
+                rmdir($dir);
+            }
+        }
     }
 
     // Gestion Logs: 

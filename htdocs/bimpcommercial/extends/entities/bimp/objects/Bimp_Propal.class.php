@@ -130,7 +130,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
             return 0;
         }
 
-        if (!in_array((int) $this->getData('fk_statut'), array(1, 2))) {
+        if (!in_array((int) $this->getData('fk_statut'), array(1, 2, 4))) {
             $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut "validé' . $this->e() . '" ou "accepté' . $this->e() . '"';
             return 0;
         }

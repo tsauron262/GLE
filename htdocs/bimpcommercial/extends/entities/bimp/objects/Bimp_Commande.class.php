@@ -27,16 +27,16 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
             return 0;
         }
 
-        if ($this->getData('fk_statut') != 1) {
-            $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut "validé' . $this->e() . '"';
-            return 0;
-        }
-
-        $invoice_status = (int) $this->getData('invoice_status');
-        if ($invoice_status > 0) {
-            $errors[] = ucfirst($this->getLabel('this')) . ' est ' . ($invoice_status === 1 ? 'partiellement ' : '') . 'facturé' . $this->e();
-            return 0;
-        }
+//        if ($this->getData('fk_statut') != 1) {
+//            $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas au statut "validé' . $this->e() . '"';
+//            return 0;
+//        }
+//
+//        $invoice_status = (int) $this->getData('invoice_status');
+//        if ($invoice_status > 0) {
+//            $errors[] = ucfirst($this->getLabel('this')) . ' est ' . ($invoice_status === 1 ? 'partiellement ' : '') . 'facturé' . $this->e();
+//            return 0;
+//        }
 
         return 1;
     }

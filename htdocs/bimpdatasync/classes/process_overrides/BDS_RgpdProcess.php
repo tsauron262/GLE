@@ -516,8 +516,6 @@ class BDS_RgpdProcess extends BDSProcess
                 $where .= ' AND ' . $params['client_field'] .= ' NOT IN (' . $excluded_clients . ')';
             }
 
-            echo $where . '<br/><br/>';
-
             $rows = $this->db->getRows($obj->getTable(), $where, null, 'array', array($primary));
 
             if (is_array($rows)) {

@@ -3030,9 +3030,14 @@ class BimpController
                 'card'        => $card
             ));
         }
-
+        
+        $newresult = array();
+        foreach($results as $result){
+            $newresult[] = $result;
+        }
+        
         return array(
-            'results'    => $results,
+            'results'    => $newresult,
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }

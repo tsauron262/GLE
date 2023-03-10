@@ -394,7 +394,7 @@ class AtradiusAPI extends BimpAPI {
         }
         
         // Il n'y a pas encore d'assurance pour ce client, on le créer
-        if(empty($cover) /* bloque lorsqu'il y a une assaurance retiré or (int) $cover['amount'] < 1*/) {
+        if(empty($cover) /* bloque lorsqu'il y a une assaurance retiré*/ or ((int) $cover['amount'] < 1 && $params['coverType'] == self::CREDIT_CHECK)) {
             return $this->createCover($params, $errors);
         // Augmentation de la limite
         } elseif(/*$params['coverType'] != self::CREDIT_CHECK and*/ (int) $cover['amount'] < $params['creditLimitAmount']) {

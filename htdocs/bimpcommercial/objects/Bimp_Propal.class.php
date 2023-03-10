@@ -103,6 +103,8 @@ class Bimp_Propal extends Bimp_PropalTemp
                 return 0;
 
             case 'close':
+                return 1;
+                
             case 'reopen':
             case 'classifyBilled':
                 if (!empty($user->rights->propal->cloturer)) {

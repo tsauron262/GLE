@@ -6,6 +6,7 @@ class BimpCron
     public $db;
     public $current_cron_name = '';
     public static $timeout = 3600; // 1h
+    public $output = '';
 
     public function __construct($db)
     {

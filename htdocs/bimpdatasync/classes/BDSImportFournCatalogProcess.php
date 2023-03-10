@@ -242,7 +242,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 }
 
                 if ($pa_ht < 0.10) {
-                    $this->Alert('Prix fournisseur non traité car inférieur à 0,10 €', $this->pfp_instance, $refFourn);
+                    $this->Alert('Prix fournisseur non traité car inférieur à 0,10 € : '.$pa_ht.' €', $this->pfp_instance, $refFourn);
                     $this->incIgnored($this->pfp_instance);
                     continue;
                 }

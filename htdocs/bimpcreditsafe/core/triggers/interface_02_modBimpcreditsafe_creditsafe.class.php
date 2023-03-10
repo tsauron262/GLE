@@ -52,7 +52,7 @@ class Interfacecreditsafe extends DolibarrTriggers {
             return 1;
         
 //        $soc->fetch_optionals();
-        if($soc->typent_code == "TE_PRIVATE" || $soc->typent_code == "TE_ADMIN")
+        if($soc->typent_code == "TE_PRIVATE" || $soc->typent_code == "TE_ADMIN" || $soc->typent_code == "TE_ASSO")
             return 1;
         
         

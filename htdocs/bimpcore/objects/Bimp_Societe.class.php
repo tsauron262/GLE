@@ -263,8 +263,7 @@ class Bimp_Societe extends BimpDolObject
     public function canBuy(&$errors = array(), $msgToError = true)
     {
         self::getTypes_entArray();
-        $type_ent_sans_verif = array("TE_PRIVATE", "TE_ADMIN");
-        if (!isset(self::$types_ent_list_code[$this->getData("fk_typent")]) || !in_array(self::$types_ent_list_code[$this->getData("fk_typent")], $type_ent_sans_verif)) {
+        if ($this->isSirenRequired()) {
             /*
              * Entreprise onf fait les verifs...
              */

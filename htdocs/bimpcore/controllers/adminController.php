@@ -38,7 +38,7 @@ class adminController extends BimpController
                 . "setObjectAction($(this), {module: 'bimpcore', object_name: 'BimpTest'}, 'testSpeed');"
                 . "}";
 
-        $html .= "goTest();";
+        $html .= "setTimeout(function(){goTest();}, 300);";
         $html .= "</script>";
 
         return $html;

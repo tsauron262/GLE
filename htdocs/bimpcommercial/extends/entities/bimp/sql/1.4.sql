@@ -1,0 +1,1 @@
+ALTER TABLE llx_facture ADD applecare_data TEXT NOT NULL DEFAULT '';

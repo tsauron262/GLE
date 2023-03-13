@@ -817,9 +817,18 @@ class BimpCommission extends BimpObject
         $fourn = BimpTools::getArrayValueFromPath($extra_data, 'fourn', '');
         $fourn_label = '';
         $id_fourn = 0;
+        $cols = array();
 
         switch ($fourn) {
             case 'techdata':
+                $cols = array(
+                    'ref_br'      => array(0, 'Billing document'),
+                    'desc'        => array(6, 'Material'),
+                    'ref_cf'      => array(7, 'Customer PO number'),
+                    'serial'      => array(8, 'Serial Number'),
+                    'price_ht'    => array(10, 'SO Net Sell Price (Loc )'),
+                    'comm_amount' => array(11, 'AC+ Reseller Commission Value (LC)')
+                );
                 $fourn_label = 'TECHDATA';
                 $id_fourn = 229890;
                 break;
@@ -849,87 +858,136 @@ class BimpCommission extends BimpObject
 
             $elements = array();
             $line_errors = array();
-            $i = 0;
+
             $facs_refs = array();
-            $serial_key = 3;
+            $serials = array();
 
-            foreach ($lines as $line) {
-                $i++;
-                $line_data = str_getcsv($line, ';');
+            // Vérif de l'en-tête:
+            if (isset($lines[0])) {
+                $line = str_getcsv($lines[0], ';');
 
-                if ($line_data[0] == 'Billing document') {
-                    continue;
+                foreach ($cols as $col_data) {
+                    if ($line[$col_data[0]] != $col_data[1]) {
+                        $errors[] = 'En-tête absent ou invalide : ' . $col_data[1] . ' (colonne ' . ($col_data[0] + 1) . ') - Veuillez vérifier le fichier';
+                    }
                 }
-
-//                $serial = $line_data[$serial_key];
-//
-//                if (!$serial) {
-//                    $line_errors[] = 'Ligne n° ' . $i . ' : numéro de série absent';
-//                    continue;
-//                }
-//
-//                $id_eq = (int) $this->db->getValue('be_equipment', 'id', 'serial = \'' . $serial . '\' OR serial = \'S' . $serial . '\'');
-//                $id_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND (serial = \'' . $serial . '\'' . ($id_eq ? ' OR equipments = \'[' . $id_eq . ']\'' : '') . ')');
-//                if ($id_fac) {
-//                    if (!isset($facs_refs[$id_fac])) {
-//                        $facs_refs[$id_fac] = $this->db->getValue('facture', 'ref', 'rowid = ' . $id_fac);
-//                    }
-//                    $line_errors[] = 'Ligne n° ' . $i . ' : une facturation de commissionnement existe déjà pour le numéro de série "' . $serial . '" - Facture ' . $facs_refs[$id_fac];
-//                    continue;
-//                }
-
-                $elements[] = $i . ';' . $line;
+            } else {
+                $errors[] = 'Fichier vide';
             }
 
-            if (count($line_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Il n\'est pas possible de créer la facture');
-            } elseif (empty($elements)) {
-                $errors[] = 'Le fichier fourni est vide';
-            }
-
-            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_fourn);
-
-            if (!BimpObject::objectLoaded($client)) {
-                $errors[] = 'Fiche client de ' . $fourn_label . ' absente';
-            }
 
             if (!count($errors)) {
-                if ((int) BimpCore::getConf('use_db_transactions')) {
-                    $this->db->db->begin();
+                $i = 0;
+                $totals_by_br = array();
+
+                foreach ($lines as $idx => $line) {
+                    if ($idx === 0) {
+                        continue;
+                    }
+
+                    $i++;
+                    $line_data = str_getcsv($line, ';');
+
+                    if ($line_data[0] == 'Billing document') {
+                        continue;
+                    }
+
+                    $serial = $line_data[$cols['serial'][0]];
+
+                    if (!$serial) {
+                        $line_errors[] = 'Ligne n° ' . $i . ' : numéro de série absent';
+                        continue;
+                    }
+
+                    if (in_array($serial, $serials)) {
+                        $line_errors[] = 'Ligne n° ' . $i . ' : le n° de série "' . $serial . '" est présent en double dans le fichier';
+                        continue;
+                    }
+
+                    $id_eq = (int) $this->db->getValue('be_equipment', 'id', 'serial = \'' . $serial . '\' OR serial = \'S' . $serial . '\'');
+                    $id_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND (serial = \'' . $serial . '\'' . ($id_eq ? ' OR equipments = \'[' . $id_eq . ']\'' : '') . ')');
+                    if ($id_fac) {
+                        if (!isset($facs_refs[$id_fac])) {
+                            $facs_refs[$id_fac] = $this->db->getValue('facture', 'ref', 'rowid = ' . $id_fac);
+                        }
+                        $line_errors[] = 'Ligne n° ' . $i . ' : une facturation de commissionnement existe déjà pour le numéro de série "' . $serial . '" - Facture ' . $facs_refs[$id_fac];
+                        continue;
+                    }
+
+                    $price = (float) str_replace(',', '.', $line_data[$cols['price_ht'][0]]);
+
+                    if ($price) {
+                        $ref_br = $line_data[$cols['ref_br'][0]];
+
+                        if (!isset($totals_by_br[$ref_br])) {
+                            $totals_by_br[$ref_br] = 0;
+                        }
+
+                        $totals_by_br[$ref_br] += $price;
+                    }
+
+                    $data = array();
+                    foreach ($cols as $col_data) {
+                        $data[] = $line_data[$col_data[0]];
+                    }
+
+                    $serials[] = $serial;
+                    $elements[] = $i . ';' . implode(';', $data);
                 }
 
-                $process->setCurrentObjectData('bimpcommercial', 'Bimp_Facture');
-                $process->incProcessed();
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Il n\'est pas possible de créer la facture');
+                } elseif (empty($elements)) {
+                    $errors[] = 'Le fichier fourni est vide';
+                }
 
-                // Création facture: 
-                $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
-                            'libelle'   => 'Commissions AppleCare ' . $fourn_label,
-                            'fk_soc'    => $id_fourn,
-                            'model_pdf' => 'bimpfact',
-                            'datef'     => date('Y-m-d'),
-                            'type'      => 0,
-                            'entrepot'  => 50,
-                            'ef_type'   => 'C'
-                                ), true, $errors, $warnings);
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_fourn);
 
-                if (BimpObject::objectLoaded($facture)) {
-                    $process->incCreated();
-                    $process->Success('Facture créée avec succès', $facture);
-                    $action_data['steps'] = array(
-                        'process_lines' => array(
-                            'label'                  => 'Ajout des lignes de facture',
-                            'on_error'               => 'continue',
-                            'elements'               => $elements,
-                            'nbElementsPerIteration' => 10
-                        )
-                    );
-                    $action_data['data'] = array(
-                        'id_facture' => $facture->id,
-                        'id_fourn'   => $id_fourn
-                    );
-                } else {
-                    $process->incIgnored();
-                    $process->Error('Echec de création de la facture');
+                if (!BimpObject::objectLoaded($client)) {
+                    $errors[] = 'Fiche client de ' . $fourn_label . ' absente';
+                }
+
+                if (!count($errors)) {
+                    if ((int) BimpCore::getConf('use_db_transactions')) {
+                        $this->db->db->begin();
+                    }
+
+                    $process->setCurrentObjectData('bimpcommercial', 'Bimp_Facture');
+                    $process->incProcessed();
+
+                    // Création facture: 
+                    $facture = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+                                'libelle'        => 'Commissions AppleCare ' . $fourn_label,
+                                'fk_soc'         => $id_fourn,
+                                'model_pdf'      => 'bimpfact',
+                                'datef'          => date('Y-m-d'),
+                                'type'           => 0,
+                                'entrepot'       => 50,
+                                'ef_type'        => 'C',
+                                'applecare_data' => array(
+                                    'totals_by_br' => $totals_by_br
+                                )
+                                    ), true, $errors, $warnings);
+
+                    if (BimpObject::objectLoaded($facture)) {
+                        $process->incCreated();
+                        $process->Success('Facture créée avec succès', $facture);
+                        $action_data['steps'] = array(
+                            'process_lines' => array(
+                                'label'                  => 'Ajout des lignes de facture',
+                                'on_error'               => 'continue',
+                                'elements'               => $elements,
+                                'nbElementsPerIteration' => 10
+                            )
+                        );
+                        $action_data['data'] = array(
+                            'id_facture' => $facture->id,
+                            'id_fourn'   => $id_fourn
+                        );
+                    } else {
+                        $process->incIgnored();
+                        $process->Error('Echec de création de la facture');
+                    }
                 }
             }
         }
@@ -962,7 +1020,8 @@ class BimpCommission extends BimpObject
                                 'desc'          => 2,
                                 'ref_commande'  => 3,
                                 'serial'        => 4,
-                                'price'         => 5
+                                'price_ht'      => 5,
+                                'comm_amount'   => 6
                             );
 
                             $facs_refs = array();
@@ -998,7 +1057,7 @@ class BimpCommission extends BimpObject
                                     'pa_editable' => 1
                                 ));
 
-                                $price = (float) str_replace(',', '.', $line_data[$keys['price']]);
+                                $price = (float) str_replace(',', '.', $line_data[$keys['comm_amount']]);
                                 $fac_line->desc = '<b>' . $line_data[$keys['desc']] . '</b><br/>';
                                 $fac_line->desc .= 'Ref facture fournisseur : ' . $line_data[$keys['ref_fac_fourn']] . '<br/>';
                                 $fac_line->desc .= 'Ref commande : ' . $line_data[$keys['ref_commande']] . '<br/>';
@@ -1052,7 +1111,7 @@ class BimpCommission extends BimpObject
     public function finalizeBdsActionGenerateFactureCommissions($process, &$errors = array(), $operation_extra_data = array(), $action_extra_data = array())
     {
         $result = array();
-        
+
         $id_facture = (int) BimpTools::getArrayValueFromPath($operation_extra_data, 'id_facture', 0);
         if ($id_facture) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);

@@ -1,0 +1,6 @@
+# Entité: bimp
+
+fields: 
+    applecare_data: 
+        label: Données commissions applecare
+        type: json

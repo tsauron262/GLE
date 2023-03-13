@@ -73,7 +73,7 @@ class BordereauChequeBlochet_csv extends ModeleChequeReceipts
 
             
             
-            $dir = $_dir . "/".get_exdir($number,0,1,0,$object,'cheque').$number;
+            $dir = $_dir . "/".get_exdir($number,0,1,0,$object,'cheque');
 
             if (! is_dir($dir))
             {

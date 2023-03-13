@@ -497,6 +497,7 @@ class BDS_RgpdProcess extends BDSProcess
         $dt->sub(new DateInterval($this->getParam('drafts_delay_interval', 'P3Y')));
         $date_delete_drafs = $dt->format('Y-m-d');
         $test_one = (int) $this->getOption('test_one', 0);
+        $excluded_clients = $this->getParam('excluded_clients', '');
 
         foreach (self::$objects as $type => $params) {
             $params = $this->getObjectParams($type);
@@ -510,6 +511,10 @@ class BDS_RgpdProcess extends BDSProcess
 
             $where = $params['status_field'] . ' = ' . $params['draft_value'];
             $where .= ' AND ' . $params['date_create_field'] . ' <= \'' . $date_delete_drafs . '\'';
+
+            if ($excluded_clients) {
+                $where .= ' AND ' . $params['client_field'] .= ' NOT IN (' . $excluded_clients . ')';
+            }
 
             $rows = $this->db->getRows($obj->getTable(), $where, null, 'array', array($primary));
 
@@ -671,6 +676,7 @@ class BDS_RgpdProcess extends BDSProcess
         }
 
         $clients = array();
+        $excluded_clients = $this->getParam('excluded_clients', '');
 
         // Recherche clients pros sans activité depuis 10 ans: 
         $dt = new DateTime();
@@ -679,6 +685,10 @@ class BDS_RgpdProcess extends BDSProcess
 
         $where = 'is_anonymized = 0 AND client IN (1,2,3)';
         $where .= ' AND date_last_activity IS NOT NULL AND date_last_activity > \'0000-00-00\' AND date_last_activity <= \'' . $dt_5y . '\'';
+
+        if ($excluded_clients) {
+            $where .= ' AND rowid NOT IN (' . $excluded_clients . ')';
+        }
 
         $rows = $this->db->getRows('societe', $where, ($limit ? $limit : null), 'array', array('rowid'), 'date_last_activity', 'ASC');
 

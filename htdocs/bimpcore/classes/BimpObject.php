@@ -2306,6 +2306,25 @@ class BimpObject extends BimpCache
             }
         }
     }
+    
+    public function finalizeBdsAction($process, $action, &$errors = array(), $operation_extra_data = array(), $action_extra_data = array(), $force_action = false)
+    {
+        $method = 'finalizeBdsAction' . ucfirst($action);
+
+        if (method_exists($this, $method)) {
+            if (!$force_action && !$this->canSetAction($action)) {
+                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
+            } elseif (!$this->isActionAllowed($action, $errors)) {
+                $errors[] = 'Action impossible';
+            }
+
+            if (!count($errors)) {
+                return $this->{$method}($process, $errors, $operation_extra_data, $action_extra_data);
+            }
+        }
+        
+        return array();
+    }
 
     public function addMultipleValuesItem($name, $value)
     {

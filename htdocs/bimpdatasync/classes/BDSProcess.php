@@ -269,7 +269,7 @@ abstract class BDSProcess
         }
 
         if (count($errors)) {
-            $this->Error(BimpTools::getMsgFromArray($errors, 'Erreur(s) technique(s)'));
+            $this->Error(BimpTools::getMsgFromArray($errors, 'Erreur(s) lors de la finalisation'));
         }
 
         $this->end();

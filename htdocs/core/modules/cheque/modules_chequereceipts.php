@@ -154,7 +154,7 @@ abstract class ModeleChequeReceipts extends CommonDocGenerator
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 		$list = getListOfModels($db, $type, $maxfilenamelength);
 		// TODO Remove this to use getListOfModels only
-		$list = array('blochet'=>'blochet');
+		$list = array('blochet_csv'=>'blochet_csv','blochet'=>'blochet');
 
 		return $list;
 	}

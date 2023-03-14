@@ -792,10 +792,9 @@ class Bimp_Facture extends BimpComm
                         $errors[] = 'Client absent';
                     } elseif (!$client->isAdministration()) {
                         $errors[] = 'Ce client n\'est pas une administration';
-                    }
-                    elseif (!BimpAPI::isApiActive('piste')) {
+                    } elseif (!BimpAPI::isApiActive('piste')) {
                         $errors[] = 'L\'API "Piste" n\'est pas active';
-                    } 
+                    }
                 }
 
                 return (count($errors) ? 0 : 1);
@@ -804,9 +803,8 @@ class Bimp_Facture extends BimpComm
                 require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
                 if ($this->getData('chorus_status') != 1) {
-                        $errors[] = 'L\'export vers Chorus n\'est pas en attente de confirmation pour ' . $this->getLabel('this');
-                }
-                elseif (!BimpAPI::isApiActive('piste')) {
+                    $errors[] = 'L\'export vers Chorus n\'est pas en attente de confirmation pour ' . $this->getLabel('this');
+                } elseif (!BimpAPI::isApiActive('piste')) {
                     $errors[] = 'L\'API "Piste" n\'est pas active';
                 }
 
@@ -827,8 +825,7 @@ class Bimp_Facture extends BimpComm
 
                 if (!in_array($this->getData('chorus_status'), array(0, 1, 3))) {
                     $errors[] = 'Le statut actuel de l\'export Chorus ne permet pas cette opération';
-                }
-                elseif (!BimpAPI::isApiActive('piste')) {
+                } elseif (!BimpAPI::isApiActive('piste')) {
                     $errors[] = 'L\'API "Piste" n\'est pas active';
                 }
 
@@ -3644,7 +3641,7 @@ class Bimp_Facture extends BimpComm
                     $content .= '<tbody>';
 
                     foreach ($ac_data['totals_by_br'] as $ref => $total) {
-                        $total_br = (float) $this->db->getValue('bl_commande_fourn_reception', 'total_ht');
+                        $total_br = (float) $this->db->getValue('bl_commande_fourn_reception', 'total_ht', 'ref = \'' . $ref . '\'');
                         $content .= '<tr>';
                         $content .= '<td><b>' . $ref . '</b></td>';
                         $content .= '<td>' . BimpTools::displayMoneyValue($total_br) . '</td>';

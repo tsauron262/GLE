@@ -1362,7 +1362,7 @@ class Bimp_Facture extends BimpComm
         }
 
         // Vérifier les paiements: 
-        if(BimpCore::getConf('use_payments') && $this->isActionAllowed('checkPaiements') && $this->canSetAction('checkPaiements')) {
+        if (BimpCore::getConf('use_payments') && $this->isActionAllowed('checkPaiements') && $this->canSetAction('checkPaiements')) {
             $buttons[] = array(
                 'label'   => 'Vérifier les paiements',
                 'icon'    => 'fas_check-circle',
@@ -2935,7 +2935,7 @@ class Bimp_Facture extends BimpComm
     {
         $html = '';
 
-        if(BimpCore::getConf('use_payments')){
+        if (BimpCore::getConf('use_payments')) {
             // Partie "Paiements": 
             if ($this->isLoaded()) {
                 $html .= '<table class="bimp_fields_table">';
@@ -2966,9 +2966,9 @@ class Bimp_Facture extends BimpComm
 
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right;"><strong>Paiements effectués</strong>';
-    //            if ((int) $this->getData('type') !== Facture::TYPE_DEPOSIT) {
-    //                $html .= '<br/>(Hors avoirs et acomptes)';
-    //            }
+                //            if ((int) $this->getData('type') !== Facture::TYPE_DEPOSIT) {
+                //                $html .= '<br/>(Hors avoirs et acomptes)';
+                //            }
                 $html .= ' : </td>';
                 $html .= '<td>' . BimpTools::displayMoneyValue($total_paid, 'EUR', 0, 0, 0, 2, 1) . '</td>';
                 $html .= '<td></td>';
@@ -3190,14 +3190,14 @@ class Bimp_Facture extends BimpComm
 
                 $html .= '<div class="buttonsContainer align-center">';
                 if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
-    //                $discount_amount = (float) $this->getSocAvailableDiscountsAmounts();
-    //                if ($discount_amount) {
+                    //                $discount_amount = (float) $this->getSocAvailableDiscountsAmounts();
+                    //                if ($discount_amount) {
                     $html .= '<button class="btn btn-default" onclick="' . $this->getJsActionOnclick('useRemise', array(), array(
                                 'form_name' => 'use_remise'
                             )) . '">';
                     $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft') . 'Appliquer un avoir ou un trop perçu disponible';
                     $html .= '</button>';
-    //                }
+                    //                }
                 }
 
                 if ($this->isActionAllowed('convertToReduc') && $this->canSetAction('convertToReduc')) {
@@ -3274,7 +3274,7 @@ class Bimp_Facture extends BimpComm
         $return = '';
 
         if ($this->isLoaded()) {
-            if(BimpCore::getConf('use_payments')){
+            if (BimpCore::getConf('use_payments')) {
                 $type = (int) $this->getData('type');
 
                 $rows = $this->db->getRows('paiement_facture', '`fk_facture` = ' . (int) $this->id, null, 'array');
@@ -3628,6 +3628,49 @@ class Bimp_Facture extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
+            if ($this->field_exists('applecare_data')) {
+                $ac_data = $this->getData('applecare_data');
+
+                if (isset($ac_data['totals_by_br']) && !empty($ac_data['totals_by_br'])) {
+                    $content = '<table class="bimp_list_table">';
+                    $content .= '<thead>';
+                    $content .= '<tr>';
+                    $content .= '<th>Ref BR</th>';
+                    $content .= '<th>Total BR</th>';
+                    $content .= '<th>Total commissions facturées</th>';
+                    $content .= '<th></th>';
+                    $content .= '</tr>';
+                    $content .= '</thead>';
+
+                    $content .= '<tbody>';
+
+                    foreach ($ac_data['totals_by_br'] as $ref => $total) {
+                        $total_br = (float) $this->db->getValue('bl_commande_fourn_reception', 'total_ht');
+                        $content .= '<tr>';
+                        $content .= '<td><b>' . $ref . '</b></td>';
+                        $content .= '<td>' . BimpTools::displayMoneyValue($total_br) . '</td>';
+                        $content .= '<td>' . BimpTools::displayMoneyValue($total) . '</td>';
+                        $content .= '<td>';
+                        if (round($total_br, 2) == round($total, 2)) {
+                            $content .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'OK</span>';
+                        } else {
+                            $content .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'écart de ' . BimpTools::displayMoneyValue($total_br - $total) . '</span>';
+                        }
+                        $content .= '</td>';
+                        $content .= '</tr>';
+                    }
+
+                    $content .= '</tbody>';
+                    $content .= '</table>';
+
+                    $html .= '<div class="row">';
+                    $html .= '<div class="col-sm-12 col-md-6">';
+                    $html .= BimpRender::renderPanel('Vérification des montants par BR', $content, '', array('type' => 'secondary'));
+                    $html .= '</div>';
+                    $html .= '</div>';
+                }
+            }
+
             $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
             $bc_list = new BC_ListTable($reval, 'facture');
             $bc_list->addFieldFilterValue('id_facture', (int) $this->id);

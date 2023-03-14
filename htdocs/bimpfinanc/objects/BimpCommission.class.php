@@ -1059,8 +1059,9 @@ class BimpCommission extends BimpObject
 
                                 $price = (float) str_replace(',', '.', $line_data[$keys['comm_amount']]);
                                 $fac_line->desc = '<b>' . $line_data[$keys['desc']] . '</b><br/>';
-                                $fac_line->desc .= 'Ref facture fournisseur : ' . $line_data[$keys['ref_fac_fourn']] . '<br/>';
-                                $fac_line->desc .= 'Ref commande : ' . $line_data[$keys['ref_commande']] . '<br/>';
+                                $fac_line->desc .= 'Ref BR: ' . $line_data[$keys['ref_fac_fourn']] . '<br/>';
+                                $fac_line->desc .= 'Ref CF : ' . $line_data[$keys['ref_commande']] . '<br/>';
+                                $fac_line->desc .= 'Montant initial HT : ' . $line_data[$keys['price_ht']];
                                 $fac_line->qty = 1;
                                 $fac_line->pu_ht = $price;
                                 $fac_line->tva_tx = 0;

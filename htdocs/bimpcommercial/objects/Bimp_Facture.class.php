@@ -3674,8 +3674,14 @@ class Bimp_Facture extends BimpComm
                     $html .= '<div class="row">';
                     $html .= '<div class="col-sm-12 col-md-6">';
                     
-                    if($this->getData('fk_statut') > 0){
+                    if(/*$this->getData('fk_statut') > 0*/1){
                         $buttons = array();   
+                        $buttons[] = array(
+                            'label'   => 'Vérifier les équipements',
+                            'icon'    => 'fas_hand-holding-usd',
+                            'onclick' => $reval->getJsActionOnclick('checkAppleCareSerials', array(
+                            ))
+                        );
                         $buttons[] = array(
                             'label'   => 'Valider les revalorisation',
                             'icon'    => 'fas_hand-holding-usd',

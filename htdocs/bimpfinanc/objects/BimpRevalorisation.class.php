@@ -247,12 +247,15 @@ class BimpRevalorisation extends BimpObject
         return 1;
     }
 
-    public function isValidable()
+    public function isValidable($manuel = false)
     {
         if ($this->getData('type') == 'crt') {
             if ($this->getData('status') == 10)
                 return 1;
-        } elseif ($this->getData('type') == 'applecare') {
+        } elseif($manuel && ($this->getData('type') == 'applecare' || $this->getData('type') == 'fac_ac')){//pas de validation manuel sur les applecare
+            
+        }
+        elseif ($this->getData('type') == 'applecare') {
             if ($this->getData('status') == 0)
                 return 1;
         } else
@@ -578,7 +581,7 @@ class BimpRevalorisation extends BimpObject
                             'type' => 'declarer'
                                 ), array())
                     );
-                if ($this->isValidable()) {
+                if ($this->isValidable(true)) {
                     $buttons[] = array(
                         'label'   => 'Accepter',
                         'icon'    => 'fas_check',
@@ -1200,6 +1203,16 @@ class BimpRevalorisation extends BimpObject
             }
         }
     }
+    
+    public function actionCheckBilledApplecareReval($data, &$success){
+        $warnings = array();
+        $success = 'Reval validées avec succés';
+        $errors = self::checkBilledApplecareReval($data['id_fact']);
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     public static function checkBilledApplecareReval($id_facture = null)
     {
@@ -1208,7 +1221,11 @@ class BimpRevalorisation extends BimpObject
         $filters = array(
             'a.type'      => 'fac_ac',
             'a.status'    => 0,
-            'f.fk_statut' => array(1, 2)
+            'f.fk_statut' => array(1, 2),
+            'a.equipments'=> array(
+                'operator' => '!=',
+                'value'    => ''
+            )
         );
 
         if ($id_facture) {

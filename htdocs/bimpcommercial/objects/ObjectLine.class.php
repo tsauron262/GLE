@@ -567,7 +567,7 @@ class ObjectLine extends BimpObject
             ));
 
             if (!empty($product_remises)) {
-                $cur_remises = $this->getRemisesArrieres();
+                $cur_remises = $this->getRemisesArrieres(false);
 
                 foreach ($product_remises as $prod_remise) {
                     if ($prod_remise->getData('type') !== 'oth') {
@@ -1423,16 +1423,21 @@ class ObjectLine extends BimpObject
         return array();
     }
 
-    public function getRemisesArrieres()
+    public function getRemisesArrieres($force_refrsh_cache = true)
     {
         if (!$this->isLoaded() || !static::$parent_comm_type) {
             return array();
         }
 
-        return BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineRemiseArriere', array(
+        $key = 'remiseArriere'.$this->id.static::$parent_comm_type;
+        if($force_refrsh_cache || !$this->cacheExists($key)){
+            $return = BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineRemiseArriere', array(
                     'id_object_line' => (int) $this->id,
                     'object_type'    => static::$parent_comm_type
-        ));
+            ));
+            $this->setCache($key, $return);
+        }
+        return $this->getCache($key);
     }
 
     public function getRemiseArriere($type = '')
@@ -1692,7 +1697,7 @@ class ObjectLine extends BimpObject
         $total = 0;
         $qty = ($full_qty ? $this->getFullQty() : (float) $this->qty);
 
-        $remises = $this->getRemisesArrieres();
+        $remises = $this->getRemisesArrieres(false);
 
         foreach ($remises as $remise) {
             $total += $remise->getRemiseAmount() * $qty;
@@ -1986,7 +1991,7 @@ class ObjectLine extends BimpObject
                         $html .= BimpTools::displayMoneyValue((float) $pa_ht, 'EUR', 0, 0, 0, 2, 1);
                     }
 
-                    $remises_arrieres = $this->getRemisesArrieres();
+                    $remises_arrieres = $this->getRemisesArrieres(false);
                     if (!empty($remises_arrieres)) {
                         foreach ($remises_arrieres as $remise_arriere) {
                             $remise_amount = (float) $remise_arriere->getRemiseAmount();
@@ -3730,7 +3735,7 @@ class ObjectLine extends BimpObject
 
         if ($this->isLoaded($errors)) {
             if (BimpObject::objectLoaded($origin) && is_a($origin, 'ObjectLine')) {
-                $remises = $origin->getRemisesArrieres();
+                $remises = $origin->getRemisesArrieres(false);
 
                 if (!empty($remises)) {
                     foreach ($remises as $remise) {

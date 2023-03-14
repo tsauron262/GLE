@@ -3625,6 +3625,7 @@ class Bimp_Facture extends BimpComm
 
         if ($this->isLoaded()) {
             if ($this->field_exists('applecare_data')) {
+                $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
                 $ac_data = $this->getData('applecare_data');
 
                 if (isset($ac_data['totals_by_br']) && !empty($ac_data['totals_by_br'])) {
@@ -3633,6 +3634,7 @@ class Bimp_Facture extends BimpComm
                     $content .= '<tr>';
                     $content .= '<th>Ref BR</th>';
                     $content .= '<th>Total BR</th>';
+                    $content .= '<th>Total Fact Fourn</th>';
                     $content .= '<th>Total commissions facturées</th>';
                     $content .= '<th></th>';
                     $content .= '</tr>';
@@ -3641,13 +3643,18 @@ class Bimp_Facture extends BimpComm
                     $content .= '<tbody>';
 
                     foreach ($ac_data['totals_by_br'] as $ref => $total) {
-                        $total_br = (float) $this->db->getValue('bl_commande_fourn_reception', 'total_ht', 'ref = \'' . $ref . '\'');
+                        $total_br = (float) $this->db->getValue('bl_commande_fourn_reception', 'total_ttc', 'ref = \'' . $ref . '\'');
+                        $total_fact_fourn = (float) $this->db->getValue('facture_fourn', 'total_ttc', 'ref_supplier = \'' . $ref . '\'');
+
                         $content .= '<tr>';
                         $content .= '<td><b>' . $ref . '</b></td>';
                         $content .= '<td>' . BimpTools::displayMoneyValue($total_br) . '</td>';
+                        $content .= '<td>' . BimpTools::displayMoneyValue($total_fact_fourn) . '</td>';
                         $content .= '<td>' . BimpTools::displayMoneyValue($total) . '</td>';
                         $content .= '<td>';
                         if (round($total_br, 2) == round($total, 2)) {
+                            $content .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'OK</span>';
+                        } elseif (round($total_fact_fourn, 2) == round($total, 2)) {
                             $content .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'OK</span>';
                         } else {
                             $content .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'écart de ' . BimpTools::displayMoneyValue($total_br - $total) . '</span>';
@@ -3664,10 +3671,28 @@ class Bimp_Facture extends BimpComm
                     $html .= BimpRender::renderPanel('Vérification des montants par BR', $content, '', array('type' => 'secondary'));
                     $html .= '</div>';
                     $html .= '</div>';
+                    $html .= '<div class="row">';
+                    $html .= '<div class="col-sm-12 col-md-6">';
+                    
+                    if($this->getData('fk_statut') > 0){
+                        $buttons = array();   
+                        $buttons[] = array(
+                            'label'   => 'Valider les revalorisation',
+                            'icon'    => 'fas_hand-holding-usd',
+                            'onclick' => $reval->getJsActionOnclick('checkBilledApplecareReval', array(
+                                'id_fact' => $this->id
+                            ))
+                        );
+                        $content2 = '';
+                        foreach($buttons as $button)
+                            $content2 .= BimpRender::renderButton($button);
+                        $html .= BimpRender::renderPanel('Actions revalorisation', $content2, '', array('type' => 'secondary'));
+                        $html .= '</div>';
+                        $html .= '</div>';
+                    }
                 }
             }
 
-            $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
             $bc_list = new BC_ListTable($reval, 'facture');
             $bc_list->addFieldFilterValue('id_facture', (int) $this->id);
 

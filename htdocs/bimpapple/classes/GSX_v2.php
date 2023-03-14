@@ -1049,7 +1049,7 @@ class GSX_v2 extends GSX_Const
         if (is_array($return)) {
             while (count($return) < $total && $page < 10) {
                 $page++;
-                $return = BimpTools::merge_array($return, $this->exec('consignmentOrderLookup', $params, $head, array('url_params' => array('pageNumber' => 2))));
+                $return = BimpTools::merge_array($return, $this->exec('consignmentOrderLookup', $params, $head, array('url_params' => array('pageNumber' => $page))));
             }
         }
         return $return;

@@ -2540,6 +2540,7 @@ class BimpComm extends BimpDolObject
 
     public function checkLines()
     {
+        return array();
         $errors = array();
 
         if ($this->lines_locked) {

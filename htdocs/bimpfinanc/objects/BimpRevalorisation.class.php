@@ -1177,6 +1177,16 @@ class BimpRevalorisation extends BimpObject
     }
 
     // Méthodes statiques: 
+    
+//    public function actionCheckAppleCareSerials($data, &$success){
+//        $warnings = array();
+//        $success = 'Equipements attribuées';
+//        $errors = self::checkAppleCareSerials();
+//        return array(
+//            'errors'   => $errors,
+//            'warnings' => $warnings
+//        );
+//    }
 
     public static function checkAppleCareSerials()
     {

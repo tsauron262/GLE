@@ -800,7 +800,10 @@ class BimpRevalorisation extends BimpObject
             if (strpos($serial, 'S') !== 0) {
                 $where .= ' OR serial = \'S' . $serial . '\'';
             }
-
+            if (strpos($serial, 'S') === 0) {
+                $where .= ' OR concat("S", serial) = \'' . $serial . '\'';
+            }
+            
             $id_eq = (int) $this->db->getValue('be_equipment', 'id', $where);
 
             if ($id_eq) {
@@ -1084,7 +1087,7 @@ class BimpRevalorisation extends BimpObject
         $eqs = $this->getData('equipments');
         $nb_eqs = count($eqs) + count($serials);
         if ($nb_eqs > (int) abs($this->getData('qty'))) {
-            $errors[] = 'Veuillez retirer ' . ($nb_eqs - (int) abs($this->getData('qty'))) . ' équipements ou n° de série';
+            $errors[] = 'Veuillez retirer ' . ($nb_eqs - (int) abs($this->getData('qty'))) . ' équipements ou n° de série ('.$nb_eqs.' / '.abs($this->getData('qty')).')';
         }
 
         if ($this->getData('type') === 'applecare') {
@@ -1178,18 +1181,19 @@ class BimpRevalorisation extends BimpObject
 
     // Méthodes statiques: 
     
-//    public function actionCheckAppleCareSerials($data, &$success){
-//        $warnings = array();
-//        $success = 'Equipements attribuées';
-//        $errors = self::checkAppleCareSerials();
-//        return array(
-//            'errors'   => $errors,
-//            'warnings' => $warnings
-//        );
-//    }
+    public function actionCheckAppleCareSerials($data, &$success){
+        $warnings = array();
+        $success = 'Equipements attribuées';
+        $errors = self::checkAppleCareSerials();
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     public static function checkAppleCareSerials()
     {
+        $errors = array();
         $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
                     'type'   => array('applecare', 'fac_ac'),
                     'serial' => array(
@@ -1209,9 +1213,11 @@ class BimpRevalorisation extends BimpObject
                     BimpCore::addlog('Reval Applecare : erreur serial', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $reval, array(
                         'Erreurs' => $reval_errors
                     ));
+                    $errors = BimpTools::merge_array($errors, $reval_errors);
                 }
             }
         }
+        return $errors;
     }
     
     public function actionCheckBilledApplecareReval($data, &$success){
@@ -1231,7 +1237,7 @@ class BimpRevalorisation extends BimpObject
         $filters = array(
             'a.type'      => 'fac_ac',
             'a.status'    => 0,
-            'f.fk_statut' => array(1, 2),
+//            'f.fk_statut' => array(1, 2),
             'a.equipments'=> array(
                 'operator' => '!=',
                 'value'    => ''

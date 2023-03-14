@@ -5730,7 +5730,7 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    // Gestion ExtraFields: 
+    // Gestion ExtraFields:
 
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {

@@ -33,9 +33,6 @@ sections:
                           10:
                                 id: revals
                                 title: Revalorisations
-                                struct: 
-                                    type: custom
-                                    custom: 
-                                        callback: 
-                                            method: renderRevalorisationsList
-                                            object: facture
+                                ajax_render_method: 
+                                    object: facture
+                                    method: renderRevalorisationsList

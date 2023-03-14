@@ -778,25 +778,24 @@ class Bimp_Facture extends BimpComm
                 return 1;
 
             case 'exportToChorus':
-                require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
-                if (!BimpAPI::isApiActive('piste')) {
-                    $errors[] = 'L\'API "Piste" n\'est pas active';
+                if (!in_array($status, array(1, 2))) {
+                    $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
+                } elseif (!$this->field_exists('chorus_status')) {
+                    $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
+                } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0, 1, 5))) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus' . (int) $this->getData('chorus_status');
                 } else {
-                    if (!in_array($status, array(1, 2))) {
-                        $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
-                    } elseif (!$this->field_exists('chorus_status')) {
-                        $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
-                    } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0, 1, 5))) {
-                        $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus' . (int) $this->getData('chorus_status');
-                    } else {
-                        $client = $this->getChildObject('client');
-                        if (!BimpObject::objectLoaded($client)) {
-                            $errors[] = 'Client absent';
-                        } elseif (!$client->isAdministration()) {
-                            $errors[] = 'Ce client n\'est pas une administration';
-                        }
+                    $client = $this->getChildObject('client');
+                    require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+                    if (!BimpObject::objectLoaded($client)) {
+                        $errors[] = 'Client absent';
+                    } elseif (!$client->isAdministration()) {
+                        $errors[] = 'Ce client n\'est pas une administration';
                     }
+                    elseif (!BimpAPI::isApiActive('piste')) {
+                        $errors[] = 'L\'API "Piste" n\'est pas active';
+                    } 
                 }
 
                 return (count($errors) ? 0 : 1);
@@ -804,12 +803,11 @@ class Bimp_Facture extends BimpComm
             case 'confirmChorusExport':
                 require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
-                if (!BimpAPI::isApiActive('piste')) {
-                    $errors[] = 'L\'API "Piste" n\'est pas active';
-                } else {
-                    if ($this->getData('chorus_status') != 1) {
+                if ($this->getData('chorus_status') != 1) {
                         $errors[] = 'L\'export vers Chorus n\'est pas en attente de confirmation pour ' . $this->getLabel('this');
-                    }
+                }
+                elseif (!BimpAPI::isApiActive('piste')) {
+                    $errors[] = 'L\'API "Piste" n\'est pas active';
                 }
 
                 $chorus_data = $this->getData('chorus_data');
@@ -827,10 +825,11 @@ class Bimp_Facture extends BimpComm
             case 'markSendNoChorusExport':
                 require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
-                if (!BimpAPI::isApiActive('piste')) {
-                    $errors[] = 'L\'API "Piste" n\'est pas active';
-                } elseif (!in_array($this->getData('chorus_status'), array(0, 1, 3))) {
+                if (!in_array($this->getData('chorus_status'), array(0, 1, 3))) {
                     $errors[] = 'Le statut actuel de l\'export Chorus ne permet pas cette opération';
+                }
+                elseif (!BimpAPI::isApiActive('piste')) {
+                    $errors[] = 'L\'API "Piste" n\'est pas active';
                 }
 
                 return (count($errors) ? 0 : 1);

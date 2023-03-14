@@ -6776,7 +6776,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $filterLinked = array('linked' => array('or' => array()));
                     foreach ($linkedObjects as $data_linked => $inut) {
                         $data_linked = json_decode($data_linked, true);
-                        if (!in_array($data_linked['object_name'], array('Equipment', 'BS_SAV', 'BR_Reservation'))) {
+                        if (!in_array($data_linked['object_name'], array('Equipment', 'BS_SAV', 'BR_Reservation', 'Bimp_FactureLine', 'BimpRevalorisation', 'FactureDolLine', 'Bimp_Vente'))) {
                             $filterLinked['linked']['or'][$data_linked["object_name"] . $data_linked['id_object']] = array('and_fields' => array(
                                     'obj_module' => $data_linked['module'],
                                     'obj_name'   => $data_linked['object_name'],

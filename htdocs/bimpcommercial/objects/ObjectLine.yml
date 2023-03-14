@@ -809,7 +809,7 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: position
         sort_way: asc
-        n: 70
+        n: 0
         single_cell:
             filters:
                 type: 2

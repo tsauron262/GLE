@@ -1,0 +1,1 @@
+UPDATE llx_societe SET id_atradius=67173313 WHERE rowid=4763

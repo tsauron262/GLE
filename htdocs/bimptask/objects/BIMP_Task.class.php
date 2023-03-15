@@ -470,7 +470,7 @@ class BIMP_Task extends BimpObject
                             break;
 
                         case 10:
-                            $prio_badge = '<span class="badge badge-warning" style="margin-right: 12px; font-size: 11px>Important</span>';
+                            $prio_badge = '<span class="badge badge-warning" style="margin-right: 12px; font-size: 11px">Important</span>';
                             break;
                     }
                     $task = array(

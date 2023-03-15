@@ -62,7 +62,7 @@ class BF_Demande extends BimpObject
         1 => 'A terme à échoir'
     );
     public static $modes_paiements = array(
-        1 => 'Prélèvements automatiquesss'
+        1 => 'Prélèvements automatiques'
     );
     public static $marges = array(
         0     => 12,

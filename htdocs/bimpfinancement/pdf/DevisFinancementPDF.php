@@ -314,6 +314,14 @@ class DevisFinancementPDF extends DocFinancementPDF
         $html .= 'Nous sommes à votre entière disposition pour tout complément d\'information, et vous prions d’agréer, ';
         $html .= 'Madame, Monsieur, l\'expression de nos meilleures salutations.';
         $html .= '</p>';
+        
+        if ($has_evo && $has_dyn) {
+            $html .= '<p style="font-size: 8px;">';
+            $html .= '<b>Merci d\'indiquer ci-dessous la formule que vous choisissez (évolutive ou dynamique) : </b>';
+            $html .= '<br/><br/>';
+            $html .= '________________________________________';
+            $html .= '</p>';
+        }
 
         $this->writeContent($html);
     }

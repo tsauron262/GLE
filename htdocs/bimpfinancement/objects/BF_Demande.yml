@@ -1351,6 +1351,8 @@ fields_tables:
               edit: 1
             - field: mode_calcul
               edit: 1 
+            - field: mode_paiement
+              edit: 1
             - field: vr_achat
               edit: 1
             - field: marge_souhaitee
@@ -1361,8 +1363,6 @@ fields_tables:
               edit: 1
             - field: formule
               label: Formule choisie par le client
-              edit: 1
-            - field: mode_paiement
               edit: 1
               
     montants: 

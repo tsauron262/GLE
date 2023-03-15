@@ -151,7 +151,7 @@ class ContratFinancementPDF extends DocFinancementPDF
             $html .= 'à terme échu';
         }
 
-        $html .= ', par ' . lcfirst($this->demande->displayData('generate_contrat', 'default', false, true)) . '.';
+        $html .= ', par ' . lcfirst($this->demande->displayData('mode_paiement', 'default', false, true)) . '.';
         $html .= '</p>';
 
         switch ($this->demande->getData('formule')) {

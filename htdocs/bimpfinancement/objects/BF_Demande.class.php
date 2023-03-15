@@ -204,10 +204,10 @@ class BF_Demande extends BimpObject
             return 0;
         }
 
-        $devis_status = (int) $this->getData('devis_status');
+        $contrat_status = (int) $this->getData('contrat_status');
 
-        if ($devis_status >= self::DOC_ACCEPTED) {
-            $errors[] = 'le devis a été signé ou refusé';
+        if ($contrat_status == self::DOC_ACCEPTED) {
+            $errors[] = 'le contrat a été signé';
             return 0;
         }
 

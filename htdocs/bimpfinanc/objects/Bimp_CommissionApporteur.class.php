@@ -40,7 +40,7 @@ class Bimp_CommissionApporteur extends BimpObject
             if($filtreObj->getData('contact_apporteur'))
                 $filtreFact .= " AND rowid IN (SELECT DISTINCT(`element_id`) FROM `llx_element_contact` WHERE `fk_c_type_contact` = (SELECT rowid FROM `llx_c_type_contact`  WHERE `code` = 'APPORTEUR' and `source` = 'external' AND `element` = 'facture') AND `fk_socpeople` IN (SELECT `rowid` FROM `llx_socpeople` WHERE `fk_soc` = " . $parent->getData('id_fourn') . ")) ";
             $filters = array(
-                'commission_apporteur' => array('<' => '0'),
+                'commission_apporteur' => array('0', ''),
                 'f.fk_facture'         => array('IN' => $filtreFact)
             );
             $joins = array('f' => array(

@@ -106,7 +106,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $this->pdf->topMargin = 44;
-        
+
         $this->header_vars = array(
             'primary_color' => $this->primary,
             'logo_img'      => $logo_file,
@@ -144,61 +144,70 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         if ($this->footerCompany->address) {
-            $line1 .= " - " . $this->footerCompany->address . " - " . $this->footerCompany->zip . " " . $this->footerCompany->town . " - Tél " . $this->footerCompany->phone;
-        }
-
-        if ($this->footerCompany->idprof1 && ($this->footerCompany->country_code != 'FR' || !$this->footerCompany->idprof2)) {
-            $field = $this->langs->transcountrynoentities("ProfId1", $this->footerCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                $field = $reg[1];
+            if (BimpCore::isEntity('prolease')) {
+                $line2 .= $this->footerCompany->address . " - " . $this->footerCompany->zip . " " . $this->footerCompany->town;
+            } else {
+                $line1 .= " - " . $this->footerCompany->address . " - " . $this->footerCompany->zip . " " . $this->footerCompany->town . " - Tél " . $this->footerCompany->phone;
             }
-            $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof1);
         }
 
-        if ($this->footerCompany->idprof2) {
-            $field = $this->langs->transcountrynoentities("ProfId2", $this->footerCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                $field = $reg[1];
+        if (BimpCore::isEntity('prolease')) {
+            $line2 .= ' - RCS : ' . $this->langs->convToOutputCharset($this->footerCompany->idprof4);
+        } else {
+            if ($this->footerCompany->idprof1 && ($this->footerCompany->country_code != 'FR' || !$this->footerCompany->idprof2)) {
+                $field = $this->langs->transcountrynoentities("ProfId1", $this->footerCompany->country_code);
+                if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                    $field = $reg[1];
+                }
+                $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof1);
             }
-            $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof2);
-        }
 
-        if ($this->footerCompany->idprof3) {
+            if ($this->footerCompany->idprof2) {
+                $field = $this->langs->transcountrynoentities("ProfId2", $this->footerCompany->country_code);
+                if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                    $field = $reg[1];
+                }
+                $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof2);
+            }
+
+            if ($this->footerCompany->idprof3) {
 //            $field = $this->langs->transcountrynoentities("ProfId3", $this->footerCompany->country_code);
-            $field = 'APE';
+                $field = 'APE';
 //            if (preg_match('/\((.*)\)/i', $field, $reg)) {
 //                $field = $reg[1];
 //                
 //            }
-            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof3);
-        }
-
-        if ($this->footerCompany->idprof4) {
-            $field = $this->langs->transcountrynoentities("ProfId4", $this->footerCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                $field = $reg[1];
+                $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof3);
             }
-            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4);
-        }
 
-        if ($this->footerCompany->idprof5) {
-            $field = $this->langs->transcountrynoentities("ProfId5", $this->footerCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg)) {
-                $field = $reg[1];
+            if ($this->footerCompany->idprof4) {
+                $field = $this->langs->transcountrynoentities("ProfId4", $this->footerCompany->country_code);
+                if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                    $field = $reg[1];
+                }
+                $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof4);
             }
-            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof5);
+
+            if ($this->footerCompany->idprof5) {
+                $field = $this->langs->transcountrynoentities("ProfId5", $this->footerCompany->country_code);
+                if (preg_match('/\((.*)\)/i', $field, $reg)) {
+                    $field = $reg[1];
+                }
+                $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof5);
+            }
+
+            if ($this->footerCompany->idprof6) {
+                $field = $this->langs->transcountrynoentities("ProfId6", $this->footerCompany->country_code);
+                if (preg_match('/\((.*)\)/i', $field, $reg))
+                    $field = $reg[1];
+                $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof6);
+            }
+            // IntraCommunautary VAT
+            if ($this->footerCompany->tva_intra != '') {
+                $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . " : " . $this->langs->convToOutputCharset($this->footerCompany->tva_intra);
+            }
         }
 
-        if ($this->footerCompany->idprof6) {
-            $field = $this->langs->transcountrynoentities("ProfId6", $this->footerCompany->country_code);
-            if (preg_match('/\((.*)\)/i', $field, $reg))
-                $field = $reg[1];
-            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->footerCompany->idprof6);
-        }
-        // IntraCommunautary VAT
-        if ($this->footerCompany->tva_intra != '') {
-            $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . " : " . $this->langs->convToOutputCharset($this->footerCompany->tva_intra);
-        }
 
         $this->footer_vars = array(
             'footer_line_1' => $line1,
@@ -601,7 +610,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 if ($this->bimpObject->field_exists($this->object_signature_params_field_name)) {
                     if ((int) $this->signature_file_idx) {
                         $signature_params = $this->bimpObject->getData($this->object_signature_params_field_name);
-                        
+
                         if (!is_array($signature_params)) {
                             $signature_params = array();
                         }

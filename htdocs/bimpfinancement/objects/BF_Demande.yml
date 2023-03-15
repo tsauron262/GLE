@@ -329,6 +329,13 @@ fields:
             conf: 
                 module: bimpfinancement
                 name: def_mode_calcul
+                
+    mode_paiement: 
+        label: Mode de paiement
+        type: int
+        values: 
+            array: modes_paiements
+        default_value: 1
             
     marge_souhaitee:
         label: Marge
@@ -852,15 +859,29 @@ forms:
             # CESSIONNAIRE: 
             - title: Cessionnaire
             - custom: 1
+              label: Cessionnaire
+              input_name: cessionnaire_id_refinanceur
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getRefinanceursArray
+                          params: 
+                              - 1
+                              - 1
+                              - Non défini
+            - custom: 1
               label: Raison sociale
               input_name: cessionnaire_saison_sociale
               input: 
                   type: text
+              depends_on: cessionnaire_id_refinanceur
             - custom: 1
               label: N° SIREN
               input_name: cessionnaire_siren
               input: 
                   type: text
+              depends_on: cessionnaire_id_refinanceur
             - custom: 1
               label: Contact signataire du refinanceur
               input_name: cessionnaire_id_contact_signataire
@@ -869,6 +890,7 @@ forms:
                   type: select
                   options: 
                       array: cessionnaireContacts
+              depends_on: cessionnaire_id_refinanceur
             - custom: 1
               label: Nom Cessionnaire
               input_name: cessionnaire_nom
@@ -1329,6 +1351,8 @@ fields_tables:
               edit: 1
             - field: mode_calcul
               edit: 1 
+            - field: mode_paiement
+              edit: 1
             - field: vr_achat
               edit: 1
             - field: marge_souhaitee

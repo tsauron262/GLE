@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bf_demande` ADD `mode_paiement` int NOT NULL DEFAULT 1;

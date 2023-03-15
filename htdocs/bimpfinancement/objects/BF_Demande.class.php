@@ -61,6 +61,9 @@ class BF_Demande extends BimpObject
         0 => 'A terme échu',
         1 => 'A terme à échoir'
     );
+    public static $modes_paiements = array(
+        1 => 'Prélèvements automatiquesss'
+    );
     public static $marges = array(
         0     => 12,
         1801  => 12,
@@ -1150,20 +1153,22 @@ class BF_Demande extends BimpObject
 
     public function getCessionnaireContactsArray()
     {
-        $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+        $id_refin = (int) BimpTools::getPostFieldValue('cessionnaire_id_refinanceur', 0);
 
-        $id_societe = (int) $this->db->getValue('bf_refinanceur', 'id_societe', 'id = ' . $id_refin);
-        if ($id_societe) {
-            return self::getSocieteContactsArray($id_societe, false, '', true);
+        if ($id_refin) {
+            $id_societe = (int) $this->db->getValue('bf_refinanceur', 'id_societe', 'id = ' . $id_refin);
+            if ($id_societe) {
+                return self::getSocieteContactsArray($id_societe, false, '', true);
+            }
         }
 
         return array();
     }
 
-    public function getRefinanceursArray($include_empty = true, $active_only = true)
+    public function getRefinanceursArray($include_empty = true, $active_only = true, $empty_label = '')
     {
         BimpObject::loadClass('bimpfinancement', 'BF_DemandeRefinanceur');
-        return BF_DemandeRefinanceur::getRefinanceursArray($include_empty, $active_only);
+        return BF_DemandeRefinanceur::getRefinanceursArray($include_empty, $active_only, $empty_label);
     }
 
     public function getDevisFilesArray($include_empty = true)
@@ -1516,9 +1521,12 @@ class BF_Demande extends BimpObject
             case 'loueur_qualite':
                 return BimpCore::getConf('loueur_signataire_qualite', null, 'bimpfinancement');
 
+            case 'cessionnaire_id_refinanceur':
+                return (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+
             case 'cessionnaire_saison_sociale':
             case 'cessionnaire_siren':
-                $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+                $id_refin = (int) BimpTools::getPostFieldValue('cessionnaire_id_refinanceur', 0);
                 if ($id_refin) {
                     $id_soc = (int) $this->db->getValue('bf_refinanceur', 'id_societe', 'id = ' . $id_refin);
                     if ($id_soc) {
@@ -1536,7 +1544,7 @@ class BF_Demande extends BimpObject
                 return '';
 
             case 'cessionnaire_id_contact_signataire':
-                $id_refin = (int) $this->getSelectedDemandeRefinanceurData('id_refinanceur');
+                $id_refin = (int) BimpTools::getPostFieldValue('cessionnaire_id_refinanceur', 0);
                 if ($id_refin) {
                     return (int) $this->db->getValue('bf_refinanceur', 'id_def_contact_signataire', 'id = ' . $id_refin);
                 }
@@ -4590,8 +4598,8 @@ class BF_Demande extends BimpObject
         );
 
         $cessionnaire_data = array(
-            'raison_social' => BimpTools::getArrayValueFromPath($data, 'cessionnaire_saison_sociale', '', $errors, true, 'Raison solicale du signataire cessionnaire absente'),
-            'siren'         => BimpTools::getArrayValueFromPath($data, 'cessionnaire_siren', '', $errors, true, 'N° SIREN du signataire cessionnaire absent'),
+            'raison_social' => BimpTools::getArrayValueFromPath($data, 'cessionnaire_saison_sociale', ''),
+            'siren'         => BimpTools::getArrayValueFromPath($data, 'cessionnaire_siren', ''),
             'nom'           => BimpTools::getArrayValueFromPath($data, 'cessionnaire_nom', ''),
             'qualite'       => BimpTools::getArrayValueFromPath($data, 'cessionnaire_qualite', '')
         );

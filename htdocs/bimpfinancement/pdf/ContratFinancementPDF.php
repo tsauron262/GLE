@@ -144,7 +144,14 @@ class ContratFinancementPDF extends DocFinancementPDF
         $html .= '<p style="font-size: 10px; font-weight: bold; color: #' . $this->primary . '">Durées et loyers</p>';
 
         $html .= '<p>';
-        $html .= 'Le loyer est ferme et non révisable en cours de contrat, payable par terme à échoir, par prélèvements automatiques.';
+        $html .= 'Le loyer est ferme et non révisable en cours de contrat, payable ';
+        if ((int) $this->demande->getData('mode_calcul') > 0) {
+            $html .= 'par terme à échoir';
+        } else {
+            $html .= 'à terme échu';
+        }
+
+        $html .= ', par ' . lcfirst($this->demande->displayData('generate_contrat', 'default', false, true)) . '.';
         $html .= '</p>';
 
         switch ($this->demande->getData('formule')) {
@@ -242,7 +249,7 @@ class ContratFinancementPDF extends DocFinancementPDF
         $html .= '<p>';
         $html .= '<b>ANNEXES : </b>';
         $html .= '<ul>';
-        $html .= '<li>Conditions générales composées de deux pages recto</li>';
+        $html .= '<li>Conditions générales composées de quatre pages recto</li>';
         $html .= '</ul>';
         $html .= '</p>';
 
@@ -276,13 +283,15 @@ class ContratFinancementPDF extends DocFinancementPDF
         $html .= '</td>';
 
         // Signature cessionnaire:
+        $raison_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'raison_social', '');
+        $siren_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'siren', '');
         $nom_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'nom', '');
         $qualite_cessionnaire = BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'qualite', '');
 
         $html .= '<td style="width: 33%">';
         $html .= '<span style="font-size: 9px; font-weight: bold">Pour le cessionnaire :</span><br/>';
-        $html .= BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'raison_social', '', $errors, true, 'Raison sociale du signataire cessionnaire absent') . '<br/>';
-        $html .= 'SIREN : ' . BimpTools::getArrayValueFromPath($this->cessionnaire_data, 'siren', '', $errors, true, 'N° SIREN du signataire cessionnaire absent') . '<br/>';
+        $html .= ($raison_cessionnaire ? $raison_cessionnaire : 'Nom: ') . '<br/>';
+        $html .= 'SIREN : ' . $siren_cessionnaire . '<br/>';
         $html .= 'Représenté par : ' . $nom_cessionnaire . '<br/>';
         $html .= 'En qualité de : ' . $qualite_cessionnaire;
         $html .= '</td>';

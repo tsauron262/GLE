@@ -434,7 +434,7 @@ class BIMP_Task extends BimpObject
         $sql = BimpTools::getSqlSelect(array('id'));
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= BimpTools::getSqlOrderBy('prio', 'DESC', 'a', 'id', 'DESC');
+        $sql .= BimpTools::getSqlOrderBy('id', 'ASC', 'a');
 
         $rows = self::getBdb()->executeS($sql, 'array');
 
@@ -462,10 +462,22 @@ class BIMP_Task extends BimpObject
                     }
 
                     $user_author = $t->getChildObject('user_create');
+                    $prio = (int) $t->getData('prio');
+                    $prio_badge = '';
+                    switch ($prio) {
+                        case 20:
+                            $prio_badge = '<span class="badge badge-danger" style="margin-right: 12px; font-size: 11px">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Urgent</span>';
+                            break;
+
+                        case 10:
+                            $prio_badge = '<span class="badge badge-warning" style="margin-right: 12px; font-size: 11px>Important</span>';
+                            break;
+                    }
                     $task = array(
                         'id'            => $t->getData('id'),
                         'user_type'     => $user_type,
-                        'prio'          => $t->getData('prio'),
+                        'prio'          => $prio,
+                        'prio_badge'    => $prio_badge,
                         'subj'          => $t->getData('subj'),
                         'src'           => $t->getData('src'),
                         'txt'           => $t->displayData("txt", 'default', false),

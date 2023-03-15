@@ -163,12 +163,11 @@ class notif_task extends AbstractNotification {
         var is_prio = (parseInt(element.prio) === 20);
         html += '<div class="task_content">';
 
-        if (is_prio) {
-            element.append = 'div.tab-content > #' + element.user_type + ' > div.task_with_prio';
-
-        } else {
-            element.append = 'div.tab-content > #' + element.user_type + ' > div.task_no_prio';
-        }
+//        if (is_prio) {
+//            element.append = 'div.tab-content > #' + element.user_type + ' > div.task_with_prio';
+//        } else {
+        element.append = 'div.tab-content > #' + element.user_type + ' > div.task_no_prio';
+//        }
 
         if (element.src) {
             html += '<div class="task_src">' + element.src + '</div>';
@@ -178,9 +177,14 @@ class notif_task extends AbstractNotification {
 
         if (element.subj) {
             html += '<div class="task_subj">';
-            if (is_prio) {
-                html += '<i class="danger fa fa-exclamation iconLeft"></i>';
+//            if (is_prio) {
+//                html += '<i class="danger fa fa-exclamation iconLeft"></i>';
+//            }
+
+            if (element.prio_badge) {
+                html += element.prio_badge;
             }
+            
             html += element.subj + '</div>';
         }
 

@@ -1207,7 +1207,7 @@ class BimpRevalorisation extends BimpObject
 
         if (is_array($revals)) {
             foreach ($revals as $reval) {
-                $nb_ok += $reval_errors = $reval->checkSerials(true);
+                $reval_errors = $reval->checkSerials(true, $nb_ok);
 
                 if (count($reval_errors)) {
                     BimpCore::addlog('Reval Applecare : erreur serial', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $reval, array(

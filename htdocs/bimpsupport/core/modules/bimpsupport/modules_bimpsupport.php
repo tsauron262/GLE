@@ -83,6 +83,7 @@ function bimpsupport_pdf_create($db, $object, $obj_type, $modele = '', $outputla
 
         $obj = new $classname($db);
         $obj->file_logo = 'BIMP_SAV.png';
+        
         if ($obj->write_file($object, $outputlangs) > 0) {
             $pdf_dir = DOL_DATA_ROOT . '/bimpcore/' . $obj_type . '/' . $obj->id . '/';
             bimpsupport_delete_preview($db, $object->getData('ref'), $pdf_dir);

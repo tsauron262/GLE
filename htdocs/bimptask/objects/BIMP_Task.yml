@@ -219,7 +219,6 @@ forms:
     attribute:
         rows:
             - field: id_user_owner
-            - field: comment
             
     changeStatut:
         rows:
@@ -231,9 +230,11 @@ forms:
               values:
                   callback: getStatusPossible
             - custom: 1
-              input_name: text
+              input_name: comment
               input: 
                   type: textarea
+                  rows: 3
+                  auto_expand: 1
               hashtags: 1
               label: Commentaire
             - custom: 1
@@ -286,6 +287,23 @@ forms:
               input_name: task_files
               input: 
                   type: drop_files
+                  
+    close: 
+        rows: 
+            - custom: 1
+              label: Notifier
+              input_name: notify
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Commentaire
+              input_name: comment
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              hashtags: 1
                   
            
 lists_cols: 
@@ -363,11 +381,17 @@ views:
             data: 
                 cols: 
                   - type: fields_table
-                    col_lg: 12
-                    col_md: 12
+                    col_lg: 6
+                    col_md: 6
                     col_sm: 12
                     fields_table:
                         name: default
+                  - type: custom
+                    col_lg: 6
+                    col_md: 6
+                    col_sm: 12
+                    custom: 
+                        callback: renderLogsList
           
             sous_taches: 
                 cols:

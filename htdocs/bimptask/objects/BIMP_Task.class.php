@@ -190,7 +190,7 @@ class BIMP_Task extends BimpObject
                         'label'      => 'Classer terminée',
                         'labelShort' => 'Terminer',
                         'icon'       => 'fas_check',
-                        'onclick'    => $this->getJsActionOnclick('close', array(), array('confirm_msg' => 'Terminer la tâche sans notifications ?'))
+                        'onclick'    => $this->getJsActionOnclick('close', array(), array('form_name' => 'close'))
                     );
             }
             if ($this->can("edit") || $this->canAttribute()) {
@@ -425,7 +425,7 @@ class BIMP_Task extends BimpObject
 
     private static function getNewTasks($filters, $user_type, &$nb)
     {
-
+        global $user;
         $tasks = array();
 
         $max_task_view = 40;
@@ -434,7 +434,7 @@ class BIMP_Task extends BimpObject
         $sql = BimpTools::getSqlSelect(array('id'));
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= BimpTools::getSqlOrderBy('prio', 'DESC', 'a', 'id', 'DESC');
+        $sql .= BimpTools::getSqlOrderBy('id', 'ASC', 'a');
 
         $rows = self::getBdb()->executeS($sql, 'array');
 
@@ -450,22 +450,38 @@ class BIMP_Task extends BimpObject
         }
 
 
+        $bdb = self::getBdb();
         foreach ($l_tasks_user as $t) {
             if ($t->can('view')) {
                 if ($j < $max_task_view) {
 
-                    $notes = $t->getNotes();
-                    $not_viewed = 0;
-                    foreach ($notes as $note) {
-                        if (!$note->getData('viewed'))
-                            $not_viewed++;
-                    }
+//                    $notes = $this->getNotes();
+//                    $not_viewed = 0;
+//                    foreach ($notes as $note) {
+//                        if (!$note->getData('viewed'))
+//                            $not_viewed++;
+//                    }
+                    $where = 'obj_type = \'bimp_object\' AND obj_module = \'bimptask\' AND obj_name = \'BIMP_Task\' AND id_obj = ' . $t->id;
+                    $where .= ' AND viewed = 0 AND user_create != ' . (int) $user->id;
+                    $not_viewed = (int) $bdb->getCount('bimpcore_note', $where);
 
                     $user_author = $t->getChildObject('user_create');
+                    $prio = (int) $t->getData('prio');
+                    $prio_badge = '';
+                    switch ($prio) {
+                        case 20:
+                            $prio_badge = '<span class="badge badge-danger" style="margin-right: 12px; font-size: 11px">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Urgent</span>';
+                            break;
+
+                        case 10:
+                            $prio_badge = '<span class="badge badge-warning" style="margin-right: 12px; font-size: 11px">Important</span>';
+                            break;
+                    }
                     $task = array(
                         'id'            => $t->getData('id'),
                         'user_type'     => $user_type,
-                        'prio'          => $t->getData('prio'),
+                        'prio'          => $prio,
+                        'prio_badge'    => $prio_badge,
                         'subj'          => $t->getData('subj'),
                         'src'           => $t->getData('src'),
                         'txt'           => $t->displayData("txt", 'default', false),
@@ -808,17 +824,25 @@ class BIMP_Task extends BimpObject
         $idTask = BimpCore::getConf('marqueur_mail', null, 'bimptask') . $this->id;
         $msg = str_replace("<br>", "<br/>", $msg);
 
-        $msg = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask . '<br/>Attention ne pas inclure votre signature animée qui est beaucoup beaucoup trop lourde' . $sep . '<br/><br/>' . $msg;
+        $html = $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask . '<br/>';
+        $html .= '<b>Attention ne pas inclure votre signature animée qui est beaucoup beaucoup trop lourde</b>' . $sep . '<br/><br/>';
+
+        $html .= '<h3>' . $this->getLink(array('syntaxe' => 'Tâche "<subj>"')) . '</h3>';
+
+        $html .= $msg;
 
         if ($rappel) {
-            $msg .= '<br/><br/><h1>' . $this->displayData('subj') . '</h1><br/>' . $this->displayData('txt') . '<br/><br/>' . $this->displayData('comment');
+            $html .= '<br/><br/>' . $this->displayData('txt', 'default', false) . '<br/><br/>';
+            if ($this->getData('comment')) {
+                $html .= '<b>Commentaire: </b>' . $this->displayData('comment', 'default', false);
+            }
 
             $notes = $this->getNotes();
             if (count($notes)) {
-                $msg .= "<br/><br/>Fil de discussion :";
+                $html .= "<br/><br/><b>Fil de discussion :</b>";
                 foreach ($notes as $note) {
-                    $msg .= $sep;
-                    $msg .= $note->getData("content");
+                    $html .= $sep;
+                    $html .= $note->getData("content");
                 }
             }
         }
@@ -830,16 +854,10 @@ class BIMP_Task extends BimpObject
 //        $msg = str_replace("<br/>", "\n", $msg);
 //        $msg = str_replace("<br/>", "\n", $msg);
 
-
-
-
-        $bimpMail = new BimpMail($this, $sujet, $to, $from, $msg);
+        $bimpMail = new BimpMail($this, $sujet, $to, $from, $html);
         $bimpMail->addFiles($files);
-        if ($bimpMail->send($errors))
-            ;
+        $bimpMail->send($errors);
 
-//        if (!mailSyn2($sujet, $to, $from, $msg))
-//            $errors[] = "Envoi email impossible";
         return $errors;
     }
 
@@ -931,8 +949,29 @@ class BIMP_Task extends BimpObject
         $errors = $warnings = array();
         $success = "Tâche fermée";
         $errors = $this->updateField("status", 4);
+        $success_callback = '';
 
-        $success_callback = 'bn.notificationActive.notif_task.obj.remove(' . $this->id . ')';
+        if (!count($errors)) {
+            $success_callback = 'bn.notificationActive.notif_task.obj.remove(' . $this->id . ')';
+
+            $comment = BimpTools::getArrayValueFromPath($data, 'comment', '');
+
+            $msg = 'Tâche terminée' . ($comment ? '<br/><b>Commentaire : </b>' . $comment : '');
+            $this->addObjectLog($msg);
+
+            if ((int) BimpTools::getArrayValueFromPath($data, 'notify', 0)) {
+                $user = BimpCore::getBimpUser();
+                $msg = 'Bonjour, <br/><br/>La tâche "' . $this->getLink(array(
+                            'syntaxe' => '<subj>'
+                        )) . '" a été marquée terminée' . (BimpObject::objectLoaded($user) ? ' par ' . $user->getName() : '');
+
+                if ($comment) {
+                    $msg .= '<br/><br/><b>Commentaire : </b><br/>';
+                    $msg .= $comment;
+                }
+                $this->notifier('Tâche "' . $this->getData('subj') . '" terminée', $msg, false);
+            }
+        }
 
         return array(
             'errors'           => $errors,
@@ -966,6 +1005,9 @@ class BIMP_Task extends BimpObject
                 $success_callback = $instance_task . '.remove(' . $this->id . ')';
         }
 
+        $msg = 'Attribuée à ' . ((int) $data['id_user_owner'] ? ' {{Utilisateur:' . $data['id_user_owner'] . '}}' : 'personne');
+        $this->addObjectLog($msg);
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -979,7 +1021,11 @@ class BIMP_Task extends BimpObject
         $success = "statut modifié";
         $errors = $this->updateField("status", $data['status']);
 
-        $msg = 'Statut passé à "' . $this->displayData('status') . '"<br/>' . $data['text'];
+        $msg = 'Statut passé à "' . $this->displayData('status', 'default', false) . '"<br/>';
+
+        if ($data['comment']) {
+            $msg .= '<b>Commentaire : </b>' . $data['comment'];
+        }
 
         $files = array();
         // Fichiers joints: 
@@ -1006,7 +1052,8 @@ class BIMP_Task extends BimpObject
         if ($data['notif']) {
             $this->notifier('Changement statut tâche "' . $this->getData('subj') . '"', $msg, true, $files);
         }
-        $this->addNote($msg);
+
+        $this->addObjectLog($msg);
 
         return array(
             'errors'           => $errors,
@@ -1069,6 +1116,23 @@ class BIMP_Task extends BimpObject
             if (!empty($files)) {
                 $files_dir = $this->getFilesDir();
                 BimpTools::moveTmpFiles($warnings, $files, $files_dir);
+            }
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = [], $force_update = false)
+    {
+        $init_id_owner = (int) $this->getInitData('id_user_owner');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            $id_owner = (int) $this->getData('id_user_owner');
+            if ($init_id_owner !== $id_owner) {
+                $msg = 'Attribuée à ' . ($id_owner ? ' {{Utilisateur:' . $id_owner . '}}' : 'personne');
+                $this->addObjectLog($msg);
             }
         }
 

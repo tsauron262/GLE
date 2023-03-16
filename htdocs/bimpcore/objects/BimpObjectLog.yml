@@ -24,6 +24,7 @@ fields:
         label: Message
         type: text
         required: 1
+        hashtags: 1
         
     code: 
         label: Code

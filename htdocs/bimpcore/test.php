@@ -29,14 +29,20 @@ if (!$user->admin) {
 if ((int) BimpTools::getValue('test_serials', 0)) {
     echo 'CHECK SERIALS <br/>';
     BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
-    BimpRevalorisation::checkAppleCareSerials();
-    echo 'OK';
+
+    $nbOk = 0;
+    BimpRevalorisation::checkAppleCareSerials($nbOk);
+
+    echo 'OK - ' . $nbOk . ' serials traités';
 }
 
 if ((int) BimpTools::getValue('test_revals', 0)) {
     echo 'CHECKS REVALS: <br/>';
     BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
-    $errors = BimpRevalorisation::checkBilledApplecareReval();
+
+    $nbOk = 0;
+    $errors = BimpRevalorisation::checkBilledApplecareReval($nbOk);
+    echo 'OK - ' . $nbOk . ' revals traitées';
 
     echo 'ERRORS<pre>';
     print_r($errors);

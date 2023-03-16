@@ -8,15 +8,19 @@ class BimpFinancCronExec
     public function checkAppleCareSerials()
     {
         BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
-        BimpRevalorisation::checkAppleCareSerials();
 
-        return 'OK';
+        $nbOk = 0;
+        BimpRevalorisation::checkAppleCareSerials($nbOk);
+
+        return 'OK - ' . $nbOk . ' serials traités';
     }
 
     public function checkBilledApplecareReval()
     {
         BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
-        $errors = BimpRevalorisation::checkBilledApplecareReval();
+        
+        $nbOk = 0;
+        $errors = BimpRevalorisation::checkBilledApplecareReval($nbOk);
 
         if (count($errors)) {
             BimpCore::addlog('Erreurs lors de la validation auto des revalorisations AppleCare', 3, 'bimpcore', null, array(
@@ -24,6 +28,6 @@ class BimpFinancCronExec
             ));
         }
 
-        return 'OK';
+        return 'OK - ' . $nbOk . ' revals traitées';
     }
 }

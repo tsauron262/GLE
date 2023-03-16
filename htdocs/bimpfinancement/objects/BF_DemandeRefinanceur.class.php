@@ -93,7 +93,7 @@ class BF_DemandeRefinanceur extends BimpObject
                     $errors[] = 'Cette demande n\'est pas sélectionnable';
                     return 0;
                 }
-                
+
                 if ($status === self::STATUS_SELECTIONNEE) {
                     $errors[] = 'Cette demande est déjà sélectionnée';
                     return 0;
@@ -277,7 +277,7 @@ class BF_DemandeRefinanceur extends BimpObject
 
     // Getters array:
 
-    public static function getRefinanceursArray($include_empty = true, $active_only = true)
+    public static function getRefinanceursArray($include_empty = true, $active_only = true, $empty_label = '')
     {
         $cache_key = 'bf_refinanceurs_array';
 
@@ -304,7 +304,7 @@ class BF_DemandeRefinanceur extends BimpObject
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty);
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
     // Getters données:
@@ -520,7 +520,7 @@ class BF_DemandeRefinanceur extends BimpObject
                     $demande->set('loyer_mensuel_dyn_ht', $values['loyer_dyn_mensuel']);
                     $demande->set('loyer_mensuel_suppl_ht', $values['loyer_dyn_suppl_mensuel']);
                     $demande->set('agreement_number', $this->getData('num_accord'));
-                    
+
                     $up_warnings = array();
                     $up_errors = $demande->update($up_warnings, true);
 

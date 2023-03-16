@@ -252,10 +252,8 @@ class BimpRevalorisation extends BimpObject
         if ($this->getData('type') == 'crt') {
             if ($this->getData('status') == 10)
                 return 1;
-        } elseif($manuel && ($this->getData('type') == 'applecare' || $this->getData('type') == 'fac_ac')){//pas de validation manuel sur les applecare
-            
-        }
-        elseif ($this->getData('type') == 'applecare') {
+        } elseif ($manuel && ($this->getData('type') == 'applecare' || $this->getData('type') == 'fac_ac')) {//pas de validation manuel sur les applecare
+        } elseif ($this->getData('type') == 'applecare') {
             if ($this->getData('status') == 0)
                 return 1;
         } else
@@ -764,7 +762,7 @@ class BimpRevalorisation extends BimpObject
 
     // Traitements: 
 
-    public function checkSerials($update = false)
+    public function checkSerials($update = false, &$nb_ok = 0)
     {
         $type = $this->getData('type');
         if (!in_array($type, array('applecare', 'fac_ac'))) {
@@ -803,7 +801,7 @@ class BimpRevalorisation extends BimpObject
             if (strpos($serial, 'S') === 0) {
                 $where .= ' OR concat("S", serial) = \'' . $serial . '\'';
             }
-            
+
             $id_eq = (int) $this->db->getValue('be_equipment', 'id', $where);
 
             if ($id_eq) {
@@ -829,6 +827,7 @@ class BimpRevalorisation extends BimpObject
                 }
 
                 if (!in_array($id_eq, $equipments)) {
+                    $nb_ok++;
                     $equipments[] = $id_eq;
                 }
             } else {
@@ -1087,7 +1086,7 @@ class BimpRevalorisation extends BimpObject
         $eqs = $this->getData('equipments');
         $nb_eqs = count($eqs) + count($serials);
         if ($nb_eqs > (int) abs($this->getData('qty'))) {
-            $errors[] = 'Veuillez retirer ' . ($nb_eqs - (int) abs($this->getData('qty'))) . ' équipements ou n° de série ('.$nb_eqs.' / '.abs($this->getData('qty')).')';
+            $errors[] = 'Veuillez retirer ' . ($nb_eqs - (int) abs($this->getData('qty'))) . ' équipements ou n° de série (' . $nb_eqs . ' / ' . abs($this->getData('qty')) . ')';
         }
 
         if ($this->getData('type') === 'applecare') {
@@ -1180,8 +1179,9 @@ class BimpRevalorisation extends BimpObject
     }
 
     // Méthodes statiques: 
-    
-    public function actionCheckAppleCareSerials($data, &$success){
+
+    public function actionCheckAppleCareSerials($data, &$success)
+    {
         $warnings = array();
         $success = 'Equipements attribuées';
         $errors = self::checkAppleCareSerials();
@@ -1191,7 +1191,7 @@ class BimpRevalorisation extends BimpObject
         );
     }
 
-    public static function checkAppleCareSerials()
+    public static function checkAppleCareSerials(&$nb_ok = 0)
     {
         $errors = array();
         $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
@@ -1207,7 +1207,7 @@ class BimpRevalorisation extends BimpObject
 
         if (is_array($revals)) {
             foreach ($revals as $reval) {
-                $reval_errors = $reval->checkSerials(true);
+                $reval_errors = $reval->checkSerials(true, $nb_ok);
 
                 if (count($reval_errors)) {
                     BimpCore::addlog('Reval Applecare : erreur serial', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $reval, array(
@@ -1219,8 +1219,9 @@ class BimpRevalorisation extends BimpObject
         }
         return $errors;
     }
-    
-    public function actionCheckBilledApplecareReval($data, &$success){
+
+    public function actionCheckBilledApplecareReval($data, &$success)
+    {
         $warnings = array();
         $success = 'Reval validées avec succés';
         $errors = self::checkBilledApplecareReval($data['id_fact']);
@@ -1230,15 +1231,15 @@ class BimpRevalorisation extends BimpObject
         );
     }
 
-    public static function checkBilledApplecareReval($id_facture = null)
+    public static function checkBilledApplecareReval($id_facture = null, &$nbOk = 0)
     {
         $errors = array();
 
         $filters = array(
-            'a.type'      => 'fac_ac',
-            'a.status'    => 0,
+            'a.type'       => 'fac_ac',
+            'a.status'     => 0,
 //            'f.fk_statut' => array(1, 2),
-            'a.equipments'=> array(
+            'a.equipments' => array(
                 'operator' => '!=',
                 'value'    => ''
             )
@@ -1295,6 +1296,10 @@ class BimpRevalorisation extends BimpObject
                                         $fac_reval->set('qty', (int) $fac_reval->getData('qty') - 1);
                                         $fac_reval->set('equipments', $eqs);
                                         $reval_errors = $fac_reval->update($w, true);
+
+                                        if (!count($reval_errors)) {
+                                            $nbOk++;
+                                        }
                                     }
                                 } else {
                                     $fac_reval->set('status', 1);
@@ -1303,6 +1308,10 @@ class BimpRevalorisation extends BimpObject
                                     $fac_reval->set('note', $note);
                                     $fac_reval->set('date_processed', date('Y-m-d'));
                                     $reval_errors = $fac_reval->update($w, true);
+
+                                    if (!count($reval_errors)) {
+                                        $nbOk++;
+                                    }
                                 }
                             }
 

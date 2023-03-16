@@ -14,6 +14,18 @@ class ConsignesContratFinancementPDF extends DocFinancementPDF
         $this->doc_name = 'Contrat de location';
     }
 
+    public function initHeader()
+    {
+        parent::initHeader();
+        $doc_ref = '';
+
+        if (BimpObject::objectLoaded($this->demande)) {
+            $doc_ref = 'N° ' . str_replace('DF', '', $this->demande->getRef());
+        }
+        $this->header_vars['doc_ref'] = $doc_ref;
+        $this->header_vars['doc_name'] = $this->doc_name;
+    }
+
     public function renderTop()
     {
         $html = '';
@@ -54,7 +66,6 @@ class ConsignesContratFinancementPDF extends DocFinancementPDF
         $html .= '<td style="width: 100px"></td>';
         $html .= '<td>';
         $html .= 'LDLC.PRO LEASE <br/>';
-        $html .= 'Pascale ARDUIN / Alain GAILLARD <br/>';
         $html .= '2 rue des érables <br/>';
         $html .= '69760 LIMONEST';
         $html .= '</td>';
@@ -71,7 +82,7 @@ class ConsignesContratFinancementPDF extends DocFinancementPDF
 
         $html .= '<table>';
         $html .= '<tr>';
-        $html .= '<td><b>Pascale ARDUIN</b><br/><a href="mailto: p.arduin@ldlc.pro">p.arduin@ldlc.pro</a><br/>Tél : 06 88 03 37 74</td>';
+        $html .= '<td><b>Valérie ROMAGNY / Gaëlle MARECHAL</b><br/><a href="mailto: financement@ldlc.pro">financement@ldlc.pro</a><br/>Tél : 04 26 68 17 94</td>';
         $html .= '<td><b>Alain GAILLARD</b><br/><a href="mailto: a.gaillard@ldlc.pro">a.gaillard@ldlc.pro</a><br/>Tél : 06 22 47 00 09</td>';
         $html .= '</tr>';
         $html .= '</table>';
@@ -79,7 +90,7 @@ class ConsignesContratFinancementPDF extends DocFinancementPDF
 
         $this->writeContent($html);
     }
-    
+
     public function renderLines()
     {
         

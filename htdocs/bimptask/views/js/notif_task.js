@@ -123,7 +123,7 @@ class notif_task extends AbstractNotification {
 
     getbuttonClose(id_object) {
         var onclick = 'setObjectAction($(this), {module: \'bimptask\', object_name: \'BIMP_Task\', id_object: ' + id_object + '}';
-        onclick += ', \'close\', {}, null, null, {confirm_msg: \'Terminer la tâche ?\'})';
+        onclick += ', \'close\', {}, null, null, {form_name: \'Terminer la tâche ?\'})';
         return '<button name="close" class="btn btn-default btn-small" type="button" onclick="' + onclick + '"><i class="fas fa5-check iconLeft"></i>Terminer</button>';
     }
 

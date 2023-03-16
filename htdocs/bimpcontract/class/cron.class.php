@@ -23,11 +23,11 @@
         
         CONST CONTRAT_RENOUVELLEMENT_NON = 0;
         CONST CONTRAT_RENOUVELLEMENT_1_FOIS = 1;
-        CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 3;
-        CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 6;
+        CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 2;
+        CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 3;
         CONST CONTRAT_RENOUVELLEMENT_4_FOIS = 4;
         CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5;
-        CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 7;
+        CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 6;
         CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12;
         CONST CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM = 666;
         
@@ -225,22 +225,33 @@
             $this->output .= count($list) . " contrat(s) Actif.<br />";
             foreach($list as $index => $c) {
                 $contrats->fetch($c['rowid']);
-                if($contrats->isLoaded() && in_array($contrats->getData('tacite'), $this->arrayTacite)) {
-                    if((strtotime($contrats->displayRealEndDate('Y-m-d')) <= strtotime($date)) && !$contrats->getData('anticipate_close_note')) {
-                        if($contrats->tacite(true)) {
-                            $this->output .= "Contrat N°" . $contrats->getRef() . ' [Renouvellement TACITE]';
+//                $this->output .= '<br/>'.$contrats->getLink();
+                if($contrats->isLoaded()){
+                    if(in_array($contrats->getData('tacite'), $this->arrayTacite)) {
+                        if((strtotime($contrats->displayRealEndDate('Y-m-d')) <= strtotime($date)) && !$contrats->getData('anticipate_close_note')) {
+                            if($contrats->tacite(true)) {
+                                $this->output .= "Contrat N°" . $contrats->getRef() . ' [Renouvellement TACITE]';
 
-                            $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrats->getData('fk_commercial_suivi'));
-                            $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrats->getData('fk_soc'));
-                            $email_commercial = $commercial->getData('email');
-                            if($commercial->getData('statut') == 0) {
-                                $email_commercial = "debugerp@bimp.fr";
-                            } 
-                            $this->output .= $email_commercial . "<br />";
-                            mailSyn2("[Contrat] - Renouvellement tacite - " . $contrats->getRef(), $email_commercial, null, "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement.<br /> Client: " . $client->getData('code_client') . " " . $client->getName());
+                                $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrats->getData('fk_commercial_suivi'));
+                                $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrats->getData('fk_soc'));
+                                $email_commercial = $commercial->getData('email');
+                                if($commercial->getData('statut') == 0) {
+                                    $email_commercial = "debugerp@bimp.fr";
+                                } 
+                                $this->output .= $email_commercial . "<br />";
+                                mailSyn2("[Contrat] - Renouvellement tacite - " . $contrats->getRef(), $email_commercial, null, "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement.<br /> Client: " . $client->getData('code_client') . " " . $client->getName());
+                            }
+//                            else
+//                                $this->output .= ' ne sembla pas avoir était renouvelle correctment';
                         }
+//                        else
+//                            $this->output .= ' ne semble pas qualifié car date non atteins';
                     }
+//                    else
+//                        $this->output .= ' ne semble pas qualifiée car plus de tacite ( '.$contrats->getData('tacite').')';
                 }
+//                else
+//                    $this->output .= ' ne semble pas qualifiée car pas loaddé';
             }
         }
         
@@ -272,9 +283,11 @@
                 }
                 if($c->getData('statut') != 11) {
                     $canBilling = false;
+                    $this->output .= $c->getRef() . ': statut contrat pas bon<br />';
                 }
 
                 if($echeanciers->isDejaFactured($data['date_start'], $data['date_end'])) {
+                    $this->output .= $c->getRef() . ': Déja facturé<br />';
                     $canBilling = false;
                 }
 

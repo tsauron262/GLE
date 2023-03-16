@@ -426,32 +426,31 @@ class BIMP_Task extends BimpObject
     private static function getNewTasks($filters, $user_type, &$nb)
     {
         global $user;
+        $bdb = self::getBdb();
+
         $tasks = array();
 
         $max_task_view = 40;
-        $i = $j = 0;
-
+        $i = 0;
+        
         $sql = 'SELECT DISTINCT a.id';
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy('id', 'ASC', 'a');
 
-        $rows = self::getBdb()->executeS($sql, 'array');
+        $rows = $bdb->executeS($sql, 'array');
 
-        $l_tasks_user = array();
-
-        if (is_array($rows) and count($rows)) {
-            $nb = count($rows);
-            foreach ($rows as $r) {
-                $task = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', (int) $r['id']);
-                if (BimpObject::objectLoaded($task))
-                    $l_tasks_user[] = $task;
-            }
+        if (!is_array($rows)) {
+            return array();
         }
+        $nb = count($rows);
 
+        foreach ($rows as $r) {
+            $t = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', (int) $r['id']);
+            if (!BimpObject::objectLoaded($t)) {
+                continue;
+            }
 
-        $bdb = self::getBdb();
-        foreach ($l_tasks_user as $t) {
             if ($t->can('view')) {
                 if ($j < $max_task_view) {
                     $where = 'obj_type = \'bimp_object\' AND obj_module = \'bimptask\' AND obj_name = \'BIMP_Task\' AND id_obj = ' . $t->id;
@@ -476,29 +475,28 @@ class BIMP_Task extends BimpObject
                     $status_icon .= BimpRender::renderPopoverData(self::$valStatus[$status]['label']) . '>';
                     $status_icon .= BimpRender::renderIcon(self::$valStatus[$status]['icon']) . '</span>';
                     $task = array(
-                        'id'            => $t->getData('id'),
-                        'user_type'     => $user_type,
-                        'prio'          => $prio,
-                        'status_icon'   => $status_icon,
-                        'prio_badge'    => $prio_badge,
-                        'subj'          => $t->getData('subj'),
-                        'src'           => $t->getData('src'),
-                        'txt'           => $t->displayData("txt", 'default', false),
-                        'date_create'   => $t->getData('date_create'),
-                        'url'           => DOL_URL_ROOT . '/bimptask/index.php?fc=task&id=' . $t->getData('id'),
-                        'not_viewed'    => (int) $not_viewed,
-                        'can_rep_mail'  => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
-                        'can_close'     => (int) $t->can('edit'),
-                        'can_attribute' => (int) ($t->can('edit') or $t->canAttribute()),
-                        'can_edit'      => (int) $t->can('edit'),
-                        'author'        => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : '')
+                        'id'             => $t->getData('id'),
+                        'user_type'      => $user_type,
+                        'prio'           => $prio,
+                        'status_icon'    => $status_icon,
+                        'prio_badge'     => $prio_badge,
+                        'subj'           => $t->getData('subj'),
+                        'src'            => $t->getData('src'),
+                        'txt'            => $t->displayData("txt", 'default', false),
+                        'date_create'    => $t->getData('date_create'),
+                        'url'            => DOL_URL_ROOT . '/bimptask/index.php?fc=task&id=' . $t->getData('id'),
+                        'not_viewed'     => (int) $not_viewed,
+                        'can_rep_mail'   => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
+                        'can_close'      => (int) $t->can('edit'),
+                        'can_attribute'  => (int) ($t->can('edit') or $t->canAttribute()),
+                        'can_edit'       => (int) $t->can('edit'),
+                        'author'         => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : '')
                     );
 
                     $tasks[] = $task;
 
                     $i++;
                 }
-                $j++;
             }
         }
 

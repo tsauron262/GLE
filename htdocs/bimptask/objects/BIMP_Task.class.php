@@ -431,7 +431,7 @@ class BIMP_Task extends BimpObject
         $max_task_view = 40;
         $i = $j = 0;
 
-        $sql = BimpTools::getSqlSelect(array('id'));
+        $sql = 'SELECT DISTINCT a.id';
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy('id', 'ASC', 'a');

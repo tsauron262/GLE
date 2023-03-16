@@ -454,13 +454,6 @@ class BIMP_Task extends BimpObject
         foreach ($l_tasks_user as $t) {
             if ($t->can('view')) {
                 if ($j < $max_task_view) {
-
-//                    $notes = $this->getNotes();
-//                    $not_viewed = 0;
-//                    foreach ($notes as $note) {
-//                        if (!$note->getData('viewed'))
-//                            $not_viewed++;
-//                    }
                     $where = 'obj_type = \'bimp_object\' AND obj_module = \'bimptask\' AND obj_name = \'BIMP_Task\' AND id_obj = ' . $t->id;
                     $where .= ' AND viewed = 0 AND user_create != ' . (int) $user->id;
                     $not_viewed = (int) $bdb->getCount('bimpcore_note', $where);
@@ -470,17 +463,23 @@ class BIMP_Task extends BimpObject
                     $prio_badge = '';
                     switch ($prio) {
                         case 20:
-                            $prio_badge = '<span class="badge badge-danger" style="margin-right: 12px; font-size: 11px">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Urgent</span>';
+                            $prio_badge = '<span class="badge badge-danger" style="margin-right: 8px; font-size: 10px">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Urgent</span>';
                             break;
 
                         case 10:
-                            $prio_badge = '<span class="badge badge-warning" style="margin-right: 12px; font-size: 11px">Important</span>';
+                            $prio_badge = '<span class="badge badge-warning" style="margin-right: 8px; font-size: 10px">Important</span>';
                             break;
                     }
+
+                    $status = (int) $t->getData('status');
+                    $status_icon = '<span class="' . implode(' ', self::$valStatus[$status]['classes']) . ' bs-popover" style="margin-right: 8px"';
+                    $status_icon .= BimpRender::renderPopoverData(self::$valStatus[$status]['label']) . '>';
+                    $status_icon .= BimpRender::renderIcon(self::$valStatus[$status]['icon']) . '</span>';
                     $task = array(
                         'id'            => $t->getData('id'),
                         'user_type'     => $user_type,
                         'prio'          => $prio,
+                        'status_icon'   => $status_icon,
                         'prio_badge'    => $prio_badge,
                         'subj'          => $t->getData('subj'),
                         'src'           => $t->getData('src'),
@@ -1139,7 +1138,7 @@ class BIMP_Task extends BimpObject
 
         if (!count($errors)) {
             $id_owner = (int) $this->getData('id_user_owner');
-            if ($init_id_owner !== $id_owner) {
+            if ($init_id_owner != $id_owner) {
                 $msg = 'Attribuée à ' . ($id_owner ? ' {{Utilisateur:' . $id_owner . '}}' : 'personne');
                 $this->addObjectLog($msg);
             }

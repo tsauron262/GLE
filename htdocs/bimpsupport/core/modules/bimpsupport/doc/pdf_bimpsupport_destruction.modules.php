@@ -158,10 +158,6 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 
-//                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/destruction.pdf');
-//                $tplidx = $pdf->importPage(1, "/MediaBox");
-//                $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                
                 $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/destruction.pdf');
                 $tplidx = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);

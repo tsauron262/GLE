@@ -1005,7 +1005,16 @@ class BIMP_Task extends BimpObject
                 $success_callback = $instance_task . '.remove(' . $this->id . ')';
         }
 
-        $msg = 'Attribuée à ' . ((int) $data['id_user_owner'] ? ' {{Utilisateur:' . $data['id_user_owner'] . '}}' : 'personne');
+        $user_name = 'personne';
+        if ((int) $data['id_user_owner']) {
+            $owner = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $data['id_user_owner']);
+
+            if (BimpObject::objectLoaded($owner)) {
+                $user_name = $owner->getName();
+            }
+        }
+
+        $msg = 'Attribuée à ' . $user_name;
         $this->addObjectLog($msg);
 
         return array(

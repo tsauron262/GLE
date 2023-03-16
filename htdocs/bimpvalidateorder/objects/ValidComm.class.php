@@ -13,11 +13,13 @@ class ValidComm extends BimpObject
     const TYPE_ENCOURS = 0;
     const TYPE_COMMERCIAL = 1;
     const TYPE_IMPAYE = 2;
+    const TYPE_SUR_SERVICE = 3;
 
     public static $types = Array(
-        self::TYPE_ENCOURS    => Array('label' => 'Encours', 'icon' => 'fas_search-dollar'),
-        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd'),
-        self::TYPE_IMPAYE     => Array('label' => 'Impayé', 'icon' => 'fas_dollar-sign')
+        self::TYPE_ENCOURS     => Array('label' => 'Encours', 'icon' => 'fas_search-dollar'),
+        self::TYPE_COMMERCIAL  => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd'),
+        self::TYPE_IMPAYE      => Array('label' => 'Impayé', 'icon' => 'fas_dollar-sign'),
+        self::TYPE_SUR_SERVICE => Array('label' => 'Remise sur service', 'icon' => 'fas_hand-holding')
     );
 
     // Piece
@@ -26,13 +28,7 @@ class ValidComm extends BimpObject
     const OBJ_FACTURE = 1;
     const OBJ_COMMANDE = 2;
     const OBJ_CONTRAT = 3;
-//    public static $objets = Array(
-//        self::OBJ_ALL      => Array('label' => 'Tous'),
-//        self::OBJ_DEVIS    => Array('label' => 'Devis',    'icon' => 'fas_file-invoice'),
-//        self::OBJ_FACTURE  => Array('label' => 'Facture',  'icon' => 'fas_file-invoice-dollar'),
-//        self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly'),
-//        self::OBJ_CONTRAT  => Array('label' => 'Contrat', 'icon' => 'retweet')
-//    );
+
     // Only child
     const USER_ASK_ALL = 0;
     const USER_ASK_CHILD = 1;
@@ -128,6 +124,7 @@ class ValidComm extends BimpObject
         $valid_comm = 1;
         $valid_encours = 1;
         $valid_impaye = 1;
+        $valid_service = 1;
 
         // Si on ne précise pas le type de validations a effectué => on les fait toutes
         if (empty($validations))
@@ -158,7 +155,7 @@ class ValidComm extends BimpObject
         $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
         $bimp_object->dol_object->db = $this->db->db;
 
-        list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp) = $this->getObjectParams($bimp_object, $errors);
+        list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp, $percent_service) = $this->getObjectParams($bimp_object, $errors);
 
         if (!empty($errors))
             return 0;
@@ -211,7 +208,13 @@ class ValidComm extends BimpObject
         } elseif (!$rtp)
             $this->validatePayed($class, $bimp_object);
 
-
+        // Validation service
+        if (($percent_service != 0)) {
+            $valid_service = (int) $this->tryValidateByType($user, self::TYPE_SUR_SERVICE, $secteur, $class, $percent_service, $bimp_object, $errors);
+        } elseif (is_a($this->demandeExists($class, (int) $bimp_object->id, self::TYPE_SUR_SERVICE), 'DemandeValidComm')) {
+            $this->updateDemande($user->id, $class, $bimp_object->id, self::TYPE_SUR_SERVICE, DemandeValidComm::STATUS_VALIDATED, DemandeValidComm::NO_VAL_COMM);
+        }
+        
         // Ajout des erreurs/success
         // Commerciales
         if (!$valid_comm)
@@ -233,12 +236,20 @@ class ValidComm extends BimpObject
                     '. La demande de validation d\'impayé a été adressée à ' . $this->valideur[self::TYPE_IMPAYE] . '.<br/>';
         elseif (in_array(self::TYPE_IMPAYE, $validations))
             $success[] = "Validation d'impayé effectuée.";
+        
+        
+        // Sur service
+        if (!$valid_service)
+            $errors[] = "Vous ne pouvez pas valider certaines remises sur les services "
+                    . $bimp_object->getLabel('this') . '. La demande de validation de remise service a été adressée à ' . $this->valideur[self::TYPE_SUR_SERVICE] . '.<br/>';
+        elseif (in_array(self::TYPE_SUR_SERVICE, $validations))
+            $success[] = "Validation de remises effectuée.";
 
+        
         if (!is_a($bimp_object, 'BContract_contrat'))
-            $ret = ($valid_comm == 1 and $valid_encours == 1 and $valid_impaye == 1);
+            $ret = ($valid_comm == 1 and $valid_encours == 1 and $valid_impaye == 1 and $valid_service == 1);
         else
-            $ret = ($valid_encours == 1 && $valid_impaye == 1);
-
+            $ret = (                     $valid_encours == 1 and $valid_impaye == 1/* and $valid_service == 1*/);
 
         // Mail si il y a eu au moins une demande de validation traitée
         if ($this->nb_validation > 0)
@@ -474,11 +485,19 @@ class ValidComm extends BimpObject
         // Remises arrières : 
         if (!is_a($object, 'BContract_contrat')) {
             $lines = $object->getLines('not_text');
-            $remises_arrieres = 0;
+            $remises_arrieres = $remise_service = $service_total_amount_ht =  $service_total_ht_without_remises = 0;
             foreach ($lines as $line) {
                 $remises_arrieres += (float) $line->getTotalRemisesArrieres(false);
+                $product = $line->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    if ((int) $product->getData('fk_product_type') == 1) {
+                        $line_remise_service_info = $line->getRemiseTotalInfos();
+                        $service_total_amount_ht += $line_remise_service_info['total_amount_ht'];
+                        $service_total_ht_without_remises += $line_remise_service_info['total_ht_without_remises'];
+                    }
+                }
             }
-
+            
             // Percent de marge
             $margin_infos = $object->getMarginInfosArray();
             $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['margin_on_products'] + $remises_arrieres;
@@ -488,7 +507,7 @@ class ValidComm extends BimpObject
                 $percent_marge = 100 * $infos_remises['remise_total_amount_ht'] / $marge_ini;
             if ($percent_marge > 100)
                 $percent_marge = 100;
-        }
+            }
 
         // Impayé
         if (method_exists($object, 'getClientFacture')) {
@@ -509,8 +528,15 @@ class ValidComm extends BimpObject
         }
         if ($rtp < 0)
             $rtp = 0;
-        //die(print_r(array($secteur, $class, $percent_pv, $percent_marge, $val, $rtp)));
-        return array($secteur, $class, $percent_pv, $percent_marge, $val, $rtp);
+        
+        
+        // Service
+        if($service_total_ht_without_remises != 0)
+            $percent_service = $service_total_amount_ht / $service_total_ht_without_remises * 100;
+        else
+            $percent_service = 0;
+
+        return array($secteur, $class, $percent_pv, $percent_marge, $val, $rtp, $percent_service);
     }
 
     public static function getObjectClass($object)
@@ -522,8 +548,6 @@ class ValidComm extends BimpObject
             return self::OBJ_COMMANDE;
         elseif(is_a($object, 'BContract_contrat'))
             return self::OBJ_CONTRAT;
-//        elseif(is_a($object, 'Bimp_Facture'))
-//            return self::OBJ_FACTURE;
 
         return -2;
     }
@@ -546,7 +570,7 @@ class ValidComm extends BimpObject
 
             switch ($type) {
                 case self::TYPE_COMMERCIAL:
-                    $val_nom = 'remise de ' . $val . '%' . ' '.print_r($options,1);
+                    $val_nom = 'remise de ' . $val . '%' . ' '. print_r($options, 1);
                     $type_nom = 'commercialement';
                     break;
                 case self::TYPE_ENCOURS:
@@ -556,6 +580,10 @@ class ValidComm extends BimpObject
                 case self::TYPE_IMPAYE:
                     $val_nom = 'montant HT de ' . $val . '€';
                     $type_nom = 'les impayés de ';
+                    break;
+                case self::TYPE_SUR_SERVICE:
+                    $val_nom = 'remise de ' . $val . '%' . ' ' .print_r($options, 1);
+                    $type_nom = 'sur service';
                     break;
             }
             $secteur_nom = BimpCache::getSecteursArray()[$secteur];
@@ -582,7 +610,7 @@ class ValidComm extends BimpObject
         if ((int) $bimp_object->id > 0) {
 
             $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
-//            $demande->db->db = $this->db2;
+
             $errors = BimpTools::merge_array($errors, $demande->validateArray(array(
                                 'type_de_piece'    => (int) $object,
                                 'id_piece'         => (int) $bimp_object->id,
@@ -651,8 +679,8 @@ class ValidComm extends BimpObject
             $sql .= ' OR (only_child=' . self::USER_ASK_CHILD . ' AND user=' . $user_ask->fk_user . ')';
         $sql .= ')';
         $sql .= ' ORDER BY sur_marge DESC, val_min ASC, val_max ASC';
-//        $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
-//        echo($sql);die;
+
+        
         $rows = self::getBdb()->executeS($sql, 'array');
 
         if (is_array($rows)) {
@@ -698,9 +726,6 @@ class ValidComm extends BimpObject
             $filters['status'] = $status;
 
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
-
-//        if($type == self::TYPE_IMPAYE)
-//            die(BimpObject::getBdb()->db->lastquery);
 
         if (!$return_all) {
             foreach ($demandes as $key => $val)
@@ -820,7 +845,6 @@ class ValidComm extends BimpObject
 
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $d->getData('id_user_ask'));
                     $client = $bimp_object->getChildObject('client');
-//                    $m .= "Bonjour " . $user->getData('firstname') . ",<br/><br/>";
                     $m .= "Liste des demandes validées pour " . $bimp_object->getNomUrl() . " : du client " . $client->getLink() . "<br/>";
                 }
 
@@ -836,8 +860,9 @@ class ValidComm extends BimpObject
                         break;
                 }
             }
-        } else
+        } else  {
             return 0;
+        }
 
         // En cours
         $filters['status'] = 0;
@@ -858,6 +883,9 @@ class ValidComm extends BimpObject
                     case self::TYPE_IMPAYE:
                         $m .= "- validation des retards de paiement du client<br/>";
                         break;
+                    case self::TYPE_SUR_SERVICE:
+                        $m .= "- validation des remise sur <br/>";
+                        break;
                 }
             }
         } else {
@@ -869,7 +897,6 @@ class ValidComm extends BimpObject
 
         $subject = "Validation " . count($demandes_valider) . '/' . (count($demandes_en_cours) + count($demandes_valider)) . ' ';
         $subject .= $bimp_object->getRef() . ' - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');
-        ;
 
         mailSyn2($subject, $user->getData('email'), null, $m);
         return 1;

@@ -425,7 +425,7 @@ class BIMP_Task extends BimpObject
 
     private static function getNewTasks($filters, $user_type, &$nb)
     {
-
+        global $user;
         $tasks = array();
 
         $max_task_view = 40;
@@ -454,12 +454,15 @@ class BIMP_Task extends BimpObject
             if ($t->can('view')) {
                 if ($j < $max_task_view) {
 
-                    $notes = $t->getNotes();
-                    $not_viewed = 0;
-                    foreach ($notes as $note) {
-                        if (!$note->getData('viewed'))
-                            $not_viewed++;
-                    }
+//                    $notes = $this->getNotes();
+//                    $not_viewed = 0;
+//                    foreach ($notes as $note) {
+//                        if (!$note->getData('viewed'))
+//                            $not_viewed++;
+//                    }
+                    $where = 'obj_type = \'bimp_object\' AND obj_module = \'bimptask\' AND obj_name = \'BIMP_Task\' AND id_obj = ' . $t->id;
+                    $where .= ' AND viewed = 0 AND user_create != ' . (int) $user->id;
+                    $not_viewed = (int) $this->db->getCount('bimpcore_note', $where);
 
                     $user_author = $t->getChildObject('user_create');
                     $prio = (int) $t->getData('prio');
@@ -1018,7 +1021,7 @@ class BIMP_Task extends BimpObject
         $errors = $this->updateField("status", $data['status']);
 
         $msg = 'Statut passé à "' . $this->displayData('status', 'default', false) . '"<br/>';
-        
+
         if ($data['comment']) {
             $msg .= '<b>Commentaire : </b>' . $data['comment'];
         }

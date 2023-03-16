@@ -450,6 +450,7 @@ class BIMP_Task extends BimpObject
         }
 
 
+        $bdb = self::getBdb();
         foreach ($l_tasks_user as $t) {
             if ($t->can('view')) {
                 if ($j < $max_task_view) {
@@ -462,7 +463,7 @@ class BIMP_Task extends BimpObject
 //                    }
                     $where = 'obj_type = \'bimp_object\' AND obj_module = \'bimptask\' AND obj_name = \'BIMP_Task\' AND id_obj = ' . $t->id;
                     $where .= ' AND viewed = 0 AND user_create != ' . (int) $user->id;
-                    $not_viewed = (int) $this->db->getCount('bimpcore_note', $where);
+                    $not_viewed = (int) $bdb->getCount('bimpcore_note', $where);
 
                     $user_author = $t->getChildObject('user_create');
                     $prio = (int) $t->getData('prio');

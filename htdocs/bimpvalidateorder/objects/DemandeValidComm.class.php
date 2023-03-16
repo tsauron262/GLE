@@ -19,11 +19,13 @@ class DemandeValidComm extends BimpObject
     const TYPE_ENCOURS = 0;
     const TYPE_COMMERCIAL = 1;
     const TYPE_IMPAYE = 2;
+    const TYPE_SUR_SERVICE = 3;
 
     public static $types = Array(
-        self::TYPE_ENCOURS    => Array('label' => 'Encours', 'icon' => 'fas_search-dollar'),
-        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd'),
-        self::TYPE_IMPAYE     => Array('label' => 'Impayé', 'icon' => 'fas_dollar-sign')
+        self::TYPE_ENCOURS     => Array('label' => 'Encours', 'icon' => 'fas_search-dollar'),
+        self::TYPE_COMMERCIAL  => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd'),
+        self::TYPE_IMPAYE      => Array('label' => 'Impayé', 'icon' => 'fas_dollar-sign'),
+        self::TYPE_SUR_SERVICE => Array('label' => 'Sur service', 'icon' => 'fas_hand-holding')
     );
 
     // Piece
@@ -58,13 +60,6 @@ class DemandeValidComm extends BimpObject
     {
         if ((int) $value) {
 
-
-
-//            $filters['typecont.element'] = static::$dol_module;
-//            $filters['typecont.source'] = 'internal';
-//            $filters['typecont.code'] = 'SALESREPFOLL';
-//            $filters['elemcont.fk_socpeople'] = (int) $value;
-
             $obj = (int) $this->getData('type_de_piece');
 
             $filtreTab = array();
@@ -81,19 +76,6 @@ class DemandeValidComm extends BimpObject
 
 
             $filters['custom'] = array('custom' => '((' . implode(') || (', $filtreTab) . '))');
-//        echo '<pre>';
-//        print_r($filters);
-//            die(self::$objets[$obj]['table']);
-//            $joins['elemcont'] = array(
-//                'table' => 'element_contact',
-//                'on'    => 'elemcont.element_id = ' . $main_alias . '.rowid',
-//                'alias' => 'elemcont'
-//            );
-//            $joins['typecont'] = array(
-//                'table' => 'c_type_contact',
-//                'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
-//                'alias' => 'typecont'
-//            );
         }
     }
 
@@ -101,26 +83,9 @@ class DemandeValidComm extends BimpObject
     {
         $obj = (int) $this->getData('type_de_piece');
         $id_obj = (int) $this->getData('id_piece');
-        if (!is_null($id_obj) && isset(self::$objets[$obj])) {
-//            switch ($obj) {
-//                case self::OBJ_DEVIS:
-//                    $devis = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_obj);
-//                    return $devis;
-//
-//                case self::OBJ_FACTURE:
-//                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_obj);
-//                    return $facsture;
-//                
-//                case self::OBJ_COMMANDE:
-//                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_obj);
-//                    return $commande;
-//                
-//                case self::OBJ_CONTRAT:
-//                    $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $id_obj);
-//                    
-//            }
+        if (!is_null($id_obj) && isset(self::$objets[$obj]))
             return BimpCache::getBimpObjectInstance(self::$objets[$obj]['module'], self::$objets[$obj]['obj_name'], $id_obj);
-        }
+        
         return null;
     }
 
@@ -182,26 +147,6 @@ class DemandeValidComm extends BimpObject
         global $user;
         $errors = array();
 
-//        $module  = 'bimpcommercial';
-//        
-//        switch ($this->getData('type_de_piece')) {
-//            case self::OBJ_DEVIS:
-//                $class = 'Bimp_Propal';
-//                break;
-//            case self::OBJ_FACTURE:
-//                $class = 'Bimp_Facture';
-//                break;
-//            case self::OBJ_COMMANDE:
-//                $class = 'Bimp_Commande';
-//                break;
-//            case self::OBJ_CONTRAT:
-//                $module = 'bimpcontract';
-//                $class = 'BContract_contrat';
-//                break;
-//            default:
-//                $errors[] = "Type d'objet non reconnu ";
-//                break;
-//        }
         //$bimp_object = BimpCache::getBimpObjectInstance($module, $class, (int) $this->getData('id_piece'));
         $bimp_object = BimpCache::getBimpObjectInstance(self::$objets[$this->getData('type_de_piece')]['module'], self::$objets[$this->getData('type_de_piece')]['obj_name'], $this->getData('id_piece'));
 
@@ -286,21 +231,7 @@ class DemandeValidComm extends BimpObject
 
     public static function getObject($object, $id_object)
     {
-//        $class = '';
-//        switch ($object) {
-//            case self::OBJ_DEVIS:
-//                $class = 'Bimp_Propal';
-//                break;
-//            case self::OBJ_FACTURE:
-//                $class = 'Bimp_Facture';
-//                break;
-//            case self::OBJ_COMMANDE:
-//                $class = 'Bimp_Commande';
-//                break;
-//            default:
-//                break;
-//        }
-        if (/* $class != '' && */ $id_object > 0)
+        if ($id_object > 0)
             return BimpCache::getBimpObjectInstance(self::$objets[$object]['module'], self::$objets[$object]['obj_name'], $id_object);
         return null;
     }
@@ -391,7 +322,7 @@ class DemandeValidComm extends BimpObject
             $bimp_object = self::getObject($d->getData('type_de_piece'), $d->getData('id_piece'));
 
             if ($bimp_object->isLoaded()) {
-                list($secteur,, $percent_pv,, $montant_piece) = $valid_comm->getObjectParams($bimp_object, $errors, false);
+                list($secteur,, $percent_pv,, $montant_piece, $rtp, $percent_service) = $valid_comm->getObjectParams($bimp_object, $errors, false);
 
                 $soc = $bimp_object->getChildObject('client');
 
@@ -407,6 +338,8 @@ class DemandeValidComm extends BimpObject
 
                 if ((int) $d->getData('type') == (int) self::TYPE_ENCOURS)
                     $new_demande['montant'] = $montant_piece;
+                elseif ((int) $d->getData('type') == (int) self::TYPE_SUR_SERVICE)
+                    $new_demande['remise'] = $percent_service;
                 else
                     $new_demande['remise'] = $percent_pv;
             } else
@@ -558,7 +491,7 @@ class DemandeValidComm extends BimpObject
                     $data = array();
                     $return = $object->actionValidate($data, $success);
                 } else {
-                    $errors[] = 'Non implément';
+                    $return = $object->actionDemandeValidation($data, $success);
                 }
             }
         }
@@ -597,7 +530,7 @@ class DemandeValidComm extends BimpObject
         $type = (int) $this->getData('type');
         $val_comm_validation = 0;
 
-        list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp) = $validateur->getObjectParams($object, $errors);
+        list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp, $percent_remise) = $validateur->getObjectParams($object, $errors);
         
         if(count($errors))
             return $errors;
@@ -611,6 +544,9 @@ class DemandeValidComm extends BimpObject
                 break;
             case self::TYPE_IMPAYE:
                 $can_validate = $validateur->userCanValidate((int) $user->id, $secteur, $type, $class, $rtp, $object, $val_comm_validation);
+                break;
+            case self::TYPE_SUR_SERVICE:
+                $can_validate = $validateur->userCanValidate((int) $user->id, $secteur, $type, $class, $percent_remise, $object, $val_comm_validation);
                 break;
             case 'default':
                 $errors[] = "Type de demande invalide";

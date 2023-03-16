@@ -152,7 +152,6 @@ fields_tables:
             - field: subj
             - field: txt
             - field: comment
-              edit: 1
             - field: id_user_owner
               edit: 1
             - label: Notifier

@@ -40,7 +40,7 @@ class BimpNote extends BimpObject
     public static $types_dest = array(
         self::BN_DEST_NO    => 'Aucun',
         self::BN_DEST_USER  => 'Utilisateur',
-        self::BN_DEST_GROUP => 'Group'
+        self::BN_DEST_GROUP => 'Groupe'
     );
     # Pas d'ID en dur dans le code : utiliser des variables de conf. 
     # Les ID sont à mettre dans config module bimpcore onglet "Groupes" => /bimpcore/index.php?fc=dev&tab=modules_conf

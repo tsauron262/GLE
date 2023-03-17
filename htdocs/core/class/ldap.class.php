@@ -1062,30 +1062,55 @@ class Ldap
 		} else {						// Use a filter forged using the $search value
 			$filter = '('.ldap_escape($useridentifier, '', LDAP_ESCAPE_FILTER).'='.ldap_escape($search, '', LDAP_ESCAPE_FILTER).')';
 		}
+                
+                
+                $info = array();
 
-		if (is_array($attributeArray)) {
-			// Return list with required fields
-			$attributeArray = array_values($attributeArray); // This is to force to have index reordered from 0 (not make ldap_search fails)
-			dol_syslog(get_class($this)."::getRecords connection=".$this->connectedServer.":".$this->serverPort." userDn=".$userDn." filter=".$filter." attributeArray=(".join(',', $attributeArray).")");
-			//var_dump($attributeArray);
-			$this->result = @ldap_search($this->connection, $userDn, $filter, $attributeArray);
-		} else {
-			// Return list with fields selected by default
-			dol_syslog(get_class($this)."::getRecords connection=".$this->connectedServer.":".$this->serverPort." userDn=".$userDn." filter=".$filter);
-			$this->result = @ldap_search($this->connection, $userDn, $filter);
-		}
-		if (!$this->result) {
-			$this->error = 'LDAP search failed: '.ldap_errno($this->connection)." ".ldap_error($this->connection);
-			return -1;
-		}
+                $cookie = '';
+                $errcode = '';
+                do {
+                    $attributeArray = array_values($attributeArray);
+                    $this->result = ldap_search(
+                        $this->connection, $userDn, $filter, $attributeArray, 0, 0, 0, LDAP_DEREF_NEVER,
+                        [['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 750, 'cookie' => $cookie]]]
+                    );
+                    ldap_parse_result($this->connection, $this->result, $errcode , $matcheddn , $errmsg , $referrals, $controls);
+                    // To keep the example short errors are not tested
+                    $entries = ldap_get_entries($this->connection, $this->result);
+                    $info = array_merge ($info, $entries);
+                    if (isset($controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie'])) {
+                        // You need to pass the cookie from the last call to the next one
+                        $cookie = $controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie'];
+                    } else {
+                        die('ffffff');
+                        $cookie = '';
+                    }
+                    // Empty cookie means last page
+                } while (!empty($cookie));
 
-		$info = @ldap_get_entries($this->connection, $this->result);
+//		if (is_array($attributeArray)) {
+//			// Return list with required fields
+//			$attributeArray = array_values($attributeArray); // This is to force to have index reordered from 0 (not make ldap_search fails)
+//			dol_syslog(get_class($this)."::getRecords connection=".$this->connectedServer.":".$this->serverPort." userDn=".$userDn." filter=".$filter." attributeArray=(".join(',', $attributeArray).")");
+//			//var_dump($attributeArray);
+//			$this->result = @ldap_search($this->connection, $userDn, $filter, $attributeArray);
+//		} else {
+//			// Return list with fields selected by default
+//			dol_syslog(get_class($this)."::getRecords connection=".$this->connectedServer.":".$this->serverPort." userDn=".$userDn." filter=".$filter);
+//			$this->result = @ldap_search($this->connection, $userDn, $filter);
+//		}
+//		if (!$this->result) {
+//			$this->error = 'LDAP search failed: '.ldap_errno($this->connection)." ".ldap_error($this->connection);
+//			return -1;
+//		}
+//
+//		$info = @ldap_get_entries($this->connection, $this->result);
 
 		// Warning: Dans info, les noms d'attributs sont en minuscule meme si passe
 		// a ldap_search en majuscule !!!
 		//print_r($info);
 
-		for ($i = 0; $i < $info["count"]; $i++) {
+		for ($i = 0; $i < count($info); $i++) {
 			$recordid = $this->convToOutputCharset($info[$i][strtolower($useridentifier)][0], $this->ldapcharset);
 			if ($recordid) {
 				//print "Found record with key $useridentifier=".$recordid."<br>\n";

@@ -129,7 +129,7 @@ class ActionsBimpcore
             if(stripos($url, '/synopsisdemandeinterv/') || stripos($url, '/synopsisfichinter/'))
                     $tabObj = array("bimptechnique", "BT_ficheInter");
 
-            if(stripos($url, '/user/') && !stripos($url, 'action=create'))
+            if(stripos($url, '/user/') && !stripos($url, 'create'))
                     $tabObj = array("bimpcore", "Bimp_User");
             if(stripos($url, '/user/group/'))
                     $tabObj = array("bimpcore", "Bimp_UserGroup");

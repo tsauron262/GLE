@@ -2895,7 +2895,9 @@ class Bimp_Product extends BimpObject
         // COMMAND
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
-            if ((int) $commande->statut != (int) Commande::STATUS_DRAFT and (int) $commande->statut != (int) Commande::STATUS_CANCELED)
+            if ((int) $commande->statut != (int) Commande::STATUS_DRAFT/* and (int) $commande->statut != (int) Commande::STATUS_CANCELED*/)
+                continue;
+            if(!$commande->areLinesValid())//des lignes ne sont pas validables
                 continue;
 
             $email_sent = false;

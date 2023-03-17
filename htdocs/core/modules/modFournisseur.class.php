@@ -656,18 +656,6 @@ class modFournisseur extends DolibarrModules
 			$this->import_fields_array[$r]['fd.multicurrency_total_tva'] = 'MulticurrencyAmountVAT';
 			$this->import_fields_array[$r]['fd.multicurrency_total_ttc'] = 'MulticurrencyAmountTTC';
 		}
-		// Add extra fields
-		$import_extrafield_sample = array();
-		$sql = "SELECT name, label, fieldrequired FROM ".MAIN_DB_PREFIX."extrafields WHERE type <> 'separate' AND elementtype = 'facture_fourn_det' AND entity IN (0, ".$conf->entity.")";
-		$resql = $this->db->query($sql);
-		if ($resql) {
-			while ($obj = $this->db->fetch_object($resql)) {
-				$fieldname = 'extra.'.$obj->name;
-				$fieldlabel = ucfirst($obj->label);
-				$this->import_fields_array[$r][$fieldname] = $fieldlabel.($obj->fieldrequired ? '*' : '');
-				$import_extrafield_sample[$fieldname] = $fieldlabel;
-			}
-		}
                 
 		$this->import_convertvalue_array[$r] = array(
                     'fd.fk_facture_fourn' => array(
@@ -685,6 +673,18 @@ class modFournisseur extends DolibarrModules
                             'method'=>'fetch'
                     )
                 );
+		// Add extra fields
+		$import_extrafield_sample = array();
+		$sql = "SELECT name, label, fieldrequired FROM ".MAIN_DB_PREFIX."extrafields WHERE type <> 'separate' AND elementtype = 'facture_fourn_det' AND entity IN (0, ".$conf->entity.")";
+		$resql = $this->db->query($sql);
+		if ($resql) {
+			while ($obj = $this->db->fetch_object($resql)) {
+				$fieldname = 'extra.'.$obj->name;
+				$fieldlabel = ucfirst($obj->label);
+				$this->import_fields_array[$r][$fieldname] = $fieldlabel.($obj->fieldrequired ? '*' : '');
+				$import_extrafield_sample[$fieldname] = $fieldlabel;
+			}
+		}
                 
 		// End add extra fields
 		$this->import_fieldshidden_array[$r] = array('extra.fk_object' => 'lastrowid-'.MAIN_DB_PREFIX.'facture_fourn_det');
@@ -872,6 +872,12 @@ class modFournisseur extends DolibarrModules
 			),
 			'cd.info_bits' => array('rule' => 'zeroifnull'),
 			'cd.special_code' => array('rule' => 'zeroifnull'),
+                    'cd.fk_product' => array(
+                            'rule'=>'fetchidfromref',
+                            'file'=>'/product/class/product.class.php',
+                            'class'=>'Product',
+                            'method'=>'fetch'
+                    )
 		);
 	}
 

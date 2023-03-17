@@ -102,13 +102,16 @@ class CActionComm
 	 *  @param  int|string	$id     id or code of action type to read
 	 *  @return int             	1=ok, 0=not found, -1=error
 	 */
-	public function fetch($id)
+	public function fetch($id, $libelle = null)
 	{
 		$sql = "SELECT id, code, type, libelle as label, color, active, picto";
 		$sql .= " FROM ".MAIN_DB_PREFIX."c_actioncomm";
 		if (is_numeric($id)) {
 			$sql .= " WHERE id=".(int) $id;
-		} else {
+		}
+                elseif(!is_null ($libelle)){
+			$sql .= " WHERE libelle='".$this->db->escape($libelle)."'";
+                }else {
 			$sql .= " WHERE code='".$this->db->escape($id)."'";
 		}
 

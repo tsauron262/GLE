@@ -793,7 +793,7 @@ if ($action == 'create' || $action == 'adduserldap') {
 		// If user list is full, we show drop-down list
 		print "\n\n<!-- Form liste LDAP debut -->\n";
 
-		print '<form name="add_user_ldap" action="'.$_SERVER["PHP_SELF"].'" method="post">';
+		print '<form name="add_user_ldap" action="'.$_SERVER["PHP_SELF"].'?post=create2" method="post">';
 		print '<input type="hidden" name="token" value="'.newToken().'">';
 		print '<table class="border centpercent"><tr>';
 		print '<td width="160">';
@@ -815,7 +815,7 @@ if ($action == 'create' || $action == 'adduserldap') {
 	}
 
 
-	print '<form action="'.$_SERVER['PHP_SELF'].'" method="POST" name="createuser">';
+	print '<form action="'.$_SERVER['PHP_SELF'].'?postcreate=true" method="POST" name="createuser">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="add">';
 	if (!empty($ldap_sid)) {

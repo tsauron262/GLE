@@ -1,4 +1,49 @@
 <?php
+//
+//$oldValue = 24563106.762;
+//$newValue = 24663961.375;
+//$cmdId = 2;
+//$oldValue = 1048128.075;
+//$newValue = 1124604.900;
+//$cmdId = 410;
+//$oldValue = 256837.619;
+//$newValue = 298483.506;
+//$cmdId = 403;
+$oldValue = 1684529.638;
+$newValue = 1781174.8;
+$cmdId = 411;
+
+    $dateDeb = "2023-03-14 07:00:00";
+    $dateFin = "2023-03-16 14:25:05";
+    $nb = 56;
+    
+    
+    $parTranche = ($newValue - $oldValue) / ($nb-0.5);
+    
+    echo 'Tranche : '.$parTranche.'<br/><br/>';
+    
+    for($i=1; $i< $nb; $i++){
+        $newDate = date('Y-m-d H:i:s', strtotime($dateDeb. ' + '.$i.' hours'));
+        
+        $value = $oldValue + ($i * $parTranche);
+        
+//        echo $i.' : <br/>';
+        $req = 'INSERT INTO historyArch (cmd_id, datetime, value) VALUES ('.$cmdId.', "'.$newDate.'", '.$value.');';
+        echo $req.'<br/><br/>';
+//        echo $newDate.'<br/><br/>';
+    }
+
+
+
+
+
+
+
+
+
+
+
+die('fin');
 //setcookie('PHPSESSIDZZZZ', 'ZZZZZZ')   ;  
 	session_start();
         

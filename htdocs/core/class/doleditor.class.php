@@ -74,7 +74,9 @@ class DolEditor
 	public function __construct($htmlname, $content, $width = '', $height = 200, $toolbarname = 'Basic', $toolbarlocation = 'In', $toolbarstartexpanded = false, $uselocalbrowser = 1, $okforextendededitor = true, $rows = 0, $cols = 0, $readonly = 0, $poscursor = array())
 	{
 		global $conf, $langs;
-
+                /*moddrsi*/
+                $toolbarname = 'Full';
+                /*fmoddrsi*/
 		dol_syslog(get_class($this)."::DolEditor htmlname=".$htmlname." width=".$width." height=".$height." toolbarname=".$toolbarname);
 
 		if (!$rows) {
@@ -231,8 +233,10 @@ class DolEditor
 					// To use filemanager with old fckeditor (GPL)
 					$out .= '    filebrowserBrowseUrl : ckeditorFilebrowserBrowseUrl,';
 					$out .= '    filebrowserImageBrowseUrl : ckeditorFilebrowserImageBrowseUrl,';
-					//$out.= '    filebrowserUploadUrl : \''.DOL_URL_ROOT.'/includes/fckeditor/editor/filemanagerdol/connectors/php/upload.php?Type=File\',';
-					//$out.= '    filebrowserImageUploadUrl : \''.DOL_URL_ROOT.'/includes/fckeditor/editor/filemanagerdol/connectors/php/upload.php?Type=Image\',';
+                                        /*moddrsi*/
+					$out.= '    filebrowserUploadUrl : \''.DOL_URL_ROOT.'/bimpcore/ajax/upload.php?type=media\',';
+					$out.= '    filebrowserImageUploadUrl : \''.DOL_URL_ROOT.'/bimpcore/ajax/upload.php?type=mediaImg\',';
+                                        /*fmoddrsi*/
 					$out .= "\n";
 					// To use filemanager with ckfinder (Non free) and ckfinder directory is inside htdocs/includes
 					/* $out.= '    filebrowserBrowseUrl : \''.DOL_URL_ROOT.'/includes/ckfinder/ckfinder.html\',

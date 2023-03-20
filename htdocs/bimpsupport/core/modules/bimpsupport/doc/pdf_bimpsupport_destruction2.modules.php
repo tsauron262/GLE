@@ -42,7 +42,6 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
      */
     function __construct($db)
     {
-
         global $conf, $langs, $mysoc;
 
         $langs->load("main");
@@ -67,37 +66,8 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
         $this->emetteur = $mysoc;
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             
-// Defini position des colonnes
+    // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
         $this->posxtva = 113;
         $this->posxup = 126;
@@ -167,9 +137,7 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
 //                    $pdf->setPrintHeader(false);
 //                    $pdf->setPrintFooter(false);
 //                }
-//
-//
-
+                
                 $pdf->Open();
                 $pdf1->Open();
                 $pdf->AddPage();
@@ -180,8 +148,6 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
 
                 // $pdf->SetDrawColor(128, 128, 128);
 
-
-
                 $pdf->SetTitle('SAV : ' . $sav->getData('ref'));
 
                 $pdf->SetSubject($outputlangs->transnoentities("Panier"));
@@ -190,10 +156,6 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
 //
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-// 
-//                
-
-
 
                 $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/destruction2.pdf');
                 $tplidx = $pdf->importPage(1, "/MediaBox");
@@ -225,7 +187,7 @@ BP 2321
                 if ($sav->getData('id_contact') > 0) {
                     $addr = $sav->getChildObject('contact')->dol_object;
                     $contact = $addr->getFullName($langs, 0, 0);
-                    $tel = ($addr->phone_mobile != "") ? $addr->phone_mobile : ($addr->phone_perso != "") ? $addr->phone_perso : ($addr->phone_pro != "") ? $addr->phone_pro : "";
+                    $tel = (($addr->phone_mobile != "") ? $addr->phone_mobile : (($addr->phone_perso != "") ? $addr->phone_perso : (($addr->phone_pro != "") ? $addr->phone_pro : "")));
                     $mail = $addr->mail;
                 } else {
                     $addr = $client;
@@ -258,6 +220,7 @@ BP 2321
                 $pdf->Close();
 
                 $this->file = $file;
+                
                 $pdf->Output($file, 'F');
 //
 ////                ////$langs->setPhpLang();    // On restaure langue session

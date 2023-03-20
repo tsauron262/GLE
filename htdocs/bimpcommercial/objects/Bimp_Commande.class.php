@@ -171,6 +171,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return parent::canSetAction($action);
     }
 
+    public function canEditField($field_name)
+    {
+        global $user;
+
+        switch ($field_name) {
+            case 'date_prevue_facturation':
+                if ($user->rights->bimpcommercial->admin_recouvrement) {
+                    return 1;
+                }
+                return 0;
+        }
+        return parent::canEditField($field_name);
+    }
+
     // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
@@ -361,29 +375,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
                 }
                 return 1;
-
-            case 'id_client_facture':
-                if (!$force_edit && $this->field_exists('id_demande_fin') && (int) $this->getData('id_demande_fin')) {
-                    return 0;
-                }
-                return 1;
         }
 
         return 1;
-    }
-
-    public function canEditField($field_name)
-    {
-        global $user;
-
-        switch ($field_name) {
-            case 'date_prevue_facturation':
-                if ($user->rights->bimpcommercial->admin_recouvrement) {
-                    return 1;
-                }
-                return 0;
-        }
-        return parent::canEditField($field_name);
     }
 
     public function isValidatable(&$errors = array())

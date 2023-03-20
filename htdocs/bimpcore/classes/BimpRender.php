@@ -698,7 +698,7 @@ class BimpRender
     public static function renderAjaxModal($modal_id, $modal_js_var_name, $full_width = false)
     {
         $html = '';
-        $html .= '<div class="modal ajax-modal fade' . ($full_width ? ' full-window-modal' : '') . '" tabindex="-1" role="dialog" id="' . $modal_id . '">';
+        $html .= '<div class="modal ajax-modal fade' . ($full_width ? ' full-window-modal' : '') . '" tabindex="" role="dialog" id="' . $modal_id . '">';
         $html .= '<div class="modal-dialog modal-lg" role="document">';
         $html .= '<div class="modal-content">';
 

@@ -481,5 +481,41 @@ class modAgenda extends DolibarrModules
 			$this->export_sql_end[$r] .= ' AND acr.fk_element = '.(empty($user) ? 0 : $user->id);
 		}
 		$this->export_sql_order[$r] = ' ORDER BY ac.datep';
+                
+                
+                
+                
+                
+                //Import Supplier Invoice
+		//--------
+		$r = 0;
+
+		$r++;
+		$this->import_code[$r] = $this->rights_class.'_'.$r;
+		$this->import_label[$r] = "ActionComm"; // Translation key
+		$this->import_icon[$r] = $this->picto;
+		$this->import_entities_array[$r] = array(); // We define here only fields that use another icon that the one defined into import_icon
+		$this->import_tables_array[$r] = array('a' => MAIN_DB_PREFIX.'actioncomm'/*, 'extra' => MAIN_DB_PREFIX.'facture_fourn_extrafields'*/);
+		$this->import_tables_creator_array[$r] = array('a' => 'fk_user_author'); // Fields to store import user id
+		$this->import_fields_array[$r] = array(
+			'a.ref_ext' => 'Réf. externe',
+			'a.datec' => 'Date création',
+			'a.datep' => 'Date début événément',
+			'a.datep2' => 'Date de fin',
+			'a.label' => 'Titre',
+			'a.note' => 'Note',
+			'a.percent' => 'Percent',
+			'a.durationp' => 'Durée',
+			'a.fk_action' => 'Type événement',
+			'a.fk_soc' => 'Nom/Enseigne/Raison sociale',
+			'a.fk_project' => 'Ref projet'
+		);
+		$this->import_examplevalues_array[$r] = array();
+		$this->import_updatekeys_array[$r] = array();
+		$this->import_convertvalue_array[$r] = array(
+			'a.fk_action' => array('rule' => 'fetchidfromref', 'file' => '/comm/action/class/cactioncomm.class.php', 'class' => 'CActionComm', 'method' => 'fetch', 'element' => 'CActionComm'),
+			'a.fk_soc' => array('rule' => 'fetchidfromref', 'file' => '/societe/class/societe.class.php', 'class' => 'Societe', 'method' => 'fetch', 'element' => 'ThirdParty'),
+			'a.fk_project' => array('rule' => 'fetchidfromref', 'file' => '/projet/class/project.class.php', 'class' => 'Project', 'method' => 'fetch', 'element' => 'projet'),
+		);
 	}
 }

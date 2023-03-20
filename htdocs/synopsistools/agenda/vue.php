@@ -404,6 +404,7 @@ foreach (array(5, 10, 15, 20, 30) as $time)
 echo '</select>';
 echo "<label style='margin-left:11px' for='workHour'>Heures ouvrées : </label><input type='checkbox' id='workHour' name='workHour' " . ("true" == $_SESSION['paraAgenda']['workHour'] ? 'checked="checked"' : "") . '/>';
 echo "<label style='margin-left:11px' for='chevauche'>Chevaucher rdv : </label><input type='checkbox' id='chevauche' name='chevauche' " . ("true" == $_SESSION['paraAgenda']['chevauche'] ? 'checked="checked"' : "") . '/>';
+print '<input type="hidden" name="token" value="'.newToken().'">';
 echo "<input type='submit' value='Ok' class='butAction'/></form>";
 echo "</div>";
 

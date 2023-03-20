@@ -426,41 +426,33 @@ class BIMP_Task extends BimpObject
     private static function getNewTasks($filters, $user_type, &$nb)
     {
         global $user;
+        $bdb = self::getBdb();
+
         $tasks = array();
 
         $max_task_view = 40;
-        $i = $j = 0;
-
-        $sql = BimpTools::getSqlSelect(array('id'));
+        $i = 0;
+        
+        $sql = 'SELECT DISTINCT a.id';
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy('id', 'ASC', 'a');
 
-        $rows = self::getBdb()->executeS($sql, 'array');
+        $rows = $bdb->executeS($sql, 'array');
 
-        $l_tasks_user = array();
-
-        if (is_array($rows) and count($rows)) {
-            $nb = count($rows);
-            foreach ($rows as $r) {
-                $task = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', (int) $r['id']);
-                if (BimpObject::objectLoaded($task))
-                    $l_tasks_user[] = $task;
-            }
+        if (!is_array($rows)) {
+            return array();
         }
+        $nb = count($rows);
 
+        foreach ($rows as $r) {
+            $t = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', (int) $r['id']);
+            if (!BimpObject::objectLoaded($t)) {
+                continue;
+            }
 
-        $bdb = self::getBdb();
-        foreach ($l_tasks_user as $t) {
             if ($t->can('view')) {
                 if ($j < $max_task_view) {
-
-//                    $notes = $this->getNotes();
-//                    $not_viewed = 0;
-//                    foreach ($notes as $note) {
-//                        if (!$note->getData('viewed'))
-//                            $not_viewed++;
-//                    }
                     $where = 'obj_type = \'bimp_object\' AND obj_module = \'bimptask\' AND obj_name = \'BIMP_Task\' AND id_obj = ' . $t->id;
                     $where .= ' AND viewed = 0 AND user_create != ' . (int) $user->id;
                     $not_viewed = (int) $bdb->getCount('bimpcore_note', $where);
@@ -470,36 +462,41 @@ class BIMP_Task extends BimpObject
                     $prio_badge = '';
                     switch ($prio) {
                         case 20:
-                            $prio_badge = '<span class="badge badge-danger" style="margin-right: 12px; font-size: 11px">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Urgent</span>';
+                            $prio_badge = '<span class="badge badge-danger" style="margin-right: 8px; font-size: 10px">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Urgent</span>';
                             break;
 
                         case 10:
-                            $prio_badge = '<span class="badge badge-warning" style="margin-right: 12px; font-size: 11px">Important</span>';
+                            $prio_badge = '<span class="badge badge-warning" style="margin-right: 8px; font-size: 10px">Important</span>';
                             break;
                     }
+
+                    $status = (int) $t->getData('status');
+                    $status_icon = '<span class="' . implode(' ', self::$valStatus[$status]['classes']) . ' bs-popover" style="margin-right: 8px"';
+                    $status_icon .= BimpRender::renderPopoverData(self::$valStatus[$status]['label']) . '>';
+                    $status_icon .= BimpRender::renderIcon(self::$valStatus[$status]['icon']) . '</span>';
                     $task = array(
-                        'id'            => $t->getData('id'),
-                        'user_type'     => $user_type,
-                        'prio'          => $prio,
-                        'prio_badge'    => $prio_badge,
-                        'subj'          => $t->getData('subj'),
-                        'src'           => $t->getData('src'),
-                        'txt'           => $t->displayData("txt", 'default', false),
-                        'date_create'   => $t->getData('date_create'),
-                        'url'           => DOL_URL_ROOT . '/bimptask/index.php?fc=task&id=' . $t->getData('id'),
-                        'not_viewed'    => (int) $not_viewed,
-                        'can_rep_mail'  => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
-                        'can_close'     => (int) $t->can('edit'),
-                        'can_attribute' => (int) ($t->can('edit') or $t->canAttribute()),
-                        'can_edit'      => (int) $t->can('edit'),
-                        'author'        => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : '')
+                        'id'             => $t->getData('id'),
+                        'user_type'      => $user_type,
+                        'prio'           => $prio,
+                        'status_icon'    => $status_icon,
+                        'prio_badge'     => $prio_badge,
+                        'subj'           => $t->getData('subj'),
+                        'src'            => $t->getData('src'),
+                        'txt'            => $t->displayData("txt", 'default', false),
+                        'date_create'    => $t->getData('date_create'),
+                        'url'            => DOL_URL_ROOT . '/bimptask/index.php?fc=task&id=' . $t->getData('id'),
+                        'not_viewed'     => (int) $not_viewed,
+                        'can_rep_mail'   => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
+                        'can_close'      => (int) $t->can('edit'),
+                        'can_attribute'  => (int) ($t->can('edit') or $t->canAttribute()),
+                        'can_edit'       => (int) $t->can('edit'),
+                        'author'         => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : '')
                     );
 
                     $tasks[] = $task;
 
                     $i++;
                 }
-                $j++;
             }
         }
 
@@ -1005,7 +1002,16 @@ class BIMP_Task extends BimpObject
                 $success_callback = $instance_task . '.remove(' . $this->id . ')';
         }
 
-        $msg = 'Attribuée à ' . ((int) $data['id_user_owner'] ? ' {{Utilisateur:' . $data['id_user_owner'] . '}}' : 'personne');
+        $user_name = 'personne';
+        if ((int) $data['id_user_owner']) {
+            $owner = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $data['id_user_owner']);
+
+            if (BimpObject::objectLoaded($owner)) {
+                $user_name = $owner->getName();
+            }
+        }
+
+        $msg = 'Attribuée à ' . $user_name;
         $this->addObjectLog($msg);
 
         return array(
@@ -1130,7 +1136,7 @@ class BIMP_Task extends BimpObject
 
         if (!count($errors)) {
             $id_owner = (int) $this->getData('id_user_owner');
-            if ($init_id_owner !== $id_owner) {
+            if ($init_id_owner != $id_owner) {
                 $msg = 'Attribuée à ' . ($id_owner ? ' {{Utilisateur:' . $id_owner . '}}' : 'personne');
                 $this->addObjectLog($msg);
             }

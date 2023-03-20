@@ -20,11 +20,11 @@ else{
 if (!is_dir($dir)) {
     BimpTools::makeDirectories($dir);
 }
-mailSyn2('envoie pj', 'tommy@bimp.fr', null, 'test '.DOL_DATA_ROOT . '/' . $dir . '/'.print_r($_FILES,1));
+//mailSyn2('envoie pj', 'tommy@bimp.fr', null, 'test '.DOL_DATA_ROOT . '/' . $dir . '/'.print_r($_FILES,1));
 
 $files = array();
 foreach ($_FILES as $file) {
-    $file_name = /*$user->id . '_' .*/ $file['name'];
+    $file_name = $user->id . '_' . $file['name'];
     if(move_uploaded_file($file['tmp_name'], DOL_DATA_ROOT . '/' . $dir . '/' . $file_name)){
         $files[] = array('fileName' => $file_name, 'uploaded'=>1, 'error'=> array(), 'url' => $url.$file_name);
     }

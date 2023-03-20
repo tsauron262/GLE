@@ -1242,6 +1242,8 @@ class BimpComm extends BimpDolObject
             $lines = $this->getChildrenObjects('lines');
             foreach ($lines as $bimp_line) {
                 $line = $bimp_line->getChildObject('line');
+                if($line->desc === 'Acompte')
+                    continue;
                 if (empty($line->pa_ht) && isset($line->fk_fournprice) && !$force_price) {
                     require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
                     $product = new ProductFournisseur($db);

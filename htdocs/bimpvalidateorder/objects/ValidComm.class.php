@@ -536,9 +536,6 @@ class ValidComm extends BimpObject
         else
             $percent_service = 0;
         
-        global $user;
-        if((int) $user->id == 330)
-            die("OERCENT SERVICE = " . $percent_service);
 
         return array($secteur, $class, $percent_pv, $percent_marge, $val, $rtp, $percent_service);
     }

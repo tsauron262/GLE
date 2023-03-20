@@ -120,7 +120,7 @@ class ValidComm extends BimpObject
         if (defined('NO_VALID_COMM') && NO_VALID_COMM) {
             return 1;
         }
-
+        
         $valid_comm = 1;
         $valid_encours = 1;
         $valid_impaye = 1;
@@ -683,7 +683,7 @@ class ValidComm extends BimpObject
 
         
         $rows = self::getBdb()->executeS($sql, 'array');
-
+        
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 if ((int) $r['user'] == $user_ask->fk_user && $can_valid_avaible == 0) {
@@ -703,7 +703,13 @@ class ValidComm extends BimpObject
                 }
             }
         }
-
+        
+        global $user;
+        if((int) $user->id == 330) {
+            echo '<br/>$can_valid_avaible ' . $can_valid_avaible;
+            echo '<br/>$can_valid_not_avaible ' . $can_valid_not_avaible;
+            
+        }
 
         if ($can_valid_avaible != 0)
             return $can_valid_avaible;

@@ -1,4 +1,0 @@
-params: 
-    id_resp_remise_service: 
-        label: Id du responsable des remises sur les services
-        def: 330

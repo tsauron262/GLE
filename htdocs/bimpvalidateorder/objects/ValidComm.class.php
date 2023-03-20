@@ -535,6 +535,10 @@ class ValidComm extends BimpObject
             $percent_service = $service_total_amount_ht / $service_total_ht_without_remises * 100;
         else
             $percent_service = 0;
+        
+        global $user;
+        if((int) $user->id == 330)
+            die("OERCENT SERVICE = " . $percent_service);
 
         return array($secteur, $class, $percent_pv, $percent_marge, $val, $rtp, $percent_service);
     }

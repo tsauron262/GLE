@@ -414,7 +414,7 @@ class ObjectLine extends BimpObject
         return parent::isChild($instance);
     }
 
-    public function isValid(&$errors = array())
+    public function isValid(&$errors = array(), $mailValid = true)
     {
         if (!$this->isLoaded()) {
             $errors[] = 'ID ' . $this->getLabel('of_the');
@@ -430,7 +430,7 @@ class ObjectLine extends BimpObject
             }
 
             if (is_object($product) && $product->id > 0) {
-                if (!$product->isVendable($errors))
+                if (!$product->isVendable($errors, false, $mailValid))
                     return 0;
             }
         }

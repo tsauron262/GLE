@@ -403,13 +403,13 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
-    public function areLinesValid(&$errors = array())
+    public function areLinesValid(&$errors = array(), $mail = true)
     {
         $result = 1;
         foreach ($this->getLines() as $line) {
             $line_errors = array();
 
-            if (!$line->isValid($line_errors)) {
+            if (!$line->isValid($line_errors, $mail)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
                 $result = 0;
             }

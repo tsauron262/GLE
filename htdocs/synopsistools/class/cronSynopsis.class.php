@@ -54,7 +54,7 @@ class CronSynopsis {
 
 
         $this->output .= "FIN";
-        echo 1;
+        echo 0;
     }
 
     public function sauvBdd($table = "") {

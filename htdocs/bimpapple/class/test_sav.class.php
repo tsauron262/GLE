@@ -101,7 +101,7 @@ class test_sav
         global $user;
         $user->fetch(1);
 
-        return 'END';
+        return 0;
     }
     
     function mailLocalise(){

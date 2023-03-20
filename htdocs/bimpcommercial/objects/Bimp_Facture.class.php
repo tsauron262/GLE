@@ -6422,8 +6422,8 @@ class Bimp_Facture extends BimpComm
             if (mailSyn2('Facture brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une facture en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
                 $i++;
         }
-        $this->resprints = "OK " . $i . ' mails';
-        return "OK " . $i . ' mails';
+        $this->output = "OK " . $i . ' mails';
+        return 0;
     }
 
     public static function checkIsPaidAll($filters = array())

@@ -397,6 +397,8 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
         
         
         $this->output .= ' ' . $this->nbImei . ' compte réactivé sur '.$nbcompte;
+        
+        return 0;
     }
 
     function fetchEquipmentsImei($nb = 1, $modeLabel = 0)

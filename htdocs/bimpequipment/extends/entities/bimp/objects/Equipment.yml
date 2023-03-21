@@ -1,0 +1,46 @@
+       
+fields: 
+    date_fin_spare:
+        label: Date de fin de spare
+        type: date
+        show:
+            callback: as_client_spare_or_date
+        
+        
+fields_tables: 
+    default: 
+        rows:
+            date_fin_spare:
+              field: date_fin_spare
+              edit: 1
+              
+forms: 
+    changeSpare:
+        rows: 
+            libelle:
+                custom: 1
+                label: Libelle
+                input_name: libelle
+                input: 
+                  type: text
+            infos1:
+                custom: 1
+                label: Infos inter
+                input_name: infos1
+                input: 
+                  type: textarea
+            newEquipment: 
+                custom: 1
+                label: Serial de remplacement
+                input_name: newEquipment
+                input:
+                  type: select
+                  options: 
+                      callback: getChangeEquipment
+            infos2:
+                custom: 1
+                label: Infos livraison
+                input_name: infos2
+                input: 
+                  type: textarea
+        

@@ -195,20 +195,21 @@ class PropalPDF extends BimpCommDocumentPDF
             }
         }
 
-        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
-            if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || !empty($conf->global->FACTURE_RIB_NUMBER)) {
-                $html .= '<tr><td>';
-                $bankid = (empty($this->object->fk_account) ? $conf->global->FACTURE_RIB_NUMBER : $this->object->fk_account);
-                if (!empty($this->object->fk_bank)) {
-                    $bankid = $this->object->fk_bank;
-                }
+        $id_default_account = BimpCore::getConf('id_default_bank_account', (!empty($conf->global->FACTURE_RIB_NUMBER) ? $conf->global->FACTURE_RIB_NUMBER : 0));
+        if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || $id_default_account) {
+            $html .= '<tr><td>';
+            $bankid = (!empty($this->object->fk_account) ? $this->object->fk_account : (!empty($this->object->fk_bank) ? $this->object->fk_bank : $id_default_account));
 
-                require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
-                $account = new Account($this->db);
-                $account->fetch($bankid);
-                $html .= $this->getBankHtml($account);
-                $html .= '</td></tr>';
+            $only_number = false;
+            if (!empty($this->object->mode_reglement_code) && $this->object->mode_reglement_code !== 'VIR') {
+                $only_number = true;
             }
+
+            require_once(DOL_DOCUMENT_ROOT . "/compta/bank/class/account.class.php");
+            $account = new Account($this->db);
+            $account->fetch($bankid);
+            $html .= $this->getBankHtml($account, $only_number);
+            $html .= '</td></tr>';
         }
 
         $html .= '</table></div>';

@@ -54,7 +54,6 @@ if(GETPOST('action') == "addProdCatExtra"){
 
 print load_fiche_titre($text);
 
-echo 'Brance MASTER <br/>';
 if (isset($user->rights->SynopsisTools->Global->phpMyAdmin)) {
     print" <br/><br/><a href='git_pull.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>GIT Pull</span></a>";
     print" <br/><br/><a href='phantomApple.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Connect Apple</span></a>";

@@ -52,7 +52,7 @@ class Bimp_ImportPaiementLine extends BimpObject
                             $price = $price / 100;
 //die('un');
                         }
-                        elseif(preg_match('/0417806000000669EUR2E04161357044C2[0-9 .A-Z\.-]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)){
+                        elseif(preg_match('/0417806000000669EUR2E04161357044C2[0-9 .A-Z()\.-]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)){
 //                            print_r($matches);
                             $price = $matches[2];
                             $lettre = substr($price, -1,1);

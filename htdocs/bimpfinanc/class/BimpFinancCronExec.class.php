@@ -5,6 +5,13 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 class BimpFinancCronExec
 {
 
+    public $db;
+
+    public function __construct($db)
+    {
+        $this->db = $db;
+    }
+
     public function checkAppleCareSerials()
     {
         BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
@@ -18,7 +25,7 @@ class BimpFinancCronExec
     public function checkBilledApplecareReval()
     {
         BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
-        
+
         $nbOk = 0;
         $errors = BimpRevalorisation::checkBilledApplecareReval($nbOk);
 

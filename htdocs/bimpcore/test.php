@@ -49,6 +49,7 @@ if ((int) BimpTools::getValue('test_revals', 0)) {
     exit;
 }
 
+
 echo '<br/>FIN';
 echo '</body></html>';
 

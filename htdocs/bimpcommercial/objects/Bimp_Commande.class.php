@@ -4388,7 +4388,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $mail = "tommy@bimp.fr";
                 }
 
-                $mail = 'f.martinez@bimp.fr';
                 $this->output .= $mail . ' : ' . count($comm_links) . ' commande(s)<br/>';
 
                 $msg = 'Bonjour, vous avez laissé ' . count($comm_links) . ' commande' . (count($comm_links) > 1 ? 's' : '');
@@ -4407,7 +4406,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $this->output .= '[ECHEC]';
                 }
                 $this->output .= '<br/><br/>';
-                break;
             }
         }
 

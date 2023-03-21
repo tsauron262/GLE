@@ -415,6 +415,11 @@ class BS_ApplePart extends BimpObject
         if ($prix == 180.62) {
             return (289 / 1.2);
         }
+        
+        /* a voir avec JC selon karim pour batterie mac book 2015 */
+        if ($prix == 130.63) {
+            return (289 / 1.2);
+        }
 
         if ($prix == 143.12) {
             return (229 / 1.2);

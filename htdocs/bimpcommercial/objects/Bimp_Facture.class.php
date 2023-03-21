@@ -6429,11 +6429,6 @@ class Bimp_Facture extends BimpComm
 
             $i = 0;
             foreach ($factures as $id_user => $facs) {
-                // Pout test: 
-                if ($id_user !== 270) {
-                    continue;
-                }
-
                 $msg = 'Bonjour, vous avez laissé ';
                 if (count($facs) > 1) {
                     $msg .= count($facs) . ' factures';
@@ -6441,23 +6436,18 @@ class Bimp_Facture extends BimpComm
                     $msg .= 'une facture';
                 }
 
-                $msg .= 'à l\'état de brouillon depuis plus de ' . $nbDay . ' jours.<br/>';
+                $msg .= ' à l\'état de brouillon depuis plus de ' . $nbDay . ' jours.<br/>';
                 $msg .= 'Merci de bien vouloir ' . (count($facs) > 1 ? 'les' : 'la') . ' régulariser au plus vite.<br/>';
 
                 foreach ($facs as $fac_link) {
                     $msg .= '<br/>' . $fac_link;
                 }
-                $mail = BimpTools::getMailOrSuperiorMail($id_user, 'f.martinez@bimp.fr');
+
+                $mail = BimpTools::getMailOrSuperiorMail($id_user, 'f.pineri@bimp.fr');
 
                 if ($mail == '') {
-                    $mail = "f.martinez@bimp.fr";
+                    $mail = "tommy@bimp.fr";
                 }
-
-//            $mail = BimpTools::getMailOrSuperiorMail($id_user, 'f.pineri@bimp.fr');
-//
-//            if ($mail == '') {
-//                $mail = "tommy@bimp.fr";
-//            }
 
                 if (mailSyn2('Facture brouillon à régulariser', $mail, null, $msg)) {
                     $i++;
@@ -6465,7 +6455,7 @@ class Bimp_Facture extends BimpComm
             }
         }
 
-        $this->output = "OK " . $i . ' mails';
+        $this->output = "OK " . $i . ' mail(s)';
         return 0;
     }
 

@@ -27,7 +27,7 @@ class BimpFinancCronExec
         BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
 
         $nbOk = 0;
-        $errors = BimpRevalorisation::checkBilledApplecareReval($nbOk);
+        $errors = BimpRevalorisation::checkBilledApplecareReval(null, $nbOk);
 
         if (count($errors)) {
             BimpCore::addlog('Erreurs lors de la validation auto des revalorisations AppleCare', 3, 'bimpcore', null, array(

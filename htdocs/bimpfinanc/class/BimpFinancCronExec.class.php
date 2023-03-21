@@ -1,16 +1,10 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
-class BimpFinancCronExec
+class BimpFinancCronExec extends BimpCron
 {
-
-    public $db;
-
-    public function __construct($db)
-    {
-        $this->db = $db;
-    }
 
     public function checkAppleCareSerials()
     {
@@ -19,7 +13,8 @@ class BimpFinancCronExec
         $nbOk = 0;
         BimpRevalorisation::checkAppleCareSerials($nbOk);
 
-        return 'OK - ' . $nbOk . ' serials traités';
+        $this->output .= 'OK - ' . $nbOk . ' serials traités';
+        return 0;
     }
 
     public function checkBilledApplecareReval()
@@ -35,6 +30,7 @@ class BimpFinancCronExec
             ));
         }
 
-        return 'OK - ' . $nbOk . ' revals traitées';
+        $this->output .= 'OK - ' . $nbOk . ' revals traitées';
+        return 0;
     }
 }

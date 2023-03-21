@@ -41,8 +41,8 @@ if ((int) BimpTools::getValue('test_revals', 0)) {
     BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
 
     $nbOk = 0;
-    $errors = BimpRevalorisation::checkBilledApplecareReval($nbOk);
-    echo 'OK - ' . $nbOk . ' revals traitées';
+    $errors = BimpRevalorisation::checkBilledApplecareReval(null, $nbOk);
+    echo 'OK - ' . $nbOk . ' revals traitées <br/>';
 
     echo 'ERRORS<pre>';
     print_r($errors);

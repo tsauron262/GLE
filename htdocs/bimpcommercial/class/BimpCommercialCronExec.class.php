@@ -11,7 +11,7 @@ class BimpCommercialCronExec extends BimpCron
         $facts = array();
         $html = '';
 
-        $sql = 'SELECT a.*';//, (a.total_ht / a.qty) - (buy_price_ht * a.qty / ABS(a.qty)) as marge';
+        $sql = 'SELECT a.*'; //, (a.total_ht / a.qty) - (buy_price_ht * a.qty / ABS(a.qty)) as marge';
         $sql .= ', p.ref as prod_ref';
         $sql .= BimpTools::getSqlFrom('facturedet', array(
                     'f'   => array(
@@ -38,7 +38,7 @@ class BimpCommercialCronExec extends BimpCron
             $margeF = $factLine->getTotalMarge();
             if ($margeF < 0) {
 //                $this->output .= $ln->fk_facture . ' MARGE I : '.$factLine->getMargin() .' MARGE F : '.$factLine->getTotalMarge(). '<br/>';
-                $facts[$ln->fk_facture][$ln->rowid] = 'Ligne n° ' . $ln->rang . ' - ' . $ln->ref_prod . ' (Marge: ' . $margeF . ')';
+                $facts[$ln->fk_facture][$ln->rowid] = 'Ligne n° ' . $ln->rang . ' - ' . $ln->prod_ref . ' ' . BimpRender::renderObjectIcons($factLine, 0, 'default', '$url') . ' (Marge: ' . $margeF . ')';
             }
         }
 

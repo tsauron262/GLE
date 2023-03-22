@@ -2969,7 +2969,7 @@ class BimpComm extends BimpDolObject
                             $err = $equipmentLine->delete($warnings, true);
                         }
 
-                        if (!count($err)) {
+                        if (empty($err)) {
                             $err = $new_line->attributeEquipment($data['id_equipment'], 0, true, false);
                         }
                     }

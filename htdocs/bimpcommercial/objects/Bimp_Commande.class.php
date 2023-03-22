@@ -4458,7 +4458,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
         }
         $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
-        return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
+        return 0;
     }
 
     public static function checkLinesEcheances()

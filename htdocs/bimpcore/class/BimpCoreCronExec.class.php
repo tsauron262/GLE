@@ -2,8 +2,9 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
-class BimpCoreCronExec
+class BimpCoreCronExec extends BimpCron
 {
 
     public $db;
@@ -32,6 +33,7 @@ class BimpCoreCronExec
 
     public function bimpDailyChecks()
     {
+        $this->current_cron_name = 'Vérifs quotidiennes BimpCore';
         $bdb = new BimpDb($this->db);
 
         // Vérifs des factures en financement impayées à 30 jours. 
@@ -105,7 +107,7 @@ class BimpCoreCronExec
 
         // Nettoyages des fichiers temporaires
         BimpTools::cleanTempFiles();
-        
+
         // Vérifs des RDV SAV à annuler:
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         BS_SAV::checkSavToCancel();
@@ -118,11 +120,14 @@ class BimpCoreCronExec
         BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
         Bimp_Commande::checkLinesEcheances();
 
-        return 'OK';
+        $this->output = 'OK';
+        return 0;
     }
 
     public function generateAppleReport()
     {
+        $this->current_cron_name = 'Rapports Apple';
+
         $vente = BimpObject::getInstance('bimpcommercial', 'Bimp_Vente');
 
         $dt = new DateTime();
@@ -154,7 +159,8 @@ class BimpCoreCronExec
                 'Erreurs' => $errors
             ));
 
-            return 'Echec génération (cf log)';
+            $this->output = 'Echec génération (cf log)';
+            return -1;
         }
 
         // Envoi FTP: 
@@ -195,18 +201,20 @@ class BimpCoreCronExec
                 'Erreurs' => $errors
             ));
 
-            return 'Echec envoi ftp (cf log)';
+            $this->output = 'Echec envoi ftp (cf log)';
+            return -1;
         }
 
-        return 'OK';
+        return 0;
     }
 
     public function mailMessageNote()
     {
+        $this->current_cron_name = 'Notes non lues';
         BimpObject::loadClass('bimpcore', 'BimpNote');
 
-        echo BimpNote::cronNonLu();
-
-        return 'OK';
+        BimpNote::cronNonLu();
+        $this->output = 'OK';
+        return 0;
     }
 }

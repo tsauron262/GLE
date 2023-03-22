@@ -58,7 +58,8 @@ class CronExec extends BimpCron
             }
 
             BimpCore::addlog('BDS: Erreur exécution tâche CRON', Bimp_Log::BIMP_LOG_ERREUR, 'bds', $process, $log_data);
-            return 'KO';
+            $this->output .= 'KO';
+            return -1;
         } else {
             $this->output .= 'OK';
             return 0;
@@ -75,6 +76,7 @@ class CronExec extends BimpCron
 
         $n = BDS_Report::cleanReports($errors);
 
-        return 'OK: ' . $n . ' - KO: ' . count($errors);
+        $this->output .= 'OK: ' . $n . ' - KO: ' . count($errors);
+        return 0;
     }
 }

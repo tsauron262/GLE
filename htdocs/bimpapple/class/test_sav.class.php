@@ -120,6 +120,7 @@ WHERE  a.status IN ("-1",0) AND a___equipment.status_gsx IN ("3")');
         }
 
         $this->output .= 'Terminé ' . $ok . ' mail envoyée ' . print_r($errors, 1);
+        return 0;
     }
 
     function getReq($statut, $iTribu)

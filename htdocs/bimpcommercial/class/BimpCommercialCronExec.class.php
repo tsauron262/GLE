@@ -7,13 +7,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 class BimpCommercialCronExec extends BimpCron
 {
 
-    public $db;
-
-    public function __construct($db)
-    {
-        $this->db = $db;
-    }
-    
     public function sendRappelFacturesMargesNegatives()
     {
         // Déplacé ici pour outils BimpCron (Envoi mail si Erreur Fatale) 

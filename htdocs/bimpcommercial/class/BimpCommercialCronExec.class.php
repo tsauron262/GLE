@@ -11,20 +11,26 @@ class BimpCommercialCronExec extends BimpCron
         $facts = array();
         $html = '';
 
-        $sql = 'SELECT (a.total_ht / a.qty) - (buy_price_ht * a.qty / ABS(a.qty)) as marge, a.*';
+        $sql = 'SELECT a.*';//, (a.total_ht / a.qty) - (buy_price_ht * a.qty / ABS(a.qty)) as marge';
+        $sql .= ', p.ref as prod_ref';
         $sql .= BimpTools::getSqlFrom('facturedet', array(
-                    'f' => array(
+                    'f'   => array(
                         'alias' => 'f',
                         'table' => 'facture',
                         'on'    => 'a.fk_facture = f.rowid'
                     ),
-                    'p' => array(
+                    'p'   => array(
                         'alias' => 'p',
+                        'table' => 'product',
+                        'on'    => 'p.rowid = a.fk_product'
+                    ),
+                    'pef' => array(
+                        'alias' => 'pef',
                         'table' => 'product_extrafields',
-                        'on'    => 'p.fk_object = a.fk_product'
+                        'on'    => 'pef.fk_object = a.fk_product'
                     )
         ));
-        $sql .= " WHERE ((a.total_ht / a.qty)+0.01) < (buy_price_ht * a.qty / ABS(a.qty)) AND f.datef > '2022-04-01' AND p.type_compta NOT IN (3)";
+        $sql .= " WHERE ((a.total_ht / a.qty)+0.01) < (buy_price_ht * a.qty / ABS(a.qty)) AND f.datef > '2022-04-01' AND pef.type_compta NOT IN (3)";
 
         $sql = $this->db->query($sql);
         while ($ln = $this->db->fetch_object($sql)) {
@@ -32,7 +38,7 @@ class BimpCommercialCronExec extends BimpCron
             $margeF = $factLine->getTotalMarge();
             if ($margeF < 0) {
 //                $this->output .= $ln->fk_facture . ' MARGE I : '.$factLine->getMargin() .' MARGE F : '.$factLine->getTotalMarge(). '<br/>';
-                $facts[$ln->fk_facture][$ln->rowid] = $factLine;
+                $facts[$ln->fk_facture][$ln->rowid] = 'Ligne n° ' . $ln->rang . ' - ' . $ln->ref_prod . ' (Marge: ' . $margeF . ')';
             }
         }
 
@@ -40,7 +46,7 @@ class BimpCommercialCronExec extends BimpCron
             $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact);
             $html .= '<h2>' . $fact->getLink() . '</h2>';
             foreach ($lines as $line) {
-                $html .= $line->getLink() . '<br/>';
+                $html .= $line . '<br/>';
             }
             $html .= '<br/>';
         }

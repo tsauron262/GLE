@@ -14,6 +14,17 @@ class BimpCoreCronExec extends BimpCron
         $this->db = $db;
     }
 
+    public function testCron()
+    {
+        if (mailSyn2('TEST CRON', 'f.martinez@bimp.fr', '', 'TEST Tâche cron')) {
+            $this->output = 'OK';
+        } else {
+            $this->output = 'KO';
+        }
+
+        return 0;
+    }
+
     public function mailCronErreur()
     {
         $bdb = new BimpDb($this->db);

@@ -5,17 +5,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 class BimpCoreCronExec extends BimpCron
 {
 
-    public function testCron()
-    {
-        if (mailSyn2('TEST CRON', 'f.martinez@bimp.fr', '', 'TEST Tâche cron')) {
-            $this->output = 'OK';
-        } else {
-            $this->output = 'KO';
-        }
-
-        return 0;
-    }
-
     public function mailCronErreur()
     {
         $bdb = new BimpDb($this->db);

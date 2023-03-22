@@ -33,7 +33,10 @@ class BimpCommercialCronExec extends BimpCron
             $html .= '<br/>';
         }
 
-        mailSyn2('Ligne de facture à marge négative', 'f.pineri@bimp.fr, tommy@bimp.fr, a.alimi@bimp.fr', null, $html);
+//        $to = 'f.pineri@bimp.fr, tommy@bimp.fr, a.alimi@bimp.fr';
+        $to = 'f.martinez@bimp.fr';
+
+        mailSyn2('Ligne de facture à marge négative', $to, null, $html);
 
         $this->output = $html;
         return 0;

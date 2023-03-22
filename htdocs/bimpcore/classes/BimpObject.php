@@ -8167,11 +8167,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                 if ($url) {
                     $onclick = 'loadImageModal($(this), \'' . $url . '\', \'' . $file->getData('file_name') . '\')';
-                    $html .= '<div onclick="' . $onclick . '" style="height: 200px; width: auto; max-width: 100%; cursor: pointer; margin: 5px; overflow-x: scroll">';
+                    $html .= '<div onclick="' . $onclick . '" style="max-height: 200px; max-width: 100%; cursor: pointer; margin: 5px; overflow-x: scroll">';
                     $html .= '<div style="font-size: 11px; font-style: italic">';
                     $html .= $file->getData('file_name');
                     $html .= '</div>';
-                    $html .= '<img src="' . $url . '" style="height: 92%; width: auto; max-width: 100%; margin: auto"/>';
+                    $html .= '<img src="' . $url . '" style="max-height: 92%; max-width: 100%; height: auto; width: auto; margin: auto"/>';
                     $html .= '</div>';
                 }
             }

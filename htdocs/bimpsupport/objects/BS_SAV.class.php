@@ -3902,7 +3902,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $mail_msg = 'Nous vous remercions d\'avoir choisi LDLC' . ($nomMachine ? ' pour votre ' . $nomMachine : '') . '.' . "\n\n";
                 
                 if (!empty($files)) {
-                    $mail_msg .= 'Veuillez trouver ci-joint la facture pour cette réparation' . "\n\n";
+                    $mail_msg .= 'Veuillez trouver ci-joint votre facture pour cette réparation' . "\n\n";
                 }
                 
                 $mail_msg .= 'Dans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d\'APPLE, votre retour est important afin d\'améliorer la qualité de notre Centre de Services.' . "\n";

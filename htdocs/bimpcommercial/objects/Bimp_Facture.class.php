@@ -6399,6 +6399,8 @@ class Bimp_Facture extends BimpComm
 
     public function sendInvoiceDraftWhithMail()
     {
+        mailSyn2('EXEC CRON sendInvoiceDraftWhithMail', 'f.martinez@bimp.fr', '', 'Heure: ' . date('d / m / Y H:i:s') . '<br/>SERVER : ' . print_r($_SERVER, 1));
+
         // Modifié pour n'envoyer qu'un seul mail par commercial. 
 
         $date = new DateTime();

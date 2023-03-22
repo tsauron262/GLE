@@ -1,18 +1,9 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
 class BimpCoreCronExec extends BimpCron
 {
-
-    public $db;
-
-    public function __construct($db)
-    {
-        $this->db = $db;
-    }
 
     public function testCron()
     {

@@ -1,7 +1,5 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
 class BimpCommercialCronExec extends BimpCron
@@ -10,12 +8,26 @@ class BimpCommercialCronExec extends BimpCron
     public function sendRappelFacturesMargesNegatives()
     {
         // Déplacé ici pour outils BimpCron (Envoi mail si Erreur Fatale) 
-        global $db;
         $facts = array();
         $html = '';
 
-        $sql = $db->query("SELECT (a.total_ht / a.qty) - (buy_price_ht * a.qty / ABS(a.qty)) as marge, a.* FROM llx_facturedet a LEFT JOIN llx_facture f ON a.fk_facture = f.rowid LEFT JOIN llx_product_extrafields p ON p.fk_object = a.fk_product WHERE ((a.total_ht / a.qty)+0.01) < (buy_price_ht * a.qty / ABS(a.qty)) AND f.datef > '2022-04-01' AND p.type_compta NOT IN (3);");
-        while ($ln = $db->fetch_object($sql)) {
+        $sql = 'SELECT (a.total_ht / a.qty) - (buy_price_ht * a.qty / ABS(a.qty)) as marge, a.*';
+        $sql .= BimpTools::getSqlFrom('facturedet', array(
+                    'f' => array(
+                        'alias' => 'f',
+                        'table' => 'facture',
+                        'on'    => 'a.fk_facture = f.rowid'
+                    ),
+                    'p' => array(
+                        'alias' => 'p',
+                        'table' => 'product_extrafields',
+                        'on'    => 'p.fk_object = a.fk_product'
+                    )
+        ));
+        $sql .= " WHERE ((a.total_ht / a.qty)+0.01) < (buy_price_ht * a.qty / ABS(a.qty)) AND f.datef > '2022-04-01' AND p.type_compta NOT IN (3)";
+
+        $sql = $this->db->query($sql);
+        while ($ln = $this->db->fetch_object($sql)) {
             $factLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array('id_line' => $ln->rowid));
             $margeF = $factLine->getTotalMarge();
             if ($margeF < 0) {

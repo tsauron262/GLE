@@ -3696,9 +3696,9 @@ class Bimp_Facture extends BimpComm
                     $html .= '</div>';
                     $html .= '<div class="row">';
                     $html .= '<div class="col-sm-12 col-md-6">';
-                    
-                    if(/*$this->getData('fk_statut') > 0*/1){
-                        $buttons = array();   
+
+                    if (/* $this->getData('fk_statut') > 0 */1) {
+                        $buttons = array();
                         $buttons[] = array(
                             'label'   => 'Vérifier les équipements',
                             'icon'    => 'fas_hand-holding-usd',
@@ -3713,7 +3713,7 @@ class Bimp_Facture extends BimpComm
                             ))
                         );
                         $content2 = '';
-                        foreach($buttons as $button)
+                        foreach ($buttons as $button)
                             $content2 .= BimpRender::renderButton($button);
                         $html .= BimpRender::renderPanel('Actions revalorisation', $content2, '', array('type' => 'secondary'));
                         $html .= '</div>';
@@ -6045,9 +6045,10 @@ class Bimp_Facture extends BimpComm
     public function actionGeneratePdfAttestLithium($data, &$success = '')
     {
         $errors = $warnings = array();
-        $this->generatePDF($data['file_type'], $errors, $warnings);
-        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
-        $success_callback = 'window.open(\'' . $url . '\');';
+        $errors[] = "Debug en cours";
+//        $this->generatePDF($data['file_type'], $errors, $warnings);
+//        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
+//        $success_callback = 'window.open(\'' . $url . '\');';
 
         return array(
             'errors'           => $errors,
@@ -6443,32 +6444,66 @@ $errors[] = print_r($_REQUEST, 1);
 
     public function sendInvoiceDraftWhithMail()
     {
+        mailSyn2('EXEC CRON sendInvoiceDraftWhithMail', 'f.martinez@bimp.fr', '', 'Heure: ' . date('d / m / Y H:i:s') . '<br/>SERVER : ' . print_r($_SERVER, 1));
+
+        // Modifié pour n'envoyer qu'un seul mail par commercial. 
+
         $date = new DateTime();
         $nbDay = 5;
         $date->sub(new DateInterval('P' . $nbDay . 'D'));
         $sql = $this->db->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "facture` WHERE `datec` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0");
-        $i = 0;
+
+        $factures = array();
         while ($ln = $this->db->db->fetch_object($sql)) {
-            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
-            $userCreate = new User($this->db->db);
+            $facture = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
 
-            $idComm = $obj->getIdContact($type = 'internal', $code = 'SALESREPSIGN');
-            if ($idComm > 0)
-                $userCreate->fetch((int) $idComm);
-            else
-                $userCreate->fetch((int) $obj->getData('fk_user_author'));
+            if (BimpObject::objectLoaded($facture)) {
+                $id_user = $facture->getIdContact('internal', 'SALESREPSIGN');
+                if (!$id_user) {
+                    $id_user = (int) $facture->getData('fk_user_author');
+                }
 
+                if (!isset($factures[$id_user])) {
+                    $factures[$id_user] = array();
+                }
 
-//            $mail = $userCreate->email;
-            $mail = BimpTools::getMailOrSuperiorMail($userCreate->id, 'f.pineri@bimp.fr');
-            if ($mail == '')
-                $mail = "tommy@bimp.fr";
-            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
-            if (mailSyn2('Facture brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une facture en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
-                $i++;
+                $factures[$id_user][] = $facture->getLink();
+            }
         }
-        $this->resprints = "OK " . $i . ' mails';
-        return "OK " . $i . ' mails';
+
+        if (!empty($factures)) {
+            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
+
+            $i = 0;
+            foreach ($factures as $id_user => $facs) {
+                $msg = 'Bonjour, vous avez laissé ';
+                if (count($facs) > 1) {
+                    $msg .= count($facs) . ' factures';
+                } else {
+                    $msg .= 'une facture';
+                }
+
+                $msg .= ' à l\'état de brouillon depuis plus de ' . $nbDay . ' jours.<br/>';
+                $msg .= 'Merci de bien vouloir ' . (count($facs) > 1 ? 'les' : 'la') . ' régulariser au plus vite.<br/>';
+
+                foreach ($facs as $fac_link) {
+                    $msg .= '<br/>' . $fac_link;
+                }
+
+                $mail = BimpTools::getMailOrSuperiorMail($id_user, 'f.pineri@bimp.fr');
+
+                if ($mail == '') {
+                    $mail = "tommy@bimp.fr";
+                }
+
+                if (mailSyn2('Facture brouillon à régulariser', $mail, null, $msg)) {
+                    $i++;
+                }
+            }
+        }
+
+        $this->output = "OK " . $i . ' mail(s)';
+        return 0;
     }
 
     public static function checkIsPaidAll($filters = array())

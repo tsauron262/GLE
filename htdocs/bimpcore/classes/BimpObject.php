@@ -222,7 +222,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if (is_a($instance, 'BimpObject')) {            
+        if (is_a($instance, 'BimpObject')) {
             if (!is_null($id_object)) {
                 $instance->fetch($id_object, $parent);
             } else {
@@ -573,8 +573,9 @@ class BimpObject extends BimpCache
     }
 
     // Getters configuation:
-    
-    public function getGeneralConf($name, $default = null, $module = null){
+
+    public function getGeneralConf($name, $default = null, $module = null)
+    {
         return BimpCore::getConf($name, $default, $module);
     }
 
@@ -2306,7 +2307,7 @@ class BimpObject extends BimpCache
             }
         }
     }
-    
+
     public function finalizeBdsAction($process, $action, &$errors = array(), $operation_extra_data = array(), $action_extra_data = array(), $force_action = false)
     {
         $method = 'finalizeBdsAction' . ucfirst($action);
@@ -2322,7 +2323,7 @@ class BimpObject extends BimpCache
                 return $this->{$method}($process, $errors, $operation_extra_data, $action_extra_data);
             }
         }
-        
+
         return array();
     }
 
@@ -3630,7 +3631,7 @@ class BimpObject extends BimpCache
 
         return $objects;
     }
-    
+
     public function getDocumentFileId()
     {
         if (!$this->isLoaded()) {
@@ -8159,18 +8160,18 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         ));
 
         if (!empty($files)) {
-            $html .= '<div class="row">';
+            $html .= '<div>';
 
             foreach ($files as $file) {
                 $url = $file->getUrl();
 
                 if ($url) {
                     $onclick = 'loadImageModal($(this), \'' . $url . '\', \'' . $file->getData('file_name') . '\')';
-                    $html .= '<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3" onclick="' . $onclick . '" style="height: 200px; cursor: pointer; margin: 5px; overflow-x: scroll">';
+                    $html .= '<div onclick="' . $onclick . '" style="max-height: 200px; max-width: 100%; cursor: zoom-in; margin: 5px; overflow-x: scroll">';
                     $html .= '<div style="font-size: 11px; font-style: italic">';
                     $html .= $file->getData('file_name');
                     $html .= '</div>';
-                    $html .= '<img src="' . $url . '" style="height: 92%; width: auto; margin: auto"/>';
+                    $html .= '<img src="' . $url . '" style="max-height: 92%; max-width: 100%; height: auto; width: auto; margin: auto"/>';
                     $html .= '</div>';
                 }
             }
@@ -8414,7 +8415,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if (isset($params['use_bimpdatasync'])) {
             $options .= ($options ? ', ' : '') . 'use_bimpdatasync: ' . ((int) $params['use_bimpdatasync'] ? 1 : 0);
         }
-        
+
         if (isset($params['use_report'])) {
             $options .= ($options ? ', ' : '') . 'use_report: ' . ((int) $params['use_report'] ? 1 : 0);
         }
@@ -10523,11 +10524,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($newVersion) {
             if ($redirect)
                 unset($_SESSION['oldVersion']);
-            if ($this->id > 0){
-                if($this->getConf('controller', null))
+            if ($this->id > 0) {
+                if ($this->getConf('controller', null))
                     $url = $this->getUrl();
-            }
-            elseif($this->getConf('list_page_url', null))
+            } elseif ($this->getConf('list_page_url', null))
                 $url = $this->getListUrl();
             $texteBtn .= "Nouvelle version";
             if ($redirectMode == 4)

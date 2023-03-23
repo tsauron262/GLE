@@ -116,7 +116,7 @@ class BFTools
             'loyer_dyn_suppl_mensuel' => $loyer_dyn_suppl_mensuel,
             'loyer_dyn_suppl'         => $loyer_dyn_suppl_mensuel * $periodicity,
             'nb_loyers_suppl'         => 12 / $periodicity,
-            'loyer_dyn_eco_percent'   => (($loyer_evo_mensuel * $nb_mois - $loyer_dyn_mensuel * $nb_mois) / $total_demande) * 100,
+            'loyer_dyn_eco_percent'   => ($total_demande ? (($loyer_evo_mensuel * $nb_mois - $loyer_dyn_mensuel * $nb_mois) / $total_demande) * 100 : 0),
             'first_loyer_maj'         => $first_loyer_maj,
             'fl10_next_loyer_mensuel' => ($loyer_evo_mensuel * $nb_mois - $first_loyer_maj * ($nb_mois - 1))
         );

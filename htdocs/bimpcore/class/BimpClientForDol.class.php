@@ -1,6 +1,7 @@
 <?php
 
 require_once(DOL_DOCUMENT_ROOT . '/bimpcore/objects/Bimp_Client.class.php');
+require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 class BimpClientForDol extends Bimp_Client
 {
@@ -10,19 +11,19 @@ class BimpClientForDol extends Bimp_Client
         require_once __DIR__ . '/../../bimpcore/Bimp_Lib.php';
         return parent::__construct('bimpcore', 'Bimp_Client');
     }
-    
+
     public function updateICBA()
     {
         $this->error = '';
         $clients = $this->getClientsFinValiditeICBA(0);
-        
+
         $nb_rappels = 0;
         $msg .= "Encours ICBA passé à 0 € (expiration après 1 an)";
 
         if (!empty($clients)) {
             BimpObject::loadClass('bimpcore', 'BimpNote');
-            foreach($clients as $c) {
-                
+            foreach ($clients as $c) {
+
                 // Commercial
                 $commercial = $c->getCommercial();
                 $this->addError(implode('', $c->addNote($msg,
@@ -33,7 +34,7 @@ class BimpClientForDol extends Bimp_Client
                 $this->addError(implode('', $c->addNote($msg,
                                                         BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                                                         BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
-                
+
                 $c->updateField('outstanding_limit_icba', 0);
                 $c->update();
 
@@ -54,7 +55,7 @@ class BimpClientForDol extends Bimp_Client
         $this->output .= "Considère les clients qui expire le: " . $date_depot->format("d/m/Y") . '<br/><br/>';
 
         $filters = array(
-            'date_depot_icba' => array(
+            'date_depot_icba'        => array(
                 'and' => array(
                     array(
                         'operator' => '<',
@@ -80,11 +81,12 @@ class BimpClientForDol extends Bimp_Client
 
     public function rappelICBA($days)
     {
+        mailSyn2('EXEC CRON rappelICBA', 'f.martinez@bimp.fr', '', 'Heure: ' . date('d / m / Y H:i:s') . '<br/>SERVER : ' . print_r($_SERVER, 1));
+
         $this->error = '';
         $clients = $this->getClientsFinValiditeICBA($days);
-        
-        $nb_rappels = 0;
 
+        $nb_rappels = 0;
 
         if (!empty($clients)) {
             BimpObject::loadClass('bimpcore', 'BimpNote');
@@ -93,7 +95,7 @@ class BimpClientForDol extends Bimp_Client
                 $date_validite = new DateTime($c->getData('date_depot_icba'));
                 $date_validite->add(new DateInterval('P1Y'));
                 $msg = "L'encours ICBA pour ce client n'est valable que jusqu'au " . $date_validite->format("d/m/Y");
-                
+
 //                // Commercial
                 $commercial = $c->getCommercial();
                 $this->addError(implode('', $c->addNote($msg,
@@ -104,13 +106,13 @@ class BimpClientForDol extends Bimp_Client
                 $this->addError(implode('', $c->addNote($msg,
                                                         BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                                                         BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
-                
+
                 $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';
                 $nb_rappels++;
             }
         }
 
-        $this->output .= "<br/><br/>Nombre de rappels d'expiration ICBA envoyé: $nb_rappels/" . count($clients) ;
+        $this->output .= "<br/><br/>Nombre de rappels d'expiration ICBA envoyé: $nb_rappels/" . count($clients);
         return 0;
     }
 
@@ -193,7 +195,7 @@ class BimpClientForDol extends Bimp_Client
 
     private function addError($error_msg)
     {
-        if($error_msg != '')
+        if ($error_msg != '')
             $this->output .= '<br/><strong style="color: red">' . $error_msg . '</strong>';
     }
 

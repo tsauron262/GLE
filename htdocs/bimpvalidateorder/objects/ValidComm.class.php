@@ -975,6 +975,7 @@ class DoliValidComm extends CommonObject
 
     const LIMIT_OBJECT = 3;
     const LIMIT_DAYS = 1;
+    public $output = '';
 
     /**
      *  Constructor

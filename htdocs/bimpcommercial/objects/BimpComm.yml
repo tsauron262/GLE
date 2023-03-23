@@ -668,6 +668,20 @@ forms:
               required: 1
               input: 
                   type: text
+            - custom: 1
+              label: TVA
+              input_name: tva_tx
+              value: 
+                  callback:
+                      method: getGlobalConf
+                      params:
+                          - tva_tx_for_acomptes
+                          - 20
+                          - bimpcommercial
+              data_type: percent
+              required: 1
+              input: 
+                  type: text
                   
     logs: 
         rows: 

@@ -3899,7 +3899,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
 
                 $subject = "Fermeture du dossier " . $this->getData('ref');
-                $mail_msg = 'Nous vous remercions d\'avoir choisi Bimp pour votre ' . $nomMachine . "\n";
+                $mail_msg = 'Nous vous remercions d\'avoir choisi LDLC' . ($nomMachine ? ' pour votre ' . $nomMachine : '') . '.' . "\n\n";
+                
+                if (!empty($files)) {
+                    $mail_msg .= 'Veuillez trouver ci-joint votre facture pour cette réparation' . "\n\n";
+                }
+                
                 $mail_msg .= 'Dans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d\'APPLE, votre retour est important afin d\'améliorer la qualité de notre Centre de Services.' . "\n";
                 break;
 
@@ -3907,9 +3912,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if (!is_null($propal)) {
                     $subject = 'Devis ' . $this->getData('ref');
                     $mail_msg = "Voici le devis pour la réparation de votre '" . $nomMachine . "'.\n";
-                    $mail_msg .= "Veuillez nous communiquer votre accord ou votre refus par retour de ce Mail.\n";
+                    $mail_msg .= "Veuillez nous communiquer votre accord ou votre refus par retour de cet e-mail.\n";
                     $mail_msg .= "Si vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).";
-                    $sms = "Bonjour, nous avons établi votre devis pour votre " . $nomMachine . "\n Vous l'avez reçu par mail.\nL'équipe LDLC";
+                    $sms = "Bonjour, nous avons établi votre devis pour votre " . $nomMachine . "\n Vous l'avez reçu par e-mail.\nL'équipe LDLC";
                 }
                 break;
 
@@ -4079,6 +4084,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 //                }
                     $bimpMail = new BimpMail($this, $subject, $toMail, $fromMail, $mail_msg);
                     $bimpMail->addFiles($files);
+                    $bimpMail->setFromType('ldlc');
                     $mail_errors = array();
                     $bimpMail->send($mail_errors);
 

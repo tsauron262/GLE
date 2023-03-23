@@ -403,13 +403,13 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
-    public function areLinesValid(&$errors = array())
+    public function areLinesValid(&$errors = array(), $mail = true)
     {
         $result = 1;
         foreach ($this->getLines() as $line) {
             $line_errors = array();
 
-            if (!$line->isValid($line_errors)) {
+            if (!$line->isValid($line_errors, $mail)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
                 $result = 0;
             }
@@ -2969,7 +2969,7 @@ class BimpComm extends BimpDolObject
                             $err = $equipmentLine->delete($warnings, true);
                         }
 
-                        if (!count($err)) {
+                        if (empty($err)) {
                             $err = $new_line->attributeEquipment($data['id_equipment'], 0, true, false);
                         }
                     }
@@ -3146,7 +3146,7 @@ class BimpComm extends BimpDolObject
         return count($errors) ? 0 : 1;
     }
 
-    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $paye = 1, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array(), $id_rib = 0, $refPaiement = '', &$idFacture = 0)
+    public function createAcompte($amount, $tva_tx, $id_mode_paiement, $id_bank_account = 0, $paye = 1, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array(), $id_rib = 0, $refPaiement = '', &$idFacture = 0)
     {
         global $user, $langs;
         $errors = array();
@@ -3248,7 +3248,7 @@ class BimpComm extends BimpDolObject
             if ($factureA->create($user) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
-                $tva = (float) BimpCore::getConf('tva_tx_for_acomptes', 0, 'bimpcommercial');
+                $tva = (float) $tva_tx;
                 $ht = $amount / (100 + $tva) * 100;
                 $factureA->addline("Acompte", $ht, 1, $tva, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $ht);
                 $user->rights->facture->creer = 1;
@@ -4896,7 +4896,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (!count($errors)) {
-            $errors = $this->createAcompte($amount, $id_mode_paiement, $id_bank_account, $paye, $data['date'], $use_caisse, $num_paiement, $nom_emetteur, $banque_emetteur, $warnings, $id_rib);
+            $errors = $this->createAcompte($amount, $data['tva_tx'], $id_mode_paiement, $id_bank_account, $paye, $data['date'], $use_caisse, $num_paiement, $nom_emetteur, $banque_emetteur, $warnings, $id_rib);
         }
 
         return array(

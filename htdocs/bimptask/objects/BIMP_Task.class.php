@@ -39,6 +39,10 @@ class BIMP_Task extends BimpObject
     public function getUserRight($right)
     {
         global $user;
+        if ($user->admin) {
+            return 1;
+        }
+        
         if (!$this->isLoaded()) {
             $classRight = BimpTools::getPostFieldValue('type_manuel', null);
             if (is_null($classRight))

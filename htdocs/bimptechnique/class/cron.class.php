@@ -18,6 +18,8 @@ class Cron
         $this->relanceCommercialAFact();
         
         $this->relanceCommercialImponderable();
+        
+        return 0;
     }
 
     public function relanceTechBrouillonJplus1etPlus()

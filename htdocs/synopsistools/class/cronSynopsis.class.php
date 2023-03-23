@@ -5,42 +5,43 @@ require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-class CronSynopsis {
+class CronSynopsis
+{
 
     var $nbErreur = 0;
     var $sortie = '';
     var $output = "";
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->db = $db;
     }
 
-    public function netoyage() {
+    public function netoyage()
+    {
         ini_set('display_errors', 1);
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE  `sourcetype` LIKE  'resa'");
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE  `tms` <  '" . $this->db->idate(strtotime("-3 day")) . "'");
-        
-        
+
         $sql = $this->db->query('SELECT rowid, SUM(`total_ttc`) as dif FROM `llx_facture` f WHERE `total_ttc` != (SELECT SUM(`total_ttc`) FROM `llx_facturedet` WHERE `fk_facture` = f.rowid GROUP BY `fk_facture`)');
-        while ($ln = $this->db->fetch_object($sql)){
-            if(($ln->dif > 0.02 || $ln->dif < -0.02) && $ln->rowid != 139472)
-                mailSyn2("prob  total fact", 'tommy@bimp.fr, f.martinez@bimp.fr', null, "ID facture total faux ".$ln->rowid);
+        while ($ln = $this->db->fetch_object($sql)) {
+            if (($ln->dif > 0.02 || $ln->dif < -0.02) && $ln->rowid != 139472)
+                mailSyn2("prob  total fact", 'tommy@bimp.fr, f.martinez@bimp.fr', null, "ID facture total faux " . $ln->rowid);
         }
-        
+
         $sql = $this->db->query("SELECT * FROM `llx_facture` WHERE `datef` > '2019-07-01' AND `fk_user_comm` < 1 AND fk_statut > 0");
-        while ($ln = $this->db->fetch_object($sql)){
-            mailSyn2("prob  total fact", 'tommy@bimp.fr, f.martinez@bimp.fr', null, "ID facture sans commercial ".$ln->rowid);
-            
+        while ($ln = $this->db->fetch_object($sql)) {
+            mailSyn2("prob  total fact", 'tommy@bimp.fr, f.martinez@bimp.fr', null, "ID facture sans commercial " . $ln->rowid);
         }
     }
-    
-    
-    public function mailFiOuvert(){
-        
+
+    public function mailFiOuvert()
+    {
         
     }
 
-    public function testGlobal() {
+    public function testGlobal()
+    {
         $this->verifCompteFermer();
 //        $this->sauvBdd();
 
@@ -54,18 +55,18 @@ class CronSynopsis {
 
 
         $this->output .= "FIN";
-        echo 1;
+        return 0;
     }
 
-    public function sauvBdd($table = "") {
+    public function sauvBdd($table = "")
+    {
         require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/maj.class.php");
         $this->sortie .= maj::sauvBdd($table);
     }
-    
-    
 
-    public function extractFact($debug = false) {
-        
+    public function extractFact($debug = false)
+    {
+
 //        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importDepot.class.php");
 //        $import = new importDepot($this->db);
 //        $import->debug = $debug;
@@ -79,15 +80,11 @@ class CronSynopsis {
 //        $import->debug = $debug;
 //        $import->go(); 
 //        $this->output .= $import->output;
-        
 //        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProd.class.php");
 //        $import = new importProd($this->db);
 //        $import->debug = $debug;
 //        $import->go(); 
 //        $this->output .= $import->output;
-        
-        
-        
 //      
 //        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importEquipment.class.php");
 //        $import = new importEquiment($this->db);
@@ -151,14 +148,6 @@ class CronSynopsis {
 //        $import->debug = $debug;
 //        $import->go(); 
 //        $this->output = $import->output;
-        
-        
-        
-        
-        
-  
-        
-        
 //        if(!isset($_REQUEST['light'])){
 //    //        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
 //    //        $export = new synopsisexport($this->db, 'file');
@@ -179,28 +168,29 @@ class CronSynopsis {
 //            
 //        }
 //        
-        
-        
-        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importMatricule.class.php");
+
+
+        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/importMatricule.class.php");
         $import = new importMatricule($this->db);
         $import->debug = $debug;
-        $import->go(); 
+        $import->go();
         $this->output .= $import->output;
 
-
         echo "fin";
-        
+
         return "End";
     }
 
-    public function sortieMail() {
+    public function sortieMail()
+    {
         mailSyn("Tommy@drsi.fr", "Rapport netoyage", $this->sortie . "<br/><br/>" . $this->erreurs());
     }
 
 //global $oldPref, $nbIframeMax, $nbIframe, $nbErreur;
 
 
-    private function verifOBj($objT, $text, $sqlReq, $option = '') {
+    private function verifOBj($objT, $text, $sqlReq, $option = '')
+    {
         global $totalFact, $tabTech;
         require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
         require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
@@ -211,7 +201,6 @@ class CronSynopsis {
         while ($result = $this->db->fetch_object($req)) {
             $obj->fetch($result->rowid);
             $erreur = true;
-
 
             if ($option == 'ligneSav' && ($objT != "Propal" || $objT != "Facture")) {
                 $erreur = false;
@@ -247,7 +236,8 @@ class CronSynopsis {
         $this->titre("</br>");
     }
 
-    function majSAv($mailTech = false) {
+    function majSAv($mailTech = false)
+    {
         global $totalFact, $tabTech;
         $totalFact = $tabTech = array();
 
@@ -299,7 +289,8 @@ class CronSynopsis {
         $this->titre("Fin maj");
     }
 
-    function majChrono() {
+    function majChrono()
+    {
 //        $finReq = "" . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid NOT IN (SELECT id FROM " . MAIN_DB_PREFIX . "synopsischrono)";
 //        $sqlValueChronoSansParent = $this->db->query("SELECT * FROM " . $finReq);
 //        while ($resultValueChronoSansParent = $this->db->fetch_object($sqlValueChronoSansParent))
@@ -385,7 +376,8 @@ class CronSynopsis {
 //        }
     }
 
-    function verifCompteFermer() {
+    function verifCompteFermer()
+    {
         global $user;
         $str = "";
         if (array_key_exists('options_date_s', $user->array_options)) {
@@ -409,14 +401,14 @@ class CronSynopsis {
 //                    mailSyn2("Fermeture compte " . $result->login. " dans ".$nbDay." jours", $mails.($result->email != "")? ",".$result->email :"", null, $str2);
 //                }
 //            }
-        echo $str." Comptes fermés";
-        }
-        else
+            echo $str . " Comptes fermés";
+        } else
             echo "Pas d'info sur la date de sortie.";
     }
 
 //else if (isset($_GET['action']) && $_GET['action'] == "verif") {
-    function verif() {
+    function verif()
+    {
         $tabSuppr = $tabSuppri = array();
         //Test des chrono
         $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE type_valeur = 10");
@@ -462,13 +454,13 @@ class CronSynopsis {
             }
         }
 
-        foreach (array("FI" => array("table" => "fichinter"),
-    "DI" => array("table" => "synopsisdemandeinterv"),
-    "commande" => array("table" => "commande"),
-    "contrat" => array("table" => "contrat"),
+        foreach (array("FI"         => array("table" => "fichinter"),
+    "DI"         => array("table" => "synopsisdemandeinterv"),
+    "commande"   => array("table" => "commande"),
+    "contrat"    => array("table" => "contrat"),
     "contratdet" => array("table" => "contratdet"),
-    "idUserGle" => array("table" => "user"),
-    "userTech" => array("table" => "user")) as $elem => $para) {
+    "idUserGle"  => array("table" => "user"),
+    "userTech"   => array("table" => "user")) as $elem => $para) {
             $result = getElementElement($elem);
             foreach ($result as $ligne) {
                 $idT = $ligne['s'];
@@ -561,19 +553,22 @@ class CronSynopsis {
         $this->titre($nbFusion . " Contact fusionné.<br/>");
     }
 
-    function sortieHtml() {
+    function sortieHtml()
+    {
         echo $this->sortie . "<br/><br/>" . $this->erreurs();
         ;
     }
 
-    function erreurs() {
+    function erreurs()
+    {
         if ($this->nbErreur == 0)
             return "Succés";
         else
             return "Finit avec des erreurs : " . $this->nbErreur;
     }
 
-    private function lienFusion($id1, $id2) {
+    private function lienFusion($id1, $id2)
+    {
         global $nbIframeMax, $nbIframe;
         $return = "<br/>";
         $lien = DOL_URL_ROOT . '/synopsischrono/card.php?id=' . $id1;
@@ -601,7 +596,6 @@ class CronSynopsis {
 //        $this->erreur("<br/>1 ligne supprimer " . $text . "<br/>");
 //        ;
 //    }
-
 //    private function fusionChrono($idMaitre, $idFaible) {
 //        $this->db->query("UPDATE " . MAIN_DB_PREFIX . "element_element SET fk_target = " . $idMaitre . " WHERE targettype = 'productCli' AND fk_target = " . $idFaible);
 //        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id=" . $idFaible);
@@ -609,19 +603,22 @@ class CronSynopsis {
 //        $this->erreur("<br/>FUSION OK :" . $idMaitre . "|" . $idFaible);
 //    }
 
-    private function erreur($text) {
+    private function erreur($text)
+    {
         global $nbErreur;
         $this->sortie .= $text;
         $this->sortie .= "<br/>";
         $this->nbErreur++;
     }
 
-    private function titre($text) {
+    private function titre($text)
+    {
         $this->sortie .= $text;
         $this->sortie .= "<br/>";
     }
 
-    private function netoyeDet($table, $table2 = null, $prefTab = null) {
+    private function netoyeDet($table, $table2 = null, $prefTab = null)
+    {
         if ($prefTab)
             $nomTable = $prefTab . $table;
         else
@@ -642,5 +639,4 @@ class CronSynopsis {
 //        $requete = "DELETE FROM ".MAIN_DB_PREFIX."propaldet WHERE fk_propal NOT IN (SELECT DISTINCT(rowid) FROM ".MAIN_DB_PREFIX."propal WHERE 1);";
 //        $this->queryS($requete);
     }
-
 }

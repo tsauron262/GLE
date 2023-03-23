@@ -685,7 +685,7 @@ class BContract_echeancier extends BimpObject
                     $html .= '</tr>';
                     $current_number_facture++;
                 } else {
-                   // $facture->getSumDiscountsUsed() . "<br />";
+                    // $facture->getSumDiscountsUsed() . "<br />";
                     $acomptes_ht += $facture->getData('total_ht');
                     $acomptes_ttc += $facture->getData('total_ttc');
                 }
@@ -909,7 +909,7 @@ class BContract_echeancier extends BimpObject
             if ($periode['FACTURE'] != '') {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
                 $facture->find(Array('ref' => $periode['FACTURE']), 1);
-                if($facture->isLoaded()) {
+                if ($facture->isLoaded()) {
                     $forDisplayReferenceFacture = $facture->getNomUrl();
                     if ($facture->getData('paye')) {
                         $displayEtatPaiment = 'PAY&Eacute;E';
@@ -1188,18 +1188,18 @@ class BContract_echeancier extends BimpObject
                 );
 
                 $tmpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
-                if($tmpFacture->find(Array('ref' => $factureStr), 1)) {
-                    if($tmpFacture->getData('fk_facture_source')) {
+                if ($tmpFacture->find(Array('ref' => $factureStr), 1)) {
+                    if ($tmpFacture->getData('fk_facture_source')) {
                         $factureSource = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $tmpFacture->getData('fk_facture_source'));
                         $periodes['periodes'][] = Array(
-                            'START' => $startDateStr,
-                            'STOP'  => $stopDateStr,
-                            'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDateStr : $startDateStr . ' ('.$factureStr.')',
-                            'HT' => $resteAPayer,
-                            'DUREE_MOIS' => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
-                            'PRICE' => $factureSource->getData('total_ht'),
-                            'TVA' => $factureSource->getData('total_ht') * 0.2,
-                            'FACTURE' => $factureSource->getRef()
+                            'START'            => $startDateStr,
+                            'STOP'             => $stopDateStr,
+                            'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDateStr : $startDateStr . ' (' . $factureStr . ')',
+                            'HT'               => $resteAPayer,
+                            'DUREE_MOIS'       => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
+                            'PRICE'            => $factureSource->getData('total_ht'),
+                            'TVA'              => $factureSource->getData('total_ht') * 0.2,
+                            'FACTURE'          => $factureSource->getRef()
                         );
                     }
                 }
@@ -1263,15 +1263,15 @@ class BContract_echeancier extends BimpObject
         $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture']);
 
         $dateDebutFacture = $instance->dol_object->lines[0]->date_start;
-        
-            if ($instance->dol_object->delete($user) > 0) {
-                    $this->onDeleteFacture($dateDebutFacture);
-                
-                $success = "Facture " . $instance->getData('ref') . ' supprimée avec succès';
-            } else {
-                $errors[] = "Facture " . $instance->getData('ref') . ' n\'à pas été supprimée';
-                ;
-            }
+
+        if ($instance->dol_object->delete($user) > 0) {
+            $this->onDeleteFacture($dateDebutFacture);
+
+            $success = "Facture " . $instance->getData('ref') . ' supprimée avec succès';
+        } else {
+            $errors[] = "Facture " . $instance->getData('ref') . ' n\'à pas été supprimée';
+            ;
+        }
 
         return Array(
             'success'  => $success,

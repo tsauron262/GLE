@@ -35,7 +35,28 @@ class BContract_contrat extends BimpDolObject
     public static $files_module_part = 'contract';
     public static $modulepart = 'contract';
 
-    // Les status
+    // Types: 
+    CONST CONTRAT_GLOBAL = "CT";
+    CONST CONTRAT_DE_MAINTENANCE = 'CMA';
+    CONST CONTRAT_SUPPORT_TELEPHONIQUE = 'CST';
+    CONST CONTRAT_MONITORING = 'CMO';
+    CONST CONTRAT_DE_SPARE = 'CSP';
+    CONST CONTRAT_DE_DELEGATION_DE_PERSONEL = 'CDP';
+    CONST CONTRAT_MONETIQUE = 'CMQ';
+    CONST CONTRAT_ASMX = 'ASMX';
+    
+    public static $objet_contrat = [
+        self::CONTRAT_GLOBAL                    => ['label' => "Contrat global", 'classes' => [], 'icon' => 'globe'],
+        self::CONTRAT_DE_MAINTENANCE            => ['label' => "Contrat de maintenance", 'classes' => [], 'icon' => 'cogs'],
+        self::CONTRAT_SUPPORT_TELEPHONIQUE      => ['label' => "Contrat de support téléphonique", 'classes' => [], 'icon' => 'phone'],
+        self::CONTRAT_MONITORING                => ['label' => "Contrat de monitoring", 'classes' => [], 'icon' => 'terminal'],
+        self::CONTRAT_DE_SPARE                  => ['label' => "Contrat de spare", 'classes' => [], 'icon' => 'share'],
+        self::CONTRAT_DE_DELEGATION_DE_PERSONEL => ['label' => "Contrat de délégation du personnel", 'classes' => [], 'icon' => 'male'],
+        self::CONTRAT_MONETIQUE                 => ['label' => "Contrat monétique", 'classes' => [], 'icon' => 'fas_file-invoice-dollar'],
+        self::CONTRAT_ASMX                 => ['label' => "Contrat ASMX", 'classes' => [], 'icon' => 'fas fa5-external-link-alt'],
+    ];
+    
+    // Statuts: 
     CONST CONTRAT_STATUT_ABORT = -1;
     CONST CONTRAT_STATUS_BROUILLON = 0;
     CONST CONTRAT_STATUS_VALIDE = 1;
@@ -46,49 +67,7 @@ class BContract_contrat extends BimpDolObject
     CONST CONTRAT_STATUS_ACTIVER = 11;
     CONST CONTRAT_STATUS_ACTIVER_TMP = 12;
     CONST CONTRAT_STATUS_ACTIVER_SUP = 13;
-    // Les périodicitées
-    CONST CONTRAT_PERIOD_AUCUNE = 0;
-    CONST CONTRAT_PERIOD_MENSUELLE = 1;
-    CONST CONTRAT_PERIOD_BIMENSUELLE = 2;
-    CONST CONTRAT_PERIOD_TRIMESTRIELLE = 3;
-    CONST CONTRAT_PERIOD_SEMESTRIELLE = 6;
-    CONST CONTRAT_PERIOD_ANNUELLE = 12;
-    CONST CONTRAT_PERIOD_TOTAL = 1200;
-    // Les délais d'intervention
-    CONST CONTRAT_DELAIS_0_HEURES = 0;
-    CONST CONTRAT_DELAIS_4_HEURES = 4;
-    CONST CONTRAT_DELAIS_8_HEURES = 8;
-    CONST CONTRAT_DELAIS_16_HEURES = 16;
-    // Les renouvellements
-    CONST CONTRAT_RENOUVELLEMENT_NON = 0; // 100
-    CONST CONTRAT_RENOUVELLEMENT_1_FOIS = 1; // 101
-    CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 2; // 102
-    CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 3; // 103
-    CONST CONTRAT_RENOUVELLEMENT_4_FOIS = 4; // 104
-    CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5; // 105
-    CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 6; // 106
-    CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12; // 112
-    CONST CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM = 666;
-    // Contrat dénoncé
-    CONST CONTRAT_DENOUNCE_NON = 0;
-    CONST CONTRAT_DENOUNCE_OUI_DANS_LES_TEMPS = 1;
-    CONST CONTRAT_DENOUNCE_OUI_HORS_DELAIS = 2;
-    CONST CONTRAT_GLOBAL = "CT";
-    CONST CONTRAT_DE_MAINTENANCE = 'CMA';
-    CONST CONTRAT_SUPPORT_TELEPHONIQUE = 'CST';
-    CONST CONTRAT_MONITORING = 'CMO';
-    CONST CONTRAT_DE_SPARE = 'CSP';
-    CONST CONTRAT_DE_DELEGATION_DE_PERSONEL = 'CDP';
-    CONST CONTRAT_MONETIQUE = 'CMQ';
-    CONST CONTRAT_ASMX = 'ASMX';
-    // Type mail interne
-    CONST MAIL_DEMANDE_VALIDATION = 1;
-    CONST MAIL_VALIDATION = 2;
-    CONST MAIL_ACTIVATION = 3;
-    CONST MAIL_SIGNED = 4;
-    CONST MAIL_TEMPORAIRE = 5;
-    CONST PRORATA_PERIODE = false;
-
+    
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT        => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_BROUILLON    => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
@@ -101,11 +80,17 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_STATUS_ACTIVER_TMP  => Array('label' => 'Activation provisoire', 'classes' => Array('important'), 'icon' => 'fas_history'),
         self::CONTRAT_STATUS_ACTIVER_SUP  => Array('label' => 'Activation suspendue pour cause de non signature', 'classes' => Array('danger'), 'icon' => 'fas_stop')
     );
-    public static $denounce = Array(
-        self::CONTRAT_DENOUNCE_NON                => Array('label' => 'Non', 'classes' => Array('success'), 'icon' => 'fas_check'),
-        self::CONTRAT_DENOUNCE_OUI_DANS_LES_TEMPS => Array('label' => 'OUI, DANS LES TEMPS', 'classes' => Array('success'), 'icon' => 'fas_check'),
-        self::CONTRAT_DENOUNCE_OUI_HORS_DELAIS    => Array('label' => 'OUI, HORS DELAIS', 'classes' => Array('danger'), 'icon' => 'fas_times'),
-    );
+    
+    // Périodicitées: 
+    
+    CONST CONTRAT_PERIOD_AUCUNE = 0;
+    CONST CONTRAT_PERIOD_MENSUELLE = 1;
+    CONST CONTRAT_PERIOD_BIMENSUELLE = 2;
+    CONST CONTRAT_PERIOD_TRIMESTRIELLE = 3;
+    CONST CONTRAT_PERIOD_SEMESTRIELLE = 6;
+    CONST CONTRAT_PERIOD_ANNUELLE = 12;
+    CONST CONTRAT_PERIOD_TOTAL = 1200;
+    
     public static $period = Array(
         self::CONTRAT_PERIOD_MENSUELLE     => 'Mensuelle',
         self::CONTRAT_PERIOD_BIMENSUELLE   => 'Bimestrielle',
@@ -115,12 +100,31 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_PERIOD_TOTAL         => 'Une fois',
         self::CONTRAT_PERIOD_AUCUNE        => 'Aucune',
     );
+    
+    // Les délais d'intervention
+    CONST CONTRAT_DELAIS_0_HEURES = 0;
+    CONST CONTRAT_DELAIS_4_HEURES = 4;
+    CONST CONTRAT_DELAIS_8_HEURES = 8;
+    CONST CONTRAT_DELAIS_16_HEURES = 16;
+    
     public static $gti = Array(
         self::CONTRAT_DELAIS_0_HEURES  => '',
         self::CONTRAT_DELAIS_4_HEURES  => '4 heures ouvrées',
         self::CONTRAT_DELAIS_8_HEURES  => '8 heures ouvrées',
         self::CONTRAT_DELAIS_16_HEURES => '16 heures ouvrées'
     );
+    
+    // Les renouvellements
+    CONST CONTRAT_RENOUVELLEMENT_NON = 0; // 100
+    CONST CONTRAT_RENOUVELLEMENT_1_FOIS = 1; // 101
+    CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 2; // 102
+    CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 3; // 103
+    CONST CONTRAT_RENOUVELLEMENT_4_FOIS = 4; // 104
+    CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5; // 105
+    CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 6; // 106
+    CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12; // 112
+    CONST CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM = 666;
+    
     public static $renouvellement = Array(
         self::CONTRAT_RENOUVELLEMENT_1_FOIS           => 'Tacite 1 fois',
         self::CONTRAT_RENOUVELLEMENT_2_FOIS           => 'Tacite 2 fois',
@@ -132,6 +136,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION  => 'Sur proposition',
         self::CONTRAT_RENOUVELLEMENT_NON              => 'Non',
     );
+    
     public static $renouvellement_create = Array(
         self::CONTRAT_RENOUVELLEMENT_NON              => "Choix du renouvellement",
         self::CONTRAT_RENOUVELLEMENT_1_FOIS           => 'Tacite 1 fois',
@@ -143,6 +148,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM => 'Durée indéterminée',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION  => 'Sur proposition'
     );
+    
     public static $renouvellement_edit = Array(
         self::CONTRAT_RENOUVELLEMENT_NON              => 'Aucun',
         self::CONTRAT_RENOUVELLEMENT_1_FOIS           => 'Tacite 1 fois',
@@ -154,16 +160,28 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM => 'Durée indéterminée',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION  => 'Sur proposition'
     );
-    public static $objet_contrat = [
-        self::CONTRAT_GLOBAL                    => ['label' => "Contrat global", 'classes' => [], 'icon' => 'globe'],
-        self::CONTRAT_DE_MAINTENANCE            => ['label' => "Contrat de maintenance", 'classes' => [], 'icon' => 'cogs'],
-        self::CONTRAT_SUPPORT_TELEPHONIQUE      => ['label' => "Contrat de support téléphonique", 'classes' => [], 'icon' => 'phone'],
-        self::CONTRAT_MONITORING                => ['label' => "Contrat de monitoring", 'classes' => [], 'icon' => 'terminal'],
-        self::CONTRAT_DE_SPARE                  => ['label' => "Contrat de spare", 'classes' => [], 'icon' => 'share'],
-        self::CONTRAT_DE_DELEGATION_DE_PERSONEL => ['label' => "Contrat de délégation du personnel", 'classes' => [], 'icon' => 'male'],
-        self::CONTRAT_MONETIQUE                 => ['label' => "Contrat monétique", 'classes' => [], 'icon' => 'fas_file-invoice-dollar'],
-        self::CONTRAT_ASMX                 => ['label' => "Contrat ASMX", 'classes' => [], 'icon' => 'fas fa5-external-link-alt'],
-    ];
+    
+    
+    // Contrat dénoncé
+    CONST CONTRAT_DENOUNCE_NON = 0;
+    CONST CONTRAT_DENOUNCE_OUI_DANS_LES_TEMPS = 1;
+    CONST CONTRAT_DENOUNCE_OUI_HORS_DELAIS = 2;
+    
+    public static $denounce = Array(
+        self::CONTRAT_DENOUNCE_NON                => Array('label' => 'Non', 'classes' => Array('success'), 'icon' => 'fas_check'),
+        self::CONTRAT_DENOUNCE_OUI_DANS_LES_TEMPS => Array('label' => 'OUI, DANS LES TEMPS', 'classes' => Array('success'), 'icon' => 'fas_check'),
+        self::CONTRAT_DENOUNCE_OUI_HORS_DELAIS    => Array('label' => 'OUI, HORS DELAIS', 'classes' => Array('danger'), 'icon' => 'fas_times'),
+    );
+    
+    // Type mail interne
+    CONST MAIL_DEMANDE_VALIDATION = 1;
+    CONST MAIL_VALIDATION = 2;
+    CONST MAIL_ACTIVATION = 3;
+    CONST MAIL_SIGNED = 4;
+    CONST MAIL_TEMPORAIRE = 5;
+    CONST PRORATA_PERIODE = false;
+    
+    
     public static $true_objects_for_link = [
         'commande'      => 'Commande',
         'facture_fourn' => 'Facture fournisseur',
@@ -174,8 +192,9 @@ class BContract_contrat extends BimpDolObject
     function __construct($module, $object_name)
     {
         $this->redirectMode = 4;
-        $this->email_group = BimpCore::getConf('email_groupe', '', 'bimpcontract'); // A éviter, faire getConf() à chaque fois que nécessaire
+        $this->email_group = BimpCore::getConf('email_groupe', '', 'bimpcontract');
         $this->email_facturation = BimpCore::getConf('email_facturation', '', 'bimpcontract');
+        
         return parent::__construct($module, $object_name);
     }
 
@@ -1720,7 +1739,7 @@ class BContract_contrat extends BimpDolObject
         foreach ($children as $id_child) {
             $av = $this->getChildObject('avenant', $id_child);
             if (!$idAvenant || $idAvenant == $id_child)
-                $total += $av->getTotalCoup();
+                $total += $av->getCoutTotal();
         }
 
         return $total;

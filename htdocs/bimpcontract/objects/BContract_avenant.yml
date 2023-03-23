@@ -57,6 +57,15 @@ fields:
         label: Contrat
         type: id_object
         object: contrat
+    type:
+        label: Type de l'avenant
+        type: int
+        values:
+            array: types
+        input: 
+            type: select
+            options: 
+                callback: getTypeAvenantArray
     lieu:
         label: Lieu d'intervention ajouté au contrat
         type: text
@@ -92,11 +101,6 @@ fields:
     private_close_note:
         label: Private
         type: text
-    type:
-        label: Type de l'avenant
-        type: int
-        values:
-            array: typeAvenant
     want_end_date:
         label: Date de fin souhaitée
         type: date
@@ -109,57 +113,11 @@ fields:
     id_signature:
         label: Signature
         type: id_object
-        object: signature
-
-                
+        object: signature                
     signature_params: 
         label: Paramètres incrustation signature
         type: json
 
-lists:
-    default:
-        object_change_reload: BContract_contrat
-        title: Liste des avenant du contrat
-        add_form_name: add
-        delete_btn: 1
-        modal_view: avenant
-        extra_btn:
-            callback: getExtraBtn
-        cols:
-            ref:
-                label: Référence
-                value:
-                    callback: getRefAv
-            date_effect:
-            nb_jours_reste:
-                label: Prorata jours
-                value:
-                    callback: getProataDays
-            signed:
-            date_signed:
-            statut:
-            coup:
-                label: Coût de l'avenant au prorata
-                value:
-                    callback: displayTotalCoup
-#            adding:
-#                label: Adding Amount
-#                value:
-#                    callback: getThisAddingAmountForTypeProlongation
-            user_create:
-            date_create:
-    all:
-        extends: default
-        add_form_name: unset
-        delete_btn: 0
-        inline_view: unset
-        modal_view: avenant
-        extra_btn: unset
-        page_btn: 1
-        cols:
-            id_contrat:
-            coup: unset
-                
 forms:
     activate:
         title: Activation de l'avenant
@@ -199,10 +157,7 @@ forms:
               input:
                   type: qty
               show:
-                  callback: 
-                      method: by
-                      params:
-                          - a
+                  callback: isByYear
             - custom: 1
               label: Nombre de mois de prolongation
               input_name: month
@@ -211,10 +166,7 @@ forms:
               input:
                   type: qty
               show:
-                  callback: 
-                      method: by
-                      params:
-                          - m
+                  callback: isByMonth
               
     add:
         title: Création d'un avenant
@@ -312,7 +264,8 @@ forms:
                                 - field_value: fk_soc
                 value: 
                     callback: getDefaultSignatureContact
-                      
+                    
+                    
 fields_tables:
     infos:
         panel: 1
@@ -322,6 +275,7 @@ fields_tables:
               edit: 1
             - field: type
               edit: 1
+              
 views:
     avenant:
         title: 
@@ -345,3 +299,47 @@ views:
                             col_lg: 12
                             custom: 
                                 callback: displayDet
+
+lists_cols: 
+    ref: 
+        label: Référence
+        value:
+            callback: getRefAv
+    cout:
+        label: Coût de l'avenant au prorata
+        value:
+            callback: displayCoutTotal
+
+lists:
+    default:
+        object_change_reload: BContract_contrat
+        title: Liste des avenant du contrat
+        add_form_name: add
+        delete_btn: 1
+        modal_view: avenant
+        extra_btn:
+            callback: getExtraBtn
+        cols:
+            ref:
+            date_effect:
+            nb_jours_reste:
+                label: Prorata jours
+                value:
+                    callback: getProataDays
+            signed:
+            date_signed:
+            statut:
+            cout:
+            user_create:
+            date_create:
+    all:
+        extends: default
+        add_form_name: unset
+        delete_btn: 0
+        inline_view: unset
+        modal_view: avenant
+        extra_btn: unset
+        page_btn: 1
+        cols:
+            id_contrat:
+            coup: unset

@@ -32,6 +32,8 @@ $where .= ' AND content LIKE \'%' . $bdb->db->escape('L\'encours ICBA pour ce cl
 
 $where .= ' AND date_create < \'2023-02-21 00:00:00\'';
 
+echo 'WHERE : ' . $where . '<br/><br/>';
+
 if ($bdb->delete('bimpcore_note', $where) <= 0) {
     echo 'FAIL - ' . $bdb->err();
 } else {

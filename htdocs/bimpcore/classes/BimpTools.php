@@ -451,9 +451,9 @@ class BimpTools
         return (int) $DT->format('U');
     }
 
-    public static function getDateFromDolDate($date, $return_format = 'Y-m-d')
+    public static function getDateFromDolDate($date_tms, $return_format = 'Y-m-d')
     {
-        if (is_null($date) || !$date) {
+        if (is_null($date_tms) || !(int) $date_tms) {
             return '';
         }
         return date($return_format, $date);

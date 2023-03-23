@@ -28,6 +28,12 @@ labels:
     name_plur: sav
 
 objects:
+    rib_client: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_SocBankAccount
+                
     contrat:
         card: 
             title: 
@@ -746,6 +752,25 @@ forms:
                   type: text
               value: 0
             - custom: 1
+              label: RIB Client
+              input_name: rib_client
+              data_type: id_object
+              object: rib_client 
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteRibsArray
+                          params: 
+                              - field_value: id_client
+                              - 1
+                  help: Le RIB du client est obligatoire pour le mode de paiement indiqué dans le devis.<br/>Si aucun RIB n\'est disponible, veuillez en créer un depuis la fiche client ou modifier le mode de réglement du devis.
+              show: 
+                  callback: isRibClientRequired
+              display_if: 
+                  field_name: paid
+                  show_values: 0
+            - custom: 1
               label: Notifier le client
               input_name: send_msg
               data_type: bool
@@ -1110,8 +1135,7 @@ forms:
               data_type: money
               required: 1
               input: 
-                  type: text
-                  
+                  type: text   
               
     europe:
         rows: 

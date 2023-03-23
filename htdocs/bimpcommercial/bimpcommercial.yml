@@ -88,6 +88,15 @@ params:
         type: bool
         def: 1
         
+    rib_client_required_modes_paiement: 
+        label: Modes de paiements pour lesquels le RIB client est obligatoire
+        info: Liste d'IDs des modes de paiement séparés par une virgule sans espaces. 
+        def: ''
+        
+    entrepots_ld:
+        label: Entrepots en livraison direct
+        info: Tableau json de type [1,2]
+        
     # PDFs: 
     pdf_add_cgv: 
         label: Ajouter CGV dans les docs PDF
@@ -149,10 +158,6 @@ params:
                   relances_clients_entrepots_speciaux: 
                       label: ID Entrepôts spéciaux pour les relances
                       info: Liste des entrepôts à relancer séparément lors des relances globales
-                      
-    entrepots_ld:
-        label: Entrepots en livraison direct
-        info: Tableau json de type [1,2]
                     
     # Signatures: 
         

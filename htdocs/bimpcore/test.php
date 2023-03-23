@@ -28,7 +28,7 @@ if (!$user->admin) {
 
 $id_client = 23;
 $where = 'obj_module = \'bimpcore\' AND obj_name = \'Bimp_Client\' AND id_obj ' . $id_client;
-$where .= ' AND content LIKE \'%L\'encours ICBA pour ce client n\'est valable que jusqu\'au%\'';
+$where .= ' AND content LIKE \'%' . $bdb->db->escape('L\'encours ICBA pour ce client n\'est valable que jusqu\'au') . '%\'';
 
 $where .= ' AND date_create < \'2023-02-21 00:00:00\'';
 

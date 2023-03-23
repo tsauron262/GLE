@@ -89,9 +89,13 @@ class BimpClientForDol extends Bimp_Client
         $nb_rappels = 0;
 
         if (!empty($clients)) {
+            $bdb = BimpCache::getBdb();
             BimpObject::loadClass('bimpcore', 'BimpNote');
 
             foreach ($clients as $c) {
+                $where = 'obj_module = \'bimpcore\' AND obj_name = \'Bimp_Client\' AND id_obj ' . $c->id;
+                $where .= ' AND content LIKE \'%L\'encours ICBA pour ce client n\'est valable que jusqu\'au%\'';
+
                 $date_validite = new DateTime($c->getData('date_depot_icba'));
                 $date_validite->add(new DateInterval('P1Y'));
                 $msg = "L'encours ICBA pour ce client n'est valable que jusqu'au " . $date_validite->format("d/m/Y");

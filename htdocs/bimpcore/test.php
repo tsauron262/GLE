@@ -26,29 +26,13 @@ if (!$user->admin) {
     exit;
 }
 
-//if ((int) BimpTools::getValue('test_serials', 0)) {
-//    echo 'CHECK SERIALS <br/>';
-//    BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
-//
-//    $nbOk = 0;
-//    BimpRevalorisation::checkAppleCareSerials($nbOk);
-//
-//    echo 'OK - ' . $nbOk . ' serials traités';
-//}
-//
-//if ((int) BimpTools::getValue('test_revals', 0)) {
-//    echo 'CHECKS REVALS: <br/>';
-//    BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
-//
-//    $nbOk = 0;
-//    $errors = BimpRevalorisation::checkBilledApplecareReval(null, $nbOk);
-//    echo 'OK - ' . $nbOk . ' revals traitées <br/>';
-//
-//    echo 'ERRORS<pre>';
-//    print_r($errors);
-//    exit;
-//}
+$id_client = 23;
+$where = 'obj_module = \'bimpcore\' AND obj_name = \'Bimp_Client\' AND id_obj ' . $id_client;
+$where .= ' AND content LIKE \'%L\'encours ICBA pour ce client n\'est valable que jusqu\'au%\'';
 
+$where .= ' AND date_create < \'2023-02-21 00:00:00\'';
+
+$bdb->delete('bimpcore_note', $where);
 
 echo '<br/>FIN';
 echo '</body></html>';

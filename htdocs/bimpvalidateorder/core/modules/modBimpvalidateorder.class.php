@@ -176,7 +176,7 @@ class modBimpvalidateorder extends DolibarrModules {
             0=>array(
                 'label'         => 'Rappel validations commerciales',
                 'jobtype'       => 'method',
-                'class'         =>  '/bimpvalidateorder/objects/ValidComm.class.php',
+                'class'         =>  '/bimpvalidateorder/class/BimpValidateOrderCronExec.class.php',
                 'objectname'    => 'BimpValidateOrderCronExec',
                 'method'        => 'sendRappel',
                 'parameters'    => '',

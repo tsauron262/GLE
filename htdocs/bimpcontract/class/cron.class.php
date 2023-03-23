@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
-class BimpContratCronExec extends BimpCron
+class cron extends BimpCron
 {
 
     public $from = null;
@@ -35,7 +35,7 @@ class BimpContratCronExec extends BimpCron
         self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM
     ];
 
-    function zu_gehen()
+    public function zu_gehen()
     {
         $this->autoClose();
         $this->mailJourActivation();
@@ -257,7 +257,7 @@ class BimpContratCronExec extends BimpCron
         }
     }
 
-    function facturation_auto()
+    public function facturation_auto()
     {
         global $langs;
 

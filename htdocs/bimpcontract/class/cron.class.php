@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
-class BimpContratCron extends BimpCron
+class BimpContratCronExec extends BimpCron
 {
 
     public $from = null;

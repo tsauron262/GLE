@@ -145,7 +145,7 @@ class BimpCore
         $notifs = '{';
         if (self::isContextPrivate()) {
             $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-            $config_notification = $notification->getList();
+            $config_notification = $notification->getList(array('active' => 1));
 
             foreach ($config_notification as $cn) {
                 $notifs .= $cn['id'] . ": {";

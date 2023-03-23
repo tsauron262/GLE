@@ -31,6 +31,10 @@ fields:
         label: Méthode (PHP)
         type: string
         
+    active:
+        label: Activé
+        type: int
+        
         
 lists:
     default:

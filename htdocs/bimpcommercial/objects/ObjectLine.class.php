@@ -1906,6 +1906,7 @@ class ObjectLine extends BimpObject
                                     $text .= 'A partir du ';
                                 }
                                 $text .= $dt_from->format('d/m/Y');
+//                                $text .= ' - ' . $this->date_from;
                             }
 
                             if ($this->date_to) {
@@ -1916,6 +1917,7 @@ class ObjectLine extends BimpObject
                                     $text .= ' au ';
                                 }
                                 $text .= $dt_to->format('d/m/Y');
+//                                $text .= ' - ' . $this->date_to;
                             }
                         }
                         if ((!$text || $field !== 'desc_light') && $desc) {

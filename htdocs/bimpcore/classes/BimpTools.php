@@ -453,10 +453,10 @@ class BimpTools
 
     public static function getDateFromDolDate($date_tms, $return_format = 'Y-m-d')
     {
-        if (is_null($date_tms) || !(int) $date_tms) {
+        if (is_null($date_tms) || !$date_tms) {
             return '';
         }
-        return date($return_format, $date);
+        return date($return_format, $date_tms);
     }
 
     public static function getExtraFieldValues($object_type, $field)

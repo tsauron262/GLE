@@ -33,15 +33,19 @@ fields:
         
     active:
         label: Activé
-        type: int
+        type: bool
+        edit: 1
         
         
 lists:
     default:
         add_form_name: default
+        edit_btn: 1
         cols:
+            id:
             label:
             nom:
             module:            
             class:
             method:
+            active:

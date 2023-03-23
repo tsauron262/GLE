@@ -32,7 +32,11 @@ $where .= ' AND content LIKE \'%L\'encours ICBA pour ce client n\'est valable qu
 
 $where .= ' AND date_create < \'2023-02-21 00:00:00\'';
 
-$bdb->delete('bimpcore_note', $where);
+if ($bdb->delete('bimpcore_note', $where) <= 0) {
+    echo 'FAIL - ' . $bdb->err();
+} else {
+    echo 'ok';
+}
 
 echo '<br/>FIN';
 echo '</body></html>';

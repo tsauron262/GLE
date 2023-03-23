@@ -5,23 +5,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 class BimpCoreCronExec extends BimpCron
 {
 
-    public function mailCronErreur()
-    {
-        $bdb = new BimpDb($this->db);
-
-        $rows = $bdb->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
-
-        $i = 0;
-        if (is_array($rows)) {
-            foreach ($rows as $r) {
-                $i++;
-                mailSyn2('Cron en erreur', 'dev@bimp.fr', null, 'Attention, le cron ' . $r['label'] . ' d\id ' . $r['rowid'] . ' est en erreur...');
-            }
-        }
-        $this->output = $i . ' erreurs';
-        return 0;
-    }
-
     public function bimpDailyChecks()
     {
         $this->current_cron_name = 'Vérifs quotidiennes BimpCore';
@@ -206,6 +189,23 @@ class BimpCoreCronExec extends BimpCron
 
         BimpNote::cronNonLu();
         $this->output = 'OK';
+        return 0;
+    }
+
+    public function mailCronErreur()
+    {
+        $bdb = new BimpDb($this->db);
+
+        $rows = $bdb->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
+
+        $i = 0;
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $i++;
+                mailSyn2('Cron en erreur', 'dev@bimp.fr', null, 'Attention, le cron ' . $r['label'] . ' d\id ' . $r['rowid'] . ' est en erreur...');
+            }
+        }
+        $this->output = $i . ' erreurs';
         return 0;
     }
 }

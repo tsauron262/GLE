@@ -576,6 +576,18 @@ class BS_SAV extends BimpObject
         return 0;
     }
 
+    public function isRibClientRequired()
+    {
+        $propal = $this->getChildObject('propal');
+        if (BimpObject::objectLoaded($propal)) {
+            if (in_array((int) $propal->getData('fk_mode_reglement'), explode(',', BimpCore::getConf('rib_client_required_modes_paiement', null, 'bimpcommercial')))) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     // Getters params: 
 
     public function getCreateJsCallback()
@@ -3900,11 +3912,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                 $subject = "Fermeture du dossier " . $this->getData('ref');
                 $mail_msg = 'Nous vous remercions d\'avoir choisi LDLC' . ($nomMachine ? ' pour votre ' . $nomMachine : '') . '.' . "\n\n";
-                
+
                 if (!empty($files)) {
                     $mail_msg .= 'Veuillez trouver ci-joint votre facture pour cette réparation' . "\n\n";
                 }
-                
+
                 $mail_msg .= 'Dans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d\'APPLE, votre retour est important afin d\'améliorer la qualité de notre Centre de Services.' . "\n";
                 break;
 
@@ -5490,6 +5502,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                                 if ($payment_1_set) {
                                     $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
+                                    die('ICI: ' . $mode_reglement);
                                 } else {
                                     $mode_reglement = (int) $propal->dol_object->mode_reglement_id;
                                 }
@@ -5529,12 +5542,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
                                 $facture->array_options['options_centre'] = $this->getData('code_centre');
                                 $facture->array_options['options_expertise'] = 90;
-                                foreach ($propal->getRibArray() as $idR => $inut) {
-                                    $facture->array_options['options_rib_client'] = $idR;
-                                    break;
-                                }
 
-//                                $facture->array_options['options_rib_client'] = 
+                                if (in_array($mode_reglement, explode(',', BimpCore::getConf('rib_client_required_modes_paiement', null, 'bimpcommercial')))) {
+                                    $facture->array_options['options_rib_client'] = (int) BimpTools::getArrayValueFromPath($data, 'rib_client', 0);
+                                }
 
                                 $facture->linked_objects[$facture->origin] = $facture->origin_id;
                                 if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {

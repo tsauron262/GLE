@@ -6124,6 +6124,8 @@ class Bimp_CommandeLine extends ObjectLine
                     $line->desc = $this->desc;
                     $line->id_product = (int) $product->id;
                     $line->qty = (float) $qty;
+                    $line->date_from = $this->date_from;
+                    $line->date_to = $this->date_to;
 
                     switch ($type_price) {
                         case 1:

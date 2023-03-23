@@ -125,7 +125,7 @@ class ValidComm extends BimpObject
         $valid_encours = 1;
         $valid_impaye = 1;
         $valid_service = 1;
-
+        
         // Si on ne précise pas le type de validations a effectué => on les fait toutes
         if (empty($validations))
             $validations = array_keys(self::$types);
@@ -440,11 +440,11 @@ class ValidComm extends BimpObject
         return 0;
     }
 
-    public function userIsAvaible($id_user)
+    public function userIsAvaible($id_user, $from = null)
     {
 
         $errors = array();
-        $ok_user = Bimp_User::isUserAvaible($id_user, $errors);
+        $ok_user = Bimp_User::isUserAvaible($id_user, $errors, $from);
 
         // L'utilisateur n'a pas une liste de demande de validation trop longue ?
         BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm');
@@ -638,11 +638,17 @@ class ValidComm extends BimpObject
      */
     private function findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, &$val_comm_demande = 0, $options = array())
     {
-
+        
         if ($type == self::TYPE_ENCOURS)
             $val += $this->getEncours($bimp_object);
+        
+        // Get tomorrow
+        $dt_tomorrow = new DateTime();
+        $dt_tomorrow->add(new DateInterval('P1D')); 
+        $tomorrow = $dt_tomorrow->format('Y-m-d 10:00:00');
 
         $can_valid_not_avaible = 0;
+        $can_valid_avaible_tomorrow = 0;
         $can_valid_avaible = 0;
 
         $filters = array(
@@ -654,7 +660,6 @@ class ValidComm extends BimpObject
                 'in' => array($object, self::OBJ_ALL)
             ),
         );
-        $jourSemaine = BimpTools::getDayOfTwoWeeks();
 
         $filter_pv = '(sur_marge = 0 AND val_min <= ' . $val . ' AND ' . $val . ' <= val_max)';
 
@@ -672,7 +677,6 @@ class ValidComm extends BimpObject
                                 'on'    => 'a.user = user.rowid',
                                 'alias' => 'user')
         ));
-        $filters['user.day_off'] = array('part_type' => 'middle', 'part' => '[' . $jourSemaine . ']', 'not' => 1);
 
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= ' AND (only_child=' . self::USER_ASK_ALL;
@@ -683,39 +687,47 @@ class ValidComm extends BimpObject
 
         
         $rows = self::getBdb()->executeS($sql, 'array');
-        
         if (is_array($rows)) {
             foreach ($rows as $r) {
-                if ((int) $r['user'] == $user_ask->fk_user && $can_valid_avaible == 0) {
+                if (/*$can_valid_avaible == 0 and */(int) $r['user'] == (int) $user_ask->fk_user) {
                     if ($this->userIsAvaible($user_ask->fk_user)) {
                         $can_valid_avaible = $user_ask->fk_user;
                         $val_comm_demande = $r['id'];
+                    } elseif($this->userIsAvaible($r['user'], $tomorrow)) {
+                        $can_valid_avaible_tomorrow = $r['user'];
+                        $val_comm_demande_avaible_tomorrow = $r['id'];
                     } else {
                         $can_valid_not_avaible = $user_ask->fk_user;
                         $val_comm_demande_not_avaible = $r['id'];
                     }
-                } elseif ($can_valid_avaible == 0 and $this->userIsAvaible($r['user'])) {
+                } elseif ($can_valid_avaible         == 0 and $this->userIsAvaible($r['user'])) {
                     $can_valid_avaible = $r['user'];
                     $val_comm_demande = $r['id'];
-                } elseif ($can_valid_not_avaible == 0) {
+                } elseif($can_valid_avaible_tomorrow == 0 and $this->userIsAvaible($r['user'], $tomorrow)) {
+                    $can_valid_avaible_tomorrow = $r['user'];
+                    $val_comm_demande_avaible_tomorrow = $r['id'];
+                } elseif ($can_valid_not_avaible     == 0) {
                     $can_valid_not_avaible = $r['user'];
                     $val_comm_demande_not_avaible = $r['id'];
                 }
             }
         }
-        
-        global $user;
-        if((int) $user->id == 330) {
-            echo '<br/>$can_valid_avaible ' . $can_valid_avaible;
-            echo '<br/>$can_valid_not_avaible ' . $can_valid_not_avaible;
-            
-        }
 
+        // Un utilisateur capable de valider est directement disponible
         if ($can_valid_avaible != 0)
             return $can_valid_avaible;
 
-        $val_comm_demande = $val_comm_demande_not_avaible;
-        return $can_valid_not_avaible;
+        // Un utilisateur capable de valider est disponible demain
+        elseif($can_valid_avaible_tomorrow) {
+            $val_comm_demande = $val_comm_demande_avaible_tomorrow;
+            return $can_valid_avaible_tomorrow;
+
+        // Un utilisateur capable de valider n'est pas disponible
+        } else {
+            $val_comm_demande = $val_comm_demande_not_avaible;
+            return $can_valid_not_avaible;
+        
+        }
     }
 
     public function demandeExists($class, $id_object, $type = null, $status = null, $return_all = false)

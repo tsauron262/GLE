@@ -5502,7 +5502,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                                 if ($payment_1_set) {
                                     $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
-                                    die('ICI: ' . $mode_reglement);
                                 } else {
                                     $mode_reglement = (int) $propal->dol_object->mode_reglement_id;
                                 }

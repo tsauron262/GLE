@@ -451,11 +451,20 @@ class BimpTools
         return (int) $DT->format('U');
     }
 
-    public static function getDateFromDolDate($date_tms, $return_format = 'Y-m-d')
+    public static function getDateFromTimestamp($date_tms, $return_format = 'Y-m-d')
     {
         if (is_null($date_tms) || !$date_tms) {
             return '';
         }
+        
+        if (!is_int($date_tms)) {
+            if (preg_match('/^[0-9]+$/', $date_tms)) {
+                $date_tms = (int) $date_tms;
+            } else {
+                $date_tms = strtotime($date_tms);
+            }
+        }
+        
         return date($return_format, $date_tms);
     }
 

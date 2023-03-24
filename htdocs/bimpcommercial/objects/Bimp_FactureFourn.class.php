@@ -1500,7 +1500,7 @@ class Bimp_FactureFourn extends BimpCommAchat
         }
 
         $this->dol_object->date = strtotime($this->getData('datef'));
-        $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($this->getData('fk_cond_reglement'))));
+        $this->set('date_lim_reglement', BimpTools::getDateFromTimestamp($this->dol_object->calculate_date_lim_reglement($this->getData('fk_cond_reglement'))));
 
         return parent::create($warnings, $force_create);
     }
@@ -1523,7 +1523,7 @@ class Bimp_FactureFourn extends BimpCommAchat
 
         if ($changeCondRegl || $changeDateF) {
             $this->dol_object->date = strtotime($this->getData('datef'));
-            $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
+            $this->set('date_lim_reglement', BimpTools::getDateFromTimestamp($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }
 
         $errors = parent::update($warnings, $force_update);

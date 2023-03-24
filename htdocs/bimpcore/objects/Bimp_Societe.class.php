@@ -2087,7 +2087,7 @@ class Bimp_Societe extends BimpDolObject
             $contrat = null;
 
             if ($this->dol_object->date_creation) {
-                $dt = new DateTime(BimpTools::getDateFromDolDate($this->dol_object->date_creation));
+                $dt = new DateTime(BimpTools::getDateFromTimestamp($this->dol_object->date_creation));
                 $date_regle_encoure = new DateTime("2021-05-01");
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Créé le ';
@@ -2105,7 +2105,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if ($this->dol_object->date_modification) {
-                $dt = new DateTime(BimpTools::getDateFromDolDate($this->dol_object->date_modification));
+                $dt = new DateTime(BimpTools::getDateFromTimestamp($this->dol_object->date_modification));
 
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Dernière mise à jour le ' . $dt->format('d / m / Y');

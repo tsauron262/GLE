@@ -5060,7 +5060,7 @@ class Bimp_Facture extends BimpComm
                     $errors = $this->updateField('datef', $today);
                     $this->dol_object->date = strtotime($this->getData('datef'));
                 }
-                $this->updateField('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement((int) $this->getData('fk_cond_reglement'))));
+                $this->updateField('date_lim_reglement', BimpTools::getDateFromTimestamp($this->dol_object->calculate_date_lim_reglement((int) $this->getData('fk_cond_reglement'))));
 
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
                 $fac_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
@@ -6355,7 +6355,7 @@ class Bimp_Facture extends BimpComm
 
         if ($changeCondRegl || $changeDateF) {
             $this->dol_object->date = strtotime($this->getData('datef'));
-            $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
+            $this->set('date_lim_reglement', BimpTools::getDateFromTimestamp($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }
 
         if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance')) {

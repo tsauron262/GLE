@@ -2947,8 +2947,8 @@ class ObjectLine extends BimpObject
                 $this->tva_tx = (float) $line->tva_tx;
                 $this->pa_ht = (float) $line->pa_ht;
                 $this->remise = (float) $line->remise_percent;
-                $this->date_from = BimpTools::getDateFromDolDate($line->date_start);
-                $this->date_to = BimpTools::getDateFromDolDate($line->date_end);
+                $this->date_from = BimpTools::getDateFromTimestamp($line->date_start);
+                $this->date_to = BimpTools::getDateFromTimestamp($line->date_end);
                 $this->id_remise_except = (int) $line->fk_remise_except;
                 break;
 

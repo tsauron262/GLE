@@ -1840,8 +1840,7 @@ class BimpCache
         if (!(int) $id_societe) {
             return ($include_empty ? array(0 => '') : array());
         }
-
-
+        
         $key = 'societe_' . $id_societe . '_ribs_array';
 
         if (!isset(self::$cache[$key])) {

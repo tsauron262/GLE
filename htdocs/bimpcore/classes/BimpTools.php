@@ -456,14 +456,15 @@ class BimpTools
         if (is_null($date_tms) || !$date_tms) {
             return '';
         }
-        
+
         if (!is_int($date_tms)) {
             if (preg_match('/^[0-9]+$/', $date_tms)) {
                 $date_tms = (int) $date_tms;
             } elseif (is_string($date_tms)) {
                 $date_tms = strtotime($date_tms);
                 BimpCore::addlog('BimpTools::getDateFromTimestamp() - tms au format string', 4, 'bimpcore', null, array(
-                    'tms' => (string) $date_tms
+                    'tms initial'  => (string) '"' . $date_tms . '"',
+                    'tms converti' => $date_tms
                 ));
             } else {
                 BimpCore::addlog('Erreur BimpTools::getDateFromTimestamp() - tms invalide', 4, 'bimpcore', null, array(
@@ -472,7 +473,7 @@ class BimpTools
                 return '';
             }
         }
-        
+
         return date($return_format, $date_tms);
     }
 

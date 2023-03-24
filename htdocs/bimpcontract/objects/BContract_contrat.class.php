@@ -208,8 +208,10 @@ class BContract_contrat extends BimpDolObject
     {
         global $user;
 
-        if ($field_name == 'expertise')
+        if (in_array($field_name, array('expertise', 'rib_client'))) {
             return 1;
+        }
+            
 
         if ($this->getData('statut') == self::CONTRAT_STATUS_REFUSE)
             return 0;

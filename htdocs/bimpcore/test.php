@@ -26,6 +26,18 @@ if (!$user->admin) {
     exit;
 }
 
+//$date = '2023-01-15 01:15:30';
+//$tms = strtotime($date);
+//
+//echo 'Date : ' . $date . '<br/>';
+//echo 'tms : ' . $tms . '<br/>';
+//
+//$dt = new DateTime($date);
+//$dt2 = new DateTime((string) $tms);
+//
+//echo 'From date ' . $dt->format('Y-m-d H:i:s') . '<br/>';
+//echo 'From TMS : ' . $dt2->format('Y-m-d H:i:s');
+
 echo '<br/>FIN';
 echo '</body></html>';
 

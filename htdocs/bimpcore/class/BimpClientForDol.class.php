@@ -89,9 +89,14 @@ class BimpClientForDol extends Bimp_Client
         $nb_rappels = 0;
 
         if (!empty($clients)) {
+            $bdb = BimpCache::getBdb();
             BimpObject::loadClass('bimpcore', 'BimpNote');
 
             foreach ($clients as $c) {
+                $where = 'obj_module = \'bimpcore\' AND obj_name = \'Bimp_Client\' AND id_obj = ' . $c->id;
+                $where .= ' AND content LIKE \'%' . $bdb->db->escape('L\'encours ICBA pour ce client n\'est valable que jusqu\'au') . '%\'';
+                $bdb->delete('bimpcore_note', $where);
+
                 $date_validite = new DateTime($c->getData('date_depot_icba'));
                 $date_validite->add(new DateInterval('P1Y'));
                 $msg = "L'encours ICBA pour ce client n'est valable que jusqu'au " . $date_validite->format("d/m/Y");
@@ -165,11 +170,13 @@ class BimpClientForDol extends Bimp_Client
         $nb_rappels = 0;
 
         if (!empty($clients)) {
-
-            if (!BimpObject::loadClass('bimpcore', 'BimpNote'))
-                $this->addError("Erreur lors du chargement de la classe BimpNote");
+            $bdb = BimpCache::getBdb();
+            BimpObject::loadClass('bimpcore', 'BimpNote');
 
             foreach ($clients as $c) {
+                $where = 'obj_module = \'bimpcore\' AND obj_name = \'Bimp_Client\' AND id_obj = ' . $c->id;
+                $where .= ' AND content LIKE \'%' . $bdb->db->escape('La limite de crédit autorisée par Atradius arrive à échéance le') . '%\'';
+                $bdb->delete('bimpcore_note', $where);
 
                 $commercial = $c->getCommercial();
 

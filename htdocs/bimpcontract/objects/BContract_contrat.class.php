@@ -276,14 +276,13 @@ class BContract_contrat extends BimpDolObject
             case 'facturation_echu':
             case 'label':
                 return 1;
-                break;
+                
             case 'condregl':
                 if ($user->rights->bimpcontract->change_periodicity)
                     return 1;
                 break;
             default:
                 return 0;
-                break;
         }
     }
 
@@ -296,6 +295,7 @@ class BContract_contrat extends BimpDolObject
     {
         if ($this->getData('statut') != self::CONTRAT_STATUS_BROUILLON)
             return 0;
+        
         return 1;
     }
 
@@ -869,10 +869,6 @@ class BContract_contrat extends BimpDolObject
                 foreach ($list as $det) {
 
                     if($debug){
-//                            print_r($det);
-//                        $instanceFiDetDebug = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det', $det['rowid']);
-//                        $instanceFiDetDebug->printData();
-//                        $fi = $instanceFiDetDebug->getParentInstance();
                         $fi = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $det['fk_fichinter']);
                         echo '<br/>'.$fi->getNomUrl().' '.($det['duree'] / 3600) .'<br/>';
                     }

@@ -460,7 +460,7 @@ class BIMP_Task extends BimpObject
             }
 
             if ($t->can('view')) {
-                if ($j < $max_task_view) {
+//                if ($j < $max_task_view) {
                     $where = 'obj_type = \'bimp_object\' AND obj_module = \'bimptask\' AND obj_name = \'BIMP_Task\' AND id_obj = ' . $t->id;
                     $where .= ' AND viewed = 0 AND user_create != ' . (int) $user->id;
                     $not_viewed = (int) $bdb->getCount('bimpcore_note', $where);
@@ -483,7 +483,7 @@ class BIMP_Task extends BimpObject
                     $status_icon .= BimpRender::renderPopoverData(self::$valStatus[$status]['label']) . '>';
                     $status_icon .= BimpRender::renderIcon(self::$valStatus[$status]['icon']) . '</span>';
                     
-                    $parent_task = $t->getChildObject('task_mere');
+//                    $parent_task = $t->getChildObject('task_mere');
                     $task = array(
                         'id'             => $t->getData('id'),
                         'user_type'      => $user_type,
@@ -501,13 +501,13 @@ class BIMP_Task extends BimpObject
                         'can_attribute'  => (int) ($t->can('edit') or $t->canAttribute()),
                         'can_edit'       => (int) $t->can('edit'),
                         'author'         => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : ''),
-                        'parent_task' => (BimpObject::objectLoaded($parent_task) ? $parent_task->getLink() : '')
+//                        'parent_task' => (BimpObject::objectLoaded($parent_task) ? $parent_task->getLink() : '')
                     );
 
                     $tasks[] = $task;
 
                     $i++;
-                }
+//                }
             }
         }
 

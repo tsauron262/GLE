@@ -169,11 +169,11 @@ class notif_task extends AbstractNotification {
             html += '<div class="task_src">' + element.author + '</div>';
         }
 
-        if (element.parent_task) {
-            html += '<div class="parent_task">';
-            html += 'Tâche mère : '.element.parent_task;
-            html += '</div>';
-        }
+//        if (element.parent_task) {
+//            html += '<div class="parent_task">';
+//            html += 'Tâche mère : '.element.parent_task;
+//            html += '</div>';
+//        }
 
         html += '<div class="task_subj">';
         if (element.status_icon) {

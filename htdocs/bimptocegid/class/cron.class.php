@@ -132,6 +132,7 @@
             } else {
                 die('Pas sur la bonne instance de l\'ERP');
             }
+            return 0;
         }
         
         protected function checkFiles():void {

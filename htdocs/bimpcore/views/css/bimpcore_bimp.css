@@ -12042,9 +12042,13 @@ div.task_panel {
     font-style: italic;
     color: #006AFF; }
   /* line 250, ../scss/bimpcore/_notifications.scss */
+  div.task_panel .parent_task {
+    margin: 5px 0;
+    font-style: italic; }
+  /* line 255, ../scss/bimpcore/_notifications.scss */
   div.task_panel .task_subj {
     font-weight: bold; }
-  /* line 254, ../scss/bimpcore/_notifications.scss */
+  /* line 259, ../scss/bimpcore/_notifications.scss */
   div.task_panel .task_txt {
     margin: 5px;
     padding: 5px;
@@ -12054,24 +12058,24 @@ div.task_panel {
     box-shadow: 0 0 2px #787878; }
 
 /* Les onglets */
-/* line 265, ../scss/bimpcore/_notifications.scss */
+/* line 270, ../scss/bimpcore/_notifications.scss */
 ul#nav_task > li {
   width: 48%; }
 
-/* line 269, ../scss/bimpcore/_notifications.scss */
+/* line 274, ../scss/bimpcore/_notifications.scss */
 ul#nav_task > li.reload {
   width: 2%; }
 
-/* line 273, ../scss/bimpcore/_notifications.scss */
+/* line 278, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a {
   padding-left: 0px;
   padding-right: 0px; }
 
-/* line 278, ../scss/bimpcore/_notifications.scss */
+/* line 283, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a > span {
   margin: 0px; }
 
-/* line 282, ../scss/bimpcore/_notifications.scss */
+/* line 287, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a:hover {
   background-color: unset !important;
   border-top-color: white;

@@ -160,7 +160,6 @@ class notif_task extends AbstractNotification {
     formatElement(element, key) {
         var html = '';
 
-        var is_prio = (parseInt(element.prio) === 20);
         html += '<div class="task_content">';
         element.append = 'div.tab-content > #' + element.user_type + ' > div.task_no_prio';
 
@@ -170,11 +169,17 @@ class notif_task extends AbstractNotification {
             html += '<div class="task_src">' + element.author + '</div>';
         }
 
+        if (element.parent_task) {
+            html += '<div class="parent_task">';
+            html += 'Tâche mère : '.element.parent_task;
+            html += '</div>';
+        }
+
         html += '<div class="task_subj">';
         if (element.status_icon) {
             html += element.status_icon;
         }
-        
+
         if (element.prio_badge) {
             html += element.prio_badge;
         }

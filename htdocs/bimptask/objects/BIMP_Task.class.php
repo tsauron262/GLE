@@ -427,7 +427,7 @@ class BIMP_Task extends BimpObject
             return array("in", $tabT[0]);
     }
 
-    private static function getNewTasks($filters, $user_type, &$nb)
+    private static function getNewTasks($filters, $user_type, &$nb, $exclude_parent_tasks = true)
     {
         global $user;
         $bdb = self::getBdb();
@@ -436,6 +436,10 @@ class BIMP_Task extends BimpObject
 
         $max_task_view = 40;
         $i = 0;
+        
+        if ($exclude_parent_tasks) {
+            $filters['(SELECT COUNT(DISTINCT st.id) FROM ' . MAIN_DB_PREFIX . 'bimp_task st WHERE st.id_task = a.id)'] = 0;
+        }
         
         $sql = 'SELECT DISTINCT a.id';
         $sql .= BimpTools::getSqlFrom('bimp_task');
@@ -478,6 +482,8 @@ class BIMP_Task extends BimpObject
                     $status_icon = '<span class="' . implode(' ', self::$valStatus[$status]['classes']) . ' bs-popover" style="margin-right: 8px"';
                     $status_icon .= BimpRender::renderPopoverData(self::$valStatus[$status]['label']) . '>';
                     $status_icon .= BimpRender::renderIcon(self::$valStatus[$status]['icon']) . '</span>';
+                    
+                    $parent_task = $t->getChildObject('task_mere');
                     $task = array(
                         'id'             => $t->getData('id'),
                         'user_type'      => $user_type,
@@ -494,7 +500,8 @@ class BIMP_Task extends BimpObject
                         'can_close'      => (int) $t->can('edit'),
                         'can_attribute'  => (int) ($t->can('edit') or $t->canAttribute()),
                         'can_edit'       => (int) $t->can('edit'),
-                        'author'         => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : '')
+                        'author'         => (BimpObject::objectLoaded($user_author) ? $user_author->getName() : ''),
+                        'parent_task' => (BimpObject::objectLoaded($parent_task) ? $parent_task->getLink() : '')
                     );
 
                     $tasks[] = $task;

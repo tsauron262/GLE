@@ -215,6 +215,7 @@ forms:
               input:
                   type: search_product
                   card: default
+                  filter_type: service
             - custom: 1
               input_name: ht
               label: Prix HT

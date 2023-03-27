@@ -122,6 +122,8 @@ class ActionsBimpcore
             if(stripos($url, '/product/')){
                 if(stripos($url, '/stock/'))
                     $tabObj = array("bimpcore", "Bimp_Entrepot");
+                elseif(stripos($url, '/reassort.php'))
+                    $tabObj = array("bimpcommercial", "Bimp_Product_Entrepot");
                 else
                     $tabObj = array("bimpcore", "Bimp_Product");
             }

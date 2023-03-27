@@ -1906,6 +1906,7 @@ class ObjectLine extends BimpObject
                                     $text .= 'A partir du ';
                                 }
                                 $text .= $dt_from->format('d/m/Y');
+//                                $text .= ' - ' . $this->date_from;
                             }
 
                             if ($this->date_to) {
@@ -1916,6 +1917,7 @@ class ObjectLine extends BimpObject
                                     $text .= ' au ';
                                 }
                                 $text .= $dt_to->format('d/m/Y');
+//                                $text .= ' - ' . $this->date_to;
                             }
                         }
                         if ((!$text || $field !== 'desc_light') && $desc) {
@@ -2945,8 +2947,8 @@ class ObjectLine extends BimpObject
                 $this->tva_tx = (float) $line->tva_tx;
                 $this->pa_ht = (float) $line->pa_ht;
                 $this->remise = (float) $line->remise_percent;
-                $this->date_from = BimpTools::getDateFromDolDate($line->date_start);
-                $this->date_to = BimpTools::getDateFromDolDate($line->date_end);
+                $this->date_from = BimpTools::getDateFromTimestamp($line->date_start);
+                $this->date_to = BimpTools::getDateFromTimestamp($line->date_end);
                 $this->id_remise_except = (int) $line->fk_remise_except;
                 break;
 

@@ -1545,7 +1545,7 @@ class Bimp_Propal extends Bimp_PropalTemp
         $new_data['datep'] = $now;
         $new_data['datec'] = $now;
         $fin_validite = BimpTools::getDateTms($now) + ($this->dol_object->duree_validite * 24 * 3600);
-        $new_data['fin_validite'] = BimpTools::getDateFromDolDate($fin_validite);
+        $new_data['fin_validite'] = BimpTools::getDateFromTimestamp($fin_validite);
         $new_data['id_signature'] = 0;
         $new_data['signature_params'] = array();
 
@@ -1557,13 +1557,13 @@ class Bimp_Propal extends Bimp_PropalTemp
                 $update = false;
                 if (isset($line->date_from) && (string) $line->date_from) {
                     $new_date_from = (BimpTools::getDateTms($line->date_from) + $date_diff);
-                    $line->date_from = BimpTools::getDateFromDolDate($new_date_from);
+                    $line->date_from = BimpTools::getDateFromTimestamp($new_date_from);
                     $update = true;
                 }
 
                 if (isset($line->date_to) && (string) $line->date_to) {
                     $new_date_to = (BimpTools::getDateTms($line->date_to) + $date_diff);
-                    $line->date_to = BimpTools::getDateFromDolDate($new_date_to);
+                    $line->date_to = BimpTools::getDateFromTimestamp($new_date_to);
                     $update = true;
                 }
 

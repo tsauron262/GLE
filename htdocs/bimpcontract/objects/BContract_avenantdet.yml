@@ -26,8 +26,7 @@ objects:
                 module: bimpcore
                 name: Bimp_Product
             id_object:
-                field_value: id_serv
-    
+                field_value: id_serv    
 
 fields:
     id_avenant:

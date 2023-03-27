@@ -28,6 +28,12 @@ labels:
     name_plur: sav
 
 objects:
+    rib_client: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_SocBankAccount
+                
     contrat:
         card: 
             title: 
@@ -707,6 +713,19 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - custom: 1
+              label: Contact
+              input_name: id_contact
+              value: 
+                  field_value: id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Laisser vide pour envoyer à l'adresse e-mail de la fiche client    
+              display_if: 
+                  field_name: send_msg
+                  show_values: 1
         
     restitute:
         title: Restituer
@@ -746,12 +765,44 @@ forms:
                   type: text
               value: 0
             - custom: 1
+              label: RIB Client
+              input_name: rib_client
+              data_type: id_object
+              object: rib_client 
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteRibsArray
+                          params: 
+                              - field_value: id_client
+                              - 1
+                  help: Le RIB du client est obligatoire pour le mode de paiement indiqué dans le devis.<br/>Si aucun RIB n\'est disponible, veuillez en créer un depuis la fiche client ou modifier le mode de réglement du devis.
+              show: 
+                  callback: isRibClientRequired
+              display_if: 
+                  field_name: paid
+                  show_values: 0
+            - custom: 1
               label: Notifier le client
               input_name: send_msg
               data_type: bool
               input: 
                   type: toggle
               value: 1
+            - custom: 1
+              label: Contact à notifier
+              input_name: id_contact_notif
+              value: 
+                  field_value: id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Laisser vide pour envoyer à l'adresse e-mail de la fiche client   
+              display_if: 
+                  field_name: send_msg
+                  show_values: 1
             - custom: 1
               label: Replacer l'équipement dans son emplacement précédent
               input_name: put_equipment_on_prev_place
@@ -786,6 +837,19 @@ forms:
               input: 
                   type: toggle
               value: 0
+            - custom: 1
+              label: Contact à notifier
+              input_name: id_contact_notif
+              value: 
+                  field_value: id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Laisser vide pour envoyer à l'adresse e-mail de la fiche client   
+              display_if: 
+                  field_name: send_msg
+                  show_values: 1
             - field: bon_resti_raison
               display_if: 
                   field_name: frais
@@ -803,6 +867,16 @@ forms:
     contact: 
         title: Recontacter
         rows: 
+            - custom: 1
+              label: Contact
+              input_name: id_contact
+              value: 
+                  field_value: id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Laisser vide pour envoyer à l'adresse e-mail de la fiche client                  
             - custom: 1
               label: Notification
               input_name: msg_type
@@ -829,6 +903,19 @@ forms:
               label: Notifier le client
               value: 1
               input_name: send_msg
+            - custom: 1
+              label: Contact à notifier
+              input_name: id_contact_notif
+              value: 
+                  field_value: id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Laisser vide pour envoyer à l'adresse e-mail de la fiche client   
+              display_if: 
+                  field_name: send_msg
+                  show_values: 1
             - custom: 1
               label: Montant devis
               content: 
@@ -883,6 +970,19 @@ forms:
               label: Notifier le client
               value: 1
               input_name: send_msg
+            - custom: 1
+              label: Contact à notifier
+              input_name: id_contact_notif
+              value: 
+                  field_value: id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Laisser vide pour envoyer à l'adresse e-mail de la fiche client   
+              display_if: 
+                  field_name: send_msg
+                  show_values: 1
             - custom: 1
               label: Montant facture
               input_name: inut
@@ -1110,8 +1210,7 @@ forms:
               data_type: money
               required: 1
               input: 
-                  type: text
-                  
+                  type: text   
               
     europe:
         rows: 

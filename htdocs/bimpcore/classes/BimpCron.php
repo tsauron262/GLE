@@ -1,9 +1,13 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
+
 class BimpCron
 {
 
     public $db;
+    public $bdb;
     public $current_cron_name = '';
     public static $timeout = 3600; // 1h
     public $output = '';
@@ -11,9 +15,9 @@ class BimpCron
     public function __construct($db)
     {
         $this->db = $db;
+        $this->bdb = BimpCache::getBdb();
 
         BimpCore::setMaxExecutionTime(static::$timeout);
-        
         register_shutdown_function(array($this, 'onExit'));
     }
 

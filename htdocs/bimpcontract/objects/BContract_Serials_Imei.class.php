@@ -1,26 +1,29 @@
 <?php
 
-class BContract_Serials_Imei extends BimpObject {
-    
+class BContract_Serials_Imei extends BimpObject
+{
+
     CONST CONTRAT_IS_CLOS = 0;
     CONST CONTRAT_IS_OPEN = 1;
-    
+
     public static $type_separator = [
         1 => 'Retour à la ligne',
         2 => 'Virgule',
         3 => 'Point virgule',
         4 => 'Fichier CSV'
     ];
-    
-    public function canView() {
+
+    public function canView()
+    {
         return 1;
     }
-    
-    public function contrat_is_open() {
-        
+
+    public function contrat_is_open()
+    {
+
         $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
-        
-        switch($contrat->getData('statut')) {
+
+        switch ($contrat->getData('statut')) {
             case self::CONTRAT_IS_OPEN:
                 $class = 'success';
                 $icon = 'check';
@@ -32,47 +35,48 @@ class BContract_Serials_Imei extends BimpObject {
                 $label = 'Hors couverture';
                 break;
         }
-        
-        return '<span class="'.$class.'" ><i class="fas fa-'.$icon.'" ></i> '.$label.'</span>';
+
+        return '<span class="' . $class . '" ><i class="fas fa-' . $icon . '" ></i> ' . $label . '</span>';
     }
-    
-    public function getAssociateService() {
+
+    public function getAssociateService()
+    {
         $lines = explode(',', $this->getData('id_line'));
-        if(!count($lines) || $lines[0] == 0) {
+        if (!count($lines) || $lines[0] == 0) {
             return '';
         }
         $return = '';
-        foreach($lines as $line => $id) {
+        foreach ($lines as $line => $id) {
             $the_line = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', intval($id));
             $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $the_line->getData('fk_product'));
             $return .= $produit->getNomUrl() . " ";
         }
-        
-        
-        
+
+
+
         return $return;
     }
-    
-    public function getFilterList() {
+
+    public function getFilterList()
+    {
         return Array(
             Array(
-                'name' => 'id_contrat',
+                'name'   => 'id_contrat',
                 'filter' => $_REQUEST['id']
             )
         );
     }
-    
+
     public function getDefaultListExtraButtons()
     {
-        
-        $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
-        if($contrat->getData('statut') == self::CONTRAT_IS_OPEN){
-            $buttons = array();
-        
-        
-            $url = 'client.php?fc=contrat_ticket&id='.$contrat->id.'&navtab-maintabs=tickets';
 
-            $callback = "window.open('" . DOL_URL_ROOT . "/bimpinterfaceclient/?fc=contrat_ticket&id=".$contrat->id."&navtab-maintabs=tickets', '_self');";
+        $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
+        if ($contrat->getData('statut') == self::CONTRAT_IS_OPEN) {
+            $buttons = array();
+
+            $url = 'client.php?fc=contrat_ticket&id=' . $contrat->id . '&navtab-maintabs=tickets';
+
+            $callback = "window.open('" . DOL_URL_ROOT . "/bimpinterfaceclient/?fc=contrat_ticket&id=" . $contrat->id . "&navtab-maintabs=tickets', '_self');";
 
             if ($this->isLoaded()) {
                 $buttons[] = array(
@@ -84,27 +88,28 @@ class BContract_Serials_Imei extends BimpObject {
             return $buttons;
         }
     }
-    
-    public function create(&$warnings = array(), $force_create = false) {
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
         $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
-        
-        switch(BimpTools::getValue('attached_serials_separator')) {
+
+        switch (BimpTools::getValue('attached_serials_separator')) {
             case 1:
                 $tab_serials = explode("<br>", BimpTools::getValue('attached_serials'));
                 break;
         }
-        
+
         foreach ($tab_serials as $index => $serial) {
-            if($serial != "") {
+            if ($serial != "") {
                 $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_Serials_Imei');
-                if($instance->find(['serial' => $serial, 'id_contrat' => $contrat->id])) {
+                if ($instance->find(['serial' => $serial, 'id_contrat' => $contrat->id])) {
                     $services = explode(',', $instance->getData('id_line'));
-                    if(!in_array(BimpTools::getValue('attached_service'), $services)) {
+                    if (!in_array(BimpTools::getValue('attached_service'), $services)) {
                         $new_field_id_line = $instance->getData('id_line') . ',' . BimpTools::getValue('attached_service');
                         $this->db->update('bcontract_serials', ['id_line' => $new_field_id_line], 'id = ' . $instance->id);
                     }
                 } else {
-                  parent::create();
+                    parent::create();
                     $this->set('serial', $serial);
                     $this->set('id_contrat', $_REQUEST['id']);
                     $this->set('id_line', BimpTools::getValue('attached_service'));
@@ -112,10 +117,10 @@ class BContract_Serials_Imei extends BimpObject {
                 }
             }
         }
-        
     }
 
-    public function list_service() {
+    public function list_service()
+    {
         $liste = [];
         $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
         foreach ($contrat->dol_object->lines as $line) {
@@ -124,5 +129,4 @@ class BContract_Serials_Imei extends BimpObject {
         }
         return $liste;
     }
-
 }

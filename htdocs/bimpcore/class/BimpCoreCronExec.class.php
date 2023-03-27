@@ -1,37 +1,13 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
-class BimpCoreCronExec
+class BimpCoreCronExec extends BimpCron
 {
-
-    public $db;
-
-    public function __construct($db)
-    {
-        $this->db = $db;
-    }
-
-    public function mailCronErreur()
-    {
-        $bdb = new BimpDb($this->db);
-
-        $rows = $bdb->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
-
-        $i = 0;
-        if (is_array($rows)) {
-            foreach ($rows as $r) {
-                $i++;
-                mailSyn2('Cron en erreur', 'dev@bimp.fr', null, 'Attention, le cron ' . $r['label'] . ' d\id ' . $r['rowid'] . ' est en erreur...');
-            }
-        }
-        $this->output = $i . ' erreurs';
-        return 0;
-    }
 
     public function bimpDailyChecks()
     {
+        $this->current_cron_name = 'Vérifs quotidiennes BimpCore';
         $bdb = new BimpDb($this->db);
 
         // Vérifs des factures en financement impayées à 30 jours. 
@@ -105,7 +81,7 @@ class BimpCoreCronExec
 
         // Nettoyages des fichiers temporaires
         BimpTools::cleanTempFiles();
-        
+
         // Vérifs des RDV SAV à annuler:
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         BS_SAV::checkSavToCancel();
@@ -118,11 +94,14 @@ class BimpCoreCronExec
         BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
         Bimp_Commande::checkLinesEcheances();
 
-        return 'OK';
+        $this->output = 'OK';
+        return 0;
     }
 
     public function generateAppleReport()
     {
+        $this->current_cron_name = 'Rapports Apple';
+
         $vente = BimpObject::getInstance('bimpcommercial', 'Bimp_Vente');
 
         $dt = new DateTime();
@@ -154,7 +133,8 @@ class BimpCoreCronExec
                 'Erreurs' => $errors
             ));
 
-            return 'Echec génération (cf log)';
+            $this->output = 'Echec génération (cf log)';
+            return -1;
         }
 
         // Envoi FTP: 
@@ -195,18 +175,37 @@ class BimpCoreCronExec
                 'Erreurs' => $errors
             ));
 
-            return 'Echec envoi ftp (cf log)';
+            $this->output = 'Echec envoi ftp (cf log)';
+            return -1;
         }
 
-        return 'OK';
+        return 0;
     }
 
     public function mailMessageNote()
     {
+        $this->current_cron_name = 'Notes non lues';
         BimpObject::loadClass('bimpcore', 'BimpNote');
 
-        echo BimpNote::cronNonLu();
+        BimpNote::cronNonLu();
+        $this->output = 'OK';
+        return 0;
+    }
 
-        return 'OK';
+    public function mailCronErreur()
+    {
+        $bdb = new BimpDb($this->db);
+
+        $rows = $bdb->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
+
+        $i = 0;
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $i++;
+                mailSyn2('Cron en erreur', 'dev@bimp.fr', null, 'Attention, le cron ' . $r['label'] . ' d\id ' . $r['rowid'] . ' est en erreur...');
+            }
+        }
+        $this->output = $i . ' erreurs';
+        return 0;
     }
 }

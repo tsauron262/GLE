@@ -3673,9 +3673,9 @@ class Bimp_Facture extends BimpComm
                     $html .= '</div>';
                     $html .= '<div class="row">';
                     $html .= '<div class="col-sm-12 col-md-6">';
-                    
-                    if(/*$this->getData('fk_statut') > 0*/1){
-                        $buttons = array();   
+
+                    if (/* $this->getData('fk_statut') > 0 */1) {
+                        $buttons = array();
                         $buttons[] = array(
                             'label'   => 'Vérifier les équipements',
                             'icon'    => 'fas_hand-holding-usd',
@@ -3690,7 +3690,7 @@ class Bimp_Facture extends BimpComm
                             ))
                         );
                         $content2 = '';
-                        foreach($buttons as $button)
+                        foreach ($buttons as $button)
                             $content2 .= BimpRender::renderButton($button);
                         $html .= BimpRender::renderPanel('Actions revalorisation', $content2, '', array('type' => 'secondary'));
                         $html .= '</div>';
@@ -5060,7 +5060,7 @@ class Bimp_Facture extends BimpComm
                     $errors = $this->updateField('datef', $today);
                     $this->dol_object->date = strtotime($this->getData('datef'));
                 }
-                $this->updateField('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement((int) $this->getData('fk_cond_reglement'))));
+                $this->updateField('date_lim_reglement', BimpTools::getDateFromTimestamp($this->dol_object->calculate_date_lim_reglement((int) $this->getData('fk_cond_reglement'))));
 
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
                 $fac_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
@@ -6354,7 +6354,7 @@ class Bimp_Facture extends BimpComm
 
         if ($changeCondRegl || $changeDateF) {
             $this->dol_object->date = strtotime($this->getData('datef'));
-            $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
+            $this->set('date_lim_reglement', BimpTools::getDateFromTimestamp($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }
 
         if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance')) {
@@ -6398,31 +6398,65 @@ class Bimp_Facture extends BimpComm
 
     public function sendInvoiceDraftWhithMail()
     {
+        mailSyn2('EXEC CRON sendInvoiceDraftWhithMail', 'f.martinez@bimp.fr', '', 'Heure: ' . date('d / m / Y H:i:s') . '<br/>SERVER : ' . print_r($_SERVER, 1));
+
+        // Modifié pour n'envoyer qu'un seul mail par commercial. 
+
         $date = new DateTime();
         $nbDay = 5;
         $date->sub(new DateInterval('P' . $nbDay . 'D'));
         $sql = $this->db->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "facture` WHERE `datec` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0");
-        $i = 0;
+
+        $factures = array();
         while ($ln = $this->db->db->fetch_object($sql)) {
-            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
-            $userCreate = new User($this->db->db);
+            $facture = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
 
-            $idComm = $obj->getIdContact($type = 'internal', $code = 'SALESREPSIGN');
-            if ($idComm > 0)
-                $userCreate->fetch((int) $idComm);
-            else
-                $userCreate->fetch((int) $obj->getData('fk_user_author'));
+            if (BimpObject::objectLoaded($facture)) {
+                $id_user = $facture->getIdContact('internal', 'SALESREPSIGN');
+                if (!$id_user) {
+                    $id_user = (int) $facture->getData('fk_user_author');
+                }
 
+                if (!isset($factures[$id_user])) {
+                    $factures[$id_user] = array();
+                }
 
-//            $mail = $userCreate->email;
-            $mail = BimpTools::getMailOrSuperiorMail($userCreate->id, 'f.pineri@bimp.fr');
-            if ($mail == '')
-                $mail = "tommy@bimp.fr";
-            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
-            if (mailSyn2('Facture brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une facture en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
-                $i++;
+                $factures[$id_user][] = $facture->getLink();
+            }
         }
-        $this->output = "OK " . $i . ' mails';
+
+        if (!empty($factures)) {
+            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
+
+            $i = 0;
+            foreach ($factures as $id_user => $facs) {
+                $msg = 'Bonjour, vous avez laissé ';
+                if (count($facs) > 1) {
+                    $msg .= count($facs) . ' factures';
+                } else {
+                    $msg .= 'une facture';
+                }
+
+                $msg .= ' à l\'état de brouillon depuis plus de ' . $nbDay . ' jours.<br/>';
+                $msg .= 'Merci de bien vouloir ' . (count($facs) > 1 ? 'les' : 'la') . ' régulariser au plus vite.<br/>';
+
+                foreach ($facs as $fac_link) {
+                    $msg .= '<br/>' . $fac_link;
+                }
+
+                $mail = BimpTools::getMailOrSuperiorMail($id_user, 'f.pineri@bimp.fr');
+
+                if ($mail == '') {
+                    $mail = "tommy@bimp.fr";
+                }
+
+                if (mailSyn2('Facture brouillon à régulariser', $mail, null, $msg)) {
+                    $i++;
+                }
+            }
+        }
+
+        $this->output = "OK " . $i . ' mail(s)';
         return 0;
     }
 

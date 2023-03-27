@@ -31,8 +31,8 @@ class BimpCube{
 //        $result = $result && $this->reqPlusLog("CALL refresh_".MAIN_DB_PREFIX."mat_view_propaldet_year_m(2019);");
         if($result){
             $this->output .= "OK";
-            return 'success';
+            return 0;
         }
-        return 'failure';
+        return -1;
     }
 }

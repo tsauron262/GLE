@@ -74,6 +74,7 @@ objects:
                 field_value: entrepot
         
     rib_client: 
+        relation: hasOne
         instance: 
             bimp_object: 
                 module: bimpcore

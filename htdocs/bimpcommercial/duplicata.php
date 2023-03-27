@@ -55,7 +55,6 @@ if ($result && $db->num_rows($result)) {
     $db->free($result);
     $ref_check = $obj->ref;
 }
-$db->free($result);
 
 if ($ref_check !== $ref) {
     echo 'Référence du document invalide';

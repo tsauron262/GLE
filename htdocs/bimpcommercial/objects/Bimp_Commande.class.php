@@ -4360,28 +4360,58 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $nbDay = 5;
         $date->sub(new DateInterval('P' . $nbDay . 'D'));
         $sql = $this->db->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "commande` WHERE `date_creation` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0");
-        $i = 0;
+
+        $commandes = array();
+
         while ($ln = $this->db->db->fetch_object($sql)) {
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
-            $userCreate = new User($this->db->db);
 
-            $idComm = $obj->getIdContact($type = 'internal', $code = 'SALESREPSIGN');
-            if ($idComm > 0)
-                $userCreate->fetch((int) $idComm);
-            else
-                $userCreate->fetch((int) $obj->getData('fk_user_author'));
+            $id_user = (int) $obj->getIdContact('internal', 'SALESREPSIGN');
+            if (!$id_user) {
+                $id_user = (int) $obj->getData('fk_user_author');
+            }
 
-            $mail = BimpTools::getMailOrSuperiorMail($userCreate->id, 'f.pineri@bimp.fr');
-//            $mail = $userCreate->email;
-            if ($mail == '')
-                $mail = "tommy@bimp.fr";
-            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
-            $this->output .= $mail . ' : ' . $obj->getNomUrl() . ' ' . $nbDay . '<br/>';
-            if (mailSyn2('Commande brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une commande en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
-                $i++;
+            if (!isset($commandes[$id_user])) {
+                $commandes[$id_user] = array();
+            }
+
+            $commandes[$id_user][] = $obj->getLink();
         }
-        $this->resprints = "OK " . $i . ' mails';
-        return "OK " . $i . ' mails';
+
+        $i = 0;
+        if (!empty($commandes)) {
+            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
+
+            foreach ($commandes as $id_user => $comm_links) {
+                $mail = BimpTools::getMailOrSuperiorMail($id_user, 'f.pineri@bimp.fr');
+                if ($mail == '') {
+                    $mail = "tommy@bimp.fr";
+                }
+
+                $this->output .= $mail . ' : ' . count($comm_links) . ' commande(s)<br/>';
+
+                $msg = 'Bonjour, vous avez laissé ' . count($comm_links) . ' commande' . (count($comm_links) > 1 ? 's' : '');
+                $msg .= ' à l\'état de brouillon depuis plus de ' . $nbDay . ' jour(s).<br/>';
+                $msg .= 'Merci de bien vouloir ' . (count($comm_links) > 1 ? 'les' : 'la') . ' régulariser au plus vite.<br/>';
+
+                foreach ($comm_links as $comm_link) {
+                    $msg .= '<br/>' . $comm_link;
+                    $this->output .= ' - ' . $comm_link . '<br/>';
+                }
+                
+                if (mailSyn2('Commande(s) brouillon à régulariser', $mail, null, $msg)) {
+                    $this->output .= '[OK]';
+                    $i++;
+                } else {
+                    $this->output .= '[ECHEC]';
+                }
+                $this->output .= '<br/><br/>';
+            }
+        }
+
+        $this->resprints = "OK " . $i . ' mail(s)';
+
+        return 0;
     }
 
     public static function checkStatusAll()
@@ -4428,7 +4458,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
         }
         $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
-        return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
+        return 0;
     }
 
     public static function checkLinesEcheances()

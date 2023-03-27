@@ -15,6 +15,7 @@ class BimpDolObject extends BimpObject
     public static $email_type = '';
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
+    public $output = '';
     
     
     public static $expertise = [

@@ -264,8 +264,7 @@ class BimpComm extends BimpDolObject
             }
         }
 
-
-        if ($this->getData('fk_mode_reglement') == 3 && $this->extrafieldsIsConfig('rib_client')) {
+        if (in_array((int) $this->getData('fk_mode_reglement'), explode(',', BimpCore::getConf('rib_client_required_modes_paiement', null, 'bimpcommercial'))) && $this->extrafieldsIsConfig('rib_client')) {
             if ($this->getData('rib_client') < 1)
                 $errors[] = 'Pour les prélèvements SEPA, le RIB est obligatoire';
             else {
@@ -2969,7 +2968,7 @@ class BimpComm extends BimpDolObject
                             $err = $equipmentLine->delete($warnings, true);
                         }
 
-                        if (!count($err)) {
+                        if (empty($err)) {
                             $err = $new_line->attributeEquipment($data['id_equipment'], 0, true, false);
                         }
                     }

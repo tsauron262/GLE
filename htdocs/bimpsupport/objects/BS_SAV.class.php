@@ -576,6 +576,18 @@ class BS_SAV extends BimpObject
         return 0;
     }
 
+    public function isRibClientRequired()
+    {
+        $propal = $this->getChildObject('propal');
+        if (BimpObject::objectLoaded($propal)) {
+            if (in_array((int) $propal->getData('fk_mode_reglement'), explode(',', BimpCore::getConf('rib_client_required_modes_paiement', null, 'bimpcommercial')))) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     // Getters params: 
 
     public function getCreateJsCallback()
@@ -3753,7 +3765,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $errors;
     }
 
-    public function sendMsg($msg_type = '', $sms_only = false)
+    public function sendMsg($msg_type = '', $sms_only = false, $id_contact = null)
     {
         global $langs;
 
@@ -3837,8 +3849,23 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
         $fromMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
 
-        $contact = $this->getChildObject('contact');
+        $contact = null;
+
+        if (!is_null($id_contact)) {
+            if ((int) $id_contact) {
+                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                if (!BimpObject::objectLoaded($contact)) {
+                    $errors[] = 'Contact sélectionné invalide';
+                }
+            }
+        } else {
+            $contact = $this->getChildObject('contact');
+        }
         $contact_pref = (int) $this->getData('contact_pref');
+
+        if (count($errors)) {
+            return $errors;
+        }
 
         switch ($msg_type) {
             case 'Facture':
@@ -3899,7 +3926,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
 
                 $subject = "Fermeture du dossier " . $this->getData('ref');
-                $mail_msg = 'Nous vous remercions d\'avoir choisi Bimp pour votre ' . $nomMachine . "\n";
+                $mail_msg = 'Nous vous remercions d\'avoir choisi LDLC' . ($nomMachine ? ' pour votre ' . $nomMachine : '') . '.' . "\n\n";
+
+                if (!empty($files)) {
+                    $mail_msg .= 'Veuillez trouver ci-joint votre facture pour cette réparation' . "\n\n";
+                }
+
                 $mail_msg .= 'Dans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d\'APPLE, votre retour est important afin d\'améliorer la qualité de notre Centre de Services.' . "\n";
                 break;
 
@@ -3907,9 +3939,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if (!is_null($propal)) {
                     $subject = 'Devis ' . $this->getData('ref');
                     $mail_msg = "Voici le devis pour la réparation de votre '" . $nomMachine . "'.\n";
-                    $mail_msg .= "Veuillez nous communiquer votre accord ou votre refus par retour de ce Mail.\n";
+                    $mail_msg .= "Veuillez nous communiquer votre accord ou votre refus par retour de cet e-mail.\n";
                     $mail_msg .= "Si vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).";
-                    $sms = "Bonjour, nous avons établi votre devis pour votre " . $nomMachine . "\n Vous l'avez reçu par mail.\nL'équipe LDLC";
+                    $sms = "Bonjour, nous avons établi votre devis pour votre " . $nomMachine . "\n Vous l'avez reçu par e-mail.\nL'équipe LDLC";
                 }
                 break;
 
@@ -4031,6 +4063,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 break;
         }
 
+        if (count($errors)) {
+            return $errors;
+        }
+
         if (!$sms_only) {
             if ($mail_msg) {
                 $toMail = '';
@@ -4079,6 +4115,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 //                }
                     $bimpMail = new BimpMail($this, $subject, $toMail, $fromMail, $mail_msg);
                     $bimpMail->addFiles($files);
+                    $bimpMail->setFromType('ldlc');
                     $mail_errors = array();
                     $bimpMail->send($mail_errors);
 
@@ -4839,7 +4876,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $this->updateField('id_user_tech', (int) $user->id, null, true);
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debDiago'));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debDiago', false, BimpTools::getArrayValueFromPath($data, 'id_contact', null)));
                 }
             }
         }
@@ -4974,7 +5011,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $propal->hydrateFromDolObject();
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis', $create_signature));
+                    $sms_only = $create_signature;
+                    $id_contact_notif = BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null);
+                    if ((int) $id_contact != (int) $id_contact_notif) {
+                        $sms_only = false;
+                    }
+                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis', $sms_only, $id_contact_notif));
                 }
             }
         }
@@ -5084,7 +5126,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!isset($data['msg_type']) || !$data['msg_type']) {
             $errors[] = 'Aucun type de notification sélectionné';
         } else {
-            $errors = $this->sendMsg($data['msg_type']);
+            $errors = $this->sendMsg($data['msg_type'], false, BimpTools::getArrayValueFromPath($data, 'id_contact', null));
         }
 
         return array('errors' => $errors, 'warnings' => array());
@@ -5203,7 +5245,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             if (!count($errors)) {
                 if ($msg_type && isset($data['send_msg']) && $data['send_msg']) {
-                    $warnings = $this->sendMsg($msg_type);
+                    $warnings = $this->sendMsg($msg_type, false, BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null));
                 }
             }
             if (!count($errors))
@@ -5523,12 +5565,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 $facture->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
                                 $facture->array_options['options_centre'] = $this->getData('code_centre');
                                 $facture->array_options['options_expertise'] = 90;
-                                foreach ($propal->getRibArray() as $idR => $inut) {
-                                    $facture->array_options['options_rib_client'] = $idR;
-                                    break;
-                                }
 
-//                                $facture->array_options['options_rib_client'] = 
+                                if (in_array($mode_reglement, explode(',', BimpCore::getConf('rib_client_required_modes_paiement', null, 'bimpcommercial')))) {
+                                    $facture->array_options['options_rib_client'] = (int) BimpTools::getArrayValueFromPath($data, 'rib_client', 0);
+                                }
 
                                 $facture->linked_objects[$facture->origin] = $facture->origin_id;
                                 if (!empty($propal->dol_object->other_linked_objects) && is_array($propal->dol_object->other_linked_objects)) {
@@ -5697,7 +5737,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                                 }
 
                                                 if (isset($data['send_msg']) && $data['send_msg']) {
-                                                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Facture'));
+                                                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Facture', false, BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null)));
                                                 }
                                             }
                                         }

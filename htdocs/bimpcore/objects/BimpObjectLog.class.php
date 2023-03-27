@@ -4,6 +4,20 @@ class BimpObjectLog extends BimpObject
 {
 
     // Getters statiques: 
+    
+    public function getUrl($forced_context = '') {
+        $obj = $this->getObjectLinked();
+        if($obj && $obj->isLoaded()){
+            return $obj->getUrl();
+        }
+        
+        return parent::getUrl($forced_context);
+    }
+    
+    public function getObjectLinked(){
+        $obj = BimpCache::getBimpObjectInstance($this->getData('obj_module'), $this->getData('obj_name'), $this->getData('id_object'));
+        return $obj;
+    }
 
     public static function getLastObjectLogByCodes($object, $codes = '')
     {

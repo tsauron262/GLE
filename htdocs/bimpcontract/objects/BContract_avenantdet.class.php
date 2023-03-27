@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcontract/objects/BContract_avenant.class.php';
 
-class BContract_avenantdet extends BContract_avenant {
+class BContract_avenantdet extends BimpDolObject {
     
     function __construct($module, $object_name) {
         return parent::__construct($module, $object_name);

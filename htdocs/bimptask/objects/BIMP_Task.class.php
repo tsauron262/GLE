@@ -437,9 +437,9 @@ class BIMP_Task extends BimpObject
         $max_task_view = 40;
         $i = 0;
         
-        if ($exclude_parent_tasks) {
-            $filters['(SELECT COUNT(DISTINCT st.id) FROM ' . MAIN_DB_PREFIX . 'bimp_task st WHERE st.id_task = a.id)'] = 0;
-        }
+//        if ($exclude_parent_tasks) {
+//            $filters['(SELECT COUNT(DISTINCT st.id) FROM ' . MAIN_DB_PREFIX . 'bimp_task st WHERE st.id_task = a.id)'] = 0;
+//        }
         
         $sql = 'SELECT DISTINCT a.id';
         $sql .= BimpTools::getSqlFrom('bimp_task');

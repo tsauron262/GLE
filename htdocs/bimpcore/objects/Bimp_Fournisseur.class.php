@@ -103,7 +103,7 @@ class Bimp_Fournisseur extends Bimp_Societe
         );
 
         // Réceptions: 
-        if($this->isModuleActif('bimplogistique'))
+        if ($this->isModuleActif('bimplogistique'))
             $tabs[] = array(
                 'id'            => 'fourn_receptions_list_tab',
                 'title'         => BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Réceptions',
@@ -206,16 +206,21 @@ class Bimp_Fournisseur extends Bimp_Societe
 
         return $html;
     }
-    
+
     // Traitements: 
-    
+
     public function onSave(&$errors = [], &$warnings = [])
     {
         if ($this->isLoaded() && !$this->getData('code_fournisseur')) {
-//            $this->updateField('code_fournisseur', $this->dol_object->get_codefournisseur($this->dol_object, 1));
+            $code_fourn = $this->dol_object->get_codefournisseur($this->dol_object, 1);
+
+            if ($code_fourn) {
+                $this->db->update('societe', array(
+                    'code_fournisseur' => $code_fourn
+                        ), 'rowid = ' . $this->id);
+            }
         }
-        
+
         parent::onSave($errors, $warnings);
     }
-
 }

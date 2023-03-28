@@ -57,13 +57,14 @@ $(window).on("load", function () {
     
     $(".dropdown_chosen").select2();
 //    
-//    $('#clearAll').click(function () {
-//        $("#chosenSelectId").children().each(function () {
-//            $(this).prop('selected', false);
-//        });
+    $('#clearAll').click(function () {
+        $("#chosenSelectId").children().each(function () {
+            $(this).prop('selected', false);
+        });
 //        $("#chosenSelectId").trigger("chosen:updated");
-//        initNbUser();
-//    });
+        $("#chosenSelectId").trigger("change");
+        initNbUser();
+    });
 //
     $("#group").change(function () {
         id = $(this).find("option:selected").val();

@@ -806,8 +806,10 @@ class BIMP_Task extends BimpObject
     public function createIfNotActif()
     {
         $tasks = $this->getList(array('dst' => $this->getData('dst'), 'src' => $this->getData('src'), 'subj' => $this->getData('subj'), 'txt' => $this->getData('txt'), 'prio' => $this->getData('prio'), 'status' => 0));
-        if (count($tasks) == 0)
-            parent::create();
+        if (count($tasks) == 0) {
+            $warnings = array();
+            return $this->create($warnings, true);
+        }
         return array();
     }
 
@@ -838,9 +840,9 @@ class BIMP_Task extends BimpObject
         $html .= $msg;
 
         if ($rappel) {
-            $html .= '<br/><br/>' . $this->displayData('txt', 'default', false) . '<br/><br/>';
+            $html .= '<br/><br/>' . $this->displayData('txt', 'default', 0, 0, 1) . '<br/><br/>';
             if ($this->getData('comment')) {
-                $html .= '<b>Commentaire: </b>' . $this->displayData('comment', 'default', false);
+                $html .= '<b>Commentaire: </b>' . $this->displayData('comment', 'default', 0, 0, 1);
             }
 
             $notes = $this->getNotes();
@@ -854,7 +856,7 @@ class BIMP_Task extends BimpObject
         }
 
         if (is_null($sujet))
-            $sujet = "Re:" . $this->getData("subj");
+            $sujet = "Re:" . $this->displayData("subj", 'default', 0, 0, 1);
 
 //        $msg = str_replace("<br />", "\n", $msg);
 //        $msg = str_replace("<br/>", "\n", $msg);

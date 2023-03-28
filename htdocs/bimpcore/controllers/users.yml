@@ -10,6 +10,12 @@ objects:
         instance:
             bimp_object: Bimp_UserGroup            
 
+    actioncomm: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ActionComm
+                    
 sections:
     - type: tabs
       tabs: 
@@ -36,3 +42,11 @@ sections:
                 - type: custom
                   custom: 
                       callback: renderRightsTab
+                      
+        actioncomm: 
+            label: Evénements agendas
+            sections: 
+                - type: list
+                  list: 
+                      name: global
+                      object: actioncomm

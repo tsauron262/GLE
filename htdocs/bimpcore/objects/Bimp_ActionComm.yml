@@ -3,6 +3,13 @@ primary: id
 icon: fas_calendar-check
 common_fields: 0
 
+dol_object: 
+    instance: 
+        dol_object: 
+            module: comm/action
+            file: actioncomm
+            class: ActionComm
+
 nom_url: 
     syntaxe: <id>
     
@@ -21,6 +28,12 @@ objects:
         instance: 
             id_object: 
                 field_value: fk_user_author
+                
+    user_update: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_mod
                 
     user_done: 
         extends: user
@@ -42,11 +55,23 @@ fields:
     label: 
         label: Libellé
         
+    ref: 
+        label: Reférence
+        
+    ref_ext: 
+        label: Ref. ext.
+        
     code: 
         label: Code
         
+    status: 
+        label: Statut
+        type: int
+        default_value: 0
+        
     fk_action: 
         label: Type
+        type: int
         values: 
             array: types
             
@@ -65,29 +90,42 @@ fields:
     fk_user_author: 
         label: Créé par
         type: id_object
+        dol_prop: authorid
         object: user_create
+        search: 
+            input: 
+                type: search_user
+                
+    fk_user_mod: 
+        label: Modifié par
+        type: id_object
+        dol_prop: usermodid
+        object: user_update
         search: 
             input: 
                 type: search_user
     
     fk_user_action: 
-        label: Propriétaire
+        label: Assigné à
         type: id_object
         object: user_action
-        search: 
-            input: 
-                type: search_user
+        dol_prop: userownerid
+        input: 
+#            multiple: 1
+            type: search_user
         
     fk_user_done: 
         label: Traité par
         type: id_object
         object: user_done
+        dol_prop: userdoneid
         search: 
             input: 
                 type: search_user
         
     fk_soc: 
         label: Société
+        dol_prop: socid
         type: id_object
         object: societe
         search: 
@@ -95,47 +133,141 @@ fields:
                 type: search_societe
         
     fk_contact: 
-        label: Contact
+        label: Contact(s)
         type: id_object
         object: contact
-        searchable: 0
+        dol_prop: contact_id
+        depends_on: fk_soc
+        display_if: 
+            field_name: fk_soc
+            hide_values: 0,''
+        input: 
+#            multiple: 1
+            type: select
+            options: 
+                callback: 
+                    method: getSocieteContactsArray
+                    params: 
+                        - field_value: fk_soc
+                        - 1
+                        - ''
+                        - 1
+        
+    fk_project: 
+        label: Projet
+        type: id
+        default_value: 0
         
     fk_element: 
         label: ID élément
         type: id
+        default_value: 0
+        dol_prop: elementid
         
     elementtype: 
         label: Type élément
         
     percent: 
         label: Progression
-        type: float
+        default_value: 0
+        dol_prop: percentage
+        values: 
+            array: progressions
         
+    priority: 
+        label: Priorité
+        type: int
+        default_value: 0
+        
+    fulldayevent: 
+        label: Evénement sur la(les) journée(s)
+        type: bool
+        default_value: 0
+        
+    location: 
+        label: Lieu
+        
+    transparency: 
+        label: Transparence
+        type: int
+        default_value: 0
+        values:
+            array: transparencies
+            
     note: 
         label: Note
-        type: text
-        input: 
-            rows: 1
-            auto_expand: 1
+        type: html
+        dol_prop: note_private
             
-views: 
-    default: 
+    email_msgid: 
+        label: E-mail MSGID
+        
+    email_from: 
+        label: Adresse e-mail envoyeur
+        
+    email_sender: 
+        label: Envoyeur e-mail
+        
+    email_to: 
+        label: Adresse e-mail destinataire
+        
+    email_tocc: 
+        label: E-mail cc
+        
+    email_tobcc: 
+        label: E-mail bcc
+        
+    email_subject: 
+        label: Sujet e-mail
+        
+    ef_conf: 
+        label: Confidentiel
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        
+    resgsx: 
+        label: Réservation GSX
+        dol_extra_field: 1
+                  
+forms: 
+    add: 
         rows: 
-            - cols: 
-                - type: object_header
-            - cols: 
-                - type: fields_table
-                  fields_table: 
-                      name: infos
-                  col_lg: 6
-                  col_md: 6
-                  
-                - type: fields_table
-                  fields_table: 
-                      name: elements
-                  col_lg: 6
-                  col_md: 6
-                  
+            type: 
+                field: fk_action
+                required: 1
+            label: 
+                field: label
+            fullday: 
+                field: fulldayevent
+            from: 
+                field: datep
+                required: 1
+            to: 
+                field: datep2
+                required: 1
+            owner: 
+                required: 1
+                label: Evénement assigné à
+                field: fk_user_action
+            occupied: 
+                label: Disponibilité
+                field: transparency
+            location: 
+                field: location
+            percent: 
+                field: percent
+            societe: 
+                label: Tiers concerné
+                field: fk_soc
+            contact:
+                field: fk_contact            
+            note: 
+                label: Description
+                field: note
+            confidentiel: 
+                field: ef_conf
+    
 fields_tables: 
     infos: 
         title: Infos
@@ -174,6 +306,24 @@ fields_tables:
               display: nom_url
             - field: fk_user_done
               display: nom_url
+              
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: infos
+                  col_lg: 6
+                  col_md: 6
+                  
+                - type: fields_table
+                  fields_table: 
+                      name: elements
+                  col_lg: 6
+                  col_md: 6
     
 filters: 
     fk_user_author: 
@@ -255,6 +405,12 @@ lists:
             fk_contact: 
             state: 
                 
+    global: 
+        extends: default
+        add_form_name: add
+        add_btn: 1
+        n: 10
+        
     soc: 
         extends: default
         filters_panel: soc

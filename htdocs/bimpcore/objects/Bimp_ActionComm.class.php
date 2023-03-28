@@ -3,20 +3,44 @@
 class Bimp_ActionComm extends BimpObject
 {
 
+    public static $transparencies = array(
+        0 => 'Disponible',
+        1 => 'Occupé',
+        2 => 'Occupé (événements refusés)'
+    );
+    public static $progressions = array(
+        -1  => 'Non applicable',
+        0   => 'A faire',
+        50  => 'En cours',
+        100 => 'Terminé'
+    );
+
     // Getters booléens: 
 
     public function isCreatable($force_create = false, &$errors = array())
     {
+        if (BimpCore::isModeDev()) {
+            return 1;
+        }
+
         return 0;
     }
 
     public function isEditable($force_edit = false, &$errors = array())
     {
+        if (BimpCore::isModeDev()) {
+            return 1;
+        }
+
         return 0;
     }
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
+        if (BimpCore::isModeDev()) {
+            return 1;
+        }
+
         return 0;
     }
 
@@ -130,19 +154,28 @@ class Bimp_ActionComm extends BimpObject
 
         return '';
     }
-    
+
     public function getListFilters($list = 'default')
     {
         global $user;
         $filters = array();
-        
-        switch($list) {
-            case 'ficheInter': 
-                $filters[] = array('name' => 'fk_element','filter' => $_REQUEST['id']);
+
+        switch ($list) {
+            case 'ficheInter':
+                $filters[] = array('name' => 'fk_element', 'filter' => $_REQUEST['id']);
                 $filters[] = array('name' => 'elementtype', 'filter' => 'fichinter');
                 break;
         }
 
         return $filters;
+    }
+
+    // Overrides: 
+
+    public function create(&$warnings = [], $force_create = false)
+    {
+        $this->dol_object = new ActionComm($this->db->db);
+
+        $errors = parent::create($warnings, $force_create);
     }
 }

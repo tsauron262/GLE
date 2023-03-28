@@ -960,7 +960,7 @@ HAVING scan_exp != scan_det";
 
                     // Qty négative
                 } else {
-
+                    $values['nb_scan'] = (int) $values['nb_scan']; // Err fatale bizzare... 
                     // On ne peut pas enlever de quantité ici
                     if ($values['nb_scan'] <= 0)
                         continue;

@@ -124,8 +124,10 @@ class Session {
             $login = $_SESSION['dol_login'];
             unset($data['dol_login']);
             $data = addslashes(json_encode($data));
-            if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != ''))
-                $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`, data_time) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."', '".$timeTot."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."', data_time = '".$timeTot."'");
+            if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != '')){
+                $req = "INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`, data_time) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."', '".$timeTot."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."', data_time = '".$timeTot."'";
+                $this->db->query($req);
+            }
     //        else{
     //            echo '<pre>ecriture';print_r($_SESSION);
     //        }

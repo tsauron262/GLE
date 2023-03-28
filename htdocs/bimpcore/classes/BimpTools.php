@@ -462,10 +462,14 @@ class BimpTools
                 $date_tms = (int) $date_tms;
             } elseif (is_string($date_tms)) {
                 $new_date_tms = strtotime($date_tms);
-                BimpCore::addlog('BimpTools::getDateFromTimestamp() - tms au format string', 4, 'bimpcore', null, array(
-                    'tms initial'  => (string) '"' . $date_tms . '"',
-                    'tms converti' => $new_date_tms
-                ));
+
+                if (!(int) $new_date_tms) {
+                    BimpCore::addlog('BimpTools::getDateFromTimestamp() - tms possiblement invalide', 4, 'bimpcore', null, array(
+                        'tms initial'  => (string) '"' . $date_tms . '"',
+                        'tms converti' => $new_date_tms
+                    ));
+                }
+
                 $date_tms = $new_date_tms;
             } else {
                 BimpCore::addlog('Erreur BimpTools::getDateFromTimestamp() - tms invalide', 4, 'bimpcore', null, array(

@@ -212,7 +212,8 @@ class Bimp_Fournisseur extends Bimp_Societe
     public function onSave(&$errors = [], &$warnings = [])
     {
         if ($this->isLoaded() && !$this->getData('code_fournisseur')) {
-            $code_fourn = $this->dol_object->get_codefournisseur($this->dol_object, 1);
+            $this->dol_object->get_codefournisseur($this->dol_object, 1);
+            $code_fourn = $this->dol_object->code_fournisseur;
 
             if ($code_fourn) {
                 $this->db->update('societe', array(

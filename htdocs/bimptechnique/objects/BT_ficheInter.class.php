@@ -93,7 +93,8 @@ class BT_ficheInter extends BimpDolObject
 
     public function canCreate()
     {
-        return 1;
+        global $user;
+        return ($user->rights->bimptechnique->plannified);
     }
 
     public function canEdit()

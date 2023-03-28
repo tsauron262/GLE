@@ -22,12 +22,15 @@ $tabPara = getPara();
 $i = 0;
 $tabJsIdUser = 'chevauche = ' . $_SESSION['paraAgenda']['chevauche'] . ';';
 $tabJsIdUser .= 'tabUserId = Array();';
+$tabIdUser = array();
 foreach ($tabUser as $userId => $nom) {
     $i++;
 //    $tabUserId[] = "'".$userId.":".$nom."'";
     $tabJsIdUser .= 'tabUserId.push(' . $userId . ');';
+    $tabIdUser[] = $userId;
 }
 $userStr = "'" . implode("','", $tabUser) . "'";
+$userIdStr = implode(",", $tabIdUser);
 
 $js = ' <script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jquerytreeview/lib/jquery.cookie.js"  async=false defer=true></script>';
 
@@ -243,7 +246,7 @@ $js .= <<<EOF
             }
         },
         
-        data: 'events.json.php',
+        data: 'events.json.php?users=$userIdStr',
         users: [$userStr],
         showAsSeparateUser: false,
         displayOddEven: true,

@@ -35,18 +35,26 @@ function getTabUser() {
     global $user, $db, $langs;
     $tabUser = array();
     $tmpUser = new User($db);
-    foreach ($_REQUEST['customSelect'] as $key => $val) {
+    
+    $tabId = (isset($_REQUEST['customSelect'])? $_REQUEST['customSelect'] : (isset($_REQUEST['users']) ? explode(',', $_REQUEST['users']): array()));
+    
+    foreach ($tabId as $val) {
         $tmpUser->fetch($val);
         $tabUser[$val] = '<span title="' . $tmpUser->getFullName($langs) . '">' . $tmpUser->getFullName($langs) . "</span>";
     }
     
-    if (count($tabUser) == 0 && isset($_SESSION['AGENDA']['tabUser']) && !isset($_REQUEST['val']))
-        $tabUser = $_SESSION['AGENDA']['tabUser'];
-    elseif (count($tabUser) == 0){
+//    if (count($tabUser) == 0 && isset($_SESSION['AGENDA']['tabUser']) && !isset($_REQUEST['val']))
+//        $tabUser = $_SESSION['AGENDA']['tabUser'];
+//    elseif (count($tabUser) == 0){
+//        $tabUser[$user->id] = $user->getFullName($langs);
+//        $_SESSION['AGENDA']['tabUser'] = $tabUser;
+//    }
+//    else
+//        $_SESSION['AGENDA']['tabUser'] = $tabUser;
+    
+    
+    if (count($tabUser) == 0)
         $tabUser[$user->id] = $user->getFullName($langs);
-        $_SESSION['AGENDA']['tabUser'] = $tabUser;
-    }
-    else
-        $_SESSION['AGENDA']['tabUser'] = $tabUser;
+    
     return $tabUser;
 }

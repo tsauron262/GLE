@@ -2117,7 +2117,7 @@ class BT_ficheInter extends BimpDolObject
                     }
 
                     // Envoi au client: 
-                    if (!$auto_terminer && $type_signature !== self::TYPE_SIGN_DIST) {
+                    if (!$auto_terminer && $type_signature !== self::TYPE_SIGN_DIST && !$this->getData('signed')) {
                         if (!is_file($pdf_file)) {
                             $mail_cli_errors[] = 'Fichier PDF de la Fiche Inter absent';
                             BimpCore::addlog('PDF Fiche Inter absent pour envoi par mail suite à signature', Bimp_Log::BIMP_LOG_ERREUR, 'bimptechnique', $this, array(

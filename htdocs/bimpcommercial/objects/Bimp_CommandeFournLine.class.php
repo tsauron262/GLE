@@ -2131,7 +2131,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     if (BimpObject::objectLoaded($product)) {
                         $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ((float) $reception_data['qty'] < 0 ? ' (Retour au fournisseur)' : '') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
                         $code_mvt = 'ANNUL_CMDF' . $commande_fourn->id . '_LN' . $this->id . '_RECEP' . $reception->id;
-                        $stock_errors = $product->correctStocks($id_entrepot, (int) $reception_data['qty'], Bimp_Product::STOCK_OUT, $code_mvt, $stock_label, 'order_supplier', $commande_fourn->id);
+                        $sens = ($reception_data['qty'] > 0) ? Bimp_Product::STOCK_OUT : Bimp_Product::STOCK_IN;
+                        $stock_errors = $product->correctStocks($id_entrepot, abs((int) $reception_data['qty']), $sens, $code_mvt, $stock_label, 'order_supplier', $commande_fourn->id);
                         if (count($stock_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($stock_errors);
                         }

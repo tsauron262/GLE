@@ -212,7 +212,7 @@ class Bimp_Fournisseur extends Bimp_Societe
     public function onSave(&$errors = [], &$warnings = [])
     {
         if ($this->isLoaded() && !$this->getData('code_fournisseur')) {
-            $this->updateField('code_fournisseur', $this->dol_object->get_codefournisseur($this->dol_object, 1));
+//            $this->updateField('code_fournisseur', $this->dol_object->get_codefournisseur($this->dol_object, 1));
         }
         
         parent::onSave($errors, $warnings);

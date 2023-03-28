@@ -381,9 +381,7 @@ class BIMP_Task extends BimpObject
                                 'value'    => $id_max
                             ),
                             'id_user_owner' => (int) $id_user,
-                            'status'        => array(
-                                'operator' => '<',
-                                'value'    => 4
+                            'status'        => array(0,1,3
                             )), 'my_task', $nb_my
                         ), self::getNewTasks(BimpTools::merge_array(array(// Tâches non affectées
                                     'id'            => array(
@@ -391,9 +389,7 @@ class BIMP_Task extends BimpObject
                                         'value'    => $id_max
                                     ),
                                     'id_user_owner' => 0,
-                                    'status'        => array(
-                                        'operator' => '<',
-                                        'value'    => 4
+                                    'status'        => array(0,1,3
                                     )
                                         ), $this->getFiltreRightArray($user)), 'unaffected_task', $nb_unaffected
         ));

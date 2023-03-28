@@ -1,3 +1,10 @@
+/*Patches Dolibarrr*/
+/*Bug affichage agenda:*/
+td.wc-grid-timeslot-header {
+    vertical-align: top;
+}
+/******************/ 
+
 div.clear{
     clear: both;
 }

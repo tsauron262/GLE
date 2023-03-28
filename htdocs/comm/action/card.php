@@ -1269,7 +1269,7 @@ if ($action == 'create') {
 		}
 		if ($origin=='contact') $preselectedids[GETPOST('originid', 'int')] = GETPOST('originid', 'int');
 		print img_picto('', 'contact', 'class="paddingrightonly"');
-		print $form->selectcontacts(GETPOSTISSET('socid')? GETPOST('socid', 'int') : -1, $preselectedids, 'socpeopleassigned[]', 1, '', '', 0, 'minwidth300 quatrevingtpercent', false, 0, array(), false, 'multiple', 'contactid');
+		print $form->selectcontacts(GETPOSTISSET('socid') && GETPOST('socid', 'int') > 0? GETPOST('socid', 'int') : -1, $preselectedids, 'socpeopleassigned[]', 1, '', '', 0, 'minwidth300 quatrevingtpercent', false, 0, array(), false, 'multiple', 'contactid');
 		print '</td></tr>';
 	}
 

@@ -39,10 +39,13 @@ function getTabUser() {
         $tmpUser->fetch($val);
         $tabUser[$val] = '<span title="' . $tmpUser->getFullName($langs) . '">' . $tmpUser->getFullName($langs) . "</span>";
     }
-    if (count($tabUser) == 0 && isset($_SESSION['AGENDA']['tabUser']))
+    
+    if (count($tabUser) == 0 && isset($_SESSION['AGENDA']['tabUser']) && !isset($_REQUEST['val']))
         $tabUser = $_SESSION['AGENDA']['tabUser'];
-    elseif (count($tabUser) == 0)
+    elseif (count($tabUser) == 0){
         $tabUser[$user->id] = $user->getFullName($langs);
+        $_SESSION['AGENDA']['tabUser'] = $tabUser;
+    }
     else
         $_SESSION['AGENDA']['tabUser'] = $tabUser;
     return $tabUser;

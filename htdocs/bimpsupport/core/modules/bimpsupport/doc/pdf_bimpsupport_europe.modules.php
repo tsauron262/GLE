@@ -296,7 +296,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 if ($sav->getData('id_contact') > 0) {
                     $addr = $sav->getChildObject('contact')->dol_object;
                     $contact = $addr->getFullName($langs, 0, 0);
-                    $tel = ($addr->phone_mobile != "") ? $addr->phone_mobile : ($addr->phone_perso != "") ? $addr->phone_perso : ($addr->phone_pro != "") ? $addr->phone_pro : "";
+                    $tel = (($addr->phone_mobile != "") ? $addr->phone_mobile : (($addr->phone_perso != "") ? $addr->phone_perso : (($addr->phone_pro != "") ? $addr->phone_pro : "")));
                     $mail = $addr->mail;
                 } else {
                     $addr = $client;

@@ -1153,4 +1153,19 @@ class BIMP_Task extends BimpObject
 
         return $errors;
     }
+    
+    // Méthodes statiques: 
+    
+    public static function addAutoTask($dst, $subject, $msg, $test_ferme = '')
+    {
+        global $conf;
+        $errors = array();
+        if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
+            $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+            $tab = array("src" => "GLE-AUTO", "dst" => $dst, "subj" => $subject, "txt" => $msg, "prio" => 20, "test_ferme" => $test_ferme, 'auto' => 1);
+            $errors = array_merge($errors, $task->validateArray($tab));
+            $errors = array_merge($errors, $task->createIfNotActif());
+        }
+        return $errors;
+    }
 }

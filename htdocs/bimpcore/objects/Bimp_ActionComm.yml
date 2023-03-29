@@ -444,6 +444,8 @@ lists:
         extends: default
         add_form_name: add
         add_btn: 1
+        add_form_values: 
+            callback: getFormValues
         n: 10
         
     soc: 

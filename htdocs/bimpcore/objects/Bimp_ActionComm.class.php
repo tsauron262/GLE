@@ -28,18 +28,18 @@ class Bimp_ActionComm extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-//        if (BimpCore::isModeDev()) {
-//            return 1;
-//        }
+        if (BimpCore::isModeDev()) {
+            return 1;
+        }
 
         return 0;
     }
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
-//        if (BimpCore::isModeDev()) {
-//            return 1;
-//        }
+        if (BimpCore::isModeDev()) {
+            return 1;
+        }
 
         return 0;
     }

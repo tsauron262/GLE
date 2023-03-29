@@ -19,7 +19,7 @@ class Bimp_ActionComm extends BimpObject
 
     public function isCreatable($force_create = false, &$errors = array())
     {
-        if (BimpCore::isModeDev()) {
+        if (BimpCore::isModeDev() || BimpCore::isUserDev()) {
             return 1;
         }
 
@@ -28,18 +28,18 @@ class Bimp_ActionComm extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if (BimpCore::isModeDev()) {
-            return 1;
-        }
+//        if (BimpCore::isModeDev()) {
+//            return 1;
+//        }
 
         return 0;
     }
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
-        if (BimpCore::isModeDev()) {
-            return 1;
-        }
+//        if (BimpCore::isModeDev()) {
+//            return 1;
+//        }
 
         return 0;
     }
@@ -170,7 +170,59 @@ class Bimp_ActionComm extends BimpObject
         return $filters;
     }
 
-    // Overrides: 
+    // Rendus HTML: 
+
+    public function renderDateInput($field_name)
+    {
+        return BimpInput::renderInput(((int) $this->getData('fulldayevent') ? 'date' : 'datetime'), $field_name, $this->getData($field_name));
+    }
+
+    // Overrides:
+
+    public function validatePost()
+    {
+
+        $errors = parent::validatePost();
+
+        if (BimpTools::isPostFieldSubmit('users_assigned')) {
+            $this->dol_object->userassigned = array();
+
+            $users = BimpTools::getPostFieldValue('users_assigned', array());
+
+            if (empty($users)) {
+                $this->set('fk_user_action', 0);
+            } else {
+                $this->set('fk_user_action', (int) $users[0]);
+                $transparency = (int) $this->getData('transparency');
+
+                foreach ($users as $id_user) {
+                    $this->dol_object->userassigned[$id_user] = array(
+                        'id'           => $id_user,
+                        'transparency' => $transparency
+                    );
+                }
+            }
+        }
+
+        if (BimpTools::isPostFieldSubmit('contacts_assigned')) {
+            $contacts = BimpTools::getPostFieldValue('contacts_assigned', array());
+
+            $this->dol_object->socpeopleassigned = array();
+
+            if (empty($contacts)) {
+                $this->set('fk_contact', 0);
+            } else {
+                $this->set('fk_contact', (int) $contacts[0]);
+                foreach ($contacts as $id_contact) {
+                    $this->dol_object->socpeopleassigned[$id_contact] = array(
+                        'id' => $id_contact
+                    );
+                }
+            }
+        }
+
+        return $errors;
+    }
 
     public function validate()
     {
@@ -192,20 +244,83 @@ class Bimp_ActionComm extends BimpObject
         if ((int) $this->getData('percent') == 100 && !$this->getData('datep2')) {
             $errors[] = 'Date de fin obligatoire';
         }
-        
+
         if (empty($conf->global->AGENDA_USE_EVENT_TYPE) && !$this->getData('label')) {
             $errors[] = 'Libellé obligatoire';
         }
-        
-        
-        
+
+        if (!(int) $this->getData('fk_user_action')) {
+            $errors[] = 'Aucun utilisateur assigné à cet événement';
+        }
+
+        if ((int) $this->getData('fk_action')) {
+            $this->dol_object->type_code = $this->db->getValue('c_actioncomm', 'code', 'id = ' . (int) $this->getData('fk_action'));
+
+            if (!$this->dol_object->type_code) {
+                $errors[] = 'Type invalide';
+            }
+        }
         return $errors;
+    }
+
+    public function onSave(&$errors = [], &$warnings = [])
+    {
+        if ($this->isLoaded() && BimpTools::isPostFieldSubmit('actioncomm_categories')) {
+            $categories = BimpTools::getPostFieldValue('actioncomm_categories', array());
+            $this->dol_object->setCategories($categories);
+        }
+
+        parent::onSave($errors, $warnings);
     }
 
     public function create(&$warnings = [], $force_create = false)
     {
-        $this->dol_object = new ActionComm($this->db->db);
+        $errors = array();
 
-        $errors = parent::create($warnings, $force_create);
+        if (in_array('actioncomm_add_reminder', array(1, 'on'))) { // A implémenter dans le form "add"
+            $offsetvalue = BimpTools::getPostFieldValue('reminder_offset_value', 0);
+            $offsetunit = BimpTools::getPostFieldValue('reminder_offset_unit', '');
+            $remindertype = BimpTools::getPostFieldValue('reminder_type', '');
+            $modelmail = BimpTools::getPostFieldValue('reminder_model_email', '');
+
+            if (!$offsetvalue || !$offsetunit || !$remindertype || !$modelmail) {
+                $errors[] = 'Paramètres invalide pour l\'envoi du rappel';
+            }
+        }
+
+        if (!count($errors)) {
+            $errors = parent::create($warnings, $force_create);
+
+            if (!count($errors)) {
+                // Create reminders
+                if ($offsetvalue && $offsetunit && $remindertype && $modelmail) {
+                    $actionCommReminder = new ActionCommReminder($this->db->db);
+
+                    $dateremind = dol_time_plus_duree($this->getData('datep'), -$offsetvalue, $offsetunit);
+
+                    $actionCommReminder->dateremind = $dateremind;
+                    $actionCommReminder->typeremind = $remindertype;
+                    $actionCommReminder->offsetunit = $offsetunit;
+                    $actionCommReminder->offsetvalue = $offsetvalue;
+                    $actionCommReminder->status = $actionCommReminder::STATUS_TODO;
+                    $actionCommReminder->fk_actioncomm = $this->id;
+                    if ($remindertype == 'email') {
+                        $actionCommReminder->fk_email_template = $modelmail;
+                    }
+
+                    global $user;
+                    foreach ($this->dol_object->userassigned as $userassigned) {
+                        $actionCommReminder->fk_user = $userassigned['id'];
+
+                        if ($actionCommReminder->create($user) <= 0) {
+                            $user_assigned = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $userassigned['id']);
+                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($actionCommReminder), 'Echec de la création du rappel pour l\'utilisateur ' . (BimpObject::objectLoaded($user_assigned) ? $user_assigned->getName() : '#' . $userassigned['id']));
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
     }
 }

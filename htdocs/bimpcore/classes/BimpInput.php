@@ -1552,16 +1552,9 @@ class BimpInput
         }
 
         $html .= '<div class="inputMultipleValues">';
-//        $html .= '<pre>';
-//        $html .= print_r($values, 1);
-//        $html .= '</pre>';
         $html .= '<table>';
         $html .= '<thead></thead>';
         $html .= '<tbody class="multipleValuesList">';
-
-        $html .= '<tr style="display: none">';
-        $html .= '<td><input type="hidden" value="" name="' . $field_name . '[]"/></td>';
-        $html .= '</tr>';
 
         foreach ($values as $value => $label) {
             $html .= '<tr class="itemRow">';
@@ -1587,6 +1580,11 @@ class BimpInput
         $html .= '<tr class="noItemRow"' . (count($values) ? ' style="display: none"' : '') . '>';
         $html .= '<td colspan="3">';
         $html .= BimpRender::renderAlerts('Aucun élément sélectionné', 'warning');
+        
+        if (!count($values)) {
+            $html .= '<input class="no_item_input" type="hidden" value="" name="' . $field_name . '"/>';
+        }
+        
         $html .= '</td>';
         $html .= '</tr>';
 

@@ -78,12 +78,30 @@ fields:
     datep: 
         label: Date de début
         type: datetime
+        depends_on: fulldayevent
+        keep_new_value: 1
+        input: 
+            type: custom
+            content: 
+                callback: 
+                    method: renderDateInput
+                    params: 
+                        - datep
         
     datep2: 
         label: Date de fin
         type: datetime
         dol_prop: datef
-        
+        depends_on: fulldayevent
+        keep_new_value: 1
+        input: 
+            type: custom
+            content: 
+                callback: 
+                    method: renderDateInput
+                    params: 
+                        - datep2
+                        
     datec: 
         label: Créé le
         type: datetime
@@ -112,7 +130,6 @@ fields:
         object: user_action
         dol_prop: userownerid
         input: 
-#            multiple: 1
             type: search_user
         
     fk_user_done: 
@@ -129,9 +146,6 @@ fields:
         dol_prop: socid
         type: id_object
         object: societe
-        search: 
-            input: 
-                type: search_societe
         
     fk_contact: 
         label: Contact(s)
@@ -143,7 +157,6 @@ fields:
             field_name: fk_soc
             hide_values: 0,''
         input: 
-#            multiple: 1
             type: select
             options: 
                 callback: 
@@ -247,10 +260,14 @@ forms:
             to: 
                 field: datep2
                 required: 1
-            owner: 
+            users_assigned: 
+                custom: 1
                 required: 1
                 label: Evénement assigné à
-                field: fk_user_action
+                input_name: users_assigned
+                input: 
+                    multiple: 1
+                    type: search_user
             occupied: 
                 label: Disponibilité
                 field: transparency
@@ -261,8 +278,25 @@ forms:
             societe: 
                 label: Tiers concerné
                 field: fk_soc
-            contact:
-                field: fk_contact            
+            contacts_assigned:
+                custom: 1
+                label: Contact(s) tiers
+                input_name: contacts_assigned
+                input: 
+                    type: select
+                    multiple: 1
+                    options: 
+                        callback: 
+                            method: getSocieteContactsArray
+                            params: 
+                                - field_value: fk_soc
+                                - 1
+                                - ''
+                                - 1
+                depends_on: fk_soc
+                display_if: 
+                    field_name: fk_soc
+                    hide_values: 0,
             note: 
                 label: Description
                 field: note

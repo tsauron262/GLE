@@ -1452,15 +1452,19 @@ function removeMultipleInputValue($button, value_input_name) {
 function checkMultipleValues() {
     $('.inputMultipleValuesContainer').each(function () {
         var $container = $(this);
-        if ($(this).find('.itemRow').length) {
-            $(this).find('.noItemRow').hide();
-        } else {
-            $(this).find('.noItemRow').show();
-        }
         var $inputContainer = $container.findParentByClass('inputContainer');
         if ($inputContainer.length) {
             var input_name = $inputContainer.data('field_name') + '_add_value';
             if (input_name) {
+                if ($inputContainer.find('.itemRow').length) {
+                    $inputContainer.find('.noItemRow').hide();
+                    $inputContainer.find('.noItemRow').find('.no_item_input').remove();
+                } else {
+                    $inputContainer.find('.noItemRow').show();
+                    var no_item_input = '<input class="no_item_input" type="hidden" value="" name="' + input_name + '"/>';
+                    $inputContainer.find('.noItemRow').children('td').first().append(no_item_input);
+                }
+
                 var $input = $inputContainer.find('[name="' + input_name + '"]');
                 if ($input.length) {
                     if ($input.tagName() === 'select') {

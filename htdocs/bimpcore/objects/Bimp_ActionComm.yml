@@ -82,6 +82,7 @@ fields:
     datep2: 
         label: Date de fin
         type: datetime
+        dol_prop: datef
         
     datec: 
         label: Créé le

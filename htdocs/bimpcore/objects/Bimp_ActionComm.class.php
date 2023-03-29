@@ -172,6 +172,36 @@ class Bimp_ActionComm extends BimpObject
 
     // Overrides: 
 
+    public function validate()
+    {
+        global $conf;
+        $errors = parent::validate();
+
+        if ((int) $this->getData('fulldayevent')) {
+            $datep = $this->getData('datep');
+            if ($datep) {
+                $this->set('datep', date('Y-m-d', strtotime($datep)) . ' 00:00:00');
+            }
+
+            $datef = $this->getData('datep2');
+            if ($datef) {
+                $this->set('datep2', date('Y-m-d', strtotime($datef)) . ' 23:59:59 ');
+            }
+        }
+
+        if ((int) $this->getData('percent') == 100 && !$this->getData('datep2')) {
+            $errors[] = 'Date de fin obligatoire';
+        }
+        
+        if (empty($conf->global->AGENDA_USE_EVENT_TYPE) && !$this->getData('label')) {
+            $errors[] = 'Libellé obligatoire';
+        }
+        
+        
+        
+        return $errors;
+    }
+
     public function create(&$warnings = [], $force_create = false)
     {
         $this->dol_object = new ActionComm($this->db->db);

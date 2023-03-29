@@ -3,6 +3,12 @@
 class BimpRevalorisation extends BimpObject
 {
 
+    const STATUS_ATTENTE = 0;
+    const STATUS_DECLARED = 10;
+    const STATUS_ATT_EQUIPMENTS = 20;
+    const STATUS_ACCEPTED = 1;
+    const STATUS_REFUSED = 2;
+    
     public static $status_list = array(
         0  => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         10 => array('label' => 'Déclarée', 'icon' => 'fas_pause-circle', 'classes' => array('success')),
@@ -884,6 +890,7 @@ class BimpRevalorisation extends BimpObject
                     $success = 'Acceptation de la revalorisation effectuée avec succès';
                     $this->set('status', 1);
                     break;
+                
                 case 'declarer':
                     $success = 'Acceptation de la revalorisation effectuée avec succès';
                     $this->set('status', 10);
@@ -895,6 +902,7 @@ class BimpRevalorisation extends BimpObject
                     $facture = $this->getChildObject('facture');
                     $facture->addNoteToCommercial('Une revalorisation a été refusée');
                     break;
+                
                 case 'setSerial':
                     $success = 'Saisie du serial OK';
                     $this->set('status', 0);

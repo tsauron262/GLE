@@ -2032,14 +2032,16 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $dol_line = $line->getChildObject('dol_line');
             if ($dol_line->getData('buy_price_ht') > 0 && $dol_line->getData('qty') > 0) {
                 $pu = $dol_line->getData('total_ht') / $dol_line->getData('qty');
-                $marge = ($pu - $dol_line->getData('buy_price_ht')) / $pu * 100;
-                if ($marge < $margeMini) {
-                    $pro = $line->getChildObject('product');
-                    $html .= BimpRender::renderAlerts('Attention la ligne avec le produit ' . $pro->getLink() . ' a une marge de ' . price($marge) . ' %');
+
+                if ((float) $pu) {
+                    $marge = ($pu - $dol_line->getData('buy_price_ht')) / $pu * 100;
+                    if ($marge < $margeMini) {
+                        $pro = $line->getChildObject('product');
+                        $html .= BimpRender::renderAlerts('Attention la ligne avec le produit ' . $pro->getLink() . ' a une marge de ' . price($marge) . ' %');
+                    }
                 }
             }
         }
-
 
         return $html;
     }

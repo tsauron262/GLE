@@ -381,7 +381,7 @@ class BIMP_Task extends BimpObject
                                 'value'    => $id_max
                             ),
                             'id_user_owner' => (int) $id_user,
-                            'status'        => array(0,1,3
+                            'status'        => array(0, 1, 3
                             )), 'my_task', $nb_my
                         ), self::getNewTasks(BimpTools::merge_array(array(// Tâches non affectées
                                     'id'            => array(
@@ -389,7 +389,7 @@ class BIMP_Task extends BimpObject
                                         'value'    => $id_max
                                     ),
                                     'id_user_owner' => 0,
-                                    'status'        => array(0,1,3
+                                    'status'        => array(0, 1, 3
                                     )
                                         ), $this->getFiltreRightArray($user)), 'unaffected_task', $nb_unaffected
         ));
@@ -446,7 +446,7 @@ class BIMP_Task extends BimpObject
         if (!is_array($rows)) {
             return array();
         }
-        
+
         foreach ($rows as $r) {
             $t = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', (int) $r['id']);
             if (!BimpObject::objectLoaded($t)) {
@@ -561,11 +561,6 @@ class BIMP_Task extends BimpObject
         return $status;
     }
 
-    public function getDefaultBugCommentInputValue()
-    {
-        return 'URL: ' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    }
-
     // Affichages: 
 
     public function displayUserNotif()
@@ -633,6 +628,16 @@ class BIMP_Task extends BimpObject
         }
 
         return $html;
+    }
+
+    public function displayPageLink()
+    {
+        $url = $this->getData('url');
+        if ($url) {
+            return '<a href="' . $url . '" target="_blank">' . $url . '</a>';
+        }
+
+        return '';
     }
 
     // Rendus HTML: 
@@ -1155,9 +1160,9 @@ class BIMP_Task extends BimpObject
 
         return $errors;
     }
-    
+
     // Méthodes statiques: 
-    
+
     public static function addAutoTask($dst, $subject, $msg, $test_ferme = '')
     {
         global $conf;

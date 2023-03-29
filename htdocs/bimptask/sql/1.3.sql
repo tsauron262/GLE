@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_task` ADD `url` VARCHAR (255) NOT NULL DEFAULT '';

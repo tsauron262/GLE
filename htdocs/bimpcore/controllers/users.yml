@@ -46,9 +46,6 @@ sections:
         actioncomm: 
             label: Evénements agendas
             sections: 
-                - type: custom
-                  custom: 
-                      callback: renderTestButton
                 - type: list
                   list: 
                       name: global

@@ -27,27 +27,4 @@ class usersController extends BimpController
 
         return BimpRender::renderNavTabs($tabs, 'rights');
     }
-
-    public function renderTestButton()
-    {
-        $html = '';
-
-        $ac = BimpObject::getInstance('bimpcore', 'Bimp_ActionComm');
-        $title = 'Ajout d\\\'un événement';
-        $values = array(
-            'fields' => array(
-                'datep'          => '2023-03-31 15:00:00',
-                'datep2'         => '2023-03-31 16:00:00',
-                'users_assigned' => array(270),
-                'fk_soc' => 946,
-                'contacts_assigned' => array(243143, 243139)
-            )
-        );
-        $onclick = $ac->getJsLoadModalForm('add', $title, $values);
-
-        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-        $html .= 'TEST';
-        $html .= '</span>';
-        return $html;
-    }
 }

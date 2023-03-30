@@ -81,7 +81,7 @@
             global $db;
             
                         
-            if(((defined('ID_ERP') && ID_ERP == 1) || $this->modeTest)) {
+            if(((defined('ID_ERP') && ID_ERP == 6) || $this->modeTest)) {
                 $this->export_class = new export($db);
                 if(!is_dir($this->local_path))
                     mkdir($this->local_path);

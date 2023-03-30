@@ -525,40 +525,57 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
             }
                                     
             $ftp = ftp_connect($this->ldlc_ftp_host, 21);
-            if($ftp === false) { $this->rapport['FTP'][] = "Erreur de connexion au FTP LDLC";} else { $this->rapport['FTP'][] = 'Connexion avec le FTP LDLC Ok'; }
-            if(!ftp_login($ftp, $this->ldlc_ftp_user, $this->ldlc_ftp_pass)){ $this->rapport['FTP'][] = 'Erreur de login FTP LDLC'; } else { $this->rapport['FTP'][] = 'Login avec le FTP LDLC Ok'; }
-            if (defined('FTP_SORTANT_MODE_PASSIF')) { ftp_pasv($ftp, true); } else { ftp_pasv($ftp, false); }
-            
-            $present_sur_ftp_ldlc = ftp_nlist($ftp, $this->ldlc_ftp_path);
-            if(count($files) > 0) {
-                foreach($files as $file_path) {
-                    $filename = basename($file_path);
-                    if(!in_array($filename, $this->filesNotFtp)) {
-                        if(!in_array($this->ldlc_ftp_path . $filename, $present_sur_ftp_ldlc)) {
-                            if(filesize($file_path) > $this->size_vide_tra) {
-                                if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {
-                                    $this->rapport['FTP'][] = $filename . " transféré avec succès sur le FTP de LDLC";
-                                    if(!is_dir($this->local_path . 'imported_auto/'))
-                                            mkdir($this->local_path . 'imported_auto/');
-                                    if(copy($file_path, $this->local_path . 'imported_auto/' . $filename)) {
-                                        unlink($file_path);
+            if($ftp === false) { 
+                $this->rapport['FTP'][] = "Erreur de connexion au FTP LDLC";
+                
+            } 
+            else { 
+                $this->rapport['FTP'][] = 'Connexion avec le FTP LDLC Ok';
+                if(!ftp_login($ftp, $this->ldlc_ftp_user, $this->ldlc_ftp_pass)){ 
+                    $this->rapport['FTP'][] = 'Erreur de login FTP LDLC'; 
+                } 
+                else { 
+                    $this->rapport['FTP'][] = 'Login avec le FTP LDLC Ok'; 
+                    
+                    if (defined('FTP_SORTANT_MODE_PASSIF')) { 
+                        ftp_pasv($ftp, true); 
+                        
+                    } else { 
+                        ftp_pasv($ftp, false); 
+                    }
+                    
+                    $present_sur_ftp_ldlc = ftp_nlist($ftp, $this->ldlc_ftp_path);
+                    if(count($files) > 0) {
+                        foreach($files as $file_path) {
+                            $filename = basename($file_path);
+                            if(!in_array($filename, $this->filesNotFtp)) {
+                                if(!in_array($this->ldlc_ftp_path . $filename, $present_sur_ftp_ldlc)) {
+                                    if(filesize($file_path) > $this->size_vide_tra) {
+                                        if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {
+                                            $this->rapport['FTP'][] = $filename . " transféré avec succès sur le FTP de LDLC";
+                                            if(!is_dir($this->local_path . 'imported_auto/'))
+                                                    mkdir($this->local_path . 'imported_auto/');
+                                            if(copy($file_path, $this->local_path . 'imported_auto/' . $filename)) {
+                                                unlink($file_path);
+                                            } else {
+                                                mailSyn2("Compta - Erreur de copie", 'dev@bimP.fr', null, 'Le fichier ' . $filename . ' ne c\'est pas copié dans ledossier d\'import');
+                                            }
+                                        } else {
+                                            $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";
+                                        }
                                     } else {
-                                        mailSyn2("Compta - Erreur de copie", 'dev@bimP.fr', null, 'Le fichier ' . $filename . ' ne c\'est pas copié dans ledossier d\'import');
+                                        $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC car il est vide (fichier supprimé automatiquement)";
+                                        unlink($file_path);
                                     }
                                 } else {
-                                    $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";
+                                    $this->rapport['FTP'][] = $filename . ' déjà présent sur le FTP de LDLC';
                                 }
-                            } else {
-                                $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC car il est vide (fichier supprimé automatiquement)";
-                                unlink($file_path);
                             }
-                        } else {
-                            $this->rapport['FTP'][] = $filename . ' déjà présent sur le FTP de LDLC';
                         }
+                    } else {
+                        $this->rapport['FTP'][] = "Aucun fichiers à transférer";
                     }
                 }
-            } else {
-                $this->rapport['FTP'][] = "Aucun fichiers à transférer";
             }
         }
         

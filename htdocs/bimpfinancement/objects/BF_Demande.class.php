@@ -4200,15 +4200,22 @@ class BF_Demande extends BimpObject
 
         if (!count($errors)) {
             BimpObject::loadClass('bimpcommercial', 'BimpCommDemandeFin');
-            $sources = $this->getChildrenObjects('sources');
+//            $sources = $this->getChildrenObjects('sources');
+//            foreach ($sources as $source) {
 
-            foreach ($sources as $source) {
+            $source = $this->getSource();
+
+            if (!BimpObject::objectLoaded($source)) {
+                $errors[] = 'Aucune source principale';
+            } else {
                 $src_errors = $source->setDocFinStatus($doc_type, BimpCommDemandeFin::DOC_STATUS_ACCEPTED);
 
                 if (count($src_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($src_errors, 'Source "' . $source->displayName() . '"');
                 }
             }
+
+//            }
 
             if (!count($errors)) {
                 $this->addObjectLog(static::getDocTypeLabel($doc_type) . ' forcé au statut "Signé"', strtoupper($doc_type) . '_FORCED_SIGNED');

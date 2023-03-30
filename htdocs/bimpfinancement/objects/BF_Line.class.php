@@ -904,7 +904,7 @@ class BF_Line extends BimpObject
         if ($this->isProductSerialisable()) {
             $serials = $this->getData('serials');
             $diff = count($serials) - (int) $this->getData('qty');
-            if ($diff > 0) {
+            if ($diff > 0 && $this->getData('qty') > 0) {
                 $errors[] = 'Le nombre de n° de série enregistrés est supérieur aux quantités de la ligne. Veuillez retirer ' . $diff . ' n° de série ( '.print_r($serials, 1).')';
             }
         }

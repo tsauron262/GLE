@@ -9,7 +9,7 @@
 //error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
     class Cron {
         
-        protected $modeTest      = false;
+        protected $modeTest      = true;
         
         protected $export_class  = null;
         protected $stopCompta    = false;
@@ -21,7 +21,7 @@
         protected $ldlc_ftp_host = 'ftp-edi.groupe-ldlc.com';
         protected $ldlc_ftp_user = 'bimp-erp';
         protected $ldlc_ftp_pass = 'Yu5pTR?(3q99Aa';
-        protected $ldlc_ftp_path = '/FTP-BIMP-ERP/accounting/'; // Bien penssé a changer pour les test à /FTP-BIMP-ERP/accountingtest/
+        protected $ldlc_ftp_path = ''; // Bien penssé a changer pour les test à /FTP-BIMP-ERP/accountingtest/
         protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
         protected $size_vide_tra = 149;
         protected $rollback = false;
@@ -46,12 +46,19 @@
         private $export_bordereauCHK    = true;
         public $output = '';
         
-        public function manualSendTRA() {
-            $errors = $warnings = Array();
+        public function __construct() {
+            $this->ldlc_ftp_path = BimpCore::getConf('pathFtpCegid', '', 'bimptocegid');
             
             if($this->modeTest) {
-                $this->ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/';
+                $this->ldlc_ftp_path .= 'test/';
             }
+            else{
+                $this->ldlc_ftp_path .= '/';
+            }
+        }
+        
+        public function manualSendTRA() {
+            $errors = $warnings = Array();
             
             $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
             $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
@@ -73,9 +80,6 @@
         public function automatique() {
             global $db;
             
-            if($this->modeTest) {
-                $this->ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/';
-            }
                         
             if(((defined('ID_ERP') && ID_ERP == 1) || $this->modeTest)) {
                 $this->export_class = new export($db);
@@ -92,13 +96,16 @@
                     $this->export_class->create_daily_files();
                     $this->files_for_ftp = $this->getFilesArrayForTranfert();
 
-                    if($this->export_payni && !$this->export_class->rollBack)                                                     $this->export_class->exportPayInc();
+                    
                     if($this->export_ventes && !$this->export_class->rollBack)                                                    $this->export_class->exportFacture();
-                    if($this->export_paiements && !$this->export_class->rollBack)                                                 $this->export_class->exportPaiement();
-                    if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();
-                    if($this->export_importPaiement &&  !$this->export_class->rollBack)                                           $this->export_class->exportImportPaiement();
-                    if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
-                    if($this->export_bordereauCHK && !$this->export_class->rollBack)                                              $this->export_class->exportBordereauxCHK();
+                    if(!BimpCore::getConf('export_only_fact', 0, 'bimptocegid')){
+                        if($this->export_payni && !$this->export_class->rollBack)                                                     $this->export_class->exportPayInc();
+                        if($this->export_paiements && !$this->export_class->rollBack)                                                 $this->export_class->exportPaiement();
+                        if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();
+                        if($this->export_importPaiement &&  !$this->export_class->rollBack)                                           $this->export_class->exportImportPaiement();
+                        if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
+                        if($this->export_bordereauCHK && !$this->export_class->rollBack)                                              $this->export_class->exportBordereauxCHK();
+                    }
 
                     $this->renameFileAvantFTP();
                     $this->checkFiles();

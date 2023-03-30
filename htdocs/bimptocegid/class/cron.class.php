@@ -9,7 +9,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
     class Cron {
         
-        protected $modeTest      = true;
+        protected $modeTest      = false;
         
         protected $export_class  = null;
         protected $stopCompta    = false;
@@ -80,7 +80,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
         public function automatique() {
             global $db;
             
-                        die($this->ldlc_ftp_path.'mmmm');
+                        die($this->ldlc_ftp_path.'    mmmm');
             if(((defined('ID_ERP') && ID_ERP == 6) || $this->modeTest)) {
                 $this->export_class = new export($db);
                 if(!is_dir($this->local_path))

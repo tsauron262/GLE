@@ -146,7 +146,7 @@ class BimpTheme
             $html .= BimpRender::renderPopoverData('Signaler un bug', 'bottom');
             $html .= ' onclick="' . $task->getJsLoadModalForm('bug', 'Signaler un bug', array(
                         'fields' => array(
-                            'comment' => $task->getDefaultBugCommentInputValue()
+                            'url' => $_SERVER['REQUEST_URI']
                         )
                     )) . '"';
             $html .= '>';

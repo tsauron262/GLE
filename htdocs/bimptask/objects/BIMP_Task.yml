@@ -132,6 +132,15 @@ fields:
         type: id_object
         object: task_mere
         depends_on: type_manuel
+        
+    url: 
+        label: Page
+        displays: 
+            link: 
+                label: Avec lien
+                type: callback
+                method: displayPageLink
+                    
  
 fields_tables:
     default: 
@@ -151,6 +160,8 @@ fields_tables:
                   callback: displayType
             - field: subj
             - field: txt
+            - field: url
+              display: link
             - field: comment
             - field: id_user_owner
               edit: 1
@@ -177,6 +188,7 @@ forms:
             - field: txt
             - field: comment
             - field: id_user_owner
+            - field: url
             
     add:
         rows:
@@ -188,6 +200,7 @@ forms:
             - field: txt
             - field: comment
             - field: id_user_owner
+            - field: url
             - custom: 1
               label: Fichiers
               input_name: task_files
@@ -280,7 +293,7 @@ forms:
               value: 20
             - field: subj
             - field: txt
-            - field: comment
+            - field: url
             - custom: 1
               label: Fichiers
               input_name: task_files
@@ -303,7 +316,6 @@ forms:
                   rows: 3
                   auto_expand: 1
               hashtags: 1
-                  
            
 lists_cols: 
     typeTache:

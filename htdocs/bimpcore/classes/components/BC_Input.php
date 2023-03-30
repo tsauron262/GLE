@@ -577,6 +577,21 @@ class BC_Input extends BimpComponent
         return $options;
     }
 
+    public function getMultipleValuesItems($input_options)
+    {
+        if (isset($this->field_params['multiple_values_matches'])) {
+            return $this->field_params['multiple_values_matches'];
+        } elseif ($this->params['type'] === 'select' && isset($input_options['options'])) {
+            return $input_options['options'];
+        } elseif (isset($this->field_params['values'])) {
+            return $this->field_params['values'];
+        } elseif ($this->params['type'] === 'search_user') {
+            return BimpCache::getUsersArray();
+        }
+
+        return null;
+    }
+
     public function renderHtml()
     {
         $html = parent::renderHtml();
@@ -719,20 +734,20 @@ class BC_Input extends BimpComponent
             }
 
             if (is_array($this->value) && !empty($this->value)) {
+                $items = $this->getMultipleValuesItems($options);
                 foreach ($this->value as $value) {
-                    if (isset($this->field_params['multiple_values_matches'][$value])) {
-                        $values[$value] = $this->field_params['multiple_values_matches'][$value];
-                    } elseif (isset($this->field_params['values'][$value])) {
-                        if (is_array($this->field_params['values'][$value])) {
-                            if (isset($this->field_params['values'][$value]['label'])) {
-                                $values[$value] = $this->field_params['values'][$value]['label'];
-                            }
-                        } else {
-                            $values[$value] = $this->field_params['values'][$value];
-                        }
-                    }
+                    if (!is_null($items)) {
+                        if (isset($items[$value])) {
+                            if (is_array($value)) {
+                                $label = BimpTools::getArrayValueFromPath($items, $value . '/label', $value);
+                                $icon = BimpTools::getArrayValueFromPath($items, $value . '/label', $value);
 
-                    if (!isset($values[$value])) {
+                                $values[$value] = ($icon ? BimpRender::renderIcon($icon, 'iconLeft') : '') . $label;
+                            } else {
+                                $values[$value] = $items[$value];
+                            }
+                        }
+                    } elseif (!isset($values[$value])) {
                         $values[$value] = $value;
                     }
                 }

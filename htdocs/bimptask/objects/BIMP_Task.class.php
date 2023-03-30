@@ -381,7 +381,7 @@ class BIMP_Task extends BimpObject
                                 'value'    => $id_max
                             ),
                             'id_user_owner' => (int) $id_user,
-                            'status'        => array(0,1,3
+                            'status'        => array(0, 1, 3
                             )), 'my_task', $nb_my
                         ), self::getNewTasks(BimpTools::merge_array(array(// Tâches non affectées
                                     'id'            => array(
@@ -389,7 +389,7 @@ class BIMP_Task extends BimpObject
                                         'value'    => $id_max
                                     ),
                                     'id_user_owner' => 0,
-                                    'status'        => array(0,1,3
+                                    'status'        => array(0, 1, 3
                                     )
                                         ), $this->getFiltreRightArray($user)), 'unaffected_task', $nb_unaffected
         ));
@@ -446,7 +446,7 @@ class BIMP_Task extends BimpObject
         if (!is_array($rows)) {
             return array();
         }
-        
+
         foreach ($rows as $r) {
             $t = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', (int) $r['id']);
             if (!BimpObject::objectLoaded($t)) {
@@ -561,11 +561,6 @@ class BIMP_Task extends BimpObject
         return $status;
     }
 
-    public function getDefaultBugCommentInputValue()
-    {
-        return 'URL: ' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    }
-
     // Affichages: 
 
     public function displayUserNotif()
@@ -633,6 +628,16 @@ class BIMP_Task extends BimpObject
         }
 
         return $html;
+    }
+
+    public function displayPageLink()
+    {
+        $url = $this->getData('url');
+        if ($url) {
+            return '<a href="' . $url . '" target="_blank">' . $url . '</a>';
+        }
+
+        return '';
     }
 
     // Rendus HTML: 
@@ -806,8 +811,10 @@ class BIMP_Task extends BimpObject
     public function createIfNotActif()
     {
         $tasks = $this->getList(array('dst' => $this->getData('dst'), 'src' => $this->getData('src'), 'subj' => $this->getData('subj'), 'txt' => $this->getData('txt'), 'prio' => $this->getData('prio'), 'status' => 0));
-        if (count($tasks) == 0)
-            parent::create();
+        if (count($tasks) == 0) {
+            $warnings = array();
+            return $this->create($warnings, true);
+        }
         return array();
     }
 
@@ -838,9 +845,9 @@ class BIMP_Task extends BimpObject
         $html .= $msg;
 
         if ($rappel) {
-            $html .= '<br/><br/>' . $this->displayData('txt', 'default', false) . '<br/><br/>';
+            $html .= '<br/><br/>' . $this->displayData('txt', 'default', 0, 0, 1) . '<br/><br/>';
             if ($this->getData('comment')) {
-                $html .= '<b>Commentaire: </b>' . $this->displayData('comment', 'default', false);
+                $html .= '<b>Commentaire: </b>' . $this->displayData('comment', 'default', 0, 0, 1);
             }
 
             $notes = $this->getNotes();
@@ -854,7 +861,7 @@ class BIMP_Task extends BimpObject
         }
 
         if (is_null($sujet))
-            $sujet = "Re:" . $this->getData("subj");
+            $sujet = "Re:" . $this->displayData("subj", 'default', 0, 0, 1);
 
 //        $msg = str_replace("<br />", "\n", $msg);
 //        $msg = str_replace("<br/>", "\n", $msg);
@@ -1151,6 +1158,21 @@ class BIMP_Task extends BimpObject
             }
         }
 
+        return $errors;
+    }
+
+    // Méthodes statiques: 
+
+    public static function addAutoTask($dst, $subject, $msg, $test_ferme = '')
+    {
+        global $conf;
+        $errors = array();
+        if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
+            $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+            $tab = array("src" => "GLE-AUTO", "dst" => $dst, "subj" => $subject, "txt" => $msg, "prio" => 20, "test_ferme" => $test_ferme, 'auto' => 1);
+            $errors = array_merge($errors, $task->validateArray($tab));
+            $errors = array_merge($errors, $task->createIfNotActif());
+        }
         return $errors;
     }
 }

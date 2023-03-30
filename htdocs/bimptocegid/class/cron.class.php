@@ -4,9 +4,9 @@
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';    
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/controle.class.php';
-//    ini_set('display_errors', 1);
-//ini_set('display_startup_errors', 1);
-//error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+    ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
     class Cron {
         
         protected $modeTest      = false;
@@ -21,7 +21,7 @@
         protected $ldlc_ftp_host = 'ftp-edi.groupe-ldlc.com';
         protected $ldlc_ftp_user = 'bimp-erp';
         protected $ldlc_ftp_pass = 'Yu5pTR?(3q99Aa';
-        protected $ldlc_ftp_path = '/FTP-BIMP-ERP/accounting/'; // Bien penssé a changer pour les test à /FTP-BIMP-ERP/accountingtest/
+        protected $ldlc_ftp_path = ''; // Bien penssé a changer pour les test à /FTP-BIMP-ERP/accountingtest/
         protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
         protected $size_vide_tra = 149;
         protected $rollback = false;
@@ -46,12 +46,19 @@
         private $export_bordereauCHK    = true;
         public $output = '';
         
-        public function manualSendTRA() {
-            $errors = $warnings = Array();
+        public function __construct() {
+            $this->ldlc_ftp_path = BimpCore::getConf('pathFtpCegid', '', 'bimptocegid');
             
             if($this->modeTest) {
-                $this->ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/';
+                $this->ldlc_ftp_path .= 'test/';
             }
+            else{
+                $this->ldlc_ftp_path .= '/';
+            }
+        }
+        
+        public function manualSendTRA() {
+            $errors = $warnings = Array();
             
             $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
             $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
@@ -73,11 +80,7 @@
         public function automatique() {
             global $db;
             
-            if($this->modeTest) {
-                $this->ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/';
-            }
-                        
-            if(((defined('ID_ERP') && ID_ERP == 1) || $this->modeTest)) {
+            if(((defined('ID_ERP') && ID_ERP == 6) || $this->modeTest)) {
                 $this->export_class = new export($db);
                 if(!is_dir($this->local_path))
                     mkdir($this->local_path);
@@ -92,13 +95,16 @@
                     $this->export_class->create_daily_files();
                     $this->files_for_ftp = $this->getFilesArrayForTranfert();
 
-                    if($this->export_payni && !$this->export_class->rollBack)                                                     $this->export_class->exportPayInc();
+                    
                     if($this->export_ventes && !$this->export_class->rollBack)                                                    $this->export_class->exportFacture();
-                    if($this->export_paiements && !$this->export_class->rollBack)                                                 $this->export_class->exportPaiement();
-                    if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();
-                    if($this->export_importPaiement &&  !$this->export_class->rollBack)                                           $this->export_class->exportImportPaiement();
-                    if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
-                    if($this->export_bordereauCHK && !$this->export_class->rollBack)                                              $this->export_class->exportBordereauxCHK();
+                    if(!BimpCore::getConf('export_only_fact', 0, 'bimptocegid')){
+                        if($this->export_payni && !$this->export_class->rollBack)                                                     $this->export_class->exportPayInc();
+                        if($this->export_paiements && !$this->export_class->rollBack)                                                 $this->export_class->exportPaiement();
+                        if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();
+                        if($this->export_importPaiement &&  !$this->export_class->rollBack)                                           $this->export_class->exportImportPaiement();
+                        if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
+                        if($this->export_bordereauCHK && !$this->export_class->rollBack)                                              $this->export_class->exportBordereauxCHK();
+                    }
 
                     $this->renameFileAvantFTP();
                     $this->checkFiles();
@@ -518,40 +524,57 @@
             }
                                     
             $ftp = ftp_connect($this->ldlc_ftp_host, 21);
-            if($ftp === false) { $this->rapport['FTP'][] = "Erreur de connexion au FTP LDLC";} else { $this->rapport['FTP'][] = 'Connexion avec le FTP LDLC Ok'; }
-            if(!ftp_login($ftp, $this->ldlc_ftp_user, $this->ldlc_ftp_pass)){ $this->rapport['FTP'][] = 'Erreur de login FTP LDLC'; } else { $this->rapport['FTP'][] = 'Login avec le FTP LDLC Ok'; }
-            if (defined('FTP_SORTANT_MODE_PASSIF')) { ftp_pasv($ftp, true); } else { ftp_pasv($ftp, false); }
-            
-            $present_sur_ftp_ldlc = ftp_nlist($ftp, $this->ldlc_ftp_path);
-            if(count($files) > 0) {
-                foreach($files as $file_path) {
-                    $filename = basename($file_path);
-                    if(!in_array($filename, $this->filesNotFtp)) {
-                        if(!in_array($this->ldlc_ftp_path . $filename, $present_sur_ftp_ldlc)) {
-                            if(filesize($file_path) > $this->size_vide_tra) {
-                                if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {
-                                    $this->rapport['FTP'][] = $filename . " transféré avec succès sur le FTP de LDLC";
-                                    if(!is_dir($this->local_path . 'imported_auto/'))
-                                            mkdir($this->local_path . 'imported_auto/');
-                                    if(copy($file_path, $this->local_path . 'imported_auto/' . $filename)) {
-                                        unlink($file_path);
+            if($ftp === false) { 
+                $this->rapport['FTP'][] = "Erreur de connexion au FTP LDLC";
+                
+            } 
+            else { 
+                $this->rapport['FTP'][] = 'Connexion avec le FTP LDLC Ok';
+                if(!ftp_login($ftp, $this->ldlc_ftp_user, $this->ldlc_ftp_pass)){ 
+                    $this->rapport['FTP'][] = 'Erreur de login FTP LDLC'; 
+                } 
+                else { 
+                    $this->rapport['FTP'][] = 'Login avec le FTP LDLC Ok'; 
+                    
+                    if (defined('FTP_SORTANT_MODE_PASSIF')) { 
+                        ftp_pasv($ftp, true); 
+                        
+                    } else { 
+                        ftp_pasv($ftp, false); 
+                    }
+                    
+                    $present_sur_ftp_ldlc = ftp_nlist($ftp, $this->ldlc_ftp_path);
+                    if(count($files) > 0) {
+                        foreach($files as $file_path) {
+                            $filename = basename($file_path);
+                            if(!in_array($filename, $this->filesNotFtp)) {
+                                if(!in_array($this->ldlc_ftp_path . $filename, $present_sur_ftp_ldlc)) {
+                                    if(filesize($file_path) > $this->size_vide_tra) {
+                                        if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {
+                                            $this->rapport['FTP'][] = $filename . " transféré avec succès sur le FTP de LDLC";
+                                            if(!is_dir($this->local_path . 'imported_auto/'))
+                                                    mkdir($this->local_path . 'imported_auto/');
+                                            if(copy($file_path, $this->local_path . 'imported_auto/' . $filename)) {
+                                                unlink($file_path);
+                                            } else {
+                                                mailSyn2("Compta - Erreur de copie", 'dev@bimP.fr', null, 'Le fichier ' . $filename . ' ne c\'est pas copié dans ledossier d\'import');
+                                            }
+                                        } else {
+                                            $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";
+                                        }
                                     } else {
-                                        mailSyn2("Compta - Erreur de copie", 'dev@bimP.fr', null, 'Le fichier ' . $filename . ' ne c\'est pas copié dans ledossier d\'import');
+                                        $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC car il est vide (fichier supprimé automatiquement)";
+                                        unlink($file_path);
                                     }
                                 } else {
-                                    $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";
+                                    $this->rapport['FTP'][] = $filename . ' déjà présent sur le FTP de LDLC';
                                 }
-                            } else {
-                                $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC car il est vide (fichier supprimé automatiquement)";
-                                unlink($file_path);
                             }
-                        } else {
-                            $this->rapport['FTP'][] = $filename . ' déjà présent sur le FTP de LDLC';
                         }
+                    } else {
+                        $this->rapport['FTP'][] = "Aucun fichiers à transférer";
                     }
                 }
-            } else {
-                $this->rapport['FTP'][] = "Aucun fichiers à transférer";
             }
         }
         

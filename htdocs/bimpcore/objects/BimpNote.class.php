@@ -49,6 +49,11 @@ class BimpNote extends BimpObject
 //    const BN_GROUPID_ATRADIUS = 680; => BimpCore::getUserGroupId('atradius')
 //    const BN_GROUPID_CONTRAT = 686; => BimpCore::getUserGroupId('contrat')
 //    const BN_GROUPID_ACHAT = 8 (remplacé par 120); => BimpCore::getUserGroupId('achat')
+    
+    private static $jsReload = '
+    if (typeof notifNote !== "undefined" && notifNote !== null)
+        notifNote.reloadNotif();
+            ';
 
     // Droits users: 
     public function canEdit()
@@ -650,7 +655,7 @@ class BimpNote extends BimpObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'reloadNote();'
+            'success_callback' => self::$jsReload
         );
     }
 
@@ -699,7 +704,7 @@ class BimpNote extends BimpObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'reloadNote();'
+            'success_callback' => self::$jsReload
         );
     }
 

@@ -15,9 +15,6 @@ class BimpFactureFournForDol extends Bimp_FactureFourn
 
     public function sendRelanceExpertiseBimp()
     {
-    ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 
         $sends = array();
         $filtres = array('expertise' => 0, 'datef' => array('operator' => '>=', 'value' => '2022-04-01'), 'a__ef.type' => array('operator' => '!=', 'value' => 'S'), 'exported' => 1);

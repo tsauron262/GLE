@@ -301,10 +301,15 @@ class Bimp_CommissionApporteur extends BimpObject
         $tot = 0;
         foreach ($tabsFiltres as $filtre) {
             $champ = 'total_ht';
-            if($filtre->getData('sur_marge'))
-                $champ = '(total_ht - buy_price_ht * qty)';
+            if($filtre->getData('sur_marge')){
+                $champ = '(total_ht - (buy_price_ht * qty))';
+                //ajout des reval
+                $res = $this->db->executeS("SELECT SUM(amount * qty) as tot FROM llx_bimp_revalorisation WHERE id_facture_line IN (SELECT bf.id FROM llx_bimp_facture_line bf WHERE `commission_apporteur` = '" . $this->id . "-" . $filtre->id . "') AND status IN (0,1) AND type != 'commission_app';");
+                $tot += $res[0]->tot * $filtre->getData('commition') / 100;
+            }
             $res = $this->db->executeS("SELECT SUM(".$champ.") as tot FROM `llx_facturedet` f, llx_bimp_facture_line bf WHERE bf.`id_line` = f.rowid AND `commission_apporteur` = '" . $this->id . "-" . $filtre->id . "'");
             $tot += $res[0]->tot * $filtre->getData('commition') / 100;
+            
         }
         $errors = BimpTools::merge_array($errors, $this->updateField('total', $tot));
         return $errors;

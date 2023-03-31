@@ -3,9 +3,9 @@
 require_once('../../main.inc.php');
 require_once("libAgenda.php");
 
-    ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+//    ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
+//error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 
 $eventsStr = array();
 if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {

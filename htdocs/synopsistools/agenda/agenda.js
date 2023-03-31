@@ -100,9 +100,39 @@ function initSimult() {
     $("div.wc-title a").click(function () {
         id = $(this).parent().find(".idAction").attr("value");
         titre = $(this).html();
-        dispatchePopIFrame(DOL_URL_ROOT + "/comm/action/card.php?id=" + id + "&action=edit&optioncss=print", function () {
-            $('#calendar').weekCalendar('refresh');
-        }, titre, 100);
+        if(typeof loadModalForm !== "undefined"){//juste pour tester 
+        loadModalForm(
+                $(this), 
+                {
+                    module: "bimpcore", 
+                    object_name: "Bimp_ActionComm", 
+                    id_object: id, id_parent: "0", 
+                    form_name: "add",
+                    force_edit: 0
+                }, 
+                "Modification d\'un événement", 
+                "", 
+                "", 
+                null, 
+                function(){ 
+                    $('#calendar').weekCalendar('refresh'); 
+                }, 
+                null
+            );
+        }
+        else{
+            dispatchePopIFrame(DOL_URL_ROOT + "/comm/action/card.php?id=" + id + "&action=edit&optioncss=print", function () {
+                $('#calendar').weekCalendar('refresh');
+            }, titre, 100);
+        }
         return false;
     });
+}
+
+
+function formatedTimestamp(timestamp){
+  const d = new Date(timestamp);
+  const date = d.toISOString().split('T')[0];
+  const time = d.toTimeString().split(' ')[0];
+  return `${date} ${time}`;
 }

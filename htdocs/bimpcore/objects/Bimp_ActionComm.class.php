@@ -62,6 +62,24 @@ class Bimp_ActionComm extends BimpObject
 
         return self::getCacheArray($cache_key, $include_empty);
     }
+    
+    public function getUsersAssigned(){
+        $users = array();
+        foreach ($this->dol_object->userassigned as $userassigned) {
+            $users[] = $userassigned['id'];
+        }
+        return $users;
+    }
+    
+    public function getContactsAssigned(){
+        $socpeople = array();
+        foreach ($this->dol_object->socpeopleassigned as $socpeopleassigned) {
+            $socpeople[] = $socpeopleassigned['id'];
+        }
+        return $socpeople;
+    }
+    
+    
 
     // Getters params: 
 

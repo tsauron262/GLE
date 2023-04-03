@@ -476,7 +476,7 @@ class DemandeValidComm extends BimpObject
             $success_tab = array();
             $can_validate = (int) $validateur->tryToValidate($object, $user, $errors, $success_tab, array($this->getData('type')));
             $success1 = str_replace(',', '<br/>', implode('<br/>', $success_tab));
-            if($can_validate && $this->getDat('status') == 0)//les regles on surmeent changé
+            if($can_validate && $this->getData('status') == 0)//les regles on surmeent changé
                 $this->updateField('status', self::STATUS_VALIDATED);
             else
                 $errors[] = 'Validation impossible';

@@ -9,7 +9,7 @@
 //error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
     class Cron {
         
-        protected $modeTest      = true;
+        protected $modeTest      = false;
         
         protected $export_class  = null;
         protected $stopCompta    = false;

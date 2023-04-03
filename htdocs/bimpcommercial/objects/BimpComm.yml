@@ -163,7 +163,7 @@ fields:
         depends_on: fk_soc
     fk_availability: 
         label: Délai de livraison
-        dol_prop: availability_id
+#        dol_prop: availability_id
         type: int
         values: 
             array: availabilities

@@ -827,9 +827,9 @@ class BimpDolObject extends BimpObject
 
         if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
             $list_int = $list_ext = array();
-            if ($type == 0 || $type == 1)
+            if ($type == 0 || $type == 1 || $type == 'internal')
                 $list_int = $this->dol_object->liste_contact(-1, 'internal', 0, $code);
-            if ($type == 0 || $type == 2)
+            if ($type == 0 || $type == 2 || $type == 'external')
                 $list_ext = $this->dol_object->liste_contact(-1, 'external', 0, $code);
             $list = BimpTools::merge_array($list_int, $list_ext);
         }

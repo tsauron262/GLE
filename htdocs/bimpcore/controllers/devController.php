@@ -86,8 +86,6 @@ class devController extends BimpController
             }
             $html .= '</ul>';
             $html .= '</div>';
-        } else {
-            $html .= '<h3 style="margin-bottom: 30px" class="success">Toutes les tâches cron ok</h3>';
         }
         
         

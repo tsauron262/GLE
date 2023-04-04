@@ -247,6 +247,8 @@ fields:
                   
 forms: 
     add: 
+        before_content: 
+            callback: renderDeleteButton
         rows: 
             type: 
                 field: fk_action

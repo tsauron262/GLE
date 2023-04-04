@@ -16,9 +16,10 @@ class Bimp_ActionComm extends BimpObject
     );
 
     // Getters booléens: 
-    
-    public function canView() {//ne fonctionne pas
-         return $this->getRight('read');
+
+    public function canView()
+    {//ne fonctionne pas
+        return $this->getRight('read');
     }
 
     public function isCreatable($force_create = false, &$errors = array())
@@ -30,27 +31,27 @@ class Bimp_ActionComm extends BimpObject
     {
         return $this->getRight('create');
     }
-    
-    public function getRight($code){
+
+    public function getRight($code)
+    {
         global $user;
-        
-        if($user->rights->agenda->allactions->$code)
+
+        if ($user->rights->agenda->allactions->$code)
             return 1;
-        
+
         $usersPost = BimpTools::getPostFieldValue('users_assigned', array());
-        
-        
+
         $users = $this->getUsersAssigned();
-        if(((count($users) > 0 && $users[0] == $user->id) || (count($usersPost) > 0 && (int) $usersPost[0] == $user->id)) && $user->rights->agenda->myactions->$code)
+        if (((count($users) > 0 && $users[0] == $user->id) || (count($usersPost) > 0 && (int) $usersPost[0] == $user->id)) && $user->rights->agenda->myactions->$code)
             return 1;
-        
+
 
         return 0;
     }
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
-         return $this->getRight('delete');
+        return $this->getRight('delete');
     }
 
     // Getters array: 
@@ -71,24 +72,24 @@ class Bimp_ActionComm extends BimpObject
 
         return self::getCacheArray($cache_key, $include_empty);
     }
-    
-    public function getUsersAssigned(){
+
+    public function getUsersAssigned()
+    {
         $users = array();
         foreach ($this->dol_object->userassigned as $userassigned) {
             $users[] = $userassigned['id'];
         }
         return $users;
     }
-    
-    public function getContactsAssigned(){
+
+    public function getContactsAssigned()
+    {
         $socpeople = array();
         foreach ($this->dol_object->socpeopleassigned as $socpeopleassigned) {
             $socpeople[] = $socpeopleassigned['id'];
         }
         return $socpeople;
     }
-    
-    
 
     // Getters params: 
 
@@ -147,31 +148,28 @@ class Bimp_ActionComm extends BimpObject
     }
 
     // Affichages: 
-    
+
     public function displayExternalUsers()
     {
         $return = '';
-        if($this->isLoaded()){
-                    
-            $ln = $this->db->getRow('synopsiscaldav_event', '`fk_object` = '.$this->id, array('participentExt'));
-            if($ln){
+        if ($this->isLoaded()) {
+
+            $ln = $this->db->getRow('synopsiscaldav_event', '`fk_object` = ' . $this->id, array('participentExt'));
+            if ($ln) {
                 $tab = explode(',', $ln->participentExt);
-                foreach($tab as $usersExt){
+                foreach ($tab as $usersExt) {
                     $tmp = explode('|', $usersExt);
                     $return .= $tmp[0];
-                    if(isset($tmp[1])){
-                        if($tmp[1] == 'NEEDS-ACTION'){
-                            $return .= ' '.BimpRender::renderIcon('fas_info-circle', 'warning');
-                        }
-                        elseif($tmp[1] == 'ACCEPTED'){
-                            $return .= ' '.BimpRender::renderIcon('fas_check-circle', 'success');
-                        }
-                        elseif($tmp[1] == 'NEEDS-ACTION'){
-                            $return .= ' '.BimpRender::renderIcon('fa_times-circle', 'danger');
+                    if (isset($tmp[1])) {
+                        if ($tmp[1] == 'NEEDS-ACTION') {
+                            $return .= ' ' . BimpRender::renderIcon('fas_info-circle', 'warning');
+                        } elseif ($tmp[1] == 'ACCEPTED') {
+                            $return .= ' ' . BimpRender::renderIcon('fas_check-circle', 'success');
+                        } elseif ($tmp[1] == 'NEEDS-ACTION') {
+                            $return .= ' ' . BimpRender::renderIcon('fa_times-circle', 'danger');
                         }
                     }
                     $return .= '<br/>';
-                        
                 }
             }
         }
@@ -231,7 +229,44 @@ class Bimp_ActionComm extends BimpObject
 
     public function renderDateInput($field_name)
     {
-        return BimpInput::renderInput(((int) $this->getData('fulldayevent') ? 'date' : 'datetime'), $field_name, $this->getData($field_name));
+        $date = $this->getData($field_name);
+
+        if (BimpTools::isPostFieldSubmit($field_name)) {
+            $date = BimpTools::getPostFieldValue($field_name, $date);
+        }
+
+        $input_type = 'datetime';
+        if ((int) $this->getData('fulldayevent')) {
+            $input_type = 'date';
+            $date = date('Y-m-d', strtotime($date));
+        } else {
+            if ($this->isLoaded()) {
+                $init_date = $this->getInitData($field_name);
+                $date = date('Y-m-d', strtotime($date)) . ' ' . date('H:i:s', strtotime($init_date));
+            } else {
+                $date = date('Y-m-d H:i:s', strtotime($date));
+            }
+        }
+
+        return BimpInput::renderInput($input_type, $field_name, $date);
+    }
+
+    public function renderDeleteButton()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $html .= '<div style="margin: 10px; text-align: center">';
+            $html .= '<span class="btn btn-danger" onclick="' . $this->getJsDeleteOnClick(array(
+                        'on_success' => 'reload'
+//                        'success_callback' => 'function() {window.location.reload();}'
+                    )) . '">';
+            $html .= BimpRender::renderIcon('fas_trash-alt', 'iconLeft') . 'Supprimer cet événement';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
+        return $html;
     }
 
     // Overrides:

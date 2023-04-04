@@ -247,12 +247,16 @@ fields:
                   
 forms: 
     add: 
-        before_content:
-            callback: displayElement
         rows: 
             type: 
                 field: fk_action
                 required: 1
+            link:
+                custom: 1
+                content: 
+                    callback: displayElement
+                label: Objet liée
+                input_name: dfsd
             label: 
                 field: label
             fullday: 
@@ -271,6 +275,8 @@ forms:
                 input: 
                     multiple: 1
                     type: search_user
+                    help: 
+                        callback: displayExternalUsers
                 value:
                     callback: getUsersAssigned
             occupied: 

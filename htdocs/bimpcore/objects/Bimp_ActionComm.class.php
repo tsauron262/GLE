@@ -147,6 +147,36 @@ class Bimp_ActionComm extends BimpObject
     }
 
     // Affichages: 
+    
+    public function displayExternalUsers()
+    {
+        $return = '';
+        if($this->isLoaded()){
+                    
+            $ln = $this->db->getRow('synopsiscaldav_event', '`fk_object` = '.$this->id, array('participentExt'));
+            if($ln){
+                $tab = explode(',', $ln->participentExt);
+                foreach($tab as $usersExt){
+                    $tmp = explode('|', $usersExt);
+                    $return .= $tmp[0];
+                    if(isset($tmp[1])){
+                        if($tmp[1] == 'NEEDS-ACTION'){
+                            $return .= ' '.BimpRender::renderIcon('fas_info-circle', 'warning');
+                        }
+                        elseif($tmp[1] == 'ACCEPTED'){
+                            $return .= ' '.BimpRender::renderIcon('fas_check-circle', 'success');
+                        }
+                        elseif($tmp[1] == 'NEEDS-ACTION'){
+                            $return .= ' '.BimpRender::renderIcon('fa_times-circle', 'danger');
+                        }
+                    }
+                    $return .= '<br/>';
+                        
+                }
+            }
+        }
+        return $return;
+    }
 
     public function displayElement()
     {

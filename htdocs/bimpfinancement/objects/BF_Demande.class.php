@@ -221,7 +221,7 @@ class BF_Demande extends BimpObject
 
     public function isActionAllowed($action, &$errors = [])
     {
-        if (in_array($action, array('generatePropositionLocation'))) {
+        if (in_array($action, array('generatePropositionLocation', 'generateListCsv'))) {
             return 1;
         }
 

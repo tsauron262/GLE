@@ -11,7 +11,7 @@ class Bimp_Facture_ExtEntity extends Bimp_Facture
     );
     
     public function isFieldEditable($field, $force_edit = false) {
-        if($field == 'type_vente' && !$this->getData('exported'))
+        if($field == 'type_vente'/* && !$this->getData('exported')*/)
             return 1;
         return parent::isFieldEditable($field, $force_edit);
     }

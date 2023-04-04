@@ -108,8 +108,6 @@ lists:
         filters_panel: default
         title: Récapitulatif des échéanciers contrat
         icon: fas_euro
-        list_filters: 
-            callback: getListFilter
         sort_field: next_facture_date
         sort_way: desc
         n: 25
@@ -138,12 +136,11 @@ lists:
         #modal_view: unset
         cols:
             reste_a_payer: unset
+            
     recap_retard:
       extends: default
       cols:
         reste_a_payer: unset
-      list_filters:
-        callback: getListFilterRetard
 
 
 forms:
@@ -174,9 +171,8 @@ forms:
               data_type: text
               input:
                   type: select
-                  options:
-                      array:
-                        callback: renderlistEndPeriod
+                  options: 
+                      array: endPeriods
             - custom: 1
               label: Montant HT
               data_type: money

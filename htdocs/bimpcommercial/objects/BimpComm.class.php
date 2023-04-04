@@ -1241,7 +1241,7 @@ class BimpComm extends BimpDolObject
             $lines = $this->getChildrenObjects('lines');
             foreach ($lines as $bimp_line) {
                 $line = $bimp_line->getChildObject('line');
-                if($line->desc === 'Acompte')
+                if ($line->desc === 'Acompte')
                     continue;
                 if (empty($line->pa_ht) && isset($line->fk_fournprice) && !$force_price) {
                     require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
@@ -2801,6 +2801,19 @@ class BimpComm extends BimpDolObject
                         'discount'
                     )) || (int) $line->id_remise_except)) {
                 continue;
+            }
+
+            // Lignes à ne pas copier si produit plus à la vente :
+            if ($params['is_clone'] || $params['is_review']) {
+                $product = $line->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande', 'Bimp_Facture'))) {
+                        if (!(int) $product->getData('tosell')) {
+                            $warnings[] = 'Ligne n°' . $line->getData('position') . ' non incluse cart le produit ' . $product->getLink() . ' n\'est plus disponible à la vente';
+                            continue;
+                        }
+                    }
+                }
             }
 
             $new_line = BimpObject::getInstance($this->module, $this->object_name . 'Line');
@@ -4543,7 +4556,7 @@ class BimpComm extends BimpDolObject
 
     public function getGraphDatasPoints($params)
     {
-        $result = array(1=>array(), 2=> array());
+        $result = array(1 => array(), 2 => array());
 
         $fieldTotal = 'total_ht';
         if ($this->object_name == 'Bimp_Propal')

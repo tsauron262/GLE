@@ -4,6 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_Facture.class.php
 class Bimp_Facture_ExtEntity extends Bimp_Facture
 {
     public static $types_vente = array(
+        null      => null,
         1      => 'Contrat de location',
         2      => 'Indemnité dépassement contrat ',
         3      => 'Cession final du produit',

@@ -5,10 +5,18 @@ fields:
         values: 
             array: types_vente
         dol_extra_field: 1
-        default_value: 10     
+        default_value: 0
+        required: 1
 fields_tables: 
     infos:
         rows: 
             type_vente:
                 field: type_vente
                 edit: 1
+                
+forms:              
+    default: 
+        rows:
+            type_vente: 
+                field: type_vente
+            

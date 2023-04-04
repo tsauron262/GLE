@@ -76,16 +76,18 @@ class devController extends BimpController
         // Crons en erreur: 
         $rows = BimpCache::getBdb()->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
         if (!empty($rows)) {
-            $html .= '<div class="row">';
+            $html .= '<div class="row" style="margin-bottom: 30px">';
             $html .= '<h3 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' tâche(s) cron en erreur</h3>';
             $html .= '<ul>';
             foreach ($rows as $r) {
                 $html .= '<li>';
-                $html .= '<a href="' . DOL_URL_ROOT . '/cron/card.php?id=' . $r['rowid'] . '" target="_blank">' . $r['label'] . BimpRender::renderIcon('fas_external-link', 'iconRight') . '</a>';
+                $html .= '<a href="' . DOL_URL_ROOT . '/cron/card.php?id=' . $r['rowid'] . '" target="_blank">' . $r['label'] . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
                 $html .= '</li>';
             }
             $html .= '</ul>';
             $html .= '</div>';
+        } else {
+            $html .= '<h3 style="margin-bottom: 30px" class="success">Toutes les tâches cron ok</h3>';
         }
         
         

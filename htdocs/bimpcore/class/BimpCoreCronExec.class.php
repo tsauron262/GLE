@@ -202,7 +202,7 @@ class BimpCoreCronExec extends BimpCron
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 $i++;
-                mailSyn2('Cron en erreur', 'dev@bimp.fr', null, 'Attention, le cron ' . $r['label'] . ' d\id ' . $r['rowid'] . ' est en erreur...');
+                mailSyn2('Cron en erreur', 'dev@bimp.fr', null, 'Attention, le cron ' . $r['label'] . ' d\'id ' . $r['rowid'] . ' est en erreur...');
             }
         }
         $this->output = $i . ' erreurs';

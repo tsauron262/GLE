@@ -374,7 +374,9 @@ class PDO extends AbstractBackend {
         $principal = $this->getPrincipalByPath($principal);
         if (!$principal) throw new DAV\Exception('Principal not found');
 
-        $stmt = $this->pdo->prepare('SELECT principals.uri as uri FROM '.$this->groupMembersTableName.' AS groupmembers LEFT JOIN '.$this->tableName.' AS principals ON groupmembers.principal_id = principals.id WHERE groupmembers.member_id = ?');
+//        $stmt = $this->pdo->prepare('SELECT principals.uri as uri FROM '.$this->groupMembersTableName.' AS groupmembers LEFT JOIN '.$this->tableName.' AS principals ON groupmembers.principal_id = principals.id WHERE groupmembers.member_id = ?');
+        
+        $stmt = $this->pdo->prepare('SELECT principals.uri as uri FROM '.$this->tableName.' AS principals  WHERE id = ?');
         $stmt->execute(array($principal['id']));
 
         $result = array();

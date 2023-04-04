@@ -198,7 +198,6 @@ function build_calfile($format, $title, $desc, $events_array, $outputfile)
 				$prefix     = "";
 				$startdatef = dol_print_date($startdate, "dayhourxcard", 'gmt');
 
-				fwrite($calfileh, "NIMPpppp".$prefix.":".$startdatef."\n");
 				if ($fulldayevent) {
 					// Local time
 					$prefix     = ";VALUE=DATE";

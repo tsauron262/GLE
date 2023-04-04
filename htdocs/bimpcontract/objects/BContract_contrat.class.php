@@ -4764,32 +4764,36 @@ class BContract_contrat extends BimpDolObject
             return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
         } else {
 
-            $relance_renouvellement = BimpTools::getValue('relance_renouvellement');
-
-            if ($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && (BimpTools::getValue('periodicity') != $this->getInitData('periodicity'))) {
-                $log = "Changement de la périodicitée de facturation de <strong>" . self::$period[$this->getInitData('periodicity')] . "</strong> à <strong>";
-                $log .= self::$period[BimpTools::getValue('periodicity')] . "</strong>";
-                $this->addLog($log);
-            }
-
-            if (BimpTools::getValue('relance_renouvellement') != $this->getInitData('relance_renouvellement') && $this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) {
-                $new_state = (BimpTools::getValue('relance_renouvellement') == 0) ? 'NON' : 'OUI';
-                $this->addLog('Changement statut relance renouvellement à : ' . $new_state);
-            }
-            if (BimpTools::getValue('facturation_echu') != $this->getInitData('facturation_echu') && $this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) {
-                $new_state = (BimpTools::getValue('facturation_echu') == 0) ? 'NON' : 'OUI';
-                $this->addLog('Changement statut facturation à terme échu à : ' . $new_state);
-            }
-            if (BimpTools::getValue('label') != $this->getInitData('label') && $this->getData(('statut')) != self::CONTRAT_STATUS_BROUILLON) {
-                $this->addLog('Nouveau label contrat: ' . BimpTools::getValue('label'));
-            }
-            if (BimpTools::getValue('date_start') != $this->getInitData('date_start') && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
-                $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
-                if ($echeancier->find(['id_contrat' => $this->id], 1)) {
-                    $errors[] = $echeancier->updateField("next_facture_date", BimpTools::getValue('date_start') . ' 00:00:00');
-                }
-                $this->addLog("Date d'effet du contrat changer à " . BimpTools::getValue('date_start'));
-            }
+//            $relance_renouvellement = BimpTools::getValue('relance_renouvellement');
+            
+            //  *******************************************************
+            //  L'ajout des logs bug (entrées vides intempestives), à corriger avant réactivation
+            //  *******************************************************
+            
+//            if ($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && (BimpTools::getValue('periodicity') != $this->getInitData('periodicity'))) {
+//                $log = "Changement de la périodicitée de facturation de <strong>" . self::$period[$this->getInitData('periodicity')] . "</strong> à <strong>";
+//                $log .= self::$period[BimpTools::getValue('periodicity')] . "</strong>";
+//                $this->addLog($log);
+//            }
+//
+//            if (BimpTools::getValue('relance_renouvellement') != $this->getInitData('relance_renouvellement') && $this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) {
+//                $new_state = (BimpTools::getValue('relance_renouvellement') == 0) ? 'NON' : 'OUI';
+//                $this->addLog('Changement statut relance renouvellement à : ' . $new_state);
+//            }
+//            if (BimpTools::getValue('facturation_echu') != $this->getInitData('facturation_echu') && $this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) {
+//                $new_state = (BimpTools::getValue('facturation_echu') == 0) ? 'NON' : 'OUI';
+//                $this->addLog('Changement statut facturation à terme échu à : ' . $new_state);
+//            }
+//            if (BimpTools::getValue('label') != $this->getInitData('label') && $this->getData(('statut')) != self::CONTRAT_STATUS_BROUILLON) {
+//                $this->addLog('Nouveau label contrat: ' . BimpTools::getValue('label'));
+//            }
+//            if (BimpTools::getValue('date_start') != $this->getInitData('date_start') && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
+//                $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
+//                if ($echeancier->find(['id_contrat' => $this->id], 1)) {
+//                    $errors[] = $echeancier->updateField("next_facture_date", BimpTools::getValue('date_start') . ' 00:00:00');
+//                }
+//                $this->addLog("Date d'effet du contrat changer à " . BimpTools::getValue('date_start'));
+//            }
 
             // Maj de la signature si nécessaire: 
 //            if ((int) $this->getData('id_signature')) {

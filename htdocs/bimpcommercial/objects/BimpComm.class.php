@@ -2809,7 +2809,7 @@ class BimpComm extends BimpDolObject
                 if (BimpObject::objectLoaded($product)) {
                     if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande', 'Bimp_Facture'))) {
                         if (!(int) $product->getData('tosell')) {
-                            $warnings[] = 'Ligne n°' . $line->getData('position') . ' non incluse cart le produit ' . $product->getLink() . ' n\'est plus disponible à la vente';
+                            $warnings[] = 'Ligne n°' . $line->getData('position') . ' non incluse car le produit ' . $product->getLink() . ' n\'est plus disponible à la vente';
                             continue;
                         }
                     }

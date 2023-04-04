@@ -16,7 +16,6 @@ class BimpFactureFournForDol extends Bimp_FactureFourn
     public function sendRelanceExpertiseBimp()
     {
 
-
         $sends = array();
         $filtres = array('expertise' => 0, 'datef' => array('operator' => '>=', 'value' => '2022-04-01'), 'a__ef.type' => array('operator' => '!=', 'value' => 'S'), 'exported' => 1);
         $joins = array();
@@ -26,7 +25,7 @@ class BimpFactureFournForDol extends Bimp_FactureFourn
 //                        'on'    => 'ef' . '.' . 'fk_facture' . ' = ' . 'a' . '.' . 'rowid'
 //                    );
 //        die('count : '.count(BimpObject::getBimpObjectList('bimpcommercial', 'Bimp_Facture', $filtres, $joins)));
-        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filtres, $joins);
+        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filtres, null, null, $joins);
         $nb = 0;
         foreach ($facts as $fact) {
             $nb++;

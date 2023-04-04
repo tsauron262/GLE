@@ -1270,7 +1270,8 @@ class BContract_echeancier extends BimpObject
         if ($dateDebutFacture) {
             $new_next_date = new DateTime();
             $new_next_date->setTimestamp($dateDebutFacture);
-            $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
+//            $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
+            $this->updateField('next_facture_date', NULL);
             $this->switch_statut();
         }
     }

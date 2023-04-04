@@ -1985,8 +1985,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 'id_client_facture' => (int) (!is_null($client_facture) ? $client_facture->id : 0),
                 'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contact_id : 0),
                 'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
-                'note_public'       => addslashes(htmlentities($this->getData('note_public'))),
-                'note_private'      => addslashes(htmlentities($this->getData('note_private'))),
+                'note_public'       => htmlentities(addslashes($this->getData('note_public'))),
+                'note_private'      => htmlentities(addslashes($this->getData('note_private'))),
                     ), array(
                 'form_name'      => 'invoice',
                 'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',

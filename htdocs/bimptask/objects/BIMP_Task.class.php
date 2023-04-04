@@ -33,6 +33,11 @@ class BIMP_Task extends BimpObject
 //    const ID_USER_DEF = 215;  => Remplacé par BimpCore::getConf('id_user_def', null, 'bimptask')
 
     public $mailReponse = 'reponse@bimp-groupe.net';
+    
+    private static $jsReload = '
+    if (typeof notifTask !== "undefined" && notifTask !== null)
+        notifTask.reloadNotif();
+            ';
 
     // Droits users: 
 
@@ -965,7 +970,7 @@ class BIMP_Task extends BimpObject
         $success_callback = '';
 
         if (!count($errors)) {
-            $success_callback = 'bn.notificationActive.notif_task.obj.remove(' . $this->id . ')';
+            $success_callback = self::$jsReload;
 
             $comment = BimpTools::getArrayValueFromPath($data, 'comment', '');
 
@@ -1000,22 +1005,10 @@ class BIMP_Task extends BimpObject
 
         $this->updateField("id_user_owner", $data['id_user_owner']);
 
-        $instance_task = 'bn.notificationActive.notif_task.obj';
-
         if ($data['id_user_owner'] > 0) {
             $success = "Attribué";
-            // Attribuée à l'utilisateur courant
-            if ((int) $data['id_user_owner'] == $user->id)
-                $success_callback = $instance_task . '.move(' . $this->id . ', ' . $this->getData('prio') . ', ' . $this->getData('id_user_owner') . ')';
-            // Attribuée à quelqu'un d'autre
-            else
-                $success_callback = $instance_task . '.remove(' . $this->id . ')';
         } else {
             $success = "Désattribué";
-            if ($this->can('view'))
-                $success_callback = $instance_task . '.move(' . $this->id . ', ' . $this->getData('prio') . ', ' . $this->getData('id_user_owner') . ')';
-            else
-                $success_callback = $instance_task . '.remove(' . $this->id . ')';
         }
 
         $user_name = 'personne';
@@ -1033,7 +1026,7 @@ class BIMP_Task extends BimpObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => $success_callback
+            'success_callback' => self::$jsReload
         );
     }
 
@@ -1080,7 +1073,7 @@ class BIMP_Task extends BimpObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => $success_callback
+            'success_callback' => self::$jsReload
         );
     }
 

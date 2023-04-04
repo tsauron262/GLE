@@ -237,12 +237,48 @@ $js .= <<<EOF
         console.log(calEvent);
                 end = calEvent.end.getTime();
                 end -= 60*1000;
+EOF;
+if($conf->global->MAIN_MODULE_BIMPCORE){
+    $js .= '
+            loadModalForm(
+                $(this), 
+                {
+                    module: "bimpcore", 
+                    object_name: "Bimp_ActionComm", 
+                    id_object: "0", id_parent: "0", 
+                    form_name: "add", 
+                    param_values: {
+                        "fields":{
+                            "datep":formatedTimestamp(start),
+                            "datep2":formatedTimestamp(end),
+                            "users_assigned":[tabUserId[parseInt(calEvent.userId)]]
+                         }
+                    }, 
+                    force_edit: 0
+                }, 
+                "Ajout d\'un événement",  
+                function(){ 
+                    $(\'#calendar\').weekCalendar(\'refresh\'); 
+                },
+                "", 
+                null, 
+                function(){ 
+                    $(\'#calendar\').weekCalendar(\'refresh\'); 
+                }, 
+                null
+            );';
+}
+else{
+    $js .= '
                 back = document.location.href;
                 back = escape(back);
                 back = back.replace(/\//g, "%2F");
                 newUrl = "../../comm/action/card.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&assignedtouser="+tabUserId[parseInt(calEvent.userId)]+"&optioncss=print&backtopage="+back+"&dol_hide_topmenu=1&dol_hide_leftmenu=1";
-                dispatchePopIFrame(newUrl, function(){ $('#calendar').weekCalendar('refresh'); }, 'New Action', 100);
+                dispatchePopIFrame(newUrl, function(){ $("#calendar").weekCalendar("refresh"); }, "New Action", 100);
     //            window.location.href = newUrl;
+            ';
+}
+    $js .= <<<EOF
             }
         },
         

@@ -1,4 +1,4 @@
-
+notifTask = null;
 class notif_task extends AbstractNotification {
 
     /**
@@ -7,6 +7,7 @@ class notif_task extends AbstractNotification {
 
     constructor(nom) {
         super(nom);
+        notifTask = this;
     }
 
     init() {

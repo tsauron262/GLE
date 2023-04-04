@@ -3,7 +3,9 @@
 require_once('../../main.inc.php');
 require_once("libAgenda.php");
 
-
+//    ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
+//error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 
 $eventsStr = array();
 if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
@@ -72,7 +74,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
 
 
         if (!isset($ligne->datep2)  && $ligne->fulldayevent == 1)
-            $ligne->datep2 = date_format($ligne->datep, 'Y-m-d')." 23:59:59";
+            $ligne->datep2 = date('Y-m-d',strtotime($ligne->datep))." 23:59:59";
         elseif (!isset($ligne->datep2))
             $ligne->datep2 = $ligne->datep;
         elseif (!isset($ligne->datep))

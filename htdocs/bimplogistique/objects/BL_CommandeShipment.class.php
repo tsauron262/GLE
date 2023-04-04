@@ -306,10 +306,10 @@ class BL_CommandeShipment extends BimpObject
                         'onclick' => $this->getJsActionOnclick('createFacture', array(
                             'id_client'      => (int) $idCliFact,
                             'id_contact'     => (int) $this->getcontact(),
-                            'libelle'        => addslashes(htmlentities($commande->getData('libelle'))),
+                            'libelle'        => htmlentities(addslashes($commande->getData('libelle'))),
                             'cond_reglement' => (int) $commande->getData('fk_cond_reglement'),
-                            'note_public'    => addslashes(htmlentities($commande->getData('note_public'))),
-                            'note_private'   => addslashes(htmlentities($commande->getData('note_private')))
+                            'note_public'    => htmlentities(addslashes($commande->getData('note_public'))),
+                            'note_private'   => htmlentities(addslashes($commande->getData('note_private')))
                                 ), array(
                             'form_name'        => 'facture',
                             'on_form_submit'   => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } ',

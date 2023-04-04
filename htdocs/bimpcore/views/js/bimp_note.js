@@ -194,8 +194,3 @@ class bimp_note extends AbstractNotification {
     }
 
 }
-
-function reloadNote() {
-    if (notifNote !== null)
-        notifNote.reloadNotif();
-}

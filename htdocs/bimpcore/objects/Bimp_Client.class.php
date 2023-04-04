@@ -3291,7 +3291,8 @@ class Bimp_Client extends Bimp_Societe
                                 if (empty($err_update)) {
                                     $success .= $this->displayFieldName('outstanding_limit_credit_check') . " : " . (int) $cover['amount'] . '<br/>';
                                     // Il y a un crédit check, donc la limite de crédit n'existe pas/plus
-                                    $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
+                                    if($this->getData('outstanding_limit_atradius') > 0)
+                                        $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
                                     if ((int) $cover['amount'] != $this->getData('outstanding_limit_credit_check')) {
                                         foreach ($this->getCommerciauxArray() as $id_commercial => $inut) {
                                             $this->addNote($success,

@@ -3697,12 +3697,12 @@ class Bimp_Facture extends BimpComm
                         $html .= '</div>';
                     }
                 }
+                $bc_list = new BC_ListTable($reval, 'facture');
+                $bc_list->addFieldFilterValue('id_facture', (int) $this->id);
+                $html .= $bc_list->renderHtml();
             }
 
-            $bc_list = new BC_ListTable($reval, 'facture');
-            $bc_list->addFieldFilterValue('id_facture', (int) $this->id);
 
-            $html .= $bc_list->renderHtml();
         }
 
         return $html;

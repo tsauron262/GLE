@@ -465,6 +465,7 @@ class DemandeValidComm extends BimpObject
     {
 
         global $user;
+        $success1 = $success2 = '';
         $errors = $warnings = array();
 
         if (!$this->isLoaded()) {
@@ -474,8 +475,12 @@ class DemandeValidComm extends BimpObject
             $object = self::getObject($this->getData('type_de_piece'), $this->getData('id_piece'));
             $success_tab = array();
             $can_validate = (int) $validateur->tryToValidate($object, $user, $errors, $success_tab, array($this->getData('type')));
-            $success = str_replace(',', '<br/>', $success_tab);
-
+            $success1 = str_replace(',', '<br/>', implode('<br/>', $success_tab));
+            if($can_validate && $this->getData('status') == 0)//les regles on surmeent changé
+                $this->updateField('status', self::STATUS_VALIDATED);
+            else
+                $errors[] = 'Validation impossible';
+            
             $filter = array(
                 'type_de_piece' => (int) $this->getData('type_de_piece'),
                 'id_piece'      => (int) $this->getData('id_piece'),
@@ -489,13 +494,13 @@ class DemandeValidComm extends BimpObject
                 // TODO faire contrat
                 if (is_a($object, 'BimpComm')) {
                     $data = array();
-                    $return = $object->actionValidate($data, $success);
+                    $return = $object->actionValidate($data, $success2);
                 } else {
-                    $return = $object->actionDemandeValidation($data, $success);
+                    $return = $object->actionDemandeValidation($data, $success2);
                 }
             }
         }
-
+        $success = $success1 .'<br/>'. $success2;
         if (isset($return) and is_array($return))
             return $return;
         else

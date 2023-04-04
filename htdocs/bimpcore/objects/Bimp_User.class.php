@@ -343,8 +343,7 @@ class Bimp_User extends BimpObject
     public function getEditFormName()
     {
         global $user;
-
-        if ($user->admin || $user->rights->user->user->creer) {
+        if ($user->admin || (isset($user->rights->user->user->creer) && $user->rights->user->user->creer)) {
             return 'default';
         }
 

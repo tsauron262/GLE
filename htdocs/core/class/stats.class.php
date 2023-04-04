@@ -116,14 +116,16 @@ abstract class Stats
 				dol_mkdir($conf->user->dir_temp);
 			}
 			$fp = fopen($newpathofdestfile, 'w');
-			fwrite($fp, json_encode($data));
-			fclose($fp);
-			if (!empty($conf->global->MAIN_UMASK)) {
-				$newmask = $conf->global->MAIN_UMASK;
-			}
-			@chmod($newpathofdestfile, octdec($newmask));
+                        if($fp){
+                            fwrite($fp, json_encode($data));
+                            fclose($fp);
+                            if (!empty($conf->global->MAIN_UMASK)) {
+                                    $newmask = $conf->global->MAIN_UMASK;
+                            }
+                            @chmod($newpathofdestfile, octdec($newmask));
 
-			$this->lastfetchdate[get_class($this).'_'.__FUNCTION__] = $nowgmt;
+                            $this->lastfetchdate[get_class($this).'_'.__FUNCTION__] = $nowgmt;
+                        }
 		}
 
 		// return array(array('Month',val1,val2,val3),...)

@@ -54,6 +54,7 @@ objects:
 fields: 
     label: 
         label: Libellé
+        required: 1
         
     ref: 
         label: Reférence
@@ -246,6 +247,8 @@ fields:
                   
 forms: 
     add: 
+        before_content:
+            callback: displayElement
         rows: 
             type: 
                 field: fk_action
@@ -268,6 +271,8 @@ forms:
                 input: 
                     multiple: 1
                     type: search_user
+                value:
+                    callback: getUsersAssigned
             occupied: 
                 label: Disponibilité
                 field: transparency
@@ -297,6 +302,8 @@ forms:
                 display_if: 
                     field_name: fk_soc
                     hide_values: 0,
+                value:
+                    callback: getContactsAssigned
             note: 
                 label: Description
                 field: note
@@ -444,8 +451,8 @@ lists:
         extends: default
         add_form_name: add
         add_btn: 1
-        add_form_values: 
-            callback: getFormValues
+#        add_form_values: 
+#            callback: getFormValues
         n: 10
         
     soc: 

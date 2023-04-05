@@ -1,6 +1,6 @@
 <?php
 
-abstract class PartStock extends BimpObject
+class PartStock extends BimpObject
 {
 
     public static $stock_type = '';

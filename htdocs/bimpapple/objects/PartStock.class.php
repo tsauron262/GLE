@@ -84,7 +84,10 @@ class PartStock extends BimpObject
 
     // Getters statics: 
 
-    abstract public static function getStockInstance($code_centre, $part_number);
+    public static function getStockInstance($code_centre, $part_number)
+    {
+        
+    }
 
     // Getters params: 
 

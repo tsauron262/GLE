@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSXRequests_v2.php';
 class gsxController extends BimpController
 {
 
+    public static $test_mode = false;
     public static $in_production = true;
     protected $userExchangePrice = true;
     public $gsx = null;
@@ -159,7 +160,7 @@ class gsxController extends BimpController
                 $repairType = (isset($params['repairType']) ? $params['repairType'] : '');
                 $coverageOption = (isset($params['coverageOption']) ? $params['coverageOption'] : '');
                 $consumerLaw = (isset($params['consumerLaw']) ? $params['consumerLaw'] : '');
-                $parts_cs_data = (isset($params['parts_cs_data']) ? $params['parts_cs_data'] : array());
+                $parts_stock_data = (isset($params['parts_stock_data']) ? $params['parts_stock_data'] : array());
 
                 if (!$id_sav) {
                     $errors[] = 'ID du SAV absent';
@@ -377,15 +378,24 @@ class gsxController extends BimpController
                                             $part_used = $part->getData('part_number');
                                         }
 
+                                        $fromInternalStock = 0;
                                         $fromConsignedStock = 0;
                                         $newSerial = '';
 
-                                        if (isset($parts_cs_data[$part->id])) {
-                                            if (isset($parts_cs_data[$part->id]['serial']) && $parts_cs_data[$part->id]['serial']) {
-                                                $fromConsignedStock = 1;
-                                                $newSerial = $parts_cs_data[$part->id]['serial'];
-                                            } elseif ((int) $parts_cs_data[$part->id]) {
-                                                $fromConsignedStock = 1;
+                                        if (isset($parts_stock_data[$part->id])) {
+                                            if (isset($parts_stock_data[$part->id]['stock']) && $parts_stock_data[$part->id]['stock']) {
+                                                switch ($parts_stock_data[$part->id]['stock']) {
+                                                    case 'internal':
+                                                        $fromInternalStock = 1;
+                                                        break;
+
+                                                    case 'consigned':
+                                                        $fromConsignedStock = 1;
+                                                        break;
+                                                }
+                                            }
+                                            if (isset($parts_stock_data[$part->id]['serial']) && $parts_stock_data[$part->id]['serial']) {
+                                                $newSerial = $parts_stock_data[$part->id]['serial'];
                                             }
                                         }
 
@@ -394,6 +404,7 @@ class gsxController extends BimpController
                                             'number'             => $part->getData('part_number'),
                                             'partUsed'           => $part_used,
                                             'pricingOption'      => $pricingOption,
+                                            'fromInternalStock'  => $fromInternalStock,
                                             'fromConsignedStock' => $fromConsignedStock,
                                             'kgbDeviceDetail'    => array(
                                                 'id' => $newSerial
@@ -451,11 +462,19 @@ class gsxController extends BimpController
 
                 if (!count($errors)) {
                     if (is_array($result) && !empty($result)) {
-                        $response = $this->gsx_v2->exec($requestName, $result);
-                        if ($response === false) {
-                            $errors = $this->gsx_v2->getErrors();
-                        } else {
+                        // Pour tests: 
+                        if (self::$test_mode) {
+                            $response = array(
+                                'repairId' => 123456789
+                            );
                             return $this->gsxOnRequestSuccess($requestName, $response, $params);
+                        } else {
+                            $response = $this->gsx_v2->exec($requestName, $result);
+                            if ($response === false) {
+                                $errors = $this->gsx_v2->getErrors();
+                            } else {
+                                return $this->gsxOnRequestSuccess($requestName, $response, $params);
+                            }
                         }
                     } else {
                         $errors[] = BimpTools::getMsgFromArray($gsxRequests->errors, 'Erreurs lors du traitement des données');
@@ -582,7 +601,7 @@ class gsxController extends BimpController
                     }
                 }
 
-                $params['parts_cs_data'] = array();
+                $params['parts_stock_data'] = array();
 
                 if (isset($result['parts']) && !empty($result['parts'])) {
                     foreach ($result['parts'] as $key => $part) {
@@ -592,20 +611,38 @@ class gsxController extends BimpController
                             }
                         }
 
-                        if (isset($part['number']) && isset($part['fromConsignedStock']) && (int) $part['fromConsignedStock']) {
+                        if (isset($part['number'])) {
                             $part_number = $part['number'];
-                            if (!isset($params['parts_cs_data'][$part_number])) {
-                                $params['parts_cs_data'][$part_number] = array(
-                                    'qty'     => 0,
-                                    'serials' => array()
-                                );
-                                $params['parts_cs_data'][$part_number]['qty']++;
+                            if (!isset($params['parts_stock_data'][$part_number])) {
+                                $params['parts_stock_data'][$part_number] = array();
                             }
 
                             $new_serial = (isset($part['kgbDeviceDetail']['id']) ? $part['kgbDeviceDetail']['id'] : '');
 
-                            if ($new_serial) {
-                                $params['parts_cs_data'][$part_number]['serials'][] = $new_serial;
+                            if (isset($part['fromInternalStock']) && (int) $part['fromInternalStock']) {
+                                if (!isset($params['parts_stock_data'][$part_number]['internal_stock'])) {
+                                    $params['parts_stock_data'][$part_number]['internal_stock'] = array(
+                                        'qty'     => 0,
+                                        'serials' => array()
+                                    );
+                                }
+                                $params['parts_stock_data'][$part_number]['internal_stock']['qty']++;
+                                if ($new_serial) {
+                                    $params['parts_stock_data'][$part_number]['internal_stock']['serials'][] = $new_serial;
+                                }
+
+                                unset($result['parts'][$key]['fromInternalStock']);
+                            } elseif (isset($part['fromConsignedStock']) && (int) $part['fromConsignedStock']) {
+                                if (!isset($params['parts_stock_data'][$part_number]['consigned_stock'])) {
+                                    $params['parts_stock_data'][$part_number]['consigned_stock'] = array(
+                                        'qty'     => 0,
+                                        'serials' => array()
+                                    );
+                                }
+                                $params['parts_stock_data'][$part_number]['consigned_stock']['qty']++;
+                                if ($new_serial) {
+                                    $params['parts_stock_data'][$part_number]['consigned_stock']['serials'][] = $new_serial;
+                                }
                             }
                         }
                     }
@@ -623,26 +660,28 @@ class gsxController extends BimpController
                     $params['coverageOption'] = $result['coverageOption'];
                 }
 
-                $questions_result = $this->gsxProcessRepairQuestionsForm($params, $result);
-                if (count($questions_result['errors'])) {
-                    $errors[] = BimpTools::getMsgFromArray($questions_result['errors'], 'Erreurs lors du traitement des questions');
-                }
-
-                if ($requestName === 'repairCreate') {
-                    if (isset($result['repairType'])) {
-                        if (in_array($result['repairType'], array('MINS', 'MINC', 'WUMS', 'WUMC'))) {
-                            if (!isset($result['account']['soldtoContactEmail']) || !(string) $result['account']['soldtoContactEmail']) {
-                                $errors[] = 'L\'e-mail de contact est obligatoire pour les réparations de type "Mail-in"';
-                            }
-                            if (!isset($result['account']['soldToContactPhone']) || !(string) $result['account']['soldToContactPhone']) {
-                                $errors[] = 'Le n° de téléphone de contact est obligatoire pour les réparations de type "Mail-in"';
-                            }
-                        }
+                if (!self::$test_mode) {
+                    $questions_result = $this->gsxProcessRepairQuestionsForm($params, $result);
+                    if (count($questions_result['errors'])) {
+                        $errors[] = BimpTools::getMsgFromArray($questions_result['errors'], 'Erreurs lors du traitement des questions');
                     }
 
-                    if (isset($result['customer']['address'][0]['postalCode']) && (string) $result['customer']['address'][0]['postalCode']) {
-                        if (isset($result['customer']['address'][0]['countryCode']) && $result['customer']['address'][0]['countryCode'] === 'FRA') {
-                            $result['customer']['address'][0]['stateCode'] = substr($result['customer']['address'][0]['postalCode'], 0, 2);
+                    if ($requestName === 'repairCreate') {
+                        if (isset($result['repairType'])) {
+                            if (in_array($result['repairType'], array('MINS', 'MINC', 'WUMS', 'WUMC'))) {
+                                if (!isset($result['account']['soldtoContactEmail']) || !(string) $result['account']['soldtoContactEmail']) {
+                                    $errors[] = 'L\'e-mail de contact est obligatoire pour les réparations de type "Mail-in"';
+                                }
+                                if (!isset($result['account']['soldToContactPhone']) || !(string) $result['account']['soldToContactPhone']) {
+                                    $errors[] = 'Le n° de téléphone de contact est obligatoire pour les réparations de type "Mail-in"';
+                                }
+                            }
+                        }
+
+                        if (isset($result['customer']['address'][0]['postalCode']) && (string) $result['customer']['address'][0]['postalCode']) {
+                            if (isset($result['customer']['address'][0]['countryCode']) && $result['customer']['address'][0]['countryCode'] === 'FRA') {
+                                $result['customer']['address'][0]['stateCode'] = substr($result['customer']['address'][0]['postalCode'], 0, 2);
+                            }
                         }
                     }
                 }
@@ -681,34 +720,38 @@ class gsxController extends BimpController
 
                 if (!count($errors)) {
                     // Gestion stocks consignés: 
-                    $parts_cs_data = (isset($params['parts_cs_data']) ? $params['parts_cs_data'] : array());
+                    $parts_stock_data = (isset($params['parts_stock_data']) ? $params['parts_stock_data'] : array());
 
-                    if (!empty($parts_cs_data)) {
-                        $sav->decreasePartsConsignedStock($parts_cs_data, 'REPAIR_' . $response['repairId'], 'Création de la réparation ' . $response['repairId']);
+                    if (!empty($parts_stock_data)) {
+                        $sav->decreasePartsStock($parts_stock_data, 'REPAIR_' . $response['repairId'], 'Création de la réparation ' . $response['repairId']);
                     }
 
-                    $rep_warnings = array();
-                    $rep_errors = $repair->validateArray(array(
-                        'ship_to'       => $this->gsx_v2->shipTo,
-                        'serial'        => (isset($params['serial']) ? $params['serial'] : $sav->getSerial()),
-                        'id_sav'        => $id_sav,
-                        'repair_number' => $response['repairId']
-                    ));
+                    if (!self::$test_mode) {
+                        $rep_warnings = array();
+                        $rep_errors = $repair->validateArray(array(
+                            'ship_to'       => $this->gsx_v2->shipTo,
+                            'serial'        => (isset($params['serial']) ? $params['serial'] : $sav->getSerial()),
+                            'id_sav'        => $id_sav,
+                            'repair_number' => $response['repairId']
+                        ));
 
-                    if (!count($rep_errors)) {
-                        $rep_errors = $repair->create($rep_warnings, true);
-                    }
+                        if (!count($rep_errors)) {
+                            $rep_errors = $repair->create($rep_warnings, true);
+                        }
 
-                    if (count($rep_warnings)) {
-                        $warnings[] = BimpTools::getMsgFromArray($rep_warnings, 'Erreurs suite à la création ' . $repair->getLabel('of_the'));
-                    }
+                        if (count($rep_warnings)) {
+                            $warnings[] = BimpTools::getMsgFromArray($rep_warnings, 'Erreurs suite à la création ' . $repair->getLabel('of_the'));
+                        }
 
-                    if (count($rep_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la création ' . $repair->getLabel('of_the'));
+                        if (count($rep_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la création ' . $repair->getLabel('of_the'));
+                        } else {
+                            $success_callback = 'bimpModal.clearAllContents();';
+                            $success_callback .= 'setTimeout(function() {' . $sav->getJsActionOnclick('attentePiece', array(), array('form_name' => 'send_msg')) . '}, 1000);';
+                            $success_callback .= 'reloadRepairsViews(' . $id_sav . ');';
+                        }
                     } else {
                         $success_callback = 'bimpModal.clearAllContents();';
-                        $success_callback .= 'setTimeout(function() {' . $sav->getJsActionOnclick('attentePiece', array(), array('form_name' => 'send_msg')) . '}, 1000);';
-                        $success_callback .= 'reloadRepairsViews(' . $id_sav . ');';
                     }
                 }
                 break;
@@ -1232,8 +1275,8 @@ class gsxController extends BimpController
                 $errors = $this->gsx_v2->getErrors();
             }
         }
-        
-        if(count($errors)){
+
+        if (count($errors)) {
             $errors[] = $html;
         }
 
@@ -3591,7 +3634,7 @@ class gsxController extends BimpController
             )));
 
 //            if ($has_parts) {
-            $onclick = 'gsx_LoadRepairConsignedStockForm($(this), ' . $sav->id . ', \'' . $serial . '\')';
+            $onclick = 'gsx_LoadRepairPartStockForm($(this), ' . $sav->id . ', \'' . $serial . '\')';
 //            } else {
 //                $onclick = 'gsx_loadRequestModalForm($(this), \'Création d\\\'une nouvelle réparation\', \'repairCreate\', {';
 //                $onclick .= 'id_sav: ' . $sav->id . ', ';

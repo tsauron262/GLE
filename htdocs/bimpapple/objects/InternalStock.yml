@@ -18,6 +18,15 @@ labels:
     name: stock interne
     name_plur: stocks internes
     
+fields: 
+    last_pa: 
+        label: Dernier Prix d'achat
+        type: money
+        default_value: 0
+        
 lists: 
     default: 
         title: Stocks internes
+        cols: 
+            last_pa: 
+                edit: 1

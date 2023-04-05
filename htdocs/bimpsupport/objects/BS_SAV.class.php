@@ -2517,6 +2517,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if (!count($parts)) {
                 $html .= BimpRender::renderAlerts('Il n\'y a aucun composant à traiter. Vous pouvez cliquer sur "Valider" pour passer à l\'étape suivante', 'info');
             } else {
+
                 $code_centre = (string) $this->getData('code_centre_repa');
                 if (!$code_centre) {
                     $code_centre = (string) $this->getData('code_centre');
@@ -2524,7 +2525,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                 $centre = $this->getCentreData(true);
 
-                $html .= '<h3>Stocks consignés du centre: "' . $centre['label'] . '" (' . $code_centre . ')</h3>';
+                $html .= '<h3>Stocks internes / consignés du centre: "' . $centre['label'] . '" (' . $code_centre . ')</h3>';
 
                 $msg = 'Attention, si le centre est incorrect, veuillez fermer ce formulaire et corriger le champ "Centre de réparation" de ce SAV';
 
@@ -2535,63 +2536,152 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $html .= '<tr>';
                 $html .= '<th>Ref.</th>';
                 $html .= '<th>Désignation</th>';
-                $html .= '<th>Prendre dans le stock consigné</th>';
+                $html .= '<th>Stock interne / consigné</th>';
                 $html .= '</tr>';
                 $html .= '</thead>';
 
                 $html .= '<tbody>';
 
                 foreach ($parts as $part) {
-
+                    $has_internal_stock = false;
                     $part_number = $part->getData('part_number');
 
-                    $html .= '<tr class="part_row" data-id_part="' . $part->id . '">';
+                    $html .= '<tr class="part_row" data-id_part="' . $part->id . '" data-part_number="' . $part_number . '">';
                     $html .= '<td>' . $part_number . '</td>';
                     $html .= '<td>' . $part->getData('label') . '</td>';
 
                     $html .= '<td>';
 
-                    if (!$part->isConsignedStockAllowed()) {
-                        $html .= '<span class="warning">Pas de stock consigné (composant tiers)</span>';
-                    } else {
-                        $stock = BimpCache::findBimpObjectInstance('bimpapple', 'ConsignedStock', array(
-                                    'code_centre' => $code_centre,
-                                    'part_number' => $part_number
-                                        ), true);
+                    // Stock interne: 
+                    if (BimpCore::isUserDev()) { // Temporaire
+                        $html .= '<b style="font-size: 13px">Stock interne : </b><br/>';
+                        if (!$part->isInternalStockAllowed()) {
+                            $html .= '<span class="warning">Pas de stock interne</span>';
+                        } else {
+                            BimpObject::loadClass('bimpapple', 'InternalStock');
+                            $internal_stock = InternalStock::getStockInstance($code_centre, $part_number);
 
-                        $input = '';
+                            $input = '';
 
-                        if (BimpObject::objectLoaded($stock)) {
-                            if ((int) $stock->getData('serialized')) {
-                                $serials = $stock->getData('serials');
+                            if (BimpObject::objectLoaded($internal_stock)) {
+                                if ((int) $internal_stock->getData('serialized')) {
+                                    $has_internal_stock = true;
+                                    $serials = $internal_stock->getData('serials');
 
-                                if (count($serials)) {
-                                    $options = array(
-                                        'none' => array('label' => 'NON', 'classes' => array('danger'))
-                                    );
+                                    if (count($serials)) {
+                                        $options = array(
+                                            '' => array('label' => 'Sélection du n° de série obligatoire', 'icon' => 'fas_exclamation-triangle', 'classes' => array('danger'))
+                                        );
+                                        foreach ($serials as $serial) {
+                                            $options[$serial] = $serial;
+                                        }
 
-                                    foreach ($serials as $serial) {
-                                        $options[$serial] = $serial;
+                                        $input = 'Qté disponible: <span class="success">' . count($serials) . '</span><br/>';
+                                        $input .= '<span class="small">Numéro de série : </span><br/>';
+                                        $input .= BimpInput::renderInput('select', 'internal_stock_serial_' . $part->id, 'none', array(
+                                                    'extra_class' => 'from_internal_stock_serial',
+                                                    'options'     => $options
+                                        ));
                                     }
-
-                                    $input = 'Qté disponible: ' . count($serials) . '<br/>';
-                                    $input .= BimpInput::renderInput('select', 'consigned_stock_serial_' . $part->id, 'none', array(
-                                                'extra_class' => 'from_consigned_stock_serial',
-                                                'options'     => $options
-                                    ));
+                                } elseif ((int) $internal_stock->getData('qty') > 0) {
+                                    $has_internal_stock = true;
+                                    $input = 'Qté disponible: <span class="success">' . $internal_stock->getData('qty') . '</span><br/>';
+                                    $input .= BimpRender::renderAlerts('Veuillez obligatoirement prendre le composant dans le stock interne', 'info');
+                                    $input .= '<input type="hidden" value="1" name="from_internal_stock_' . $part->id . '" class="from_internal_stock_input"/>';
                                 }
-                            } elseif ((int) $stock->getData('qty') > 0) {
-                                $input = 'Qté disponible: ' . $stock->getData('qty') . '<br/>';
-                                $input .= BimpInput::renderInput('toggle', 'from_consigned_stock_' . $part->id, 1, array(
-                                            'extra_class' => 'from_consigned_stock_check'
-                                ));
+                            }
+
+                            if ($input) {
+                                $html .= $input;
+                            } else {
+                                $html .= '<span class="warning">Aucun stock interne disponible</span>';
                             }
                         }
 
-                        if ($input) {
-                            $html .= $input;
+                        if (!$has_internal_stock) {
+                            $stocks = BimpCache::getBimpObjectObjects('bimpapple', 'InternalStock', array(
+                                        'part_number' => $part_number,
+                                        'code_centre' => array(
+                                            'operator' => '!=',
+                                            'value'    => $code_centre
+                                        )
+                            ));
+
+                            if (!empty($stocks)) {
+                                $total_qty = 0;
+                                $nb_centres = 0;
+
+                                $centres = array();
+                                foreach ($stocks as $stock) {
+                                    $stock_qty = 0;
+                                    if ((int) $stock->getData('serialized')) {
+                                        $serials = $stock->getData('serials');
+                                        $stock_qty = count($serials);
+                                    } else {
+                                        $stock_qty = (int) $stock->getData('qty');
+                                    }
+
+                                    if ($stock_qty > 0) {
+                                        $nb_centres++;
+                                        $total_qty += $stock_qty;
+                                        $centres[] = $stock->displayDataDefault('code_centre') . ' : ' . $stock_qty . ' unité(s) dispo';
+                                    }
+                                }
+
+                                if ($total_qty > 0) {
+                                    $msg = '<b>' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . $total_qty . ' unité(s) disponible(s) dans ' . $nb_centres . ' autre(s) centre(s)</b>';
+                                    $html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($centres, $msg), 'warning');
+                                }
+                            }
+                        }
+
+                        $html .= '<br/><br/>';
+                    }
+
+                    if (!$has_internal_stock) {
+                        $html .= '<b style="font-size: 13px">Stock consigné : </b><br/>';
+                        if (!$part->isConsignedStockAllowed()) {
+                            $html .= '<span class="warning">Pas de stock consigné (composant tiers)</span>';
                         } else {
-                            $html .= '<span class="warning">Aucun stock consigné disponible</span>';
+                            BimpObject::loadClass('bimpapple', 'ConsignedStock');
+                            $consigned_stock = ConsignedStock::getStockInstance($code_centre, $part_number);
+
+                            $input = '';
+
+                            if (BimpObject::objectLoaded($consigned_stock)) {
+                                if ((int) $consigned_stock->getData('serialized')) {
+                                    $serials = $consigned_stock->getData('serials');
+
+                                    if (count($serials)) {
+                                        $options = array(
+                                            'none' => array('label' => 'NON', 'classes' => array('danger'))
+                                        );
+
+                                        foreach ($serials as $serial) {
+                                            $options[$serial] = $serial;
+                                        }
+
+                                        $input = 'Qté disponible: <span class="success">' . count($serials) . '</span><br/>';
+                                        $input .= '<span class="small">Numéro de série : </span><br/>';
+                                        $input .= BimpInput::renderInput('select', 'consigned_stock_serial_' . $part->id, 'none', array(
+                                                    'extra_class' => 'from_consigned_stock_serial',
+                                                    'options'     => $options
+                                        ));
+                                    }
+                                } elseif ((int) $consigned_stock->getData('qty') > 0) {
+                                    $input = 'Qté disponible: <span class="success">' . $consigned_stock->getData('qty') . '</span><br/>';
+                                    $input .= 'Prendre dans le stock consigné : ';
+                                    $input .= BimpInput::renderInput('toggle', 'from_consigned_stock_' . $part->id, 1, array(
+                                                'extra_class' => 'from_consigned_stock_check'
+                                    ));
+                                }
+                            }
+
+                            if ($input) {
+                                $html .= $input;
+                            } else {
+                                $html .= '<span class="warning">Aucun stock consigné disponible</span>';
+                            }
                         }
                     }
                     $html .= '</td>';
@@ -4761,8 +4851,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $errors;
     }
 
-    public function decreasePartsConsignedStock($parts_cs_data, $code_mvt, $desc)
+    public function decreasePartsStock($parts_stock_data, $code_mvt, $desc)
     {
+        BimpObject::loadClass('bimpapple', 'InternalStock');
+        BimpObject::loadClass('bimpapple', 'ConsignedStock');
+
         $code_centre = $this->getData('code_centre_repa');
 
         if (!$code_centre) {
@@ -4770,26 +4863,47 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         $warnings = array();
-        foreach ($parts_cs_data as $part_number => $data) {
-            $stock = BimpCache::findBimpObjectInstance('bimpapple', 'ConsignedStock', array(
-                        'code_centre' => $code_centre,
-                        'part_number' => $part_number
-                            ), true);
+        foreach ($parts_stock_data as $part_number => $stock_data) {
+            if (isset($stock_data['internal_stock'])) {
+                $stock = InternalStock::getStockInstance($code_centre, $part_number);
 
-            if (BimpObject::objectLoaded($stock)) {
-                if ((int) $stock->getData('serialized')) {
-                    $serials = BimpTools::getArrayValueFromPath($data, 'serials', array());
+                if (BimpObject::objectLoaded($stock)) {
+                    if ((int) $stock->getData('serialized')) {
+                        $serials = BimpTools::getArrayValueFromPath($stock_data, 'internal_stock/serials', array());
 
-                    if (count($serials)) {
-                        foreach ($serials as $serial) {
-                            $stock->correctStock(-1, $serial, $code_mvt, $desc, $warnings, true, true);
+                        if (count($serials)) {
+                            foreach ($serials as $serial) {
+                                $stock->correctStock(-1, $serial, $code_mvt, $desc, $warnings, true, true);
+                            }
+                        }
+                    } else {
+                        $qty = (int) $stock_data['internal_stock']['qty'];
+
+                        if ($qty > 0) {
+                            $stock->correctStock(-$qty, '', $code_mvt, $desc, $warnings, true, true);
                         }
                     }
-                } else {
-                    $qty = (int) $data['qty'];
+                }
+            }
 
-                    if ($qty > 0) {
-                        $stock->correctStock(-$qty, '', $code_mvt, $desc, $warnings, true, true);
+            if (isset($stock_data['consigned_stock'])) {
+                $stock = ConsignedStock::getStockInstance($code_centre, $part_number);
+
+                if (BimpObject::objectLoaded($stock)) {
+                    if ((int) $stock->getData('serialized')) {
+                        $serials = BimpTools::getArrayValueFromPath($stock_data, 'consigned_stock/serials', array());
+
+                        if (count($serials)) {
+                            foreach ($serials as $serial) {
+                                $stock->correctStock(-1, $serial, $code_mvt, $desc, $warnings, true, true);
+                            }
+                        }
+                    } else {
+                        $qty = (int) $stock_data['consigned_stock']['qty'];
+
+                        if ($qty > 0) {
+                            $stock->correctStock(-$qty, '', $code_mvt, $desc, $warnings, true, true);
+                        }
                     }
                 }
             }

@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_apple_internal_stock` (
   `qty` int(11) NOT NULL DEFAULT 0,
   `code_centre` varchar(5) NOT NULL DEFAULT '',
   `serials` text NOT NULL,
-  `serialized` tinyint(1) NOT NULL DEFAULT 0
+  `serialized` tinyint(1) NOT NULL DEFAULT 0,
+  `last_pa` DOUBLE(24,8) NOT NULL DEFAULT '0'
 );

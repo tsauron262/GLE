@@ -8,6 +8,7 @@ class ConsignedStock extends PartStock
     public static $stock_type = 'consigned';
 
     // Droits user: 
+    
     public function canSetAction($action)
     {
         switch ($action) {

@@ -8,7 +8,7 @@ list_page_url:
     module: bimpsupport
     controller: index
     url_params: 
-        tab: consigned_stocks
+        tab: part_stocks
         navtab-maintabs: cs_shipments
         
 header_list_name: default

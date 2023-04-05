@@ -1,0 +1,180 @@
+abstract: 1
+
+primary: id
+icon: fas_box-open
+common_fields: 0
+    
+list_page_url: 
+    module: bimpsupport
+    controller: index
+    
+header_btn: 
+    callback: getActionsButtons
+    
+header_list_name: default
+header_edit_form: default
+header_delete_btn: 0
+
+fields: 
+    code_centre: 
+        label: Centre
+        required: 1
+        values: 
+            array: centres
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getCentresArray
+                    params: 
+                        - 0
+        default_value: 
+            callback: getDefaultCodeCentre
+            
+    part_number: 
+        label: Réf. composant
+        required: 1
+        
+    serialized: 
+        label: Serialisé 
+        type: bool
+        default_value: 0
+        
+    qty: 
+        label: Quantité
+        type: qty
+        decimals: 0
+        default_value: 0
+        min: 0
+        display_if: 
+            field_name: serialized
+            show_values: 0
+            
+    serials: 
+        label: Numéros de série
+        type: items_list
+        items_braces: 1
+        display_if: 
+            field_name: serialized
+            show_values: 1
+        
+forms: 
+    default: 
+        rows: 
+            - field: code_centre
+            - field: part_number
+            - field: serialized
+            - custom: 1
+              label: Quantité
+              input_name: qty_tot
+              data_type: qty
+              input: 
+                type: qty
+              decimals: 0
+              min: 0
+              value: 1
+              display_if: 
+                field_name: serialized
+                show_values: 0
+                
+    edit: 
+        rows: 
+            - field: serialized
+    
+    correct:
+        rows: 
+            centre: 
+                field: code_centre
+                edit: 0
+            part: 
+                field: part_number
+                edit: 0
+            mode: 
+                custom: 1
+                label: Mode de saisie
+                input_name: mode
+                input: 
+                    type: select
+                    options: 
+                        total: Quantité totale du stock
+                        add: Quantité à ajouter au stock
+                        remove: Quantité à retirer du stock
+                value: total
+            qty: 
+                field: qty
+                label: Nouvelles quantités totales
+                display_if: 
+                    field_name: mode
+                    show_values: total
+            qty_to_add: 
+                custom: 1
+                label: Quantité à ajouter
+                input_name: qty_to_add
+                data_type: qty
+                input: 
+                    type: qty
+                decimals: 0
+                min: 0
+                value: 0
+                display_if: 
+                    field_name: mode
+                    show_values: add
+            qty_to_remove: 
+                custom: 1
+                label: Quantité à retirer
+                input_name: qty_to_remove
+                data_type: qty
+                input: 
+                    type: qty
+                decimals: 0
+                min: 0
+                value: 0
+                display_if: 
+                    field_name: mode
+                    show_values: remove
+            infos: 
+                custom: 1
+                label: Informations
+                input_name: infos
+                input: 
+                    type: textarea
+           
+    correct_serialized: 
+        extends: correct
+        rows: 
+            mode: unset
+            qty_to_add: unset
+            qty_to_remove: unset
+            qty: 
+                field: serials
+                label: Numéros de série
+                display_if: unset
+              
+filters_panels: 
+    default: 
+        filters: 
+            code_centre: 
+            part_number: 
+            serialized: 
+                
+lists: 
+    default:
+        configurable: 1
+        filters_panel: default
+        sort_field: id
+        sort_way: desc
+        n: 10
+        header_buttons: 
+            callback: getListHeaderButtons
+        add_form_name: default
+        add_btn: 
+            callback: isUserAdmin
+        edit_btn: 1
+        edit_form: edit
+        extra_btn: 
+            callback: getListExtraButtons
+        cols:
+            code_centre:
+            part_number:
+            qty:
+            serials:

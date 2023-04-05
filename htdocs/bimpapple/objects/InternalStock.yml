@@ -1,0 +1,23 @@
+abstract: 0
+
+extends: 
+    module: bimpapple
+    object_name: PartStock
+
+table: bimp_apple_internal_stock
+
+nom_url: 
+    syntaxe: Stock interne <part_number>
+    
+list_page_url: 
+    url_params: 
+        tab: part_stocks
+        navtab-maintabs: internal_stocks
+
+labels: 
+    name: stock interne
+    name_plur: stocks internes
+    
+lists: 
+    default: 
+        title: Stocks internes

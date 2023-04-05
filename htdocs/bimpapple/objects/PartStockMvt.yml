@@ -1,4 +1,4 @@
-table: bimp_apple_consigned_stock_mvt
+table: bimp_apple_part_stock_mvt
 primary: id
 icon: fas_exchange-alt
 common_fields: 0
@@ -7,37 +7,44 @@ list_page_url:
     module: bimpsupport
     controller: index
     url_params: 
-        tab: consigned_stocks
-        navtab-maintabs: mvts
+        tab: part_stocks
+        navtab-maintabs: parts_mvts
         
 header_list_name: default
 
 labels: 
-    name: mouvement de stock consigné
-    name_plur: mouvementd de stock consigné
-
-objects: 
-    stock: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpapple
-                name: ConsignedStock
-            id_object: 
-                field_value: id_stock
+    name: mouvement de stock composants
+    name_plur: mouvements de stock composants
             
 fields: 
+    stock_type: 
+        label: Type de stock
+        required: 1
+        values: 
+            array: stock_types
+            
     id_stock: 
         label: Stock consigné
-        type: id_object
-        object: stock
+        type: id
         required: 1
-        
+        displays: 
+            default: 
+                type: callback
+                method: displayStockObject
     id_user: 
         label: Utilisateur
         type: id_object
         object: user
+        
+    code_centre: 
+        label: Centre
+        required: 1
+        values: 
+            array: centres
+            
+    part_number: 
+        label: Réf. composant
+        required: 1
         
     date: 
         label: Date
@@ -71,6 +78,7 @@ fields_tables:
     infos: 
         rows: 
             - field: code_centre
+            - field: stock_type
             - field: id_stock
             - field: date
             - field: qty
@@ -93,8 +101,8 @@ views:
 filters_panel: 
     default: 
         filters: 
-            stock:code_centre:
-            stock:part_number:
+            code_centre:
+            part_number:
             date: 
             id_user:
             code_mvt: 
@@ -102,7 +110,7 @@ filters_panel:
             
 lists: 
     default: 
-        title: Mouvements stocks consignés Apple
+        title: Mouvements stocks des composants Apple
         icon: fas_exchange-alt
         checkboxes:
             callback: isUserAdmin
@@ -121,9 +129,9 @@ lists:
               confirm_msg: Veuillez confirmer l\'annulation de tous les mouvements de stock filtrés
         cols: 
             id: 
-            id_stock: 
-            stock:code_centre:
-            stock:part_number:
+            stock_type: 
+            code_centre:
+            part_number:
             date: 
             qty: 
                 display: badge

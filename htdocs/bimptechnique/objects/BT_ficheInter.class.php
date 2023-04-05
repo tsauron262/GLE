@@ -1803,7 +1803,6 @@ class BT_ficheInter extends BimpDolObject
     public function renderSignatureTab()
     {
         $html = "";
-        global $user;
         if (!$this->isOldFi()) {
             if ($this->getData('fk_statut') == self::STATUT_BROUILLON) {
                 $form = new BC_Form($this, null, 'signature');

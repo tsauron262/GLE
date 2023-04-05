@@ -37,7 +37,13 @@ objects:
         instance: 
             bimp_object: BS_Sac         
             
-    stocks: 
+    internal_stock: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: InternalStock
+                
+    consigned_stock: 
         instance: 
             bimp_object: 
                 module: bimpapple
@@ -49,11 +55,11 @@ objects:
                 module: bimpapple
                 name: ConsignedStockShipment
                 
-    cs_mvt: 
+    part_stock_mvt: 
         instance: 
             bimp_object: 
                 module: bimpapple
-                name: ConsignedStockMvt
+                name: PartStockMvt
             
 sections:
     - type: tabs
@@ -109,39 +115,46 @@ sections:
                             struct: 
                                 type: custom
                                 custom: 
-                                    callback: renderPartsPendingList
-                                            
-                            
+                                    callback: renderPartsPendingList               
         sac: 
             label: Sacs
             icon: fas_shopping-bag
             sections:
                 - type: list
                   list: 
-                      object: sac
-                      
-        consigned_stocks: 
-            label: Stocks consignés
+                      object: sac               
+        part_stocks: 
+            label: Stocks composants
             icon: fas_boxes
             sections: 
                 - type: nav_tabs
                   nav_tabs: 
-                    - id: cs_stocks
-                      title: Stocks
+                    - id: internal_stocks
+                      title: Stocks internes
+                      icon: fas_warehouse
                       struct: 
                           type: list
                           list: 
-                              object: stocks
+                              object: internal_stock
+                    - id: consigned_stocks
+                      title: Stocks consignés
+                      icon: fab_apple
+                      struct: 
+                          type: list
+                          list: 
+                              object: consigned_stock
                     - id: cs_shipments
-                      title: Renvois
+                      title: Renvois stocks consignés
+                      icon: fas_shipping-fast
                       struct: 
                           type: list
                           list: 
                               object: cs_shipment
-                    - id: cs_mvts
+                    - id: parts_mvts
                       title: Mouvements de stock
+                      icon: fas_exchange-alt
                       struct: 
                           type: list
                           list: 
-                              object: cs_mvt
+                              object: part_stock_mvt
                 

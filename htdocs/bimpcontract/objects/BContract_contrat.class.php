@@ -17,7 +17,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php
  * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
  */
 
-
 /*
  * req maj expertise : 
  * SELECT f.* FROM llx_contrat_extrafields c, llx_element_element e, llx_facture_extrafields f WHERE e.sourcetype = 'contrat' AND e.fk_source = c.fk_object AND e.targettype = 'facture' AND e.fk_target = f.fk_object AND c.expertise != '' AND f.expertise = '';
@@ -211,8 +210,6 @@ class BContract_contrat extends BimpDolObject
         if (in_array($field_name, array('expertise', 'rib_client'))) {
             return 1;
         }
-            
-
         if ($this->getData('statut') == self::CONTRAT_STATUS_REFUSE)
             return 0;
 
@@ -282,11 +279,6 @@ class BContract_contrat extends BimpDolObject
             default:
                 return 0;
         }
-    }
-
-    public function canEdit()
-    {
-        return 1;
     }
 
     public function canDelete()
@@ -394,7 +386,6 @@ class BContract_contrat extends BimpDolObject
 
     public function isCommercialOfContrat()
     {
-
         global $user;
 
         $searchComm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
@@ -825,9 +816,22 @@ class BContract_contrat extends BimpDolObject
 
     // Getters données: 
 
+    public function getEcheancier(&$errors = array())
+    {
+        $echeancier = BimpCache::findBimpObjectInstance('bimpcontract', 'BContract_echeancier', array(
+                    'id_contrat' => $this->id
+        ));
+
+        if (!BimpObject::objectLoaded($echeancier)) {
+            $errors[] = 'Aucun échéancier lié à ce contrat';
+            return null;
+        }
+
+        return $echeancier;
+    }
+
     public function getHeuresRestantesDelegation()
     {
-
         $reste = 0;
         $totalHeuresVendues = 0;
         $totalHeuresFaites = 0;
@@ -845,8 +849,8 @@ class BContract_contrat extends BimpDolObject
                 if (count($list) > 0) {
                     if ($debug)
                         echo '<h2>Services</h2>';
-                    foreach ($list as $det) {
 
+                    foreach ($list as $det) {
                         if ($debug) {
 //                            print_r($det);
                             $instanceFiDetDebug = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det', $det['rowid']);
@@ -987,7 +991,6 @@ class BContract_contrat extends BimpDolObject
 
     public function getTitreAvenantSection()
     {
-
         $titre = "Avenants";
 
         $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenant');
@@ -1000,20 +1003,23 @@ class BContract_contrat extends BimpDolObject
 
     public function getAllSerialsForAvenant()
     {
-
         $html = "";
         foreach ($this->dol_object->lines as $line) {
-            $serials = [];
             $p = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
             $l = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $line->id);
 
             $html .= "<b>" . $p->getData('ref') . '</b><br />';
 
-            $theSerials = json_decode($l->getData('serials'));
-            foreach ($theSerials as $theSerial) {
-                $serials[$theSerial] = $theSerial;
+            $items = array();
+            $serials = json_decode($l->getData('serials'));
+
+            if (is_array($serials)) {
+                foreach ($serials as $serial) {
+                    $items[$serial] = $serial;
+                }
             }
-            $html .= BimpInput::renderInput('check_list', 'delserials_' . $l->id, '', ['items' => $serials]);
+
+            $html .= BimpInput::renderInput('check_list', 'delserials_' . $l->id, '', ['items' => $items]);
         }
 
         return $html;
@@ -1045,8 +1051,6 @@ class BContract_contrat extends BimpDolObject
             return $total_contrat - $total_fis;
         }
 
-
-
         return null;
     }
 
@@ -1056,21 +1060,6 @@ class BContract_contrat extends BimpDolObject
             return BimpCache::getBimpObjectObjects('bimptechnique', 'BT_ficheInter', ['fk_contrat' => $this->id]);
         }
         return Array();
-    }
-
-    public function getTotalInterTime()
-    {
-        $temps = 0;
-        $fiches = $fiche->getList(['fk_contrat' => $this->id]);
-        foreach ($fiches as $index => $infos) {
-            $fiche = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $infos['rowid']);
-            $allInters = $fiche->getChildrenList('inters');
-            foreach ($allInters as $id) {
-                $inter = $fiche->getChildObject('inters', $id);
-                $temps += $inter->getData('duree');
-            }
-        }
-        return $temps;
     }
 
     public function getAllServices($field = 'fk_product')
@@ -1323,7 +1312,7 @@ class BContract_contrat extends BimpDolObject
             $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_' . ucfirst($object), $l->rowid);
             $return[$instance->id] = $instance->getData('ref') . " - " . $instance->getData('libelle');
         }
-        //print_r($return);
+        
         return $return;
     }
 
@@ -1343,14 +1332,6 @@ class BContract_contrat extends BimpDolObject
         $client = new Societe($db);
         $client->fetch($this->getData('fk_soc'));
         return $client->cond_reglement_id;
-    }
-
-    public function getConditionReglementsArray()
-    {
-
-
-
-        return $cond;
     }
 
     public function getEndDate()
@@ -1386,17 +1367,13 @@ class BContract_contrat extends BimpDolObject
 
     public function getIndiceSyntec()
     {
-        // Eviter ce genre de fonction inutile (on ne va pas créer une fonction pour chaque param de conf!)
-        // Pour rappel : pas besoin de callback dans les yml, utiliser:
-        //   conf: 
-        //      module: ...
-        //      name: ...
         return BimpCore::getConf('current_indice_syntec');
     }
 
     public function getAddContactIdClient()
     {
         $id_client = (int) BimpTools::getPostFieldValue('id_client');
+        
         if (!$id_client) {
             $id_client = (int) $this->getData('fk_soc');
         }
@@ -1532,37 +1509,30 @@ class BContract_contrat extends BimpDolObject
 
     public function reste_a_payer($num_renouvellement = 0)
     {
-//        $duree_mois = $this->getData('duree_mois');
-//        $periodicity = $this->getData('periodicity');
-//        $nombre_periode = $duree_mois / $periodicity;
-        $facture_delivred = getElementElement('contrat', 'facture', $this->id);
-        if ($facture_delivred) {
-            foreach ($facture_delivred as $link) {
-                $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
-                if ($instance->getData('type') != 3)
-                    $montant += $instance->getData('total_ht');
+        $list_factures = getElementElement('contrat', 'facture', $this->id);
+        $montant = 0;
+        if (count($list_factures)) {
+            foreach ($list_factures as $link) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
+                if (BimpObject::objectLoaded($facture) && $facture->getData('type') != 3) {
+                    $montant += $facture->getData('total_ht');
+                }
             }
-            $return = $this->getTotalContrat() - $montant;
-        } else {
-            $return = $this->getTotalContrat();
         }
-        return $return;
+
+        return $this->getTotalContrat() - $montant;
     }
 
     public function reste_days()
     {
-
-        $duree_total = $this->getData('duree_mois');
         $today = new DateTime();
         $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
         $reste = $today->diff($diff);
-
         return $reste->days;
     }
 
     public function reste_periode($num_renouvellement = 0)
     {
-
         if ($this->isLoaded()) {
             $instance = BimpCache::findBimpObjectInstance('bimpcontract', 'BContract_echeancier', ['id_contrat' => $this->id]);
 
@@ -1572,9 +1542,6 @@ class BContract_contrat extends BimpDolObject
                 $date_1 = new DateTime();
 
             $date_2 = new DateTime($this->displayRealEndDate("Y-m-d"));
-//            if ($date_1->format('Y-m-d') == $this->getData('date_start')) {
-//                $return = $this->getData('duree_mois') / $this->getData('periodicity');
-//            } else {
             $date_1->sub(new DateInterval('P1D'));
             $interval = $date_1->diff($date_2);
 
@@ -1586,12 +1553,11 @@ class BContract_contrat extends BimpDolObject
             } else {
                 $totalReste += $interval->d / 30;
             }
-//                dol_syslog('contrat d '.$interval->d,3);
+
             if ($this->getData('periodicity') > 0)
                 $return = ($totalReste / $this->getData('periodicity'));
             else
                 $return = $totalReste;
-            //}
 
             return $return;
         }
@@ -1602,7 +1568,7 @@ class BContract_contrat extends BimpDolObject
         if (!$this->totalContrat) {
             $montant = 0;
             foreach ($this->dol_object->lines as $line) {
-                $child = $this->getChildObject("lines", $line->id);
+//                $child = $this->getChildObject("lines", $line->id);
                 //if($child->getData('renouvellement') == $this->getData('current_renouvellement')) {
                 $montant += $line->total_ht;
                 //}
@@ -1622,13 +1588,10 @@ class BContract_contrat extends BimpDolObject
 
     public function getDureeInitial()
     {
-
-        $filters = [
-            'type' => 1
-        ];
-        $filters['statut'] = 2;
-
-        $children = $this->getChildrenList('avenant', $filters);
+        $children = $this->getChildrenList('avenant', array(
+            'type'   => 1,
+            'statut' => 2
+        ));
 
         $dureePrlong = 0;
 
@@ -1636,8 +1599,6 @@ class BContract_contrat extends BimpDolObject
             $av = $this->getChildObject('avenant', $id_child);
             $dureePrlong += $av->getNbMois();
         }
-
-
 
         return ($this->getData('duree_mois') - $dureePrlong) / ($this->getData('current_renouvellement') + 1);
     }
@@ -1836,8 +1797,9 @@ class BContract_contrat extends BimpDolObject
     {
         $debut = new DateTime($this->getData('date_start'));
         $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
+        
         $interval = $debut->diff($diff);
-        //print_r($interval);
+        
         return $interval->days;
     }
 
@@ -1852,26 +1814,11 @@ class BContract_contrat extends BimpDolObject
         }
 
         $list = $this->getAllFiles();
-//        $idSepa = 0;
-//        $idSepaSigne = 0;
         foreach ($list as $id => $elem) {
-//            if (stripos($elem, "sepa")) {
-//                $idSepa = $id;
-//                if (stripos($elem, "signe"))
-//                    $idSepaSigne = $id;
-//            }
             if (stripos($elem, $this->getRef()) !== FALSE) {
                 $values[] = $id;
             }
         }
-
-
-
-//        if ($idSepa > 0 && $idSepaSigne < 1)
-//            $values[] = $idSepa;
-
-
-
 
         return $values;
     }
@@ -1882,9 +1829,11 @@ class BContract_contrat extends BimpDolObject
     {
         $sql = $this->db->getRows('bimp_c_secteur', 'clef = "CTC" OR clef = "CTE"');
         $return = Array();
+        
         foreach ($sql as $index => $i) {
             $return[$i->clef] = $i->valeur;
         }
+        
         return $return;
     }
 
@@ -1990,14 +1939,14 @@ class BContract_contrat extends BimpDolObject
         }
         return $commandes;
     }
-    
+
     public function getClientRibsArray()
     {
         $id_client = (int) $this->getData('fk_soc_facturation');
         if (!$id_client) {
             $id_client = (int) $this->getData('fk_soc');
         }
-        
+
         return BimpCache::getSocieteRibsArray($id_client, true);
     }
 
@@ -2200,8 +2149,8 @@ class BContract_contrat extends BimpDolObject
     public function displayContratChild()
     {
         $obj = $this->getContratChild();
-        if ($obj) {
-            return $obj->getNomUrl();
+        if (BimpObject::objectLoaded($obj)) {
+            return $obj->getLink();
         }
 
         return 'Ce contrat n\'a pas de contrat de remplacement';
@@ -2547,28 +2496,25 @@ class BContract_contrat extends BimpDolObject
         return $html;
     }
 
-    public function renderEcheancier($display = true)
+    public function renderEcheancier()
     {
+        $html = '';
+        $errors = array();
+        $warnings = array();
 
         if ($this->isLoaded()) {
-            $instance = BimpCache::findBimpObjectInstance('bimpcontract', 'BContract_echeancier', ['id_contrat' => $this->id]);
-            if ($display) {
-                if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER && (!$instance || !$instance->isLoaded())) {
-                    return BimpRender::renderAlerts('Le contrat n\'est pas activé', 'danger', false);
+            $echeancier = $this->getEcheancier($errors);
+
+            if (!count($errors)) {
+                if ((int) $this->getData('statut') != self::CONTRAT_STATUS_ACTIVER) {
+                    $errors[] = 'Ce contrat n\'est pas activé';
                 }
                 if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-                    return BimpRender::renderAlerts("Le contrat a été facturé à partir d'une commande, il ne comporte donc pas d'échéancier", 'warning', false);
+                    $warnings[] = 'Le contrat a été facturé à partir d\'une commande, il ne comporte donc pas d\'échéancier';
                 }
-            }
 
-            $data = $this->action_line_echeancier();
-            //echo "<pre>" . print_r($data, 1);
-            if (!$instance || !$instance->isLoaded()) {
-                $this->createEcheancier();
-                $instance = BimpCache::findBimpObjectInstance('bimpcontract', 'BContract_echeancier', ['id_contrat' => $this->id]);
-            }
-            if ($instance && $instance->isLoaded()) {
-                $html .= $instance->displayEcheancier($data, $display);
+                $data = $this->getEcheancierData();
+                $html .= $echeancier->displayEcheancier($data, true);
             }
 
             return $html;
@@ -2863,7 +2809,6 @@ class BContract_contrat extends BimpDolObject
 
     public function tryToValidate(&$errors)
     {
-
         global $user;
         $success = [];
         $validComm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
@@ -3785,11 +3730,11 @@ class BContract_contrat extends BimpDolObject
         $facture->set('model_pdf', 'bimpfact');
         $facture->set('ref_client', $this->getData('ref_customer'));
         $facture->set('expertise', $this->getData('expertise'));
-        
+
         if ($facture->field_exists('rib_client') && $this->field_exists('rib_client')) {
             $facture->set('rib_client', (int) $this->getData('rib_client'));
         }
-        
+
         $errors = $facture->create($warnings, true);
 
         if (!count($errors)) {
@@ -4425,47 +4370,62 @@ class BContract_contrat extends BimpDolObject
 
         $ids = $data['id_objects'];
 
+        $today = date('Y-m-d');
+
         foreach ($ids as $id) {
-            $have_echeancier = true;
-            $can_factured = true;
             $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $id);
+            if (!BimpObject::objectLoaded($contrat)) {
+                $warnings[] = 'Le contrat #' . $id . ' n\'existe plus';
+                continue;
+            }
+
             $statut = $contrat->getData('statut');
             if ($statut == self::CONTRAT_STATUS_BROUILLON) {
                 $warnings[] = "Le contrat " . $contrat->getRef() . ' ne peut être facturé car il est au statut brouillon';
-                $can_factured = false;
-            }
-            if ($statut == self::CONTRAT_STATUS_CLOS && $can_factured) {
-                $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car il est au statut clos";
-                $can_factured = false;
-            }
-            if (($statut == self::CONTRAT_STATUS_VALIDE || $statut == self::CONTRAT_STATUS_WAIT) && $can_factured) {
-                $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car il n'est pas encore actif";
-                $can_factured = false;
+                continue;
             }
 
-            $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
-            if ($echeancier->find(['id_contrat' => $contrat->id]) && $can_factured) {
+            if ($statut == self::CONTRAT_STATUS_CLOS) {
+                $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car il est au statut clos";
+                continue;
+            }
+
+            if (($statut == self::CONTRAT_STATUS_VALIDE || $statut == self::CONTRAT_STATUS_WAIT)) {
+                $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car il n'est pas encore actif";
+                continue;
+            }
+
+            $echeancier = BimpCache::findBimpObjectInstance('bimpcontract', 'BContract_echeancier', array(
+                        'id_contrat' => $contrat->id
+            ));
+
+            if (BimpObject::objectLoaded($echeancier)) {
                 $next_facture_date = $echeancier->getData('next_facture_date');
-                $date = new DateTime($next_facture_date);
-                $today = new DateTime();
-                if ($date->getTimestamp() <= $today->getTimestamp()) {
-                    $forBilling = $contrat->renderEcheancier(false);
-                    $id_facture = $echeancier->actionCreateFacture($forBilling);
-                    if ($id_facture) {
-                        $f = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-                        $s = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
-                        $comm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_suivi'));
-                        $msg = "Une facture a été créée sur le contrat " . $contrat->getRef() . ". Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider.<br />";
-                        $msg .= "Client : " . $s->dol_object->getNomUrl() . '<br />';
-                        $msg .= "Contrat : " . $contrat->dol_object->getNomUrl() . "<br/>Commercial : " . $comm->getNomUrl() . "<br />";
-                        $msg .= "Facture : " . $f->dol_object->getNomUrl();
-                        mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", $this->email_facturation, BimpCore::getConf('devs_email'), $msg);
-                        $success = "Le contrat " . $contrat->getRef() . " a été facturé avec succès";
+
+                if ($next_facture_date <= $today) {
+                    $err = array();
+                    $nextFactureData = $echeancier->getNextFactureData($err);
+
+                    if (count($err)) {
+                        $warnings[] = BimpTools::getMsgFromArray($err, 'Contrat ' . $contrat->getRef());
+                    } else {
+                        $id_facture = $echeancier->actionCreateFacture($nextFactureData);
+                        if ($id_facture) {
+                            $f = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                            $s = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
+                            $comm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_suivi'));
+                            $msg = "Une facture a été créée sur le contrat " . $contrat->getRef() . ". Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider.<br />";
+                            $msg .= "Client : " . $s->dol_object->getNomUrl() . '<br />';
+                            $msg .= "Contrat : " . $contrat->dol_object->getNomUrl() . "<br/>Commercial : " . $comm->getNomUrl() . "<br />";
+                            $msg .= "Facture : " . $f->dol_object->getNomUrl();
+                            mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", $this->email_facturation, BimpCore::getConf('devs_email'), $msg);
+                            $success .= ($success ? '<br/>' : '') . "Le contrat " . $contrat->getRef() . " facturé avec succès";
+                        }
                     }
                 } else {
-                    $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car la période de facturation n'est ps encore arrivée";
+                    $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car la période de facturation n'est pas encore atteinte";
                 }
-            } elseif ($can_factured) {
+            } else {
                 $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car il n'a pas d'échéancier";
             }
         }
@@ -4622,9 +4582,8 @@ class BContract_contrat extends BimpDolObject
         }
     }
 
-    public function action_line_echeancier($num_renouvellement = 0)
+    public function getEcheancierData($num_renouvellement = 0)
     {
-
         $returnedArray = Array(
             'factures_send' => getElementElement('contrat', 'facture', $this->id),
             'reste_a_payer' => $this->reste_a_payer(),
@@ -4765,11 +4724,9 @@ class BContract_contrat extends BimpDolObject
         } else {
 
 //            $relance_renouvellement = BimpTools::getValue('relance_renouvellement');
-            
             //  *******************************************************
             //  L'ajout des logs bug (entrées vides intempestives), à corriger avant réactivation
             //  *******************************************************
-            
 //            if ($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && (BimpTools::getValue('periodicity') != $this->getInitData('periodicity'))) {
 //                $log = "Changement de la périodicitée de facturation de <strong>" . self::$period[$this->getInitData('periodicity')] . "</strong> à <strong>";
 //                $log .= self::$period[BimpTools::getValue('periodicity')] . "</strong>";
@@ -4794,7 +4751,6 @@ class BContract_contrat extends BimpDolObject
 //                }
 //                $this->addLog("Date d'effet du contrat changer à " . BimpTools::getValue('date_start'));
 //            }
-
             // Maj de la signature si nécessaire: 
 //            if ((int) $this->getData('id_signature')) {
 //                $signature = $this->getChildObject('signature');

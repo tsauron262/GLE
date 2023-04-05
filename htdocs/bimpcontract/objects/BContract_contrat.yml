@@ -1411,7 +1411,7 @@ views:
         rows:
             - cols:
                 - type: custom
-                  col_lg: 18
+                  col_lg: 12
                   col_md: 12
                   custom:
                       callback: renderEcheancier
@@ -1423,7 +1423,7 @@ views:
         rows:
             - cols:
                 - type: list
-                  col_lg: 18
+                  col_lg: 12
                   col_md: 12
                   list:
                       children: avenant

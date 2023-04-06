@@ -265,9 +265,20 @@ class cron extends BimpCron
 
         $this->output .= '<br/><br/>--- Facturation auto --- <br/>';
 
-        $where = 'validate = 1 AND next_facture_date > \'0000-00-00\' AND next_facture_date <= \'' . $today . '\'';
-        $rows = $bdb->getRows('bcontract_prelevement', $where, null, 'array', array('id'));
+        $sql = 'SELECT a.id, a.id_contrat FROM ' . MAIN_DB_PREFIX . 'bcontract_prelevement a';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'contrat c ON c.rowid = a.id_contrat';
+        $sql .= ' WHERE a.validate = 1 AND a.next_facture_date > \'0000-00-00\' AND a.next_facture_date <= \'' . $today . '\'';
+        $sql .= ' AND c.statut = 11';
 
+        $rows = $bdb->executeS($sql, 'array');
+
+        $this->output .= 'ROWS: <pre>' . print_r($rows, 1) . '</pre>';
+
+        if (!is_array($rows)) {
+            $this->output .= 'ERR : ' . $bdb->err();
+            return;
+        }
+        
         foreach ($rows as $r) {
             $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier', (int) $r['id']);
 
@@ -284,7 +295,7 @@ class cron extends BimpCron
 
             $errors = array();
             $data = $echeancier->getNextFactureData($errors);
-            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
+//            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
 
             if (!$data['date_start'] || !$data['date_end'] || $data['date_end'] < $data['date_start']) {
                 $this->output .= 'Date incorrectes';

@@ -130,8 +130,8 @@ class BC_Filter extends BimpComponent
             $this->is_default = true;
         }
 
-        
-        
+
+
         $type_path = 'filters/' . $this->filter_name . '/type';
         $this->params['type'] = $this->object->getConf($type_path, '');
 
@@ -146,7 +146,7 @@ class BC_Filter extends BimpComponent
         } elseif ($this->object->config->isDefined('filters/' . $this->filter_name . '/input/type')) {
             $input_path = 'filters/' . $this->filter_name . '/input/type';
         }
-        if(isset($input_path))
+        if (isset($input_path))
             $input_type = $this->object->getConf($input_path, '');
         else
             $input_type = null;
@@ -163,8 +163,8 @@ class BC_Filter extends BimpComponent
                     $this->params['type'] = 'user';
                 }
             }
-        }       
-        
+        }
+
         $items = null;
         if (is_null($this->params['type']) || !(string) $this->params['type']) {
             if (!is_null($this->bc_field)) {
@@ -711,7 +711,7 @@ class BC_Filter extends BimpComponent
         $filter_name = array_pop($children);
         $field_alias = 'a';
         $field_object = $this->base_object;
-        
+
         $values = self::getConvertedValues($this->params['type'], $this->values);
         $excluded_values = self::getConvertedValues($this->params['type'], $this->excluded_values);
 

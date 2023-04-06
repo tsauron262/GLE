@@ -26,18 +26,12 @@ if (!$user->admin) {
     exit;
 }
 
-$ac = BimpObject::getInstance('bimpcore', 'Bimp_ActionComm');
-$title = 'Ajout d\\\'un événement';
-$values = array(
-    'fields' => array(
-        'datep'          => '2023-03-31 15:00:00',
-        'datep2'         => '2023-03-31 16:00:00',
-        'users_assigned' => array(270)
-    )
-);
-$onclick = $ac->getJsLoadModalForm('add', $title, $values) . '</script>';
+$fi = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', 99249);
+$err = $fi->updateField('description', 'gkjhgkdjfhgkdjf');
 
-echo $html .'<br/>';
+echo '<pre>';
+print_r($err);
+echo '</pre>';
 
 echo '<br/>FIN';
 echo '</body></html>';

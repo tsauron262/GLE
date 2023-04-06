@@ -134,16 +134,8 @@ fields:
         label: Date prévisionnelle de facturation
         type: date
         
-#    fk_user_modif: 
-#        label: Dernière modification par
-#        type: int
-        
     fk_user_valid: 
         dol_prop: user_valid
-        
-#    fk_user_cloture: 
-#        label: Fermée par
-#        type: int
         
     date_livraison: 
         label: Date de livraison souhaitée

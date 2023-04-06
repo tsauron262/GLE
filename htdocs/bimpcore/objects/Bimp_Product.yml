@@ -535,12 +535,12 @@ fields:
         default_value: 0
                     
     fk_user_modif:
-        label: Utilisateur modification
+        label: Modifié par
         type: id_object
         object: user
         
     fk_user_author:
-        label: Créateur
+        label: Créé par
         type: id_object
         object: user
         

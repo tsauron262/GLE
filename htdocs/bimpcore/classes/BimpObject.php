@@ -26,6 +26,7 @@ class BimpObject extends BimpCache
     public static $ref_properties = array('ref', 'reference', 'code');
     public static $status_properties = array('status', 'fk_statut', 'statut');
     public static $date_update_properties = array('date_update', 'tms');
+    public static $user_update_properties = array('user_update', 'fk_user_modif');
     public static $allowedDbNullValueDataTypes = array('date', 'datetime', 'time');
     public static $logo_properties = array('logo');
     public $use_commom_fields = false;
@@ -766,6 +767,17 @@ class BimpObject extends BimpCache
     public function getDateUpdateProperty()
     {
         foreach (static::$date_update_properties as $prop) {
+            if ($this->field_exists($prop)) {
+                return $prop;
+            }
+        }
+
+        return '';
+    }
+
+    public function getUserUpdateProperty()
+    {
+        foreach (static::$user_update_properties as $prop) {
             if ($this->field_exists($prop)) {
                 return $prop;
             }
@@ -4124,7 +4136,7 @@ class BimpObject extends BimpCache
 
         return $display;
     }
-    
+
     public function displayDataDefault($field, $no_html = false, $no_history = false)
     {
         return $this->displayData($field, 'default', false, $no_html, $no_history);
@@ -5007,6 +5019,19 @@ class BimpObject extends BimpCache
                         } else {
                             $this->data['user_update'] = 0;
                         }
+                    } else {
+                        $date_update_field = $this->getDateUpdateProperty();
+                        if ($date_update_field) {
+                            $this->data[$date_update_field] = date('Y-m-d H:i:s');
+                        }
+                        
+                        $user_update_field = $this->getUserUpdateProperty();
+                        if ($user_update_field) {
+                            global $user;
+                            if (BimpObject::objectLoaded($user)) {
+                                $this->data[$user_update_field] = $user->id;
+                            }
+                        }
                     }
 
                     if ($this->isDolObject()) {
@@ -5180,9 +5205,24 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     $primary = $this->getPrimary();
 
                     if ($table && $primary) {
-                        if ($this->db->update($table, array(
-                                    $field => $db_value
-                                        ), '`' . $primary . '` = ' . (int) $id_object) <= 0) {
+                        $data = array(
+                            $field => $db_value
+                        );
+
+                        $date_update_field = $this->getDateUpdateProperty();
+                        if ($date_update_field) {
+                            $data[$date_update_field] = date('Y-m-d H:i:s');
+                        }
+                        
+                        $user_update_field = $this->getUserUpdateProperty();
+                        if ($user_update_field) {
+                            global $user;
+                            if (BimpObject::objectLoaded($user)) {
+                                $data[$user_update_field] = $user->id;
+                            }
+                        }
+
+                        if ($this->db->update($table, $data, '`' . $primary . '` = ' . (int) $id_object) <= 0) {
                             $sqlError = $this->db->db->lasterror();
                             $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
                         }

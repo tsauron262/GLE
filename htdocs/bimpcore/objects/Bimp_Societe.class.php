@@ -2110,12 +2110,13 @@ class Bimp_Societe extends BimpDolObject
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Dernière mise à jour le ' . $dt->format('d / m / Y');
 
-                if ((int) $this->dol_object->user_modification) {
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_modification);
-                    if (BimpObject::objectLoaded($user)) {
-                        $html .= ' par ' . $user->getLink();
-                    }
-                }
+                // User pas toujours juste...
+//                 if ((int) $this->dol_object->user_modification) {
+//                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_modification);
+//                    if (BimpObject::objectLoaded($user)) {
+//                        $html .= ' par ' . $user->getLink();
+//                    }
+//                }
 
                 $html .= '</div>';
             }

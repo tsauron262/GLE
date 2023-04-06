@@ -295,7 +295,7 @@ class cron extends BimpCron
 
             $errors = array();
             $data = $echeancier->getNextFactureData($errors);
-//            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
+            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
 
             if (!$data['date_start'] || !$data['date_end'] || $data['date_end'] < $data['date_start']) {
                 $this->output .= 'Date incorrectes';

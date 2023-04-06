@@ -26,13 +26,6 @@ if (!$user->admin) {
     exit;
 }
 
-$fi = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', 99249);
-$err = $fi->updateField('description', 'gkjhgkdjfhgkdjf');
-
-echo '<pre>';
-print_r($err);
-echo '</pre>';
-
 echo '<br/>FIN';
 echo '</body></html>';
 

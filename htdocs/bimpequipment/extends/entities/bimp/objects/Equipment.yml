@@ -29,6 +29,15 @@ forms:
                 input_name: infos1
                 input: 
                   type: textarea
+            memeProd:
+                custom: 1
+                label: Même produit
+                input_name: memeProd
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+                
             newEquipment: 
                 custom: 1
                 label: Serial de remplacement
@@ -37,6 +46,23 @@ forms:
                   type: select
                   options: 
                       callback: getChangeEquipment
+                display_if:
+                  field_name: memeProd
+                  show_values: 1
+            newEquipment2: 
+                custom: 1
+                label: Serial de remplacement (tous)
+                input_name: newEquipment2
+                input:
+                  type: select
+                  options: 
+                      callback: 
+                        method: getChangeEquipment
+                        params:
+                            - false
+                display_if:
+                  field_name: memeProd
+                  show_values: 0
             infos2:
                 custom: 1
                 label: Infos livraison

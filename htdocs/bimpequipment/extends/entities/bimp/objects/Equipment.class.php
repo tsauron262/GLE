@@ -44,14 +44,16 @@ class Equipment_ExtEntity extends Equipment
             return true;
     }
     
-    public function getChangeEquipment(){
-        $list = BimpCache::getBimpObjectObjects('bimpequipment', 'Equipment', 
-                array(
+    public function getChangeEquipment($memeRef = true){
+        $filtre = array(
                     "places.type"          => 2,
                     "places.position"      => 1,
-                    "places.id_entrepot"   => $this->getIdEntrepotSpare(),
-                    "id_product"             => $this->getData("id_product")
-                ), null, null, array('places' => array(
+                    "places.id_entrepot"   => $this->getIdEntrepotSpare()
+                );
+        if($memeRef)
+            $filtre['id_product'] = $this->getData("id_product");
+        $list = BimpCache::getBimpObjectObjects('bimpequipment', 'Equipment', 
+                $filtre, null, null, array('places' => array(
                         'table' => 'be_equipment_place',
                         'alias' => 'places',
                         'on'    => 'places.id_equipment = a.id'
@@ -69,7 +71,7 @@ class Equipment_ExtEntity extends Equipment
         $success = 'Echange OK';
         
         //inversion des dates de spare
-        $newEquipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $data['newEquipment']);
+        $newEquipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, ($data['memeProd']? $data['newEquipment'] : $data['newEquipment2']));
         $newEquipment->updateField('date_fin_spare', $this->getData('date_fin_spare'));
         $this->updateField('date_fin_spare', null);
         

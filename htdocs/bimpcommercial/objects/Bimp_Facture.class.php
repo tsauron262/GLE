@@ -2000,12 +2000,15 @@ class Bimp_Facture extends BimpComm
         }
 
         if ($this->isLoaded()) {
-            $filtre = array(
+            $filters = array(
                 'id_facture' => (int) $this->id
             );
-            if (count($type_reval))
-                $filtre['type'] = $type_reval;
-            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', $filtre);
+            
+            if (count($type_reval)){
+                $filters['type'] = $type_reval;
+            }
+            
+            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', $filters);
 
             foreach ($revals as $reval) {
                 $total = $reval->getTotal();

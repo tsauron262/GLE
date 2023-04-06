@@ -257,7 +257,7 @@ class BimpStatsFacture {
                     $hash[$ind]['type_garantie'] = (isset($obj2->type_garantie)) ? $obj2->type_garantie : '';
                     $hash[$ind]['sav_id'] = ($obj2 AND isset($obj2->sav_id)) ? $obj2->sav_id : '';
                     $hash[$ind]['sav_ref'] = ($obj2 AND isset($obj2->sav_ref)) ? $obj2->sav_ref : '';
-                    $hash[$ind]['ggsx'] = ($obj2 AND isset($obj2->ggsx) && $obj2->ggsx != '') ? $obj2->ggsx : ($obj2 AND isset($obj2->ggsx2) && $obj2->ggsx2 != '')? $obj2->ggsx2 : '';
+                    $hash[$ind]['ggsx'] = ($obj2 AND isset($obj2->ggsx) && $obj2->ggsx != '') ? $obj2->ggsx : (($obj2 AND isset($obj2->ggsx2) && $obj2->ggsx2 != '')? $obj2->ggsx2 : '');
                     $hash[$ind]['prop_total'] = (isset($obj->prop_total)) ? $obj->prop_total : '';
                     $hash[$ind]['fact_date'] = (isset($obj->fact_date)) ? dol_print_date($this->db->jdate($obj->fact_date)) : '';
                     $ind++;

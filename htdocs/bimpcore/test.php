@@ -26,19 +26,6 @@ if (!$user->admin) {
     exit;
 }
 
-$ac = BimpObject::getInstance('bimpcore', 'Bimp_ActionComm');
-$title = 'Ajout d\\\'un événement';
-$values = array(
-    'fields' => array(
-        'datep'          => '2023-03-31 15:00:00',
-        'datep2'         => '2023-03-31 16:00:00',
-        'users_assigned' => array(270)
-    )
-);
-$onclick = $ac->getJsLoadModalForm('add', $title, $values) . '</script>';
-
-echo $html .'<br/>';
-
 echo '<br/>FIN';
 echo '</body></html>';
 

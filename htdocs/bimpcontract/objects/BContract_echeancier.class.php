@@ -121,7 +121,7 @@ class BContract_echeancier extends BimpObject
             }
 
             $where = 'fk_facture IN (' . implode(',', $facs_ids) . ')';
-            $where .= 'date_start <= \'' . $date_end . '\'';
+            $where .= ' AND date_start <= \'' . $date_end . '\'';
             $where .= ' AND date_end >= \'' . $date_start . '\'';
 
             if ((int) $this->db->getCount('facturedet', $where, 'rowid') > 0) {

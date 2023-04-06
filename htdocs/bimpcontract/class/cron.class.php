@@ -35,7 +35,7 @@ class cron extends BimpCron
         self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM
     ];
 
-    public function zu_gehen()
+    public function dailyProcess()
     {
 //        $this->autoClose();
 //        $this->mailJourActivation();

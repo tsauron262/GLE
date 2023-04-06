@@ -73,6 +73,22 @@ class devController extends BimpController
         $html .= '</div>';
         $html .= '</div>';
 
+        // Crons en erreur: 
+        $rows = BimpCache::getBdb()->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
+        if (!empty($rows)) {
+            $html .= '<div class="row" style="margin-bottom: 30px">';
+            $html .= '<h3 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' tâche(s) cron en erreur</h3>';
+            $html .= '<ul>';
+            foreach ($rows as $r) {
+                $html .= '<li>';
+                $html .= '<a href="' . DOL_URL_ROOT . '/cron/card.php?id=' . $r['rowid'] . '" target="_blank">' . $r['label'] . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+                $html .= '</li>';
+            }
+            $html .= '</ul>';
+            $html .= '</div>';
+        }
+        
+        
         $html .= '<div class="row">';
 
         // Récap logs: 
@@ -81,7 +97,7 @@ class devController extends BimpController
         $html .= '</div>';
 
         $html .= '<div class="col-sm-12 col-md-4">';
-        
+
         // Liens: 
         $content = '';
         foreach (self::$dev_links as $link) {
@@ -97,7 +113,7 @@ class devController extends BimpController
         $html .= '</div>';
         $html .= '</div>';
 
-        if(BimpTools::isModuleDoliActif('BIMPTASK')){
+        if (BimpTools::isModuleDoliActif('BIMPTASK')) {
             $html .= '<div class="row">';
             $html .= '<div class="col-sm-12 col-md-6">';
             $html .= '<h3>' . BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Tâches</h3>';
@@ -109,7 +125,7 @@ class devController extends BimpController
             $html .= '<div class="row">';
             $list = new BC_ListTable(BimpObject::getInstance('bimptask', 'BIMP_Task'), 'main', 1, null, 'Tâches dév');
             $list->addFieldFilterValue('id_task', 0);
-    //        $list->addFieldFilterValue('type_manuel', 'dev');
+            //        $list->addFieldFilterValue('type_manuel', 'dev');
             $html .= $list->renderHtml();
             $html .= '</div>';
         }

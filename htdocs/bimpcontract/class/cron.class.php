@@ -267,7 +267,7 @@ class cron extends BimpCron
         foreach ($list as $i => $infos) {
             $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $infos['id_contrat']);
             $echeanciers->fetch($infos['id']);
-            //$data = $c->renderEcheancier(false);
+            
             $data = Array(
                 'factures_send' => getElementElement('contrat', 'facture', $c->id),
                 'reste_a_payer' => $c->reste_a_payer(),
@@ -289,7 +289,7 @@ class cron extends BimpCron
                 $this->output .= $c->getRef() . ': statut contrat pas bon<br />';
             }
 
-            if ($echeanciers->isDejaFactured($data['date_start'], $data['date_end'])) {
+            if ($echeanciers->isPeriodInvoiced($data['date_start'], $data['date_end'])) {
                 $this->output .= $c->getRef() . ': Déja facturé<br />';
                 $canBilling = false;
             }

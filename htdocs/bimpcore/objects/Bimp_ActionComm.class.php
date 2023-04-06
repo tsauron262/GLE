@@ -259,7 +259,6 @@ class Bimp_ActionComm extends BimpObject
             $html .= '<div style="margin: 10px; text-align: center">';
             $html .= '<span class="btn btn-danger" onclick="' . $this->getJsDeleteOnClick(array(
                         'on_success' => 'reload'
-//                        'success_callback' => 'function() {window.location.reload();}'
                     )) . '">';
             $html .= BimpRender::renderIcon('fas_trash-alt', 'iconLeft') . 'Supprimer cet événement';
             $html .= '</span>';

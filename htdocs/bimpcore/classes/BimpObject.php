@@ -4124,6 +4124,11 @@ class BimpObject extends BimpCache
 
         return $display;
     }
+    
+    public function displayDataDefault($field, $no_html = false, $no_history = false)
+    {
+        return $this->displayData($field, 'default', false, $no_html, $no_history);
+    }
 
     public function displayFieldName($field)
     {

@@ -882,7 +882,7 @@ class BContract_avenant extends BContract_contrat
         }
 
         if (!count($errors)) {
-            $number = (int) $this->db->getCount('bcontract_avenant', 'id_contrat = ' . $id_contrat, 'rowid');
+            $number = (int) $this->db->getCount('bcontract_avenant', 'id_contrat = ' . $id_contrat, 'id');
             $this->set('number_in_contrat', $number);
 
             $errors = parent::create($warnings, $force_create);

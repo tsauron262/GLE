@@ -116,6 +116,7 @@
                     <data name="partUsed" required="0"></data>
                     <data name="coverageOption" required="0"></data>
                     <data name="pricingOption" required="0"></data>
+                    <data name="fromInternalStock" required="1" default="0" edit="0"></data>
                     <data name="fromConsignedStock" required="1" default="0" edit="0"></data>
                     <data name="kgbDeviceDetail" required="0">
                         <datas>

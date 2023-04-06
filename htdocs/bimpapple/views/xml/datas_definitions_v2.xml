@@ -91,6 +91,9 @@
             <val val="DOA">HS à l'arrivée</val>
         </values>
     </def>
+    <def name="fromInternalStock" type="bool">
+        <label>Pris dans le stock interne</label>
+    </def>
     <def name="fromConsignedStock" type="bool">
         <label>Pris dans le stock consigné</label>
     </def>

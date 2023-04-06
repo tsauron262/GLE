@@ -12,26 +12,63 @@ class BContract_echeancier extends BimpObject
         self::STATUT_IS_FINISH => ['label' => "Facturation terminée", 'classes' => ['danger'], 'icon' => 'fas_times']
     ];
 
-    // Droits user : 
+    // Droits user:
 
     public function canViewObject($object)
     {
         if (is_object($object))
-            return true;
-        return false;
+            return 1;
+        return 0;
     }
 
-    public function canEdit()
+    public function canSetAction($action)
     {
+        global $user;
 
-        $parent = $this->getParentInstance();
-        if ($parent->getData('statut') == 2 || $parent->getData('statut') == -1)
-            return false;
+        switch ($action) {
+            case 'stopBill':
+                if ($user->rights->bimpcontract->stop_bills_timeline || $user->admin) {
+                    return 1;
+                }
+                return 0;
+        }
 
-        return true;
+        return parent::canSetAction($action);
     }
 
     // Getters booléens: 
+
+    public function isEditable($force_edit = false, &$errors = []): int
+    {
+        if ($force_edit) {
+            return 1;
+        }
+
+        $contrat = $this->getParentInstance();
+        if (in_array((int) $contrat->getData('statut'), array(2, -1))) {
+            return 0;
+        }
+
+        return 1;
+    }
+
+    public function isActionAllowed($action, &$errors = []): int
+    {
+        switch ($action) {
+            case 'stopBill':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
+                if ((int) $this->getData('statut') != self::STATUT_EN_COURS) {
+                    $errors[] = 'Cet échéancier n\'est plus en cours';
+                    return 0;
+                }
+                return 1;
+        }
+
+        return parent::isActionAllowed($action, $errors);
+    }
 
     public function isEnRetard()
     {
@@ -39,6 +76,7 @@ class BContract_echeancier extends BimpObject
         $aujourdui = new DateTime();
         $next = new Datetime($this->getData('next_facture_date'));
         $diff = $aujourdui->diff($next);
+
         if ($parent->getData('facturation_echu') == 1) {
             if ($parent->getData('periodicity')) {
                 $finPeriode = $next->add(new DateInterval('P' . $parent->getData('periodicity') . 'M'));
@@ -56,6 +94,7 @@ class BContract_echeancier extends BimpObject
                 return 1;
             }
         }
+
         $lastFactureId = $this->getLastFactureId();
         if ($lastFactureId > 0) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $lastFactureId);
@@ -70,32 +109,27 @@ class BContract_echeancier extends BimpObject
         return 0;
     }
 
-    public function isDejaFactured($date_start, $date_end)
+    public function isPeriodInvoiced($date_start, $date_end)
     {
         $parent = $this->getParentInstance();
-        $correspondance = 0;
-        $listeFactures = getElementElement("contrat", 'facture', $parent->id);
-        if (count($listeFactures) > 0) {
-            foreach ($listeFactures as $index => $i) {
-                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $i['d']);
-                if (1) {
-                    $dateDebut = New DateTime();
-                    $dateFin = New DateTime();
-                    if (is_int($facture->dol_object->lines[0]->date_start) && is_int($facture->dol_object->lines[0]->date_end)) {
-                        $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
-                        $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
-                        if ($dateDebut->format('Y-m-d') == $date_start && $dateFin->format('Y-m-d') == $date_end) {
-                            $correspondance++;
-                        }
-                    }
-                }
+        $list = getElementElement("contrat", 'facture', $parent->id);
+
+        if (count($list)) {
+            $facs_ids = array();
+            foreach ($list as $i) {
+                $facs_ids[] = (int) $i['d'];
+            }
+
+            $where = 'fk_facture IN (' . implode(',', $facs_ids) . ')';
+            $where .= 'date_start <= \'' . $date_end . '\'';
+            $where .= ' AND date_end >= \'' . $date_start . '\'';
+
+            if ((int) $this->db->getCount('facturedet', $where, 'rowid') > 0) {
+                return 1;
             }
         }
-        if ($correspondance == 1) {
-            $parent->addLog("Facturation de la même periode stopée automatiquement ");
-            return true;
-        }
-        return false;
+
+        return 0;
     }
 
     public function isClosDansCombienDeTemps()
@@ -144,12 +178,9 @@ class BContract_echeancier extends BimpObject
 
     public function getListExtraButtons()
     {
-        global $user;
         $buttons = [];
 
-        $parent = $this->getParentInstance();
-
-        if (($user->rights->bimpcontract->stop_bills_timeline || $user->admin) && $this->getData('statut') == self::STATUT_EN_COURS) {
+        if ($this->isActionAllowed('stopBill') && $this->canSetAction('stopBill')) {
             $buttons[] = array(
                 'label'   => 'Stoper la facturation',
                 'icon'    => 'fas_times',
@@ -161,7 +192,7 @@ class BContract_echeancier extends BimpObject
 
         return $buttons;
     }
-    
+
     // Getters données: 
 
     public function getDateNextPeriodRegen()
@@ -200,7 +231,7 @@ class BContract_echeancier extends BimpObject
         }
         return 0;
     }
-    
+
     public function getFacturesExterneByPeriode($periode = '')
     {
         $return = [];
@@ -502,6 +533,56 @@ class BContract_echeancier extends BimpObject
         return $periodes;
     }
 
+    public function getNextFactureData(&$errors = array())
+    {
+        $contrat = $this->getParentInstance();
+
+        $total_ht = 0;
+        $pa = 0;
+        $date_start = '';
+        $date_end = '';
+
+        if (!BimpObject::objectLoaded($contrat)) {
+            $errors[] = 'Contrat absent';
+        } else {
+            $data = $contrat->getEcheancierData();
+            $date_start = $this->getData('next_facture_date');
+            $dt_end = new DateTime($date_start);
+            $dt_end->add(new DateInterval("P" . $data->periodicity . "M"));
+            $dt_end->sub(new DateInterval("P1D"));
+            $date_end = $dt_end->format('Y-m-d');
+
+            $morceauPeriode = ($data->reste_periode >= 1 ? 1 : $data->reste_periode);
+
+            $real_end_date = $contrat->displayRealEndDate('Y-m-d');
+            if ($real_end_date < $date_end) {
+                $date_end = $real_end_date;
+            }
+
+            $contrat_periodicity = $contrat->getData('periodicity');
+
+            if ($contrat_periodicity > 0 && $contrat_periodicity != 1200 && $data->reste_periode > 1) {
+                $total_ht = $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);
+                $tva = $total_ht * 0.2;
+                $nb_periode = ceil($contrat->getData('duree_mois') / $contrat->getData('periodicity'));
+                $pa = ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa')) / ($data->reste_periode * $morceauPeriode);
+            } else {
+                $total_ht = $data->reste_a_payer;
+                $tva = $total_ht * 0.2;
+                $nb_periode = 1;
+                $pa = ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa'));
+            }
+        }
+
+        return array(
+            'total_ht'   => $total_ht,
+            'pa'         => $pa,
+            'date_start' => $date_start,
+            'date_end'   => $date_end,
+            'origine'    => 'cron'
+        );
+    }
+
     // Affichages: 
 
     public function displayCommercialContrat()
@@ -596,8 +677,6 @@ class BContract_echeancier extends BimpObject
                         }
                     }
 
-
-
                     $html .= '<td style="text-align:center"><b>' . price($facture->getData('total_ht')) . ' €</b> </td>'
                             . '<td style="text-align:center"><b>' . price($facture->getData('total_tva')) . ' € </b></td>'
                             . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
@@ -661,9 +740,12 @@ class BContract_echeancier extends BimpObject
                 }
 
                 $getEndDate = new DateTime($parent->displayRealEndDate("Y-m-d"));
-                if ($getEndDate < $dateTime_end_mkTime)
+                if ($getEndDate < $dateTime_end_mkTime) {
                     $dateTime_end_mkTime = $getEndDate;
-                $amount = 0; //$parent->getAddAmountAvenantProlongation() / ($data->reste_periode / $morceauPeriode);
+                }
+
+                $amount = 0;
+
                 $firstPassage = false;
                 if ($parent->getData('periodicity') > 0 && $parent->getData('periodicity') != 1200 && $data->reste_periode > 1) {
                     $amount += $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);
@@ -678,14 +760,13 @@ class BContract_echeancier extends BimpObject
                 }
 
                 if (!$display) {
-                    $none_display = [
+                    return array(
                         'total_ht'   => $amount,
                         'pa'         => $pa,
                         'date_start' => $dateTime_start_mkTime->format('Y-m-d'),
                         'date_end'   => $dateTime_end_mkTime->format('Y-m-d'),
                         'origine'    => 'cron'
-                    ];
-                    return $none_display;
+                    );
                 }
 
                 $html .= '<tr class="objectListItemRow" >';
@@ -951,33 +1032,20 @@ class BContract_echeancier extends BimpObject
     public function displayRetard()
     {
         $parent = $this->getParentInstance();
-        $alert = "<b class='success bs-popover' " . BimpRender::renderPopoverData('Facturation à jour') . ">" . BimpRender::renderIcon('check') . "</b>";
-        $next = $this->getData('next_facture_date');
-        $dateTime = new DateTime($next);
-        $toDay = new DateTime();
-        if ($this->isEnRetard()) {
-            $popover = BimpRender::renderPopoverData('Retard de facturation', 'top');
-            $alert = '<b class="danger bs-popover" ' . $popover . ' >' . BimpRender::renderIcon('warning') . '</b>';
+
+        if (BimpObject::objectLoaded($parent)) {
+            if ($parent->getData('duree_mois') > 0) {
+                if ($this->isEnRetard()) {
+                    $popover = BimpRender::renderPopoverData('Retard de facturation');
+                    $html .= '<b class="danger bs-popover" ' . $popover . ' >' . BimpRender::renderIcon('warning') . '</b>';
+                } else {
+                    $popover = BimpRender::renderPopoverData('Facturation à jour');
+                    $html .= "<b class='success bs-popover' " . $popover . ">" . BimpRender::renderIcon('check') . "</b>";
+                }
+            }
         }
 
-        if ($parent->getData('duree_mois') > 0)
-            return $alert;
-        else
-            return '';
-    }
-
-    public function displayParentInfos($field, $module = null, $bimp_object = null)
-    {
-        $parent = $this->getParentInstance();
-
-        $returned_info = $parent->getData($field);
-
-        if (!is_null($module) && !is_null($bimp_object)) {
-            $instance = BimpCache::getBimpObjectInstance($module, $bimp_object, $returned_info);
-            return $instance->getNomUrl();
-        }
-
-        return $returned_info;
+        return $html;
     }
 
     // Rendus HTML: 
@@ -1060,7 +1128,7 @@ class BContract_echeancier extends BimpObject
             $this->switch_statut();
         }
     }
-    
+
     public function switch_statut()
     {
         $parent = $this->getParentInstance();
@@ -1088,7 +1156,7 @@ class BContract_echeancier extends BimpObject
 
             $contrat = $this->getParentInstance();
             if (BimpObject::objectLoaded($contrat)) {
-                $contrat->addObjectLog('Facturation stoppée');
+                $contrat->addLog('Facturation stoppée');
             }
         }
 
@@ -1194,130 +1262,141 @@ class BContract_echeancier extends BimpObject
 
     public function actionCreateFacture($data, &$success = '')
     {
-        $errors = $warnings = [];
+        $errors = array();
+        $warnings = array();
 
-        if ($this->isDejaFactured($data['date_start'], $data['date_end'])) {
-            return array('errors' => array("Contrat déjà facturé pour cette période, merci de rafraîchir la page pour voir cette facture dans l'échéancier"));
-        }
+        if ($this->isPeriodInvoiced($data['date_start'], $data['date_end'])) {
+            $errors[] = 'Contrat déjà facturé pour cette période, merci de rafraîchir la page pour voir cette facture dans l\'échéancier';
+        } else {
+            $contrat = $this->getParentInstance();
 
-        $contrat = $this->getParentInstance();
-
-        $linked_propal = $this->db->getValue('element_element', 'fk_source', 'targettype = "contrat" and fk_target = ' . $contrat->id);
-
-        $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $linked_propal);
-        $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE' : 'CTC';
-        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
-        $facture->set('fk_soc', ($contrat->getData('fk_soc_facturation')) ? $contrat->getData('fk_soc_facturation') : $contrat->getData('fk_soc'));
-
-        $bill_label = (isset($data['label']) ? $data['label'] . ' ' : '') . "Facture " . $contrat->displayPeriode();
-        $bill_label .= " du contrat N°" . $contrat->getData('ref');
-        $bill_label .= ' - ' . $contrat->getData('label');
-        $facture->set('libelle', $bill_label);
-        $facture->set('type', 0);
-//        $facture->set('fk_account', 1);
-
-        if (!$contrat->getData('entrepot') && $contrat->useEntrepot()) {
-            return array('errors' => array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt"));
-        }
-        if ($contrat->useEntrepot())
-            $facture->set('entrepot', $contrat->getData('entrepot'));
-        $facture->set('fk_cond_reglement', ($contrat->getData('condregl')) ? $contrat->getData('condregl') : 2);
-        $facture->set('fk_mode_reglement', ($contrat->getData('moderegl')) ? $contrat->getData('moderegl') : 2);
-        $facture->set('datef', date('Y-m-d H:i:s'));
-        $facture->set('ef_type', $ef_type);
-        $facture->set('model_pdf', 'bimpfact');
-        $facture->set('ref_client', $contrat->getData('ref_customer'));
-        $facture->set('expertise', $contrat->getData('expertise'));
-
-        if ($facture->field_exists('rib_client') && $this->field_exists('rib_client')) {
-            $facture->set('rib_client', (int) $this->getData('rib_client'));
-        }
-
-        $errors = $facture->create($warnings, true);
-        $facture->copyContactsFromOrigin($contrat);
-
-        $lines = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine');
-        $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
-        foreach ($lines->getList(['fk_contrat' => $contrat->id, "renouvellement" => $contrat->getData('current_renouvellement')]) as $idLine => $infos) {
-            $desc .= $infos['description'] . "<br /><br />";
-        }
-        $facture_ok = false;
-        if (!count($errors)) {
-
-            $dateStart = new DateTime($data['date_start']);
-            $dateEnd = new DateTime($data['date_end']);
-
-            $add_desc = "";
-            $contrat->actionUpdateSyntec();
-            // Vérification si le contrat est un renouvellement
-            if ($contrat->getData('current_renouvellement') > 0) {
-                $current_syntec = $contrat->getCurrentSyntecFromSyntecFr();
-                // Vérification de si il y à un indice syntec à la signature
-                if ($contrat->getData('syntec') > 0) {
-
-                    $add_desc .= "<br />";
-                    $add_desc .= "<b><u>Calcul de l’indice Syntec</u></b><br />";
-                    $add_desc .= "Revalorisation annuelle à la date d’effet du contrat<br />";
-                    $add_desc .= "Valeur du dernier indice connu à ce jour: <b>$current_syntec </b><br />";
-                    $add_desc .= "Valeur de l’indice d’origine: <b>" . $contrat->getData('syntec') . "</b><br />";
-                    // Prix révisé : (xxx,xx / xxx,xx) X Prix de base
-                    $new_price = ($current_syntec / $contrat->getData('syntec') * $contrat->getTotalBeforeRenouvellement());
-                    $surreter_syntec = ($current_syntec / $contrat->getData('syntec'));
-                    $add_desc .= "Prix révisé = (Prix de base " . $contrat->getTotalBeforeRenouvellement() . "€ ) X ($current_syntec / " . $contrat->getData('syntec') . ") = " . $contrat->getTotalBeforeRenouvellement() . " X " . round($surreter_syntec, 6) . " = " . round($new_price, 2) . "€";
+            if (!BimpObject::objectLoaded($contrat)) {
+                $errors[] = 'Contrat lié absent';
+            } else {
+                if (!(int) $contrat->getData('entrepot') && $contrat->useEntrepot()) {
+                    $errors[] = "La facture ne peut pas être créée car le contrat n'a pas d'entrepôt";
                 }
             }
+        }
 
-            $description_total = $desc . $add_desc;
+        if (!count($errors)) {
+            $linked_propal = $this->db->getValue('element_element', 'fk_source', 'targettype = "contrat" and fk_target = ' . $contrat->id);
 
-            addElementElement("contrat", "facture", $contrat->id, $facture->id);
+            $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $linked_propal);
+            $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE' : 'CTC';
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+            $facture->set('fk_soc', ($contrat->getData('fk_soc_facturation')) ? $contrat->getData('fk_soc_facturation') : $contrat->getData('fk_soc'));
 
-            $new_first_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
-            $errors = BimpTools::merge_array($errors, $new_first_line->validateArray(array(
-                                'type'   => ObjectLine::LINE_FREE,
-                                'id_obj' => (int) $facture->id
-            )));
+            $bill_label = (isset($data['label']) ? $data['label'] . ' ' : '') . "Facture " . $contrat->displayPeriode();
+            $bill_label .= " du contrat N°" . $contrat->getData('ref');
+            $bill_label .= ' - ' . $contrat->getData('label');
 
-            if (!isset($data['labelLn'])) {
-                $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
-            } else {
-                $new_first_line->desc = $data['labelLn'];
+            $facture->set('libelle', $bill_label);
+            $facture->set('type', 0);
+
+            if ($contrat->useEntrepot()) {
+                $facture->set('entrepot', $contrat->getData('entrepot'));
             }
 
-            $new_first_line->date_from = $data['date_start'];
-            $new_first_line->date_to = $data['date_end'];
-            $new_first_line->pu_ht = (double) $data['total_ht'];
-            $new_first_line->tva_tx = 20;
-            $new_first_line->pa_ht = $data['pa'];
+            $facture->set('fk_cond_reglement', ($contrat->getData('condregl')) ? $contrat->getData('condregl') : 2);
+            $facture->set('fk_mode_reglement', ($contrat->getData('moderegl')) ? $contrat->getData('moderegl') : 2);
+            $facture->set('datef', date('Y-m-d H:i:s'));
+            $facture->set('ef_type', $ef_type);
+            $facture->set('model_pdf', 'bimpfact');
+            $facture->set('ref_client', $contrat->getData('ref_customer'));
+            $facture->set('expertise', $contrat->getData('expertise'));
 
-            $errors = BimpTools::merge_array($errors, $new_first_line->create($warnings, true));
-            $new_first_line->date_from = $data['date_start'];
-            $new_first_line->update($warnings);
+            if ($facture->field_exists('rib_client') && $contrat->field_exists('rib_client')) {
+                $facture->set('rib_client', (int) $contrat->getData('rib_client'));
+            }
 
+            $errors = $facture->create($warnings, true);
+            $facture->copyContactsFromOrigin($contrat);
+
+            $lines = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine');
+            $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
+            foreach ($lines->getList(['fk_contrat' => $contrat->id, "renouvellement" => $contrat->getData('current_renouvellement')]) as $idLine => $infos) {
+                $desc .= $infos['description'] . "<br /><br />";
+            }
+
+            $facture_ok = false;
             if (!count($errors)) {
 
-                $new_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
-                $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
-                                    'type'   => ObjectLine::LINE_TEXT,
-                                    'id_obj' => (int) $facture->id,
-                )));
+                $dateStart = new DateTime($data['date_start']);
+                $dateEnd = new DateTime($data['date_end']);
 
-                $new_line->desc = $description_total;
-                $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));
+                $add_desc = "";
+                $contrat->actionUpdateSyntec();
+                // Vérification si le contrat est un renouvellement
+                if ($contrat->getData('current_renouvellement') > 0) {
+                    $current_syntec = $contrat->getCurrentSyntecFromSyntecFr();
+                    // Vérification de si il y à un indice syntec à la signature
+                    if ($contrat->getData('syntec') > 0) {
 
-                $success = 'Facture créer avec succès';
-                $facture_ok = true;
-
-                $this->switch_statut();
-
-                if ($contrat->reste_periode() == 0) {
-                    $this->updateField('next_facture_date', null);
-                } else {
-                    $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+                        $add_desc .= "<br />";
+                        $add_desc .= "<b><u>Calcul de l’indice Syntec</u></b><br />";
+                        $add_desc .= "Revalorisation annuelle à la date d’effet du contrat<br />";
+                        $add_desc .= "Valeur du dernier indice connu à ce jour: <b>$current_syntec </b><br />";
+                        $add_desc .= "Valeur de l’indice d’origine: <b>" . $contrat->getData('syntec') . "</b><br />";
+                        // Prix révisé : (xxx,xx / xxx,xx) X Prix de base
+                        $new_price = ($current_syntec / $contrat->getData('syntec') * $contrat->getTotalBeforeRenouvellement());
+                        $surreter_syntec = ($current_syntec / $contrat->getData('syntec'));
+                        $add_desc .= "Prix révisé = (Prix de base " . $contrat->getTotalBeforeRenouvellement() . "€ ) X ($current_syntec / " . $contrat->getData('syntec') . ") = " . $contrat->getTotalBeforeRenouvellement() . " X " . round($surreter_syntec, 6) . " = " . round($new_price, 2) . "€";
+                    }
                 }
 
-                $contrat->renderEcheancier();
-            } else {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object));
+                $description_total = $desc . $add_desc;
+
+                addElementElement("contrat", "facture", $contrat->id, $facture->id);
+
+                $new_first_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
+                $errors = BimpTools::merge_array($errors, $new_first_line->validateArray(array(
+                                    'type'   => ObjectLine::LINE_FREE,
+                                    'id_obj' => (int) $facture->id
+                )));
+
+                if (!isset($data['labelLn'])) {
+                    $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
+                } else {
+                    $new_first_line->desc = $data['labelLn'];
+                }
+
+                $new_first_line->date_from = $data['date_start'];
+                $new_first_line->date_to = $data['date_end'];
+                $new_first_line->pu_ht = (double) $data['total_ht'];
+                $new_first_line->tva_tx = 20;
+                $new_first_line->pa_ht = $data['pa'];
+
+                $errors = BimpTools::merge_array($errors, $new_first_line->create($warnings, true));
+                $new_first_line->date_from = $data['date_start'];
+                $new_first_line->update($warnings);
+
+                if (!count($errors)) {
+
+                    $new_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
+                    $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
+                                        'type'   => ObjectLine::LINE_TEXT,
+                                        'id_obj' => (int) $facture->id,
+                    )));
+
+                    $new_line->desc = $description_total;
+                    $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));
+
+                    $success = 'Facture créer avec succès';
+                    $facture_ok = true;
+
+                    $this->switch_statut();
+
+                    if ($contrat->reste_periode() == 0) {
+                        $this->updateField('next_facture_date', null);
+                    } else {
+                        $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+                    }
+
+//                $contrat->renderEcheancier(); ??? 
+                } else {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object));
+                }
             }
         }
 
@@ -1365,7 +1444,6 @@ class BContract_echeancier extends BimpObject
 
     public function actionDeleteFacture($data, &$success)
     {
-
         global $user;
         $errors = $warnings = array();
         $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture']);
@@ -1378,7 +1456,6 @@ class BContract_echeancier extends BimpObject
             $success = "Facture " . $instance->getData('ref') . ' supprimée avec succès';
         } else {
             $errors[] = "Facture " . $instance->getData('ref') . ' n\'à pas été supprimée';
-            ;
         }
 
         return Array(
@@ -1396,7 +1473,6 @@ class BContract_echeancier extends BimpObject
         $warnings = [];
         $success = "";
         if (BimpTools::getValue('next_facture_date')) {
-
             $success = "Création de la facture avec succès";
             $parent = $this->getParentInstance();
 
@@ -1426,7 +1502,7 @@ class BContract_echeancier extends BimpObject
             $new_next_date = new DateTime(BimpTools::getValue('fin_periode'));
             $new_next_date->add(new dateInterval('P1D'));
             $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
-            $parent->renderEcheancier();
+//            $parent->renderEcheancier(); ??? 
         } else {
             return parent::update($warnings, $force_update);
         }
@@ -1437,5 +1513,4 @@ class BContract_echeancier extends BimpObject
             'errors'   => $errors
         ];
     }
-
 }

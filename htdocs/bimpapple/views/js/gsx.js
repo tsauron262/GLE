@@ -104,7 +104,7 @@ function gsx_open_login_modal($button, success_callback) {
     }
 
     bimp_msg('Veuillez vous authentifier sur la plateforme GSX', 'warning', null, true);
-    
+
     setObjectAction($button, {
         module: 'bimpsupport',
         object_name: 'BS_SAV'
@@ -397,9 +397,9 @@ function gsx_saveAppleParts($button, id_issue, modal_idx) {
         $inputs.each(function () {
             var $row = $(this).findParentByClass('partRow');
             var exchange_price = $row.data('exchange_price');
-            if(exchange_price == 0 && $row.data('stock_price') == 0 && ($row.data('num').indexOf('661') == 0 || $row.data('num').indexOf('F661') == 0 || $row.data('num').indexOf('ZM661') == 0))
-                exchange_price = window.prompt('Pas de prix pour le '+$row.data('num') + ' : ' + $row.data('name') + ' merci d\'indiquer le prix', 0);
-            if(exchange_price == null)
+            if (exchange_price == 0 && $row.data('stock_price') == 0 && ($row.data('num').indexOf('661') == 0 || $row.data('num').indexOf('F661') == 0 || $row.data('num').indexOf('ZM661') == 0))
+                exchange_price = window.prompt('Pas de prix pour le ' + $row.data('num') + ' : ' + $row.data('name') + ' merci d\'indiquer le prix', 0);
+            if (exchange_price == null)
                 return;
             if ($.isOk($row)) {
                 parts.push({
@@ -838,7 +838,7 @@ function gsx_addAppleShipmentSelectedParts($button, id_shipment) {
     });
 }
 
-function gsx_LoadRepairConsignedStockForm($button, id_sav, serial) {
+function gsx_LoadRepairPartStockForm($button, id_sav, serial) {
     if ($.isOk($button) && $button.hasClass('disabled')) {
         return;
     }
@@ -876,14 +876,44 @@ function gsx_LoadRepairConsignedStockForm($button, id_sav, serial) {
             bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
             bimpModal.addButton('Valider<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
             bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
+                var $btn = $(this);
                 var parts = {};
+                var check = true;
 
+                // Stocks internes: 
+                $form.find('input.from_internal_stock_input').each(function () {
+                    if (parseInt($(this).val())) {
+                        var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
+
+                        if (id_part && !isNaN(id_part)) {
+                            parts[id_part] = {'stock': 'internal'};
+                        }
+                    }
+                });
+
+                $form.find('select.from_internal_stock_serial').each(function () {
+                    var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
+
+                    if (id_part && !isNaN(id_part)) {
+                        var serial = $(this).val();
+
+                        if (serial && serial !== 'none') {
+                            parts[id_part] = {'stock': 'internal', 'serial': serial};
+                        } else {
+                            var part_number = $(this).findParentByClass('part_row').data('part_number');
+                            bimp_msg('Veuillez sélectionner un n° de série pour le composant "' + part_number + '"', 'warning');
+                            check = false;
+                        }
+                    }
+                });
+
+                // Stocks consignés: 
                 $form.find('input.from_consigned_stock_check').each(function () {
                     if (parseInt($(this).val())) {
                         var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
 
                         if (id_part && !isNaN(id_part)) {
-                            parts[id_part] = 1;
+                            parts[id_part] = {'stock': 'consigned'};
                         }
                     }
                 });
@@ -895,16 +925,18 @@ function gsx_LoadRepairConsignedStockForm($button, id_sav, serial) {
                         var serial = $(this).val();
 
                         if (serial && serial !== 'none') {
-                            parts[id_part] = {'serial': serial};
+                            parts[id_part] = {'stock': 'consigned', 'serial': serial};
                         }
                     }
                 });
 
-                data.parts_cs_data = parts;
+                if (check) {
+                    data.parts_stock_data = parts;
 
-                setTimeout(function () {
-                    gsx_loadRequestModalForm($button, 'Création d\'une nouvelle réparation', 'repairCreate', data, {});
-                }, 500);
+                    setTimeout(function () {
+                        gsx_loadRequestModalForm($btn, 'Création d\'une nouvelle réparation', 'repairCreate', data, {});
+                    }, 500);
+                }
             });
         }
     });

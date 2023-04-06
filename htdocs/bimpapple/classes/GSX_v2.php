@@ -35,8 +35,6 @@ class GSX_v2 extends GSX_Const
             case 'test':
                 $this->appleId = self::$test_ids['apple_id'];
                 $this->applePword = self::$test_ids['apple_pword'];
-//                $this->shipTo = BimpTools::addZeros(self::$test_ids['ship_to'], self::$numbersNumChars);
-//                $this->soldTo = BimpTools::addZeros(self::$test_ids['sold_to'], self::$numbersNumChars);
                 $this->setShipTo(self::$test_ids['ship_to']);
                 break;
 
@@ -53,13 +51,10 @@ class GSX_v2 extends GSX_Const
                 }
 
                 if ($shipTo) {
-//                    $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
                     $this->setShipTo($shipTo);
                 } elseif (isset($user->array_options['options_apple_shipto']) && (string) $user->array_options['options_apple_shipto']) {
-//                    $this->shipTo = BimpTools::addZeros($user->array_options['options_apple_shipto'], self::$numbersNumChars);
                     $this->setShipTo($user->array_options['options_apple_shipto']);
                 } else {
-//                    $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to'], self::$numbersNumChars);
                     $this->setShipTo(self::$default_ids['ship_to']);
                 }
                 break;

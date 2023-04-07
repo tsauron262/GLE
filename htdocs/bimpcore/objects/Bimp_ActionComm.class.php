@@ -42,7 +42,9 @@ class Bimp_ActionComm extends BimpObject
         $usersPost = BimpTools::getPostFieldValue('users_assigned', array());
 
         $users = $this->getUsersAssigned();
-        if (((count($users) > 0 && $users[0] == $user->id) || (count($usersPost) > 0 && (int) $usersPost[0] == $user->id)) && $user->rights->agenda->myactions->$code)
+        
+        $idUserCreate = $this->getData('fk_user_author');
+        if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersPost) > 0 && (int) $usersPost[0] == $user->id)) && $user->rights->agenda->myactions->$code)
             return 1;
 
 
@@ -52,6 +54,14 @@ class Bimp_ActionComm extends BimpObject
     public function isDeletable($force_delete = false, &$errors = array())
     {
         return $this->getRight('delete');
+    }
+    
+    public function canDelete() {
+        return $this->getRight('delete');
+    }
+    
+    public function canEdit() {
+        return $this->getRight('create');
     }
 
     // Getters array: 
@@ -255,7 +265,7 @@ class Bimp_ActionComm extends BimpObject
     {
         $html = '';
 
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && $this->canDelete()) {
             $html .= '<div style="margin: 10px; text-align: center">';
             $html .= '<span class="btn btn-danger" onclick="' . $this->getJsDeleteOnClick(array(
                         'on_success' => 'reload'
@@ -275,7 +285,7 @@ class Bimp_ActionComm extends BimpObject
 
         $errors = parent::validatePost();
 
-        if (BimpTools::isPostFieldSubmit('users_assigned')) {
+        if (BimpTools::isPostFieldSubmit('users_assigned') && $this->canEdit()) {
             $this->dol_object->userassigned = array();
 
             $users = BimpTools::getPostFieldValue('users_assigned', array());
@@ -295,7 +305,7 @@ class Bimp_ActionComm extends BimpObject
             }
         }
 
-        if (BimpTools::isPostFieldSubmit('contacts_assigned')) {
+        if (BimpTools::isPostFieldSubmit('contacts_assigned') && $this->canEdit()) {
             $contacts = BimpTools::getPostFieldValue('contacts_assigned', array());
 
             $this->dol_object->socpeopleassigned = array();

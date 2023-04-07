@@ -1716,7 +1716,7 @@ class BContract_contrat extends BimpDolObject
                                 $montant += $instance->getData('total_ht');
                             elseif ($field == 'pa')
 //                                $montant += $instance->getData('total_achat_reval_ok');
-                                $montant += $instance->getTotalMargeWithReval(array('"correction_pa"'));
+                                $montant += $instance->getTotalMargeWithReval(array('correction_pa'));
                         }
                     } else {
                         if (/* $instance->getData('type') == 0 */1) {
@@ -1724,7 +1724,7 @@ class BContract_contrat extends BimpDolObject
                                 $montant += $instance->getData('total_ht');
                             elseif ($field == 'pa')
 //                                $montant += $instance->getData('total_achat_reval_ok');
-                                $montant += $instance->getTotalMargeWithReval(array('"correction_pa"'));
+                                $montant += $instance->getTotalMargeWithReval(array('correction_pa'));
                         }
                     }
                 }

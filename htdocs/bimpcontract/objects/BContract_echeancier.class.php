@@ -121,7 +121,7 @@ class BContract_echeancier extends BimpObject
             }
 
             $where = 'fk_facture IN (' . implode(',', $facs_ids) . ')';
-            $where .= 'date_start <= \'' . $date_end . '\'';
+            $where .= ' AND date_start <= \'' . $date_end . '\'';
             $where .= ' AND date_end >= \'' . $date_start . '\'';
 
             if ((int) $this->db->getCount('facturedet', $where, 'rowid') > 0) {
@@ -1264,6 +1264,7 @@ class BContract_echeancier extends BimpObject
     {
         $errors = array();
         $warnings = array();
+        $id_facture = 0;
 
         if ($this->isPeriodInvoiced($data['date_start'], $data['date_end'])) {
             $errors[] = 'Contrat déjà facturé pour cette période, merci de rafraîchir la page pour voir cette facture dans l\'échéancier';
@@ -1311,99 +1312,102 @@ class BContract_echeancier extends BimpObject
             }
 
             $errors = $facture->create($warnings, true);
-            $facture->copyContactsFromOrigin($contrat);
 
-            $lines = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine');
-            $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
-            foreach ($lines->getList(['fk_contrat' => $contrat->id, "renouvellement" => $contrat->getData('current_renouvellement')]) as $idLine => $infos) {
-                $desc .= $infos['description'] . "<br /><br />";
-            }
-
-            $facture_ok = false;
             if (!count($errors)) {
+                $id_facture = $facture->id;
+                $facture->copyContactsFromOrigin($contrat);
 
-                $dateStart = new DateTime($data['date_start']);
-                $dateEnd = new DateTime($data['date_end']);
-
-                $add_desc = "";
-                $contrat->actionUpdateSyntec();
-                // Vérification si le contrat est un renouvellement
-                if ($contrat->getData('current_renouvellement') > 0) {
-                    $current_syntec = $contrat->getCurrentSyntecFromSyntecFr();
-                    // Vérification de si il y à un indice syntec à la signature
-                    if ($contrat->getData('syntec') > 0) {
-
-                        $add_desc .= "<br />";
-                        $add_desc .= "<b><u>Calcul de l’indice Syntec</u></b><br />";
-                        $add_desc .= "Revalorisation annuelle à la date d’effet du contrat<br />";
-                        $add_desc .= "Valeur du dernier indice connu à ce jour: <b>$current_syntec </b><br />";
-                        $add_desc .= "Valeur de l’indice d’origine: <b>" . $contrat->getData('syntec') . "</b><br />";
-                        // Prix révisé : (xxx,xx / xxx,xx) X Prix de base
-                        $new_price = ($current_syntec / $contrat->getData('syntec') * $contrat->getTotalBeforeRenouvellement());
-                        $surreter_syntec = ($current_syntec / $contrat->getData('syntec'));
-                        $add_desc .= "Prix révisé = (Prix de base " . $contrat->getTotalBeforeRenouvellement() . "€ ) X ($current_syntec / " . $contrat->getData('syntec') . ") = " . $contrat->getTotalBeforeRenouvellement() . " X " . round($surreter_syntec, 6) . " = " . round($new_price, 2) . "€";
-                    }
+                $lines = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine');
+                $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
+                foreach ($lines->getList(['fk_contrat' => $contrat->id, "renouvellement" => $contrat->getData('current_renouvellement')]) as $idLine => $infos) {
+                    $desc .= $infos['description'] . "<br /><br />";
                 }
 
-                $description_total = $desc . $add_desc;
-
-                addElementElement("contrat", "facture", $contrat->id, $facture->id);
-
-                $new_first_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
-                $errors = BimpTools::merge_array($errors, $new_first_line->validateArray(array(
-                                    'type'   => ObjectLine::LINE_FREE,
-                                    'id_obj' => (int) $facture->id
-                )));
-
-                if (!isset($data['labelLn'])) {
-                    $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
-                } else {
-                    $new_first_line->desc = $data['labelLn'];
-                }
-
-                $new_first_line->date_from = $data['date_start'];
-                $new_first_line->date_to = $data['date_end'];
-                $new_first_line->pu_ht = (double) $data['total_ht'];
-                $new_first_line->tva_tx = 20;
-                $new_first_line->pa_ht = $data['pa'];
-
-                $errors = BimpTools::merge_array($errors, $new_first_line->create($warnings, true));
-                $new_first_line->date_from = $data['date_start'];
-                $new_first_line->update($warnings);
-
+                $facture_ok = false;
                 if (!count($errors)) {
+                    $dateStart = new DateTime($data['date_start']);
+                    $dateEnd = new DateTime($data['date_end']);
 
-                    $new_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
-                    $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
-                                        'type'   => ObjectLine::LINE_TEXT,
-                                        'id_obj' => (int) $facture->id,
+                    $add_desc = "";
+                    $contrat->actionUpdateSyntec();
+                    // Vérification si le contrat est un renouvellement
+                    if ($contrat->getData('current_renouvellement') > 0) {
+                        $current_syntec = $contrat->getCurrentSyntecFromSyntecFr();
+                        // Vérification de si il y à un indice syntec à la signature
+                        if ($contrat->getData('syntec') > 0) {
+
+                            $add_desc .= "<br />";
+                            $add_desc .= "<b><u>Calcul de l’indice Syntec</u></b><br />";
+                            $add_desc .= "Revalorisation annuelle à la date d’effet du contrat<br />";
+                            $add_desc .= "Valeur du dernier indice connu à ce jour: <b>$current_syntec </b><br />";
+                            $add_desc .= "Valeur de l’indice d’origine: <b>" . $contrat->getData('syntec') . "</b><br />";
+                            // Prix révisé : (xxx,xx / xxx,xx) X Prix de base
+                            $new_price = ($current_syntec / $contrat->getData('syntec') * $contrat->getTotalBeforeRenouvellement());
+                            $surreter_syntec = ($current_syntec / $contrat->getData('syntec'));
+                            $add_desc .= "Prix révisé = (Prix de base " . $contrat->getTotalBeforeRenouvellement() . "€ ) X ($current_syntec / " . $contrat->getData('syntec') . ") = " . $contrat->getTotalBeforeRenouvellement() . " X " . round($surreter_syntec, 6) . " = " . round($new_price, 2) . "€";
+                        }
+                    }
+
+                    $description_total = $desc . $add_desc;
+
+                    addElementElement("contrat", "facture", $contrat->id, $facture->id);
+
+                    $new_first_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
+                    $errors = BimpTools::merge_array($errors, $new_first_line->validateArray(array(
+                                        'type'   => ObjectLine::LINE_FREE,
+                                        'id_obj' => (int) $facture->id
                     )));
 
-                    $new_line->desc = $description_total;
-                    $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));
-
-                    $success = 'Facture créer avec succès';
-                    $facture_ok = true;
-
-                    $this->switch_statut();
-
-                    if ($contrat->reste_periode() == 0) {
-                        $this->updateField('next_facture_date', null);
+                    if (!isset($data['labelLn'])) {
+                        $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
                     } else {
-                        $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+                        $new_first_line->desc = $data['labelLn'];
                     }
 
+                    $new_first_line->date_from = $data['date_start'];
+                    $new_first_line->date_to = $data['date_end'];
+                    $new_first_line->pu_ht = (double) $data['total_ht'];
+                    $new_first_line->tva_tx = 20;
+                    $new_first_line->pa_ht = $data['pa'];
+
+                    $errors = BimpTools::merge_array($errors, $new_first_line->create($warnings, true));
+                    $new_first_line->date_from = $data['date_start'];
+                    $new_first_line->update($warnings);
+
+                    if (!count($errors)) {
+                        $new_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
+                        $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
+                                            'type'   => ObjectLine::LINE_TEXT,
+                                            'id_obj' => (int) $facture->id,
+                        )));
+
+                        $new_line->desc = $description_total;
+                        $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));
+
+                        $success = 'Facture créée avec succès';
+                        $facture_ok = true;
+
+                        $this->switch_statut();
+
+                        if ($contrat->reste_periode() == 0) {
+                            $this->updateField('next_facture_date', null);
+                        } else {
+                            $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+                        }
+
 //                $contrat->renderEcheancier(); ??? 
-                } else {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object));
+                    } else {
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object));
+                    }
                 }
             }
         }
 
         return Array(
-            'success'  => $success,
-            'warnings' => $warnings,
-            'errors'   => $errors,
+            'success'    => $success,
+            'warnings'   => $warnings,
+            'errors'     => $errors,
+            'id_facture' => $id_facture
         );
     }
 

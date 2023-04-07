@@ -1698,7 +1698,7 @@ class BimpObject extends BimpCache
         return $value;
     }
     
-    public function getGlobalConf($name, $default, $module){
+    public function getGlobalConf($name, $default = '', $module = ''){
         return BimpCore::getConf($name, $default, $module);
     }
 

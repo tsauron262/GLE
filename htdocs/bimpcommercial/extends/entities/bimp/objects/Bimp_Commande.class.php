@@ -171,7 +171,7 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
         if (!is_null($list)) {
             foreach ($list as $item) {
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id_equipment']);
-                $equipment->updateFied('date_fin_spare', $data['dateF']);
+                $equipment->updateField('date_fin_spare', $data['dateF']);
                 $success .= '<br/>'.$equipment->getData('serial');
             }
         }

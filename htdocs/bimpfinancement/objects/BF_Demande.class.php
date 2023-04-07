@@ -4206,7 +4206,7 @@ class BF_Demande extends BimpObject
             $source = $this->getSource();
 
             if (!BimpObject::objectLoaded($source)) {
-                $errors[] = 'Aucune source principale';
+//                $errors[] = 'Aucune source principale';
             } else {
                 $src_errors = $source->setDocFinStatus($doc_type, BimpCommDemandeFin::DOC_STATUS_ACCEPTED);
 

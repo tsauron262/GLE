@@ -4339,7 +4339,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $init_entrepot = (int) $this->getInitData('entrepot');
 //        $this->setPaiementComptant(); // Eviter de créer des fonctions avec juste 1 ligne, les classes sont déjà bien assez surchargées en fonctions. 
         $this->set('paiement_comptant', $this->isPaiementComptant());
+        
+        $this->dol_object->delivery_date = $this->getData('date_livraison');
         $errors = parent::update($warnings, $force_update);
+        
 
         if (!count($errors)) {
             if ($init_entrepot !== (int) $this->getData('entrepot')) {

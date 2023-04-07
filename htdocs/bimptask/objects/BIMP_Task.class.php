@@ -278,8 +278,8 @@ class BIMP_Task extends BimpObject
                         )
                     )
             ));
-        } else
-            $filtre['id'] = array('operator' => '>', 'value' => '0'); //toujours vraie
+        } /*else
+            $filtre['id'] = array('operator' => '>', 'value' => '0'); //toujours vraie   !!! pourquoi ? fait bugger*/
         return $filtre;
     }
 

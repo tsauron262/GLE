@@ -17,3 +17,13 @@ fields:
         type: id_object
         object: demande_fin
         default_value: 0
+        
+forms:
+    majDateFinSpare:
+        rows:
+            dateF:
+                label: Date de fin de SPARE
+                custom: 1
+                input_name: dateF
+                input:
+                    type: date

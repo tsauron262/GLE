@@ -69,11 +69,24 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
     }
 
     // Getters params: 
+    
+    public function getIdEntrepotSpare(){
+        $cli = $this->getChildObject('client');
+        return $cli->getData('entrepot_spare');
+    }
 
     public function getActionsButtons()
     {
         $buttons = parent::getActionsButtons();
         $df_buttons = parent::getDemandeFinButtons();
+        
+        if($this->getIdEntrepotSpare()){
+            $buttons[] = array(
+                'label'   => 'Maj date fin spare',
+                'icon'    => 'fas_link',
+                'onclick' => $this->getJsActionOnclick('majDateFinSpare', array(), array('form_name'=>'majDateFinSpare'))
+            );
+        }
 
         if (!empty($df_buttons)) {
             return array(
@@ -132,5 +145,36 @@ class Bimp_Commande_ExtEntity extends Bimp_Commande
             'warnings'         => $warnings,
             'success_callback' => $sc
         );
+    }
+    
+    public function actionMajDateFinSpare($data, &$success){
+//        $lines = $this->getChildrenObjects('lines', array(
+//            'type' => ObjectLine::LINE_PRODUCT
+//        ));
+//        foreach ($lines as $line) {
+//            $product = $line->getProduct();
+//            $full_qty = (float) $line->getFullQty();
+//            if (BimpObject::objectLoaded($product)) {
+//                if ($product->isSerialisable()) {
+        
+        $success = 'Nouvelle date fin SPARE '.$data['dateF'];
+        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+        $list = $reservation->getList(array(
+            'id_commande_client'      => (int) $this->id,
+//            'status'                  => 200,
+            'id_equipment'            => array(
+                'operator' => '>',
+                'value'    => 0
+            )
+                ), null, null, 'id', 'asc', 'array', array('id', 'id_equipment'));
+        
+        if (!is_null($list)) {
+            foreach ($list as $item) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id_equipment']);
+                $equipment->updateFied('date_fin_spare', $data['dateF']);
+                $success .= '<br/>'.$equipment->getData('serial');
+            }
+        }
+        return array('errors'=>array(), 'warnings'=> array());
     }
 }

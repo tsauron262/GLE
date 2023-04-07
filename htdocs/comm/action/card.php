@@ -2003,7 +2003,7 @@ if ($id > 0) {
 			//$morehtmlref.='<br>'.$langs->trans('Project') . ' ';
 			$morehtmlref .= $langs->trans('Project').' ';
 			if ($user->rights->agenda->allactions->create ||
-				(($object->authorid == $user->id || $object->userownerid == $user->id) && $user->rights->agenda->myactions->create)) {
+				(($object->authorid == $user->id /*|| $object->userownerid == $user->id*/) && $user->rights->agenda->myactions->create)) {
 				if ($action != 'classify') {
 					$morehtmlref .= '<a class="editfielda" href="'.$_SERVER['PHP_SELF'].'?action=classify&token='.newToken().'&id='.$object->id.'">'.img_edit($langs->transnoentitiesnoconv('SetProject')).'</a> : ';
 				}
@@ -2292,14 +2292,14 @@ if ($id > 0) {
 	if (empty($reshook)) {
 		if ($action != 'edit') {
 			if ($user->rights->agenda->allactions->create ||
-			   (($object->authorid == $user->id || $object->userownerid == $user->id) && $user->rights->agenda->myactions->create)) {
+			   (($object->authorid == $user->id /*|| $object->userownerid == $user->id*/) && $user->rights->agenda->myactions->create)) {
 				print '<div class="inline-block divButAction"><a class="butAction" href="card.php?action=edit&token='.newToken().'&id='.$object->id.'">'.$langs->trans("Modify").'</a></div>';
 			} else {
 				print '<div class="inline-block divButAction"><a class="butActionRefused classfortooltip" href="#" title="'.$langs->trans("NotAllowed").'">'.$langs->trans("Modify").'</a></div>';
 			}
 
 			if ($user->rights->agenda->allactions->create ||
-			   (($object->authorid == $user->id || $object->userownerid == $user->id) && $user->rights->agenda->myactions->create)) {
+			   (($object->authorid == $user->id /*|| $object->userownerid == $user->id*/) && $user->rights->agenda->myactions->create)) {
 				print '<div class="inline-block divButAction"><a class="butAction" href="card.php?action=clone&object='.$object->element.'&id='.$object->id.'">'.$langs->trans("ToClone").'</a></div>';
 			} else {
 				print '<div class="inline-block divButAction"><a class="butActionRefused classfortooltip" href="#" title="'.$langs->trans("NotAllowed").'">'.$langs->trans("ToClone").'</a></div>';
@@ -2307,7 +2307,7 @@ if ($id > 0) {
 		}
 
 			if ($user->rights->agenda->allactions->delete ||
-			   (($object->authorid == $user->id || $object->userownerid == $user->id) && $user->rights->agenda->myactions->delete)) {
+			   (($object->authorid == $user->id/* || $object->userownerid == $user->id*/) && $user->rights->agenda->myactions->delete)) {
 				print '<div class="inline-block divButAction"><a class="butActionDelete" href="card.php?action=delete&token='.newToken().'&id='.$object->id.'">'.$langs->trans("Delete").'</a></div>';
 			} else {
 				print '<div class="inline-block divButAction"><a class="butActionRefused classfortooltip" href="#" title="'.$langs->trans("NotAllowed").'">'.$langs->trans("Delete").'</a></div>';

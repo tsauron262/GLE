@@ -55,7 +55,13 @@ class Bimp_Facture extends BimpComm
         4  => array('label' => 'Exporté via L\'interface Chorus Pro', 'icon' => 'fas_check', 'classes' => array('success')),
         5  => array('label' => 'Envoyé par e-mail sans export Chorus', 'icon' => 'fas_check', 'classes' => array('success'))
     );
-
+    public static $motif_demande_avoir = array(
+        1 => array('label' => 'Motif 1'),
+        2 => array('label' => 'Motif 2'),
+        3 => array('label' => 'Motif 3'),
+        4 => array('label' => 'Autre')
+    );
+    
     // Gestion des droits: 
 
     public function canCreate()
@@ -171,6 +177,9 @@ class Bimp_Facture extends BimpComm
 
             case 'generatePdfAttestLithium':
                 return $user->admin or $user->id == 7;
+                
+            case 'demanderValidationAvoir':
+                return 1;
         }
 
         return parent::canSetAction($action);
@@ -833,6 +842,9 @@ class Bimp_Facture extends BimpComm
 
             case 'generatePdfAttestLithium':
                 return $status == 1 or $status == 2;
+                
+            case 'demanderValidationAvoir':
+                return 1;
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -1374,6 +1386,17 @@ class Bimp_Facture extends BimpComm
                 'onclick' => $this->getJsActionOnclick('checkMargin')
             );
         }
+        
+        // Demander une validation d'avoir
+//        if ($this->isActionAllowed('demanderValidationAvoir') && $this->canSetAction('demanderValidationAvoir')) {
+//            $buttons[] = array(
+//                'label'   => 'Demander une validation davoir',
+//                'icon'    => 'fas_comment',
+//                'onclick' => $this->getJsActionOnclick('demanderValidationAvoir', array(), array(
+//                    'form_name'      => 'demanderValidationAvoir'
+//                ))
+//            );
+//        }
 
         return $buttons;
     }
@@ -6029,6 +6052,28 @@ class Bimp_Facture extends BimpComm
         $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
         $success_callback = 'window.open(\'' . $url . '\');';
 
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+    
+    public function actionDemanderValidationAvoir($data, &$success = '')
+    {
+        $errors = $warnings = array();
+        
+        $motif = BimpTools::getPostFieldValue('motif');
+        $avoir_total = BimpTools::getPostFieldValue('avoir_total');
+        $montant = BimpTools::getPostFieldValue('montant');
+        $comment = BimpTools::getPostFieldValue('comment');
+        
+        
+//        $this->generatePDF($data['file_type'], $errors, $warnings);
+//        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
+//        $success_callback = 'window.open(\'' . $url . '\');';
+$success .= "OK";
+$errors[] = print_r($_REQUEST, 1);
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,

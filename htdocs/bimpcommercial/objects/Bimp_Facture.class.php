@@ -5941,14 +5941,23 @@ class Bimp_Facture extends BimpComm
         }
 
         if (!count($errors)) {
+            $files = array();
             $params = '{id_facture: ' . $this->id . ', id_struture: \'' . $id_structure . '\', code_service: \'' . $code_service . '\'});}';
             $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', 0, \'soumettreFacture\', {}, ' . $params . ', 500);';
-        }
-
-        if (!count($errors) && isset($data['files_compl']) && is_array($data['files_compl']) && count($data['files_compl'])) {
+            
+            $files_compl = BimpTools::getArrayValueFromPath($data, 'files_compl', array());
+            if (is_array($files_compl)) {
+                $files = $files_compl;
+            }
+            
+            $join_files = BimpTools::getArrayValueFromPath($data, 'join_files', array());
+            if (is_array($join_files) && count($join_files)) {
+                $files = BimpTools::merge_array($files, $join_files);
+            }
+            
             $api = BimpAPI::getApiInstance('piste');
             $chorus_data = $this->getData('chorus_data');
-            $files = BimpTools::merge_array($data['join_files'], $data['files_compl']);
+            
             foreach ($files as $idF) {
                 $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $idF);
 
@@ -5959,6 +5968,7 @@ class Bimp_Facture extends BimpComm
                 else
                     $errors[] = 'Fichier ' . $name . ' non envoyé vers Chorus';
             }
+            
             $this->set('chorus_data', $chorus_data);
             $errors = BimpTools::merge_array($errors, $this->update($warnings));
         }

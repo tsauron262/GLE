@@ -990,6 +990,13 @@ class BimpCommission extends BimpObject
                                 $desc .= ' ' . $desc2;
                             }
 
+                            $price = $line_data[$cols['total_ht'][0]];
+                            echo 'PRICE : ' . $price . ' - ';
+                            $price = str_replace(' ', '', $price);
+                            echo $price . ' - ';
+                            $price = str_replace(',', '.', $price);
+                            echo $price . '<br/>';
+
                             $price = (float) str_replace(',', '.', str_replace(' ', '', $line_data[$cols['total_ht'][0]])) / $qty;
                             $comm_amount = (float) str_replace(',', '.', str_replace(' ', '', $line_data[$cols['total_comm_amount'][0]])) / $qty;
                             $elements[] = $i . ';' . $id_cf . ';' . $id_prod . ';' . $desc . ';' . $qty . ';' . $price . ';' . $comm_amount;

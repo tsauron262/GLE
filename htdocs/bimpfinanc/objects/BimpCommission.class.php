@@ -836,6 +836,15 @@ class BimpCommission extends BimpObject
             case 'ingram':
                 $fourn_label = 'INGRAM MICRO';
                 $id_fourn = 230496;
+                $cols = array(
+                    'ref_cf'            => array(2, 'Custpo Nbr'),
+                    'ref_prod'          => array(7, 'Ref fournisseur'),
+                    'desc'              => array(8, 'Product Descr1'),
+                    'desc_2'            => array(9, 'Product Descr2'),
+                    'qty'               => array(11, 'Quantité'),
+                    'total_ht'          => array(12, 'CA HT'),
+                    'total_comm_amount' => array(13, 'Montant à verser')
+                );
                 break;
 
             default:
@@ -888,51 +897,129 @@ class BimpCommission extends BimpObject
                     $i++;
                     $line_data = str_getcsv($line, ';');
 
-                    if ($line_data[0] == 'Billing document') {
-                        continue;
+                    switch ($fourn) {
+                        case 'techdata':
+                            $serial = $line_data[$cols['serial'][0]];
+
+                            if (!$serial) {
+                                $line_errors[] = 'Ligne n° ' . $i . ' : numéro de série absent';
+                                continue;
+                            }
+
+                            if (in_array($serial, $serials)) {
+                                $line_errors[] = 'Ligne n° ' . $i . ' : le n° de série "' . $serial . '" est présent en double dans le fichier';
+                                continue;
+                            }
+
+                            $id_eq = (int) $this->db->getValue('be_equipment', 'id', 'serial = \'' . $serial . '\' OR serial = \'S' . $serial . '\'');
+                            $id_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND (serial = \'' . $serial . '\'' . ($id_eq ? ' OR equipments = \'[' . $id_eq . ']\'' : '') . ')');
+                            if ($id_fac) {
+                                if (!isset($facs_refs[$id_fac])) {
+                                    $facs_refs[$id_fac] = $this->db->getValue('facture', 'ref', 'rowid = ' . $id_fac);
+                                }
+                                $line_errors[] = 'Ligne n° ' . $i . ' : une facturation de commissionnement existe déjà pour le numéro de série "' . $serial . '" - Facture ' . $facs_refs[$id_fac];
+                                continue;
+                            }
+
+                            $price = (float) str_replace(',', '.', $line_data[$cols['price_ht'][0]]);
+
+                            if ($price) {
+                                $ref_br = $line_data[$cols['ref_br'][0]];
+
+                                if (!isset($totals_by_br[$ref_br])) {
+                                    $totals_by_br[$ref_br] = 0;
+                                }
+
+                                $totals_by_br[$ref_br] += $price;
+                            }
+
+                            $data = array();
+                            foreach ($cols as $col_data) {
+                                $data[] = $line_data[$col_data[0]];
+                            }
+
+                            $serials[] = $serial;
+                            $elements[] = $i . ';' . implode(';', $data);
+                            break;
+
+                        case 'ingram':
+                            $cols = array(
+                                'ref_cf'            => array(2, 'Custpo Nbr'),
+                                'ref_prod'          => array(7, 'Ref fournisseur'),
+                                'desc'              => array(8, 'Product Descr1'),
+                                'desc_2'            => array(9, 'Product Descr2'),
+                                'qty'               => array(11, 'Quantité'),
+                                'total_ht'          => array(12, 'CA HT'),
+                                'total_comm_amount' => array(13, 'Montant à verser')
+                            );
+
+                            $ref_prod = $line_data[$cols['ref_prod'][0]];
+                            if (!$ref_prod) {
+                                $line_errors[] = 'Ligne n° ' . $i . ' : référence produit absente';
+                                continue;
+                            }
+
+                            $id_prod = (int) $this->db->getValue('product', 'rowid', 'ref = \'APP-' . $ref_prod . '\'');
+                            if (!$id_prod) {
+                                $line_errors[] = 'Ligne n° ' . $i . ' : aucun produit trouvé pour la référence APP-' . $ref_prod;
+                                continue;
+                            }
+
+                            $ref_cf = $line_data[$cols['ref_cf'][0]];
+                            if (!$ref_cf) {
+                                $line_errors[] = 'Ligne n° ' . $i . ' : référence de la commande fournisseur absente';
+                                continue;
+                            }
+
+                            $id_cf = (int) $this->db->getValue('commande_fournisseur', 'rowid', 'ref = \'' . $ref_cf . '\'');
+                            if (!$id_cf) {
+                                $line_errors[] = 'Ligne n° ' . $i . ' : aucune commande fournisseur trouvée pour la référence ' . $ref_cf;
+                                continue;
+                            }
+
+                            $qty = (int) $line_data[$cols['qty'][0]];
+                            if (!$qty) {
+                                $line_errors[] = 'Ligne n° ' . $i . ' : Quantité absente ou nulle';
+                                continue;
+                            }
+
+                            $desc = $line_data[$cols['desc'][0]];
+                            $desc2 = $line_data[$cols['desc_2'][0]];
+
+                            if ($desc2) {
+                                $desc .= ' ' . $desc2;
+                            }
+
+                            $price = (float) str_replace(',', '.', $line_data[$cols['total_ht'][0]]) / $qty;
+                            $comm_amount = (float) str_replace(',', '.', $line_data[$cols['total_ht'][0]]) / $qty;
+                            $elements[] = $i . ';' . $id_cf . ';' . $id_prod . ';' . $desc . ';' . $qty . ';' . $price . ';' . $comm_amount;
+
+//                            $where = 'a.id_obj = ' . $id_cf . ' AND cfl.fk_product = ' . $id_prod;
+//                            $rows = $this->db->getRows('bimp_commande_fourn_line a', $where, null, 'array', array('a.linked_object_name', 'a.linked_id_object'), null, null, array(
+//                                'cfl' => array(
+//                                    'alias' => 'cfl',
+//                                    'table' => 'commande_fournisseurdet',
+//                                    'on'    => 'a.id_line = cfl.rowid'
+//                                )
+//                            ));
+//
+//                            $serials = array();
+//                            if (!empty($rows)) {
+//                                foreach ($rows as $r) {
+//                                    if ($r['linked_object_name'] !== 'commande_line' || !(int) $r['linked_id_object']) {
+//                                        continue;
+//                                    }
+//
+//                                    $id_commande = (int) $this->db->getValue('bimp_commande_line', 'id_obj', 'id = ' . (int) $r['linked_id_object']);
+//                                    if (!$id_commande) {
+//                                        continue;
+//                                    }
+//
+//                                    $line_ac = BimpCache::getBimpObjectInstance('bimpcommerical', 'Bimp_CommandeLine', (int) $r['linked_id_object']);
+//                                }
+//                            }
+                            break;
                     }
-
-                    $serial = $line_data[$cols['serial'][0]];
-
-                    if (!$serial) {
-                        $line_errors[] = 'Ligne n° ' . $i . ' : numéro de série absent';
-                        continue;
-                    }
-
-                    if (in_array($serial, $serials)) {
-                        $line_errors[] = 'Ligne n° ' . $i . ' : le n° de série "' . $serial . '" est présent en double dans le fichier';
-                        continue;
-                    }
-
-                    $id_eq = (int) $this->db->getValue('be_equipment', 'id', 'serial = \'' . $serial . '\' OR serial = \'S' . $serial . '\'');
-                    $id_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND (serial = \'' . $serial . '\'' . ($id_eq ? ' OR equipments = \'[' . $id_eq . ']\'' : '') . ')');
-                    if ($id_fac) {
-                        if (!isset($facs_refs[$id_fac])) {
-                            $facs_refs[$id_fac] = $this->db->getValue('facture', 'ref', 'rowid = ' . $id_fac);
-                        }
-                        $line_errors[] = 'Ligne n° ' . $i . ' : une facturation de commissionnement existe déjà pour le numéro de série "' . $serial . '" - Facture ' . $facs_refs[$id_fac];
-                        continue;
-                    }
-
-                    $price = (float) str_replace(',', '.', $line_data[$cols['price_ht'][0]]);
-
-                    if ($price) {
-                        $ref_br = $line_data[$cols['ref_br'][0]];
-
-                        if (!isset($totals_by_br[$ref_br])) {
-                            $totals_by_br[$ref_br] = 0;
-                        }
-
-                        $totals_by_br[$ref_br] += $price;
-                    }
-
-                    $data = array();
-                    foreach ($cols as $col_data) {
-                        $data[] = $line_data[$col_data[0]];
-                    }
-
-                    $serials[] = $serial;
-                    $elements[] = $i . ';' . implode(';', $data);
                 }
 
                 if (count($line_errors)) {
@@ -940,6 +1027,13 @@ class BimpCommission extends BimpObject
                 } elseif (empty($elements)) {
                     $errors[] = 'Le fichier fourni est vide';
                 }
+
+                echo '<pre>';
+                print_r($errors);
+                echo '</pre>';
+                echo '<pre>';
+                print_r($elements);
+                exit;
 
                 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_fourn);
 
@@ -982,7 +1076,8 @@ class BimpCommission extends BimpObject
                         );
                         $action_data['data'] = array(
                             'id_facture' => $facture->id,
-                            'id_fourn'   => $id_fourn
+                            'id_fourn'   => $id_fourn,
+                            'fourn'      => $fourn
                         );
                     } else {
                         $process->incIgnored();

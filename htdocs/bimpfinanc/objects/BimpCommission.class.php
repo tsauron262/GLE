@@ -983,8 +983,8 @@ class BimpCommission extends BimpObject
                                 continue;
                             }
 
-                            $desc = $line_data[$cols['desc'][0]];
-                            $desc2 = $line_data[$cols['desc_2'][0]];
+                            $desc = trim($line_data[$cols['desc'][0]]);
+                            $desc2 = trim($line_data[$cols['desc_2'][0]]);
 
                             if ($desc2) {
                                 $desc .= ' ' . $desc2;

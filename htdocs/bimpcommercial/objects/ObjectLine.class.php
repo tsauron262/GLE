@@ -1429,11 +1429,11 @@ class ObjectLine extends BimpObject
             return array();
         }
 
-        $key = 'remiseArriere'.$this->id.static::$parent_comm_type;
-        if($force_refrsh_cache || !$this->cacheExists($key)){
+        $key = 'remiseArriere' . $this->id . static::$parent_comm_type;
+        if ($force_refrsh_cache || !$this->cacheExists($key)) {
             $return = BimpCache::getBimpObjectObjects('bimpcommercial', 'ObjectLineRemiseArriere', array(
-                    'id_object_line' => (int) $this->id,
-                    'object_type'    => static::$parent_comm_type
+                        'id_object_line' => (int) $this->id,
+                        'object_type'    => static::$parent_comm_type
             ));
             $this->setCache($key, $return);
         }
@@ -4053,6 +4053,120 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
+    public function duplicate($force_create = false, $new_data = array(), &$errors = array(), &$warnings = array())
+    {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+
+        if ((int) $this->id_remise_except) {
+            $errors[] = 'Les lignes de type "Avoir client" ne peuvent pas être copiées';
+        }
+
+        $parent = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($parent)) {
+            $errors[] = 'Objet parent absent';
+            return 0;
+        }
+
+        if (!$parent->areLinesEditable()) {
+            $errors[] = 'Il n\'est pas possible d\'ajouter des lignes à ' . $parent->getLabel('this');
+            return 0;
+        }
+
+        $prod = $this->getProduct();
+        if (BimpObject::objectLoaded($prod)) {
+            if (!$parent::$achat && !$prod->getData('tosell')) {
+                $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est plus en vente';
+                return 0;
+            } elseif ($parent::$achat && !$prod->getData('tobuy')) {
+                $errors[] = 'Le produit ' . $prod->getRef() . ' n\'est plus en achat';
+                return 0;
+            }
+        }
+
+        $data = $this->getDataArray();
+        unset($data['id_line']);
+        unset($data['id_parent_line']);
+        unset($data['linked_object_name']);
+        unset($data['linked_id_object']);
+
+        $data['deletable'] = 1;
+        $data['editable'] = 1;
+
+        switch ($parent->object_name) {
+            case 'BS_SavPropal':
+                unset($data['id_reservation']);
+                break;
+
+            case 'Bimp_Commande':
+                unset($data['ref_reservations']);
+                unset($data['shipments']);
+                unset($data['factures']);
+                unset($data['equipments_returned']);
+                unset($data['qty_modif']);
+                unset($data['qty_total']);
+                unset($data['qty_shipped']);
+                unset($data['qty_to_ship']);
+                unset($data['qty_billed']);
+                unset($data['qty_to_bill']);
+                unset($data['qty_shipped_not_billed']);
+                unset($data['qty_billed_not_shipped']);
+                unset($data['exp_periods_start']);
+                unset($data['next_date_exp']);
+                unset($data['fac_periods_start']);
+                unset($data['next_date_fac']);
+                unset($data['achat_periods_start']);
+                unset($data['next_date_achat']);
+                break;
+
+            case 'Bimp_CommandeFourn':
+                unset($data['receptions']);
+                unset($data['qty_modif']);
+                unset($data['qty_total']);
+                unset($data['qty_received']);
+                unset($data['qty_to_receive']);
+                unset($data['qty_billed']);
+                unset($data['qty_to_billed']);
+                break;
+        }
+
+        foreach ($new_data as $field => $value) {
+            if ($this->field_exists($field)) {
+                $data[$field] = $value;
+            }
+        }
+
+        $new_line = BimpObject::getInstance($this->module, $this->object_name);
+        $errors = $new_line->validateArray($data);
+
+        if (!count($errors)) {
+            $new_line->desc = $this->desc;
+            $new_line->tva_tx = $this->tva_tx;
+            $new_line->id_product = $this->id_product;
+            $new_line->qty = $this->getFullQty();
+            $new_line->pu_ht = $this->pu_ht;
+            $new_line->pa_ht = $this->pa_ht;
+            $new_line->id_fourn_price = $this->id_fourn_price;
+            $new_line->date_from = $this->date_from;
+            $new_line->date_to = $this->date_to;
+            $new_line->id_remise_except = 0;
+
+            $new_line->no_remises_arrieres_auto_create = true;
+            $errors = $new_line->create($warnings, $force_create);
+
+            if (!count($errors)) {
+                $errors = BimpTools::merge_array($errors, $new_line->copyRemisesFromOrigin($this));
+                $errors = BimpTools::merge_array($errors, $new_line->copyRemisesArrieresFromOrigine($this));
+
+                if (!count($errors)) {
+                    return $new_line->id;
+                }
+            }
+        }
+        return 0;
+    }
+
     // Rendus HTML: 
 
     public function renderLineInput($field, $attribute_equipment = false, $prefixe = '', $force_edit = false)
@@ -4820,6 +4934,45 @@ class ObjectLine extends BimpObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => 'triggerObjectChange(\'bimpcommercial\', \'ObjectLineRemiseArriere\')'
+        );
+    }
+
+    public function actionDuplicateLines($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Lignes copiées avec succès';
+
+        $id_lines = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (!is_array($id_lines) || empty($id_lines)) {
+            $errors[] = 'Aucune ligne sélectionée';
+        } else {
+            foreach ($id_lines as $id_line) {
+                $line = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_line);
+
+                if (!BimpObject::objectLoaded($line)) {
+                    $errors[] = 'La ligne #' . $id_line . ' n\'existe plus';
+                } else {
+                    $line_errors = array();
+                    $line_warnings = array();
+                    
+                    $line->duplicate(false, array(), $line_errors, $line_warnings);
+                    
+                    if (!empty($line_warnings)) {
+                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n° ' . $line->getData('position'));
+                    }
+                    
+                    if (!empty($line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position').' : échec de la copie');
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

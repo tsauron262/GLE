@@ -1255,7 +1255,7 @@ class BimpCommission extends BimpObject
                                                                 if ($eqs_check) {
                                                                     $lines_infos .= 'Equipements OK<br/><br/>';
                                                                     $equipments = $line_eqs;
-                                                                    $msg .= count($equipments) . ' trouvés pour ' . $ac_prod->getLink() . '<br/>';
+                                                                    $msg = count($equipments) . ' équipement(s) trouvé(s) pour ' . $ac_prod->getLink() . '<br/>';
                                                                     $msg .= 'Libellé : <b>'. $ac_prod->getName().'<br/><br/>';
                                                                     $msg .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Verifier que le produit ci-dessous correspond bien à cet AppleCare';
                                                                     $msg .= ' (corriger les équipements si ce n\'est pas le cas) : <br/>';

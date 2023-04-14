@@ -1380,7 +1380,7 @@ class ObjectLine extends BimpObject
         return array();
     }
 
-    public function getCurrentEquipmentsLinesData()
+    public function getCurrentEquipmentsLinesData($equipments_list_only = false)
     {
         $data = array();
 
@@ -1390,9 +1390,16 @@ class ObjectLine extends BimpObject
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    $data[(int) $r['id']] = (int) $r['id_equipment'];
+                    if ($equipments_list_only) {
+                        $data[] = (int) $r['id_equipment'];
+                    } else {
+                        $data[(int) $r['id']] = (int) $r['id_equipment'];
+                    }
                 }
-                ksort($data, SORT_NUMERIC);
+
+                if (!$equipments_list_only) {
+                    ksort($data, SORT_NUMERIC);
+                }
             }
         }
 
@@ -4956,15 +4963,15 @@ class ObjectLine extends BimpObject
                 } else {
                     $line_errors = array();
                     $line_warnings = array();
-                    
+
                     $line->duplicate(false, array(), $line_errors, $line_warnings);
-                    
+
                     if (!empty($line_warnings)) {
                         $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n° ' . $line->getData('position'));
                     }
-                    
+
                     if (!empty($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position').' : échec de la copie');
+                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ' : échec de la copie');
                     }
                 }
             }

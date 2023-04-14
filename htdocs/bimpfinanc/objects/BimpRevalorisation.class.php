@@ -8,7 +8,7 @@ class BimpRevalorisation extends BimpObject
     const STATUS_ATT_EQUIPMENTS = 20;
     const STATUS_ACCEPTED = 1;
     const STATUS_REFUSED = 2;
-    
+
     public static $status_list = array(
         0  => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         10 => array('label' => 'Déclarée', 'icon' => 'fas_pause-circle', 'classes' => array('success')),
@@ -890,7 +890,7 @@ class BimpRevalorisation extends BimpObject
                     $success = 'Acceptation de la revalorisation effectuée avec succès';
                     $this->set('status', 1);
                     break;
-                
+
                 case 'declarer':
                     $success = 'Acceptation de la revalorisation effectuée avec succès';
                     $this->set('status', 10);
@@ -902,7 +902,7 @@ class BimpRevalorisation extends BimpObject
                     $facture = $this->getChildObject('facture');
                     $facture->addNoteToCommercial('Une revalorisation a été refusée');
                     break;
-                
+
                 case 'setSerial':
                     $success = 'Saisie du serial OK';
                     $this->set('status', 0);
@@ -1069,6 +1069,17 @@ class BimpRevalorisation extends BimpObject
         );
     }
 
+    public function actionCheckAppleCareSerials($data, &$success)
+    {
+        $warnings = array();
+        $success = 'Equipements attribuées';
+        $errors = self::checkAppleCareSerials();
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
     public function validate()
@@ -1187,17 +1198,6 @@ class BimpRevalorisation extends BimpObject
     }
 
     // Méthodes statiques: 
-
-    public function actionCheckAppleCareSerials($data, &$success)
-    {
-        $warnings = array();
-        $success = 'Equipements attribuées';
-        $errors = self::checkAppleCareSerials();
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
 
     public static function checkAppleCareSerials(&$nb_ok = 0)
     {

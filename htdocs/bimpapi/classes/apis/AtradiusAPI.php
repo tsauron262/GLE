@@ -102,85 +102,89 @@ class AtradiusAPI extends BimpAPI
                 ), $errors, $header, $code);
 
         $status = (int) Bimp_Client::STATUS_ATRADIUS_OK;
-        foreach ($response['data'] as $k => $c) {
 
-            // Il y a une demande en cours d'arbitrage
-            if (isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_EN_COURS) {
-                $status = (int) Bimp_Client::STATUS_ATRADIUS_EN_ATTENTE;
-                $warnings[] = "Une demande pour un montant de " . $c['creditLimitApplicationAmountInPolicyCurrency'] . " euros est en cours d'arbitrage";
-            }
+        if (isset($response['data'])) {
+            foreach ($response['data'] as $k => $c) {
 
-            // Il y a une décision prise pour cet acheteur
-            if (isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_VALID) {
-                $cover = $response['data'][$k];
-
-                if (isset($cover['totalDecision']['decisionAmtInPolicyCurrency']) && $cover['totalDecision']['decisionAmtInPolicyCurrency'] == 0) {
-                    $status = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
+                // Il y a une demande en cours d'arbitrage
+                if (isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_EN_COURS) {
+                    $status = (int) Bimp_Client::STATUS_ATRADIUS_EN_ATTENTE;
+                    $warnings[] = "Une demande pour un montant de " . $c['creditLimitApplicationAmountInPolicyCurrency'] . " euros est en cours d'arbitrage";
                 }
 
-                // Il y a 2 décisions prises
-                if (isset($c['firstAmtDecision']) and is_array($c['firstAmtDecision'])
-                        and isset($c['secondAmtDecision']) and is_array($c['secondAmtDecision'])) {
+                // Il y a une décision prise pour cet acheteur
+                if (isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_VALID) {
+                    $cover = $response['data'][$k];
+
+                    if (isset($cover['totalDecision']['decisionAmtInPolicyCurrency']) && $cover['totalDecision']['decisionAmtInPolicyCurrency'] == 0) {
+                        $status = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
+                    }
+
+                    // Il y a 2 décisions prises
+                    if (isset($c['firstAmtDecision']) and is_array($c['firstAmtDecision'])
+                            and isset($c['secondAmtDecision']) and is_array($c['secondAmtDecision'])) {
 
 
-                    /* Date d'expiration */
-                    // Les 2 décisions ont une date d'expiration
-                    if (isset($c['firstAmtDecision']['decisionExpiryDate']) and isset($c['secondAmtDecision']['decisionExpiryDate'])) {
-                        $date_first = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
-                        $date_secon = new DateTime($c['secondAmtDecision']['decisionExpiryDate']);
+                        /* Date d'expiration */
+                        // Les 2 décisions ont une date d'expiration
+                        if (isset($c['firstAmtDecision']['decisionExpiryDate']) and isset($c['secondAmtDecision']['decisionExpiryDate'])) {
+                            $date_first = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
+                            $date_secon = new DateTime($c['secondAmtDecision']['decisionExpiryDate']);
 
-                        if ($date_first < $date_secon)
-                            $date_expire = $date_first;
-                        else
-                            $date_expire = $date_secon;
+                            if ($date_first < $date_secon)
+                                $date_expire = $date_first;
+                            else
+                                $date_expire = $date_secon;
 
-                        $has_special_limit = 1;
+                            $has_special_limit = 1;
 
-                        // Une seule décision a une date d'expiration
-                    } elseif (isset($c['firstAmtDecision']['decisionExpiryDate']) or isset($c['secondAmtDecision']['decisionExpiryDate'])) {
-                        if (isset($c['firstAmtDecision']['decisionExpiryDate']))
+                            // Une seule décision a une date d'expiration
+                        } elseif (isset($c['firstAmtDecision']['decisionExpiryDate']) or isset($c['secondAmtDecision']['decisionExpiryDate'])) {
+                            if (isset($c['firstAmtDecision']['decisionExpiryDate']))
+                                $date_expire = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
+                            else
+                                $date_expire = new DateTime($c['secondAmtDecision']['decisionExpiryDate']);
+                            $has_special_limit = 1;
+
+                            // Décision sans limite dans le temps
+                        } else
+                            $has_special_limit = 0;
+
+
+                        /* Commentaires */
+                        $warn_first = $this->getCommentaires($c['firstAmtDecision'], 'première');
+                        $warn_secon = $this->getCommentaires($c['secondAmtDecision'], 'seconde');
+
+                        if ($warn_first)
+                            $warnings[] = $warn_first;
+                        if ($warn_secon)
+                            $warnings[] = $warn_secon;
+
+
+                        // Il y a 1 décisions prise
+                    } elseif (isset($c['firstAmtDecision']) and is_array($c['firstAmtDecision'])) {
+
+                        /* Date d'expiration */
+                        if (isset($c['firstAmtDecision']['decisionExpiryDate'])) {
+                            $has_special_limit = 1;
                             $date_expire = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
-                        else
-                            $date_expire = new DateTime($c['secondAmtDecision']['decisionExpiryDate']);
-                        $has_special_limit = 1;
-
-                        // Décision sans limite dans le temps
-                    } else
-                        $has_special_limit = 0;
+                        } else
+                            $has_special_limit = 0;
 
 
-                    /* Commentaires */
-                    $warn_first = $this->getCommentaires($c['firstAmtDecision'], 'première');
-                    $warn_secon = $this->getCommentaires($c['secondAmtDecision'], 'seconde');
-
-                    if ($warn_first)
-                        $warnings[] = $warn_first;
-                    if ($warn_secon)
-                        $warnings[] = $warn_secon;
-
-
-                    // Il y a 1 décisions prise
-                } elseif (isset($c['firstAmtDecision']) and is_array($c['firstAmtDecision'])) {
-
-                    /* Date d'expiration */
-                    if (isset($c['firstAmtDecision']['decisionExpiryDate'])) {
-                        $has_special_limit = 1;
-                        $date_expire = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
-                    } else
-                        $has_special_limit = 0;
-
-
-                    /* Commentaires */
-                    $warn = $this->getCommentaires($c['firstAmtDecision']);
-                    if ($warn)
-                        $warnings[] = $warn;
+                        /* Commentaires */
+                        $warn = $this->getCommentaires($c['firstAmtDecision']);
+                        if ($warn)
+                            $warnings[] = $warn;
+                    }
                 }
             }
         }
 
         // Pas de couverture trouvé => on force TODO test
-        if (!is_array($cover))
+        if (!is_array($cover) && isset($response['data'][0])) {
             $cover = $response['data'][0];
+        }
 
         if (!is_array($cover)) {
             return array();
@@ -215,7 +219,7 @@ class AtradiusAPI extends BimpAPI
         if (!isset($params['currencyCode']) and $params['coverType'] != self::CREDIT_CHECK) {
             $params['currencyCode'] = 'EUR';
         }
-        
+
         if (isset($params['creditLimitAmount']) and $params['coverType'] == self::CREDIT_CHECK) {
             unset($params['creditLimitAmount']);
         }
@@ -232,7 +236,7 @@ class AtradiusAPI extends BimpAPI
         } elseif ($params['coverType'] == self::CREDIT_LIMIT) {
             $cover_type = "La demande de limite de crédit";
         }
-        
+
         if (!is_array($data)) {
             $data = array();
         }

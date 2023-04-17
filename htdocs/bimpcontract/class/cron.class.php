@@ -45,7 +45,7 @@ class cron extends BimpCron
         $this->relance_echeance_tacite();
         $this->relance_demande();
         $this->tacite();
-        $this->facturation_auto();
+//        $this->facturation_auto(); => à débuguer
         $this->notifDemainFacturation();
         $this->relanceAvenantProvisoir();
         return 0;

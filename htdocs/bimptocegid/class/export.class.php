@@ -148,22 +148,24 @@
             
             if(count($list) > 0)  {
                 foreach ($list as $line)  {
-
                     $datas = json_decode($line->datas);
                     
                     $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', (int) $datas->id_paiement);
-                    $datas->code = $paiement->getData('fk_paiement');
-                    if($this->bdb->getValue('c_paiement', 'code', 'id = ' . $paiement->getData('fk_paiement')) != 'NO_COM') {
-                        if($this->write_tra($this->TRA_deplacementPaiement->constructTra($paiement, $datas), $file)) {
-                            $this->good['DP'][$paiement->getRef()] = 'Ok dans le fichier ' . $file;
-                            $this->bdb->update('mvt_paiement', Array('traite' => 1), 'id = ' . $line->id);
-                        } else {
-                            $this->fails['DP'][$paiement->getRef()] = 'Erreur de déplacement de ce paiement';
+                    $datas->code = (int) $paiement->getData('fk_paiement');
+                    
+                    if ($datas->code) {
+                        if($this->bdb->getValue('c_paiement', 'code', 'id = ' . $datas->code) != 'NO_COM') {
+                            if($this->write_tra($this->TRA_deplacementPaiement->constructTra($paiement, $datas), $file)) {
+                                $this->good['DP'][$paiement->getRef()] = 'Ok dans le fichier ' . $file;
+                                $this->bdb->update('mvt_paiement', Array('traite' => 1), 'id = ' . $line->id);
+                            } else {
+                                $this->fails['DP'][$paiement->getRef()] = 'Erreur de déplacement de ce paiement';
+                            }
                         }
+                    } else {
+                        $this->fails['DP'][$paiement->getRef()] = 'Type de paiement absent';
                     }
-
                 }
-                
             }
             
             $this->tiers = $this->TRA_deplacementPaiement->rapportTier;

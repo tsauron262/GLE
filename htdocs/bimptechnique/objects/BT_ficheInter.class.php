@@ -2693,7 +2693,7 @@ class BT_ficheInter extends BimpDolObject
                         $errors = $this->updateField('commandes', BimpTools::merge_array($this->getData('commandes'), [$instance->id]));
                         if (!count($errors)) {
                             addElementElement('fichinter', 'commande', $this->id, $instance->id);
-                            if (count($data['idLineFI_idLineCommande'])) {
+                            if (is_array($data['idLineFI_idLineCommande']) && count($data['idLineFI_idLineCommande'])) {
                                 foreach ($data['idLineFI_idLineCommande'] as $id_line_fiche => $id_commande_line) {
                                     $child = $this->getChildObject('inters', $id_line_fiche);
                                     if ($child->getData('type') == 3)
@@ -2711,8 +2711,6 @@ class BT_ficheInter extends BimpDolObject
                         $errors[] = 'Cette commande n\'appartient pas à ' . $client->getName();
                     }
                 }
-
-
                 break;
         }
 

@@ -314,10 +314,28 @@ class Bimp_User extends BimpObject
     }
 
     // Getters params: 
-
+    public function actionDispo($param) {
+        
+        if(self::isUserAvaible(330))
+            $errors[] = "Dispo";
+        else
+            $errors[] = "PAS Dispo";
+        
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
     public function getActionsButtons()
     {
         $buttons = array();
+        
+            $buttons[] = array(
+                'label'   => 'Utilisateur dispo',
+                'icon'    => 'fas_file-image',
+                'onclick' => $this->getJsActionOnclick('dispo')
+            );
 
         if ($this->can('edit') && $this->isEditable()) {
             $buttons[] = array(
@@ -597,7 +615,12 @@ class Bimp_User extends BimpObject
         if ($contact_infos) {
             $html .= ($html ? '<br/>' : '') . $contact_infos;
         }
-
+        
+        if(self::isUserOff((int) $this->id)) {
+            $html .= BimpRender::renderAlerts("Utilisateur off aujourd'hui", 'warning');
+        }
+        
+//        $html .= BimpRender::renderAlerts("Utilisateur off aujourd'hui", 'warning');
         return $html;
     }
 
@@ -2107,6 +2130,40 @@ class Bimp_User extends BimpObject
 
         return self::$cache[$cache_key];
     }
+    
+    public static function isUserOff($id_user, &$errors = array(), $from = null)
+    {
+
+        if (is_null($id_user) or $id_user < 0) {
+            $errors[] = "ID de l'utilisateur absent ou mal renseigné";die('VVV');
+            return -1;
+        }
+        
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+        if(!BimpObject::objectLoaded($user))  {
+            $errors[] = "Utilisateur d'ID " . $id_user . "absent";
+            return -2;
+        }
+        
+        if (is_null($from))
+            $date = new DateTime();
+        elseif(is_string($from))
+            $date = new DateTime($from);
+        elseif(is_a('DateTime', $from))
+            $date = $from;
+        else {
+            $errors[] = "Format de la date inconnu";
+            return -3;
+        }
+                
+        foreach($user->getData('day_off') as $id_day_off){
+            if((int) $date->format('W') % 2 == 0 and (int) $date->format('w') + 7 == $id_day_off or
+               (int) $date->format('W') % 2 == 1 and (int) $date->format('w')     == $id_day_off)
+                return 1;
+        }
+        
+        return 0;
+    }
 
     public static function isUserAvaible($id_user, &$errors = array(), $from = null)
     {
@@ -2115,23 +2172,18 @@ class Bimp_User extends BimpObject
             $errors[] = "ID de l'utilisateur absent ou mal renseigné";
             return -1;
         }
+        
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+        if(!BimpObject::objectLoaded($user))  {
+            $errors[] = "Utilisateur d'ID " . $id_user . "absent";
+            return -2;
+        }
 
         // L'utilisateur est actif ?
-        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
         if (!$user->getData('statut'))
             return 0;
 
-        // L'utilisateur est-il OFF ?
-        if (is_null($from))
-            $dt = new DateTime();
-        else
-            $dt = new DateTime($from);
-
-        // SI vrai => le user est en jour OFF
-        if ((int) $user->getData('day_off') == (int) $dt->format('N'))
-            return 0;
-
-
+        
         // L'utilisateur est disponible ?
         if (is_null($from)) {
             $init_from = new DateTime();
@@ -2152,6 +2204,10 @@ class Bimp_User extends BimpObject
                 $from = $init_from->format('Y-m-d 10:00:00');
             }
         }
+        
+        // L'utilisateur est-il off ?
+        if(self::isUserOff($id_user, $errors, $from))
+            return 0;
 
         $sql = 'SELECT *';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm';
@@ -2166,9 +2222,8 @@ class Bimp_User extends BimpObject
 
         $rows = self::getBdb()->executeS($sql, 'object');
 
-        foreach ($rows as $r) {
+        foreach ($rows as $r)
             return 0;
-        }
 
         return 1;
     }

@@ -41,14 +41,16 @@ class Bimp_Societe extends BimpDolObject
         1  => array('D', 'warning', 'Risque très Elevé'),
         0  => array('E', 'danger', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
     );
+
 //    public static $regions = array(
 //        'Alpes-Drôme'      => array(73, 74, 38, 7, 26),
 //        'Rhône-Auvergne'   => array(3, 15, 43, 63, 42, 1, 69),
 //        'PACA-Occitanie'   => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64, 65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30, 4, 5, 6, 13, 83, 84, '2A', '2B'),
 //        'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
 //    );
-    
-    public function getRefProperty() {
+
+    public function getRefProperty()
+    {
         return 'code_client';
     }
 
@@ -620,7 +622,7 @@ class Bimp_Societe extends BimpDolObject
                     'onclick' => 'window.open(\'' . $url . '\');'
                 );
             }
-            
+
             if ($this->isFournisseur()) {
                 $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=fournisseur&id=' . $this->id;
 
@@ -1257,7 +1259,7 @@ class Bimp_Societe extends BimpDolObject
     public function getRemainToPay($true_value = false, $round = true, &$debug = '')
     {
         $amount = 0;
-        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc' => $this->id, 'paye' => 0, 'fk_statut' => array(0,1)));
+        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc' => $this->id, 'paye' => 0, 'fk_statut' => array(0, 1)));
         foreach ($facts as $fact) {
             $value = $fact->getRemainToPay($true_value = false, $round = true);
             $debug .= '<br/>Fact : ' . $fact->getLink() . ' ' . BimpTools::displayMoneyValue($value);
@@ -1985,7 +1987,16 @@ class Bimp_Societe extends BimpDolObject
     public function displayEncoursDetail()
     {
         $this->displayEncoursNonFacture();
-        return implode($this->debug, '<br/><br/>');
+
+        if (isset($this->debug)) {
+            if (is_array($this->debug)) {
+                return implode($this->debug, '<br/><br/>');
+            } elseif ((string) $this->debug) {
+                return $this->debug;
+            }
+        }
+
+        return '';
     }
 
     public function displayEncoursNonFacture()
@@ -3895,7 +3906,7 @@ class Bimp_Societe extends BimpDolObject
             if ($this->isSirenRequired()) {
                 $siret = $this->getData('siret');
                 if (!$siret) {
-                    $errors[] = 'Numéro SIRET absent';
+                    $errors[] = 'Numéro SIRET absent pour le client d\'id ' . $this->id;
                 } elseif (!$this->Luhn($siret, 14)) {
                     $errors[] = 'Numéro SIRET invalide';
                 } else {

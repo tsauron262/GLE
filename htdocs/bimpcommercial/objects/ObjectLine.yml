@@ -807,6 +807,9 @@ lists:
             - label: supprimer les lignes sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
+            - label: Dupliquer les lignes sélectionnées
+              icon: fas_copy
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'duplicateLines', {}, null, 'Veuillez confirmer', true)
         sort_field: position
         sort_way: asc
         n: 0

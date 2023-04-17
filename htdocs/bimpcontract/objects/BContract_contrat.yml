@@ -1497,7 +1497,7 @@ filters_panels:
                 show: 1
             statut:
             fk_commercial_suivi:
-            client:
+            fk_soc:
             commercialclient:
             entrepot:
             #end_date:

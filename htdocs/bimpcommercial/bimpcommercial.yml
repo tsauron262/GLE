@@ -248,3 +248,13 @@ params:
                       label: Autoriser le refus des signatures pour les PV de réception
                       type: bool
                       def: 0
+                      
+    id_resp_validation_avoir_commercial: 
+        label: Id du responsable des avoirs commerciaux
+        type: int
+        def: 62
+        
+    id_resp_validation_avoir_education: 
+        label: Id du responsable des avoirs éducation
+        type: int
+        def: 201

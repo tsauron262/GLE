@@ -1185,6 +1185,22 @@ class Bimp_CommandeLine extends ObjectLine
             return $ref;
         return '';
     }
+    
+    public function getReservationsEquipmentsList()
+    {
+        $equipments = array();
+        
+        $reservations = $this->getReservations();
+        
+        foreach ($reservations as $res) {
+            $id_eq = (int) $res->getData('id_equipment');
+            if ($id_eq && !in_array($id_eq, $equipments)) {
+                $equipments[] = $id_eq;
+            }
+        }
+        
+        return $equipments;
+    }
 
     // Getters opé périodiques: 
 

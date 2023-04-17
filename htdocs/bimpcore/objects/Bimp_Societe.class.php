@@ -3895,7 +3895,7 @@ class Bimp_Societe extends BimpDolObject
             if ($this->isSirenRequired()) {
                 $siret = $this->getData('siret');
                 if (!$siret) {
-                    $errors[] = 'Numéro SIRET absent';
+                    $errors[] = 'Numéro SIRET absent pour le client d\'id ' . $this->id;
                 } elseif (!$this->Luhn($siret, 14)) {
                     $errors[] = 'Numéro SIRET invalide';
                 } else {

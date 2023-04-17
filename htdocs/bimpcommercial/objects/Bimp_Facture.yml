@@ -281,6 +281,37 @@ fields:
         type: datetime
     fk_mode_reglement: 
         history: 1
+    
+    # Validation d'avoir
+    valid_avoir_fichier_joints:
+        label: Justificatif demande d'avoir
+        dol_extra_field: 1
+        type: json
+    valid_avoir_montant:
+        label: Montant avoir demandé
+        dol_extra_field: 1
+        type: money
+    valid_avoir:
+        label: Avoir accepté
+        dol_extra_field: 1
+        type: bool
+        input: 
+            type: toggle
+        default_value: 0
+    valid_avoir_id_user_ask:
+        label: Demandeur de l'avoir
+        dol_extra_field: 1
+        type: id_object
+        object: user
+    valid_avoir_id_user:
+        label: Valideur de l'avoir
+        dol_extra_field: 1
+        type: id_object
+        object: user
+    valid_avoir_montant_accorder:
+        label: Montant avoir accordé
+        dol_extra_field: 1
+        type: money
         
     fk_availability: unset
     fk_input_reason: unset
@@ -707,6 +738,98 @@ forms:
                     method: renderMailExtraFilesInput
                     params:
                         - files_compl
+                        
+    demander_validation_avoir:
+        rows: 
+            - custom: 1
+              label: Motif de la demande
+              input_name: motif
+              input: 
+                  type: select
+                  options: 
+                      array: motif_demande_avoir
+                      
+            - custom: 1
+              label: Avoir total
+              input_name: avoir_total
+              data_type: bool
+              input: 
+                  type: toggle
+              default_value: 1
+                      
+            - custom: 1
+              label: Montant
+              input_name: montant
+#                 data_type: money
+              input: 
+                  type: text
+              display_if: 
+                  field_name: avoir_total
+                  hide_values: 1
+              
+        
+            - custom: 1
+              label: Commentaire
+              input_name: comment
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              hashtags: 1
+
+
+            - custom: 1
+              label: Fichiers joints
+              input_name: join_files
+              data_type: id_object
+              input: 
+                  type: check_list
+                  items: 
+                      callback: 
+                          method: getAllFiles
+                          params: 
+                              - 0
+              object: files
+              create_form: upload_light
+              create_form_label: Ajouter
+              create_form_values: 
+                  fields: 
+                      parent_module: 
+                          prop: module
+                      parent_object_name: 
+                          prop: object_name
+                      id_parent: 
+                          prop: id
+
+                        
+    validation_avoir:
+        rows:
+
+            - field: valid_avoir
+              
+            - field: valid_avoir_montant_accorder
+              value:
+                callback:
+                  method: getData
+                  params:
+                    - valid_avoir_montant
+              display_if: 
+                  field_name: valid_avoir
+                  hide_values: 0
+                          
+            - custom: 1
+              label: Raison de refus
+              input_name: comment
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              hashtags: 1
+                    
+            - custom: 1
+              label: Images liées
+              content: 
+                  callback: renderImagesDemandeAvoir
                   
 fields_tables: 
     infos:
@@ -845,9 +968,32 @@ fields_tables:
             - field: note_private
             - field: logs
             
+            
+    avoir:
+        title: Avoir
+        icon: exchange-alt
+        footer_extra_btn: 
+            callback: getAvoirExtraBtn
+        rows:
+            - field: valid_avoir
+            - field: valid_avoir_montant
+            - field: valid_avoir_montant_accorder
+            - field: valid_avoir_id_user_ask
+            - field: valid_avoir_id_user
+            
 views: 
     default: 
         objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale
+        rows: 
+            0: 
+                cols: 
+                    1: 
+                        rows: 
+                            2: 
+                                cols: 
+                                    - type: fields_table
+                                      fields_table: 
+                                          name: avoir
     content_infos: 
         objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale
     full: 

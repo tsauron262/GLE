@@ -8195,18 +8195,22 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $html;
     }
 
-    public function renderImages()
+    public function renderImages($filters = null)
     {
         $html = '';
 
-        $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
-                    'parent_module'      => $this->module,
-                    'parent_object_name' => $this->object_name,
-                    'id_parent'          => $this->id,
-                    'file_ext'           => array(
-                        'in' => array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif')
-                    )
-        ));
+        if(is_null($filters)) {
+            $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
+                        'parent_module'      => $this->module,
+                        'parent_object_name' => $this->object_name,
+                        'id_parent'          => $this->id,
+                        'file_ext'           => array(
+                            'in' => array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif')
+                        )
+            ));
+        } else
+            $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', $filters);
+        
 
         if (!empty($files)) {
             $html .= '<div>';

@@ -2952,12 +2952,27 @@ class BT_ficheInter extends BimpDolObject
 
     public function validatePost()
     {
+        $id_contact = (int) BimpTools::getPostFieldValue('id_contact_signature');
+            
+        if(0 < $id_contact) {
+            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+            
+            if(BimpObject::objectLoaded($contact)) {
+                if(array_key_exists('signataire', $_POST) and BimpTools::getPostFieldValue('signataire') == '')
+                    $_POST['signataire'] = $contact->getName();
+                
+                if(array_key_exists('email_signature', $_POST) and BimpTools::getPostFieldValue('email_signature') == '')
+                    $_POST['email_signature'] = $contact->getData('email');
+            }
+        }
+        
         $errors = parent::validatePost();
 
         if (!count($errors)) {
             if ((int) BimpTools::getPostFieldValue('signature_set', 0)) {
                 if (!count($this->getChildrenList("inters"))) {
                     $errors[] = "Vous ne pouvez pas faire signer une fiche d'intervention sans intervention enregistrée";
+//                    $errors[] = print_r($_POST, 1);
                 }
             }
         }
@@ -2965,6 +2980,32 @@ class BT_ficheInter extends BimpDolObject
         return $errors;
     }
 
+    public function getSignatureContactCreateFormValues()
+    {
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $fields = array(
+                'fk_soc' => $client->getData('id'),
+                'email'  => $client->getData('email'),
+            );
+
+            if (!$client->isCompany()) {
+                $fields['address'] = $client->getData('address');
+                $fields['zip'] = $client->getData('zip');
+                $fields['town'] = $client->getData('town');
+                $fields['fk_pays'] = $client->getData('fk_pays');
+                $fields['fk_departement'] = $client->getData('fk_departement');
+            }
+
+            return array(
+                'fields' => $fields
+            );
+        }
+        
+        return array();
+    }
+    
     public function validate()
     {
         $errors = parent::validate();

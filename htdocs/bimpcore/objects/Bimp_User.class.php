@@ -139,8 +139,8 @@ class Bimp_User extends BimpObject
         }
 
         foreach ($this->getData('day_off') as $id_day_off) {
-            if ((int) $date->format('W') % 2 == 0 && (int) $date->format('w') + 7 == $id_day_off or
-                    (int) $date->format('W') % 2 == 1 && (int) $date->format('w') == $id_day_off) {
+            if ((int) $dt->format('W') % 2 == 0 && (int) $dt->format('w') + 7 == $id_day_off or
+                    (int) $dt->format('W') % 2 == 1 && (int) $dt->format('w') == $id_day_off) {
                 return 1;
             }
         }

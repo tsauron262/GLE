@@ -212,7 +212,7 @@ class BimpRevalorisation extends BimpObject
         } else {
             return 1;
         }
-        
+
         return 0;
     }
 
@@ -1279,6 +1279,7 @@ class BimpRevalorisation extends BimpObject
             foreach ($revals as $reval) {
                 $equipments = $reval->getData('equipments');
                 if (!empty($equipments)) {
+                    $nb_eqs_ok = 0;
                     foreach ($equipments as $id_eq) {
                         if ($id_eq) {
                             $fac_reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
@@ -1329,22 +1330,25 @@ class BimpRevalorisation extends BimpObject
                                             $nbOk++;
                                         }
                                     }
-                                }
 
-                                if (!count($reval_errors)) {
-                                    $reval->set('status', 1);
-                                    $reval->set('date_processed', date('Y-m-d'));
-                                    $reval_errors = $reval->update($w, true);
-                                }
-
-                                if (count($reval_errors)) {
-                                    $bdb->db->rollback();
-                                    $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation #' . $reval->id);
+                                    if (count($reval_errors)) {
+                                        $bdb->db->rollback();
+                                        $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation #' . $reval->id);
+                                    } else {
+                                        $nb_eqs_ok++;
+                                        $bdb->db->commit();
+                                    }
                                 } else {
-                                    $bdb->db->commit();
+                                    $nb_eqs_ok++;
                                 }
                             }
                         }
+                    }
+
+                    if ($nb_eqs_ok == (int) $reval->getData('qty')) {
+                        $reval->set('status', 1);
+                        $reval->set('date_processed', date('Y-m-d'));
+                        $reval_errors = $reval->update($w, true);
                     }
                 }
             }

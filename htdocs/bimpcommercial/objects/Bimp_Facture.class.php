@@ -3762,7 +3762,7 @@ class Bimp_Facture extends BimpComm
                 }
 
                 if ($this->getData('fk_statut') > 0) {
-                    $html .= '<div class="buttonsContainer" style="margin: 15px; 0 ">';
+                    $html .= '<div class="buttonsContainer" style="margin: 15px 0;">';
 
                     $onclick = $reval->getJsActionOnclick('checkAppleCareSerials', array(), array());
                     $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';

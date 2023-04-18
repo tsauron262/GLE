@@ -3931,7 +3931,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $tech = '';
         $user_tech = $this->getChildObject('user_tech');
         if (!is_null($user_tech) && $user_tech->isLoaded()) {
-            $tech = $user_tech->dol_object->getFullName($langs);
+            $tech = $user_tech->dol_object->firstname;
         }
 
         $textSuivie = "\n <a href='" . $this->getPublicLink() . "'>Vous pouvez suivre l'intervention ici.</a>";

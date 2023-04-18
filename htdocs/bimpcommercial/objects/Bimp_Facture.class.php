@@ -63,7 +63,7 @@ class Bimp_Facture extends BimpComm
         5 => array('label' => 'Retour produit'),
         6 => array('label' => 'Autre')
     );
-    
+
     // Gestion des droits: 
 
     public function canCreate()
@@ -179,10 +179,10 @@ class Bimp_Facture extends BimpComm
 
             case 'generatePdfAttestLithium':
                 return $user->admin or $user->id == 7;
-                
+
             case 'demanderValidationAvoir':
 //                return (int) $this->can('create');
-                
+
             case 'validationAvoir':
                 return (int) $user->admin;
 //                return (int) $user->admin or
@@ -850,15 +850,15 @@ class Bimp_Facture extends BimpComm
 
             case 'generatePdfAttestLithium':
                 return $status == 1 or $status == 2;
-            
+
             case 'demanderValidationAvoir':
             case 'validationAvoir':
-                if($type == Facture::TYPE_DEPOSIT)
+                if ($type == Facture::TYPE_DEPOSIT)
                     $errors[] = "Création d'avoir impossible pour les " . self::$types[$type]['label'] . "s";
-                
-                if($this->getData('valid_avoir'))
+
+                if ($this->getData('valid_avoir'))
                     $errors[] = "Avoir déjà validé";
-                
+
                 return (count($errors) ? 0 : 1);
         }
 
@@ -1401,7 +1401,7 @@ class Bimp_Facture extends BimpComm
                 'onclick' => $this->getJsActionOnclick('checkMargin')
             );
         }
-        
+
 
         return $buttons;
     }
@@ -1626,14 +1626,14 @@ class Bimp_Facture extends BimpComm
         $buttons = array();
 
         if ($this->isLoaded()) {
-            
+
             // Demander une validation d'avoir
             if ($this->isActionAllowed('demanderValidationAvoir') && $this->canSetAction('demanderValidationAvoir')) {
                 $buttons[] = array(
                     'label'   => 'Demander une validation d\'avoir',
                     'icon'    => 'fas_comment',
                     'onclick' => $this->getJsActionOnclick('demanderValidationAvoir', array(), array(
-                        'form_name'      => 'demander_validation_avoir'
+                        'form_name' => 'demander_validation_avoir'
                     ))
                 );
             }
@@ -1644,7 +1644,7 @@ class Bimp_Facture extends BimpComm
                     'label'   => 'Validation d\'avoir',
                     'icon'    => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('validationAvoir', array(), array(
-                        'form_name'      => 'validation_avoir'
+                        'form_name' => 'validation_avoir'
                     ))
                 );
             }
@@ -1887,28 +1887,29 @@ class Bimp_Facture extends BimpComm
 
         return $factures;
     }
-    
-    public function getMessageDemandeAvoir($id_user_ask, $motif, $avoir_total, $montant, $comment, $join_files) {
-        
+
+    public function getMessageDemandeAvoir($id_user_ask, $motif, $avoir_total, $montant, $comment, $join_files)
+    {
+
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user_ask);
-        
-        $msg  = $user->getName() . ' souhaite créer un avoir ';
+
+        $msg = $user->getName() . ' souhaite créer un avoir ';
         $msg .= ($avoir_total) ? 'total' : 'partiel';
         $msg .= ' de ' . BimpTools::displayMoneyValue($montant, 'EUR', 0, 0, 0, 2, 1);
         $msg .= ' à partir de la facture ' . $this->getRef();
-        
+
         // Motif
-        if($motif != 6)
+        if ($motif != 6)
             $msg .= '<br/>Motif de la demande:<strong> ' . self::$motif_demande_avoir[$motif]['label'] . '</strong>';
-        
+
         // Commentaire
-        if($comment)
+        if ($comment)
             $msg .= '<br/>Commentaire: ' . $comment;
-        
+
         // Commentaire
-        if(0 < (int) sizeof($join_files))
+        if (0 < (int) sizeof($join_files))
             $msg .= '<br/>Nombre de fichier(s) joint(s) : <strong>' . sizeof($join_files) . '</strong>';
-        
+
         return $msg;
     }
 
@@ -2087,11 +2088,11 @@ class Bimp_Facture extends BimpComm
             $filters = array(
                 'id_facture' => (int) $this->id
             );
-            
-            if (count($type_reval)){
+
+            if (count($type_reval)) {
                 $filters['type'] = $type_reval;
             }
-            
+
             $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', $filters);
 
             foreach ($revals as $reval) {
@@ -3758,38 +3759,29 @@ class Bimp_Facture extends BimpComm
                     $html .= BimpRender::renderPanel('Vérification des montants par BR', $content, '', array('type' => 'secondary'));
                     $html .= '</div>';
                     $html .= '</div>';
-                    $html .= '<div class="row">';
-                    $html .= '<div class="col-sm-12 col-md-6">';
-
-                    if (/* $this->getData('fk_statut') > 0 */1) {
-                        $buttons = array();
-                        $buttons[] = array(
-                            'label'   => 'Vérifier les équipements',
-                            'icon'    => 'fas_hand-holding-usd',
-                            'onclick' => $reval->getJsActionOnclick('checkAppleCareSerials', array(
-                            ))
-                        );
-                        $buttons[] = array(
-                            'label'   => 'Valider les revalorisation',
-                            'icon'    => 'fas_hand-holding-usd',
-                            'onclick' => $reval->getJsActionOnclick('checkBilledApplecareReval', array(
-                                'id_fact' => $this->id
-                            ))
-                        );
-                        $content2 = '';
-                        foreach ($buttons as $button)
-                            $content2 .= BimpRender::renderButton($button);
-                        $html .= BimpRender::renderPanel('Actions revalorisation', $content2, '', array('type' => 'secondary'));
-                        $html .= '</div>';
-                        $html .= '</div>';
-                    }
                 }
-                $bc_list = new BC_ListTable($reval, 'facture');
-                $bc_list->addFieldFilterValue('id_facture', (int) $this->id);
-                $html .= $bc_list->renderHtml();
+
+                if ($this->getData('fk_statut') > 0) {
+                    $html .= '<div class="buttonsContainer" style="margin: 15px;">';
+
+                    $onclick = $reval->getJsActionOnclick('checkAppleCareSerials', array(), array());
+                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $html .= BimpRender::renderIcon('fas_', 'iconLeft') . 'Vérifier les n° de série';
+                    $html .= '</span>';
+
+                    $onclick = $reval->getJsActionOnclick('checkBilledApplecareReval', array(
+                        'id_fact' => $this->id
+                    ));
+                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $html .= BimpRender::renderIcon('fas_', 'iconLeft') . 'Valider les revalorisations AppleCare';
+                    $html .= '</span>';
+                    $html .= '</div>';
+                }
             }
 
-
+            $bc_list = new BC_ListTable($reval, 'facture');
+            $bc_list->addFieldFilterValue('id_facture', (int) $this->id);
+            $html .= $bc_list->renderHtml();
         }
 
         return $html;
@@ -4091,14 +4083,15 @@ class Bimp_Facture extends BimpComm
 
         return $html;
     }
-    
-    public function renderImagesDemandeAvoir() {
+
+    public function renderImagesDemandeAvoir()
+    {
         $filters = array(
             'id' => array(
                 'in' => $this->getData('valid_avoir_fichier_joints')
             )
         );
-        
+
         return $this->renderImages($filters);
     }
 
@@ -6015,20 +6008,20 @@ class Bimp_Facture extends BimpComm
             $files = array();
             $params = '{id_facture: ' . $this->id . ', id_struture: \'' . $id_structure . '\', code_service: \'' . $code_service . '\'});}';
             $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', 0, \'soumettreFacture\', {}, ' . $params . ', 500);';
-            
+
             $files_compl = BimpTools::getArrayValueFromPath($data, 'files_compl', array());
             if (is_array($files_compl)) {
                 $files = $files_compl;
             }
-            
+
             $join_files = BimpTools::getArrayValueFromPath($data, 'join_files', array());
             if (is_array($join_files) && count($join_files)) {
                 $files = BimpTools::merge_array($files, $join_files);
             }
-            
+
             $api = BimpAPI::getApiInstance('piste');
             $chorus_data = $this->getData('chorus_data');
-            
+
             foreach ($files as $idF) {
                 $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $idF);
 
@@ -6039,7 +6032,7 @@ class Bimp_Facture extends BimpComm
                 else
                     $errors[] = 'Fichier ' . $name . ' non envoyé vers Chorus';
             }
-            
+
             $this->set('chorus_data', $chorus_data);
             $errors = BimpTools::merge_array($errors, $this->update($warnings));
         }
@@ -6139,114 +6132,114 @@ class Bimp_Facture extends BimpComm
             'success_callback' => $success_callback
         );
     }
-    
+
     public function actionDemanderValidationAvoir($data, &$success = '')
     {
         global $user;
         $errors = $warnings = array();
         $id_user_valid = 0;
-        
+
         $motif = (int) BimpTools::getPostFieldValue('motif');
         $avoir_total = (int) BimpTools::getPostFieldValue('avoir_total');
         $comment = (string) BimpTools::getPostFieldValue('comment');
-        $join_files = (array) BimpTools::getPostFieldValue('join_files');        
-        if($avoir_total)
+        $join_files = (array) BimpTools::getPostFieldValue('join_files');
+        if ($avoir_total)
             $montant = (float) $this->dol_object->total_ttc;
         else
             $montant = (float) BimpTools::getPostFieldValue('montant');
-        
-        if(!$avoir_total and ! $montant)
+
+        if (!$avoir_total and!$montant)
             $errors[] = "Montant non renseigné alors que l'avoir est partiel";
-        
-        $nb_demande = (int) sizeof(BimpCache::getBimpObjectObjects('bimpcore', 'BimpNote', 
-            array('content'    => array(
-                'operator' => 'like',
-                'value'    => '%souhaite créer un avoir%'
-            ),
-            "obj_type"   => "bimp_object",
-            "obj_module" => $this->module,
-            "obj_name"   => $this->object_name,
-            "id_obj"     => $this->id)));
-        
-        if(0 < $nb_demande)
-            $warnings[] = "Il y a déjà " . $nb_demande . " de validation d'avoir pour cette facture";            
-            
-        if(!$data['join_files'])
+
+        $nb_demande = (int) sizeof(BimpCache::getBimpObjectObjects('bimpcore', 'BimpNote',
+                                                                   array('content'    => array(
+                                        'operator' => 'like',
+                                        'value'    => '%souhaite créer un avoir%'
+                                    ),
+                                    "obj_type"   => "bimp_object",
+                                    "obj_module" => $this->module,
+                                    "obj_name"   => $this->object_name,
+                                    "id_obj"     => $this->id)));
+
+        if (0 < $nb_demande)
+            $warnings[] = "Il y a déjà " . $nb_demande . " de validation d'avoir pour cette facture";
+
+        if (!$data['join_files'])
             $join_files = array();
-            
-        
+
+
 //        $errors[] = print_r($_REQUEST, 1);
-        
-        if($this->getData('ef_type') == 'E')
-            $id_user_valid = (int) BimpCore::getConf('id_resp_validation_avoir_education',  null, 'bimpcommercial');
+
+        if ($this->getData('ef_type') == 'E')
+            $id_user_valid = (int) BimpCore::getConf('id_resp_validation_avoir_education', null, 'bimpcommercial');
         else
             $id_user_valid = (int) BimpCore::getConf('id_resp_validation_avoir_commercial', null, 'bimpcommercial');
-        
-        
+
+
         $msg = $this->getMessageDemandeAvoir((int) $user->id, $motif, $avoir_total, $montant, $comment, $join_files);
 
         // Création de la note
-        if(!count($errors)){
+        if (!count($errors)) {
             BimpObject::loadClass('bimpcore', 'BimpNote');
             $this->addNote($msg,
-                BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                BimpNote::BN_DEST_USER, 0, (int) $id_user_valid);
-            
+                           BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                           BimpNote::BN_DEST_USER, 0, (int) $id_user_valid);
+
             $this->set('valid_avoir_fichier_joints', $join_files);
             $this->set('valid_avoir_montant', $montant);
             $this->set('valid_avoir_id_user_ask', (int) $user->id);
             $errors = $this->update();
         }
-        
+
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
+            'errors'   => $errors,
+            'warnings' => $warnings,
         );
-    }    
-    public function actionValidationAvoir ($data, &$success = '')
+    }
+
+    public function actionValidationAvoir($data, &$success = '')
     {
         global $user;
         $errors = $warnings = array();
-        
-        
+
         $valid_avoir = (int) BimpTools::getPostFieldValue('valid_avoir', 0);
         $valid_avoir_id_user = (int) $user->id;
-       
-        if($valid_avoir)
+
+        if ($valid_avoir)
             $valid_avoir_montant_accorder = (float) BimpTools::getPostFieldValue('valid_avoir_montant_accorder', 0);
         else
             $valid_avoir_montant_accorder = 0;
-        
-        if(!count($errors)) {
+
+        if (!count($errors)) {
             $msg = '';
-            
-            if($valid_avoir)
+
+            if ($valid_avoir)
                 $msg .= "Demande d'avoir validée";
             else
                 $msg .= "Demande d'avoir refusée";
-            
+
             $user_valid = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
             $comment = (string) BimpTools::getPostFieldValue('comment');
-            if($comment != '') 
+            if ($comment != '')
                 $msg .= ", commentaire de " . $user_valid->getName() . " : " . $comment;
             else
                 $msg .= ", aucune raison n'a été rédigé";
-            
+
 
             BimpObject::loadClass('bimpcore', 'BimpNote');
             $this->addNote($msg,
-                BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
-                BimpNote::BN_DEST_USER, 0, (int) $this->getData('valid_avoir_id_user_ask'));
-            
+                           BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                           BimpNote::BN_DEST_USER, 0, (int) $this->getData('valid_avoir_id_user_ask'));
+
             $this->set('valid_avoir', $valid_avoir);
             $this->set('valid_avoir_id_user', $valid_avoir_id_user);
             $this->set('valid_avoir_montant_accorder', $valid_avoir_montant_accorder);
             $errors = $this->update();
         }
-        
+
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
+            'errors'   => $errors,
+            'warnings' => $warnings,
         );
     }
 

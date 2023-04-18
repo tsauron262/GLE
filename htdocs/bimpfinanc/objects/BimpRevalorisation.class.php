@@ -1353,6 +1353,7 @@ class BimpRevalorisation extends BimpObject
                             print_r($errors);
                             echo '</pre>';
                         } else {
+                            echo 'GOOD: ' . $reval->getData('status') .'<br/>';
                             $bdb->db->commit();
                         }
                     } else {

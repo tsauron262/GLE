@@ -915,6 +915,11 @@ class BimpDolObject extends BimpObject
                 if (!isset($data['model']) || !$data['model']) {
                     $data['model'] = $this->getModelPdf();
                 }
+                else{
+                    if($this->field_exists('model_pdf'))
+                        $this->updateField('model_pdf', $data['model']);
+                    
+                }
                 global $langs;
                 $this->dol_object->error = '';
                 $this->dol_object->errors = array();

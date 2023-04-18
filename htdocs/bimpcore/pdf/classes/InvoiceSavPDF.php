@@ -26,6 +26,8 @@ class InvoiceSavPDF extends InvoicePDF
         }
 
         parent::init($object);
+        
+        $this->pdf->addCgvPages = true;
     }
 
     protected function initHeader()

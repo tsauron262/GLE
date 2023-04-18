@@ -1089,11 +1089,17 @@ class BimpRevalorisation extends BimpObject
         );
     }
 
-    public function actionCheckBilledApplecareReval($data, &$success)
+    public function actionCheckBilledApplecareReval($data, &$success = '')
     {
         $warnings = array();
-        $success = 'Reval validées avec succés';
-        $errors = self::checkBilledApplecareReval($data['id_fact']);
+        
+        $nbOk = 0;
+        $warnings = self::checkBilledApplecareReval($data['id_fact'], $nbOk);
+        
+        if ($nbOk) {
+            $success =  $nbOk .' revalorisation(s) validée(s) avec succès';
+        }
+        
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

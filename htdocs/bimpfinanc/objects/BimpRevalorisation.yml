@@ -149,19 +149,19 @@ fields:
         label: N° de série
         type: text
         
-    equipments: 
+    equipments:
         label: Equipements
         type: items_list
         items_data_type: id_object
         items_braces: 1
-        object: equipment        
-        input: 
+        object: equipment
+        input:
             type: check_list
             select_all_buttons: 1
             search_input: 1
-            max: 
+            max:
                 field_value: qty
-            items: 
+            items:
                 callback: getAvailableEquipmentsArray
                 
 forms: 

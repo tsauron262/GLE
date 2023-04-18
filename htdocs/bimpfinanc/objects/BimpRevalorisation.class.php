@@ -1287,6 +1287,7 @@ class BimpRevalorisation extends BimpObject
             foreach ($revals as $reval) {
                 $equipments = $reval->getData('equipments');
                 if (!empty($equipments)) {
+                    $reval_errors = array();
                     $bdb->db->begin();
 
                     $nb_eqs_ok = 0;
@@ -1301,8 +1302,6 @@ class BimpRevalorisation extends BimpObject
                                             ), true);
 
                             if (BimpObject::objectLoaded($fac_reval)) {
-                                $reval_errors = array();
-
                                 $facture = $reval->getChildObject('facture');
                                 if ((int) $fac_reval->getData('status') !== 1) {
                                     if ((int) $fac_reval->getData('qty') > 1) {

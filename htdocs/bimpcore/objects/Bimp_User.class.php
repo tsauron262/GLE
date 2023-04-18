@@ -1619,6 +1619,7 @@ class Bimp_User extends BimpObject
                 if (num_public_holiday($tms, $tms, '', 1) != 0) {
                     $html .= '<span>' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Fermé</span>';
                     $html .= '</td><td>';
+                    $html .= '<span>' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Fermé</span>';
                 } else {
                     if (!$this->isAvailable($dt->format('Y-m-d 10:00:00'), $day_errors, $reason)) {
                         $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non Disponible' . ($reason ? ' (' . $reason . ')' : '') . '</span>';

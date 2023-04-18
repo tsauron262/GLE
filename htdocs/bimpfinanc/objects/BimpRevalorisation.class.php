@@ -1346,9 +1346,12 @@ class BimpRevalorisation extends BimpObject
                     }
 
                     if ($nb_eqs_ok == (int) $reval->getData('qty')) {
+                        echo '#' . $reval->id . ' [OK]<br/>';
                         $reval->set('status', 1);
                         $reval->set('date_processed', date('Y-m-d'));
                         $reval_errors = $reval->update($w, true);
+                    } else {
+                        echo '#' . $reval->id . ' [FAIL] - ' . $nb_eqs_ok . ' - ' . (int) $reval->getData('qty') . '<br/>';
                     }
                 }
             }

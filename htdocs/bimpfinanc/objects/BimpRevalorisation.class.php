@@ -75,61 +75,6 @@ class BimpRevalorisation extends BimpObject
         return (int) parent::canSetAction($action);
     }
 
-    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
-    {
-        if ((int) $value) {
-            $filters['typecont.element'] = 'facture';
-            $filters['typecont.source'] = 'internal';
-            $filters['typecont.code'] = 'SALESREPFOLL';
-            $filters['elemcont.fk_socpeople'] = (int) $value;
-
-            $joins['elemcont'] = array(
-                'table' => 'element_contact',
-                'on'    => 'elemcont.element_id = ' . $main_alias . '.id_facture',
-                'alias' => 'elemcont'
-            );
-            $joins['typecont'] = array(
-                'table' => 'c_type_contact',
-                'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
-                'alias' => 'typecont'
-            );
-        }
-    }
-
-    public function actionSetStatus($data, &$success)
-    {
-        $success = 'Maj status OK';
-        $errors = $warnings = array();
-        if ($this->canSetAction('process')) {
-            if ($data['status'] == 1 || $data['status'] == 2) {
-                foreach ($data['id_objects'] as $nb => $idT) {
-                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
-                    if (($instance->getData('type') == 'crt' && $instance->getData('status') != 10) ||
-                            ($instance->getData('type') != 'crt' && $instance->getData('status') != 0)) {
-                        $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
-                    }
-                    if (!$instance->isActionAllowed('process'))
-                        $errors[] = ($nb + 1) . ' éme ligne séléctionné opération impossible';
-                }
-                if (!count($errors)) {
-                    foreach ($data['id_objects'] as $nb => $idT) {
-                        $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
-                        $instance->updateField('status', $data['status']);
-                    }
-                }
-            } elseif ($data['status'] == 0) {
-                if ($instance->getData('type') == 'applecare' && $instance->getData('status') != 20) {
-                    $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
-                }
-            } else {
-                $errors[] = 'Action non géré';
-            }
-        } else {
-            $errors[] = 'Vous n\'avez pas la permission';
-        }
-        return array('errors' => $errors, 'warnings' => $warnings);
-    }
-
     // Getters booléens: 
 
     public function isActionAllowed($action, &$errors = array())
@@ -258,12 +203,16 @@ class BimpRevalorisation extends BimpObject
         if ($this->getData('type') == 'crt') {
             if ($this->getData('status') == 10)
                 return 1;
-        } elseif ($manuel && ($this->getData('type') == 'applecare' || $this->getData('type') == 'fac_ac')) {//pas de validation manuel sur les applecare
         } elseif ($this->getData('type') == 'applecare') {
-            if ($this->getData('status') == 0)
+            if ($this->getData('status') == 0) {
                 return 1;
-        } else
+            }
+        } elseif ($this->getData('type') == 'fac_ac') {
+            return 0;
+        } else {
             return 1;
+        }
+        
         return 0;
     }
 
@@ -689,6 +638,27 @@ class BimpRevalorisation extends BimpObject
         return $buttons;
     }
 
+    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ((int) $value) {
+            $filters['typecont.element'] = 'facture';
+            $filters['typecont.source'] = 'internal';
+            $filters['typecont.code'] = 'SALESREPFOLL';
+            $filters['elemcont.fk_socpeople'] = (int) $value;
+
+            $joins['elemcont'] = array(
+                'table' => 'element_contact',
+                'on'    => 'elemcont.element_id = ' . $main_alias . '.id_facture',
+                'alias' => 'elemcont'
+            );
+            $joins['typecont'] = array(
+                'table' => 'c_type_contact',
+                'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+                'alias' => 'typecont'
+            );
+        }
+    }
+
     // Affichage: 
 
     public function displayDesc()
@@ -868,6 +838,45 @@ class BimpRevalorisation extends BimpObject
     }
 
     // Actions 
+
+    public function actionSetStatus($data, &$success = '')
+    {
+        $errors = $warnings = array();
+        $success = 'Maj status OK';
+
+        if ($this->canSetAction('process')) {
+            if ($data['status'] == 1 || $data['status'] == 2) {
+                foreach ($data['id_objects'] as $nb => $idT) {
+                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
+                    if (($instance->getData('type') == 'crt' && $instance->getData('status') != 10) ||
+                            ($instance->getData('type') != 'crt' && $instance->getData('status') != 0)) {
+                        $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
+                    }
+                    if (!$instance->isActionAllowed('process'))
+                        $errors[] = ($nb + 1) . ' éme ligne séléctionné opération impossible';
+                }
+                if (!count($errors)) {
+                    foreach ($data['id_objects'] as $nb => $idT) {
+                        $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
+                        $instance->updateField('status', $data['status']);
+                    }
+                }
+            } elseif ($data['status'] == 0) {
+                if ($instance->getData('type') == 'applecare' && $instance->getData('status') != 20) {
+                    $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
+                }
+            } else {
+                $errors[] = 'Action non géré';
+            }
+        } else {
+            $errors[] = 'Vous n\'avez pas la permission';
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     public function actionProcess($data, &$success)
     {

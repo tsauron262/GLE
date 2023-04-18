@@ -535,6 +535,28 @@ abstract class DoliDB implements Database
 	}
         
         
+    // moddrsi : Ajouts
+        
+    public static function commitAll()
+    {
+        if (!$this->noTransaction) {
+            if ($this->transaction_opened > 0) {
+                while ($this->transaction_opened > 1) {
+                    if (defined('BIMP_LIB') && BimpDebug::isActive()) {
+                        $content = '<span class="success">COMMIT #' . ($this->transaction_opened). '</span><br/><br/>';
+                        BimpDebug::addDebug('sql', '', $content, array(
+                            'foldable' => false
+                        ));
+                    }        
+                    $this->transaction_opened--;
+                }
+                
+                $this->commit();
+            }
+        }
+        
+        $this->transaction_opened = 0;
+    }
     
     static function stopAll(){
         $errors = array('Problème réseau, merci de relancer l\'opération');

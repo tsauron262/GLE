@@ -1092,14 +1092,14 @@ class BimpRevalorisation extends BimpObject
     public function actionCheckBilledApplecareReval($data, &$success = '')
     {
         $warnings = array();
-        
+
         $nbOk = 0;
         $warnings = self::checkBilledApplecareReval($data['id_fact'], $nbOk);
-        
+
         if ($nbOk) {
-            $success =  $nbOk .' revalorisation(s) validée(s) avec succès';
+            $success = $nbOk . ' revalorisation(s) validée(s) avec succès';
         }
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -1282,14 +1282,16 @@ class BimpRevalorisation extends BimpObject
 
         if (!empty($revals)) {
             $bdb = BimpCache::getBdb();
+            $bdb->db->commitAll();
+
             foreach ($revals as $reval) {
                 $equipments = $reval->getData('equipments');
                 if (!empty($equipments)) {
+                    $bdb->db->begin();
+
                     $nb_eqs_ok = 0;
                     foreach ($equipments as $id_eq) {
                         if ($id_eq) {
-//                            $bdb->db->begin();
-                            
                             $fac_reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
                                         'type'       => 'applecare',
                                         'equipments' => array(
@@ -1351,20 +1353,20 @@ class BimpRevalorisation extends BimpObject
                         $reval->set('status', 1);
                         $reval->set('date_processed', date('Y-m-d'));
                         $reval_errors = $reval->update($w, true);
-
-                        if (count($reval_errors)) {
-//                            $bdb->db->rollback();
-                            $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation #' . $reval->id);
-                            
-                            echo '<pre>';
-                            print_r($reval_errors);
-                            echo '</pre>';
-                        } else {
-                            echo 'GOOD: ' . $reval->getData('status') .'<br/>';
-//                            $bdb->db->commit();
-                        }
                     } else {
                         echo '#' . $reval->id . ' [FAIL] - ' . $nb_eqs_ok . ' - ' . (int) $reval->getData('qty') . '<br/>';
+                    }
+
+                    if (count($reval_errors)) {
+                        $bdb->db->rollback();
+                        $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation #' . $reval->id);
+
+                        echo '<pre>';
+                        print_r($reval_errors);
+                        echo '</pre>';
+                    } else {
+                        echo 'GOOD: ' . $reval->getData('status') . '<br/>';
+                        $bdb->db->commit();
                     }
                 }
             }

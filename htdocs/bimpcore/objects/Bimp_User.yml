@@ -350,6 +350,22 @@ forms:
                   options: 
                       callback: getUserGroupsArray
                       
+    disponibilities: 
+        rows: 
+            - custom: 1
+              label: Du
+              input_name: date_from
+              data_type: date
+              input: 
+                  type: date
+                  display_now: 1
+            - custom: 1
+              label: Au
+              input_name: date_to
+              data_type: date
+              input: 
+                  type: date
+                  display_now: 1
               
 fields_tables: 
     identity:

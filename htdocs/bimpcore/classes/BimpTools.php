@@ -2151,6 +2151,24 @@ class BimpTools
         return $day;
     }
 
+    public static function getNextOpenDay($date)
+    {
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+        $dt = new DateTime($date);
+        $i = 0;
+        while ($i < 100) {
+            $dt->add(new DateInterval('P1D'));
+            $tms = strtotime($dt->format('Y-m-d 00:00:00'));
+            if (num_public_holiday($tms, $tms, '', 1) == 0) {
+                break;
+            }
+
+            $i++;
+        }
+
+        return $dt->format('Y-m-d');
+    }
+
     // Devises / prix: 
 
     public static function getCurrencyIcon($currency)

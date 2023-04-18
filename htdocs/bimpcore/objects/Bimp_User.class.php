@@ -122,6 +122,89 @@ class Bimp_User extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
+    public function isOff($date = null, &$errors = array())
+    {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+        if (is_null($date)) {
+            $dt = new DateTime();
+        } elseif (is_string($date)) {
+            $dt = new DateTime($date);
+        } elseif (is_a($date, 'DateTime')) {
+            $dt = $date;
+        } else {
+            $errors[] = "Format de la date invalide";
+            return 0;
+        }
+
+        foreach ($this->getData('day_off') as $id_day_off) {
+            if ((int) $date->format('W') % 2 == 0 && (int) $date->format('w') + 7 == $id_day_off or
+                    (int) $date->format('W') % 2 == 1 && (int) $date->format('w') == $id_day_off) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function isAvailable($date = null, &$errors = array(), &$unavailable_reason = '')
+    {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+
+        if (!(int) $this->getData('statut')) {
+            $unavailable_reason = 'inactif';
+            return 0;
+        }
+
+        if (empty($date)) {
+            $dt = new DateTime();
+        } elseif (is_string($date)) {
+            $dt = new DateTime($date);
+        } elseif (is_a($date, 'DateTime')) {
+            $dt = $date;
+        }
+
+        $hour = (int) $dt->format('h');
+
+        if ($hour < 12) {
+            // Si on est avant midi, on vérifie les dispo à 10h
+            $date = $dt->format('Y-m-d 10:00:00');
+        } elseif ($hour < 18) {
+            // Si on est après-midi mais pas le soir, on vérifie les dispo à 15h
+            $date = $dt->format('Y-m-d 15:00:00');
+        } else {
+            // Pendant la soirée on vérifie les dispo le lendemain matin (10h)
+            $date = BimpTools::getNextOpenDay($dt->format('Y-m-d')) . ' 10:00:00';
+        }
+
+        // L'utilisateur est-il off ?
+        if ($this->isOff($dt, $errors)) {
+            $unavailable_reason = 'en off';
+            return 0;
+        }
+
+        $sql = 'SELECT *';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm';
+        $sql .= ' WHERE fk_user_action = ' . $this->id;
+        $sql .= ' AND code IN ("CONGES", "RTT_DEM")';
+        $sql .= ' AND (';
+
+        $sql .= ' datep < "' . $date . '" AND ';
+        $sql .= ' datep2 > "' . $date . '"';
+
+        $sql .= ')';
+
+        if (!empty(self::getBdb()->executeS($sql, 'object'))) {
+            $unavailable_reason = 'en congé ou rtt';
+            return 0;
+        }
+
+        return 1;
+    }
+
     // Getters données: 
 
     public function getCardFields($card_name)
@@ -314,28 +397,18 @@ class Bimp_User extends BimpObject
     }
 
     // Getters params: 
-    public function actionDispo($param) {
-        
-        if(self::isUserAvaible(330))
-            $errors[] = "Dispo";
-        else
-            $errors[] = "PAS Dispo";
-        
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
+
     public function getActionsButtons()
     {
         $buttons = array();
-        
-            $buttons[] = array(
-                'label'   => 'Utilisateur dispo',
-                'icon'    => 'fas_file-image',
-                'onclick' => $this->getJsActionOnclick('dispo')
-            );
+
+        $buttons[] = array(
+            'label'   => 'Afficher disponibilités',
+            'icon'    => 'fas_user-check',
+            'onclick' => $this->getJsActionOnclick('displayAvailabilities', array(), array(
+                'form_name' => 'disponibilities'
+            ))
+        );
 
         if ($this->can('edit') && $this->isEditable()) {
             $buttons[] = array(
@@ -615,11 +688,11 @@ class Bimp_User extends BimpObject
         if ($contact_infos) {
             $html .= ($html ? '<br/>' : '') . $contact_infos;
         }
-        
-        if(self::isUserOff((int) $this->id)) {
+
+        if (self::isUserOff((int) $this->id)) {
             $html .= BimpRender::renderAlerts("Utilisateur off aujourd'hui", 'warning');
         }
-        
+
 //        $html .= BimpRender::renderAlerts("Utilisateur off aujourd'hui", 'warning');
         return $html;
     }
@@ -669,7 +742,7 @@ class Bimp_User extends BimpObject
                 );
             }
 
-            if(BimpCore::isModuleActive('BIMPTASK'))
+            if (BimpCore::isModuleActive('BIMPTASK'))
                 $tabs[] = array(
                     'id'      => 'tasks',
                     'title'   => BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Mes tâches',
@@ -1495,6 +1568,94 @@ class Bimp_User extends BimpObject
         return $html;
     }
 
+    public function renderAvailabilities($date_from = null, $date_to = null)
+    {
+        $html = '';
+        $errors = array();
+
+        if (is_null($date_from)) {
+            $date_from = date('Y-m-d');
+        } else {
+            $date_from = date('Y-m-d', strtotime($date_from));
+        }
+
+        if (is_null($date_to)) {
+            $date_to = date('Y-m-d');
+        } else {
+            $date_to = date('Y-m-d', strtotime($date_to));
+        }
+
+        if ($date_to < $date_from) {
+            $errors[] = 'Date de fin antérieure à la date de début';
+        } else {
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+
+            $html .= '<table class="bimp_list_table">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th style="width: 160px">Date</th>';
+            $html .= '<th>Disponibilité matin</th>';
+            $html .= '<th>Disponibilité après-midi</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+
+            $html .= '<tbody class="headers_col">';
+
+            $dt = new DateTime($date_from);
+            $interval = new DateInterval('P1D');
+
+            $i = 0;
+            while ($dt->format('Y-m-d') <= $date_to) {
+                $html .= '<tr>';
+                $html .= '<td>' . $dt->format('d / m / Y') . '</td>';
+                $html .= '<td>';
+
+                $i++;
+
+                $reason = '';
+                $day_errors = array();
+                $tms = strtotime($dt->format('Y-m-d 00:00:00'));
+
+                if (num_public_holiday($tms, $tms, '', 1) != 0) {
+                    $html .= '<span>' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Fermé</span>';
+                    $html .= '</td><td>';
+                } else {
+                    if (!$this->isAvailable($dt->format('Y-m-d 10:00:00'), $day_errors, $reason)) {
+                        $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non Disponible' . ($reason ? ' (' . $reason . ')' : '') . '</span>';
+                    } elseif (!empty($day_errors)) {
+                        $html .= BimpRender::renderAlerts($day_errors);
+                    } else {
+                        $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Disponible</span>';
+                    }
+
+                    $html .= '</td><td>';
+
+                    if (!$this->isAvailable($dt->format('Y-m-d 15:00:00'), $day_errors, $reason)) {
+                        $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non Disponible' . ($reason ? ' (' . $reason . ')' : '') . '</span>';
+                    } elseif (!empty($day_errors)) {
+                        $html .= BimpRender::renderAlerts($day_errors);
+                    } else {
+                        $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Disponible</span>';
+                    }
+                }
+
+                $html .= '</td>';
+                $html .= '</tr>';
+
+                if ($i >= 365) {
+                    break;
+                }
+
+                $dt->add($interval);
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+        }
+
+        return $html;
+    }
+
     // Traitements: 
 
     public function saveInterfaceParam($param_name, $value)
@@ -1986,6 +2147,28 @@ class Bimp_User extends BimpObject
         );
     }
 
+    public function actionDisplayAvailabilities($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        if ($this->isLoaded($errors)) {
+            $date_from = BimpTools::getArrayValueFromPath($data, 'date_from', null);
+            $date_to = BimpTools::getArrayValueFromPath($data, 'date_to', null);
+            $html = $this->renderAvailabilities($date_from, $date_to);
+
+            $success_callback .= 'setTimeout(function() {bimpModal.newContent(\'Disponibilités de ' . $this->getName() . '\', \'' . str_replace("'", "\'", $html) . '\', false, \'\', $());}, 500);';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
     // Overrides
 
     public function onSave(&$errors = array(), &$warnings = array())
@@ -2021,92 +2204,54 @@ class Bimp_User extends BimpObject
 
     // Méthodes statiques: 
 
-    public static function getUsersAvaible($users_in, &$errors = array(), &$warnings = array(), $max_user = 1, $return_array = false, $fetch = false, $from = null, $to = null)
+    public static function getAvailableUsersList($users_in, $date_from = null, $date_to = null, &$errors = array(), &$warnings = array())
     {
-
-        if (1 < $max_user and!$return_array)
-            $errors[] = "Impossible de renvoyer plusieurs utilisateurs sans utiliser les tableaux !";
-
-        if (1 == $max_user and $return_array)
-            $warnings[] = "Il est recommandé d'utilisé un retour unique plutôt qu'un tableau";
-
-        if (count($errors))
-            return -1;
-
-        if (!is_array($users_in))
+        if (!is_array($users_in)) {
             $users_in = array($users_in);
-
+        }
 
         $users_out = array();
-        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $users_in[0]);
 
-        $nb_add = 0;
         foreach ($users_in as $u) {
-
-            $cnt_tab = count($users_out);
-
-            // Il s'agit d'un utilisateur
-            if (0 < $u) {
-
-                if (self::isUserAvaible($u, $errors, $from, $to))
-                    $users_out[] = $u;
-
+            if (is_int($u) || preg_match('/^[0-9]+$/', $u)) {
+                // ID utilisateur
+                $id_user = (int) $u;
+                if (!in_array($id_user, $users_out)) {
+                    if (self::isUserAvaible($id_user, $errors, $date_from, $date_to)) {
+                        $users_out[] = $id_user;
+                    }
+                }
+            } elseif (in_array($u, array('superior', 'parent'))) {
                 // Supérieur hiérarchique
-            } elseif ($u == 'parent') {
-                $id_parent = $user->getData('fk_user');
+                $user = BimpCore::getBimpUser();
+                if (BimpObject::objectLoaded($user)) {
+                    $id_parent = (int) $user->getData('fk_user');
 
-                if ($id_parent == 1414)
-                    continue;
+                    if (!$id_parent || $id_parent == 1414 || in_array($id_parent, $users_out)) {
+                        continue;
+                    }
 
-                if (self::isUserAvaible($id_parent, $errors, $from, $to))
-                    $users_out[] = $id_parent;
-
-                // Code d'un groupe d'utilisateur
+                    if (self::isUserAvaible($id_parent, $errors, $date_from, $date_to)) {
+                        $users_out[] = $id_parent;
+                    }
+                }
             } else {
-                $ids_user = self::getUsersInGroup($u);
+                // Code d'un groupe d'utilisateur
+                $ids_users = self::getUsersInGroup($u);
 
-                foreach ($ids_user as $id) {
-                    if (self::isUserAvaible($id, $errors, $from, $to))
-                        $users_out[] = $id;
+                foreach ($ids_users as $id_user) {
+                    if (in_array($id_user, $users_out)) {
+                        continue;
+                    }
+
+                    if (self::isUserAvaible($id_user, $errors, $date_from, $date_to)) {
+                        $users_out[] = $id_user;
+                    }
                 }
             }
-
-            if ($cnt_tab < count($users_out))
-                $nb_add++;
-
-            if ($nb_add >= $max_user)
-                break;
         }
 
-        if (empty($users_out)) {
-            $id_default = array_shift($users_in);
-            $users_out[] = $id_default;
-            $warnings[] = "Personne n'est disponible, l'utilisateur par défaut a été selectionné automatiquement (id: " . $id_default . ')';
-        }
-
-        // Renvoie plusieurs utilisateurs
-        if ($return_array) {
-
-            if (!$fetch)
-                return $users_out;
-
-            else {
-                $user_fetch = array();
-                foreach ($users_out as $u)
-                    $user_fetch[] = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $u);
-
-                return $user_fetch;
-            }
-
-            // Renvoie un seul utilisateur
-        } else {
-            $id_user_out = array_pop($users_out);
-
-            if (!$fetch)
-                return $id_user_out;
-            else
-                return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user_out);
-        }
+        return $users_out;
     }
 
     public static function getUsersInGroup($group_name)
@@ -2130,102 +2275,36 @@ class Bimp_User extends BimpObject
 
         return self::$cache[$cache_key];
     }
-    
-    public static function isUserOff($id_user, &$errors = array(), $from = null)
-    {
 
-        if (is_null($id_user) or $id_user < 0) {
-            $errors[] = "ID de l'utilisateur absent ou mal renseigné";die('VVV');
-            return -1;
+    public static function isUserOff($id_user, &$errors = array(), $date = null, &$unavailable_reason = '')
+    {
+        if (is_null($id_user) || $id_user < 0) {
+            $errors[] = "ID de l'utilisateur absent ou mal renseigné";
+            return 0;
         }
-        
+
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-        if(!BimpObject::objectLoaded($user))  {
+        if (!BimpObject::objectLoaded($user)) {
             $errors[] = "Utilisateur d'ID " . $id_user . "absent";
-            return -2;
+            return 0;
         }
-        
-        if (is_null($from))
-            $date = new DateTime();
-        elseif(is_string($from))
-            $date = new DateTime($from);
-        elseif(is_a('DateTime', $from))
-            $date = $from;
-        else {
-            $errors[] = "Format de la date inconnu";
-            return -3;
-        }
-                
-        foreach($user->getData('day_off') as $id_day_off){
-            if((int) $date->format('W') % 2 == 0 and (int) $date->format('w') + 7 == $id_day_off or
-               (int) $date->format('W') % 2 == 1 and (int) $date->format('w')     == $id_day_off)
-                return 1;
-        }
-        
-        return 0;
+
+        return $user->isOff($date, $errors);
     }
 
-    public static function isUserAvaible($id_user, &$errors = array(), $from = null)
+    public static function isUserAvaible($id_user, $date = null, &$errors = array())
     {
-
-        if (is_null($id_user) or $id_user < 0) {
-            $errors[] = "ID de l'utilisateur absent ou mal renseigné";
-            return -1;
+        if (empty($id_user)) {
+            $errors[] = 'ID utilisateur absent';
+            return 0;
         }
-        
+
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-        if(!BimpObject::objectLoaded($user))  {
-            $errors[] = "Utilisateur d'ID " . $id_user . "absent";
-            return -2;
+        if (!BimpObject::objectLoaded($user)) {
+            return 0;
         }
 
-        // L'utilisateur est actif ?
-        if (!$user->getData('statut'))
-            return 0;
-
-        
-        // L'utilisateur est disponible ?
-        if (is_null($from)) {
-            $init_from = new DateTime();
-            $hour = (int) $init_from->format('h');
-
-            // Si on est avant midi, on vérifie les dispo à 10h
-            if ($hour < 12)
-                $from = $init_from->format('Y-m-d 10:00:00');
-
-            // Si on est après-midi mais pas le soir, on vérifie les dispo à 15h
-            elseif ($hour < 18)
-                $from = $init_from->format('Y-m-d 15:00:00');
-
-            // Pendant la soirée on vérifie les dispo le lendemain matin (10h)
-            else {
-                // TODO Fin de semaine/jour férié ?
-                $init_from->add(new DateInterval('P1D'));
-                $from = $init_from->format('Y-m-d 10:00:00');
-            }
-        }
-        
-        // L'utilisateur est-il off ?
-        if(self::isUserOff($id_user, $errors, $from))
-            return 0;
-
-        $sql = 'SELECT *';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm';
-        $sql .= ' WHERE fk_user_action = ' . $id_user;
-        $sql .= ' AND code IN ("CONGES", "RTT_DEM")';
-        $sql .= ' AND (';
-
-        $sql .= ' datep < "' . $from . '" AND ';
-        $sql .= ' datep2 > "' . $from . '"';
-
-        $sql .= ')';
-
-        $rows = self::getBdb()->executeS($sql, 'object');
-
-        foreach ($rows as $r)
-            return 0;
-
-        return 1;
+        return $user->isAvailable($date, $errors, $unavailable_reason);
     }
 
     // Boxes: 

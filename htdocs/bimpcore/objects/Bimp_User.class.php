@@ -688,23 +688,27 @@ class Bimp_User extends BimpObject
         if ($contact_infos) {
             $html .= ($html ? '<br/>' : '') . $contact_infos;
         }
-        $errors = array();
-
-//        $dispo_am = $this->isAvailable(date('Y-m-d 10:00:00'), $errors, $am_reason);
-//        $dispo_pm = $this->isAvailable(date('Y-m-d 15:00:00'), $errors, $pm_reason);
         
-        $dispo_am = $this->isAvailable('2023-04-21 10:00:00', $errors, $am_reason);
-        $dispo_pm = $this->isAvailable('2023-04-21 15:00:00', $errors, $pm_reason);
+        $errors = array();
+        $am_reason = '';
+        $pm_reason = '';
+        
+        $dispo_am = $this->isAvailable(date('Y-m-d 10:00:00'), $errors, $am_reason);
+        $dispo_pm = $this->isAvailable(date('Y-m-d 15:00:00'), $errors, $pm_reason);
 
-        if (!$dispo_am && !$dispo_pm && $am_reason == $pm_reason) {
-            $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non disponible aujourd\'hui' . ($am_reason ? ' (' . $am_reason . ')' : '') . '</span>';
-        } else {
-            if (!$dispo_am) {
-                $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non disponible ce matin' . ($am_reason ? ' (' . $am_reason . ')' : '') . '</span>';
+        if (!$dispo_am || !$dispo_pm) {
+            $html .= '<div style="margin-top: 10px">';
+            if (!$dispo_am && !$dispo_pm && $am_reason == $pm_reason) {
+                $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non disponible aujourd\'hui' . ($am_reason ? ' (' . $am_reason . ')' : '') . '</span>';
+            } else {
+                if (!$dispo_am) {
+                    $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non disponible ce matin' . ($am_reason ? ' (' . $am_reason . ')' : '') . '</span>';
+                }
+                if (!$dispo_pm) {
+                    $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non disponible cet après-midi' . ($pm_reason ? ' (' . $pm_reason . ')' : '') . '</span>';
+                }
             }
-            if (!$dispo_pm) {
-                $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non disponible cet après-midi' . ($pm_reason ? ' (' . $pm_reason . ')' : '') . '</span>';
-            }
+            $html .= '</div>';
         }
 
         return $html;

@@ -537,7 +537,7 @@ abstract class DoliDB implements Database
         
     // moddrsi : Ajouts
         
-    public static function commitAll()
+    public function commitAll()
     {
         if (!$this->noTransaction) {
             if ($this->transaction_opened > 0) {

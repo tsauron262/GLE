@@ -1,24 +1,14 @@
 <?php
 
-require_once(DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_Commande.class.php');
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
-class BimpCommandeForDol extends Bimp_Commande
+class BimpCommandeCronExec extends BimpCron
 {
-
-    public function __construct($db)
-    {
-
-        require_once __DIR__ . '/../../bimpcore/Bimp_Lib.php';
-
-        return parent::__construct('bimpcommercial', 'Bimp_Commande');
-    }
 
     public function remindEndLine($days = 60)
     {
         $user_line = $this->getLinesToRemind($days);
         $this->sendRappel($user_line);
-
-        $this->output = 'OK';
         return 0;
     }
 
@@ -49,12 +39,10 @@ class BimpCommandeForDol extends Bimp_Commande
         ));
         $sql .= ' WHERE a.date_end != "" AND a.date_end < "' . $date_limit_expire->format('Y-m-d H:i:s') . '" AND c.rappel_service_expire > 0';
         $sql .= BimpTools::getSqlOrderBy("a.date_end", 'ASC');
-        $rows = $this->db->executeS($sql);
+        $rows = $this->bdb->executeS($sql);
 
         if (!is_null($rows)) {
             foreach ($rows as $r) {
-
-
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $r->id_c);
                 $id_commercial = $commande->getCommercialId();
 
@@ -121,13 +109,10 @@ class BimpCommandeForDol extends Bimp_Commande
 
             // Commande
             foreach ($commandes as $id_c => $c) {
-
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_c);
                 $client = $commande->getChildObject('client');
-                ;
-
-                // ucfirst($commande->getLabel()) . ': ' .
-                $m .= $commande->getNomUrl(1) . ' ' . $commande->getData('label');
+                
+                $m .= $commande->getLink() . ' ' . $commande->getData('label');
                 $m .= $client->getLabel() . ': ' . $client->getRef() . ' - ' . $client->getName() . ':<br/>';
 
                 $nb_l = count($c);
@@ -144,14 +129,13 @@ class BimpCommandeForDol extends Bimp_Commande
 
                     $date_start = new DateTime(substr($data['date_start'], 0, 10));
                     $date_end = new DateTime(substr($data['date_end'], 0, 10));
-                    ;
 
                     $day_until_expire = $now->diff($date_end)->format('%r%a');
 
                     $m .= '- Quantité: ' . $l->getFullQty() . ', libellé: ' . $product_label . ' ';
                     $m .= $date_start->format('d/m/Y') . ' - ' . $date_end->format('d/m/Y');
 
-                    if (0 < (int) $day_until_expire)
+                    if ((int) $day_until_expire > 0)
                         $m .= ' <strong>expire dans ' . $day_until_expire . ' jours</strong><br/>';
                     else
                         $m .= ' <strong style="color: #b50000">expiré depuis ' . str_replace('-', '', $day_until_expire) . ' jours</strong><br/>';
@@ -160,9 +144,7 @@ class BimpCommandeForDol extends Bimp_Commande
                 $m .= '<br/>';
                 $l_user += $nb_l;
 
-//                echo $commande->getInitData('rappel_service_expire').'<br/>';
                 $commande->updateField('rappel_service_expire', ($commande->getInitData('rappel_service_expire') - 1));
-//                die('fff'.$commande->id);
             }
 
             $subject = $l_user . " ligne" . (($l_user > 1) ? 's' : '') . " de commande arrivant à expiration";
@@ -174,12 +156,14 @@ class BimpCommandeForDol extends Bimp_Commande
         }
 
         $this->output .= $tot_l . " Lignes de commandes arrivent a expirations (ou sont expirées).";
-
-        foreach ($errors as $e)
-            $this->output .= '<br/><strong style="color: red">' . $e . '</strong>';
-
-        foreach ($warnings as $w)
-            $this->output .= '<br/><strong style="color: orange">' . $w . '</strong>';
+        
+        if (!empty($errors)) {
+            $this->output .= BimpRender::renderAlerts($errors);
+        }
+        
+        if (!empty($warnings)) {
+            $this->output .= BimpRender::renderAlerts($warnings, 'warning');
+        }
 
 
         return !count($errors);

@@ -1316,6 +1316,7 @@ class BimpRevalorisation extends BimpObject
 
                                             if (!count($reval_errors)) {
                                                 $nbOk++;
+                                                $nb_eqs_ok++;
                                             }
                                         }
                                     } else {
@@ -1328,15 +1329,8 @@ class BimpRevalorisation extends BimpObject
 
                                         if (!count($reval_errors)) {
                                             $nbOk++;
+                                            $nb_eqs_ok++;
                                         }
-                                    }
-
-                                    if (count($reval_errors)) {
-                                        $bdb->db->rollback();
-                                        $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation #' . $reval->id);
-                                    } else {
-                                        $nb_eqs_ok++;
-                                        $bdb->db->commit();
                                     }
                                 } else {
                                     $nb_eqs_ok++;
@@ -1350,6 +1344,17 @@ class BimpRevalorisation extends BimpObject
                         $reval->set('status', 1);
                         $reval->set('date_processed', date('Y-m-d'));
                         $reval_errors = $reval->update($w, true);
+
+                        if (count($reval_errors)) {
+                            $bdb->db->rollback();
+                            $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation #' . $reval->id);
+                            
+                            echo '<pre>';
+                            print_r($errors);
+                            echo '</pre>';
+                        } else {
+                            $bdb->db->commit();
+                        }
                     } else {
                         echo '#' . $reval->id . ' [FAIL] - ' . $nb_eqs_ok . ' - ' . (int) $reval->getData('qty') . '<br/>';
                     }

@@ -690,8 +690,11 @@ class Bimp_User extends BimpObject
         }
         $errors = array();
 
-        $dispo_am = $this->isAvailable(date('Y-m-d 10:00:00'), $errors, $am_reason);
-        $dispo_pm = $this->isAvailable(date('Y-m-d 15:00:00'), $errors, $pm_reason);
+//        $dispo_am = $this->isAvailable(date('Y-m-d 10:00:00'), $errors, $am_reason);
+//        $dispo_pm = $this->isAvailable(date('Y-m-d 15:00:00'), $errors, $pm_reason);
+        
+        $dispo_am = $this->isAvailable('2023-04-21 10:00:00', $errors, $am_reason);
+        $dispo_pm = $this->isAvailable('2023-04-21 15:00:00', $errors, $pm_reason);
 
         if (!$dispo_am && !$dispo_pm && $am_reason == $pm_reason) {
             $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non disponible aujourd\'hui' . ($am_reason ? ' (' . $am_reason . ')' : '') . '</span>';

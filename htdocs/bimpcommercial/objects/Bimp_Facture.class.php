@@ -3762,18 +3762,18 @@ class Bimp_Facture extends BimpComm
                 }
 
                 if ($this->getData('fk_statut') > 0) {
-                    $html .= '<div class="buttonsContainer" style="margin: 15px;">';
+                    $html .= '<div class="buttonsContainer" style="margin: 15px; 0 ">';
 
                     $onclick = $reval->getJsActionOnclick('checkAppleCareSerials', array(), array());
                     $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                    $html .= BimpRender::renderIcon('fas_', 'iconLeft') . 'Vérifier les n° de série';
+                    $html .= BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'Vérifier les n° de série';
                     $html .= '</span>';
 
                     $onclick = $reval->getJsActionOnclick('checkBilledApplecareReval', array(
                         'id_fact' => $this->id
                     ));
                     $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                    $html .= BimpRender::renderIcon('fas_', 'iconLeft') . 'Valider les revalorisations AppleCare';
+                    $html .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Valider les revalorisations AppleCare';
                     $html .= '</span>';
                     $html .= '</div>';
                 }

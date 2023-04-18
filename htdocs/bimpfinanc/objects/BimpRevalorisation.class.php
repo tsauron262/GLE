@@ -1101,7 +1101,7 @@ class BimpRevalorisation extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
+            'errors'   => array(),
             'warnings' => $warnings
         );
     }

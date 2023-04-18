@@ -120,7 +120,6 @@ fields:
         default_value: 0
     date_creation: 
         label: Créée le
-        dol_prop: date
         type: datetime
     date_valid: 
         label: Validée le

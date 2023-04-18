@@ -1098,6 +1098,8 @@ class BimpRevalorisation extends BimpObject
 
         if ($nbOk) {
             $success = $nbOk . ' revalorisation(s) validée(s) avec succès';
+        } else {
+            $warnings[] = 'Aucune validation effectuée';
         }
 
         return array(

@@ -1282,6 +1282,8 @@ class BimpRevalorisation extends BimpObject
                     $nb_eqs_ok = 0;
                     foreach ($equipments as $id_eq) {
                         if ($id_eq) {
+                            $bdb->db->begin();
+                            
                             $fac_reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
                                         'type'       => 'applecare',
                                         'equipments' => array(
@@ -1292,7 +1294,6 @@ class BimpRevalorisation extends BimpObject
 
                             if (BimpObject::objectLoaded($fac_reval)) {
                                 $reval_errors = array();
-                                $bdb->db->begin();
 
                                 $facture = $reval->getChildObject('facture');
                                 if ((int) $fac_reval->getData('status') !== 1) {
@@ -1350,7 +1351,7 @@ class BimpRevalorisation extends BimpObject
                             $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation #' . $reval->id);
                             
                             echo '<pre>';
-                            print_r($errors);
+                            print_r($reval_errors);
                             echo '</pre>';
                         } else {
                             echo 'GOOD: ' . $reval->getData('status') .'<br/>';

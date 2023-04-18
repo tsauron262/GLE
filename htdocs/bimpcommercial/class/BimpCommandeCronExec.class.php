@@ -71,99 +71,102 @@ class BimpCommandeCronExec extends BimpCron
     {
 
         $errors = array();
-        $warnings = array();
-        $now = new DateTime();
-        $tot_l = 0;
-
-        $id_user_def = (int) BimpCore::getConf('id_user_mail_comm_line_expire', null, 'bimpcommercial');
-
-        // User
-        foreach ($user_line as $id_user_in => $commandes) {
-
-            $u_init = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_in);
-            $u_a = Bimp_User::getUsersAvaible(array($id_user_in, 'parent', $id_user_def), $errors, $warnings, 1, false, true);
-
-            $m = '';
-
-            // L'utilisateur disponible n'est ni le commercial, ni le créateur de la pièce
-            if ((int) $u_a->id != (int) $id_user_in) {
-
-
-                // Supérieur hiérarchique
-                if ((int) $u_init->getData('fk_user') == (int) $u_a->id) {
-                    $m .= "Vous recevez ce message car vous être le supérieur hiérarchique de ";
-                    $m .= $u_init->getData('firstname') . ' ' . $u_init->getData('lastname') . ' qui n\'est pas disponible<br/>';
-
-                    // Chargé des commandes
-                } elseif ((int) $u_a->id == (int) $id_user_def) {
-                    $m .= "Vous recevez ce message car vous êtes la personne en charge des";
-                    $m .= " relances de commandes pour les clients sans commerciaux disponible.<br/>";
-                    $m .= " (ici celles de " . $u_init->getData('firstname') . ' ' . $u_init->getData('lastname') . ')<br/>';
-                }
-            }
-
-            $l_user = 0;
-
-            $m .= 'Bonjour ' . $u_a->getData('firstname') . ',<br/><br/>';
-            $m .= 'Voici la liste de vos commandes contenant des lignes arrivant à expiration:<br/>';
-
-            // Commande
-            foreach ($commandes as $id_c => $c) {
-                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_c);
-                $client = $commande->getChildObject('client');
-                
-                $m .= $commande->getLink() . ' ' . $commande->getData('label');
-                $m .= $client->getLabel() . ': ' . $client->getRef() . ' - ' . $client->getName() . ':<br/>';
-
-                $nb_l = count($c);
-
-                // Lignes
-                foreach ($c as $id_dol_line => $data) {
-                    $l = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $data['id_bimp_line']);
-
-                    $product = $l->getProduct();
-                    if (BimpObject::objectLoaded($product))
-                        $product_label = BimpTools::cleanString($product->getData('label'));
-                    else
-                        $product_label = "Produit non renseigné";
-
-                    $date_start = new DateTime(substr($data['date_start'], 0, 10));
-                    $date_end = new DateTime(substr($data['date_end'], 0, 10));
-
-                    $day_until_expire = $now->diff($date_end)->format('%r%a');
-
-                    $m .= '- Quantité: ' . $l->getFullQty() . ', libellé: ' . $product_label . ' ';
-                    $m .= $date_start->format('d/m/Y') . ' - ' . $date_end->format('d/m/Y');
-
-                    if ((int) $day_until_expire > 0)
-                        $m .= ' <strong>expire dans ' . $day_until_expire . ' jours</strong><br/>';
-                    else
-                        $m .= ' <strong style="color: #b50000">expiré depuis ' . str_replace('-', '', $day_until_expire) . ' jours</strong><br/>';
-                }
-
-                $m .= '<br/>';
-                $l_user += $nb_l;
-
-                $commande->updateField('rappel_service_expire', ($commande->getInitData('rappel_service_expire') - 1));
-            }
-
-            $subject = $l_user . " ligne" . (($l_user > 1) ? 's' : '') . " de commande arrivant à expiration";
-
-            $this->output .= 'Sujet:' . $subject . '<br/>' . $m;
-
-            mailSyn2($subject, $u_a->getData('email'), '', $m);
-            $tot_l += $l_user;
-        }
-
-        $this->output .= $tot_l . " Lignes de commandes arrivent a expirations (ou sont expirées).";
-        
-        if (!empty($errors)) {
-            $this->output .= BimpRender::renderAlerts($errors);
-        }
-        
-        if (!empty($warnings)) {
-            $this->output .= BimpRender::renderAlerts($warnings, 'warning');
-        }
+        // A terminer de débuguer
+         
+         
+//        $warnings = array();
+//        $now = new DateTime();
+//        $tot_l = 0;
+//
+//        $id_user_def = (int) BimpCore::getConf('id_user_mail_comm_line_expire', null, 'bimpcommercial');
+//
+//        // User
+//        foreach ($user_line as $id_user_in => $commandes) {
+//
+//            $u_init = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_in);
+//            $u_a = Bimp_User::getUsersAvaible(array($id_user_in, 'parent', $id_user_def), $errors, $warnings, 1, false, true);
+//
+//            $m = '';
+//
+//            // L'utilisateur disponible n'est ni le commercial, ni le créateur de la pièce
+//            if ((int) $u_a->id != (int) $id_user_in) {
+//
+//
+//                // Supérieur hiérarchique
+//                if ((int) $u_init->getData('fk_user') == (int) $u_a->id) {
+//                    $m .= "Vous recevez ce message car vous être le supérieur hiérarchique de ";
+//                    $m .= $u_init->getData('firstname') . ' ' . $u_init->getData('lastname') . ' qui n\'est pas disponible<br/>';
+//
+//                    // Chargé des commandes
+//                } elseif ((int) $u_a->id == (int) $id_user_def) {
+//                    $m .= "Vous recevez ce message car vous êtes la personne en charge des";
+//                    $m .= " relances de commandes pour les clients sans commerciaux disponible.<br/>";
+//                    $m .= " (ici celles de " . $u_init->getData('firstname') . ' ' . $u_init->getData('lastname') . ')<br/>';
+//                }
+//            }
+//
+//            $l_user = 0;
+//
+//            $m .= 'Bonjour ' . $u_a->getData('firstname') . ',<br/><br/>';
+//            $m .= 'Voici la liste de vos commandes contenant des lignes arrivant à expiration:<br/>';
+//
+//            // Commande
+//            foreach ($commandes as $id_c => $c) {
+//                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_c);
+//                $client = $commande->getChildObject('client');
+//                
+//                $m .= $commande->getLink() . ' ' . $commande->getData('label');
+//                $m .= $client->getLabel() . ': ' . $client->getRef() . ' - ' . $client->getName() . ':<br/>';
+//
+//                $nb_l = count($c);
+//
+//                // Lignes
+//                foreach ($c as $id_dol_line => $data) {
+//                    $l = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $data['id_bimp_line']);
+//
+//                    $product = $l->getProduct();
+//                    if (BimpObject::objectLoaded($product))
+//                        $product_label = BimpTools::cleanString($product->getData('label'));
+//                    else
+//                        $product_label = "Produit non renseigné";
+//
+//                    $date_start = new DateTime(substr($data['date_start'], 0, 10));
+//                    $date_end = new DateTime(substr($data['date_end'], 0, 10));
+//
+//                    $day_until_expire = $now->diff($date_end)->format('%r%a');
+//
+//                    $m .= '- Quantité: ' . $l->getFullQty() . ', libellé: ' . $product_label . ' ';
+//                    $m .= $date_start->format('d/m/Y') . ' - ' . $date_end->format('d/m/Y');
+//
+//                    if ((int) $day_until_expire > 0)
+//                        $m .= ' <strong>expire dans ' . $day_until_expire . ' jours</strong><br/>';
+//                    else
+//                        $m .= ' <strong style="color: #b50000">expiré depuis ' . str_replace('-', '', $day_until_expire) . ' jours</strong><br/>';
+//                }
+//
+//                $m .= '<br/>';
+//                $l_user += $nb_l;
+//
+//                $commande->updateField('rappel_service_expire', ($commande->getInitData('rappel_service_expire') - 1));
+//            }
+//
+//            $subject = $l_user . " ligne" . (($l_user > 1) ? 's' : '') . " de commande arrivant à expiration";
+//
+//            $this->output .= 'Sujet:' . $subject . '<br/>' . $m;
+//
+//            mailSyn2($subject, $u_a->getData('email'), '', $m);
+//            $tot_l += $l_user;
+//        }
+//
+//        $this->output .= $tot_l . " Lignes de commandes arrivent a expirations (ou sont expirées).";
+//        
+//        if (!empty($errors)) {
+//            $this->output .= BimpRender::renderAlerts($errors);
+//        }
+//        
+//        if (!empty($warnings)) {
+//            $this->output .= BimpRender::renderAlerts($warnings, 'warning');
+//        }
 
 
         return !count($errors);

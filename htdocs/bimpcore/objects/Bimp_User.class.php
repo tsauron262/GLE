@@ -2222,7 +2222,7 @@ class Bimp_User extends BimpObject
 
     // Méthodes statiques: 
 
-    public static function getAvailableUsersList($users_in, $date_from = null, $date_to = null, &$errors = array(), &$warnings = array())
+    public static function getAvailableUsersList($users_in, $date_from = null, &$errors = array(), &$warnings = array())
     {
         if (!is_array($users_in)) {
             $users_in = array($users_in);
@@ -2235,7 +2235,7 @@ class Bimp_User extends BimpObject
                 // ID utilisateur
                 $id_user = (int) $u;
                 if (!in_array($id_user, $users_out)) {
-                    if (self::isUserAvaible($id_user, $errors, $date_from, $date_to)) {
+                    if (self::isUserAvailable($id_user, $date_from, $errors)) {
                         $users_out[] = $id_user;
                     }
                 }
@@ -2249,7 +2249,7 @@ class Bimp_User extends BimpObject
                         continue;
                     }
 
-                    if (self::isUserAvaible($id_parent, $errors, $date_from, $date_to)) {
+                    if (self::isUserAvailable($id_parent, $date_from, $errors)) {
                         $users_out[] = $id_parent;
                     }
                 }
@@ -2262,7 +2262,7 @@ class Bimp_User extends BimpObject
                         continue;
                     }
 
-                    if (self::isUserAvaible($id_user, $errors, $date_from, $date_to)) {
+                    if (self::isUserAvailable($id_user, $date_from, $errors)) {
                         $users_out[] = $id_user;
                     }
                 }
@@ -2294,7 +2294,7 @@ class Bimp_User extends BimpObject
         return self::$cache[$cache_key];
     }
 
-    public static function isUserOff($id_user, &$errors = array(), $date = null, &$unavailable_reason = '')
+    public static function isUserOff($id_user, &$errors = array(), $date = null)
     {
         if (is_null($id_user) || $id_user < 0) {
             $errors[] = "ID de l'utilisateur absent ou mal renseigné";
@@ -2310,7 +2310,7 @@ class Bimp_User extends BimpObject
         return $user->isOff($date, $errors);
     }
 
-    public static function isUserAvaible($id_user, $date = null, &$errors = array())
+    public static function isUserAvailable($id_user, $date = null, &$errors = array(), &$unavailable_reason = '')
     {
         if (empty($id_user)) {
             $errors[] = 'ID utilisateur absent';

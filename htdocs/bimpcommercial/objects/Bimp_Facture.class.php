@@ -6638,7 +6638,6 @@ class Bimp_Facture extends BimpComm
         return $out;
     }
 
-//    public function sendInvoiceDraftWhithMail()
     public static function sendRappelFacturesBrouillons()
     {
         $delay = (int) BimpCore::getConf('rappels_factures_brouillons_delay', null, 'bimpcommercial');

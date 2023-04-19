@@ -11,7 +11,7 @@ class BimpCommercialCronExec extends BimpCron
         
         $commande_class = '';
         BimpObject::loadClass('bimpcommercial', 'Bimp_Commande', $commande_class);
-        $this->output = $commande_class::checkLinesEcheances(60);
+        $this->output = $commande_class::sendRappels();
         
         return 0;
     }

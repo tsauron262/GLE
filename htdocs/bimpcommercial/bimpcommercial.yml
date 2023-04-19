@@ -262,6 +262,20 @@ params:
         def: 201
         
     # Rappels: 
+    rappels_commandes_brouillons_delay: 
+        label: Délai pour l\'envoi des rappels pour les commandes brouillons
+        type: int
+        cat: rappels
+        info: Laisser 0 pour désactiver l\'envoi des rappels
+        def: 0
+        
+    rappels_commandes_echeances_delay: 
+        label: Délai pour l\'envoi des rappels pour les produits arrivant à échéances des commandes
+        type: int
+        cat: rappels
+        info: Laisser 0 pour désactiver l\'envoi des rappels
+        def: 0
+        
     rappels_factures_brouillons_delay: 
         label: Délai pour l\'envoi des rappels pour les factures brouillons
         type: int

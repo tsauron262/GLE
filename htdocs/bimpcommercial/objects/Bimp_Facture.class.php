@@ -6610,20 +6610,26 @@ class Bimp_Facture extends BimpComm
     {
         $out = '';
 
+        // Rappels quotidiens: 
         $result = static::sendRappelFacturesBrouillons();
         if ($result) {
             $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels factures brouillons -----------<br/><br/>' . $result;
         }
 
-        $result = static::sendRappelFacturesMargesNegatives();
-        if ($result) {
-            $out .= ($out ? '<br/><br/>' : '') . '------- Rappels factures à marges négatives -------<br/><br/>' . $result;
-        }
-        
-        $result = static::sendRappelFacturesMargesNegatives();
+        $result = static::sendRappelFacturesFinancementImpayees();
         if ($result) {
             $out .= ($out ? '<br/><br/>' : '') . '----- Rappels factures en financement impayées ----<br/><br/>' . $result;
         }
+
+        // Rappels Hebdomadaires: 
+        
+        if (date('N') == 7) {
+            $result = static::sendRappelFacturesMargesNegatives();
+            if ($result) {
+                $out .= ($out ? '<br/><br/>' : '') . '------- Rappels factures à marges négatives -------<br/><br/>' . $result;
+            }
+        }
+
 
         return $out;
     }
@@ -6754,7 +6760,7 @@ class Bimp_Facture extends BimpComm
             if (!empty($facts)) {
                 foreach ($facts as $idFact => $lines) {
                     $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact);
-                    $html .= '<h2>' . $fact->getLink() . '</h2>';
+                    $html .= ' - ' . $fact->getLink() . ' : <br/>';
                     foreach ($lines as $line) {
                         $html .= $line . '<br/>';
                     }
@@ -6762,7 +6768,7 @@ class Bimp_Facture extends BimpComm
                 }
 
                 $to = BimpTools::cleanEmailsStr($to);
-                mailSyn2('Liste des ligne(s) de facture à marge négative', $to, null, $html);
+//                mailSyn2('Liste des ligne(s) de facture à marge négative', $to, null, $html);
             }
         }
 
@@ -6777,11 +6783,11 @@ class Bimp_Facture extends BimpComm
         if (!$delay) {
             return '';
         }
-        
+
         $out = '';
         $modes = array();
         $bdb = BimpCache::getBdb();
-        
+
         $rows = $bdb->getRows('c_paiement', 'code IN(\'FIN\',\'SOFINC\',\'FINAPR\',\'FLOC\',\'FINLDL\',\'FIN_YC\')', null, 'array', array('id'));
 
         if (is_array($rows)) {
@@ -6837,7 +6843,7 @@ class Bimp_Facture extends BimpComm
                                 $msg .= 'La facture "' . $facture->getLink() . '" dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le ';
                                 $msg .= date('d / m / Y', strtotime($fac_date_lim));
 
-                                $out .= ' - Fac ' . $facture->getLink() .' : ';
+                                $out .= ' - Fac ' . $facture->getLink() . ' : ';
                                 if (mailSyn2($subject, $to, '', $msg, array(), array(), array(), $cc)) {
                                     $out .= '[OK]';
                                 } else {
@@ -6853,7 +6859,7 @@ class Bimp_Facture extends BimpComm
                 }
             }
         }
-        
+
         return $out;
     }
 

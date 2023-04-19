@@ -4537,6 +4537,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
                 }
             }
+            
+            if (empty($data)) {
+                return 'Aucune échéance à notifier';
+            }
 
             $return .= 'Données : <pre>';
             $return .= print_r($data, 1);

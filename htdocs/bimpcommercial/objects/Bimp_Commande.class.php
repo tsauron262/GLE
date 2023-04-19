@@ -4339,10 +4339,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $init_entrepot = (int) $this->getInitData('entrepot');
 //        $this->setPaiementComptant(); // Eviter de créer des fonctions avec juste 1 ligne, les classes sont déjà bien assez surchargées en fonctions. 
         $this->set('paiement_comptant', $this->isPaiementComptant());
-        
+
         $this->dol_object->delivery_date = $this->getData('date_livraison');
         $errors = parent::update($warnings, $force_update);
-        
 
         if (!count($errors)) {
             if ($init_entrepot !== (int) $this->getData('entrepot')) {
@@ -4401,7 +4400,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $msg .= '<br/>' . $comm_link;
                     $this->output .= ' - ' . $comm_link . '<br/>';
                 }
-                
+
                 if (mailSyn2('Commande(s) brouillon à régulariser', $mail, null, $msg)) {
                     $this->output .= '[OK]';
                     $i++;
@@ -4464,12 +4463,13 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return 0;
     }
 
-    public static function checkLinesEcheances()
+    public static function checkLinesEcheances($delay_days = 60)
     {
+        $return = '';
         $bdb = self::getBdb(true);
 
         $dt = new DateTime();
-        $dt->add(new DateInterval('P30D'));
+        $dt->add(new DateInterval('P' . $delay_days . 'D'));
         $dt_str = $dt->format('Y-m-d');
 
         $fields = array('bl.id as id_line', 'c.rowid as id_commande', 'a.date_end');
@@ -4510,12 +4510,18 @@ class Bimp_Commande extends Bimp_CommandeTemp
         if (is_array($rows)) {
             // Trie par commerciaux et commandes: 
             $data = array();
+            $commercial_params = array(
+                'check_active'    => true,
+                'allow_superior'  => true,
+                'allow_default'   => true,
+                'id_default_user' => (int) BimpCore::getConf('id_user_mail_comm_line_expire', (int) BimpCore::getConf('default_id_commercial', null), 'bimpcommercial')
+            );
             foreach ($rows as $r) {
                 if ((int) $r['id_commande']) {
                     $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $r['id_commande']);
 
                     if (BimpObject::objectLoaded($commande)) {
-                        $id_commercial = $commande->getCommercialId();
+                        $id_commercial = $commande->getCommercialId($commercial_params);
 
                         if ($id_commercial) {
                             if (!isset($data[$id_commercial])) {
@@ -4598,18 +4604,25 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         }
 
                         $msg = 'Bonjour,<br/><br/>';
-                        $msg .= 'Il y a <b>' . $nProds . '</b> produit(s) vendu(s) à durée limitée qui arrivent à échéance dans 30 jours ou moins.<br/>';
+                        $msg .= 'Il y a <b>' . $nProds . '</b> produit(s) vendu(s) à durée limitée qui arrivent à échéance dans ' . $delay_days . ' jours ou moins.<br/>';
                         $msg .= 'Note: vous ne recevrez pas d\'autre alerte pour les produits listés ci-dessous.<br/><br/>';
                         $msg .= $html;
 
+                        $return .= 'Mail to ' . ($email) . ' (' . $nProds . ' produit(s)) => ';
                         if (mailSyn2($subject, $email, '', $msg)) {
+                            $return .= '[OK]';
                             $bdb->update('bimp_commande_line', array(
                                 'echeance_notif_send' => 1
                                     ), 'id IN (' . implode(',', $lines_done) . ')');
+                        } else {
+                            $return .= '[ECHEC]';
                         }
+                        $return .= '<br/>';
                     }
                 }
             }
         }
+
+        return $return;
     }
 }

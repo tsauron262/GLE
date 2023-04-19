@@ -5,6 +5,13 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 class BimpCommercialCronExec extends BimpCron
 {
 
+    public function checkCommandeLinesEcheances($delay_days = 60)
+    {
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+        $this->output = Bimp_Commande::checkLinesEcheances($delay_days);
+        return 0;
+    }
+
     public function sendRappelFacturesMargesNegatives()
     {
         // Déplacé ici pour outils BimpCron (Envoi mail si Erreur Fatale) 
@@ -52,7 +59,7 @@ class BimpCommercialCronExec extends BimpCron
         }
 
         $to = 'f.pineri@bimp.fr, tommy@bimp.fr, a.alimi@bimp.fr';
-        
+
         mailSyn2('Ligne de facture à marge négative', $to, null, $html);
 
         $this->output = $html;

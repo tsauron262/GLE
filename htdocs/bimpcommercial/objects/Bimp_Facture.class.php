@@ -6621,12 +6621,16 @@ class Bimp_Facture extends BimpComm
             $out .= ($out ? '<br/><br/>' : '') . '----- Rappels factures en financement impayées ----<br/><br/>' . $result;
         }
 
+        $result = static::createTasksChorus();
+        if ($result) {
+            $out .= ($out ? '<br/><br/>' : '') . '-------------- Tâches exports CHORUS -------------<br/><br/>' . $result;
+        }
+
         // Rappels Hebdomadaires: 
-        
-        if (date('N') == 7) {
+        if ((int) date('N') == 7) {
             $result = static::sendRappelFacturesMargesNegatives();
             if ($result) {
-                $out .= ($out ? '<br/><br/>' : '') . '------- Rappels factures à marges négatives -------<br/><br/>' . $result;
+                $out .= ($out ? '<br/><br/>' : '') . '------- Rappels factures à marges négatives ------<br/><br/>' . $result;
             }
         }
 
@@ -6654,7 +6658,7 @@ class Bimp_Facture extends BimpComm
         if (!empty($rows)) {
             $factures = array();
 
-            $id_default_user = (int) BimpCore::getConf('default_id_commercial', null, 'bimpcommercial');
+            $id_default_user = (int) BimpCore::getConf('default_id_commercial', null);
             foreach ($rows as $r) {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommmercial', 'Bimp_Facture', (int) $r['rowid']);
 
@@ -6858,6 +6862,28 @@ class Bimp_Facture extends BimpComm
                     }
                 }
             }
+        }
+
+        return $out;
+    }
+
+    public function createTasksChorus()
+    {
+        $out = '';
+
+        BimpObject::loadClass('bimptask', 'BIMP_Task');
+
+        $factures = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('chorus_status' => array(0, 1), 'fk_statut' => array(1, 2)));
+
+        if (empty($factures)) {
+            return 'Aucune facture en attente d\'export CHORUS';
+        }
+
+        foreach ($factures as $fact) {
+            $out .= ' - ' . $fact->getLink() . '<br/>';
+            $sujet = 'Facture en attente d\'export Chorus ' . $fact->getRef();
+            $msg = 'La facture {{Facture:' . $fact->id . '}} est en attente d\'export chorus';
+            BIMP_Task::addAutoTask('facturation', $sujet, $msg, "facture_extrafields:fk_object=" . $fact->id . ' AND chorus_status > 1');
         }
 
         return $out;

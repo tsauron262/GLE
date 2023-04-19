@@ -4465,7 +4465,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public static function checkLinesEcheances($delay_days = 60)
     {
-        $return = '';
         $bdb = self::getBdb(true);
 
         $dt = new DateTime();
@@ -4542,7 +4541,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 return 'Aucune échéance à notifier';
             }
 
-            $return .= 'Données : <pre>';
+            $return = 'Données : <pre>';
             $return .= print_r($data, 1);
             $return .= '</pre><br/><br/>';
 

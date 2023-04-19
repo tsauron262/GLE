@@ -42,18 +42,6 @@ class Bimp_Societe extends BimpDolObject
         0  => array('E', 'danger', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
     );
 
-//    public static $regions = array(
-//        'Alpes-Drôme'      => array(73, 74, 38, 7, 26),
-//        'Rhône-Auvergne'   => array(3, 15, 43, 63, 42, 1, 69),
-//        'PACA-Occitanie'   => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64, 65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30, 4, 5, 6, 13, 83, 84, '2A', '2B'),
-//        'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
-//    );
-
-    public function getRefProperty()
-    {
-        return 'code_client';
-    }
-
     public static $regions = array(
         1 => array(
             'A' => array(1, 69),
@@ -76,6 +64,9 @@ class Bimp_Societe extends BimpDolObject
             'B' => array(22, 29, 35, 56),
             'C' => array(14, 27, 50, 61, 76)
         ),
+        5 => array(
+            'A' => array(971, 972, 973, 974, 976, 977, 98)
+        )
     );
     public static $anonymization_fields = array('nom', 'name_alias', 'address', 'zip', 'town', 'email', 'skype', 'url', 'phone', 'fax', 'siren', 'siret', 'ape', 'idprof4', 'idprof5', 'idprof6', 'tva_intra');
     private $debug = array();
@@ -864,6 +855,11 @@ class Bimp_Societe extends BimpDolObject
 
     // Getters données: 
 
+    public function getRefProperty()
+    {
+        return 'code_client';
+    }
+    
     public function getRef($with_generic = true)
     {
         $return = '';

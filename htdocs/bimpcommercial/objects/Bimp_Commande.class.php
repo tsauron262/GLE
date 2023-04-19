@@ -4382,12 +4382,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
         if ($result) {
             $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels commandes brouillons -----------<br/><br/>' . $result;
         }
-        
+
         $result = static::checkLinesEcheances();
         if ($result) {
             $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels échéances commandes -----------<br/><br/>' . $result;
         }
-        
+
         // Rappels Hebdomadaires: 
         if ((int) date('N') == 7) {
             $result = static::sendRappelsNotBilled();
@@ -4395,10 +4395,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $out .= ($out ? '<br/><br/>' : '') . '------- Rappels commandes non facturées------<br/><br/>' . $result;
             }
         }
-        
+
         return $out;
     }
-    
+
     public static function sendRappelCommandesBrouillons()
     {
         $delay = (int) BimpCore::getConf('rappels_commandes_brouillons_delay', null, 'bimpcommercial');
@@ -4464,12 +4464,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
 
                 $return .= ' - Mail to ' . $mail . ' : ';
-//                if (mailSyn2('Commande(s) brouillon à régulariser', BimpTools::cleanEmailsStr($mail), null, $msg)) {
+                if (mailSyn2('Commande(s) brouillon à régulariser', BimpTools::cleanEmailsStr($mail), null, $msg)) {
                     $return .= ' [OK]';
                     $i++;
-//                } else {
-//                    $return .= ' [ECHEC]';
-//                }
+                } else {
+                    $return .= ' [ECHEC]';
+                }
                 $return .= '<br/>';
             }
         }
@@ -4481,7 +4481,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
     {
         $out = '';
         $nFails = $nOk = 0;
-        
+
         $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND total_ht != 0 AND (date_prevue_facturation < now() OR date_prevue_facturation IS NULL) AND (date_valid <= "' . date("Y-m-d", strtotime("-1 month")) . '") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
 
         if (!is_null($rows)) {
@@ -4512,14 +4512,14 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         $msg .= 'La commande ' . $commande->getLink() . ' du client ' . $soc->getLink() . ', créée le ' . $commande->displayData('date_creation', 'default', 0, 1) . ' n\'est pas facturée.<br/>';
                         $msg .= 'Merci de la régulariser au plus vite.';
 
-                        $out .= ' - Mail to ' . $to.' : ';
-//                        if (mailSyn2("Commande " . $commande->getRef() . ' non facturée', $to, '', $msg)) {
+                        $out .= ' - Mail to ' . $to . ' : ';
+                        if (mailSyn2("Commande " . $commande->getRef() . ' non facturée', $to, '', $msg)) {
                             $out .= '[OK]';
                             $nOk++;
-//                        } else {
-//                            $out .= '[ECHEC]';
-//                            $nFails++;
-//                        }
+                        } else {
+                            $out .= '[ECHEC]';
+                            $nFails++;
+                        }
                         $out .= '<br/>';
 
                         if ($nFails > 20 || $nOk > 2100) {
@@ -4542,7 +4542,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         if (!$delay) {
             return '';
         }
-        
+
         $bdb = self::getBdb(true);
 
         $dt = new DateTime();
@@ -4694,14 +4694,14 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         $msg .= $html;
 
                         $return .= 'Mail to ' . ($email) . ' (' . $nProds . ' produit(s)) => ';
-//                        if (mailSyn2($subject, $email, '', $msg)) {
+                        if (mailSyn2($subject, $email, '', $msg)) {
                             $return .= '[OK]';
                             $bdb->update('bimp_commande_line', array(
                                 'echeance_notif_send' => 1
                                     ), 'id IN (' . implode(',', $lines_done) . ')');
-//                        } else {
-//                            $return .= '[ECHEC]';
-//                        }
+                        } else {
+                            $return .= '[ECHEC]';
+                        }
                         $return .= '<br/>';
                     }
                 }

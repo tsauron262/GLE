@@ -1401,9 +1401,9 @@ class BimpComm extends BimpDolObject
         return $zone;
     }
 
-    public function getCommercial()
+    public function getCommercial($params = array())
     {
-        $id_comm = (int) $this->getCommercialId();
+        $id_comm = (int) $this->getCommercialId($params);
         if ($id_comm) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_comm);
             if (BimpObject::objectLoaded($user)) {

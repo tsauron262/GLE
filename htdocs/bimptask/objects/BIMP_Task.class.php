@@ -1006,7 +1006,7 @@ class BIMP_Task extends BimpObject
     {
         $mails = array();
         foreach ($this->getUsersToNotify(true) as $userN) {
-            $mails[] = BimpTools::getMailOrSuperiorMail($userN->id);
+            $mails[] = BimpTools::getUserEmailOrSuperiorEmail($userN->id);
         }
         $to = implode(',', $mails);
 

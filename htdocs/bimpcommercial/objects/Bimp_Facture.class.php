@@ -6604,41 +6604,78 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    // Méthodes statiques: 
+    // Rappels liés aux factures: 
 
-    public function sendInvoiceDraftWhithMail()
+    public static function sendRappels()
     {
-        mailSyn2('EXEC CRON sendInvoiceDraftWhithMail', 'f.martinez@bimp.fr', '', 'Heure: ' . date('d / m / Y H:i:s') . '<br/>SERVER : ' . print_r($_SERVER, 1));
+        $out = '';
 
-        // Modifié pour n'envoyer qu'un seul mail par commercial. 
+        $result = static::sendRappelFacturesBrouillons();
+        if ($result) {
+            $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels factures brouillons -----------<br/><br/>' . $result;
+        }
 
+        $result = static::sendRappelFacturesMargesNegatives();
+        if ($result) {
+            $out .= ($out ? '<br/><br/>' : '') . '------- Rappels factures à marges négatives -------<br/><br/>' . $result;
+        }
+        
+        $result = static::sendRappelFacturesMargesNegatives();
+        if ($result) {
+            $out .= ($out ? '<br/><br/>' : '') . '----- Rappels factures en financement impayées ----<br/><br/>' . $result;
+        }
+
+        return $out;
+    }
+
+//    public function sendInvoiceDraftWhithMail()
+    public static function sendRappelFacturesBrouillons()
+    {
+        $delay = (int) BimpCore::getConf('rappels_factures_brouillons_delay', null, 'bimpcommercial');
+
+        if (!$delay) {
+            return '';
+        }
+
+        $return = '';
         $date = new DateTime();
-        $nbDay = 5;
-        $date->sub(new DateInterval('P' . $nbDay . 'D'));
-        $sql = $this->db->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "facture` WHERE `datec` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0");
+        $date->sub(new DateInterval('P' . $delay . 'D'));
 
-        $factures = array();
-        while ($ln = $this->db->db->fetch_object($sql)) {
-            $facture = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
+        $bdb = BimpCache::getBdb();
+        $where = 'datec < \'' . $date->format('Y-m-d') . '\' AND fk_statut = 0';
+        $rows = $bdb->getRows('facture', $where, null, 'array', array('rowid'));
 
-            if (BimpObject::objectLoaded($facture)) {
-                $id_user = $facture->getIdContact('internal', 'SALESREPSIGN');
-                if (!$id_user) {
-                    $id_user = (int) $facture->getData('fk_user_author');
+        if (!empty($rows)) {
+            $factures = array();
+
+            $id_default_user = (int) BimpCore::getConf('default_id_commercial', null, 'bimpcommercial');
+            foreach ($rows as $r) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommmercial', 'Bimp_Facture', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($facture)) {
+                    $id_user = $facture->getIdContact('internal', 'SALESREPSIGN');
+                    if (!$id_user) {
+                        $id_user = (int) $facture->getData('fk_user_author');
+                    }
+
+                    if (!$id_user) {
+                        $id_user = $id_default_user;
+                    }
+
+                    if (!isset($factures[$id_user])) {
+                        $factures[$id_user] = array();
+                    }
+
+                    $factures[$id_user][] = $facture->getLink();
                 }
-
-                if (!isset($factures[$id_user])) {
-                    $factures[$id_user] = array();
-                }
-
-                $factures[$id_user][] = $facture->getLink();
             }
         }
+
+        $i = 0;
 
         if (!empty($factures)) {
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 
-            $i = 0;
             foreach ($factures as $id_user => $facs) {
                 $msg = 'Bonjour, vous avez laissé ';
                 if (count($facs) > 1) {
@@ -6647,28 +6684,180 @@ class Bimp_Facture extends BimpComm
                     $msg .= 'une facture';
                 }
 
-                $msg .= ' à l\'état de brouillon depuis plus de ' . $nbDay . ' jours.<br/>';
+                $msg .= ' à l\'état de brouillon depuis plus de ' . $delay . ' jours.<br/>';
                 $msg .= 'Merci de bien vouloir ' . (count($facs) > 1 ? 'les' : 'la') . ' régulariser au plus vite.<br/>';
 
                 foreach ($facs as $fac_link) {
                     $msg .= '<br/>' . $fac_link;
                 }
 
-                $mail = BimpTools::getMailOrSuperiorMail($id_user, 'f.pineri@bimp.fr');
+                $mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
 
-                if ($mail == '') {
-                    $mail = "tommy@bimp.fr";
-                }
-
-                if (mailSyn2('Facture brouillon à régulariser', $mail, null, $msg)) {
+                $return .= ' - Mail to ' . $mail . ' : ';
+                if (mailSyn2('Facture brouillon à régulariser', BimpTools::cleanEmailsStr($mail), null, $msg)) {
+                    $return .= ' [OK]';
                     $i++;
+                } else {
+                    $return .= ' [ECHEC]';
                 }
+                $return .= '<br/>';
             }
         }
 
-        $this->output = "OK " . $i . ' mail(s)';
-        return 0;
+        return "OK " . $i . ' mail(s)<br/><br/>' . $return;
     }
+
+    public static function sendRappelFacturesMargesNegatives()
+    {
+        $to = BimpCore::getConf('rappels_factures_marges_negatives_email', null, 'bimpcommercial');
+
+        if (!$to) {
+            return '';
+        }
+
+        $bdb = BimpCache::getBdb();
+        $facts = array();
+        $html = '';
+
+        $sql = 'SELECT a.*';
+        $sql .= ', p.ref as prod_ref';
+        $sql .= BimpTools::getSqlFrom('facturedet', array(
+                    'f'   => array(
+                        'alias' => 'f',
+                        'table' => 'facture',
+                        'on'    => 'a.fk_facture = f.rowid'
+                    ),
+                    'p'   => array(
+                        'alias' => 'p',
+                        'table' => 'product',
+                        'on'    => 'p.rowid = a.fk_product'
+                    ),
+                    'pef' => array(
+                        'alias' => 'pef',
+                        'table' => 'product_extrafields',
+                        'on'    => 'pef.fk_object = a.fk_product'
+                    )
+        ));
+        $sql .= " WHERE ((a.total_ht / a.qty)+0.01) < (buy_price_ht * a.qty / ABS(a.qty)) AND f.datef > '2022-04-01' AND pef.type_compta NOT IN (3)";
+
+        $lines = $bdb->executeS($sql);
+
+        if (!empty($lines)) {
+            foreach ($lines as $ln) {
+                $factLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array('id_line' => $ln->rowid));
+                $margeF = $factLine->getTotalMarge();
+                if ($margeF < 0) {
+                    $facts[$ln->fk_facture][$ln->rowid] = 'Ligne n° ' . $ln->rang . ' - ' . $ln->prod_ref . ' ' . BimpRender::renderObjectIcons($factLine, 0, 'default', '$url') . ' (Marge: ' . $margeF . ')';
+                }
+            }
+
+            if (!empty($facts)) {
+                foreach ($facts as $idFact => $lines) {
+                    $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact);
+                    $html .= '<h2>' . $fact->getLink() . '</h2>';
+                    foreach ($lines as $line) {
+                        $html .= $line . '<br/>';
+                    }
+                    $html .= '<br/>';
+                }
+
+                $to = BimpTools::cleanEmailsStr($to);
+                mailSyn2('Liste des ligne(s) de facture à marge négative', $to, null, $html);
+            }
+        }
+
+        return $html;
+    }
+
+    public static function sendRappelFacturesFinancementImpayees()
+    {
+        $delay = (int) BimpCore::getConf('rappels_factures_financement_impayees', null, 'bimpcommercial');
+        $to = BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial');
+
+        if (!$delay) {
+            return '';
+        }
+        
+        $out = '';
+        $modes = array();
+        $bdb = BimpCache::getBdb();
+        
+        $rows = $bdb->getRows('c_paiement', 'code IN(\'FIN\',\'SOFINC\',\'FINAPR\',\'FLOC\',\'FINLDL\',\'FIN_YC\')', null, 'array', array('id'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $modes[] = $r['id'];
+            }
+        }
+
+        $dt_lim = new DateTime();
+        $dt_lim->sub(new DateInterval('P30D'));
+
+        $where = 'paye = 0 AND fk_statut = 1 AND paiement_status < 2 AND fk_mode_reglement IN(' . implode(',', $modes) . ') AND date_lim_reglement < \'' . $dt_lim->format('Y-m-d') . '\' AND datec > \'2019-06-30\'';
+        $rows = $bdb->getRows('facture', $where, null, 'array', array('rowid'));
+
+        if (is_array($rows)) {
+            $now = date('Y-m-d');
+            foreach ($rows as $r) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($facture)) {
+                    $fac_date_lim = $facture->getData('date_lim_reglement');
+
+                    if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $fac_date_lim) && strtotime($fac_date_lim) > 0) {
+                        $date_check = new DateTime($fac_date_lim);
+
+                        while ($date_check->format('Y-m-d') <= $now) {
+                            if ($date_check->format('Y-m-d') == $now) {
+                                $soc = $facture->getChildObject('client');
+
+                                // Envoi e-mail:
+                                $cc = '';
+                                $subject = 'Facture financement impayée - ' . $facture->getRef();
+
+                                if (BimpObject::objectLoaded($soc)) {
+                                    $subject .= ' - Client: ' . $soc->getRef() . ' - ' . $soc->getName();
+                                }
+
+                                $comms = $bdb->getRows('societe_commerciaux', 'fk_soc = ' . (int) $facture->getData('fk_soc'), null, 'array', array(
+                                    'fk_user'
+                                ));
+
+                                if (is_array($comms)) {
+                                    foreach ($comms as $c) {
+                                        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $c['fk_user']);
+
+                                        if (BimpObject::objectLoaded($commercial)) {
+                                            $cc .= ($cc ? ', ' : '') . BimpTools::cleanEmailsStr($commercial->getData('email'));
+                                        }
+                                    }
+                                }
+
+                                $msg = 'Bonjour, ' . "\n\n";
+                                $msg .= 'La facture "' . $facture->getLink() . '" dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le ';
+                                $msg .= date('d / m / Y', strtotime($fac_date_lim));
+
+                                $out .= ' - Fac ' . $facture->getLink() .' : ';
+                                if (mailSyn2($subject, $to, '', $msg, array(), array(), array(), $cc)) {
+                                    $out .= '[OK]';
+                                } else {
+                                    $out .= '[ECHEC]';
+                                }
+                                $out .= '<br/>';
+                                break;
+                            }
+
+                            $date_check->add(new DateInterval('P15D'));
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $out;
+    }
+
+    // Traitements globaux: 
 
     public static function checkIsPaidAll($filters = array())
     {
@@ -6934,6 +7123,7 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
+    // Gestion Graphs : 
     public static function dataGraphPayeAn($boxObj, $context)
     {
         $boxObj->boxlabel = 'Facture par statut paiement';

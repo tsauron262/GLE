@@ -5,6 +5,8 @@ categories:
         label: Relances clients
     signatures: 
         label: Signatures
+    rappels: 
+        label: Envoi rappels
         
 params: 
     date_debut_exercice: 
@@ -258,3 +260,23 @@ params:
         label: Id du responsable des avoirs éducation
         type: int
         def: 201
+        
+    # Rappels: 
+    rappels_factures_brouillons_delay: 
+        label: Délai pour l\'envoi des rappels pour les factures brouillons
+        type: int
+        cat: rappels
+        info: Laisser 0 pour désactiver l\'envoi des rappels
+        def: 0
+        
+    rappels_factures_marges_negatives_email: 
+        label: Adresse(s) e-mail pour l\'envoi des rappels de factures à marge négative
+        cat: rappels
+        info: Laisser vide pour désactiver l\'envoi des rappels
+        def: ''
+        
+    rappels_factures_financement_impayees_emails:
+        label: Adresse(s) e-mail pour l\'envoi des rappels pour les factures en financement impayées
+        cat: rappels
+        info: Laisser vide pour désactiver l\'envoi des rappels
+        def: ''

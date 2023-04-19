@@ -3133,7 +3133,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $this->updateField('logistique_status', $new_status);
                     if ($new_status == 3) {
                         $idComm = $this->getIdCommercial();
-                        $mail = BimpTools::getMailOrSuperiorMail($idComm);
+                        $email = BimpTools::getUserEmailOrSuperiorEmail($idComm);
 
                         $infoClient = "";
                         $client = $this->getChildObject('client');
@@ -3141,9 +3141,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             $infoClient = " du client " . $client->getLink();
                         }
 
-
-                        if (isset($mail) && $mail != "")
-                            mailSyn2("Logistique commande OK", $mail, null, 'Bonjour la logistique de votre commande ' . $this->getLink() . $infoClient . ' est compléte ');
+                        if (!empty($email)) {
+                            mailSyn2("Logistique commande OK", $email, null, 'Bonjour la logistique de votre commande ' . $this->getLink() . $infoClient . ' est compléte ');
+                        }
                     }
                 }
             }
@@ -3283,7 +3283,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $this->updateField('invoice_status', $new_status);
 
                     $idComm = $this->getIdCommercial();
-                    $mail = BimpTools::getMailOrSuperiorMail($idComm);
+                    $mail = BimpTools::getUserEmailOrSuperiorEmail($idComm);
 
                     $infoClient = "";
                     $client = $this->getChildObject('client');
@@ -4385,7 +4385,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 
             foreach ($commandes as $id_user => $comm_links) {
-                $mail = BimpTools::getMailOrSuperiorMail($id_user, 'f.pineri@bimp.fr');
+                $mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, 'f.pineri@bimp.fr');
                 if ($mail == '') {
                     $mail = "tommy@bimp.fr";
                 }
@@ -4446,7 +4446,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $idComm = $comm->getIdCommercial();
                 if ($idComm == 0)
                     $idComm = $comm->getIdContact($type = 'internal', $code = 'SALESREPSIGN');
-                $mail = BimpTools::getMailOrSuperiorMail($idComm, 'a.delauzun@bimp.fr');
+                $mail = BimpTools::getUserEmailOrSuperiorEmail($idComm, 'a.delauzun@bimp.fr');
                 if ($mail == 'a.delauzun@bimp.fr')
                     $mailDef++;
                 if (mailSyn2("Commande " . $comm->getRef() . ' non facturée', $mail, '', 'Bonjour
@@ -4537,7 +4537,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
                 }
             }
-            
+
             $return .= 'Données : <pre>';
             $return .= print_r($data, 1);
             $return .= '</pre><br/><br/>';

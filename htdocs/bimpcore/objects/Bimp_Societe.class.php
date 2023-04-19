@@ -2578,9 +2578,9 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
-    public function majEncourscreditSafe($majOutstandingLimit = false, $maxOutstandingLimit = 100000)
+    public function majEncourscreditSafe($majOutstandingLimit = false, $maxOutstandingLimit = 100000, &$warnings = array())
     {
-        $data = $errors = $w = array();
+        $data = $errors = array();
 
         $code = (string) $this->getData('siret');
         $code_type = 'siret';
@@ -2591,7 +2591,7 @@ class Bimp_Societe extends BimpDolObject
         }
         
         if ($code) {
-            $errors = BimpTools::merge_array($errors, $this->checkSiren($code_type, $code, $data));
+            $errors = BimpTools::merge_array($errors, $this->checkSiren($code_type, $code, $data, $warnings));
 
             if (!count($errors)) {
                 if (isset($data['lettrecreditsafe'])) {
@@ -2620,7 +2620,7 @@ class Bimp_Societe extends BimpDolObject
                     $this->set('siren', $data['siren']);
                 }
                 
-                $errors = $this->update($w, true);
+                $errors = $this->update($warnings, true);
             }
         }
         

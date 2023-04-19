@@ -4537,6 +4537,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
                 }
             }
+            
+            $return .= 'Données : <pre>';
+            $return .= print_r($data, 1);
+            $return .= '</pre><br/><br/>';
 
             // Envoi des e-mails:
             foreach ($data as $id_commercial => $commandes) {

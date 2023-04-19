@@ -469,4 +469,14 @@ forms:
             - field: 
                   request_field: field_name
                   
+    add_files: 
+        title: Ajouter des fichiers
+        icon: fas_folder-plus
+        rows: 
+            - custom: 1
+              label: Fichiers
+              input_name: files
+              input: 
+                  type: drop_files
+            
         

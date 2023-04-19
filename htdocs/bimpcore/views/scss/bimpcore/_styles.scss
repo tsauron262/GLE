@@ -325,6 +325,16 @@ div.alert {
     box-shadow: 0 0 2px #787878;
 }
 
+.trash_button {
+    font-weight: bold;
+    color: $gray;
+    cursor: pointer;
+    
+    &:hover {
+        color: $danger;
+    }
+}
+
 /*Objects Components*/
 
 .object_component {

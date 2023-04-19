@@ -291,7 +291,6 @@ class GSX_v2 extends GSX_Const
                 break;
 
             case 'auth':
-//                $this->saveToken('acti', $token);
                 $this->auth_token = $token;
                 $field = 'gsx_auth_token';
                 break;

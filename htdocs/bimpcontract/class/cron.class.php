@@ -470,6 +470,7 @@ class cron extends BimpCron
         $nombre_relance = 0;
         $nombre_pas_relance = 0;
         $not_tacite = [0, 12];
+        
         foreach ($list as $i => $contrat) {
             $send = false;
             $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
@@ -477,7 +478,12 @@ class cron extends BimpCron
 
             $commercial_suivi = $c->getData('fk_commercial_suivi');
             BimpObject::loadClass('bimpcore', 'Bimp_User');
-            $commercial_suivi = Bimp_User::getUsersAvaible(array($commercial_suivi, 'parent'));
+            $dispo_users = Bimp_User::getAvailableUsersList(array($commercial_suivi, 'parent'));
+            
+            if (!empty($dispo_users)) {
+                $commercial_suivi = (int) $dispo_users[0];
+            }
+            
             $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $commercial_suivi);
             $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
             if ($c->getData('periodicity')) {

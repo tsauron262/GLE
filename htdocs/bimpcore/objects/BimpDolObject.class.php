@@ -16,8 +16,6 @@ class BimpDolObject extends BimpObject
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
     public $output = '';
-    
-    
     public static $expertise = [
         ''  => "",
         10  => "Arts graphiques",
@@ -371,7 +369,7 @@ class BimpDolObject extends BimpObject
 
         return $values;
     }
-    
+
     public function getDirOutput()
     {
         return '';
@@ -406,12 +404,51 @@ class BimpDolObject extends BimpObject
         return '';
     }
 
-    public function getCommercialId()
+    public function getCommercialId($params = array(), &$is_superior = false, &$is_default = false)
     {
+        $params = BimpTools::overrideArray(array(
+                    'check_active'    => false,
+                    'allow_superior'  => false,
+                    'allow_default'   => false,
+                    'id_default_user' => (int) BimpCore::getConf('default_id_commercial', null)
+                        ), $params);
+
         if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-            if (isset($contacts[0]) && $contacts[0]) {
-                return (int) $contacts[0];
+            $users = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+
+            if (!empty($users)) {
+                $user = null;
+
+                foreach ($users as $id_user) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+
+                    if (!BimpObject::objectLoaded($user)) {
+                        continue;
+                    }
+
+                    if (!(int) $user->getData('statut')) {
+                        continue;
+                    }
+                }
+
+                if (BimpObject::objectLoaded($user)) {
+                    if ($params['check_active'] && !(int) $user->getData('statut')) {
+                        if ($params['allow_superior']) {
+                            if ((int) $user->getData('fk_user')) {
+                                $is_superior = true;
+                                return (int) $user->getData('fk_user');
+                            }
+                        }
+
+                        if ($params['allow_default']) {
+                            $is_default = true;
+                            return $params['id_default_user'];
+                        }
+                    }
+                } elseif ($params['allow_default']) {
+                    $is_default = true;
+                    return $params['id_default_user'];
+                }
             }
         }
 
@@ -914,6 +951,9 @@ class BimpDolObject extends BimpObject
             } else {
                 if (!isset($data['model']) || !$data['model']) {
                     $data['model'] = $this->getModelPdf();
+                } else {
+                    if ($this->field_exists('model_pdf'))
+                        $this->updateField('model_pdf', $data['model']);
                 }
                 global $langs;
                 $this->dol_object->error = '';

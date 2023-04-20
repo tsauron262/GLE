@@ -293,6 +293,7 @@ fields:
         
     signataire:
         label: Signataire
+        type: string
         
     date_signed:
         label: Date de signature client
@@ -507,8 +508,30 @@ forms:
               display_if: 
                   field_name: type_signature
                   show_values: 2,3
+              hidden: 1
+
             - field: email_signature
-              label: Adresse e-mail du client
+              hidden: 1
+            
+            - custom: 1
+              label: Contact signataire
+              data_type: id_object
+              input_name: id_contact_signature
+              object: contact
+              create_form: default
+              create_form_values: 
+                  callback: getSignatureContactCreateFormValues
+              input: 
+                  type: select
+                  help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+                  options: 
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                              - field_value: fk_soc
+              value: 
+                  callback: getDefaultSignatureContact
+
             - field: note_public
             - field: attente_client
             - field: no_finish_reason

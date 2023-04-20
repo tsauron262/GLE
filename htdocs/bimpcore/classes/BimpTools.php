@@ -2172,6 +2172,24 @@ class BimpTools
         return (count($errors) ? 0 : 1);
     }
 
+    public static function getNextOpenDay($date)
+    {
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+        $dt = new DateTime($date);
+        $i = 0;
+        while ($i < 100) {
+            $dt->add(new DateInterval('P1D'));
+            $tms = strtotime($dt->format('Y-m-d 00:00:00'));
+            if (num_public_holiday($tms, $tms, '', 1) == 0) {
+                break;
+            }
+
+            $i++;
+        }
+
+        return $dt->format('Y-m-d');
+    }
+
     // Devises / prix: 
 
     public static function getCurrencyIcon($currency)
@@ -3608,19 +3626,18 @@ class BimpTools
             return 0;
     }
 
-    public static function getMailOrSuperiorMail($idComm, $defMail = 'erp@bimp.fr')
+    public static function getUserEmailOrSuperiorEmail($id_user, $allow_default = true)
     {
-        $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
-        $ok = true;
-        if ($userT->getData("statut") < 1)
-            $ok = false;
-        if ($ok && $userT->getData('email') != '')
-            return $userT->getData('email');
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+        if (BimpObject::objectLoaded($user)) {
+            return $user->getEmailOrSuperiorEmail($allow_default);
+        }
+        
+        if ($allow_default) {
+            return (string) BimpCore::getConf('default_user_email', null);
+        }
 
-        if ($userT->getData('fk_user') > 0)
-            return static::getMailOrSuperiorMail($userT->getData('fk_user'), $defMail);
-
-        return $defMail;
+        return '';
     }
 
     public static function mailGrouper($to, $from, $msg)

@@ -26,6 +26,8 @@ class InvoiceSavPDF extends InvoicePDF
         }
 
         parent::init($object);
+        
+        $this->pdf->addCgvPages = true;
     }
 
     protected function initHeader()
@@ -40,6 +42,12 @@ class InvoiceSavPDF extends InvoicePDF
                 $imei = $equipment->getData('imei');
                 if($imei != '' && $imei != "n/a")
                     $rows .= "<br/>".$imei;
+//                $prod = $equipment->getchildObject('product');
+                $pordDesc = $equipment->displayProduct('default', true, true);
+                if($pordDesc != '' && $pordDesc != "n/a")
+                    $rows .= "<br/>".'<span style="font-size: 8px;">'.$pordDesc.'</span>';
+                
+                
             }
         }
 

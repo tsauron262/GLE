@@ -29,15 +29,8 @@ class BIMP_Task extends BimpObject
             'dev' => array('label' => 'Développement')
         )
     );
-//    const MARQEUR_MAIL = "IDTASK:5467856456"; => Remplacé par BimpCore::getConf('marqueur_mail', null, 'bimptask')
-//    const ID_USER_DEF = 215;  => Remplacé par BimpCore::getConf('id_user_def', null, 'bimptask')
-
     public $mailReponse = 'reponse@bimp-groupe.net';
-    
-    private static $jsReload = '
-    if (typeof notifTask !== "undefined" && notifTask !== null)
-        notifTask.reloadNotif();
-            ';
+    private static $jsReload = 'if (typeof notifTask !== "undefined" && notifTask !== null) notifTask.reloadNotif();';
 
     // Droits users: 
 
@@ -58,7 +51,7 @@ class BIMP_Task extends BimpObject
         if ($this->getData("id_user_owner") == $user->id)
             return 1;
 
-        if ($this->getData("user_create") == $user->id && $right == 'read')
+        if ($this->getData("user_create") == $user->id/* && $right == 'read' */) // => Pourquoi? le créateur devrait pouvoir modifier la tâche
             return 1;
 
         return $user->rights->bimptask->$classRight->$right;
@@ -78,7 +71,7 @@ class BIMP_Task extends BimpObject
         if ($this->getUserRight("read"))
             return 1;
 
-        $users = $this->getUserNotif();
+        $users = $this->getUsersToNotify();
         foreach ($users as $userT) {
             if ($userT->id == $user->id)
                 return 1;
@@ -118,6 +111,15 @@ class BIMP_Task extends BimpObject
         return parent::canEditField($field_name);
     }
 
+    public function canSetAction($action)
+    {
+        switch ($action) {
+            case 'addFiles':
+                return $this->canEdit();
+        }
+        return parent::canSetAction($action);
+    }
+
     // Getters booléens: 
 
     public function isFieldEditable($field, $force_edit = false)
@@ -136,6 +138,69 @@ class BIMP_Task extends BimpObject
     public function isDeletable($force_delete = false, &$errors = array())
     {
         return $this->isEditable($force_delete, $errors);
+    }
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        if (!$this->isLoaded($errors)) {
+            return 0;
+        }
+
+        switch ($action) {
+            case 'reopen':
+                if ((int) $this->getData('status') !== 4) {
+                    $errors[] = 'Cette tâche n\'a pas besoin d\'être réouverte';
+                    return 0;
+                }
+
+                return 1;
+
+            case 'follow':
+                global $user;
+                $id_user = BimpTools::getPostFieldValue('id_user', $user->id);
+                if (!$id_user) {
+                    $errors[] = 'Aucun utilisateur connecté';
+                    return 0;
+                }
+
+                if (array_key_exists($id_user, $this->getUsersToNotify(false))) {
+                    if ($id_user == $user->id) {
+                        $errors[] = 'Vous suivez déjà cette tâche';
+                    } else {
+                        $errors[] = 'Cet utilisateur suit déjà cette tâche';
+                    }
+                    return 0;
+                }
+                return 1;
+
+            case 'unfollow':
+                global $user;
+                $id_user = BimpTools::getPostFieldValue('id_user', $user->id);
+                if (!$id_user) {
+                    $errors[] = 'Aucun utilisateur connecté';
+                    return 0;
+                }
+
+                if (in_array($id_user, $this->getData('users_no_follow'))) {
+                    if ($id_user == $user->id) {
+                        $errors[] = 'Vous avez déjà refusé le suivi de cette tâche';
+                    } else {
+                        $errors[] = 'Cet utilisateur a déjà refusé le suivi de cette tâche';
+                    }
+                    return 0;
+                }
+
+                if (!array_key_exists($id_user, $this->getUsersToNotify(false))) {
+                    if ($id_user == $user->id) {
+                        $errors[] = 'Vous n\'êtes pas notifié pour cette tâche';
+                    } else {
+                        $errors[] = 'Cet utilisateur n\'est pas notifié pour cette tâche';
+                    }
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::isActionAllowed($action, $errors);
     }
 
     public function hasFilleEnCours()
@@ -167,6 +232,26 @@ class BIMP_Task extends BimpObject
         global $user;
         $buttons = array();
 
+        if ($this->isActionAllowed('follow') && $this->canSetAction('follow')) {
+            $buttons[] = array(
+                'label'   => 'Suivre',
+                'icon'    => 'fas_bell',
+                'onclick' => $this->getJsActionOnclick('follow', array(), array())
+            );
+        }
+
+        if ($this->isActionAllowed('unfollow') && $this->canSetAction('unfollow')) {
+            $buttons[] = array(
+                'label'   => 'Ne plus suivre',
+                'icon'    => 'fas_bell-slash',
+                'onclick' => $this->getJsActionOnclick('unfollow', array(), array())
+            );
+        }
+
+        if ($btn = $this->getAddFilesButton()) {
+            $buttons[] = $btn;
+        }
+        
         if ($this->hasSousTaches()) {
             $buttons[] = array(
                 'label'   => 'Liste des sous-tâches',
@@ -228,6 +313,13 @@ class BIMP_Task extends BimpObject
             }
         }
 
+        if ($this->isActionAllowed('reopen') && $this->canSetAction('reopen')) {
+            $buttons[] = array(
+                'label'   => 'Réouvrir',
+                'icon'    => 'fas_undo',
+                'onclick' => $this->getJsActionOnclick('reopen', array(), array())
+            );
+        }
         return $buttons;
     }
 
@@ -278,14 +370,9 @@ class BIMP_Task extends BimpObject
                         )
                     )
             ));
-        } /*else
-            $filtre['id'] = array('operator' => '>', 'value' => '0'); //toujours vraie   !!! pourquoi ? fait bugger*/
+        } /* else
+          $filtre['id'] = array('operator' => '>', 'value' => '0'); //toujours vraie   !!! pourquoi ? fait bugger */
         return $filtre;
-    }
-
-    public static function getPrio_list_taskArray()
-    {
-        return self::$valPrio;
     }
 
     public function getSous_type_list_taskArray()
@@ -309,6 +396,11 @@ class BIMP_Task extends BimpObject
         }
 
         return $types;
+    }
+
+    public static function getPrio_list_taskArray()
+    {
+        return self::$valPrio;
     }
 
     public static function getTypeArray()
@@ -344,29 +436,90 @@ class BIMP_Task extends BimpObject
 
     // Getters données: 
 
+    public function getParentTask()
+    {
+        if ((int) $this->getData('id_task')) {
+            return BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', (int) $this->getData('id_task'));
+        }
+
+        return null;
+    }
+
     public function getRefProperty()
     {
         return 'subj';
     }
 
-    public function getUserNotif($excludeMy = false)
+    public function getUsersToNotify($excludeMe = false, $exclude_unactive = true)
     {
-        global $user;
-        $users = array();
-        $users[$this->getData('user_create')] = $this->getChildObject('user_create');
         BimpObject::loadClass('bimpcore', 'BimpLink');
+        global $user;
+        $users_no_follow = $this->getData('users_no_follow');
+        $users = array(
+            $this->getData('user_create') => $this->getChildObject('user_create')
+        );
+
         $users = BimpTools::merge_array($users, BimpLink::getUsersLinked($this), true);
 
         $notes = $this->getNotes();
-        foreach ($notes as $note)
+        foreach ($notes as $note) {
             $users = BimpTools::merge_array($users, BimpLink::getUsersLinked($note), true);
-        $parentTask = $this->getChildObject('task_mere');
-        if ($parentTask && $parentTask->isLoaded())
-            $users = BimpTools::merge_array($users, $parentTask->getUserNotif($excludeMy), true);
+        }
 
-        if ($excludeMy)
-            unset($users[$user->id]);
-//            echo '<pre>';  print_r($users);
+        foreach ($users as $id_user => $u) {
+            if (!BimpObject::objectLoaded($u)) {
+                unset($users[$id_user]);
+            }
+
+            if ($excludeMe && $id_user == $user->id) {
+                unset($users[$id_user]);
+            }
+
+            if ($exclude_unactive && !(int) $u->getData('statut')) {
+                unset($users[$id_user]);
+            }
+
+            if (in_array($id_user, $users_no_follow)) {
+                unset($users[$id_user]);
+            }
+        }
+
+        foreach ($this->getData('users_follow') as $id_user) {
+            if ($excludeMe && $id_user == $user->id) {
+                continue;
+            }
+
+            if (in_array($id_user, $users_no_follow)) {
+                continue;
+            }
+
+            if (!array_key_exists($id_user, $users)) {
+                $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+
+                if (BimpObject::objectLoaded($u)) {
+                    if ($exclude_unactive && !(int) $u->getData('statut')) {
+                        continue;
+                    }
+
+                    $users[$id_user] = $u;
+                }
+            }
+        }
+
+        $parent_task = $this->getParentTask();
+
+        if (BimpObject::objectLoaded($parent_task)) {
+            foreach ($parent_task->getUsersToNotify($excludeMe) as $id_user => $u) {
+                if (in_array($id_user, $users_no_follow)) {
+                    continue;
+                }
+
+                if (!array_key_exists($id_user, $users)) {
+                    $users[$id_user] = $u;
+                }
+            }
+        }
+
         return $users;
     }
 
@@ -571,9 +724,35 @@ class BIMP_Task extends BimpObject
     public function displayUserNotif()
     {
         $html = '';
-        $users = $this->getUserNotif();
-        foreach ($users as $user)
+        $users = $this->getUsersToNotify(false);
+
+        $edit = $this->canEdit();
+
+        foreach ($users as $user) {
+            if ($edit) {
+                $onclick = $this->getJsActionOnclick('unfollow', array(
+                    'id_user' => $user->id
+                        ), array(
+                    'confirm_msg' => 'Veuillez confirmer l\\\'arrêt du suivi pour ' . $user->getName()
+                ));
+                $html .= '<span class="trash_button" style="display: inline-block; margin-right: 15px" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_trash-alt');
+                $html .= '</span>';
+            }
             $html .= $user->getLink() . '<br/>';
+        }
+
+        if ($edit) {
+            $onclick = $this->getJsActionOnclick('follow', array(), array(
+                'form_name' => 'add_user_follow'
+            ));
+
+            $html .= '<div style="margin-bottom: 10px; text-align: right">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_user-plus', 'iconLeft') . 'Ajouter un utilisateur à notifier';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
 
         return $html;
     }
@@ -826,8 +1005,8 @@ class BIMP_Task extends BimpObject
     public function notifier($subject, $message, $rappel = false, $files = array())
     {
         $mails = array();
-        foreach ($this->getUserNotif(true) as $userN) {
-            $mails[] = BimpTools::getMailOrSuperiorMail($userN->id);
+        foreach ($this->getUsersToNotify(true) as $userN) {
+            $mails[] = BimpTools::getUserEmailOrSuperiorEmail($userN->id);
         }
         $to = implode(',', $mails);
 
@@ -838,7 +1017,7 @@ class BIMP_Task extends BimpObject
     {
         $errors = array();
         $sep = "<br/>---------------------<br/>";
-//        $idTask = self::MARQEUR_MAIL . $this->getData("id");
+
         $idTask = BimpCore::getConf('marqueur_mail', null, 'bimptask') . $this->id;
         $msg = str_replace("<br>", "<br/>", $msg);
 
@@ -865,12 +1044,9 @@ class BIMP_Task extends BimpObject
             }
         }
 
-        if (is_null($sujet))
+        if (is_null($sujet)) {
             $sujet = "Re:" . $this->displayData("subj", 'default', 0, 0, 1);
-
-//        $msg = str_replace("<br />", "\n", $msg);
-//        $msg = str_replace("<br/>", "\n", $msg);
-//        $msg = str_replace("<br/>", "\n", $msg);
+        }
 
         $bimpMail = new BimpMail($this, $sujet, $to, $from, $html);
         $bimpMail->addFiles($files);
@@ -881,13 +1057,20 @@ class BIMP_Task extends BimpObject
 
     public function reouvrir()
     {
+        $errors = array();
+
         if ($this->getData('status') == 4 || $this->getData('status') == 2) {
-            $this->updateField('status', 1);
-            $parentTask = $this->getChildObject('task_mere');
-            if ($parentTask && $parentTask->isLoaded()) {
-                $parentTask->reouvrir();
+            $errors = $this->updateField('status', 1);
+
+            if (!count($errors)) {
+                $parentTask = $this->getChildObject('task_mere');
+                if ($parentTask && $parentTask->isLoaded()) {
+                    $parentTask->reouvrir();
+                }
             }
         }
+
+        return $errors;
     }
 
     public function addRepMail($user, $src, $txt)
@@ -900,7 +1083,7 @@ class BIMP_Task extends BimpObject
         $id_user_def = (int) BimpCore::getConf('id_user_def', null, 'bimptask');
 
         $this->addNote($txt, BimpNote::BN_ALL, 0, 0, $src, ($user->id == $id_user_def ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), null, null, null, 0);
-        foreach ($this->getUserNotif(true) as $userT) {
+        foreach ($this->getUsersToNotify(true) as $userT) {
             $this->addNote($txt, null, 0, 0, $src, ($user->id == $id_user_def ? BimpNote::BN_AUTHOR_FREE : BimpNote::BN_AUTHOR_USER), BimpNote::BN_DEST_USER, null, (int) $userT->id, 1);
         }
     }
@@ -998,6 +1181,20 @@ class BIMP_Task extends BimpObject
         );
     }
 
+    public function actionReopen($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Tâche réouverte avec succès';
+
+        $errors = $this->reouvrir();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     public function actionAttribute($data, &$success)
     {
         global $user;
@@ -1086,6 +1283,75 @@ class BIMP_Task extends BimpObject
 
         if (!count($errors))
             $this->addNote($data['email'], BimpNote::BN_ALL, 1);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionFollow($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Suivi enregistré avec succès';
+
+        global $user;
+        $id_user = (int) BimpTools::getArrayValueFromPath($data, 'id_user', $user->id);
+
+        if (!$id_user) {
+            $errors[] = 'Aucun utilisateur spécifié';
+        } else {
+            $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+            if (!BimpObject::objectLoaded($u)) {
+                $errors[] = 'Cet utilisateur n\'existe plus';
+            } else {
+                if (!(int) $u->getData('statut')) {
+                    $errors[] = 'Cet utilisateur est désactivé';
+                } else {
+                    $users_no_follow = BimpTools::unsetArrayValue($this->getData('users_no_follow'), $id_user);
+                    $users_follow = $this->getData('users_follow');
+                    if (!in_array($id_user, $users_follow)) {
+                        $users_follow[] = $id_user;
+                    }
+
+                    $this->set('users_no_follow', $users_no_follow);
+                    $this->set('users_follow', $users_follow);
+
+                    $errors = $this->update($warnings, true);
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionUnfollow($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Arrêt du suivi enregistré avec succès';
+
+        global $user;
+        $id_user = (int) BimpTools::getArrayValueFromPath($data, 'id_user', $user->id);
+
+        if (!$id_user) {
+            $errors[] = 'Aucun utilisateur spécifié';
+        } else {
+            $users_follow = BimpTools::unsetArrayValue($this->getData('users_follow'), $id_user);
+            $users_no_follow = $this->getData('users_no_follow');
+            if (!in_array($id_user, $users_no_follow)) {
+                $users_no_follow[] = $id_user;
+            }
+
+            $this->set('users_no_follow', $users_no_follow);
+            $this->set('users_follow', $users_follow);
+
+            $errors = $this->update($warnings, true);
+        }
 
         return array(
             'errors'   => $errors,

@@ -15,7 +15,7 @@ echo '<form><input type="hidden" name="go" value="1"/><input type="text" name="b
 if($ok && $branche != ''){
     $lien = '/synopsistools/git_pull.php?no_menu=1&nolog=ujgjhkhkfghgkvgkfdkshfiohf5453FF454FFDzelef&go=1&branche='.$branche;
 
-    $array = array("erp1", "erp2", /*"erp3",*/ "erp4", /*"erp5",*/ "erp6");
+    $array = array("erp1", /*"erp2",*/ /*"erp3",*/ "erp4", /*"erp5",*/ "erp6");
 
 
     foreach($array as $erp){

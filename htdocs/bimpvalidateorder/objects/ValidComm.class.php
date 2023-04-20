@@ -442,9 +442,10 @@ class ValidComm extends BimpObject
 
     public function userIsAvaible($id_user, $from = null)
     {
+        BimpObject::loadClass('bimpcore', 'Bimp_User');
 
         $errors = array();
-        $ok_user = Bimp_User::isUserAvaible($id_user, $errors, $from);
+        $ok_user = Bimp_User::isUserAvailable($id_user, $from, $errors);
 
         // L'utilisateur n'a pas une liste de demande de validation trop longue ?
         BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm');

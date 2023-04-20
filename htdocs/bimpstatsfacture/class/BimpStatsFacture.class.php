@@ -524,10 +524,10 @@ class BimpStatsFacture {
         else
             $place = 'Centre';
 
-        (in_array('c', $sortBy)) ? $sortCenter = true : $sortCenter = false;
-        (in_array('t', $sortBy)) ? $sortType = true : $sortType = false;
-        (in_array('g', $sortBy)) ? $sortTypeGarantie = true : $sortTypeGarantie = false;
-        (in_array('e', $sortBy)) ? $sortEquipement = true : $sortEquipement = false;
+        (is_array($sortBy) && in_array('c', $sortBy)) ? $sortCenter = true : $sortCenter = false;
+        (is_array($sortBy) && in_array('t', $sortBy)) ? $sortType = true : $sortType = false;
+        (is_array($sortBy) && in_array('g', $sortBy)) ? $sortTypeGarantie = true : $sortTypeGarantie = false;
+        (is_array($sortBy) && in_array('e', $sortBy)) ? $sortEquipement = true : $sortEquipement = false;
 
         if ($sortTypeGarantie) {
             $allTypeGarantie = $this->getTypeGaranties();
@@ -580,9 +580,9 @@ class BimpStatsFacture {
             $out[$filtre]['total_payer'] += $row['paipaye_ttc'];
 
             if (!isset($out[$filtre]['nb_facture'][$row['fac_id']])) {//La facture n'est pas encore traité sinon deuxieme paiement
-                $out[$filtre]['total_total'] += $row['factotal'];
-                $out[$filtre]['total_total_prop'] += $row['prop_total'];
-                $out[$filtre]['total_total_marge'] += $row['marge'];
+                $out[$filtre]['total_total'] += (float) $row['factotal'];
+                $out[$filtre]['total_total_prop'] += (float) $row['prop_total'];
+                $out[$filtre]['total_total_marge'] += (float) $row['marge'];
                 $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
             } else {//deuxieme paiement on vire les montant
                 $row['factotal'] = 0;

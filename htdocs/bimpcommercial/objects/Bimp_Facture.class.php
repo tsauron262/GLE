@@ -56,12 +56,14 @@ class Bimp_Facture extends BimpComm
         5  => array('label' => 'Envoyé par e-mail sans export Chorus', 'icon' => 'fas_check', 'classes' => array('success'))
     );
     public static $motif_demande_avoir = array(
-        1 => array('label' => 'Motif 1'),
-        2 => array('label' => 'Motif 2'),
-        3 => array('label' => 'Motif 3'),
-        4 => array('label' => 'Autre')
+        1 => array('label' => 'Changement d\'intitulé de facturation, de client à facturer '),
+        2 => array('label' => 'Erreurs de facturation'),
+        3 => array('label' => 'Facturation automatique de contrat en renouvellement tacite qui n\'a pas été noté dénoncé'),
+        4 => array('label' => 'Geste commercial après édition de la facture'),
+        5 => array('label' => 'Retour produit'),
+        6 => array('label' => 'Autre')
     );
-    
+
     // Gestion des droits: 
 
     public function canCreate()
@@ -177,9 +179,15 @@ class Bimp_Facture extends BimpComm
 
             case 'generatePdfAttestLithium':
                 return $user->admin or $user->id == 7;
-                
+
             case 'demanderValidationAvoir':
-                return 1;
+//                return (int) $this->can('create');
+
+            case 'validationAvoir':
+                return (int) $user->admin;
+//                return (int) $user->admin or
+//                       (int) $user->id == (int) BimpCore::getConf('id_resp_validation_avoir_commercial', null, 'bimpcommercial') or
+//                       (int) $user->id == (int) BimpCore::getConf('id_resp_validation_avoir_education',  null, 'bimpcommercial');
         }
 
         return parent::canSetAction($action);
@@ -842,9 +850,16 @@ class Bimp_Facture extends BimpComm
 
             case 'generatePdfAttestLithium':
                 return $status == 1 or $status == 2;
-                
+
             case 'demanderValidationAvoir':
-                return 1;
+            case 'validationAvoir':
+                if ($type == Facture::TYPE_DEPOSIT)
+                    $errors[] = "Création d'avoir impossible pour les " . self::$types[$type]['label'] . "s";
+
+                if ($this->getData('valid_avoir'))
+                    $errors[] = "Avoir déjà validé";
+
+                return (count($errors) ? 0 : 1);
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -1386,17 +1401,7 @@ class Bimp_Facture extends BimpComm
                 'onclick' => $this->getJsActionOnclick('checkMargin')
             );
         }
-        
-        // Demander une validation d'avoir
-//        if ($this->isActionAllowed('demanderValidationAvoir') && $this->canSetAction('demanderValidationAvoir')) {
-//            $buttons[] = array(
-//                'label'   => 'Demander une validation davoir',
-//                'icon'    => 'fas_comment',
-//                'onclick' => $this->getJsActionOnclick('demanderValidationAvoir', array(), array(
-//                    'form_name'      => 'demanderValidationAvoir'
-//                ))
-//            );
-//        }
+
 
         return $buttons;
     }
@@ -1609,6 +1614,38 @@ class Bimp_Facture extends BimpComm
                     'icon'    => 'fas_file-pdf',
                     'onclick' => $this->getJsActionOnclick('generatePdfAttestLithium', array(
                         'file_type' => 'attest_lithium'))
+                );
+            }
+        }
+
+        return $buttons;
+    }
+
+    public function getAvoirExtraBtn()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+
+            // Demander une validation d'avoir
+            if ($this->isActionAllowed('demanderValidationAvoir') && $this->canSetAction('demanderValidationAvoir')) {
+                $buttons[] = array(
+                    'label'   => 'Demander une validation d\'avoir',
+                    'icon'    => 'fas_comment',
+                    'onclick' => $this->getJsActionOnclick('demanderValidationAvoir', array(), array(
+                        'form_name' => 'demander_validation_avoir'
+                    ))
+                );
+            }
+
+            // Validation d'avoir
+            if ($this->isActionAllowed('validationAvoir') && $this->canSetAction('validationAvoir')) {
+                $buttons[] = array(
+                    'label'   => 'Validation d\'avoir',
+                    'icon'    => 'fas_check',
+                    'onclick' => $this->getJsActionOnclick('validationAvoir', array(), array(
+                        'form_name' => 'validation_avoir'
+                    ))
                 );
             }
         }
@@ -1851,6 +1888,31 @@ class Bimp_Facture extends BimpComm
         return $factures;
     }
 
+    public function getMessageDemandeAvoir($id_user_ask, $motif, $avoir_total, $montant, $comment, $join_files)
+    {
+
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user_ask);
+
+        $msg = $user->getName() . ' souhaite créer un avoir ';
+        $msg .= ($avoir_total) ? 'total' : 'partiel';
+        $msg .= ' de ' . BimpTools::displayMoneyValue($montant, 'EUR', 0, 0, 0, 2, 1);
+        $msg .= ' à partir de la facture ' . $this->getRef();
+
+        // Motif
+        if ($motif != 6)
+            $msg .= '<br/>Motif de la demande:<strong> ' . self::$motif_demande_avoir[$motif]['label'] . '</strong>';
+
+        // Commentaire
+        if ($comment)
+            $msg .= '<br/>Commentaire: ' . $comment;
+
+        // Commentaire
+        if (0 < (int) sizeof($join_files))
+            $msg .= '<br/>Nombre de fichier(s) joint(s) : <strong>' . sizeof($join_files) . '</strong>';
+
+        return $msg;
+    }
+
     // Getters données: 
 
     public function getSumDiscountsUsed()
@@ -2026,11 +2088,11 @@ class Bimp_Facture extends BimpComm
             $filters = array(
                 'id_facture' => (int) $this->id
             );
-            
-            if (count($type_reval)){
+
+            if (count($type_reval)) {
                 $filters['type'] = $type_reval;
             }
-            
+
             $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', $filters);
 
             foreach ($revals as $reval) {
@@ -3697,38 +3759,29 @@ class Bimp_Facture extends BimpComm
                     $html .= BimpRender::renderPanel('Vérification des montants par BR', $content, '', array('type' => 'secondary'));
                     $html .= '</div>';
                     $html .= '</div>';
-                    $html .= '<div class="row">';
-                    $html .= '<div class="col-sm-12 col-md-6">';
-
-                    if (/* $this->getData('fk_statut') > 0 */1) {
-                        $buttons = array();
-                        $buttons[] = array(
-                            'label'   => 'Vérifier les équipements',
-                            'icon'    => 'fas_hand-holding-usd',
-                            'onclick' => $reval->getJsActionOnclick('checkAppleCareSerials', array(
-                            ))
-                        );
-                        $buttons[] = array(
-                            'label'   => 'Valider les revalorisation',
-                            'icon'    => 'fas_hand-holding-usd',
-                            'onclick' => $reval->getJsActionOnclick('checkBilledApplecareReval', array(
-                                'id_fact' => $this->id
-                            ))
-                        );
-                        $content2 = '';
-                        foreach ($buttons as $button)
-                            $content2 .= BimpRender::renderButton($button);
-                        $html .= BimpRender::renderPanel('Actions revalorisation', $content2, '', array('type' => 'secondary'));
-                        $html .= '</div>';
-                        $html .= '</div>';
-                    }
                 }
-                $bc_list = new BC_ListTable($reval, 'facture');
-                $bc_list->addFieldFilterValue('id_facture', (int) $this->id);
-                $html .= $bc_list->renderHtml();
+
+                if ($this->getData('fk_statut') > 0) {
+                    $html .= '<div class="buttonsContainer" style="margin: 15px 0;">';
+
+                    $onclick = $reval->getJsActionOnclick('checkAppleCareSerials', array(), array());
+                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $html .= BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'Vérifier les n° de série';
+                    $html .= '</span>';
+
+                    $onclick = $reval->getJsActionOnclick('checkBilledApplecareReval', array(
+                        'id_fact' => $this->id
+                    ));
+                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $html .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Valider les revalorisations AppleCare';
+                    $html .= '</span>';
+                    $html .= '</div>';
+                }
             }
 
-
+            $bc_list = new BC_ListTable($reval, 'facture');
+            $bc_list->addFieldFilterValue('id_facture', (int) $this->id);
+            $html .= $bc_list->renderHtml();
         }
 
         return $html;
@@ -4029,6 +4082,17 @@ class Bimp_Facture extends BimpComm
         }
 
         return $html;
+    }
+
+    public function renderImagesDemandeAvoir()
+    {
+        $filters = array(
+            'id' => array(
+                'in' => $this->getData('valid_avoir_fichier_joints')
+            )
+        );
+
+        return $this->renderImages($filters);
     }
 
     // Traitements:
@@ -5944,20 +6008,20 @@ class Bimp_Facture extends BimpComm
             $files = array();
             $params = '{id_facture: ' . $this->id . ', id_struture: \'' . $id_structure . '\', code_service: \'' . $code_service . '\'});}';
             $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', 0, \'soumettreFacture\', {}, ' . $params . ', 500);';
-            
+
             $files_compl = BimpTools::getArrayValueFromPath($data, 'files_compl', array());
             if (is_array($files_compl)) {
                 $files = $files_compl;
             }
-            
+
             $join_files = BimpTools::getArrayValueFromPath($data, 'join_files', array());
             if (is_array($join_files) && count($join_files)) {
                 $files = BimpTools::merge_array($files, $join_files);
             }
-            
+
             $api = BimpAPI::getApiInstance('piste');
             $chorus_data = $this->getData('chorus_data');
-            
+
             foreach ($files as $idF) {
                 $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $idF);
 
@@ -5968,7 +6032,7 @@ class Bimp_Facture extends BimpComm
                 else
                     $errors[] = 'Fichier ' . $name . ' non envoyé vers Chorus';
             }
-            
+
             $this->set('chorus_data', $chorus_data);
             $errors = BimpTools::merge_array($errors, $this->update($warnings));
         }
@@ -6068,26 +6132,114 @@ class Bimp_Facture extends BimpComm
             'success_callback' => $success_callback
         );
     }
-    
+
     public function actionDemanderValidationAvoir($data, &$success = '')
     {
+        global $user;
         $errors = $warnings = array();
-        
-        $motif = BimpTools::getPostFieldValue('motif');
-        $avoir_total = BimpTools::getPostFieldValue('avoir_total');
-        $montant = BimpTools::getPostFieldValue('montant');
-        $comment = BimpTools::getPostFieldValue('comment');
-        
-        
-//        $this->generatePDF($data['file_type'], $errors, $warnings);
-//        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . urlencode(dol_sanitizeFileName($this->getRef()) . '/' . $data['file_type'] . '.pdf');
-//        $success_callback = 'window.open(\'' . $url . '\');';
-$success .= "OK";
-$errors[] = print_r($_REQUEST, 1);
+        $id_user_valid = 0;
+
+        $motif = (int) BimpTools::getPostFieldValue('motif');
+        $avoir_total = (int) BimpTools::getPostFieldValue('avoir_total');
+        $comment = (string) BimpTools::getPostFieldValue('comment');
+        $join_files = (array) BimpTools::getPostFieldValue('join_files');
+        if ($avoir_total)
+            $montant = (float) $this->dol_object->total_ttc;
+        else
+            $montant = (float) BimpTools::getPostFieldValue('montant');
+
+        if (!$avoir_total and!$montant)
+            $errors[] = "Montant non renseigné alors que l'avoir est partiel";
+
+        $nb_demande = (int) sizeof(BimpCache::getBimpObjectObjects('bimpcore', 'BimpNote',
+                                                                   array('content'    => array(
+                                        'operator' => 'like',
+                                        'value'    => '%souhaite créer un avoir%'
+                                    ),
+                                    "obj_type"   => "bimp_object",
+                                    "obj_module" => $this->module,
+                                    "obj_name"   => $this->object_name,
+                                    "id_obj"     => $this->id)));
+
+        if (0 < $nb_demande)
+            $warnings[] = "Il y a déjà " . $nb_demande . " de validation d'avoir pour cette facture";
+
+        if (!$data['join_files'])
+            $join_files = array();
+
+
+//        $errors[] = print_r($_REQUEST, 1);
+
+        if ($this->getData('ef_type') == 'E')
+            $id_user_valid = (int) BimpCore::getConf('id_resp_validation_avoir_education', null, 'bimpcommercial');
+        else
+            $id_user_valid = (int) BimpCore::getConf('id_resp_validation_avoir_commercial', null, 'bimpcommercial');
+
+
+        $msg = $this->getMessageDemandeAvoir((int) $user->id, $motif, $avoir_total, $montant, $comment, $join_files);
+
+        // Création de la note
+        if (!count($errors)) {
+            BimpObject::loadClass('bimpcore', 'BimpNote');
+            $this->addNote($msg,
+                           BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                           BimpNote::BN_DEST_USER, 0, (int) $id_user_valid);
+
+            $this->set('valid_avoir_fichier_joints', $join_files);
+            $this->set('valid_avoir_montant', $montant);
+            $this->set('valid_avoir_id_user_ask', (int) $user->id);
+            $errors = $this->update();
+        }
+
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
+            'errors'   => $errors,
+            'warnings' => $warnings,
+        );
+    }
+
+    public function actionValidationAvoir($data, &$success = '')
+    {
+        global $user;
+        $errors = $warnings = array();
+
+        $valid_avoir = (int) BimpTools::getPostFieldValue('valid_avoir', 0);
+        $valid_avoir_id_user = (int) $user->id;
+
+        if ($valid_avoir)
+            $valid_avoir_montant_accorder = (float) BimpTools::getPostFieldValue('valid_avoir_montant_accorder', 0);
+        else
+            $valid_avoir_montant_accorder = 0;
+
+        if (!count($errors)) {
+            $msg = '';
+
+            if ($valid_avoir)
+                $msg .= "Demande d'avoir validée";
+            else
+                $msg .= "Demande d'avoir refusée";
+
+            $user_valid = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
+            $comment = (string) BimpTools::getPostFieldValue('comment');
+            if ($comment != '')
+                $msg .= ", commentaire de " . $user_valid->getName() . " : " . $comment;
+            else
+                $msg .= ", aucune raison n'a été rédigé";
+
+
+            BimpObject::loadClass('bimpcore', 'BimpNote');
+            $this->addNote($msg,
+                           BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
+                           BimpNote::BN_DEST_USER, 0, (int) $this->getData('valid_avoir_id_user_ask'));
+
+            $this->set('valid_avoir', $valid_avoir);
+            $this->set('valid_avoir_id_user', $valid_avoir_id_user);
+            $this->set('valid_avoir_montant_accorder', $valid_avoir_montant_accorder);
+            $errors = $this->update();
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
         );
     }
 
@@ -6452,41 +6604,87 @@ $errors[] = print_r($_REQUEST, 1);
         return $errors;
     }
 
-    // Méthodes statiques: 
+    // Rappels liés aux factures: 
 
-    public function sendInvoiceDraftWhithMail()
+    public static function sendRappels()
     {
-        mailSyn2('EXEC CRON sendInvoiceDraftWhithMail', 'f.martinez@bimp.fr', '', 'Heure: ' . date('d / m / Y H:i:s') . '<br/>SERVER : ' . print_r($_SERVER, 1));
+        $out = '';
 
-        // Modifié pour n'envoyer qu'un seul mail par commercial. 
+        // Rappels quotidiens: 
+        $result = static::sendRappelFacturesBrouillons();
+        if ($result) {
+            $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels factures brouillons -----------<br/><br/>' . $result;
+        }
 
-        $date = new DateTime();
-        $nbDay = 5;
-        $date->sub(new DateInterval('P' . $nbDay . 'D'));
-        $sql = $this->db->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "facture` WHERE `datec` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0");
+        $result = static::sendRappelFacturesFinancementImpayees();
+        if ($result) {
+            $out .= ($out ? '<br/><br/>' : '') . '----- Rappels factures en financement impayées ----<br/><br/>' . $result;
+        }
 
-        $factures = array();
-        while ($ln = $this->db->db->fetch_object($sql)) {
-            $facture = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
+        $result = static::createTasksChorus();
+        if ($result) {
+            $out .= ($out ? '<br/><br/>' : '') . '-------------- Tâches exports CHORUS -------------<br/><br/>' . $result;
+        }
 
-            if (BimpObject::objectLoaded($facture)) {
-                $id_user = $facture->getIdContact('internal', 'SALESREPSIGN');
-                if (!$id_user) {
-                    $id_user = (int) $facture->getData('fk_user_author');
-                }
-
-                if (!isset($factures[$id_user])) {
-                    $factures[$id_user] = array();
-                }
-
-                $factures[$id_user][] = $facture->getLink();
+        // Rappels Hebdomadaires: 
+        if ((int) date('N') == 7) {
+            $result = static::sendRappelFacturesMargesNegatives();
+            if ($result) {
+                $out .= ($out ? '<br/><br/>' : '') . '------- Rappels factures à marges négatives ------<br/><br/>' . $result;
             }
         }
+
+
+        return $out;
+    }
+
+    public static function sendRappelFacturesBrouillons()
+    {
+        $delay = (int) BimpCore::getConf('rappels_factures_brouillons_delay', null, 'bimpcommercial');
+
+        if (!$delay) {
+            return '';
+        }
+
+        $return = '';
+        $date = new DateTime();
+        $date->sub(new DateInterval('P' . $delay . 'D'));
+
+        $bdb = BimpCache::getBdb();
+        $where = 'datec < \'' . $date->format('Y-m-d') . '\' AND fk_statut = 0';
+        $rows = $bdb->getRows('facture', $where, null, 'array', array('rowid'));
+
+        if (!empty($rows)) {
+            $factures = array();
+
+            $id_default_user = (int) BimpCore::getConf('default_id_commercial', null);
+            foreach ($rows as $r) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommmercial', 'Bimp_Facture', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($facture)) {
+                    $id_user = $facture->getIdContact('internal', 'SALESREPSIGN');
+                    if (!$id_user) {
+                        $id_user = (int) $facture->getData('fk_user_author');
+                    }
+
+                    if (!$id_user) {
+                        $id_user = $id_default_user;
+                    }
+
+                    if (!isset($factures[$id_user])) {
+                        $factures[$id_user] = array();
+                    }
+
+                    $factures[$id_user][] = $facture->getLink();
+                }
+            }
+        }
+
+        $i = 0;
 
         if (!empty($factures)) {
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 
-            $i = 0;
             foreach ($factures as $id_user => $facs) {
                 $msg = 'Bonjour, vous avez laissé ';
                 if (count($facs) > 1) {
@@ -6495,28 +6693,202 @@ $errors[] = print_r($_REQUEST, 1);
                     $msg .= 'une facture';
                 }
 
-                $msg .= ' à l\'état de brouillon depuis plus de ' . $nbDay . ' jours.<br/>';
+                $msg .= ' à l\'état de brouillon depuis plus de ' . $delay . ' jours.<br/>';
                 $msg .= 'Merci de bien vouloir ' . (count($facs) > 1 ? 'les' : 'la') . ' régulariser au plus vite.<br/>';
 
                 foreach ($facs as $fac_link) {
                     $msg .= '<br/>' . $fac_link;
                 }
 
-                $mail = BimpTools::getMailOrSuperiorMail($id_user, 'f.pineri@bimp.fr');
+                $mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
 
-                if ($mail == '') {
-                    $mail = "tommy@bimp.fr";
+                $return .= ' - Mail to ' . $mail . ' : ';
+                if (mailSyn2('Facture brouillon à régulariser', BimpTools::cleanEmailsStr($mail), null, $msg)) {
+                    $return .= ' [OK]';
+                    $i++;
+                } else {
+                    $return .= ' [ECHEC]';
+                }
+                $return .= '<br/>';
+            }
+        }
+
+        return "OK " . $i . ' mail(s)<br/><br/>' . $return;
+    }
+
+    public static function sendRappelFacturesMargesNegatives()
+    {
+        $to = BimpCore::getConf('rappels_factures_marges_negatives_email', null, 'bimpcommercial');
+
+        if (!$to) {
+            return '';
+        }
+
+        $bdb = BimpCache::getBdb();
+        $facts = array();
+        $html = '';
+
+        $sql = 'SELECT a.*';
+        $sql .= ', p.ref as prod_ref';
+        $sql .= BimpTools::getSqlFrom('facturedet', array(
+                    'f'   => array(
+                        'alias' => 'f',
+                        'table' => 'facture',
+                        'on'    => 'a.fk_facture = f.rowid'
+                    ),
+                    'p'   => array(
+                        'alias' => 'p',
+                        'table' => 'product',
+                        'on'    => 'p.rowid = a.fk_product'
+                    ),
+                    'pef' => array(
+                        'alias' => 'pef',
+                        'table' => 'product_extrafields',
+                        'on'    => 'pef.fk_object = a.fk_product'
+                    )
+        ));
+        $sql .= " WHERE ((a.total_ht / a.qty)+0.01) < (buy_price_ht * a.qty / ABS(a.qty)) AND f.datef > '2022-04-01' AND pef.type_compta NOT IN (3)";
+
+        $lines = $bdb->executeS($sql);
+
+        if (!empty($lines)) {
+            foreach ($lines as $ln) {
+                $factLine = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array('id_line' => $ln->rowid));
+                $margeF = $factLine->getTotalMarge();
+                if ($margeF < 0) {
+                    $facts[$ln->fk_facture][$ln->rowid] = 'Ligne n° ' . $ln->rang . ' - ' . $ln->prod_ref . ' ' . BimpRender::renderObjectIcons($factLine, 0, 'default', '$url') . ' (Marge: ' . $margeF . ')';
+                }
+            }
+
+            if (!empty($facts)) {
+                foreach ($facts as $idFact => $lines) {
+                    $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact);
+                    $html .= ' - ' . $fact->getLink() . ' : <br/>';
+                    foreach ($lines as $line) {
+                        $html .= $line . '<br/>';
+                    }
+                    $html .= '<br/>';
                 }
 
-                if (mailSyn2('Facture brouillon à régulariser', $mail, null, $msg)) {
-                    $i++;
+                $to = BimpTools::cleanEmailsStr($to);
+//                mailSyn2('Liste des ligne(s) de facture à marge négative', $to, null, $html);
+            }
+        }
+
+        return $html;
+    }
+
+    public static function sendRappelFacturesFinancementImpayees()
+    {
+        $delay = (int) BimpCore::getConf('rappels_factures_financement_impayees', null, 'bimpcommercial');
+        $to = BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial');
+
+        if (!$delay) {
+            return '';
+        }
+
+        $out = '';
+        $modes = array();
+        $bdb = BimpCache::getBdb();
+
+        $rows = $bdb->getRows('c_paiement', 'code IN(\'FIN\',\'SOFINC\',\'FINAPR\',\'FLOC\',\'FINLDL\',\'FIN_YC\')', null, 'array', array('id'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $modes[] = $r['id'];
+            }
+        }
+
+        $dt_lim = new DateTime();
+        $dt_lim->sub(new DateInterval('P30D'));
+
+        $where = 'paye = 0 AND fk_statut = 1 AND paiement_status < 2 AND fk_mode_reglement IN(' . implode(',', $modes) . ') AND date_lim_reglement < \'' . $dt_lim->format('Y-m-d') . '\' AND datec > \'2019-06-30\'';
+        $rows = $bdb->getRows('facture', $where, null, 'array', array('rowid'));
+
+        if (is_array($rows)) {
+            $now = date('Y-m-d');
+            foreach ($rows as $r) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($facture)) {
+                    $fac_date_lim = $facture->getData('date_lim_reglement');
+
+                    if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $fac_date_lim) && strtotime($fac_date_lim) > 0) {
+                        $date_check = new DateTime($fac_date_lim);
+
+                        while ($date_check->format('Y-m-d') <= $now) {
+                            if ($date_check->format('Y-m-d') == $now) {
+                                $soc = $facture->getChildObject('client');
+
+                                // Envoi e-mail:
+                                $cc = '';
+                                $subject = 'Facture financement impayée - ' . $facture->getRef();
+
+                                if (BimpObject::objectLoaded($soc)) {
+                                    $subject .= ' - Client: ' . $soc->getRef() . ' - ' . $soc->getName();
+                                }
+
+                                $comms = $bdb->getRows('societe_commerciaux', 'fk_soc = ' . (int) $facture->getData('fk_soc'), null, 'array', array(
+                                    'fk_user'
+                                ));
+
+                                if (is_array($comms)) {
+                                    foreach ($comms as $c) {
+                                        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $c['fk_user']);
+
+                                        if (BimpObject::objectLoaded($commercial)) {
+                                            $cc .= ($cc ? ', ' : '') . BimpTools::cleanEmailsStr($commercial->getData('email'));
+                                        }
+                                    }
+                                }
+
+                                $msg = 'Bonjour, ' . "\n\n";
+                                $msg .= 'La facture "' . $facture->getLink() . '" dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le ';
+                                $msg .= date('d / m / Y', strtotime($fac_date_lim));
+
+                                $out .= ' - Fac ' . $facture->getLink() . ' : ';
+                                if (mailSyn2($subject, $to, '', $msg, array(), array(), array(), $cc)) {
+                                    $out .= '[OK]';
+                                } else {
+                                    $out .= '[ECHEC]';
+                                }
+                                $out .= '<br/>';
+                                break;
+                            }
+
+                            $date_check->add(new DateInterval('P15D'));
+                        }
+                    }
                 }
             }
         }
 
-        $this->output = "OK " . $i . ' mail(s)';
-        return 0;
+        return $out;
     }
+
+    public function createTasksChorus()
+    {
+        $out = '';
+
+        BimpObject::loadClass('bimptask', 'BIMP_Task');
+
+        $factures = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('chorus_status' => array(0, 1), 'fk_statut' => array(1, 2)));
+
+        if (empty($factures)) {
+            return 'Aucune facture en attente d\'export CHORUS';
+        }
+
+        foreach ($factures as $fact) {
+            $out .= ' - ' . $fact->getLink() . '<br/>';
+            $sujet = 'Facture en attente d\'export Chorus ' . $fact->getRef();
+            $msg = 'La facture {{Facture:' . $fact->id . '}} est en attente d\'export chorus';
+            BIMP_Task::addAutoTask('facturation', $sujet, $msg, "facture_extrafields:fk_object=" . $fact->id . ' AND chorus_status > 1');
+        }
+
+        return $out;
+    }
+
+    // Traitements globaux: 
 
     public static function checkIsPaidAll($filters = array())
     {
@@ -6782,6 +7154,7 @@ $errors[] = print_r($_REQUEST, 1);
         return $errors;
     }
 
+    // Gestion Graphs : 
     public static function dataGraphPayeAn($boxObj, $context)
     {
         $boxObj->boxlabel = 'Facture par statut paiement';

@@ -146,6 +146,8 @@ class BS_SAV extends BimpObject
         parent::__construct("bimpsupport", get_class($this));
 
         $this->useCaisseForPayments = (int) BimpCore::getConf('use_caisse_for_payments');
+        
+        BimpMail::$defaultType = 'ldlc';
     }
 
     // Gestion des droits et autorisations: 
@@ -1341,7 +1343,7 @@ class BS_SAV extends BimpObject
 
         if (!$modal_view) {
             $statut = self::$status_list[$this->data["status"]];
-            return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->getRef() . '</span></a>';
+            return "<a href='" . $this->getUrl() . "'>" . '<span class="' . ($statut['classes'] && is_array($statut['classes'])? implode(" ", $statut['classes']) : '') . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->getRef() . '</span></a>';
         }
 
         return parent::getNomUrl($withpicto, $ref_only, $page_link, $modal_view, $card);
@@ -3150,6 +3152,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $prop->cond_reglement_id = $id_cond_reglement;
             $prop->mode_reglement_id = $id_mode_reglement;
             $prop->fk_account = (int) BimpCore::getConf('id_default_bank_account');
+            $prop->model_pdf = 'bimpdevissav';
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
@@ -3928,7 +3931,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $tech = '';
         $user_tech = $this->getChildObject('user_tech');
         if (!is_null($user_tech) && $user_tech->isLoaded()) {
-            $tech = $user_tech->dol_object->getFullName($langs);
+            $tech = $user_tech->dol_object->firstname;
         }
 
         $textSuivie = "\n <a href='" . $this->getPublicLink() . "'>Vous pouvez suivre l'intervention ici.</a>";
@@ -7135,6 +7138,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             }
         }
     }
+    
+    public static function sendAlertesClientsUnrestituteSav()
+    {
+        $delay = (int) BimpCore::getConf('delay_alertes_clients_unrestitute_sav', null, 'bimpsupport');
+        
+        if (!$delay) {
+            return '';
+        }
+    }
 
     // Méthodes signature: 
 
@@ -7389,6 +7401,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $to = BimpTools::cleanEmailsStr($to);
 
                         $bimpMail = new BimpMail($this, $subject, $to, $from, $message);
+                        $bimpMail->setFromType('ldlc');
                         $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
                         $bimpMail->send($errors);
                     } else {

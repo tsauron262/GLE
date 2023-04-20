@@ -1094,9 +1094,9 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
             if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv) {
                 $html .= '<span style="font-weight: bold;">';
                 if ($this->pdf->addCgvPages)
-                    $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site www.bimp-pro.fr pour les professionnels et sur www.bimp.fr pour les particuliers.';
+                    $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
                 else
-                    $html .= 'Nos Conditions Générales de Vente sont consultables sur le site www.bimp-pro.fr pour les professionnels et sur www.bimp.fr pour les particuliers.';
+                    $html .= 'Nos Conditions Générales de Vente sont consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
                 $html .= "</span>";
                 $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
    En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';

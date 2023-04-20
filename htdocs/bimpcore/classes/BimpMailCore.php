@@ -24,6 +24,9 @@ class BimpMailCore
     public $url = '';
     public $files = array();
     public $parent;
+    
+    
+    public static $defaultType = '';
 
     function __construct($parent, $subject, $to, $from, $msg = '', $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
     {
@@ -116,6 +119,9 @@ class BimpMailCore
         $this->errors_to = $errors_to;
         $this->deliveryreceipt = $deliveryreceipt;
         $this->primary = BimpCore::getParam('public_email/primary', '807F7F');
+        
+        if(static::$defaultType != '')
+            $this->setFromType(static::$defaultType);
     }
 
     public function getHeader()

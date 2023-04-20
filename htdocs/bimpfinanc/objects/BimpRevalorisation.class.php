@@ -8,7 +8,7 @@ class BimpRevalorisation extends BimpObject
     const STATUS_ATT_EQUIPMENTS = 20;
     const STATUS_ACCEPTED = 1;
     const STATUS_REFUSED = 2;
-    
+
     public static $status_list = array(
         0  => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         10 => array('label' => 'Déclarée', 'icon' => 'fas_pause-circle', 'classes' => array('success')),
@@ -73,61 +73,6 @@ class BimpRevalorisation extends BimpObject
         }
 
         return (int) parent::canSetAction($action);
-    }
-
-    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
-    {
-        if ((int) $value) {
-            $filters['typecont.element'] = 'facture';
-            $filters['typecont.source'] = 'internal';
-            $filters['typecont.code'] = 'SALESREPFOLL';
-            $filters['elemcont.fk_socpeople'] = (int) $value;
-
-            $joins['elemcont'] = array(
-                'table' => 'element_contact',
-                'on'    => 'elemcont.element_id = ' . $main_alias . '.id_facture',
-                'alias' => 'elemcont'
-            );
-            $joins['typecont'] = array(
-                'table' => 'c_type_contact',
-                'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
-                'alias' => 'typecont'
-            );
-        }
-    }
-
-    public function actionSetStatus($data, &$success)
-    {
-        $success = 'Maj status OK';
-        $errors = $warnings = array();
-        if ($this->canSetAction('process')) {
-            if ($data['status'] == 1 || $data['status'] == 2) {
-                foreach ($data['id_objects'] as $nb => $idT) {
-                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
-                    if (($instance->getData('type') == 'crt' && $instance->getData('status') != 10) ||
-                            ($instance->getData('type') != 'crt' && $instance->getData('status') != 0)) {
-                        $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
-                    }
-                    if (!$instance->isActionAllowed('process'))
-                        $errors[] = ($nb + 1) . ' éme ligne séléctionné opération impossible';
-                }
-                if (!count($errors)) {
-                    foreach ($data['id_objects'] as $nb => $idT) {
-                        $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
-                        $instance->updateField('status', $data['status']);
-                    }
-                }
-            } elseif ($data['status'] == 0) {
-                if ($instance->getData('type') == 'applecare' && $instance->getData('status') != 20) {
-                    $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
-                }
-            } else {
-                $errors[] = 'Action non géré';
-            }
-        } else {
-            $errors[] = 'Vous n\'avez pas la permission';
-        }
-        return array('errors' => $errors, 'warnings' => $warnings);
     }
 
     // Getters booléens: 
@@ -258,12 +203,16 @@ class BimpRevalorisation extends BimpObject
         if ($this->getData('type') == 'crt') {
             if ($this->getData('status') == 10)
                 return 1;
-        } elseif ($manuel && ($this->getData('type') == 'applecare' || $this->getData('type') == 'fac_ac')) {//pas de validation manuel sur les applecare
         } elseif ($this->getData('type') == 'applecare') {
-            if ($this->getData('status') == 0)
+            if ($this->getData('status') == 0) {
                 return 1;
-        } else
+            }
+        } elseif ($this->getData('type') == 'fac_ac') {
+            return 0;
+        } else {
             return 1;
+        }
+
         return 0;
     }
 
@@ -689,6 +638,27 @@ class BimpRevalorisation extends BimpObject
         return $buttons;
     }
 
+    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ((int) $value) {
+            $filters['typecont.element'] = 'facture';
+            $filters['typecont.source'] = 'internal';
+            $filters['typecont.code'] = 'SALESREPFOLL';
+            $filters['elemcont.fk_socpeople'] = (int) $value;
+
+            $joins['elemcont'] = array(
+                'table' => 'element_contact',
+                'on'    => 'elemcont.element_id = ' . $main_alias . '.id_facture',
+                'alias' => 'elemcont'
+            );
+            $joins['typecont'] = array(
+                'table' => 'c_type_contact',
+                'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+                'alias' => 'typecont'
+            );
+        }
+    }
+
     // Affichage: 
 
     public function displayDesc()
@@ -869,6 +839,45 @@ class BimpRevalorisation extends BimpObject
 
     // Actions 
 
+    public function actionSetStatus($data, &$success = '')
+    {
+        $errors = $warnings = array();
+        $success = 'Maj status OK';
+
+        if ($this->canSetAction('process')) {
+            if ($data['status'] == 1 || $data['status'] == 2) {
+                foreach ($data['id_objects'] as $nb => $idT) {
+                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
+                    if (($instance->getData('type') == 'crt' && $instance->getData('status') != 10) ||
+                            ($instance->getData('type') != 'crt' && $instance->getData('status') != 0)) {
+                        $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
+                    }
+                    if (!$instance->isActionAllowed('process'))
+                        $errors[] = ($nb + 1) . ' éme ligne séléctionné opération impossible';
+                }
+                if (!count($errors)) {
+                    foreach ($data['id_objects'] as $nb => $idT) {
+                        $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
+                        $instance->updateField('status', $data['status']);
+                    }
+                }
+            } elseif ($data['status'] == 0) {
+                if ($instance->getData('type') == 'applecare' && $instance->getData('status') != 20) {
+                    $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
+                }
+            } else {
+                $errors[] = 'Action non géré';
+            }
+        } else {
+            $errors[] = 'Vous n\'avez pas la permission';
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     public function actionProcess($data, &$success)
     {
         $errors = array();
@@ -890,7 +899,7 @@ class BimpRevalorisation extends BimpObject
                     $success = 'Acceptation de la revalorisation effectuée avec succès';
                     $this->set('status', 1);
                     break;
-                
+
                 case 'declarer':
                     $success = 'Acceptation de la revalorisation effectuée avec succès';
                     $this->set('status', 10);
@@ -902,7 +911,7 @@ class BimpRevalorisation extends BimpObject
                     $facture = $this->getChildObject('facture');
                     $facture->addNoteToCommercial('Une revalorisation a été refusée');
                     break;
-                
+
                 case 'setSerial':
                     $success = 'Saisie du serial OK';
                     $this->set('status', 0);
@@ -1069,6 +1078,36 @@ class BimpRevalorisation extends BimpObject
         );
     }
 
+    public function actionCheckAppleCareSerials($data, &$success)
+    {
+        $warnings = array();
+        $success = 'Equipements attribuées';
+        $errors = self::checkAppleCareSerials();
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCheckBilledApplecareReval($data, &$success = '')
+    {
+        $warnings = array();
+
+        $nbOk = 0;
+        $warnings = self::checkBilledApplecareReval($data['id_fact'], $nbOk);
+
+        if ($nbOk) {
+            $success = $nbOk . ' revalorisation(s) validée(s) avec succès';
+        } else {
+            $warnings[] = 'Aucune validation effectuée';
+        }
+
+        return array(
+            'errors'   => array(),
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
     public function validate()
@@ -1188,17 +1227,6 @@ class BimpRevalorisation extends BimpObject
 
     // Méthodes statiques: 
 
-    public function actionCheckAppleCareSerials($data, &$success)
-    {
-        $warnings = array();
-        $success = 'Equipements attribuées';
-        $errors = self::checkAppleCareSerials();
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
     public static function checkAppleCareSerials(&$nb_ok = 0)
     {
         $errors = array();
@@ -1228,17 +1256,6 @@ class BimpRevalorisation extends BimpObject
         return $errors;
     }
 
-    public function actionCheckBilledApplecareReval($data, &$success)
-    {
-        $warnings = array();
-        $success = 'Reval validées avec succés';
-        $errors = self::checkBilledApplecareReval($data['id_fact']);
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
     public static function checkBilledApplecareReval($id_facture = null, &$nbOk = 0)
     {
         $errors = array();
@@ -1246,7 +1263,7 @@ class BimpRevalorisation extends BimpObject
         $filters = array(
             'a.type'       => 'fac_ac',
             'a.status'     => 0,
-//            'f.fk_statut' => array(1, 2),
+            'f.fk_statut'  => array(1, 2),
             'a.equipments' => array(
                 'operator' => '!=',
                 'value'    => ''
@@ -1267,75 +1284,82 @@ class BimpRevalorisation extends BimpObject
 
         if (!empty($revals)) {
             $bdb = BimpCache::getBdb();
+            $bdb->db->commitAll();
+
             foreach ($revals as $reval) {
                 $equipments = $reval->getData('equipments');
                 if (!empty($equipments)) {
-                    $id_eq = (int) $equipments[0];
+                    $reval_errors = array();
+                    $bdb->db->begin();
 
-                    if ($id_eq) {
-                        $fac_reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
-                                    'type'       => 'applecare',
-                                    'equipments' => array(
-                                        'part_type' => 'middle',
-                                        'part'      => '[' . $id_eq . ']'
-                                    ),
-                                        ), true);
+                    $nb_eqs_ok = 0;
+                    foreach ($equipments as $id_eq) {
+                        if ($id_eq) {
+                            $fac_reval = BimpCache::findBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', array(
+                                        'type'       => 'applecare',
+                                        'equipments' => array(
+                                            'part_type' => 'middle',
+                                            'part'      => '[' . $id_eq . ']'
+                                        ),
+                                            ), true);
 
-                        if (BimpObject::objectLoaded($fac_reval)) {
-                            $reval_errors = array();
-                            $bdb->db->begin();
+                            if (BimpObject::objectLoaded($fac_reval)) {
+                                $facture = $reval->getChildObject('facture');
+                                if ((int) $fac_reval->getData('status') !== 1) {
+                                    if ((int) $fac_reval->getData('qty') > 1) {
+                                        // Création d'une nouvelle reval: 
+                                        $data = $fac_reval->getDataArray();
+                                        $data['qty'] = 1;
+                                        $data['status'] = 1;
+                                        $data['equipments'] = array($id_eq);
+                                        $data['date_processed'] = date('Y-m-d');
+                                        $data['note'] .= ($data['note'] ? "\n\n" : '') . 'Validée en auto' . (BimpObject::objectLoaded($facture) ? ' via facture ' . $facture->getRef() : '');
 
-                            $facture = $reval->getChildObject('facture');
-                            if ((int) $fac_reval->getData('status') !== 1) {
-                                if ((int) $fac_reval->getData('qty') > 1) {
-                                    // Création d'une nouvelle reval: 
-                                    $data = $fac_reval->getDataArray();
-                                    $data['qty'] = 1;
-                                    $data['status'] = 1;
-                                    $data['equipments'] = array($id_eq);
-                                    $data['date_processed'] = date('Y-m-d');
-                                    $data['note'] .= ($data['note'] ? "\n\n" : '') . 'Validée en auto' . (BimpObject::objectLoaded($facture) ? ' via facture ' . $facture->getRef() : '');
+                                        BimpObject::createBimpObject('bimpfinanc', 'BimpRevalorisation', $data, true, $reval_errors);
 
-                                    BimpObject::createBimpObject('bimpfinanc', 'BimpRevalorisation', $data, true, $reval_errors);
+                                        if (!count($reval_errors)) {
+                                            $eqs = $fac_reval->getData('equipments');
+                                            $eqs = BimpTools::unsetArrayValue($eqs, $id_eq);
+                                            $fac_reval->set('qty', (int) $fac_reval->getData('qty') - 1);
+                                            $fac_reval->set('equipments', $eqs);
+                                            $reval_errors = $fac_reval->update($w, true);
 
-                                    if (!count($reval_errors)) {
-                                        $eqs = $fac_reval->getData('equipments');
-                                        $eqs = BimpTools::unsetArrayValue($eqs, $id_eq);
-                                        $fac_reval->set('qty', (int) $fac_reval->getData('qty') - 1);
-                                        $fac_reval->set('equipments', $eqs);
+                                            if (!count($reval_errors)) {
+                                                $nbOk++;
+                                                $nb_eqs_ok++;
+                                            }
+                                        }
+                                    } else {
+                                        $fac_reval->set('status', 1);
+                                        $note = $fac_reval->getData('note');
+                                        $note .= ($note ? "\n\n" : '') . 'Validée en auto' . (BimpObject::objectLoaded($facture) ? ' via facture ' . $facture->getRef() : '');
+                                        $fac_reval->set('note', $note);
+                                        $fac_reval->set('date_processed', date('Y-m-d'));
                                         $reval_errors = $fac_reval->update($w, true);
 
                                         if (!count($reval_errors)) {
                                             $nbOk++;
+                                            $nb_eqs_ok++;
                                         }
                                     }
                                 } else {
-                                    $fac_reval->set('status', 1);
-                                    $note = $fac_reval->getData('note');
-                                    $note .= ($note ? "\n\n" : '') . 'Validée en auto' . (BimpObject::objectLoaded($facture) ? ' via facture ' . $facture->getRef() : '');
-                                    $fac_reval->set('note', $note);
-                                    $fac_reval->set('date_processed', date('Y-m-d'));
-                                    $reval_errors = $fac_reval->update($w, true);
-
-                                    if (!count($reval_errors)) {
-                                        $nbOk++;
-                                    }
+                                    $nb_eqs_ok++;
                                 }
                             }
-
-                            if (!count($reval_errors)) {
-                                $reval->set('status', 1);
-                                $reval->set('date_processed', date('Y-m-d'));
-                                $reval_errors = $reval->update($w, true);
-                            }
-
-                            if (count($reval_errors)) {
-                                $bdb->db->rollback();
-                                $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation #' . $reval->id);
-                            } else {
-                                $bdb->db->commit();
-                            }
                         }
+                    }
+
+                    if ($nb_eqs_ok == (int) $reval->getData('qty')) {
+                        $reval->set('status', 1);
+                        $reval->set('date_processed', date('Y-m-d'));
+                        $reval_errors = $reval->update($w, true);
+                    }
+
+                    if (count($reval_errors)) {
+                        $bdb->db->rollback();
+                        $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation #' . $reval->id);
+                    } else {
+                        $bdb->db->commit();
                     }
                 }
             }

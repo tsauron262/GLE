@@ -1202,6 +1202,21 @@ class BimpObject extends BimpCache
         return $fields;
     }
 
+    public function getAddFilesButton()
+    {
+        if ($this->isActionAllowed('addFiles') && $this->canSetAction('addFiles')) {
+            return array(
+                'label'   => 'Ajouter des fichiers',
+                'icon'    => 'fas_folder-plus',
+                'onclick' => $this->getJsActionOnclick('addFiles', array(), array(
+                    'form_name' => 'add_files'
+                ))
+            );
+        }
+        
+        return array();
+    }
+
     // Getters boolééns:
 
     public function isLoaded(&$errors = array())
@@ -1697,8 +1712,9 @@ class BimpObject extends BimpCache
     {
         return $value;
     }
-    
-    public function getGlobalConf($name, $default = '', $module = ''){
+
+    public function getGlobalConf($name, $default = '', $module = '')
+    {
         return BimpCore::getConf($name, $default, $module);
     }
 
@@ -4056,7 +4072,6 @@ class BimpObject extends BimpCache
 
     // Gestion des signatures: 
 
-
     public function getSignatureInstance($doc_type)
     {
         if ($this->isLoaded()) {
@@ -5028,7 +5043,7 @@ class BimpObject extends BimpCache
                         if ($date_update_field) {
                             $this->data[$date_update_field] = date('Y-m-d H:i:s');
                         }
-                        
+
                         $user_update_field = $this->getUserUpdateProperty();
                         if ($user_update_field) {
                             global $user;
@@ -5217,7 +5232,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         if ($date_update_field) {
                             $data[$date_update_field] = date('Y-m-d H:i:s');
                         }
-                        
+
                         $user_update_field = $this->getUserUpdateProperty();
                         if ($user_update_field) {
                             global $user;
@@ -6202,6 +6217,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function isActionAllowed($action, &$errors = array())
     {
+        switch ($action) {
+            case 'addFiles':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                return 1;
+        }
+
         return 1;
     }
 
@@ -8195,18 +8218,22 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $html;
     }
 
-    public function renderImages()
+    public function renderImages($filters = null)
     {
         $html = '';
 
-        $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
-                    'parent_module'      => $this->module,
-                    'parent_object_name' => $this->object_name,
-                    'id_parent'          => $this->id,
-                    'file_ext'           => array(
-                        'in' => array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif')
-                    )
-        ));
+        if (is_null($filters)) {
+            $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
+                        'parent_module'      => $this->module,
+                        'parent_object_name' => $this->object_name,
+                        'id_parent'          => $this->id,
+                        'file_ext'           => array(
+                            'in' => array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif')
+                        )
+            ));
+        } else
+            $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', $filters);
+
 
         if (!empty($files)) {
             $html .= '<div>';
@@ -10133,6 +10160,27 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $success_callback
+        );
+    }
+
+    public function actionAddFiles($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $files = BimpTools::getArrayValueFromPath($data, 'files', array());
+
+        if (empty($files)) {
+            $errors[] = 'Aucun fichier ajouté';
+        } else {
+            $files_dir = $this->getFilesDir();
+            BimpTools::moveTmpFiles($warnings, $files, $files_dir);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

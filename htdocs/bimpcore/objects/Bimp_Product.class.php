@@ -2904,11 +2904,23 @@ class Bimp_Product extends BimpObject
 
             $email_sent = false;
             $list_contact = $commande->liste_contact(-1, 'internal');
-
+            
+            //mail au créateur
+            $mailCreateur = '';
+            if($commande->fk_user_author){
+                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+                $userT = new User($this->db->db);
+                $userT->fetch($commande->fk_user_author);
+                $mailCreateur = $userT->email;
+            }
+            if($mailCreateur && $mailCreateur != '')
+                $this->sendEmailCommandeValid($commande, $mailCreateur);
+                    
             // Search responsible
             foreach ($list_contact as $contact) {
                 if ($contact['code'] == 'SALESREPFOLL' && !$email_sent) {
-                    $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
+                    if($contact['email'] != $mailCreateur)
+                        $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -2917,7 +2929,8 @@ class Bimp_Product extends BimpObject
             // Search signatory
             if (!$email_sent) {
                 foreach ($list_contact as $contact) {
-                    $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
+                    if($contact['email'] != $mailCreateur)
+                        $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -2928,7 +2941,8 @@ class Bimp_Product extends BimpObject
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
-                $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $userT->email));
+                if($userT->email != $mailCreateur)
+                        $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $userT->email));
                 $email_sent = true;
                 continue;
             }

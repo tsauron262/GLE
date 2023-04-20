@@ -2161,64 +2161,65 @@ class BT_ficheInter extends BimpDolObject
                         if (count($mail_cli_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($mail_cli_errors, 'Echec de l\'envoi de la FI par e-mail au client');
                         }
-                    }
 
-                    // Envoi au commecial / tech
-                    if ($email_comm || $email_tech) {
-                        $subject = '[FI] ' . $this->getRef();
+                        // Envoi au commecial / tech
+                        if ($email_comm || $email_tech) {
+                            $subject = '[FI] ' . $this->getRef();
 
-                        if (count($mail_cli_errors)) {
-                            $subject .= ' [ECHEC ENVOI E-MAIL AU CLIENT]';
-                        }
-
-                        if (BimpObject::objectLoaded($client)) {
-                            $subject .= ' - Client ' . $client->getRef() . ' ' . $client->getName();
-                        }
-
-                        $message = "Bonjour, pour informations : <br/><br/>";
-                        $message .= "L'intervention " . $this->getLink() . ' pour le client ' . $client->getLink() . ' ';
-
-                        if ($auto_terminer) {
-                            $message .= "en interne a été signée par le technicien. La FI à été marquée comme terminée automatiquement.";
-                        } else {
                             if (count($mail_cli_errors)) {
-                                $message .= 'n\'a pas pu être envoyée par e-mail au client ';
+                                $subject .= ' [ECHEC ENVOI E-MAIL AU CLIENT]';
+                            }
+
+                            if (BimpObject::objectLoaded($client)) {
+                                $subject .= ' - Client ' . $client->getRef() . ' ' . $client->getName();
+                            }
+
+                            $message = "Bonjour, pour informations : <br/><br/>";
+                            $message .= "L'intervention " . $this->getLink() . ' pour le client ' . $client->getLink() . ' ';
+
+                            if ($auto_terminer) {
+                                $message .= "en interne a été signée par le technicien. La FI à été marquée comme terminée automatiquement.";
                             } else {
-                                $message .= 'a été envoyée par e-mail au client ';
+                                if (count($mail_cli_errors)) {
+                                    $message .= 'n\'a pas pu être envoyée par e-mail au client ';
+                                } else {
+                                    $message .= 'a été envoyée par e-mail au client ';
+                                }
+
+                                switch ($type_signature) {
+                                    case self::TYPE_SIGN_DIST:
+                                        $message .= 'pour signature électronique à distance.';
+                                        break;
+
+                                    case self::TYPE_SIGN_ELEC:
+                                        $message .= ' suite à sa signature électronique.';
+                                        break;
+
+                                    case self::TYPE_SIGN_PAPIER:
+                                        $message .= ' pour signature papier à renvoyer par e-mail.';
+                                        break;
+                                }
+
+                                if (count($mail_cli_errors)) {
+                                    $message . '<br/><br/>';
+                                    $message .= BimpTools::getMsgFromArray($mail_cli_errors, 'Erreurs');
+                                }
+
+                                if ($email_cli) {
+                                    $message .= '<br/><br/>Adresse e-mail du client: ' . $email_cli;
+                                }
+
+                                $message .= '<br/><br/>';
                             }
 
-                            switch ($type_signature) {
-                                case self::TYPE_SIGN_DIST:
-                                    $message .= 'pour signature électronique à distance.';
-                                    break;
+                            $to = $email_comm ? $email_comm : $email_tech;
+                            $cc = ($email_comm ? $email_tech : ''); // . 't.sauron@bimp.fr, f.martinez@bimp.fr';
 
-                                case self::TYPE_SIGN_ELEC:
-                                    $message .= ' suite à sa signature électronique.';
-                                    break;
-
-                                case self::TYPE_SIGN_PAPIER:
-                                    $message .= ' pour signature papier à renvoyer par e-mail.';
-                                    break;
+                            if (!mailSyn2($subject, $to, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), $cc)) {
+                                $warnings[] = 'Echec de l\'envoi de l\'e-mail de notification au commercial du client';
                             }
-
-                            if (count($mail_cli_errors)) {
-                                $message . '<br/><br/>';
-                                $message .= BimpTools::getMsgFromArray($mail_cli_errors, 'Erreurs');
-                            }
-
-                            if ($email_cli) {
-                                $message .= '<br/><br/>Adresse e-mail du client: ' . $email_cli;
-                            }
-
-                            $message .= '<br/><br/>';
                         }
-
-                        $to = $email_comm ? $email_comm : $email_tech;
-                        $cc = ($email_comm ? $email_tech : ''); // . 't.sauron@bimp.fr, f.martinez@bimp.fr';
-
-                        if (!mailSyn2($subject, $to, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), $cc)) {
-                            $warnings[] = 'Echec de l\'envoi de l\'e-mail de notification au commercial du client';
-                        }
+                    
                     }
                 }
             }
@@ -2950,12 +2951,27 @@ class BT_ficheInter extends BimpDolObject
 
     public function validatePost()
     {
+        $id_contact = (int) BimpTools::getPostFieldValue('id_contact_signature');
+            
+        if(0 < $id_contact) {
+            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+            
+            if(BimpObject::objectLoaded($contact)) {
+                if(array_key_exists('signataire', $_POST) and BimpTools::getPostFieldValue('signataire') == '')
+                    $_POST['signataire'] = $contact->getName();
+                
+                if(array_key_exists('email_signature', $_POST) and BimpTools::getPostFieldValue('email_signature') == '')
+                    $_POST['email_signature'] = $contact->getData('email');
+            }
+        }
+        
         $errors = parent::validatePost();
 
         if (!count($errors)) {
             if ((int) BimpTools::getPostFieldValue('signature_set', 0)) {
                 if (!count($this->getChildrenList("inters"))) {
                     $errors[] = "Vous ne pouvez pas faire signer une fiche d'intervention sans intervention enregistrée";
+//                    $errors[] = print_r($_POST, 1);
                 }
             }
         }
@@ -2963,6 +2979,32 @@ class BT_ficheInter extends BimpDolObject
         return $errors;
     }
 
+    public function getSignatureContactCreateFormValues()
+    {
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $fields = array(
+                'fk_soc' => $client->getData('id'),
+                'email'  => $client->getData('email'),
+            );
+
+            if (!$client->isCompany()) {
+                $fields['address'] = $client->getData('address');
+                $fields['zip'] = $client->getData('zip');
+                $fields['town'] = $client->getData('town');
+                $fields['fk_pays'] = $client->getData('fk_pays');
+                $fields['fk_departement'] = $client->getData('fk_departement');
+            }
+
+            return array(
+                'fields' => $fields
+            );
+        }
+        
+        return array();
+    }
+    
     public function validate()
     {
         $errors = parent::validate();

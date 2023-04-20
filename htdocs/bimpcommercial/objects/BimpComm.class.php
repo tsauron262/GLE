@@ -5248,10 +5248,10 @@ class BimpComm extends BimpDolObject
         if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente')) {
             $init_zone = $this->getInitData('zone_vente');
             $cur_zone = $this->getData('zone_vente');
-
+            
             if (!(int) $this->getData('fk_statut')) {
                 if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) ||
-                        $this->getData('entrepot') == 164 || $init_id_entrepot = 164) &&
+                        $this->getData('entrepot') == 164 || $init_id_entrepot == 164) &&
                         (((int) $this->getData('fk_soc') !== $init_fk_soc) || (int) $this->getData('entrepot') !== $init_id_entrepot)) {
                     $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
                     if (BimpObject::objectLoaded($soc)) {

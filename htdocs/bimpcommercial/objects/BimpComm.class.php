@@ -5133,15 +5133,15 @@ class BimpComm extends BimpDolObject
         if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente') && !(int) $this->getData('fk_statut')) {
             $cur_zone = $this->getData('zone_vente');
             // Check zone vente : 
-                if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) || (int) $this->getData('entrepot') == 164)) {
-                    $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
-                    if (BimpObject::objectLoaded($soc)) {
-                        $new_zone = $this->getZoneByCountry($soc);
-                        if ($new_zone && $new_zone != $cur_zone) {
-                            $this->set('zone_vente', $new_zone);
-                        }
+            if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) || (int) $this->getData('entrepot') == 164)) {
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
+                if (BimpObject::objectLoaded($soc)) {
+                    $new_zone = $this->getZoneByCountry($soc);
+                    if ($new_zone && $new_zone != $cur_zone) {
+                        $this->set('zone_vente', $new_zone);
                     }
                 }
+            }
         }
 
         $errors = parent::create($warnings, $force_create);
@@ -5255,7 +5255,11 @@ class BimpComm extends BimpDolObject
                         (((int) $this->getData('fk_soc') !== $init_fk_soc) || (int) $this->getData('entrepot') !== $init_id_entrepot)) {
                     $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
                     if (BimpObject::objectLoaded($soc)) {
-                        $this->set('zone_vente', $this->getZoneByCountry($soc));
+                        $new_zone = $this->getZoneByCountry($soc);
+
+                        if ($new_zone && $new_zone != $cur_zone) {
+                            $this->set('zone_vente', $new_zone);
+                        }
                     }
                 }
             }
@@ -5271,7 +5275,7 @@ class BimpComm extends BimpDolObject
             if ($init_zone && $this->areLinesEditable()) {
                 $cur_zone = (int) $this->getData('zone_vente');
 
-                if ($cur_zone !== $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_UE))) {
+                if ($cur_zone != $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_UE))) {
                     $lines_errors = $this->removeLinesTvaTx();
                     if (count($lines_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');

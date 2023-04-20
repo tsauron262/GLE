@@ -259,7 +259,6 @@ class cron extends BimpCron
 
     public function facturation_auto()
     {
-        global $langs;
         $bdb = BimpCache::getBdb();
         $today = date('Y-m-d');
 

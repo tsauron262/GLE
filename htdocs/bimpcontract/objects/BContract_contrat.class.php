@@ -1312,7 +1312,7 @@ class BContract_contrat extends BimpDolObject
             $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_' . ucfirst($object), $l->rowid);
             $return[$instance->id] = $instance->getData('ref') . " - " . $instance->getData('libelle');
         }
-        
+
         return $return;
     }
 
@@ -1373,7 +1373,7 @@ class BContract_contrat extends BimpDolObject
     public function getAddContactIdClient()
     {
         $id_client = (int) BimpTools::getPostFieldValue('id_client');
-        
+
         if (!$id_client) {
             $id_client = (int) $this->getData('fk_soc');
         }
@@ -1797,9 +1797,9 @@ class BContract_contrat extends BimpDolObject
     {
         $debut = new DateTime($this->getData('date_start'));
         $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
-        
+
         $interval = $debut->diff($diff);
-        
+
         return $interval->days;
     }
 
@@ -1823,17 +1823,34 @@ class BContract_contrat extends BimpDolObject
         return $values;
     }
 
+    public function getIdLinkedPropal()
+    {
+        if ($this->isLoaded()) {
+            $where = 'targettype = \'contrat\' and fk_target = ' . $this->id . ' AND sourcetype = \'propal\'';
+            $id_propal = (int) $this->db->getValue('element_element', 'fk_source', $where, 'rowid');
+
+            if (!$id_propal) {
+                $where = 'sourcetype = \'contrat\' and fk_source = ' . $this->id . ' AND targettype = \'propal\'';
+                $id_propal = (int) $this->db->getValue('element_element', 'fk_target', $where, 'rowid');
+            }
+            
+            return $id_propal;
+        }
+
+        return 0;
+    }
+
     // Getters array: 
 
     public function getContratSecteursArray()
     {
         $sql = $this->db->getRows('bimp_c_secteur', 'clef = "CTC" OR clef = "CTE"');
         $return = Array();
-        
+
         foreach ($sql as $index => $i) {
             $return[$i->clef] = $i->valeur;
         }
-        
+
         return $return;
     }
 

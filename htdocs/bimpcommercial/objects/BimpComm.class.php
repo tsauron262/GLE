@@ -93,6 +93,16 @@ class BimpComm extends BimpDolObject
 
         return 0;
     }
+    
+    public function canSetAction($action)
+    {
+        global $user;
+//        if ($action == 'checkTotal' && !$user->admin)
+//            return 0;
+        if ($action == 'checkMarge' && !$user->admin)
+            return 0;
+        return parent::canSetAction($action);
+    }
 
     // Getters booléens: 
 
@@ -680,16 +690,6 @@ class BimpComm extends BimpDolObject
         }
 
         return $buttons;
-    }
-
-    public function canSetAction($action)
-    {
-        global $user;
-//        if ($action == 'checkTotal' && !$user->admin)
-//            return 0;
-        if ($action == 'checkMarge' && !$user->admin)
-            return 0;
-        return parent::canSetAction($action);
     }
 
     public function getDefaultListExtraButtons()
@@ -1414,6 +1414,11 @@ class BimpComm extends BimpDolObject
         return null;
     }
 
+    public function getIdCommercial()
+    {
+        return $this->getIdContact($type = 'internal', $code = 'SALESREPFOLL');
+    }
+    
     public function getSocAvailableDiscountsAmounts()
     {
         if ((int) $this->getData('fk_soc')) {
@@ -1874,16 +1879,6 @@ class BimpComm extends BimpDolObject
         }
 
         return BimpTools::displayMoneyValue($total, '', 0, 0, 0, 2, 1);
-    }
-
-    public function getIdCommercial()
-    {
-        return $this->getIdContact($type = 'internal', $code = 'SALESREPFOLL');
-    }
-
-    public function addNoteToCommercial($note)
-    {
-        return $this->addNote($note, null, 0, 0, '', 1, 1, 0, $this->getIdCommercial());
     }
 
     public function displayCommercial()
@@ -3676,6 +3671,11 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
+    public function addNoteToCommercial($note)
+    {
+        return $this->addNote($note, null, 0, 0, '', 1, 1, 0, $this->getIdCommercial());
+    }
+    
     public function checkRemisesGlobales($echo = false, $create_avoir = false)
     {
         if ($this->isLoaded()) {

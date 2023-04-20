@@ -18,6 +18,8 @@ class BimpCommercialCronExec extends BimpCron
 
     public function sendRappelsFactures()
     {
+        $this->current_cron_name = 'Envoi des rappels pour les factures';
+        
         $facture_class = '';
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture', $facture_class);
         $this->output = $facture_class::sendRappels();

@@ -6866,7 +6866,7 @@ class Bimp_Facture extends BimpComm
         return $out;
     }
 
-    public function createTasksChorus()
+    public static function createTasksChorus()
     {
         $out = '';
 

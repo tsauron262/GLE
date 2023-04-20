@@ -216,7 +216,7 @@ class BC_FiltersPanel extends BC_Panel
             $html .= BimpRender::renderRowButton('Liste des filtres enregistrés', 'fas_bars', 'loadBCUserConfigsModalList($(this), ' . $user->id . ',\'' . $this->identifier . '\', \'ListFilters\', \'' . $list_title . '\')');
         }
         if ($this->params['configurable']) {
-            $list_title = 'Gestion des configrations de  fitres';
+            $list_title = 'Gestion des configurations de filtres';
             $html .= BimpRender::renderRowButton('Configurations des filtres', 'fas_cog', 'loadBCUserConfigsModalList($(this), ' . $user->id . ',\'' . $this->identifier . '\', \'FiltersConfig\', \'' . $list_title . '\')');
         }
         $html .= BimpRender::renderRowButton('Replier tous les filtres', 'fas_minus-square', 'hideAllFilters(\'' . $this->identifier . '\')');

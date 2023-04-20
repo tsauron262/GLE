@@ -112,6 +112,12 @@ params:
         info: "Exemple : &quot;L'équipe XXX&quot;"
         warning: Cette signature n'est pas incluse automatiquement à chaque e-mail
         def: ''
+    CLOSE_DATE:
+        label: Date de fermeture (si présente ERP fermé)
+    IP_ADMIN:
+        label: Ip Admin (pour fermeture ERP)
+    git_branch:
+        label: Branche GIT
     
     # Defaults: 
     default_id_entrepot: 
@@ -148,6 +154,10 @@ params:
         label: Adresse e-mail tous les devs
         cat: emails
         def: dev@bimp.fr
+    default_user_email: 
+        label: Adresse e-mail utilisateur par défaut
+        cat: emails
+        required: 1
     public_default_reply_to_email: 
         label: reply_to par défaut pour les e-mails publics
         cat: emails
@@ -260,29 +270,19 @@ params:
         label: ID Groupe Logistique
         cat: groups
         def: 0
-        
     id_user_group_facturation: 
         label: ID Groupe Faturation
         cat: groups
         def: 0
-        
     id_user_group_contrat: 
         label: ID Groupe Contrats
         cat: groups
         def: 0
-        
     id_user_group_achat: 
         label: ID Groupe Achat
         cat: groups
         def: 0
-        
     id_user_group_atradius: 
         label: ID Groupe Atradius
         cat: groups
         def: 0
-    CLOSE_DATE:
-        label: Date de fermeture (si présente ERP fermé)
-    IP_ADMIN:
-        label: Ip Admin (pour fermeture ERP)
-    git_branch:
-        label: Branche GIT

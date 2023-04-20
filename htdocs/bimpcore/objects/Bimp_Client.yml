@@ -104,8 +104,7 @@ fields_tables:
                   callback: displayFormAtradius
             - field: id_atradius
             - field: status_atradius
-           
-
+      
 views: 
     client:
         extends: default

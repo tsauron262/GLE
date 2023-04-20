@@ -585,14 +585,13 @@ class BimpInput
                 break;
 
             case 'search_user':
-                if (!isset($options['include_empty'])) {
-                    $options['include_empty'] = 0;
-                }
-                if (!isset($options['empty_label'])) {
-                    $options['empty_label'] = '';
-                }
+                $options = BimpTools::overrideArray(array(
+                            'include_empty' => 0,
+                            'empty_label'   => '',
+                            'active_only'   => null
+                                ), $options);
 
-                $options['options'] = BimpCache::getUsersArray($options['include_empty'], $options['empty_label']);
+                $options['options'] = BimpCache::getUsersArray($options['include_empty'], $options['empty_label'], $options['active_only']);
 
                 if (isset($options['include_current']) && (int) $options['include_current']) {
                     $new_options = array(
@@ -895,7 +894,7 @@ class BimpInput
                 $html .= BimpRender::renderIcon('fas_folder-open', 'iconLeft') . 'Sélectionner un fichier</label>';
 
                 $html .= '<p class="inputHelp">Ou faites glisser un fichier dans la zone ci-dessous: </p>';
-                
+
                 $html .= '<div class="bimp_drop_files_area">';
                 $html .= '<div class="drop_infos">Déposez vos fichiers ici</div>';
                 $html .= '<div class="drop_files"></div>';
@@ -906,10 +905,10 @@ class BimpInput
                     $html .= '<p class="small info">' . $options['max_items'] . ' fichier' . ($options['max_items'] > 1 ? 's' : '') . ' max</p>';
                 }
                 if (isset($options['allowed_types']) && (string) $options['allowed_types']) {
-                    $html .= '<p class="small">Extension(s) autorisée(s) : <b>'.$options['allowed_types'].'</b></p>';
+                    $html .= '<p class="small">Extension(s) autorisée(s) : <b>' . $options['allowed_types'] . '</b></p>';
                 }
                 if (isset($options['allowed_ext']) && (string) $options['allowed_ext']) {
-                    $html .= '<p class="small">Extension(s) autorisée(s) : <b>'.$options['allowed_ext'].'</b></p>';
+                    $html .= '<p class="small">Extension(s) autorisée(s) : <b>' . $options['allowed_ext'] . '</b></p>';
                 }
 
                 $html .= '</div>';
@@ -1580,11 +1579,11 @@ class BimpInput
         $html .= '<tr class="noItemRow"' . (count($values) ? ' style="display: none"' : '') . '>';
         $html .= '<td colspan="3">';
         $html .= BimpRender::renderAlerts('Aucun élément sélectionné', 'warning');
-        
+
         if (!count($values)) {
             $html .= '<input class="no_item_input" type="hidden" value="" name="' . $field_name . '"/>';
         }
-        
+
         $html .= '</td>';
         $html .= '</tr>';
 

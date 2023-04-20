@@ -1114,6 +1114,8 @@ class BimpCommission extends BimpObject
                                     break;
                             }
 
+                            BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
+                            
                             $facs_refs = array();
                             foreach ($elements as $line) {
                                 $process->setCurrentObjectData('bimpcommercial', 'Bimp_FactureLine');
@@ -1124,6 +1126,7 @@ class BimpCommission extends BimpObject
                                 $serial = '';
                                 $equipments = array();
                                 $qty = 1;
+                                $tva_tx = 0;
 
                                 switch ($fourn) {
                                     case 'techdata':
@@ -1153,6 +1156,7 @@ class BimpCommission extends BimpObject
                                         break;
 
                                     case 'ingram':
+                                        $tva_tx = BimpTools::getDefaultTva();
                                         $line_desc = '<b>' . $line_data[$keys['desc']] . '</b><br/>';
                                         $line_desc .= 'Ref AppleCare: ' . $line_data[$keys['ref_prod']] . '<br/>';
                                         $line_desc .= 'Ref CF : ' . $line_data[$keys['ref_cf']] . '<br/>';
@@ -1229,7 +1233,7 @@ class BimpCommission extends BimpObject
 
                                                     $lines_infos = '';
                                                     foreach ($comm_lines as $comm_line) {
-                                                        $lines_infos .= 'Vérif ligne de commande #' . $comm_line['id'] .': <br/>';
+                                                        $lines_infos .= 'Vérif ligne de commande #' . $comm_line['id'] . ': <br/>';
                                                         $line_prod = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $comm_line['id']);
 
                                                         if (!BimpObject::objectLoaded($line_prod)) {
@@ -1239,14 +1243,14 @@ class BimpCommission extends BimpObject
 
                                                         $line_eqs = $line_prod->getReservationsEquipmentsList();
                                                         if (count($line_eqs) == $qty) {
-                                                            $lines_infos .= count($line_eqs) .' équipements trouvés.<br/>';
+                                                            $lines_infos .= count($line_eqs) . ' équipements trouvés.<br/>';
                                                             $prod = $line_prod->getProduct();
                                                             if (BimpObject::objectLoaded($prod)) {
                                                                 $eqs_check = true;
                                                                 foreach ($line_eqs as $id_eq) {
                                                                     $id_fac = (int) $this->db->getValue('bimp_revalorisation', 'id_facture', 'type = \'fac_ac\' AND equipments LIKE \'%[' . $id_eq . ']%\'');
                                                                     if ($id_fac) {
-                                                                        $lines_infos .= 'L\'équipement #' . $id_eq .' est attribué à la facture #' . $id_fac .'<br/><br/>';
+                                                                        $lines_infos .= 'L\'équipement #' . $id_eq . ' est attribué à la facture #' . $id_fac . '<br/><br/>';
                                                                         $eqs_check = false;
                                                                         break;
                                                                     }
@@ -1256,11 +1260,11 @@ class BimpCommission extends BimpObject
                                                                     $lines_infos .= 'Equipements OK<br/><br/>';
                                                                     $equipments = $line_eqs;
                                                                     $msg = count($equipments) . ' équipement(s) trouvé(s) pour ' . $ac_prod->getLink() . '<br/>';
-                                                                    $msg .= 'Libellé : <b>'. $ac_prod->getName().'<br/><br/>';
+                                                                    $msg .= 'Libellé : <b>' . $ac_prod->getName() . '<br/><br/>';
                                                                     $msg .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Verifier que le produit ci-dessous correspond bien à cet AppleCare';
                                                                     $msg .= ' (corriger les équipements si ce n\'est pas le cas) : <br/>';
-                                                                    $msg .= 'Produit: ' . $prod->getLink() .'<br/>';
-                                                                    $msg .= 'Libellé : <b>'. $prod->getName();
+                                                                    $msg .= 'Produit: ' . $prod->getLink() . '<br/>';
+                                                                    $msg .= 'Libellé : <b>' . $prod->getName();
                                                                     $process->Info($msg, $facture, '');
                                                                     break;
                                                                 }
@@ -1301,7 +1305,7 @@ class BimpCommission extends BimpObject
                                 $fac_line->desc = $line_desc;
                                 $fac_line->qty = $qty;
                                 $fac_line->pu_ht = $price;
-                                $fac_line->tva_tx = 0;
+                                $fac_line->tva_tx = $tva_tx;
                                 $fac_line->pa_ht = 0;
 
                                 $line_warnings = array();
@@ -1320,9 +1324,15 @@ class BimpCommission extends BimpObject
                                     $process->incProcessed();
 
                                     $reval_errors = array();
+                                    $status = (int) BimpRevalorisation::STATUS_ATT_EQUIPMENTS;
+                                    if ((count($equipments) == $qty) || ($qty == 1 && $serial)) {
+                                        $status = (int) BimpRevalorisation::STATUS_ATTENTE;
+                                    }
+
                                     BimpObject::createBimpObject('bimpfinanc', 'BimpRevalorisation', array(
                                         'id_facture'      => $facture->id,
                                         'id_facture_line' => $fac_line->id,
+                                        'status'          => $status,
                                         'type'            => 'fac_ac',
                                         'qty'             => $qty,
                                         'amount'          => -$price,

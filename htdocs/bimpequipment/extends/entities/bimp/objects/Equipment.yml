@@ -6,7 +6,6 @@ fields:
         show:
             callback: as_client_spare_or_date
         
-        
 fields_tables: 
     default: 
         rows:
@@ -69,4 +68,36 @@ forms:
                 input_name: infos2
                 input: 
                   type: textarea
+                  
+    import_spare: 
+        rows: 
+            - custom: 1
+              label: Client
+              input_name: id_client
+              data_type: id_object
+              object: client
+              input: 
+                  type: search_object
+                  card: default
+              required: 1
+            - custom: 1
+              label: Fichier
+              input_name: file
+              input: 
+                  type: drop_files
+                  max_items: 1
+                  allowed_ext: csv
+                  extra_content: '<span class="info">Fichier CSV avec point-virgule comme séparateur.<br/>Colonnes: Ref. prod, N° série, Date fin SPARE, Note, Ref. commande</span>'
+                      
+                  
+lists: 
+    default: 
+        header_buttons: 
+            callback: getDefaultListHeaderButtons
+            
+    client: 
+        header_buttons: 
+            callback: getDefaultListHeaderButtons
+            
+            
         

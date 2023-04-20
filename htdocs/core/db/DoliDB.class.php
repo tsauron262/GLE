@@ -284,8 +284,8 @@ abstract class DoliDB implements Database
                 $this->transaction_opened--;
                 return 1;
             } else {
-                BimpCore::addlog('Tentative de COMMIT transaction deja fermée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore');
-                return 0;
+                // On doit considérer ça comme ok
+                return 1;
             }
                 /*fmoddrsi*/
 	}
@@ -343,12 +343,14 @@ abstract class DoliDB implements Database
                     dol_syslog("ROLLBACK Transaction" . ($log ? ' ' . $log : ''), LOG_DEBUG);
                     return $ret;
                 } elseif ($this->noTransaction) {
-                    BimpCore::addlog('Tentative de ROLLBACK sur instance sans transactions', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                    // Pas besoin de loguer, de nombreux cas où c'est normal d'arriver là (Quand on veut contourner un comportement par défaut). 
+//                    BimpCore::addlog('Tentative de ROLLBACK sur instance sans transactions', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
                     return 1;
                 } else {
                     $this->transaction_opened--;
                     $this->has_rollback = true;
-                    BimpCore::addLogs_debug_trace('Tentative de ROLLBACK sur transaction d\'id ' . ($this->transaction_opened + 1));
+                    // Idem
+//                    BimpCore::addLogs_debug_trace('Tentative de ROLLBACK sur transaction d\'id ' . ($this->transaction_opened + 1));
                     return 1;
                 }
                 
@@ -535,6 +537,28 @@ abstract class DoliDB implements Database
 	}
         
         
+    // moddrsi : Ajouts
+        
+    public function commitAll()
+    {
+        if (!$this->noTransaction) {
+            if ($this->transaction_opened > 0) {
+                while ($this->transaction_opened > 1) {
+                    if (defined('BIMP_LIB') && BimpDebug::isActive()) {
+                        $content = '<span class="success">COMMIT #' . ($this->transaction_opened). '</span><br/><br/>';
+                        BimpDebug::addDebug('sql', '', $content, array(
+                            'foldable' => false
+                        ));
+                    }        
+                    $this->transaction_opened--;
+                }
+                
+                $this->commit();
+            }
+        }
+        
+        $this->transaction_opened = 0;
+    }
     
     static function stopAll(){
         $errors = array('Problème réseau, merci de relancer l\'opération');

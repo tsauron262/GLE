@@ -203,6 +203,10 @@ class BC_FieldsTable extends BC_Panel
                 continue;
             }
 
+            if (isset($row_params['extra_content'])) {
+                $content .= $row_params['extra_content'];
+            }
+            
             if (!$label) {
                 $label = BimpTools::ucfirst($row);
             }

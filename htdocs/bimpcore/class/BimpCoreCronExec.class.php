@@ -123,6 +123,8 @@ class BimpCoreCronExec extends BimpCron
 
     public function mailCronErreur()
     {
+        $this->current_cron_name = 'Alerte crons en erreur';
+
         $bdb = new BimpDb($this->db);
 
         $rows = $bdb->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
@@ -139,9 +141,16 @@ class BimpCoreCronExec extends BimpCron
 
         if ($msg) {
             $msg = $i . ' Cron(s) en erreur : <br/>' . $msg;
-            mailSyn2($i . ' Cron(s) en erreur', BimpCore::getConf('devs_email', 'dev@bimp.fr'), null, $msg);
+            $this->output = 'Envoi mail pour ' . $i . ' erreur(s) : ';
+            if (mailSyn2($i . ' Cron(s) en erreur', BimpCore::getConf('devs_email', 'dev@bimp.fr'), null, $msg)) {
+                $this->output .= '[OK]';
+            } else {
+                $this->output .= '[ECHEC]';
+            }
+        } else {
+            $this->output .= 'Aucun cron en erreur';
         }
-        $this->output = $i . ' erreur(s)';
+
         return 0;
     }
 }

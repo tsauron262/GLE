@@ -32,6 +32,8 @@ class BS_SAV extends BimpObject
     const BS_SAV_FERME = 999;
     
     //reparation en magasin avec retour avant remplacement
+    //pas de doublons Réf centre
+    //923-00173
 
     public static $status_list = array(
         self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
@@ -2557,7 +2559,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $html .= '<td>';
 
                     // Stock interne: 
-                    if (BimpCore::isUserDev()) { // Temporaire
+                    if (1 || BimpCore::isUserDev()) { // Temporaire
                         $html .= '<b style="font-size: 13px">Stock interne : </b><br/>';
                         if (!$part->isInternalStockAllowed()) {
                             $html .= '<span class="warning">Pas de stock interne</span>';

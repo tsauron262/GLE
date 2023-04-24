@@ -46,24 +46,24 @@ fields:
         decimals: 0
         default_value: 0
         min: 0
-        display_if: 
-            field_name: serialized
-            show_values: 0
+#        display_if: 
+#            field_name: serialized
+#            show_values: 0
             
-    serials: 
-        label: Numéros de série
-        type: items_list
-        items_braces: 1
-        display_if: 
-            field_name: serialized
-            show_values: 1
+#    serials: 
+#        label: Numéros de série
+#        type: items_list
+#        items_braces: 1
+#        display_if: 
+#            field_name: serialized
+#            show_values: 1
         
 forms: 
     default: 
         rows: 
             - field: code_centre
-            - field: part_number
-            - field: serialized
+#            - field: part_number
+#            - field: serialized
             - custom: 1
               label: Quantité
               input_name: qty_tot
@@ -73,22 +73,22 @@ forms:
               decimals: 0
               min: 0
               value: 1
-              display_if: 
-                field_name: serialized
-                show_values: 0
+#              display_if: 
+#                field_name: serialized
+#                show_values: 0
                 
-    edit: 
-        rows: 
-            - field: serialized
+#    edit: 
+#        rows: 
+#            - field: serialized
     
     correct:
         rows: 
             centre: 
                 field: code_centre
                 edit: 0
-            part: 
-                field: part_number
-                edit: 0
+#            part: 
+#                field: part_number
+#                edit: 0
             mode: 
                 custom: 1
                 label: Mode de saisie
@@ -139,23 +139,23 @@ forms:
                 input: 
                     type: textarea
            
-    correct_serialized: 
-        extends: correct
-        rows: 
-            mode: unset
-            qty_to_add: unset
-            qty_to_remove: unset
-            qty: 
-                field: serials
-                label: Numéros de série
-                display_if: unset
+#    correct_serialized: 
+#        extends: correct
+#        rows: 
+#            mode: unset
+#            qty_to_add: unset
+#            qty_to_remove: unset
+#            qty: 
+#                field: serials
+#                label: Numéros de série
+#                display_if: unset
               
 filters_panels: 
     default: 
         filters: 
             code_centre: 
-            part_number: 
-            serialized: 
+#            part_number: 
+#            serialized: 
                 
 lists: 
     default:
@@ -175,6 +175,6 @@ lists:
             callback: getListExtraButtons
         cols:
             code_centre:
-            part_number:
+#            part_number:
             qty:
             serials:

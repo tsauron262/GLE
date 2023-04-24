@@ -30,6 +30,8 @@ class BS_SAV extends BimpObject
     const BS_SAV_ATT_CLIENT_ACTION = 7;
     const BS_SAV_A_RESTITUER = 9;
     const BS_SAV_FERME = 999;
+    
+    //reparation en magasin avec retour avant remplacement
 
     public static $status_list = array(
         self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),

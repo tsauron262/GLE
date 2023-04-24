@@ -31,9 +31,9 @@ fields:
         default_value: 
             callback: getDefaultCodeCentre
             
-#    part_number: 
-#        label: Réf. composant
-#        required: 1
+    part_number: 
+        label: Réf. composant
+        required: 1
         
 #    serialized: 
 #        label: Serialisé 
@@ -62,7 +62,7 @@ forms:
     default: 
         rows: 
             - field: code_centre
-#            - field: part_number
+            - field: part_number
 #            - field: serialized
             - custom: 1
               label: Quantité
@@ -86,9 +86,9 @@ forms:
             centre: 
                 field: code_centre
                 edit: 0
-#            part: 
-#                field: part_number
-#                edit: 0
+            part: 
+                field: part_number
+                edit: 0
             mode: 
                 custom: 1
                 label: Mode de saisie
@@ -154,7 +154,7 @@ filters_panels:
     default: 
         filters: 
             code_centre: 
-#            part_number: 
+            part_number: 
 #            serialized: 
                 
 lists: 
@@ -175,6 +175,6 @@ lists:
             callback: getListExtraButtons
         cols:
             code_centre:
-#            part_number:
+            part_number:
             qty:
-            serials:
+#            serials:

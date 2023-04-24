@@ -31,14 +31,14 @@ fields:
         default_value: 
             callback: getDefaultCodeCentre
             
-    part_number: 
-        label: Réf. composant
-        required: 1
+#    part_number: 
+#        label: Réf. composant
+#        required: 1
         
-    serialized: 
-        label: Serialisé 
-        type: bool
-        default_value: 0
+#    serialized: 
+#        label: Serialisé 
+#        type: bool
+#        default_value: 0
         
     qty: 
         label: Quantité

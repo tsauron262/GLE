@@ -7140,6 +7140,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             }
         }
     }
+    
+    public static function sendAlertesClientsUnrestituteSav()
+    {
+        $delay = (int) BimpCore::getConf('delay_alertes_clients_unrestitute_sav', null, 'bimpsupport');
+        
+        if (!$delay) {
+            return '';
+        }
+    }
 
     // Méthodes signature: 
 

@@ -110,30 +110,47 @@ class BimpCoreCronExec extends BimpCron
         return 0;
     }
 
-    public function mailMessageNote()
+    public function mailNotesNonLues()
     {
         $this->current_cron_name = 'Notes non lues';
-        BimpObject::loadClass('bimpcore', 'BimpNote');
 
+        BimpObject::loadClass('bimpcore', 'BimpNote');
         BimpNote::cronNonLu();
+
         $this->output = 'OK';
         return 0;
     }
 
     public function mailCronErreur()
     {
+        $this->current_cron_name = 'Alerte crons en erreur';
+
         $bdb = new BimpDb($this->db);
 
         $rows = $bdb->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
 
         $i = 0;
+        $msg = '';
         if (is_array($rows)) {
+            $url_base = DOL_URL_ROOT . '/cron/card.php?id=';
             foreach ($rows as $r) {
                 $i++;
-                mailSyn2('Cron en erreur', 'dev@bimp.fr', null, 'Attention, le cron ' . $r['label'] . ' d\'id ' . $r['rowid'] . ' est en erreur...');
+                $msg .= '<br/><a href="' . $url_base . $r['rowid'] . '">Cron #' . $r['rowid'] . ' ' . $r['label'] . '</a>';
             }
         }
-        $this->output = $i . ' erreurs';
+
+        if ($msg) {
+            $msg = $i . ' Cron(s) en erreur : <br/>' . $msg;
+            $this->output = 'Envoi mail pour ' . $i . ' erreur(s) : ';
+            if (mailSyn2($i . ' Cron(s) en erreur', BimpCore::getConf('devs_email', 'dev@bimp.fr'), null, $msg)) {
+                $this->output .= '[OK]';
+            } else {
+                $this->output .= '[ECHEC]';
+            }
+        } else {
+            $this->output .= 'Aucun cron en erreur';
+        }
+
         return 0;
     }
 }

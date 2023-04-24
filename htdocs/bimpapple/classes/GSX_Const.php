@@ -126,7 +126,7 @@ class GSX_Const
     );
     public static $repair_types = array(
         'CIN'  => 'Carry-In',
-        'CRBR' => 'Carry-In Return Before Replace',
+        'CRBR' => 'Carry-In (Sans recommande de stock)',//Return Before Replace',
         'CINR' => 'Carry-In Non-Replenishment',
         'MINS' => 'Mail-In Return to Service Location',
 //        'MINC' => 'Mail-In Return to Customer',

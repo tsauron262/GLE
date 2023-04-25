@@ -415,7 +415,6 @@ class BimpDolObject extends BimpObject
 
         if ($this->isLoaded()) {
             $users = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-
             if (!empty($users)) {
                 $user = null;
 
@@ -432,7 +431,10 @@ class BimpDolObject extends BimpObject
                 }
 
                 if (BimpObject::objectLoaded($user)) {
-                    if ($params['check_active'] && !(int) $user->getData('statut')) {
+                    if (!$params['check_active'] || ($params['check_active'] && (int) $user->getData('statut'))) {
+                        return $user->id;
+                    }
+                    elseif ($params['check_active'] && !(int) $user->getData('statut')) {
                         if ($params['allow_superior']) {
                             if ((int) $user->getData('fk_user')) {
                                 $is_superior = true;

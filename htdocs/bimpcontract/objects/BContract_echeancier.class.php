@@ -1421,15 +1421,15 @@ class BContract_echeancier extends BimpObject
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec ajout de la ligne de période de facturation');
                     } else {
-                        $success .= 'Ligne crée avec succès (' . $total_ht . ' - ' . $date_start . ' - ' . $date_end . ')';
+                        $success .= 'BimpRender::renderLigne crée avec succès (' . $total_ht . ' - ' . $date_start . ' - ' . $date_end . ')';
                         $new_first_line->date_from = $date_start;
                         $new_first_line->update($warnings);
 
                         $new_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
-                        $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
+                        $new_line->validateArray(array(
                                             'type'   => ObjectLine::LINE_TEXT,
                                             'id_obj' => (int) $facture->id,
-                        )));
+                        ));
 
                         $new_line->desc = $description_total;
                         $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));

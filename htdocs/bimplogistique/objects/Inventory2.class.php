@@ -95,7 +95,7 @@ HAVING scan_exp != scan_det";
         $percent = 0;
         $return = '';
         $info = "";
-        if ($this->getData('status') == self::STATUS_OPEN) {
+//        if ($this->getData('status') == self::STATUS_OPEN) {
             $sql = $this->db->db->query('SELECT SUM(`qty_scanned`) as scan, SUM(`qty`) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = ' . $this->id);
             if ($this->db->db->num_rows($sql)) {
                 $ln = $this->db->db->fetch_object($sql);
@@ -103,8 +103,8 @@ HAVING scan_exp != scan_det";
                     $percent = $ln->scan / $ln->att * 100;
                 $info = $ln->scan . ' / ' . $ln->att;
             }
-        } elseif ($this->getData('status') == self::STATUS_CLOSED)
-            $percent = 100;
+//        } elseif ($this->getData('status') == self::STATUS_CLOSED)
+//            $percent = 100;
 
         $return = price($percent) . ' %';
         if ($info != "")

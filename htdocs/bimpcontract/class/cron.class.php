@@ -326,7 +326,7 @@ class cron extends BimpCron
             }
 
             if (BimpObject::objectLoaded($facture)) {
-                $this->output .= $contrat->getRef() . ' : Facturation automatique (' . $facture->getRef() . ')';
+                $this->output .= 'Facture créée : ' . $facture->getLink();
 
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
                 $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_suivi'));

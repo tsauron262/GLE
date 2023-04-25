@@ -317,7 +317,8 @@ class cron extends BimpCron
 
             $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
             
-            $result = $echeancier->actionCreateFacture($data);
+            $s = "";
+            $result = $echeancier->actionCreateFacture($data, $s);
             $id_facture = BimpTools::getArrayValueFromPath($result, 'id_facture', 0);
             
             $facture = null;
@@ -326,7 +327,7 @@ class cron extends BimpCron
             }
 
             if (BimpObject::objectLoaded($facture)) {
-                $this->output .= 'Facture créée : ' . $facture->getLink();
+                $this->output .= 'Facture créée : ' . $facture->getLink() . '<br/>Succès: ' . $s;
 
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
                 $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_suivi'));
@@ -346,12 +347,12 @@ class cron extends BimpCron
                 $note->set('fk_group_dest', BimpCore::getUserGroupId('facturation'));
                 $note->set('content', $msg);
 
-                $w = array();
-                $errors = $note->create($w, true);
+//                $w = array();
+//                $errors = $note->create($w, true);
 
-                if (count($errors)) {
-                    mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $msg);
-                }
+//                if (count($errors)) {
+//                    mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $msg);
+//                }
                 
                 break;
             } else {

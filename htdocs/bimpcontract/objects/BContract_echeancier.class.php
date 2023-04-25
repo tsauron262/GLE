@@ -1421,6 +1421,7 @@ class BContract_echeancier extends BimpObject
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec ajout de la ligne de période de facturation');
                     } else {
+                        $success .= 'Ligne crée avec succès (' . $total_ht . ' - ' . $date_start . ' - ' . $date_end . ')';
                         $new_first_line->date_from = $date_start;
                         $new_first_line->update($warnings);
 
@@ -1433,12 +1434,14 @@ class BContract_echeancier extends BimpObject
                         $new_line->desc = $description_total;
                         $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));
 
-                        $this->switch_statut();
+                        if (!count($errors)) {
+                            $this->switch_statut();
 
-                        if ($contrat->reste_periode() == 0) {
-                            $this->updateField('next_facture_date', null);
-                        } else {
-                            $this->updateField('next_facture_date', $dt_end->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+                            if ($contrat->reste_periode() == 0) {
+                                $this->updateField('next_facture_date', null);
+                            } else {
+                                $this->updateField('next_facture_date', $dt_end->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+                            }
                         }
                     }
                 }

@@ -322,8 +322,7 @@ class cron extends BimpCron
 
             $bdb->db->begin();
             
-            $s = "";
-            $result = $echeancier->actionCreateFacture($data, $s);
+            $result = $echeancier->actionCreateFacture($data);
 
             if (count($result['errors'])) {
                 $this->output .= 'ECHEC FAC - <pre>' . print_r($result['errors'], 1) . '</pre>';
@@ -357,11 +356,11 @@ class cron extends BimpCron
                     $note->set('fk_group_dest', BimpCore::getUserGroupId('facturation'));
                     $note->set('content', $msg);
 
-//                $w = array();
-//                $errors = $note->create($w, true);
-//                if (count($errors)) {
-//                    mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $msg);
-//                }
+                    $w = array();
+                    $note_errors = $note->create($w, true);
+                    if (count($note_errors)) {
+                        mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $msg);
+                    }
 
                     $bdb->db->commit();
                     break;

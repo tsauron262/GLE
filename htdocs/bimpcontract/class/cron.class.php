@@ -290,7 +290,7 @@ class cron extends BimpCron
                 continue;
             }
 
-            $this->output .= '<br/><br/> - ' . $contrat->getRef() . ' : <br/>';
+            $this->output .= '<br/><br/> - ' . $contrat->getLink() . ' : <br/>';
 
             $errors = array();
             $data = $echeancier->getNextFactureData($errors);
@@ -318,11 +318,10 @@ class cron extends BimpCron
             $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
             
 //            $result = $echeancier->actionCreateFacture($data);
-
 //            $id_facture = BimpTools::getArrayValueFromPath($result, 'id_facture', 0);
-            
-            $id_facture = 0;
 
+            $id_facture = 0;
+            
             $facture = null;
             if ($id_facture) {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);

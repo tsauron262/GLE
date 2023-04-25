@@ -914,7 +914,6 @@ class BContract_echeancier extends BimpObject
         $html .= '<tbody class="listRows">';
 
         foreach ($allPeriodes['periodes'] as $periode) {
-
             $dateDebutDeLaPeriode = new DateTime(str_replace('/', '-', $periode['START']));
             $dateFinDeLaPeriode = new DateTime(str_replace('/', '-', $periode['STOP']));
             $nextFactureDate = new DateTime($this->getData('next_facture_date'));
@@ -1161,6 +1160,11 @@ class BContract_echeancier extends BimpObject
         $this->updateField('statut', $new);
 
         return $new;
+    }
+
+    public function checkFacturesDates()
+    {
+        // TODO - Vérif date de toutes les factures et corrections éventuelles 
     }
 
     // Actions: 
@@ -1473,16 +1477,29 @@ class BContract_echeancier extends BimpObject
     public function actionGeneratePdfEcheancier($data, &$success)
     {
         global $langs;
-        $parent = $this->getParentInstance();
-        $this->dol_object->id_contrat = $this->getData('id_contrat');
-        $this->dol_object->afficher_total = $data['total_lines'];
-        //$this->afficherContact = (int) $data['afficherContact']; 
-        $url = DOL_URL_ROOT . '/document.php?modulepart=' . 'contrat' . '&file=' . $parent->getRef() . '/Echeancier.pdf';
         $errors = $warnings = array();
         $success = "PDF de l'échéancier généré avec succès";
-        $success_callback = 'window.open("' . $url . '")';
-        $parent->dol_object->generateDocument('echeancierContrat', $langs);
-        return array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => $success_callback);
+
+        $parent = $this->getParentInstance();
+        
+        if (!BimpObject::objectLoaded($parent)) {
+            $errors[] = 'Contrat lié absent';
+        } else {
+            $this->dol_object->id_contrat = $this->getData('id_contrat');
+            $this->dol_object->afficher_total = $data['total_lines'];
+            //$this->afficherContact = (int) $data['afficherContact']; 
+
+            $url = DOL_URL_ROOT . '/document.php?modulepart=' . 'contrat' . '&file=' . $parent->getRef() . '/Echeancier.pdf';
+            $success_callback = 'window.open("' . $url . '")';
+
+            $parent->dol_object->generateDocument('echeancierContrat', $langs);
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
     }
 
     public function actionDeleteFacture($data, &$success)

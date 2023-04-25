@@ -37,17 +37,17 @@ class cron extends BimpCron
 
     public function dailyProcess()
     {
-        $this->autoClose();
-        $this->mailJourActivation();
-        $this->relanceActivationProvisoire();
-        $this->relance_brouillon();
-        $this->echeance_contrat();
-        $this->relance_echeance_tacite();
-        $this->relance_demande();
-        $this->tacite();
-//        $this->facturation_auto(); => à débuguer
-        $this->notifDemainFacturation();
-        $this->relanceAvenantProvisoir();
+//        $this->autoClose();
+//        $this->mailJourActivation();
+//        $this->relanceActivationProvisoire();
+//        $this->relance_brouillon();
+//        $this->echeance_contrat();
+//        $this->relance_echeance_tacite();
+//        $this->relance_demande();
+//        $this->tacite();
+        $this->facturation_auto();
+//        $this->notifDemainFacturation();
+//        $this->relanceAvenantProvisoir();
         return 0;
     }
 
@@ -294,7 +294,6 @@ class cron extends BimpCron
 
             $errors = array();
             $data = $echeancier->getNextFactureData($errors);
-//            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
 
             if (!$data['date_start'] || !$data['date_end'] || $data['date_end'] < $data['date_start']) {
                 $this->output .= 'Date incorrectes';
@@ -316,9 +315,13 @@ class cron extends BimpCron
                 continue;
             }
 
-            $result = $echeancier->actionCreateFacture($data);
+            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
+            
+//            $result = $echeancier->actionCreateFacture($data);
 
-            $id_facture = BimpTools::getArrayValueFromPath($result, 'id_facture', 0);
+//            $id_facture = BimpTools::getArrayValueFromPath($result, 'id_facture', 0);
+            
+            $id_facture = 0;
 
             $facture = null;
             if ($id_facture) {

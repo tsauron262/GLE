@@ -106,7 +106,7 @@ class GSX_Const
         'ship_to'     => '1442050'
     );
     public static $default_ids = array(
-        'apple_id'    => 'admin.gle@bimp.fr',
+        'apple_id'    => 't.sauron@ldlc.com',
 //        'apple_id'    => 't.sauron@ldlc.com',
         'apple_pword' => '@LdLc.com#69760',
         'sold_to'     => '1442050',
@@ -126,7 +126,7 @@ class GSX_Const
     );
     public static $repair_types = array(
         'CIN'  => 'Carry-In',
-        'CRBR' => 'Carry-In Return Before Replace',
+        'CRBR' => 'Carry-In (Sans recommande de stock)',//Return Before Replace',
         'CINR' => 'Carry-In Non-Replenishment',
         'MINS' => 'Mail-In Return to Service Location',
 //        'MINC' => 'Mail-In Return to Customer',

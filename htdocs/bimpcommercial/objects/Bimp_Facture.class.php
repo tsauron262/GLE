@@ -6780,7 +6780,7 @@ class Bimp_Facture extends BimpComm
 
     public static function sendRappelFacturesFinancementImpayees()
     {
-        $delay = (int) BimpCore::getConf('rappels_factures_financement_impayees', null, 'bimpcommercial');
+        $delay = (int) BimpCore::getConf('rappels_factures_financement_impayees_delay', null, 'bimpcommercial');
         $to = BimpCore::getConf('rappels_factures_financement_impayees_emails', null, 'bimpcommercial');
 
         if (!$delay) {
@@ -6866,7 +6866,7 @@ class Bimp_Facture extends BimpComm
         return $out;
     }
 
-    public function createTasksChorus()
+    public static function createTasksChorus()
     {
         $out = '';
 

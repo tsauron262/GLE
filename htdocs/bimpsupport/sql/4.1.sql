@@ -1,0 +1,1 @@
+ALTER TABLE llx_bs_sav ADD `id_signature_destruct` int(11) NOT NULL DEFAULT 0;

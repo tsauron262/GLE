@@ -30,6 +30,10 @@ class BS_SAV extends BimpObject
     const BS_SAV_ATT_CLIENT_ACTION = 7;
     const BS_SAV_A_RESTITUER = 9;
     const BS_SAV_FERME = 999;
+    
+    //reparation en magasin avec retour avant remplacement
+    //pas de doublons Réf centre
+    //923-00173
 
     public static $status_list = array(
         self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
@@ -135,6 +139,7 @@ class BS_SAV extends BimpObject
         'display_date'  => 1,
         'display_nom'   => 1,
     );
+    public static $default_signature_destruct_params = array();
     public static $check_on_create = 0;
     public static $check_on_update = 0;
     public static $check_on_update_field = 0;
@@ -2555,7 +2560,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $html .= '<td>';
 
                     // Stock interne: 
-                    if (BimpCore::isUserDev()) { // Temporaire
+                    if (1 || BimpCore::isUserDev()) { // Temporaire
                         $html .= '<b style="font-size: 13px">Stock interne : </b><br/>';
                         if (!$part->isInternalStockAllowed()) {
                             $html .= '<span class="warning">Pas de stock interne</span>';
@@ -7256,6 +7261,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case 'sav_resti':
                 return 'id_signature_resti';
+                
+            case 'sav_destruct': 
+                return 'id_signature_destruct';
         }
 
         return'';
@@ -7271,6 +7279,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case 'sav_resti':
                 return 'Restitution_' . dol_sanitizeFileName($this->getRef()) . ($signed ? '_signe' : '') . '.' . $ext;
+                
+            case 'sav_destruct':
+                return 'Destruction_' . dol_sanitizeFileName($this->getRef()) . ($signed ? '_signe' : '') . '.' . $ext;
         }
 
         return '';
@@ -7309,6 +7320,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case 'sav_resti':
                 return 'BR-' . $this->getRef();
+                
+            case 'sav_destruct':
+                return 'DESTR-' . $this->getRef();
         }
 
         return '';
@@ -7322,6 +7336,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case 'sav_resti':
                 return BimpTools::overrideArray(self::$default_signature_resti_params, (array) $this->getData('signature_resti_params'));
+                
+            case 'sav_destruct':
+                return self::$default_signature_destruct_params;
         }
 
         return array();

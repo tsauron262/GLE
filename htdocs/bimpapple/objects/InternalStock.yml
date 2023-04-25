@@ -24,6 +24,15 @@ fields:
     qty: 
         display_if: unset
         
+    description:
+        label: Description
+        
+    product_label: 
+        label: Libellé produit
+        
+    code_eee: 
+        label: Code EEE
+        
     last_pa: 
         label: Dernier Prix d'achat
         type: money
@@ -42,6 +51,16 @@ forms:
             last_pa: 
                 field: last_pa
             
+    csv_import: 
+        rows: 
+            - custom: 1
+              label: Fichier
+              input_name: file
+              input: 
+                  type: drop_files
+                  allowed_ext: csv
+                  max_items: 1
+                  help: 'Séparateur : ";"<br/>Colonnes : Code centre, Réf., Qté à ajouter, Dernier PA HT'
             
 filters_panels: 
     default: 

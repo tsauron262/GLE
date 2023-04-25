@@ -332,12 +332,14 @@ class PartStock extends BimpObject
             $errors[] = 'Cette référence existe déja pour ce centre';
         }
 
-        $errors = parent::create($warnings, $force_create);
+        if (!count($errors)) {
+            $errors = parent::create($warnings, $force_create);
 
-        if (!count($errors) && !$this->getData('serialized')) {
-            $qty = BimpTools::getValue('qty_tot', 0);
-            if ($qty > 0) {
-                $errors = $this->correctStock($qty, '', 'CREATION');
+            if (!count($errors) && !$this->getData('serialized')) {
+                $qty = BimpTools::getValue('qty_tot', 0);
+                if ($qty > 0) {
+                    $errors = $this->correctStock($qty, '', 'CREATION');
+                }
             }
         }
 

@@ -317,10 +317,8 @@ class cron extends BimpCron
 
             $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
             
-//            $result = $echeancier->actionCreateFacture($data);
-//            $id_facture = BimpTools::getArrayValueFromPath($result, 'id_facture', 0);
-
-            $id_facture = 0;
+            $result = $echeancier->actionCreateFacture($data);
+            $id_facture = BimpTools::getArrayValueFromPath($result, 'id_facture', 0);
             
             $facture = null;
             if ($id_facture) {
@@ -354,6 +352,8 @@ class cron extends BimpCron
                 if (count($errors)) {
                     mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $msg);
                 }
+                
+                break;
             } else {
                 $this->output .= 'ECHEC FAC - <pre>' . print_r($result['errors'], 1) . '</pre>';
             }

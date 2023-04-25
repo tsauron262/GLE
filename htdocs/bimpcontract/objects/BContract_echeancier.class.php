@@ -569,6 +569,9 @@ class BContract_echeancier extends BimpObject
         } else {
             $data = $contrat->getEcheancierData();
             $date_start = $this->getData('next_facture_date');
+            if ($date_start) {
+                $date_start = date('Y-m-d', strtotime($date_start));
+            }
             $dt_end = new DateTime($date_start);
             $dt_end->add(new DateInterval("P" . $data->periodicity . "M"));
             $dt_end->sub(new DateInterval("P1D"));

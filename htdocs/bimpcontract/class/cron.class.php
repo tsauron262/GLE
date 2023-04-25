@@ -318,7 +318,7 @@ class cron extends BimpCron
                 continue;
             }
 
-            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
+//            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
 
             $bdb->db->begin();
             
@@ -336,7 +336,7 @@ class cron extends BimpCron
                 }
 
                 if (BimpObject::objectLoaded($facture)) {
-                    $this->output .= 'Facture créée : ' . $facture->getLink() . '<br/>Succès: ' . $s;
+                    $this->output .= 'Facture créée : ' . $facture->getLink();
 
                     $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
                     $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_suivi'));
@@ -363,7 +363,6 @@ class cron extends BimpCron
                     }
 
                     $bdb->db->commit();
-                    break;
                 }
             }
         }

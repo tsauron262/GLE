@@ -290,7 +290,7 @@ class cron extends BimpCron
                 continue;
             }
 
-            $this->output .= '<br/><br/> - ' . $contrat->getLink() . ' : <br/>';
+            $this->output .= '<br/><br/> - ' . $contrat->getLink(array('syntaxe' => '<ref>')) . ' : <br/>';
 
             $errors = array();
             $data = $echeancier->getNextFactureData($errors);

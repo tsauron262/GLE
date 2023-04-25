@@ -19,14 +19,39 @@ labels:
     name_plur: stocks internes
     
 fields: 
+    serialized: unset
+    serials: unset
+    qty: 
+        display_if: unset
+        
     last_pa: 
         label: Dernier Prix d'achat
         type: money
         default_value: 0
         
+forms: 
+    default: 
+        rows: 
+            serialized: unset
+        qty_tot: 
+            display_if: unset
+            
+    edit: 
+        rows: 
+            unextends: 1
+            last_pa: 
+                field: last_pa
+            
+            
+filters_panels: 
+    default: 
+        filters: 
+            serialized: unset
+            
 lists: 
     default: 
         title: Stocks internes
         cols: 
+            serials: unset
             last_pa: 
                 edit: 1

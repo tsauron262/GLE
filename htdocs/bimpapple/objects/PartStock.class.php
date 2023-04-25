@@ -96,11 +96,17 @@ class PartStock extends BimpObject
         $buttons = array();
 
         if ($this->isActionAllowed('correct') && $this->canSetAction('correct')) {
+            $form_name = 'correct';
+
+            if ($this->field_exists('serialized') && (int) $this->getData('serialized')) {
+                $form_name .= '_serialized';
+            }
+
             $buttons[] = array(
                 'label'   => 'Corriger le stock',
                 'icon'    => 'fas_pen',
                 'onclick' => $this->getJsActionOnclick('correct', array(), array(
-                    'form_name' => 'correct' . ((int) $this->getData('serialized') ? '_serialized' : '')
+                    'form_name' => $form_name
                 ))
             );
         }

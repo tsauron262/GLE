@@ -49,8 +49,7 @@ class InternalStock extends PartStock
     {
         $errors = array();
         $warnings = array();
-        $success = '';
-        $nOk = 0;
+        $success = 'Toutes les lignes du fichier traitées avec succès';
 
         $file_name = BimpTools::getArrayValueFromPath($data, 'file/0', '');
 
@@ -64,18 +63,26 @@ class InternalStock extends PartStock
             }
         }
 
-        if (!count($errors)) {
+        $code_centre = BimpTools::getArrayValueFromPath($data, 'code_centre', '', $errors, true, 'Code centre absent');
+        if ($code_centre) {
             $centres = BimpCache::getCentres();
+            if (!isset($centres[$code_centre])) {
+                $errors[] = 'Code centre invalide';
+            }
+        }
 
+        if (!count($errors)) {
             $keys = array(
-                'code_centre' => 0,
-                'part_number' => 1,
-                'qty'         => 2,
-                'pa_ht'       => 3
+                'part_number' => 0,
+                'desc'        => 1,
+                'prod'        => 2,
+                'pa_ht'       => 3,
+                'eee'         => 4,
+                'qty'         => 5
             );
 
             $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
+            
             // Checks: 
             $i = 0;
             foreach ($lines as $line) {
@@ -83,17 +90,13 @@ class InternalStock extends PartStock
                 $line_errors = array();
                 $line_data = str_getcsv($line, ';');
 
-                $code_centre = BimpTools::getArrayValueFromPath($line_data, $keys['code_centre'], '', $line_errors, true, 'Code centre absent');
                 $part_number = BimpTools::getArrayValueFromPath($line_data, $keys['part_number'], '', $line_errors, true, 'Réf. Composant absent');
                 $qty = (int) BimpTools::getArrayValueFromPath($line_data, $keys['qty'], 0, $line_errors, true, 'Qtés à ajouter absentes');
-                
-                if (!isset($centres[$code_centre])) {
-                    $line_errors[] = 'Code centre invalide';
-                }
+
                 if ($qty <= 0) {
                     $line_errors[] = 'Qté à ajouter invalides';
                 }
-                
+
                 if (count($line_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $i);
                 }
@@ -103,24 +106,67 @@ class InternalStock extends PartStock
                 $i = 0;
                 foreach ($lines as $line) {
                     $i++;
-                    $line_errors = array();
+                    $line_errors = $line_warnings = array();
                     $line_data = str_getcsv($line, ';');
 
-                    $code_centre = BimpTools::getArrayValueFromPath($line_data, $keys['code_centre'], '');
-                    $part_number = BimpTools::getArrayValueFromPath($line_data, $keys['part_number'], '');
-                    $qty = BimpTools::getArrayValueFromPath($line_data, $keys['qty'], 0);
-                    $pa_ht = (float) BimpTools::getArrayValueFromPath($line_data, $keys['pa_ht'], null);
+                    $part_number = trim(BimpTools::getArrayValueFromPath($line_data, $keys['part_number'], ''));
+                    $desc = trim(BimpTools::getArrayValueFromPath($line_data, $keys['desc'], ''));
+                    $prod_label = trim(BimpTools::getArrayValueFromPath($line_data, $keys['prod'], ''));
+                    $eee = trim(BimpTools::getArrayValueFromPath($line_data, $keys['eee'], ''));
+                    $qty = (int) trim(BimpTools::getArrayValueFromPath($line_data, $keys['qty'], 0));
+                    $pa_ht = (float) str_replace(',', '.', trim(BimpTools::getArrayValueFromPath($line_data, $keys['pa_ht'], null)));
+
+                    if ($eee == '0') {
+                        $eee = '';
+                    }
                     
                     $stock = static::getStockInstance($code_centre, $part_number);
-                    
+
                     if (BimpObject::objectLoaded($stock)) {
-                        $stock->correctStock($qty, '', 'IMPORT_CSV', 'Import CSV');
-                        
-                        if ($pa_ht && $pa_ht != (float) $stock->getData('last_pa')) {
-                            
+                        $line_errors = $stock->correctStock($qty, '', 'IMPORT_CSV', 'Import CSV');
+
+                        if (!count($line_errors)) {
+                            $up = false;
+
+                            if ($pa_ht > 0) {
+                                $stock->set('last_pa', $pa_ht);
+                                $up = true;
+                            }
+                            if ($desc) {
+                                $stock->set('description', $desc);
+                                $up = true;
+                            }
+                            if ($prod_label) {
+                                $stock->set('product_label', $prod_label);
+                                $up = true;
+                            }
+                            if ($eee) {
+                                $stock->set('code_eee', $eee);
+                                $up = true;
+                            }
+
+                            if ($up) {
+                                $line_errors = $stock->update($line_warnings, true);
+                            }
                         }
                     } else {
-                        
+                        $stock = BimpObject::createBimpObject('bimpapple', 'InternalStock', array(
+                                    'code_centre'   => $code_centre,
+                                    'part_number'   => $part_number,
+                                    'qty'           => $qty,
+                                    'description'   => $desc,
+                                    'product_label' => $prod_label,
+                                    'code_eee'      => $eee,
+                                    'last_pa'       => $pa_ht
+                                        ), true, $line_errors, $line_wanings);
+                    }
+
+                    if (count($line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $i);
+                    }
+                    
+                    if (count($line_warnings)) {
+                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n° ' . $i);
                     }
                 }
             }

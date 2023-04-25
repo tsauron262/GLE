@@ -278,6 +278,9 @@ class cron extends BimpCron
             return;
         }
 
+        $bdb = BimpCache::getBdb();
+        $bdb->db->commitAll();
+        
         foreach ($rows as $r) {
             $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier', (int) $r['id']);
 
@@ -317,11 +320,14 @@ class cron extends BimpCron
 
             $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
 
+            $bdb->db->begin();
+            
             $s = "";
             $result = $echeancier->actionCreateFacture($data, $s);
 
             if (count($result['errors'])) {
                 $this->output .= 'ECHEC FAC - <pre>' . print_r($result['errors'], 1) . '</pre>';
+                $bdb->db->rollback();
             } else {
                 $id_facture = BimpTools::getArrayValueFromPath($result, 'id_facture', 0);
 
@@ -357,6 +363,7 @@ class cron extends BimpCron
 //                    mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $msg);
 //                }
 
+                    $bdb->db->commit();
                     break;
                 }
             }

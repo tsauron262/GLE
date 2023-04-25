@@ -146,7 +146,7 @@ class BS_SAV extends BimpObject
         parent::__construct("bimpsupport", get_class($this));
 
         $this->useCaisseForPayments = (int) BimpCore::getConf('use_caisse_for_payments');
-        
+
         BimpMail::$defaultType = 'ldlc';
     }
 
@@ -1343,7 +1343,7 @@ class BS_SAV extends BimpObject
 
         if (!$modal_view) {
             $statut = self::$status_list[$this->data["status"]];
-            return "<a href='" . $this->getUrl() . "'>" . '<span class="' . ($statut['classes'] && is_array($statut['classes'])? implode(" ", $statut['classes']) : '') . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->getRef() . '</span></a>';
+            return "<a href='" . $this->getUrl() . "'>" . '<span class="' . ($statut['classes'] && is_array($statut['classes']) ? implode(" ", $statut['classes']) : '') . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->getRef() . '</span></a>';
         }
 
         return parent::getNomUrl($withpicto, $ref_only, $page_link, $modal_view, $card);
@@ -7138,14 +7138,112 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             }
         }
     }
-    
+
     public static function sendAlertesClientsUnrestituteSav()
     {
         $delay = (int) BimpCore::getConf('delay_alertes_clients_unrestitute_sav', null, 'bimpsupport');
-        
+
+        $delay = 30;
         if (!$delay) {
             return '';
         }
+
+        $out = '';
+
+        $dt = new DateTime();
+        $dt->sub(new DateInterval('P' . $delay . 'D'));
+        $date = $dt->format('Y-m-d 00:00:00');
+
+        $savs = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SAV', array(
+                    'date_pc'           => array(
+                        'operator' => '<',
+                        'value'    => $date
+                    ),
+                    'status'            => self::BS_SAV_A_RESTITUER,
+                    'alert_unrestitute' => 0
+        ));
+
+        if (empty($savs)) {
+            return 'Aucun SAV non restitué à alerter';
+        }
+
+
+        foreach ($savs as $sav) {
+            $centre_email = '';
+            $centre_data = $sav->getCentreData();
+            $centre_email = BimpTools::getArrayValueFromPath($centre_data, 'mail', '');
+            $client_email = '';
+            $contact = $sav->getChildObject('contact');
+
+            if (BimpObject::objectLoaded($contact)) {
+                $client_email = $contact->getData('email');
+            }
+
+            if (!$client_email) {
+                $client = $sav->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    $client_email = $client->getData('email');
+                }
+            }
+
+            if ($client_email) {
+                // Envoi alerte au client:
+                $prod_label = '';
+                $eq = $sav->getChildObject('equipment');
+                if (BimpObject::objectLoaded($eq)) {
+                    $prod_label = $eq->getProductLabel();
+                }
+                $centre_address = BimpTools::getArrayValueFromPath($centre_data, 'address', '');
+                $centre_address .= ($centre_address ? '<br/>' : '') . BimpTools::getArrayValueFromPath($centre_data, 'zip', '');
+                $centre_address .= ($centre_address ? ' ' : '') . BimpTools::getArrayValueFromPath($centre_data, 'town', '');
+//                
+                $subject = 'RAPPEL IMPORTANT : votre matériel est toujours en attente de restitution dans votre centre LDLC APPLE';
+                $msg = 'Bonjour, <br/><br/>';
+                $msg .= 'Nous tenons à vous rappeller que votre matériel ' . ($prod_label ? '"' . $prod_label . '" ' : '');
+                $msg .= 'est en attente de restitution depuis ' . $delay . ' jours ou plus dans notre centre de réparation LDLC Apple';
+                if ($centre_address) {
+                    $msg .= ': <br/><br/><b>' . $centre_address . '</b><br/><br/>';
+                } else {
+                    $msg .= '.<br/><br/>';
+                }
+                $msg .= 'Nous vous informons qu\'à partir de ' . $delay . ' jours de non restitution nous appliquons des frais de garde de 4 euros par jour.<br/>';
+                $msg .= 'Nous vous prions donc de venir récupérer votre matériel au plus vite.<br/><br/>';
+                $msg .= 'Si vous souhaitez nous confier la destruction de ce matériel, veuillez cliquer sur le lien ci-dessous : <br/><br/>';
+
+                $msg .= '<a href="' . DOL_URL_ROOT . '">Demander la destruction de votre matériel</a>';
+
+                $msg .= '<br/><br/>Cordialement,<br/>L\'équipe LDLC Apple';
+
+                $mail_errors = array();
+
+                $out .= $sav->getLink() . ' - Mail to ' . $client_email . ' : ';
+
+                $bimpMail = new BimpMail($sav, $subject, $client_email, $centre_email, $msg);
+                $bimpMail->setFromType('ldlc');
+                if ($bimpMail->send($mail_errors)) {
+                    $out .= '[OK]';
+                    $sav->updateField('alert_unrestitute', 1);
+                } else {
+                    $out .= '[ECHEC]';
+                    if (count($mail_errors)) {
+                        $out .= BimpRender::renderAlerts($mail_errors);
+                    }
+                }
+                $out .= '<br/>';
+                break;
+            } else {
+                // Envoi mail au centre SAV: 
+                if (!$centre_email) {
+                    $centre_email = BimpCore::getConf('default_sav_email', null, 'bimpsupport');
+                }
+
+                $msg = 'Bonjour, <br/><br/>Aucune adresse e-mail valide enregistrée pour le client du SAV ' . $sav->getLink();
+                $msg .= '<br/><br/>Il n\'est donc pas possible d\'alerter le client pour la non restitution de son matériel';
+                mailSyn2('Adresse e-mail client absente (SAV ' . $sav->getRef() . ')', $centre_email, '', $msg);
+            }
+        }
+
+        return $out;
     }
 
     // Méthodes signature: 

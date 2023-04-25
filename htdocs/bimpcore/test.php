@@ -26,6 +26,9 @@ if (!$user->admin) {
     exit;
 }
 
+BimpObject::loadClass('bimpsupport', 'BS_SAV');
+echo BS_SAV::sendAlertesClientsUnrestituteSav();
+
 echo '<br/>FIN';
 echo '</body></html>';
 

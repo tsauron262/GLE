@@ -29,25 +29,6 @@ class Bimp_Contact extends BimpObject
 
         return 0;
     }
-    
-    public function getNomCompletCsvValue($needed_fields = array())
-    {
-        $return = $needed_fields['firstname'];
-        if($needed_fields['lastname'] != '' && $needed_fields['firstname'] != '')
-            $return .= ' ';
-        $return .= $needed_fields['lastname'];
-
-        return $return;
-    }
-    
-    public function displayNomComplet(){
-        $return = $this->getData('firstname');
-        if($this->getData('lastname') != '' && $this->getData('firstname') != '')
-            $return .= ' ';
-        $return .= $this->getData('lastname');
-
-        return $return;
-    }
 
     public function canClientCreate()
     {
@@ -104,12 +85,12 @@ class Bimp_Contact extends BimpObject
 
         return parent::canSetStatus($status);
     }
-    
+
     public function canEditField($field_name)
     {
         if ($this->isLoaded()) {
             $client = $this->getParentInstance();
-            
+
             if (BimpObject::objectLoaded($client)) {
                 if ($client->isAnonymised()) {
                     if (in_array($field_name, self::$anonymization_fields)) {
@@ -287,6 +268,26 @@ class Bimp_Contact extends BimpObject
         }
 
         return $html;
+    }
+
+    public function getNomCompletCsvValue($needed_fields = array())
+    {
+        $return = $needed_fields['firstname'];
+        if ($needed_fields['lastname'] != '' && $needed_fields['firstname'] != '')
+            $return .= ' ';
+        $return .= $needed_fields['lastname'];
+
+        return $return;
+    }
+
+    public function displayNomComplet()
+    {
+        $return = $this->getData('firstname');
+        if ($this->getData('lastname') != '' && $this->getData('firstname') != '')
+            $return .= ' ';
+        $return .= $this->getData('lastname');
+
+        return $return;
     }
 
     // Traitements: 

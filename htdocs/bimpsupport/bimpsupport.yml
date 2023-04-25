@@ -22,6 +22,10 @@ params:
         type: bool
         def: 0
         
+    default_sav_email: 
+        label: E-mail par défaut pour les SAV (si e-mail centre absent)
+        required: 1
+        
     bs_pret_use_pdf_v2: 
         label: Utiliser version 2 pour les PDF des bons de prêts
         type: bool

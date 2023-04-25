@@ -547,6 +547,10 @@ fields:
     name_reseller:
         label: Nom du revendeur
         type: string
+    alert_unrestitute: 
+        label: Alerte de non restitution envoyée au client
+        type: bool
+        default_value: 0
         
 forms: 
     default:
@@ -1291,6 +1295,7 @@ fields_tables:
               show: 
                   callback: isGratuit
             - field: name_reseller
+            - field: alert_unrestitute
                  
     facturation:
         title: Facturation

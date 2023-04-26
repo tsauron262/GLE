@@ -569,6 +569,9 @@ class BContract_echeancier extends BimpObject
         } else {
             $data = $contrat->getEcheancierData();
             $date_start = $this->getData('next_facture_date');
+            if ($date_start) {
+                $date_start = date('Y-m-d', strtotime($date_start));
+            }
             $dt_end = new DateTime($date_start);
             $dt_end->add(new DateInterval("P" . $data->periodicity . "M"));
             $dt_end->sub(new DateInterval("P1D"));
@@ -914,7 +917,6 @@ class BContract_echeancier extends BimpObject
         $html .= '<tbody class="listRows">';
 
         foreach ($allPeriodes['periodes'] as $periode) {
-
             $dateDebutDeLaPeriode = new DateTime(str_replace('/', '-', $periode['START']));
             $dateFinDeLaPeriode = new DateTime(str_replace('/', '-', $periode['STOP']));
             $nextFactureDate = new DateTime($this->getData('next_facture_date'));
@@ -1163,6 +1165,11 @@ class BContract_echeancier extends BimpObject
         return $new;
     }
 
+    public function checkFacturesDates()
+    {
+        // TODO - Vérif date de toutes les factures et corrections éventuelles 
+    }
+
     // Actions: 
 
     public function actionStopBill($data, &$success)
@@ -1284,6 +1291,8 @@ class BContract_echeancier extends BimpObject
 
     public function actionCreateFacture($data, &$success = '')
     {
+        $success = 'Facture créée avec succès';
+
         $errors = array();
         $warnings = array();
         $id_facture = 0;
@@ -1363,10 +1372,9 @@ class BContract_echeancier extends BimpObject
                     $desc .= $infos['description'] . "<br /><br />";
                 }
 
-                $facture_ok = false;
                 if (!count($errors)) {
-                    $dateStart = new DateTime($date_start);
-                    $dateEnd = new DateTime($date_end);
+                    $dt_start = new DateTime($date_start);
+                    $dt_end = new DateTime($date_end);
 
                     $add_desc = "";
                     $contrat->actionUpdateSyntec();
@@ -1399,7 +1407,7 @@ class BContract_echeancier extends BimpObject
                     )));
 
                     if (!$label_line) {
-                        $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
+                        $new_first_line->desc = "Facturation pour la période du <b>" . $dt_start->format('d/m/Y') . "</b> au <b>" . $dt_end->format('d/m/Y') . "</b>";
                     } else {
                         $new_first_line->desc = $label_line;
                     }
@@ -1410,34 +1418,34 @@ class BContract_echeancier extends BimpObject
                     $new_first_line->tva_tx = BimpTools::getDefaultTva();
                     $new_first_line->pa_ht = $pa_ht;
 
-                    $errors = BimpTools::merge_array($errors, $new_first_line->create($warnings, true));
-//                    $new_first_line->date_from = $date_start; ?? 
-//                    $new_first_line->update($warnings);
+                    $line_warnings = array();
+                    $line_errors = $new_first_line->create($line_warnings, true);
 
-                    if (!count($errors)) {
+                    if (count($line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec ajout de la ligne de période de facturation');
+                    } else {
+                        $new_first_line->date_from = $date_start;
+                        $new_first_line->update($warnings);
+
                         $new_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
-                        $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
+                        $new_line->validateArray(array(
                                             'type'   => ObjectLine::LINE_TEXT,
                                             'id_obj' => (int) $facture->id,
-                        )));
+                        ));
 
                         $new_line->desc = $description_total;
                         $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));
 
-                        $success = 'Facture créée avec succès';
-                        $facture_ok = true;
+                        if (!count($errors)) {
+                            $this->switch_statut();
 
-                        $this->switch_statut();
-
-                        if ($contrat->reste_periode() == 0) {
-                            $this->updateField('next_facture_date', null);
-                        } else {
-                            $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+                            if ($contrat->reste_periode() == 0) {
+                                $this->updateField('next_facture_date', null);
+                            } else {
+                                $this->updateField('next_facture_date', $dt_end->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+                            }
                         }
                     }
-//                    else {
-//                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object));
-//                    }
                 }
             }
         }
@@ -1473,16 +1481,29 @@ class BContract_echeancier extends BimpObject
     public function actionGeneratePdfEcheancier($data, &$success)
     {
         global $langs;
-        $parent = $this->getParentInstance();
-        $this->dol_object->id_contrat = $this->getData('id_contrat');
-        $this->dol_object->afficher_total = $data['total_lines'];
-        //$this->afficherContact = (int) $data['afficherContact']; 
-        $url = DOL_URL_ROOT . '/document.php?modulepart=' . 'contrat' . '&file=' . $parent->getRef() . '/Echeancier.pdf';
         $errors = $warnings = array();
         $success = "PDF de l'échéancier généré avec succès";
-        $success_callback = 'window.open("' . $url . '")';
-        $parent->dol_object->generateDocument('echeancierContrat', $langs);
-        return array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => $success_callback);
+
+        $parent = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($parent)) {
+            $errors[] = 'Contrat lié absent';
+        } else {
+            $this->dol_object->id_contrat = $this->getData('id_contrat');
+            $this->dol_object->afficher_total = $data['total_lines'];
+            //$this->afficherContact = (int) $data['afficherContact']; 
+
+            $url = DOL_URL_ROOT . '/document.php?modulepart=' . 'contrat' . '&file=' . $parent->getRef() . '/Echeancier.pdf';
+            $success_callback = 'window.open("' . $url . '")';
+
+            $parent->dol_object->generateDocument('echeancierContrat', $langs);
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
     }
 
     public function actionDeleteFacture($data, &$success)

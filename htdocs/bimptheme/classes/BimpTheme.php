@@ -153,6 +153,16 @@ class BimpTheme
             $html .= BimpRender::renderIcon('fas_bug');
             $html .= '</span>';
         }
+        
+        $html .= '<span class="bs-popover header-icon" style="margin: 0 6px"';
+        $html .= BimpRender::renderPopoverData('ChangeLog', 'bottom');
+        $onclick  = "docModal.loadAjaxContent($(this), 'loadChangeLog', {}, 'ChangeLog', 'Chargement', function (result, bimpAjax) {});";
+        $onclick .= 'docModal.show();';
+        
+        $html .= ' onclick="' . $onclick . '"';
+        $html .= '>';
+        $html .= BimpRender::renderIcon('fas_cash-register');
+        $html .= '</span>';
 
         $html .= '<a class="nav-link dropdown-toggle" href="#" id="notiDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
         $html .= BimpRender::renderIcon('fas_comments');

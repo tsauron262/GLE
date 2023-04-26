@@ -45,7 +45,7 @@ class cron extends BimpCron
         $this->relance_echeance_tacite();
         $this->relance_demande();
         $this->tacite();
-//        $this->facturation_auto(); => à débuguer
+        $this->facturation_auto();
         $this->notifDemainFacturation();
         $this->relanceAvenantProvisoir();
         return 0;
@@ -277,6 +277,9 @@ class cron extends BimpCron
             $this->output .= 'ERR : ' . $bdb->err();
             return;
         }
+
+        $bdb = BimpCache::getBdb();
+        $bdb->db->commitAll();
         
         foreach ($rows as $r) {
             $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier', (int) $r['id']);
@@ -290,11 +293,10 @@ class cron extends BimpCron
                 continue;
             }
 
-            $this->output .= '<br/><br/> - ' . $contrat->getRef() . ' : <br/>';
+            $this->output .= '<br/><br/> - ' . $contrat->getLink(array('syntaxe' => '<ref>')) . ' : <br/>';
 
             $errors = array();
             $data = $echeancier->getNextFactureData($errors);
-//            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
 
             if (!$data['date_start'] || !$data['date_end'] || $data['date_end'] < $data['date_start']) {
                 $this->output .= 'Date incorrectes';
@@ -316,44 +318,52 @@ class cron extends BimpCron
                 continue;
             }
 
+//            $this->output .= 'Data : <pre>' . print_r($data, 1) . '</pre>';
+
+            $bdb->db->begin();
+            
             $result = $echeancier->actionCreateFacture($data);
 
-            $id_facture = BimpTools::getArrayValueFromPath($result, 'id_facture', 0);
-
-            $facture = null;
-            if ($id_facture) {
-                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-            }
-
-            if (BimpObject::objectLoaded($facture)) {
-                $this->output .= $contrat->getRef() . ' : Facturation automatique (' . $facture->getRef() . ')';
-
-                $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
-                $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_suivi'));
-
-                $msg = "Une facture a été créée automatiquement. Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider.<br />";
-                $msg .= "Client : " . $client->getLink() . '<br />';
-                $msg .= "Contrat : " . $contrat->getLink() . "<br/>";
-                $msg .= "Commercial : " . $commercial->getName() . "<br />";
-
-                $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote');
-                $note->set('obj_type', 'bimp_object');
-                $note->set('obj_module', 'bimpcontract');
-                $note->set('obj_name', 'BContract_contrat');
-                $note->set('id_obj', $contrat->id);
-                $note->set('type_author', $note::BN_AUTHOR_USER);
-                $note->set('type_dest', $note::BN_DEST_GROUP);
-                $note->set('fk_group_dest', BimpCore::getUserGroupId('facturation'));
-                $note->set('content', $msg);
-
-                $w = array();
-                $errors = $note->create($w, true);
-
-                if (count($errors)) {
-                    mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $msg);
-                }
-            } else {
+            if (count($result['errors'])) {
                 $this->output .= 'ECHEC FAC - <pre>' . print_r($result['errors'], 1) . '</pre>';
+                $bdb->db->rollback();
+            } else {
+                $id_facture = BimpTools::getArrayValueFromPath($result, 'id_facture', 0);
+
+                $facture = null;
+                if ($id_facture) {
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                }
+
+                if (BimpObject::objectLoaded($facture)) {
+                    $this->output .= 'Facture créée : ' . $facture->getLink();
+
+                    $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
+                    $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_suivi'));
+
+                    $msg = "Une facture a été créée automatiquement. Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider.<br />";
+                    $msg .= "Client : " . $client->getLink() . '<br />';
+                    $msg .= "Contrat : " . $contrat->getLink() . "<br/>";
+                    $msg .= "Commercial : " . $commercial->getName() . "<br />";
+
+                    $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote');
+                    $note->set('obj_type', 'bimp_object');
+                    $note->set('obj_module', 'bimpcontract');
+                    $note->set('obj_name', 'BContract_contrat');
+                    $note->set('id_obj', $contrat->id);
+                    $note->set('type_author', $note::BN_AUTHOR_USER);
+                    $note->set('type_dest', $note::BN_DEST_GROUP);
+                    $note->set('fk_group_dest', BimpCore::getUserGroupId('facturation'));
+                    $note->set('content', $msg);
+
+                    $w = array();
+                    $note_errors = $note->create($w, true);
+                    if (count($note_errors)) {
+                        mailSyn2("Facturation Contrat [" . $contrat->getRef() . "] client " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $msg);
+                    }
+
+                    $bdb->db->commit();
+                }
             }
         }
     }
@@ -470,7 +480,7 @@ class cron extends BimpCron
         $nombre_relance = 0;
         $nombre_pas_relance = 0;
         $not_tacite = [0, 12];
-        
+
         foreach ($list as $i => $contrat) {
             $send = false;
             $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
@@ -479,11 +489,11 @@ class cron extends BimpCron
             $commercial_suivi = $c->getData('fk_commercial_suivi');
             BimpObject::loadClass('bimpcore', 'Bimp_User');
             $dispo_users = Bimp_User::getAvailableUsersList(array($commercial_suivi, 'parent'));
-            
+
             if (!empty($dispo_users)) {
                 $commercial_suivi = (int) $dispo_users[0];
             }
-            
+
             $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $commercial_suivi);
             $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
             if ($c->getData('periodicity')) {

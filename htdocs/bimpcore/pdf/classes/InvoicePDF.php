@@ -182,15 +182,15 @@ class InvoicePDF extends BimpCommDocumentPDF
                             }
                         }
 
-                        $this->fromCompany->name = "LDLC";
+                        $this->fromCompany->name = "OLYS LDLC";
 
                         // Éducation
                     } elseif ($secteur == 'E') {
-                        $this->fromCompany->name = "BIMP.PRO";
+                        $this->fromCompany->name = "OLYS BIMP.PRO";
 
                         // PRO
                     } elseif (!in_array($secteur, array('S', 'M'))) {
-                        $this->fromCompany->name = "BIMP.PRO";
+                        $this->fromCompany->name = "OLYS BIMP.PRO";
                     }
                 }
             } else {

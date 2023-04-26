@@ -19,14 +19,77 @@ labels:
     name_plur: stocks internes
     
 fields: 
+    serialized: unset
+    serials: unset
+    
+    qty: 
+        display_if: unset
+        
+    description:
+        label: Description
+        
+    product_label: 
+        label: Libellé produit
+        
+    code_eee: 
+        label: Code EEE
+        
     last_pa: 
         label: Dernier Prix d'achat
         type: money
         default_value: 0
         
+forms: 
+    default: 
+        rows: 
+            serialized: unset
+            qty_tot: 
+                display_if: unset
+            description: 
+                field: description
+            product_label: 
+                field: product_label
+            code_eee: 
+                field: code_eee
+            last_pa: 
+                field: last_pa
+            
+    edit: 
+        rows: 
+            unextends: 1
+            description: 
+                field: description
+            product_label: 
+                field: product_label
+            code_eee: 
+                field: code_eee
+            last_pa: 
+                field: last_pa
+            
+    csv_import: 
+        rows: 
+            - field: code_centre
+            - custom: 1
+              label: Fichier
+              input_name: file
+              input: 
+                  type: drop_files
+                  allowed_ext: csv
+                  max_items: 1
+                  help: 'Séparateur : ";"<br/>Colonnes : Réf., Description, Libellé produit, Prix d&apos;achat HT, Code eee, Qté à ajouter'
+            
+filters_panels: 
+    default: 
+        filters: 
+            serialized: unset
+            
 lists: 
     default: 
         title: Stocks internes
         cols: 
+            serials: unset
+            description: 
+            product_label: 
+            code_eee: 
             last_pa: 
                 edit: 1

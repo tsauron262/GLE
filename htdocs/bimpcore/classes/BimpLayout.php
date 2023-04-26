@@ -167,6 +167,13 @@ class BimpLayout
     public function displayHead()
     {
         $this->initHead();
+
+        if (BimpTools::getValue('fc', '') == 'generateDoc') {
+            echo '<pre>';
+            print_r($this->css_files);
+            exit;
+        }
+
         top_htmlhead($this->extra_head, $this->page_title, $this->no_js, $this->no_head, $this->js_files, $this->css_files);
     }
 

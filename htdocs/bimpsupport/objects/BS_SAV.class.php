@@ -139,7 +139,20 @@ class BS_SAV extends BimpObject
         'display_date'  => 1,
         'display_nom'   => 1,
     );
-    public static $default_signature_destruct_params = array();
+    public static $default_signature_destruct_params = array(
+        'page'             => 1,
+        'x_pos'            => 130,
+        'y_pos'            => 240,
+        'width'            => 50,
+        'date_x_offset'    => -112,
+        'date_y_offset'    => -6,
+        'ville_x_offset'   => -105,
+        'ville_y_offset'   => -15,
+        'display_date'     => 1,
+        'display_ville'    => 1,
+        'display_nom'      => 0,
+        'display_fonction' => 0
+    );
     public static $check_on_create = 0;
     public static $check_on_update = 0;
     public static $check_on_update_field = 0;
@@ -4264,6 +4277,52 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $errors;
     }
 
+    public function sendClientEmail($subject, $msg, $to = '', $files = array())
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if (!$to) {
+            $contact = $this->getChildObject('contact');
+
+            if (BimpObject::objectLoaded($contact)) {
+                $to = $contact->getData('email');
+            }
+
+            if (!$to) {
+                $client = $this->getChildObject('client');
+
+                if (BimpObject::objectLoaded($client)) {
+                    $to = $client->getData('email');
+                }
+            }
+        }
+
+        if (!$to) {
+            $errors[] = 'Aucune adresse e-mail enregistrée pour le client';
+        } else {
+            $centre = $this->getCentreData();
+            $from = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
+
+            $to = BimpTools::cleanEmailsStr($to);
+
+            $bimpMail = new BimpMail($this, $subject, $to, $from, $msg);
+            $bimpMail->setFromType('ldlc');
+
+            if (!empty($files)) {
+                $bimpMail->addFiles($files);
+            }
+
+            $bimpMail->send($errors);
+        }
+
+
+        return $errors;
+    }
+
     public function generatePDF($file_type, &$errors)
     {
         $url = '';
@@ -4801,6 +4860,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $errors[] = 'Type de signature invalide "' . $doc_type . '"';
         } elseif (!$this->field_exists($field_name)) {
             $errors[] = 'Signature non disponible';
+        } elseif ((int) $this->getData($field_name)) {
+            $errors[] = 'La fiche signature pour ce type de document a déjà été créée';
         } else {
             if (is_null($id_contact)) {
                 $id_contact = (int) $this->getData('id_contact');
@@ -4979,10 +5040,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         if (!count($errors)) {
-            if ($create_signature) {
-                $this->createSignature('sav_destruct', $id_contact, $warnings, array(
-                    'allow_no_scan' => 0,
-                    'allow_dist'    => 1
+            if ($create_signature && !(int) $this->getData('id_signature_destruct')) {
+                $errors = $this->createSignature('sav_destruct', $id_contact, $warnings, array(
+                    'allow_no_scan'   => 0,
+                    'allow_dist'      => 1,
+                    'open_dist_acces' => 1
                 ));
             }
         }
@@ -7180,6 +7242,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
     public static function sendAlertesClientsUnrestituteSav()
     {
+        if (!BimpCore::isModeDev()) {
+            return 'En développement';
+        }
+        
         $delay = (int) BimpCore::getConf('delay_alertes_clients_unrestitute_sav', null, 'bimpsupport');
 
         $delay = 30;
@@ -7213,6 +7279,16 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         foreach ($savs as $sav) {
+            if (BimpCore::isModeDev()) {
+                $sav->updateField('id_client', 947);
+                $sav->updateField('id_contact', 228362);
+
+                $propal = $sav->getChildObject('propal');
+                if (BimpObject::objectLoaded($propal)) {
+                    $propal->updateField('fk_soc', 947);
+                }
+            }
+
             $centre_email = '';
             $centre_data = $sav->getCentreData();
             $centre_email = BimpTools::getArrayValueFromPath($centre_data, 'mail', '');
@@ -7241,7 +7317,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $centre_address .= ($centre_address ? '<br/>' : '') . BimpTools::getArrayValueFromPath($centre_data, 'zip', '');
                 $centre_address .= ($centre_address ? ' ' : '') . BimpTools::getArrayValueFromPath($centre_data, 'town', '');
 //                
-                $subject = 'RAPPEL IMPORTANT : votre matériel est toujours en attente de restitution dans votre centre LDLC APPLE';
+                $subject = 'RAPPEL IMPORTANT concernant votre dossier SAV LDLC APPLE';
                 $msg = 'Bonjour, <br/><br/>';
                 $msg .= 'Nous tenons à vous rappeller que le dossier ' . $sav->getRef() . ' concernant la réparation de votre ';
                 $msg .= ($prod_label ? '"' . $prod_label . '" ' : 'matériel');
@@ -7256,7 +7332,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $msg .= '<b>des frais de garde de 4 € par jour</b> sont appliqués.<br/><br/>';
                 $msg .= 'Vous pouvez nous confier le recyclage de votre matériel en cliquant sur le lien ci-dessous : <br/><br/>';
 
-                $msg .= '<a href="' . DOL_URL_ROOT . '">Demander la destruction de mon matériel</a>';
+                $url = self::getPublicBaseUrl(false) . 'fc=generateDoc&dt=sav_destruct&ids=' . $sav->id . '&rs=' . urlencode($sav->getRef());
+                $msg .= '<a href="' . $url . '">Demander la destruction de mon matériel</a>';
 
                 $msg .= '<br/><br/>La réception de ce document signé de votre part entraînera l\'annulation des frais de garde.';
                 $msg .= '<br/><br/>Cordialement,<br/>L\'équipe LDLC Apple';
@@ -7278,7 +7355,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     }
                 }
                 $out .= '<br/>';
-                break;
             } else {
                 // Envoi mail au centre SAV: 
                 if (!$centre_email) {
@@ -7289,6 +7365,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $msg .= '<br/><br/>Il n\'est donc pas possible d\'alerter le client pour la non restitution de son matériel';
                 mailSyn2('Adresse e-mail client absente (SAV ' . $sav->getRef() . ')', $centre_email, '', $msg);
             }
+
+            break; // Poir tests
         }
 
         return $out;
@@ -7530,55 +7608,62 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             return $errors;
         }
 
-        if ($signature->getData('doc_type') == 'sav_pc') {
-            $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
-                        'id_signature' => $signature->id,
-                        'code'         => 'default'
-                            ), true);
+        switch ($signature->getData('doc_type')) {
+            case 'sav_pc':
+                $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
+                            'id_signature' => $signature->id,
+                            'code'         => 'default'
+                                ), true);
 
-            if (BimpObject::objectLoaded($signataire) && $signataire->getData('type_signature') == BimpSignataire::TYPE_ELEC) {
-                $fileName = $this->getSignatureDocFileName('sav_pc', true);
-                $filePath = $this->getSignatureDocFileDir('sav_pc') . $fileName;
+                if (BimpObject::objectLoaded($signataire) && $signataire->getData('type_signature') == BimpSignataire::TYPE_ELEC) {
+                    $fileName = $this->getSignatureDocFileName('sav_pc', true);
+                    $filePath = $this->getSignatureDocFileDir('sav_pc') . $fileName;
 
-                if (file_exists($filePath)) {
-                    $subject = 'LDLDC - Votre bon de prise en charge PC-' . $this->getRef();
+                    if (file_exists($filePath)) {
+                        $subject = 'LDLDC - Votre bon de prise en charge PC-' . $this->getRef();
 
-                    $message = 'Bonjour, ' . "\n\n";
-                    $message .= 'Vous trouverez ci-joint votre bon de prise en charge ' . $this->getLink(array(), 'public') . " \n\n";
-                    $message .= 'Merci d\'avoir choisi LDLC' . "\n\n";
-                    $message .= 'Cordialement';
+                        $message = 'Bonjour, ' . "\n\n";
+                        $message .= 'Vous trouverez ci-joint votre bon de prise en charge ' . $this->getLink(array(), 'public') . " \n\n";
+                        $message .= 'Merci d\'avoir choisi LDLC' . "\n\n";
+                        $message .= 'Cordialement';
 
-                    $centre = $this->getCentreData();
-                    $from = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
+                        $files = array(
+                            array($filePath, 'application/pdf', $fileName)
+                        );
+                        $mail_errors = $this->sendClientEmail($subject, $message, '', $files);
 
-                    $contact = $this->getChildObject('contact');
-
-                    if (BimpObject::objectLoaded($contact)) {
-                        $to = $contact->getData('email');
-                    }
-
-                    if (!$to) {
-                        $client = $this->getChildObject('client');
-
-                        if (BimpObject::objectLoaded($client)) {
-                            $to = $client->getData('email');
+                        if (count($mail_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi du bon de prise en charge au client par e-mail');
                         }
-                    }
-
-                    if ($to) {
-                        $to = BimpTools::cleanEmailsStr($to);
-
-                        $bimpMail = new BimpMail($this, $subject, $to, $from, $message);
-                        $bimpMail->setFromType('ldlc');
-                        $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
-                        $bimpMail->send($errors);
                     } else {
-                        $errors[] = 'Impossible d\'envoyer le bon de prise en charge par e-mail au client (Adresse e-mail du client absente)';
+                        $errors[] = 'Impossible d\'envoyer le bon de prise en charge par e-mail au client (fichier "' . $fileName . '" non trouvé)';
                     }
-                } else {
-                    $errors[] = 'Impossible d\'envoyer le bon de prise en charge par e-mail au client (fichier "' . $fileName . '" non trouvé)';
                 }
-            }
+                break;
+
+            case 'sav_destruct':
+                $centre = $this->getCentreData();
+                $fileName = $this->getSignatureDocFileName('sav_destruct', true);
+                $filePath = $this->getSignatureDocFileDir('sav_destruct') . $fileName;
+
+                // Mail client: 
+                $subject = 'LDLDC Apple - Confirmation de la destruction de votre matériel';
+
+                $message = 'Bonjour, ' . "\n\n";
+                $message .= 'Merci d\'avoir choisi LDLC Apple' . "\n\n";
+                $message .= 'Cordialement';
+
+                $files = array();
+                if (file_exists($filePath)) {
+                    $files[] = array($filePath, 'application/pdf', $fileName);
+                }
+
+                $mail_errors = $this->sendClientEmail($subject, $message, '', $files);
+
+                if (count($mail_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de confirmation au client');
+                }
+                break;
         }
 
         return $errors;

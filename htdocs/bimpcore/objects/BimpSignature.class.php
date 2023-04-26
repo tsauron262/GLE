@@ -1433,6 +1433,10 @@ class BimpSignature extends BimpObject
                 if ((int) BimpTools::getArrayValueFromPath($params, 'display_fonction', $is_company)) {
                     $texts['fonction'] = utf8_decode($signataire->getData('fonction'));
                 }
+                
+                if ((int) BimpTools::getArrayValueFromPath($params, 'display_ville', 0)) {
+                    $texts['ville'] = utf8_decode($signataire->getData('ville'));
+                }
 
                 $pdf = new BimpConcatPdf();
                 $errors = $pdf->insertSignatureImage($srcFile, $image, $destFile, $params, $texts);

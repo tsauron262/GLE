@@ -1731,6 +1731,8 @@ signatures:
         label: Bon de restitution SAV
     sav_facture: 
         label: Facture SAV
+    sav_destruct: 
+        label: Bon de destruction SAV
         
 pages: 
     default: 

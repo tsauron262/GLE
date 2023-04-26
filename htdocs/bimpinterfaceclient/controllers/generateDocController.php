@@ -12,10 +12,7 @@ class generateDocController extends BimpPublicController
         $html .= '<div class="container bic_container bic_main_panel">';
         $html .= '<div class="row">';
         $html .= '<div class="col-lg-12">';
-
-        $html .= '<h3>';
-        $html .= 'TEST';
-        $html .= '</h3>';
+        
         $errors = array();
 
         $doc_type = BimpTools::getValue('dt', '');
@@ -24,6 +21,7 @@ class generateDocController extends BimpPublicController
         } else {
             switch ($doc_type) {
                 case 'sav_destruct':
+                    $html .= '<h2>Bon de destruction</h2>';
                     $id_sav = (int) BimpTools::getValue('ids', 0);
                     $ref_sav = BimpTools::getValue('rs', '');
 
@@ -43,13 +41,13 @@ class generateDocController extends BimpPublicController
                             if ($ref_sav != $sav->getRef()) {
                                 $errors[] = 'Référence de votre dossier SAV invalide';
                             } else {
-                                if ((int) $sav->getData('status') !== BS_SAV::BS_SAV_A_RESTITUER) {
+                                if (!in_array((int) $sav->getData('status'), array(self::BS_SAV_ATT_CLIENT, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER))) {
                                     $errors[] = 'Le dossier ' . $ref_sav . ' n\'est pas en attente de restitution, il n\'est donc pas possible de générer le bon de destruction de votre matériel';
                                 } else {
                                     $bdb = BimpCache::getBdb();
                                     $bdb->db->begin();
                                     $doc_warnings = array();
-                                    $doc_errors = $sav->processBonDesctruction(true, true, null, $warnings);
+                                    $doc_errors = $sav->processBonDesctruction(true, true, null, $doc_warnings);
 
                                     $html .= '<div style="text-align: center">';
                                     if (count($doc_errors) || count($doc_warnings)) {

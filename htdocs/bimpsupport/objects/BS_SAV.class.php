@@ -7194,18 +7194,23 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $date = $dt->format('Y-m-d 00:00:00');
 
         $savs = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SAV', array(
-                    'date_pc'           => array(
+                    'p.date_valid'        => array(
                         'operator' => '<',
                         'value'    => $date
                     ),
-                    'status'            => self::BS_SAV_A_RESTITUER,
-                    'alert_unrestitute' => 0
+                    'a.status'            => array(self::BS_SAV_ATT_CLIENT, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER),
+                    'a.alert_unrestitute' => 0
+                        ), 'id', 'asc', array(
+                    'p' => array(
+                        'alias' => 'p',
+                        'table' => 'propal',
+                        'on'    => 'p.rowid = a.id_propal'
+                    )
         ));
 
         if (empty($savs)) {
             return 'Aucun SAV non restitué à alerter';
         }
-
 
         foreach ($savs as $sav) {
             $centre_email = '';
@@ -7238,19 +7243,22 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 //                
                 $subject = 'RAPPEL IMPORTANT : votre matériel est toujours en attente de restitution dans votre centre LDLC APPLE';
                 $msg = 'Bonjour, <br/><br/>';
-                $msg .= 'Nous tenons à vous rappeller que votre matériel ' . ($prod_label ? '"' . $prod_label . '" ' : '');
-                $msg .= 'est en attente de restitution depuis ' . $delay . ' jours ou plus dans notre centre de réparation LDLC Apple';
+                $msg .= 'Nous tenons à vous rappeller que le dossier ' . $sav->getRef() . ' concernant la réparation de votre ';
+                $msg .= ($prod_label ? '"' . $prod_label . '" ' : 'matériel');
+                $msg .= ' déposé dans notre centre de réparation LDLC Apple ';
                 if ($centre_address) {
                     $msg .= ': <br/><br/><b>' . $centre_address . '</b><br/><br/>';
                 } else {
                     $msg .= '.<br/><br/>';
                 }
-                $msg .= 'Nous vous informons qu\'à partir de ' . $delay . ' jours de non restitution nous appliquons des frais de garde de 4 euros par jour.<br/>';
-                $msg .= 'Nous vous prions donc de venir récupérer votre matériel au plus vite.<br/><br/>';
-                $msg .= 'Si vous souhaitez nous confier la destruction de ce matériel, veuillez cliquer sur le lien ci-dessous : <br/><br/>';
+                $msg .= 'est en attente d\'une réponse de votre part depuis plus de 30 jours.<br/><br/>';
+                $msg .= 'Passé ce délai et comme indiqué dans nos conditions de prise en charge, ';
+                $msg .= '<b>des frais de garde de 4 € par jour</b> sont appliqués.<br/><br/>';
+                $msg .= 'Vous pouvez nous confier le recyclage de votre matériel en cliquant sur le lien ci-dessous : <br/><br/>';
 
-                $msg .= '<a href="' . DOL_URL_ROOT . '">Demander la destruction de votre matériel</a>';
+                $msg .= '<a href="' . DOL_URL_ROOT . '">Demander la destruction de mon matériel</a>';
 
+                $msg .= '<br/><br/>La réception de ce document signé de votre part entraînera l\'annulation des frais de garde.';
                 $msg .= '<br/><br/>Cordialement,<br/>L\'équipe LDLC Apple';
 
                 $mail_errors = array();
@@ -7262,7 +7270,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if ($bimpMail->send($mail_errors)) {
                     $out .= '[OK]';
                     $sav->updateField('alert_unrestitute', 1);
-                    $this->addNote('Alerte e-mail de non restitution envoyée avec succès le ' . date('d / m / Y à H:i') . ' à l\'adresse e-mail "' . $client_email . '"');
+                    $sav->addNote('Alerte e-mail de non restitution envoyée avec succès le ' . date('d / m / Y à H:i') . ' à l\'adresse e-mail "' . $client_email . '"');
                 } else {
                     $out .= '[ECHEC]';
                     if (count($mail_errors)) {

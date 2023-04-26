@@ -21,6 +21,7 @@ labels:
 fields: 
     serialized: unset
     serials: unset
+    
     qty: 
         display_if: unset
         
@@ -75,7 +76,7 @@ forms:
                   type: drop_files
                   allowed_ext: csv
                   max_items: 1
-                  help: 'Séparateur : ";"<br/>Colonnes : Code centre, Réf., Qté à ajouter, Dernier PA HT'
+                  help: 'Séparateur : ";"<br/>Colonnes : Réf., Description, Libellé produit, Prix d&apos;achat HT, Code eee, Qté à ajouter'
             
 filters_panels: 
     default: 

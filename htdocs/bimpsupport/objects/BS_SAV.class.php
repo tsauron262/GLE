@@ -30,7 +30,7 @@ class BS_SAV extends BimpObject
     const BS_SAV_ATT_CLIENT_ACTION = 7;
     const BS_SAV_A_RESTITUER = 9;
     const BS_SAV_FERME = 999;
-    
+
     //reparation en magasin avec retour avant remplacement
     //pas de doublons Réf centre
     //923-00173
@@ -4783,8 +4783,16 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return array();
     }
 
-    public function createSignature($doc_type, $id_contact = null, &$warnings = array())
+    public function createSignature($doc_type, $id_contact = null, &$warnings = array(), $params = array())
     {
+        $params = BimpTools::overrideArray(array(
+                    'allow_no_scan'   => 1,
+                    'allow_dist'      => 0,
+                    'allow_docusign'  => 0,
+                    'allow_refuse'    => 0,
+                    'open_dist_acces' => 0
+                        ), $params);
+
         $errors = array();
 
         $field_name = $this->getSignatureFieldName($doc_type);
@@ -4805,24 +4813,32 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         'doc_type'      => $doc_type,
                         'id_client'     => (int) $this->getData('id_client'),
                         'id_contact'    => (int) $id_contact,
-                        'allow_no_scan' => 1
+                        'allow_no_scan' => (int) $params['allow_no_scan']
                             ), true, $errors, $warnings);
 
             if (BimpObject::objectLoaded($signature)) {
                 $this->updateField($field_name, (int) $signature->id);
 
                 $signataire_errors = array();
-                BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
-                    'id_signature'   => $signature->id,
-                    'id_client'      => (int) $this->getData('id_client'),
-                    'id_contact'     => (int) $id_contact,
-                    'allow_dist'     => 0,
-                    'allow_docusign' => 0,
-                    'allow_refuse'   => 0
-                        ), true, $signataire_errors, $warnings);
+                $signataire = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
+                            'id_signature'   => $signature->id,
+                            'id_client'      => (int) $this->getData('id_client'),
+                            'id_contact'     => (int) $id_contact,
+                            'allow_dist'     => ((int) $params['open_dist_acces'] || (int) $params['allow_dist']),
+                            'allow_docusign' => (int) $params['allow_docusign'],
+                            'allow_refuse'   => (int) $params['allow_refuse'],
+                                ), true, $signataire_errors, $warnings);
 
                 if (count($signataire_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
+                } else {
+                    if ((int) $params['open_dist_acces']) {
+                        $open_errors = $signataire->openSignDistAccess(true, '', true);
+
+                        if (count($open_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($open_errors, 'Echec de l\'ouverture de l\'accès à la signature à distance');
+                        }
+                    }
                 }
             }
         }
@@ -4947,13 +4963,31 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         );
     }
 
-    public static function setGsxActiToken($token, $login = '')
+    public function processBonDesctruction($create_signature = true, $open_dist_acces = true, $id_contact = null, &$warnings = array())
     {
-        require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+        $errors = array();
 
-        $gsx = new GSX_v2();
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
 
-        $errors = $gsx->setActivationToken($token, $login);
+        $dir = $this->getFilesDir();
+        $file_name = $this->getSignatureDocFileName('sav_destruct');
+
+        if (!file_exists($dir . $file_name)) {
+            $this->generatePDF('destruction', $errors);
+        }
+
+        if (!count($errors)) {
+            if ($create_signature) {
+                $this->createSignature('sav_destruct', $id_contact, $warnings, array(
+                    'allow_no_scan' => 0,
+                    'allow_dist'    => 1
+                ));
+            }
+        }
+
+
         return $errors;
     }
 
@@ -7228,6 +7262,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if ($bimpMail->send($mail_errors)) {
                     $out .= '[OK]';
                     $sav->updateField('alert_unrestitute', 1);
+                    $this->addNote('Alerte e-mail de non restitution envoyée avec succès le ' . date('d / m / Y à H:i') . ' à l\'adresse e-mail "' . $client_email . '"');
                 } else {
                     $out .= '[ECHEC]';
                     if (count($mail_errors)) {
@@ -7251,6 +7286,16 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $out;
     }
 
+    public static function setGsxActiToken($token, $login = '')
+    {
+        require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+
+        $gsx = new GSX_v2();
+
+        $errors = $gsx->setActivationToken($token, $login);
+        return $errors;
+    }
+
     // Méthodes signature: 
 
     public function getSignatureFieldName($doc_type)
@@ -7261,8 +7306,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case 'sav_resti':
                 return 'id_signature_resti';
-                
-            case 'sav_destruct': 
+
+            case 'sav_destruct':
                 return 'id_signature_destruct';
         }
 
@@ -7279,9 +7324,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case 'sav_resti':
                 return 'Restitution_' . dol_sanitizeFileName($this->getRef()) . ($signed ? '_signe' : '') . '.' . $ext;
-                
+
             case 'sav_destruct':
-                return 'Destruction_' . dol_sanitizeFileName($this->getRef()) . ($signed ? '_signe' : '') . '.' . $ext;
+                return 'Destruction-' . dol_sanitizeFileName($this->getRef()) . ($signed ? '_signe' : '') . '.' . $ext;
         }
 
         return '';
@@ -7320,7 +7365,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case 'sav_resti':
                 return 'BR-' . $this->getRef();
-                
+
             case 'sav_destruct':
                 return 'DESTR-' . $this->getRef();
         }
@@ -7336,7 +7381,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             case 'sav_resti':
                 return BimpTools::overrideArray(self::$default_signature_resti_params, (array) $this->getData('signature_resti_params'));
-                
+
             case 'sav_destruct':
                 return self::$default_signature_destruct_params;
         }

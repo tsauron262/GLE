@@ -141,6 +141,16 @@ objects:
             id_object: 
                 field_value: id_signature_resti
                 
+    signature_destruct: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_destruct
+                
     sac: 
         relation: hasMany
         delete: 0
@@ -500,6 +510,10 @@ fields:
     signature_resti_params: 
         label: Paramètres signature restitution
         type: json
+    id_signature_destruct: 
+        label: Signature bon destruction
+        type: id_object
+        object: signature_destruct
     sacs:
         label: Sac d'emballage
         type: items_list
@@ -1427,6 +1441,10 @@ fields_tables:
               display: card
               show: 
                   field_value: id_signature_resti
+            - field: id_signature_destruct
+              display: card
+              show: 
+                  field_value: id_signature_destruct
               
 views: 
     default: 

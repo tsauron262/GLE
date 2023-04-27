@@ -409,8 +409,8 @@ class BimpSignature extends BimpObject
     public static function getDefaultSignDistEmailContent($type = 'elec')
     {
         $message = 'Bonjour, <br/><br/>';
-//        $message .= 'La signature du document "{NOM_DOCUMENT}" pour {NOM_PIECE} {REF_PIECE}  est en attente.<br/><br/>';
-        $message .= '{NOM_PIECE} {REF_PIECE} est en attente de validation.<br/><br/>';
+        $message .= 'La signature du document "{NOM_DOCUMENT}" pour {NOM_PIECE} {REF_PIECE}  est en attente.<br/><br/>';
+//        $message .= '{NOM_PIECE} {REF_PIECE} est en attente de validation.<br/><br/>';
 
         switch ($type) {
             case 'docusign':

@@ -7245,7 +7245,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!BimpCore::isModeDev()) {
             return 'En développement';
         }
-        
+
         $delay = (int) BimpCore::getConf('delay_alertes_clients_unrestitute_sav', null, 'bimpsupport');
 
         $delay = 30;
@@ -7347,7 +7347,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if ($bimpMail->send($mail_errors)) {
                     $out .= '[OK]';
                     $sav->updateField('alert_unrestitute', 1);
-                    $sav->addNote('Alerte e-mail de non restitution envoyée avec succès le ' . date('d / m / Y à H:i') . ' à l\'adresse e-mail "' . $client_email . '"');
+                    $sav->addNote('Alerte e-mail de non restitution envoyée avec succès le ' . date('d / m / Y à H:i') . ' à l\'adresse e-mail "' . $client_email . '"', BimpNote::BN_ALL);
                 } else {
                     $out .= '[ECHEC]';
                     if (count($mail_errors)) {
@@ -7642,16 +7642,24 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 break;
 
             case 'sav_destruct':
-                $centre = $this->getCentreData();
                 $fileName = $this->getSignatureDocFileName('sav_destruct', true);
                 $filePath = $this->getSignatureDocFileDir('sav_destruct') . $fileName;
+
+                $prod_label = '';
+                $eq = $this->getChildObject('equipment');
+                if (BimpObject::objectLoaded($eq)) {
+                    $prod_label = $eq->getProductLabel();
+                }
 
                 // Mail client: 
                 $subject = 'LDLDC Apple - Confirmation de la destruction de votre matériel';
 
                 $message = 'Bonjour, ' . "\n\n";
-                $message .= 'Merci d\'avoir choisi LDLC Apple' . "\n\n";
-                $message .= 'Cordialement';
+                $message .= 'Nous vous confirmons la prise en compte de votre demande de destruction de votre ';
+                $message .= ($prod_label ? $prod_label : 'matériel') . ' (Dossier ' . $this->getRef() . ').<br/><br/>';
+                $message .= 'Nous vous confirmons également l\'annulation des frais de garde de 4 € par jours.<br/><br/>';
+                $message .= 'Cordialement,<br/><br/>';
+                $message .= 'L\'équiope LDLC Apple';
 
                 $files = array();
                 if (file_exists($filePath)) {

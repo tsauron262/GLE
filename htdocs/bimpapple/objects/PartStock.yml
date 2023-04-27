@@ -35,10 +35,10 @@ fields:
         label: Réf. composant
         required: 1
         
-#    serialized: 
-#        label: Serialisé 
-#        type: bool
-#        default_value: 0
+    serialized: 
+        label: Serialisé 
+        type: bool
+        default_value: 0
         
     qty: 
         label: Quantité
@@ -46,40 +46,45 @@ fields:
         decimals: 0
         default_value: 0
         min: 0
-#        display_if: 
-#            field_name: serialized
-#            show_values: 0
+        display_if: 
+            field_name: serialized
+            show_values: 0
             
-#    serials: 
-#        label: Numéros de série
-#        type: items_list
-#        items_braces: 1
-#        display_if: 
-#            field_name: serialized
-#            show_values: 1
+    serials: 
+        label: Numéros de série
+        type: items_list
+        items_braces: 1
+        display_if: 
+            field_name: serialized
+            show_values: 1
         
 forms: 
     default: 
         rows: 
-            - field: code_centre
-            - field: part_number
-#            - field: serialized
-            - custom: 1
-              label: Quantité
-              input_name: qty_tot
-              data_type: qty
-              input: 
-                type: qty
-              decimals: 0
-              min: 0
-              value: 1
-#              display_if: 
-#                field_name: serialized
-#                show_values: 0
+            code_cente: 
+                field: code_centre
+            part_number: 
+                field: part_number
+            serialized: 
+                field: serialized
+            qty_tot: 
+                custom: 1
+                label: Quantité
+                input_name: qty_tot
+                data_type: qty
+                input: 
+                   type: qty
+                decimals: 0
+                min: 0
+                value: 1
+                display_if: 
+                   field_name: serialized
+                   show_values: 0
                 
-#    edit: 
-#        rows: 
-#            - field: serialized
+    edit: 
+        rows: 
+            serialiaze: 
+                field: serialized
     
     correct:
         rows: 
@@ -139,23 +144,23 @@ forms:
                 input: 
                     type: textarea
            
-#    correct_serialized: 
-#        extends: correct
-#        rows: 
-#            mode: unset
-#            qty_to_add: unset
-#            qty_to_remove: unset
-#            qty: 
-#                field: serials
-#                label: Numéros de série
-#                display_if: unset
+    correct_serialized: 
+        extends: correct
+        rows: 
+            mode: unset
+            qty_to_add: unset
+            qty_to_remove: unset
+            qty: 
+                field: serials
+                label: Numéros de série
+                display_if: unset
               
 filters_panels: 
     default: 
         filters: 
             code_centre: 
             part_number: 
-#            serialized: 
+            serialized: 
                 
 lists: 
     default:
@@ -177,4 +182,4 @@ lists:
             code_centre:
             part_number:
             qty:
-#            serials:
+            serials:

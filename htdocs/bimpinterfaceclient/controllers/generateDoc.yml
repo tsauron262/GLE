@@ -1,0 +1,8 @@
+bootstrap: 1
+
+css: 
+    - /bimpinterfaceclient/views/css/bootstrap_public.css
+    - /bimpinterfaceclient/views/css/public.css
+    
+js: 
+    - /bimpinterfaceclient/views/js/bootstrap_public.js

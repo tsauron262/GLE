@@ -1067,6 +1067,7 @@ class BimpInput
             $dt_value = new DateTime($value);
         }
 
+        $html .= '<div class="dropdown">';
         $html .= '<input type="hidden" class="datepicker_value' . ($extra_class ? ' ' . $extra_class : '') . '" id="' . $input_id . '" name="' . $input_name . '" value="';
         if (!is_null($dt_value)) {
             $html .= $dt_value->format($php_format);
@@ -1094,6 +1095,7 @@ class BimpInput
         $html .= "}";
         $html .= "})";
         $html .= '</script>';
+        $html .= '</div>';
 
         return $html;
     }

@@ -4080,7 +4080,7 @@ class BimpObject extends BimpCache
                         'obj_name'   => $this->object_name,
                         'id_obj'     => $this->id,
                         'doc_type'   => $doc_type
-            ));
+            ), true);
         }
 
         return null;
@@ -4092,7 +4092,7 @@ class BimpObject extends BimpCache
             $signature = $this->getSignatureInstance($doc_type);
 
             if (BimpObject::objectLoaded($signature) && $signature->getData('signed_doc_ext')) {
-                return $signature->getData('signed_doc_ext');
+                return strtolower($signature->getData('signed_doc_ext'));
             }
         }
 

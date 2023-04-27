@@ -96,11 +96,17 @@ class PartStock extends BimpObject
         $buttons = array();
 
         if ($this->isActionAllowed('correct') && $this->canSetAction('correct')) {
+            $form_name = 'correct';
+
+            if ($this->field_exists('serialized') && (int) $this->getData('serialized')) {
+                $form_name .= '_serialized';
+            }
+
             $buttons[] = array(
                 'label'   => 'Corriger le stock',
                 'icon'    => 'fas_pen',
                 'onclick' => $this->getJsActionOnclick('correct', array(), array(
-                    'form_name' => 'correct' . ((int) $this->getData('serialized') ? '_serialized' : '')
+                    'form_name' => $form_name
                 ))
             );
         }
@@ -326,12 +332,14 @@ class PartStock extends BimpObject
             $errors[] = 'Cette référence existe déja pour ce centre';
         }
 
-        $errors = parent::create($warnings, $force_create);
+        if (!count($errors)) {
+            $errors = parent::create($warnings, $force_create);
 
-        if (!count($errors) && !$this->getData('serialized')) {
-            $qty = BimpTools::getValue('qty_tot', 0);
-            if ($qty > 0) {
-                $errors = $this->correctStock($qty, '', 'CREATION');
+            if (!count($errors) && !$this->getData('serialized')) {
+                $qty = BimpTools::getValue('qty_tot', 0);
+                if ($qty > 0) {
+                    $errors = $this->correctStock($qty, '', 'CREATION');
+                }
             }
         }
 

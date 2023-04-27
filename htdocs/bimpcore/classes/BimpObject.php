@@ -1202,6 +1202,21 @@ class BimpObject extends BimpCache
         return $fields;
     }
 
+    public function getAddFilesButton()
+    {
+        if ($this->isActionAllowed('addFiles') && $this->canSetAction('addFiles')) {
+            return array(
+                'label'   => 'Ajouter des fichiers',
+                'icon'    => 'fas_folder-plus',
+                'onclick' => $this->getJsActionOnclick('addFiles', array(), array(
+                    'form_name' => 'add_files'
+                ))
+            );
+        }
+
+        return array();
+    }
+
     // Getters boolééns:
 
     public function isLoaded(&$errors = array())
@@ -1697,8 +1712,9 @@ class BimpObject extends BimpCache
     {
         return $value;
     }
-    
-    public function getGlobalConf($name, $default = '', $module = ''){
+
+    public function getGlobalConf($name, $default = '', $module = '')
+    {
         return BimpCore::getConf($name, $default, $module);
     }
 
@@ -4056,7 +4072,6 @@ class BimpObject extends BimpCache
 
     // Gestion des signatures: 
 
-
     public function getSignatureInstance($doc_type)
     {
         if ($this->isLoaded()) {
@@ -4065,7 +4080,7 @@ class BimpObject extends BimpCache
                         'obj_name'   => $this->object_name,
                         'id_obj'     => $this->id,
                         'doc_type'   => $doc_type
-            ));
+            ), true);
         }
 
         return null;
@@ -4077,7 +4092,7 @@ class BimpObject extends BimpCache
             $signature = $this->getSignatureInstance($doc_type);
 
             if (BimpObject::objectLoaded($signature) && $signature->getData('signed_doc_ext')) {
-                return $signature->getData('signed_doc_ext');
+                return strtolower($signature->getData('signed_doc_ext'));
             }
         }
 
@@ -5028,7 +5043,7 @@ class BimpObject extends BimpCache
                         if ($date_update_field) {
                             $this->data[$date_update_field] = date('Y-m-d H:i:s');
                         }
-                        
+
                         $user_update_field = $this->getUserUpdateProperty();
                         if ($user_update_field) {
                             global $user;
@@ -5217,7 +5232,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                         if ($date_update_field) {
                             $data[$date_update_field] = date('Y-m-d H:i:s');
                         }
-                        
+
                         $user_update_field = $this->getUserUpdateProperty();
                         if ($user_update_field) {
                             global $user;
@@ -6202,6 +6217,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function isActionAllowed($action, &$errors = array())
     {
+        switch ($action) {
+            case 'addFiles':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                return 1;
+        }
+
         return 1;
     }
 
@@ -8195,11 +8218,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $html;
     }
 
-    public function renderImages($filters = null)
+    public function renderImages($full_panel = false, $filters = null)
     {
         $html = '';
 
-        if(is_null($filters)) {
+        if (is_null($filters)) {
             $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
                         'parent_module'      => $this->module,
                         'parent_object_name' => $this->object_name,
@@ -8208,9 +8231,10 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             'in' => array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif')
                         )
             ));
-        } else
+        } else {
             $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', $filters);
-        
+        }
+
 
         if (!empty($files)) {
             $html .= '<div>';
@@ -8220,9 +8244,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                 if ($url) {
                     $onclick = 'loadImageModal($(this), \'' . $url . '\', \'' . $file->getData('file_name') . '\')';
-                    $html .= '<div onclick="' . $onclick . '" style="max-height: 200px; max-width: 100%; cursor: zoom-in; margin: 5px; overflow-x: scroll">';
+                    $html .= '<div onclick="' . $onclick . '"';
+                    $html .= ' style="display: inline-block; max-height: 200px; max-width: 300px; width: auto; height: auto;';
+                    $html .= ' cursor: zoom-in; margin: 5px; padding: 5px; border: 1px solid #ccc; vertical-align: top; overflow: hidden">';
                     $html .= '<div style="font-size: 11px; font-style: italic">';
-                    $html .= $file->getData('file_name');
+                    $html .= '<b>' . $file->getData('file_name') . '</b>';
                     $html .= '</div>';
                     $html .= '<img src="' . $url . '" style="max-height: 92%; max-width: 100%; height: auto; width: auto; margin: auto"/>';
                     $html .= '</div>';
@@ -8232,6 +8258,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</div>';
         }
 
+        if ($full_panel) {
+            $title = BimpRender::renderIcon('fas_file-image', 'iconLeft') . 'Images liées';
+            return BimpRender::renderPanel($title, $html, '', array(
+                        'type' => 'secondary'
+            ));
+        }
         return $html;
     }
 
@@ -10137,6 +10169,27 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $success_callback
+        );
+    }
+
+    public function actionAddFiles($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $files = BimpTools::getArrayValueFromPath($data, 'files', array());
+
+        if (empty($files)) {
+            $errors[] = 'Aucun fichier ajouté';
+        } else {
+            $files_dir = $this->getFilesDir();
+            BimpTools::moveTmpFiles($warnings, $files, $files_dir);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

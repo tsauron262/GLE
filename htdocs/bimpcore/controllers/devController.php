@@ -31,7 +31,7 @@ class devController extends BimpController
         $html = '';
 
         // ToolsBar:
-        $html .= '<div class="buttonsContainer align-right" style="padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #000000">';
+        $html .= '<div class="buttonsContainer align-left" style="padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #000000">';
         if (BimpCore::isModuleActive('bimpapple')) {
             $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/synopsistools/phantomApple.php" target="_blank">';
             $html .= 'Connect Apple' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
@@ -41,6 +41,12 @@ class devController extends BimpController
         if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/test.php')) {
             $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/test.php" target="_blank">';
             $html .= 'TESTS' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+            $html .= '</a>';
+        }
+
+        if (BimpCore::isModuleActive('bimpinterfaceclient')) {
+            $html .= '<a class="btn btn-default" href="' . BimpObject::getPublicBaseUrl(true) . '" target="_blank">';
+            $html .= 'Espace client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
         }
 
@@ -87,8 +93,8 @@ class devController extends BimpController
             $html .= '</ul>';
             $html .= '</div>';
         }
-        
-        
+
+
         $html .= '<div class="row">';
 
         // Récap logs: 

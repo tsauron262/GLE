@@ -295,6 +295,21 @@ class BimpSignataire extends BimpObject
         return 1;
     }
 
+    public function isVilleRequired()
+    {
+        $signature = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($signature)) {
+            $params = $signature->getSignatureParams($this, 'elec');
+
+            if (is_array($params)) {
+                return (int) BimpTools::getArrayValueFromPath($params, 'display_ville', 0);
+            }
+        }
+
+        return 0;
+    }
+
     public function showAutoOpenPublicAccess()
     {
         return (empty($this->getInitData('allowed_users_client')) ? 1 : 0);
@@ -1493,7 +1508,7 @@ class BimpSignataire extends BimpObject
                         $msg .= '<b>Signature: </b>' . $signature->getLink(array(), 'private') . '<br/><br/>';
 
                         $msg .= '<b>Date de la signature: </b>' . date('d / m / Y à H:i:s', strtotime($this->getData('date_signed'))) . '<br/>';
-                        $msg .= '<b>Type signature: </b>' . BimpTools::getArrayValueFromPath(self::$types, $this->getData('type') . '/label', 'inconnue') . '<br/>';
+                        $msg .= '<b>Type signature: </b>' . BimpTools::getArrayValueFromPath(self::$types_signatures, $this->getData('type_signature') . '/label', 'inconnue') . '<br/>';
                         if ($this->getData('label') !== 'Signataire') {
                             $msg .= '<b>Type signataire: </b>' . $this->getData('label') . '<br/>';
                         }
@@ -1616,6 +1631,7 @@ class BimpSignataire extends BimpObject
                 $nom = BimpTools::getArrayValueFromPath($data, 'nom', $this->getData('nom'));
                 $email = BimpTools::getArrayValueFromPath($data, 'email', $this->getData('email'));
                 $fonction = BimpTools::getArrayValueFromPath($data, 'fonction', $this->getData('fonction'));
+                $ville = BimpTools::getArrayValueFromPath($data, 'ville', '');
 
                 if (!$email) {
                     $errors[] = 'Veuillez saisir l\'adresse e-mail du signataire';
@@ -1642,6 +1658,10 @@ class BimpSignataire extends BimpObject
                     $errors[] = 'Veuillez saisir la fonction du signataire';
                 }
 
+                if (!$ville && $this->isVilleRequired()) {
+                    $errors[] = 'Veuillez saisir le lieu de signature';
+                }
+
                 if ($signature->hasMultipleFiles()) {
                     $selected_file = BimpTools::getArrayValueFromPath($data, 'selected_file', '');
                     if (!$selected_file) {
@@ -1661,6 +1681,7 @@ class BimpSignataire extends BimpObject
                     $this->set('date_signed', date('Y-m-d H:i:s'));
                     $this->set('nom', $nom);
                     $this->set('fonction', $fonction);
+                    $this->set('ville', $ville);
                     $this->set('email', $email);
                     $this->set('base_64_signature', $signature_image);
 
@@ -1792,6 +1813,11 @@ class BimpSignataire extends BimpObject
                         }
                     }
 
+                    $ville = BimpTools::getArrayValueFromPath($data, 'ville', '');
+                    if (!$ville && $this->isVilleRequired()) {
+                        $errors[] = 'Veuillez saisir le lieu de signature';
+                    }
+
                     if ($signature->hasMultipleFiles()) {
                         $selected_file = BimpTools::getArrayValueFromPath($data, 'selected_file', '');
                         if (!$selected_file) {
@@ -1815,6 +1841,7 @@ class BimpSignataire extends BimpObject
                         $this->set('date_signed', date('Y-m-d H:i:s'));
                         $this->set('nom', $nom);
                         $this->set('fonction', $fonction);
+                        $this->set('ville', $ville);
                         $this->set('email', $userClient->getData('email'));
                         $this->set('id_user_client_signataire', $userClient->id);
                         $this->set('base_64_signature', $signature_image);

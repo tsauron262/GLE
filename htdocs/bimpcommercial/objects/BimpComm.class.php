@@ -94,6 +94,16 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
+    public function canSetAction($action)
+    {
+        global $user;
+//        if ($action == 'checkTotal' && !$user->admin)
+//            return 0;
+        if ($action == 'checkMarge' && !$user->admin)
+            return 0;
+        return parent::canSetAction($action);
+    }
+
     // Getters booléens: 
 
     public function isDeletable($force_delete = false, &$errors = array())
@@ -680,16 +690,6 @@ class BimpComm extends BimpDolObject
         }
 
         return $buttons;
-    }
-
-    public function canSetAction($action)
-    {
-        global $user;
-//        if ($action == 'checkTotal' && !$user->admin)
-//            return 0;
-        if ($action == 'checkMarge' && !$user->admin)
-            return 0;
-        return parent::canSetAction($action);
     }
 
     public function getDefaultListExtraButtons()
@@ -1401,9 +1401,9 @@ class BimpComm extends BimpDolObject
         return $zone;
     }
 
-    public function getCommercial()
+    public function getCommercial($params = array())
     {
-        $id_comm = (int) $this->getCommercialId();
+        $id_comm = (int) $this->getCommercialId($params);
         if ($id_comm) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_comm);
             if (BimpObject::objectLoaded($user)) {
@@ -1412,6 +1412,11 @@ class BimpComm extends BimpDolObject
         }
 
         return null;
+    }
+
+    public function getIdCommercial()
+    {
+        return $this->getIdContact($type = 'internal', $code = 'SALESREPFOLL');
     }
 
     public function getSocAvailableDiscountsAmounts()
@@ -1874,16 +1879,6 @@ class BimpComm extends BimpDolObject
         }
 
         return BimpTools::displayMoneyValue($total, '', 0, 0, 0, 2, 1);
-    }
-
-    public function getIdCommercial()
-    {
-        return $this->getIdContact($type = 'internal', $code = 'SALESREPFOLL');
-    }
-
-    public function addNoteToCommercial($note)
-    {
-        return $this->addNote($note, null, 0, 0, '', 1, 1, 0, $this->getIdCommercial());
     }
 
     public function displayCommercial()
@@ -3676,6 +3671,11 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
+    public function addNoteToCommercial($note)
+    {
+        return $this->addNote($note, null, 0, 0, '', 1, 1, 0, $this->getIdCommercial());
+    }
+
     public function checkRemisesGlobales($echo = false, $create_avoir = false)
     {
         if ($this->isLoaded()) {
@@ -5097,27 +5097,6 @@ class BimpComm extends BimpDolObject
         parent::checkObject($context, $field);
     }
 
-    public function validate()
-    {
-        if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente') && $this->getData('fk_statut') == 0) {
-            $zone = self::BC_ZONE_FR;
-            if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) || $this->getData('entrepot') == '164' || $this->getInitData('entrepot') == '164'
-                    ) && (((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) || (int) $this->getData('entrepot') !== (int) $this->getInitData('entrepot'))) {
-                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
-                if (BimpObject::objectLoaded($soc)) {
-                    $zone = $this->getZoneByCountry($soc);
-                    if ($this->getData('zone_vente') != $zone) {
-                        $this->set('zone_vente', $zone);
-                        $this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true));
-                        //TODO l'objet n'est pas encore loadé du coup addObjectLog ne fonctionne pas...
-                    }
-                }
-            }
-        }
-
-        return parent::validate();
-    }
-
     public function create(&$warnings = array(), $force_create = false)
     {
         $origin = BimpTools::getValue('origin', '');
@@ -5149,9 +5128,28 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        $cur_zone = '';
+        $new_zone = '';
+        if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente') && !(int) $this->getData('fk_statut')) {
+            $cur_zone = $this->getData('zone_vente');
+            // Check zone vente : 
+            if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) || (int) $this->getData('entrepot') == 164)) {
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
+                if (BimpObject::objectLoaded($soc)) {
+                    $new_zone = $this->getZoneByCountry($soc);
+                    if ($new_zone && $new_zone != $cur_zone) {
+                        $this->set('zone_vente', $new_zone);
+                    }
+                }
+            }
+        }
+
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
+            if ($new_zone && $new_zone != $cur_zone) {
+                $this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true));
+            }
             switch ($this->object_name) {
                 case 'Bimp_Propal':
                 case 'Bimp_Facture':
@@ -5241,18 +5239,43 @@ class BimpComm extends BimpDolObject
             return $this->importLinesFromFile($warnings);
         }
 
+        $init_id_entrepot = (int) $this->getInitData('entrepot');
+        $init_fk_soc = (int) $this->getInitData('fk_soc');
         $init_zone = '';
-        if ($this->dol_field_exists('zone_vente')) {
-            $init_zone = (int) $this->getInitData('zone_vente');
+        $cur_zone = '';
+        $new_zone = '';
+
+        if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente')) {
+            $init_zone = $this->getInitData('zone_vente');
+            $cur_zone = $this->getData('zone_vente');
+            
+            if (!(int) $this->getData('fk_statut')) {
+                if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) ||
+                        $this->getData('entrepot') == 164 || $init_id_entrepot == 164) &&
+                        (((int) $this->getData('fk_soc') !== $init_fk_soc) || (int) $this->getData('entrepot') !== $init_id_entrepot)) {
+                    $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
+                    if (BimpObject::objectLoaded($soc)) {
+                        $new_zone = $this->getZoneByCountry($soc);
+
+                        if ($new_zone && $new_zone != $cur_zone) {
+                            $this->set('zone_vente', $new_zone);
+                        }
+                    }
+                }
+            }
         }
 
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
-            if (static::$use_zone_vente_for_tva && $init_zone && $this->areLinesEditable()) {
+            if ($new_zone && $cur_zone != $new_zone) {
+                $this->addObjectLog('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', 0, 1));
+            }
+
+            if ($init_zone && $this->areLinesEditable()) {
                 $cur_zone = (int) $this->getData('zone_vente');
 
-                if ($cur_zone !== $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_UE))) {
+                if ($cur_zone != $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_UE))) {
                     $lines_errors = $this->removeLinesTvaTx();
                     if (count($lines_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');

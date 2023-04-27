@@ -3258,6 +3258,26 @@ class BimpController
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
+    
+    protected function ajaxProcessLoadChangeLog()
+    {
+        $html = '';
+        $dir = DOL_DOCUMENT_ROOT.'/bimpcore/changelogs/';
+        $files = scandir($dir, SCANDIR_SORT_DESCENDING);
+        foreach($files as $entry) {
+            if(is_file($dir.$entry)){
+                $html .= '<h3>'.basename($entry, '.txt').' : </h3>';
+                $html .= nl2br(file_get_contents($dir.$entry));
+            }
+        }
+
+        return array(
+            'errors'     => array(),
+            'warnings'   => array(),
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
 
     protected function ajaxProcessLoadAlertModal()
     {

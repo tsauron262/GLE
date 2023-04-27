@@ -3133,7 +3133,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $this->updateField('logistique_status', $new_status);
                     if ($new_status == 3) {
                         $idComm = $this->getIdCommercial();
-                        $mail = BimpTools::getMailOrSuperiorMail($idComm);
+                        $email = BimpTools::getUserEmailOrSuperiorEmail($idComm);
 
                         $infoClient = "";
                         $client = $this->getChildObject('client');
@@ -3141,9 +3141,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             $infoClient = " du client " . $client->getLink();
                         }
 
-
-                        if (isset($mail) && $mail != "")
-                            mailSyn2("Logistique commande OK", $mail, null, 'Bonjour la logistique de votre commande ' . $this->getLink() . $infoClient . ' est compléte ');
+                        if (!empty($email)) {
+                            mailSyn2("Logistique commande OK", $email, null, 'Bonjour la logistique de votre commande ' . $this->getLink() . $infoClient . ' est compléte ');
+                        }
                     }
                 }
             }
@@ -3283,7 +3283,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $this->updateField('invoice_status', $new_status);
 
                     $idComm = $this->getIdCommercial();
-                    $mail = BimpTools::getMailOrSuperiorMail($idComm);
+                    $mail = BimpTools::getUserEmailOrSuperiorEmail($idComm);
 
                     $infoClient = "";
                     $client = $this->getChildObject('client');
@@ -4339,10 +4339,9 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $init_entrepot = (int) $this->getInitData('entrepot');
 //        $this->setPaiementComptant(); // Eviter de créer des fonctions avec juste 1 ligne, les classes sont déjà bien assez surchargées en fonctions. 
         $this->set('paiement_comptant', $this->isPaiementComptant());
-        
+
         $this->dol_object->delivery_date = $this->getData('date_livraison');
         $errors = parent::update($warnings, $force_update);
-        
 
         if (!count($errors)) {
             if ($init_entrepot !== (int) $this->getData('entrepot')) {
@@ -4356,66 +4355,6 @@ class Bimp_Commande extends Bimp_CommandeTemp
     }
 
     // Méthodes statiques: 
-
-    public function sendDraftWhithMail()
-    {
-        $date = new DateTime();
-        $nbDay = 5;
-        $date->sub(new DateInterval('P' . $nbDay . 'D'));
-        $sql = $this->db->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "commande` WHERE `date_creation` < '" . $date->format('Y-m-d') . "' AND `fk_statut` = 0");
-
-        $commandes = array();
-
-        while ($ln = $this->db->db->fetch_object($sql)) {
-            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
-
-            $id_user = (int) $obj->getIdContact('internal', 'SALESREPSIGN');
-            if (!$id_user) {
-                $id_user = (int) $obj->getData('fk_user_author');
-            }
-
-            if (!isset($commandes[$id_user])) {
-                $commandes[$id_user] = array();
-            }
-
-            $commandes[$id_user][] = $obj->getLink();
-        }
-
-        $i = 0;
-        if (!empty($commandes)) {
-            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
-
-            foreach ($commandes as $id_user => $comm_links) {
-                $mail = BimpTools::getMailOrSuperiorMail($id_user, 'f.pineri@bimp.fr');
-                if ($mail == '') {
-                    $mail = "tommy@bimp.fr";
-                }
-
-                $this->output .= $mail . ' : ' . count($comm_links) . ' commande(s)<br/>';
-
-                $msg = 'Bonjour, vous avez laissé ' . count($comm_links) . ' commande' . (count($comm_links) > 1 ? 's' : '');
-                $msg .= ' à l\'état de brouillon depuis plus de ' . $nbDay . ' jour(s).<br/>';
-                $msg .= 'Merci de bien vouloir ' . (count($comm_links) > 1 ? 'les' : 'la') . ' régulariser au plus vite.<br/>';
-
-                foreach ($comm_links as $comm_link) {
-                    $msg .= '<br/>' . $comm_link;
-                    $this->output .= ' - ' . $comm_link . '<br/>';
-                }
-                
-                if (mailSyn2('Commande(s) brouillon à régulariser', $mail, null, $msg)) {
-                    $this->output .= '[OK]';
-                    $i++;
-                } else {
-                    $this->output .= '[ECHEC]';
-                }
-                $this->output .= '<br/><br/>';
-            }
-        }
-
-        $this->resprints = "OK " . $i . ' mail(s)';
-
-        return 0;
-    }
 
     public static function checkStatusAll()
     {
@@ -4434,42 +4373,180 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
     }
 
-    public function sendEmailNotBilled()
+    public static function sendRappels()
     {
-        $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND total_ht != 0 AND (date_prevue_facturation < now() OR date_prevue_facturation IS NULL) AND (date_valid <= "' . date("Y-m-d", strtotime("-1 month")) . '") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
+        $out = '';
 
-        $err = $ok = $mailDef = 0;
-        if (!is_null($rows)) {
-            foreach ($rows as $r) {
-                $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
-                $soc = BimpObject::getInstance('bimpcore', 'Bimp_Societe', (int) $comm->getData('fk_soc'));
+        // Rappels quotidiens: 
+        $result = static::sendRappelCommandesBrouillons();
+        if ($result) {
+            $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels commandes brouillons -----------<br/><br/>' . $result;
+        }
 
-                $idComm = $comm->getIdCommercial();
-                if ($idComm == 0)
-                    $idComm = $comm->getIdContact($type = 'internal', $code = 'SALESREPSIGN');
-                $mail = BimpTools::getMailOrSuperiorMail($idComm, 'a.delauzun@bimp.fr');
-                if ($mail == 'a.delauzun@bimp.fr')
-                    $mailDef++;
-                if (mailSyn2("Commande " . $comm->getRef() . ' non facturée', $mail, '', 'Bonjour
-<br/>La commande ' . $comm->getLink() . ' du client ' . $soc->getLink() . ', créée le ' . $comm->getData('date_creation') . ' n\'est pas facturée
-<br/>Merci de la régulariser au plus vite.'))
-                    $ok++;
-                else
-                    $err++;
-                if ($err > 20 || $ok > 2100)
-                    break;
+        $result = static::checkLinesEcheances();
+        if ($result) {
+            $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels échéances commandes -----------<br/><br/>' . $result;
+        }
+
+        // Rappels Hebdomadaires: 
+        if ((int) date('N') == 7) {
+            $result = static::sendRappelsNotBilled();
+            if ($result) {
+                $out .= ($out ? '<br/><br/>' : '') . '------- Rappels commandes non facturées------<br/><br/>' . $result;
             }
         }
-        $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
-        return 0;
+
+        return $out;
+    }
+
+    public static function sendRappelCommandesBrouillons()
+    {
+        $delay = (int) BimpCore::getConf('rappels_commandes_brouillons_delay', null, 'bimpcommercial');
+
+        if (!$delay) {
+            return '';
+        }
+
+        $return = '';
+        $date = new DateTime();
+        $date->sub(new DateInterval('P' . $delay . 'D'));
+
+        $bdb = BimpCache::getBdb();
+        $where = 'date_creation < \'' . $date->format('Y-m-d') . '\' AND fk_statut = 0';
+        $rows = $bdb->getRows('commande', $where, null, 'array', array('rowid'));
+
+        if (!empty($rows)) {
+            $commandes = array();
+
+            $id_default_user = (int) BimpCore::getConf('default_id_commercial', null);
+            foreach ($rows as $r) {
+                $commande = BimpCache::getBimpObjectInstance('bimpcommmercial', 'Bimp_Commande', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($commande)) {
+                    $id_user = $commande->getIdContact('internal', 'SALESREPSIGN');
+                    if (!$id_user) {
+                        $id_user = (int) $commande->getData('fk_user_author');
+                    }
+
+                    if (!$id_user) {
+                        $id_user = $id_default_user;
+                    }
+
+                    if (!isset($commandes[$id_user])) {
+                        $commandes[$id_user] = array();
+                    }
+
+                    $commandes[$id_user][] = $commande->getLink();
+                }
+            }
+        }
+
+        $i = 0;
+
+        if (!empty($commandes)) {
+            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
+
+            foreach ($commandes as $id_user => $user_commandes) {
+                $msg = 'Bonjour, vous avez laissé ';
+                if (count($user_commandes) > 1) {
+                    $msg .= count($user_commandes) . ' factures';
+                } else {
+                    $msg .= 'une facture';
+                }
+
+                $msg .= ' à l\'état de brouillon depuis plus de ' . $delay . ' jours.<br/>';
+                $msg .= 'Merci de bien vouloir ' . (count($user_commandes) > 1 ? 'les' : 'la') . ' régulariser au plus vite.<br/>';
+
+                foreach ($user_commandes as $link) {
+                    $msg .= '<br/>' . $link;
+                }
+
+                $mail = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
+
+                $return .= ' - Mail to ' . $mail . ' : ';
+                if (mailSyn2('Commande(s) brouillon à régulariser', BimpTools::cleanEmailsStr($mail), null, $msg)) {
+                    $return .= ' [OK]';
+                    $i++;
+                } else {
+                    $return .= ' [ECHEC]';
+                }
+                $return .= '<br/>';
+            }
+        }
+
+        return "OK " . $i . ' mail(s)<br/><br/>' . $return;
+    }
+
+    public static function sendRappelsNotBilled()
+    {
+        $out = '';
+        $nFails = $nOk = 0;
+
+        $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND total_ht != 0 AND (date_prevue_facturation < now() OR date_prevue_facturation IS NULL) AND (date_valid <= "' . date("Y-m-d", strtotime("-1 month")) . '") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
+
+        if (!is_null($rows)) {
+            $commandes = array();
+            foreach ($rows as $r) {
+                $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
+                $idComm = (int) $comm->getIdCommercial();
+
+                if (!$idComm) {
+                    $idComm = $comm->getIdContact('internal', 'SALESREPSIGN');
+                }
+
+                if (!isset($commandes[$idComm])) {
+                    $commandes[$idComm] = array();
+                }
+
+                $commandes[$idComm][] = $comm->getLink();
+            }
+
+            if (!empty($commandes)) {
+                foreach ($commandes as $id_user => $commande) {
+                    $to = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
+
+                    if ($to) {
+                        $soc = $commande->getChildObject('client');
+
+                        $msg = 'Bonjour,<br/>';
+                        $msg .= 'La commande ' . $commande->getLink() . ' du client ' . $soc->getLink() . ', créée le ' . $commande->displayData('date_creation', 'default', 0, 1) . ' n\'est pas facturée.<br/>';
+                        $msg .= 'Merci de la régulariser au plus vite.';
+
+                        $out .= ' - Mail to ' . $to . ' : ';
+                        if (mailSyn2("Commande " . $commande->getRef() . ' non facturée', $to, '', $msg)) {
+                            $out .= '[OK]';
+                            $nOk++;
+                        } else {
+                            $out .= '[ECHEC]';
+                            $nFails++;
+                        }
+                        $out .= '<br/>';
+
+                        if ($nFails > 20 || $nOk > 2100) {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                return 'Aucune commande à régulariser';
+            }
+        }
+
+        return $nOk . ' envoi(s) OK - ' . ($nFails ? ' - ' . $nFails . ' échecs' : '') . '<br/><br/>' . $out;
     }
 
     public static function checkLinesEcheances()
     {
+        $delay = (int) BimpCore::getConf('rappels_commandes_echeances_delay', null, 'bimpcommercial');
+
+        if (!$delay) {
+            return '';
+        }
+
         $bdb = self::getBdb(true);
 
         $dt = new DateTime();
-        $dt->add(new DateInterval('P30D'));
+        $dt->add(new DateInterval('P' . $delay . 'D'));
         $dt_str = $dt->format('Y-m-d');
 
         $fields = array('bl.id as id_line', 'c.rowid as id_commande', 'a.date_end');
@@ -4510,12 +4587,18 @@ class Bimp_Commande extends Bimp_CommandeTemp
         if (is_array($rows)) {
             // Trie par commerciaux et commandes: 
             $data = array();
+            $commercial_params = array(
+                'check_active'    => true,
+                'allow_superior'  => true,
+                'allow_default'   => true,
+                'id_default_user' => (int) BimpCore::getConf('id_user_mail_comm_line_expire', (int) BimpCore::getConf('default_id_commercial', null), 'bimpcommercial')
+            );
             foreach ($rows as $r) {
                 if ((int) $r['id_commande']) {
                     $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $r['id_commande']);
 
                     if (BimpObject::objectLoaded($commande)) {
-                        $id_commercial = $commande->getCommercialId();
+                        $id_commercial = $commande->getCommercialId($commercial_params);
 
                         if ($id_commercial) {
                             if (!isset($data[$id_commercial])) {
@@ -4531,6 +4614,14 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
                 }
             }
+
+            if (empty($data)) {
+                return 'Aucune échéance à notifier';
+            }
+
+            $return = 'Données : <pre>';
+            $return .= print_r($data, 1);
+            $return .= '</pre><br/><br/>';
 
             // Envoi des e-mails:
             foreach ($data as $id_commercial => $commandes) {
@@ -4598,18 +4689,25 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         }
 
                         $msg = 'Bonjour,<br/><br/>';
-                        $msg .= 'Il y a <b>' . $nProds . '</b> produit(s) vendu(s) à durée limitée qui arrivent à échéance dans 30 jours ou moins.<br/>';
+                        $msg .= 'Il y a <b>' . $nProds . '</b> produit(s) vendu(s) à durée limitée qui arrivent à échéance dans ' . $delay . ' jours ou moins.<br/>';
                         $msg .= 'Note: vous ne recevrez pas d\'autre alerte pour les produits listés ci-dessous.<br/><br/>';
                         $msg .= $html;
 
+                        $return .= 'Mail to ' . ($email) . ' (' . $nProds . ' produit(s)) => ';
                         if (mailSyn2($subject, $email, '', $msg)) {
+                            $return .= '[OK]';
                             $bdb->update('bimp_commande_line', array(
                                 'echeance_notif_send' => 1
                                     ), 'id IN (' . implode(',', $lines_done) . ')');
+                        } else {
+                            $return .= '[ECHEC]';
                         }
+                        $return .= '<br/>';
                     }
                 }
             }
         }
+
+        return $return;
     }
 }

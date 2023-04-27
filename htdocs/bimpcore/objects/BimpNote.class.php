@@ -899,7 +899,7 @@ class BimpNote extends BimpObject
     {
         $listUser = BimpObject::getBimpObjectList('bimpcore', 'Bimp_User', array('statut' => 1));
 
-        global $db, $langs;
+        global $db;
         $userT = new User($db);
 //        $listUser = array(242);
         foreach ($listUser as $idUser) {

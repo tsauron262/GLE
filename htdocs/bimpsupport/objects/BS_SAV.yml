@@ -141,6 +141,16 @@ objects:
             id_object: 
                 field_value: id_signature_resti
                 
+    signature_destruct: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_destruct
+                
     sac: 
         relation: hasMany
         delete: 0
@@ -500,6 +510,10 @@ fields:
     signature_resti_params: 
         label: Paramètres signature restitution
         type: json
+    id_signature_destruct: 
+        label: Signature bon destruction
+        type: id_object
+        object: signature_destruct
     sacs:
         label: Sac d'emballage
         type: items_list
@@ -547,6 +561,10 @@ fields:
     name_reseller:
         label: Nom du revendeur
         type: string
+    alert_unrestitute: 
+        label: Alerte de non restitution envoyée au client
+        type: bool
+        default_value: 0
         
 forms: 
     default:
@@ -1291,6 +1309,7 @@ fields_tables:
               show: 
                   callback: isGratuit
             - field: name_reseller
+            - field: alert_unrestitute
                  
     facturation:
         title: Facturation
@@ -1422,6 +1441,10 @@ fields_tables:
               display: card
               show: 
                   field_value: id_signature_resti
+            - field: id_signature_destruct
+              display: card
+              show: 
+                  field_value: id_signature_destruct
               
 views: 
     default: 
@@ -1708,6 +1731,8 @@ signatures:
         label: Bon de restitution SAV
     sav_facture: 
         label: Facture SAV
+    sav_destruct: 
+        label: Bon de destruction SAV
         
 pages: 
     default: 

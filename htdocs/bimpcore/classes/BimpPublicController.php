@@ -68,14 +68,14 @@ class BimpPublicController extends BimpController
                 if (BimpTools::isSubmit('ajax')) {
                     die(json_encode(Array("request_id" => $_REQUEST['request_id'], 'nologged' => 1)));
                 } elseif ($this->login_file) {
-// Chargement du formulaire de connexion: 
+                    // Chargement du formulaire de connexion: 
                     $this->displayLoginForm();
                 } else {
                     accessforbidden();
                     exit;
                 }
             } elseif ($this->new_pw_file && ((int) BimpTools::getPostFieldValue('bic_change_pw', 0) || (int) $userClient->getData('renew_required'))) {
-// Formulaire changement de MDP: 
+                // Formulaire changement de MDP: 
                 $this->displayChangePwForm(array(), (int) $userClient->getData('renew_required'));
                 exit;
             }
@@ -92,7 +92,7 @@ class BimpPublicController extends BimpController
 
         if (isset($_SESSION['userClient']) && (string) $_SESSION['userClient']) {
             if (!BimpObject::objectLoaded($userClient)) {
-// Vérif user client session:
+                // Vérif user client session:
                 $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                             'email' => $_SESSION['userClient']
                 ));
@@ -106,7 +106,7 @@ class BimpPublicController extends BimpController
         }
 
         if (!static::$user_client_required || BimpObject::objectLoaded($userClient)) {
-// Si connexion ok: 
+            // Si connexion ok: 
             global $user, $langs, $db;
             if (BimpObject::objectLoaded($userClient)) {
                 $langs->setDefaultLang(BIC_UserClient::$langs_list[$userClient->getData('lang')]);
@@ -143,13 +143,13 @@ class BimpPublicController extends BimpController
         return BimpObject::getPublicBaseUrl() . 'bic_logout=1';
     }
 
-// Affichage standards: 
+    // Affichage standards: 
 
     public function displayHeader()
     {
         global $hookmanager;
 
-// Création et initialisation du BimpLayout: 
+        // Création et initialisation du BimpLayout: 
         $layout = BimpLayout::getInstance();
         $layout->page_title = $this->getPageTitle();
 
@@ -177,7 +177,7 @@ class BimpPublicController extends BimpController
         parent::display();
     }
 
-// Affichages forms publics: 
+    // Affichages forms publics: 
 
     public function displayPublicForm($form_name, $params = array(), $form_errors = array())
     {
@@ -307,7 +307,7 @@ class BimpPublicController extends BimpController
                 ), $errors);
     }
 
-// Rendus HTML: 
+    // Rendus HTML: 
 
     public function renderLoginFormInputsHtml()
     {
@@ -367,7 +367,7 @@ class BimpPublicController extends BimpController
         return $html;
     }
 
-// Traitements forms publics: 
+    // Traitements forms publics: 
 
     public function processPublicForm()
     {

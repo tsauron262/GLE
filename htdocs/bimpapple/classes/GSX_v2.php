@@ -174,7 +174,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $this->displayDebug('Tentative d\'authentification (token ' . $this->acti_token . ') : ');
-        static::debug($this->appleId, 'Tentative d\'authentification (token ' . $this->acti_token . ') : ');
+//        static::debug($this->appleId, 'Tentative d\'authentification (token ' . $this->acti_token . ') : ');
 
         $result = $this->exec('authenticate', array(
             'userAppleId' => $this->appleId,
@@ -291,7 +291,6 @@ class GSX_v2 extends GSX_Const
                 break;
 
             case 'auth':
-//                $this->saveToken('acti', $token);
                 $this->auth_token = $token;
                 $field = 'gsx_auth_token';
                 break;
@@ -376,7 +375,6 @@ class GSX_v2 extends GSX_Const
         $headers = array(
             'Accept: application/json' . (in_array($request_name, self::$fileContentRequests) ? ',application/octet-stream' : ''),
             'Content-Type: application/json',
-//            'Accept-Language: fr_FR', // OLD
             'X-Apple-Client-Locale: fr-FR',
             'X-Apple-SoldTo: ' . $this->soldTo,
             'X-Apple-ShipTo: ' . $this->shipTo

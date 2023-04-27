@@ -111,6 +111,9 @@ fields:
     fonction: 
         label: Fonction signataire
         
+    ville: 
+        label: Signé à (lieu)
+        
     date_open: 
         label: Date ouverture accès public
         type: date
@@ -286,6 +289,14 @@ forms:
               show: 
                   callback: isFonctionRequired
             - custom: 1
+              label: Fait à
+              input_name: ville
+              required: 1
+              input: 
+                  type: text
+              show: 
+                  callback: isVilleRequired
+            - custom: 1
               label: Signature
               input_name: signature
               input: 
@@ -333,10 +344,20 @@ forms:
               show: 
                   callback: isClientCompany
             - custom: 1
+              label: Fait à
+              input_name: ville
+              required: 1
+              input: 
+                  type: text
+              show: 
+                  callback: isVilleRequired
+            - custom: 1
               label: Signature
               input_name: signature
               input: 
                   type: signature_pad
+                  check_mentions: 
+                      callback: getCheckMentions
               required: 1
                   
     signature_params: 
@@ -435,6 +456,7 @@ fields_tables:
             - field: nom
             - field: email
             - field: fonction
+            - field: ville
             - field: ip_signataire
               show: 
                   callback: isSigned

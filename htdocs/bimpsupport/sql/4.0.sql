@@ -1,0 +1,1 @@
+ALTER TABLE llx_bs_sav ADD alert_unrestitute tinyint (1) NOT NULL DEFAULT 0;

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_signature_signataire` ADD `ville` VARCHAR(255) NOT NULL DEFAULT '';

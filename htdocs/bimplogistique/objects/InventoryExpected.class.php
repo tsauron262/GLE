@@ -111,9 +111,9 @@ class InventoryExpected extends BimpObject
 
             $eq = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
 
-            global $modeCsv;
+            global $modeCSV;
 
-            if (!$modeCsv)
+            if (!$modeCSV)
                 $label = $eq->getNomUrl();
             else
                 $label = $eq->getData('serial');
@@ -238,8 +238,10 @@ class InventoryExpected extends BimpObject
 
     public function renderValorisation()
     {
-
-        $diff = $this->getData('qty') - $this->getData('qty_scanned');
+        if($this->getData('qty') > 0)
+            $diff = $this->getData('qty') - $this->getData('qty_scanned');
+        else
+            $diff = - $this->getData('qty_scanned');
         $id_prod = $this->getData('id_product');
         $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
         $pa = $prod->getCurrentPaHt();
@@ -263,7 +265,12 @@ class InventoryExpected extends BimpObject
             }
         }
 
-        return price($valorisation);
+        
+        global $modeCSV;
+        if (!$modeCSV)
+            return price($valorisation);
+        else
+            return str_replace ('.', ',', $valorisation);
     }
 
     public function containEquipment($id_equipment)

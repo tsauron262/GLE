@@ -61,7 +61,7 @@ fields:
         label: Statut
         values: 
             array: status_list
-        field: statut
+        default_value: 1
     admin: 
         label: Administrateur
         type: bool

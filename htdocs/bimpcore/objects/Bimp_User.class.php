@@ -298,6 +298,32 @@ class Bimp_User extends BimpObject
         $params = $this->getUserParams();
         return BimpTools::getArrayValueFromPath($params, $param_name, $default_value);
     }
+    
+    public function getEmailOrSuperiorEmail($allow_default = true)
+    {
+        $email = '';
+        
+        if ((int) $this->getData('statut')) {
+        $email = $this->getData('email');    
+        }
+        
+        if (!$email) {
+            $id_superior = (int) $this->getData('fk_user');
+            
+            if ($id_superior) {
+                $superior = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_superior);
+                if (BimpObject::objectLoaded($superior) && (int) $superior->getData('statut')) {
+                    $email = $superior->getData('email');
+                }
+            }
+        }
+        
+        if (!$email && $allow_default) {
+            $email = BimpCore::getConf('default_user_email', null);
+        }
+        
+        return $email;
+    }
 
     // Getters Statics: 
 

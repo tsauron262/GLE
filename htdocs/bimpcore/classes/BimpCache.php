@@ -1840,7 +1840,7 @@ class BimpCache
         if (!(int) $id_societe) {
             return ($include_empty ? array(0 => '') : array());
         }
-        
+
         $key = 'societe_' . $id_societe . '_ribs_array';
 
         if (!isset(self::$cache[$key])) {
@@ -1931,14 +1931,16 @@ class BimpCache
 
     // User: 
 
-    public static function getUsersArray($include_empty = 0, $empty_label = '')
+    public static function getUsersArray($include_empty = 0, $empty_label = '', $active_only = null)
     {
         global $conf, $langs;
 
-        if (!empty($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX)) {
-            $active_only = true;
-        } else {
-            $active_only = false;
+        if (is_null($active_only)) {
+            if (!empty($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX)) {
+                $active_only = true;
+            } else {
+                $active_only = false;
+            }
         }
 
         $cache_key = 'users';
@@ -3161,6 +3163,7 @@ class BimpCache
             35   => "WatchOs",
             37   => "Windows",
             39   => "Produit non concerné par un système",
+            1300 => "MAC OS 13 (Ventura)",
             1200 => "MAC OS 12 (Monterey)",
             1120 => "MAC OS 11.2 (Big Sur)",
             1015 => "MAC OS 10.15 (Catalina)",

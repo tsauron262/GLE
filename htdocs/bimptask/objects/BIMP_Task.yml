@@ -185,9 +185,6 @@ fields_tables:
             - label: Notifier
               value: 
                   callback: displayUserNotif
-            - label: Images liées
-              value: 
-                  callback: renderImages
         
 forms:
     default: 
@@ -429,7 +426,14 @@ views:
                     col_sm: 12
                     custom: 
                         callback: renderLogsList
-          
+            images: 
+                cols: 
+                    - type: custom
+                      custom: 
+                          callback: 
+                              method: renderImages
+                              params: 
+                                  - 1
             sous_taches: 
                 cols:
                   - type: custom

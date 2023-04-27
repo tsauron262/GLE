@@ -356,6 +356,8 @@ forms:
               input_name: signature
               input: 
                   type: signature_pad
+                  check_mentions: 
+                      callback: getCheckMentions
               required: 1
                   
     signature_params: 

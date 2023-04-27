@@ -409,8 +409,8 @@ class BimpSignature extends BimpObject
     public static function getDefaultSignDistEmailContent($type = 'elec')
     {
         $message = 'Bonjour, <br/><br/>';
-//        $message .= 'La signature du document "{NOM_DOCUMENT}" pour {NOM_PIECE} {REF_PIECE}  est en attente.<br/><br/>';
-        $message .= '{NOM_PIECE} {REF_PIECE} est en attente de validation.<br/><br/>';
+        $message .= 'La signature du document "{NOM_DOCUMENT}" pour {NOM_PIECE} {REF_PIECE}  est en attente.<br/><br/>';
+//        $message .= '{NOM_PIECE} {REF_PIECE} est en attente de validation.<br/><br/>';
 
         switch ($type) {
             case 'docusign':
@@ -807,7 +807,7 @@ class BimpSignature extends BimpObject
                     $file_name = $obj->getSignatureDocFileName($doc_type, $signed);
 
                     if ($signed) {
-                        $file_ext = $this->getData('signed_doc_ext');
+                        $file_ext = strtolower($this->getData('signed_doc_ext'));
 
                         if ($file_ext && $file_ext !== 'pdf') {
                             $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
@@ -834,7 +834,7 @@ class BimpSignature extends BimpObject
                 if (method_exists($obj, 'getSignatureDocFileUrl')) {
                     $ext = 'pdf';
                     if ($signed && $this->getData('signed_doc_ext')) {
-                        $ext = $this->getData('signed_doc_ext');
+                        $ext = strtolower($this->getData('signed_doc_ext'));
                     }
                     return $obj->getSignatureDocFileUrl($doc_type, $forced_context, $signed);
                 }
@@ -1122,7 +1122,7 @@ class BimpSignature extends BimpObject
     public function renderHeaderExtraLeft()
     {
         $html = '';
-
+        
         if ($this->isLoaded() && !$this->isSigned()) {
             $warning = $this->displayNoPublicAccessWarnings();
 
@@ -1181,7 +1181,7 @@ class BimpSignature extends BimpObject
 
             $html .= '</div>';
         }
-
+        
         return $html;
     }
 
@@ -2012,7 +2012,7 @@ class BimpSignature extends BimpObject
 
                             $file_ext = pathinfo($_FILES['file_signed']['name'], PATHINFO_EXTENSION);
                             $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
-                            $this->set('signed_doc_ext', $file_ext);
+                            $this->set('signed_doc_ext', strtolower($file_ext));
 
                             $_FILES['file_signed']['name'] = $file_name;
 

@@ -4092,7 +4092,7 @@ class Bimp_Facture extends BimpComm
             )
         );
 
-        return $this->renderImages($filters);
+        return $this->renderImages(false, $filters);
     }
 
     // Traitements:

@@ -1213,7 +1213,7 @@ class BimpObject extends BimpCache
                 ))
             );
         }
-        
+
         return array();
     }
 
@@ -8218,7 +8218,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $html;
     }
 
-    public function renderImages($filters = null)
+    public function renderImages($full_panel = false, $filters = null)
     {
         $html = '';
 
@@ -8231,8 +8231,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             'in' => array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif')
                         )
             ));
-        } else
+        } else {
             $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', $filters);
+        }
 
 
         if (!empty($files)) {
@@ -8255,6 +8256,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</div>';
         }
 
+        if ($full_panel) {
+            $title = BimpRender::renderIcon('fas_file-image', 'iconLeft') . 'Images liées';
+            return BimpRender::renderPanel($title, $html, '', array(
+                        'type' => 'secondary'
+            ));
+        }
         return $html;
     }
 

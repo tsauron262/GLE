@@ -3,6 +3,7 @@ fields:
     date_fin_spare:
         label: Date de fin de spare
         type: date
+        null_allowed: 1
         show:
             callback: as_client_spare_or_date
         

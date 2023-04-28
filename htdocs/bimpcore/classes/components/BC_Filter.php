@@ -634,13 +634,13 @@ class BC_Filter extends BimpComponent
                             }
                         }
                     }
-                    
-                    if(count($excluded_values) > 0){
+
+                    if (count($excluded_values) > 0 && empty($values)) {
                         $or_field[] = array('and' => $and_field);
                         $or_field[] = 'IS_NULL';
                         $and_field = array();
                     }
-                    
+
                     break;
 
                 case 'value_part':

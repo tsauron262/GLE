@@ -1193,7 +1193,7 @@ class DoliDBMysqliC extends DoliDB
 
                $extra_data['Requête'] = '<br/><br/>' . BimpRender::renderSql($query).'<br/><br/>';
 
-               BimpCore::addlog('ERREUR SQL', Bimp_Log::BIMP_LOG_ERREUR, $classLog, null, $extra_data);   
+               BimpCore::addlog('ERREUR SQL - ' . $this->lasterror, Bimp_Log::BIMP_LOG_ERREUR, $classLog, null, $extra_data);   
             }
         }else{
             dol_syslog ('Erreur sql BimpCore non loadé', LOG_ERR);

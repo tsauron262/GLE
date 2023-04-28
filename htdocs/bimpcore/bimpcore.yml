@@ -15,7 +15,7 @@ categories:
         label: Signatures
     groups: 
         label: Groupes
-    logs: 
+    bimplogs: 
         label: Logs
         
         
@@ -274,14 +274,14 @@ params:
         label: Afficher directement les logs Bimp
         type: bool
         def: 0
-        cat: logs
+        cat: bimplogs
         warning: Activer uniquement sur les versions de dev
         
     use_bimp_logs: 
         label: Activer les logs Bimp
         type: bool
         def: 1
-        cat: logs
+        cat: bimplogs
         sub_params: 
             - if: 1
               params: 

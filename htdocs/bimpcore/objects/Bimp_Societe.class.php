@@ -1985,7 +1985,7 @@ class Bimp_Societe extends BimpDolObject
 
         if (isset($this->debug)) {
             if (is_array($this->debug)) {
-                return implode($this->debug, '<br/><br/>');
+                return implode('<br/><br/>', $this->debug);
             } elseif ((string) $this->debug) {
                 return $this->debug;
             }

@@ -1167,7 +1167,15 @@ class DoliDBMysqliC extends DoliDB
         dol_syslog($msg, LOG_ERR);
         
         if (class_exists('BimpCore')) {
-            if (!in_array($this->lasterrno, array('DB_ERROR_1205'))) {
+            $log = true;
+            if (in_array($this->lasterrno, array('DB_ERROR_1205'))) {
+                $log = false;
+            } elseif ($classLog == 'deadLock' && !(int) BimpCore::getConf('log_sql_dealocks')) {
+                $log = false;
+            } elseif ($classLog == 'sql_duplicate' && !(int) BimpCore::getConf('log_sql_duplicate')) {
+                $log = false;
+            }
+            if ($log) {
                 $extra_data = array(
                    'Code erreur' => $this->lasterrno,
                    'Erreur SQL' => $this->lasterror,

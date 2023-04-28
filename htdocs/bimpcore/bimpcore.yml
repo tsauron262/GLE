@@ -15,6 +15,8 @@ categories:
         label: Signatures
     groups: 
         label: Groupes
+    logs: 
+        label: Logs
         
         
 params: 
@@ -37,26 +39,6 @@ params:
             1: Code SMS écran
             2: Normal
         def: 0
-    use_bimp_logs: 
-        label: Activer les logs Bimp
-        type: bool
-        def: 1
-        sub_params: 
-            - if: 1
-              params: 
-                  bimp_log_urgent_send_email: 
-                      label: Envoyer un e-mail aux devs pour chaque nouveau log urgent
-                      type: bool
-                      def: 1
-                  log_actions_rollbacks: 
-                      label: Logguer les rollbacks des actions des BimpObject
-                      type: bool
-                      def: 0
-    print_bimp_logs: 
-        label: Afficher directement les logs Bimp
-        type: bool
-        def: 0
-        warning: Activer uniquement sur les versions de dev
     use_bimp_object_instances_clones: 
         label: cloner les instances de base des BimpObject
         type: bool
@@ -286,3 +268,36 @@ params:
         label: ID Groupe Atradius
         cat: groups
         def: 0
+        
+    # Logs: 
+    print_bimp_logs: 
+        label: Afficher directement les logs Bimp
+        type: bool
+        def: 0
+        cat: logs
+        warning: Activer uniquement sur les versions de dev
+        
+    use_bimp_logs: 
+        label: Activer les logs Bimp
+        type: bool
+        def: 1
+        cat: logs
+        sub_params: 
+            - if: 1
+              params: 
+                  bimp_log_urgent_send_email: 
+                      label: Envoyer un e-mail aux devs pour chaque nouveau log urgent
+                      type: bool
+                      def: 1
+                  log_actions_rollbacks: 
+                      label: Logguer les rollbacks des actions des BimpObject
+                      type: bool
+                      def: 0
+                  log_sql_dealocks: 
+                      label: Logguer les Dead Locks SQL
+                      type: bool
+                      def: 0
+                  log_sql_duplicate: 
+                      label: Logguer les doublons SQL
+                      type: bool
+                      def: 0

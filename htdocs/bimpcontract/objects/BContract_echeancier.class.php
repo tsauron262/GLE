@@ -652,6 +652,10 @@ class BContract_echeancier extends BimpObject
                 $displayAppatenance = "<strong>Information à venir</strong>";
                 break;
         }
+        
+        $parent = $this->getParentInstance();
+        $dateFin = new DateTime($parent->getData('date_start'));
+        $dateFin->sub(new DateInterval('P1D'));
 
         if ($data->factures_send) {
             $current_number_facture = 1;
@@ -730,16 +734,12 @@ class BContract_echeancier extends BimpObject
                 }
             }
         }
-        
-//        if ($this->getData('next_facture_date') < "2000-01-01" || (isset($dateFin) && $this->getData('next_facture_date') < $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'))){
-//            $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
-//        }
-//        
-//        if ($this->getData('next_facture_date') == 0 && (intval($parent->getTotalContrat()) - intval($parent->getTotalDejaPayer())) > 0) {
-//            $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
-//            die('Echéancier corrigé, rafraichir la page');
-//        }
-        
+        if ($dateFin && $this->getData('next_facture_date') < "2000-01-01" || (isset($dateFin) && $this->getData('next_facture_date') < $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00')))
+            $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+        if ($dateFin && $this->getData('next_facture_date') == 0 && (intval($parent->getTotalContrat()) - intval($parent->getTotalDejaPayer())) > 0) {
+            $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+            die('Echéancier corrigé, rafraichir la page');
+        }
         if ($this->getData('next_facture_date') != 0) {
             $startedDate = new DateTime($this->getData('next_facture_date'));
             $enderDate = new DateTime($this->getData('next_facture_date'));
@@ -1341,7 +1341,9 @@ class BContract_echeancier extends BimpObject
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
             $facture->set('fk_soc', ($contrat->getData('fk_soc_facturation')) ? $contrat->getData('fk_soc_facturation') : $contrat->getData('fk_soc'));
 
-            $bill_label = ($label ? $label . ' ' : '') . "Facture " . $contrat->displayPeriode();
+            $bill_label = ($label ? $label . ' ' : '') . "Facture";
+            if($contrat->getData('periodicity') != $contrat::CONTRAT_PERIOD_TOTAL)
+                 $bill_label .= " ". $contrat->displayPeriode();
             $bill_label .= " du contrat N°" . $contrat->getData('ref');
             $bill_label .= ' - ' . $contrat->getData('label');
 

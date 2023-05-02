@@ -1337,7 +1337,9 @@ class BContract_echeancier extends BimpObject
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
             $facture->set('fk_soc', ($contrat->getData('fk_soc_facturation')) ? $contrat->getData('fk_soc_facturation') : $contrat->getData('fk_soc'));
 
-            $bill_label = ($label ? $label . ' ' : '') . "Facture " . $contrat->displayPeriode();
+            $bill_label = ($label ? $label . ' ' : '') . "Facture";
+            if($contrat->getData('periodicity') != $contrat::CONTRAT_PERIOD_TOTAL)
+                 $bill_label .= " ". $contrat->displayPeriode();
             $bill_label .= " du contrat N°" . $contrat->getData('ref');
             $bill_label .= ' - ' . $contrat->getData('label');
 

@@ -82,7 +82,7 @@ class InternalStock extends PartStock
             );
 
             $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            
+
             // Checks: 
             $i = 0;
             foreach ($lines as $line) {
@@ -119,7 +119,7 @@ class InternalStock extends PartStock
                     if ($eee == '0') {
                         $eee = '';
                     }
-                    
+
                     $stock = static::getStockInstance($code_centre, $part_number);
 
                     if (BimpObject::objectLoaded($stock)) {
@@ -164,7 +164,7 @@ class InternalStock extends PartStock
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $i);
                     }
-                    
+
                     if (count($line_warnings)) {
                         $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n° ' . $i);
                     }
@@ -186,5 +186,37 @@ class InternalStock extends PartStock
                     'code_centre' => $code_centre,
                     'part_number' => $part_number
                         ), true);
+    }
+
+    public static function getInternalStockQtyUsed($id_stock)
+    {
+        if ((int) $id_stock) {
+            $sql = 'SELECT SUM(pdet.qty) as qty_used';
+            $sql .= BimpTools::getSqlFrom('propaldet', array(
+                        'bl' => array(
+                            'table' => 'bs_sav_propal_line',
+                            'on'    => 'bl.id_line = pdet.rowid'
+                        ),
+                        's'  => array(
+                            'table' => 'bs_sav',
+                            'on'    => 's.id_propal = pdet.fk_propal'
+                        )
+                            ), 'pdet');
+            $sql .= BimpTools::getSqlWhere(array(
+                        'bl.linked_object_name' => 'internal_stock',
+                        'bl.linked_id_object'   => $id_stock,
+                        's.status'              => array(
+                            'operator' => '<',
+                            'value'    => 999
+                        )
+                            ), 'pdet');
+            
+            $result = self::getBdb()->executeS($sql, 'array');
+            
+            if (isset($result[0]['qty_used'])) {
+                return (int) $result[0]['qty_used'];
+            }
+        }
+        return 0;
     }
 }

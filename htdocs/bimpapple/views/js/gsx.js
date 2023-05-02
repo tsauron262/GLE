@@ -385,15 +385,12 @@ function gsx_saveAppleParts($button, id_issue, modal_idx) {
     var $container = bimpModal.$contents.find('#modal_content_' + modal_idx);
 
     if ($.isOk($container)) {
-        var $inputs = $container.find('input[name="parts[]"]:checked');
 
-        if (!$inputs.length) {
-            bimp_msg('Aucun composant sélectionné', 'warning', null, true);
-            return;
-        }
 
         var parts = [];
+        var internal_stock_parts = [];
 
+        var $inputs = $container.find('input[name="parts[]"]:checked');
         $inputs.each(function () {
             var $row = $(this).findParentByClass('partRow');
             var exchange_price = $row.data('exchange_price');
@@ -413,13 +410,19 @@ function gsx_saveAppleParts($button, id_issue, modal_idx) {
             }
         });
 
-        if (parts.length) {
+        $inputs = $container.find('input[name="internal_parts[]"]:checked');
+        $inputs.each(function () {
+            internal_stock_parts.push($(this).val());
+        });
+
+        if (parts.length || internal_stock_parts.length) {
             setObjectAction($button, {
                 module: 'bimpsupport',
                 object_name: 'BS_Issue',
                 id_object: id_issue
             }, 'addParts', {
-                parts: parts
+                parts: parts,
+                internal_parts: internal_stock_parts
             }, null, function () {
                 bimpModal.removeContent(modal_idx);
             });

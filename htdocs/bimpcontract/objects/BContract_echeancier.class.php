@@ -652,6 +652,10 @@ class BContract_echeancier extends BimpObject
                 $displayAppatenance = "<strong>Information à venir</strong>";
                 break;
         }
+        
+        $parent = $this->getParentInstance();
+        $dateFin = new DateTime($parent->getData('date_start'));
+        $dateFin->sub(new DateInterval('P1D'));
 
         if ($data->factures_send) {
             $current_number_facture = 1;

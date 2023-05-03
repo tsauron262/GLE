@@ -376,8 +376,6 @@ class BT_ficheInter extends BimpDolObject
         return $actions;
     }
 
-    // Fonction de BIMPCOMM
-
     public function getActionsButtons()
     {
         global $user;
@@ -740,6 +738,39 @@ class BT_ficheInter extends BimpDolObject
     public function getLinesForBilling()
     {
         return $this->tmp_facturable;
+    }
+    
+    public function getSignatureContactCreateFormValues()
+    {
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $fields = array(
+                'fk_soc' => $client->getData('id'),
+                'email'  => $client->getData('email'),
+            );
+
+            if (!$client->isCompany()) {
+                $fields['address'] = $client->getData('address');
+                $fields['zip'] = $client->getData('zip');
+                $fields['town'] = $client->getData('town');
+                $fields['fk_pays'] = $client->getData('fk_pays');
+                $fields['fk_departement'] = $client->getData('fk_departement');
+            }
+
+            return array(
+                'fields' => $fields
+            );
+        }
+        
+        return array();
+    }
+    
+    public function getEventId()
+    {
+        $where = 'code <> \'AC_FICHINTER_VALIDATE\' AND fk_element = ' . $this->id . ' AND elementtype = \'fichinter\'';
+
+        return $this->db->getValue('actioncomm', 'id', $where);
     }
 
     // Getters array: 
@@ -1827,6 +1858,44 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Traitements: 
+    
+    public function duplicate($new_data)
+    {
+        global $user;
+        
+        $fieldsNonClone = array('signed', 'type_signature', 'old_status', 'fk_facture', 'no_finish_reason', 'client_want_contact', 'public_signature_date_cloture', 'public_signature_date_delivrance', 'public_signature_url', 'public_signature_code', 'attente_client', 'date_signed', 'signataire', 'base_64_signature', 'fk_user_modif', 'fk_user_valid');
+
+        $new_object = clone $this;
+        $new_object->id = null;
+        $new_object->id = 0;
+
+        foreach ($new_data as $field => $value) {
+            $new_object->set($field, $value);
+        }
+
+        $new_object->set('id', 0);
+        $new_object->set('ref', '');
+        $new_object->set('fk_statut', 0);
+        $new_object->set('logs', '');
+
+        foreach ($fieldsNonClone as $fieldNC) {
+            $new_object->set($fieldNC, null);
+        }
+
+        $new_object->dol_object->user_author = $user->id;
+        $new_object->dol_object->user_valid = '';
+
+        $warnings = array();
+        $errors = $new_object->create($warnings);
+
+        $lines_errors = $new_object->createLinesFromOrigin($this, $new_object);
+        
+        if (count($lines_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la copie des lignes ' . $this->getLabel('of_the'));
+        }
+
+        return $errors;
+    }
 
     public function createFromContrat($contrat, $data)
     {
@@ -2390,56 +2459,6 @@ class BT_ficheInter extends BimpDolObject
         ];
     }
 
-    public function duplicate($new_data)
-    {
-        global $user;
-//        print_r($data);die;
-        $fieldsNonClone = array('signed', 'type_signature', 'old_status', 'fk_facture', 'no_finish_reason', 'client_want_contact', 'public_signature_date_cloture', 'public_signature_date_delivrance', 'public_signature_url', 'public_signature_code', 'attente_client', 'date_signed', 'signataire', 'base_64_signature', 'fk_user_modif', 'fk_user_valid');
-
-        $new_object = clone $this;
-        $new_object->id = null;
-        $new_object->id = 0;
-
-        foreach ($new_data as $field => $value) {
-            $new_object->set($field, $value);
-        }
-
-        $new_object->set('id', 0);
-        $new_object->set('ref', '');
-        $new_object->set('fk_statut', 0);
-        $new_object->set('logs', '');
-
-        foreach ($fieldsNonClone as $fieldNC) {
-            $new_object->set($fieldNC, null);
-        }
-
-        $new_object->dol_object->user_author = $user->id;
-        $new_object->dol_object->user_valid = '';
-
-        $errors = $new_object->create($warnings, $force_create);
-
-        $lines_errors = $new_object->createLinesFromOrigin($this, $new_object);
-//
-        if (count($lines_errors)) {
-            $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la copie des lignes ' . $this->getLabel('of_the'));
-        }
-
-        // Copie des remises globales: 
-//        if (static::$remise_globale_allowed) {
-//            $new_object->copyRemisesGlobalesFromOrigin($this, $errors, $params['inverse_qty']);
-//        }
-//
-//        if (is_object($hookmanager)) {
-//            $parameters = array('objFrom' => $this->dol_object, 'clonedObj' => $new_object->dol_object);
-//            $action = '';
-//            $hookmanager->executeHooks('createFrom', $parameters, $new_object->dol_object, $action);
-//        }
-//        print_r($errors);
-//        die('ok');
-
-        return $errors;
-    }
-
     public function createLinesFromOrigin($origin, $newParent)
     {
         $errors = array();
@@ -2457,9 +2476,8 @@ class BT_ficheInter extends BimpDolObject
         $warnings = array();
         $i = 0;
 
-        // Création des lignes: 
-        $lines_new = array();
-
+        // Création des lignes:
+        
         foreach ($lines as $line) {
             $i++;
 
@@ -2978,32 +2996,6 @@ class BT_ficheInter extends BimpDolObject
 
         return $errors;
     }
-
-    public function getSignatureContactCreateFormValues()
-    {
-        $client = $this->getChildObject('client');
-
-        if (BimpObject::objectLoaded($client)) {
-            $fields = array(
-                'fk_soc' => $client->getData('id'),
-                'email'  => $client->getData('email'),
-            );
-
-            if (!$client->isCompany()) {
-                $fields['address'] = $client->getData('address');
-                $fields['zip'] = $client->getData('zip');
-                $fields['town'] = $client->getData('town');
-                $fields['fk_pays'] = $client->getData('fk_pays');
-                $fields['fk_departement'] = $client->getData('fk_departement');
-            }
-
-            return array(
-                'fields' => $fields
-            );
-        }
-        
-        return array();
-    }
     
     public function validate()
     {
@@ -3307,13 +3299,6 @@ class BT_ficheInter extends BimpDolObject
         }
 
         return $errors;
-    }
-
-    public function getEventId()
-    {
-        $where = 'code <> \'AC_FICHINTER_VALIDATE\' AND fk_element = ' . $this->id . ' AND elementtype = \'fichinter\'';
-
-        return $this->db->getValue('actioncomm', 'id', $where);
     }
 
     public function delete(&$warnings = [], $force_delete = false)

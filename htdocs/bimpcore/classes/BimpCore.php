@@ -1424,7 +1424,7 @@ class BimpCore
         if (BimpCore::isUserDev()) {
             $html .= '<div style="margin: 5px 0; text-align: center; color: #7F7F7F; font-size: 11px">----- OUTILS DEV ------</div>';
 
-            $onclick = "bimpModal.loadAjaxContent($(this), 'loadChangeLog', {type: 'dev'}, 'ChangeLog ERP', 'Chargement', function (result, bimpAjax) {});";
+            $onclick = "bimpModal.loadAjaxContent($(this), 'loadChangeLog', {type: 'dev'}, 'ChangeLog DEV', 'Chargement', function (result, bimpAjax) {});";
             $onclick .= 'bimpModal.show();';
             $html .= '<div>';
             $html .= '<span class="btn btn-light-default" onclick="' . $onclick . '">';

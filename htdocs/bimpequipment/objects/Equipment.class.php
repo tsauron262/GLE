@@ -62,19 +62,6 @@ class Equipment extends BimpObject
         return (int) ($user->admin || $user->login == 'l.gay');
     }
 
-    public function isCreatable($force_create = false, &$errors = array())
-    {
-        return $this->isEditable($force_create, $errors);
-    }
-
-    public function isEditable($force_edit = false, &$errors = array())
-    {
-        global $user;
-        if ($force_edit || $user->rights->admin or $user->rights->produit->creer) {
-            return 1;
-        }
-    }
-
     public function canEditField($field_name)
     {
         global $user;
@@ -99,6 +86,19 @@ class Equipment extends BimpObject
         }
 
         return 0;
+    }
+    
+    public function isCreatable($force_create = false, &$errors = array())
+    {
+        return $this->isEditable($force_create, $errors);
+    }
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        global $user;
+        if ($force_edit || $user->rights->admin or $user->rights->produit->creer) {
+            return 1;
+        }
     }
 
     // Getters booléens:
@@ -301,6 +301,14 @@ class Equipment extends BimpObject
         }
 
         return (count($errors) ? 0 : 1);
+    }
+    
+    public function isIphone()
+    {
+        $product_label = $this->displayProduct('nom', true);
+        if (stripos($product_label, "Iphone") !== false || stripos($product_label, "IPAD") !== false || stripos($product_label, "IPOD") !== false || stripos($product_label, "WATCH") !== false || stripos($product_label, "XXXX") !== false || stripos($product_label, "***") !== false)
+            return true;
+        return false;
     }
 
     public function isInEntrepot($id_entrepot = 0, &$errors = array())
@@ -1177,14 +1185,6 @@ class Equipment extends BimpObject
         }
 
         return $html;
-    }
-
-    public function isIphone()
-    {
-        $product_label = $this->displayProduct('nom', true);
-        if (stripos($product_label, "Iphone") !== false || stripos($product_label, "IPAD") !== false || stripos($product_label, "IPOD") !== false || stripos($product_label, "WATCH") !== false || stripos($product_label, "XXXX") !== false || stripos($product_label, "***") !== false)
-            return true;
-        return false;
     }
 
     public function gsxLookup($serial, &$errors)

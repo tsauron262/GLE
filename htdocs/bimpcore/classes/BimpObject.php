@@ -1213,7 +1213,7 @@ class BimpObject extends BimpCache
                 ))
             );
         }
-        
+
         return array();
     }
 
@@ -4080,7 +4080,7 @@ class BimpObject extends BimpCache
                         'obj_name'   => $this->object_name,
                         'id_obj'     => $this->id,
                         'doc_type'   => $doc_type
-            ));
+            ), true);
         }
 
         return null;
@@ -4092,7 +4092,7 @@ class BimpObject extends BimpCache
             $signature = $this->getSignatureInstance($doc_type);
 
             if (BimpObject::objectLoaded($signature) && $signature->getData('signed_doc_ext')) {
-                return $signature->getData('signed_doc_ext');
+                return strtolower($signature->getData('signed_doc_ext'));
             }
         }
 
@@ -8218,7 +8218,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $html;
     }
 
-    public function renderImages($filters = null)
+    public function renderImages($full_panel = false, $filters = null)
     {
         $html = '';
 
@@ -8231,8 +8231,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             'in' => array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif')
                         )
             ));
-        } else
+        } else {
             $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', $filters);
+        }
 
 
         if (!empty($files)) {
@@ -8243,9 +8244,11 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
                 if ($url) {
                     $onclick = 'loadImageModal($(this), \'' . $url . '\', \'' . $file->getData('file_name') . '\')';
-                    $html .= '<div onclick="' . $onclick . '" style="max-height: 200px; max-width: 100%; cursor: zoom-in; margin: 5px; overflow-x: scroll">';
+                    $html .= '<div onclick="' . $onclick . '"';
+                    $html .= ' style="display: inline-block; max-height: 200px; max-width: 300px; width: auto; height: auto;';
+                    $html .= ' cursor: zoom-in; margin: 5px; padding: 5px; border: 1px solid #ccc; vertical-align: top; overflow: hidden">';
                     $html .= '<div style="font-size: 11px; font-style: italic">';
-                    $html .= $file->getData('file_name');
+                    $html .= '<b>' . $file->getData('file_name') . '</b>';
                     $html .= '</div>';
                     $html .= '<img src="' . $url . '" style="max-height: 92%; max-width: 100%; height: auto; width: auto; margin: auto"/>';
                     $html .= '</div>';
@@ -8255,6 +8258,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</div>';
         }
 
+        if ($full_panel) {
+            $title = BimpRender::renderIcon('fas_file-image', 'iconLeft') . 'Images liées';
+            return BimpRender::renderPanel($title, $html, '', array(
+                        'type' => 'secondary'
+            ));
+        }
         return $html;
     }
 

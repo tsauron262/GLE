@@ -14,4 +14,9 @@ fields_tables:
         rows: 
             entrepot_spare:
                 field: entrepot_spare
+                
+forms:
+    default:
+        rows:
+            - field: entrepot_spare
         

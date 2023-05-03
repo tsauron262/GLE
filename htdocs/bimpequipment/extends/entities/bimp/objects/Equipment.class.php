@@ -189,7 +189,7 @@ class Equipment_ExtEntity extends Equipment
                 ));
 
                 if (!count($errors)) {
-                    $line->id_product = $this->getData('id_product');
+                    $line->id_product = $newEquipment->getData('id_product');
                     $line->qty = 1;
 
                     $errors = $line->create($warnings, true);

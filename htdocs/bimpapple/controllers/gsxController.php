@@ -3795,14 +3795,9 @@ class gsxController extends BimpController
 
     public function renderPartsList($parts, $id_sav = null, $sufixe = '', $isIphone = false)
     {
-        $add_btn = false;
-        if (!is_null($id_sav) && !$this->use_gsx_v2) {
+        $sav = null;
+        if ((int) $id_sav) {
             $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
-            if (!is_null($sav) && $sav->isLoaded()) {
-//                if ($sav->isPropalEditable()) {
-                $add_btn = true;
-//                }
-            }
         }
 
 //        return '<pre>' . print_r($parts, true) . '</pre>';
@@ -3812,9 +3807,8 @@ class gsxController extends BimpController
             if (empty($parts)) {
                 $html .= BimpRender::renderAlerts('Aucun composant compatible trouvé', 'warning');
             } else {
-                if ($this->use_gsx_v2) {
-                    $html .= '<div id="partsListContainer' . $sufixe . '" class="partsListContainer">';
-                }
+                $html .= '<h3>' . BimpRender::renderIcon('fab_apple', 'iconLeft') . ' Pièces Apple</h3>';
+                $html .= '<div id="partsListContainer' . $sufixe . '" class="partsListContainer">';
                 $html .= '<div class="partsSearchContainer">';
                 $html .= '<div class="searchBloc">';
                 $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>';
@@ -3841,41 +3835,25 @@ class gsxController extends BimpController
 
                 $groups = array();
 
+                $parts_numbers = array();
                 foreach ($parts as $part) {
-                    $group = '';
-                    if ($this->use_gsx_v2) {
-                        $group = (isset($part['type']) ? addslashes($part['type']) : '');
+                    $group = (isset($part['type']) ? addslashes($part['type']) : '');
 
-                        if (!isset($groups[$group])) {
-                            $label = (isset(self::$componentsTypesV2[$group]) ? self::$componentsTypesV2[$group] : ($group ? $part['typeDescription'] : 'Général'));
-                            $groups[$group] = array(
-                                'label' => $label,
-                                'parts' => array()
-                            );
-                        }
-                    } else {
-                        $group = (isset($part['componentCode']) ? addslashes($part['componentCode']) : '');
-                        if (!$group || $group === ' ') {
-                            $group = 0;
-                        }
-
-                        if (!isset($groups[$group])) {
-                            $groups[$group] = array(
-                                'label' => self::$componentsTypes[$group],
-                                'parts' => array()
-                            );
-                        }
+                    if (!isset($groups[$group])) {
+                        $label = (isset(self::$componentsTypesV2[$group]) ? self::$componentsTypesV2[$group] : ($group ? $part['typeDescription'] : 'Général'));
+                        $groups[$group] = array(
+                            'label' => $label,
+                            'parts' => array()
+                        );
                     }
                     $groups[$group]['parts'][] = $part;
+                    $parts_numbers[] = $part['number'];
                 }
 
                 $html .= '<div id = "partsList">';
 
                 $headers = '<thead>';
-                if ($this->use_gsx_v2) {
-                    $headers .= '<th></th>';
-//                    $headers .= '<th></th>'; // ImageUrl
-                }
+                $headers .= '<th></th>';
                 $headers .= '<th style = "min-width: 250px">Nom</th>';
                 $headers .= '<th style = "min-width: 80px">Ref.</th>';
                 $headers .= '<th style = "min-width: 80px">Nouvelle Ref.</th>';
@@ -3886,10 +3864,6 @@ class gsxController extends BimpController
                 $headers .= '<th>Prix spéciaux</th>';
                 $headers .= '<th>Prix vente HT</th>';
                 $headers .= '<th>Prix vente TTC</th>';
-
-                if (!$this->use_gsx_v2) {
-                    $headers .= '<th style = "width: 30px; text-align: center"></th>';
-                }
 
                 $headers .= '</thead>';
 
@@ -3902,66 +3876,29 @@ class gsxController extends BimpController
 
                     $odd = true;
                     foreach ($group['parts'] as $part) {
-                        if ($this->use_gsx_v2) {
-                            $code = (isset($part['componentCode']) ? addslashes($part['componentCode']) : '');
-                            $eeeCode = '';
-                            if (isset($part['eeeCodes'])) {
-                                foreach ($part['eeeCodes'] as $eeeC) {
-                                    $eeeCode .= ($eeeCode ? ', ' : '') . $eeeC;
-                                }
+                        $code = (isset($part['componentCode']) ? addslashes($part['componentCode']) : '');
+                        $eeeCode = '';
+                        if (isset($part['eeeCodes'])) {
+                            foreach ($part['eeeCodes'] as $eeeC) {
+                                $eeeCode .= ($eeeCode ? ', ' : '') . $eeeC;
                             }
-                            $name = (isset($part['description']) ? addslashes(str_replace(" ", "", $part['description'])) : '');
-                            $num = (isset($part['number']) ? addslashes($part['number']) : '');
-                            $partNewNumber = (isset($part['substitutePartNumber']) ? addslashes($part['substitutePartNumber']) : '');
-                            $exchange_price = (isset($part['exchangePrice']) ? addslashes($part['exchangePrice']) : 0);
-                            $stock_price = (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : 0);
-                            $type = (isset($part['type']) ? addslashes($part['type']) : '');
+                        }
+                        $name = (isset($part['description']) ? addslashes(str_replace(" ", "", $part['description'])) : '');
+                        $num = (isset($part['number']) ? addslashes($part['number']) : '');
+                        $partNewNumber = (isset($part['substitutePartNumber']) ? addslashes($part['substitutePartNumber']) : '');
+                        $exchange_price = (isset($part['exchangePrice']) ? addslashes($part['exchangePrice']) : 0);
+                        $stock_price = (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : 0);
+                        $type = (isset($part['type']) ? addslashes($part['type']) : '');
 
-                            $price_options = array();
+                        $price_options = array();
 
-                            if (isset($part['pricingOptions']) && is_array($part['pricingOptions'])) {
-                                foreach ($part['pricingOptions'] as $price_option) {
-                                    if (isset($price_option['code'])) {
-                                        $price_options[$price_option['code']] = array(
-                                            'price'       => $price_option['price'],
-                                            'description' => $price_option['description']
-                                        );
-                                    }
-                                }
-                            }
-                        } else {
-                            $partNewNumber = '';
-                            if (isset($part['originalPartNumber']) && $part['originalPartNumber'] != '') {
-                                $partNewNumber = $part['partNumber'];
-                                $part['partNumber'] = $part['originalPartNumber'];
-                            }
-
-                            $code = (isset($part['componentCode']) ? addslashes($part['componentCode']) : '');
-                            $eeeCode = (isset($part['eeeCode']) ? addslashes($part['eeeCode']) : '');
-                            $name = (isset($part['partDescription']) ? addslashes(str_replace(" ", "", $part['partDescription'])) : '');
-                            $num = (isset($part['partNumber']) ? addslashes($part['partNumber']) : '');
-                            $exchange_price = (isset($part['exchangePrice']) ? addslashes($part['exchangePrice']) : 0);
-                            $stock_price = (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : 0);
-                            $type = (isset($part['partType']) ? addslashes($part['partType']) : '');
-
-                            $price_options = array();
-                            if (isset($part['pricingOptions']['pricingOption'])) {
-                                if (is_array($part['pricingOptions']['pricingOption']) && isset($part['pricingOptions']['pricingOption']['code'])) {
-                                    $price_options = array(
-                                        $part['pricingOptions']['pricingOption']['code'] => array(
-                                            'price'       => $part['pricingOptions']['pricingOption']['price'],
-                                            'description' => $part['pricingOptions']['pricingOption']['description']
-                                        )
+                        if (isset($part['pricingOptions']) && is_array($part['pricingOptions'])) {
+                            foreach ($part['pricingOptions'] as $price_option) {
+                                if (isset($price_option['code'])) {
+                                    $price_options[$price_option['code']] = array(
+                                        'price'       => $price_option['price'],
+                                        'description' => $price_option['description']
                                     );
-                                } else {
-                                    foreach ($part['pricingOptions']['pricingOption'] as $price_option) {
-                                        if (isset($price_option['code'])) {
-                                            $price_options[$price_option['code']] = array(
-                                                'price'       => $price_option['price'],
-                                                'description' => $price_option['description']
-                                            );
-                                        }
-                                    }
                                 }
                             }
                         }
@@ -3978,23 +3915,16 @@ class gsxController extends BimpController
                         $content .= ' data-price_options = "' . (count($price_options) ? htmlentities(json_encode($price_options)) : '') . '"';
                         $content .= '>';
 
-                        if ($this->use_gsx_v2) {
-                            $content .= '<td style = "width: 30px; text-align: center">';
-                            $content .= '<input type = "checkbox" name = "parts[]" value = "' . $num . '"/>';
-                            $content .= '</td>';
-//                            $content .= '<td>';
-//                            if (isset($part['imageUrl']) && (string) $part['imageUrl']) {
-//                                $content .= '<img src="' . $part['imageUrl'] . '" style="width: auto; height: 30px;"/>';
-//                            }
-//                            $content .= '</td>';
-                        }
+                        $content .= '<td style = "width: 30px; text-align: center">';
+                        $content .= '<input type = "checkbox" name = "parts[]" value = "' . $num . '"/>';
+                        $content .= '</td>';
 //                        
                         $vente_price = 'N/C';
-                        $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
                         if (BimpObject::objectLoaded($sav)) {
                             $equipment = $sav->getChildObject('equipment');
                             $isIphone = $equipment->isIphone();
                         }
+
                         BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
                         $type = BS_ApplePart::getCategProdApple($num, $name);
                         $vente_price = BS_ApplePart::convertPrixStatic($type, ($exchange_price > 0 ? $exchange_price : $stock_price), $num, $isIphone, 'EXCHANGE');
@@ -4018,19 +3948,6 @@ class gsxController extends BimpController
                             $content .= addslashes($option['price'] . ' (' . $code . ')');
                         }
                         $content .= '</td>';
-//                        $content .= '<td>';
-//
-//                        if ($add_btn) {
-//                            $content .= BimpRender::renderButton(array(
-//                                        'label'       => 'Ajouter au panier',
-//                                        'icon_before' => 'shopping-basket',
-//                                        'classes'     => array('btn', 'btn-default'),
-//                                        'attr'        => array(
-//                                            'onclick' => 'addPartToCart($(this), ' . $id_sav . ')'
-//                                        )
-//                            ));
-//                        }
-//                        $content .= '</td>';
                         $content .= '<td>' . price($vente_price) . ' €</td>';
                         $content .= '<td>' . price($vente_price * 1.2) . ' €</td>';
                         $content .= '</tr>';
@@ -4050,13 +3967,137 @@ class gsxController extends BimpController
                     ));
                 }
 
-                if ($this->use_gsx_v2) {
-                    $html .= '</div>';
+                if (BimpObject::objectLoaded($sav)) {
+                    // Pièces stock interne hors Catalogue Apple: 
+                    $code_centre = $sav->getData('code_centre_repa');
+                    if (!$code_centre) {
+                        $code_centre = $sav->getData('code_centre');
+                    }
+
+                    if ($code_centre) {
+                        $eq = $sav->getChildObject('equipment');
+                        $prod_label = '';
+                        $isIphone = false;
+                        if (BimpObject::objectLoaded($eq)) {
+                            $prod_label = strtolower($eq->getProductLabel());
+                            $isIphone = $eq->isIphone();
+                        }
+
+                        $bdb = BimpCache::getBdb();
+                        $where = 'code_centre = \'' . $code_centre . '\' AND qty > 0';
+                        $stocks = $bdb->getRows('bimp_apple_internal_stock', $where, null, 'array');
+                        $prod_stocks = array();
+                        $other_stocks = array();
+
+                        if (!empty($stocks)) {
+                            BimpObject::loadClass('bimpsupport', 'BS_ApplePart');
+                            BimpObject::loadClass('bimpapple', 'InternalStock');
+
+                            foreach ($stocks as $s) {
+                                if (in_array($s['part_number'], $parts_numbers)) {
+                                    continue;
+                                }
+
+                                $stock_label = strtolower($s['product_label']);
+                                if ($prod_label && $stock_label && (strpos($stock_label, $prod_label) !== false ||
+                                        strpos($prod_label, $stock_label) !== false)) {
+                                    $prod_stocks[] = $s;
+                                } else {
+                                    $other_stocks[] = $s;
+                                }
+                            }
+
+                            $html .= '<h3 style="margin-top: 20px">' . BimpRender::renderIcon('fas_warehouse', 'iconLeft') . ' Pièces du stocks interne hors catalogue Apple</h3>';
+
+                            if (!empty($prod_stocks)) {
+                                $headers = array(
+                                    'checkbox'    => array('label' => '', 'align' => 'center', 'col_style' => 'width: 40px', 'searchable' => false, 'sortable' => false),
+                                    'part_number' => 'Ref.',
+                                    'product'     => 'Produit',
+                                    'libelle'     => 'Description',
+                                    'qty_reel'    => 'Stock réel',
+                                    'qty_dispo'   => 'Stock dispo',
+                                    'pu_ht'       => 'Prix de vente HT'
+                                );
+
+                                $rows = array();
+
+                                $nb_prod_stock = 0;
+                                foreach ($prod_stocks as $stock) {
+                                    $qty_dispo = (int) $stock['qty'] - InternalStock::getInternalStockQtyUsed($stock['id']);
+
+                                    if ($qty_dispo > 0) {
+                                        $nb_prod_stock++;
+                                    }
+
+                                    $part_type = BS_ApplePart::getCategProdApple($stock['part_number'], $stock['description']);
+                                    $pu_ht = BS_ApplePart::convertPrixStatic($part_type, $stock['last_pa'], $stock['part_number'], $isIphone);
+
+                                    $rows[] = array(
+                                        'checkbox'    => ($qty_dispo > 0 ? '<input type = "checkbox" name = "internal_parts[]" value = "' . $stock['id'] . '"/>' : ''),
+                                        'part_number' => $stock['part_number'],
+                                        'libelle'     => $stock['description'],
+                                        'product'     => $stock['product_label'],
+                                        'qty_reel'    => (int) $stock['qty'],
+                                        'qty_dispo'   => '<span class="badge badge-' . ($qty_dispo > 0 ? 'success' : 'danger') . '">' . $qty_dispo . '</span>',
+                                        'pu_ht'       => BimpTools::displayMoneyValue($pu_ht)
+                                    );
+                                }
+
+                                $content = BimpRender::renderBimpListTable($rows, $headers, array(
+                                            'searchable' => true,
+                                            'sortable'   => true
+                                ));
+                                $title = $prod_label;
+                                $title .= ' <span class="badge partsNbr">' . $nb_prod_stock . '</span>';
+                                $html .= BimpRender::renderPanel($title, $content, '', array(
+                                            'type'        => 'default',
+                                            'panel_class' => 'internal_parts_panel',
+                                            'foldable'    => true,
+                                            'open'        => false
+                                ));
+                            }
+
+                            if (!empty($other_stocks)) {
+                                $headers = array(
+                                    'checkbox'    => array('label' => '', 'align' => 'center', 'col_style' => 'width: 40px', 'searchable' => false, 'sortable' => false),
+                                    'part_number' => 'Ref.',
+                                    'product'     => 'Produit',
+                                    'libelle'     => 'Description',
+                                    'qty_reel'    => 'Stock réel'
+                                );
+
+                                $rows = array();
+
+                                foreach ($other_stocks as $stock) {
+                                    $rows[] = array(
+                                        'checkbox'    => ($qty_dispo > 0 ? '<input type = "checkbox" name = "internal_parts[]" value = "' . $stock['id'] . '"/>' : ''),
+                                        'part_number' => $stock['part_number'],
+                                        'product'     => $stock['product_label'],
+                                        'libelle'     => $stock['description'],
+                                        'qty_reel'    => (int) $stock['qty']
+                                    );
+                                }
+
+                                $content = BimpRender::renderBimpListTable($rows, $headers, array(
+                                            'searchable' => true,
+                                            'sortable'   => true
+                                ));
+                                $title = 'Autres produits';
+                                $title .= ' <span class="badge partsNbr">' . count($other_stocks) . '</span>';
+                                $html .= BimpRender::renderPanel($title, $content, '', array(
+                                            'type'        => 'default',
+                                            'panel_class' => 'internal_parts_panel',
+                                            'foldable'    => true,
+                                            'open'        => false
+                                ));
+                            }
+                        }
+                    }
                 }
+
+                $html .= '</div>';
             }
-        } elseif (!$this->use_gsx_v2) {
-            $html .= BimpRender::renderAlerts('Echec de la récupération de la liste des composants compatibles depuis la plateforme GSX');
-            $html .= $this->gsx->getGSXErrorsHtml();
         }
         return $html;
     }

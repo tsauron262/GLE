@@ -3163,6 +3163,7 @@ class BimpCache
             35   => "WatchOs",
             37   => "Windows",
             39   => "Produit non concerné par un système",
+            1300 => "MAC OS 13 (Ventura)",
             1200 => "MAC OS 12 (Monterey)",
             1120 => "MAC OS 11.2 (Big Sur)",
             1015 => "MAC OS 10.15 (Catalina)",

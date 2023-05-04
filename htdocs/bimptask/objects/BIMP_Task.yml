@@ -297,6 +297,9 @@ forms:
               
     bug: 
         title: Signaler un bug
+        msgs: 
+            - type: warning
+              content: "NOTE IMPORTANTE : afin que les développeurs puissent répondre au mieux à votre demande, merci d'être aussi précis et détaillé que possible.<br/>"
         rows: 
             - field: type_manuel
               hidden: 1

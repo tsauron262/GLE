@@ -40,7 +40,7 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
     }
 
     $email_cli = BimpTools::cleanEmailsStr($fi->getData('email_signature'));
-    $reply_to = ($email_comm ? $email_comm : $email_tech);
+    $reply_to = ($email_comm ? $email_comm : ($email_tech ? $email_tech : ''));
 
     $file = $conf->ficheinter->dir_output . '/' . $ref . '/' . $ref . '.pdf';
     $fi->actionGeneratePdf([]);
@@ -51,7 +51,13 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
     $message .= '<br/>Très courtoisement.';
     $message .= "<br /><br /><b>Le Service Technique</b><br/>";
     
-    $cc = $email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '');
+    $cc = $email_comm;
+    
+    if ($email_tech) {
+        $cc .= ($cc ? ', '  : '') . $email_tech;
+    }
+    
+    $cc .= ($cc ? ', '  : '') . 'f.martinez@bimp.fr';
 
     $bm = new BimpMail($fi, $subject, $email_cli, '', $message, $reply_to, $cc);
 

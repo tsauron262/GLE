@@ -1649,16 +1649,16 @@ class Bimp_Facture extends BimpComm
                 );
             }
             
-            // Créer un avoir
-            if ($this->isActionAllowed('createAvoir') && $this->canSetAction('createAvoir')) {
-                $buttons[] = array(
-                    'label'   => 'Créer un avoir',
-                    'icon'    => 'fas_file-import',
-                    'onclick' => $this->getJsActionOnclick('createAvoir', array(), array(
-                        'form_name' => 'edit'
-                    ))
-                );
-            }
+//            // Créer un avoir
+//            if ($this->isActionAllowed('createAvoir') && $this->canSetAction('createAvoir')) {
+//                $buttons[] = array(
+//                    'label'   => 'Créer un avoir',
+//                    'icon'    => 'fas_file-import',
+//                    'onclick' => $this->getJsActionOnclick('createAvoir', array(), array(
+//                        'form_name' => 'edit'
+//                    ))
+//                );
+//            }
         }
 
         return $buttons;

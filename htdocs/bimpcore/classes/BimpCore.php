@@ -1391,6 +1391,66 @@ class BimpCore
 
     // Rendus HTML Globaux: 
 
+    public static function renderUserTopExtraToolsHtml()
+    {
+        $html = '';
+
+        // Déclarer un bug: 
+        if (BimpCore::isModuleActive('bimptask') && BimpCore::getConf('allow_bug_task', null, 'bimptask')) {
+            $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
+            $onclick = $task->getJsLoadModalForm('bug', 'Signaler un bug', array(
+                'fields' => array(
+                    'url' => $_SERVER['REQUEST_URI']
+                )
+            ));
+
+            $html .= '<div>';
+            $html .= '<span class="btn btn-light-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_bug', 'iconLeft') . 'Déclarer un bug';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
+        // Change log ERP
+        $onclick = "bimpModal.loadAjaxContent($(this), 'loadChangeLog', {}, 'ChangeLog ERP', 'Chargement', function (result, bimpAjax) {});";
+        $onclick .= 'bimpModal.show();';
+        $html .= '<div>';
+        $html .= '<span class="btn btn-light-default" onclick="' . $onclick . '">';
+        $html .= BimpRender::renderIcon('fas_book-medical', 'iconLeft') . 'ChangeLog ERP';
+        $html .= '</span>';
+        $html .= '</div>';
+
+        // Outils devs: 
+        if (BimpCore::isUserDev()) {
+            $html .= '<div style="margin: 5px 0; text-align: center; color: #7F7F7F; font-size: 11px">----- OUTILS DEV ------</div>';
+
+            $onclick = "bimpModal.loadAjaxContent($(this), 'loadChangeLog', {type: 'dev'}, 'ChangeLog DEV', 'Chargement', function (result, bimpAjax) {});";
+            $onclick .= 'bimpModal.show();';
+            $html .= '<div>';
+            $html .= '<span class="btn btn-light-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_book-medical', 'iconLeft') . 'ChangeLog DEV';
+            $html .= '</span>';
+            $html .= '</div>';
+
+            if (!BimpCore::isModeDev()) {
+                $html .= '<a class="btn btn-light-default" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_all.php?go=1&branche=master" target="_blank">';
+                $html .= BimpRender::renderIcon('fas_arrow-down', 'iconLeft') . 'GIT PULL ALL MASTER';
+                $html .= '</a>';
+            }
+        }
+
+        if ($html) {
+            $content = '<div style="padding: 10px;">' . $html . '</div>';
+
+            $label = BimpRender::renderIcon('fas_tools');
+            return BimpRender::renderDropDownContent('userDropdown', $label, $content, array(
+                        'type'        => 'span',
+                        'extra_class' => 'nav-link header-icon',
+                        'side'        => 'left'
+            ));
+        }
+    }
+
     public static function renderUserTopAccountHtml()
     {
         global $user;

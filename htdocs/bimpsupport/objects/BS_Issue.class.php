@@ -407,27 +407,33 @@ class BS_Issue extends BimpObject
         $warnings = array();
         $success = 'Composant(s) ajouté(s) avec succès';
 
-        if (!isset($data['parts']) || empty($data['parts'])) {
-            $warnings[] = 'Aucun composant sélectionné';
-        } else {
-            $sav = $this->getParentInstance();
+        $sav = $this->getParentInstance();
+        $parts = BimpTools::getArrayValueFromPath($data, 'parts', array());
+        $internal_parts = BimpTools::getArrayValueFromPath($data, 'internal_parts', array());
 
-            if (!BimpObject::objectLoaded($sav)) {
-                $errors[] = 'ID du SAV absent';
-            } else {
-                $current_parts = $sav->getChildrenList('parts');
+        if (!BimpObject::objectLoaded($sav)) {
+            $errors[] = 'ID du SAV absent';
+        }
 
-                if ((count($current_parts) + count($data['parts'])) > 25) {
-                    $msg = 'Il n\'est possible d\'ajouter que 25 composants par SAV. ';
-                    $diff = (count($current_parts) + count($data['parts'])) - 25;
-                    if ($diff > 0) {
-                        $msg .= 'Veuillez déselectionner ' . $diff . ' composant(s)';
-                    } else {
-                        $msg .= 'Vous ne pouvez plus aujouter d\'autres composants';
-                    }
-                    $errors[] = $msg;
+        if (empty($parts) && empty($internal_parts)) {
+            $errors[] = 'Aucun composant sélectionné';
+        }
+
+        if (!count($errors)) {
+            $current_parts = $sav->getChildrenList('parts');
+
+            if ((count($current_parts) + count($parts)) > 25) {
+                $msg = 'Il n\'est possible d\'ajouter que 25 composants par SAV. ';
+                $diff = (count($current_parts) + count($data['parts'])) - 25;
+                if ($diff > 0) {
+                    $msg .= 'Veuillez déselectionner ' . $diff . ' composant(s)';
                 } else {
-                    foreach ($data['parts'] as $part_data) {
+                    $msg .= 'Vous ne pouvez plus aujouter d\'autres composants';
+                }
+                $errors[] = $msg;
+            } else {
+                if (!empty($parts)) {
+                    foreach ($parts as $part_data) {
                         $part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
 
                         $part_warnings = array();
@@ -454,6 +460,73 @@ class BS_Issue extends BimpObject
                         }
                         if (count($part_warnings)) {
                             $warnings[] = BimpTools::getMsgFromArray($part_warnings, 'Erreurs suite à la création ' . $part->getLabel('of_the') . ' "' . $part_data['part_number'] . '"');
+                        }
+                    }
+                }
+
+                if (!empty($internal_parts)) {
+                    if (!$sav->isPropalEditable()) {
+                        $errors[] = 'Il n\'est pas possible d\'ajouter des pièces du stock interne (Devis validé)';
+                    } else {
+                        $propal = $sav->getChildObject('propal');
+
+                        if (!BimpObject::objectLoaded($propal)) {
+                            $errors[] = 'Il n\'est pas possible d\'ajouter des pièces du stock interne (Devis absent)';
+                        } else {
+                            $eq = $sav->getChildObject('equipment');
+                            $isIphone = false;
+                            if (BimpObject::objectLoaded($eq)) {
+                                $isIphone = $eq->isIphone();
+                            }
+
+                            BimpObject::loadClass('bimpsupport', 'BS_ApplePart');
+                            BimpObject::loadClass('bimpapple', 'InternalStock');
+
+                            foreach ($internal_parts as $id_stock) {
+                                $stock = BimpCache::getBimpObjectInstance('bimpapple', 'InternalStock', $id_stock);
+
+                                if (!BimpObject::objectLoaded($stock)) {
+                                    $errors[] = 'Le stock interne #' . $id_stock . ' n\'existe plus';
+                                    continue;
+                                }
+
+                                $qty_used = InternalStock::getInternalStockQtyUsed($stock->id);
+
+                                if ((int) $stock->getData('qty') - $qty_used <= 0) {
+                                    $errors[] = 'Le composant "' . $stock->getData('part_number') . '" n\'est plus disponible dans le stock interne';
+                                    continue;
+                                }
+
+                                $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+                                $line->validateArray(array(
+                                    'id_obj'             => $propal->id,
+                                    'type'               => BS_SavPropalLine::LINE_FREE,
+                                    'linked_object_name' => 'internal_stock',
+                                    'linked_id_object'   => $id_stock,
+                                    'deletable'          => 1,
+                                    'editable'           => 1,
+                                    'remisable'          => 1
+                                ));
+
+                                $part_number = $stock->getData('part_number');
+                                $desc = $stock->getData('description');
+                                $part_type = BS_ApplePart::getCategProdApple($part_number, $desc);
+                                $pa_ht = (float) $stock->getData('last_pa');
+                                $pu_ht = BS_ApplePart::convertPrixStatic($part_type, $pa_ht, $part_number, $isIphone);
+
+                                $line->desc = $part_number . ' - ' . $desc;
+                                $line->qty = 1;
+                                $line->pa_ht = $pa_ht;
+                                $line->pu_ht = $pu_ht;
+                                $line->tva_tx = BimpTools::getDefaultTva();
+
+                                $line_warnings = array();
+                                $line_errors = $line->create($line_warnings, true);
+
+                                if (count($line_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout du composant "' . $part_number . '" au devis');
+                                }
+                            }
                         }
                     }
                 }

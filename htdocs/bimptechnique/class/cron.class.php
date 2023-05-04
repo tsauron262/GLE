@@ -69,9 +69,7 @@ class Cron
             echo '<h1>'.$tech->dol_object->getFullName($langs).'</h1><br/>'.$mail;
             mailSyn2($sujet, $emailSendTo, null, $mail);
         }
-    }
-    
-    
+    }    
     
     public function relanceCommercialAFact(){
         $this->relanceCommercial("SELECT DISTINCT a___parent.rowid
@@ -85,6 +83,7 @@ WHERE (a___parent.datei >= '2022-01-01') AND a.type IN ('4','3') AND (a___parent
 FROM llx_fichinterdet a LEFT JOIN llx_fichinter a___parent ON a___parent.rowid = a.fk_fichinter WHERE (a___parent.datei >= '2022-01-01') AND a.type IN ('1') AND a___parent.fk_statut IN ('1','2','4','10','11')",
                 "Voici la liste de vos fiches d’interventions comportant de l'impondérable");
     }
+    
     public function relanceCommercial($req, $text)
     {
         $db = BimpObject::getBdb();

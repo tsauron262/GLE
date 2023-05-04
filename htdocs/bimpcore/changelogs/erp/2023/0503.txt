@@ -1,0 +1,3 @@
+- Ajout Icône "Ouils" dans barre de menu principale
+  Déplacement des fonctions "Signaler un bug" et ChangeLogs dans un sous-menu accessible via l'icône "Outils".
+  D'autres fonctions pourront être intégrées dans ce sous-menu ultérieurement. 

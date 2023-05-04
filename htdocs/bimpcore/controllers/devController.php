@@ -55,7 +55,7 @@ class devController extends BimpController
             $html .= 'GIT PULL' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
 
-            $html .= '<a class="btn btn-info" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_all.php" target="_blank">';
+            $html .= '<a class="btn btn-info" href="' . DOL_URL_ROOT . '/synopsistools/git_pull_all.php?go=1&branche=master" target="_blank">';
             $html .= 'GIT PULL ALL' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
         }

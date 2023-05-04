@@ -270,7 +270,7 @@ class GSX_v2 extends GSX_Const
 
     public function reauthenticate()
     {
-        static::debug($this->appleId, 'reauthentification');
+//        static::debug($this->appleId, 'reauthentification');
         if ($this->auth_token) {
             $this->saveToken('auth', '');
         }
@@ -282,7 +282,7 @@ class GSX_v2 extends GSX_Const
 
     public function saveToken($type, $token)
     {
-        static::debug($this->appleId, 'enregistrement token ' . $type . ' : ' . $token);
+//        static::debug($this->appleId, 'enregistrement token ' . $type . ' : ' . $token); // Génère trop de logs. 
         $field = '';
         switch ($type) {
             case 'acti':

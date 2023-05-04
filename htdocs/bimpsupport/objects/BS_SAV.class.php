@@ -5643,6 +5643,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                         $warnings[] = BimpTools::getMsgFromArray($stock_errors);
                                     }
                                 }
+                            } elseif ($line->getData('linked_object_name') == 'internal_stock' && (int) $line->getData('linked_id_object')) {
+                                $internal_stock = BimpCache::getBimpObjectInstance('bimpapple', 'InternalStock', (int) $line->getData('linked_id_object'));
+
+                                if (BimpObject::objectLoaded($internal_stock)) {
+                                    $stock_errors = $internal_stock->correctStock(-$line->qty, '', 'FACTURATION_SAV_' . $this->id, 'Facturation ' . $this->getLink());
+                                    if (count($stock_errors)) {
+                                        $warnings[] = BimpTools::getMsgFromArray($stock_errors, 'Echec de la mise à jour du stock interne pour le composant "' . $internal_stock->getData('part_number') . '"');
+                                    }
+                                }
                             }
                         }
 

@@ -9,7 +9,6 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     public static $label_prime = "Apport externe";
     public static $label_prime2 = "Apport externe2";
     public static $use_cgv = true;
-    
     public static $type = 'pdf';
 
     # Objets: 
@@ -32,7 +31,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
     public $nbPeriods = 0;
     public $max_line_serials = 50;
 
-    # Options: 
+    # Options:
     public $hide_pu = false;
     public $hideReduc = false;
     public $hideTtc = false;
@@ -492,7 +491,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                                 $tvacompl = " (" . $this->langs->transnoentities("NonPercuRecuperable") . ")";
                             }
                             $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
-                            $totalvat .= vatrate(abs((float)$tvakey), 1) . $tvacompl;
+                            $totalvat .= vatrate(abs((float) $tvakey), 1) . $tvacompl;
 
                             if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
                                 $tvaval /= $this->nbPeriods;
@@ -1091,12 +1090,15 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 //        $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
 //        $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
 
-            if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv) {
+            if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && (static::$use_cgv || is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF'))) {
                 $html .= '<span style="font-weight: bold;">';
-                if ($this->pdf->addCgvPages)
+                if (is_a($this, 'PropalSavPDF') || is_a($this, 'InvoiceSavPDF')) {
+                    $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et en boutique pour les particuliers.';
+                } elseif ($this->pdf->addCgvPages) {
                     $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
-                else
+                } else {
                     $html .= 'Nos Conditions Générales de Vente sont consultables sur le site <a href="https://www.bimp-pro.fr">www.bimp-pro.fr</a> pour les professionnels et sur <a href="https://www.ldlc.com/magasins-ldlc">www.ldlc.com/magasins-ldlc</a> pour les particuliers.';
+                }
                 $html .= "</span>";
                 $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
    En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';

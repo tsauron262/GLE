@@ -1250,24 +1250,34 @@ class DoliDBMysqli extends DoliDB
         dol_syslog($msg, LOG_ERR);
         
         if (class_exists('BimpCore')) {
-            $extra_data = array(
-                'Code erreur' => $this->lasterrno,
-                'Erreur SQL' => $this->lasterror,
-                'Serveur' => $this->database_host,
-                'Timer' => $timer
-            );
-
-            if ($this->timeDebReq > 0) {
-                $extra_data['Durée req 1'] = (microtime(true) - $this->timeDebReq);
+            $log = true;
+            if (in_array($this->lasterrno, array('DB_ERROR_1205'))) {
+                $log = false;
+            } elseif ($classLog == 'deadLock' && !(int) BimpCore::getConf('log_sql_dealocks')) {
+                $log = false;
+            } elseif ($classLog == 'sql_duplicate' && !(int) BimpCore::getConf('log_sql_duplicate')) {
+                $log = false;
             }
+            if ($log) {
+                $extra_data = array(
+                   'Code erreur' => $this->lasterrno,
+                   'Erreur SQL' => $this->lasterror,
+                   'Serveur' => $this->database_host,
+                   'Timer' => $timer
+               );
 
-            if ($this->timeDebReq2 > 0) {
-                $extra_data['Durée req 2'] = (microtime(true) - $this->timeDebReq2);
+               if ($this->timeDebReq > 0) {
+                   $extra_data['Durée req 1'] = (microtime(true) - $this->timeDebReq);
+               }
+
+               if ($this->timeDebReq2 > 0) {
+                   $extra_data['Durée req 2'] = (microtime(true) - $this->timeDebReq2);
+               }
+
+               $extra_data['Requête'] = '<br/><br/>' . BimpRender::renderSql($query).'<br/><br/>';
+
+               BimpCore::addlog('ERREUR SQL - ' . $this->lasterror, Bimp_Log::BIMP_LOG_ERREUR, $classLog, null, $extra_data);   
             }
-            
-            $extra_data['Requête'] = '<br/><br/>' . BimpRender::renderSql($query).'<br/><br/>';
-
-            BimpCore::addlog('ERREUR SQL', Bimp_Log::BIMP_LOG_ERREUR, $classLog, null, $extra_data);
         }else{
             dol_syslog ('Erreur sql BimpCore non loadé', LOG_ERR);
         }

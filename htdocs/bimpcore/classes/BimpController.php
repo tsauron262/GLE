@@ -1005,7 +1005,7 @@ class BimpController
     // Enregistrements BimpObjects: 
 
     protected function ajaxProcessSaveObject()
-    {        
+    {
         $errors = array();
         $url = '';
 
@@ -1054,7 +1054,7 @@ class BimpController
                 $errors = BimpTools::merge_array($errors, BimpCore::unlockObject($object_module, $object_name, $id_object));
             }
         }
-        
+
         return array(
             'errors'           => $errors,
             'warnings'         => $result['warnings'],
@@ -3030,12 +3030,12 @@ class BimpController
                 'card'        => $card
             ));
         }
-        
+
         $newresult = array();
-        foreach($results as $result){
+        foreach ($results as $result) {
             $newresult[] = $result;
         }
-        
+
         return array(
             'results'    => $newresult,
             'request_id' => BimpTools::getValue('request_id', 0)
@@ -3241,7 +3241,7 @@ class BimpController
         );
     }
 
-    // Gestion BimpDocumentation: 
+    // Divers: 
 
     protected function ajaxProcessLoadDocumentation()
     {
@@ -3258,17 +3258,70 @@ class BimpController
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
-    
+
     protected function ajaxProcessLoadChangeLog()
     {
         $html = '';
-        $dir = DOL_DOCUMENT_ROOT.'/bimpcore/changelogs/';
-        $files = scandir($dir, SCANDIR_SORT_DESCENDING);
-        foreach($files as $entry) {
-            if(is_file($dir.$entry)){
-                $html .= '<h3>'.basename($entry, '.txt').' : </h3>';
-                $html .= nl2br(file_get_contents($dir.$entry));
+        $type = BimpTools::getValue('type', 'erp');
+        $year = BimpTools::getValue('year', date('Y'));
+        $content_only = (int) BimpTools::getValue('content_only', 0);
+
+        $dir = DOL_DOCUMENT_ROOT . '/bimpcore/changelogs/' . $type . '/';
+        
+        if (!$content_only) {
+            $div_id = 'BimpChangeLog_' . random_int(111111, 999999);
+            
+            $dirs = scandir($dir, SCANDIR_SORT_DESCENDING);
+            
+            foreach ($dirs as $d) {
+                if (in_array($d, array('.', '..'))) {
+                    continue;
+                }
+
+                if (preg_match('/^\d{4}$/', $d)) {
+                    $years[] = $d;
+                }
             }
+
+            if (count($years) > 1) {
+                $select_name = 'bimpChangeLogs_' . $type . '_' . $year;
+                $data = '{year: $(this).val(), type: \'' . $type . '\', content_only: 1}';
+                $params = '{display_success: 0, append_html: 1}';
+                $onchange = "BimpAjax('LoadChangeLog', " . $data . ", $('#" . $div_id . "'), " . $params . ");";
+
+                $html .= '<div style="margin-bottom: 15px; padding: 10px; background-color: #FAFAFA">';
+                $html .= '<b>Année : </b>';
+                $html .= '<select name="' . $select_name . '" onchange="' . $onchange . '">';
+                foreach ($years as $y) {
+                    $html .= BimpInput::renderSelectOption($y, $y, $year);
+                }
+                $html .= '</select>';
+                $html .= '</div>';
+                $html .= '<div id="' . $div_id . '">';
+            }
+        }
+
+        $html .= '<h3>Change logs ' . $type . ' ' . $year . '</h3>';
+
+        $dir .= $year . '/';
+        $files = scandir($dir, SCANDIR_SORT_DESCENDING);
+        $logs = '';
+        
+        foreach ($files as $entry) {
+            if (is_file($dir . $entry)) {
+                $logs .= '<br/><b>Le ' . substr($entry, 2, 2) . ' / ' . substr($entry, 0, 2) . ' : </b><br/>';
+                $logs .= nl2br(file_get_contents($dir . $entry));
+            }
+        }
+
+        if (!$logs) {
+            $html .= BimpRender::renderAlerts('Aucun log', 'warning');
+        } else {
+            $html .= $logs;
+        }
+
+        if (!$content_only) {
+            $html .= '</div>';
         }
 
         return array(
@@ -3292,8 +3345,6 @@ class BimpController
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
-
-    // Divers: 
 
     protected function ajaxProcessLoadProductStocks()
     {

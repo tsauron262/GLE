@@ -140,29 +140,7 @@ class BimpTheme
 
         $html .= '<div class="dropdown modifDropdown login_block_other">';
 
-        if (BimpCore::isModuleActive('bimptask') && BimpCore::getConf('allow_bug_task', null, 'bimptask')) {
-            $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
-            $html .= '<span class="bs-popover header-icon" style="margin: 0 6px"';
-            $html .= BimpRender::renderPopoverData('Signaler un bug', 'bottom');
-            $html .= ' onclick="' . $task->getJsLoadModalForm('bug', 'Signaler un bug', array(
-                        'fields' => array(
-                            'url' => $_SERVER['REQUEST_URI']
-                        )
-                    )) . '"';
-            $html .= '>';
-            $html .= BimpRender::renderIcon('fas_bug');
-            $html .= '</span>';
-        }
-        
-        $html .= '<span class="bs-popover header-icon" style="margin: 0 6px"';
-        $html .= BimpRender::renderPopoverData('ChangeLog', 'bottom');
-        $onclick  = "docModal.loadAjaxContent($(this), 'loadChangeLog', {}, 'ChangeLog', 'Chargement', function (result, bimpAjax) {});";
-        $onclick .= 'docModal.show();';
-        
-        $html .= ' onclick="' . $onclick . '"';
-        $html .= '>';
-        $html .= BimpRender::renderIcon('fas_cash-register');
-        $html .= '</span>';
+        $html .= BimpCore::renderUserTopExtraToolsHtml();
 
         $html .= '<a class="nav-link dropdown-toggle" href="#" id="notiDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
         $html .= BimpRender::renderIcon('fas_comments');

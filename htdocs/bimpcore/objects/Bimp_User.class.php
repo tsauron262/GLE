@@ -2431,7 +2431,11 @@ class Bimp_User extends BimpObject
         $data = array();
         $i = 0;
         foreach ($lns as $ln) {
-            $data[] = array('user' => $ln->lastname . ' ' . $ln->firstname, 'total' => price($ln->total), 'totalServ' => price($ln->totalServ), 'pourc' => price($ln->totalServ / $ln->total * 100) . ' %', 'qty' => round($ln->qtyTot), 'qtyServ' => round($ln->qtyServ));
+            if($ln->total != 0)
+                $pourc = price($ln->totalServ / $ln->total * 100);
+            else
+                $pourc = 'n/c';
+            $data[] = array('user' => $ln->lastname . ' ' . $ln->firstname, 'total' => price($ln->total), 'totalServ' => price($ln->totalServ), 'pourc' => $pourc . ' %', 'qty' => round($ln->qtyTot), 'qtyServ' => round($ln->qtyServ));
         }
 
 

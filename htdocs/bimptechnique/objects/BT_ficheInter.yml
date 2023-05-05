@@ -529,8 +529,8 @@ forms:
                           method: getSocieteContactsArray
                           params: 
                               - field_value: fk_soc
-              value: 
-                  callback: getDefaultSignatureContact
+#              value: 
+#                  callback: getDefaultSignatureContact
 
             - field: note_public
             - field: attente_client

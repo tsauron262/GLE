@@ -315,14 +315,14 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
             if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
                 $total_remises /= $this->nbPeriods;
             }
-//            $html .= '<tr>';
-//            $html .= '<td style="background-color: #F0F0F0;">Total remises HT</td>';
-//            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($total_remises, '', 0, 0, 1);
-//            if ((int) $this->periodicity) {
-//                $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
-//            }
-//            $html .= '</td>';
-//            $html .= '</tr>';
+            $html .= '<tr>';
+            $html .= '<td style="background-color: #F0F0F0;">Total remises HT</td>';
+            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($total_remises, '', 0, 0, 1);
+            if ((int) $this->periodicity) {
+                $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+            }
+            $html .= '</td>';
+            $html .= '</tr>';
         }
 
 

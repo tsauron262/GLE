@@ -257,32 +257,36 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
 				dol_syslog("cron_run_jobs.php::fetch Error ".$cronjob->error, LOG_ERR);
 				exit(-1);
 			}
-			// Execute job
-			$result = $cronjob->run_jobs($userlogin);
-			if ($result < 0) {
-				echo "Error cronjobid: ".$line->id." cronjob->run_job: ".$cronjob->error."\n";
-				echo "At least one job failed. Go on menu Home-Setup-Admin tools to see result for each job.\n";
-				echo "You can also enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
-				dol_syslog("cron_run_jobs.php::run_jobs Error ".$cronjob->error, LOG_ERR);
-				$nbofjobslaunchedko++;
-				$resultstring = 'KO';
-			} else {
-				$nbofjobslaunchedok++;
-				$resultstring = 'OK';
-			}
+                        if(!$cronjob->processing){
+                            // Execute job
+                            $result = $cronjob->run_jobs($userlogin);
+                            if ($result < 0) {
+                                    echo "Error cronjobid: ".$line->id." cronjob->run_job: ".$cronjob->error."\n";
+                                    echo "At least one job failed. Go on menu Home-Setup-Admin tools to see result for each job.\n";
+                                    echo "You can also enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
+                                    dol_syslog("cron_run_jobs.php::run_jobs Error ".$cronjob->error, LOG_ERR);
+                                    $nbofjobslaunchedko++;
+                                    $resultstring = 'KO';
+                            } else {
+                                    $nbofjobslaunchedok++;
+                                    $resultstring = 'OK';
+                            }
 
-			echo " - run_jobs ".$resultstring." result = ".$result;
+                            echo " - run_jobs ".$resultstring." result = ".$result;
 
-			// We re-program the next execution and stores the last execution time for this job
-			$result = $cronjob->reprogram_jobs($userlogin, $now);
-			if ($result < 0) {
-				echo "Error cronjobid: ".$line->id." cronjob->reprogram_job: ".$cronjob->error."\n";
-				echo "Enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
-				dol_syslog("cron_run_jobs.php::reprogram_jobs Error ".$cronjob->error, LOG_ERR);
-				exit(-1);
-			}
+                            // We re-program the next execution and stores the last execution time for this job
+                            $result = $cronjob->reprogram_jobs($userlogin, $now);
+                            if ($result < 0) {
+                                    echo "Error cronjobid: ".$line->id." cronjob->reprogram_job: ".$cronjob->error."\n";
+                                    echo "Enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
+                                    dol_syslog("cron_run_jobs.php::reprogram_jobs Error ".$cronjob->error, LOG_ERR);
+                                    exit(-1);
+                            }
 
-			echo " - reprogrammed\n";
+                            echo " - reprogrammed\n";
+                        }
+                        else
+                            echo " - processing\n";
 		} else {
 			echo " - not qualified\n";
 

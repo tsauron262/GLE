@@ -7269,19 +7269,13 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $date = $dt->format('Y-m-d 00:00:00');
 
         $savs = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SAV', array(
-                    'p.date_valid'        => array(
+                    'a.date_terminer'        => array(
                         'operator' => '<',
                         'value'    => $date
                     ),
                     'a.status'            => array(self::BS_SAV_ATT_CLIENT, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER),
                     'a.alert_unrestitute' => 0
-                        ), 'id', 'asc', array(
-                    'p' => array(
-                        'alias' => 'p',
-                        'table' => 'propal',
-                        'on'    => 'p.rowid = a.id_propal'
-                    )
-        ));
+                        ), 'id', 'asc');
 
         if (empty($savs)) {
             return 'Aucun SAV non restitué à alerter';

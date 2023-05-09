@@ -268,7 +268,7 @@ class Bimp_ActionComm extends BimpObject
         if ($this->isLoaded() && $this->canDelete()) {
             $html .= '<div style="margin: 10px; text-align: center">';
             $html .= '<span class="btn btn-danger" onclick="' . $this->getJsDeleteOnClick(array(
-                        'on_success' => 'reload'
+                        'success_callback' => "function(){bimpModal.hide();$('#calendar').weekCalendar('refresh');}"
                     )) . '">';
             $html .= BimpRender::renderIcon('fas_trash-alt', 'iconLeft') . 'Supprimer cet événement';
             $html .= '</span>';

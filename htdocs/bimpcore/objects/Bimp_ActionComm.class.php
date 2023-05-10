@@ -46,7 +46,7 @@ class Bimp_ActionComm extends BimpObject
         global $user;
         //ne fonctionne pas
         if ($user->id == 270) {
-            return 0;
+            return 1;
         }
         return $this->getRight('read');
     }

@@ -20,34 +20,30 @@ class Bimp_ActionComm extends BimpObject
     public function getRight($code)
     {
         global $user;
-        if ($user->id == 270) {
-            return 0;
-        }
 
         if ($user->rights->agenda->allactions->$code)
             return 1;
 
-        $usersPost = BimpTools::getPostFieldValue('users_assigned', array());
+        $usersAssigned = BimpTools::getPostFieldValue('users_assigned', $this->getUsersAssigned());
 
-        $users = $this->getUsersAssigned();
+        if (!$this->isLoaded()) {
+            $idUserCreate = $user->id;
+        } else {
+            $idUserCreate = $this->getData('fk_user_author');
+        }
 
-        $idUserCreate = $this->getData('fk_user_author');
-        
-        if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersPost) > 0 && (int) $usersPost[0] == $user->id)) && 
-                $user->rights->agenda->myactions->$code)
+        if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersAssigned) && in_array($user->id, $usersAssigned))) &&
+                $user->rights->agenda->myactions->$code) {
             return 1;
-
+        }
 
         return 0;
     }
-    
+
     public function canView()
     {
-        global $user;
         //ne fonctionne pas
-        if ($user->id == 270) {
-            return 1;
-        }
+
         return $this->getRight('read');
     }
 
@@ -65,8 +61,7 @@ class Bimp_ActionComm extends BimpObject
 
     public function isCreatable($force_create = false, &$errors = array())
     {
-//        return $this->isEditable(); // pas de droits user ici 
-        return 1;
+        return $this->isEditable();
     }
 
     public function isEditable($force_edit = false, &$errors = array())

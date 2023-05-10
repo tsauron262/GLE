@@ -15,26 +15,14 @@ class Bimp_ActionComm extends BimpObject
         100 => 'Terminé'
     );
 
-    // Getters booléens: 
-
-    public function canView()
-    {//ne fonctionne pas
-        return $this->getRight('read');
-    }
-
-    public function isCreatable($force_create = false, &$errors = array())
-    {
-        return $this->isEditable();
-    }
-
-    public function isEditable($force_edit = false, &$errors = array())
-    {
-        return $this->getRight('create');
-    }
+    // Droits users: 
 
     public function getRight($code)
     {
         global $user;
+        if ($user->id == 270) {
+            return 0;
+        }
 
         if ($user->rights->agenda->allactions->$code)
             return 1;
@@ -42,26 +30,50 @@ class Bimp_ActionComm extends BimpObject
         $usersPost = BimpTools::getPostFieldValue('users_assigned', array());
 
         $users = $this->getUsersAssigned();
-        
+
         $idUserCreate = $this->getData('fk_user_author');
-        if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersPost) > 0 && (int) $usersPost[0] == $user->id)) && $user->rights->agenda->myactions->$code)
+        
+        if ((($idUserCreate == $user->id) || (!$this->isLoaded() && count($usersPost) > 0 && (int) $usersPost[0] == $user->id)) && 
+                $user->rights->agenda->myactions->$code)
             return 1;
 
 
         return 0;
     }
+    
+    public function canView()
+    {//ne fonctionne pas
+        return $this->getRight('read');
+    }
 
-    public function isDeletable($force_delete = false, &$errors = array())
+    public function canDelete()
     {
         return $this->getRight('delete');
     }
-    
-    public function canDelete() {
-        return $this->getRight('delete');
-    }
-    
-    public function canEdit() {
+
+    public function canEdit()
+    {
         return $this->getRight('create');
+    }
+
+    // Getters booléens: 
+
+    public function isCreatable($force_create = false, &$errors = array())
+    {
+//        return $this->isEditable(); // pas de droits user ici 
+        return 1;
+    }
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+//        return $this->getRight('create');// pas de droits user ici 
+        return 1;
+    }
+
+    public function isDeletable($force_delete = false, &$errors = array())
+    {
+//        return $this->getRight('delete');// pas de droits user ici 
+        return 1;
     }
 
     // Getters array: 

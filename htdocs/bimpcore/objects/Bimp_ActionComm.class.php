@@ -42,7 +42,12 @@ class Bimp_ActionComm extends BimpObject
     }
     
     public function canView()
-    {//ne fonctionne pas
+    {
+        global $user;
+        //ne fonctionne pas
+        if ($user->id == 270) {
+            return 0;
+        }
         return $this->getRight('read');
     }
 

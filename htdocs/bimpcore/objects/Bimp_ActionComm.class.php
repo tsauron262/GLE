@@ -297,39 +297,63 @@ class Bimp_ActionComm extends BimpObject
 
         $errors = parent::validatePost();
 
-        if (BimpTools::isPostFieldSubmit('users_assigned') && $this->canEdit()) {
+        if ($this->canEdit()) {
             $this->dol_object->userassigned = array();
-
             $users = BimpTools::getPostFieldValue('users_assigned', array());
+            $transparency = (int) $this->getData('transparency');
 
-            if (empty($users)) {
-                $this->set('fk_user_action', 0);
-            } else {
-                $this->set('fk_user_action', (int) $users[0]);
-                $transparency = (int) $this->getData('transparency');
-
+            if (!empty($users)) {
                 foreach ($users as $id_user) {
-                    $this->dol_object->userassigned[$id_user] = array(
-                        'id'           => $id_user,
-                        'transparency' => $transparency
-                    );
+                    if (!isset($this->dol_object->userassigned[$id_user])) {
+                        $this->dol_object->userassigned[$id_user] = array(
+                            'id'           => $id_user,
+                            'transparency' => $transparency
+                        );
+                    }
                 }
             }
-        }
 
-        if (BimpTools::isPostFieldSubmit('contacts_assigned') && $this->canEdit()) {
-            $contacts = BimpTools::getPostFieldValue('contacts_assigned', array());
+            $usergroups = BimpTools::getPostFieldValue('usergroups_assigned', array());
+            if (!empty($usergroups)) {
+                foreach ($usergroups as $id_group) {
+                    $users = BimpCache::getGroupUsersList($id_group);
 
-            $this->dol_object->socpeopleassigned = array();
-
-            if (empty($contacts)) {
-                $this->set('fk_contact', 0);
+                    if (!empty($users)) {
+                        foreach ($users as $id_user) {
+                            if (!isset($this->dol_object->userassigned[$id_user])) {
+                                $this->dol_object->userassigned[$id_user] = array(
+                                    'id'           => $id_user,
+                                    'transparency' => $transparency
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (empty($this->dol_object->userassigned)) {
+                $this->set('fk_user_action', 0);
             } else {
-                $this->set('fk_contact', (int) $contacts[0]);
-                foreach ($contacts as $id_contact) {
-                    $this->dol_object->socpeopleassigned[$id_contact] = array(
-                        'id' => $id_contact
-                    );
+                foreach ($this->dol_object->userassigned as $id_user => $data) {
+                    $this->set('fk_user_action', $id_user);
+                    break;
+                }
+            }
+
+            if (BimpTools::isPostFieldSubmit('contacts_assigned')) {
+                $contacts = BimpTools::getPostFieldValue('contacts_assigned', array());
+
+                $this->dol_object->socpeopleassigned = array();
+
+                if (empty($contacts)) {
+                    $this->set('fk_contact', 0);
+                } else {
+                    $this->set('fk_contact', (int) $contacts[0]);
+                    foreach ($contacts as $id_contact) {
+                        $this->dol_object->socpeopleassigned[$id_contact] = array(
+                            'id' => $id_contact
+                        );
+                    }
                 }
             }
         }

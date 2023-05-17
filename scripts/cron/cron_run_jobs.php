@@ -119,26 +119,23 @@ if (!empty($dolibarr_main_db_readonly)) {
 	exit(-1);
 }
 
-require_once DOL_DOCUMENT_ROOT. '/bimpcore.Bimp_Lib.php';
-$bdb = BimpCache::getBdb(true);
-
 // If param userlogin is reserved word 'firstadmin'
 if ($userlogin == 'firstadmin') {
 	$sql = 'SELECT login, entity from '.MAIN_DB_PREFIX.'user WHERE admin = 1 and statut = 1 ORDER BY entity LIMIT 1';
-	$resql = $bdb->db->query($sql);
+	$resql = $db->query($sql);
 	if ($resql) {
-		$obj = $bdb->db->fetch_object($resql);
+		$obj = $db->fetch_object($resql);
 		if ($obj) {
 			$userlogin = $obj->login;
 			echo "First admin user found is login '".$userlogin."', entity ".$obj->entity."\n";
 		}
 	} else {
-		dol_print_error($bdb->db);
+		dol_print_error($db);
 	}
 }
 
 // Check user login
-$user = new User($bdb->db);
+$user = new User($db);
 $result = $user->fetch('', $userlogin, '', 1);
 if ($result < 0) {
 	echo "User Error: ".$user->error;
@@ -171,7 +168,7 @@ if (isset($argv[3]) && $argv[3]) {
 }
 
 // create a jobs object
-$object = new Cronjob($bdb->db);
+$object = new Cronjob($db);
 
 $filter = array();
 if (!empty($id)) {
@@ -210,7 +207,7 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
 			echo " -> we change entity so we reload mysoc, langs, user and conf";
 
 			$conf->entity = (empty($line->entity) ? 1 : $line->entity);
-			$conf->setValues($bdb->db); // This make also the $mc->setValues($conf); that reload $mc->sharings
+			$conf->setValues($db); // This make also the $mc->setValues($conf); that reload $mc->sharings
 			$mysoc->setMysoc($conf);
 
 			// Force recheck that user is ok for the entity to process and reload permission for entity
@@ -252,7 +249,7 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
 
 			dol_syslog("cron_run_jobs.php line->datenextrun:".dol_print_date($line->datenextrun, 'dayhourrfc')." line->datestart:".dol_print_date($line->datestart, 'dayhourrfc')." line->dateend:".dol_print_date($line->dateend, 'dayhourrfc')." now:".dol_print_date($now, 'dayhourrfc'));
 
-			$cronjob = new Cronjob($bdb->db);
+			$cronjob = new Cronjob($db);
 			$result = $cronjob->fetch($line->id);
 			if ($result < 0) {
 				echo "Error cronjobid: ".$line->id." cronjob->fetch: ".$cronjob->error."\n";
@@ -302,7 +299,7 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
 	echo "cron_run_jobs.php no qualified job found\n";
 }
 
-$bdb->db->close();
+$db->close();
 
 if ($nbofjobslaunchedko) {
 	exit(1);

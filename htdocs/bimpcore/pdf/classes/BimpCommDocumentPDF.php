@@ -130,7 +130,8 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                             }
                         }
                     }
-                    
+                    if (BimpCore::isEntity('bimp'))
+                        $this->fromCompany->name = 'BIMP';
                     if($this->object->array_options['options_type'] == 'C' || $this->object->array_options['options_type'] == 'CTC'){
                         $this->fromCompany->url = 'www.bimp-pro.fr';
                     }

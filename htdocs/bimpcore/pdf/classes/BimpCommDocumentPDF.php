@@ -110,7 +110,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
                 if (method_exists($this->object, 'fetch_optionals')) {
                     $this->object->fetch_optionals();
-                    if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
+                    if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0  && $this->object->array_options['options_type'] == 'S') {
                         $entrepot = new Entrepot($this->db);
                         $entrepot->fetch($this->object->array_options['options_entrepot']);
                         if ($entrepot->address != "" && $entrepot->town != "") {
@@ -129,6 +129,13 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                                 }
                             }
                         }
+                    }
+                    
+                    if($this->object->array_options['options_type'] == 'C' || $this->object->array_options['options_type'] == 'CTC'){
+                        $this->fromCompany->url = 'www.bimp-pro.fr';
+                    }
+                    if($this->object->array_options['options_type'] == 'E' || $this->object->array_options['options_type'] == 'CTE'){
+                        $this->fromCompany->url = 'www.bimp-education.fr';
                     }
                 }
 

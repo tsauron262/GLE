@@ -251,7 +251,7 @@ class BIMP_Task extends BimpObject
         if ($btn = $this->getAddFilesButton()) {
             $buttons[] = $btn;
         }
-        
+
         if ($this->hasSousTaches()) {
             $buttons[] = array(
                 'label'   => 'Liste des sous-tâches',
@@ -534,12 +534,25 @@ class BIMP_Task extends BimpObject
         $tasks['content'] = BimpTools::merge_array(
                         // Tâches affectées à l'utilisateur actuel        
                         self::getNewTasks(array(
-                            'id'            => array(
+                            'id'      => array(
                                 'operator' => '>',
                                 'value'    => $id_max
                             ),
-                            'id_user_owner' => (int) $id_user,
-                            'status'        => array(0, 1, 3
+                            'or_user' => array(
+                                'or' => array(
+                                    'owner'  => array(
+                                        'and_fields' => array(
+                                            'id_user_owner' => (int) $id_user,
+                                            'status'        => array(0, 1, 3)
+                                        )
+                                    ),
+                                    'author' => array(
+                                        'and_fields' => array(
+                                            'user_create' => (int) $id_user,
+                                            'status'      => 2
+                                        )
+                                    )
+                                )
                             )), 'my_task', $nb_my
                         ), self::getNewTasks(BimpTools::merge_array(array(// Tâches non affectées
                                     'id'            => array(

@@ -57,7 +57,7 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
         $cc .= ($cc ? ', '  : '') . $email_tech;
     }
     
-    $cc .= ($cc ? ', '  : '') . 'f.martinez@bimp.fr';
+//    $cc .= ($cc ? ', '  : '') . 'f.martinez@bimp.fr';
 
     $bm = new BimpMail($fi, $subject, $email_cli, '', $message, $reply_to, $cc);
 

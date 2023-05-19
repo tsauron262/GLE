@@ -4260,15 +4260,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             //$to = "0686691814";
             $fromsms = 'SAV LDLC';
 
-            $to = traiteNumMobile($to);
-            if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
-                $errors[] = 'Numéro invalide pour l\'envoi du sms';
-            } else {
-                $smsfile = new CSMSFile($to, $fromsms, $sms);
-                if (!$smsfile->sendfile()) {
-                    $errors[] = 'Echec de l\'envoi du sms';
-                }
-            }
+//            $to = traiteNumMobile($to);
+//            if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
+//                $errors[] = 'Numéro invalide pour l\'envoi du sms';
+//            } else {
+//                $smsfile = new CSMSFile($to, $fromsms, $sms);
+//                if (!$smsfile->sendfile()) {
+//                    $errors[] = 'Echec de l\'envoi du sms';
+//                }
+//            }
         }
 
         if ($contact_pref === 2) {

@@ -4488,17 +4488,22 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $commandes = array();
             foreach ($rows as $r) {
                 $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
-                $idComm = (int) $comm->getIdCommercial();
+                
+                if (!BimpObject::objectLoaded($comm)) {
+                    continue;
+                }
+                
+                $id_user = (int) $comm->getIdCommercial();
 
-                if (!$idComm) {
-                    $idComm = $comm->getIdContact('internal', 'SALESREPSIGN');
+                if (!$id_user) {
+                    $id_user = $comm->getIdContact('internal', 'SALESREPSIGN');
                 }
 
-                if (!isset($commandes[$idComm])) {
-                    $commandes[$idComm] = array();
+                if (!isset($commandes[$id_user])) {
+                    $commandes[$id_user] = array();
                 }
 
-                $commandes[$idComm][] = $comm->getLink();
+                $commandes[$id_user][] = $comm;
             }
 
             if (!empty($commandes)) {

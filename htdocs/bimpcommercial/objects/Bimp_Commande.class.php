@@ -4510,7 +4510,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     foreach ($user_commandes as $commande) {
                         $to = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
 
-                        $to .= ($to ? ', ' : '') . 'f.martinez@bimp.fr';
+//                        $to .= ($to ? ', ' : '') . 'f.martinez@bimp.fr';
 
                         if ($to) {
                             $soc = $commande->getChildObject('client');

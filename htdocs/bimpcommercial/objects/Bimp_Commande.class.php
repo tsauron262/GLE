@@ -4378,23 +4378,23 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $out = '';
 
         // Rappels quotidiens: 
-        $result = static::sendRappelCommandesBrouillons();
-        if ($result) {
-            $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels commandes brouillons -----------<br/><br/>' . $result;
-        }
-
-        $result = static::checkLinesEcheances();
-        if ($result) {
-            $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels échéances commandes -----------<br/><br/>' . $result;
-        }
+//        $result = static::sendRappelCommandesBrouillons();
+//        if ($result) {
+//            $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels commandes brouillons -----------<br/><br/>' . $result;
+//        }
+//
+//        $result = static::checkLinesEcheances();
+//        if ($result) {
+//            $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels échéances commandes -----------<br/><br/>' . $result;
+//        }
 
         // Rappels Hebdomadaires: 
-        if ((int) date('N') == 7) {
+//        if ((int) date('N') == 7) {
             $result = static::sendRappelsNotBilled();
             if ($result) {
                 $out .= ($out ? '<br/><br/>' : '') . '------- Rappels commandes non facturées------<br/><br/>' . $result;
             }
-        }
+//        }
 
         return $out;
     }

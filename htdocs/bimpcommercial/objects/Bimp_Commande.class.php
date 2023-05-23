@@ -4387,13 +4387,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
 //        if ($result) {
 //            $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels échéances commandes -----------<br/><br/>' . $result;
 //        }
-
         // Rappels Hebdomadaires: 
 //        if ((int) date('N') == 7) {
-            $result = static::sendRappelsNotBilled();
-            if ($result) {
-                $out .= ($out ? '<br/><br/>' : '') . '------- Rappels commandes non facturées------<br/><br/>' . $result;
-            }
+        $result = static::sendRappelsNotBilled();
+        if ($result) {
+            $out .= ($out ? '<br/><br/>' : '') . '------- Rappels commandes non facturées------<br/><br/>' . $result;
+        }
 //        }
 
         return $out;
@@ -4488,11 +4487,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
             $commandes = array();
             foreach ($rows as $r) {
                 $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
-                
+
                 if (!BimpObject::objectLoaded($comm)) {
                     continue;
                 }
-                
+
                 $id_user = (int) $comm->getIdCommercial();
 
                 if (!$id_user) {
@@ -4507,30 +4506,32 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
 
             if (!empty($commandes)) {
-                foreach ($commandes as $id_user => $commande) {
-                    $to = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
+                foreach ($commandes as $id_user => $user_commandes) {
+                    foreach ($user_commandes as $commande) {
+                        $to = BimpTools::getUserEmailOrSuperiorEmail($id_user, true);
 
-                    $to .= ($to ? ', ' : '') . 'f.martinez@bimp.fr';
-                    
-                    if ($to) {
-                        $soc = $commande->getChildObject('client');
+                        $to .= ($to ? ', ' : '') . 'f.martinez@bimp.fr';
 
-                        $msg = 'Bonjour,<br/>';
-                        $msg .= 'La commande ' . $commande->getLink() . ' du client ' . $soc->getLink() . ', créée le ' . $commande->displayData('date_creation', 'default', 0, 1) . ' n\'est pas facturée.<br/>';
-                        $msg .= 'Merci de la régulariser au plus vite.';
+                        if ($to) {
+                            $soc = $commande->getChildObject('client');
 
-                        $out .= ' - Mail to ' . $to . ' : ';
-                        if (mailSyn2("Commande " . $commande->getRef() . ' non facturée', $to, '', $msg)) {
-                            $out .= '[OK]';
-                            $nOk++;
-                        } else {
-                            $out .= '[ECHEC]';
-                            $nFails++;
-                        }
-                        $out .= '<br/>';
+                            $msg = 'Bonjour,<br/>';
+                            $msg .= 'La commande ' . $commande->getLink() . ' du client ' . $soc->getLink() . ', créée le ' . $commande->displayData('date_creation', 'default', 0, 1) . ' n\'est pas facturée.<br/>';
+                            $msg .= 'Merci de la régulariser au plus vite.';
 
-                        if ($nFails > 20 || $nOk > 2100) {
-                            break;
+                            $out .= ' - Mail to ' . $to . ' : ';
+                            if (mailSyn2("Commande " . $commande->getRef() . ' non facturée', $to, '', $msg)) {
+                                $out .= '[OK]';
+                                $nOk++;
+                            } else {
+                                $out .= '[ECHEC]';
+                                $nFails++;
+                            }
+                            $out .= '<br/>';
+
+                            if ($nFails > 20 || $nOk > 2100) {
+                                break;
+                            }
                         }
                     }
                 }

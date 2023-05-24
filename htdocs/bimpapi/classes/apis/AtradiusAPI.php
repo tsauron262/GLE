@@ -212,6 +212,7 @@ class AtradiusAPI extends BimpAPI
 
         if (!$user->rights->bimpcommercial->gestion_recouvrement) {
             $errors[] = "Vous n'avez pas le droit de créer les assurances Atradius";
+            return array();
         }
 
         if (!isset($params['currencyCode']) and $params['coverType'] != self::CREDIT_CHECK) {
@@ -221,7 +222,7 @@ class AtradiusAPI extends BimpAPI
         if (isset($params['creditLimitAmount']) and $params['coverType'] == self::CREDIT_CHECK) {
             unset($params['creditLimitAmount']);
         }
-
+        
         $data = $this->execCurlCustom('createCover', array(
             'fields' => $params,
             'type'   => 'POST'
@@ -265,9 +266,10 @@ class AtradiusAPI extends BimpAPI
 
         global $user;
 
-        if (!$user->rights->bimpcommercial->gestion_recouvrement)
+        if (!$user->rights->bimpcommercial->gestion_recouvrement) {
             $errors[] = "Vous n'avez pas le droit de mettre à jour les assurances Atradius";
-
+            return array();
+        }
 
 //        if($params['coverType'] == self::CREDIT_CHECK) {
 //            $errors[] = "Tentative de mise à jour de crédit check impossible";

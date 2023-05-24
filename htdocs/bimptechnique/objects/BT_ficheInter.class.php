@@ -2158,7 +2158,7 @@ class BT_ficheInter extends BimpDolObject
                     $email_cli = BimpTools::cleanEmailsStr($this->getData('email_signature'));
                     if (!$email_cli) {
                         if (BimpObject::objectLoaded($client)) {
-                            $email_cli = BimpTools::cleanEmailsStr($email_cli);
+                            $email_cli = BimpTools::cleanEmailsStr($client->getData('email'));
                         }
                     }
                     if (!count($this->getData('commandes')) && !$this->getData('fk_contrat')) {
@@ -2985,7 +2985,7 @@ class BT_ficheInter extends BimpDolObject
                 if(array_key_exists('signataire', $_POST) and BimpTools::getPostFieldValue('signataire') == '')
                     $_POST['signataire'] = $contact->getName();
                 
-                if(array_key_exists('email_signature', $_POST) and BimpTools::getPostFieldValue('email_signature') == '')
+//                if(array_key_exists('email_signature', $_POST) and BimpTools::getPostFieldValue('email_signature') == '')
                     $_POST['email_signature'] = $contact->getData('email');
             }
         }

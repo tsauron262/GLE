@@ -31,7 +31,7 @@ class AtradiusAPI extends BimpAPI
             'url_base_type' => 'auth'
         ),
         'getMyBuyer'   => array(
-            'label' => 'Details ce nos client',
+            'label' => 'Details de nos client',
             'url'   => '/credit-insurance/organisation-management/v1/buyers/my-buyers'
         ),
         'getBuyer'     => array(
@@ -47,7 +47,7 @@ class AtradiusAPI extends BimpAPI
             'url'   => '/credit-insurance/cover-management/v1/covers',
         ),
         'updateCover'  => array(
-            'label' => 'MAJ assurance',
+            'label' => 'Editer assurance',
             'url'   => '/credit-insurance/cover-management/v1/covers',
         ),
         'deleteCover'  => array(
@@ -55,7 +55,7 @@ class AtradiusAPI extends BimpAPI
             'url'   => '/credit-insurance/cover-management/v1/covers',
         ),
         'decisions'    => array(
-            'label' => 'Check des décisions',
+            'label' => 'Vérification des décisions',
             'url'   => '/credit-insurance/cover-management/v1/covers'
         )
     );
@@ -66,8 +66,6 @@ class AtradiusAPI extends BimpAPI
     // Requêtes: 
     public function getMyBuyer($filters, &$errors = array())
     {
-
-
         $data = $this->execCurlCustom('getMyBuyer', array(
             'url_params' => $filters
                 ), $errors);
@@ -253,7 +251,8 @@ class AtradiusAPI extends BimpAPI
                 break;
             default:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-                $errors[] = $cover_type . " a été refusée<br/>";
+//                $errors[] = $cover_type . " a été refusée<br/>";
+                $errors[] = "Echec de la requête auprès d'Atradius";
                 break;
         }
 

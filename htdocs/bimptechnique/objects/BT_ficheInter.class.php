@@ -2029,6 +2029,7 @@ class BT_ficheInter extends BimpDolObject
                     $errors = $this->update($warnings, true);
                     $this->no_update_process = false;
                 }
+                
                 //print_r($errors); die('dhudfishfds');
                 if (!count($errors)) {
                     // Mise à jour ActionComm
@@ -2050,9 +2051,6 @@ class BT_ficheInter extends BimpDolObject
 
                     if (count($result['errors'])) {
                         $warnings[] = BimpTools::getMsgFromArray($result['errors'], 'Echec création du fichier PDF');
-                        //print_r($warnings); die ('eee');
-                    } else {
-                        //die('ok');
                     }
 
                     // Fermeture auto: 
@@ -2185,7 +2183,7 @@ class BT_ficheInter extends BimpDolObject
                     }
 
                     // Envoi au client: 
-                    if (!$auto_terminer && $type_signature !== self::TYPE_SIGN_DIST && !$this->getData('signed')) {
+                    if (!$auto_terminer && $type_signature !== self::TYPE_SIGN_DIST/* && !$this->getData('signed')*/) {
                         if (!is_file($pdf_file)) {
                             $mail_cli_errors[] = 'Fichier PDF de la Fiche Inter absent';
                             BimpCore::addlog('PDF Fiche Inter absent pour envoi par mail suite à signature', Bimp_Log::BIMP_LOG_ERREUR, 'bimptechnique', $this, array(
@@ -2198,17 +2196,18 @@ class BT_ficheInter extends BimpDolObject
                         }
 
                         if (!count($mail_cli_errors)) {
+                            $signed = (int) $this->getData('signed');
                             $subject = "Fiche d'intervention " . $ref;
 
                             $message = "Bonjour,<br/><br/>Veuillez trouver ci-joint votre Fiche d'Intervention<br/><br/>";
 
-                            if ($type_signature == self::TYPE_SIGN_PAPIER) {
+                            if ($type_signature == self::TYPE_SIGN_PAPIER && !$signed) {
                                 $message .= "Merci de bien vouloir l'envoyer par email à votre interlocuteur commercial, dûment complétée et signée.<br/>";
                             }
 
                             $message .= "Vous souhaitant bonne réception de ces éléments, nous restons à votre disposition pour tout complément d'information.<br/>";
 
-                            if ($type_signature == self::TYPE_SIGN_PAPIER) {
+                            if ($type_signature == self::TYPE_SIGN_PAPIER && !$signed) {
                                 $message .= "Dans l'attente de votre retour.<br/>";
                             }
 

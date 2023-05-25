@@ -2220,7 +2220,7 @@ class BT_ficheInter extends BimpDolObject
                                 $cc = ($cc ? ', ' : '') . $email_tech;
                             }
 
-                            $cc .= ($cc ? ', ' : '') . 'f.martinez@bimp.fr';
+//                            $cc .= ($cc ? ', ' : '') . 'f.martinez@bimp.fr';
 
                             $bimpMail = new BimpMail($this, $subject, $email_cli, '', $message, $reply_to, $cc);
                             $bimpMail->addFile(array($pdf_file, 'application/pdf', $ref . '.pdf'));
@@ -2288,7 +2288,7 @@ class BT_ficheInter extends BimpDolObject
                             $to = $email_comm ? $email_comm : $email_tech;
                             $cc = ($email_comm ? $email_tech : '');
 
-                            $cc .= ($cc ? ', ' : '') . 'f.martinez@bimp.fr';
+//                            $cc .= ($cc ? ', ' : '') . 'f.martinez@bimp.fr';
 
                             if (!mailSyn2($subject, $to, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), $cc)) {
                                 $warnings[] = 'Echec de l\'envoi de l\'e-mail de notification au commercial du client';

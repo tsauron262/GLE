@@ -132,11 +132,8 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     }
                     if (BimpCore::isEntity('bimp'))
                         $this->fromCompany->name = 'BIMP';
-                    if($this->object->array_options['options_type'] == 'C' || $this->object->array_options['options_type'] == 'CTC'){
-                        $this->fromCompany->url = 'www.bimp-pro.fr';
-                    }
-                    if($this->object->array_options['options_type'] == 'E' || $this->object->array_options['options_type'] == 'CTE'){
-                        $this->fromCompany->url = 'www.bimp-education.fr';
+                    if($this->object->array_options['options_type'] == 'C' || $this->object->array_options['options_type'] == 'CTC' || $this->object->array_options['options_type'] == 'E' || $this->object->array_options['options_type'] == 'CTE'){
+                        $this->fromCompany->url = 'www.bimp-pro.fr - www.bimp-education.fr';
                     }
                 }
 

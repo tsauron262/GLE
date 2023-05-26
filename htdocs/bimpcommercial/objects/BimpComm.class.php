@@ -2712,6 +2712,11 @@ class BimpComm extends BimpDolObject
         foreach ($new_data as $field => $value) {
             $new_object->set($field, $value);
         }
+        
+        // Pour commandes fourn. (temporaire, todo: trouver pourquoi c'est pas ajusté en auto)
+        if (isset($new_object->dol_object->date_creation)) {
+            $new_object->dol_object->date_creation = date('Y-m-d H:i:s');
+        }
 
         $new_object->set('id', 0);
         $new_object->set('ref', '');
@@ -5248,7 +5253,7 @@ class BimpComm extends BimpDolObject
         if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente')) {
             $init_zone = $this->getInitData('zone_vente');
             $cur_zone = $this->getData('zone_vente');
-            
+
             if (!(int) $this->getData('fk_statut')) {
                 if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) ||
                         $this->getData('entrepot') == 164 || $init_id_entrepot == 164) &&

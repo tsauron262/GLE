@@ -432,12 +432,12 @@ switch ($type) {
     case 'taux_services':
         $commercial_fk_type_contact = 50;
         $filename = 'Services par commerciaux';
-//        $headers = array(
-//            'comm'    => 'Commercial',
-//            'ventes'  => 'Total CA HT',
-//            'service' => 'Total services HT',
-//            'percent' => 'Pourcentage'
-//        );
+        $headers = array(
+            'comm'    => 'Commercial',
+            'ventes'  => 'Total CA HT',
+            'service' => 'Total services HT',
+            'percent' => 'Pourcentage'
+        );
 
         $sql = BimpTools::getSqlSelect(array(
                     'a.total_ht',
@@ -445,7 +445,7 @@ switch ($type) {
 //                    'a.fk_product',
 //                    'a.product_type as line_product_type',
 //                    'p.fk_product_type as product_type',
-//                    'ec.fk_socpeople as id_user',
+                    'ec.fk_socpeople as id_user',
                     'p.ref as ref_prod'
         ));
         $sql .= BimpTools::getSqlFrom('facturedet', array(
@@ -477,7 +477,6 @@ switch ($type) {
                     ),
                     'a.fk_remise_except'   => 'IS_NULL',
                     'ec.fk_c_type_contact' => $commercial_fk_type_contact,
-                    'ec.fk_socpeople'      => 260,
                     'f.datef'              => array(
                         'min' => '2022-04-01',
                         'max' => '2023-03-31'
@@ -489,10 +488,6 @@ switch ($type) {
 
         $results = $bdb->executeS($sql, 'array');
         $users = array();
-
-//        echo '<pre>';
-//        print_r($results);
-//        echo '</pre>';
 
         if (is_array($results)) {
             foreach ($results as $r) {
@@ -508,39 +503,24 @@ switch ($type) {
                 if ($r['ref_prod'] && preg_match('/^SERV.+$/', $r['ref_prod'])) {
                     $users[(int) $r['id_user']]['services'] += $r['total_ht'];
                 }
-
-                $headers = array(
-                    'fac'  => 'Fac.',
-                    'prod' => 'Ref. prod',
-                    'tot'  => 'Total HT'
-                );
-                $filename = 'markey';
-                $rows[] = array(
-                    'fac'  => $r['fac_ref'],
-                    'prod' => $r['ref_prod'],
-                    'tot'  => $r['total_ht']
-                );
             }
         }
 
 
-//        foreach ($users as $id_user => $user_data) {
-//            if ($user_data['total']) {
-//                $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-//                $percent = $user_data['services'] / $user_data['total'] * 100;
-//
-//                $tp += $percent;
-//                $rows[] = array(
-//                    'comm'    => $u->getName(),
-//                    'ventes'  => $user_data['total'],
-//                    'service' => $user_data['services'],
-//                    'percent' => $percent
-//                );
-//            }
-//        }
-//        echo '<pre>';
-//        print_r($rows);
-//        exit;
+        foreach ($users as $id_user => $user_data) {
+            if ($user_data['total']) {
+                $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+                $percent = $user_data['services'] / $user_data['total'] * 100;
+
+                $rows[] = array(
+                    'comm'    => $u->getName(),
+                    'ventes'  => $user_data['total'],
+                    'service' => $user_data['services'],
+                    'percent' => $percent
+                );
+            }
+        }
+        
         break;
 }
 

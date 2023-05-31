@@ -33,7 +33,8 @@ if (!$type) {
     $types = array(
         'factures_credits' => 'Factures pour crédits clients',
         'stats_vente'      => 'States ventes sur 12 mois',
-        'ventes_prods'     => 'Ventes produits'
+        'ventes_prods'     => 'Ventes produits',
+        'taux_services'    => 'Pourcentage de vente de service par commerciaux'
     );
 
     $path = pathinfo(__FILE__);
@@ -268,7 +269,7 @@ switch ($type) {
                     $ventes[(int) $r['id_entrepot']][$dt_str] = 0;
                 }
 
-                $ventes[(int) $r['id_entrepot']][$dt_str] ++;
+                $ventes[(int) $r['id_entrepot']][$dt_str]++;
             }
         }
 
@@ -367,7 +368,6 @@ switch ($type) {
 
         $result = $bdb->executeS($sql, 'array');
 
-
         if (is_null($result)) {
             echo $bdb->db->lasterror() . '<br/><br/>';
             exit;
@@ -400,7 +400,6 @@ switch ($type) {
             'type_client' => 'Type client'
         );
 
-
         foreach ($result as $r) {
             $pu_ht = (float) $r['subprice'];
 
@@ -428,6 +427,102 @@ switch ($type) {
             echo 'Done: ' . $nb . '<br/>';
             echo 'Rows: ' . count($rows) . '<br/>';
         }
+        break;
+
+    case 'taux_services':
+        $commercial_fk_type_contact = 50;
+        $filename = 'Services par commerciaux';
+        $headers = array(
+            'comm'    => 'Commercial',
+            'percent' => 'Pourcentage'
+        );
+
+        $sql = BimpTools::getSqlSelect(array(
+                    'a.total_ht',
+                    'a.fk_product',
+                    'a.product_type as line_product_type',
+                    'p.fk_product_type as product_type',
+                    'ec.fk_socpeople as id_user'
+        ));
+        $sql .= BimpTools::getSqlFrom('facturedet', array(
+                    'p'   => array(
+                        'table' => 'product',
+                        'on'    => 'p.rowid = a.fk_product'
+                    ),
+                    'f'   => array(
+                        'table' => 'facture',
+                        'on'    => 'f.rowid = a.fk_facture'
+                    ),
+                    'fef' => array(
+                        'table' => 'facture_extrafields',
+                        'on'    => 'fef.fk_object = a.fk_facture'
+                    ),
+                    'ec'  => array(
+                        'table' => 'element_contact',
+                        'on'    => 'ec.element_id = a.fk_facture'
+                    )
+        ));
+
+        $sql .= BimpTools::getSqlWhere(array(
+                    'a.total_ht'           => array(
+                        'operator' => '!=',
+                        'value'    => 0
+                    ),
+                    'a.fk_remise_except'   => 'IS_NULL',
+                    'ec.fk_c_type_contact' => $commercial_fk_type_contact,
+                    'f.datef'              => array(
+                        'min' => '2022-04-01',
+                        'max' => '2023-03-31'
+                    )
+        ));
+
+//        echo $sql . '<br/><br/>';
+
+        $results = $bdb->executeS($sql, 'array');
+        $total = 0;
+        $users = array();
+
+        if (is_array($results)) {
+            foreach ($results as $r) {
+                if ((int) $r['fk_product']) {
+                    if ((int) $r['product_type'] != 1) {
+                        continue;
+                    }
+                } elseif ((int) $r['line_product_type'] != 1) {
+                    continue;
+                }
+
+                $total += $r['total_ht'];
+
+                if (!isset($users[(int) $r['id_user']])) {
+                    $users[(int) $r['id_user']] = 0;
+                }
+
+                $users[(int) $r['id_user']] += $r['total_ht'];
+            }
+        }
+
+        echo 'TOT: ' . $total .'<br/><br/>';
+        
+        $tp = 0;
+
+        if ($total) {
+            foreach ($users as $id_user => $tot_user) {
+                $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+                $percent = $tot_user / $total * 100;
+
+                $tp += $percent;
+                $rows[] = array(
+                    'comm'    => $u->getName(),
+                    'percent' => $percent
+                );
+            }
+        }
+        
+        echo 'TP: ' . $tp.'<br/><br/>';
+        echo '<pre>';
+        print_r($rows);
+        exit;
         break;
 }
 

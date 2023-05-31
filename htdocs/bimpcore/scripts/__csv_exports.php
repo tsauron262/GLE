@@ -434,7 +434,8 @@ switch ($type) {
         $filename = 'Services par commerciaux';
         $headers = array(
             'comm'    => 'Commercial',
-            'ventes'  => 'CA (HT)',
+            'ventes'  => 'Total CA HT',
+            'service' => 'Total services HT',
             'percent' => 'Pourcentage'
         );
 
@@ -458,6 +459,10 @@ switch ($type) {
                         'table' => 'facture_extrafields',
                         'on'    => 'fef.fk_object = a.fk_facture'
                     ),
+                    'fef' => array(
+                        'table' => 'facture_extrafields',
+                        'on'    => 'fef.fk_object = a.fk_facture'
+                    ),
                     'ec'  => array(
                         'table' => 'element_contact',
                         'on'    => 'ec.element_id = a.fk_facture'
@@ -474,56 +479,57 @@ switch ($type) {
                     'f.datef'              => array(
                         'min' => '2022-04-01',
                         'max' => '2023-03-31'
+                    ),
+                    'fef.type'             => array(
+                        'in' => array('C', 'E')
                     )
         ));
 
 //        echo $sql . '<br/><br/>';
 
         $results = $bdb->executeS($sql, 'array');
-        $total = 0;
         $users = array();
 
         if (is_array($results)) {
             foreach ($results as $r) {
+                $is_service = true;
                 if ((int) $r['fk_product']) {
                     if ((int) $r['product_type'] != 1) {
-                        continue;
+                        $is_service = false;
                     }
                 } elseif ((int) $r['line_product_type'] != 1) {
-                    continue;
+                    $is_service = false;
                 }
-
-                $total += $r['total_ht'];
 
                 if (!isset($users[(int) $r['id_user']])) {
-                    $users[(int) $r['id_user']] = 0;
+                    $users[(int) $r['id_user']] = array(
+                        'total'    => 0,
+                        'services' => 0
+                    );
                 }
 
-                $users[(int) $r['id_user']] += $r['total_ht'];
+                $users[(int) $r['id_user']]['total'] += $r['total_ht'];
+
+                if ($is_service) {
+                    $users[(int) $r['id_user']]['services'] += $r['total_ht'];
+                }
             }
         }
 
-        $tp = 0;
-
-        if ($total) {
-            foreach ($users as $id_user => $tot_user) {
+        foreach ($users as $id_user => $user_data) {
+            if ($user_data['total']) {
                 $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-                $percent = $tot_user / $total * 100;
+                $percent = $user_data['services'] / $user_data['total'] * 100;
 
                 $tp += $percent;
                 $rows[] = array(
                     'comm'    => $u->getName(),
-                    'ventes'  => $tot_user,
+                    'ventes'  => $user_data['total'],
+                    'service' => $user_data['services'],
                     'percent' => $percent
                 );
             }
         }
-
-        $rows[] = array(
-            'comm'    => 'Total',
-            'ventes'  => $total,
-            'percent' => $tp
-        );
         break;
 }
 

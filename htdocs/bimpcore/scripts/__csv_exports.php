@@ -513,7 +513,7 @@ switch ($type) {
                 $tp += $percent;
                 $rows[] = array(
                     'comm'    => $u->getName(),
-                    'vente'   => $tot_user,
+                    'ventes'  => $tot_user,
                     'percent' => $percent
                 );
             }
@@ -521,7 +521,7 @@ switch ($type) {
 
         $rows[] = array(
             'comm'    => 'Total',
-            'vente'   => $total,
+            'ventes'  => $total,
             'percent' => $tp
         );
         break;

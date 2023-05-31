@@ -444,7 +444,8 @@ switch ($type) {
                     'a.fk_product',
                     'a.product_type as line_product_type',
                     'p.fk_product_type as product_type',
-                    'ec.fk_socpeople as id_user'
+                    'ec.fk_socpeople as id_user',
+                    'p.ref as ref_prod'
         ));
         $sql .= BimpTools::getSqlFrom('facturedet', array(
                     'p'   => array(
@@ -468,7 +469,6 @@ switch ($type) {
                         'on'    => 'ec.element_id = a.fk_facture'
                     )
         ));
-
         $sql .= BimpTools::getSqlWhere(array(
                     'a.total_ht'           => array(
                         'operator' => '!=',
@@ -476,6 +476,7 @@ switch ($type) {
                     ),
                     'a.fk_remise_except'   => 'IS_NULL',
                     'ec.fk_c_type_contact' => $commercial_fk_type_contact,
+                    'ec.fk_socpeople'      => 260,
                     'f.datef'              => array(
                         'min' => '2022-04-01',
                         'max' => '2023-03-31'
@@ -485,22 +486,15 @@ switch ($type) {
                     )
         ));
 
-//        echo $sql . '<br/><br/>';
-
         $results = $bdb->executeS($sql, 'array');
         $users = array();
 
+//        echo '<pre>';
+//        print_r($results);
+//        echo '</pre>';
+        
         if (is_array($results)) {
             foreach ($results as $r) {
-                $is_service = true;
-                if ((int) $r['fk_product']) {
-                    if ((int) $r['product_type'] != 1) {
-                        $is_service = false;
-                    }
-                } elseif ((int) $r['line_product_type'] != 1) {
-                    $is_service = false;
-                }
-
                 if (!isset($users[(int) $r['id_user']])) {
                     $users[(int) $r['id_user']] = array(
                         'total'    => 0,
@@ -510,7 +504,7 @@ switch ($type) {
 
                 $users[(int) $r['id_user']]['total'] += $r['total_ht'];
 
-                if ($is_service) {
+                if ($r['ref_prod'] && preg_match('/^SERV.+$/', $r['ref_prod'])) {
                     $users[(int) $r['id_user']]['services'] += $r['total_ht'];
                 }
             }
@@ -530,6 +524,10 @@ switch ($type) {
                 );
             }
         }
+        
+        echo '<pre>';
+        print_r($rows);
+        exit;
         break;
 }
 

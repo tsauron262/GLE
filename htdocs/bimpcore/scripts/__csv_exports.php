@@ -434,6 +434,7 @@ switch ($type) {
         $filename = 'Services par commerciaux';
         $headers = array(
             'comm'    => 'Commercial',
+            'ventes'  => 'CA (HT)',
             'percent' => 'Pourcentage'
         );
 
@@ -502,8 +503,6 @@ switch ($type) {
             }
         }
 
-        echo 'TOT: ' . $total .'<br/><br/>';
-        
         $tp = 0;
 
         if ($total) {
@@ -514,15 +513,17 @@ switch ($type) {
                 $tp += $percent;
                 $rows[] = array(
                     'comm'    => $u->getName(),
+                    'vente'   => $tot_user,
                     'percent' => $percent
                 );
             }
         }
-        
-        echo 'TP: ' . $tp.'<br/><br/>';
-        echo '<pre>';
-        print_r($rows);
-        exit;
+
+        $rows[] = array(
+            'comm'    => 'Total',
+            'vente'   => $total,
+            'percent' => $tp
+        );
         break;
 }
 

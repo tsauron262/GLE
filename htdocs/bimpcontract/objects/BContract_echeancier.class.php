@@ -257,13 +257,11 @@ class BContract_echeancier extends BimpObject
 
     public function getFacturesExterneByPeriode($periode = '')
     {
-        $return = [];
+        $return = array();
 
         if ($periode != '') {
-
             $obj = (array) json_decode($this->getData('facturesExterne_soldePeriode'));
             if (array_key_exists($periode, $obj)) {
-
                 $return['ref'] = $obj[$periode]->ref;
                 $return['ht'] = $obj[$periode]->ht;
                 $return['tva'] = $obj[$periode]->ht * 0.2;
@@ -815,12 +813,6 @@ class BContract_echeancier extends BimpObject
                 $html .= '</td>';
 
                 $infos = $this->getFacturesExterneByPeriode($dateTime_start_mkTime->format('Y-m-d') . '_' . $dateTime_end_mkTime->format('Y-m-d'));
-
-                if ($user->id == 270) {
-                    $html .= '<pre>';
-                    $html .= print_r($infos, 1);
-                    $html .= '</pre>';
-                }
                 
                 if (!count($infos)) {
                     $html .= '<td style="text-align:center">' . price($amount) . ' € </td>'

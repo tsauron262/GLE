@@ -726,6 +726,15 @@ fields:
     consigne_ref_ext:
         label: Consigne référence externe
         type: text
+        
+    type_educ: 
+        label: Type éducation
+        values: 
+            array: types_educ
+            
+    type_educ_fin_validite: 
+        label: Date de fin de validité (Enseignants / étudiants)
+        type: date
 
 fields_tables: 
     identity:
@@ -743,6 +752,10 @@ fields_tables:
             - field: nom
             - field: name_alias
             - field: fk_typent
+            - field: type_educ
+              edit: 1
+            - field: type_educ_fin_validite
+              edit: 1
             - field: client
               show: 
                   callback: isClient
@@ -1034,6 +1047,13 @@ forms:
                 display_if: 
                     field_name: is_company
                     show_values: 1
+            type_educ: 
+                field: type_educ
+            type_educ_fin_validite: 
+                field: type_educ_fin_validite
+                display_if: 
+                    field_name: type_educ
+                    show_values: E4
             mode_reglement: 
                 field: mode_reglement
             cond_reglement: 

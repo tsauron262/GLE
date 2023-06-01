@@ -339,6 +339,23 @@ class BContract_contrat extends BimpDolObject
     public function isActionAllowed($action, &$errors = []): int
     {
         switch ($action) {
+            case 'createEcheancier':
+                if ((int) $this->getData('statut') != self::CONTRAT_STATUS_ACTIVER) {
+                    $errors[] = 'Ce contrat n\'est pas actif';
+                    return 0;
+                }
+
+                if ((int) $this->getData('periodicity') == self::CONTRAT_PERIOD_AUCUNE) {
+                    $errors[] = 'Aucune périodicité';
+                    return 0;
+                }
+
+                if ((int) $this->db->getValue('bcontract_prelevement', 'id', 'id_contrat = ' . $this->id)) {
+                    $errors[] = 'Echéancier déjà créé';
+                    return 0;
+                }
+                return 1;
+
             case 'createSignature':
             case 'createSignatureDocuSign':
                 return !$this->getChildObject('signature')->isLoaded() and ((int) $this->getData('statut') == self::CONTRAT_STATUS_VALIDE || (int) $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER_TMP);
@@ -1514,7 +1531,7 @@ class BContract_contrat extends BimpDolObject
         if (count($list_factures)) {
             foreach ($list_factures as $link) {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
-                if (BimpObject::objectLoaded($facture) && $facture->getData('type') != 3) {
+                if (BimpObject::objectLoaded($facture) && (int) $facture->getData('type') != Facture::TYPE_DEPOSIT) {
                     $montant += $facture->getData('total_ht');
                 }
             }
@@ -1833,7 +1850,7 @@ class BContract_contrat extends BimpDolObject
                 $where = 'sourcetype = \'contrat\' and fk_source = ' . $this->id . ' AND targettype = \'propal\'';
                 $id_propal = (int) $this->db->getValue('element_element', 'fk_target', $where, 'rowid');
             }
-            
+
             return $id_propal;
         }
 
@@ -2529,13 +2546,27 @@ class BContract_contrat extends BimpDolObject
                 if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
                     $warnings[] = 'Le contrat a été facturé à partir d\'une commande, il ne comporte donc pas d\'échéancier';
                 }
-
-                $data = $this->getEcheancierData();
-                $html .= $echeancier->displayEcheancier($data, true);
+                
+                $html .= $echeancier->displayEcheancier();
             }
 
-            return $html;
+            if (count($errors)) {
+                $html .= BimpRender::renderAlerts($errors);
+            }
+
+            if (count($warnings)) {
+                $html .= BimpRender::renderAlerts($warnings, 'warning');
+            }
+
+            if ($this->isActionAllowed('createEcheancier')) {
+                $onclick = $this->getJsActionOnclick('createEcheancier');
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer l\'échéancier';
+                $html .= '</span>';
+            }
         }
+        
+        return $html;
     }
 
     public function renderContacts()
@@ -2851,9 +2882,11 @@ class BContract_contrat extends BimpDolObject
         return $errors;
     }
 
-    public function createEcheancier()
+    public function createEcheancier(&$warnings = array())
     {
-        if ($this->isLoaded()) {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
             $date = new DateTime($this->getData('date_start'));
             $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
             $instance->set('id_contrat', $this->id);
@@ -2863,8 +2896,10 @@ class BContract_contrat extends BimpDolObject
             $instance->set('client', $this->getData('fk_soc'));
             $instance->set('commercial', $this->getData('fk_commercial_suivi'));
             $instance->set('statut', 1);
-            return $instance->create();
+            $errors = $instance->create($warnings, true);
         }
+
+        return $errors;
     }
 
     public function closeFromCron($reason = "Contrat clos automatiquement")
@@ -3474,8 +3509,6 @@ class BContract_contrat extends BimpDolObject
 
             $signed_doc = ($data['have_contrat_signed']) ? true : false;
             if ($signed_doc) {
-                $contratChhild = $this->getContratChild();
-
                 $this->closeContratChildWhenActivateRenewManual();
 
                 $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
@@ -3495,7 +3528,8 @@ class BContract_contrat extends BimpDolObject
                 } else {
                     $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
                 }
-                if (!BimpCache::findBimpObjectInstance('bimpcontract', 'BContract_echeancier', ['id_contrat' => $this->id]) && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
+                $id_echeancier = (int) $this->db->getValue('bcontract_prelevement', 'id', 'id_contrat = ' . $this->id);
+                if (!$id_echeancier && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
                     $this->createEcheancier();
                 }
             } else {
@@ -4650,6 +4684,26 @@ class BContract_contrat extends BimpDolObject
             'errors'   => $errors,
             'warnings' => $warnings
         ];
+    }
+
+    public function actionCreateEcheancier($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Echéancier créé avec succès';
+        $sc = '';
+
+        $errors = $this->createEcheancier($warnings);
+
+        if (!count($errors) && !count($warnings)) {
+            $sc = 'bimp_reloadPage();';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
     }
 
     // Overrrides: 

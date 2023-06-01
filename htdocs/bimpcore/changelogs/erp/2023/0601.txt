@@ -1,0 +1,1 @@
+ - Ajout champs "Type éducation" et "Date de fin de validité (Enseignants / étudiants)" dans les fiches clients. 

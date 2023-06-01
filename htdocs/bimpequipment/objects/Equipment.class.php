@@ -933,7 +933,7 @@ class Equipment extends BimpObject
             $html = $this->displayData('id_product', $display_name, ($no_html ? 0 : 1), $no_html);
             if ($with_label) {
                 $product = $this->getChildObject('product');
-                if (BimpObject::objectLoaded($product)) {
+                if (BimpObject::objectLoaded($product) && $product->label != $html) {
                     if ($no_html) {
                         $html .= "\n";
                     } else {

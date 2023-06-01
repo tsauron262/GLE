@@ -888,7 +888,7 @@ class BContract_echeancier extends BimpObject
         $html .= "<table style='float:right' class='border' border='1'>";
         $html .= "<tr>";
         $html .= "<th style='border-right: 1px solid black; border-top: 1px solid white; border-left: 1px solid white; width: 20%'></th>";
-        $html .= "th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th>";
+        $html .= "<th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th>";
         $html .= "<th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th>";
         $html .= "<th style='background-color:#ed7c1c;color:white;text-align:center'>Achat</th>";
         $html .= '</tr>';

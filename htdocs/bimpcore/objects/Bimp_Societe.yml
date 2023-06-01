@@ -735,9 +735,6 @@ fields:
     type_educ_fin_validite: 
         label: Date de fin de validité (Enseignants / étudiants)
         type: date
-        display_if: 
-            field_name: type_educ
-            show_values: E4
 
 fields_tables: 
     identity:
@@ -1054,6 +1051,9 @@ forms:
                 field: type_educ
             type_educ_fin_validite: 
                 field: type_educ_fin_validite
+                display_if: 
+                    field_name: type_educ
+                    show_values: E4
             mode_reglement: 
                 field: mode_reglement
             cond_reglement: 

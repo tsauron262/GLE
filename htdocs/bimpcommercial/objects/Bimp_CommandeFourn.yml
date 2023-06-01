@@ -121,6 +121,7 @@ fields:
     date_creation: 
         label: Créée le
         type: datetime
+        dol_prop: date_creation
     date_valid: 
         label: Validée le
         type: datetime

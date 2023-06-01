@@ -280,15 +280,15 @@ class Bimp_ImportPaiementLine extends BimpObject
             if($obj->getData('total_ttc')+0.1 < $this->getData('price'))
                 $errors[] = 'Montant plus grand que le total de la piéce';
             if(!count($errors))
-                $errors = $obj->createAcompte($this->getData('price'), 20, $parent->id_mode_paiement, $this->getData('banque'), 1, $this->getData('date'), false, '', '', '', $warnings, 0, $this->getData('num'), $idFacture);
+                $errors = $obj->createAcompte($this->getData('price'), 20, $parent->id_mode_paiement, $this->getData('banque'), 0, $this->getData('date'), false, '', '', '', $warnings, 0, $this->getData('num'), $idFacture);
             $obj->addNoteToCommercial('Bonjour.<br/>Le client '.$client->getLink().' a effectué un virement de '.$this->getData('price').' €.');
         }
         
         if(!count($errors) && $idFacture > 0){
             global $user;
             $errors = BimpTools::merge_array($errors, $this->set('factures', array($idFacture)));
-            $errors = BimpTools::merge_array($errors, $this->set('traite', 1));
-            $errors = BimpTools::merge_array($errors, $this->set('id_user_traite', $user->id));
+//            $errors = BimpTools::merge_array($errors, $this->set('traite', 1));
+//            $errors = BimpTools::merge_array($errors, $this->set('id_user_traite', $user->id));
             
             $errors = BimpTools::merge_array($errors, $this->update());
         }

@@ -4080,7 +4080,7 @@ class BimpObject extends BimpCache
                         'obj_name'   => $this->object_name,
                         'id_obj'     => $this->id,
                         'doc_type'   => $doc_type
-            ), true);
+                            ), true);
         }
 
         return null;
@@ -9792,8 +9792,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     if (!file_put_contents($dir . '/' . $file_name . '.csv', $content)) {
                         $errors[] = 'Echec de la création du fichier "' . $file_name . '"';
                     } else {
-                        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('lists_csv/' . $this->module . '/' . $this->object_name . '/' . $list_name . '/' . $file_name . '.csv');
-                        $success_callback = 'window.open(\'' . $url . '\')';
+                        if (!file_exists($dir)) {
+                            $errors[] = 'Echec de la création du fichier "' . $file_name . '"';
+                        } else {
+                            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode('lists_csv/' . $this->module . '/' . $this->object_name . '/' . $list_name . '/' . $file_name . '.csv');
+                            $success_callback = 'window.open(\'' . $url . '\')';
+                        }
                     }
                 } elseif (!count($errors)) {
                     $warnings[] = 'Aucun contenu à générer trouvé';

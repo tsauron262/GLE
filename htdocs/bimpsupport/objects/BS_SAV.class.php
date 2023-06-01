@@ -4260,15 +4260,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             //$to = "0686691814";
             $fromsms = 'SAV LDLC';
 
-            $to = traiteNumMobile($to);
-            if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
-                $errors[] = 'Numéro invalide pour l\'envoi du sms';
-            } else {
-                $smsfile = new CSMSFile($to, $fromsms, $sms);
-                if (!$smsfile->sendfile()) {
-                    $errors[] = 'Echec de l\'envoi du sms';
-                }
-            }
+//            $to = traiteNumMobile($to);
+//            if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
+//                $errors[] = 'Numéro invalide pour l\'envoi du sms';
+//            } else {
+//                $smsfile = new CSMSFile($to, $fromsms, $sms);
+//                if (!$smsfile->sendfile()) {
+//                    $errors[] = 'Echec de l\'envoi du sms';
+//                }
+//            }
         }
 
         if ($contact_pref === 2) {
@@ -6735,13 +6735,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
             }
 
-            foreach ($this->getData('sacs') as $sacId) {
-                $sac = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Sac', $sacId);
-                $list = $sac->getSav();
-                if (count($list)) {
-                    foreach ($list as $sav) {
-                        if ($sav->id != $this->id)
-                            $errors[] = 'Le sac ' . $sac->getLink() . ' est déja utilisé dans le ' . $sav->getLink();
+            if (!$this->isLoaded()) { // temporaire
+                foreach ($this->getData('sacs') as $sacId) {
+                    $sac = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Sac', $sacId);
+                    $list = $sac->getSav();
+                    if (count($list)) {
+                        foreach ($list as $sav) {
+                            if ($sav->id != $this->id)
+                                $errors[] = 'Le sac ' . $sac->getLink() . ' est déja utilisé dans le ' . $sav->getLink();
+                        }
                     }
                 }
             }
@@ -7269,7 +7271,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $date = $dt->format('Y-m-d 00:00:00');
 
         $savs = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SAV', array(
-                    'a.date_terminer'        => array(
+                    'a.date_terminer'     => array(
                         'operator' => '<',
                         'value'    => $date
                     ),

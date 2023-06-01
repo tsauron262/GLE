@@ -31,7 +31,7 @@ class AtradiusAPI extends BimpAPI
             'url_base_type' => 'auth'
         ),
         'getMyBuyer'   => array(
-            'label' => 'Details ce nos client',
+            'label' => 'Details de nos client',
             'url'   => '/credit-insurance/organisation-management/v1/buyers/my-buyers'
         ),
         'getBuyer'     => array(
@@ -47,7 +47,7 @@ class AtradiusAPI extends BimpAPI
             'url'   => '/credit-insurance/cover-management/v1/covers',
         ),
         'updateCover'  => array(
-            'label' => 'MAJ assurance',
+            'label' => 'Editer assurance',
             'url'   => '/credit-insurance/cover-management/v1/covers',
         ),
         'deleteCover'  => array(
@@ -55,7 +55,7 @@ class AtradiusAPI extends BimpAPI
             'url'   => '/credit-insurance/cover-management/v1/covers',
         ),
         'decisions'    => array(
-            'label' => 'Check des décisions',
+            'label' => 'Vérification des décisions',
             'url'   => '/credit-insurance/cover-management/v1/covers'
         )
     );
@@ -66,8 +66,6 @@ class AtradiusAPI extends BimpAPI
     // Requêtes: 
     public function getMyBuyer($filters, &$errors = array())
     {
-
-
         $data = $this->execCurlCustom('getMyBuyer', array(
             'url_params' => $filters
                 ), $errors);
@@ -214,6 +212,7 @@ class AtradiusAPI extends BimpAPI
 
         if (!$user->rights->bimpcommercial->gestion_recouvrement) {
             $errors[] = "Vous n'avez pas le droit de créer les assurances Atradius";
+            return array();
         }
 
         if (!isset($params['currencyCode']) and $params['coverType'] != self::CREDIT_CHECK) {
@@ -223,7 +222,7 @@ class AtradiusAPI extends BimpAPI
         if (isset($params['creditLimitAmount']) and $params['coverType'] == self::CREDIT_CHECK) {
             unset($params['creditLimitAmount']);
         }
-
+        
         $data = $this->execCurlCustom('createCover', array(
             'fields' => $params,
             'type'   => 'POST'
@@ -253,7 +252,8 @@ class AtradiusAPI extends BimpAPI
                 break;
             default:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-                $errors[] = $cover_type . " a été refusée<br/>";
+//                $errors[] = $cover_type . " a été refusée<br/>";
+                $errors[] = "Echec de la requête auprès d'Atradius";
                 break;
         }
 
@@ -266,9 +266,10 @@ class AtradiusAPI extends BimpAPI
 
         global $user;
 
-        if (!$user->rights->bimpcommercial->gestion_recouvrement)
+        if (!$user->rights->bimpcommercial->gestion_recouvrement) {
             $errors[] = "Vous n'avez pas le droit de mettre à jour les assurances Atradius";
-
+            return array();
+        }
 
 //        if($params['coverType'] == self::CREDIT_CHECK) {
 //            $errors[] = "Tentative de mise à jour de crédit check impossible";
@@ -300,9 +301,13 @@ class AtradiusAPI extends BimpAPI
                 break;
             default:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-                $errors[] = "Demande refusée";
+//                $errors[] = "Demande refusée";
+                $errors[] = "Echec de la requête auprès d'Atradius";
                 break;
         }
+        
+        if($data['data'][0]['response'] == 'Action has been refused.')
+            $errors[] = "Demande refusée";
 
         return $data;
     }
@@ -408,7 +413,7 @@ class AtradiusAPI extends BimpAPI
         }
 
         // Il n'y a pas encore d'assurance pour ce client, on le créer
-        if (empty($cover) /* bloque lorsqu'il y a une assaurance retiré */ or ((int) $cover['amount'] < 1 && $params['coverType'] == self::CREDIT_CHECK)) {
+        if (empty($cover) /* bloque lorsqu'il y a une assaurance retiré exemple 164940 */ /*or ((int) $cover['amount'] < 1 && $params['coverType'] == self::CREDIT_CHECK)*/) {
             return $this->createCover($params, $errors);
             // Augmentation de la limite
         } elseif (/* $params['coverType'] != self::CREDIT_CHECK and */ (int) $cover['amount'] < $params['creditLimitAmount']) {

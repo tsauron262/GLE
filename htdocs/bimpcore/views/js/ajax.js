@@ -427,9 +427,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                     if (typeof (bimpAjax.error) === 'function') {
                         bimpAjax.error(null, bimpAjax);
                     }
-                    if ($.isOk(bimpAjax.$button)) {
-                        bimpAjax.$button.removeClass('disabled');
-                    }
+//                    if ($.isOk(bimpAjax.$button)) {
+//                        bimpAjax.$button.removeClass('disabled');
+//                    }
                     delete bimp_requests[bimpAjax.request_id];
                 }
             }

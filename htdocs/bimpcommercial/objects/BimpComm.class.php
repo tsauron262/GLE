@@ -2719,6 +2719,11 @@ class BimpComm extends BimpDolObject
         foreach ($new_data as $field => $value) {
             $new_object->set($field, $value);
         }
+        
+        // Pour commandes fourn. (temporaire, todo: trouver pourquoi c'est pas ajusté en auto)
+        if (isset($new_object->dol_object->date_creation)) {
+            $new_object->dol_object->date_creation = date('Y-m-d H:i:s');
+        }
 
         $new_object->set('id', 0);
         $new_object->set('ref', '');

@@ -2546,9 +2546,8 @@ class BContract_contrat extends BimpDolObject
                 if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
                     $warnings[] = 'Le contrat a été facturé à partir d\'une commande, il ne comporte donc pas d\'échéancier';
                 }
-
-                $data = $this->getEcheancierData();
-                $html .= $echeancier->displayEcheancier($data, true);
+                
+                $html .= $echeancier->displayEcheancier();
             }
 
             if (count($errors)) {

@@ -2559,15 +2559,21 @@ class BContract_contrat extends BimpDolObject
                 $html .= BimpRender::renderAlerts($warnings, 'warning');
             }
 
-            if ($this->isActionAllowed('createEcheancier')) {
+            $err = array();
+            if ($this->isActionAllowed('createEcheancier', $err)) {
                 $onclick = $this->getJsActionOnclick('createEcheancier');
                 $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
                 $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer l\'échéancier';
                 $html .= '</span>';
             }
-
-            return $html;
+            
+            global $user;
+            if ($user->id == 270 && count($err)) {
+                $html .= BimpRender::renderAlerts($err);
+            }
         }
+        
+        return $html;
     }
 
     public function renderContacts()

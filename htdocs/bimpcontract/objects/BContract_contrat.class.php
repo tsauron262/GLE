@@ -345,7 +345,7 @@ class BContract_contrat extends BimpDolObject
                     return 0;
                 }
 
-                if ((int) $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
+                if ((int) $this->getData('periodicity') == self::CONTRAT_PERIOD_AUCUNE) {
                     $errors[] = 'Aucune périodicité';
                     return 0;
                 }

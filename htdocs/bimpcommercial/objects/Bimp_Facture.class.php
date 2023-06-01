@@ -349,8 +349,10 @@ class Bimp_Facture extends BimpComm
             } elseif ($this->getData('type_educ') == 'E4') {
                 $date_fin_validite = $client->getData('type_educ_fin_validite');
 
-                if (!$date_fin_validite || $date_fin_validite < date('Y-m-d')) {
-                    $errors[] = 'Cette facture contient une remise CRT or le statut enseignant / étudiant';
+                if (!$date_fin_validite) {
+                    $errors[] = 'Cette facture contient une remise CRT or date de fin de validité du statut enseignant / étudiant n\'est pas renseigné. Veuillez corriger la fiche client avant validation de la facture';
+                } elseif ($date_fin_validite < date('Y-m-d')) {
+                    $errors[] = 'Validation impossible : cette facture contient une remise CRT or la date de fin de validité du statut enseignant / étudiant du client est dépassée.';
                 }
             }
         }

@@ -2533,6 +2533,14 @@ class BContract_contrat extends BimpDolObject
                 $data = $this->getEcheancierData();
                 $html .= $echeancier->displayEcheancier($data, true);
             }
+            
+            if (count($errors)) {
+                $html .= BimpRender::renderAlerts($errors);
+            }
+            
+            if (count($warnings)) {
+                $html .= BimpRender::renderAlerts($warnings, 'warning');
+            }
 
             return $html;
         }

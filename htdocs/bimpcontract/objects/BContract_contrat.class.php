@@ -1531,7 +1531,7 @@ class BContract_contrat extends BimpDolObject
         if (count($list_factures)) {
             foreach ($list_factures as $link) {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
-                if (BimpObject::objectLoaded($facture) && $facture->getData('type') != 3) {
+                if (BimpObject::objectLoaded($facture) && (int) $facture->getData('type') != Facture::TYPE_DEPOSIT) {
                     $montant += $facture->getData('total_ht');
                 }
             }

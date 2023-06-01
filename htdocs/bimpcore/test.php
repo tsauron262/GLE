@@ -26,10 +26,13 @@ if (!$user->admin) {
     exit;
 }
 
-if (BimpCore::isModeDev()) {
-    BimpObject::loadClass('bimpsupport', 'BS_SAV');
-    echo BS_SAV::sendAlertesClientsUnrestituteSav();
-}
+//if (BimpCore::isModeDev()) {
+//    BimpObject::loadClass('bimpsupport', 'BS_SAV');
+//    echo BS_SAV::sendAlertesClientsUnrestituteSav();
+//}
+
+$f = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', 1073235);
+echo 'CRT : ' . (int) $f->hasRemiseCRT();
 
 echo '<br/>FIN';
 echo '</body></html>';

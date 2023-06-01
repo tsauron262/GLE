@@ -445,6 +445,13 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
+    public function hasRemiseCRT()
+    {
+        $line_instance = $this->getLineInstance();
+        
+        return (int) $this->db->getCount($line_instance->getTable(), 'id_obj = ' . $this->id . ' AND remise_crt > 0') > 0;
+    }
+
     public function isTvaActive()
     {
         if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente')) {
@@ -3323,7 +3330,7 @@ class BimpComm extends BimpDolObject
 
     public function getClientFacture()
     {
-        if ((int) $this->getData('id_client_facture')) {
+        if ($this->field_exists('id_client_facture') && (int) $this->getData('id_client_facture')) {
             $client = $this->getChildObject('client_facture');
             if (BimpObject::objectLoaded($client)) {
                 return $client;
@@ -5248,7 +5255,7 @@ class BimpComm extends BimpDolObject
         if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente')) {
             $init_zone = $this->getInitData('zone_vente');
             $cur_zone = $this->getData('zone_vente');
-            
+
             if (!(int) $this->getData('fk_statut')) {
                 if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) ||
                         $this->getData('entrepot') == 164 || $init_id_entrepot == 164) &&

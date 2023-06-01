@@ -431,26 +431,30 @@ Preferred Field
                             }
                             if (isset($prod['factures']) && !empty($prod['factures'])) {
                                 foreach ($prod['factures'] as $id_fac => $fac_lines) {
-                                    $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
                                     $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'ref', 'datef'), 'array');
 
                                     if (is_null($fac_data)) {
                                         continue;
                                     }
 
-                                    $soc_data = $this->db->getRow('societe', 'rowid = ' . (int) $fac_data['fk_soc'], array('fk_typent', 'fk_pays', 'nom', 'address', 'town', 'zip'), 'array');
+                                    $soc_data = $this->db->getRow('societe', 'rowid = ' . (int) $fac_data['fk_soc'], array('fk_typent', 'type_educ', 'fk_pays', 'nom', 'address', 'town', 'zip'), 'array');
                                     $soc_data['zip'] = substr($soc_data['zip'], 0, 5);
-                                    
-                                    if ($secteur == 'E' || in_array((int) $fac_data['fk_soc'], array(527782, 8786))) {
-                                        $customer_code = '1R';
-                                        //                                } elseif ($secteur == 'BP') {
-                                        //                                    $customer_code = 'BB';
+
+                                    $is_educ = false;
+                                    if ($soc_data['type_educ']) {
+                                        $is_educ = true;
+                                        $customer_code = $soc_data['type_educ'];
                                     } else {
-                                        $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
-                                        if (!$id_soc_type) {
-                                            $customer_code = 'EN';
+                                        $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
+                                        if ($secteur == 'BP') {
+                                            $customer_code = 'BB';
                                         } else {
-                                            $customer_code = ($id_soc_type === $id_soc_type_particulier ? 'EN' : '21');
+                                            $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
+                                            if (!$id_soc_type) {
+                                                $customer_code = 'EN';
+                                            } else {
+                                                $customer_code = ($id_soc_type === $id_soc_type_particulier ? 'EN' : '21');
+                                            }
                                         }
                                     }
 
@@ -467,7 +471,6 @@ Preferred Field
                                     $dt_fac = new DateTime($fac_data['datef']);
 
                                     foreach ($fac_lines as $id_line => $line_data) {
-//                                        print_r($line_data);die;
                                         $file_str .= '"' . implode('";"', array(
                                                     $shipTo, // A
                                                     substr($prod_ref, 0, 15), // B
@@ -481,13 +484,13 @@ Preferred Field
                                                     $line_data['position'], // J
                                                     $dt_fac->format('Ymd'),
                                                     '',
-                                                    ($customer_code == '1R' ? str_replace('"', '', $soc_data['nom']) : ($customer_code != 'EN' ? 'XXX' : '')), // M
-                                                    ($customer_code == '1R' ? str_replace(array('"', "
+                                                    ($is_educ ? str_replace('"', '', $soc_data['nom']) : ($customer_code != 'EN' ? 'XXX' : '')), // M
+                                                    ($is_educ ? str_replace(array('"', "
 ", '
 ', "\n", "\r", 'Hotel'), '', $soc_data['address']) : ($customer_code != 'EN' ? 'XXX' : '')), // N
-                                                    ($customer_code == '1R' ? str_replace('"', '', substr($soc_data['town'], 0, 19)) : ($customer_code != 'EN' ? 'XXX' : '')), // O
+                                                    ($is_educ ? str_replace('"', '', substr($soc_data['town'], 0, 19)) : ($customer_code != 'EN' ? 'XXX' : '')), // O
                                                     '',
-                                                    ($customer_code == '1R' ? str_replace('"', '', (string) $soc_data['zip']) : ''), // Q
+                                                    ($is_educ ? str_replace('"', '', (string) $soc_data['zip']) : ''), // Q
                                                     $country_code, // R
                                                     $customer_code // S
                                                 )) . '"' . "\n";

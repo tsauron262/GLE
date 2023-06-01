@@ -41,6 +41,15 @@ class Bimp_Societe extends BimpDolObject
         1  => array('D', 'warning', 'Risque très Elevé'),
         0  => array('E', 'danger', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
     );
+    public static $types_educ = array(
+        ''   => '',
+        '1R' => 'Etudes supérieures',
+        'HS' => 'Lycée',
+        'M8' => 'Institutions éducatives',
+        'VO' => 'Ecole primaire',
+        'VQ' => 'Ecole secondaire',
+        'E4' => 'Enseignants / étudiants'
+    );
     public static $regions = array(
         1 => array(
             'A' => array('01', 69),
@@ -1521,9 +1530,9 @@ class Bimp_Societe extends BimpDolObject
 
             if ($dpt) {
                 foreach (self::$regions as $region => $secteurs) {
-                    foreach ($secteurs as $secteur => $codes){
-                        foreach($codes as $code){
-                            if(stripos($dpt, $code) === 0){
+                    foreach ($secteurs as $secteur => $codes) {
+                        foreach ($codes as $code) {
+                            if (stripos($dpt, $code) === 0) {
                                 return 'Région ' . $region;
                             }
                         }
@@ -1546,9 +1555,9 @@ class Bimp_Societe extends BimpDolObject
 
             if ($dpt) {
                 foreach (self::$regions as $region => $secteurs) {
-                    foreach ($secteurs as $secteur => $codes){
-                        foreach($codes as $code){
-                            if(stripos($dpt, $code) === 0){
+                    foreach ($secteurs as $secteur => $codes) {
+                        foreach ($codes as $code) {
+                            if (stripos($dpt, $code) === 0) {
                                 return 'R' . $region . $secteur;
                             }
                         }
@@ -1948,9 +1957,9 @@ class Bimp_Societe extends BimpDolObject
 
             if ($dpt) {
                 foreach (self::$regions as $region => $secteurs) {
-                    foreach ($secteurs as $secteur => $codes){
-                        foreach($codes as $code){
-                            if(stripos($dpt, $code) === 0){
+                    foreach ($secteurs as $secteur => $codes) {
+                        foreach ($codes as $code) {
+                            if (stripos($dpt, $code) === 0) {
                                 return 'Région ' . $region;
                             }
                         }
@@ -1975,9 +1984,9 @@ class Bimp_Societe extends BimpDolObject
 
             if ($dpt) {
                 foreach (self::$regions as $region => $secteurs) {
-                    foreach ($secteurs as $secteur => $codes){
-                        foreach($codes as $code){
-                            if(stripos($dpt, $code) === 0){
+                    foreach ($secteurs as $secteur => $codes) {
+                        foreach ($codes as $code) {
+                            if (stripos($dpt, $code) === 0) {
                                 return 'R' . $region . $secteur;
                             }
                         }
@@ -2599,7 +2608,7 @@ class Bimp_Societe extends BimpDolObject
             $code = (string) $this->getData('siren');
             $code_type = 'siren';
         }
-        
+
         if ($code) {
             $errors = BimpTools::merge_array($errors, $this->checkSiren($code_type, $code, $data, $warnings));
 
@@ -2629,11 +2638,11 @@ class Bimp_Societe extends BimpDolObject
                 if (isset($data['siren'])) {
                     $this->set('siren', $data['siren']);
                 }
-                
+
                 $errors = $this->update($warnings, true);
             }
         }
-        
+
         return $errors;
     }
 
@@ -3942,6 +3951,12 @@ class Bimp_Societe extends BimpDolObject
 
             if (!count($errors) && $have_already_code_comptable) {
                 $this->set('exported', 1);
+            }
+
+            if ($this->getData('type_educ') == 'E4') {
+                if (!$this->getData('type_educ_fin_validite')) {
+                    $errors[] = 'Veuillez saisir la date de fin de validité du statut "Enseignant / étudiant"';
+                }
             }
         }
         return $errors;

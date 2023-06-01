@@ -331,23 +331,33 @@ class Bimp_Facture extends BimpComm
 
     public function isValidatable(&$errors = array())
     {
-        parent::isValidatable($errors);
-        if (!count($errors)) {
-            $this->areLinesValid($errors);
+        $this->areLinesValid($errors);
 
-            $client = $this->getChildObject('client');
-            $client_facture = $this->getClientFacture();
-            if (!BimpObject::objectLoaded($client)) {
-                $errors[] = 'Client absent';
-            }
+        $client = $this->getClientFacture();
+        if (!BimpObject::objectLoaded($client)) {
+            $errors[] = 'Client absent';
+        }
 
+        //ref externe si consigne
+        if ($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == '') {
+            $errors[] = 'Attention la réf client ne peut pas être vide : <br/>' . nl2br($client->getData('consigne_ref_ext'));
+        }
 
-            //ref externe si consigne
-            if ($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == '') {
-                $errors[] = 'Attention la réf client ne peut pas être vide : <br/>' . nl2br($client->getData('consigne_ref_ext'));
+        if ($this->hasRemiseCRT()) {
+            if (!$client->getData('type_educ')) {
+                $errors[] = 'Cette facture contient une remise CRT or le type éducation n\'est pas renseigné pour ce client, veuillez corriger la fiche client avant validation de cette facture';
+            } elseif ($this->getData('type_educ') == 'E4') {
+                $date_fin_validite = $client->getData('type_educ_fin_validite');
+
+                if (!$date_fin_validite || $date_fin_validite < date('Y-m-d')) {
+                    $errors[] = 'Cette facture contient une remise CRT or le statut enseignant / étudiant';
+                }
             }
         }
 
+        if (!count($errors)) {
+            parent::isValidatable($errors);
+        }
 
         return (count($errors) ? 0 : 1);
     }
@@ -1648,7 +1658,7 @@ class Bimp_Facture extends BimpComm
                     ))
                 );
             }
-            
+
 //            // Créer un avoir
 //            if ($this->isActionAllowed('createAvoir') && $this->canSetAction('createAvoir')) {
 //                $buttons[] = array(

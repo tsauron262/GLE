@@ -4306,6 +4306,28 @@ class Bimp_Product extends BimpObject
                     'force_update' => 1
                 )
             );
+            $actions[] = array(
+                'label'      => 'Editer en Vente',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'tosell',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+            $actions[] = array(
+                'label'      => 'Editer en Achat',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'tobuy',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
         }
         return $actions;
     }

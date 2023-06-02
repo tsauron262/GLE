@@ -5,6 +5,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/BimpAPI.php';
 class AtradiusAPI extends BimpAPI
 {
 
+    // atradius dev https://login-app.atradius.com/
+    // page de demande d'identifiants https://group.atradius.com/api/register-now
     // pass web documentation: 885xcMaS
 
     const CREDIT_CHECK = 'credit-check'; // Limité à 7000 euros
@@ -20,7 +22,7 @@ class AtradiusAPI extends BimpAPI
             'test' => 'https://api-uat.atradius.com'
         ),
         'auth'    => array(
-            'prod' => 'https://api.atradius.com/authenticate/v2/tokens',
+            'prod' => 'https://api.atradius.com/authenticate/v2/tokens',/*bug si auth sur l'url de prod*/
             'prod' => 'https://api-uat.atradius.com/authenticate/v1/tokens',
             'test' => 'https://api-uat.atradius.com/authenticate/v1/tokens'
         )

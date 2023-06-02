@@ -448,7 +448,6 @@ class BimpComm extends BimpDolObject
     public function hasRemiseCRT()
     {
         $line_instance = $this->getLineInstance();
-        
         return (int) $this->db->getCount($line_instance->getTable(), 'id_obj = ' . $this->id . ' AND remise_crt > 0') > 0;
     }
 
@@ -1963,6 +1962,29 @@ class BimpComm extends BimpDolObject
             $html .= BimpDocumentation::renderBtn('liste', 'Test pour les admin, doc liste');
         }
 
+        if (BimpCore::isEntity('bimp')) {
+            if ($this->hasRemiseCRT()) {
+                $client = $this->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    if (!$client->getData('type_educ')) {
+                        $onclick = $client->getJsLoadModalForm('edit_type_educ', 'Saisie du type éducation', array(), '', '', 1);
+
+                        $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                        $msg .= '<b>ATTENTION : ' . $this->getLabel('this') . ' contient une remise CRT, or le type éducation du client ';
+                        $msg .= 'n\'est pas renseigné. En l\'absence de cette information, la validation des factures sera bloquée.</b>';
+                        $msg .= '<div style="text-align: center">';
+                        $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $msg .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Sélectionner le type éducation du client';
+                        $msg .= '</span>';
+
+                        $msg .= '</div>';
+
+                        $html .= BimpRender::renderAlerts($msg, 'warning');
+                    }
+                }
+            }
+        }
+
         return $html;
     }
 
@@ -2719,7 +2741,7 @@ class BimpComm extends BimpDolObject
         foreach ($new_data as $field => $value) {
             $new_object->set($field, $value);
         }
-        
+
         // Pour commandes fourn. (temporaire, todo: trouver pourquoi c'est pas ajusté en auto)
         if (isset($new_object->dol_object->date_creation)) {
             $new_object->dol_object->date_creation = date('Y-m-d H:i:s');

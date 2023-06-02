@@ -735,6 +735,8 @@ fields:
     type_educ_fin_validite: 
         label: Date de fin de validité (Enseignants / étudiants)
         type: date
+        input: 
+            help: Obligatoire pour les enseignants / étudiants
 
 fields_tables: 
     identity:
@@ -1395,6 +1397,14 @@ forms:
               input_name: date_max
               input: 
                   type: date
+                  
+    edit_type_educ:
+        rows: 
+            - field: type_educ
+            - field: type_educ_fin_validite
+              display_if: 
+                    field_name: type_educ
+                    show_values: E4
              
 filters: 
     accounting_account:

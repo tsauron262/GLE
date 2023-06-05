@@ -3227,13 +3227,13 @@ class Bimp_Product extends BimpObject
     {
         global $user;
         if ($urgent) {
-            $mail = "XX_Achats@bimp.fr," . BimpCore::getConf('devs_email');
+            $mail = "AchatsBimp@bimp.fr," . BimpCore::getConf('devs_email');
             $msg = 'Bonjour, ' . "\n\n";
             $msg .= 'Le produit ' . $this->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
             $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";
             $msg .= 'Cordialement.';
         } else {
-            $mail = "XX_Achats@bimp.fr";
+            $mail = "AchatsBimp@bimp.fr";
             $msg = "Bonjour " . $user->getNomUrl(0) . "souhaite que vous validiez " . $this->getNomUrl(0) . "<br/>Cordialement";
         }
         if (mailSyn2("Validation produit", $mail, null, $msg)) {

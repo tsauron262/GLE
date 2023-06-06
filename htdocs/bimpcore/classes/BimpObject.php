@@ -7752,23 +7752,29 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function renderSearchInput($input_name, $value = null, $options = array())
     {
-        $html = BimpInput::renderSearchListInput($input_name, $options, $value, 'default');
+        $html = BimpInput::renderSearchObjectInput($this, $input_name, $value, $options);
         $html .= '<p class="inputHelp">Rechercher ' . $this->getLabel('a') . '</p>';
         return $html;
     }
 
-    public function renderSearchObjectInput($input_name, $object_name)
+    public function renderSearchObjectInput($input_name, $object_data)
     {
-        if (in_array($object_name, $this->params['objects'])) {
-            $params = $this->config->getCompiledParams('objects/' . $object_name);
-            if (isset($params['instance']['bimp_object'])) {
-                $instance = BimpObject::getInstance($params['instance']['bimp_object']['module'], $params['instance']['bimp_object']['name']);
-                return $instance->renderSearchInput($input_name);
-            } elseif (isset($params['instance']['dol_object'])) {
-                return BimpRender::renderAlerts('Dol object: "' . $object_name . '" à implémenter', 'warning');
+
+        if (preg_match('/^(.+)\-(.+)$/', $object_data, $matches)) {
+            $module = $matches[1];
+            $object_name = $matches[2];
+
+            if ($module && $object_name) {
+                $instance = BimpObject::getInstance($module, $object_name);
+                if (get_class($instance) != 'BimpObject') {
+                    return $instance->renderSearchInput($input_name);
+                } else {
+                    return BimpRender::renderAlerts('Erreur de configuration: objet "' . $object_data . '" non défini');
+                }
+            } else {
+                return BimpRender::renderAlerts('Erreur de configuration: données objet invalide (' . $object_data . ')');
             }
         }
-        return BimpRender::renderAlerts('Erreur de configuration: objet "' . $object_name . '" non défini');
     }
 
     public function renderHeaderBtnRedir()
@@ -9679,19 +9685,28 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             } elseif (!$file->isParent($this)) {
                 $errors[] = 'Ce fichier n\'appartient pas à ' . $this->getLabel('this');
             } else {
-                $object_name = isset($data['move_to_object_name']) ? $data['move_to_object_name'] : '';
+                $module = '';
+                $object_name = '';
+                $obj_data = isset($data['move_to_object_name']) ? $data['move_to_object_name'] : '';
                 $id_object = (int) isset($data['move_to_id_object']) ? $data['move_to_id_object'] : 0;
 
-                if (!$object_name) {
+                if (!$obj_data) {
                     $errors[] = 'Type de destinataire absent';
+                } elseif (preg_match('/^(.+)\-(.+)$/', $obj_data, $matches)) {
+                    $module = $matches[1];
+                    $object_name = $matches[2];
+                }
+
+                if (!$module || !$object_name) {
+                    $errors[] = 'Données du destinataire invalide';
                 }
 
                 if (!$id_object) {
-                    $errors[] = 'Destinataire absent';
+                    $errors[] = 'ID du destinataire absent';
                 }
 
                 if (!count($errors)) {
-                    $moveTo = $this->getChildObject($object_name, $id_object);
+                    $moveTo = BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
                     if (!BimpObject::objectLoaded($moveTo)) {
                         $errors[] = 'Destinataire invalide';
                     } else {

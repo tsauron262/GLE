@@ -3082,6 +3082,35 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return $errors;
     }
 
+    public function checkClientsFinauxFactures(&$nbDone = 0)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $id_client_facture = (int) $this->getData('id_client_facture');
+            $id_client = (int) $this->getData('fk_soc');
+
+            if ($id_client_facture && $id_client_facture !== $id_client) {
+                $asso = new BimpAssociation($this, 'factures');
+
+                $factures_ids = $asso->getAssociatesList();
+                foreach ($factures_ids as $id_facture) {
+                    if (!(int) $this->db->getValue('facture', 'id_client_final', 'rowid = ' . $id_facture)) {
+                        if ($this->db->update('facture', array(
+                                    'id_client_final' => $id_client
+                                ), 'rowid = ' . (int) $id_facture) <= 0) {
+                            $errors[] = 'Facture #' . $id_facture . ' : échec màj - ' . $this->db->err();
+                        } else {
+                            $nbDone++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Checks status: 
 
     public function checkStatus()

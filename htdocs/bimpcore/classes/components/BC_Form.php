@@ -648,13 +648,14 @@ class BC_Form extends BC_Panel
 
         $html .= '<div class="formGroupTitle">';
         $title = '';
-        if (isset($params['title'])) {
+        if (isset($params['title']) && $params['title']) {
             $title = $params['title'];
         } elseif ((int) $params['multiple']) {
             $title = BimpTools::ucfirst(BimpObject::getInstanceLabel($object, 'name_plur'));
         } else {
             $title = BimpTools::ucfirst(BimpObject::getInstanceLabel($object));
         }
+        
         $html .= '<h3>' . $title . '</h3>';
         $html .= '</div>';
         $html .= '</div>';

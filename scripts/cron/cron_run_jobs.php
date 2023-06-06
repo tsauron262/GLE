@@ -192,7 +192,7 @@ $nbofjobs = count($object->lines);
 $nbofjobslaunchedok = 0;
 $nbofjobslaunchedko = 0;
 
-$bimp_debug_html = '';
+$bimp_debug_html = 'DEBUG CRON ' . date('H:i:s') . "\n\n";
 $bimp_check = false;
 
 if (is_array($object->lines) && (count($object->lines) > 0)) {

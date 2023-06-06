@@ -71,7 +71,7 @@ class DevisFinancementPDF extends DocFinancementPDF
         $html .= '<br/>';
 
         $html .= '<div style="font-size: 9px; font-weight: bold">';
-        $html .= 'Objet: Proposition de location de vos équiments informatiques';
+        $html .= 'Objet: Proposition de location de vos équipements informatiques';
         $html .= '</div>';
 
         $html .= '<p style="font-size: 8px">';

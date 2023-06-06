@@ -155,7 +155,7 @@
                         $sens = ($line->multicurrency_total_ht > 0) ? "D" : "C";
                     }
                     if(!$line->fk_product && method_exists($facture, 'getProdWithFactureType'))
-                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $facture->getProdWithFactureType());    
+                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $facture->getProdWithFactureType($line));    
                     else
                         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                     

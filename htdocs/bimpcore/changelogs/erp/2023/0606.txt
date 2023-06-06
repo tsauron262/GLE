@@ -1,0 +1,2 @@
+- Ajout du champ "Client final" (client destinataire de la commande) dans les factures. 
+

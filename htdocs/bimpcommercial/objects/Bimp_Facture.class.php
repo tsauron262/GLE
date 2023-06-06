@@ -6445,6 +6445,10 @@ class Bimp_Facture extends BimpComm
                     }
                 }
 
+                if ($this->field_exists('expertise')) {
+                    $this->set('expertise', $facture->getData('expertise'));
+                }
+                
                 if (!count($errors)) {
                     $linked_objects = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);
 

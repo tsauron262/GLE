@@ -431,13 +431,15 @@ Preferred Field
                             }
                             if (isset($prod['factures']) && !empty($prod['factures'])) {
                                 foreach ($prod['factures'] as $id_fac => $fac_lines) {
-                                    $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'ref', 'datef'), 'array');
+                                    $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'ref', 'datef', 'id_client_final'), 'array');
 
                                     if (is_null($fac_data)) {
                                         continue;
                                     }
+                                    
+                                    $id_client = (int) ((int) $fac_data['id_client_final'] ? $fac_data['id_client_final'] : $fac_data['fk_soc']);
 
-                                    $soc_data = $this->db->getRow('societe', 'rowid = ' . (int) $fac_data['fk_soc'], array('fk_typent', 'type_educ', 'fk_pays', 'nom', 'address', 'town', 'zip'), 'array');
+                                    $soc_data = $this->db->getRow('societe', 'rowid = ' . $id_client, array('fk_typent', 'type_educ', 'fk_pays', 'nom', 'address', 'town', 'zip'), 'array');
                                     $soc_data['zip'] = substr($soc_data['zip'], 0, 5);
 
                                     $is_educ = false;

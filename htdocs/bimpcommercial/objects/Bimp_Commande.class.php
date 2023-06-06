@@ -2450,7 +2450,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         if (is_null($id_client)) {
-            $id_client = (int) $this->getData('fk_soc');
+            if ((int) $this->getData('id_client_facture')) {
+                $id_client = (int) $this->getData('id_client_facture');
+            } else {
+                $id_client = (int) $this->getData('fk_soc');
+            }
         }
 
         if (!$id_client) {
@@ -2568,10 +2572,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
         }
 
-        if ($id_facture && $replaced_ref) {
-            $this->db->update('facture', array(
-                'replaced_ref' => $replaced_ref
-                    ), 'rowid = ' . (int) $id_facture);
+        if ($id_facture) {
+            $data = array();
+
+            if ($replaced_ref) {
+                $data['replaced_ref'] = $replaced_ref;
+            }
+
+            if ((int) $this->getData('fk_soc') !== (int) $id_client) {
+                $data['id_client_final'] = (int) $this->getData('fk_soc');
+            }
+
+            if (!empty($data)) {
+                $this->db->update('facture', $data, 'rowid = ' . (int) $id_facture);
+            }
         }
 
         return $id_facture;
@@ -4387,7 +4401,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         if ($result) {
             $out .= ($out ? '<br/><br/>' : '') . '----------- Rappels échéances commandes -----------<br/><br/>' . $result;
         }
-        
+
         // Rappels Hebdomadaires: 
         if ((int) date('N') == 7) {
             $result = static::sendRappelsNotBilled();

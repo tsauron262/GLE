@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` ADD `id_client_final` int(11) NOT NULL DEFAULT 0;

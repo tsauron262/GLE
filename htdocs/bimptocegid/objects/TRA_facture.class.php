@@ -155,7 +155,7 @@
                         $sens = ($line->multicurrency_total_ht > 0) ? "D" : "C";
                     }
                     if(!$line->fk_product && method_exists($facture, 'getProdWithFactureType'))
-                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $facture->getProdWithFactureType());    
+                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $facture->getProdWithFactureType($line));    
                     else
                         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                     
@@ -174,7 +174,7 @@
                         }
                         else {
 //                            $this->compte_general = '70600000';
-                            $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), $line->product_type).$line->product_type;
+                            $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), $line->product_type, ($line->tva_tx == 0)? 1 : 0);//.$line->product_type;
                             $debug['LOADED_PRODUCT_' . $line->id] = 'NULL';
                         }
                         

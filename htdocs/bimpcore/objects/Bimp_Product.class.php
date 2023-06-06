@@ -615,7 +615,7 @@ class Bimp_Product extends BimpObject
 //        }
     }
 
-    public function getCodeComptableVente($zone_vente = 1, $force_type = -1)
+    public function getCodeComptableVente($zone_vente = 1, $force_type = -1, $tva_null = 0)
     {
         // ACHAT DE D3E juste pour la france
         // ACHAT DE TVA JUSTe PAR AUTOLIQUIDATION - si on a un numéro intracom sur un pro UE
@@ -653,7 +653,7 @@ class Bimp_Product extends BimpObject
             $type = $force_type;
         
         
-        if($type < 2 && $zone_vente == 1 && $this->getData('tva_tx') == 0){//produit ou service tva null vendu en france
+        if($type < 2 && $zone_vente == 1 && ($this->getData('tva_tx') == 0 || $tva_null)){//produit ou service tva null vendu en france
             $confName = 'vente_tva_null';
         }
         else{

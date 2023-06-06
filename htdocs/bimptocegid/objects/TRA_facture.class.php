@@ -174,7 +174,7 @@
                         }
                         else {
 //                            $this->compte_general = '70600000';
-                            $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), $line->product_type).$line->product_type;
+                            $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), $line->product_type, ($line->tva_tx == 0)? 1 : 0);//.$line->product_type;
                             $debug['LOADED_PRODUCT_' . $line->id] = 'NULL';
                         }
                         

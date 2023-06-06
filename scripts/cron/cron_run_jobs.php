@@ -193,6 +193,7 @@ $nbofjobslaunchedok = 0;
 $nbofjobslaunchedko = 0;
 
 $bimp_debug_html = '';
+$bimp_check = false;
 
 if (is_array($object->lines) && (count($object->lines) > 0)) {
     $savconf = dol_clone($conf);
@@ -246,6 +247,9 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
 
         //If date_next_jobs is less of current date, execute the program, and store the execution time of the next execution in database
         if (($line->datenextrun < $now) && (empty($line->datestart) || $line->datestart <= $now) && (empty($line->dateend) || $line->dateend >= $now)) {
+            if ($line->id == 76) {
+                $bimp_check = true;
+            }
             $bimp_debug_html .= " - qualified";
 
             dol_syslog("cron_run_jobs.php line->datenextrun:" . dol_print_date($line->datenextrun, 'dayhourrfc') . " line->datestart:" . dol_print_date($line->datestart, 'dayhourrfc') . " line->dateend:" . dol_print_date($line->dateend, 'dayhourrfc') . " now:" . dol_print_date($now, 'dayhourrfc'));
@@ -299,11 +303,13 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
     $bimp_debug_html .= "cron_run_jobs.php no qualified job found\n";
 }
 
-if (!function_exists('mailSyn2')) {
-    require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
-}
+if ($bimp_check) {
+    if (!function_exists('mailSyn2')) {
+        require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
+    }
 
-mailSyn2('Debug cron_run_jobs', 'f.martinez@bimp.fr', '', $bimp_debug_html);
+    mailSyn2('Debug cron_run_jobs', 'f.martinez@bimp.fr', '', $bimp_debug_html);
+}
 
 $db->close();
 

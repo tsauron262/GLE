@@ -29,6 +29,8 @@ class devController extends BimpController
         }
 
         $html = '';
+        
+        $html .= '<div class="container-fluid">';
 
         // ToolsBar:
         $html .= '<div class="buttonsContainer align-left" style="padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #000000">';
@@ -129,12 +131,16 @@ class devController extends BimpController
             $html .= '</div>';
 
             $html .= '<div class="row">';
+            $html .= '<div class="col-lg-12">';
             $list = new BC_ListTable(BimpObject::getInstance('bimptask', 'BIMP_Task'), 'main', 1, null, 'Tâches dév');
             $list->addFieldFilterValue('id_task', 0);
             //        $list->addFieldFilterValue('type_manuel', 'dev');
             $html .= $list->renderHtml();
             $html .= '</div>';
+            $html .= '</div>';
         }
+        
+        $html .= '</div>';
 
         return $html;
     }

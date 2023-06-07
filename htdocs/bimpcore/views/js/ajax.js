@@ -393,7 +393,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                         }
 
                         if (result.success_callback && typeof (result.success_callback) === 'string') {
-                            console.log(result.success_callback);
+//                            console.log(result.success_callback);
                             eval(result.success_callback);
                         }
                     }

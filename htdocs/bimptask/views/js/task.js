@@ -17,7 +17,7 @@ function stopAlert(){
 
 
 function cronAlert(){
-    console.log("cron");
+//    console.log("cron");
     if(audio)
         audio.play();
     setTimeout(function(){

@@ -38,7 +38,7 @@ class hashtag extends AbstractNotification {
     }
 
     formatElement(element, key) {
-        console.log(element);
+//        console.log(element);
         if ($('div.list_part[key="' + key + '"]').length) {
             $('div.list_part[key="' + key + '"]').remove();
             AbstractNotification.prototype.elementRemoved(1, this.dropdown_id);

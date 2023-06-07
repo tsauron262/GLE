@@ -310,7 +310,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
                                         $form.append('<div id="progressbar_' + id + '"></div>');
                                     },
                                     progress: function (progress) {
-                                        console.log(progress);
+//                                        console.log(progress);
                                         $("#progressbar_" + id).progressbar({value: progress});
                                     },
                                     success: function (data) {

@@ -57,7 +57,7 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
         on_save = $form.data('on_save');
     }
 
-    console.log(data);
+//    console.log(data);
 
     BimpAjax('saveObject', data, $resultContainer, {
         $form: $form,
@@ -4427,8 +4427,7 @@ function BimpInputHashtags() {
                     bih.$modal.modal('hide');
 
                     bih.reset();
-                } else
-                    console.log('trouve pas #');
+                }
             }
         }
     };

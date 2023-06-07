@@ -807,12 +807,11 @@ class Bimp_Facture extends BimpComm
                 return 1;
 
             case 'exportToChorus':
-
                 if (!in_array($status, array(1, 2))) {
                     $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
                 } elseif (!$this->field_exists('chorus_status')) {
                     $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
-                } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0, 1, 5))) {
+                } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0, 5))) {
                     $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus' . (int) $this->getData('chorus_status');
                 } else {
                     $client = $this->getChildObject('client');
@@ -841,11 +840,6 @@ class Bimp_Facture extends BimpComm
                 if (!BimpTools::getArrayValueFromPath($chorus_data, 'id_pdf', '')) {
                     $errors[] = 'Identifiant chorus du fichier PDF absent';
                 }
-
-                if (!BimpTools::getArrayValueFromPath($chorus_data, 'num_facture', '')) {
-                    $errors[] = 'N° facture sur Chorus absent';
-                }
-
                 return (count($errors) ? 0 : 1);
 
             case 'forceChorusExported':
@@ -5955,17 +5949,10 @@ class Bimp_Facture extends BimpComm
         $api = BimpAPI::getApiInstance('piste');
 
         if (is_a($api, 'PisteAPI')) {
-            $response = $api->deposerPdfFacture($this->id, array(), $errors, $warnings);
+            $id_pdf = $api->deposerPdfFacture($this->id, $errors, $warnings);
 
-            $id_pdf = (int) BimpTools::getArrayValueFromPath($response, 'pieceJointeId', 0);
-            $num_facture = BimpTools::getArrayValueFromPath($response, 'numeroFacture', '');
-
-            if (!$id_pdf) {
+            if (!count($errors) && !$id_pdf) {
                 $errors[] = 'ID Du PDF sur Chorus absent';
-            }
-
-            if (!$num_facture) {
-                $errors[] = 'N° Chorus de la facture absent';
             }
 
             if (!count($errors)) {
@@ -5982,7 +5969,6 @@ class Bimp_Facture extends BimpComm
                 $chorus_data = $this->getData('chorus_data');
 
                 $chorus_data['id_pdf'] = $id_pdf;
-                $chorus_data['num_facture'] = $num_facture;
 
                 $this->set('chorus_status', 1);
                 $this->set('chorus_data', $chorus_data);
@@ -5998,7 +5984,7 @@ class Bimp_Facture extends BimpComm
                             ), true);
                 }
 
-                $this->addLog('Envoi PDF sur Chorus (ID PDF: ' . $id_pdf . ' - N° fac: ' . $num_facture . ')');
+                $this->addLog('Envoi PDF sur Chorus (ID PDF: ' . $id_pdf . ')');
             }
         }
 

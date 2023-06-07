@@ -68,10 +68,10 @@ class InvoiceSavPDF extends InvoicePDF
     
     public function renderTop(){
         parent::renderTop();
-        $this->writeContent('Pour augmenter la durée de vie de vos produits Apple, rendez vous sur :<br/><a href="https://support.apple.com/fr-fr">https://support.apple.com/fr-fr</a> ou scannez ce QR code<br/><br/>');
+        $this->writeContent('<div style="font-size: 9px">Pour augmenter la durée de vie de vos produits Apple, rendez vous sur :<br/><a href="https://support.apple.com/fr-fr">https://support.apple.com/fr-fr</a> ou scannez ce QR code</div><br/><br/>');
         $qr_dir = DOL_DATA_ROOT . "/bimpcore/tmp/";
         $this->getQrCode('https://support.apple.com/fr-fr', $qr_dir);
-        $this->pdf->Image($qr_dir . "/apple.png", 150, $this->pdf->getY()- 17, 0, 15);
+        $this->pdf->Image($qr_dir . "/apple.png", 120, $this->pdf->getY()- 19, 0, 15);
     }
 
     public function getAfterTotauxHtml()

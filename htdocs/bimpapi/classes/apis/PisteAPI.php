@@ -116,7 +116,7 @@ class PisteAPI extends BimpAPI
         return $response;
     }
 
-    public function deposerPdfFacture($id_facture, $params = array(), &$errors = array(), &$warnings = array())
+    public function deposerPdfFacture($id_facture, &$errors = array(), &$warnings = array())
     {
         if (!$id_facture) {
             $errors[] = 'ID de la facture absent';
@@ -132,18 +132,12 @@ class PisteAPI extends BimpAPI
                 if (!file_exists($dir . '/' . $file_name)) {
                     $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
                 } else {
-                    $params['fields'] = array(
-                        'fichierFacture' => base64_encode(file_get_contents($dir . '/' . $file_name)),
-                        'nomFichier'     => $file_name,
-                        'formatDepot'    => 'PDF_NON_SIGNE'
-                    );
-
-                    return $this->execCurl('deposerPdfFacture', $params, $errors);
+                    return $this->uploadFile($dir, $file_name, $errors);
                 }
             }
         }
 
-        return null;
+        return 0;
     }
 
     public function getTypePj(&$errors = array(), $type = 'FACTURE')
@@ -357,14 +351,9 @@ class PisteAPI extends BimpAPI
                         $chorus_data = $facture->getData('chorus_data');
 
                         $id_pdf = (int) BimpTools::getArrayValueFromPath($chorus_data, 'id_pdf', 0);
-                        $num_facture = BimpTools::getArrayValueFromPath($chorus_data, 'num_facture', '');
 
                         if (!$id_pdf) {
                             $errors[] = 'ID Chorus du PDF absent';
-                        }
-
-                        if (!$num_facture) {
-                            $errors[] = 'N° Chorus de la facture absent';
                         }
 
                         $mode_paiement = '';

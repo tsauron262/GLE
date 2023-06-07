@@ -29,7 +29,7 @@ class devController extends BimpController
         }
 
         $html = '';
-        
+
         $html .= '<div class="container-fluid">';
 
         // ToolsBar:
@@ -81,11 +81,18 @@ class devController extends BimpController
         $html .= '</div>';
         $html .= '</div>';
 
+        // Vérif des versions vérouillée: 
+        if ((int) BimpCore::getConf('check_versions_lock')) {
+            $html .= '<h4 class="danger">';
+            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . ' Vérification des versions vérouillée';
+            $html .= '</h4>';
+        }
+
         // Crons en erreur: 
         $rows = BimpCache::getBdb()->getRows('cronjob', '`datenextrun` < DATE_ADD(now(), INTERVAL -1 HOUR) AND status = 1', null, 'array', array('rowid', 'label'));
         if (!empty($rows)) {
             $html .= '<div class="row" style="margin-bottom: 30px">';
-            $html .= '<h3 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' tâche(s) cron en erreur</h3>';
+            $html .= '<h4 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($rows) . ' tâche(s) cron en erreur</h4>';
             $html .= '<ul>';
             foreach ($rows as $r) {
                 $html .= '<li>';
@@ -97,7 +104,19 @@ class devController extends BimpController
         }
 
         // Paramètres obligatoires non définis: 
-        // Todo
+        $missings_params = BimpModuleConf::getMissingRequiredParams();
+        if (!empty($missings_params)) {
+            $html .= '<div class="row" style="margin-bottom: 30px">';
+            $html .= '<h4 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($missings_params) . ' paramètre(s) obligatoire(s) non défini(s)</h4>';
+            $html .= '<ul>';
+            foreach ($missings_params as $p) {
+                $html .= '<li>';
+                $html .= $p;
+                $html .= '</li>';
+            }
+            $html .= '</ul>';
+            $html .= '</div>';
+        }
 
         // Récap logs: 
         $html .= '<div class="row">';
@@ -137,7 +156,7 @@ class devController extends BimpController
             $html .= '</div>';
             $html .= '</div>';
         }
-        
+
         $html .= '</div>';
 
         return $html;

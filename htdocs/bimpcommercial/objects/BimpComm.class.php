@@ -448,7 +448,12 @@ class BimpComm extends BimpDolObject
     public function hasRemiseCRT()
     {
         $line_instance = $this->getLineInstance();
-        return (int) $this->db->getCount($line_instance->getTable(), 'id_obj = ' . $this->id . ' AND remise_crt > 0') > 0;
+
+        if ($line_instance->field_exists('remise_crt')) {
+            return (int) $this->db->getCount($line_instance->getTable(), 'id_obj = ' . $this->id . ' AND remise_crt > 0') > 0;
+        }
+
+        return 0;
     }
 
     public function isTvaActive()

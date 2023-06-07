@@ -96,29 +96,27 @@ class devController extends BimpController
             $html .= '</div>';
         }
 
-
-        $html .= '<div class="row">';
+        // Paramètres obligatoires non définis: 
+        // Todo
 
         // Récap logs: 
+        $html .= '<div class="row">';
         $html .= '<div class="col-sm-12 col-md-8">';
         $html .= Bimp_Log::renderBeforeListContent();
         $html .= '</div>';
 
-        $html .= '<div class="col-sm-12 col-md-4">';
-
-        // Liens: 
-        $content = '';
-        foreach (self::$dev_links as $link) {
-            $content .= ($content ? '<br/><br/>' : '');
-            $content .= '<a href="' . DOL_URL_ROOT . '/' . $link[2] . '" target="_blank">';
-            $content .= BimpRender::renderIcon($link[1], 'iconLeft');
-            $content .= $link[0] . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
-            $content .= '</a>';
-        }
-
-        $html .= BimpRender::renderPanel('Liens utiles', $content);
-
-        $html .= '</div>';
+//        // Liens: 
+//        $html .= '<div class="col-sm-12 col-md-4">';
+//        $content = '';
+//        foreach (self::$dev_links as $link) {
+//            $content .= ($content ? '<br/><br/>' : '');
+//            $content .= '<a href="' . DOL_URL_ROOT . '/' . $link[2] . '" target="_blank">';
+//            $content .= BimpRender::renderIcon($link[1], 'iconLeft');
+//            $content .= $link[0] . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+//            $content .= '</a>';
+//        }
+//        $html .= BimpRender::renderPanel('Liens utiles', $content);
+//        $html .= '</div>';
         $html .= '</div>';
 
         if (BimpTools::isModuleDoliActif('BIMPTASK')) {

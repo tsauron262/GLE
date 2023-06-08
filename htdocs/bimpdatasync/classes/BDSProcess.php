@@ -1037,54 +1037,54 @@ abstract class BDSProcess
 
     // Gestion des incrémentations d'objet dans le rapport:
 
-    public function incObjectData($data_name, $object = 'current')
+    public function incObjectData($data_name, $object = 'current', $number = 1)
     {
         if (BimpObject::objectLoaded($this->report)) {
             if ($object === 'current') {
                 if ($this->current_object['module'] &&
                         $this->current_object['name'] &&
                         $this->current_object['increase']) {
-                    $this->report->increaseObjectData($this->current_object['module'], $this->current_object['name'], $data_name);
+                    $this->report->increaseObjectData($this->current_object['module'], $this->current_object['name'], $data_name, $number);
                 }
             } elseif (is_a($object, 'BimpObject')) {
-                $this->report->increaseObjectData($object->module, $object->object_name, $data_name);
+                $this->report->increaseObjectData($object->module, $object->object_name, $data_name, $number);
             }
         }
     }
 
-    public function incProcessed($object = 'current')
+    public function incProcessed($object = 'current', $number = 1)
     {
-        $this->incObjectData('nbProcessed', $object);
+        $this->incObjectData('nbProcessed', $object, $number);
     }
 
-    public function incCreated($object = 'current')
+    public function incCreated($object = 'current', $number = 1)
     {
-        $this->incObjectData('nbCreated', $object);
+        $this->incObjectData('nbCreated', $object, $number);
     }
 
-    public function incUpdated($object = 'current')
+    public function incUpdated($object = 'current', $number = 1)
     {
-        $this->incObjectData('nbUpdated', $object);
+        $this->incObjectData('nbUpdated', $object, $number);
     }
 
-    public function incActivated($object = 'current')
+    public function incActivated($object = 'current', $number = 1)
     {
-        $this->incObjectData('nbActivated', $object);
+        $this->incObjectData('nbActivated', $object, $number);
     }
 
-    public function incDeactivated($object = 'current')
+    public function incDeactivated($object = 'current', $number = 1)
     {
-        $this->incObjectData('nbDeactivated', $object);
+        $this->incObjectData('nbDeactivated', $object, $number);
     }
 
-    public function incIgnored($object = 'current')
+    public function incIgnored($object = 'current', $number = 1)
     {
-        $this->incObjectData('nbIgnored', $object);
+        $this->incObjectData('nbIgnored', $object, $number);
     }
 
-    public function incDeleted($object = 'current')
+    public function incDeleted($object = 'current', $number = 1)
     {
-        $this->incObjectData('nbDeleted', $object);
+        $this->incObjectData('nbDeleted', $object, $number);
     }
 
     // Gestion statique des processus:

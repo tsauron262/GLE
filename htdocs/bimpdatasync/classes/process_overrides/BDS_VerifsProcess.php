@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    public static $current_version = 3;
+    public static $current_version = 4;
     public static $default_public_title = 'Vérifications et corrections diverses';
 
     // Vérifs marges factures : 
@@ -897,6 +897,64 @@ class BDS_VerifsProcess extends BDSProcess
         }
     }
 
+    // Vérifs produits sans mouvements depuis 2 ans
+
+    public function initCheckInactiveProducts(&$data, &$errors = array())
+    {
+        $dt_max_datec = new DateTime();
+        $dt_max_datec->sub(new DateInterval('P3M'));
+
+        $dt_min_date_mvt = new DateTime();
+        $dt_min_date_mvt->sub(new DateInterval('P2Y'));
+
+        $sql = 'SELECT a.rowid FROM ' . MAIN_DB_PREFIX . 'product a ';
+        $sql .= 'WHERE a.datec < "' . $dt_max_datec->format('Y-m-d') . ' 00:00:00" AND (a.tosell > 0 OR a.tobuy > 0)';
+        $sql .= ' AND a.fk_product_type = 0';
+        $sql .= ' AND (SELECT COUNT(mvt.rowid) FROM ' . MAIN_DB_PREFIX . 'stock_mouvement mvt WHERE';
+        $sql .= ' mvt.fk_product = a.rowid AND mvt.datem > "' . $dt_min_date_mvt->format('Y-m-d') . ' 00:00:00"';
+        $sql .= ') = 0';
+
+        $this->debug_content .= 'SQL : ' . $sql;
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            $elements = array();
+
+            foreach ($rows as $r) {
+                $elements[] = (int) $r['rowid'];
+            }
+
+            $data['steps']['process'] = array(
+                'label'                  => 'Désactivation des produits',
+                'on_error'               => 'continue',
+                'elements'               => $elements,
+                'nbElementsPerIteration' => 1000
+            );
+        } else {
+            $errors[] = 'ERR SQL - ' . $this->db->err();
+        }
+    }
+
+    public function executeCheckInactiveProducts($step_name, &$errors = array(), $extra_data = array())
+    {
+        if ($step_name == 'process') {
+            $this->setCurrentObjectData('bimpcore', 'Bimp_Product');
+            if (!empty($this->references)) {
+                $this->incProcessed('current', count($this->references));
+                if ($this->db->update('product', array(
+                            'tosell' => 0,
+                            'tobuy'  => 0
+                                ), 'rowid IN (' . implode(',', $this->references) . ')') <= 0) {
+                    $this->incIgnored('current', count($this->references));
+                    $this->Error('Echec màj - ' . $this->db->err());
+                } else {
+                    $this->incUpdated('current', count($this->references));
+                }
+            }
+        }
+    }
+
     // Install: 
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
@@ -1084,6 +1142,19 @@ class BDS_VerifsProcess extends BDSProcess
                             ), true, $errors, $warnings);
         }
 
+        if ($cur_version < 4) {
+            // Opération "Désactivation des produits sans mouvements depuis 2 ans": 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $id_process,
+                        'title'         => 'Désactivation des produits sans mouvements depuis 2 ans',
+                        'name'          => 'checkInactiveProducts',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 365
+                            ), true, $errors, $warnings);
+        }
         return $errors;
     }
 }

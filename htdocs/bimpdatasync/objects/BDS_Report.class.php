@@ -33,7 +33,7 @@ class BDS_Report extends BimpReport
         }
     }
 
-    public function increaseObjectData($module, $object_name, $field_name)
+    public function increaseObjectData($module, $object_name, $field_name, $number = 1)
     {
         if ($this->isLoaded()) {
             $this->loadObjetsData();
@@ -50,7 +50,7 @@ class BDS_Report extends BimpReport
 
             if (isset($this->objects_data[$key]) && BimpObject::objectLoaded($this->objects_data[$key])) {
                 if ($this->objects_data[$key]->field_exists($field_name)) {
-                    $this->objects_data[$key]->set($field_name, (int) $this->objects_data[$key]->getData($field_name) + 1);
+                    $this->objects_data[$key]->set($field_name, (int) $this->objects_data[$key]->getData($field_name) + $number);
                 }
             }
         }

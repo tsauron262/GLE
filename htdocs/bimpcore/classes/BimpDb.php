@@ -150,7 +150,7 @@ class BimpDb
                 $sql = preg_replace("/;( )*\n/U", ";\n", $sql);
                 $tabSql = explode(";\n", $sql);
                 foreach ($tabSql as $req) {
-                    if ($req != "")
+                    if (trim($req) != "")
                         if ($result = $this->execute($req) < 0) {
                             BimpCore::addlog('Erreur SQL maj', 3, 'sql', null, array(
                                 'Requête' => (!is_null($req) ? $req : ''),

@@ -330,7 +330,7 @@ class AtradiusAPI extends BimpAPI
             $errors = BimpTools::merge_array($errors, $data['errors']);
         }
 
-        $id_atradius = (int) BimpTools::getArrayValueFromPath($data, 'datat/0/buyerId', 0);
+        $id_atradius = (int) BimpTools::getArrayValueFromPath($data, 'data/0/buyerId', 0);
         if ($id_atradius) {
             return $id_atradius;
         }

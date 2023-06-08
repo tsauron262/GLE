@@ -621,7 +621,7 @@ class Bimp_Client extends Bimp_Societe
     }
 
     // Getters données:
-    
+
     public function getFacturesToRelanceByClients($params = array())
     {
         $clients = array();
@@ -2800,50 +2800,50 @@ class Bimp_Client extends Bimp_Societe
 
     public function getIdAtradius(&$errors = array())
     {
-        if (0 < (int) $this->getData('id_atradius'))
+        if ((int) $this->getData('id_atradius') > 0) {
             return (int) $this->getData('id_atradius');
+        }
 
         if ($this->isSirenValid()) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
             $api = BimpAPI::getApiInstance('atradius');
             if (is_a($api, 'AtradiusAPI')) {
                 $id_atradius = (int) $api->getBuyerIdBySiren((string) $this->getData('siren'), $errors);
-                if (0 < (int) $id_atradius) {
+                if ((int) $id_atradius > 0) {
                     $this->updateField('id_atradius', $id_atradius);
+                    return $id_atradius;
                 } else {
-                    $errors[] = "Id Atradius introuvable";
+                    $errors[] = "Echec de l'obtention de l'ID Atradius";
                 }
-                return $id_atradius;
             } else {
-                $errors[] = "API inatégniable";
+                $errors[] = 'L\'API Atraidus n\'est pas configurée correctement';
             }
+        } else {
+            $errors[] = "SIREN ivalide : impossible d'obtenir l'ID Atradius";
         }
 
-        $errors[] = "Id adtradius non définie et SIREN erroné/non définit";
         return 0;
     }
 
     public function syncroAtradius(&$warnings = array(), &$success = '')
     {
-        $success .= '';
         $errors = array();
         $id_atradius = $this->getIdAtradius($errors);
         BimpObject::loadClass('bimpcore', 'BimpNote');
-        if (0 < (int) $id_atradius) {
+
+        if ((int) $id_atradius > 0) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
             $api = BimpAPI::getApiInstance('atradius');
+
             if (is_a($api, 'AtradiusAPI')) {
                 $cover = $api->getCover(array('buyerId' => $id_atradius), $errors, $warnings);
 
                 if (empty($cover)) {
                     $warnings[] = "Aucune couverture pour ce client.";
                     $cover['amount'] = 0;
-//                    return $errors;
                 }
 
                 if (is_array($cover) and!empty($cover)) {
-
-
                     if (isset($cover['amount'])) {
                         if ($cover['amount'] == 0) {
                             if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK || $this->getData('outstanding_limit_credit_check') > 0)
@@ -2914,7 +2914,7 @@ class Bimp_Client extends Bimp_Societe
                 $errors[] = "API non définit";
             }
         } else {
-            $errors[] = "Id atradius non définit";
+            $errors[] = "ID atradius absent : impossible de rafraîchir les données Atradius pour ce client";
         }
 
         return $errors;
@@ -3458,7 +3458,6 @@ class Bimp_Client extends Bimp_Societe
 
     public function actionRefreshOutstandingAtradius($data, &$success)
     {
-
         $errors = $warnings = array();
 
         if (!$this->isLoaded()) {

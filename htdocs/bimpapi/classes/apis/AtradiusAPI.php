@@ -22,7 +22,7 @@ class AtradiusAPI extends BimpAPI
             'test' => 'https://api-uat.atradius.com'
         ),
         'auth'    => array(
-            'prod' => 'https://api.atradius.com/authenticate/v2/tokens',/*bug si auth sur l'url de prod*/
+            'prod' => 'https://api.atradius.com/authenticate/v2/tokens', /* bug si auth sur l'url de prod */
             'prod' => 'https://api-uat.atradius.com/authenticate/v1/tokens',
             'test' => 'https://api-uat.atradius.com/authenticate/v1/tokens'
         )
@@ -224,7 +224,7 @@ class AtradiusAPI extends BimpAPI
         if (isset($params['creditLimitAmount']) and $params['coverType'] == self::CREDIT_CHECK) {
             unset($params['creditLimitAmount']);
         }
-        
+
         $data = $this->execCurlCustom('createCover', array(
             'fields' => $params,
             'type'   => 'POST'
@@ -307,8 +307,8 @@ class AtradiusAPI extends BimpAPI
                 $errors[] = "Echec de la requête auprès d'Atradius";
                 break;
         }
-        
-        if($data['data'][0]['response'] == 'Action has been refused.')
+
+        if ($data['data'][0]['response'] == 'Action has been refused.')
             $errors[] = "Demande refusée";
 
         return $data;
@@ -316,32 +316,37 @@ class AtradiusAPI extends BimpAPI
 
     public function getBuyerIdBySiren($siren, &$errors = array())
     {
-        // Définir id atra pour le client
         $params_get = array(
             'country' => 'FRA',
             'uid'     => $siren,
             'uidType' => 'SN'
         );
+
         $data = $this->execCurlCustom('getBuyer', array(
             'url_params' => $params_get
                 ), $errors, $response_headers, $response_code, array('customerId', 'policyId'));
-        if (isset($data['data']) && isset($data['data'][0]) && isset($data['data'][0]) && isset($data['data'][0]['buyerId'])) {
-            if (is_array($data['errors']) and count($data['errors']))
-                $errors = BimpTools::merge_array($errors, $data['errors']);
-            return (int) $data['data'][0]['buyerId'];
+
+        if (is_array($data['errors']) and count($data['errors'])) {
+            $errors = BimpTools::merge_array($errors, $data['errors']);
         }
 
-        $errors[] = 'Client non trouvé (par SIREN ' . $siren . ')';
+        $id_atradius = (int) BimpTools::getArrayValueFromPath($data, 'datat/0/buyerId', 0);
+        if ($id_atradius) {
+            return $id_atradius;
+        }
+
+        if (!count($errors)) {
+            $errors[] = 'Aucun ID Atradius trouvé pour le SIREN ' . $siren . '';
+        }
+
         return 0;
     }
 
     private function deleteCover($params = array(), &$errors = array(), &$success = '')
     {
-
         $params['action'] = 'cancel';
 
         if (!count($errors)) {
-
             $data = $this->execCurlCustom('deleteCover', array(
                 'fields'       => $params,
                 'type'         => 'PUT',
@@ -415,7 +420,7 @@ class AtradiusAPI extends BimpAPI
         }
 
         // Il n'y a pas encore d'assurance pour ce client, on le créer
-        if (empty($cover) /* bloque lorsqu'il y a une assaurance retiré exemple 164940 */ /*or ((int) $cover['amount'] < 1 && $params['coverType'] == self::CREDIT_CHECK)*/) {
+        if (empty($cover) /* bloque lorsqu'il y a une assaurance retiré exemple 164940 */ /* or ((int) $cover['amount'] < 1 && $params['coverType'] == self::CREDIT_CHECK) */) {
             return $this->createCover($params, $errors);
             // Augmentation de la limite
         } elseif (/* $params['coverType'] != self::CREDIT_CHECK and */ (int) $cover['amount'] < $params['creditLimitAmount']) {
@@ -470,13 +475,12 @@ class AtradiusAPI extends BimpAPI
 
     private function getErrors($response, &$errors)
     {
-
         if (isset($response['errors'])) {
             $this->getError($response, $errors);
         } else {
-
-            foreach ($response as $k => $unused)
+            foreach ($response as $k => $unused) {
                 $this->getError($response[$k], $errors);
+            }
         }
 
         return $response;
@@ -486,7 +490,6 @@ class AtradiusAPI extends BimpAPI
     {
         if (isset($response['errors'])) {
             foreach ($response['errors'] as $k => $e) {
-
                 if (isset($e['source']['parameter']))
                     $errors[] = $e['detail'] . " pour le paramètre " . $e['source']['parameter'];
                 else
@@ -713,6 +716,10 @@ class AtradiusAPI extends BimpAPI
 
         if (isset($response_body['codeRetour']) && (int) $response_body['codeRetour'] !== 0 && isset($response_body['libelle'])) {
             $errors[] = $response_body['libelle'];
+        }
+        
+        if (isset($response_body['faultstring']) && (string) $response_body['faultstring']) {
+            $errors[] = $response_body['faultstring'];
         }
 
         return $return;

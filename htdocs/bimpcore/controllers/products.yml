@@ -132,6 +132,8 @@ sections:
                       
         values8sens: 
             label: Tags 8sens
+            show:
+                verif_cond: "BimpCore::isEntity('bimp')"
             sections: 
                 - type: list
                   list: 

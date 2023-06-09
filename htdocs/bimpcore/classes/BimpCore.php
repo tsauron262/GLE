@@ -948,8 +948,16 @@ class BimpCore
 
     public static function isEntity($entity)
     {
-        if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY == $entity) {
-            return 1;
+        if (defined('BIMP_EXTENDS_ENTITY')) {
+            if (is_array($entity)) {
+                if (in_array(BIMP_EXTENDS_ENTITY, $entity)) {
+                    return 1;
+                }
+            } else {
+                if (BIMP_EXTENDS_ENTITY == $entity) {
+                    return 1;
+                }
+            }
         }
 
         return 0;
@@ -957,8 +965,16 @@ class BimpCore
 
     public static function isVersion($version)
     {
-        if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION == $version) {
-            return 1;
+        if (defined('BIMP_EXTENDS_VERSION')) {
+            if (is_array($version)) {
+                if (in_array(BIMP_EXTENDS_VERSION, $version)) {
+                    return 1;
+                }
+            } else {
+                if (BIMP_EXTENDS_VERSION == $version) {
+                    return 1;
+                }
+            }
         }
 
         return 0;

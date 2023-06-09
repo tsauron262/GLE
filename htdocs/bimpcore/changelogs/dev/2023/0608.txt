@@ -1,0 +1,3 @@
+- Correctif dans hookmanager.class.php : $hookmanager->resPrint est réinitialisé à chaque appel à executeHooks(), 
+  or il y a des cas de figures où 2 appels à executehooks() sont emboîtés l'un dans l'autre, ce qui entrâine un écrasement 
+  du contenu HTML. (Exemple : sur l'ancien thème, le bloc liens SAV peut parfois être écrasé par le bloc Historique de navigation)

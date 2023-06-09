@@ -148,7 +148,7 @@ class BimpCore
             $config_notification = $notification->getList(array('active' => 1));
 
             foreach ($config_notification as $cn) {
-                if(BimpCore::isModuleActive($cn['module'])){
+                if (BimpCore::isModuleActive($cn['module'])) {
                     $notifs .= $cn['id'] . ": {";
                     $notifs .= "nom: '" . $cn['nom'] . "', ";
                     $notifs .= "id_notification: '" . $cn['id'] . "', ";
@@ -668,6 +668,7 @@ class BimpCore
 
                 if (!(string) $value) {
                     $bdb->insert('bimpcore_conf', array(
+                        'name'  => 'bimpcore_version',
                         'value' => json_encode(array(
                             'florian' => 0,
                             'tommy'   => 0,

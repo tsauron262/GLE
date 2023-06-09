@@ -108,32 +108,37 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     }
                 }
 
-                if (method_exists($this->object, 'fetch_optionals')) {
-                    $this->object->fetch_optionals();
-                    if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0  && $this->object->array_options['options_type'] == 'S') {
-                        $entrepot = new Entrepot($this->db);
-                        $entrepot->fetch($this->object->array_options['options_entrepot']);
-                        if ($entrepot->address != "" && $entrepot->town != "") {
-                            $this->fromCompany->zip = $entrepot->zip;
-                            $this->fromCompany->address = $entrepot->address;
-                            $this->fromCompany->town = $entrepot->town;
-
-                            if (BimpCore::isEntity('bimp')) {
-                                if ($this->fromCompany->name == "Bimp Groupe Olys")
-                                    $this->fromCompany->name = "Bimp Olys SAS";
-
-                                if ($entrepot->ref == "PR") {
-                                    $this->fromCompany->address = "2 rue des Erables CS 21055  ";
-                                    $this->fromCompany->town = "LIMONEST";
-                                    $this->fromCompany->zip = "69760";
+                if (BimpCore::isEntity('bimp')) {
+                    /* ATTENTION A NE PAS ALTERER LES INFOS EN EN-TETE POUR LES DOCS SAV*/
+                    
+                    if (method_exists($this->object, 'fetch_optionals')) {
+                        $this->object->fetch_optionals();
+                        if (isset($this->object['options_type']) && (string) $this->object['options_type']) {
+                            $secteur = $this->object->array_options['options_type'];
+                            if ($secteur == 'S') {
+                                // DOCS SAV : 
+                                $this->fromCompany->name = 'OLYS LDLC';
+                                if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
+                                    $entrepot = new Entrepot($this->db);
+                                    $entrepot->fetch($this->object->array_options['options_entrepot']);
+                                    if ($entrepot->ref == "PR") {
+                                        $this->fromCompany->address = "2 rue des Erables CS 21055  ";
+                                        $this->fromCompany->town = "LIMONEST";
+                                        $this->fromCompany->zip = "69760";
+                                    } elseif ($entrepot->address != "" && $entrepot->town != "") {
+                                        $this->fromCompany->zip = $entrepot->zip;
+                                        $this->fromCompany->address = $entrepot->address;
+                                        $this->fromCompany->town = $entrepot->town;
+                                    }
+                                }
+                            } else {
+                                $this->fromCompany->name = 'BIMP';
+                                if (in_array($secteur, array('C', 'CTC', 'E', 'CTE'))) {
+                                    // DOCS EDUC: 
+                                    $this->fromCompany->url = 'www.bimp-pro.fr - www.bimp-education.fr';
                                 }
                             }
                         }
-                    }
-                    if (BimpCore::isEntity('bimp'))
-                        $this->fromCompany->name = 'BIMP';
-                    if($this->object->array_options['options_type'] == 'C' || $this->object->array_options['options_type'] == 'CTC' || $this->object->array_options['options_type'] == 'E' || $this->object->array_options['options_type'] == 'CTE'){
-                        $this->fromCompany->url = 'www.bimp-pro.fr - www.bimp-education.fr';
                     }
                 }
 

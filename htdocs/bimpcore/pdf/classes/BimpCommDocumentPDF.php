@@ -113,7 +113,7 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     
                     if (method_exists($this->object, 'fetch_optionals')) {
                         $this->object->fetch_optionals();
-                        if (isset($this->object['options_type']) && (string) $this->object['options_type']) {
+                        if (isset($this->object->array_options['options_type']) && (string) $this->object->array_options['options_type']) {
                             $secteur = $this->object->array_options['options_type'];
                             if ($secteur == 'S') {
                                 // DOCS SAV : 

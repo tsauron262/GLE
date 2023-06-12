@@ -148,7 +148,7 @@ class BimpCore
             $config_notification = $notification->getList(array('active' => 1));
 
             foreach ($config_notification as $cn) {
-                if(BimpCore::isModuleActive($cn['module'])){
+                if (BimpCore::isModuleActive($cn['module'])) {
                     $notifs .= $cn['id'] . ": {";
                     $notifs .= "nom: '" . $cn['nom'] . "', ";
                     $notifs .= "id_notification: '" . $cn['id'] . "', ";
@@ -668,6 +668,7 @@ class BimpCore
 
                 if (!(string) $value) {
                     $bdb->insert('bimpcore_conf', array(
+                        'name'  => 'bimpcore_version',
                         'value' => json_encode(array(
                             'florian' => 0,
                             'tommy'   => 0,
@@ -947,8 +948,16 @@ class BimpCore
 
     public static function isEntity($entity)
     {
-        if (defined('BIMP_EXTENDS_ENTITY') && BIMP_EXTENDS_ENTITY == $entity) {
-            return 1;
+        if (defined('BIMP_EXTENDS_ENTITY')) {
+            if (is_array($entity)) {
+                if (in_array(BIMP_EXTENDS_ENTITY, $entity)) {
+                    return 1;
+                }
+            } else {
+                if (BIMP_EXTENDS_ENTITY == $entity) {
+                    return 1;
+                }
+            }
         }
 
         return 0;
@@ -956,8 +965,16 @@ class BimpCore
 
     public static function isVersion($version)
     {
-        if (defined('BIMP_EXTENDS_VERSION') && BIMP_EXTENDS_VERSION == $version) {
-            return 1;
+        if (defined('BIMP_EXTENDS_VERSION')) {
+            if (is_array($version)) {
+                if (in_array(BIMP_EXTENDS_VERSION, $version)) {
+                    return 1;
+                }
+            } else {
+                if (BIMP_EXTENDS_VERSION == $version) {
+                    return 1;
+                }
+            }
         }
 
         return 0;

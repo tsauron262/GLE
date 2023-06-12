@@ -1,0 +1,11 @@
+- Ajout du mot-clé "verif_cond" pour les configs yml. 
+
+Exemples d'utilisation: 
+
+show: 
+    verif_cond: "BimpCore::isUserDev()"
+    verif_cond: "!BimpCore::isUserDev()"
+    verif_cond: "BimpCore::isEntity('bimp')"
+    verif_cond: "$user->admin"
+    verif_cond: "$conf->xxx"
+        

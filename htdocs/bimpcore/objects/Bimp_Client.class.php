@@ -96,6 +96,10 @@ class Bimp_Client extends Bimp_Societe
     {
         switch ($action) {
             case 'relancePaiements':
+                if (!(int) BimpCore::getConf('use_relances_paiements_clients', null, 'bimpcommercial')) {
+                    $errors[] = 'Les relances de paiements sont désactivées';
+                    return 0;
+                }
                 if ($this->isLoaded()) { // L'instance peut ne pas être loadée dans le cas des relances groupées. 
                     if (!(int) $this->getData('relances_actives')) {
                         $errors[] = 'Les relances de paiement ne sont pas activées pour ce client';
@@ -569,7 +573,8 @@ class Bimp_Client extends Bimp_Societe
         global $user;
         $buttons = array();
 
-        if ($this->canSetAction('relancePaiements') && $user->rights->bimpcommercial->admin_relance_global) {
+        if ($this->canSetAction('relancePaiements') && $this->isActionAllowed('relancePaiements') &&
+                $user->rights->bimpcommercial->admin_relance_global) {
             $buttons[] = array(
                 'label'       => 'Relance impayés',
                 'icon_before' => 'fas_cogs',
@@ -583,7 +588,7 @@ class Bimp_Client extends Bimp_Societe
             );
         }
 
-        if ($this->canSetAction('listClientsToExcludeForCreditLimits')) {
+        if (BimpCore::isEntity('bimp') && $this->canSetAction('listClientsToExcludeForCreditLimits')) {
             $buttons[] = array(
                 'label'   => 'Listes clients à exclure',
                 'icon'    => 'fas_bars',

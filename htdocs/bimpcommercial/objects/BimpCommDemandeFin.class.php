@@ -2187,6 +2187,7 @@ class BimpCommDemandeFin extends BimpObject
                         if (count($signataire_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de la mise à jour des données du signataire');
                         } else {
+                            $signature->checkStatus($errors, $warnings);
                             $success .= ($success ? '<br/>' : '') . 'Enregistrement du document signé effectué avec succès';
                         }
                     }

@@ -112,6 +112,20 @@ class Bimp_User extends BimpObject
         }
         return parent::canSetAction($action);
     }
+    
+    public function canEditField($field_name)
+    {
+        switch ($field_name) {
+            case 'extra_materiel': 
+                global $user;
+                
+                if ($user->admin || $user->login == 'l.gay') {
+                    return 1;
+                }
+                return 0;
+        }
+        return parent::canEditField($field_name);
+    }
 
     // Getters booléens:
 

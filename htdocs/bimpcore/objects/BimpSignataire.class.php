@@ -1306,6 +1306,29 @@ class BimpSignataire extends BimpObject
         return $errors;
     }
 
+    public function setSignedPapier($date_signed = '', &$warnings = array())
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if (!$date_signed) {
+                $date_signed = date('Y-m-d H:i:s');
+            }
+            
+            $errors = $this->validateArray(array(
+                'status'         => self::STATUS_SIGNED,
+                'date_signed'    => $date_signed,
+                'type_signature' => self::TYPE_PAPIER
+            ));
+            
+            if (!count($errors)) {
+                $errors = $this->update($warnings, true);
+            }
+        }
+
+        return $errors;
+    }
+
     // Envois des e-mails: 
 
     public function sendSignDistEmail($users = null, $email_content = '', &$success = '', &$warnings = array())

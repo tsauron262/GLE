@@ -2032,16 +2032,9 @@ class BimpSignature extends BimpObject
                                     $signataire = BimpCache::getBimpObjectInstance('bimpcore', 'BimpSignataire', $id_signataire);
 
                                     if (BimpObject::objectLoaded($signataire)) {
-                                        $signataire_errors = $signataire_warnings = array();
-                                        $signataire_errors = $signataire->validateArray(array(
-                                            'status'         => BimpSignataire::STATUS_SIGNED,
-                                            'date_signed'    => $date,
-                                            'type_signature' => BimpSignataire::TYPE_PAPIER
-                                        ));
-
-                                        if (!count($signataire_errors)) {
-                                            $signataire_errors = $signataire->update($signataire_warnings, true);
-                                        }
+                                        $signataire_warnings = array();
+                                        $signataire_errors = $signataire->setSignedPapier($date, $signataire_warnings);
+                                        
                                         if (count($signataire_errors)) {
                                             $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de la mise à jour du signataire "' . $signataire->getName() . '"');
                                         }

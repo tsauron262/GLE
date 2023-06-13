@@ -63,5 +63,4 @@ params:
                       def: 0
                   id_responsable_general: 
                       label: Identifiant du responsable général
-                      type: int
                       def: 1414

@@ -296,13 +296,15 @@ class PropalPDF extends BimpCommDocumentPDF
             $this->writeContent($html);
         }
     }
-    
+
     public function getBottomLeftHtml()
     {
         $html = '';
         $html .= parent::getBottomLeftHtml();
-        if(BimpCore::isEntity('bimp'))
+
+        if (BimpCore::isEntity('bimp')) {
             $html .= '<table style="width: 100%" cellpadding="5"><tr><td style="width: 60%; border: solid 6px black; font-size: 7px;">Les produits éligibles* bénéficient gratuitement d\'une garantie commerciale de 3 ans chez OLYS<br/>*Voir les conditions en annexe.</td></tr></table>';
+        }
         return $html;
     }
 }

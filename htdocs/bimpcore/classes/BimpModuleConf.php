@@ -589,13 +589,12 @@ class BimpModuleConf
     {
         $missings = array();
 
-//        foreach (scandir(DOL_DOCUMENT_ROOT) as $dir) {
-        foreach(array('bimpcore') as $dir) {
+        foreach (scandir(DOL_DOCUMENT_ROOT) as $dir) {
             if (in_array($dir, array('.', '..')) || !is_dir(DOL_DOCUMENT_ROOT . '/' . $dir) || strpos($dir, 'bimp') !== 0) {
                 continue;
             }
 
-            if (file_exists(DOL_DOCUMENT_ROOT . '/' . $dir . '/' . $dir . '.yml')) {
+            if (BimpCore::isModuleActive($dir) && file_exists(DOL_DOCUMENT_ROOT . '/' . $dir . '/' . $dir . '.yml')) {
                 $module_conf = self::getInstance($dir);
 
                 $params = $module_conf->getFullParamsData();

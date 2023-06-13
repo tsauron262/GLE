@@ -3256,6 +3256,53 @@ class BimpTools
 //        return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $file; => Selon changelog DOL16 (A vérifier) 
         return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=logos/' . $file;
     }
+    
+    public static function verifCond($s)
+    {
+        // Adapté de dol_eval() : nécessaire pour contourner cetaines restrictions. 
+        
+        $errors = array();
+
+        if (preg_match('/[^a-z0-9\s' . preg_quote('^$_+-.*>&|=!?():"\',/@', '/') . ']/i', $s)) {
+            $errors[] = 'Caractères interdits';
+        }
+        if (strpos($s, '`') !== false) {
+            $errors[] = '` interdit';
+        }
+        if (preg_match('/[^0-9]+\.[^0-9]+/', $s)) {
+            $errors[] = 'Point interdit';
+        }
+
+        $forbiddenphpstrings = array('$$');
+        $forbiddenphpstrings = array_merge($forbiddenphpstrings, array('_ENV', '_SESSION', '_COOKIE', '_GET', '_POST', '_REQUEST'));
+
+        $forbiddenphpfunctions = array("exec", "passthru", "shell_exec", "system", "proc_open", "popen", "eval", "dol_eval", "executeCLI", "verifCond", "base64_decode");
+        $forbiddenphpfunctions = array_merge($forbiddenphpfunctions, array("fopen", "file_put_contents", "fputs", "fputscsv", "fwrite", "fpassthru", "require", "include", "mkdir", "rmdir", "symlink", "touch", "unlink", "umask"));
+        $forbiddenphpfunctions = array_merge($forbiddenphpfunctions, array("function", "call_user_func"));
+
+        $forbiddenphpregex = 'global\s+\$|\b(' . implode('|', $forbiddenphpfunctions) . ')\b';
+
+        do {
+            $oldstringtoclean = $s;
+            $s = str_ireplace($forbiddenphpstrings, '__forbiddenstring__', $s);
+            $s = preg_replace('/' . $forbiddenphpregex . '/i', '__forbiddenstring__', $s);
+        } while ($oldstringtoclean != $s);
+
+        if (strpos($s, '__forbiddenstring__') !== false) {
+            $errors[] = 'Présence d\'une chaîne interdite';
+        }
+
+        if (count($errors)) {
+            BimpCore::addlog('Erreur condition', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                'Chaîne'  => $s,
+                'Erreurs' => $errors
+            ));
+            return 0;
+        }
+
+        global $user, $conf;
+        return eval('return ' . $s . ';');
+    }
 
     // Gestion des couleurs: 
 

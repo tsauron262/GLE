@@ -15,7 +15,7 @@ class BimpConfig
     public $current = null;
     public $errors = array();
     public static $keywords = array(
-        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf', 'dol_conf', 'is_module_active'
+        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf', 'dol_conf', 'is_module_active', 'verif_cond'
     );
     public $cache_key = '';
     protected static $params = array();
@@ -755,6 +755,9 @@ class BimpConfig
             if (isset($value['is_module_active'])) {
                 return $this->getIsModuleActive($value['is_module_active'], $path . '/is_module_active');
             }
+            if (isset($value['verif_cond'])) {
+                return BimpTools::verifCond($value['verif_cond']);
+            }
         }
         return $value;
     }
@@ -1193,13 +1196,7 @@ class BimpConfig
 
     protected function getIsModuleActive($module, $path)
     {
-        if (strpos($module, 'bimp') === 0) {
-            return (int) BimpCore::isModuleActive($module);
-        } else {
-            // todo
-        }
-
-        return 0;
+        return (int) BimpCore::isModuleActive($module);
     }
 
     // Gestion des objets: 

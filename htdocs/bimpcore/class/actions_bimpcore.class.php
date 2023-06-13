@@ -167,7 +167,7 @@ class ActionsBimpcore
 //            if(!isset($object->array_options) || count($object->array_options) == 0)
             $object->fetch_optionals();
             $serialisable = $object->array_options['options_serialisable'];
-            $hookmanager->resPrint = Bimp_Product::getStockIconStatic($object->id, null, $serialisable); // $id_entrepôt facultatif, peut être null.
+            $hookmanager->resPrintsArray['getNomUrl'] = Bimp_Product::getStockIconStatic($object->id, null, $serialisable); // $id_entrepôt facultatif, peut être null.
         }
 
         return 0;

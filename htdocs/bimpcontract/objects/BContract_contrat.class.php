@@ -1958,7 +1958,7 @@ class BContract_contrat extends BimpDolObject
     {
         // ??? 
         $commandes = [];
-
+        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande');
         $list = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
 
         foreach ($list as $nb => $infos) {

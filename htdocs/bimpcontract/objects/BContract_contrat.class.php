@@ -3283,12 +3283,12 @@ class BContract_contrat extends BimpDolObject
                         // Responsable
                         if ($this->getTotalContrat() < 8000) {
                             if ($this->getData('secteur') == 'CTE') {
-                                $id_user = BimpCore::getConf('id_responsable_education', null, 'bimpcontract');
+                                $id_user = (int) BimpCore::getConf('id_responsable_education', null, 'bimpcontract');
                             } else {
-                                $id_user = BimpCore::getConf('id_responsable_commercial', null, 'bimpcontract');
+                                $id_user = (int) BimpCore::getConf('id_responsable_commercial', null, 'bimpcontract');
                             }
                         } else {
-                            $id_user = BimpCore::getConf('id_responsable_general', null, 'bimpcontract');
+                            $id_user = (int) BimpCore::getConf('id_responsable_general', null, 'bimpcontract');
                         }
 
                         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);

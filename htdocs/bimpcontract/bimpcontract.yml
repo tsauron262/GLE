@@ -63,7 +63,6 @@ params:
                       def: 0
                   id_responsable_general: 
                       label: ID du responsable général
-                      def: 1414
                   id_responsable_education: 
                       label: ID du responsable éducation
                   id_responsable_commercial: 

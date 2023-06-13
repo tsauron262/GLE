@@ -238,6 +238,12 @@ fields:
         label: Signature
         input: 
             type: signature_pad
+    extra_materiel: 
+        label: Autre matériel
+        type: text
+        input: 
+            rows: 5
+            auto_expand: 1
         
 forms:
     light: 
@@ -448,6 +454,12 @@ fields_tables:
         rows: 
             - field: id8sens
             - field: idtech8sens
+            
+    extra_materiel: 
+#        panel_header: 0
+        rows: 
+            - field: extra_materiel
+              edit: 1
         
 views: 
     default: 
@@ -510,6 +522,15 @@ views:
                 type: custom
                 custom: 
                     callback: renderValidationsRedirForm
+                    
+    extra_materiel: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 12
+                  fields_table: 
+                      name: extra_materiel
                     
 filters_panel: 
     default: 

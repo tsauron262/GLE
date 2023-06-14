@@ -1,0 +1,22 @@
+# Entité : actimac
+
+fields: 
+    replaced_ref: unset
+    id_contrat: unset
+    id_ticket: unset
+    
+forms: 
+    default: 
+        rows: 
+            replaced_ref: unset
+            id_contrat: unset
+            id_ticket: unset
+            
+    prise_en_charge: 
+        rows: 
+            id_contrat: unset
+            
+    edit: 
+        rows: 
+            replaced_ref: unset
+            id_contrat: unset

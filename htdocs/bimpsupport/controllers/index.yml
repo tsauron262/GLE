@@ -67,6 +67,10 @@ sections:
         default:
             label: Hotline
             icon: fas_headset
+            show: 
+                conf: 
+                    module: bimpsupport
+                    name: use_tickets
             sections:
                 - type: list
                   list: 

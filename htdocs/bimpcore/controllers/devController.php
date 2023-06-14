@@ -100,8 +100,6 @@ class devController extends BimpController
 
         $lock_msg = BimpCore::getConf('git_pull_lock_msg');
         if ($lock_msg) {
-            $html = '';
-
             $html .= '<h4 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'GIT PULL vérouillés</h4>';
             $html .= 'Message : <b>' . $lock_msg .'</b>';
 

@@ -237,6 +237,8 @@ class BimpTools
                 }
             }
         }
+        
+        return (count($errors) ? false : true);
     }
 
     public static function cleanTempFiles()

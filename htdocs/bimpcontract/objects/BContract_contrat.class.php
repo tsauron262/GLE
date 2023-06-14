@@ -1958,7 +1958,7 @@ class BContract_contrat extends BimpDolObject
     {
         // ??? 
         $commandes = [];
-
+        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande');
         $list = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
 
         foreach ($list as $nb => $infos) {
@@ -2546,7 +2546,7 @@ class BContract_contrat extends BimpDolObject
                 if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
                     $warnings[] = 'Le contrat a été facturé à partir d\'une commande, il ne comporte donc pas d\'échéancier';
                 }
-                
+
                 $html .= $echeancier->displayEcheancier();
             }
 
@@ -2565,7 +2565,7 @@ class BContract_contrat extends BimpDolObject
                 $html .= '</span>';
             }
         }
-        
+
         return $html;
     }
 
@@ -3281,19 +3281,19 @@ class BContract_contrat extends BimpDolObject
                         $errors[] = BimpTools::getMsgFromArray($signataire_errors, 'Echec de l\'ajout du contact signataire à la fiche signature');
                     } else {
                         // Responsable
-                        if ($this->getTotalContrat() < 8000) {
+                        if ($this->getTotalContrat() < 15000) {
                             if ($this->getData('secteur') == 'CTE') {
-                                $id_user = BimpCore::getConf('id_responsable_education', null, 'bimpcontract');
+                                $id_user = (int) BimpCore::getConf('id_responsable_education', null, 'bimpcontract');
                             } else {
-                                $id_user = BimpCore::getConf('id_responsable_commercial', null, 'bimpcontract');
+                                $id_user = (int) BimpCore::getConf('id_responsable_commercial', null, 'bimpcontract');
                             }
                         } else {
-                            $id_user = BimpCore::getConf('id_responsable_general', null, 'bimpcontract');
+                            $id_user = (int) BimpCore::getConf('id_responsable_general', null, 'bimpcontract');
                         }
 
                         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
 
-                        if (0 < $id_user) {
+                        if ($id_user && BimpObject::objectLoaded($user)) {
                             $signataire_user = BimpObject::createBimpObject('bimpcore', 'BimpSignataire', array(
                                         'id_signature'   => $signature->id,
                                         'label'          => 'Responsable',
@@ -3338,7 +3338,7 @@ class BContract_contrat extends BimpDolObject
                                 }
                             }
                         } else {
-                            $errors[] = 'Responsable inconnu pour le secteur ' . $this->getData('secteur');
+                            $errors[] = 'Responsable inconnu pour le secteur "' . $this->displayDataDefault('secteur') . '"';
                         }
                     }
                 }

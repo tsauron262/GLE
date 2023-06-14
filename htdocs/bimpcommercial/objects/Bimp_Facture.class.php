@@ -1,7 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
 global $langs;
 $langs->load('bills');

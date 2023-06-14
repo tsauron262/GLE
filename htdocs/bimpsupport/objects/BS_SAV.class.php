@@ -1,7 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
-require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
 class BS_SAV extends BimpObject
 {
@@ -2741,7 +2741,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
             $hrefFin = "";
 
-            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
             global $tabCentre;
             if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
                 $centreUser = array();

@@ -2659,7 +2659,7 @@ class BimpCache
             global $tabCentre;
 
             if (!is_array($tabCentre)) {
-                require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+                BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
             }
 
             self::$cache['centres'] = array();

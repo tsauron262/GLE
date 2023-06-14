@@ -980,6 +980,30 @@ class BimpCore
         return 0;
     }
 
+    public static function requireFileForEntity($module, $file_name)
+    {
+        $dir = DOL_DOCUMENT_ROOT . ($module ? '/' . $module : '') . '/';
+        $entity = self::getEntity();
+
+        if (!$entity) {
+            if (file_exists($dir . $file_name)) {
+                require_once $dir . $file_name;
+                return true;
+            }
+
+            $entity = 'default';
+        } elseif (!file_exists($dir . 'extends/' . $entity . '/' . $file_name)) {
+            $entity = 'default';
+        }
+
+        if (file_exists($dir . 'extends/' . $entity . '/' . $file_name)) {
+            require_once $dir . $file_name;
+            return true;
+        }
+
+        return false;
+    }
+
     // Gestion du contexte:
 
     public static function getContext()

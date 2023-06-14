@@ -1,10 +1,12 @@
 <?php
 
-class synopsisexport {
+class synopsisexport
+{
 
     public $info = array();
 
-    public function __construct($db, $sortie = 'html') {
+    public function __construct($db, $sortie = 'html')
+    {
         $this->db = $db;
         $this->sortie = $sortie;
 
@@ -19,16 +21,15 @@ class synopsisexport {
         }
     }
 
-    public function exportFactureSav($print = true) {
-        if($print)
-        echo "Debut export : <br/>";
+    public function exportFactureSav($print = true)
+    {
+        if ($print)
+            echo "Debut export : <br/>";
 //        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, ref, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
 //, email , total, total_ttc, id8Sens FROM  `" . MAIN_DB_PREFIX . "facture` fact, " . MAIN_DB_PREFIX . "societe soc
 //LEFT JOIN " . MAIN_DB_PREFIX . "element_element el, " . MAIN_DB_PREFIX . "user_extrafields ue, " . MAIN_DB_PREFIX . "synopsischrono_view_105 chrono 
 // WHERE `fk_object` = IF(chrono.Technicien > 0, chrono.Technicien, fact.fk_user_author) AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND el.fk_source = chrono.propalid AND fk_target = fact.rowid
 //  AND  fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND  close_code is null AND paye = 1 AND extraparams is null GROUP BY fact.rowid");
-
-
 //        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, ref, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
 //, email , total, total_ttc, idtech8sens as id8Sens, chronoT.Centre FROM  `" . MAIN_DB_PREFIX . "facture` fact
 //
@@ -67,15 +68,15 @@ class synopsisexport {
 
                 if ($print)
                     echo "<br/>Facture : " . $ligne->ref . " exporté.<br/>";
-            }
-            else 
+            } else
                 echo "Export de " . $ligne->ref . " annule.</br>";
         }
-        if($print)
-        echo "Fin export : <br/>";
+        if ($print)
+            echo "Fin export : <br/>";
     }
 
-    public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false, $dateDeb = null, $dateFin = null, $blockCentre = null) {
+    public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false, $dateDeb = null, $dateFin = null, $blockCentre = null)
+    {
 //        echo "Momentanément indisponible";return "";
         global $user, $tabVal;
         $tabVal = array();
@@ -156,7 +157,7 @@ class synopsisexport {
 
         if ($typeAff2 != "fact")
             $where .= " AND chronoT.id = chrono.id ";
-        $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT, " . MAIN_DB_PREFIX . "synopsischrono chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid";// AND propal.extraparams is null ";
+        $partReq5 = " FROM  " . MAIN_DB_PREFIX . "synopsischrono_chrono_105 chronoT, " . MAIN_DB_PREFIX . "synopsischrono chrono LEFT JOIN " . MAIN_DB_PREFIX . "propal propal on chrono.propalId = propal.rowid"; // AND propal.extraparams is null ";
         $partReq5 .= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsis_apple_repair repair on chrono.id = repair.chronoId ";
         $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "societe soc on  soc.rowid = propal.fk_soc ";
 //        $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
@@ -180,8 +181,7 @@ class synopsisexport {
 
                             LEFT JOIN `" . MAIN_DB_PREFIX . "paiement` p1
                              ON p1.rowid = p2.fk_paiement";
-            
-            
+
             $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
             $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "propal propal on  propal.rowid = el.fk_source ";
             $partReq5 .= " LEFT JOIN  " . MAIN_DB_PREFIX . "synopsischrono chrono1 ON (`revisionNext` = 0 || `revisionNext` is NULL) AND chrono1.propalId = el.fk_source ";
@@ -207,10 +207,10 @@ class synopsisexport {
             while ($ligne = $this->db->fetch_object($result)) {
                 $tabT = explode("(", $ligne->description);
                 $description = traiteCarac(trim($tabT[0]), " ");
-                if($typeAff == "parTypeMat2")        
-                        $description .= " (". traiteCarac($ligne->Type_garantie).")";
+                if ($typeAff == "parTypeMat2")
+                    $description .= " (" . traiteCarac($ligne->Type_garantie) . ")";
                 $tabT = getElementElement("SAV", "productCli", null, $ligne->id);
-                foreach($tabT as $resultTab)
+                foreach ($tabT as $resultTab)
                     $tabMateriel[strtoupper($description)][] = $resultTab['s'];
 //                if (count($tabT) > 0)
 //                    $tabMateriel[strtoupper($description)][] = $tabT[0]['s'];
@@ -225,7 +225,6 @@ class synopsisexport {
 //                break;
                 $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND chrono.id in (" . implode(",", $tabChrono) . ") " . $partReqFin);
 
-
 //            echo "<br/>Facture : " . $ligne['ref'] . " exporté.<br/>";
             }
         } elseif ($typeAff == "parTypeGar") {
@@ -237,8 +236,8 @@ class synopsisexport {
                 $description = traiteCarac(trim($tabT[0]), " ");
                 $tabT = getElementElement("SAV", "productCli", null, $ligne->id);
                 if (count($tabT) > 0)
-                    foreach($tabT as $elem)
-                    $tabMateriel[strtoupper($description)][] = $elem['s'];
+                    foreach ($tabT as $elem)
+                        $tabMateriel[strtoupper($description)][] = $elem['s'];
             }
 //        print_r($tabMateriel);die;
             ksort($tabMateriel, SORT_STRING);
@@ -249,7 +248,6 @@ class synopsisexport {
 //            if($j > 50)
 //                break;
                 $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND chrono.id in (" . implode(",", $tabChrono) . ") " . $partReqFin);
-
 
 //            echo "<br/>Facture : " . $ligne['ref'] . " exporté.<br/>";
             }
@@ -302,7 +300,8 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
         $this->sortie("", "statSav");
     }
 
-    private function statLigneFacture($titre, $req) {
+    private function statLigneFacture($titre, $req)
+    {
         $return1 = $return2 = "";
         $result2 = $this->db->query($req);
 //
@@ -317,9 +316,9 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                     $this->textSortie($titre, "titre");
                     $return1 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "", true);
                 }
-                
+
                 $return2 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, $titre, false, $enDouble);
-                
+
                 $oldLigne = $ligne2;
             }
             if ($i > 1)
@@ -329,7 +328,8 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
         }
     }
 
-    public function textSortie($text, $type = "tab") {
+    public function textSortie($text, $type = "tab")
+    {
         if ($this->sortie == 'html' && $type == "tab")
             $this->textSortie .= "<table><tr><td>" . $text . "</td></tr></table>";
         elseif ($this->sortie == 'html' && $type == "titre")
@@ -338,7 +338,8 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
             $this->textSortie .= $text;
     }
 
-    public function sortie($text, $nom = "temp", $type = "n/c", $idObj = null, $print = true) {
+    public function sortie($text, $nom = "temp", $type = "n/c", $idObj = null, $print = true)
+    {
         global $user;
         $text .= $this->textSortie;
 
@@ -365,10 +366,9 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                 }
                 if ($print)
                     echo "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&attachment=1&file=/export/" . $file . "' class='butAction'>Fichier</a>";
-            }
-            else {
+            } else {
                 if ($print)
-                    echo "<span style='color:red;'>Impossible d'exporté " .$folder1. $file . "</span>";
+                    echo "<span style='color:red;'>Impossible d'exporté " . $folder1 . $file . "</span>";
             }
         } else {
             echo "<style>"
@@ -381,14 +381,15 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
         $this->textSortie = "";
     }
 
-    private function textTable($ligne, $separateur, $sautDeLigne, $prefLigne = '', $afficheTitre = true) {
+    private function textTable($ligne, $separateur, $sautDeLigne, $prefLigne = '', $afficheTitre = true)
+    {
         global $tabVal, $enDouble;
         $return = "";
         $tabCacher = array('factid', 'rowid');
         if ($afficheTitre === "Total") {
             $return .= $prefLigne . $separateur;
             foreach ($ligne as $nom => $valeur) {
-                if($nom == "Centre")
+                if ($nom == "Centre")
                     continue;
 //            if($nom == 'product_type')
 //                $nom = 'ref_prod';
@@ -398,11 +399,10 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                     $return .= str_replace(array($sautDeLigne, $separateur, "\n", "\r"), "  ", (isset($this->tabTot[$nom]) ? str_replace(" ", "", price($this->tabTot[$nom])) : "TOTAL")) . $separateur;
             }
             $return .= $sautDeLigne;
-        }
-        elseif ($afficheTitre) {
+        } elseif ($afficheTitre) {
             $return .= $prefLigne . $separateur;
             foreach ($ligne as $nom => $valeur) {
-                if($nom == "Centre")
+                if ($nom == "Centre")
                     continue;
 //            if($nom == 'product_type')
 //                $nom = 'ref_prod';
@@ -413,12 +413,11 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
             }
             $return .= $sautDeLigne;
             $this->tabTot = array();
-        }
-        else {
+        } else {
             $return .= $prefLigne . $separateur;
             foreach ($ligne as $nom => $valeur) {
-                $valeur = str_replace("\\n",'', $valeur);
-                if($nom == "Centre")
+                $valeur = str_replace("\\n", '', $valeur);
+                if ($nom == "Centre")
                     continue;
                 if ($nom == 'product_type') {
                     if ($valeur == -100)
@@ -432,34 +431,36 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
                 }
 
                 if ($nom == "objFact") {
-                    if (isset($tabVal[$valeur])){
+                    if (isset($tabVal[$valeur])) {
                         $tabVal[$valeur] = $tabVal[$valeur] + 1;
                         $enDouble = true;
-                    }
-                    else{
+                    } else {
                         $tabVal[$valeur] = 1;
                         $enDouble = false;
                     }
                 }
-                
-                if($enDouble && in_array($nom, array("total", "total_marge")))
-                        $valeur = "";
+
+                if ($enDouble && in_array($nom, array("total", "total_marge")))
+                    $valeur = "";
 
                 if ($nom == "id8Sens") {
                     if ($valeur <= 1) {
                         if (isset($ligne->Centre) && $ligne->Centre != "") {
-                            require_once(DOL_DOCUMENT_ROOT."/synopsisapple/centre.inc.php");
+                            if (!defined('BIMP_LIB')) {
+                                require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+                            }
+                            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
                             global $tabCentre;
                             if (isset($tabCentre[$ligne->Centre][3]) && $tabCentre[$ligne->Centre][3] > 0)
                                 $valeur = $tabCentre[$ligne->Centre][3];
-                            else{
-                                dol_syslog("Pas d'id tech, pas de tech referent DANS centre pour export facture " . print_r($ligne, 1)." \n\n   |    \n\n ".print_r($tabCentre[$ligne->Centre],1), 3);
+                            else {
+                                dol_syslog("Pas d'id tech, pas de tech referent DANS centre pour export facture " . print_r($ligne, 1) . " \n\n   |    \n\n " . print_r($tabCentre[$ligne->Centre], 1), 3);
                                 $this->annulExport = true;
                             }
-                        } else{
-                            mailSyn("jc.cannet@bimp.fr", "Facture sans Centre", "Bonjour, la facture ".$ligne->ref." na pas de centre, elle ne peut donc pas étre exporté vers 8Sens. Cordialement.");
+                        } else {
+                            mailSyn("jc.cannet@bimp.fr", "Facture sans Centre", "Bonjour, la facture " . $ligne->ref . " na pas de centre, elle ne peut donc pas étre exporté vers 8Sens. Cordialement.");
                             dol_syslog("Pas d'id tech, pas de centre pour export facture " . print_r($ligne, 1), 3);
-                            $this->annulExport =true;
+                            $this->annulExport = true;
                         }
                     }
                 }
@@ -493,29 +494,29 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
 
                 if ($nom == "refSav" && $this->sortie == "html")
                     $valeur = "<a href='" . DOL_URL_ROOT . "/synopsischrono/card.php?ref=" . $valeur . "'>" . $valeur . "</a>";
-                if ($nom == "Tech" && $valeur > 0){
+                if ($nom == "Tech" && $valeur > 0) {
                     global $langs;
-                    if(!isset($tabTech[$valeur])){
+                    if (!isset($tabTech[$valeur])) {
                         $techT = new User($this->db);
                         $techT->fetch($valeur);
                         $tabTech[$valeur] = $techT;
                     }
-                    if($this->sortie == "html")
+                    if ($this->sortie == "html")
                         $valeur = $tabTech[$valeur]->getNomUrl(1);
                     else
-                        $valeur =  $tabTech[$valeur]->getFullName($langs);
+                        $valeur = $tabTech[$valeur]->getFullName($langs);
                 }
-                        
-                
+
+
                 if ($nom == "Paye")
                     $valeur = ($valeur > 0 ? "Oui" : "Non");
-                
-                if ($nom == "Statut"){
-                    if(!isset($tabStatut)){
+
+                if ($nom == "Statut") {
+                    if (!isset($tabStatut)) {
                         $tabStatut = array();
-                        $result = $this->db->query("SELECT * FROM `".MAIN_DB_PREFIX."Synopsis_Process_form_list_members` WHERE `list_refid` = 7");
-                        while($ligne = $this->db->fetch_object($result))
-                                $tabStatut[$ligne->valeur] = $ligne->label;
+                        $result = $this->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7");
+                        while ($ligne = $this->db->fetch_object($result))
+                            $tabStatut[$ligne->valeur] = $ligne->label;
                     }
                     $valeur = $tabStatut[$valeur];
                 }
@@ -537,5 +538,4 @@ WHERE  `list_refid` =11 AND ct.Centre = ls.valeur AND ct.id = chrono.id";
         }
         return $return;
     }
-
 }

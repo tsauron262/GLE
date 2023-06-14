@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php';
-require_once DOL_DOCUMENT_ROOT . "/bimpsupport/centre.inc.php";
+BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
 class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 {

@@ -1,6 +1,6 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
 class BE_Place extends BimpObject
 {

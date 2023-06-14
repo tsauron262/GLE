@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/BimpYmlGenerator.php';
+
 class BimpYml
 {
 
@@ -317,6 +319,16 @@ class BimpYml
             'title'   => 'Tous les paramètres (brut)',
             'content' => '<div><pre>' . print_r($full_params, 1) . '</pre></div>'
         );
+
+        $generator_content = BimpYmlGenerator::renderObjectYmlGeneratorView($module, $name);
+
+        if ($generator_content) {
+            $tabs[] = array(
+                'id'      => 'generator',
+                'title'   => 'Générateur',
+                'content' => $generator_content
+            );
+        }
 
         $html .= BimpRender::renderNavTabs($tabs, 'yml_analyser');
 

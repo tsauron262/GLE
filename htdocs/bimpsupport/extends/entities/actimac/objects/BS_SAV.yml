@@ -20,3 +20,10 @@ forms:
         rows: 
             replaced_ref: unset
             id_contrat: unset
+            
+fields_tables: 
+    infos: 
+        rows: 
+            replaced_ref: unset
+            id_ticket: unset
+            

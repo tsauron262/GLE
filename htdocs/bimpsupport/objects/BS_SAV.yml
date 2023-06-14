@@ -1313,40 +1313,60 @@ fields_tables:
         footer_extra_btn: 
             callback: getInfosExtraBtn
         rows: 
-            - field: replaced_ref
-              show: 
-                  field_value: replaced_ref
-            - field: ref
-            - field: date_rdv
-            - field: resgsx
-            - field: status
-              display: actions
-            - field: code_centre
-            - field: code_centre_repa
-            - field: id_entrepot
-              display: nom_url
-            - field: id_user_tech
-              display: nom_url
-            - field: id_equipment
-              display: card
-            - field: id_ticket
-              display: card
-            - field: prioritaire
-            - field: sav_pro
-              edit: 1
-            - field: prestataire_number
-            - label: Autre
-              value:
-                 callback: displayExtraSav
-            - field: date_terminer
-            - label: Lien publique
-              value:
-                 callback: displayPublicLink
-            - field: bon_resti_raison
-              show: 
-                  callback: isGratuit
-            - field: name_reseller
-            - field: alert_unrestitute
+            replaced_ref: 
+                field: replaced_ref
+                show: 
+                    field_value: replaced_ref
+            ref: 
+                field: ref
+            date_rdv: 
+                field: date_rdv
+            resgsx: 
+                field: resgsx
+            status: 
+                field: status
+                display: actions
+            code_centre: 
+                field: code_centre
+            code_centre_repa: 
+                field: code_centre_repa
+            id_entrepot: 
+                field: id_entrepot
+                display: nom_url
+            id_user_tech: 
+                field: id_user_tech
+                display: nom_url
+            id_equipment: 
+                field: id_equipment
+                display: card
+            id_ticket: 
+                field: id_ticket
+                display: card
+            prioritaire: 
+                field: prioritaire
+            sav_pro: 
+                field: sav_pro
+                edit: 
+            prestataire_number: 
+                field: prestataire_number
+            extra_sav: 
+                label: Autre
+                value: 
+                    callback: displayExtraSav
+            date_terminer: 
+                field: date_terminer
+            public_link: 
+                label: Lien publique
+                value: 
+                    callback: displayPublicLink
+            bon_resti_raison: 
+                field: bon_resti_raison
+                show: 
+                    callback: isGratuit
+            name_reseller: 
+                field: name_reseller
+            alert_unrestitute: 
+                field: alert_unrestitute
                  
     facturation:
         title: Facturation

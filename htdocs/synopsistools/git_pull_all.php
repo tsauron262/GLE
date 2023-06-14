@@ -15,7 +15,7 @@ if ($lock_msg) {
     $html .= '<h3 class="danger">GIT PULL vérouillés</h3>';
     $html .= 'Message : <b>' . $lock_msg . '</b>';
 
-    $onclick = 'saveBimpcoreConf(\'bimpcore\', \'git_pull_lock_msg\', \'\', null, function() {bimp_reloadPage();})';
+    $onclick = 'saveBimpcoreConf(\'bimpcore\', \'git_pull_lock_msg\', \'\', null)';
 
     $html .= '<div style="margin: 15px">';
     $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';

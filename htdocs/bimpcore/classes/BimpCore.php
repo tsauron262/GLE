@@ -992,12 +992,12 @@ class BimpCore
             }
 
             $entity = 'default';
-        } elseif (!file_exists($dir . 'extends/' . $entity . '/' . $file_name)) {
+        } elseif (!file_exists($dir . 'extends/entities/' . $entity . '/' . $file_name)) {
             $entity = 'default';
         }
 
-        if (file_exists($dir . 'extends/' . $entity . '/' . $file_name)) {
-            require_once $dir . $file_name;
+        if (file_exists($dir . 'extends/entities/' . $entity . '/' . $file_name)) {
+            require_once $dir . 'extends/entities/' . $entity . '/' . $file_name;
             return true;
         }
 

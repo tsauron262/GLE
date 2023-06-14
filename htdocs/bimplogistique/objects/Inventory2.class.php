@@ -84,31 +84,28 @@ HAVING scan_exp != scan_det";
             return BimpRender::renderAlerts($errors);
     }
 
-    public function fetch($id, $parent = null)
-    {
-        $return = parent::fetch($id, $parent);
-        return $return;
-    }
-
     public function displayCompletion()
     {
         $percent = 0;
         $return = '';
         $info = "";
-//        if ($this->getData('status') == self::STATUS_OPEN) {
+
         $sql = $this->db->db->query('SELECT SUM(IF(`qty_scanned` > 0, qty_scanned, 0)) as scan, SUM(IF(`qty` > 0, qty, 0)) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = ' . $this->id);
-        if ($this->db->db->num_rows($sql)) {
-            $ln = $this->db->db->fetch_object($sql);
-            if ($ln->scan > 0 && $ln->att > 0)
-                $percent = $ln->scan / $ln->att * 100;
-            $info = $ln->scan . ' / ' . $ln->att;
+
+        if (is_object($sql)) {
+            if ($this->db->db->num_rows($sql)) {
+                $ln = $this->db->db->fetch_object($sql);
+                if ($ln->scan > 0 && $ln->att > 0)
+                    $percent = $ln->scan / $ln->att * 100;
+                $info = $ln->scan . ' / ' . $ln->att;
+            }
         }
-//        } elseif ($this->getData('status') == self::STATUS_CLOSED)
-//            $percent = 100;
 
         $return = price($percent) . ' %';
-        if ($info != "")
+
+        if ($info != "") {
             $return .= ' (' . $info . ')';
+        }
         return $return;
     }
 
@@ -155,12 +152,12 @@ HAVING scan_exp != scan_det";
             if (count($err)) {
                 $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la création du package "Nouveau"');
             }
-            
+
             $err = $this->createWarehouseType($warehouse_and_type, $w_main, $t_main);
             if (count($err)) {
                 $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la création du (des) emplacement(s)');
             }
-            
+
             if (!count($errors)) {
                 $this->updateField('id_package_vol', $this->temp_package_vol);
                 $this->updateField('id_package_nouveau', $this->temp_package_nouveau);

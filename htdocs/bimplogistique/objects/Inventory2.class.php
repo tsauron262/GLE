@@ -114,7 +114,6 @@ HAVING scan_exp != scan_det";
 
     public function create(&$warnings = array(), $force_create = false)
     {
-
         $errors = array();
         $ids_prod = array();
 
@@ -132,13 +131,10 @@ HAVING scan_exp != scan_det";
             return $errors;
         }
 
-
-
         $warehouse_and_type = BimpTools::getValue('warehouse_and_type');
-        unset($warehouse_and_type[0]);
 
         // Définition de l'entrepot par défault
-        list($w_main, $t_main) = explode('_', $warehouse_and_type[1]);
+        list($w_main, $t_main) = explode('_', $warehouse_and_type[0]);
         $this->data['fk_warehouse'] = (int) $w_main;
         $this->data['type'] = (int) $t_main;
 
@@ -146,17 +142,31 @@ HAVING scan_exp != scan_det";
             return $errors;
 
         // Création de l'inventaire
-        $errors = BimpTools::merge_array($errors, parent::create($warnings, $force_create));
+        $errors = parent::create($warnings, $force_create);
 
-        // Création des packages
-        $errors = BimpTools::merge_array($errors, $this->createPackageVol());
-        $errors = BimpTools::merge_array($errors, $this->createPackageNouveau());
+        if (!count($errors)) {
+            // Création des packages
+            $err = $this->createPackageVol();
+            if (count($err)) {
+                $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la création du package "Vol"');
+            }
 
-        // MAJ des champ id_package_vol et id_package_nouveau
-        $errors = BimpTools::merge_array($errors, $this->updateField('id_package_vol', $this->temp_package_vol));
-        $errors = BimpTools::merge_array($errors, $this->updateField('id_package_nouveau', $this->temp_package_nouveau));
+            $err = $this->createPackageNouveau();
+            if (count($err)) {
+                $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la création du package "Nouveau"');
+            }
+            
+            $err = $this->createWarehouseType($warehouse_and_type, $w_main, $t_main);
+            if (count($err)) {
+                $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la création du (des) emplacement(s)');
+            }
+            
+            if (!count($errors)) {
+                $this->updateField('id_package_vol', $this->temp_package_vol);
+                $this->updateField('id_package_nouveau', $this->temp_package_nouveau);
+            }
+        }
 
-        $errors = BimpTools::merge_array($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
 
         return $errors;
     }

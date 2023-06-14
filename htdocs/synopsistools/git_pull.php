@@ -49,7 +49,7 @@ if ($lock_msg) {
         //);
 
         foreach ($tabHook as $hook) {
-            echo '<textarea style="whidth: 780px; height: 380px">';
+            echo '<textarea style="width: 780px; height: 380px">';
             $ch = curl_init($hook['url']);
             $file_name = PATH_TMP . '/secret.json';
             $secretJson = json_encode($hook['data']);

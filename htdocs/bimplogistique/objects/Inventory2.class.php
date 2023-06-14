@@ -96,13 +96,13 @@ HAVING scan_exp != scan_det";
         $return = '';
         $info = "";
 //        if ($this->getData('status') == self::STATUS_OPEN) {
-            $sql = $this->db->db->query('SELECT SUM(IF(`qty_scanned` > 0, qty_scanned, 0)) as scan, SUM(IF(`qty` > 0, qty, 0)) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = ' . $this->id);
-            if ($this->db->db->num_rows($sql)) {
-                $ln = $this->db->db->fetch_object($sql);
-                if ($ln->scan > 0 && $ln->att > 0)
-                    $percent = $ln->scan / $ln->att * 100;
-                $info = $ln->scan . ' / ' . $ln->att;
-            }
+        $sql = $this->db->db->query('SELECT SUM(IF(`qty_scanned` > 0, qty_scanned, 0)) as scan, SUM(IF(`qty` > 0, qty, 0)) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = ' . $this->id);
+        if ($this->db->db->num_rows($sql)) {
+            $ln = $this->db->db->fetch_object($sql);
+            if ($ln->scan > 0 && $ln->att > 0)
+                $percent = $ln->scan / $ln->att * 100;
+            $info = $ln->scan . ' / ' . $ln->att;
+        }
 //        } elseif ($this->getData('status') == self::STATUS_CLOSED)
 //            $percent = 100;
 
@@ -364,12 +364,12 @@ HAVING scan_exp != scan_det";
 
         return 0;
     }
-    
     /*
      * Requiert de faire
      * $init_filters = $this->getFiltersValue();
      * avant de modifier les filtres
      */
+
     public function resetFilters($init_filters, $init_has_filter)
     {
         foreach ($init_filters as $field => $value)
@@ -465,30 +465,33 @@ HAVING scan_exp != scan_det";
 
         foreach ($this->filters_radical as $radical) {
 
-            $inter = array_intersect(${'incl_' . $radical}, ${'excl_' . $radical});
+            if (isset(${'incl_' . $radical}) && is_array(${'incl_' . $radical}) &&
+                    isset(${'excl_' . $radical}) && is_array(${'excl_' . $radical})) {
+                $inter = array_intersect(${'incl_' . $radical}, ${'excl_' . $radical});
 
-            if (!empty($inter)) {
+                if (!empty($inter)) {
 
-                if ($radical == 'product') {
+                    if ($radical == 'product') {
 
-                    foreach ($inter as $id_prod) {
+                        foreach ($inter as $id_prod) {
 
-                        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+                            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
 
-                        $errors[] = "La ref " . $prod->getRef()
-                                . " du champ produit est présente dans les inclusions et les exlusions"
-                                . ", merci de corriger.";
+                            $errors[] = "La ref " . $prod->getRef()
+                                    . " du champ produit est présente dans les inclusions et les exlusions"
+                                    . ", merci de corriger.";
+                        }
+                    } else {
+
+                        self::loadClass('bimpcore', 'Bimp_Product');
+                        $select_options = Bimp_Product::getProductsTagsByTypeArray($radical);
+
+                        foreach ($inter as $id_option)
+                            $errors[] = "L'entrée " . $select_options[$id_option]
+                                    . " du champ " . $radical
+                                    . " est présente dans les inclusions et les exlusions"
+                                    . ", merci de corriger.";
                     }
-                } else {
-
-                    self::loadClass('bimpcore', 'Bimp_Product');
-                    $select_options = Bimp_Product::getProductsTagsByTypeArray($radical);
-
-                    foreach ($inter as $id_option)
-                        $errors[] = "L'entrée " . $select_options[$id_option]
-                                . " du champ " . $radical
-                                . " est présente dans les inclusions et les exlusions"
-                                . ", merci de corriger.";
                 }
             }
         }
@@ -498,7 +501,6 @@ HAVING scan_exp != scan_det";
 
     public function getPostedFilterData()
     {
-
         $incl_categorie = BimpTools::getPostFieldValue('incl_categorie');
         $excl_categorie = BimpTools::getPostFieldValue('excl_categorie');
 

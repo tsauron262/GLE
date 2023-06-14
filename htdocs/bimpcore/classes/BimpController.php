@@ -3267,12 +3267,12 @@ class BimpController
         $content_only = (int) BimpTools::getValue('content_only', 0);
 
         $dir = DOL_DOCUMENT_ROOT . '/bimpcore/changelogs/' . $type . '/';
-        
+
         if (!$content_only) {
             $div_id = 'BimpChangeLog_' . random_int(111111, 999999);
-            
+
             $dirs = scandir($dir, SCANDIR_SORT_DESCENDING);
-            
+
             foreach ($dirs as $d) {
                 if (in_array($d, array('.', '..'))) {
                     continue;
@@ -3306,7 +3306,7 @@ class BimpController
         $dir .= $year . '/';
         $files = scandir($dir, SCANDIR_SORT_DESCENDING);
         $logs = '';
-        
+
         foreach ($files as $entry) {
             if (is_file($dir . $entry)) {
                 $logs .= '<br/><b>Le ' . substr($entry, 2, 2) . ' / ' . substr($entry, 0, 2) . ' : </b><br/>';
@@ -3440,6 +3440,34 @@ class BimpController
             'errors'        => $errors,
             'notifications' => $notifs_for_user,
             'request_id'    => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessSaveBimpcoreConf()
+    {
+        $errors = array();
+
+        $module = BimpTools::getValue('module', 'bimpcore');
+        $name = BimpTools::getValue('name', '');
+        $value = BimpTools::getValue('value', null);
+
+        if (!$name) {
+            $errors[] = 'Nom de la variable de configuration absent';
+        }
+
+        if (is_null($value)) {
+            $errors[] = 'Nouvelle valeur à définir ' . ($name ? ' pour "' . $name . '"' : '') . ' absente';
+        }
+
+        if (!count($errors)) {
+            $errors = BimpCore::setConf($name, $value, $module);
+        }
+
+        return array(
+            'errors'     => $errors,
+            'warnings'   => array(),
+            'success'    => 'Enregistrement effectué avec succès',
+            'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
 

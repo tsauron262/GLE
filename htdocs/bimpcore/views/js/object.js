@@ -598,4 +598,24 @@ function forceBimpObjectUnlock($button, object_data, $resultContainer) {
     });
 }
 
+function saveBimpcoreConf(module, name, value, $resultContainer, successCallback, display_success) {
+    var data = {
+        module: module,
+        name: name,
+        value: value
+    };
+
+    if (typeof (display_success) === 'undefined') {
+        display_success = true;
+    }
+
+    BimpAjax('saveBimpcoreConf', data, $resultContainer, {
+        display_success: display_success,
+        success: function (result, bimpAjax) {
+            if (typeof (successCallback) === 'function') {
+                successCallback(result);
+            }
+        }
+    });
+}
 // simpleUpload : déplacé dans functions.js

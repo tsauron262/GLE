@@ -1,0 +1,1 @@
+- Mise en palce du vérouillage des GIT PULL via conf "git_pull_lock_msg". Définir un message pour vérouiller. 

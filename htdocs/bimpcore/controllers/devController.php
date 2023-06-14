@@ -86,6 +86,32 @@ class devController extends BimpController
             $html .= '<h4 class="danger">';
             $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . ' Vérification des versions vérouillée';
             $html .= '</h4>';
+
+            $onclick = 'saveBimpcoreConf(\'bimpcore\', \'check_versions_lock\', \'0\', null, function() {bimp_reloadPage();})';
+
+            $html .= '<div style="margin: 15px">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= 'Dévérouiller immédiatement';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
+        // vérif des pull vérouillés: 
+
+        $lock_msg = BimpCore::getConf('git_pull_lock_msg');
+        if ($lock_msg) {
+            $html = '';
+
+            $html .= '<h4 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'GIT PULL vérouillés</h4>';
+            $html .= 'Message : <b>' . $lock_msg .'</b>';
+
+            $onclick = 'saveBimpcoreConf(\'bimpcore\', \'git_pull_lock_msg\', \'\', null, function() {bimp_reloadPage();})';
+
+            $html .= '<div style="margin: 15px">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= 'Dévérouiller immédiatement';
+            $html .= '</span>';
+            $html .= '</div>';
         }
 
         // Crons en erreur: 

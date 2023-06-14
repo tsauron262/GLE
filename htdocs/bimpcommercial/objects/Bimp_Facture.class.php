@@ -1035,27 +1035,26 @@ class Bimp_Facture extends BimpComm
         }
 
         // Export Chorus:
-        if ($this->isActionAllowed('exportToChorus') && $this->canSetAction('exportToChorus')) {
-            $buttons[] = array(
-                'label'   => 'Exporter PDF vers Chorus',
-                'icon'    => 'fas_file-export',
-                'onclick' => $this->getJsActionOnclick('exportToChorus', array(), array(
-                    'confirm_msg' => 'Veuillez confirmer l\\\'envoi du fichier PDF vers Chorus'
-                ))
-            );
-        }
-
+        // API PISTE à débugguer
+//        if ($this->isActionAllowed('exportToChorus') && $this->canSetAction('exportToChorus')) {
+//            $buttons[] = array(
+//                'label'   => 'Exporter PDF vers Chorus',
+//                'icon'    => 'fas_file-export',
+//                'onclick' => $this->getJsActionOnclick('exportToChorus', array(), array(
+//                    'confirm_msg' => 'Veuillez confirmer l\\\'envoi du fichier PDF vers Chorus'
+//                ))
+//            );
+//        }
         // Confirmation Chorus:
-        if ($this->isActionAllowed('confirmChorusExport') && $this->canSetAction('confirmChorusExport')) {
-            $buttons[] = array(
-                'label'   => 'Valider export Chorus',
-                'icon'    => 'fas_file-export',
-                'onclick' => $this->getJsActionOnclick('confirmChorusExport', array(), array(
-                    'form_name' => 'export_to_chorus'
-                ))
-            );
-        }
-
+//        if ($this->isActionAllowed('confirmChorusExport') && $this->canSetAction('confirmChorusExport')) {
+//            $buttons[] = array(
+//                'label'   => 'Valider export Chorus',
+//                'icon'    => 'fas_file-export',
+//                'onclick' => $this->getJsActionOnclick('confirmChorusExport', array(), array(
+//                    'form_name' => 'export_to_chorus'
+//                ))
+//            );
+//        }
         // Marquer exporté vers Chorus: 
         if ($this->isActionAllowed('forceChorusExported') && $this->canSetAction('forceChorusExported')) {
             $buttons[] = array(
@@ -3576,6 +3575,14 @@ class Bimp_Facture extends BimpComm
                     $html .= '</div>';
                 }
             }
+        }
+
+        if ($this->isActionAllowed('exportToChorus') && $this->canSetAction('exportToChorus')) {
+            $html .= '<div style="margin-top: 10px">';
+            $msg = '<b>' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Nous rencontrons actuellement un problème avec l\'API d\'export des factures sur CHORUS.<br/>';
+            $msg .= 'Veuillez pour l\'instant déposer la facture directement sur le protail CHORUS et utiliser la fonction "Actions > Marquer exporté vers Chorus"</b>';
+            $html .= BimpRender::renderAlerts($msg);
+            $html .= '</div>';
         }
 
         return $html;
@@ -6434,7 +6441,7 @@ class Bimp_Facture extends BimpComm
                 if ($this->field_exists('expertise')) {
                     $this->set('expertise', $facture->getData('expertise'));
                 }
-                
+
                 if (!count($errors)) {
                     $linked_objects = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);
 

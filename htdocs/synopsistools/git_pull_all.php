@@ -39,7 +39,7 @@ if ($lock_msg) {
             echo '<h1>Serveur ' . $erp . '</h1>';
             $lienF = 'https://' . $erp . '.bimp.fr/' . DOL_URL_ROOT . $lien;
             echo $lienF;
-            echo '<iframe style="width: 100%; height: 400px;" src="' . $lienF . '"></iframe>';
+            echo '<iframe height="400" width="800" src="' . $lienF . '"></iframe>';
         }
 
 

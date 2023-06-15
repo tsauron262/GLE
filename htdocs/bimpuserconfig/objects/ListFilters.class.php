@@ -48,11 +48,6 @@ class ListFilters extends BCUserConfig
 
         return (BimpObject::objectLoaded($user) ? $user->getFullName($langs) . ': l' : 'L') . 'iste des filtres enregistrés';
     }
-
-    public static function getUserConfigsArray($id_user, $object, $component_name = '', $include_empty = false) {
-        // Bizzare : sinon erreur fatale "Call to undefined method ListFilters::getUserConfigsArray()"
-        return parent::getUserConfigsArray($id_user, $object, $component_name, $include_empty);
-    }
     
     // Overrides:
 

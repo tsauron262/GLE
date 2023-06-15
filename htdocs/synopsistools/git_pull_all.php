@@ -38,7 +38,7 @@ if ($lock_msg) {
         foreach ($array as $erp) {
             echo '<h1>Serveur ' . $erp . '</h1>';
             $lienF = 'https://' . $erp . '.bimp.fr/' . DOL_URL_ROOT . $lien;
-            echo $lienF;
+            echo $lienF .'<br/>';
             echo '<iframe height="400" width="800" src="' . $lienF . '"></iframe>';
         }
 

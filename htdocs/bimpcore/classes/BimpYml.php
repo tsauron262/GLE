@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/BimpYmlGenerator.php';
+
 class BimpYml
 {
 
@@ -69,7 +71,7 @@ class BimpYml
                 }
 
                 if ($type === 'all' || $type === 'objects') {
-                    if(is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects'))
+                    if (is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects'))
                         foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $m . '/objects') as $f) {
                             if (in_array($f, array('.', '..'))) {
                                 continue;
@@ -88,7 +90,7 @@ class BimpYml
                 }
 
                 if ($type === 'all' || $type === 'controllers') {
-                    if(is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers'))
+                    if (is_dir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers'))
                         foreach (scandir(DOL_DOCUMENT_ROOT . '/' . $m . '/controllers') as $f) {
                             if (in_array($f, array('.', '..'))) {
                                 continue;
@@ -103,7 +105,7 @@ class BimpYml
 
                                 $files[$value] = $m . ' - Controller: [bold]' . $matches[1] . '[/bold]';
                             }
-                        } 
+                        }
                 }
 
                 if ($type === 'all' || $type === 'configs') {
@@ -317,6 +319,16 @@ class BimpYml
             'title'   => 'Tous les paramètres (brut)',
             'content' => '<div><pre>' . print_r($full_params, 1) . '</pre></div>'
         );
+
+        $generator_content = BimpYmlGenerator::renderObjectYmlGeneratorView($module, $name);
+
+        if ($generator_content) {
+            $tabs[] = array(
+                'id'      => 'generator',
+                'title'   => 'Générateur',
+                'content' => $generator_content
+            );
+        }
 
         $html .= BimpRender::renderNavTabs($tabs, 'yml_analyser');
 

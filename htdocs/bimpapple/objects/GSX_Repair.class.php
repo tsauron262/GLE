@@ -2559,7 +2559,7 @@ class GSX_Repair extends BimpObject
 
         $nOk = 0;
         if (is_array($rows)) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
             global $tabCentre;
 
             foreach ($rows as $r) {

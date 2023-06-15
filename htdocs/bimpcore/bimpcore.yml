@@ -31,6 +31,10 @@ params:
         warning: <b>En cas de plantage lors d'une mise à jour, le vérouillage doit être désactivé manuellement.</b>
         type: bool
         def: 0
+    git_pull_lock_msg: 
+        label: Message de vérouillage des GIT PULL
+        info: Si défini, les GIT PULL sont bloqués et le message est affiché lors d'une tentative de pull.<br/>Un bouton est également affiché pour dévérouillage immédiat.
+        def: ''
     mode_securlogin: 
         label: Mode Secure Login
         type: select

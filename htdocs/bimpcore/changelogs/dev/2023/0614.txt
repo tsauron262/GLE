@@ -1,0 +1,3 @@
+- Mise en palce du vérouillage des GIT PULL via conf "git_pull_lock_msg". Définir un message pour vérouiller. 
+- Ajout de la fonction js saveBimpcoreConf() (bimpcore / object.js)
+- Ajout de BimpCore::requireFileForEntity()

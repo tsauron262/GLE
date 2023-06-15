@@ -369,7 +369,6 @@ forms:
                             - ''
                             - contrat_fin
                 
-                            
     signature_pvr_fin: 
         extends: signature_doc_fin
         title: Demander la signature du contrat de location
@@ -391,6 +390,25 @@ forms:
                         params: 
                             - ''
                             - pvr_fin
+                            
+    upload_signed_doc: 
+        title: déposer un document signé
+        rows: 
+            date_signed: 
+                custom: 1
+                label: Date de la signature
+                input_name: date_signed
+                input: 
+                    type: datetime
+                    help: Laisser vide pour utiliser la date et l'heure actuelles
+            signed_doc_file: 
+                custom: 1
+                label: Fichier du document signé
+                input_name: signed_doc_file
+                input: 
+                    type: drop_files
+                    max_items: 1
+                
        
 signatures: 
     devis_fin: 

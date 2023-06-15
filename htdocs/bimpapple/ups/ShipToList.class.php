@@ -1,7 +1,5 @@
 <?php
 
-require_once(DOL_DOCUMENT_ROOT . "/bimpsupport/centre.inc.php");
-
 class shipToList
 {
 
@@ -9,6 +7,8 @@ class shipToList
     
     static function init()
     {
+        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
+        
         global $tabCentre;
         foreach ($tabCentre as $centre)
             if (isset($centre['7']))

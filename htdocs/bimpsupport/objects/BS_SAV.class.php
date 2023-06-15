@@ -1,7 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
-require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
 class BS_SAV extends BimpObject
 {
@@ -2741,7 +2741,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
             $hrefFin = "";
 
-            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
             global $tabCentre;
             if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
                 $centreUser = array();
@@ -4266,15 +4265,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             //$to = "0686691814";
             $fromsms = 'SAV LDLC';
 
-//            $to = traiteNumMobile($to);
-//            if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
-//                $errors[] = 'Numéro invalide pour l\'envoi du sms';
-//            } else {
-//                $smsfile = new CSMSFile($to, $fromsms, $sms);
-//                if (!$smsfile->sendfile()) {
-//                    $errors[] = 'Echec de l\'envoi du sms';
-//                }
-//            }
+            $to = traiteNumMobile($to);
+            if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
+                $errors[] = 'Numéro invalide pour l\'envoi du sms';
+            } else {
+                $smsfile = new CSMSFile($to, $fromsms, $sms);
+                if (!$smsfile->sendfile()) {
+                    $errors[] = 'Echec de l\'envoi du sms';
+                }
+            }
         }
 
         if ($contact_pref === 2) {

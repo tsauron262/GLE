@@ -289,7 +289,7 @@ class GSX_Const
         if (is_null(self::$centres_array)) {
             self::$centres_array = array();
 
-            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+            BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
 
             global $tabCentre;
             foreach ($tabCentre as $code => $centre) {

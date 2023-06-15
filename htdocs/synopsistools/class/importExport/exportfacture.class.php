@@ -6,7 +6,8 @@ require_once (DOL_DOCUMENT_ROOT . "/categories/class/categorie.class.php");
 
 require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/export8sens.class.php");
 
-class exportfacture extends export8sens {
+class exportfacture extends export8sens
+{
 
 //    var $sep = "    -   ";
 //    var $saut = "<br/>";   
@@ -20,34 +21,36 @@ class exportfacture extends export8sens {
     public $tabIgnore = array();
     private $where = " AND fact.fk_statut > 0 AND close_code is null AND (fact.extraparams < 1 || fact.extraparams is NULL) AND fact.total != 0  AND ref NOT LIKE '%PROV%' GROUP BY fact.rowid";
 
-    public function __construct($db, $sortie = 'html') {
+    public function __construct($db, $sortie = 'html')
+    {
         parent::__construct($db);
-        $this->pathExport = $this->path."fact/";
-        $this->pathI = $this->path."../export/factures/";
+        $this->pathExport = $this->path . "fact/";
+        $this->pathI = $this->path . "../export/factures/";
         $tabFiles = scandir($this->pathExport);
         $nbFiles = $nbFilesErr = 0;
-        foreach($tabFiles as $file)
-            if(stripos($file, ".txt"))
-                    $nbFiles++;
-        foreach($tabFiles as $file)
-            if(stripos($file, ".ER8"))
-                    $nbFilesErr++;
-        if($nbFiles > 5){
+        foreach ($tabFiles as $file)
+            if (stripos($file, ".txt"))
+                $nbFiles++;
+        foreach ($tabFiles as $file)
+            if (stripos($file, ".ER8"))
+                $nbFilesErr++;
+        if ($nbFiles > 5) {
 //            mailSyn2("Synchro 8Sens OFF", BimpCore::getConf('devs_email') . ", gsx@bimp.fr", null, "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
             $this->addTaskAlert("facture import OFF");
         }
-        if($nbFilesErr > 0){
+        if ($nbFilesErr > 0) {
 //            mailSyn2("Synchro 8Sens FICHIER ERREURS", "tommy@bimp.fr", null, "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFilesErr);
             $this->addTaskAlert("facture import erreurs");
         }
     }
 
-    public function exportTout() {
-        if(defined("MODE_TEST")){
-            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importFacture.class.php");
+    public function exportTout()
+    {
+        if (defined("MODE_TEST")) {
+            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/importFacture.class.php");
             $importFact = new importFacture($this->db);
             $importFact->importFact();
-            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportpaiement.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/exportpaiement.class.php");
             $exp = new exportpaiement($this->db);
             $exp->exportTout();
         }
@@ -68,22 +71,30 @@ class exportfacture extends export8sens {
         }
     }
 
-    private function getId8sensByCentreSav($centre) {
-        require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/centre.inc.php");
+    private function getId8sensByCentreSav($centre)
+    {
+        if (!defined('BIMP_LIB')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+        }
+        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
         global $tabCentre;
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
             return $tabCentre[$centre][3];
-        if(!defined("MODE_TEST"))
+        if (!defined("MODE_TEST"))
             mailSyn2("Impossible de trouvé un id8sens", BimpCore::getConf('devs_email') . ", jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
         return 0;
     }
 
-    private function getId8sensByCentreNewSav($centre) {
-        require_once(DOL_DOCUMENT_ROOT . "/bimpsupport/centre.inc.php");
+    private function getId8sensByCentreNewSav($centre)
+    {
+        if (!defined('BIMP_LIB')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+        }
+        BimpCore::requireFileForEntity('bimpsupport', 'centre.inc.php');
         global $tabCentre;
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
             return $tabCentre[$centre][3];
-        if(!defined("MODE_TEST"))
+        if (!defined("MODE_TEST"))
             mailSyn2("Impossible de trouvé un id8sens", BimpCore::getConf('devs_email') . ", jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
         return 0;
     }
@@ -105,7 +116,8 @@ class exportfacture extends export8sens {
 //        }
 //    }
 
-    public function exportFactureNewSav() {
+    public function exportFactureNewSav()
+    {
         $this->type = "sav";
         $result = $this->db->query("SELECT fact.rowid as id, idtech8sens as id8Sens, sav.code_centre as Centre 
 FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "bs_sav sav , " . MAIN_DB_PREFIX . "user_extrafields ue 
@@ -122,7 +134,8 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
         }
     }
 
-    public function exportFactureReseau() {
+    public function exportFactureReseau()
+    {
         $this->type = "R";
         $result = $this->db->query("SELECT fact.rowid as id "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe "
@@ -133,7 +146,8 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
         }
     }
 
-    public function exportFactureSavSeul() {
+    public function exportFactureSavSeul()
+    {
         $this->type = "sav";
         $result = $this->db->query("SELECT fact.rowid as id, fe.centre "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe "
@@ -146,7 +160,8 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
         }
     }
 
-    public function exportFactureNormal() {
+    public function exportFactureNormal()
+    {
         $this->type = "sav";
         $result = $this->db->query("SELECT fact.rowid as id, fk_user_author, fe.centre "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe "
@@ -159,7 +174,8 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
         }
     }
 
-    public function getId8sensByFact($id, $userCr) {
+    public function getId8sensByFact($id, $userCr)
+    {
         $this->id8sens = 0;
         $sql = $this->db->query("SELECT * FROM `llx_element_contact` WHERE `element_id` = " . $id . " AND `fk_c_type_contact` = 50 ORDER BY `rowid` DESC");
         if ($this->db->num_rows($sql) > 0) {
@@ -170,23 +186,23 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
             if ($this->id8sens < 1) {
                 if ($this->debug)
                     echo "<br/>Comm pas de comm<br/>";
-                if(!defined("MODE_TEST"))
+                if (!defined("MODE_TEST"))
                     mailSyn2("Exportation facture", $userC->email, null, "Bonjour vos factures ne peuvent être exporté car vous n'avez pas d'identifiant 8Sens dans vottre profil <a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php?id=" . $userC->id . "'>Voir</a>");
             }
-        }
-        else {
+        } else {
             if ($userCr < 1)
                 $userCr = 1;
             $userM = new User($this->db);
             $userM->fetch($userCr);
             if ($this->debug)
                 echo "<br/>Pas de comm<br/>";
-            if(!defined("MODE_TEST"))
+            if (!defined("MODE_TEST"))
                 mailSyn2("Exportation facture", $userM->email, null, "Bonjour vos factures ne peuvent être exportées car il n'y a pas de commercial rataché <a href='" . DOL_URL_ROOT . "/compta/facture/card.php?facid=" . $id . "'>Voir</a>");
         }
     }
 
-    public function getFactDontExport() {
+    public function getFactDontExport()
+    {
         $this->pathExport = DOL_DATA_ROOT . "/test/";
         $result = $this->db->query("SELECT fact.rowid as id, ref "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact "
@@ -196,11 +212,12 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
             $facts .= $ligne->ref . " - ";
         }
         if ($facts != "")
-            if(!defined("MODE_TEST"))
-                mailSyn2("Facture non export", BimpCore::getConf('devs_email') .  ", jc.cannet@bimp.fr", null, "Bonjour voici les facture non exporté " . $facts);
+            if (!defined("MODE_TEST"))
+                mailSyn2("Facture non export", BimpCore::getConf('devs_email') . ", jc.cannet@bimp.fr", null, "Bonjour voici les facture non exporté " . $facts);
     }
-    
-    function extract($id) {
+
+    function extract($id)
+    {
         if ($this->type == "") {
             $this->error("Pas de type pour export " . $id);
         } elseif ($this->id8sens == 0) {
@@ -208,13 +225,10 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
         } else {
             $this->exportOk = true;
 
-
-
             $facture = new Facture($this->db);
             $facture->fetch($id);
             $societe = new Societe($this->db);
             $societe->fetch($facture->socid);
-
 
             if ($this->debug)
                 echo "Tentative export facture " . $facture->getNomUrl(1);
@@ -238,9 +252,9 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
                     $line->pa_ht = -$line->pa_ht;
 
                 $tabCodeTva = array(
-                    "20" => 1,
+                    "20"    => 1,
                     "5.500" => 7,
-                    "0" => 0
+                    "0"     => 0
                 );
                 $tvaCode = $tabCodeTva[$line->tva_tx];
                 $line->desc = $this->traiteStr($line->desc);
@@ -266,7 +280,8 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
         }
     }
 
-    function getRef($line) {
+    function getRef($line)
+    {
         $tabCatProd = array(1202 => "GEN-ABO", 1203 => "GEN-CERTIF", 1204 => "GEN-HEBERG", 1206 => "GEN-HEBERG", 1205 => "GEN-LOC",
             1100 => "GEN-TELECOM", 1176 => "GEN-CONSO", 1216 => "GEN-SAV-PIECES", 1079 => "GEN-MAT", 1072 => "GEN-LOG", 1227 => "GEN-MO-EXT", 1156 => "GEN-MO-INT", 1225 => "GEN-MAINT-INT", 1140 => "GEN-MAINT-EXT", 1214 => "GEN-MAT-OCCAS", 1215 => "GEN-ACCES", 1207 => "GEN-PORT", 1217 => "GEN-DEP-INT", 1228 => "GEN-DEP-EXT", 1135 => "GEN-TEXTIL", 1233 => "GEN-ZZ");
         $valeur = "";
@@ -284,8 +299,7 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
                 $valeur = "GEN-SAV-MO";
             elseif ($line->fk_product_type == 0)
                 $valeur = "GEN-SAV-PIECES";
-        }
-        else {
+        } else {
             $idP = $line->fk_product;
             if ($idP > 0) {
                 $catId = 0;
@@ -300,8 +314,7 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
                         $this->error("Pas de Code 8sens pour la catégorie " . $catId, 0, $catId);
                 } else
                     $this->error("Pas de categorie pour le prod " . $idP, $idP);
-            }
-            else {
+            } else {
                 if ($line->desc == "Acompte")
                     $valeur = "GEN-RES-ACOMPTE";
                 elseif ($line->fk_product_type == 1)
@@ -317,7 +330,8 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
         return $valeur;
     }
 
-    function error($msg, $idProd = 0, $idCat = 0) {
+    function error($msg, $idProd = 0, $idCat = 0)
+    {
         $this->error = $msg;
         dol_syslog($msg, 3, 0, "_extract");
         $to = "";
@@ -335,10 +349,9 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
             $to = "tommy@bimp.fr";
         }
         if ($to != "")
-            if(!defined("MODE_TEST"))
+            if (!defined("MODE_TEST"))
                 mailSyn2("Produit non catégorisé", $to, null, "Bonjour ceci est un message automatique des export vers 8sens <br/>" . $msg);
         if ($this->debug)
             echo "<span class='red'>" . $msg . "</span><br/>";
     }
-
 }

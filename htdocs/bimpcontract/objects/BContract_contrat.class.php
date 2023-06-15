@@ -1924,6 +1924,7 @@ class BContract_contrat extends BimpDolObject
     {
         $tickets = [];
 
+        $ticket = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Ticket');
         $list = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
 
         foreach ($list as $nb => $infos) {

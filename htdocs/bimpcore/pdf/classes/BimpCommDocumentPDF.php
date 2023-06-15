@@ -108,38 +108,41 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
                     }
                 }
 
-                if (BimpCore::isEntity('bimp')) {
-                    /* ATTENTION A NE PAS ALTERER LES INFOS EN EN-TETE POUR LES DOCS SAV*/
-                    
-                    if (method_exists($this->object, 'fetch_optionals')) {
-                        $this->object->fetch_optionals();
-                        if (isset($this->object->array_options['options_type']) && (string) $this->object->array_options['options_type']) {
-                            $secteur = $this->object->array_options['options_type'];
-                            if ($secteur == 'S') {
-                                // DOCS SAV : 
-                                $this->fromCompany->name = 'OLYS LDLC';
-                                if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
-                                    $entrepot = new Entrepot($this->db);
-                                    $entrepot->fetch($this->object->array_options['options_entrepot']);
-                                    if ($entrepot->ref == "PR") {
-                                        $this->fromCompany->address = "2 rue des Erables CS 21055  ";
-                                        $this->fromCompany->town = "LIMONEST";
-                                        $this->fromCompany->zip = "69760";
-                                    } elseif ($entrepot->address != "" && $entrepot->town != "") {
-                                        $this->fromCompany->zip = $entrepot->zip;
-                                        $this->fromCompany->address = $entrepot->address;
-                                        $this->fromCompany->town = $entrepot->town;
+                switch (BimpCore::getEntity()) {
+                    case 'bimp':
+                        if (method_exists($this->object, 'fetch_optionals')) {
+                            $this->object->fetch_optionals();
+                            if (isset($this->object->array_options['options_type']) && (string) $this->object->array_options['options_type']) {
+                                $secteur = $this->object->array_options['options_type'];
+                                if ($secteur == 'S') {
+                                    // DOCS SAV : 
+                                    $this->fromCompany->name = 'OLYS LDLC';
+                                    if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
+                                        $entrepot = new Entrepot($this->db);
+                                        $entrepot->fetch($this->object->array_options['options_entrepot']);
+                                        if ($entrepot->ref == "PR") {
+                                            $this->fromCompany->address = "2 rue des Erables CS 21055  ";
+                                            $this->fromCompany->town = "LIMONEST";
+                                            $this->fromCompany->zip = "69760";
+                                        } elseif ($entrepot->address != "" && $entrepot->town != "") {
+                                            $this->fromCompany->zip = $entrepot->zip;
+                                            $this->fromCompany->address = $entrepot->address;
+                                            $this->fromCompany->town = $entrepot->town;
+                                        }
                                     }
-                                }
-                            } else {
-                                $this->fromCompany->name = 'BIMP';
-                                if (in_array($secteur, array('C', 'CTC', 'E', 'CTE'))) {
-                                    // DOCS EDUC: 
-                                    $this->fromCompany->url = 'www.bimp-pro.fr - www.bimp-education.fr';
+                                } else {
+                                    $this->fromCompany->name = 'BIMP';
+                                    if (in_array($secteur, array('C', 'CTC', 'E', 'CTE'))) {
+                                        // DOCS EDUC: 
+                                        $this->fromCompany->url = 'www.bimp-pro.fr - www.bimp-education.fr';
+                                    }
                                 }
                             }
                         }
-                    }
+                        break;
+
+                    case 'actimag':
+                        break;
                 }
 
                 if (isset($this->object->statut) && !(int) $this->object->statut) {

@@ -1,0 +1,15 @@
+# Entité: actimac
+
+fields: 
+    replaced_ref: unset
+    prime: unset
+    prime2: unset
+    expertise: unset
+    
+    pdf_hide_pu: unset
+    pdf_hide_reduc: unset
+    pdf_hide_total: unset
+    pdf_hide_ttc: unset
+    pdf_periodicity: unset
+    pdf_periods_number: unset
+    pdf_proforma: unset

@@ -352,7 +352,10 @@ class BC_Form extends BC_Panel
 
     public function renderFieldRow($field_name, $params = array(), $label_cols = 3)
     {
-        if (in_array($field_name, $this->object->params['fields']) && !$this->object->isFieldActivated($field_name)) {
+//        if (in_array($field_name, $this->object->params['fields']) && !$this->object->isFieldActivated($field_name)) {
+//            return '';
+//        }
+        if (!$this->object->field_exists($field_name)) {
             return '';
         }
 

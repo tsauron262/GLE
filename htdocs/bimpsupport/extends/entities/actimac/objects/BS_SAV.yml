@@ -26,4 +26,6 @@ fields_tables:
         rows: 
             replaced_ref: unset
             id_ticket: unset
+            # temporaire : 
+            public_link: unset 
             

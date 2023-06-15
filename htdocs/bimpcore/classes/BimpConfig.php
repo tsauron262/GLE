@@ -186,65 +186,6 @@ class BimpConfig
                     ));
                 }
 
-                // Surcharges version:
-                $override_params = array();
-                if (defined('BIMP_EXTENDS_VERSION')) {
-                    $version_module_dir = 'extends/versions/' . BIMP_EXTENDS_VERSION . ($module_dir ? '/' . $module_dir : '');
-                    $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $version_module_dir . '/' . $file_name . '.yml';
-                    if (file_exists($version_file)) {
-                        $version_params = $this->getParamsFromFile($module, $version_module_dir, $file_name, $errors, false);
-
-                        if (!empty($version_params)) {
-                            if (self::$debug) {
-                                $html .= BimpRender::renderFoldableContainer('VERSION PARAMS', '<pre>' . print_r($version_params, 1) . '</pre>', array(
-                                            'open'        => false,
-                                            'offset_left' => true
-                                ));
-                            }
-
-                            $override_params = $this->mergeParams($override_params, $version_params, false);
-                        }
-                    }
-                }
-
-                // Surcharge entité: 
-                if (defined('BIMP_EXTENDS_ENTITY')) {
-                    $entity_module_dir = 'extends/entities/' . BIMP_EXTENDS_ENTITY . ($module_dir ? '/' . $module_dir : '');
-                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $entity_module_dir . '/' . $file_name . '.yml';
-                    if (file_exists($entity_file)) {
-                        $entity_params = $this->getParamsFromFile($module, $entity_module_dir, $file_name, $errors, false);
-
-                        if (!empty($entity_params)) {
-                            if (self::$debug) {
-                                $html .= BimpRender::renderFoldableContainer('ENTITY PARAMS', '<pre>' . print_r($entity_params, 1) . '</pre>', array(
-                                            'open'        => false,
-                                            'offset_left' => true
-                                ));
-                            }
-
-                            $override_params = $this->mergeParams($override_params, $entity_params, false);
-                        }
-                    }
-                }
-
-                if (!empty($override_params)) {
-                    if (self::$debug) {
-                        $html .= BimpRender::renderFoldableContainer('ALL OVERRIDE PARAMS', '<pre>' . print_r($override_params, 1) . '</pre>', array(
-                                    'open'        => false,
-                                    'offset_left' => true
-                        ));
-                    }
-
-                    $params = $this->mergeParams($params, $override_params, true);
-
-                    if (self::$debug) {
-                        $html .= BimpRender::renderFoldableContainer('PARAMS AFTER OVERRIDE', '<pre>' . print_r($params, 1) . '</pre>', array(
-                                    'open'        => false,
-                                    'offset_left' => true
-                        ));
-                    }
-                }
-
                 // Traitement des fichiers étendus: 
                 if ($check_extends && isset($params['extends'])) {
                     $sub_dir = '';
@@ -305,6 +246,65 @@ class BimpConfig
                         } else {
                             $errors[] = 'Le fichier étendu "' . $parent_file . '" n\'existe pas';
                         }
+                    }
+                }
+
+                // Surcharges version:
+                $override_params = array();
+                if (defined('BIMP_EXTENDS_VERSION')) {
+                    $version_module_dir = 'extends/versions/' . BIMP_EXTENDS_VERSION . ($module_dir ? '/' . $module_dir : '');
+                    $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $version_module_dir . '/' . $file_name . '.yml';
+                    if (file_exists($version_file)) {
+                        $version_params = $this->getParamsFromFile($module, $version_module_dir, $file_name, $errors, false);
+
+                        if (!empty($version_params)) {
+                            if (self::$debug) {
+                                $html .= BimpRender::renderFoldableContainer('VERSION PARAMS', '<pre>' . print_r($version_params, 1) . '</pre>', array(
+                                            'open'        => false,
+                                            'offset_left' => true
+                                ));
+                            }
+
+                            $override_params = $this->mergeParams($override_params, $version_params, false);
+                        }
+                    }
+                }
+
+                // Surcharge entité: 
+                if (defined('BIMP_EXTENDS_ENTITY')) {
+                    $entity_module_dir = 'extends/entities/' . BIMP_EXTENDS_ENTITY . ($module_dir ? '/' . $module_dir : '');
+                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $entity_module_dir . '/' . $file_name . '.yml';
+                    if (file_exists($entity_file)) {
+                        $entity_params = $this->getParamsFromFile($module, $entity_module_dir, $file_name, $errors, false);
+
+                        if (!empty($entity_params)) {
+                            if (self::$debug) {
+                                $html .= BimpRender::renderFoldableContainer('ENTITY PARAMS', '<pre>' . print_r($entity_params, 1) . '</pre>', array(
+                                            'open'        => false,
+                                            'offset_left' => true
+                                ));
+                            }
+
+                            $override_params = $this->mergeParams($override_params, $entity_params, false);
+                        }
+                    }
+                }
+
+                if (!empty($override_params)) {
+                    if (self::$debug) {
+                        $html .= BimpRender::renderFoldableContainer('ALL OVERRIDE PARAMS', '<pre>' . print_r($override_params, 1) . '</pre>', array(
+                                    'open'        => false,
+                                    'offset_left' => true
+                        ));
+                    }
+
+                    $params = $this->mergeParams($params, $override_params, false);
+
+                    if (self::$debug) {
+                        $html .= BimpRender::renderFoldableContainer('PARAMS AFTER OVERRIDE', '<pre>' . print_r($params, 1) . '</pre>', array(
+                                    'open'        => false,
+                                    'offset_left' => true
+                        ));
                     }
                 }
             }

@@ -980,13 +980,16 @@ class BimpCore
         return 0;
     }
 
-    public static function requireFileForEntity($module, $file_name)
+    public static function requireFileForEntity($module, $file_name, $return_only = false)
     {
         $dir = DOL_DOCUMENT_ROOT . ($module ? '/' . $module : '') . '/';
         $entity = self::getEntity();
 
         if (!$entity) {
             if (file_exists($dir . $file_name)) {
+                if ($return_only) {
+                    return $dir . $file_name;
+                }
                 require_once $dir . $file_name;
                 return true;
             }
@@ -997,6 +1000,9 @@ class BimpCore
         }
 
         if (file_exists($dir . 'extends/entities/' . $entity . '/' . $file_name)) {
+            if ($return_only) {
+                return $dir . $file_name;
+            }
             require_once $dir . 'extends/entities/' . $entity . '/' . $file_name;
             return true;
         }

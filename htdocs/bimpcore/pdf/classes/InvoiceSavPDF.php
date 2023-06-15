@@ -24,18 +24,27 @@ class InvoiceSavPDF extends InvoicePDF
                 }
             }
 
-            if (BimpObject::objectLoaded($this->sav)) {
-                $code_centre = $this->sav->getData('code_centre');
-            }
-
-            if (!$code_centre) {
-                $code_centre = 'L'; // Par précaution sinon aucune CGV ne peut être intégrée.
-            }
+            // Chargement CGV : 
             
-            // Ajout fichier CGV Boutique : 
-            $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
+            $cgv_file = '';
+            switch (BimpCore::getEntity()) {
+                case 'bimp':
+                    if (BimpObject::objectLoaded($this->sav)) {
+                        $code_centre = $this->sav->getData('code_centre');
+                    }
 
-            if (file_exists($cgv_file)) {
+                    if (!$code_centre) {
+                        $code_centre = 'L'; // Par précaution sinon aucune CGV ne peut être intégrée.
+                    }
+                    $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
+                    break;
+
+                case 'actimac':
+                    $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_actimac.pdf';
+                    break;
+            }
+
+            if ($cgv_file && file_exists($cgv_file)) {
                 $this->pdf->extra_concat_files[] = $cgv_file;
             }
         }
@@ -65,21 +74,21 @@ class InvoiceSavPDF extends InvoicePDF
 //        $this->header_vars['apple_img'] = DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg";
         $this->header_vars['header_right'] = $rows;
     }
-    
-    public function renderTop(){
+
+    public function renderTop()
+    {
         parent::renderTop();
         $this->writeContent('<div style="font-size: 9px">Pour augmenter la durée de vie de vos produits Apple, rendez vous sur :<br/><a href="https://support.apple.com/fr-fr">https://support.apple.com/fr-fr</a> ou scannez ce QR code</div><br/><br/>');
         $qr_dir = DOL_DATA_ROOT . "/bimpcore/tmp/";
         $this->getQrCode('https://support.apple.com/fr-fr', $qr_dir);
-        $this->pdf->Image($qr_dir . "/apple.png", 120, $this->pdf->getY()- 19, 0, 15);
+        $this->pdf->Image($qr_dir . "/apple.png", 120, $this->pdf->getY() - 19, 0, 15);
     }
 
     public function getAfterTotauxHtml()
     {
         return '';
     }
-    
-    
+
     function getQrCode($data, $dir, $file = "apple.png")
     {
         require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");

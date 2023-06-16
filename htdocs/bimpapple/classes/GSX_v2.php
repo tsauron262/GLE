@@ -71,9 +71,11 @@ class GSX_v2 extends GSX_Const
             //passage sur les id de base
             $userT = new User(BimpCache::getBdb()->db);
             $userT->fetch(242);
-            $this->appleId = self::$default_ids['apple_id'];
-            $this->acti_token = $userT->array_options['options_gsx_acti_token'];
-            $this->auth_token = $userT->array_options['options_gsx_auth_token'];
+            if($userT->array_options['options_gsx_acti_token'] != ''){
+                $this->appleId = self::$default_ids['apple_id'];
+                $this->acti_token = $userT->array_options['options_gsx_acti_token'];
+                $this->auth_token = $userT->array_options['options_gsx_auth_token'];
+            }
         }
         else{
             if (isset($user->array_options['options_gsx_acti_token']) && (string) $user->array_options['options_gsx_acti_token']) {

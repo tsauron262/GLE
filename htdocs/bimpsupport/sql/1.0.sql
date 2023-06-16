@@ -222,7 +222,9 @@ ALTER TABLE `llx_bs_sav_propal_line` ADD `remisable` BOOLEAN NOT NULL DEFAULT TR
 
 ALTER TABLE `llx_bs_inter` ADD `resolution` TEXT NOT NULL DEFAULT '' AFTER `description`;
 
-
+ALTER TABLE `llx_bs_apple_part` ADD `id_issue` int(11) NOT NULL DEFAULT 0;
+ALTER TABLE `llx_bs_apple_part` ADD `is_tier` int(1) NOT NULL DEFAULT 0;
+ALTER TABLE `llx_bs_apple_part` ADD `not_invoiced` int(1) NOT NULL DEFAULT 0;
 ALTER TABLE `llx_bs_apple_part` ADD `price_type` VARCHAR(128) NOT NULL DEFAULT '' AFTER `exchange_price`;
 ALTER TABLE `llx_bs_apple_part` ADD `price_options` TEXT NOT NULL DEFAULT '' AFTER `exchange_price`;
 
@@ -231,3 +233,19 @@ UPDATE `llx_bs_apple_part` SET `price_type` = 'STOCK' WHERE `no_order` = 1;
 
 
 ALTER TABLE `llx_bs_sav_propal_line` ADD `force_qty_1` BOOLEAN NOT NULL;
+
+CREATE TABLE IF NOT EXISTS `llx_bs_sav_issue` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_sav` int(11) NOT NULL DEFAULT 0,
+  `type` varchar(20) NOT NULL DEFAULT '',
+  `category_code` varchar(7) NOT NULL DEFAULT '',
+  `category_label` varchar(255) NOT NULL DEFAULT '',
+  `issue_code` varchar(7) NOT NULL DEFAULT '',
+  `issue_label` varchar(255) NOT NULL DEFAULT '',
+  `reproducibility` varchar(1) NOT NULL DEFAULT '',
+  `position` int(11) NOT NULL DEFAULT 0
+);
+
+
+
+ALTER TABLE `llx_bimp_gsx_repair` ADD `old_repair_number` VARCHAR(128) NOT NULL DEFAULT '' AFTER `canceled`; 

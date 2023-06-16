@@ -101,7 +101,7 @@ class Bimp_Vente extends BimpObject
             return $html;
         }
 
-        return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
+        return BimpRender::renderAlerts('(789) ID ' . $this->getLabel('of_the') . ' absent');
     }
 
     // Affichage:

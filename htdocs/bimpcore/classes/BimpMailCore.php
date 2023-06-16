@@ -25,7 +25,6 @@ class BimpMailCore
     public $files = array();
     public $parent;
     
-    
     public static $defaultType = '';
 
     function __construct($parent, $subject, $to, $from, $msg = '', $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')

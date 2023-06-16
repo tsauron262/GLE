@@ -1,0 +1,8 @@
+# Entité : actimac
+
+fields: 
+    categorie: unset
+    collection: unset
+    nature: unset
+    famille: unset
+    gamme: unset

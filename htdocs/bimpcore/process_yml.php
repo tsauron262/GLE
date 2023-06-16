@@ -26,6 +26,9 @@ if (!$user->admin) {
     exit;
 }
 
+echo '<div style="padding: 30px">';
+
+
 $m = BimpTools::getValue('m', 'bimpcore');
 $o = BimpTools::getValue('o', '');
 $t = BimpTools::getValue('t', '');
@@ -35,6 +38,10 @@ if (!$m || !$o || $r || !$n) {
     echo 'Params invalides.<br/>';
     echo 'm=module&o=obj_name&t=type&n=name';
 } else {
+    echo '<h3>'.$m .' - ' . $o .'</h3>';
+    echo '<h4>'.$t .' : ' . $n .'</h4>';
+    echo '<br/><br/>';
+    
     require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpYml.php';
     $errors = array();
 
@@ -61,6 +68,7 @@ if (!$m || !$o || $r || !$n) {
 }
 
 echo '<br/>FIN';
+echo '</div>';
 echo '</body></html>';
 
 //llxFooter();

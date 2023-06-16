@@ -36,7 +36,6 @@ class PropalSavPDF extends PropalPDF
 
             // SAV
             if ($secteur == 'S') {
-
                 $code_centre = $this->sav->getData('code_centre');
 
                 if ($code_centre == '') {
@@ -50,10 +49,20 @@ class PropalSavPDF extends PropalPDF
                         $this->fromCompany->email = $centre['mail'];
                     }
 
-                    // Ajout fichier CGV Boutique : 
-                    $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
+                    // Chargement CGV : 
+                    
+                    $cgv_file = '';
+                    switch (BimpCore::getEntity()) {
+                        case 'bimp':
+                            $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_boutiques/cgv_' . $code_centre . '.pdf';
+                            break;
 
-                    if (file_exists($cgv_file)) {
+                        case 'actimac':
+                            $cgv_file = DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/cgv_actimac.pdf';
+                            break;
+                    }
+
+                    if ($cgv_file && file_exists($cgv_file)) {
                         $this->pdf->extra_concat_files[] = $cgv_file;
                     } else {
                         // CGV par défaut : 

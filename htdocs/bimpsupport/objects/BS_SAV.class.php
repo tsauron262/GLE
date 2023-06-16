@@ -164,7 +164,7 @@ class BS_SAV extends BimpObject
         parent::__construct("bimpsupport", get_class($this));
 
         $this->useCaisseForPayments = (int) BimpCore::getConf('use_caisse_for_payments');
-
+        
         BimpMail::$defaultType = 'ldlc';
     }
 

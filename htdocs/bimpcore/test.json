@@ -1,0 +1,36 @@
+{
+	"data":
+	[
+		{
+			"rowid": 132,
+			"name": "pdf_hide_ref",
+			"entity": 1,
+			"elementtype": "propal",
+			"tms": "2018-10-25 23:51:43",
+			"label": "Masquer les ref dans le PDF",
+			"type": "boolean",
+			"size": "",
+			"fieldunique": 0,
+			"fieldrequired": 0,
+			"perms": null,
+			"list": "1",
+			"totalizable": 0,
+			"pos": 4,
+			"alwayseditable": 1,
+			"param": "a:1:{s:7:\"options\";a:1:{s:0:\"\";N;}}",
+			"ishidden": 0,
+			"fieldcomputed": null,
+			"fielddefault": null,
+			"langs": null,
+			"fk_user_author": null,
+			"fk_user_modif": null,
+			"datec": null,
+			"enabled": "1",
+			"help": null,
+			"printable": 0,
+			"css": null,
+			"cssview": null,
+			"csslist": null
+		}
+	]
+}

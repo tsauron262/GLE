@@ -123,7 +123,6 @@ fields:
         
     type_manuel:
         label: Type de tâche manuel
-        type: text
         values: 
             array: types_manuel
             

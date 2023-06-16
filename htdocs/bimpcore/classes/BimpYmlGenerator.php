@@ -108,7 +108,7 @@ class BimpYmlGenerator
                         $new_params[$new_key] = $sub_params;
                     }
 
-                    $nTabs = count(explode('/', $path));
+                    $nTabs = count(explode('/', $path)) - 1;
                     self::addParamsToContent($nTabs, $result, $new_params);
                 }
             }

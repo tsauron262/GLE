@@ -621,6 +621,7 @@ fields:
         dol_extra_field: 1
         type: id_object
         object: contact_email_facturation
+        default_value: 0
         values: 
             array: contacts
             
@@ -1022,18 +1023,6 @@ forms:
                 data_type: bool
                 content: 
                     callback: renderIsCompanyInput
-            has_already_code_comptable_client:
-                custom: 1
-                label: A déjà un code comptable client
-                input_name: has_already_code_comptable_client
-                data_type: int
-                input:
-                    type: toggle
-            code_compta:
-                field: code_compta
-                display_if:
-                    field_name: has_already_code_comptable_client
-                    show_values: 1
             siren_ok: 
                 custom: 1
                 hidden: 1
@@ -1074,16 +1063,6 @@ forms:
                 display_if: 
                     field_name: is_company
                     show_values: 1
-            outstanding_limit_atradius:
-                field: outstanding_limit_atradius
-            outstanding_limit: 
-                field: outstanding_limit
-            outstanding_limit_credit_safe:
-                field: outstanding_limit_credit_safe
-            notecreditsafe: 
-                field: notecreditsafe
-            lettrecreditsafe:
-                field: lettrecreditsafe
             nom: 
                 field: nom
             prenom: 
@@ -1124,6 +1103,28 @@ forms:
             # ce type de champ (item_list) n'est pas filtrable pour l'instant. 
 #            secteur: 
 #                field: secteuractivite
+            has_already_code_comptable_client:
+                custom: 1
+                label: A déjà un code comptable client
+                input_name: has_already_code_comptable_client
+                data_type: int
+                input:
+                    type: toggle
+            code_compta:
+                field: code_compta
+                display_if:
+                    field_name: has_already_code_comptable_client
+                    show_values: 1
+            outstanding_limit_atradius:
+                field: outstanding_limit_atradius
+            outstanding_limit: 
+                field: outstanding_limit
+            outstanding_limit_credit_safe:
+                field: outstanding_limit_credit_safe
+            notecreditsafe: 
+                field: notecreditsafe
+            lettrecreditsafe:
+                field: lettrecreditsafe
             tva_assuj: 
                 field: tva_assuj
             tva_intra: 

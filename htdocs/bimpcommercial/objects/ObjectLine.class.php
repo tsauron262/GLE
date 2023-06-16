@@ -237,7 +237,7 @@ class ObjectLine extends BimpObject
     public function isActionAllowed($action, &$errors = array())
     {
         if (in_array($action, array('attributeEquipment')) && !$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(111) ID ' . $this->getLabel('of_the') . ' absent';
             return 0;
         }
 
@@ -3288,7 +3288,7 @@ class ObjectLine extends BimpObject
                         $this->pa_ht = $new_pa_ht;
                     }
                 } else {
-                    $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                    $errors[] = '(112) ID ' . $this->getLabel('of_the') . ' absent';
                 }
             }
         }
@@ -3302,7 +3302,7 @@ class ObjectLine extends BimpObject
         $equipments_set = array();
 
         if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(113) ID ' . $this->getLabel('of_the') . ' absent';
             return $errors;
         }
 
@@ -3470,7 +3470,7 @@ class ObjectLine extends BimpObject
 
         // Vérifications: 
         if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(114) ID ' . $this->getLabel('of_the') . ' absent';
             return $errors;
         }
 

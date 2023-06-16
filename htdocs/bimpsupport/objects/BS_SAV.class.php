@@ -164,7 +164,7 @@ class BS_SAV extends BimpObject
         parent::__construct("bimpsupport", get_class($this));
 
         $this->useCaisseForPayments = (int) BimpCore::getConf('use_caisse_for_payments');
-        
+
         BimpMail::$defaultType = 'ldlc';
     }
 
@@ -959,26 +959,27 @@ class BS_SAV extends BimpObject
                 }
 
                 // Réparation en cours: 
-//                if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE))) {
-                if (!is_null($propal) && $propal_status > 0) {
-                    if ($propal->isSigned()) {
-                        $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 0)';
-                        $buttons[] = array(
-                            'label'   => 'Réparation en cours',
-                            'icon'    => 'wrench',
-                            'onclick' => $this->getJsActionOnclick('startRepair')
-                        );
-                    } else {
-                        $buttons[] = array(
-                            'label'    => 'Réparation en cours',
-                            'icon'     => 'wrench',
-                            'onclick'  => '',
-                            'disabled' => 1,
-                            'popover'  => 'Devis non signé'
-                        );
+                if (!in_array($status, array(self::BS_SAV_REP_EN_COURS, self::BS_SAV_A_RESTITUER, self::BS_SAV_FERME))) {
+                    if (!is_null($propal) && $propal_status > 0) {
+                        if ($propal->isSigned()) {
+                            $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 0)';
+                            $buttons[] = array(
+                                'label'   => 'Réparation en cours',
+                                'icon'    => 'wrench',
+                                'onclick' => $this->getJsActionOnclick('startRepair')
+                            );
+                        } else {
+                            $buttons[] = array(
+                                'label'    => 'Réparation en cours',
+                                'icon'     => 'wrench',
+                                'onclick'  => '',
+                                'disabled' => 1,
+                                'popover'  => 'Devis non signé'
+                            );
+                        }
                     }
                 }
-//                }
+
                 // Réparation terminée: 
                 if ($this->isActionAllowed('toRestitute')) {
                     if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {

@@ -304,7 +304,7 @@ class BimpComm extends BimpDolObject
                     return 0;
                 }
                 if (!$this->isLoaded()) {
-                    $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                    $errors[] = '(100) ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
 //                if ($this->object_name !== 'Bimp_Facture' && (int) $this->getData('fk_statut') > 0) {
@@ -2700,7 +2700,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
+            return array('(101) ID ' . $this->getLabel('of_the') . ' absent');
         }
 
         if (!method_exists($this->dol_object, 'createFromClone')) {
@@ -4784,7 +4784,7 @@ class BimpComm extends BimpDolObject
         $success = 'Remise au statut "Brouillon" effectué avec succès';
 
         if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(102) ID ' . $this->getLabel('of_the') . ' absent';
         } elseif (!$this->can("edit")) {
             $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action';
         } elseif (!method_exists($this->dol_object, 'setDraft')) {
@@ -4822,7 +4822,7 @@ class BimpComm extends BimpDolObject
         $success = 'Suppression du contact effectué avec succès';
 
         if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(104) ID ' . $this->getLabel('of_the') . ' absent';
         } else {
             if (!isset($data['id_contact']) || !(int) $data['id_contact']) {
                 $errors[] = 'Contact à supprimer non spécifié';

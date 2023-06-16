@@ -4,8 +4,8 @@ require_once __DIR__ . '/GSX_Const.php';
 
 class GSX_v2 extends GSX_Const
 {
-
-    public static $oldShipTos = array(1111748, 1000566, 462140, 1139941, 1000565, 1000483, 494685, 466183, 484926, 1040727, 1046076, 1046075, 1187559, 1187562, 1187561, 1187560, 1199659, 897316);
+//old shipto correspond a altimac   
+    public static $oldShipTos = array(1134736, 608105, 1185605);
     protected static $instance = null;
     protected $ch;
     public $baseUrl = '';
@@ -136,7 +136,7 @@ class GSX_v2 extends GSX_Const
     {
         $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
         if (in_array(intval($this->shipTo), self::$oldShipTos)) {
-            $this->setSoldTo('897316');
+            $this->setSoldTo('608111');
         } else {
             $this->setSoldTo('1442050');
         }

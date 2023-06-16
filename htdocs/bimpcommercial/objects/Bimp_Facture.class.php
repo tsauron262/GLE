@@ -3600,7 +3600,7 @@ class Bimp_Facture extends BimpComm
         $html = '';
 
         if (!$this->isLoaded()) {
-            $html .= BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
+            $html .= BimpRender::renderAlerts('(345) ID ' . $this->getLabel('of_the') . ' absent');
         } else {
             // Pour être sûr d\'être à jour:
             $this->dol_object->fetch_lines();
@@ -4502,7 +4502,7 @@ class Bimp_Facture extends BimpComm
     public function createCreditNoteWithNegativesLines($lines = null, $convertToReduc = false, $useConvertedReduc = false)
     {
         if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
+            return array('(202) ID ' . $this->getLabel('of_the') . ' absent');
         }
 
         if ((int) $this->getData('type') !== Facture::TYPE_STANDARD) {

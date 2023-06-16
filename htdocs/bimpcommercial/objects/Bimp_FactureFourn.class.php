@@ -67,7 +67,7 @@ class Bimp_FactureFourn extends BimpCommAchat
 
         if (in_array($action, array('validate', 'modify', 'reopen', 'sendEMail', 'makePayment', 'classifyPaid', 'convertToReduc', 'duplicate', 'create_credit_note'))) {
             if (!$this->isLoaded()) {
-                $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                $errors[] = '(999) ID ' . $this->getLabel('of_the') . ' absent';
                 return 0;
             }
             if (is_null($status)) {

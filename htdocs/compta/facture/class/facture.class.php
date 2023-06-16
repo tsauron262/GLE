@@ -6100,7 +6100,7 @@ class FactureLigne extends CommonInvoiceLine
 		$sql .= ", ".price2num($this->multicurrency_total_tva);
 		$sql .= ", ".price2num($this->multicurrency_total_ttc);
 		$sql .= ')';
-echo $sql;
+
 		dol_syslog(get_class($this)."::insert", LOG_DEBUG);
 		$resql = $this->db->query($sql);
 		if ($resql) {

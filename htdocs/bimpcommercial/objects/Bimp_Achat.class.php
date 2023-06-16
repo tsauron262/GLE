@@ -40,7 +40,7 @@ class Bimp_Achat extends BimpObject
             return $html;
         }
 
-        return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
+        return BimpRender::renderAlerts('(789) ID ' . $this->getLabel('of_the') . ' absent');
     }
 
     public function getLink($params = array(), $forced_context = '')
@@ -66,7 +66,7 @@ class Bimp_Achat extends BimpObject
             return $html;
         }
 
-        return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
+        return BimpRender::renderAlerts('(790) ID ' . $this->getLabel('of_the') . ' absent');
     }
 
     // Affichages: 

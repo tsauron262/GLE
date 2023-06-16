@@ -416,7 +416,8 @@ class BimpInput
                 if (!isset($options['include_empty'])) {
                     $options['include_empty'] = 0;
                 }
-
+                global $langs;
+                $langs->load('bills');
                 $form->load_cache_types_paiements();
                 $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '"' . $data . '>';
 
@@ -432,7 +433,7 @@ class BimpInput
                     }
                     $html .= '</option>';
                 }
-
+                
                 foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
                     if (!(int) $options['active_only'] || ((int) $options['active_only'] && (int) $payment_data['active'])) {
                         if (in_array($payment_data['code'], static::$paiementRestrictive) && !self::canUseRestrictedPaiement()) {

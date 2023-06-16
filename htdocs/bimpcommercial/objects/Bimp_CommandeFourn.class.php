@@ -105,7 +105,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         $status = $this->getData('fk_statut');
         if (in_array($action, array('validate', 'approve', 'approve2', 'refuse', 'modify', 'sendEmail', 'reopen', 'make_order', 'receive', 'receive_products', 'classifyBilled', 'forceStatus'))) {
             if (!$this->isLoaded()) {
-                $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                $errors[] = '(111) ID ' . $this->getLabel('of_the') . ' absent';
                 return 0;
             }
             if (is_null($status)) {

@@ -176,7 +176,7 @@ class Bimp_Propal extends Bimp_PropalTemp
 
         if (in_array($action, array('validate', 'modify', 'review', 'close', 'reopen', 'sendEmail', 'createOrder', 'createContract', 'createInvoice', 'classifyBilled', 'createContrat', 'createSignature'))) {
             if (!$this->isLoaded()) {
-                $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                $errors[] = '(456) ID ' . $this->getLabel('of_the') . ' absent';
                 return 0;
             }
             if (is_null($status)) {
@@ -1529,7 +1529,7 @@ class Bimp_Propal extends Bimp_PropalTemp
     {
 
         if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
+            return array('(432) ID ' . $this->getLabel('of_the') . ' absent');
         }
 
         if (!$this->fetch($this->id)) {

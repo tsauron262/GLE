@@ -4034,7 +4034,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         $success = '';
 
         if (!$this->isLoaded())
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+            $errors[] = '(321) ID ' . $this->getLabel('of_the') . ' absent';
         else {
 
             if ((int) $this->getData('fk_soc')) {

@@ -2791,7 +2791,7 @@ class ObjectLine extends BimpObject
         } else {
             $id_line = (int) $this->getData('id_line');
             if (!$id_line) {
-                return array('ID de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the') . ' absent');
+                return array('(220) ID de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the') . ' absent');
             }
 
             if ($check_data) {
@@ -2983,7 +2983,7 @@ class ObjectLine extends BimpObject
         } else {
             $id_line = (int) $this->getData('id_line');
             if (!$id_line) {
-                return array('ID de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the') . ' absent');
+                return array('(221) ID de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the') . ' absent');
             }
 
             $instance->dol_object->error = '';
@@ -3482,7 +3482,7 @@ class ObjectLine extends BimpObject
             $parent = $this->getParentInstance();
             if (!BimpObject::ObjectLoaded($parent)) {
                 if (is_a($parent, 'BimpComm')) {
-                    $errors[] = 'ID ' . $parent->getLabel('of_the') . ' absent';
+                    $errors[] = '(224) ID ' . $parent->getLabel('of_the') . ' absent';
                 } else {
                     $errors[] = 'objet parent absent';
                 }
@@ -3869,7 +3869,7 @@ class ObjectLine extends BimpObject
         if (is_null($parent)) {
             $errors[] = 'Objet parent non défini';
         } elseif (!$parent->isLoaded()) {
-            $errors[] = 'ID ' . $parent->getLabel('of_the') . ' absent';
+            $errors[] = '(225) ID ' . $parent->getLabel('of_the') . ' absent';
         }
 
         if (!count($errors)) {

@@ -94,7 +94,7 @@ class BimpThemeLayout extends BimpLayout
         } else {
             global $conf;
             $logo_file = $conf->mycompany->dir_output . '/logos/' . $conf->global->MAIN_INFO_SOCIETE_LOGO;
-            if(is_file(DOL_DATA_ROOT.$logo_file)){
+            if(is_file($logo_file)){
                 $html .= '<img src="' . DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=logos%2F'.$conf->global->MAIN_INFO_SOCIETE_LOGO.'" class="header-brand-img" alt="Logo" width="125">';
             }
             else{

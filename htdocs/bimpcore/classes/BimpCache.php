@@ -2421,10 +2421,12 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $where = 'fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
-            $rows = self::getBdb()->getRows('categorie', $where, null, 'array', array('rowid', 'label'));
-            foreach ($rows as $r) {
-                self::$cache[$cache_key][(int) $r['rowid']] = $r['label'];
+            if(BimpCore::getConf('marques_parent_categories', '') != ''){
+                $where = 'fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
+                $rows = self::getBdb()->getRows('categorie', $where, null, 'array', array('rowid', 'label'));
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['rowid']] = $r['label'];
+                }
             }
         }
 
@@ -2438,10 +2440,12 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $where = 'fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
-            $rows = self::getBdb()->getRows('categorie', $where, null, 'array', array('rowid'));
-            foreach ($rows as $r) {
-                self::$cache[$cache_key][] = (int) $r['rowid'];
+            if(BimpCore::getConf('marques_parent_categories', '') != ''){
+                $where = 'fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
+                $rows = self::getBdb()->getRows('categorie', $where, null, 'array', array('rowid'));
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][] = (int) $r['rowid'];
+                }
             }
         }
 

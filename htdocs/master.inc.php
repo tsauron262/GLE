@@ -144,7 +144,7 @@ if (!defined('NOREQUIREDB')) {
 		if (!defined('USEDOLIBARREDITOR') && !defined('USEDOLIBARRSERVER') && !empty($_SERVER['SCRIPT_FILENAME']) && (strpos($_SERVER['SCRIPT_FILENAME'], DOL_DATA_ROOT.'/website') === 0)) {
 			$sapi_type = php_sapi_name();
 			if (substr($sapi_type, 0, 3) != 'cgi') {
-				http_response_code(500); // To tel search engine this is a temporary error
+				http_response_code(503); // To tel search engine this is a temporary error
 			}
 			print '<div class="center" style="text-align: center; margin: 100px;">';
 			if (is_object($langs)) {

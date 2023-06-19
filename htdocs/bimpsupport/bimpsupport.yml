@@ -41,4 +41,4 @@ params:
         label: Domaine par default (mail)
         
     default_name:
-        labe: Nom Commercial
+        label: Nom Commercial

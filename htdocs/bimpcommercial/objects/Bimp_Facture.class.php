@@ -6435,54 +6435,55 @@ class Bimp_Facture extends BimpComm
                         $errors[] = 'Facture à corriger invalide';
                     } else {
                         $this->set('fk_facture_source', $id_fac_src);
-                    }
-                }
-
-                if ($this->field_exists('expertise')) {
-                    $this->set('expertise', $facture->getData('expertise'));
-                }
-
-                if (!count($errors)) {
-                    $linked_objects = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);
-
-                    foreach ($linked_objects as $item) {
-                        if (!isset($this->dol_object->linked_objects[$item['type']])) {
-                            $this->dol_object->linked_objects[$item['type']] = array();
-                        } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
-                            $this->dol_object->linked_objects[$item['type']] = array($this->dol_object->linked_objects[$item['type']]);
+                        
+                        if ($this->field_exists('expertise')) {
+                            $this->set('expertise', $facture->getData('expertise'));
                         }
 
-                        if (!in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {
-                            $this->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
+                        if (!count($errors)) {
+                            $linked_objects = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);
+
+                            foreach ($linked_objects as $item) {
+                                if (!isset($this->dol_object->linked_objects[$item['type']])) {
+                                    $this->dol_object->linked_objects[$item['type']] = array();
+                                } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
+                                    $this->dol_object->linked_objects[$item['type']] = array($this->dol_object->linked_objects[$item['type']]);
+                                }
+
+                                if (!in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {
+                                    $this->dol_object->linked_objects[$item['type']] = (int) $item['id_object'];
+                                }
+                            }
+
+                            $errors = parent::create($warnings, true);
+                        }
+
+                        if (count($errors)) {
+                            return $errors;
+                        }
+
+                        if ($avoir_same_lines) {
+                            $line_errors = $this->createLinesFromOrigin($facture, array(
+                                'inverse_qty' => true,
+                                'pa_editable' => false
+                            ));
+                            if (count($line_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($line_errors);
+                            }
+
+                            // Copie des remises globales: 
+                            $this->copyRemisesGlobalesFromOrigin($facture, $warnings, true);
+                        } elseif ($avoir_remain_to_pay) {
+                            $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
+                        }
+
+                        // Copie des contacts: 
+                        if (BimpObject::objectLoaded($facture)) {
+                            $this->copyContactsFromOrigin($facture, $warnings);
                         }
                     }
-
-                    $errors = parent::create($warnings, true);
                 }
 
-                if (count($errors)) {
-                    return $errors;
-                }
-
-                if ($avoir_same_lines) {
-                    $line_errors = $this->createLinesFromOrigin($facture, array(
-                        'inverse_qty' => true,
-                        'pa_editable' => false
-                    ));
-                    if (count($line_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($line_errors);
-                    }
-
-                    // Copie des remises globales: 
-                    $this->copyRemisesGlobalesFromOrigin($facture, $warnings, true);
-                } elseif ($avoir_remain_to_pay) {
-                    $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
-                }
-
-                // Copie des contacts: 
-                if (BimpObject::objectLoaded($facture)) {
-                    $this->copyContactsFromOrigin($facture, $warnings);
-                }
                 break;
 
             case Facture::TYPE_STANDARD:

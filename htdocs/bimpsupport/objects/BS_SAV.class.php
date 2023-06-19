@@ -3966,7 +3966,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $nomMachine = $this->getNomMachine();
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
-        $fromMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
+        $fromMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 
         $contact = null;
 
@@ -4122,7 +4122,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if ($this->db->db->num_rows($sql) > 0) {
                         while ($ln = $this->db->db->fetch_object($sql)) {
                             if (isset($ln->mail) && $ln->mail != "") {
-                                $toMail = str_ireplace("Sav", "Boutique", $ln->mail) . "@bimp.fr";
+                                $toMail = str_ireplace("Sav", "Boutique", $ln->mail) . "@".BimpCore::getConf('default_domaine', '', 'bimpsupport');
                                 mailSyn2($subject, $toMail, $fromMail, $text);
                                 $mailOk = true;
                             }
@@ -4133,7 +4133,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $rows2 = $this->db->getRows('usergroup', "rowid IN " . $where, null, 'object', array('nom'));
                         if (!is_null($rows2)) {
                             foreach ($rows2 as $r) {
-                                $toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@bimp.fr";
+                                $toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@".BimpCore::getConf('default_domaine', '', 'bimpsupport');
                                 mailSyn2($subject, $toMail, $fromMail, $text);
                             }
                         }
@@ -4311,7 +4311,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $errors[] = 'Aucune adresse e-mail enregistrée pour le client';
         } else {
             $centre = $this->getCentreData();
-            $from = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
+            $from = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 
             $to = BimpTools::cleanEmailsStr($to);
 
@@ -6262,7 +6262,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             } else {
                 $client = $this->getChildObject('client');
                 $centre = $this->getCentreData();
-                $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
+                $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
                 mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 $success = "Acompte créer avec succés.";
             }
@@ -6272,7 +6272,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $centre = $this->getCentreData();
             $return = $propal->actionAddAcompte($data, $success);
             if (!count($return['errors'])) {
-                $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
+                $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
                 mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 return $return;
             }
@@ -6485,7 +6485,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                         $client = $this->getChildObject('client');
                         $centre = $this->getCentreData();
-                        $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
+                        $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 //                        mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                         $success = "Acompte créer avec succés.";
                     }

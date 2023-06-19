@@ -1535,7 +1535,7 @@ class BS_SAV extends BimpObject
         $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
         $message .= "Si vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).<br/><br/>";
         $message .= 'Cordialement, <br/><br/>';
-        $message .= 'L\'équipe LDLC';
+        $message .= 'L\'équipe '.BimpCore::getConf('default_name', '', 'bimpsupport');
 
         return $message;
     }
@@ -3915,7 +3915,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             return array($error_msg . ' - Centre absent');
         }
         $signature = '';
-//        $signature = BimpCache::getSignature('SAV LDLC', "Centre de Services Agréé Apple", $centre['tel']);
+//        $signature = BimpCache::getSignature('SAV '.BimpCore::getConf('default_name', '', 'bimpsupport'), "Centre de Services Agréé Apple", $centre['tel']);
 //        $signature = file_get_contents("https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=BIMP%20SAV&job=Centre%20de%20Services%20Agr%C3%A9%C3%A9%20Apple&phone=" . urlencode($centre['tel']), false, stream_context_create(array(
 //            'http' => array(
 //                'timeout' => 2   // Timeout in seconds
@@ -3966,7 +3966,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $nomMachine = $this->getNomMachine();
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
-        $fromMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+        $fromMail = "SAV ".BimpCore::getConf('default_name', '', 'bimpsupport')."<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 
         $contact = null;
 
@@ -4045,7 +4045,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
 
                 $subject = "Fermeture du dossier " . $this->getData('ref');
-                $mail_msg = 'Nous vous remercions d\'avoir choisi LDLC' . ($nomMachine ? ' pour votre ' . $nomMachine : '') . '.' . "\n\n";
+                $mail_msg = 'Nous vous remercions d\'avoir choisi '.BimpCore::getConf('default_name', '', 'bimpsupport') . ($nomMachine ? ' pour votre ' . $nomMachine : '') . '.' . "\n\n";
 
                 if (!empty($files)) {
                     $mail_msg .= 'Veuillez trouver ci-joint votre facture pour cette réparation' . "\n\n";
@@ -4060,22 +4060,22 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $mail_msg = "Voici le devis pour la réparation de votre '" . $nomMachine . "'.\n";
                     $mail_msg .= "Veuillez nous communiquer votre accord ou votre refus par retour de cet e-mail.\n";
                     $mail_msg .= "Si vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).";
-                    $sms = "Bonjour, nous avons établi votre devis pour votre " . $nomMachine . "\n Vous l'avez reçu par e-mail.\nL'équipe LDLC";
+                    $sms = "Bonjour, nous avons établi votre devis pour votre " . $nomMachine . "\n Vous l'avez reçu par e-mail.\nL'équipe ".BimpCore::getConf('default_name', '', 'bimpsupport');
                 }
                 break;
 
             case 'debut':
                 $subject = 'Prise en charge ' . $this->getData('ref');
-                $mail_msg = "Merci d'avoir choisi LDLC en tant que Centre de Services Agréé Apple.\n";
+                $mail_msg = "Merci d'avoir choisi ".BimpCore::getConf('default_name', '', 'bimpsupport')." en tant que Centre de Services Agréé Apple.\n";
                 $mail_msg .= 'La référence de votre dossier de réparation est : ' . $this->getData('ref') . ", ";
                 $mail_msg .= "si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n";
-                $sms = "Merci d'avoir choisi LDLC " . $nomMachine . "\nLa référence de votre dossier de réparation est : " . $this->getData('ref') . "\nL'équipe LDLC";
+                $sms = "Merci d'avoir choisi ".BimpCore::getConf('default_name', '', 'bimpsupport')." " . $nomMachine . "\nLa référence de votre dossier de réparation est : " . $this->getData('ref') . "\nL'équipe ".BimpCore::getConf('default_name', '', 'bimpsupport');
                 break;
 
             case 'debDiago':
                 $subject = "Prise en charge " . $this->getData('ref');
                 $mail_msg = "Nous avons commencé le diagnostic de votre \"$nomMachine\", vous aurez rapidement des nouvelles de notre part. ";
-                $sms = "Nous avons commencé le diagnostic de votre \" $nomMachine \", vous aurez rapidement des nouvelles de notre part.\nL'équipe LDLC";
+                $sms = "Nous avons commencé le diagnostic de votre \" $nomMachine \", vous aurez rapidement des nouvelles de notre part.\nL'équipe ".BimpCore::getConf('default_name', '', 'bimpsupport');
                 break;
 
             case 'commOk':
@@ -4083,7 +4083,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $mail_msg = "Nous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. ";
                 $mail_msg .= "\n Voici notre diagnostique : " . $this->getData("diagnostic");
                 $mail_msg .= "\n Nous restons à votre disposition pour toutes questions au " . $tel;
-                $sms = "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci.\nL'équipe LDLC";
+                $sms = "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci.\nL'équipe ".BimpCore::getConf('default_name', '', 'bimpsupport');
                 break;
 
             case 'repOk':
@@ -4091,21 +4091,21 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $mail_msg = "Nous avons le plaisir de vous annoncer que la réparation de votre \"$nomMachine\" est finie.\n";
                 $mail_msg .= "Voici ce que nous avons fait : " . $this->getData("resolution") . "\n";
                 $mail_msg .= "Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel;
-                $sms = "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à " . $nomCentre . " " . $delai . ".\nL'Equipe LDLC.";
+                $sms = "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à " . $nomCentre . " " . $delai . ".\nL'Equipe ".BimpCore::getConf('default_name', '', 'bimpsupport').".";
                 break;
 
             case 'revPropRefu':
                 $subject = "Prise en charge " . $this->getData('ref') . " terminée";
                 $mail_msg = "la réparation de votre \"$nomMachine\" est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . "\n";
                 $mail_msg .= "Si vous souhaitez plus de renseignements, contactez le " . $tel;
-                $sms = "Bonjour, la réparation de votre \"$nomMachine\"  est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ".\nL'Equipe LDLC.";
+                $sms = "Bonjour, la réparation de votre \"$nomMachine\"  est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ".\nL'Equipe ".BimpCore::getConf('default_name', '', 'bimpsupport').".";
                 break;
 
             case 'pieceOk':
                 $subject = "Pieces recues " . $this->getData('ref');
                 $mail_msg = "La pièce/le produit que nous avions commandé pour votre \"$nomMachine\" est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil.\n";
                 $mail_msg .= "Vous serez prévenu dès qu'il sera prêt.";
-                $sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe LDLC.";
+                $sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe ".BimpCore::getConf('default_name', '', 'bimpsupport').".";
                 break;
 
             case "commercialRefuse":
@@ -4224,7 +4224,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $mail_msg .= "\n" . "Technicien en charge de la réparation : " . $tech;
                 }
 
-                $mail_msg .= "\n" . $textSuivie . "\n\n Cordialement.\n\nL'équipe LDLC\n\n" . $signature;
+                $mail_msg .= "\n" . $textSuivie . "\n\n Cordialement.\n\nL'équipe ".BimpCore::getConf('default_name', '', 'bimpsupport')."\n\n" . $signature;
 
                 $toMail = BimpTools::cleanEmailsStr($toMail);
 
@@ -4264,7 +4264,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             $sms .= "\n" . $this->getData('ref');
             //$to = "0686691814";
-            $fromsms = 'SAV LDLC';
+            $fromsms = 'SAV '.BimpCore::getConf('default_name', '', 'bimpsupport');
 
             $to = traiteNumMobile($to);
             if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
@@ -4311,7 +4311,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $errors[] = 'Aucune adresse e-mail enregistrée pour le client';
         } else {
             $centre = $this->getCentreData();
-            $from = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+            $from = "SAV ".BimpCore::getConf('default_name', '', 'bimpsupport')."<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 
             $to = BimpTools::cleanEmailsStr($to);
 
@@ -6262,7 +6262,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             } else {
                 $client = $this->getChildObject('client');
                 $centre = $this->getCentreData();
-                $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+                $toMail = "SAV ".BimpCore::getConf('default_name', '', 'bimpsupport')."<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
                 mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 $success = "Acompte créer avec succés.";
             }
@@ -6272,7 +6272,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $centre = $this->getCentreData();
             $return = $propal->actionAddAcompte($data, $success);
             if (!count($return['errors'])) {
-                $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+                $toMail = "SAV ".BimpCore::getConf('default_name', '', 'bimpsupport')."<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
                 mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 return $return;
             }
@@ -6485,7 +6485,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                         $client = $this->getChildObject('client');
                         $centre = $this->getCentreData();
-                        $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+                        $toMail = "SAV ".BimpCore::getConf('default_name', '', 'bimpsupport')."<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 //                        mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                         $success = "Acompte créer avec succés.";
                     }
@@ -7151,7 +7151,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         }
 
                         if ($to) {
-                            $subject = 'Votre rendez-vous Apple chez LDLC';
+                            $subject = 'Votre rendez-vous chez '.BimpCore::getConf('default_name', '', 'bimpsupport');
                             $msg = 'Cher client' . "\n\n";
                             $msg .= 'Sauf erreur de notre part, vous ne vous êtes pas présenté au rendez vous que vous aviez planifié dans notre boutique ';
                             if (isset($centres[$r['code_centre']]['town'])) {
@@ -7162,7 +7162,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 }
                                 $msg .= $centres[$r['code_centre']]['town'];
                             } else {
-                                $msg .= ' LDLC';
+                                $msg .= ' '.BimpCore::getConf('default_name', '', 'bimpsupport');
                             }
                             $msg .= ' le ' . date('d / m / Y à H:i', strtotime($r['date_rdv'])) . '. ' . "\n";
                             $msg .= 'Celui-ci à été annulé.' . "\n\n";
@@ -7172,7 +7172,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             }
 
                             $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpCore::getConf('base_url', '', 'bimpinterfaceclient') . '">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
-                            $msg .= 'L’équipe technique LDLC';
+                            $msg .= 'L’équipe technique '.BimpCore::getConf('default_name', '', 'bimpsupport');
 
 //                            mailSyn2($subject, $to, '', $msg);
                             $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
@@ -7220,7 +7220,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
 
                 if ($to) {
-                    $subject = 'Votre demande d’intervention chez LDLC';
+                    $subject = 'Votre demande d’intervention chez '.BimpCore::getConf('default_name', '', 'bimpsupport');
                     $msg = 'Cher client' . "\n\n";
                     $msg .= 'Vous avez ouvert une demande d’intervention dans notre boutique ';
                     if (isset($centres[$r['code_centre']]['town'])) {
@@ -7231,7 +7231,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         }
                         $msg .= $centres[$r['code_centre']]['town'];
                     } else {
-                        $msg .= ' LDLC';
+                        $msg .= ' '.BimpCore::getConf('default_name', '', 'bimpsupport');
                     }
                     $msg .= ' le ' . date('d / m / Y à H:i', strtotime($r['date_create'])) . '. ' . "\n\n";
                     $msg .= 'Sauf erreur de notre part, vous n’avez pas déposé votre produit pour réparation. Sans nouvelle de votre part d’ci deux jours, votre demande sera clôturée.' . "\n\n";
@@ -7241,7 +7241,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     }
 
                     $msg .= 'Vous pourrez néanmoins accéder à votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> sur notre site internet «  www.bimp.fr », et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
-                    $msg .= 'L’équipe technique LDLC';
+                    $msg .= 'L’équipe technique '.BimpCore::getConf('default_name', '', 'bimpsupport');
 
                     $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
 
@@ -7328,11 +7328,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $centre_address .= ($centre_address ? '<br/>' : '') . BimpTools::getArrayValueFromPath($centre_data, 'zip', '');
                 $centre_address .= ($centre_address ? ' ' : '') . BimpTools::getArrayValueFromPath($centre_data, 'town', '');
 //                
-                $subject = 'RAPPEL IMPORTANT concernant votre dossier SAV LDLC APPLE';
+                $subject = 'RAPPEL IMPORTANT concernant votre dossier SAV '.BimpCore::getConf('default_name', '', 'bimpsupport');
                 $msg = 'Bonjour, <br/><br/>';
                 $msg .= 'Nous tenons à vous rappeller que le dossier ' . $sav->getRef() . ' concernant la réparation de votre ';
                 $msg .= ($prod_label ? '"' . $prod_label . '" ' : 'matériel');
-                $msg .= ' déposé dans notre centre de réparation LDLC Apple ';
+                $msg .= ' déposé dans notre centre de réparation '.BimpCore::getConf('default_name', '', 'bimpsupport').' ';
                 if ($centre_address) {
                     $msg .= ': <br/><br/><b>' . $centre_address . '</b><br/><br/>';
                 } else {
@@ -7347,7 +7347,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $msg .= '<a href="' . $url . '">Demander la destruction de mon matériel</a>';
 
                 $msg .= '<br/><br/>La réception de ce document signé de votre part entraînera l\'annulation des frais de garde.';
-                $msg .= '<br/><br/>Cordialement,<br/>L\'équipe LDLC Apple';
+                $msg .= '<br/><br/>Cordialement,<br/>L\'équipe '.BimpCore::getConf('default_name', '', 'bimpsupport');
 
                 $mail_errors = array();
 
@@ -7635,7 +7635,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                         $message = 'Bonjour, ' . "\n\n";
                         $message .= 'Vous trouverez ci-joint votre bon de prise en charge ' . $this->getLink(array(), 'public') . " \n\n";
-                        $message .= 'Merci d\'avoir choisi LDLC' . "\n\n";
+                        $message .= 'Merci d\'avoir choisi '.BimpCore::getConf('default_name', '', 'bimpsupport') . "\n\n";
                         $message .= 'Cordialement';
 
                         $files = array(
@@ -7670,7 +7670,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $message .= ($prod_label ? $prod_label : 'matériel') . ' (Dossier ' . $this->getRef() . ').<br/><br/>';
                 $message .= 'Nous vous confirmons également l\'annulation des frais de garde de 4 € par jours.<br/><br/>';
                 $message .= 'Cordialement,<br/><br/>';
-                $message .= 'L\'équiope LDLC Apple';
+                $message .= 'L\'équipe '.BimpCore::getConf('default_name', '', 'bimpsupport');
 
                 $files = array();
                 if (file_exists($filePath)) {

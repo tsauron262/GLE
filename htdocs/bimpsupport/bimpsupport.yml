@@ -36,3 +36,6 @@ params:
         info: Laisser 0 pour désactiver l'envoi des alertes
         type: int
         def: 0
+                      
+    default_domaine:
+        label: Domaine par default (mail)

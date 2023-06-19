@@ -39,3 +39,6 @@ params:
                       
     default_domaine:
         label: Domaine par default (mail)
+        
+    default_name:
+        labe: Nom Commercial

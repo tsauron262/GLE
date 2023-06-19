@@ -56,7 +56,7 @@
 				return 0;
 			} else {
                             if(class_exists('BimpCore')){
-                                BimpCore::setConf('nb_sms', BimpCore::getConf('nb_sms') + 1);
+                                BimpCore::setConf('nb_sms', BimpCore::getConf('nb_sms', 0) + 1);
                             }
 				return 1;
 			}

@@ -1212,8 +1212,7 @@ class Bimp_Product extends BimpObject
     }
 
     public function getValues8sens($type, $include_empty = true)
-    {
-        // Utiliser ***impérativement*** le cache pour ce genre de requêtes         
+    {       
         return self::getProductsTagsByTypeArray($type, $include_empty);
     }
 

@@ -1,6 +1,10 @@
 # Entité : actimac
 
 fields: 
+    id_famille: 
+        label: Famille
+        type: id_object
+        
     categorie: unset
     collection: unset
     nature: unset

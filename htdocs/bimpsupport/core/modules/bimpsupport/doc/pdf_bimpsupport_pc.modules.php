@@ -304,7 +304,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $pdf->MultiCell(175, 6, $text, 0, 'L');
 
             $cgv = "";
-            $cgv .= "-" . $conf->global->MAIN_INFO_SOCIETE_NOM . " ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
+            $cgv .= "-" . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . " ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
 
             $prixRefus = "49";
             if ($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA")

@@ -149,7 +149,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
             $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
 
-            $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/PCMod.pdf');
+            $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpsupport/core/modules/bimpsupport/doc/PC.pdf');
             $tplidx = $pdf->importPage(1, "/MediaBox");
             $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 
@@ -295,7 +295,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             $pdf->SetXY('9.3', '165.3');
             
-            if (isset(BS_SAV::getSaveOptionDesc($save))) {
+            if (BS_SAV::getSaveOptionDesc($save) != null) {
                 $text = BS_SAV::getSaveOptionDesc($save);
             } else {
                 $text = $sav->displayData('save_option', 'default', false, true);

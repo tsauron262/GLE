@@ -28,40 +28,6 @@ if (!$user->admin) {
 
 global $bdb, $keys, $fourns;
 
-//ID pièce
-//5 Statut Cde
-//Imprimée
-//4 Attentions particulières
-//Appro Spécifique pour
-//16 - Validation DT
-//21 Date d'appro Max
-//7 Date d'instal souhaitée
-//9 Tech. Instal
-//Etat
-//N° pièce vente
-//Date pièce
-//Code représentant
-//Code client
-//Libellé client
-//Code établissement
-//Code dépôt départ
-//Dernier utilisateur
-//0 Ref Cde Client
-//SELECT F_ARTICLE.AR_Ref ActiReference, 
-//        F_ARTICLE.AR_Design Designation, 
-//        IIF(F_ARTICLE.AR_CodeBarre = '', NULL, F_ARTICLE.AR_CodeBarre) EanCode,
-//              F_ARTICLE.FA_CodeFamille, 
-//        F_FAMILLE.FA_Intitule,
-//              F_ARTSTOCK.AS_QteSto Quantity, 
-//        F_ARTICLE.AR_PrixVen PriceVatOff, 
-//        F_ARTICLE.AR_PrixVen * 1.2 PriceVatOn, 
-//        F_ARTICLE.AR_PrixAch BuyingPriceVatOff,ISNULL(D3E.TA_Taux, 0) EcoTaxVatOff,
-//                      ISNULL(F_ARTSTOCK.cbCreation, GETDATE()) CreatedAt, 
-//        ISNULL(F_ARTSTOCK.cbModification, GETDATE()) UpdatedAt,
-//                      F_DEPOT.DE_No, 
-//        F_DEPOT.DE_Intitule
-
-
 $keys = array(
     'ref'           => 0,
     'label'         => 1,
@@ -143,12 +109,6 @@ function import($rows, $refs)
 {
     $failed = array();
     global $bdb;
-
-//    $categories = BimpCache::getProductsTagsByTypeArray('categorie', false, 'label');
-//    $gammes = BimpCache::getProductsTagsByTypeArray('gamme', false, 'label');
-//    $collections = BimpCache::getProductsTagsByTypeArray('collection', false, 'label');
-//    $natures = BimpCache::getProductsTagsByTypeArray('nature', false, 'label');
-//    $familles = BimpCache::getProductsTagsByTypeArray('famille', false, 'label');
 
     $familles = array();
     $entrepots = array();

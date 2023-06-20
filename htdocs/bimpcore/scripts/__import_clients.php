@@ -71,6 +71,10 @@ foreach ($lines as $idx => $line) {
     $row = array();
 
     foreach ($keys as $code => $i) {
+        if ($data[$i] == 'NULL') {
+            $row[$code] = '';
+            continue;
+        }
         $row[$code] = $data[$i];
     }
 
@@ -113,7 +117,7 @@ if (!(int) BimpTools::getValue('exec', 0)) {
 //    'pays'          => 14,
 //    'encours'       => 15
 
-$results = self::getBdb()->getRows('c_country', $where, null, 'array', array('rowid', 'code_iso'));
+$results = $bdb->getRows('c_country', $where, null, 'array', array('rowid', 'code_iso'));
 $countries = array();
 
 foreach ($results as $result) {
@@ -128,6 +132,7 @@ $nFails = 0;
 foreach ($rows as $r) {
     $societe->code_client = -1;
     $societe->get_codeclient($societe, 0);
+    
     $id_pays = 0;
     if ($r['code_pays'] == 'FRA' || $r['pays'] == 'FRANCE') {
         $id_pays = 1;
@@ -136,7 +141,7 @@ foreach ($rows as $r) {
     }
 
     if ($bdb->insert('societe', array(
-                'code_client'              => $code_client,
+                'code_client'              => $societe->code_client,
                 'code_compta'              => $r['ref'],
                 'nom'                      => $r['name'],
                 'client'                   => 1,
@@ -160,7 +165,7 @@ foreach ($rows as $r) {
         $nOk++;
     }
 
-    break;
+//    break;
 }
 
 echo '<br/>';

@@ -23,7 +23,7 @@ class BimpMail extends BimpMailCore
 
     public function setFromType($type)
     {
-        if ($type == 'actimag') {
+        if ($type == 'actimag' || $type == 'ldlc') {
             $this->title = 'ACTIMAG';
             $this->subtitle = '';
             if ($this->from_name) {

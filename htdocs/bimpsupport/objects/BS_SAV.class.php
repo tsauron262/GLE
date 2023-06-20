@@ -7564,7 +7564,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $html .= '<b>Symptômes: </b>' . $this->getData('symptomes') . '<br/><br/>';
             $html .= '<b>Option de sauvegarde</b>: ' . $this->displayData('save_option', 'default', false);
 
-            if (isset(BS_SAV::getSaveOptionDesc((int) $this->getData('save_option')))) {
+            if (BS_SAV::getSaveOptionDesc((int) $this->getData('save_option')) != null) {
                 $html .= '<br/><span class="danger">' . BS_SAV::getSaveOptionDesc((int) $this->getData('save_option')) . '</span>';
             }
 

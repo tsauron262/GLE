@@ -1,0 +1,13 @@
+table: c_famille_produit
+common_fields: 0
+
+labels: 
+    name: famille
+    is_female: 1
+    
+fields: 
+    code: 
+        label: Code
+        
+    label: 
+        label: Libellé 

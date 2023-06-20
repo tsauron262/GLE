@@ -1,1 +1,0 @@
-ALTER TABLE `llx_bs_apple_part` ADD `new_part_number` VARCHAR(255) NOT NULL DEFAULT '' AFTER `part_number`; 

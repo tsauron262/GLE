@@ -295,8 +295,8 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             $pdf->SetXY('9.3', '165.3');
             
-            if (isset(BS_SAV::$save_options_desc[$save])) {
-                $text = BS_SAV::$save_options_desc[$save];
+            if (isset(BS_SAV::getSaveOptionDesc($save))) {
+                $text = BS_SAV::getSaveOptionDesc($save);
             } else {
                 $text = $sav->displayData('save_option', 'default', false, true);
             }

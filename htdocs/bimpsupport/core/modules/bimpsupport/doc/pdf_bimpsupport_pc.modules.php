@@ -375,7 +375,22 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $data = $sav->getPublicLink();
 //            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $sav->getChildObject("equipment")->getData("serial")."&id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
             $this->getQrCode($data, $qr_dir, "suivie.png");
-            $pdf->Image($qr_dir . "/suivie.png", 100, 30, 0, 24);
+            $pdf->Image($qr_dir . "/suivie.png", 100, 33, 0, 24);
+            
+            // Logo
+            $logo = false;
+            if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png")) {
+                $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png";
+            } else {
+                $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo;
+            }
+            $testFile = str_replace(array(".jpg", "_RESEAUNANCE.png", ".png"), "_SAV.png", $logo);
+            if (is_file($testFile))
+                $logo = $testFile;
+
+    //        $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo;
+            if ($logo && is_readable($logo))
+                    $pdf->Image($logo, 10, 16, 0, 22);
 
             if (method_exists($pdf, 'AliasNbPages'))
                 $pdf->AliasNbPages();

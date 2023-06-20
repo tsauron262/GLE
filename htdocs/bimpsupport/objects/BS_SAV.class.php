@@ -78,7 +78,7 @@ class BS_SAV extends BimpObject
     );
     public static $save_options_desc = array(
         1 => 'Le client donne son accord pour que toutes ses données soient effacées. Son produit lui sera restitué en configuration usine, aucune de ses données personnelles ne sera présentes.',
-        2 => 'Le client autorise BIMP à essayer de sauvegarder ses données personnelles. Si cela s’avère impossible aucune intervention ne sera réalisée sur le produit sans accord préalable du client. Le délai d’intervention pourra en être augmenté.'
+        2 => 'Le client autorise ENTITY_NAME à essayer de sauvegarder ses données personnelles. Si cela s’avère impossible aucune intervention ne sera réalisée sur le produit sans accord préalable du client. Le délai d’intervention pourra en être augmenté.'
     );
     public static $contact_prefs = array(
         3 => 'SMS + E-mail',
@@ -158,6 +158,12 @@ class BS_SAV extends BimpObject
     public static $check_on_update_field = 0;
     public static $systems_cache = null;
     public $check_version = true;
+    
+    public static function getSaveOptionDesc($choice){
+        if(isset(self::$save_options_desc[(int) $choice]))
+            return str_repace('ENTITY_NAME', BimpCore::getConf('default_name', '', 'bimpsupport'), self::$save_options_desc[(int) $choice]);
+        return null;
+    }
 
     public function __construct($db)
     {
@@ -7558,8 +7564,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $html .= '<b>Symptômes: </b>' . $this->getData('symptomes') . '<br/><br/>';
             $html .= '<b>Option de sauvegarde</b>: ' . $this->displayData('save_option', 'default', false);
 
-            if (isset(BS_SAV::$save_options_desc[(int) $this->getData('save_option')])) {
-                $html .= '<br/><span class="danger">' . BS_SAV::$save_options_desc[(int) $this->getData('save_option')] . '</span>';
+            if (isset(BS_SAV::getSaveOptionDesc((int) $this->getData('save_option')))) {
+                $html .= '<br/><span class="danger">' . BS_SAV::getSaveOptionDesc((int) $this->getData('save_option')) . '</span>';
             }
 
             $cgv = "";

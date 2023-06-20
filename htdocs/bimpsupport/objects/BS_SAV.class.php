@@ -161,7 +161,7 @@ class BS_SAV extends BimpObject
     
     public static function getSaveOptionDesc($choice){
         if(isset(self::$save_options_desc[(int) $choice]))
-            return str_repace('ENTITY_NAME', BimpCore::getConf('default_name', '', 'bimpsupport'), self::$save_options_desc[(int) $choice]);
+            return str_replace('ENTITY_NAME', BimpCore::getConf('default_name', '', 'bimpsupport'), self::$save_options_desc[(int) $choice]);
         return null;
     }
 

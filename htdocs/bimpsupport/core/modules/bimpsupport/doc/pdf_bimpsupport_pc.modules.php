@@ -287,7 +287,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $tailleP = ($taille2 > 4 || $taille > 100) ? 8 : 12;
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $tailleP);
             $pdf->MultiCell(170, 6, $symptomes, 0, 'L');
-            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10.5);
 
             $save = (int) $sav->getData('save_option');
             if ($save === 2 || $save == 1)

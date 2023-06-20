@@ -4176,7 +4176,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 $msg_mail .= " a été validée financièrement par paiement comptant ou mandat SEPA par ";
                 $msg_mail .= ucfirst($user->firstname) . ' ' . strtoupper($user->lastname);
                 $msg_mail .= "<br/>Merci de vérifier le paiement ultérieurement.";
-                mailSyn2("Validation par paiement comptant ou mandat SEPA", 'a.delauzun@bimp.fr, s.reynaud@bimp.fr', "gle@bimp.fr", $msg_mail);
+                mailSyn2("Validation par paiement comptant ou mandat SEPA", 's.reynaud@bimp.fr', "gle@bimp.fr", $msg_mail);
             } else {
                 $client_facture = $this->getClientFacture();
                 if (!$client_facture->getData('validation_financiere')) {

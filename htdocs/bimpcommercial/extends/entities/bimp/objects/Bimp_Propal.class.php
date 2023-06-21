@@ -90,25 +90,27 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                 break;
 
             case 'getPropositionLocation':
-                if (!$this->isLoaded()) {
-                    return 0;
-                }
-
-                if (!in_array((int) $this->getData('fk_statut'), array(1, 2))) {
-                    $errors[] = 'Statut invalide pour la génération d\'une proposition de location';
-                    return 0;
-                }
-
                 global $user;
-                if ($user->id !== 270) {
+                if ($user->id != 270) {
+                    if (!$this->isLoaded()) {
+                        return 0;
+                    }
+
+                    if (!in_array((int) $this->getData('fk_statut'), array(1, 2))) {
+                        $errors[] = 'Statut invalide pour la génération d\'une proposition de location';
+                        return 0;
+                    }
+
+
                     if ((int) $this->getData('id_demande_fin')) {
                         $errors[] = 'Une demande de location a déjà été faite pour ce devis';
                         return 0;
                     }
-                }
 
-                if (!$this->isDemandeFinAllowed($errors)) {
-                    return 0;
+
+                    if (!$this->isDemandeFinAllowed($errors)) {
+                        return 0;
+                    }
                 }
 
                 return 1;

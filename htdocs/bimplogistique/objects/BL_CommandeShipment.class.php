@@ -2950,7 +2950,6 @@ class BL_CommandeShipment extends BimpObject
             $filePath = $this->getSignatureDocFileDir('bl') . $this->getSignatureDocFileName('bl');
 
             if (!file_exists($filePath)) {
-                echo 'ici';
                 $overwrite = 1;
             }
         }

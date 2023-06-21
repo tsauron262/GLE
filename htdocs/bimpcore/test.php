@@ -31,17 +31,17 @@ BimpObject::loadClass('bimpfinancement', 'BF_Refinanceur');
 BimpObject::loadClass('bimpfinancement', 'BF_Demande');
 
 $err = array();
-$montant_materiels = 19536.44;
+$montant_materiels = 19635.44;
 $montant_services = 0;
-//$tx = 7.4;
+$tx_cession = 7.4;
 $nb_mois = 36;
 $marge = 10;
 $vr_achat = 5;
 $mode_calcul = 1;
 $periodicity = 3;
 
-$tx_cession = BF_Refinanceur::getTauxMoyen($montant_materiels);
-$marge = BF_Demande::getDefaultMargePercent($montant_materiels);
+//$tx_cession = BF_Refinanceur::getTauxMoyen($montant_materiels);
+//$marge = BF_Demande::getDefaultMargePercent($montant_materiels);
 
 echo 'tx: ' . $tx_cession . '<br/>';
 echo 'marge : ' . $marge . '<br/>';

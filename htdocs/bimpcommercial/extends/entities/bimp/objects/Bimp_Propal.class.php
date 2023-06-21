@@ -99,9 +99,12 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
                     return 0;
                 }
 
-                if ((int) $this->getData('id_demande_fin')) {
-                    $errors[] = 'Une demande de location a déjà été faite pour ce devis';
-                    return 0;
+                global $user;
+                if ($user->id !== 270) {
+                    if ((int) $this->getData('id_demande_fin')) {
+                        $errors[] = 'Une demande de location a déjà été faite pour ce devis';
+                        return 0;
+                    }
                 }
 
                 if (!$this->isDemandeFinAllowed($errors)) {

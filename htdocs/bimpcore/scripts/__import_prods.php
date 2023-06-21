@@ -28,21 +28,28 @@ if (!$user->admin) {
 
 global $bdb, $keys, $fourns;
 
+// ActiReference, Designation, EanCode, CodeFamille, LibFamille, Serialisable, Quantity, PriceVatOff, PriceVatOn, BuyingPriceVatOff, EcoTaxVatOff, CreatedAt, UpdatedAt, CodeDépot, LibDepot, Com1, Com2, Com3, Com4
+
 $keys = array(
     'ref'           => 0,
     'label'         => 1,
     'ean'           => 2,
     'code_famille'  => 3,
     'label_famille' => 4,
-    'qty'           => 5,
-    'pu_ht'         => 6,
-    'pu_ttc'        => 7,
-    'pa_ht'         => 8,
-    'eco_tax'       => 9,
-    'date_create'   => 10,
-    'date_update'   => 11,
-    'code_stock'    => 12,
-    'label_stock'   => 13
+    'serialisable'  => 5,
+    'qty'           => 6,
+    'pu_ht'         => 7,
+    'pu_ttc'        => 8,
+    'pa_ht'         => 9,
+    'eco_tax'       => 10,
+    'date_create'   => 11,
+    'date_update'   => 12,
+    'code_stock'    => 13,
+    'label_stock'   => 14,
+    'com1'          => 15,
+    'com2'          => 16,
+    'com3'          => 17,
+    'com4'          => 18
 );
 
 $fourns = array();
@@ -118,13 +125,12 @@ function import($rows, $refs)
 
     BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
 
+    $apple_keywords = array('apple', 'iphone', 'ipad', 'mac', 'ipod');
     foreach ($rows as $r) {
-        echo '<br/><br/>';
-        if (!(string) $r['ref']) {
-            if ($r['code'] && $r['pref'] && preg_match('/^([A-Z]{1,3})\-?$/', $r['pref'], $matches)) {
-                $r['ref'] = $matches[1] . '-' . $r['code'];
-            }
+        if ($r['code_famille'] == 'PIECESAV') {
+            continue;
         }
+        echo '<br/><br/>';
         $id_product = (int) $bdb->getValue('product', 'rowid', 'ref = \'' . $r['ref'] . '\'');
         if (!$id_product) {
             echo '<strong>' . $r['ref'] . '</strong>: ';
@@ -156,16 +162,28 @@ function import($rows, $refs)
                 $id_famille = (int) $familles[$r['code_famille']];
             }
 
+            $is_apple = false;
+            foreach ($apple_keywords as $kw) {
+                if (strpos($r['com2'], $kw) !== false) {
+                    $is_apple = true;
+                    break;
+                }
+            }
+
             // Créa du produit: 
+            $ref = ($is_apple ? 'APP-' : 'INC-') . $r['ref'];
             $prod = BimpObject::createBimpObject('bimpcore', 'Bimp_Product', array(
-                        'ref'        => $r['ref'],
-                        'label'      => $r['label'],
-                        'price'      => (float) $r['pu_ht'],
-                        'tva_tx'     => $tva_tx,
-                        'barcode'    => $r['ean'],
-                        'id_famille' => $id_famille,
-                        'deee'       => $r['eco_tax'],
-                        'validate'   => 1
+                        'ref'          => $r['ref'],
+                        'label'        => $r['label'],
+                        'price'        => (float) $r['pu_ht'],
+                        'tva_tx'       => $tva_tx,
+                        'barcode'      => $r['ean'],
+                        'id_famille'   => $id_famille,
+                        'deee'         => $r['eco_tax'],
+                        'validate'     => 1,
+                        'fabricant'    => ($is_apple ? 'APPLE' : ''),
+                        'serialisable' => ((int) $r['serialisable'] === 1 ? 1 : 0),
+                        'datec'        => substr($r['date_create'], 0, 19)
                             ), true, $errors);
 
             if (count($errors)) {
@@ -225,6 +243,8 @@ function import($rows, $refs)
                     echo ' - <span class="success">Stocks OK</span>';
                 }
             }
+
+            break;
         }
     }
 

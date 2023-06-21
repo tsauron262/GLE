@@ -1,0 +1,1 @@
+ALTER TABLE `llx_product` ADD `fabricant` VARCHAR(255) NOT NULL DEFAULT '';

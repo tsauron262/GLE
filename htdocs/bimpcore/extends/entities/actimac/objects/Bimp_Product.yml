@@ -5,6 +5,9 @@ fields:
         label: Famille
         type: id_object
         
+    fabricant: 
+        label: Fabricant
+        
     categorie: unset
     collection: unset
     nature: unset

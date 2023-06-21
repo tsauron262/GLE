@@ -585,60 +585,66 @@ class BimpCore
         $cache = self::getConfCache();
 
         if (isset($cache['bimpcore'])) {
+            $modules = array('bimpcore');
+
             foreach ($cache['bimpcore'] as $name => $value) {
                 if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
-                    $module = $matches[1];
+                    if (!in_array($matches[1], $modules)) {
+                        $modules[] = $matches[1];
+                    }
+                }
+            }
 
-                    if (defined('BIMP_EXTENDS_VERSION')) {
-                        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/sql';
-                        if (file_exists($dir) && is_dir($dir)) {
-                            $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_version_' . BIMP_EXTENDS_VERSION, 0);
-                            $files = scandir($dir);
+            foreach ($modules as $module) {
+                if (defined('BIMP_EXTENDS_VERSION')) {
+                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/sql';
+                    if (file_exists($dir) && is_dir($dir)) {
+                        $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_version_' . BIMP_EXTENDS_VERSION, 0);
+                        $files = scandir($dir);
 
-                            foreach ($files as $f) {
-                                if (in_array($f, array('.', '..'))) {
-                                    continue;
-                                }
+                        foreach ($files as $f) {
+                            if (in_array($f, array('.', '..'))) {
+                                continue;
+                            }
 
-                                if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
-                                    if ((float) $matches2[1] > $current_version) {
-                                        if (!isset($updates[$module])) {
-                                            $updates[$module] = array();
-                                        }
-                                        if (!isset($updates[$module]['version'])) {
-                                            $updates[$module]['version'] = array();
-                                        }
-
-                                        $updates[$module]['version'][] = (float) $matches2[1];
+                            if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
+                                if ((float) $matches2[1] > $current_version) {
+                                    if (!isset($updates[$module])) {
+                                        $updates[$module] = array();
                                     }
+                                    if (!isset($updates[$module]['version'])) {
+                                        $updates[$module]['version'] = array();
+                                    }
+
+                                    $updates[$module]['version'][] = (float) $matches2[1];
                                 }
                             }
                         }
                     }
+                }
 
-                    if (defined('BIMP_EXTENDS_ENTITY')) {
-                        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql';
-                        if (file_exists($dir) && is_dir($dir)) {
+                if (defined('BIMP_EXTENDS_ENTITY')) {
+                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql';
+                    if (file_exists($dir) && is_dir($dir)) {
 
-                            $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, 0);
-                            $files = scandir($dir);
+                        $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, 0);
+                        $files = scandir($dir);
 
-                            foreach ($files as $f) {
-                                if (in_array($f, array('.', '..'))) {
-                                    continue;
-                                }
+                        foreach ($files as $f) {
+                            if (in_array($f, array('.', '..'))) {
+                                continue;
+                            }
 
-                                if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
-                                    if ((float) $matches2[1] > $current_version) {
-                                        if (!isset($updates[$module])) {
-                                            $updates[$module] = array();
-                                        }
-                                        if (!isset($updates[$module]['entity'])) {
-                                            $updates[$module]['entity'] = array();
-                                        }
-
-                                        $updates[$module]['entity'][] = (float) $matches2[1];
+                            if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
+                                if ((float) $matches2[1] > $current_version) {
+                                    if (!isset($updates[$module])) {
+                                        $updates[$module] = array();
                                     }
+                                    if (!isset($updates[$module]['entity'])) {
+                                        $updates[$module]['entity'] = array();
+                                    }
+
+                                    $updates[$module]['entity'][] = (float) $matches2[1];
                                 }
                             }
                         }

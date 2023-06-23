@@ -194,7 +194,7 @@ $nbofjobslaunchedko = 0;
 
 $rand = random_int(111111, 999999);
 $bimp_debug = "\n" . '***** BEGIN #' . $rand . ' : ' . date('d / m H:i:s') . "\n";
-file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs', $bimp_debug, FILE_APPEND);
+file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
 
 if (is_array($object->lines) && (count($object->lines) > 0)) {
     $savconf = dol_clone($conf);
@@ -263,7 +263,7 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
             if (!$cronjob->processing) {
                 if ($line->id == 76) {
                     $bimp_debug = 'Exec #' . $rand . ' : ' . date('H:i:s') . "\n";
-                    file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs', $bimp_debug, FILE_APPEND);
+                    file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
                 }
                 // Execute job
                 $result = $cronjob->run_jobs($userlogin);

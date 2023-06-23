@@ -193,7 +193,7 @@ $nbofjobslaunchedok = 0;
 $nbofjobslaunchedko = 0;
 
 $rand = random_int(111111, 999999);
-$bimp_debug = "\n" . '***** BEGIN #' . $rand . ' : ' . date('d / m H:i:s') . "\n";
+$bimp_debug = "\n" . '***** BEGIN #' . $rand . ' : ' . date('H:i:s') . "\n";
 file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs', $bimp_debug, FILE_APPEND);
 
 if (is_array($object->lines) && (count($object->lines) > 0)) {
@@ -202,12 +202,12 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
     // Loop over job
     foreach ($object->lines as $line) {
         dol_syslog("cron_run_jobs.php cronjobid: " . $line->id . " priority=" . $line->priority . " entity=" . $line->entity . " label=" . $line->label, LOG_DEBUG);
-        echo "cron_run_jobs.php cronjobid: " . $line->id . " priority=" . $line->priority . " entity=" . $line->entity . " label=" . $line->label;
+        $bimp_debug_html .= "cron_run_jobs.php cronjobid: " . $line->id . " priority=" . $line->priority . " entity=" . $line->entity . " label=" . $line->label;
 
         // Force reload of setup for the current entity
         if ((empty($line->entity) ? 1 : $line->entity) != $conf->entity) {
             dol_syslog("cron_run_jobs.php we work on another entity conf than " . $conf->entity . " so we reload mysoc, langs, user and conf", LOG_DEBUG);
-            echo " -> we change entity so we reload mysoc, langs, user and conf";
+            $bimp_debug_html .= " -> we change entity so we reload mysoc, langs, user and conf";
 
             $conf->entity = (empty($line->entity) ? 1 : $line->entity);
             $conf->setValues($db); // This make also the $mc->setValues($conf); that reload $mc->sharings
@@ -217,12 +217,12 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
             if ($conf->entity != $user->entity) {
                 $result = $user->fetch('', $userlogin, '', 1);
                 if ($result < 0) {
-                    echo "\nUser Error: " . $user->error . "\n";
+                    $bimp_debug_html .= "\nUser Error: " . $user->error . "\n";
                     dol_syslog("cron_run_jobs.php:: User Error:" . $user->error, LOG_ERR);
                     exit(-1);
                 } else {
                     if ($result == 0) {
-                        echo "\nUser login: " . $userlogin . " does not exists for entity " . $conf->entity . "\n";
+                        $bimp_debug_html .= "\nUser login: " . $userlogin . " does not exists for entity " . $conf->entity . "\n";
                         dol_syslog("User login:" . $userlogin . " does not exists", LOG_ERR);
                         exit(-1);
                     }
@@ -248,29 +248,28 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
 
         //If date_next_jobs is less of current date, execute the program, and store the execution time of the next execution in database
         if (($line->datenextrun < $now) && (empty($line->datestart) || $line->datestart <= $now) && (empty($line->dateend) || $line->dateend >= $now)) {
-            echo " - qualified";
+            if ($line->id == 76) {
+                $bimp_check = true;
+            }
+//            $bimp_debug_html .= " - qualified";
 
             dol_syslog("cron_run_jobs.php line->datenextrun:" . dol_print_date($line->datenextrun, 'dayhourrfc') . " line->datestart:" . dol_print_date($line->datestart, 'dayhourrfc') . " line->dateend:" . dol_print_date($line->dateend, 'dayhourrfc') . " now:" . dol_print_date($now, 'dayhourrfc'));
 
             $cronjob = new Cronjob($db);
             $result = $cronjob->fetch($line->id);
             if ($result < 0) {
-                echo "Error cronjobid: " . $line->id . " cronjob->fetch: " . $cronjob->error . "\n";
-                echo "Failed to fetch job " . $line->id . "\n";
+                $bimp_debug_html .= "Error cronjobid: " . $line->id . " cronjob->fetch: " . $cronjob->error . "\n";
+                $bimp_debug_html .= "Failed to fetch job " . $line->id . "\n";
                 dol_syslog("cron_run_jobs.php::fetch Error " . $cronjob->error, LOG_ERR);
                 exit(-1);
             }
             if (!$cronjob->processing) {
-                if ($line->id == 76) {
-                    $bimp_debug = 'Exec #' . $rand . ' : ' . date('H:i:s') . "\n";
-                    file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs', $bimp_debug, FILE_APPEND);
-                }
                 // Execute job
                 $result = $cronjob->run_jobs($userlogin);
                 if ($result < 0) {
-                    echo "Error cronjobid: " . $line->id . " cronjob->run_job: " . $cronjob->error . "\n";
-                    echo "At least one job failed. Go on menu Home-Setup-Admin tools to see result for each job.\n";
-                    echo "You can also enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
+                    $bimp_debug_html .= "Error cronjobid: " . $line->id . " cronjob->run_job: " . $cronjob->error . "\n";
+                    $bimp_debug_html .= "At least one job failed. Go on menu Home-Setup-Admin tools to see result for each job.\n";
+                    $bimp_debug_html .= "You can also enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
                     dol_syslog("cron_run_jobs.php::run_jobs Error " . $cronjob->error, LOG_ERR);
                     $nbofjobslaunchedko++;
                     $resultstring = 'KO';
@@ -279,22 +278,22 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
                     $resultstring = 'OK';
                 }
 
-                echo " - run_jobs " . $resultstring . " result = " . $result;
+                $bimp_debug_html .= " - run_jobs " . $resultstring . " result = " . $result;
 
                 // We re-program the next execution and stores the last execution time for this job
                 $result = $cronjob->reprogram_jobs($userlogin, $now);
                 if ($result < 0) {
-                    echo "Error cronjobid: " . $line->id . " cronjob->reprogram_job: " . $cronjob->error . "\n";
-                    echo "Enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
+                    $bimp_debug_html .= "Error cronjobid: " . $line->id . " cronjob->reprogram_job: " . $cronjob->error . "\n";
+                    $bimp_debug_html .= "Enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
                     dol_syslog("cron_run_jobs.php::reprogram_jobs Error " . $cronjob->error, LOG_ERR);
                     exit(-1);
                 }
 
-                echo " - reprogrammed\n";
+                $bimp_debug_html .= " - reprogrammed\n";
             } else
-                echo " - processing\n";
+                $bimp_debug_html .= " - processing\n";
         } else {
-            echo " - not qualified\n";
+            $bimp_debug_html .= " - not qualified\n";
 
             dol_syslog("cron_run_jobs.php job not qualified line->datenextrun:" . dol_print_date($line->datenextrun, 'dayhourrfc') . " line->datestart:" . dol_print_date($line->datestart, 'dayhourrfc') . " line->dateend:" . dol_print_date($line->dateend, 'dayhourrfc') . " now:" . dol_print_date($now, 'dayhourrfc'));
         }
@@ -302,7 +301,15 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
 
     $conf = $savconf;
 } else {
-    echo "cron_run_jobs.php no qualified job found\n";
+    $bimp_debug_html .= "cron_run_jobs.php no qualified job found\n";
+}
+
+if ($bimp_check) {
+    if (!function_exists('mailSyn2')) {
+        require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
+    }
+
+    mailSyn2('Debug cron_run_jobs', 'f.martinez@bimp.fr', '', $bimp_debug_html);
 }
 
 $db->close();

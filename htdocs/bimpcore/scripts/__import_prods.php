@@ -30,6 +30,32 @@ global $bdb, $keys, $fourns;
 
 // ActiReference, Designation, EanCode, CodeFamille, LibFamille, Serialisable, Quantity, PriceVatOff, PriceVatOn, BuyingPriceVatOff, EcoTaxVatOff, CreatedAt, UpdatedAt, CodeDépot, LibDepot, Com1, Com2, Com3, Com4
 
+$products = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Product', array(
+            'rowid' => array(
+                'operator' => '>',
+                'value'    => 4
+            )
+        ));
+
+if (count($products)) {
+    echo 'SUPPR DES PRODS';
+    $n = 0;
+    foreach ($products as $p) {
+        $err = $p->delete($w, true);
+
+        if (count($err)) {
+            echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($err, '#' . $p->id));
+        } else {
+            $n++;
+        }
+    }
+
+    echo $n . ' prod(s) suppr';
+    exit;
+}
+
+die('no prods');
+
 $keys = array(
     'ref'           => 0,
     'label'         => 1,
@@ -82,10 +108,6 @@ foreach ($lines as $idx => $line) {
     $rows[] = $row;
 }
 
-//echo '<pre>';
-//print_r($rows);
-//echo '</pre>';
-
 if (!(int) BimpTools::getValue('exec', 0)) {
     if (is_array($rows) && count($rows)) {
         echo count($rows) . ' élément(s) à traiter <br/><br/>';
@@ -126,65 +148,86 @@ function import($rows, $refs)
     BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
 
     $apple_keywords = array('apple', 'iphone', 'ipad', 'mac', 'ipod');
+    $done = array();
     foreach ($rows as $r) {
+        if ($r['code_stock'] == 'SAVM') {
+            $r['code_stock'] = 'SAV2MV';
+        }
         if ($r['code_famille'] == 'PIECESAV') {
             continue;
         }
+
+        if (isset($done[$r['code_stock']][$r['ref']])) {
+            continue;
+        }
+
+        if (!isset($done[$r['code_stock']])) {
+            $done[$r['code_stock']] = array();
+        }
+
+        $done[$r['code_stock']][$r['ref']] = 1;
+
         echo '<br/><br/>';
-        $id_product = (int) $bdb->getValue('product', 'rowid', 'ref = \'' . $r['ref'] . '\'');
-        if (!$id_product) {
-            echo '<strong>' . $r['ref'] . '</strong>: ';
-            $tva_tx = 20;
+        echo '<strong>' . $r['ref'] . '</strong>: ';
+        $tva_tx = 20;
 
-            $errors = array();
-            $id_famille = 0;
-            $id_entrepot = 0;
-            if (!isset($familles[$r['code_famille']])) {
-                $id_famille = (int) $bdb->getValue('c_famille_produit', 'id', 'code = \'' . $r['code_famille'] . '\'');
+        $errors = array();
+        $id_famille = 0;
+        $id_entrepot = 0;
+        if (!isset($familles[$r['code_famille']])) {
+            $id_famille = (int) $bdb->getValue('c_famille_produit', 'id', 'code = \'' . $r['code_famille'] . '\'');
 
-                if ($id_famille) {
-                    $familles[$r['code_famille']] = $id_famille;
-                } else {
-                    $id_famille = (int) $bdb->insert('c_famille_produit', array(
-                                'code'  => $r['code_famille'],
-                                'label' => $r['label_famille']
-                                    ), true);
-
-                    if (!$id_famille) {
-                        echo '<span class="danger">';
-                        echo '<br/>Echec de la création de la famille "' . $r['code_famille'] . '" - ' . $bdb->err() . '<br/>';
-                        echo '</span>';
-                    } else {
-                        $familles[$r['code_famille']] = $id_famille;
-                    }
-                }
+            if ($id_famille) {
+                $familles[$r['code_famille']] = $id_famille;
             } else {
-                $id_famille = (int) $familles[$r['code_famille']];
-            }
+                $id_famille = (int) $bdb->insert('c_famille_produit', array(
+                            'code'  => $r['code_famille'],
+                            'label' => $r['label_famille']
+                                ), true);
 
-            $is_apple = false;
-            foreach ($apple_keywords as $kw) {
-                if (strpos($r['com2'], $kw) !== false) {
-                    $is_apple = true;
-                    break;
+                if (!$id_famille) {
+                    echo '<span class="danger">';
+                    echo '<br/>Echec de la création de la famille "' . $r['code_famille'] . '" - ' . $bdb->err() . '<br/>';
+                    echo '</span>';
+                } else {
+                    $familles[$r['code_famille']] = $id_famille;
                 }
             }
+        } else {
+            $id_famille = (int) $familles[$r['code_famille']];
+        }
 
+        $is_apple = false;
+        foreach ($apple_keywords as $kw) {
+            if (strpos($r['com2'], $kw) !== false) {
+                $is_apple = true;
+                break;
+            }
+        }
+
+        $ref = ($is_apple ? 'APP-' : 'INC-') . $r['ref'];
+
+        $data = array(
+            'ref'          => $r['ref'],
+            'label'        => $r['label'],
+            'price'        => (float) $r['pu_ht'],
+            'tva_tx'       => $tva_tx,
+            'barcode'      => $r['ean'],
+            'id_famille'   => $id_famille,
+            'deee'         => $r['eco_tax'],
+            'validate'     => 1,
+            'fabricant'    => ($is_apple ? 'APPLE' : ''),
+            'serialisable' => ((int) $r['serialisable'] === 1 ? 1 : 0),
+            'datec'        => substr($r['date_create'], 0, 19)
+        );
+
+        $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                    'ref' => array($ref, $r['ref'])
+        ));
+
+        if (!BimpObject::objectLoaded($prod)) {
             // Créa du produit: 
-            $ref = ($is_apple ? 'APP-' : 'INC-') . $r['ref'];
-            $prod = BimpObject::createBimpObject('bimpcore', 'Bimp_Product', array(
-                        'ref'          => $r['ref'],
-                        'label'        => $r['label'],
-                        'price'        => (float) $r['pu_ht'],
-                        'tva_tx'       => $tva_tx,
-                        'barcode'      => $r['ean'],
-                        'id_famille'   => $id_famille,
-                        'deee'         => $r['eco_tax'],
-                        'validate'     => 1,
-                        'fabricant'    => ($is_apple ? 'APPLE' : ''),
-                        'serialisable' => ((int) $r['serialisable'] === 1 ? 1 : 0),
-                        'datec'        => substr($r['date_create'], 0, 19)
-                            ), true, $errors);
+            $prod = BimpObject::createBimpObject('bimpcore', 'Bimp_Product', $data, true, $errors);
 
             if (count($errors)) {
                 echo BimpRender::renderAlerts($errors);
@@ -200,17 +243,37 @@ function import($rows, $refs)
                     'amount'     => (float) $r['pa_ht']
                         ), true, $errors);
 
-                if (count($errors)) {
-                    echo BimpRender::renderAlerts($errors);
-                } else {
+                if (!count($errors)) {
                     echo ' - <span class="success">PA courant OK</span>';
                 }
             }
         } else {
-            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+            $w = array();
+            if ($r['code_famille'] == 'PIECESAV') {
+                // suppr: 
+                $errors = $prod->delete($w, true);
+                if (!count($errors)) {
+                    echo ' - <span class="success">Suppr prod part OK</span>';
+                }
+                continue;
+            }
+
+            // Maj du produit: 
+            $errors = $prod->validateArray($data);
+
+            if (!count($errors)) {
+
+                $errors = $prod->update($w, true);
+
+                if (!count($errors)) {
+                    echo ' - <span class="success">MAJ Prod OK</span>';
+                }
+            }
         }
 
-        if (BimpObject::objectLoaded($prod)) {
+        if (count($errors)) {
+            echo BimpRender::renderAlerts($errors);
+        } elseif (BimpObject::objectLoaded($prod)) {
             if (isset($entrepots[$r['label_stock']])) {
                 $id_entrepot = (int) $entrepots[$r['label_stock']];
             } else {
@@ -243,9 +306,9 @@ function import($rows, $refs)
                     echo ' - <span class="success">Stocks OK</span>';
                 }
             }
-
-            break;
         }
+
+        break;
     }
 
     echo '<br/><br/> NON CREES: <br/><br/>';

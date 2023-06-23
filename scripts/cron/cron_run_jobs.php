@@ -261,10 +261,8 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
                 exit(-1);
             }
             if (!$cronjob->processing) {
-                if ($line->id == 76) {
-                    $bimp_debug = 'Exec #' . $rand . ' : ' . date('H:i:s') . "\n";
-                    file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
-                }
+                $bimp_debug = 'Exec #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ')' . "\n";
+                file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
                 // Execute job
                 $result = $cronjob->run_jobs($userlogin);
                 if ($result < 0) {

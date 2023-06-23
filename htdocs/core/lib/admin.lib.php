@@ -67,7 +67,7 @@ function versioncompare($versionarray1, $versionarray2)
 {
 	$ret = 0;
 	$level = 0;
-	$count1 = count($versionarray1);
+	$count1 = (is_array($versionarray1) ? count($versionarray1) : 0);
 	$count2 = (is_array($versionarray2)? count($versionarray2) : 0);
 	$maxcount = max($count1, $count2);
 	while ($level < $maxcount) {

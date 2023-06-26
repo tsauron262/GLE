@@ -5202,7 +5202,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $client = $this->getChildObject('client');
 
                         $encoursActu = $client->getAllEncoursForSiret(true)['total'];
-                        $authorisation = ($client->getData('outstanding_limit')+$this->getUserLimitEncours) * 1.2;
+                        $authorisation = ($client->getData('outstanding_limit')+$this->getUserLimitEncours()) * 1.2;
                         $besoin = $encoursActu + $propal->dol_object->total_ht;
 
                         if ($besoin > ($authorisation + 1))

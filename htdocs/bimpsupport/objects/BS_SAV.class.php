@@ -5202,7 +5202,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $client = $this->getChildObject('client');
 
                         $encoursActu = $client->getAllEncoursForSiret(true)['total'];
-                        $authorisation = $client->getData('outstanding_limit') * 1.2;
+                        $authorisation = ($client->getData('outstanding_limit')+$this->getUserLimitEncours) * 1.2;
                         $besoin = $encoursActu + $propal->dol_object->total_ht;
 
                         if ($besoin > ($authorisation + 1))
@@ -5263,6 +5263,19 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+    
+    public function getUserLimitEncours(){
+        global $db, $user;
+        $sql = $db->query("SELECT val_max
+FROM llx_validate_comm a
+WHERE a.user = '".$user->id."' AND a.secteur = 'S' AND a.type = '0'
+ORDER BY a.val_max DESC");
+        if($db->num_rows($sql) > 0){
+            $ln = $db->fetch_object($sql);
+            return $ln->val_max;
+        }
+        return 0;
     }
 
     public function actionPropalAccepted($data, &$success)
@@ -5532,7 +5545,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if ($impayee > 1) {
                 //on vérifie encours
                 $encoursActu = $client_fac->getAllEncoursForSiret(true)['total'];
-                $authorisation = $client_fac->getData('outstanding_limit') * 1.2;
+                $authorisation = ($client_fac->getData('outstanding_limit') + $this->getUserLimitEncours()) * 1.2;
                 $besoin = $encoursActu + $impayee;
 
                 if ($besoin > $authorisation) {

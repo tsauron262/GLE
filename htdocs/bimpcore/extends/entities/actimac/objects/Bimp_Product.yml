@@ -8,6 +8,11 @@ fields:
     fabricant: 
         label: Fabricant
         
+    import_actimac: 
+        label: Import Actimac
+        type: bool
+        default_value: 0
+        
     categorie: unset
     collection: unset
     nature: unset

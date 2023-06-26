@@ -1,0 +1,1 @@
+ALTER TABLE `llx_product` ADD `import_actimac` tinyint(1) NOT NULL DEFAULT 0;

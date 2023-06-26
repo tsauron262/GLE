@@ -1036,25 +1036,29 @@ class Bimp_Facture extends BimpComm
 
         // Export Chorus:
         // API PISTE à débugguer
-//        if ($this->isActionAllowed('exportToChorus') && $this->canSetAction('exportToChorus')) {
-//            $buttons[] = array(
-//                'label'   => 'Exporter PDF vers Chorus',
-//                'icon'    => 'fas_file-export',
-//                'onclick' => $this->getJsActionOnclick('exportToChorus', array(), array(
-//                    'confirm_msg' => 'Veuillez confirmer l\\\'envoi du fichier PDF vers Chorus'
-//                ))
-//            );
-//        }
-        // Confirmation Chorus:
-//        if ($this->isActionAllowed('confirmChorusExport') && $this->canSetAction('confirmChorusExport')) {
-//            $buttons[] = array(
-//                'label'   => 'Valider export Chorus',
-//                'icon'    => 'fas_file-export',
-//                'onclick' => $this->getJsActionOnclick('confirmChorusExport', array(), array(
-//                    'form_name' => 'export_to_chorus'
-//                ))
-//            );
-//        }
+        if (BimpCore::isUserDev()) {
+            if ($this->isActionAllowed('exportToChorus') && $this->canSetAction('exportToChorus')) {
+                $buttons[] = array(
+                    'label'   => 'Exporter PDF vers Chorus',
+                    'icon'    => 'fas_file-export',
+                    'onclick' => $this->getJsActionOnclick('exportToChorus', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer l\\\'envoi du fichier PDF vers Chorus'
+                    ))
+                );
+            }
+
+            // Confirmation Chorus:
+            if ($this->isActionAllowed('confirmChorusExport') && $this->canSetAction('confirmChorusExport')) {
+                $buttons[] = array(
+                    'label'   => 'Valider export Chorus',
+                    'icon'    => 'fas_file-export',
+                    'onclick' => $this->getJsActionOnclick('confirmChorusExport', array(), array(
+                        'form_name' => 'export_to_chorus'
+                    ))
+                );
+            }
+        }
+
         // Marquer exporté vers Chorus: 
         if ($this->isActionAllowed('forceChorusExported') && $this->canSetAction('forceChorusExported')) {
             $buttons[] = array(
@@ -6435,7 +6439,7 @@ class Bimp_Facture extends BimpComm
                         $errors[] = 'Facture à corriger invalide';
                     } else {
                         $this->set('fk_facture_source', $id_fac_src);
-                        
+
                         if ($this->field_exists('expertise')) {
                             $this->set('expertise', $facture->getData('expertise'));
                         }

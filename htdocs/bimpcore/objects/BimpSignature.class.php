@@ -1019,8 +1019,8 @@ class BimpSignature extends BimpObject
 
         $errors = array();
         if ($this->isObjectValid($errors, $obj)) {
-            if (method_exists($obj, 'displayDocExtraInfos')) {
-                $extra_infos = $obj->displayDocExtraInfos($this->getData('doc_type'));
+            if (method_exists($obj, 'displaySignatureDocExtraInfos')) {
+                $extra_infos = $obj->displaySignatureDocExtraInfos($this->getData('doc_type'));
 
                 if ($extra_infos) {
                     $html .= '<br/>' . $extra_infos;

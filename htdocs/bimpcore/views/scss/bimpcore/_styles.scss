@@ -1019,6 +1019,7 @@ i.iconRight {
 
     &.foldable {
         & > .array_content_caption {
+            display: inline-block;
             cursor: pointer;
 
             & > span.title:after {
@@ -1030,6 +1031,7 @@ i.iconRight {
         }
 
         & > .folding_buttons {
+            display: inline-block;
             margin: 5px 0;
 
             & > span.open_all,

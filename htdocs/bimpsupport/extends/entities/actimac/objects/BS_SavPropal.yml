@@ -1,8 +1,0 @@
-# Entité : actimac
-
-fields: 
-    # normalement pas nécessaire mais bug à résoudre. 
-    replaced_ref: unset
-    prime: unset
-    prime2: unset
-    expertise: unset

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bl_inventory_det` ADD `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;

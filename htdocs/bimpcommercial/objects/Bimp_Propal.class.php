@@ -2313,4 +2313,62 @@ class Bimp_Propal extends Bimp_PropalTemp
     {
         return 1;
     }
+
+    public function displaySignatureDocExtraInfos($doc_type)
+    {
+        $html = '';
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if ($doc_type == 'devis') {
+                $lines = $this->getLines();
+
+                if (count($lines)) {
+                    $html .= '<table class="bimp_list_table">';
+                    $html .= '<thead>';
+                    $html .= '<tr>';
+                    $html .= '<th>Désignation</th>';
+                    $html .= '<th>Qté</th>';
+                    $html .= '<th>P.U. HT</th>';
+                    $html .= '<th>Tx. TVA</th>';
+                    $html .= '<th>Remise</th>';
+                    $html .= '<th>Total TTC</th>';
+                    $html .= '</tr>';
+                    $html .= '</thead>';
+
+                    $html .= '<tbody>';
+
+                    foreach ($lines as $line) {
+                        $html .= '<tr>';
+
+                        if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
+                            $html .= '<td colspan="99">' . $line->displayLineData('desc', 0, 'default', true) . '</td>';
+                        } else {
+                            $html .= '<td>' . $line->displayLineData('desc_light', 0, 'default', true) . '</td>';
+                            $html .= '<td>' . $line->displayLineData('qty', 0, 'default', true) . '</td>';
+                            $html .= '<td>' . $line->displayLineData('pu_ht', 0, 'default', true) . '</td>';
+                            $html .= '<td>' . $line->displayLineData('tva_tx', 0, 'default', true) . '</td>';
+                            $html .= '<td>' . $line->displayLineData('remise', 0, 'default', true) . '</td>';
+                            $html .= '<td>' . $line->displayLineData('total_ttc', 0, 'default', true) . '</td>';
+                        }
+
+                        $html .= '</tr>';
+                    }
+
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                }
+                
+                $html .= '<div style="margin-top: 15px; text-align: right; font-weight: bold; font-size: 14px">';
+                $html .= 'Total TTC : ' . BimpTools::displayMoneyValue($this->getTotalTtc());
+                $html .= '</div>';
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+        return $html;
+    }
 }

@@ -146,8 +146,10 @@ foreach ($rows as $r) {
 
         if (!$id_contact) {
             echo '<span class="danger">FAIL - ' . $bdb->err() . '</span>';
+            $nFails++;
         } else {
             echo ' - <span class="success">[OK]</span> #' . $id_contact;
+            $nOk++;
         }
 
         break;

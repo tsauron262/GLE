@@ -279,7 +279,7 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
                 }
 
                 $end_time = time();
-                $bimp_debug = 'END EXEC #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ') => '($end_time - $begin_time) . ' sec.' . "\n";
+                $bimp_debug = 'END EXEC #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ') => ' . ($end_time - $begin_time) . ' sec.' . "\n";
                 file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
                 echo " - run_jobs " . $resultstring . " result = " . $result;
 

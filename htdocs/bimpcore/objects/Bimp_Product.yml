@@ -1306,14 +1306,15 @@ searches:
             - REPLACE(ROUND(a.price,2),'.',',') as price
             - a.stock
             - fpl.stockFourn as stockFournL
+            - a.tosell
         label_syntaxe: '<ref> - <label> - <price> € HT - Stock: [REDIFNEG]<stock>[/REDIFNEG] - Stock LDLC : <stockFournL>'
         order_by: rowid
         order_way: desc
         
     tosell: 
         extends: default
-        filters: 
-            a.tosell: 1
+        disabled: 
+            tosell: 1
             
     tobuy: 
         extends: default

@@ -55,10 +55,10 @@ class BimpDocumentPDF extends BimpModelPDF
         global $conf;
 
         // Todo : réporganiser tout ça... 
-        if (BimpCore::isEntity('actimac')) {
-            // Temporaire...
-            $logo_file = DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/actimac/logo_actimag_sav.png';
-        } else {
+//        if (BimpCore::isEntity('actimac')) {
+//            // Temporaire...
+//            $logo_file = DOL_DOCUMENT_ROOT . '/bimpcore/extends/entities/actimac/logo_actimag_sav.png';
+//        } else {
             $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
             if ($this->file_logo != '' && is_file($conf->mycompany->dir_output . '/logos/' . $this->file_logo)) {
                 $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->file_logo;
@@ -84,7 +84,7 @@ class BimpDocumentPDF extends BimpModelPDF
                         $logo_file = $testFile;
                 }
             }
-        }
+//        }
 
 
         $logo_width = 0;

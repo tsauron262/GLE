@@ -2152,6 +2152,9 @@ function displayInputChoices($input, choices, onItemSelected) {
                 if (card) {
                     html += ' bs-popover';
                 }
+                if (typeof (choices[i].disabled) !== 'undefined' && choices[i].disabled) {
+                    html += ' disabled';
+                }
                 html += '"';
                 if (card) {
                     data['toggle'] = 'popover';
@@ -2223,7 +2226,8 @@ function loadSearchObjectResults($input, idx) {
                                             data: {
                                                 value: result.results[i].id
                                             },
-                                            card: result.results[i].card
+                                            card: result.results[i].card,
+                                            disabled: result.results[i].disabled
                                         });
                                     }
 

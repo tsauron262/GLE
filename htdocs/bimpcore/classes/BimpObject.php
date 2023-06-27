@@ -1055,14 +1055,14 @@ class BimpObject extends BimpCache
                         if(!$disabled){
                             $results[(int) $r[$primary]] = array(
                                 'id'    => (int) $r[$primary],
-                                'label' => $label.'mm',
+                                'label' => $label,
                                 'card'  => $card_html
                             );
                         }
                         else{
                             $resultsDisabled[(int) $r[$primary]] = array(
                                 'id'    => (int) $r[$primary],
-                                'label' => $label.'mm',
+                                'label' => $label,
                                 'card'  => $card_html,
                                 'disabled' => 1
                             );

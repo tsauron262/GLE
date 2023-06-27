@@ -152,7 +152,7 @@ foreach ($rows as $r) {
             $nOk++;
         }
 
-        break;
+//        break;
     } else {
         echo '<span class="danger">Client non trouvé</span>';
     }

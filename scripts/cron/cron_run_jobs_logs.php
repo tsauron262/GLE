@@ -261,6 +261,7 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
                 exit(-1);
             }
             if (!$cronjob->processing) {
+                $begin_time = time();
                 $bimp_debug = 'Exec #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ')' . "\n";
                 file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
                 // Execute job
@@ -277,6 +278,9 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
                     $resultstring = 'OK';
                 }
 
+                $end_time = time();
+                $bimp_debug = 'END EXEC #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ') => '($end_time - $begin_time) . ' sec.' . "\n";
+                file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
                 echo " - run_jobs " . $resultstring . " result = " . $result;
 
                 // We re-program the next execution and stores the last execution time for this job

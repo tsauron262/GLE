@@ -8,7 +8,7 @@ set_time_limit(0);
 
 ignore_user_abort(0);
 
-top_htmlhead('', 'IMPORT CLIENTS', 0, 0, array(), array());
+top_htmlhead('', 'IMPORT CONTACTS', 0, 0, array(), array());
 
 echo '<body>';
 

@@ -1438,16 +1438,16 @@ class Bimp_Client extends Bimp_Societe
 
         // Atradius: 
 
-        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
-        $api = BimpAPI::getApiInstance('atradius');
-        if ($api && $api->isApiOk()) {
+//        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+//        $api = BimpAPI::getApiInstance('atradius');
+//        if ($api && $api->isApiOk()) {
             $tabs[] = array(
                 'id'            => 'client_atradius_list_tab',
                 'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
             );
-        }
+//        }
 
         $html = BimpRender::renderNavTabs($tabs, 'card_view');
         $html .= $this->renderNotesList();

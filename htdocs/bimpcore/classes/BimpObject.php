@@ -1071,7 +1071,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
-        return BimpTools::merge_array($results, $resultsDisabled);
+        return BimpTools::merge_array($results, $resultsDisabled, true);
     }
 
     public function getLinkFields($with_card = true)

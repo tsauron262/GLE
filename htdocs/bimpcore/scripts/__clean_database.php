@@ -34,44 +34,54 @@ if (!$action) {
 
     $path = pathinfo(__FILE__);
 
-    $nb = (int) $bdb->getCount('product', '1', 'rowid');
-    if ($nb) {
-        $action['del_prods'] = 'Suppr. produits (' . $nb . ')';
-    }
-
-    $nb = (int) $bdb->getCount('be_equipment');
-    if ($nb) {
-        $action['del_eqs'] = 'Suppr. équipements (' . $nb . ')';
-    }
-    
     $nb = (int) $bdb->getCount('bs_sav');
     if ($nb) {
-        $action['del_savs'] = 'Suppr. SAVs (' . $nb . ')';
+        $actions['del_savs'] = 'Suppr. SAVs (' . $nb . ')';
     }
-    
+
     $nb = (int) $bdb->getCount('propal', '1', 'rowid');
     if ($nb) {
-        $action['del_propales'] = 'Suppr. propales (' . $nb . ')';
+        $actions['del_propales'] = 'Suppr. propales (' . $nb . ')';
     }
-    
+
     $nb = (int) $bdb->getCount('commande', '1', 'rowid');
     if ($nb) {
-        $action['del_commandes'] = 'Suppr. commandes (' . $nb . ')';
+        $actions['del_commandes'] = 'Suppr. commandes (' . $nb . ')';
     }
-    
+
     $nb = (int) $bdb->getCount('facture', '1', 'rowid');
     if ($nb) {
-        $action['del_facs'] = 'Suppr. factures (' . $nb . ')';
+        $actions['del_facs'] = 'Suppr. factures (' . $nb . ')';
     }
-    
+
     $nb = (int) $bdb->getCount('commande_fournisseur', '1', 'rowid');
     if ($nb) {
-        $action['del_commandes_fourn'] = 'Suppr. commandes fourn (' . $nb . ')';
+        $actions['del_commandes_fourn'] = 'Suppr. commandes fourn (' . $nb . ')';
     }
-    
+
     $nb = (int) $bdb->getCount('facture_fourn', '1', 'rowid');
     if ($nb) {
-        $action['del_facs_fourn'] = 'Suppr. factures fourn (' . $nb . ')';
+        $actions['del_facs_fourn'] = 'Suppr. factures fourn (' . $nb . ')';
+    }
+    
+    $nb = (int) $bdb->getCount('be_equipment');
+    if ($nb) {
+        $actions['del_eqs'] = 'Suppr. équipements (' . $nb . ')';
+    }
+
+    $nb = (int) $bdb->getCount('product', '1', 'rowid');
+    if ($nb) {
+        $actions['del_prods'] = 'Suppr. produits (' . $nb . ')';
+    }
+    
+    $nb = (int) $bdb->getCount('socpeople', '1', 'rowid');
+    if ($nb) {
+        $actions['del_contacts'] = 'Suppr. contacts (' . $nb . ')';
+    }
+
+    $nb = (int) $bdb->getCount('societe', '1', 'rowid');
+    if ($nb) {
+        $actions['del_socs'] = 'Suppr. tiers (' . $nb . ')';
     }
 
     foreach ($actions as $code => $label) {
@@ -85,6 +95,272 @@ if (!$action) {
 }
 
 BimpCore::setMaxExecutionTime(2400);
+$html = '';
+$nOk = 0;
+$nFails = 0;
+$errors = array();
+
+switch ($action) {
+    case 'del_contacts':
+        $rows = $bdb->getRows('socpeople', '1', 10000, 'array', array('rowid'));
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $err = $obj->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Contact #' . $r['rowid']);
+                        $nFails++;
+                    } else {
+                        $nOk++;
+                    }
+                } else {
+                    $errors[] = 'Contact #' . $r['rowid'] . ' non trouvé';
+                    $nFails++;
+                }
+            }
+        } else {
+            $errors[] = $bdb->err();
+            $nFails++;
+        }
+        break;
+
+    case 'del_socs':
+        $rows = $bdb->getRows('societe', '1', 10000, 'array', array('rowid'));
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $err = $obj->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Soc #' . $r['rowid']);
+                        $nFails++;
+                    }else {
+                        $nOk++;
+                    }
+                } else {
+                    $errors[] = 'Soc #' . $r['rowid'] . ' non trouvée';
+                    $nFails++;
+                }
+            }
+        } else {
+            $errors[] = $bdb->err();
+            $nFails++;
+        }
+        break;
+
+    case 'del_prods':
+        $rows = $bdb->getRows('product', '1', 10000, 'array', array('rowid'));
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $err = $obj->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Prod #' . $r['rowid']);
+                        $nFails++;
+                    }else {
+                        $nOk++;
+                    }
+                } else {
+                    $errors[] = 'Prod #' . $r['rowid'] . ' non trouvé';
+                    $nFails++;
+                }
+            }
+        } else {
+            $errors[] = $bdb->err();
+            $nFails++;
+        }
+        break;
+
+    case 'del_eqs':
+        $rows = $bdb->getRows('be_equipment', '1', 10000, 'array', array('id'));
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $r['id']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $err = $obj->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Equip #' . $r['id']);
+                        $nFails++;
+                    }else {
+                        $nOk++;
+                    }
+                } else {
+                    $errors[] = 'Equip #' . $r['id'] . ' non trouvé';
+                    $nFails++;
+                }
+            }
+        } else {
+            $errors[] = $bdb->err();
+            $nFails++;
+        }
+        break;
+
+    case 'del_savs':
+        $rows = $bdb->getRows('bs_sav', '1', 10000, 'array', array('id'));
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $r['id']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $err = $obj->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'SAV #' . $r['id']);
+                        $nFails++;
+                    }else {
+                        $nOk++;
+                    }
+                } else {
+                    $errors[] = 'SAV #' . $r['id'] . ' non trouvé';
+                    $nFails++;
+                }
+            }
+        } else {
+            $errors[] = $bdb->err();
+            $nFails++;
+        }
+        break;
+
+    case 'del_propales':
+        $rows = $bdb->getRows('propal', '1', 10000, 'array', array('rowid'));
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $err = $obj->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Propale #' . $r['rowid']);
+                        $nFails++;
+                    }else {
+                        $nOk++;
+                    }
+                } else {
+                    $errors[] = 'Propale #' . $r['rowid'] . ' non trouvée';
+                    $nFails++;
+                }
+            }
+        } else {
+            $errors[] = $bdb->err();
+            $nFails++;
+        }
+        break;
+
+    case 'del_commandes':
+        $rows = $bdb->getRows('commande', '1', 10000, 'array', array('rowid'));
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $err = $obj->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Commande #' . $r['rowid']);
+                        $nFails++;
+                    }else {
+                        $nOk++;
+                    }
+                } else {
+                    $errors[] = 'Commande #' . $r['rowid'] . ' non trouvée';
+                    $nFails++;
+                }
+            }
+        } else {
+            $errors[] = $bdb->err();
+            $nFails++;
+        }
+        break;
+
+    case 'del_facs':
+        $rows = $bdb->getRows('facture', '1', 10000, 'array', array('rowid'));
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $err = $obj->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Facture #' . $r['rowid']);
+                        $nFails++;
+                    }else {
+                        $nOk++;
+                    }
+                } else {
+                    $errors[] = 'Facture #' . $r['rowid'] . ' non trouvée';
+                    $nFails++;
+                }
+            }
+        } else {
+            $errors[] = $bdb->err();
+            $nFails++;
+        }
+        break;
+
+    case 'del_commandes_fourn':
+        $rows = $bdb->getRows('commande_fournisseur', '1', 10000, 'array', array('rowid'));
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $err = $obj->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Commande fourn #' . $r['rowid']);
+                        $nFails++;
+                    }else {
+                        $nOk++;
+                    }
+                } else {
+                    $errors[] = 'Commande fourn #' . $r['rowid'] . ' non trouvée';
+                    $nFails++;
+                }
+            }
+        } else {
+            $errors[] = $bdb->err();
+            $nFails++;
+        }
+        break;
+
+    case 'del_facs_fourn':
+        $rows = $bdb->getRows('facture_fourn', '1', 10000, 'array', array('rowid'));
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $err = $obj->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Facture fourn #' . $r['rowid']);
+                        $nFails++;
+                    }else {
+                        $nOk++;
+                    }
+                } else {
+                    $errors[] = 'Facture fourn #' . $r['rowid'] . ' non trouvée';
+                    $nFails++;
+                }
+            }
+        } else {
+            $errors[] = $bdb->err();
+            $nFails++;
+        }
+        break;
+}
 
 echo '<br/>';
 echo $nOk . 'OK<br/>';

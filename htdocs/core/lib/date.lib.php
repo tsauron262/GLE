@@ -122,6 +122,7 @@ function dol_time_plus_duree($time, $duration_value, $duration_unit, $ruleforend
 {
 	global $conf;
         
+        /*moddrsi*/
         // Pour debug, à suppr. : 
         if (!is_int($time)) {
             if (preg_match('/^[0-9]+$/', $time)) {
@@ -137,7 +138,7 @@ function dol_time_plus_duree($time, $duration_value, $duration_unit, $ruleforend
                 $time = strtotime($time);
             }
         }
-        // ----
+        /*fmoddrsi*/
 
 	if ($duration_value == 0) {
 		return $time;

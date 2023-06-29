@@ -55,10 +55,6 @@ $rows = array();
 $lines = file($dir . $file_name, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 foreach ($lines as $idx => $line) {
-    if (!$idx) {
-        continue;
-    }
-
     $data = str_getcsv($line, ';');
     $row = array();
 

@@ -1,5 +1,4 @@
 TRUNCATE TABLE `llx_bank`;
-TRUNCATE TABLE `llx_bank_account`;
 TRUNCATE TABLE `llx_bank_url`;
 
 TRUNCATE TABLE `llx_bc_caisse_mvt`;

@@ -3740,8 +3740,9 @@ class Bimp_Facture extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
+            $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+
             if ($this->field_exists('applecare_data')) {
-                $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
                 $ac_data = $this->getData('applecare_data');
 
                 if (isset($ac_data['totals_by_br']) && !empty($ac_data['totals_by_br'])) {

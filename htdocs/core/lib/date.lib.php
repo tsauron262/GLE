@@ -121,6 +121,24 @@ function getServerTimeZoneInt($refgmtdate = 'now')
 function dol_time_plus_duree($time, $duration_value, $duration_unit, $ruleforendofmonth = 0)
 {
 	global $conf;
+        
+        /*moddrsi*/
+        // Pour debug, à suppr. : 
+        if (!is_int($time)) {
+            if (preg_match('/^[0-9]+$/', $time)) {
+                $time = (int) $time;
+            } else {
+                if (!defined('BIMP_LIB')) {
+                    require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+                }
+                BimpCore::addlog('ERREUR timestamp', 4, 'bimpcore', null, array(
+                    'time' => '"' . $time .'"'
+                ));
+                
+                $time = strtotime($time);
+            }
+        }
+        /*fmoddrsi*/
 
 	if ($duration_value == 0) {
 		return $time;

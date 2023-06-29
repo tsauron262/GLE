@@ -184,7 +184,17 @@ class BimpContratAuto {
                     }
                 }
                 
-                $statut = $this->checkStatut($line->statut, dol_time_plus_duree($line->date_ouverture, $nb, $unite));
+                // Debug : $date_ouverture nulle génère erreur fatale => Vérifier si ok. 
+                if ($date_ouverture == '') {
+                    $date_ouverture = $line->date_ouverture_prevue;
+                } 
+                
+                if ($date_ouverture) {
+                    $statut = $this->checkStatut($line->statut, dol_time_plus_duree(/*moddrsi*//*$line->date_ouverture*/$date_ouverture/*fmoddrsi*/, $nb, $unite));
+                } else {
+                    $statut = 1;
+                }
+                // ---
 
                 $services[] = array(
                     'id_product' => $line->id, // attention l'id n'est pas toujours définit

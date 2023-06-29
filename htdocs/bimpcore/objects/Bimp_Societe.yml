@@ -1115,8 +1115,8 @@ forms:
                 display_if:
                     field_name: has_already_code_comptable_client
                     show_values: 1
-            outstanding_limit_atradius:
-                field: outstanding_limit_atradius
+#            outstanding_limit_atradius:
+#                field: outstanding_limit_atradius
             outstanding_limit: 
                 field: outstanding_limit
             outstanding_limit_credit_safe:

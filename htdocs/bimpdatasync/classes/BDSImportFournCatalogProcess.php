@@ -279,6 +279,13 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     if ($line['ean'] && $prod_data['barcode'] != $line['ean']) {
                         $new_prod_data['barcode'] = $line['ean'];
                     }
+                    
+                    if(stripos($prod_data['ref'], 'INC-') === 0){
+                        if(stripos($line['ean'], $line['ref_manuf']) === false){
+                            $newRef = substr($line['brand'], 0, 3).'-'.$line['ref_manuf'];
+                            $new_prod_data['ref'] = $newRef;
+                        }
+                    }
 
                     if (!empty($new_prod_data)) {
                         $this->db->update('product', $new_prod_data, 'rowid = ' . $id_product);

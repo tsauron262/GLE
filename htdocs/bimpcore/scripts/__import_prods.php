@@ -41,8 +41,14 @@ if ((int) BimpTools::getValue('delete', 0)) {
             $p = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $r['rowid']);
 
             if (BimpObject::objectLoaded($p)) {
+                $bdb->delete('commandedet', 'fk_product = ' . $p->id);
+                $bdb->delete('propaldet', 'fk_product = ' . $p->id);
+                $bdb->delete('facturedet', 'fk_product = ' . $p->id);
+                $bdb->delete('facture_fourn_det', 'fk_product = ' . $p->id);
+                $bdb->delete('commande_fournisseurdet', 'fk_product = ' . $p->id);
                 $bdb->delete('stock_mouvement', 'fk_product = ' . $p->id);
                 $bdb->delete('product_stock', 'fk_product = ' . $p->id);
+                $bdb->delete('br_reservation', 'id_product = ' . $p->id);
 
                 $eqs = BimpCache::getBimpObjectObjects('bimpequipment', 'Equipment', array(
                             'id_product' => $p->id
@@ -142,10 +148,6 @@ foreach ($lines as $idx => $line) {
     $refs_fourn[$data[0]] = $data[1];
 }
 
-echo 'Refs fourn: <pre>';
-print_r($refs_fourn);
-exit;
-
 if (!(int) BimpTools::getValue('exec', 0)) {
     if (is_array($rows) && count($rows)) {
         echo count($rows) . ' élément(s) à traiter <br/><br/>';
@@ -161,7 +163,7 @@ if (!(int) BimpTools::getValue('exec', 0)) {
     exit;
 }
 
-import($rows, $refs, BimpTools::getValue('test', 0));
+import($rows, $refs_fourn);
 
 function cleanPrice($price)
 {
@@ -188,7 +190,9 @@ function import($rows, $refs_fourn)
 
     $apple_keywords = array('apple', 'iphone', 'ipad', 'mac', 'ipod');
     $done = array();
+    $i = 0;
     foreach ($rows as $r) {
+        $i++;
         $is_apple = false;
         foreach ($apple_keywords as $kw) {
             if (strpos(strtolower($r['com2']), $kw) !== false) {
@@ -211,6 +215,7 @@ function import($rows, $refs_fourn)
         echo '<strong>' . $r['ref'] . '</strong>: ';
 
         if ($r['code_famille'] == 'PIECESAV') {
+            continue;
             echo ' - Ajout Pièce SAV ';
             // Ajout Pièce SAV : 
             $code_centre = '';
@@ -243,7 +248,6 @@ function import($rows, $refs_fourn)
                 echo '<span class="info">Existe déjà</span>';
             }
         } else {
-            continue;
             // Ajout produit : 
             $tva_tx = 20;
 
@@ -482,8 +486,6 @@ function import($rows, $refs_fourn)
                 }
             }
         }
-
-//        break;
     }
 
     echo '<br/><br/> NON CREES: <br/><br/>';

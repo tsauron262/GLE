@@ -278,6 +278,7 @@ fields:
         label: Litige
         dol_extra_field: 1
         type: bool
+        default_value: 0
     chorus_status: 
         label: Statut export chorus
         dol_extra_field: 1

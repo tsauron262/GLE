@@ -15,10 +15,8 @@ INSERT INTO llx_product_extrafields (fk_object, code_config,type2,serialisable,g
 INSERT INTO `llx_product_remise_arriere` (id_product, type, nom, value, active) 
 SELECT p.rowid, type, nom, value, active FROM ERP_PROD_BIMP.llx_product_remise_arriere e, llx_product p WHERE p.id_bimp = e.id_product AND e.type = 'CRT';
 
---   `annexe` varchar(255) DEFAULT NULL
+
 --   `serialisable2` int(1) DEFAULT NULL,
---   `ref_constructeur` int(255) DEFAULT NULL,
---   `validate` int(1) DEFAULT NULL,
 --   `zone_pr` varchar(255) DEFAULT NULL,
 --   `cto` varchar(255) DEFAULT NULL,
 --   `type_compta` text DEFAULT NULL,

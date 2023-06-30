@@ -305,3 +305,6 @@ params:
                       label: Logguer les doublons SQL
                       type: bool
                       def: 0
+                      
+    ftp_dir:
+        label: Dossier sur le FTP

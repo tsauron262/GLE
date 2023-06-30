@@ -17,7 +17,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
         $url = "ftp-edi.groupe-ldlc.com";
         $login = "bimp-erp";
         $mdp = "Yu5pTR?(3q99Aa";
-        $folder = "/FTP-BIMP-ERP/tracing/";
+        $folder = "/".BimpCore::getConf('ftp_dir')."/tracing/";
 
 //            $url = "exportftp.techdata.fr";
 //            $login = "bimp";
@@ -162,7 +162,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
 
     public function traitePdfFactureFtp($conn, $facNumber)
     {
-        $folder = "/FTP-BIMP-ERP/invoices";
+        $folder = "/".BimpCore::getConf('ftp_dir')."/invoices";
         $tab = ftp_nlist($conn, $folder);
         $errors = array();
 
@@ -344,7 +344,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                         } else {
                             ftp_pasv($conn, 0);
                         }
-                        if (!ftp_put($conn, "/FTP-BIMP-ERP/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
+                        if (!ftp_put($conn, "/".BimpCore::getConf('ftp_dir')."/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
                             $errors[] = 'Probléme d\'upload du fichier';
                         else {
                             //                        global $user;

@@ -234,6 +234,3 @@ params:
     export_only_fact:
         label: Exporté que les factures
         def: 0
-    pathFtpCegid:
-        label: Path FTP Cegid
-        def: /FTP-BIMP-ERP/accounting

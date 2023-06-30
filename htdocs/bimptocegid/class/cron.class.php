@@ -47,7 +47,7 @@
         public $output = '';
         
         public function __construct() {
-            $this->ldlc_ftp_path = BimpCore::getConf('pathFtpCegid', '', 'bimptocegid');
+            $this->ldlc_ftp_path = "/".BimpCore::getConf('ftp_dir').'/accounting';
             
             if($this->modeTest) {
                 $this->ldlc_ftp_path .= 'test/';

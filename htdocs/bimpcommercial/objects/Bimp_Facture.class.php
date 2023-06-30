@@ -1318,10 +1318,20 @@ class Bimp_Facture extends BimpComm
                                 'id_facture_to_correct' => (int) $this->id,
                                 'fk_account'            => (int) $this->getData('fk_account'),
                                 'entrepot'              => (int) $this->getData('entrepot'),
+                                'libelle'               => $this->getData('libelle'),
+                                'expertise'             => $this->getData('expertise'),
                                 'centre'                => $this->getData('centre'),
                                 'ef_type'               => $this->getData('ef_type'),
                                 'fk_cond_reglement'     => $this->getData('fk_cond_reglement'),
-                                'fk_mode_reglement'     => $this->getData('fk_mode_reglement')
+                                'fk_mode_reglement'     => $this->getData('fk_mode_reglement'),
+                                'douane_number'         => $this->getData('douane_number'),
+                                'zone_vente'            => $this->getData('zone_vente'),
+                                'prime'                 => $this->getData('prime'),
+                                'prime2'                => $this->getData('prime2'),
+                                'model_pdf'             => $this->getData('model_pdf'),
+                                'rib_client'            => $this->getData('rib_client'),
+                                'note_private'          => $this->getData('note_private'),
+                                'note_public'           => $this->getData('note_public')
                             )
                         );
                         $onclick = $facture->getJsLoadModalForm('default', 'Créer un avoir', $values, null, 'redirect');
@@ -1342,10 +1352,20 @@ class Bimp_Facture extends BimpComm
                             'id_avoir_to_refacture' => (int) $this->id,
                             'fk_account'            => (int) $this->getData('fk_account'),
                             'entrepot'              => (int) $this->getData('entrepot'),
+                            'libelle'               => $this->getData('libelle'),
+                            'expertise'             => $this->getData('expertise'),
                             'centre'                => $this->getData('centre'),
                             'ef_type'               => $this->getData('ef_type'),
                             'fk_cond_reglement'     => $this->getData('fk_cond_reglement'),
-                            'fk_mode_reglement'     => $this->getData('fk_mode_reglement')
+                            'fk_mode_reglement'     => $this->getData('fk_mode_reglement'),
+                            'douane_number'         => $this->getData('douane_number'),
+                            'zone_vente'            => $this->getData('zone_vente'),
+                            'prime'                 => $this->getData('prime'),
+                            'prime2'                => $this->getData('prime2'),
+                            'model_pdf'             => $this->getData('model_pdf'),
+                            'rib_client'            => $this->getData('rib_client'),
+                            'note_private'          => $this->getData('note_private'),
+                            'note_public'           => $this->getData('note_public')
                         )
                     );
                     $onclick = $facture->getJsLoadModalForm('refacture', 'Refacturation de l\\\'avoir ' . $this->getRef(), $values, null, 'redirect');
@@ -3740,8 +3760,9 @@ class Bimp_Facture extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
+            $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+
             if ($this->field_exists('applecare_data')) {
-                $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
                 $ac_data = $this->getData('applecare_data');
 
                 if (isset($ac_data['totals_by_br']) && !empty($ac_data['totals_by_br'])) {
@@ -6439,10 +6460,6 @@ class Bimp_Facture extends BimpComm
                         $errors[] = 'Facture à corriger invalide';
                     } else {
                         $this->set('fk_facture_source', $id_fac_src);
-
-                        if ($this->field_exists('expertise')) {
-                            $this->set('expertise', $facture->getData('expertise'));
-                        }
 
                         if (!count($errors)) {
                             $linked_objects = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db);

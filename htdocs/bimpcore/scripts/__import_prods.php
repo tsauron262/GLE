@@ -26,34 +26,59 @@ if (!$user->admin) {
     exit;
 }
 
-global $bdb, $keys, $fourns;
+if ((int) BimpTools::getValue('delete', 0)) {
+    $bdb = new BimpDb($db);
+    $rows = $bdb->getRows('product', 'import_actimac = 1', null, 'array', array('rowid'));
 
-// ActiReference, Designation, EanCode, CodeFamille, LibFamille, Serialisable, Quantity, PriceVatOff, PriceVatOn, BuyingPriceVatOff, EcoTaxVatOff, CreatedAt, UpdatedAt, CodeDépot, LibDepot, Com1, Com2, Com3, Com4
-//$products = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Product', array(
-//            'rowid' => array(
-//                'operator' => '>',
-//                'value'    => 4
-//            )
-//        ));
-//
-//if (count($products)) {
-//    echo 'SUPPR DES PRODS';
-//    $n = 0;
-//    foreach ($products as $p) {
-//        $err = $p->delete($w, true);
-//
-//        if (count($err)) {
-//            echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($err, '#' . $p->id));
-//        } else {
-//            $n++;
-//        }
-//    }
-//
-//    echo $n . ' prod(s) suppr';
-//    exit;
-//}
-//
-//die('no prods');
+    $nOk = 0;
+    $nFails = 0;
+    $nEqs = 0;
+
+    if (empty($rows)) {
+        echo 'Aucun prod à suppr';
+    } else {
+        foreach ($rows as $r) {
+            $p = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $r['rowid']);
+
+            if (BimpObject::objectLoaded($p)) {
+                $bdb->delete('commandedet', 'fk_product = ' . $p->id);
+                $bdb->delete('propaldet', 'fk_product = ' . $p->id);
+                $bdb->delete('facturedet', 'fk_product = ' . $p->id);
+                $bdb->delete('facture_fourn_det', 'fk_product = ' . $p->id);
+                $bdb->delete('commande_fournisseurdet', 'fk_product = ' . $p->id);
+                $bdb->delete('stock_mouvement', 'fk_product = ' . $p->id);
+                $bdb->delete('product_stock', 'fk_product = ' . $p->id);
+                $bdb->delete('br_reservation', 'id_product = ' . $p->id);
+
+                $eqs = BimpCache::getBimpObjectObjects('bimpequipment', 'Equipment', array(
+                            'id_product' => $p->id
+                ));
+
+                foreach ($eqs as $eq) {
+                    $eq_err = $eq->delete($w, true);
+                    if (!count($eq_err)) {
+                        $nEqs++;
+                    }
+                }
+
+                $err = $p->delete($w, true);
+                if (count($err)) {
+                    echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($err, 'Prod #' . $p->id));
+                    $nFails++;
+                } else {
+                    $nOk++;
+                }
+            }
+        }
+
+        echo '<br/><br/>';
+        echo 'OK : ' . $nOk . '<br/>';
+        echo 'Eq del: ' . $nEqs . '<br/>';
+        echo 'FAILS : ' . $nFails . '<br/>';
+    }
+    exit;
+}
+global $bdb, $keys, $fourns;
 
 $keys = array(
     'ref'           => 0,
@@ -93,10 +118,6 @@ $rows = array();
 $lines = file($dir . $file_name, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 foreach ($lines as $idx => $line) {
-    if (!$idx) {
-        continue;
-    }
-
     $data = str_getcsv($line, ';');
     $row = array();
 
@@ -114,6 +135,19 @@ foreach ($lines as $idx => $line) {
 //print_r($rows);
 //exit;
 
+$refs_fourn = array();
+$file_name = 'prods_refs_matches.csv';
+if (!file_exists($dir . $file_name)) {
+    echo BimpRender::renderAlerts('Le fichier "' . $dir . $file_name . '" n\'existe pas');
+    exit;
+}
+
+$lines = file($dir . $file_name, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+foreach ($lines as $idx => $line) {
+    $data = str_getcsv($line, ';');
+    $refs_fourn[$data[0]] = $data[1];
+}
+
 if (!(int) BimpTools::getValue('exec', 0)) {
     if (is_array($rows) && count($rows)) {
         echo count($rows) . ' élément(s) à traiter <br/><br/>';
@@ -129,7 +163,7 @@ if (!(int) BimpTools::getValue('exec', 0)) {
     exit;
 }
 
-import($rows, $refs, BimpTools::getValue('test', 0));
+import($rows, $refs_fourn);
 
 function cleanPrice($price)
 {
@@ -140,8 +174,9 @@ function cleanPrice($price)
     return (float) $price;
 }
 
-function import($rows, $refs)
+function import($rows, $refs_fourn)
 {
+    $id_fourn_ldlc = 6;
     $failed = array();
     global $bdb;
 
@@ -151,20 +186,19 @@ function import($rows, $refs)
     $label_move = 'Import CSV';
 
     BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
+    BimpObject::loadClass('bimpapple', 'InternalStock');
 
     $apple_keywords = array('apple', 'iphone', 'ipad', 'mac', 'ipod');
     $done = array();
+    $i = 0;
     foreach ($rows as $r) {
+        $i++;
         $is_apple = false;
         foreach ($apple_keywords as $kw) {
             if (strpos(strtolower($r['com2']), $kw) !== false) {
                 $is_apple = true;
                 break;
             }
-        }
-        continue;
-        if ($r['code_famille'] == 'PIECESAV') {
-            continue;
         }
 
         if (isset($done[$r['code_stock']][$r['ref']])) {
@@ -179,225 +213,279 @@ function import($rows, $refs)
 
         echo '<br/><br/>';
         echo '<strong>' . $r['ref'] . '</strong>: ';
-        $tva_tx = 20;
 
-        $errors = array();
-        $id_famille = 0;
-        if (!isset($familles[$r['code_famille']])) {
-            $id_famille = (int) $bdb->getValue('c_famille_produit', 'id', 'code = \'' . $r['code_famille'] . '\'');
+        if ($r['code_famille'] == 'PIECESAV') {
+            continue;
+            echo ' - Ajout Pièce SAV ';
+            // Ajout Pièce SAV : 
+            $code_centre = '';
+            switch ($r['code_stock']) {
+                case 22: // SAVM
+                    $code_centre = 'MV';
+                    break;
+                default:
+                    echo '<span class="danger">Code entrepot invalide pour pièce SAV : ' . $r['label_stock'] . '</span>';
+                    continue;
+            }
 
-            if ($id_famille) {
-                $familles[$r['code_famille']] = $id_famille;
-            } else {
-                $id_famille = (int) $bdb->insert('c_famille_produit', array(
-                            'code'  => $r['code_famille'],
-                            'label' => $r['label_famille']
-                                ), true);
+            $stock = InternalStock::getStockInstance($code_centre, $r['ref']);
+            if (!BimpObject::objectLoaded($stock)) {
+                $part_errors = array();
+                $stock = BimpObject::createBimpObject('bimpapple', 'InternalStock', array(
+                            'code_centre'   => $code_centre,
+                            'part_number'   => $r['ref'],
+                            'product_label' => $r['label'],
+                            'qty'           => (int) $r['qty'],
+                            'last_pa'       => (float) $r['pa_ht']
+                                ), true, $part_errors);
 
-                if (!$id_famille) {
-                    echo '<span class="danger">';
-                    echo '<br/>Echec de la création de la famille "' . $r['code_famille'] . '" - ' . $bdb->err() . '<br/>';
-                    echo '</span>';
+                if (count($part_errors)) {
+                    echo BimpRender::renderAlerts($part_errors);
                 } else {
-                    $familles[$r['code_famille']] = $id_famille;
+                    echo '<span class="success">OK</span>';
                 }
-            }
-        } else {
-            $id_famille = (int) $familles[$r['code_famille']];
-        }
-
-        $is_apple = false;
-        foreach ($apple_keywords as $kw) {
-            if (strpos(strtolower($r['com2']), $kw) !== false) {
-                $is_apple = true;
-                break;
-            }
-        }
-
-        $ref = ($is_apple ? 'APP-' : 'INC-') . $r['ref'];
-
-        $data = array(
-            'ref'             => $ref,
-            'label'           => $r['label'],
-            'price'           => (float) $r['pu_ht'],
-            'tva_tx'          => $tva_tx,
-            'barcode'         => $r['ean'],
-            'fk_barcode_type' => ($r['ean'] ? 2 : null),
-            'id_famille'      => $id_famille,
-            'deee'            => $r['eco_tax'],
-            'validate'        => 1,
-            'fabricant'       => ($is_apple ? 'APPLE' : ''),
-            'serialisable'    => ((int) $r['serialisable'] === 1 ? 1 : 0),
-            'datec'           => substr($r['date_create'], 0, 19),
-            'import_actimac'  => 1
-        );
-
-        $filters = array();
-
-        if ((string) $r['ean']) {
-            $filters = array(
-                'or_search' => array(
-                    'or' => array(
-                        'ref'     => array($ref, $r['ref']),
-                        'barcode' => $r['ean']
-                    )
-            ));
-        } else {
-            $filters['ref'] = array($ref, $r['ref']);
-        }
-
-        $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', $filters, true);
-
-        if (!BimpObject::objectLoaded($prod)) {
-            // Créa du produit: 
-            $prod = BimpObject::createBimpObject('bimpcore', 'Bimp_Product', $data, true, $errors);
-
-            if (count($errors)) {
-                echo BimpRender::renderAlerts($errors);
-                $failed[] = $r['ref'];
             } else {
-                echo '<span class="success">Créa OK (' . $prod->getLink() . ')</span>';
-            }
-
-            if (!count($errors) && BimpObject::objectLoaded($prod)) {
-                // Créa PA courant: 
-                BimpObject::createBimpObject('bimpcore', 'BimpProductCurPa', array(
-                    'id_product' => $prod->id,
-                    'amount'     => (float) $r['pa_ht']
-                        ), true, $errors);
-
-                if (!count($errors)) {
-                    echo ' - <span class="success">PA courant OK</span>';
-                }
+                echo '<span class="info">Existe déjà</span>';
             }
         } else {
-            if ((int) $prod->getData('import_actimac')) {
-                echo 'Déjà traité ' . $prod->getLink();
-                continue;
-            }
-            $w = array();
-            if ($r['code_famille'] == 'PIECESAV') {
-                // suppr: 
-                $errors = $prod->delete($w, true);
-                if (!count($errors)) {
-                    echo ' - <span class="success">Suppr prod part OK</span>';
+            // Ajout produit : 
+            $tva_tx = 20;
+
+            $errors = array();
+            $id_famille = 0;
+            if (!isset($familles[$r['code_famille']])) {
+                $id_famille = (int) $bdb->getValue('c_famille_produit', 'id', 'code = \'' . $r['code_famille'] . '\'');
+
+                if ($id_famille) {
+                    $familles[$r['code_famille']] = $id_famille;
+                } else {
+                    $id_famille = (int) $bdb->insert('c_famille_produit', array(
+                                'code'  => $r['code_famille'],
+                                'label' => $r['label_famille']
+                                    ), true);
+
+                    if (!$id_famille) {
+                        echo '<span class="danger">';
+                        echo '<br/>Echec de la création de la famille "' . $r['code_famille'] . '" - ' . $bdb->err() . '<br/>';
+                        echo '</span>';
+                    } else {
+                        $familles[$r['code_famille']] = $id_famille;
+                    }
                 }
-                continue;
+            } else {
+                $id_famille = (int) $familles[$r['code_famille']];
             }
 
-            // Maj du produit: 
-            $errors = $prod->validateArray(array(
+            $is_apple = false;
+            foreach ($apple_keywords as $kw) {
+                if (strpos(strtolower($r['com2']), $kw) !== false) {
+                    $is_apple = true;
+                    break;
+                }
+            }
+
+            $ref = ($is_apple ? 'APP-' : 'INC-') . $r['ref'];
+
+            $data = array(
+                'ref'             => $ref,
+                'label'           => $r['label'],
+                'price'           => (float) $r['pu_ht'],
+                'tva_tx'          => $tva_tx,
                 'barcode'         => $r['ean'],
                 'fk_barcode_type' => ($r['ean'] ? 2 : null),
                 'id_famille'      => $id_famille,
-                'fabricant'       => ($is_apple ? 'APPLE' : '')
-            ));
+                'deee'            => $r['eco_tax'],
+                'validate'        => 1,
+                'fabricant'       => ($is_apple ? 'APPLE' : ''),
+                'serialisable'    => ((int) $r['serialisable'] === 1 ? 1 : 0),
+                'datec'           => substr($r['date_create'], 0, 19),
+                'import_actimac'  => 1
+            );
 
-            if (!count($errors)) {
-                $errors = $prod->update($w, true);
+            $filters = array();
+
+            if ((string) $r['ean']) {
+                $filters = array(
+                    'or_search' => array(
+                        'or' => array(
+                            'ref'     => array($ref, $r['ref']),
+                            'barcode' => $r['ean']
+                        )
+                ));
+            } else {
+                $filters['ref'] = array($ref, $r['ref']);
+            }
+
+            $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', $filters, true);
+
+            if (!BimpObject::objectLoaded($prod)) {
+                // Créa du produit: 
+                $prod = BimpObject::createBimpObject('bimpcore', 'Bimp_Product', $data, true, $errors);
+
+                if (count($errors)) {
+                    echo BimpRender::renderAlerts($errors);
+                    $failed[] = $r['ref'];
+                } else {
+                    echo '<span class="success">Créa OK (' . $prod->getLink() . ')</span>';
+                }
+
+                if (!count($errors) && BimpObject::objectLoaded($prod)) {
+                    // Créa PA courant: 
+//                    BimpObject::createBimpObject('bimpcore', 'BimpProductCurPa', array(
+//                        'id_product' => $prod->id,
+//                        'amount'     => (float) $r['pa_ht']
+//                            ), true, $errors);
+//
+//                    if (!count($errors)) {
+//                        echo ' - <span class="success">PA courant OK</span>';
+//                    }
+                    // Créa PA Fourn : 
+                    if (isset($refs_fourn[$r['ref']]) && $refs_fourn[$r['ref']]) {
+                        $pa_err = array();
+                        BimpObject::createBimpObject('bimpcore', 'Bimp_ProductFournisseurPrice', array(
+                            'fk_product' => $prod->id,
+                            'fk_soc'     => $id_fourn_ldlc,
+                            'ref_fourn'  => $refs_fourn[$r['ref']],
+                            'price'      => 0,
+                            'tva_tx'     => 20
+                                ), true, $pa_err);
+
+                        if (count($pa_err)) {
+                            echo BimpRender::renderAlerts($pa_err);
+                        } else {
+                            echo ' - <span class="success">PA FOURN OK</span> ';
+                        }
+                    } else {
+                        echo ' <span class="danger">NO REF FOURN</span> ';
+                    }
+                }
+            } else {
+                if ((int) $prod->getData('import_actimac')) {
+                    echo 'Déjà traité ' . $prod->getLink();
+                    continue;
+                }
+                $w = array();
+                if ($r['code_famille'] == 'PIECESAV') {
+                    // suppr: 
+                    $errors = $prod->delete($w, true);
+                    if (!count($errors)) {
+                        echo ' - <span class="success">Suppr prod part OK</span>';
+                    }
+                    continue;
+                }
+
+                // Maj du produit: 
+                $errors = $prod->validateArray(array(
+                    'barcode'         => $r['ean'],
+                    'fk_barcode_type' => ($r['ean'] ? 2 : null),
+                    'id_famille'      => $id_famille,
+                    'fabricant'       => ($is_apple ? 'APPLE' : '')
+                ));
 
                 if (!count($errors)) {
-                    echo ' - <span class="success">MAJ Prod OK</span>';
+                    $errors = $prod->update($w, true);
+
+                    if (!count($errors)) {
+                        echo ' - <span class="success">MAJ Prod OK</span>';
+                    }
                 }
             }
-        }
 
-        if (count($errors)) {
-            echo BimpRender::renderAlerts($errors);
-        } elseif (BimpObject::objectLoaded($prod)) {
-            $id_entrepot = 0;
-            $id_package = 0;
+            if (count($errors)) {
+                echo BimpRender::renderAlerts($errors);
+            } elseif (BimpObject::objectLoaded($prod)) {
+                $id_entrepot = 0;
+                $id_package = 0;
 
-            switch ((int) $r['code_stock']) {
-                case 29: //'CAMBRIDGE':
-                    $id_entrepot = 10;
-                    break;
+                switch ((int) $r['code_stock']) {
+                    case 29: //'CAMBRIDGE':
+                        $id_entrepot = 10;
+                        break;
 
-                case 22: //'SAVM':
-                    $id_entrepot = 1;
-                    break;
+                    case 22: //'SAVM':
+                        $id_entrepot = 1;
+                        break;
 
-                case 23: //'IDF':
-                    $id_entrepot = 34;
-                    break;
+                    case 23: //'IDF':
+                        $id_entrepot = 34;
+                        break;
 
-                case 32: //'Prêts Cambridge':
-                    $id_package = 4;
-                    break;
+                    case 32: //'Prêts Cambridge':
+                        $id_package = 4;
+                        break;
 
-                case 24: //'Prêts SAVM':
-                    $id_package = 1;
-                    break;
+                    case 24: //'Prêts SAVM':
+                        $id_package = 1;
+                        break;
 
-                case 8: // Utilisation interne: 
-                    $id_package = 7;
-                    break;
-            }
+                    case 8: // Utilisation interne: 
+                        $id_package = 7;
+                        break;
+                }
 
-            // Maj des stocks. 
-            if ((float) $r['qty']) {
-                $stock_errors = array();
+                // Maj des stocks. 
+                if ((float) $r['qty']) {
+                    $stock_errors = array();
 
-                if ((int) $prod->getData('serialisable')) {
-                    for ($i = 1; $i <= (int) $r['qty']; $i++) {
-                        $eq_errors = array();
-                        $serial = 'NS_INC_' . $r['ref'] . '_' . $i;
-                        $eq = BimpObject::createBimpObject('bimpequipment', 'Equipment', array(
-                                    'serial'     => $serial,
-                                    'id_product' => $prod->id
-                                        ), true, $eq_errors);
+                    if ((int) $prod->getData('serialisable')) {
+                        for ($i = 1; $i <= (int) $r['qty']; $i++) {
+                            $eq_errors = array();
+                            $serial = 'NS_INC_' . $r['ref'] . '_' . $i;
+                            $eq = BimpObject::createBimpObject('bimpequipment', 'Equipment', array(
+                                        'serial'     => $serial,
+                                        'id_product' => $prod->id
+                                            ), true, $eq_errors);
 
-                        if (BimpObject::objectLoaded($eq)) {
-                            if ($id_entrepot) {
-                                echo 'AJ nb ' . $serial . ' Entr. #' . $id_entrepot;
-                                BimpObject::createBimpObject('bimpequipment', 'BE_Place', array(
-                                    'id_equipment' => $eq->id,
-                                    'type'         => 2,
-                                    'id_entrepot'  => $id_entrepot,
-                                    'code_mvt'     => 'IMPORT_CSV',
-                                    'infos'        => 'Import CSV',
-                                    'date'         => date('Y-m-d H:i:s')
-                                        ), true, $eq_errors);
-                            } elseif ($id_package) {
-                                echo 'AJ nb ' . $serial . ' Pack. #' . $id_package;
-                                $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
-                                if (BimpObject::objectLoaded($package)) {
-                                    $eq_errors = $package->addEquipment($eq->id, 'IMPORT_CSV', 'Import CSV');
-                                } else {
-                                    $stock_errors[] = 'PACK #' . $id_package . ' absent';
+                            if (BimpObject::objectLoaded($eq)) {
+                                if ($id_entrepot) {
+                                    echo 'AJ nb ' . $serial . ' Entr. #' . $id_entrepot;
+                                    BimpObject::createBimpObject('bimpequipment', 'BE_Place', array(
+                                        'id_equipment' => $eq->id,
+                                        'type'         => 2,
+                                        'id_entrepot'  => $id_entrepot,
+                                        'code_mvt'     => 'IMPORT_CSV',
+                                        'infos'        => 'Import CSV',
+                                        'date'         => date('Y-m-d H:i:s')
+                                            ), true, $eq_errors);
+                                } elseif ($id_package) {
+                                    echo 'AJ nb ' . $serial . ' Pack. #' . $id_package;
+                                    $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
+                                    if (BimpObject::objectLoaded($package)) {
+                                        $eq_errors = $package->addEquipment($eq->id, 'IMPORT_CSV', 'Import CSV');
+                                    } else {
+                                        $stock_errors[] = 'PACK #' . $id_package . ' absent';
+                                    }
                                 }
                             }
-                        }
 
-                        if (count($eq_errors)) {
-                            $stock_errors[] = BimpTools::getMsgFromArray($eq_errors, 'Eq ' . $i);
+                            if (count($eq_errors)) {
+                                $stock_errors[] = BimpTools::getMsgFromArray($eq_errors, 'Eq ' . $i);
+                            }
+                        }
+                    } else {
+                        if ($id_entrepot) {
+                            echo ' - AJ Entr. #' . $id_entrepot;
+                            $stock_errors = $prod->correctStocks($id_entrepot, (float) $r['qty'], 0, $code_move, $label_move);
+                        } elseif ($id_package) {
+                            echo ' - AJ Pack. #' . $id_package;
+                            $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
+                            if (BimpObject::objectLoaded($package)) {
+                                $warnings = array();
+                                $stock_errors = $package->addProduct($prod->id, (float) $r['qty'], -1, $warnings, 'IMPORT_CSV', 'Import CSV');
+                            } else {
+                                $stock_errors[] = 'PACK #' . $id_package . ' absent';
+                            }
                         }
                     }
-                } else {
-                    if ($id_entrepot) {
-                        echo ' - AJ Entr. #' . $id_entrepot;
-                        $stock_errors = $prod->correctStocks($id_entrepot, (float) $r['qty'], 0, $code_move, $label_move);
-                    } elseif ($id_package) {
-                        echo ' - AJ Pack. #' . $id_package;
-                        $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
-                        if (BimpObject::objectLoaded($package)) {
-                            $warnings = array();
-                            $stock_errors = $package->addProduct($prod->id, (float) $r['qty'], -1, $warnings, 'IMPORT_CSV', 'Import CSV');
-                        } else {
-                            $stock_errors[] = 'PACK #' . $id_package . ' absent';
-                        }
-                    }
-                }
 
-                if (count($stock_errors)) {
-                    echo BimpRender::renderAlerts($stock_errors);
-                } else {
-                    echo ' - <span class="success">Stocks OK</span>';
+                    if (count($stock_errors)) {
+                        echo BimpRender::renderAlerts($stock_errors);
+                    } else {
+                        echo ' - <span class="success">Stocks OK</span>';
+                    }
                 }
             }
         }
-
-//        break;
     }
 
     echo '<br/><br/> NON CREES: <br/><br/>';

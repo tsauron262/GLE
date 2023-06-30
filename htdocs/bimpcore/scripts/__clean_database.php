@@ -63,7 +63,7 @@ if (!$action) {
     if ($nb) {
         $actions['del_facs_fourn'] = 'Suppr. factures fourn (' . $nb . ')';
     }
-    
+
     $nb = (int) $bdb->getCount('be_equipment');
     if ($nb) {
         $actions['del_eqs'] = 'Suppr. équipements (' . $nb . ')';
@@ -73,7 +73,7 @@ if (!$action) {
     if ($nb) {
         $actions['del_prods'] = 'Suppr. produits (' . $nb . ')';
     }
-    
+
     $nb = (int) $bdb->getCount('socpeople', '1', 'rowid');
     if ($nb) {
         $actions['del_contacts'] = 'Suppr. contacts (' . $nb . ')';
@@ -139,7 +139,7 @@ switch ($action) {
                     if (count($err)) {
                         $errors[] = BimpTools::getMsgFromArray($err, 'Soc #' . $r['rowid']);
                         $nFails++;
-                    }else {
+                    } else {
                         $nOk++;
                     }
                 } else {
@@ -154,6 +154,7 @@ switch ($action) {
         break;
 
     case 'del_prods':
+        $bdb->execute('TRUNCATE TABLE `llx_br_reservation`');
         $rows = $bdb->getRows('product', '1', 10000, 'array', array('rowid'));
         if (is_array($rows)) {
             foreach ($rows as $r) {
@@ -165,7 +166,7 @@ switch ($action) {
                     if (count($err)) {
                         $errors[] = BimpTools::getMsgFromArray($err, 'Prod #' . $r['rowid']);
                         $nFails++;
-                    }else {
+                    } else {
                         $nOk++;
                     }
                 } else {
@@ -191,7 +192,7 @@ switch ($action) {
                     if (count($err)) {
                         $errors[] = BimpTools::getMsgFromArray($err, 'Equip #' . $r['id']);
                         $nFails++;
-                    }else {
+                    } else {
                         $nOk++;
                     }
                 } else {
@@ -217,7 +218,7 @@ switch ($action) {
                     if (count($err)) {
                         $errors[] = BimpTools::getMsgFromArray($err, 'SAV #' . $r['id']);
                         $nFails++;
-                    }else {
+                    } else {
                         $nOk++;
                     }
                 } else {
@@ -243,7 +244,7 @@ switch ($action) {
                     if (count($err)) {
                         $errors[] = BimpTools::getMsgFromArray($err, 'Propale #' . $r['rowid']);
                         $nFails++;
-                    }else {
+                    } else {
                         $nOk++;
                     }
                 } else {
@@ -269,7 +270,7 @@ switch ($action) {
                     if (count($err)) {
                         $errors[] = BimpTools::getMsgFromArray($err, 'Commande #' . $r['rowid']);
                         $nFails++;
-                    }else {
+                    } else {
                         $nOk++;
                     }
                 } else {
@@ -295,7 +296,7 @@ switch ($action) {
                     if (count($err)) {
                         $errors[] = BimpTools::getMsgFromArray($err, 'Facture #' . $r['rowid']);
                         $nFails++;
-                    }else {
+                    } else {
                         $nOk++;
                     }
                 } else {
@@ -321,7 +322,7 @@ switch ($action) {
                     if (count($err)) {
                         $errors[] = BimpTools::getMsgFromArray($err, 'Commande fourn #' . $r['rowid']);
                         $nFails++;
-                    }else {
+                    } else {
                         $nOk++;
                     }
                 } else {
@@ -347,7 +348,7 @@ switch ($action) {
                     if (count($err)) {
                         $errors[] = BimpTools::getMsgFromArray($err, 'Facture fourn #' . $r['rowid']);
                         $nFails++;
-                    }else {
+                    } else {
                         $nOk++;
                     }
                 } else {

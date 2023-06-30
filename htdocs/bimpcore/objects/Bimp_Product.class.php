@@ -980,14 +980,16 @@ class Bimp_Product extends BimpObject
         while ($ln = $db->fetch_object($sql)) {
             $tabT[] = $ln->rowid;
         }
-        $query = 'SELECT (total_ht / qty) as derPv, fk_product FROM `' . MAIN_DB_PREFIX . 'facturedet` l WHERE rowid IN (' . implode(",", $tabT) . ')';
-        $sql = $db->query($query);
+        if(count($tabT)){
+            $query = 'SELECT (total_ht / qty) as derPv, fk_product FROM `' . MAIN_DB_PREFIX . 'facturedet` l WHERE rowid IN (' . implode(",", $tabT) . ')';
+            $sql = $db->query($query);
 
-        $cache_key = $dateMin . "-" . $dateMax . 'derPv';
+            $cache_key = $dateMin . "-" . $dateMax . 'derPv';
 
-        while ($ln = $db->fetch_object($sql)) {
-            self::$ventes[$cache_key][$ln->fk_product] = $ln->derPv;
-//            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
+            while ($ln = $db->fetch_object($sql)) {
+                self::$ventes[$cache_key][$ln->fk_product] = $ln->derPv;
+    //            self::$ventes[$cache_key][$ln->fk_product][null]['total_achats'] += $ln->total_achats;
+            }
         }
     }
 

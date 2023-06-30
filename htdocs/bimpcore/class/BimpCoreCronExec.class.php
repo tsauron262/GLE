@@ -86,7 +86,7 @@ class BimpCoreCronExec extends BimpCron
                 }
 
                 $local_dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y') . '/';
-                $ftp_dir = '/FTP-BIMP-ERP/statsapple/' . date('Y') . '/';
+                $ftp_dir = '/'.BimpCore::getConf('ftp_dir').'/statsapple/' . date('Y') . '/';
 
                 foreach ($result['files'] as $fileName) {
                     if (!ftp_put($ftp, $ftp_dir . $fileName, $local_dir . $fileName)) {

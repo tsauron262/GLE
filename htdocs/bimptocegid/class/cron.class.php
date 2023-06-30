@@ -21,7 +21,7 @@
         protected $ldlc_ftp_host = 'ftp-edi.groupe-ldlc.com';
         protected $ldlc_ftp_user = 'bimp-erp';
         protected $ldlc_ftp_pass = 'Yu5pTR?(3q99Aa';
-        protected $ldlc_ftp_path = ''; // Bien penssé a changer pour les test à /FTP-BIMP-ERP/accountingtest/
+        protected $ldlc_ftp_path = ''; 
         protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
         protected $size_vide_tra = 149;
         protected $rollback = false;
@@ -46,7 +46,7 @@
         private $export_bordereauCHK    = true;
         public $output = '';
         
-        public function __construct() {
+        public function __construct() {// Bien penssé a changer pour les test à /accountingtest/
             $this->ldlc_ftp_path = "/".BimpCore::getConf('ftp_dir').'/accounting';
             
             if($this->modeTest) {

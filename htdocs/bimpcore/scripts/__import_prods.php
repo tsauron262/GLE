@@ -421,10 +421,6 @@ function import($rows, $refs_fourn)
                     case 8: // Utilisation interne: 
                         $id_package = 7;
                         break;
-
-                    case 34: // SAVH
-                        $id_entrepot = 7;
-                        break;
                     
                     case 33: // SAVR
                         $id_entrepot = 4;

@@ -11,7 +11,6 @@ class Bimp_CommandeFourn extends BimpCommAchat
     const DELIV_CUSTOM = 2;
     const DELIV_DIRECT = 3;
 
-    public $idLdlc = 230880;
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande_fournisseur';
     public static $email_type = 'order_supplier_send';

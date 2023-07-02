@@ -11,6 +11,6 @@ $tabCentre = array(
 );
 
 
-$tabCentre["MV"][4] = '1442050';
-$tabCentre["RR"][4] = '1442050';
-$tabCentre["LH"][4] = '1442050';
+//$tabCentre["MV"][4] = '1442050';
+//$tabCentre["RR"][4] = '1442050';
+//$tabCentre["LH"][4] = '1442050';

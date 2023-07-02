@@ -5,7 +5,7 @@ require_once __DIR__ . '/GSX_Const.php';
 class GSX_v2 extends GSX_Const
 {
 //old shipto correspond a altimac   
-    public static $oldShipTos = array(1134736, 608105, 1185605);
+    public static $oldShipTos = array(1134736, 608105, 1185605, 608111);
     protected static $instance = null;
     protected $ch;
     public $baseUrl = '';

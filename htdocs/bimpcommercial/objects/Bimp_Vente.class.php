@@ -486,10 +486,10 @@ Preferred Field
                                                     $line_data['position'], // J
                                                     $dt_fac->format('Ymd'),
                                                     '',
-                                                    ($is_educ ? str_replace('"', '', $soc_data['nom']) : ($customer_code != 'EN' ? 'XXX' : '')), // M
+                                                    ($is_educ ? str_replace('"', '', substr($soc_data['nom'], 0, 70)) : ($customer_code != 'EN' ? 'XXX' : '')), // M
                                                     ($is_educ ? str_replace(array('"', "
 ", '
-', "\n", "\r", 'Hotel'), '', $soc_data['address']) : ($customer_code != 'EN' ? 'XXX' : '')), // N
+', "\n", "\r", 'Hotel'), '', substr($soc_data['address'], 0, 70)) : ($customer_code != 'EN' ? 'XXX' : '')), // N
                                                     ($is_educ ? str_replace('"', '', substr($soc_data['town'], 0, 19)) : ($customer_code != 'EN' ? 'XXX' : '')), // O
                                                     '',
                                                     ($is_educ ? str_replace('"', '', (string) $soc_data['zip']) : ''), // Q

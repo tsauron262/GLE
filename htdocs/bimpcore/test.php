@@ -55,23 +55,31 @@ if (!$user->admin) {
 //print_r($values);
 //exit;
 
-$data = json_decode(file_get_contents(__DIR__ . '/test.json'), 1);
+//$data = json_decode(file_get_contents(__DIR__ . '/test.json'), 1);
+//
+//global $db;
+//$extrafields = new ExtraFields($db);
+////$attrname, $label, $type, $pos, $size, $elementtype, $unique = 0, $required = 0, $default_value = '', $param = '', $alwayseditable = 0, $perms = '', $list = '-1', $help = '', $computed = '', $entity = '', $langfile = '', $enabled = '1', $totalizable = 0, $printable = 0
+//
+//foreach ($data['data'] as $ef) {
+//    echo 'ADD ' . $ef['label'] . ' (' . $ef['name'] . ' - ' . $ef['elementtype'] . ') : ';
+//    $res = $extrafields->addExtraField($ef['name'], $ef['label'], $ef['type'], $ef['pos'], $ef['size'], $ef['elementtype'], $ef['fieldunique'], $ef['fieldrequired'], $ef['fielddefault'], $ef['param'], $ef['alwayseditable'], $ef['perms'], $ef['list'], $ef['help'], $ef['fieldcomputed'], $ef['entity'], $ef['langs'], $ef['enabled'], $ef['totalizable'], $ef['printable']);
+//    if ($res > 0) {
+//        echo '[OK]';
+//    } else {
+//        echo ' FAIL ' . $res;
+//        echo '<br/>' . $extrafields->error .' - ' . $extrafields->errno;
+//    }
+//    echo '<br/>';
+//}
 
-global $db;
-$extrafields = new ExtraFields($db);
-//$attrname, $label, $type, $pos, $size, $elementtype, $unique = 0, $required = 0, $default_value = '', $param = '', $alwayseditable = 0, $perms = '', $list = '-1', $help = '', $computed = '', $entity = '', $langfile = '', $enabled = '1', $totalizable = 0, $printable = 0
+$cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 946);
 
-foreach ($data['data'] as $ef) {
-    echo 'ADD ' . $ef['label'] . ' (' . $ef['name'] . ' - ' . $ef['elementtype'] . ') : ';
-    $res = $extrafields->addExtraField($ef['name'], $ef['label'], $ef['type'], $ef['pos'], $ef['size'], $ef['elementtype'], $ef['fieldunique'], $ef['fieldrequired'], $ef['fielddefault'], $ef['param'], $ef['alwayseditable'], $ef['perms'], $ef['list'], $ef['help'], $ef['fieldcomputed'], $ef['entity'], $ef['langs'], $ef['enabled'], $ef['totalizable'], $ef['printable']);
-    if ($res > 0) {
-        echo '[OK]';
-    } else {
-        echo ' FAIL ' . $res;
-        echo '<br/>' . $extrafields->error .' - ' . $extrafields->errno;
-    }
-    echo '<br/>';
-}
+$contacts = $cli->getChildrenList('contacts');
+
+echo '<pre>';
+print_r($contacts);
+exit;
 
 echo '<br/>FIN';
 echo '</body></html>';

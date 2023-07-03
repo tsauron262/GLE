@@ -632,6 +632,11 @@ forms:
                 field: sav_pro
             prestataire_number: 
                 field: prestataire_number
+            id_ticket: 
+                field: id_ticket
+                hidden: 1
+            sacs: 
+                field: sacs
             send_msg: 
                 custom: 1
                 label: Notifier le client de la création du SAV
@@ -640,15 +645,18 @@ forms:
                 input: 
                     type: toggle
                 value: 1
-            id_ticket: 
-                field: id_ticket
-                hidden: 1
-            sacs: 
-                field: sacs
+            create_signature_pc: 
+                custom: 1
+                label: Demander la signature du bon de prise en charge
+                input_name: create_signature_pc
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
             files: 
                 object: files
                 multiple: 1
-              
+                
     prise_en_charge: 
         rows: 
             code_centre: 
@@ -864,6 +872,13 @@ forms:
               data_type: bool
               content: 
                   callback: renderEquipmentPlaceOptionInput
+            - custom: 1
+              label: Demander la signature du bon de restitution
+              input_name: create_signature_resti
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
                   
     close_refused: 
         title: Fermeture
@@ -918,6 +933,13 @@ forms:
               display_if: 
                   field_name: bon_resti_raison
                   show_values: 99
+            - custom: 1
+              label: Demander la signature du bon de restitution
+              input_name: create_signature_resti
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
               
     contact: 
         title: Recontacter

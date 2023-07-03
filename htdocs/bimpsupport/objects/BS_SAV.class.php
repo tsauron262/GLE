@@ -158,9 +158,10 @@ class BS_SAV extends BimpObject
     public static $check_on_update_field = 0;
     public static $systems_cache = null;
     public $check_version = true;
-    
-    public static function getSaveOptionDesc($choice){
-        if(isset(self::$save_options_desc[(int) $choice]))
+
+    public static function getSaveOptionDesc($choice)
+    {
+        if (isset(self::$save_options_desc[(int) $choice]))
             return str_replace('ENTITY_NAME', BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport'), self::$save_options_desc[(int) $choice]);
         return null;
     }
@@ -1541,7 +1542,7 @@ class BS_SAV extends BimpObject
         $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
         $message .= "Si vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).<br/><br/>";
         $message .= 'Cordialement, <br/><br/>';
-        $message .= 'L\'équipe '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+        $message .= 'L\'équipe ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
         return $message;
     }
@@ -3972,7 +3973,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $nomMachine = $this->getNomMachine();
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
-        $fromMail = "SAV ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')."<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+        $fromMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 
         $contact = null;
 
@@ -4051,7 +4052,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
 
                 $subject = "Fermeture du dossier " . $this->getData('ref');
-                $mail_msg = 'Nous vous remercions d\'avoir choisi '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ($nomMachine ? ' pour votre ' . $nomMachine : '') . '.' . "\n\n";
+                $mail_msg = 'Nous vous remercions d\'avoir choisi ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ($nomMachine ? ' pour votre ' . $nomMachine : '') . '.' . "\n\n";
 
                 if (!empty($files)) {
                     $mail_msg .= 'Veuillez trouver ci-joint votre facture pour cette réparation' . "\n\n";
@@ -4066,22 +4067,22 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $mail_msg = "Voici le devis pour la réparation de votre '" . $nomMachine . "'.\n";
                     $mail_msg .= "Veuillez nous communiquer votre accord ou votre refus par retour de cet e-mail.\n";
                     $mail_msg .= "Si vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).";
-                    $sms = "Bonjour, nous avons établi votre devis pour votre " . $nomMachine . "\n Vous l'avez reçu par e-mail.\nL'équipe ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                    $sms = "Bonjour, nous avons établi votre devis pour votre " . $nomMachine . "\n Vous l'avez reçu par e-mail.\nL'équipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
                 }
                 break;
 
             case 'debut':
                 $subject = 'Prise en charge ' . $this->getData('ref');
-                $mail_msg = "Merci d'avoir choisi ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')." en tant que Centre de Services Agréé Apple.\n";
+                $mail_msg = "Merci d'avoir choisi " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . " en tant que Centre de Services Agréé Apple.\n";
                 $mail_msg .= 'La référence de votre dossier de réparation est : ' . $this->getData('ref') . ", ";
                 $mail_msg .= "si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n";
-                $sms = "Merci d'avoir choisi ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')." " . $nomMachine . "\nLa référence de votre dossier de réparation est : " . $this->getData('ref') . "\nL'équipe ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                $sms = "Merci d'avoir choisi " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . " " . $nomMachine . "\nLa référence de votre dossier de réparation est : " . $this->getData('ref') . "\nL'équipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
                 break;
 
             case 'debDiago':
                 $subject = "Prise en charge " . $this->getData('ref');
                 $mail_msg = "Nous avons commencé le diagnostic de votre \"$nomMachine\", vous aurez rapidement des nouvelles de notre part. ";
-                $sms = "Nous avons commencé le diagnostic de votre \" $nomMachine \", vous aurez rapidement des nouvelles de notre part.\nL'équipe ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                $sms = "Nous avons commencé le diagnostic de votre \" $nomMachine \", vous aurez rapidement des nouvelles de notre part.\nL'équipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
                 break;
 
             case 'commOk':
@@ -4089,7 +4090,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $mail_msg = "Nous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. ";
                 $mail_msg .= "\n Voici notre diagnostique : " . $this->getData("diagnostic");
                 $mail_msg .= "\n Nous restons à votre disposition pour toutes questions au " . $tel;
-                $sms = "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci.\nL'équipe ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                $sms = "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci.\nL'équipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
                 break;
 
             case 'repOk':
@@ -4097,21 +4098,21 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $mail_msg = "Nous avons le plaisir de vous annoncer que la réparation de votre \"$nomMachine\" est finie.\n";
                 $mail_msg .= "Voici ce que nous avons fait : " . $this->getData("resolution") . "\n";
                 $mail_msg .= "Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel;
-                $sms = "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à " . $nomCentre . " " . $delai . ".\nL'Equipe ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport').".";
+                $sms = "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à " . $nomCentre . " " . $delai . ".\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
                 break;
 
             case 'revPropRefu':
                 $subject = "Prise en charge " . $this->getData('ref') . " terminée";
                 $mail_msg = "la réparation de votre \"$nomMachine\" est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . "\n";
                 $mail_msg .= "Si vous souhaitez plus de renseignements, contactez le " . $tel;
-                $sms = "Bonjour, la réparation de votre \"$nomMachine\"  est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ".\nL'Equipe ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport').".";
+                $sms = "Bonjour, la réparation de votre \"$nomMachine\"  est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ".\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
                 break;
 
             case 'pieceOk':
                 $subject = "Pieces recues " . $this->getData('ref');
                 $mail_msg = "La pièce/le produit que nous avions commandé pour votre \"$nomMachine\" est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil.\n";
                 $mail_msg .= "Vous serez prévenu dès qu'il sera prêt.";
-                $sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport').".";
+                $sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
                 break;
 
             case "commercialRefuse":
@@ -4128,7 +4129,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if ($this->db->db->num_rows($sql) > 0) {
                         while ($ln = $this->db->db->fetch_object($sql)) {
                             if (isset($ln->mail) && $ln->mail != "") {
-                                $toMail = str_ireplace("Sav", "Boutique", $ln->mail) . "@".BimpCore::getConf('default_domaine', '', 'bimpsupport');
+                                $toMail = str_ireplace("Sav", "Boutique", $ln->mail) . "@" . BimpCore::getConf('default_domaine', '', 'bimpsupport');
                                 mailSyn2($subject, $toMail, $fromMail, $text);
                                 $mailOk = true;
                             }
@@ -4139,7 +4140,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $rows2 = $this->db->getRows('usergroup', "rowid IN " . $where, null, 'object', array('nom'));
                         if (!is_null($rows2)) {
                             foreach ($rows2 as $r) {
-                                $toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@".BimpCore::getConf('default_domaine', '', 'bimpsupport');
+                                $toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@" . BimpCore::getConf('default_domaine', '', 'bimpsupport');
                                 mailSyn2($subject, $toMail, $fromMail, $text);
                             }
                         }
@@ -4230,7 +4231,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $mail_msg .= "\n" . "Technicien en charge de la réparation : " . $tech;
                 }
 
-                $mail_msg .= "\n" . $textSuivie . "\n\n Cordialement.\n\nL'équipe ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')."\n\n" . $signature;
+                $mail_msg .= "\n" . $textSuivie . "\n\n Cordialement.\n\nL'équipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "\n\n" . $signature;
 
                 $toMail = BimpTools::cleanEmailsStr($toMail);
 
@@ -4270,7 +4271,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             $sms .= "\n" . $this->getData('ref');
             //$to = "0686691814";
-            $fromsms = 'SAV '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+            $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
             $to = traiteNumMobile($to);
             if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
@@ -4317,7 +4318,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $errors[] = 'Aucune adresse e-mail enregistrée pour le client';
         } else {
             $centre = $this->getCentreData();
-            $from = "SAV ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')."<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+            $from = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 
             $to = BimpTools::cleanEmailsStr($to);
 
@@ -5202,7 +5203,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $client = $this->getChildObject('client');
 
                         $encoursActu = $client->getAllEncoursForSiret(true)['total'];
-                        $authorisation = ($client->getData('outstanding_limit')+$this->getUserLimitEncours()) * 1.2;
+                        $authorisation = ($client->getData('outstanding_limit') + $this->getUserLimitEncours()) * 1.2;
                         $besoin = $encoursActu + $propal->dol_object->total_ht;
 
                         if ($besoin > ($authorisation + 1))
@@ -5264,14 +5265,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'warnings' => $warnings
         );
     }
-    
-    public function getUserLimitEncours(){
+
+    public function getUserLimitEncours()
+    {
         global $db, $user;
         $sql = $db->query("SELECT val_max
 FROM llx_validate_comm a
-WHERE a.user = '".$user->id."' AND a.secteur = 'S' AND a.type = '0'
+WHERE a.user = '" . $user->id . "' AND a.secteur = 'S' AND a.type = '0'
 ORDER BY a.val_max DESC");
-        if($db->num_rows($sql) > 0){
+        if ($db->num_rows($sql) > 0) {
             $ln = $db->fetch_object($sql);
             return $ln->val_max;
         }
@@ -6021,23 +6023,25 @@ ORDER BY a.val_max DESC");
             if (count($pdf_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du Bon de restitution');
             } else {
-                // Création signature: 
-                $signature_errors = $this->createSignature('sav_resti');
+                if ((int) BimpTools::getValue('create_signature_resti', 0)) {
+                    // Création signature: 
+                    $signature_errors = $this->createSignature('sav_resti');
 
-                if (count($signature_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');
-                } else {
-                    $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
-                                'id_signature' => $this->getData('id_signature_resti'),
-                                'code'         => 'default'
-                                    ), true);
+                    if (count($signature_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');
+                    } else {
+                        $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
+                                    'id_signature' => $this->getData('id_signature_resti'),
+                                    'code'         => 'default'
+                                        ), true);
 
-                    if (BimpObject::objectLoaded($signataire) && $signataire->isActionAllowed('signElec')) {
-                        $success_callback .= 'setTimeout(function() {' . $signataire->getJsActionOnclick('signElec', array(), array(
-                                    'form_name'   => 'sign_elec',
-                                    'no_button'   => true,
-                                    'modal_title' => 'Signature électronique du bon de restitution "BR-' . $this->getRef() . '"'
-                                )) . '}, 500);';
+                        if (BimpObject::objectLoaded($signataire) && $signataire->isActionAllowed('signElec')) {
+                            $success_callback .= 'setTimeout(function() {' . $signataire->getJsActionOnclick('signElec', array(), array(
+                                        'form_name'   => 'sign_elec',
+                                        'no_button'   => true,
+                                        'modal_title' => 'Signature électronique du bon de restitution "BR-' . $this->getRef() . '"'
+                                    )) . '}, 500);';
+                        }
                     }
                 }
             }
@@ -6281,7 +6285,7 @@ ORDER BY a.val_max DESC");
             } else {
                 $client = $this->getChildObject('client');
                 $centre = $this->getCentreData();
-                $toMail = "SAV ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')."<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+                $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
                 mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 $success = "Acompte créer avec succés.";
             }
@@ -6291,7 +6295,7 @@ ORDER BY a.val_max DESC");
             $centre = $this->getCentreData();
             $return = $propal->actionAddAcompte($data, $success);
             if (!count($return['errors'])) {
-                $toMail = "SAV ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')."<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+                $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
                 mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 return $return;
             }
@@ -6504,7 +6508,7 @@ ORDER BY a.val_max DESC");
 
                         $client = $this->getChildObject('client');
                         $centre = $this->getCentreData();
-                        $toMail = "SAV ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport')."<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@'.BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+                        $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 //                        mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                         $success = "Acompte créer avec succés.";
                     }
@@ -6907,10 +6911,11 @@ ORDER BY a.val_max DESC");
                     }
 
                     // Création de la signature du Bon de prise en charge:
-                    $signature_errors = $this->createSignature('sav_pc');
-
-                    if (count($signature_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($signature_errors);
+                    if ((int) BimpTools::getValue('create_signature_pc', 0)) {
+                        $signature_errors = $this->createSignature('sav_pc');
+                        if (count($signature_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($signature_errors);
+                        }
                     }
                 }
             }
@@ -7170,7 +7175,7 @@ ORDER BY a.val_max DESC");
                         }
 
                         if ($to) {
-                            $subject = 'Votre rendez-vous chez '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                            $subject = 'Votre rendez-vous chez ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
                             $msg = 'Cher client' . "\n\n";
                             $msg .= 'Sauf erreur de notre part, vous ne vous êtes pas présenté au rendez vous que vous aviez planifié dans notre boutique ';
                             if (isset($centres[$r['code_centre']]['town'])) {
@@ -7181,7 +7186,7 @@ ORDER BY a.val_max DESC");
                                 }
                                 $msg .= $centres[$r['code_centre']]['town'];
                             } else {
-                                $msg .= ' '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                                $msg .= ' ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
                             }
                             $msg .= ' le ' . date('d / m / Y à H:i', strtotime($r['date_rdv'])) . '. ' . "\n";
                             $msg .= 'Celui-ci à été annulé.' . "\n\n";
@@ -7191,7 +7196,7 @@ ORDER BY a.val_max DESC");
                             }
 
                             $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpCore::getConf('base_url', '', 'bimpinterfaceclient') . '">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
-                            $msg .= 'L’équipe technique '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                            $msg .= 'L’équipe technique ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
 //                            mailSyn2($subject, $to, '', $msg);
                             $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
@@ -7239,7 +7244,7 @@ ORDER BY a.val_max DESC");
                 }
 
                 if ($to) {
-                    $subject = 'Votre demande d’intervention chez '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                    $subject = 'Votre demande d’intervention chez ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
                     $msg = 'Cher client' . "\n\n";
                     $msg .= 'Vous avez ouvert une demande d’intervention dans notre boutique ';
                     if (isset($centres[$r['code_centre']]['town'])) {
@@ -7250,7 +7255,7 @@ ORDER BY a.val_max DESC");
                         }
                         $msg .= $centres[$r['code_centre']]['town'];
                     } else {
-                        $msg .= ' '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                        $msg .= ' ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
                     }
                     $msg .= ' le ' . date('d / m / Y à H:i', strtotime($r['date_create'])) . '. ' . "\n\n";
                     $msg .= 'Sauf erreur de notre part, vous n’avez pas déposé votre produit pour réparation. Sans nouvelle de votre part d’ci deux jours, votre demande sera clôturée.' . "\n\n";
@@ -7260,7 +7265,7 @@ ORDER BY a.val_max DESC");
                     }
 
                     $msg .= 'Vous pourrez néanmoins accéder à votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> sur notre site internet «  www.bimp.fr », et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
-                    $msg .= 'L’équipe technique '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                    $msg .= 'L’équipe technique ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
                     $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
 
@@ -7347,11 +7352,11 @@ ORDER BY a.val_max DESC");
                 $centre_address .= ($centre_address ? '<br/>' : '') . BimpTools::getArrayValueFromPath($centre_data, 'zip', '');
                 $centre_address .= ($centre_address ? ' ' : '') . BimpTools::getArrayValueFromPath($centre_data, 'town', '');
 //                
-                $subject = 'RAPPEL IMPORTANT concernant votre dossier SAV '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                $subject = 'RAPPEL IMPORTANT concernant votre dossier SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
                 $msg = 'Bonjour, <br/><br/>';
                 $msg .= 'Nous tenons à vous rappeller que le dossier ' . $sav->getRef() . ' concernant la réparation de votre ';
                 $msg .= ($prod_label ? '"' . $prod_label . '" ' : 'matériel');
-                $msg .= ' déposé dans notre centre de réparation '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport').' ';
+                $msg .= ' déposé dans notre centre de réparation ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ' ';
                 if ($centre_address) {
                     $msg .= ': <br/><br/><b>' . $centre_address . '</b><br/><br/>';
                 } else {
@@ -7366,7 +7371,7 @@ ORDER BY a.val_max DESC");
                 $msg .= '<a href="' . $url . '">Demander la destruction de mon matériel</a>';
 
                 $msg .= '<br/><br/>La réception de ce document signé de votre part entraînera l\'annulation des frais de garde.';
-                $msg .= '<br/><br/>Cordialement,<br/>L\'équipe '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                $msg .= '<br/><br/>Cordialement,<br/>L\'équipe ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
                 $mail_errors = array();
 
@@ -7654,7 +7659,7 @@ ORDER BY a.val_max DESC");
 
                         $message = 'Bonjour, ' . "\n\n";
                         $message .= 'Vous trouverez ci-joint votre bon de prise en charge ' . $this->getLink(array(), 'public') . " \n\n";
-                        $message .= 'Merci d\'avoir choisi '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "\n\n";
+                        $message .= 'Merci d\'avoir choisi ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "\n\n";
                         $message .= 'Cordialement';
 
                         $files = array(
@@ -7689,7 +7694,7 @@ ORDER BY a.val_max DESC");
                 $message .= ($prod_label ? $prod_label : 'matériel') . ' (Dossier ' . $this->getRef() . ').<br/><br/>';
                 $message .= 'Nous vous confirmons également l\'annulation des frais de garde de 4 € par jours.<br/><br/>';
                 $message .= 'Cordialement,<br/><br/>';
-                $message .= 'L\'équipe '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                $message .= 'L\'équipe ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
                 $files = array();
                 if (file_exists($filePath)) {

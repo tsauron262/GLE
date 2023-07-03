@@ -99,7 +99,8 @@ $keys = array(
     'com1'          => 15,
     'com2'          => 16,
     'com3'          => 17,
-    'com4'          => 18
+    'com4'          => 18,
+    'serials'       => 19
 );
 
 $fourns = array();
@@ -176,7 +177,12 @@ function cleanPrice($price)
 
 function import($rows, $refs_fourn)
 {
-    $id_fourn_ldlc = 6;
+    $qties = array(
+        'p' => array(),
+        'e' => array()
+    );
+
+    $id_fourn_ldlc = 128866;
     $failed = array();
     global $bdb;
 
@@ -214,7 +220,7 @@ function import($rows, $refs_fourn)
         echo '<br/><br/>';
         echo '<strong>' . $r['ref'] . '</strong>: ';
 
-        if ($r['code_famille'] == 'PIECESAV') {
+        if ($r['code_famille'] == 'PIECESAV' && in_array($r['code_stock'], array(22, 33, 34))) {
             continue;
             echo ' - Ajout Pièce SAV ';
             // Ajout Pièce SAV : 
@@ -223,11 +229,19 @@ function import($rows, $refs_fourn)
                 case 22: // SAVM
                     $code_centre = 'MV';
                     break;
+
+                case 33: // SAVR
+                    $code_centre = 'RR';
+                    break;
+
+                case 34: // SAVH
+                    $code_centre = 'LH';
+                    break;
                 default:
                     echo '<span class="danger">Code entrepot invalide pour pièce SAV : ' . $r['label_stock'] . '</span>';
                     continue;
             }
-
+//
             $stock = InternalStock::getStockInstance($code_centre, $r['ref']);
             if (!BimpObject::objectLoaded($stock)) {
                 $part_errors = array();
@@ -288,6 +302,7 @@ function import($rows, $refs_fourn)
 
             $data = array(
                 'ref'             => $ref,
+                'fk_product_type' => 0,
                 'label'           => $r['label'],
                 'price'           => (float) $r['pu_ht'],
                 'tva_tx'          => $tva_tx,
@@ -302,23 +317,22 @@ function import($rows, $refs_fourn)
                 'import_actimac'  => 1
             );
 
-            $filters = array();
+            $where = 'ref LIKE \'___-' . $r['ref'] . '\'';
 
             if ((string) $r['ean']) {
-                $filters = array(
-                    'or_search' => array(
-                        'or' => array(
-                            'ref'     => array($ref, $r['ref']),
-                            'barcode' => $r['ean']
-                        )
-                ));
-            } else {
-                $filters['ref'] = array($ref, $r['ref']);
+                $where .= ' OR barcode = \'' . $r['ean'] . '\'';
             }
 
-            $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', $filters, true);
+            $prod = null;
+            $id_product = (int) $bdb->getValue('product', 'rowid', $where);
+
+            if ($id_product) {
+                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+            }
 
             if (!BimpObject::objectLoaded($prod)) {
+                echo 'NON TROUVE <br/>';
+                continue;
                 // Créa du produit: 
                 $prod = BimpObject::createBimpObject('bimpcore', 'Bimp_Product', $data, true, $errors);
 
@@ -360,34 +374,34 @@ function import($rows, $refs_fourn)
                     }
                 }
             } else {
-                if ((int) $prod->getData('import_actimac')) {
-                    echo 'Déjà traité ' . $prod->getLink();
-                    continue;
-                }
-                $w = array();
-                if ($r['code_famille'] == 'PIECESAV') {
-                    // suppr: 
-                    $errors = $prod->delete($w, true);
-                    if (!count($errors)) {
-                        echo ' - <span class="success">Suppr prod part OK</span>';
-                    }
-                    continue;
-                }
-
-                // Maj du produit: 
-                $errors = $prod->validateArray(array(
-                    'barcode'         => $r['ean'],
-                    'fk_barcode_type' => ($r['ean'] ? 2 : null),
-                    'id_famille'      => $id_famille,
-                    'fabricant'       => ($is_apple ? 'APPLE' : '')
-                ));
-
-                if (!count($errors)) {
-                    $errors = $prod->update($w, true);
+                if ((int) $prod->getData('fk_product_type') > 0) {
+                    $w = array();
+//                if ($r['code_famille'] == 'PIECESAV') {
+//                    // suppr: 
+//                    $errors = $prod->delete($w, true);
+//                    if (!count($errors)) {
+//                        echo ' - <span class="success">Suppr prod part OK</span>';
+//                    }
+//                    continue;
+//                }
+                    // Maj du produit: 
+                    $errors = $prod->validateArray(array(
+                        'fk_product_type' => 0,
+                        'barcode'         => $r['ean'],
+                        'fk_barcode_type' => ($r['ean'] ? 2 : null),
+                        'id_famille'      => $id_famille,
+                        'fabricant'       => ($is_apple ? 'APPLE' : '')
+                    ));
 
                     if (!count($errors)) {
-                        echo ' - <span class="success">MAJ Prod OK</span>';
+                        $errors = $prod->update($w, true);
+
+                        if (!count($errors)) {
+                            echo ' - <span class="success">MAJ Prod OK ' . $prod->getLink() . '</span>';
+                        }
                     }
+                } else {
+                    continue;
                 }
             }
 
@@ -421,11 +435,11 @@ function import($rows, $refs_fourn)
                     case 8: // Utilisation interne: 
                         $id_package = 7;
                         break;
-                    
+
                     case 33: // SAVR
                         $id_entrepot = 4;
                         break;
-                    
+
                     case 34: // SAVH
                         $id_entrepot = 7;
                         break;
@@ -436,9 +450,35 @@ function import($rows, $refs_fourn)
                     $stock_errors = array();
 
                     if ((int) $prod->getData('serialisable')) {
-                        for ($i = 1; $i <= (int) $r['qty']; $i++) {
+                        $serials = explode('|', $r['serials']);
+
+                        echo 'SERIALS<pre>';
+                        print_r($serials);
+                        echo '</pre>';
+
+                        if (count($serials) != (int) $r['qty']) {
+                            echo BimpRender::renderAlerts((int) $r['qty'] - count($serials) . ' serials absents');
+                        }
+
+                        $serials_done = array();
+                        foreach ($serials as $serial) {
+                            if (in_array($serial, $serials_done)) {
+                                $i = 2;
+                                $new_serial = $serial . '-' . $i;
+
+                                while (in_array($new_serial, $serials_done)) {
+                                    $i++;
+                                    $new_serial = $serial . '-' . $i;
+                                }
+
+                                echo BimpRender::renderAlerts('SERIAL EN DOUBLON : ' . $serial);
+
+                                $serial = $new_serial;
+                            }
+
+                            $serials_done[] = $serial;
+
                             $eq_errors = array();
-                            $serial = 'NS_INC_' . $r['ref'] . '_' . $i;
                             $eq = BimpObject::createBimpObject('bimpequipment', 'Equipment', array(
                                         'serial'     => $serial,
                                         'id_product' => $prod->id
@@ -446,7 +486,7 @@ function import($rows, $refs_fourn)
 
                             if (BimpObject::objectLoaded($eq)) {
                                 if ($id_entrepot) {
-                                    echo 'AJ nb ' . $serial . ' Entr. #' . $id_entrepot;
+                                    echo ' - AJ ns ' . $serial . ' Entr. #' . $id_entrepot;
                                     BimpObject::createBimpObject('bimpequipment', 'BE_Place', array(
                                         'id_equipment' => $eq->id,
                                         'type'         => 2,
@@ -456,7 +496,7 @@ function import($rows, $refs_fourn)
                                         'date'         => date('Y-m-d H:i:s')
                                             ), true, $eq_errors);
                                 } elseif ($id_package) {
-                                    echo 'AJ nb ' . $serial . ' Pack. #' . $id_package;
+                                    echo ' - AJ nb ' . $serial . ' Pack. #' . $id_package;
                                     $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
                                     if (BimpObject::objectLoaded($package)) {
                                         $eq_errors = $package->addEquipment($eq->id, 'IMPORT_CSV', 'Import CSV');
@@ -489,12 +529,29 @@ function import($rows, $refs_fourn)
                     if (count($stock_errors)) {
                         echo BimpRender::renderAlerts($stock_errors);
                     } else {
-                        echo ' - <span class="success">Stocks OK</span>';
+                        if ($id_entrepot) {
+                            if (!isset($qties['e'][$id_entrepot])) {
+                                $qties['e'][$id_entrepot] = 0;
+                            }
+
+                            $qties['e'][$id_entrepot] += (float) $r['qty'];
+                        } elseif ($id_package) {
+                            if (!isset($qties['p'][$id_package])) {
+                                $qties['p'][$id_package] = 0;
+                            }
+
+                            $qties['p'][$id_package] += (float) $r['qty'];
+                        }
+                        echo ' - <span class="success">Stocks OK (' . $r['qty'] . ')</span>';
                     }
                 }
             }
         }
     }
+
+    echo '<pre>';
+    print_r($qties);
+    echo '</pre>';
 
     echo '<br/><br/> NON CREES: <br/><br/>';
     foreach ($failed as $ref) {

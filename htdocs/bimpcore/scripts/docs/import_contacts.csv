@@ -117,6 +117,7 @@ BATICOLOR;0;lecaude;valentin;;;;;
 BATIFORMES;0;MARTI;Quentin;;;;q.marti@batiformes.com;
 BBC;0;Portable;;;06 16 58 27 17;;;
 BDVA;0;MR AUDRAIN;;;;06 08 56 50 94;;
+BEAU;0;BEAU;Dominique;;;06 60 75 42 91;;
 BELLOMO;0;BELLOMO;Salvador;;;06 80 98 12 14;;
 BERNAGOU;0;BERNAGOU;Guy;;;06 64 66 98 64;;
 BERNARDI;1;BERNADI;;;;06 70 60 76 88;;
@@ -191,6 +192,7 @@ CDFA;1;LEREBOURG;Sophie;;;;sophie-lerebourg@cdfa.asso.fr;
 CEID;0;BOREL;;;;;;
 CERIEL;1;CAPART;Césalie;;;;CCAPART@ceriel.fr;
 CERIEL;1;MOREAU;Cécile;;;;CMOREAU@ceriel.fr;
+CESR14;0;" ";;;;;;
 CFACFCJEANNEDARC;0;MARIE;Noel;;;;;
 CFEUROPE;1;LEBON;Jocelyne;;;;;
 CFEUROPE;0;PERRIER;;;;;boss@nomotech.net;
@@ -441,6 +443,7 @@ HALBOUTANTOINE;0;HALBOUT;ANTOINE;;;0680545302;;
 HALBOUTSERVICE;0;DESDOIT;Jean-Michel;;02 33 64 32 43;;jean-michel.halbout.service@orange.fr;
 HALBOUTSERVICE;1;DGHDXTJ;Brigitte;Comptabilité;02 33 64 37 34;;;Comptabilité
 HANSEN;0;HANSEN VON BUNAU;Frédérik;;;06 09 17 29 52;;
+HANSENCELINE;1;HANSEN;Céline;Ligne direct;02 31 73 30 39;06 16 66 52 67;;Ligne direct
 HARASCHATREUX;0;BRANDEBOURGER;Alain;;02 31 79 00 40;06 08 72 21 50;;
 HARASFRESNAY;0;ANDRE;Françoise;;;;andre@harasfresnay.com;
 HARASFRESNAY;0;BRUNET;Martine;;;;brunet@harasfresnay.com;
@@ -465,6 +468,7 @@ HMUSIC;0;HEURTAULT;Sebastien;;;;;
 HOLDILEK;0;Mme LESCALIER;;;;06 78 72 06 95;;
 HOMEINFOSERVICES;0;BENNETEU;Jonathan;TechnicoCommercial;;;;TechnicoCommercial
 HOTELDELEUROPE;0;PIAT;GEORGES;;;;;
+HOULECONSULTING;0;HOULE;Michel;;;;;
 HPCONNECT;0;LEVY;Joseph;;;06 18 63 37 25;;
 HUBERTPARQUET;0;BAZIN;Olivier;;;06 76 41 43 13;;
 HUCHET;0;Cabinet huchet;;COMPTABILITE;02 31 74 00 97;;;COMPTABILITE
@@ -509,7 +513,6 @@ JELDIFFUSION;0;CHEMLA;Laurent;directeur;;;"l.chemla@printempscaen.fr ";directeur
 JOFFROYETUDE;0;DUFONT;Jean-François;;02 31 20 44 90;;francois-xavier.dufond@notaires.fr;
 JV2R;1;AMRANI;Nadia;;03 88 182 158;;Nadia Amrani <n.amrani@macway.com>;
 JV2R;1;DUMONT;Adeline;Comptabilité;03 88 182 170;;a.dumont@macway.com;Comptabilité
-JV2R;1;GUEGAN;Audrey;Commande;03 88 182 157;;a.guegan@macway.com;Commande
 JV2R;0;PAYEN;Ramen;;03 88 182 159;06.23.27.30.09;R.payen@macway.com;
 KEOLISCALVADOS;0;BRUNET;Stéphane;;;;;
 KEOLISCALVADOS;0;COSNEFROY;Nicolas;;;;;
@@ -635,9 +638,11 @@ MAISONDELIMAGEBN;0;LECANN;Isabelle;;;;i.lecann@maisondelimage-bn.fr;
 MAISONFAMILIALERU;1;PICHARD;Mélanie;comptable;;;mfr.coulans@mfr.asso.fr;comptable
 MAIZA;0;Télécopie;;;02 31 94 53 45;;;
 MANCHENUMERIQUE;1;PIERSIAK;Perrine;Comptable;02 14 29 02 23;;;Comptable
+MANSIONMARTIAL;0;MANSION;;;;06 80 11 44 26;;
 MAPORAMA;0;POTICOT;NADINE;COMPTABLE;01 44 84 10 75;;;COMPTABLE
 MARAIS1YANN;0;MARAIS;Yann;;;;;
 MARIEPASCAL;0;MARIE;Pascal;;;06 17 94 21 72;;
+MARIOTTEBENOIT;0;Martoitte;;;;06 85 07 22 39;;
 MARQUEBERNARD;0;MARQUE;Bernard;;;69 83 20 18 03;;
 MASSELIN;1;LAURE;;;02 33 23 43 43;;;
 MASTERNAUT;0;EDET;Sébastien;;;;;
@@ -663,6 +668,7 @@ MRSHCAEN;0;Télécopie;;;02 31 56 62 60;;;
 MTCA;0;BOULEN;;;;;g.chevallier@mtca.fr;
 MULTIPLEXECINEMOV;1;FIGUERES;Leslie;Comptable;;;;Comptable
 NABA;0;LEBRASSEUR;;;;06 22 72 74 57;;
+NAGUSZEWSKIDOMINI;0;NAGUSZEWSKI;Dominique;;;06 72 71 70 41;;
 NATURALTECH;0;GROUT;David;;;06 27 43 73 39;;
 NAVARRE;0;SYLVAIN;;;;06 98 01 74 68;;
 NETKOMODO;0;SAINT Gille;Thomas;;;;;
@@ -750,6 +756,7 @@ PORTAUTONOMEDUHAV;1;JOURDIN;Valérie;comptabilité fournisseur;02 32 74 71 11;;;
 PORTAUTONOMEDUHAV;1;ROUSSELIN;Nadège;comptabilité fournisseur;02 32 74 71 64;;;comptabilité fournisseur
 POTHIER1JM;0;POTHIER;JM;;;06 07 17 44 65;;
 POTTIER1EMMANUEL;0;POTTIER;;PERSO;02 31 79 94 22;06 11 90 17 83;;PERSO
+POULLAIN;0;POULAIN;Arnaud;;;06 81 69 01 89;;
 POURCHERVERONIQUE;0;POURCHER;;;02 35 07 85 61;;;
 PREMIERRANG;0;Télécopie;;;02 31 23 28 16;;;
 PROMETAL;0;"marti ";"QUENTIN ";;;;q.marti@batiformes.com;
@@ -1027,7 +1034,7 @@ JFRFINANCES;0;sfgdfb;;Comptabilité;;;nk@cinemasreynaud.fr;Comptabilité
 SNEIC;0;ghvb,;;Comptabilité;;;compta@cinemasreynaud.fr;Comptabilité
 FAYASARL;1;MARGUERITTE;Elisabeth;;;;;
 LESJEUNESPOUSSES;0;Bauqué;;compta;;07 72 51 82 94;compta@lesjeunespousses.fr;compta
-HOMERENOVNORMANDI;0;Home rénovation Normandie;;;;0623382708;;
+HOMERENOVNORMANDI;0;Home rénovation Normandie;;;;06 23 38 27 08;;
 TRANSPORTFARCY;0;PICOT;Delphine;;;06 99 15 47 47;compta@transports-farcyfils.fr;
 DOUANESNORMANDIE;0;COGNIEUX;"Gilles ";;;;gilles.cognieux@douane.finances.gouv.fr;
 DOUANESNORMANDIE;1;DREZET;Christel;;;06 08 21 82 61;christel.drezet@douane.finances.gouv.fr;
@@ -1044,3 +1051,8 @@ MANGOTECHNOLOGIES;0;"CAUDRON ";Jean-Christophe;Co-gérant;0562668079;;contact@ma
 VIDELIO;0;TERNOIS;Lise;;01 40 55 59 84;;lternois@videlio.com;
 SMISMB;1;"COURTEILLE ";Laurence;;02 31 92 54 93;;;
 KINOCAEN;1;AUDOUARD;Rosalie;;;06 60 32 84 20;;
+LOGIQFINANCE;0;xxxxx;;comptabilité;;;haouragh@logiq-group.com;comptabilité
+AMBULANCEDENUIT;1;Directrice;;;02 31 74 84 98;;;
+CD50;0;Emmanuel ALLIX;Validation des factures;;02 14 29 02 96;06 32 80 62 06;;
+TRACEM;0;LE TELLIER;Pascal;Gérant;0231591051;;direction@vuesdintrieurs.fr;Gérant
+MYSTOREOILTEE;1;Mouna;;Comptable;;;mdeffalah@sipromad.com;Comptable

@@ -3,6 +3,7 @@
 class BimpObject extends BimpCache
 {
 
+    
     public $db = null;
     public $cache_id = 0;
     public $module = '';
@@ -1381,8 +1382,8 @@ class BimpObject extends BimpCache
             $instance_parent_module = $instance->getParentModule();
             $instance_parent_object_name = $instance->getParentObjectName();
 
-            if ($instance_parent_module === $this->module &&
-                    $instance_parent_object_name === $this->object_name) {
+            if (is_a($this, $instance_parent_object_name) || ($instance_parent_module === $this->module &&
+                    $instance_parent_object_name === $this->object_name)) {
                 if (!$instance->isLoaded()) {
                     return 1;
                 }

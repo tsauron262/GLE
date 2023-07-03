@@ -147,7 +147,7 @@ class BWS_Profile extends BimpObject
 
     public function validate()
     {
-
+        $errors = array();
         $name = $this->getData('name');
 
         $where = 'name = \'' . $name . '\'';

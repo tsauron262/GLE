@@ -5432,7 +5432,7 @@ ORDER BY a.val_max DESC");
                             $frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
                             $new_propal->dol_object->addline(
                                     "Machine(s) : " . $this->getNomMachine() .
-                                    "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, 3470, $client->dol_object->remise_percent, 'HT', null, null, 1);
+                                    "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, BimpCore::getConf('id_prod_refus', '', 'bimpsupport'), $client->dol_object->remise_percent, 'HT', null, null, 1);
 
                             $new_propal->fetch($new_propal->id);
                             $new_propal->dol_object->valid($user);

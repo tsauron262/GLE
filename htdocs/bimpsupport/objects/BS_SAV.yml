@@ -632,14 +632,6 @@ forms:
                 field: sav_pro
             prestataire_number: 
                 field: prestataire_number
-            send_msg: 
-                custom: 1
-                label: Notifier le client de la création du SAV
-                input_name: send_msg
-                data_type: bool
-                input: 
-                    type: toggle
-                value: 1
             id_ticket: 
                 field: id_ticket
                 hidden: 1
@@ -648,7 +640,23 @@ forms:
             files: 
                 object: files
                 multiple: 1
-              
+            send_msg: 
+                custom: 1
+                label: Notifier le client de la création du SAV
+                input_name: send_msg
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            create_signature_pc: 
+                custom: 1
+                label: Demander la signature du bon de prise en charge
+                input_name: create_signature_pc
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+                
     prise_en_charge: 
         rows: 
             code_centre: 

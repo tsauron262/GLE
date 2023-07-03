@@ -6,6 +6,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/extends/entities/ldlc_filiale/
 
 class Bimp_CommandeFourn_ExtEntity extends Bimp_CommandeFourn_LdlcFiliale
 {
-    public $idLdlc = 6;
+    public $idLdlc = 128866;
     
 }

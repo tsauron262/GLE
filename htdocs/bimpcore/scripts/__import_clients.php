@@ -8,7 +8,7 @@ set_time_limit(0);
 
 ignore_user_abort(0);
 
-top_htmlhead('', 'IMPORT CLIENTS', 0, 0, array(), array());
+top_htmlhead('', 'IMPORT FOURNS', 0, 0, array(), array());
 
 echo '<body>';
 
@@ -52,7 +52,7 @@ $keys = array(
 $bdb = new BimpDb($db);
 
 $dir = DOL_DOCUMENT_ROOT . '/bimpcore/scripts/docs/';
-$file_name = 'import_clients.csv';
+$file_name = 'import_fourn.csv';
 
 if (!file_exists($dir . $file_name)) {
     echo BimpRender::renderAlerts('Le fichier "' . $dir . $file_name . '" n\'existe pas');
@@ -126,9 +126,9 @@ $nOk = 0;
 $nFails = 0;
 
 foreach ($rows as $r) {
-    $societe->code_client = -1;
-    $societe->get_codeclient($societe, 0);
-    
+    $societe->code_fournisseur = -1;
+    $societe->get_codefournisseur($societe, 1);
+
     $id_pays = 0;
     if ($r['code_pays'] == 'FRA' || $r['pays'] == 'FRANCE') {
         $id_pays = 1;
@@ -137,23 +137,22 @@ foreach ($rows as $r) {
     }
 
     if ($bdb->insert('societe', array(
-                'code_client'              => $societe->code_client,
-                'code_compta'              => $r['ref'],
-                'nom'                      => $r['name'],
-                'client'                   => 1,
-                'fk_typent'                => ($r['siret'] ? 100 : 8),
-                'email'                    => $r['email'],
-                'phone'                    => $r['phone'],
-                'siret'                    => $r['siret'],
-                'siren'                    => ($r['siret'] ? substr($r['siret'], 0, 9) : ''),
-                'tva_intra'                => $r['num_tva'],
-                'address'                  => $r['street'],
-                'zip'                      => $r['zip'],
-                'town'                     => $r['town'],
-                'fk_pays'                  => $id_pays,
-                'outstanding_limit_manuel' => $r['encours'],
-                'date_last_activity'       => substr($r['last_activity'], 0, 10),
-                'datec'                    => substr($r['date_create'], 0, 19),
+                'code_fournisseur'        => $societe->code_fournisseur,
+                'code_compta'        => $r['ref'],
+                'nom'                => $r['name'],
+                'fournisseur'        => 1,
+                'fk_typent'          => ($r['siret'] ? 100 : 8),
+                'email'              => $r['email'],
+                'phone'              => $r['phone'],
+                'siret'              => $r['siret'],
+                'siren'              => ($r['siret'] ? substr($r['siret'], 0, 9) : ''),
+                'tva_intra'          => $r['num_tva'],
+                'address'            => $r['street'],
+                'zip'                => $r['zip'],
+                'town'               => $r['town'],
+                'fk_pays'            => $id_pays,
+                'date_last_activity' => substr($r['last_activity'], 0, 10),
+                'datec'              => substr($r['date_create'], 0, 19),
             )) <= 0) {
         echo 'ECHEC insertion - ' . $r['ref'] . ' - ' . $bdb->err() . '<br/>';
         $nFails++;

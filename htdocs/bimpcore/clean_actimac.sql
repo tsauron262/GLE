@@ -114,3 +114,29 @@ TRUNCATE TABLE `llx_stock_mouvement_extrafields`;
 TRUNCATE TABLE `llx_Synopsis_Histo_User`;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+--------
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE `llx_be_equipment`;
+TRUNCATE TABLE `llx_be_equipment_place`;
+TRUNCATE TABLE `llx_be_package_product`;
+
+TRUNCATE TABLE `llx_product`;
+TRUNCATE TABLE `llx_product_copy`;
+TRUNCATE TABLE `llx_product_extrafields`;
+TRUNCATE TABLE `llx_product_fournisseur_price`;
+TRUNCATE TABLE `llx_product_fournisseur_price_extrafields`;
+TRUNCATE TABLE `llx_product_fournisseur_price_log`;
+TRUNCATE TABLE `llx_product_price`;
+TRUNCATE TABLE `llx_product_remise_arriere`;
+TRUNCATE TABLE `llx_product_stock`;
+
+TRUNCATE TABLE `llx_stock_mouvement`;
+TRUNCATE TABLE `llx_stock_mouvement_extrafields`;
+
+
+SET FOREIGN_KEY_CHECKS = 1;

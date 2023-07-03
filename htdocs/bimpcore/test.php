@@ -74,7 +74,7 @@ if (!$user->admin) {
 
 $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 946);
 
-$contacts = $cli->getChildrenList('contacts');
+$contacts = $cli->getChildrenList('public_users');
 
 echo 'Cli - ' . $cli->getName();
 echo '<pre>';

@@ -88,6 +88,7 @@ print_r($contacts);
 echo '</pre>';
 
 $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', 946);
+$contacts = $cli->getChildrenList('contacts');
 
 echo 'CONTACTS SOC<pre>';
 print_r($contacts);

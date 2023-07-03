@@ -59,6 +59,9 @@ BWSApi::$requests['reopenDemandeFinancement'] = array(
     'status'         => array('label' => 'Statut de la demande de financement', 'data_type' => 'int', 'required' => 1)
 );
 
+BWSApi::$requests['getContractInfo'] = array(
+);
+
 class BWSApi_ExtEntity extends BWSApi
 {
 
@@ -297,5 +300,12 @@ class BWSApi_ExtEntity extends BWSApi
         }
 
         return $response;
+    }
+    
+    protected function wsRequest_getContractInfo(){
+        return array(
+                            'success'        => 1,
+                            'contract_infos' => array('ref'=>'hjhjkhkjkh', 'cli'=> 'hjkhkjhj')
+        );
     }
 }

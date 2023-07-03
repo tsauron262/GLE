@@ -54,7 +54,6 @@ if (!$user->admin) {
 //echo '<pre>';
 //print_r($values);
 //exit;
-
 //$data = json_decode(file_get_contents(__DIR__ . '/test.json'), 1);
 //
 //global $db;
@@ -77,6 +76,7 @@ $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 946);
 
 $contacts = $cli->getChildrenList('contacts');
 
+echo 'Cli - ' . $cli->getName();
 echo '<pre>';
 print_r($contacts);
 exit;

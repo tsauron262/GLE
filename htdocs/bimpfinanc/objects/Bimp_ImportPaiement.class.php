@@ -82,7 +82,7 @@ class Bimp_ImportPaiement extends BimpObject
 //                        $p->facid = (int) $idFact;
 
                 if ($p->create($user) < 0) {
-                    $msg = 'Echec de l\'ajout à la facture du paiement de ' . $montant;
+                    $msg = 'Echec de l\'ajout à la facture du paiement de ' . $montant. 'client : '.$child->getData('name');
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), $msg);
                 } else {
                     global $conf;

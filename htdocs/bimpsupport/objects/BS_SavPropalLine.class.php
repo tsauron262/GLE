@@ -335,9 +335,9 @@ class BS_SavPropalLine extends Bimp_PropalLine
     {
         $is_garantie = ($this->getData('linked_object_name') === 'sav_garantie');
 
-        $sav = $this->getParentInstance();
-        if (BimpObject::objectLoaded($sav)) {
-//            $sav = $propal->getSav();
+        $propal = $this->getParentInstance();
+        if (BimpObject::objectLoaded($propal)) {
+            $sav = $propal->getSav();
 
             $errors = parent::delete($warnings, $force_delete);
 

@@ -3,6 +3,7 @@
 class BimpObject extends BimpCache
 {
 
+    
     public $db = null;
     public $cache_id = 0;
     public $module = '';

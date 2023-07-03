@@ -132,6 +132,40 @@ foreach ($lines as $idx => $line) {
     $rows[] = $row;
 }
 
+foreach ($rows as $r) {
+    echo '<br/>' . $r['ref'] . ' : ';
+    $where = 'ref LIKE \'___-' . $r['ref'] . '\'';
+
+    if ((string) $r['ean']) {
+        $where .= ' OR barcode = \'' . $r['ean'] . '\'';
+    }
+
+    $prod = null;
+    $id_product = (int) $bdb->getValue('product', 'rowid', $where);
+
+    if ($id_product) {
+        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+
+        echo $prod->getLink() . ' - ';
+
+        $pu_ht = (float) $r['pu_ht'] + (float) $r['eco_tax'];
+
+        if ($prod->getData('price') == $pu_ht) {
+            echo ' PRIX DEJA OK';
+        } else {
+            BimpTools::resetDolObjectErrors($prod->dol_object);
+            if ($prod->dol_object->updatePrice($pu_ht, 'HT', $user, 20) < 0) {
+                echo BimpRender::renderAlerts('FAIL - ' . BimpTools::getErrorsFromDolObject($prod->dol_object));
+            } else {
+                echo '<span class="success">MAJ OK</span>';
+            }
+        }
+    } else {
+        echo '<span class="danger">NO PROD</span>';
+    }
+}
+
+exit;
 //echo '<pre>';
 //print_r($rows);
 //exit;
@@ -164,7 +198,7 @@ if (!(int) BimpTools::getValue('exec', 0)) {
     exit;
 }
 
-import($rows, $refs_fourn);
+//import($rows, $refs_fourn);
 
 function cleanPrice($price)
 {

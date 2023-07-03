@@ -92,6 +92,10 @@ class GSX_Const
         897316 => array(
             'test' => array('AppleCare-Partner-0001442050.Test.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Test.apple.com.key'),
             'prod' => array('AppleCare-Partner-0001442050.Prod.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Prod.apple.com.key')
+        ),
+        608111 => array(
+             'test' => array('AppleCare-Partner-0000608111.Test.apple.com.fullchain.pem', 'tresor', 'AppleCare-Partner-0000608111.Test.apple.com.key'),
+             'prod' => array('AppleCare-Partner-0000608111.Prod.apple.com.fullchain.pem', 'tresor', 'AppleCare-Partner-0000608111.Prod.apple.com.key')
         )
     );
     public static $test_ids = array(

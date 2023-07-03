@@ -215,7 +215,7 @@ fields:
         type: money    
     model_pdf: 
         label: Modèle de document par défaut
-        dol_prop: modelpdf
+        dol_prop: model_pdf
         values: 
             array: modelsPdf
         sortable: 0

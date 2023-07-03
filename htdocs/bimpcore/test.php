@@ -77,9 +77,21 @@ $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', 946);
 $contacts = $cli->getChildrenList('public_users');
 
 echo 'Cli - ' . $cli->getName();
-echo '<pre>';
+echo 'USERS<pre>';
 print_r($contacts);
-exit;
+echo '</pre>';
+
+$contacts = $cli->getChildrenList('contacts');
+
+echo 'CONTACTS<pre>';
+print_r($contacts);
+echo '</pre>';
+
+$cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', 946);
+
+echo 'CONTACTS SOC<pre>';
+print_r($contacts);
+echo '</pre>';
 
 echo '<br/>FIN';
 echo '</body></html>';

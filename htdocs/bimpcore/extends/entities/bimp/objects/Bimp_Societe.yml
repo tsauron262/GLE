@@ -3,6 +3,7 @@ objects:
         instance: 
             id_object:
                 field_value: entrepot
+                
 fields: 
     entrepot_spare:
         label: Entrepot SPARE

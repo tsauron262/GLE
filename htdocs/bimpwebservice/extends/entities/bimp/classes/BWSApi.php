@@ -305,7 +305,7 @@ class BWSApi_ExtEntity extends BWSApi
     protected function wsRequest_getContractInfo(){
         return array(
                             'success'        => 1,
-                            'contract_infos' => array('ref'=>'hjhjkhkjkh', 'cli'=> 'hjkhkjhj')
+                            'contract_infos' => array(array('ref'=>'hjhjkhkjkh', 'cli'=> 'hjkhkjhj'), array('ref'=>'ppopop', 'cli'=> 'rtrtrtrt'))
         );
     }
 }

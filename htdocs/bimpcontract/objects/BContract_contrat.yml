@@ -36,6 +36,8 @@ objects:
                 field_value: fk_soc
     
     bimp_client:
+        relation: hasOne
+        delete: 0
         instance:
             bimp_object: 
                 module: bimpcore

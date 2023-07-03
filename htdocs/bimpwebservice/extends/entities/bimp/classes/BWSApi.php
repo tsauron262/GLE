@@ -60,6 +60,8 @@ BWSApi::$requests['reopenDemandeFinancement'] = array(
 );
 
 BWSApi::$requests['getContractInfo'] = array(
+    'date_valid'   => array('label' => 'Date ou le contrat doit être actif', 'required' => 0), 
+    'ref_cli'      => array('label' => 'Code client', 'required' => 0),
 );
 
 class BWSApi_ExtEntity extends BWSApi

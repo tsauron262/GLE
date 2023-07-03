@@ -6023,23 +6023,25 @@ ORDER BY a.val_max DESC");
             if (count($pdf_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du Bon de restitution');
             } else {
-                // Création signature: 
-                $signature_errors = $this->createSignature('sav_resti');
+                if ((int) BimpTools::getValue('create_signature_resti', 0)) {
+                    // Création signature: 
+                    $signature_errors = $this->createSignature('sav_resti');
 
-                if (count($signature_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');
-                } else {
-                    $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
-                                'id_signature' => $this->getData('id_signature_resti'),
-                                'code'         => 'default'
-                                    ), true);
+                    if (count($signature_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');
+                    } else {
+                        $signataire = BimpCache::findBimpObjectInstance('bimpcore', 'BimpSignataire', array(
+                                    'id_signature' => $this->getData('id_signature_resti'),
+                                    'code'         => 'default'
+                                        ), true);
 
-                    if (BimpObject::objectLoaded($signataire) && $signataire->isActionAllowed('signElec')) {
-                        $success_callback .= 'setTimeout(function() {' . $signataire->getJsActionOnclick('signElec', array(), array(
-                                    'form_name'   => 'sign_elec',
-                                    'no_button'   => true,
-                                    'modal_title' => 'Signature électronique du bon de restitution "BR-' . $this->getRef() . '"'
-                                )) . '}, 500);';
+                        if (BimpObject::objectLoaded($signataire) && $signataire->isActionAllowed('signElec')) {
+                            $success_callback .= 'setTimeout(function() {' . $signataire->getJsActionOnclick('signElec', array(), array(
+                                        'form_name'   => 'sign_elec',
+                                        'no_button'   => true,
+                                        'modal_title' => 'Signature électronique du bon de restitution "BR-' . $this->getRef() . '"'
+                                    )) . '}, 500);';
+                        }
                     }
                 }
             }
@@ -6909,12 +6911,11 @@ ORDER BY a.val_max DESC");
                     }
 
                     // Création de la signature du Bon de prise en charge:
-                    if (BimpTools::getValue('create_signature_pc', 0)) {
+                    if ((int) BimpTools::getValue('create_signature_pc', 0)) {
                         $signature_errors = $this->createSignature('sav_pc');
-                    }
-
-                    if (count($signature_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($signature_errors);
+                        if (count($signature_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($signature_errors);
+                        }
                     }
                 }
             }

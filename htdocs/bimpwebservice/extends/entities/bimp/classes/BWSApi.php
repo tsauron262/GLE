@@ -337,7 +337,8 @@ class BWSApi_ExtEntity extends BWSApi
 //                $cli = $contract->getChildObject("bimp_client");
                 $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $contract->getData('fk_soc'));
                 $ln['client'] = array('ref' => $cli->getData('code_client'), 'nom' => $cli->getData('nom'));
-                $contacts = $cli->getChildrenObjects('contacts');
+//                $contacts = $cli->getChildrenObjects('contacts');
+                $contacts = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Contact', array('fk_soc'=>$contract->getData('fk_soc')));
                 foreach ($contacts as $contact) {
                     $ln['client']['contacts'][] = array("nom" => $contact->displayNomComplet(), 'mail' => $contact->getData('email'));
                 }

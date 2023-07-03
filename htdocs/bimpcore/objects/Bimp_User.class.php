@@ -1959,6 +1959,10 @@ class Bimp_User extends BimpObject
             'success_callback' => $success_callback
         );
     }
+    
+    public function getFullName(){
+        return $this->getData('firstname').' '.$this->getData('lastname');
+    }
 
     public function actionAddRight($data, &$success)
     {

@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * curl -k -X POST -H "BWS-LOGIN: cGV0ZXJAYmltcC5mcg==" "https://erp.bimp.fr/bimp8/bimpwebservice/request.php?req=authenticate" -F pword=cVpwYlc4M0pTb0M2
+
+
+
+
+curl -k -X POST -H "BWS-TOKEN: Zkd5Y0RiTFhBek4xOTByWU5PVDBxVjM1" -H "BWS-LOGIN: cGV0ZXJAYmltcC5mcg==" "https://erp.bimp.fr/bimp8/bimpwebservice/request.php?req=getContractInfo"
+ */
+
 class BWSApi
 {
 

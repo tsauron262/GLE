@@ -42,3 +42,7 @@ params:
         
     default_name:
         label: Nom Commercial
+        
+    id_prod_refus:
+        label: Id du produit devis refusé
+        required: 1

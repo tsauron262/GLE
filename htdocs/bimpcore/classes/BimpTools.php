@@ -237,7 +237,7 @@ class BimpTools
                 }
             }
         }
-        
+
         return (count($errors) ? false : true);
     }
 
@@ -509,9 +509,9 @@ class BimpTools
 
             $where = '(`fk_source` = ' . (int) $dol_object->id . ' AND `sourcetype` = \'' . $dol_object->element . '\')';
             $where .= ' OR (`fk_target` = ' . (int) $dol_object->id . ' AND `targettype` = \'' . $dol_object->element . '\')';
-            
+
             $rows = $bdb->getRows('element_element', $where, null, 'array');
-            
+
             if (!is_null($rows) && count($rows)) {
                 foreach ($rows as $r) {
                     if ((int) $r['fk_source'] === (int) $dol_object->id &&
@@ -519,7 +519,7 @@ class BimpTools
                         if (!empty($type_filters) && !in_array($r['targettype'], $type_filters)) {
                             continue;
                         }
-                        
+
                         $list[] = array(
                             'id_object' => (int) $r['fk_target'],
                             'type'      => $r['targettype']
@@ -529,7 +529,7 @@ class BimpTools
                         if (!empty($type_filters) && !in_array($r['sourcetype'], $type_filters)) {
                             continue;
                         }
-                        
+
                         $list[] = array(
                             'id_object' => (int) $r['fk_source'],
                             'type'      => $r['sourcetype']
@@ -886,7 +886,7 @@ class BimpTools
         return $parent->getConf('fields/' . $id_object_field . '/object/primary', null, false);
     }
 
-    public static function getNextRef($table, $field, $prefix = '', $numCaractere = null)
+    public static function getNextRef($table, $field, $prefix = '', $numCaractere = null, &$errors = array())
     {
 
         $prefix = str_replace("{AA}", date('y'), $prefix);
@@ -918,9 +918,9 @@ class BimpTools
 
         if ($numCaractere > 0) {
             $diff = $numCaractere - strlen($num);
-            if ($diff < 0)
-                die("impossible trop de caractére BimpTools::GetNextRef");
-            else {
+            if ($diff < 0) {
+                $errors[] = 'Trop de caractéres pour l\'obtention d\'une nouvelle ref';
+            } else {
                 for ($i = 0; $i < $diff; $i++) {
                     $num = "0" . $num;
                 }
@@ -2156,7 +2156,7 @@ class BimpTools
 
         return $day;
     }
-    
+
     public static function isDateRangeValid($date_start, $date_end, &$errors = array())
     {
         if (!$date_start) {
@@ -2170,7 +2170,7 @@ class BimpTools
         if ($date_end < $date_start) {
             $errors[] = 'Date de fin inférieure à la date de début';
         }
-        
+
         return (count($errors) ? 0 : 1);
     }
 
@@ -3258,11 +3258,11 @@ class BimpTools
 //        return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $file; => Selon changelog DOL16 (A vérifier) 
         return DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=logos/' . $file;
     }
-    
+
     public static function verifCond($s)
     {
         // Adapté de dol_eval() : nécessaire pour contourner cetaines restrictions. 
-        
+
         $errors = array();
 
         if (preg_match('/[^a-z0-9\s' . preg_quote('^$_+-.*>&|=!?():"\',/@', '/') . ']/i', $s)) {
@@ -3681,7 +3681,7 @@ class BimpTools
         if (BimpObject::objectLoaded($user)) {
             return $user->getEmailOrSuperiorEmail($allow_default);
         }
-        
+
         if ($allow_default) {
             return (string) BimpCore::getConf('default_user_email', null);
         }

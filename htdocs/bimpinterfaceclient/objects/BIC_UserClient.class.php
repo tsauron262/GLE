@@ -852,7 +852,7 @@ class BIC_UserClient extends BimpObject
                     $sujet = "Mot de passe Interface Client LDLC Apple";
 
                     $message = "Bonjour, <br /><br />";
-                    $message .= "Bienvenue sur le service d’assistante ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport').".<br />";
+                    $message .= "Bienvenue sur le service d’assistance ".BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport').".<br />";
                     $message .= "Cet espace vous est directement dédié. Il est là pour vous garantir les meilleures prestations possibles.<br /><br/>";
 
                     $contrats = $this->getContratsVisibles(true);

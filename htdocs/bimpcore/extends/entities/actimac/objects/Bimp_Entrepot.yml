@@ -1,0 +1,16 @@
+
+fields: 
+    ship_to: 
+        label: N° ShipTo
+        
+    code_journal_compta: 
+        label: Code journal
+        
+    compte_comptable_banque: 
+        label: Compte comptable banque
+        
+    compte_comptable: 
+        label: Compte comptable
+        
+    compte_aux: 
+        label: Compte aux.

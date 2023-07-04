@@ -353,7 +353,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
                 'Classe propal en cache'     => get_class(BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $this->getData('id_obj')))
                     ), true);
 
-            $propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $this->getData('id_obj'));
+//            $propal = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', $this->getData('id_obj'));
         }
 
         if (BimpObject::objectLoaded($propal)) {

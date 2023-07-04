@@ -3,7 +3,6 @@
 class BimpObject extends BimpCache
 {
 
-    
     public $db = null;
     public $cache_id = 0;
     public $module = '';
@@ -677,6 +676,12 @@ class BimpObject extends BimpCache
             $object_name = $this->getParentObjectName();
 
             if ($module && $object_name) {
+                if (is_a($this, 'BS_SavPropalLine')) {
+                    BimpCore::addlog('INFO PARENT SAV PROPAL LINE', 1, 'sav', $this, array(
+                        'module_parent' => $module,
+                        'objet parent'  => $object_name
+                    ));
+                }
                 $this->parent = BimpCache::getBimpObjectInstance($module, $object_name, $id_parent);
             }
         }
@@ -852,7 +857,7 @@ class BimpObject extends BimpCache
             $order_by = $this->getConf($path . '/order_by', '');
             $disabled = $this->getConf($path . '/disabled', array(), true, 'array');
             $order_way = $this->getConf($path . '/order_way', 'asc');
-            
+
             if (!$order_by) {
                 if ($ref_prop) {
                     $order_by = $this->getFieldSqlKey($ref_prop, 'a', null, $filters, $joins);
@@ -922,7 +927,7 @@ class BimpObject extends BimpCache
         return array(
             'fields_search' => $fields_search,
             'fields_return' => $fields_return,
-            'disabled'       => $disabled,
+            'disabled'      => $disabled,
             'filters'       => $filters,
             'joins'         => $joins,
             'label_syntaxe' => $syntaxe,
@@ -1046,25 +1051,24 @@ class BimpObject extends BimpCache
                                 $card_html = addslashes(htmlentities($bc_card->renderHtml()));
                             }
                         }
-                        
+
                         $disabled = 0;
                         foreach ($params['disabled'] as $field => $inut) {
-                            if(isset($r[$field]) && !$r[$field])
+                            if (isset($r[$field]) && !$r[$field])
                                 $disabled = 1;
                         }
 
-                        if(!$disabled){
+                        if (!$disabled) {
                             $results[(int) $r[$primary]] = array(
                                 'id'    => (int) $r[$primary],
                                 'label' => $label,
                                 'card'  => $card_html
                             );
-                        }
-                        else{
+                        } else {
                             $resultsDisabled[(int) $r[$primary]] = array(
-                                'id'    => (int) $r[$primary],
-                                'label' => $label,
-                                'card'  => $card_html,
+                                'id'       => (int) $r[$primary],
+                                'label'    => $label,
+                                'card'     => $card_html,
                                 'disabled' => 1
                             );
                         }

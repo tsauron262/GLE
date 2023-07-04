@@ -4605,7 +4605,7 @@ class ObjectLine extends BimpObject
         }
 
         if (BimpTools::isSubmit('line_pa_ht')) {
-            $line_pa = BimpTools::getValue('line_pa_ht');
+            $line_pa = (float) BimpTools::getValue('line_pa_ht');
         } elseif (BimpTools::isSubmit('line_id_fourn_price')) {
             $fournPrice = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) BimpTools::getValue('line_id_fourn_price'));
             if (BimpObject::objectLoaded($fournPrice)) {

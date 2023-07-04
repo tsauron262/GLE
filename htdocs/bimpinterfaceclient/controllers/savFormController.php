@@ -1018,7 +1018,7 @@ class savFormController extends BimpPublicController
             $base_url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
 
             if ($base_url) {
-                $cancel_url = $base_url . '?fc=savForm&cancel_rdv=1';
+                $cancel_url = $base_url . 'fc=savForm&cancel_rdv=1';
                 if (BimpObject::objectLoaded($sav)) {
                     $cancel_url .= '&sav=' . $sav->id . '&r=' . $sav->getRef();
                 }

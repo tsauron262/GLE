@@ -676,7 +676,7 @@ class BimpObject extends BimpCache
             $object_name = $this->getParentObjectName();
 
             if ($module && $object_name) {
-                if (is_a($this, 'BS_SavPropalLine')) {
+                if (BimpCore::isEntity('actimac') && is_a($this, 'BS_SavPropalLine')) {
                     BimpCore::addlog('INFO PARENT SAV PROPAL LINE', 1, 'sav', $this, array(
                         'module_parent' => $module,
                         'objet parent'  => $object_name

@@ -59,6 +59,10 @@ if (!$user->admin) {
 
 $data = json_decode(file_get_contents(__DIR__ . '/test.json'), 1);
 
+echo 'DATA<pre>';
+print_r($data);
+echo '</pre>';
+
 global $db;
 $extrafields = new ExtraFields($db);
 //$attrname, $label, $type, $pos, $size, $elementtype, $unique = 0, $required = 0, $default_value = '', $param = '', $alwayseditable = 0, $perms = '', $list = '-1', $help = '', $computed = '', $entity = '', $langfile = '', $enabled = '1', $totalizable = 0, $printable = 0

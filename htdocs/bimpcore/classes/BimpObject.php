@@ -9126,7 +9126,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?';
         }
 
-        return BimpCore::getConf('base_url', '', 'bimpinterfaceclient') . '?';
+        return BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
     }
 
     public function getPublicUrl($internal = true)

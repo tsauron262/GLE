@@ -289,7 +289,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
             $tab = array(
                 array("tag"      => "Stream", "attrs"    => array("type" => "order", 'version' => "1.0"),
                     "children" => array(
-                        array("tag"      => "Order", "attrs"    => array("date" => date("Y-m-d H:i:s"), 'reference' => $this->getData('ref'), "external_identifier" => $this->getData('ref'), "currency" => "EUR", "source" => "BIMP", "shipping_vat_on" => $portHt, "shipping_vat_off" => $portTtc, "shipping_mode" => $shipping_mode),
+                        array("tag"      => "Order", "attrs"    => array("date" => date("Y-m-d H:i:s"), 'reference' => $this->getData('ref'), "external_identifier" => $this->getData('ref'), "currency" => "EUR", "source" => $this->code_representant, "shipping_vat_on" => $portHt, "shipping_vat_off" => $portTtc, "shipping_mode" => $shipping_mode),
                             "children" => array(
                                 array("tag"      => "Customer", "attrs"    => array("identifiedby" => "code", 'linked_entity_code' => "PRO"),
                                     "children" => array(

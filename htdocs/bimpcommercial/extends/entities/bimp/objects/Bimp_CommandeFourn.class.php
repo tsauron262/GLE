@@ -8,4 +8,5 @@ class Bimp_CommandeFourn_ExtEntity extends Bimp_CommandeFourn_LdlcFiliale
 {
     
     public $idLdlc = 230880;
+    public $code_representant = "BIMP";
 }

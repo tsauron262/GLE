@@ -3700,8 +3700,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         $this->allGarantie = true;
 
+        $bProp = $this->getChildObject('propal');
         if (is_null($propal)) {
-            $bProp = $this->getChildObject('propal');
             if (BimpObject::objectLoaded($bProp)) {
                 $propal = $bProp->dol_object;
             }
@@ -3716,7 +3716,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         BimpObject::loadClass($this->module, 'BS_SavPropalLine');
 
-        foreach ($this->getChildrenObjects('propal_lines', array(
+        foreach ($bProp->getChildrenObjects('propal_lines', array(
             'type' => array("in" => array(BS_SavPropalLine::LINE_PRODUCT, BS_SavPropalLine::LINE_FREE)),
         )) as $line) {
             if ((int) $line->pu_ht > 0) {

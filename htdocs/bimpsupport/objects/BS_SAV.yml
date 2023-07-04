@@ -74,15 +74,15 @@ objects:
             id_object: 
                 field_value: id_facture_avoir
                 
-    propal_lines: 
-        relation: hasMany
-        delete: 0
-        instance: 
-            bimp_object: BS_SavPropalLine
-        list: 
-            filters: 
-                id_obj: 
-                    field_value: id_propal
+#    propal_lines: 
+#        relation: hasMany
+#        delete: 0
+#        instance: 
+#            bimp_object: BS_SavPropalLine
+#        list: 
+#            filters: 
+#                id_obj: 
+#                    field_value: id_propal
                     
     apple_parts: 
         relation: hasMany

@@ -279,7 +279,7 @@ class BS_SAV extends BimpObject
         $propal = $this->getChildObject('propal');
         if ($propal->isLoaded()) {
             $montant += $propal->getData('total_ht');
-            $lines = $this->getChildrenObjects('propal_lines');
+            $lines = $this->getPropalLines();
             foreach ($lines as $lineS) {
                 if ($lineS->getData('linked_object_name') == 'sav_garantie') {
                     $montant -= $lineS->getTotalHT(true);
@@ -519,7 +519,7 @@ class BS_SAV extends BimpObject
     {
         if ($this->isLoaded()) {
             BimpObject::loadClass('bimpsupport', 'BS_SavPropalLine');
-            $lines = $this->getChildrenObjects('propal_lines', array(
+            $lines = $this->getPropalLines(array(
                 'type'               => BS_SavPropalLine::LINE_PRODUCT,
                 'linked_object_name' => ''
             ));
@@ -1360,6 +1360,17 @@ class BS_SAV extends BimpObject
     }
 
     // Getters données: 
+
+    public function getPropalLines($filters = array())
+    {
+        $propal = $this->getChildObject('propal');
+
+        if (BimpObject::objectLoaded($propal)) {
+            return $propal->getChildrenObjects('lines', $filters);
+        }
+
+        return array();
+    }
 
     public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '', $card = '')
     {
@@ -3716,7 +3727,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         BimpObject::loadClass($this->module, 'BS_SavPropalLine');
 
-        foreach ($bProp->getChildrenObjects('propal_lines', array(
+        foreach ($this->getPropalLines(array(
             'type' => array("in" => array(BS_SavPropalLine::LINE_PRODUCT, BS_SavPropalLine::LINE_FREE)),
         )) as $line) {
             if ((int) $line->pu_ht > 0) {
@@ -3743,7 +3754,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             }
         }
 
-//        foreach ($this->getChildrenObjects('propal_lines', array(
+//        foreach ($this->getPropalLines(array(
 //            'linked_object_name' => 'sav_apple_part'
 //        )) as $line) {
 //            if (!(int) $line->getData('out_of_warranty')) {
@@ -4388,7 +4399,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
     public function setAllStatutWarranty($garantie = false)
     {
-        foreach ($this->getChildrenObjects("propal_lines") as $line) {
+        foreach ($this->getPropalLines() as $line) {
             $prod = $line->getProduct();
             if ($line->getData('linked_object_name') == 'sav_apple_part' || (BimpObject::objectLoaded($prod) && stripos($prod->getData("ref"), "sav-niveau") !== false)) {
                 $out_of_warranty = $garantie ? 0 : 1;
@@ -4410,7 +4421,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if (!count($errors)) {
                 BimpObject::loadClass('bimpcommercial', 'ObjectLine');
                 $error_msg = 'Echec de la création de la réservation';
-                $lines = $this->getChildrenObjects('propal_lines', array(
+                $lines = $this->getPropalLines(array(
                     'type'               => ObjectLine::LINE_PRODUCT,
                     'linked_object_name' => ''
                 ));
@@ -5639,7 +5650,7 @@ ORDER BY a.val_max DESC");
                         $id_entrepot = (int) BimpTools::getArrayValueFromPath($centre_data, 'id_entrepot', 0);
                         $codemove = 'SAV' . $this->id . '_';
 
-                        foreach ($this->getChildrenObjects('propal_lines') as $line) {
+                        foreach ($this->getPropalLines() as $line) {
                             $product = $line->getProduct();
 
                             if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === Product::TYPE_PRODUCT) {
@@ -6138,7 +6149,7 @@ ORDER BY a.val_max DESC");
 //
 //        BimpObject::loadClass('bimpsupport', 'BS_SavPropalLine');
 //
-//        foreach ($this->getChildrenObjects('propal_lines', array(
+//        foreach ($this->getPropalLines(array(
 //            'type'               => BS_SavPropalLine::LINE_PRODUCT,
 //            'linked_object_name' => ''
 //        )) as $line) {

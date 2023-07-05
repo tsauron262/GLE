@@ -5397,12 +5397,13 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $this->reset();
 
         if (!is_null($parent) && is_object($parent)) {
-            if (!is_a($parent, $this->getParentObjectName())) {
-                BimpCore::addlog('Instance parente invalide dans fetch()', 3, 'bimpcore', $this, array(
-                    'Attendu' => $this->getParentObjectName(),
-                    'Obtenu'  => get_class($parent)
-                        ), true);
-            } else {
+            if (is_a($parent, $this->getParentObjectName())) {
+//            if (!is_a($parent, $this->getParentObjectName())) {
+//                BimpCore::addlog('Instance parente invalide dans fetch()', 3, 'bimpcore', $this, array(
+//                    'Attendu' => $this->getParentObjectName(),
+//                    'Obtenu'  => get_class($parent)
+//                        ), true);
+//            } else {
                 $this->parent = $parent;
             }
         }

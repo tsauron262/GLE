@@ -107,6 +107,11 @@ params:
         label: Id du responsable des avoirs éducation
         def: 201
         
+    extra_emails_from: 
+        label: Adresse e-mails supplémentaires pour l'émetteur des envois d'e-mail des pièces commerciales.
+        info: Séparer chaque adresse e-mail par une virgule sans espace. 
+        def: ''
+        
     # PDFs: 
     pdf_add_cgv: 
         label: Ajouter CGV dans les docs PDF

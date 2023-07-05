@@ -1,6 +1,9 @@
 <?php
 
 global $tabCentre;
+
+// 0: tel / 1: email / 2: label / 3: ?? / 4: shipTo / 5: zip / 6: ville / 7: adresse / 8: ID entrepôt / 9: actif / 10: Centre répa de rattachement (fac.) 
+
 $tabCentre = array(
     "V"     => array("04 75 62 73 80", "sav07@ldlc.com", "Guillerand Granges", 19, "1461030", "07500", "GUILLERAND GRANGES", "Espace Colibri \n 85 rue Conrad Kilian", 25, 1),
     "M"     => array(/*"04 50 22 15 55"*/"04 50 32 89 07", "sav74@ldlc.com", "Meythet", 58, "462140", "74960", "Meythet", "3 RUE DU VIEUX MOULIN", 21, 0),

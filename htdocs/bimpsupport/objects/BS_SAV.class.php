@@ -5571,6 +5571,16 @@ ORDER BY a.val_max DESC");
             return array('errors' => $errors, 'warnings' => $warnings);
         }
 
+        // Vérif contact signataire: 
+        if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0)) {
+            if (!(int) BimpTools::getPostFieldValue('id_contact_signataire', 0)) {
+                $client_sav = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client_sav);
+                if (BimpObject::objectLoaded($client_sav) && $client_sav->isCompany()) {
+                    $errors[] = 'Veuillez sélectionner le contact signataire (obligatoire pour les clients pros)';
+                }
+            }
+        }
+
         // Vérifs paiements: 
         $caisse = null;
         $payment_1_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
@@ -6034,9 +6044,9 @@ ORDER BY a.val_max DESC");
             if (count($pdf_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du Bon de restitution');
             } else {
-                if ((int) BimpTools::getValue('create_signature_resti', 0)) {
+                if ((int) BimpTools::getPostFieldValue('create_signature_resti', 0)) {
                     // Création signature: 
-                    $signature_errors = $this->createSignature('sav_resti');
+                    $signature_errors = $this->createSignature('sav_resti', BimpTools::getPostFieldValue('id_contact_signataire'));
 
                     if (count($signature_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');

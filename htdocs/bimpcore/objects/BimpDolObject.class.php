@@ -155,6 +155,14 @@ class BimpDolObject extends BimpObject
                     }
                 }
             }
+
+            $extra_emails = explode(',', BimpCore::getConf('extra_emails_from', null, 'bimpcommercial'));
+            if (!empty($extra_emails)) {
+                foreach ($extra_emails as $email) {
+                    $email = BimpTools::cleanEmailsStr($email);
+                    self::$cache[$cache_key][$email] = $email;
+                }
+            }
         }
 
         return self::$cache[$cache_key];
@@ -433,8 +441,7 @@ class BimpDolObject extends BimpObject
                 if (BimpObject::objectLoaded($user)) {
                     if (!$params['check_active'] || ($params['check_active'] && (int) $user->getData('statut'))) {
                         return $user->id;
-                    }
-                    elseif ($params['check_active'] && !(int) $user->getData('statut')) {
+                    } elseif ($params['check_active'] && !(int) $user->getData('statut')) {
                         if ($params['allow_superior']) {
                             if ((int) $user->getData('fk_user')) {
                                 $is_superior = true;

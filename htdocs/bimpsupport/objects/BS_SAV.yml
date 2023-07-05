@@ -873,7 +873,7 @@ forms:
               content: 
                   callback: renderEquipmentPlaceOptionInput
             - custom: 1
-              label: Demander la signature du bon de restitutionn
+              label: Demander la signature du bon de restitution
               input_name: create_signature_resti
               data_type: bool
               input: 

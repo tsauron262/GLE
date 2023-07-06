@@ -98,10 +98,11 @@ class OrderFournPDF extends BimpCommDocumentPDF
             switch ($this->bimpCommObject->getData('delivery_type')) {
                 case Bimp_CommandeFourn::DELIV_ENTREPOT:
                 default:
+                    global $mysoc;
                     $entrepot = $this->bimpCommObject->getChildObject('entrepot');
                     if (BimpObject::objectLoaded($entrepot)) {
                         if ($entrepot->address) {
-                            $html .= 'BIMP<br/>'.$entrepot->address . '<br/>';
+                            $html .= $mysoc->name.'<br/>'.$entrepot->address . '<br/>';
                             if ($entrepot->zip) {
                                 $html .= $entrepot->zip . ' ';
                             } else {

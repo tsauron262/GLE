@@ -486,7 +486,9 @@ Preferred Field
                                                     $line_data['position'], // J
                                                     $dt_fac->format('Ymd'),
                                                     '',
-                                                    ($is_educ ? str_replace('"', '', substr($soc_data['nom'], 0, 70)) : ($customer_code != 'EN' ? 'XXX' : '')), // M
+                                            
+                                            $is_educ  
+                                                    ($is_educ ? str_replace('"', '', substr($soc_data['nom'], 0, 70)) : (!in_array($customer_code,varray('EN', 'E4')) $customer_code != 'EN' ? 'XXX' : '')) , // M
                                                     ($is_educ ? str_replace(array('"', "
 ", '
 ', "\n", "\r", 'Hotel'), '', substr($soc_data['address'], 0, 70)) : ($customer_code != 'EN' ? 'XXX' : '')), // N

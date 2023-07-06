@@ -988,31 +988,35 @@ class BimpCore
 
     public static function requireFileForEntity($module, $file_name, $return_only = false)
     {
+        // Priorités: 
+        // - Fichier "Entité" 
+        // - Fichier "Version"
+        // - Fichier entité "default" 
+        // - Fichier de base
+
         $dir = DOL_DOCUMENT_ROOT . ($module ? '/' . $module : '') . '/';
+        $final_file_path = '';
         $entity = self::getEntity();
+        $version = self::getVersion();
 
-        if (!$entity) {
-            if (file_exists($dir . $file_name)) {
-                if ($return_only) {
-                    return $dir . $file_name;
-                }
-                require_once $dir . $file_name;
-                return true;
-            }
-
-            $entity = 'default';
-        } elseif (!file_exists($dir . 'extends/entities/' . $entity . '/' . $file_name)) {
-            $entity = 'default';
+        if ($entity && file_exists($dir . 'extends/entities/' . $entity . '/' . $file_name)) {
+            $final_file_path = $dir . 'extends/entities/' . $entity . '/' . $file_name;
+        } elseif ($version && file_exists($dir . 'extends/versions/' . $version . '/' . $file_name)) {
+            $final_file_path = $dir . 'extends/versions/' . $version . '/' . $file_name;
+        } elseif (file_exists($dir . 'extends/entities/default/' . $file_name)) {
+            $final_file_path = $dir . 'extends/entities/default/' . $file_name;
+        } elseif (file_exists($dir . $file_name)) {
+            $final_file_path = $dir . $file_name;
         }
 
-        if (file_exists($dir . 'extends/entities/' . $entity . '/' . $file_name)) {
+        if ($final_file_path) {
             if ($return_only) {
-                return $dir . $file_name;
+                return $final_file_path;
             }
-            require_once $dir . 'extends/entities/' . $entity . '/' . $file_name;
+            require_once $final_file_path;
             return true;
         }
-
+        
         return false;
     }
 

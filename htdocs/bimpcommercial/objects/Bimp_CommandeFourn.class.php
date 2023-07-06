@@ -2222,6 +2222,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
         $new_data['attente_info'] = 0;
 
         $new_data['date_creation'] = date('Y-m-d H:i:s');
+        $new_data['date_commande'] = null;
         $new_data['date_valid'] = null;
         $new_data['date_approve'] = null;
         $new_data['date_approve2'] = null;

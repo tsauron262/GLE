@@ -676,12 +676,6 @@ class BimpObject extends BimpCache
             $object_name = $this->getParentObjectName();
 
             if ($module && $object_name) {
-                if (BimpCore::isEntity('actimac') && is_a($this, 'BS_SavPropalLine')) {
-                    BimpCore::addlog('INFO PARENT SAV PROPAL LINE', 1, 'sav', $this, array(
-                        'module_parent' => $module,
-                        'objet parent'  => $object_name
-                    ));
-                }
                 $this->parent = BimpCache::getBimpObjectInstance($module, $object_name, $id_parent);
             }
         }
@@ -5402,8 +5396,16 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $this->reset();
 
-        if (!is_null($parent)) {
-            $this->parent = $parent;
+        if (!is_null($parent) && is_object($parent)) {
+            if (is_a($parent, $this->getParentObjectName())) {
+//            if (!is_a($parent, $this->getParentObjectName())) {
+//                BimpCore::addlog('Instance parente invalide dans fetch()', 3, 'bimpcore', $this, array(
+//                    'Attendu' => $this->getParentObjectName(),
+//                    'Obtenu'  => get_class($parent)
+//                        ), true);
+//            } else {
+                $this->parent = $parent;
+            }
         }
 
         if (!is_null($this->dol_object)) {

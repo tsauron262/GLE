@@ -74,15 +74,15 @@ objects:
             id_object: 
                 field_value: id_facture_avoir
                 
-    propal_lines: 
-        relation: hasMany
-        delete: 0
-        instance: 
-            bimp_object: BS_SavPropalLine
-        list: 
-            filters: 
-                id_obj: 
-                    field_value: id_propal
+#    propal_lines: 
+#        relation: hasMany
+#        delete: 0
+#        instance: 
+#            bimp_object: BS_SavPropalLine
+#        list: 
+#            filters: 
+#                id_obj: 
+#                    field_value: id_propal
                     
     apple_parts: 
         relation: hasMany
@@ -879,6 +879,20 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - custom: 1
+              label: Contact signataire
+              input_name: id_contact_signataire
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Obligatoire pour les clients pros
+              value: 
+                  field_value: id_contact
+              display_if: 
+                  field_name: create_signature_resti
+                  show_values: 1
                   
     close_refused: 
         title: Fermeture
@@ -940,6 +954,20 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - custom: 1
+              label: Contact signataire
+              input_name: id_contact_signataire
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      array: client_contacts
+                  help: Obligatoire pour les clients pros
+              value: 
+                  field_value: id_contact
+              display_if: 
+                  field_name: create_signature_resti
+                  show_values: 1
               
     contact: 
         title: Recontacter

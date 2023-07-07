@@ -166,9 +166,10 @@ class BS_SAV extends BimpObject
         return null;
     }
 
-    public function __construct($db)
+    public function __construct($module, $class)
     {
-        parent::__construct("bimpsupport", get_class($this));
+//        parent::__construct("bimpsupport", get_class($this));
+        parent::__construct($module, $class);
 
         $this->useCaisseForPayments = (int) BimpCore::getConf('use_caisse_for_payments');
 

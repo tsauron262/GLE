@@ -1,0 +1,18 @@
+# Entité : bimp
+table: bs_sav
+fields: 
+    status_ecologic: 
+        label: Status Ecologic
+        type: int
+        values: 
+            array: status_ecologic_list
+        default_value: 0
+    
+    
+
+fields_tables: 
+    infos: 
+        rows: 
+            status_ecologic:
+                field: status_ecologic
+                edit: 1

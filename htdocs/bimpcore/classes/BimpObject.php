@@ -849,7 +849,7 @@ class BimpObject extends BimpCache
             $joins = $this->config->getCompiledParams($path . '/joins');
             $filters = $this->config->getCompiledParams($path . '/filters');
             $order_by = $this->getConf($path . '/order_by', '');
-            $disabled = $this->getConf($path . '/disabled', array(), true, 'array');
+            $disabled = $this->getConf($path . '/disabled', array(), false, 'array');
             $order_way = $this->getConf($path . '/order_way', 'asc');
 
             if (!$order_by) {

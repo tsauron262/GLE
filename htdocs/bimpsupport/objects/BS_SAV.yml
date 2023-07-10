@@ -62,6 +62,12 @@ objects:
             id_object: 
                 field_value: id_propal
                 
+    facture: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: id_facture
+                
     facture_acompte: 
         extends: facture
         instance: 

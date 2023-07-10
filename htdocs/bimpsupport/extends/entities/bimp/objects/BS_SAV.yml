@@ -7,13 +7,9 @@ fields:
         values: 
             array: status_ecologic_list
         default_value: 0
-        display_if:
-            callback: asProdEcologic
     ecologic_data: 
         label: Données écologic
         type: json
-        display_if:
-            callback: asProdEcologic
     
     
 

@@ -46,7 +46,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         $resultList = array();
         foreach($result['ResponseData'] as $typeMat){
             if(is_null($type) || $typeMat['ProductId'] == $type){
-                foreach($typeMat['RepairCodes'] as $val)
+                foreach($typeMat['IRISSymtoms'] as $val)
                     $resultList[$val['Code']] = $val['Label'];
             }
         }
@@ -72,5 +72,147 @@ class BS_SAV_ExtEntity extends BS_SAV{
         
         
         return parent::actionToRestitute($data, $success);
+    }
+    
+    
+    public function actionSendDemandeEcologic($data, &$success){
+        $errors = $warnings = array();
+        $success = 'Demande envoyée';
+        $data = array();
+        $client = $this->getChildObject('client');
+        $nomClient = $client->getData('nom');
+        $tabName = explode(' ', $nomClient);
+        $data['Consumer'] = array(
+            "Title"=> 1,
+            "LastName"=> $tabName[0],
+            "FirstName"=> $tabName[1],
+            "StreetNumber"=> '',
+            "Address1"=> $client->getData('address'),
+            "Address2"=> "",
+            "Address3"=> "",
+            "Zip"=> $client->getData('zip'),
+            "City"=> 'Marseille',
+            "Country"=> "250",
+            "Phone"=> "",
+            "Email"=> "",
+            "AutoValidation"=> true
+        );
+        
+        $equipment = $this->getChildObject('equipment');
+        $prod = $equipment->getChildObject('product');
+        $ecologicData = $this->getData('ecologic_data');
+        $facture = $this->getChildObject('facture');
+        $ref = '';
+        if (BimpObject::objectLoaded($prod)) 
+            $ref = $prod->ref;
+         
+        
+        $data['Product'] = array(
+            "ProductId"=> $this->getEcologicProductId(),
+            "BrandId"=> "243",
+            "CommercialRef"=> $prod->ref ,
+            "SerialNumber"=> $this->getSerial(),
+            "PurchaseDate"=> "",
+            "IRISCondition"=> "",
+            "IRISConditionEX"=> "",
+            "IRISSymptom"=> $ecologicData['IRISSymtoms'],
+            "IRISSection"=> "",
+            "IRISDefault"=> "",
+            "IRISRepair"=> "",
+            "FailureDescription"=> $this->getData('symptomes'),
+            "DefectCode"=> ""
+        );
+        
+        $totalSpare = 0;
+        $data["SpareParts"] = array();
+        foreach ($this->getPropalLines(array(
+            'linked_object_name' => 'sav_apple_part'
+        )) as $line) {
+            if($line->getTotalHT() > 0){
+                $data["SpareParts"][] = array(
+                    "Partref"=> $line->desc,
+                    "Quantity"=> $line->qty,
+                    "Status"=> ""
+                ); 
+                $totalSpare+= $line->getTotalHT();
+            }
+//            echo '<pre>';
+//////            print_r($line->printData());
+//            print_r($line->getTotalHT());
+        }
+        
+        if($totalSpare > $facture->getData('total_ht'))
+            $totalSpare = $facture->getData('total_ht');
+        
+        $data["Quote"] = array(
+            "LaborCost"=> array(
+              "Amount"=> round($facture->getData('total_ht') - $totalSpare,2),
+              "Currency"=> "EUR"
+            ),
+            "SparePartsCost"=> array(
+              "Amount"=> round($totalSpare,2),
+              "Currency"=> "EUR"
+            ),
+            "TravelCost"=> array(
+              "Amount"=> 0.00,
+              "Currency"=> "EUR"
+            ),
+            "TotalAmountExclVAT"=> array(
+              "Amount"=> round($facture->getData('total_ht'),2),
+              "Currency"=> "EUR"
+            ),
+            "TotalAmountInclVAT"=> array(
+              "Amount"=> round($facture->getData('total_ttc'),2),
+              "Currency"=> "EUR"
+            ),
+            "SupportAmount"=> array(
+              "Amount"=> 25.00,
+              "Currency"=> "EUR"
+            )
+        );
+        
+        
+        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+
+        $api = BimpAPI::getApiInstance('ecologic');
+        $params = array();
+        $params['fields'] = $data;
+        $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s")/*time()*//*date('YmdHis')*/, 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
+        $return = $api->execCurl('createsupportrequest', $params, $errors);
+        
+        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
+            $datas = $this->getData('ecologic_data');
+            $datas['RequestId'] = $return['ResponseData']['RequestId'];
+            $datas['EcoOrganizationId'] = $return['ResponseData']['EcoOrganizationId'];
+            $this->updateField('ecologic_data', $datas);
+        }
+        
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function getDefaultSiteId()
+    {
+        global $tabCentre;
+        if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')][11]))
+            return $tabCentre[$this->getData('code_centre')][11];
+    }
+    
+    
+    public function getViewExtraBtn() {
+        $btn = parent::getViewExtraBtn();
+        if($this->asProdEcologic() && $this->getStatus() == 999){
+            $btn[] = array(
+                    'label'   => 'Envoyée a Ecologic',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('sendDemandeEcologic', array(), array(
+//                        'form_name' => 'cancel_rdv'
+                    ))
+                );
+        }
+        return $btn;
     }
 }

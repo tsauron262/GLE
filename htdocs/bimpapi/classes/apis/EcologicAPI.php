@@ -80,13 +80,13 @@ class EcologicAPI extends BimpAPI
     
     public function executereqWithCache($name, $params = array(), &$errors = array(), &$warnings = array()){
         $key = 'apiReqEcologic'.$name.base64_encode(json_encode($params));
-        $warnings[] = 'key'.$key;
-        $cache = BimpCache::getCacheServeur($key);
-        if(is_null($cache)){
-            $cache = $this->execCurl('getrepairsitesbyats', $params, $errors);
-            BimpCache::setCacheServeur($key, $cache);
+//        $warnings[] = 'key'.$key;
+        if(BimpCache::cacheServerExists($key)){
+            $cache = BimpCache::getCacheServeur($key);
         }
         else{
+            $cache = $this->execCurl('getrepairsitesbyats', $params, $errors);
+            BimpCache::setCacheServeur($key, $cache);
         }
         return $cache;
     }

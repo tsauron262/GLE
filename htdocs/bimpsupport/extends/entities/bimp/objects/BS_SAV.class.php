@@ -68,7 +68,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
     public function actionToRestitute($data, &$success) {
         $datas = $this->getData('ecologic_data');
         $datas['IRISSymtoms'] = $data['IRISSymtoms'];
-        $this->updateField('ecologic_data', $datas);
+        $this->updateField('ecologic_data', 99);
         
         
         return parent::actionToRestitute($data, $success);
@@ -185,6 +185,8 @@ class BS_SAV_ExtEntity extends BS_SAV{
             $datas['RequestId'] = $return['ResponseData']['RequestId'];
             $datas['EcoOrganizationId'] = $return['ResponseData']['EcoOrganizationId'];
             $this->updateField('ecologic_data', $datas);
+            $this->updateField('status_ecologic', $datas);
+            
         }
         
         
@@ -204,7 +206,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
     
     public function getViewExtraBtn() {
         $btn = parent::getViewExtraBtn();
-        if($this->asProdEcologic() && $this->getStatus() == 999){
+        if($this->asProdEcologic() && $this->getStatus() == 999 && $this->getData('status_ecologic') == 1){
             $btn[] = array(
                     'label'   => 'Envoyée a Ecologic',
                     'icon'    => 'fas_times',

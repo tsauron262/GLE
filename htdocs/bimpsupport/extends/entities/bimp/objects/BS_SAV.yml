@@ -7,9 +7,13 @@ fields:
         values: 
             array: status_ecologic_list
         default_value: 0
+        display_if:
+            callback: asProdEcologic
     ecologic_data: 
         label: Données écologic
         type: json
+        display_if:
+            callback: asProdEcologic
     
     
 
@@ -19,8 +23,12 @@ fields_tables:
             status_ecologic:
                 field: status_ecologic
                 edit: 1
+                show: 
+                    callback: asProdEcologic
             ecologic_data:
                 field: ecologic_data
+                show: 
+                    callback: asProdEcologic
                 
                 
 forms:              
@@ -29,6 +37,8 @@ forms:
             - custom: 1
               label: IRISSymtoms
               input_name: IRISSymtoms
+              show: 
+                   callback: asProdEcologic
               input: 
                   type: select
                   options: 

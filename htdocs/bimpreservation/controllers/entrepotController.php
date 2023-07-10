@@ -29,7 +29,7 @@ class entrepotController extends reservationController
                 ));
                 
             case 'to_process':
-                return $this->renderReservationsTabContent($entrepot, 'Réservations à traiter', 'to_reserve', 0);
+                return $this->renderReservationsTabContent($entrepot, 'Réservations à traiter', 'to_reserve', array());
                 
             case 'to_deliver':
                 return $this->renderReservationsTabContent($entrepot, 'Réservations à livrer', 'to_deliver', array(

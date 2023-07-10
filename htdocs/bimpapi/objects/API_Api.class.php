@@ -57,7 +57,7 @@ class API_Api extends BimpObject
             }
         }
 
-        if (BimpCore::isModeDev()) {
+        if (BimpCore::isModeDev() || 1) {
             $api = $this->getApiInstance();
 
             if (is_a($api, 'BimpAPI') && $api->isOk()) {

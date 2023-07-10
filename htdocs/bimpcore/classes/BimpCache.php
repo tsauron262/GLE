@@ -146,6 +146,16 @@ class BimpCache
             }
         }
     }
+    
+    public static function printAllCacheServeur(){
+        if (is_null(self::$cache_server)) {
+            self::initCacheServeur();
+        }
+        if (is_a(self::$cache_server, 'BimpCacheServer')) {
+            return self::$cache_server->printAll();
+        }
+        return 'Serveur not OK';
+    }
 
     public static function getCacheServeur($key)
     {

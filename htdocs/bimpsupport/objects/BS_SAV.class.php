@@ -5461,7 +5461,7 @@ ORDER BY a.val_max DESC");
                     $this->updateField('resolution', (string) $data['resolution'], null, true);
                 }
                 if ((int) $this->getData('status') !== self::BS_SAV_REP_EN_COURS) {
-                    $errors[] = 'Statut actuel invalide';
+                    $errors[] = 'Statut actuel invalide : status actuel : '.$this->getData('status');
                 } elseif ($this->needEquipmentAttribution()) {
                     $errors[] = 'Certains produits nécessitent encore l\'attribution d\'un équipement';
                 } else {

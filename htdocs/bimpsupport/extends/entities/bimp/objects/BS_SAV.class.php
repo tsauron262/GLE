@@ -11,7 +11,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
     );
     
     public function actionClose($data, &$success){
-        $return = parent::actionToRestitute($data, $success);
+        $return = parent::actionClose($data, $success);
         if(!count($return['errors'])){
             if($this->asProdEcologic()){
                 $this->updateField('status_ecologic',1);

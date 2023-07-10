@@ -38,7 +38,7 @@ class modSynopsisJasper extends DolibarrModules {
      *
      *   @param      DoliDB		$db      Database handler
      */
-    function modSynopsisJasper($db) {
+    function __construct($db) {
         global $langs, $conf;
 
         $this->db = $db;

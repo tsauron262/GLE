@@ -32,7 +32,7 @@ class modSynopsisHrm extends DolibarrModules {
      *   \brief      Constructeur. Definit les noms, constantes et boites
      *   \param      DB      handler d'acces base
      */
-    function modSynopsisHrm($DB) {
+    function __construct($DB) {
         $this->db = $DB;
         $this->numero = 22230;
 

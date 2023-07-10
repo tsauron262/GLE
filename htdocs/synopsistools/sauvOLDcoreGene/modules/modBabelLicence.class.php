@@ -50,7 +50,7 @@ class modBabelLicence extends DolibarrModules {
      *   \brief      Constructeur. Definit les noms, constantes et boites
      *   \param      DB      handler d'acces base
      */
-    function modBabelLicence($DB) {
+    function __construct($DB) {
         $this->db = $DB;
         $this->numero = 122229;
 

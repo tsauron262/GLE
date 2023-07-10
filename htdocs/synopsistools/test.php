@@ -1,4 +1,4 @@
-<?php
+    <?php
 //
 //$oldValue = 24563106.762;
 //$newValue = 24663961.375;
@@ -9,43 +9,74 @@
 //$oldValue = 256837.619;
 //$newValue = 298483.506;
 //$cmdId = 403;
-$oldValue = 1684529.638;
-$newValue = 1781174.8;
-$cmdId = 411;
 
+
+
+//
+//$oldValue = 1684529.638;
+//$newValue = 1781174.8;
+$cmdId = 605;
+//
     $dateDeb = "2023-03-14 07:00:00";
-    $dateFin = "2023-03-16 14:25:05";
-    $nb = 56;
-    
-    
-    $parTranche = ($newValue - $oldValue) / ($nb-0.5);
-    
-    echo 'Tranche : '.$parTranche.'<br/><br/>';
-    
+    $dateFin = "2023-05-23 14:25:05";
+//    $nb = 56;
+//    
+//    
+//    $parTranche = ($newValue - $oldValue) / ($nb-0.5);
+//    
+//    echo 'Tranche : '.$parTranche.'<br/><br/>';
+//    
+    $nb = 145;
+    echo 'reglage '.$cmdId.'<br/>';
     for($i=1; $i< $nb; $i++){
-        $newDate = date('Y-m-d H:i:s', strtotime($dateDeb. ' + '.$i.' hours'));
+        $newDate = date('Y-m-d H:i:s', strtotime($dateDeb. ' + '.($i*12).' hours'));
         
-        $value = $oldValue + ($i * $parTranche);
-        
+//        $value = $oldValue + ($i * $parTranche);
+        $value = 0;
 //        echo $i.' : <br/>';
         $req = 'INSERT INTO historyArch (cmd_id, datetime, value) VALUES ('.$cmdId.', "'.$newDate.'", '.$value.');';
         echo $req.'<br/><br/>';
 //        echo $newDate.'<br/><br/>';
     }
-
-
-
-
-
-
-
-
-
-
-
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 die('fin');
-//setcookie('PHPSESSIDZZZZ', 'ZZZZZZ')   ;  
-	session_start();
+////setcookie('PHPSESSIDZZZZ', 'ZZZZZZ')   ;  
+
+
+require_once('../main.inc.php');
+    
+llxHeader();
+$ac = BimpObject::getInstance('bimpcore', 'Bimp_ActionComm');
+$title = 'Ajout dun événement';
+$values = array(
+'fields' => array(
+'datep' => '2023-03-31 15:00:00', // Début
+'datep2' => '2023-03-31 16:00:00', // Fin
+'users_assigned' => array(270),
+)
+);
+$onclick = ''.$ac->getJsLoadModalForm('add', $title, $values);
+
+echo "<button onclick='".$onclick."'>ffff</button>";
+        
+        
+//print_r($_SESSION['assignedtouser']);
+//
+//
+//echo '<br/><br/>';
+//
+//print_r($_SESSION);
+die;
         
         
     

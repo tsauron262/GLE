@@ -38,6 +38,7 @@ class ActionsSynopsisHisto
 
     function afficherMenu($context)
     {
+        return'';
         global $conf, $user, $db;
         $return = '';
         $tabElem = getTypeAndId();

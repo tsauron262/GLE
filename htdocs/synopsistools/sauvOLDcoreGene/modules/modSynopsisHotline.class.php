@@ -35,7 +35,7 @@ class modSynopsisHotline extends DolibarrModules
     *   \brief      Constructeur. Definit les noms, constantes et boites
     *   \param      DB      handler d'acces base
     */
-    function modSynopsisHotline($DB)
+    function __construct($DB)
     {
         $this->db = $DB ;
         $this->numero = 29900;

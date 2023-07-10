@@ -34,7 +34,7 @@ class modBabelCron extends DolibarrModules
    /**
     *   \brief      Constructeur. Definit les noms, constantes et boites
     *   \param      DB      handler d'acces base
-    */
+    __construct
     function modBabelCron($DB)
     {
         $this->db = $DB ;

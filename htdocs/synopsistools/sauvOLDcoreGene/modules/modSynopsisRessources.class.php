@@ -35,7 +35,7 @@ class modSynopsisRessources extends DolibarrModules
     *   \brief      Constructeur. Definit les noms, constantes et boites
     *   \param      DB      handler d'acces base
     */
-    function modSynopsisRessources($DB)
+    function __construct($DB)
     {
         $this->db = $DB ;
         $this->numero = 22232;

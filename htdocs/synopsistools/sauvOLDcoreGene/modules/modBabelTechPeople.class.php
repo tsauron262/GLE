@@ -35,7 +35,7 @@ class modBabelTechPeople extends DolibarrModules
     *   \brief      Constructeur. Definit les noms, constantes et boites
     *   \param      DB      handler d'acces base
     */
-    function modBabelTechPeople($DB)
+    function __construct($DB)
     {
         $this->db = $DB ;
         $this->numero = 22228 ;

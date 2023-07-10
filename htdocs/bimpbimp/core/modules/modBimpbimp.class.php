@@ -31,7 +31,7 @@ class modBimpbimp extends DolibarrModules {
      *   \brief      Constructeur. Definit les noms, constantes et boites
      *   \param      DB      handler d'acces base
      */
-    function modBimpbimp($DB) {
+    function __construct($DB) {
         $this->db = $DB;
         $this->numero = 8567;
 

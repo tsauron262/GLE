@@ -28,10 +28,14 @@ class EcologicAPI extends BimpAPI
             'label'         => 'Récupération des informations du site associé à la clé API ',
             'url'           => 'getrepairsitesbyats'
         ),
-//        'getMyBuyer'   => array(
-//            'label' => 'Details de nos client',
-//            'url'   => '/credit-insurance/organisation-management/v1/buyers/my-buyers'
-//        ),
+        'printproducttypelist'   => array(
+            'label' => 'Récupérer la liste des types de produit',
+            'url'   => 'printproducttypelist'
+        ),
+        'printproducttypewithlabellist'   => array(
+            'label' => 'Récupérer la liste des types de produit',
+            'url'   => 'printproducttypewithlabellist'
+        ),
 //        'getBuyer'     => array(
 //            'label' => 'Details client',
 //            'url'   => '/credit-insurance/organisation-management/v1/buyers'
@@ -67,7 +71,7 @@ class EcologicAPI extends BimpAPI
 
     public function testRequest(&$errors = array(), &$warnings = array())
     {
-        $data = $this->executereqWithCache('getrepairsitesbyats', array(
+        $data = $this->executereqWithCache('printproducttypewithlabellist', array(
             'url_params' => array()
                 ), $errors, $warnings);
         
@@ -80,12 +84,11 @@ class EcologicAPI extends BimpAPI
     
     public function executereqWithCache($name, $params = array(), &$errors = array(), &$warnings = array()){
         $key = 'apiReqEcologic'.$name.base64_encode(json_encode($params));
-//        $warnings[] = 'key'.$key;
         if(BimpCache::cacheServerExists($key)){
             $cache = BimpCache::getCacheServeur($key);
         }
         else{
-            $cache = $this->execCurl('getrepairsitesbyats', $params, $errors);
+            $cache = $this->execCurl($name, $params, $errors);
             BimpCache::setCacheServeur($key, $cache);
         }
         return $cache;

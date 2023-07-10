@@ -60,7 +60,7 @@ class modsynopsisdemandeinterv  extends DolibarrModules
     *   \brief      Constructeur. Definit les noms, constantes et boites
     *   \param      DB      handler d'acces base
     */
-  function modsynopsisdemandeinterv($DB)
+  function __construct($DB)
   {
     $this->db = $DB ;
     $this->numero = 22229 ;

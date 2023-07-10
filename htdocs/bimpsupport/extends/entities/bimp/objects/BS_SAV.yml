@@ -7,6 +7,9 @@ fields:
         values: 
             array: status_ecologic_list
         default_value: 0
+    ecologic_data: 
+        label: Données écologic
+        type: json
     
     
 
@@ -16,3 +19,21 @@ fields_tables:
             status_ecologic:
                 field: status_ecologic
                 edit: 1
+            ecologic_data:
+                field: ecologic_data
+                
+                
+forms:              
+    resolution: 
+        rows: 
+            - custom: 1
+              label: IRISSymtoms
+              input_name: IRISSymtoms
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                        method: getIRISSymtoms
+                        params:
+                            - callback: getEcologicProductId
+            

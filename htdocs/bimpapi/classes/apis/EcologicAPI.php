@@ -36,6 +36,14 @@ class EcologicAPI extends BimpAPI
             'label' => 'Récupérer la liste des types de produit',
             'url'   => 'printproducttypewithlabellist'
         ),
+        'printbrandlist'   => array(
+            'label' => 'Récupérer la liste des mrques',
+            'url'   => 'printbrandlist'
+        ),
+        'createsupportrequest'   => array(
+            'label' => 'Envoyer demande',
+            'url'   => 'createsupportrequest'
+        ),
 //        'getBuyer'     => array(
 //            'label' => 'Details client',
 //            'url'   => '/credit-insurance/organisation-management/v1/buyers'
@@ -112,61 +120,67 @@ class EcologicAPI extends BimpAPI
         $return = $response_body;
 //        else
 //        $this->getErrors($response_body, $errors);
-
-        switch ($response_code) {
-            case '0':
-                $errors[] = 'Atradius API: Vérifiez votre connexion internet';
-                break;
-
-            case '400':
-                $errors[] = 'Atradius API: Requête incorrecte';
-                break;
-
-            case '401':
-                $errors[] = 'Atradius API: Non authentifié';
-                $return = 'unauthenticate';
-                break;
-
-            case '403':
-                $errors[] = 'Atradius API: Accès refusé';
-                break;
-
-            case '404':
-                $errors[] = 'Atradius API: API non trouvée';
-                break;
-
-            case '405':
-                $errors[] = 'Atradius API: Format de la requête non supporté';
-                break;
-
-            case '406':
-                $errors[] = 'Atradius API: Non accepté';
-                break;
-
-            case '408':
-                $errors[] = 'Atradius API: Temps écoulé';
-                break;
-
-            case '422':
-                $errors[] = 'Atradius API: Requête non traitable';
-                break;
-
-            case '500':
-                $errors[] = 'Atradius API: Erreur interne serveur';
-                break;
-
-            case '503':
-                $errors[] = 'Atradius API: Service surchargé, merci de réessayer plus tard';
-                break;
-        }
-
-        if (isset($response_body['codeRetour']) && (int) $response_body['codeRetour'] !== 0 && isset($response_body['libelle'])) {
-            $errors[] = $response_body['libelle'];
-        }
         
-        if (isset($response_body['faultstring']) && (string) $response_body['faultstring']) {
-            $errors[] = $response_body['faultstring'];
+        if($response_code == 206){
+            foreach($return['ResponseData']['ValidationErrors'] as $err){
+                $errors[] = implode(' - ', $err);
+            }
         }
+
+//        switch ($response_code) {
+//            case '0':
+//                $errors[] = 'Atradius API: Vérifiez votre connexion internet';
+//                break;
+//
+//            case '400':
+//                $errors[] = 'Atradius API: Requête incorrecte';
+//                break;
+//
+//            case '401':
+//                $errors[] = 'Atradius API: Non authentifié';
+//                $return = 'unauthenticate';
+//                break;
+//
+//            case '403':
+//                $errors[] = 'Atradius API: Accès refusé';
+//                break;
+//
+//            case '404':
+//                $errors[] = 'Atradius API: API non trouvée';
+//                break;
+//
+//            case '405':
+//                $errors[] = 'Atradius API: Format de la requête non supporté';
+//                break;
+//
+//            case '406':
+//                $errors[] = 'Atradius API: Non accepté';
+//                break;
+//
+//            case '408':
+//                $errors[] = 'Atradius API: Temps écoulé';
+//                break;
+//
+//            case '422':
+//                $errors[] = 'Atradius API: Requête non traitable';
+//                break;
+//
+//            case '500':
+//                $errors[] = 'Atradius API: Erreur interne serveur';
+//                break;
+//
+//            case '503':
+//                $errors[] = 'Atradius API: Service surchargé, merci de réessayer plus tard';
+//                break;
+//        }
+//
+//        if (isset($response_body['codeRetour']) && (int) $response_body['codeRetour'] !== 0 && isset($response_body['libelle'])) {
+//            $errors[] = $response_body['libelle'];
+//        }
+//        
+//        if (isset($response_body['faultstring']) && (string) $response_body['faultstring']) {
+//            $errors[] = $response_body['faultstring'];
+//        }
 
         return $return;
     }

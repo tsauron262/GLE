@@ -17,7 +17,7 @@ class modcyberoffice extends DolibarrModules
     *   \brief      Constructor. Define names, constants, directories, boxes, permissions
     *   \param      DB      Database handler
     */
-	function modcyberoffice ($DB)
+	function __construct ($DB)
 	{
 		global $langs;
 		$this->db = $DB;

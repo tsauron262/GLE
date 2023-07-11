@@ -258,8 +258,6 @@ class BS_SAV_ExtEntity extends BS_SAV{
                         $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
                         $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1].'.'.$fileT[2], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
                         $return = $api->execCurl('AttachFile', $paramsFile, $errors);
-//                        echo '<pre>';
-//                        print_r($return);
                         if(stripos($return, 'Code 200') !== false){
 //                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
                             $ecologicData['files'][] = $fileT[1];
@@ -279,11 +277,12 @@ class BS_SAV_ExtEntity extends BS_SAV{
         
         
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId']) && $filesOk){
-//            $params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'), 'Submit' => 'true');
-//            $return = $api->execCurl('updateclaim', $params, $errors);
-//            
-//            if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S")
-//                $this->updateField('status_ecologic', 99);
+            $warnings = array();//Tout semble ok, on vire les ancinne erreur de fichier qui sont résolu entre temps
+            $params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'), 'Submit' => 'true');
+            $return = $api->execCurl('updateclaim', $params, $errors);
+            
+            if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S")
+                $this->updateField('status_ecologic', 99);
         }
         else{
             if(!isset($ecologicData['ClaimId']))

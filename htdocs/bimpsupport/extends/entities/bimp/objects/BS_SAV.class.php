@@ -244,8 +244,8 @@ class BS_SAV_ExtEntity extends BS_SAV{
                             //enregistrement pendant les fichiers, au cas ou...
                             $this->updateField('ecologic_data', $ecologicData);
                         }
-    //                    print_r($return);
-    //                    print_r($ecologicData);die('oups');
+//                        print_r($return);
+//                        print_r($ecologicData);die('oups');
                     }
                 }
             }

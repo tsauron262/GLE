@@ -212,7 +212,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
             }
         }
         elseif(isset($ecologicData['RequestId'])  && !isset($ecologicData['ClaimId']) && !isset($ecologicData['RequestOk'])){//on update la demande
-            $params['url_params'] = array('RequestId' => $ecologicData['RequestId']);
+            $params['url_params'] = array('RequestId' => $ecologicData['RequestId'],'callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
             $return = $api->execCurl('updatesupportrequest', $params, $errors);
             
             if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && $return['ResponseData']['IsValid']){

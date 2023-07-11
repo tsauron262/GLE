@@ -45,17 +45,23 @@ class EcologicAPI extends BimpAPI
             'url'   => 'createsupportrequest'
         ),
         'createclaim'   => array(
-            'label' => 'Envoyer demande2',
+            'label' => 'Envoyer claim',
             'url'   => 'createclaim'
         ),
         'updateclaim'   => array(
-            'label' => 'Modifier demande2',
+            'label' => 'Modifier claim',
             'url'   => 'updateclaim'
         ),
         'AttachFile'   => array(
             'label' => 'Ajouter document',
             'url'   => 'AttachFile'
         ),
+        'updatesupportrequest'   => array(
+            'label' => 'Modifier demande',
+            'url'   => 'updatesupportrequest'
+        ),
+        
+        
 //        'getBuyer'     => array(
 //            'label' => 'Details client',
 //            'url'   => '/credit-insurance/organisation-management/v1/buyers'

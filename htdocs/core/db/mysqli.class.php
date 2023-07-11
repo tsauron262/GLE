@@ -1285,7 +1285,7 @@ class DoliDBMysqli extends DoliDB
         }
         if($deadLock){
             $this->transaction_opened = 0;
-            static::stopAll ();
+            static::stopAll ('catch');
         }
     }
     

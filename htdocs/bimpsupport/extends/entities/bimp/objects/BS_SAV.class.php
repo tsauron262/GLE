@@ -94,6 +94,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
     
     
     public function actionSendDemandeEcologic($data, &$success){
+        $this->db = BimpCache::getBdb(true);
         $errors = $warnings = array();
         $success = 'Demande envoyée';
         $data = array();
@@ -213,7 +214,6 @@ class BS_SAV_ExtEntity extends BS_SAV{
         }
         
         //enregistrement avant les fichiers au cas ou....
-        $this->db = BimpCache::getBdb(true);
         $this->updateField('ecologic_data', $ecologicData);
         
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
@@ -242,7 +242,6 @@ class BS_SAV_ExtEntity extends BS_SAV{
                         if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
                             $ecologicData['files'][] = $fileT[1];
                             //enregistrement pendant les fichiers, au cas ou...
-                            $this->db = BimpCache::getBdb(true);
                             $this->updateField('ecologic_data', $ecologicData);
                         }
     //                    print_r($return);
@@ -265,7 +264,6 @@ class BS_SAV_ExtEntity extends BS_SAV{
         
         
 //            $ecologicData['EcoOrganizationId'] = $return['ResponseData']['EcoOrganizationId'];
-        $this->db = BimpCache::getBdb(true);
         $this->updateField('ecologic_data', $ecologicData);
         
         

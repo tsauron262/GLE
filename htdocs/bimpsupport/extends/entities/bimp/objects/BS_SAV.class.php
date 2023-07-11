@@ -202,14 +202,14 @@ class BS_SAV_ExtEntity extends BS_SAV{
             $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s")/*time()*//*date('YmdHis')*/, 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
             $return = $api->execCurl('createsupportrequest', $params, $errors);
             
-            if(isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']))
                 $ecologicData['RequestId'] = $return['ResponseData']['RequestId'];
         }
         
         if(isset($ecologicData['RequestId']) && !isset($ecologicData['ClaimId'])){
             $params['url_params'] = array('RequestId' => $ecologicData['RequestId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
             $return = $api->execCurl('createclaim', $params, $errors);
-            if(isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['ClaimId']))
                 $ecologicData['ClaimId'] = $return['ResponseData']['ClaimId'];
         }
         

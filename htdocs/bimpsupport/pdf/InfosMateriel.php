@@ -33,14 +33,14 @@ class InfosMateriel extends BimpModelPDF
         $html .= $this->title;
         $html .= '</div>';
 
-        $html .= '<div style="font-size: 9px">';
+        $html .= '<div style="font-size: 8px">';
         $html .= '<table style="width: 100%">';
         $html .= '<tr>';
 
         if (!empty($this->data_left)) {
             $html .= '<td style="width: 50%">';
 
-            $html .= '<table style="width: 100%">';
+            $html .= '<table class="border" style="width: 100%">';
             $html .= '<tr>';
             $html .= '<td colspan="2" style="background-color: #DCDCDC; font-weight: bold">Infos Produits</td>';
             $html .= '</tr>';
@@ -60,7 +60,7 @@ class InfosMateriel extends BimpModelPDF
         if (!empty($this->data_right)) {
             $html .= '<td style="width: 50%">';
 
-            $html .= '<table style="width: 100%">';
+            $html .= '<table class="border" style="width: 100%">';
             $html .= '<tr>';
             $html .= '<td colspan="2" style="background-color: #DCDCDC; font-weight: bold">Couverture</td>';
             $html .= '</tr>';

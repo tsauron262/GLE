@@ -206,7 +206,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 $warnings = BimpTools::merge_array($warnings, $errors);
                 $errors = array();
                 $ecologicData['RequestId'] = $return['ResponseData']['RequestId'];
-                if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
+                if($return['ResponseData']['IsValid']){
                     $ecologicData['RequestOk'] = true;
                 }
             }
@@ -222,6 +222,13 @@ class BS_SAV_ExtEntity extends BS_SAV{
             }
         }
         elseif(isset($ecologicData['RequestId'])  && !isset($ecologicData['ClaimId'])){//on update la demande
+            $params['url_params'] = array('RequestId' => $ecologicData['RequestId']);
+            $return = $api->execCurl('updatesupportrequest', $params, $errors);
+            
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && $return['ResponseData']['IsValid']){
+                $ecologicData['RequestOk'] = true;
+            }
+            
             
         }
         

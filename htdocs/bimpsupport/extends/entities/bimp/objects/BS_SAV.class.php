@@ -86,7 +86,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         $datas = $this->getData('ecologic_data');
         $datas['IRISSymtoms'] = $data['IRISSymtoms'];
         $datas['RepairCodes'] = $data['RepairCodes'];
-        $this->updateField('ecologic_data', 99);
+        $this->updateField('ecologic_data', $datas);
         
         
         return parent::actionToRestitute($data, $success);

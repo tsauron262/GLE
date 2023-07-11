@@ -132,7 +132,7 @@ class EcologicAPI extends BimpAPI
     }
     
     
-    public function traiteReq($errors, $warnings, $data, $siteId, $ref, $tabFile, $dateClose, $facRef, $sav){
+    public function traiteReq($errors, $warnings, $data, $ecologicData, $siteId, $ref, $tabFile, $dateClose, $facRef, $sav){
         
         $params = array();
         $params['fields'] = $data;

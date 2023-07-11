@@ -1006,6 +1006,9 @@ class DoliDBMysqliC extends DoliDB
                     if(class_exists('BimpCore')){
                         BimpCore::addlog('Gros probléme changement de thread Id', 3, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $thread_id));
                     }
+                    else{
+                        die('ThreadId probléme, est pas de BimpCore');
+                    }
                     $this->transaction_opened = 0;
                     static::stopAll('ThreadId');
                 }

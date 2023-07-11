@@ -2714,6 +2714,8 @@ class gsxController extends BimpController
 
             if (is_array($data) && !empty($data) && isset($data['device'])) {
                 $data = $data['device'];
+                $pdf_data_left = array();
+                $pdf_data_right = array();
 
                 if (isset($data['identifiers']['serial'])) {
                     $this->serial2 = $data['identifiers']['serial'];
@@ -2763,6 +2765,7 @@ class gsxController extends BimpController
                     ));
                     if (!is_null($value)) {
                         $infosContent .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
+                        $pdf_data_left[$label] = $value;
                     }
                 }
 
@@ -2804,6 +2807,7 @@ class gsxController extends BimpController
                     ));
                     if (!is_null($value)) {
                         $warrantyContent .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
+                        $pdf_data_right[$label] = $value;
                     }
                 }
                 $product_label = $data['productDescription'];
@@ -2830,6 +2834,16 @@ class gsxController extends BimpController
                             'type'     => 'secondary',
                             'foldable' => true
                 ));
+
+                if (BimpCore::isEntity('actimac')) {
+                    $sav_dir = $sav->getFilesDir();
+                    if (!file_exists($sav_dir . 'infos_materiel.pdf')) {
+                        require_once DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/InfosMateriel.pdf';
+
+                        $pdf = new InfosMateriel($data['productDescription'], $pdf_data_left, $pdf_data_right);
+                        $pdf->render($sav_dir . 'infos_materiel.pdf', 'F');
+                    }
+                }
             } else {
                 $html .= BimpRender::renderAlerts('Aucune données reçues pour le numéro de série "' . $this->serial . '"');
                 $html .= $this->gsx_v2->displayErrors();

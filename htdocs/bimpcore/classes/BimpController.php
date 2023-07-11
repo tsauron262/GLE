@@ -290,7 +290,7 @@ class BimpController
                 if (stripos($msg, 'Deadlock') !== false) {
                     global $db;
                     $db = new mysqli();
-                    $db::stopAll();
+                    $db::stopAll('deadlock');
                 }
                 return false;
         }
@@ -302,7 +302,7 @@ class BimpController
                 'Ligne'   => $line,
                 'Msg'     => $msg
             ));
-            $db::stopAll();
+            $db::stopAll('handleError');
         }
 
         return true;

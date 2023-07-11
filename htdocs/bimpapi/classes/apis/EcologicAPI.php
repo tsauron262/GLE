@@ -45,17 +45,23 @@ class EcologicAPI extends BimpAPI
             'url'   => 'createsupportrequest'
         ),
         'createclaim'   => array(
-            'label' => 'Envoyer demande2',
+            'label' => 'Envoyer claim',
             'url'   => 'createclaim'
         ),
         'updateclaim'   => array(
-            'label' => 'Modifier demande2',
+            'label' => 'Modifier claim',
             'url'   => 'updateclaim'
         ),
         'AttachFile'   => array(
             'label' => 'Ajouter document',
             'url'   => 'AttachFile'
         ),
+        'updatesupportrequest'   => array(
+            'label' => 'Modifier demande',
+            'url'   => 'updatesupportrequest'
+        ),
+        
+        
 //        'getBuyer'     => array(
 //            'label' => 'Details client',
 //            'url'   => '/credit-insurance/organisation-management/v1/buyers'
@@ -124,6 +130,108 @@ class EcologicAPI extends BimpAPI
             'api_key'    => BimpTools::getArrayValueFromPath($this->params, $this->getOption('mode', 'test').'_api_key', '')
         );
     }
+    
+    
+    public function traiteReq(&$errors, &$warnings, $data, $ecologicData, $siteId, $ref, $tabFile, $dateClose, $facRef, $sav){
+        
+        $params = array();
+        $params['fields'] = $data;
+        
+        
+        if(!isset($ecologicData['RequestId'])){//on cré la demande
+            $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
+            $return = $this->execCurl('createsupportrequest', $params, $errors);
+            
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId'])){
+                $warnings = BimpTools::merge_array($warnings, $errors);
+                $errors = array();
+                $ecologicData['RequestId'] = $return['ResponseData']['RequestId'];
+                if($return['ResponseData']['IsValid']){
+                    $ecologicData['RequestOk'] = true;
+                }
+            }
+        }
+        elseif(isset($ecologicData['RequestId'])  && !isset($ecologicData['ClaimId']) && !isset($ecologicData['RequestOk'])){//on update la demande
+            $params['url_params'] = array('claimId'/*attention erreur API, ca devrait être RequestId*/ => $ecologicData['RequestId'],'callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
+            $return = $this->execCurl('updatesupportrequest', $params, $errors);
+            
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && $return['ResponseData']['IsValid']){
+                $ecologicData['RequestOk'] = true;
+            }
+            
+            
+        }
+        
+        if(isset($ecologicData['RequestId']) && isset($ecologicData['RequestOk']) && $ecologicData['RequestOk'] && !isset($ecologicData['ClaimId'])){//on créer le claim
+            $params['url_params'] = array('RequestId' => $ecologicData['RequestId'], 'RepairEndDate' => $dateClose, 'ConsumerInvoiceNumber'=>$facRef, 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
+            $return = $this->execCurl('createclaim', $params, $errors);
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['ClaimId'])){
+                $warnings = BimpTools::merge_array($warnings, $errors);
+                $errors = array();
+                $ecologicData['ClaimId'] = $return['ResponseData']['ClaimId'];
+            }
+        }
+        
+        //enregistrement avant les fichiers au cas ou....
+        $sav->updateField('ecologic_data', $ecologicData);
+        
+        if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
+            
+            $filesOk = true;
+            foreach($tabFile as $fileT){
+                if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){
+                    $errors[] = 'Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable';
+                    BimpCore::addlog ('Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable');
+                    $filesOk = false;
+                }
+            }
+            
+            if($filesOk){
+                foreach($tabFile as $fileT){
+                    if(!isset($ecologicData['files']) || !in_array($fileT[1], $ecologicData['files'])){
+                        $paramsFile = array();
+                        $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
+                        $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
+                        $return = $this->execCurl('AttachFile', $paramsFile, $errors);
+                        if(stripos($return, 'Code 200') !== false){
+//                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
+                            $ecologicData['files'][] = $fileT[1];
+                            //enregistrement pendant les fichiers, au cas ou...
+                            $sav->updateField('ecologic_data', $ecologicData);
+                            $warnings = BimpTools::merge_array($warnings, $errors);
+                            $errors = array();
+                        }
+                        else{
+                            $filesOk = false;
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        
+        if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId']) && $filesOk){
+            $warnings = array();//Tout semble ok, on vire les ancinne erreur de fichier qui sont résolu entre temps
+            $params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => $dateClose, 'ConsumerInvoiceNumber'=>$facRef, 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref, 'Submit' => 'true');
+            $return = $this->execCurl('updateclaim', $params, $errors);
+            
+            if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S" && isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
+                $sav->updateField('status_ecologic', 99);
+        }
+        else{
+            if(!isset($ecologicData['ClaimId']))
+                $errors[] = 'Demande non créer';
+            elseif(!$filesOk)
+                $errors[] = 'Les fichiers ne sont pas ou partielement envoyées';
+            else
+                $errors[] = 'Erreur inconnue';
+        }
+        
+        
+        
+        $sav->updateField('ecologic_data', $ecologicData);
+    }
 
     public function processRequestResponse($request_name, $response_code, $response_body, $response_headers = array(), &$infos = '', &$errors = array())
     {
@@ -142,6 +250,9 @@ class EcologicAPI extends BimpAPI
         if($response_code == 404){
             if(isset($return['Message']))
                 $errors[] = $return['Message'];
+        }
+        if($response_code == 400){
+                $errors[] = 'Bad request';
         }
         
         if($response_code == 500){

@@ -86,7 +86,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         $datas = $this->getData('ecologic_data');
         $datas['IRISSymtoms'] = $data['IRISSymtoms'];
         $datas['RepairCodes'] = $data['RepairCodes'];
-        $this->updateField('ecologic_data', 99);
+        $this->updateField('ecologic_data', $datas);
         
         
         return parent::actionToRestitute($data, $success);
@@ -94,6 +94,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
     
     
     public function actionSendDemandeEcologic($data, &$success){
+        $this->useNoTransactionsDb();
         $errors = $warnings = array();
         $success = 'Demande envoyée';
         $data = array();
@@ -109,7 +110,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
             "Address2"=> "",
             "Address3"=> "",
             "Zip"=> $client->getData('zip'),
-            "City"=> $client->getData('town'),
+            "City"=> str_replace('-', ' ', $client->getData('town')),
             "Country"=> "250",
             "Phone"=> "",
             "Email"=> "",
@@ -193,65 +194,14 @@ class BS_SAV_ExtEntity extends BS_SAV{
         require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
         $api = BimpAPI::getApiInstance('ecologic');
-        $params = array();
-        $params['fields'] = $data;
         
+        $tabFile = array();
+
+        $tabFile[] = array($facture->getFilesDir(), $facture->getData('ref'), 'pdf', 'INVOICE');
+        $tabFile[] = array($this->getFilesDir(), 'Restitution_'.$this->getData('ref').'_signe', 'pdf', 'CONSUMERVALIDATION');
+        $tabFile[] = array($this->getFilesDir(), 'Plaque', 'pdf', 'NAMEPLATE');
         
-        if(!isset($ecologicData['RequestId'])){
-            $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s")/*time()*//*date('YmdHis')*/, 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
-            $return = $api->execCurl('createsupportrequest', $params, $errors);
-            
-            if(isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
-                $ecologicData['RequestId'] = $return['ResponseData']['RequestId'];
-        }
-        
-        if(isset($ecologicData['RequestId']) && !isset($ecologicData['ClaimId'])){
-            $params['url_params'] = array('RequestId' => $ecologicData['RequestId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
-            $return = $api->execCurl('createclaim', $params, $errors);
-            if(isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
-                $ecologicData['ClaimId'] = $return['ResponseData']['ClaimId'];
-        }
-        
-        if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
-            $tabFile = array();
-            
-            $tabFile[] = array($facture->getFilesDir(), $facture->getData('ref'), 'pdf', 'INVOICE');
-            $tabFile[] = array($this->getFilesDir(), 'Restitution_'.$this->getData('ref').'_signe', 'pdf', 'CONSUMERVALIDATION');
-            $tabFile[] = array($this->getFilesDir(), 'Plaque', 'pdf', 'NAMEPLATE');
-            
-            $filesOk = true;
-            foreach($tabFile as $fileT){
-                if(!is_file($fileT[0] . $fileT[1].'.'.$fileT[2])){
-                    $errors[] = 'Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable';
-                    BimpCore::addlog ('Fichier : '.$fileT[0] . $fileT[1].'.'.$fileT[2].' introuvable');
-                    $filesOk = false;
-                }
-            }
-            
-            if($filesOk){
-                foreach($tabFile as $fileT){
-                    $paramsFile = array();
-                    $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
-                    $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1].'.'.$fileT[2], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
-                    $return = $api->execCurl('AttachFile', $paramsFile, $errors);
-                }
-            }
-        }
-        
-        
-        
-        if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
-            $params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'), 'Submit' => 'true');
-            $return = $api->execCurl('updateclaim', $params, $errors);
-            
-            if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S")
-                $this->updateField('status_ecologic', 99);
-        }
-        
-        
-        
-//            $ecologicData['EcoOrganizationId'] = $return['ResponseData']['EcoOrganizationId'];
-            $this->updateField('ecologic_data', $ecologicData);
+        $api->traiteReq($errors, $warnings, $data, $ecologicData, $this->getDefaultSiteId(), $this->getData('ref'), $tabFile, date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), $facture->getData('ref'), $this);
         
         
         return array(

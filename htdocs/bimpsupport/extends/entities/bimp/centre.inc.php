@@ -24,7 +24,7 @@ $tabCentre = array(
     "N"     => array("04 66 842 974", "sav30@ldlc.com", "Nîmes", 217, "1461026", "30900", "Nîmes", "Centre commercial Cap Costière, 400 Avenue Claude Baillet", 39, 0),
     "MONTP" => array("04 67 555 111", "sav34@ldlc.com", "Montpellier", 218, "1187561", "34000", "Montpellier", "36 Rue Saint-Guilhem", 38, 0),
     "MAU"   => array("04 67 222 333", "sav341@ldlc.com", "Mauguio", 221, "1461024", "34130", "Mauguio", "39 Rue René Fonck", 37, 1, null, '32861caa-2661-40dd-b6d8-66f9c71b9e2a'),
-    "BB"    => array("09 53 01 39 84", "sav01@ldlc.com", "Bourg-en-Bresse", 58, "1461022", "01000", "Bourg-en-Bresse", "20 Avenue des granges barde", 45, 1)
+    "BB"    => array("09 53 01 39 84", "sav01@ldlc.com", "Bourg-en-Bresse", 58, "1461022", "01000", "Bourg-en-Bresse", "20 Avenue des granges barde", 45, 1, null, 'c960e5bb-1b92-4d71-9c66-82ec1747dca4')
     );
 
 $tabCentre["GB"] = $tabCentre["GA"];

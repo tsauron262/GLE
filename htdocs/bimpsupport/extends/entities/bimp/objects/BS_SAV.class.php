@@ -206,10 +206,13 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 $warnings = BimpTools::merge_array($warnings, $errors);
                 $errors = array();
                 $ecologicData['RequestId'] = $return['ResponseData']['RequestId'];
+                if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
+                    $ecologicData['RequestOk'] = true;
+                }
             }
         }
         
-        if(isset($ecologicData['RequestId']) && !isset($ecologicData['ClaimId'])){
+        if(isset($ecologicData['RequestId']) && isset($ecologicData['RequestOk']) && $ecologicData['RequestOk'] && !isset($ecologicData['ClaimId'])){//on créer le claim
             $params['url_params'] = array('RequestId' => $ecologicData['RequestId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
             $return = $api->execCurl('createclaim', $params, $errors);
             if(isset($return['ResponseData']) && isset($return['ResponseData']['ClaimId'])){
@@ -217,6 +220,9 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 $errors = array();
                 $ecologicData['ClaimId'] = $return['ResponseData']['ClaimId'];
             }
+        }
+        elseif(isset($ecologicData['RequestId'])  && !isset($ecologicData['ClaimId'])){//on update la demande
+            
         }
         
         //enregistrement avant les fichiers au cas ou....

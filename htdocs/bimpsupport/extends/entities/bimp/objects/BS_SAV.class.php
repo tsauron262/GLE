@@ -251,7 +251,8 @@ class BS_SAV_ExtEntity extends BS_SAV{
         
         
 //            $ecologicData['EcoOrganizationId'] = $return['ResponseData']['EcoOrganizationId'];
-            $this->updateField('ecologic_data', $ecologicData);
+        $this->db = BimpCache::getBdb(true);
+        $this->updateField('ecologic_data', $ecologicData);
         
         
         return array(

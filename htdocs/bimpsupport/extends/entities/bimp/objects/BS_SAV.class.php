@@ -215,9 +215,9 @@ class BS_SAV_ExtEntity extends BS_SAV{
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
             $tabFile = array();
             
-//            $tabFile[] = array($facture->getFilesDir(), $facture->getData('ref'), 'pdf', 'INVOICE');
-//            $tabFile[] = array($this->getFilesDir(), 'Restitution_'.$this->getData('ref').'_signe', 'pdf', 'CONSUMERVALIDATION');
-//            $tabFile[] = array($this->getFilesDir(), 'Plaque', 'pdf', 'NAMEPLATE');
+            $tabFile[] = array($facture->getFilesDir(), $facture->getData('ref'), 'pdf', 'INVOICE');
+            $tabFile[] = array($this->getFilesDir(), 'Restitution_'.$this->getData('ref').'_signe', 'pdf', 'CONSUMERVALIDATION');
+            $tabFile[] = array($this->getFilesDir(), 'Plaque', 'pdf', 'NAMEPLATE');
             
             $filesOk = true;
             foreach($tabFile as $fileT){
@@ -243,13 +243,15 @@ class BS_SAV_ExtEntity extends BS_SAV{
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
             $params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'), 'Submit' => 'true');
             $return = $api->execCurl('updateclaim', $params, $errors);
+            
+            if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S")
+                $this->updateField('status_ecologic', 99);
         }
         
         
         
-            $ecologicData['EcoOrganizationId'] = $return['ResponseData']['EcoOrganizationId'];
+//            $ecologicData['EcoOrganizationId'] = $return['ResponseData']['EcoOrganizationId'];
             $this->updateField('ecologic_data', $ecologicData);
-            $this->updateField('status_ecologic', 1);
         
         
         return array(

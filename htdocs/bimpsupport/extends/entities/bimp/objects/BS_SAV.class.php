@@ -244,6 +244,9 @@ class BS_SAV_ExtEntity extends BS_SAV{
                             //enregistrement pendant les fichiers, au cas ou...
                             $this->updateField('ecologic_data', $ecologicData);
                         }
+                        else{
+                            $filesOk = false;
+                        }
 //                        print_r($return);
 //                        print_r($ecologicData);die('oups');
                     }
@@ -253,7 +256,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         
         
         
-        if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
+        if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId']) && $filesOk){
             $params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'), 'Submit' => 'true');
             $return = $api->execCurl('updateclaim', $params, $errors);
             

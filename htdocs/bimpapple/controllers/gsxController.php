@@ -2838,7 +2838,7 @@ class gsxController extends BimpController
 //                if (BimpCore::isEntity('actimac')) {
 //                    $sav_dir = $sav->getFilesDir();
 //                    if (!file_exists($sav_dir . 'infos_materiel.pdf')) {
-//                        require_once DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/InfosMateriel.pdf';
+//                        require_once DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/InfosMateriel.php';
 //
 //                        $pdf = new InfosMateriel($data['productDescription'], $pdf_data_left, $pdf_data_right);
 //                        $pdf->render($sav_dir . 'infos_materiel.pdf', 'F');

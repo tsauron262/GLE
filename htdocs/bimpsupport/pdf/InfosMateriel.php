@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/BimpModelPDF.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpModelPDF.php';
 
 class InfosMateriel extends BimpModelPDF
 {
@@ -29,10 +29,11 @@ class InfosMateriel extends BimpModelPDF
         $html .= 'table.border td {border: 1px solid #DDDDDD; font-size: 9px}';
         $html .= '</style>';
 
-        $html .= '<p stle="text-align: center; font-size: 12px; font-weight: bold">';
+        $html .= '<div style="text-align: center; font-size: 12px; font-weight: bold">';
         $html .= $this->title;
-        $html .= '</p>';
+        $html .= '</div>';
 
+        $html .= '<div style="font-size: 9px">';
         $html .= '<table style="width: 100%">';
         $html .= '<tr>';
 
@@ -42,13 +43,15 @@ class InfosMateriel extends BimpModelPDF
             $html .= '<table style="width: 100%">';
             $html .= '<tr>';
             $html .= '<td colspan="2" style="background-color: #DCDCDC; font-weight: bold">Infos Produits</td>';
+            $html .= '</tr>';
 
             foreach ($this->data_left as $label => $value) {
+                $html .= '<tr>';
                 $html .= '<td style="background-color: #F0F0F0; font-weight: bold">' . $label . '</td>';
                 $html .= '<td>' . $value . '</td>';
+                $html .= '</tr>';
             }
 
-            $html .= '</tr>';
             $html .= '</table>';
 
             $html .= '</td>';
@@ -60,13 +63,15 @@ class InfosMateriel extends BimpModelPDF
             $html .= '<table style="width: 100%">';
             $html .= '<tr>';
             $html .= '<td colspan="2" style="background-color: #DCDCDC; font-weight: bold">Couverture</td>';
+            $html .= '</tr>';
 
             foreach ($this->data_right as $label => $value) {
+                $html .= '<tr>';
                 $html .= '<td style="background-color: #F0F0F0; font-weight: bold">' . $label . '</td>';
                 $html .= '<td>' . $value . '</td>';
+                $html .= '</tr>';
             }
 
-            $html .= '</tr>';
             $html .= '</table>';
 
             $html .= '</td>';
@@ -74,5 +79,8 @@ class InfosMateriel extends BimpModelPDF
 
         $html .= '</tr>';
         $html .= '</table>';
+        $html .= '</div>';
+
+        $this->writeContent($html);
     }
 }

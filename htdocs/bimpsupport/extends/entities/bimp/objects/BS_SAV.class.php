@@ -201,7 +201,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         $tabFile[] = array($this->getFilesDir(), 'Restitution_'.$this->getData('ref').'_signe', 'pdf', 'CONSUMERVALIDATION');
         $tabFile[] = array($this->getFilesDir(), 'Plaque', 'pdf', 'NAMEPLATE');
         
-        $api->traiteReq($errors, $warnings, $data, $this->getDefaultSiteId(), $this->getData('ref'), $tabFile, date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), $facture->getData('ref'), $this);
+        $api->traiteReq($errors, $warnings, $data, $ecologicData, $this->getDefaultSiteId(), $this->getData('ref'), $tabFile, date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), $facture->getData('ref'), $this);
         
         
         return array(

@@ -290,7 +290,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
                 $pdf->setTextColor(255, 255, 255);
                 $pdf->setDrawColor(255, 255, 255);
-                $pdf->setColor('fill', 236, 147, 0);
+                $pdf->setColor('fill', $this->primay_rgb[0], $this->primay_rgb[1], $this->primay_rgb[2]);
                 $pdf->Cell($W, 8, 'Entre les parties', 1, null, 'C', true);
                 $pdf->setColor('fill', 255, 255, 255);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');

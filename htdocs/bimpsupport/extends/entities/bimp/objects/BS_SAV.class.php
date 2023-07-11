@@ -266,8 +266,6 @@ class BS_SAV_ExtEntity extends BS_SAV{
             }
         }
         
-        if(!$filesOk)
-            $warnings[] = 'Les fichiers ne sont pas ou partielement envoyées';
         
         
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId']) && $filesOk){
@@ -276,6 +274,12 @@ class BS_SAV_ExtEntity extends BS_SAV{
             
             if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S")
                 $this->updateField('status_ecologic', 99);
+        }
+        else{
+            if(!$filesOk)
+                $errors[] = 'Les fichiers ne sont pas ou partielement envoyées';
+            else
+                $errors[] = 'Demande non créer';
         }
         
         

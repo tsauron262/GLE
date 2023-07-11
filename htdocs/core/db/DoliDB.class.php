@@ -280,7 +280,7 @@ abstract class DoliDB implements Database
                     }
                     return 0;
                 }
-            } elseif($this->transaction_opened > 1 || $this->noTransaction) {
+            } elseif($this->transaction_opened > 1) {
                 $this->transaction_opened--;
                 return 1;
             } else {

@@ -94,7 +94,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
     
     
     public function actionSendDemandeEcologic($data, &$success){
-        $this->db = BimpCache::getBdb(true);
+        $this->useNoTransactionsDb();
         $errors = $warnings = array();
         $success = 'Demande envoyée';
         $data = array();

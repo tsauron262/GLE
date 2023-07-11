@@ -212,6 +212,10 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 $ecologicData['ClaimId'] = $return['ResponseData']['ClaimId'];
         }
         
+        //enregistrement avant les fichiers au cas ou....
+        $this->db = BimpCache::getBdb(true);
+        $this->updateField('ecologic_data', $ecologicData);
+        
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId'])){
             $tabFile = array();
             
@@ -230,15 +234,19 @@ class BS_SAV_ExtEntity extends BS_SAV{
             
             if($filesOk){
                 foreach($tabFile as $fileT){
-                    if(!isset($ecologicData['files']) || !in_array($fileT[1], $ecologicData['files']));
-                    $paramsFile = array();
-                    $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
-                    $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1].'.'.$fileT[2], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
-                    $return = $api->execCurl('AttachFile', $paramsFile, $errors);
-                    if(isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
-                        $ecologicData['files'][] = $fileT[1];
-//                    print_r($return);
-//                    print_r($ecologicData);die('oups');
+                    if(!isset($ecologicData['files']) || !in_array($fileT[1], $ecologicData['files'])){
+                        $paramsFile = array();
+                        $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
+                        $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1].'.'.$fileT[2], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
+                        $return = $api->execCurl('AttachFile', $paramsFile, $errors);
+                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
+                            $ecologicData['files'][] = $fileT[1];
+                        //enregistrement pendant les fichiers, au cas ou...
+                        $this->db = BimpCache::getBdb(true);
+                        $this->updateField('ecologic_data', $ecologicData);
+    //                    print_r($return);
+    //                    print_r($ecologicData);die('oups');
+                    }
                 }
             }
         }

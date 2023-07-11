@@ -202,15 +202,21 @@ class BS_SAV_ExtEntity extends BS_SAV{
             $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s")/*time()*//*date('YmdHis')*/, 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
             $return = $api->execCurl('createsupportrequest', $params, $errors);
             
-            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']))
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId'])){
+                $warnings = BimpTools::merge_array($warnings, $errors);
+                $errors = array();
                 $ecologicData['RequestId'] = $return['ResponseData']['RequestId'];
+            }
         }
         
         if(isset($ecologicData['RequestId']) && !isset($ecologicData['ClaimId'])){
             $params['url_params'] = array('RequestId' => $ecologicData['RequestId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
             $return = $api->execCurl('createclaim', $params, $errors);
-            if(isset($return['ResponseData']) && isset($return['ResponseData']['ClaimId']))
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['ClaimId'])){
+                $warnings = BimpTools::merge_array($warnings, $errors);
+                $errors = array();
                 $ecologicData['ClaimId'] = $return['ResponseData']['ClaimId'];
+            }
         }
         
         //enregistrement avant les fichiers au cas ou....
@@ -243,6 +249,8 @@ class BS_SAV_ExtEntity extends BS_SAV{
                             $ecologicData['files'][] = $fileT[1];
                             //enregistrement pendant les fichiers, au cas ou...
                             $this->updateField('ecologic_data', $ecologicData);
+                            $warnings = BimpTools::merge_array($warnings, $errors);
+                            $errors = array();
                         }
                         else{
                             $filesOk = false;
@@ -253,7 +261,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         }
         
         if(!$filesOk)
-            $errors[] = 'Les fichiers ne sont pas ou partielement envoyées';
+            $warnings[] = 'Les fichiers ne sont pas ou partielement envoyées';
         
         
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId']) && $filesOk){

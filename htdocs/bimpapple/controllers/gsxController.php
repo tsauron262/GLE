@@ -2835,7 +2835,7 @@ class gsxController extends BimpController
                             'foldable' => true
                 ));
 
-                if (BimpCore::isEntity('actimac')) {
+                if (BimpCore::isEntity('bimp')) {
                     $sav_dir = $sav->getFilesDir();
                     if (!file_exists($sav_dir . 'infos_materiel.pdf')) {
                         require_once DOL_DOCUMENT_ROOT . '/bimpsupport/pdf/InfosMateriel.php';

@@ -109,7 +109,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
             "Address2"=> "",
             "Address3"=> "",
             "Zip"=> $client->getData('zip'),
-            "City"=> 'Marseille',
+            "City"=> $client->getData('town'),
             "Country"=> "250",
             "Phone"=> "",
             "Email"=> "",

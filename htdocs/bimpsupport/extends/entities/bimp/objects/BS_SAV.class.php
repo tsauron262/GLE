@@ -247,13 +247,13 @@ class BS_SAV_ExtEntity extends BS_SAV{
                         else{
                             $filesOk = false;
                         }
-//                        print_r($return);
-//                        print_r($ecologicData);die('oups');
                     }
                 }
             }
         }
         
+        if(!$filesOk)
+            $errors[] = 'Les fichiers ne sont pas ou partielement envoyées';
         
         
         if(isset($ecologicData['RequestId']) && isset($ecologicData['ClaimId']) && $filesOk){

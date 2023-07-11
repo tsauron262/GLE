@@ -40,15 +40,15 @@ class InfosMateriel extends BimpModelPDF
         if (!empty($this->data_left)) {
             $html .= '<td style="width: 50%">';
 
-            $html .= '<table class="border" style="width: 100%">';
+            $html .= '<table cellpadding="5" class="border" style="width: 100%">';
             $html .= '<tr>';
-            $html .= '<td colspan="2" style="background-color: #DCDCDC; font-weight: bold">Infos Produits</td>';
+            $html .= '<td colspan="2" style="background-color: #DCDCDC; font-weight: bold; border: 1px solid #DDDDDD">Infos Produits</td>';
             $html .= '</tr>';
 
             foreach ($this->data_left as $label => $value) {
                 $html .= '<tr>';
-                $html .= '<td style="background-color: #F0F0F0; font-weight: bold">' . $label . '</td>';
-                $html .= '<td>' . $value . '</td>';
+                $html .= '<td style="background-color: #F0F0F0; font-weight: bold; border: 1px solid #DDDDDD">' . $label . '</td>';
+                $html .= '<td style="border: 1px solid #DDDDDD">' . $value . '</td>';
                 $html .= '</tr>';
             }
 
@@ -60,15 +60,15 @@ class InfosMateriel extends BimpModelPDF
         if (!empty($this->data_right)) {
             $html .= '<td style="width: 50%">';
 
-            $html .= '<table class="border" style="width: 100%">';
+            $html .= '<table cellpadding="5" class="border" style="width: 100%">';
             $html .= '<tr>';
-            $html .= '<td colspan="2" style="background-color: #DCDCDC; font-weight: bold">Couverture</td>';
+            $html .= '<td colspan="2" style="background-color: #DCDCDC; font-weight: bold; border: 1px solid #DDDDDD">Couverture</td>';
             $html .= '</tr>';
 
             foreach ($this->data_right as $label => $value) {
                 $html .= '<tr>';
-                $html .= '<td style="background-color: #F0F0F0; font-weight: bold">' . $label . '</td>';
-                $html .= '<td>' . $value . '</td>';
+                $html .= '<td style="background-color: #F0F0F0; font-weight: bold; border: 1px solid #DDDDDD">' . $label . '</td>';
+                $html .= '<td style="border: 1px solid #DDDDDD">' . $value . '</td>';
                 $html .= '</tr>';
             }
 

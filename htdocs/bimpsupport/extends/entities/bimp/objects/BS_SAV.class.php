@@ -109,7 +109,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         $success = 'Demande envoyée';
         $data = array();
         $client = $this->getChildObject('client');
-        $nomClient = $client->getData('nom');
+        $nomClient = str_replace('  ', ' ', $client->getData('nom'));
         $tabName = explode(' ', $nomClient);
         $data['Consumer'] = array(
             "Title"=> 1,

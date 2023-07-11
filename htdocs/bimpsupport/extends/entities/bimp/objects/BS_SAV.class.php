@@ -198,7 +198,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         $params['fields'] = $data;
         
         
-        if(!isset($ecologicData['RequestId'])){
+        if(!isset($ecologicData['RequestId'])){//on cré la demande
             $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s")/*time()*//*date('YmdHis')*/, 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
             $return = $api->execCurl('createsupportrequest', $params, $errors);
             
@@ -211,6 +211,16 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 }
             }
         }
+        elseif(isset($ecologicData['RequestId'])  && !isset($ecologicData['ClaimId']) && !isset($ecologicData['RequestOk'])){//on update la demande
+            $params['url_params'] = array('RequestId' => $ecologicData['RequestId']);
+            $return = $api->execCurl('updatesupportrequest', $params, $errors);
+            
+            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && $return['ResponseData']['IsValid']){
+                $ecologicData['RequestOk'] = true;
+            }
+            
+            
+        }
         
         if(isset($ecologicData['RequestId']) && isset($ecologicData['RequestOk']) && $ecologicData['RequestOk'] && !isset($ecologicData['ClaimId'])){//on créer le claim
             $params['url_params'] = array('RequestId' => $ecologicData['RequestId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
@@ -220,16 +230,6 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 $errors = array();
                 $ecologicData['ClaimId'] = $return['ResponseData']['ClaimId'];
             }
-        }
-        elseif(isset($ecologicData['RequestId'])  && !isset($ecologicData['ClaimId'])){//on update la demande
-            $params['url_params'] = array('RequestId' => $ecologicData['RequestId']);
-            $return = $api->execCurl('updatesupportrequest', $params, $errors);
-            
-            if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId']) && $return['ResponseData']['IsValid']){
-                $ecologicData['RequestOk'] = true;
-            }
-            
-            
         }
         
         //enregistrement avant les fichiers au cas ou....

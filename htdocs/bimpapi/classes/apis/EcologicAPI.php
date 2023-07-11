@@ -44,6 +44,18 @@ class EcologicAPI extends BimpAPI
             'label' => 'Envoyer demande',
             'url'   => 'createsupportrequest'
         ),
+        'createclaim'   => array(
+            'label' => 'Envoyer demande2',
+            'url'   => 'createclaim'
+        ),
+        'updateclaim'   => array(
+            'label' => 'Modifier demande2',
+            'url'   => 'updateclaim'
+        ),
+        'AttachFile'   => array(
+            'label' => 'Ajouter document',
+            'url'   => 'AttachFile'
+        ),
 //        'getBuyer'     => array(
 //            'label' => 'Details client',
 //            'url'   => '/credit-insurance/organisation-management/v1/buyers'
@@ -125,6 +137,18 @@ class EcologicAPI extends BimpAPI
             foreach($return['ResponseData']['ValidationErrors'] as $err){
                 $errors[] = implode(' - ', $err);
             }
+        }
+        
+        if($response_code == 404){
+            if(isset($return['Message']))
+                $errors[] = $return['Message'];
+        }
+        
+        if($response_code == 500){
+            if(isset($return['ResponseMessage']))
+                $errors[] = $return['ResponseMessage'];
+            if(isset($return['ResponseErrorMessage']))
+                $errors[] = $return['ResponseErrorMessage'];
         }
 
 //        switch ($response_code) {

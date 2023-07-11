@@ -42,4 +42,16 @@ forms:
                         method: getIRISSymtoms
                         params:
                             - callback: getEcologicProductId
+            - custom: 1
+              label: RepairCodes
+              input_name: RepairCodes
+              show: 
+                   callback: asProdEcologic
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                        method: getRepairCodes
+                        params:
+                            - callback: getEcologicProductId
             

@@ -230,10 +230,15 @@ class BS_SAV_ExtEntity extends BS_SAV{
             
             if($filesOk){
                 foreach($tabFile as $fileT){
+                    if(!in_array($fileT[1], $ecologicData['files']));
                     $paramsFile = array();
                     $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
                     $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1].'.'.$fileT[2], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
                     $return = $api->execCurl('AttachFile', $paramsFile, $errors);
+                    if(isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
+                        $ecologicData['files'][] = $fileT[1];
+                    print_r($return);
+                    print_r($ecologicData);die('oups');
                 }
             }
         }

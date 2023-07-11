@@ -55,5 +55,33 @@ forms:
                         callback: 
                           method: getRepairCodes
                           params:
+                              - callback: getEcologicProductId      
+    ecologic: 
+        rows: 
+            IRISSymtoms:
+                custom: 1
+                label: IRISSymtoms
+                input_name: IRISSymtoms
+                show: 
+                    callback: asProdEcologic
+                input: 
+                   type: select
+                   options: 
+                       callback: 
+                         method: getIRISSymtoms
+                         params:
+                             - callback: getEcologicProductId
+            RepairCodes:
+                custom: 1
+                label: RepairCodes
+                input_name: RepairCodes
+                show: 
+                     callback: asProdEcologic
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                          method: getRepairCodes
+                          params:
                               - callback: getEcologicProductId
             

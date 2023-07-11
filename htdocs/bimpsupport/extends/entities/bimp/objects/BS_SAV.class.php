@@ -91,6 +91,16 @@ class BS_SAV_ExtEntity extends BS_SAV{
         
         return parent::actionToRestitute($data, $success);
     }
+    public function actionCodeEcologic($data, &$success) {
+        $success = 'Ok';
+        $datas = $this->getData('ecologic_data');
+        $datas['IRISSymtoms'] = $data['IRISSymtoms'];
+        $datas['RepairCodes'] = $data['RepairCodes'];
+        $this->updateField('ecologic_data', $datas);
+        
+        
+        return array('errors'=>array(), 'warnings'=>array());
+    }
     
     
     public function actionSendDemandeEcologic($data, &$success){
@@ -226,6 +236,13 @@ class BS_SAV_ExtEntity extends BS_SAV{
                     'icon'    => 'fas_times',
                     'onclick' => $this->getJsActionOnclick('sendDemandeEcologic', array(), array(
 //                        'form_name' => 'cancel_rdv'
+                    ))
+                );
+            $btn[] = array(
+                    'label'   => 'Codes Ecologic',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('codeEcologic', array(), array(
+                        'form_name' => 'ecologic'
                     ))
                 );
         }

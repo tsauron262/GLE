@@ -281,7 +281,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
             $params['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'RepairEndDate' => date("Y-m-d\TH:i:s", strtotime($this->getData('date_close'))), 'ConsumerInvoiceNumber'=>$facture->getData('ref'), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'), 'Submit' => 'true');
             $return = $api->execCurl('updateclaim', $params, $errors);
             
-            if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S")
+            if(isset($return['ResponseStatus']) && $return['ResponseStatus'] == "S" && isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
                 $this->updateField('status_ecologic', 99);
         }
         else{

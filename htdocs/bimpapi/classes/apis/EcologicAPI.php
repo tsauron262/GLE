@@ -143,9 +143,9 @@ class EcologicAPI extends BimpAPI
             if(isset($return['Message']))
                 $errors[] = $return['Message'];
         }
-//        if($response_code == 400){
-//                $errors[] = 'Bad request';
-//        }
+        if($response_code == 400){
+                $errors[] = 'Bad request';
+        }
         
         if($response_code == 500){
             if(isset($return['ResponseMessage']))

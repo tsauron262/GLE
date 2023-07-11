@@ -276,10 +276,12 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 $this->updateField('status_ecologic', 99);
         }
         else{
-            if(!$filesOk)
+            if(!isset($ecologicData['ClaimId']))
+                $errors[] = 'Demande non créer';
+            elseif(!$filesOk)
                 $errors[] = 'Les fichiers ne sont pas ou partielement envoyées';
             else
-                $errors[] = 'Demande non créer';
+                $errors[] = 'Erreur inconnue';
         }
         
         

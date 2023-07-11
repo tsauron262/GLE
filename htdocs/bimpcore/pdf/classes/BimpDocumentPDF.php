@@ -384,6 +384,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '<br/><div class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; ">';
             $html .= '<span style="color: #' . $this->primary . '">' . ('Client Final :') . '</span></div>';
             $html .= '';
+            $html .= pdfBuildThirdpartyName($this->contactFinal, $this->langs).'<br/>';
             $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contactFinal, !is_null($this->contactFinal) ? 1 : 0, 'target');
         }
 

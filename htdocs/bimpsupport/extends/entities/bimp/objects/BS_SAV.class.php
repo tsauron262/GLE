@@ -237,8 +237,8 @@ class BS_SAV_ExtEntity extends BS_SAV{
                     $return = $api->execCurl('AttachFile', $paramsFile, $errors);
                     if(isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
                         $ecologicData['files'][] = $fileT[1];
-                    print_r($return);
-                    print_r($ecologicData);die('oups');
+//                    print_r($return);
+//                    print_r($ecologicData);die('oups');
                 }
             }
         }

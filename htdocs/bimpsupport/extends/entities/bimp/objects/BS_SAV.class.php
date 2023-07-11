@@ -239,11 +239,12 @@ class BS_SAV_ExtEntity extends BS_SAV{
                         $paramsFile['fields']['FileContent'] = base64_encode(file_get_contents($fileT[0] . $fileT[1].'.'.$fileT[2]));
                         $paramsFile['url_params'] = array('ClaimId' => $ecologicData['ClaimId'], 'FileName' => $fileT[1].'.'.$fileT[2], 'FileExtension' => $fileT[2], 'DocumentType' => $fileT[3]);
                         $return = $api->execCurl('AttachFile', $paramsFile, $errors);
-                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid'])
+                        if(isset($return['ResponseData']) && $return['ResponseData']['IsValid']){
                             $ecologicData['files'][] = $fileT[1];
-                        //enregistrement pendant les fichiers, au cas ou...
-                        $this->db = BimpCache::getBdb(true);
-                        $this->updateField('ecologic_data', $ecologicData);
+                            //enregistrement pendant les fichiers, au cas ou...
+                            $this->db = BimpCache::getBdb(true);
+                            $this->updateField('ecologic_data', $ecologicData);
+                        }
     //                    print_r($return);
     //                    print_r($ecologicData);die('oups');
                     }

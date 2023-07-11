@@ -3683,7 +3683,7 @@ class BimpTools
                     'File' => $fichierBloquant
                 ));
                 global $db;
-                $db::stopAll();
+                $db::stopAll('sleppIfBloqued');
                 return 0;
             }
         } else

@@ -199,7 +199,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         
         
         if(!isset($ecologicData['RequestId'])){//on cré la demande
-            $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s")/*time()*//*date('YmdHis')*/, 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
+            $params['url_params'] = array('callDate'=> date("Y-m-d\TH:i:s"), 'repairSiteId'=> $this->getDefaultSiteId(), 'quoteNumber'=> $this->getData('ref'));
             $return = $api->execCurl('createsupportrequest', $params, $errors);
             
             if(isset($return['ResponseData']) && isset($return['ResponseData']['RequestId'])){

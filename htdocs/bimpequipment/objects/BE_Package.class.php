@@ -1,4 +1,4 @@
-<?php
+<<?php
 
 class BE_Package extends BimpObject
 {

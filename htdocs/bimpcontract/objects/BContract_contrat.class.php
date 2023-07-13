@@ -255,7 +255,7 @@ class BContract_contrat extends BimpDolObject
                 break;
             case 'syntec':
                 $linked_factures = getElementElement('contrat', 'facture', $this->id);
-                if ($user->admin && !count($linked_factures))
+                if (($user->admin || $user->rights->bimpcommercial->priceVente) && !count($linked_factures))
                     return 1;
                 break;
             case 'entrepot':
@@ -4557,7 +4557,10 @@ class BContract_contrat extends BimpDolObject
         global $langs;
 
         $success = "PDF contrat généré avec Succes";
-        $this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
+        if($this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs) <= 0){
+            $errors = BimpTools::getErrorsFromDolObject($this->dol_object, $error = null, $langs);
+            $warnings[] = BimpTools::getMsgFromArray($errors, 'Echec de la création du fichier PDF');
+        }
 
         return [
             'errors'   => $errors,

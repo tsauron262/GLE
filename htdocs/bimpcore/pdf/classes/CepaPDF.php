@@ -62,7 +62,17 @@ class CepaPDF extends BimpModelPDF
                 $this->pdf2->setXY(120, 107.3);
                 $this->pdf2->Cell(70, 8, $rum, 0);
 
-                $this->pdf2->setXY(60, 40);
+                $off_x = 0;
+                $off_y = 0;
+
+                switch (BimpCore::getEntity()) {
+                    case 'actimac':
+                        $off_x = 2;
+                        $off_y = 0.7;
+                        break;
+                }
+
+                $this->pdf2->setXY(60 + $off_x, 40 + $off_y);
                 $this->pdf2->Cell(70, 8, $soc->getData('code_client'), 0);
 
                 $this->pdf2->Close();

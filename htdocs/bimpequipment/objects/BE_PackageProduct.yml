@@ -86,6 +86,8 @@ lists:
     package:
         extends: default
         cols:
+            id_package: unset
+            place: unset
             id_product: 
             qty:
             infos:

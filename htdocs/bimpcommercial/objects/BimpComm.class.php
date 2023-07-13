@@ -1969,17 +1969,24 @@ class BimpComm extends BimpDolObject
 
         if (BimpCore::isEntity('bimp')) {
             if ($this->hasRemiseCRT()) {
-                $client = $this->getChildObject('client');
+                $client = null;
+                if (is_a($this, 'Bimp_Facture') && $this->field_exists('id_client_final') && (int) $this->getData('id_client_final')) {
+                    $client = $this->getChildObject('client_final');
+                }
+                if (!BimpObject::objectLoaded($client)) {
+                    $client = $this->getChildObject('client');
+                }
+
                 if (BimpObject::objectLoaded($client)) {
                     if (!$client->getData('type_educ')) {
-                        $onclick = $client->getJsLoadModalForm('edit_type_educ', 'Saisie du type éducation', array(), '', '', 1);
+                        $onclick = $client->getJsLoadModalForm('edit_type_educ', 'Saisie du type éducation pour le client "' . $client->getName() . '"', array(), '', '', 1);
 
                         $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                         $msg .= '<b>ATTENTION : ' . $this->getLabel('this') . ' contient une remise CRT, or le type éducation du client ';
                         $msg .= 'n\'est pas renseigné. En l\'absence de cette information, la validation des factures sera bloquée.</b>';
                         $msg .= '<div style="text-align: center">';
                         $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                        $msg .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Sélectionner le type éducation du client';
+                        $msg .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Sélectionner le type éducation du client "' . $client->getName() . '"';
                         $msg .= '</span>';
 
                         $msg .= '</div>';

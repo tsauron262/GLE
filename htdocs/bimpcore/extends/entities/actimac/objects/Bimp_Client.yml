@@ -8,4 +8,10 @@ fields_tables:
     infos_comm: 
         rows:
             kmTotal:
-                field: kmTotal
+                field: kmTotal            
+forms: 
+    light: 
+        rows:
+            kmTotal:
+                field: kmTotal 
+            

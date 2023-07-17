@@ -867,7 +867,9 @@ class BContract_echeancier extends BimpObject
                     'labelLn'  => 'Facturation supplémentaire',
                     'label'    => 'Complément à',
                     'total_ht' => $contrat->getTotalContrat() - $contrat->getTotalDejaPayer(),
-                    'pa'       => ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa'))
+                    'pa'       => ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa')),
+                    'date_start' => $startedDate->format('Y-m-d'), 
+                    'date_end' => $dateFin->format('Y-m-d')
                         ), array(
                     "success_callback" => $callback
                         )

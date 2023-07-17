@@ -201,7 +201,6 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 //                                $mailTech .= ",tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
                                     mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
-                                    die($mailTech.'ppppp');
                                     $this->nbMail++;
                                 }
                             }
@@ -218,7 +217,6 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 //                                $mailTech .= ", tommy@bimp.fr";
                                 if (isset($_GET['envoieMail'])) {
                                     mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
-                                    die($mailTech.'ppppp2');
                                     $this->nbMail++;
                                 }
                             }
@@ -304,7 +302,6 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 //                                $mailTech .= ",tommy@bimp.fr";
                             if (isset($_GET['envoieMail'])) {
                                 mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
-                                    die($mailTech.'ppppp3');
                                 $this->nbMail++;
                             }
                         }
@@ -320,7 +317,6 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 
                             if (isset($_GET['envoieMail'])) {
                                 mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
-                                    die($mailTech.'ppppp4');
                                 $this->nbMail++;
                             }
                         }

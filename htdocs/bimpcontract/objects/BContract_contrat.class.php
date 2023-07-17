@@ -1595,7 +1595,7 @@ class BContract_contrat extends BimpDolObject
             $this->totalContrat = $montant;
             return $montant;
         }
-        return $this->totalContrat;
+        return round($this->totalContrat,4);
     }
 
     public function getCurrentTotal($taxe = 0)

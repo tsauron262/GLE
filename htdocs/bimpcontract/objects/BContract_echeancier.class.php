@@ -1351,7 +1351,7 @@ class BContract_echeancier extends BimpObject
         }
 
         if (BimpTools::isDateRangeValid($date_start, $date_end, $errors)) {
-            if ($this->isPeriodInvoiced($date_start, $date_end)) {
+            if ($this->isPeriodInvoiced($date_start, $date_end) && stripos($label_line, 'supplémentaire') === false) {
                 $errors[] = 'Contrat déjà facturé pour cette période, merci de rafraîchir la page pour voir cette facture dans l\'échéancier';
             }
         }

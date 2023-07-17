@@ -863,12 +863,15 @@ class BContract_echeancier extends BimpObject
 
 
             if (($user->rights->facture->creer && $reste_periodeEntier == 0 && round($contrat->getTotalContrat(), 2) - round($contrat->getTotalDejaPayer(), 2) != 0) && $contrat->getData('statut') == 11) {
+                
+                $dateDeb = new DateTime($contrat->getData('date_start'));
+                $dateDeb->sub(new DateInterval('P1D'));
                 $onclick = $this->getJsActionOnclick("createFacture", array(
                     'labelLn'  => 'Facturation supplémentaire',
                     'label'    => 'Complément à',
                     'total_ht' => $contrat->getTotalContrat() - $contrat->getTotalDejaPayer(),
                     'pa'       => ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa')),
-                    'date_start' => $startedDate->format('Y-m-d'), 
+                    'date_start' => $dateDeb->format('Y-m-d'), 
                     'date_end' => $dateFin->format('Y-m-d')
                         ), array(
                     "success_callback" => $callback

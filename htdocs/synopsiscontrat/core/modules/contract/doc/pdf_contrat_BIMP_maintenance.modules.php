@@ -58,7 +58,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
     {
         global $conf, $user;
 
-        if ($user->login == 'f.martines') {
+        if ($user->login == 'f.martinez') {
             echo $conf->mycompany->dir_output . '/logos/';
             echo '<pre>';
             print_r(scandir($conf->mycompany->dir_output . '/logos/'));

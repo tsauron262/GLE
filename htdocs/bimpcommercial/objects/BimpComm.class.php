@@ -154,16 +154,24 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
-    public function isFieldActivated($field_name)
+    public function isFieldActivated($field_name, &$infos = '')
     {
-        if ($field_name == "marge" && !(int) BimpCore::getConf('use_marge_in_parent_bimpcomm', 0, 'bimpcommercial'))
+        if ($field_name == "marge" && !(int) BimpCore::getConf('use_marge_in_parent_bimpcomm', 0, 'bimpcommercial')) {
+            $infos = 'Marges désactivées pour les pièces commerciales';
             return 0;
-        if (in_array($field_name, array('statut_export', 'douane_number')) && !(int) BimpCore::getConf('use_statut_export', 0, 'bimpcommercial'))
-            return 0;
-        if (in_array($field_name, array('statut_relance', 'nb_relance')) && !(int) BimpCore::getConf('use_relances_paiements_clients', 0, 'bimpcommercial'))
-            return 0;
+        }
 
-        return parent::isFieldActivated($field_name);
+        if (in_array($field_name, array('statut_export', 'douane_number')) && !(int) BimpCore::getConf('use_statut_export', 0, 'bimpcommercial')) {
+            $infos = 'Exports désactivés pour les pièces commerciales';
+            return 0;
+        }
+
+        if (in_array($field_name, array('statut_relance', 'nb_relance')) && !(int) BimpCore::getConf('use_relances_paiements_clients', 0, 'bimpcommercial')) {
+            $infos = 'Relance de paiement désactivées';
+            return 0;
+        }
+
+        return parent::isFieldActivated($field_name, $infos);
     }
 
     public function isFieldEditable($field, $force_edit = false)
@@ -3958,8 +3966,10 @@ class BimpComm extends BimpDolObject
         $errors = array();
 
         if ($this->isLoaded($errors)) {
-            if ($this->field_exists('marge')) {
+            $infos = '';
+            if ($this->field_exists('marge', $infos)) {
                 $margins = $this->getMarginInfosArray();
+
                 $marge = $margins['total_margin'];
 
                 if ($marge != (float) $this->getData('marge')) {

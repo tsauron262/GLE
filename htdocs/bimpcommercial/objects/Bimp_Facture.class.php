@@ -7177,11 +7177,11 @@ class Bimp_Facture extends BimpComm
         $rows = self::getBdb()->getRows('facture', "`datec` >= '" . $from . "'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
 
         if (is_array($rows)) {
-            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($rows as $r) {
-                if ($facture->fetch((int) $r['rowid'])) {
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
+                if (BimpObject::objectLoaded($facture)) {
                     $fac_errors = array();
-                    $fac_errors = $facture->checkMargin(true);
+                    $fac_errors = $facture->checkMargin(true, true);
                     $fac_errors = BimpTools::merge_array($fac_errors, $facture->checkTotalAchat(true));
 
                     if (count($fac_errors)) {

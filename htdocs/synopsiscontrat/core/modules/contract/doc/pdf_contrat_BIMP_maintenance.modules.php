@@ -195,7 +195,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
                         $print = true;
                         if ($i > 9) {
                             $pdf->AddPage();
-                            $this->addLogo($pdf, 20);
+                            $this->addLogo($pdf, 15);
                             $i = 0;
                         }
                         $i++;

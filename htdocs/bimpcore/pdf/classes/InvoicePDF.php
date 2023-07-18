@@ -79,83 +79,85 @@ class InvoicePDF extends BimpCommDocumentPDF
                 }
 
                 // Livraisons: 
-                $this->shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
-                            'id_facture' => (int) $this->facture->id
-                ));
-                if (empty($this->shipments) && $this->bimpCommObject->getData('fk_facture_source') > 0) {
+                if (!(int) $this->bimpCommObject->getData('pdf_hide_livraisons')) {
                     $this->shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
-                                'id_facture' => (int) $this->bimpCommObject->getData('fk_facture_source')
+                                'id_facture' => (int) $this->facture->id
                     ));
-                }
-                if (empty($this->shipments) && !empty($this->commandes)) {//on chereche tous les BL de la commande
-                    foreach ($this->commandes as $commande) {
-                        $this->shipments = BimpTools::merge_array($this->shipments, BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
-                                            'id_commande_client' => (int) $commande->id
-                        )));
+                    if (empty($this->shipments) && $this->bimpCommObject->getData('fk_facture_source') > 0) {
+                        $this->shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
+                                    'id_facture' => (int) $this->bimpCommObject->getData('fk_facture_source')
+                        ));
                     }
-                }
+                    if (empty($this->shipments) && !empty($this->commandes)) {//on chereche tous les BL de la commande
+                        foreach ($this->commandes as $commande) {
+                            $this->shipments = BimpTools::merge_array($this->shipments, BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
+                                                'id_commande_client' => (int) $commande->id
+                            )));
+                        }
+                    }
 
-                // Contacts livraisons:
-                if (!empty($this->shipments)) {
-                    foreach ($this->shipments as $shipment) {
-                        $id_client = 0;
-                        $id_contact = (int) $shipment->getcontact();
-                        if (!$id_contact) {
-                            $commande = $shipment->getParentInstance();
-                            if (BimpObject::objectLoaded($commande)) {
+                    // Contacts livraisons:
+                    if (!empty($this->shipments)) {
+                        foreach ($this->shipments as $shipment) {
+                            $id_client = 0;
+                            $id_contact = (int) $shipment->getcontact();
+                            if (!$id_contact) {
+                                $commande = $shipment->getParentInstance();
+                                if (BimpObject::objectLoaded($commande)) {
+                                    $id_client = (int) $commande->getData('fk_soc');
+                                }
+                            }
+
+                            if (!$id_client && $id_contact) {
+                                $id_client = (int) BimpCache::getBdb()->getValue('socpeople', 'fk_soc', '`rowid` = ' . (int) $id_contact);
+                            }
+
+                            if ($id_client) {
+                                if (!isset($this->deliveries[$id_client])) {
+                                    $this->deliveries[$id_client] = array();
+                                }
+                                if (!isset($this->deliveries[$id_client][$id_contact])) {
+                                    $this->deliveries[$id_client][$id_contact] = array(
+                                        'shipments' => array()
+                                    );
+                                    $this->nb_deliveries++;
+                                }
+                                $this->deliveries[$id_client][$id_contact]['shipments'][] = $shipment->id;
+                            }
+                        }
+                    } elseif (!empty($this->commandes)) {
+                        foreach ($this->commandes as $commande) {
+                            if (!BimpObject::objectLoaded($commande)) {
+                                continue;
+                            }
+                            $id_contact = (int) $commande->getIdContact();
+                            if ($id_contact) {
+                                $id_client = (int) BimpCache::getBdb()->getValue('socpeople', 'fk_soc', '`rowid` = ' . (int) $id_contact);
+                            } else {
                                 $id_client = (int) $commande->getData('fk_soc');
                             }
-                        }
 
-                        if (!$id_client && $id_contact) {
-                            $id_client = (int) BimpCache::getBdb()->getValue('socpeople', 'fk_soc', '`rowid` = ' . (int) $id_contact);
-                        }
-
-                        if ($id_client) {
-                            if (!isset($this->deliveries[$id_client])) {
-                                $this->deliveries[$id_client] = array();
+                            if ($id_client) {
+                                if (!isset($this->deliveries[$id_client])) {
+                                    $this->deliveries[$id_client] = array();
+                                }
+                                if (!isset($this->deliveries[$id_client][$id_contact])) {
+                                    $this->deliveries[$id_client][$id_contact] = array(
+                                        'commandes' => array()
+                                    );
+                                    $this->nb_deliveries++;
+                                }
+                                $this->deliveries[$id_client][$id_contact]['commandes'][] = $commande->id;
                             }
-                            if (!isset($this->deliveries[$id_client][$id_contact])) {
-                                $this->deliveries[$id_client][$id_contact] = array(
-                                    'shipments' => array()
-                                );
+                        }
+                    } else {
+                        $contacts = $this->facture->getIdContact('external', 'SHIPPING');
+                        if (isset($contacts[0]) && $contacts[0]) {
+                            $id_client = (int) BimpCache::getBdb()->getValue('socpeople', 'fk_soc', '`rowid` = ' . (int) $contacts[0]);
+                            if ($id_client) {
+                                $this->deliveries[$id_client][$contacts[0]] = array();
                                 $this->nb_deliveries++;
                             }
-                            $this->deliveries[$id_client][$id_contact]['shipments'][] = $shipment->id;
-                        }
-                    }
-                } elseif (!empty($this->commandes)) {
-                    foreach ($this->commandes as $commande) {
-                        if (!BimpObject::objectLoaded($commande)) {
-                            continue;
-                        }
-                        $id_contact = (int) $commande->getIdContact();
-                        if ($id_contact) {
-                            $id_client = (int) BimpCache::getBdb()->getValue('socpeople', 'fk_soc', '`rowid` = ' . (int) $id_contact);
-                        } else {
-                            $id_client = (int) $commande->getData('fk_soc');
-                        }
-
-                        if ($id_client) {
-                            if (!isset($this->deliveries[$id_client])) {
-                                $this->deliveries[$id_client] = array();
-                            }
-                            if (!isset($this->deliveries[$id_client][$id_contact])) {
-                                $this->deliveries[$id_client][$id_contact] = array(
-                                    'commandes' => array()
-                                );
-                                $this->nb_deliveries++;
-                            }
-                            $this->deliveries[$id_client][$id_contact]['commandes'][] = $commande->id;
-                        }
-                    }
-                } else {
-                    $contacts = $this->facture->getIdContact('external', 'SHIPPING');
-                    if (isset($contacts[0]) && $contacts[0]) {
-                        $id_client = (int) BimpCache::getBdb()->getValue('socpeople', 'fk_soc', '`rowid` = ' . (int) $contacts[0]);
-                        if ($id_client) {
-                            $this->deliveries[$id_client][$contacts[0]] = array();
-                            $this->nb_deliveries++;
                         }
                     }
                 }
@@ -399,7 +401,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                             $contact = null;
                         }
 
-                        $html .= str_replace("\n", "<br/>", /*$client->dol_object->nom . '<br/>' .*/ pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (BimpObject::objectLoaded($contact) ? $contact->dol_object : ''), !is_null($contact) ? 1 : 0, 'target'));
+                        $html .= str_replace("\n", "<br/>", /* $client->dol_object->nom . '<br/>' . */ pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (BimpObject::objectLoaded($contact) ? $contact->dol_object : ''), !is_null($contact) ? 1 : 0, 'target'));
                         break 2;
                     }
                 }

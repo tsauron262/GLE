@@ -1,0 +1,1 @@
+- Ajout du champ "Masquer l'adresse de livraison dans le PDF" pour les factures

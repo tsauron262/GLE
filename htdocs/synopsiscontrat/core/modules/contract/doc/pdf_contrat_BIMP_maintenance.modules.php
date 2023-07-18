@@ -22,7 +22,6 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
     private $have_save_mensuelle = false;
     private $have_save_annuelle = false;
     private $have_ass = false;
-    
 
     function __construct($db)
     {
@@ -45,7 +44,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
         $this->emetteur = $mysoc;
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);
-        
+
         parent::__construct($db);
     }
 
@@ -57,7 +56,15 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
 
     public function addLogo(&$pdf, $size, $pdf1 = null)
     {
-        global $conf;
+        global $conf, $user;
+
+        if ($user->login == 'f.martines') {
+            echo $conf->mycompany->dir_output . '/logos/';
+            echo '<pre>';
+            print_r(scandir($conf->mycompany->dir_output . '/logos/'));
+            exit;
+        }
+
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
         $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);
         if (is_file($testFile))
@@ -195,7 +202,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
                         $print = true;
                         if ($i > 9) {
                             $pdf->AddPage();
-                            $this->addLogo($pdf, 15);
+                            $this->addLogo($pdf, 20);
                             $i = 0;
                         }
                         $i++;

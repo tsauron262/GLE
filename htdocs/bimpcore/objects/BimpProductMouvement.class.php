@@ -608,10 +608,20 @@ class BimpProductMouvement extends BimpObject
         if (!count($errors)) {
             $bdb = self::getBdb();
 
-            $rows = $bdb->getRows('stock_mouvement', 'datem BETWEEN \'' . $date_min . '\' AND \'' . $date_max . '\'', null, 'array', array(
-                'rowid', 'fk_product', 'fk_entrepot', 'value', 'type_mouvement', 'label', 'inventorycode'
-                    ), 'datem', 'desc');
+            $sql = 'SELECT a.* FROM `llx_stock_mouvement` a WHERE
+a.datem >= \'2023-07-01 00:00:00\' 
+AND (
+SELECT COUNT(DISTINCT b.rowid) FROM `llx_stock_mouvement` b 
+WHERE b.rowid != a.rowid 
+AND b.fk_product = a.fk_product 
+AND b.fk_entrepot = a.fk_entrepot
+AND b.`type_mouvement` = a.`type_mouvement`
+AND b.`value` = a.`value`
+AND b.label = a.label
+AND (b.`inventorycode` LIKE \'CMDF%_LN%_RECEP%\' OR b.`inventorycode` LIKE \'CO%_EXP%\')
+) > 0;';
 
+            $rows = $bdb->executeS($sql, 'array');
             $done = array();
             if (is_array($rows)) {
                 foreach ($rows as $r) {
@@ -619,7 +629,8 @@ class BimpProductMouvement extends BimpObject
                         continue;
                     }
 
-                    $where = 'fk_product = ' . $r['fk_product'];
+                    $where = 'rowid != ' . $r['rowid'];
+                    $where .= ' AND fk_product = ' . $r['fk_product'];
                     $where .= ' AND fk_entrepot = ' . $r['fk_entrepot'];
                     $where .= ' AND value = ' . $r['value'];
                     $where .= ' AND type_mouvement = ' . $r['type_mouvement'];
@@ -633,7 +644,6 @@ class BimpProductMouvement extends BimpObject
                     $doublons = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'datem', 'label', 'inventorycode'), 'datem', 'asc');
 
                     if (is_array($doublons) && count($doublons) > 1) {
-                        echo 'rrrrrr';
                         $cancels = array();
 
                         foreach ($doublons as $mvt) {
@@ -677,6 +687,8 @@ class BimpProductMouvement extends BimpObject
                             if ((int) $diff !== 1) {
                                 echo 'MVT #' . $r['rowid'] . '(' . $r['inventorycode'] . '): ' . count($doublons) . ' doublons - ' . count($cancels) . ' annul. <br/>';
                             }
+                        } elseif (preg_match('/^CO(\d+)_EXP(\d+)$/', $r['inventorycode'], $matches)) {
+                            
                         }
                     }
 

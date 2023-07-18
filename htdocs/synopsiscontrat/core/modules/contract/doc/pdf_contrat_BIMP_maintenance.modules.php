@@ -56,16 +56,15 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
 
     public function addLogo(&$pdf, $size, $pdf1 = null)
     {
-        global $conf, $user;
+        global $conf;
 
-        if ($user->login == 'f.martinez') {
-            echo $conf->mycompany->dir_output . '/logos/';
-            echo '<pre>';
-            print_r(scandir($conf->mycompany->dir_output . '/logos/'));
-            exit;
+        $logo_name = $this->emetteur->logo;
+        
+        if (BimpCore::isEntity('actimac')) {
+            $logo_name = 'carre.png';
         }
 
-        $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
+        $logo = $conf->mycompany->dir_output . '/logos/' . $logo_name;
         $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);
         if (is_file($testFile))
             $logo = $testFile;

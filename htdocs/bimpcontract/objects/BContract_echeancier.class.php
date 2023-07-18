@@ -863,11 +863,16 @@ class BContract_echeancier extends BimpObject
 
 
             if (($user->rights->facture->creer && $reste_periodeEntier == 0 && round($contrat->getTotalContrat(), 2) - round($contrat->getTotalDejaPayer(), 2) != 0) && $contrat->getData('statut') == 11) {
+                
+                $dateDebT = new DateTime($contrat->getData('date_start'));
+                $dateFinT = $contrat->getEndDate();
                 $onclick = $this->getJsActionOnclick("createFacture", array(
                     'labelLn'  => 'Facturation supplémentaire',
                     'label'    => 'Complément à',
                     'total_ht' => $contrat->getTotalContrat() - $contrat->getTotalDejaPayer(),
-                    'pa'       => ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa'))
+                    'pa'       => ($contrat->getTotalPa() - $contrat->getTotalDejaPayer(false, 'pa')),
+                    'date_start' => $dateDebT->format('Y-m-d'), 
+                    'date_end' => $dateFinT->format('Y-m-d')
                         ), array(
                     "success_callback" => $callback
                         )
@@ -1346,7 +1351,7 @@ class BContract_echeancier extends BimpObject
         }
 
         if (BimpTools::isDateRangeValid($date_start, $date_end, $errors)) {
-            if ($this->isPeriodInvoiced($date_start, $date_end)) {
+            if ($this->isPeriodInvoiced($date_start, $date_end) && stripos($label_line, 'supplémentaire') === false) {
                 $errors[] = 'Contrat déjà facturé pour cette période, merci de rafraîchir la page pour voir cette facture dans l\'échéancier';
             }
         }

@@ -1,0 +1,17 @@
+fields:
+    kmTotal:
+        type: int
+        label: km aller/retour
+
+
+fields_tables: 
+    infos_comm: 
+        rows:
+            kmTotal:
+                field: kmTotal            
+forms: 
+    light: 
+        rows:
+            kmTotal:
+                field: kmTotal 
+            

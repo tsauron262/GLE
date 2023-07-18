@@ -1273,6 +1273,10 @@ class BimpObject extends BimpCache
             return 1;
         }
 
+        if (!isset($this->params['fields'])) {
+            return 0;
+        }
+        
         if (!in_array($field_name, $this->params['fields']) && (!$this->use_commom_fields || !in_array($field_name, self::$common_fields))) {
             $infos = 'Le champ "' . $field_name . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
             return 0;

@@ -727,7 +727,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
 
                     $current_exemplaire++;
                     // Titre partie
-                    $this->titre_partie($pdf, 'Entre les partieees');
+                    $this->titre_partie($pdf, 'Entre les parties');
 //                $this->titre_partie($pdf1, 'Entre les parties');
                     // Entre les parties
                     $client->fetch($contrat->socid);

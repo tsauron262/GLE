@@ -281,21 +281,11 @@ switch ($action) {
         $date_min = BimpTools::getValue('date_min', '');
         $date_max = BimpTools::getValue('date_max', date('Y-m-d H:i:s'));
 
-        if (!$date_min || !$date_max) {
+        if (!$date_min) {
             echo BimpRender::renderAlerts('Indiquer date_min et date_max dans l\'url', 'info');
         } else {
-            $exec = (int) BimpTools::getValue('exec', 0);
-
-            if (!$exec) {
-                $path = pathinfo(__FILE__);
-                echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=check_stocks_mouvements&exec=1&date_min=' . $date_min . '&date_max=' . $date_max . '" class="btn btn-default">';
-                echo 'effectuer les corrections';
-                echo '</a>';
-                echo '<br/><br/>';
-            } else {
-                BimpObject::loadClass('bimpcore', 'BimpProductMouvement');
-                BimpProductMouvement::checkMouvements($date_min, $date_max, true, false);
-            }
+            BimpObject::loadClass('bimpcore', 'BimpProductMouvement');
+            BimpProductMouvement::checkMouvements($date_min, $date_max, true);
         }
         break;
 

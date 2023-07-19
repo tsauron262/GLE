@@ -1267,13 +1267,22 @@ class BimpObject extends BimpCache
         return 1;
     }
 
-    public function field_exists($field_name)
+    public function field_exists($field_name, &$infos = '')
     {
         if ($field_name === $this->getPrimary()) {
             return 1;
         }
 
-        if (!isset($this->params['fields']) || !$this->isFieldActivated($field_name)) {
+        if (!isset($this->params['fields'])) {
+            return 0;
+        }
+        
+        if (!in_array($field_name, $this->params['fields']) && (!$this->use_commom_fields || !in_array($field_name, self::$common_fields))) {
+            $infos = 'Le champ "' . $field_name . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
+            return 0;
+        }
+
+        if (!$this->isFieldActivated($field_name, $infos)) {
             return 0;
         }
 
@@ -1282,11 +1291,12 @@ class BimpObject extends BimpCache
             $extra_fields = self::getExtraFieldsArray($this->dol_object->table_element);
 
             if (!is_array($extra_fields) || !isset($extra_fields[$field_tmp])) {
+                $infos = 'Extrafield absent pour le champ "' . $field_name . '"';
                 return 0;
             }
         }
 
-        return (in_array($field_name, $this->params['fields']) || ($this->use_commom_fields && in_array($field_name, self::$common_fields)));
+        return 1;
     }
 
     public function isExtraField($field_name)
@@ -6220,16 +6230,23 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $this->isEditable($force_edit);
     }
 
-    public function isFieldActivated($field_name)
+    public function isFieldActivated($field_name, &$infos = '')
     {
-        return $this->isFieldUsed($field_name);
+        return $this->isFieldUsed($field_name, $infos);
     }
 
-    public function isFieldUsed($field_name)
+    public function isFieldUsed($field_name, &$infos = '')
     {
         if ($this->config->isDefined('fields/' . $field_name)) {
-            return ((int) $this->getConf('fields/' . $field_name . '/unused', 0, false, 'bool') ? 0 : 1);
+            if ((int) $this->getConf('fields/' . $field_name . '/unused', 0, false, 'bool')) {
+                $infos = 'Champ "' . $field_name . '" défini comme non utilisé';
+                return 0;
+            }
+
+            return 1;
         }
+
+        $infos = 'Champ "' . $field_name . '" non défini dans la config yml';
 
         return 0;
     }

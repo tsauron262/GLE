@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` ADD `pdf_hide_livraisons` tinyint (1) NOT NULL DEFAULT 0;

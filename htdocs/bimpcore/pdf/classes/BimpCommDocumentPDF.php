@@ -241,11 +241,11 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         $desc = '';
         if (!is_null($product)) {
             if (!$this->hideRef) {
-                $desc .= $product->ref;
+                $desc .= '<b>' . $product->ref . '</b>';
             }
 
             if (!$hide_product_label) {
-                $desc .= ($desc ? ' - ' : '') . $product->label;
+                $desc .= ($desc ? ' - ' : '') . '<b>' . $product->label . '</b>';
             }
 
 //            if ($product->type == 1) {

@@ -1609,6 +1609,10 @@ views:
                     fields_table:
                         name: suivi
             - cols: 
+                  - type: custom
+                    custom: 
+                        callback: renderNotesList
+            - cols: 
                 - type: list
                   list: 
                       name: default

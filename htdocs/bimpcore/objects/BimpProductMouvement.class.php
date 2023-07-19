@@ -593,8 +593,9 @@ class BimpProductMouvement extends BimpObject
 
     // Méthodes statiques: 
 
-    public static function checkMouvements($date_min = '', $date_max = '', $echo = false, $correct = false)
+    public static function checkMouvements($date_min = '', $date_max = '', $echo = false)
     {
+        $html = '';
         $errors = array();
 
         if (!$date_min) {
@@ -602,24 +603,38 @@ class BimpProductMouvement extends BimpObject
         }
 
         if (!$date_max) {
-            $errors[] = 'Date max absente';
+            $date_max = date('Y-m-d 23:59:59');
         }
 
         if (!count($errors)) {
             $bdb = self::getBdb();
 
-            $rows = $bdb->getRows('stock_mouvement', 'datem BETWEEN \'' . $date_min . '\' AND \'' . $date_max . '\'', null, 'array', array(
-                'rowid', 'fk_product', 'fk_entrepot', 'value', 'type_mouvement', 'label', 'inventorycode'
-                    ), 'datem', 'desc');
+            $sql = 'SELECT a.* FROM `llx_stock_mouvement` a WHERE
+a.datem >= \'' . $date_min . ' 00:00:00\' 
+AND (
+SELECT COUNT(DISTINCT b.rowid) FROM `llx_stock_mouvement` b 
+WHERE b.rowid != a.rowid 
+AND b.fk_product = a.fk_product 
+AND b.fk_entrepot = a.fk_entrepot
+AND b.`type_mouvement` = a.`type_mouvement`
+AND b.`value` = a.`value`
+AND b.label = a.label
+AND (b.`inventorycode` LIKE \'CMDF%_LN%_RECEP%\' OR b.`inventorycode` LIKE \'CO%_EXP%\')
+) > 0;';
 
+            $rows = $bdb->executeS($sql, 'array');
             $done = array();
             if (is_array($rows)) {
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<tbody>';
+
                 foreach ($rows as $r) {
                     if (in_array((int) $r['rowid'], $done)) {
                         continue;
                     }
 
-                    $where = 'fk_product = ' . $r['fk_product'];
+                    $where = 'rowid != ' . $r['rowid'];
+                    $where .= ' AND fk_product = ' . $r['fk_product'];
                     $where .= ' AND fk_entrepot = ' . $r['fk_entrepot'];
                     $where .= ' AND value = ' . $r['value'];
                     $where .= ' AND type_mouvement = ' . $r['type_mouvement'];
@@ -630,10 +645,9 @@ class BimpProductMouvement extends BimpObject
                         $where .= ' AND rowid NOT IN (' . implode(',', $done) . ')';
                     }
 
-                    $doublons = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'datem', 'label', 'inventorycode'), 'datem', 'asc');
+                    $doublons = $bdb->getRows('stock_mouvement', $where, null, 'array', array(), 'datem', 'asc');
 
                     if (is_array($doublons) && count($doublons) > 1) {
-                        echo 'rrrrrr';
                         $cancels = array();
 
                         foreach ($doublons as $mvt) {
@@ -663,49 +677,113 @@ class BimpProductMouvement extends BimpObject
                                     $where .= ' AND label LIKE \'%' . $serial . '\'';
 
                                     // Recherche suppr. équipement: 
-                                    $cancels = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid'));
+                                    $cancels = $bdb->getRows('stock_mouvement', $where, null, 'array', array());
                                 }
                             } else {
                                 $where = 'fk_product = ' . $r['fk_product'];
                                 $where .= ' AND fk_entrepot = ' . $r['fk_entrepot'];
                                 $where .= ' AND (inventorycode = \'ANNUL_' . $r['inventorycode'] . '\' OR inventorycode = \'ANNUL_CMDF_' . $matches[1] . '_LN_' . $matches[2] . '_RECEP_' . $matches[3] . '\')';
 
-                                $cancels = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid'));
+                                $cancels = $bdb->getRows('stock_mouvement', $where, null, 'array', array());
+                            }
+                        } elseif (preg_match('/^CO(\d+)_EXP(\d+)$/', $r['inventorycode'], $matches)) {
+                            $serial = '';
+                            if (preg_match('/^.+serial: "(.+)"$/', $r['label'], $matches2)) {
+                                $serial = $matches2[1];
                             }
 
-                            $diff = count($doublons) - count($cancels);
-                            if ((int) $diff !== 1) {
-                                echo 'MVT #' . $r['rowid'] . '(' . $r['inventorycode'] . '): ' . count($doublons) . ' doublons - ' . count($cancels) . ' annul. <br/>';
+                            if ($serial) {
+                                $where = 'fk_product = ' . $r['fk_product'];
+                                $where .= ' AND fk_entrepot = ' . $r['fk_entrepot'];
+                                $where .= ' AND inventorycode = \'' . $r['inventorycode'] . '_ANNUL\'';
+                                $where .= ' AND label LIKE \'%serial: "' . $serial . '"\'';
+
+                                // Recherche suppr. équipement: 
+                                $cancels = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid'));
+
+                                if (!count($cancels) && preg_match('/^S(.+)/', $serial, $matches3)) {
+                                    $serial = $matches3[1];
+                                    $where = 'fk_product = ' . $r['fk_product'];
+                                    $where .= ' AND fk_entrepot = ' . $r['fk_entrepot'];
+                                    $where .= ' AND inventorycode = \'' . $r['inventorycode'] . '_ANNUL\'';
+                                    $where .= ' AND label LIKE \'%serial: "' . $serial . '"\'';
+
+                                    // Recherche suppr. équipement: 
+                                    $cancels = $bdb->getRows('stock_mouvement', $where, null, 'array', array());
+                                }
+                            } else {
+                                $where = 'fk_product = ' . $r['fk_product'];
+                                $where .= ' AND fk_entrepot = ' . $r['fk_entrepot'];
+                                $where .= ' AND inventorycode = \'' . $r['inventorycode'] . '_ANNUL\'';
+
+                                $cancels = $bdb->getRows('stock_mouvement', $where, null, 'array', array());
+                            }
+                        }
+
+                        $diff = count($doublons) - count($cancels);
+                        if ((int) $diff !== 1) {
+                            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $r['fk_product']);
+                            if (BimpObject::objectLoaded($prod)) {
+                                $html .= '<tr>';
+                                $html .= '<td>' . $prod->getLink() . '</td>';
+                                $html .= '<td>';
+                                $html .= '<table>';
+                                $html .= '<tbody>';
+                                $html .= '<tr>';
+                                $html .= '<td>MVT #' . $r['rowid'] . '</td>';
+                                $html .= '<td>' . $r['inventorycode'] . '</td>';
+                                $html .= '<td>' . $r['label'] . '</td>';
+                                $html .= '<td><span class="' . self::$type_mouvement[(int) $r['type_mouvement']]['label']['classes'][0] . '">' . self::$type_mouvement[(int) $r['type_mouvement']]['label'] . '</span></td>';
+                                $html .= '<td>' . $r['value'] . '</td>';
+                                $html .= '</tr>';
+
+                                if (count($doublons)) {
+                                    foreach ($doublons as $d) {
+                                        $html .= '<tr>';
+                                        $html .= '<td>MVT #' . $d['rowid'] . '</td>';
+                                        $html .= '<td>' . $d['inventorycode'] . '</td>';
+                                        $html .= '<td>' . $d['label'] . '</td>';
+                                        $html .= '<td><span class="' . self::$type_mouvement[(int) $d['type_mouvement']]['label']['classes'][0] . '">' . self::$type_mouvement[(int) $d['type_mouvement']]['label'] . '</span></td>';
+                                        $html .= '<td>' . $d['value'] . '</td>';
+                                        $html .= '</tr>';
+                                    }
+                                }
+
+                                if (count($cancels)) {
+                                    foreach ($cancels as $c) {
+                                        $html .= '<tr>';
+                                        $html .= '<td>MVT #' . $c['rowid'] . '</td>';
+                                        $html .= '<td>' . $c['inventorycode'] . '</td>';
+                                        $html .= '<td>' . $c['label'] . '</td>';
+                                        $html .= '<td><span class="' . self::$type_mouvement[(int) $c['type_mouvement']]['label']['classes'][0] . '">' . self::$type_mouvement[(int) $c['type_mouvement']]['label'] . '</span></td>';
+                                        $html .= '<td>' . $c['value'] . '</td>';
+                                        $html .= '</tr>';
+                                    }
+                                }
+
+                                $html .= '</tbody>';
+                                $html .= '</table>';
+                                $html .= '</td>';
+                                $html .= '</tr>';
                             }
                         }
                     }
-
-                    if (count($doublons) > 1) {
-//                        if ($echo) {
-//                            echo 'PROD #' . $r['fk_product'] . ' - Entrepôt #' . $r['fk_entrepot'] . ' - Code "' . $r['inventorycode'] . '": ' . count($doublons) . ' entrées<br/>';
-//                        }
-//
-//                        if ($echo) {
-//                            $dt = new DateTime($mvt['datem']);
-//                            echo ' - ' . $mvt['rowid'] . ' ' . $dt->format('d / m / Y H:i:s') . '<br/>';
-//                        }
-//
-//                        if ($correct && (int) $r['rowid'] !== (int) $mvt['rowid']) {
-//                            // todo...
-//                        }
-                    }
                 }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
             } else {
                 $errors[] = 'Aucun mouvement trouvé pour ces dates';
             }
         }
 
         if (count($errors)) {
-            if ($echo) {
-                echo BimpRender::renderAlerts($errors);
-            }
+            $html .= BimpRender::renderAlerts($errors);
         }
 
-        return $errors;
+        if ($echo) {
+            echo $html;
+        }
+        return $html;
     }
 }

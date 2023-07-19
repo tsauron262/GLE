@@ -3056,7 +3056,7 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    public static function getSecteursArray($include_empty = true)
+    public static function getSecteursArray($include_empty = true, $empty_value = '', $empty_label = '')
     {
         if (!(int) BimpCore::getConf("USE_SECTEUR")) {
             return array();
@@ -3075,7 +3075,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty, '', '');
+        return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_label);
     }
 
     public static function getSecteursData()

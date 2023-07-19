@@ -280,12 +280,13 @@ switch ($action) {
     case 'check_stocks_mouvements':
         $date_min = BimpTools::getValue('date_min', '');
         $date_max = BimpTools::getValue('date_max', date('Y-m-d H:i:s'));
+        $id_product = BimpTools::getValue('id_product', 0);
 
         if (!$date_min) {
             echo BimpRender::renderAlerts('Indiquer date_min et date_max dans l\'url', 'info');
         } else {
             BimpObject::loadClass('bimpcore', 'BimpProductMouvement');
-            BimpProductMouvement::checkMouvements($date_min, $date_max, true);
+            BimpProductMouvement::checkMouvements($date_min, $date_max, true, $id_product);
         }
         break;
 

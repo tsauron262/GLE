@@ -593,7 +593,7 @@ class BimpProductMouvement extends BimpObject
 
     // Méthodes statiques: 
 
-    public static function checkMouvements($date_min = '', $date_max = '', $echo = false)
+    public static function checkMouvements($date_min = '', $date_max = '', $echo = false, $id_product = 0)
     {
         $html = '';
         $errors = array();
@@ -610,8 +610,12 @@ class BimpProductMouvement extends BimpObject
             $bdb = self::getBdb();
 
             $sql = 'SELECT a.* FROM `llx_stock_mouvement` a WHERE
-a.datem >= \'' . $date_min . ' 00:00:00\' 
-AND (
+a.datem >= \'' . $date_min . ' 00:00:00\'';
+
+            if ($id_product) {
+                $sql .= ' AND a.fk_product = ' . $id_product;
+            } else {
+                $sql .= ' AND (
 SELECT COUNT(DISTINCT b.rowid) FROM `llx_stock_mouvement` b 
 WHERE b.rowid != a.rowid 
 AND b.fk_product = a.fk_product 
@@ -620,7 +624,8 @@ AND b.`type_mouvement` = a.`type_mouvement`
 AND b.`value` = a.`value`
 AND b.label = a.label
 AND (b.`inventorycode` LIKE \'CMDF%_LN%_RECEP%\' OR b.`inventorycode` LIKE \'CO%_EXP%\')
-) > 0;';
+) > 0';
+            }
 
             $rows = $bdb->executeS($sql, 'array');
             $done = array();
@@ -653,7 +658,7 @@ AND (b.`inventorycode` LIKE \'CMDF%_LN%_RECEP%\' OR b.`inventorycode` LIKE \'CO%
 
                     if (is_null($doublons)) {
                         $row_errors[] = 'FAIL DOUBLONS - ' . $bdb->err();
-                    } elseif (count($doublons)) {
+                    } elseif (count($doublons) || $id_product) {
                         $cancels = array();
 
                         foreach ($doublons as $mvt) {
@@ -770,56 +775,56 @@ AND (b.`inventorycode` LIKE \'CMDF%_LN%_RECEP%\' OR b.`inventorycode` LIKE \'CO%
                         }
 
                         $diff = count($doublons) - count($cancels);
-                        if ((int) $diff !== 0) {
+                        if (($diff != 0 && $diff != -1) || $id_product) {
                             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $r['fk_product']);
-                            if (BimpObject::objectLoaded($prod)) {
-                                $html .= '<tr>';
-                                $html .= '<td>' . $prod->getLink() . '<br/>' . count($doublons) . ' doublon(s) - ' . count($cancels) . ' annulations</td>';
-                                $html .= '<td>';
-                                $html .= '<table>';
-                                $html .= '<tbody>';
-                                $html .= '<tr>';
-                                $html .= '<td>MVT #' . $r['rowid'] . '</td>';
-                                $html .= '<td>' . $r['inventorycode'] . '</td>';
-                                $html .= '<td>' . $r['label'] . '</td>';
-                                $html .= '<td><span class="' . self::$type_mouvement[(int) $r['type_mouvement']]['classes'][0] . '">' . self::$type_mouvement[(int) $r['type_mouvement']]['label'] . '</span></td>';
-                                $html .= '<td>' . $r['value'] . '</td>';
-                                $html .= '</tr>';
+                            $html .= '<tr>';
+                            $html .= '<td>' . (BimpObject::objectLoaded($prod) ? $prod->getLink() : 'Prod #' . $r['fk_product']) . '<br/>' . count($doublons) . ' doublon(s) - ' . count($cancels) . ' annulations</td>';
+                            $html .= '<td>';
+                            $html .= '<table>';
+                            $html .= '<tbody>';
+                            $html .= '<tr>';
+                            $html .= '<td>MVT #' . $r['rowid'] . '</td>';
+                            $html .= '<td>' . $r['inventorycode'] . '</td>';
+                            $html .= '<td>' . $r['label'] . '</td>';
+                            $html .= '<td><span class="' . self::$type_mouvement[(int) $r['type_mouvement']]['classes'][0] . '">' . self::$type_mouvement[(int) $r['type_mouvement']]['label'] . '</span></td>';
+                            $html .= '<td>' . $r['value'] . '</td>';
+                            $html .= '</tr>';
 
-                                if (count($doublons)) {
-                                    foreach ($doublons as $d) {
-                                        $html .= '<tr>';
-                                        $html .= '<td>MVT #' . $d['rowid'] . '</td>';
-                                        $html .= '<td>' . $d['inventorycode'] . '</td>';
-                                        $html .= '<td>' . $d['label'] . '</td>';
-                                        $html .= '<td><span class="' . self::$type_mouvement[(int) $d['type_mouvement']]['classes'][0] . '">' . self::$type_mouvement[(int) $d['type_mouvement']]['label'] . '</span></td>';
-                                        $html .= '<td>' . $d['value'] . '</td>';
-                                        $html .= '</tr>';
-                                    }
+                            if (count($doublons)) {
+                                foreach ($doublons as $d) {
+                                    $html .= '<tr>';
+                                    $html .= '<td>MVT #' . $d['rowid'] . '</td>';
+                                    $html .= '<td>' . $d['inventorycode'] . '</td>';
+                                    $html .= '<td>' . $d['label'] . '</td>';
+                                    $html .= '<td><span class="' . self::$type_mouvement[(int) $d['type_mouvement']]['classes'][0] . '">' . self::$type_mouvement[(int) $d['type_mouvement']]['label'] . '</span></td>';
+                                    $html .= '<td>' . $d['value'] . '</td>';
+                                    $html .= '</tr>';
                                 }
-
-                                if (count($cancels)) {
-                                    foreach ($cancels as $c) {
-                                        $html .= '<tr>';
-                                        $html .= '<td>MVT #' . $c['rowid'] . '</td>';
-                                        $html .= '<td>' . $c['inventorycode'] . '</td>';
-                                        $html .= '<td>' . $c['label'] . '</td>';
-                                        $html .= '<td><span class="' . self::$type_mouvement[(int) $c['type_mouvement']]['classes'][0] . '">' . self::$type_mouvement[(int) $c['type_mouvement']]['label'] . '</span></td>';
-                                        $html .= '<td>' . $c['value'] . '</td>';
-                                        $html .= '</tr>';
-                                    }
-                                }
-
-                                $html .= '</tbody>';
-                                $html .= '</table>';
-                                $html .= '</td>';
-                                $html .= '</tr>';
                             }
+
+                            if (count($cancels)) {
+                                foreach ($cancels as $c) {
+                                    $html .= '<tr>';
+                                    $html .= '<td>MVT #' . $c['rowid'] . '</td>';
+                                    $html .= '<td>' . $c['inventorycode'] . '</td>';
+                                    $html .= '<td>' . $c['label'] . '</td>';
+                                    $html .= '<td><span class="' . self::$type_mouvement[(int) $c['type_mouvement']]['classes'][0] . '">' . self::$type_mouvement[(int) $c['type_mouvement']]['label'] . '</span></td>';
+                                    $html .= '<td>' . $c['value'] . '</td>';
+                                    $html .= '</tr>';
+                                }
+                            }
+
+                            $html .= '</tbody>';
+                            $html .= '</table>';
+                            $html .= '</td>';
+                            $html .= '</tr>';
                         }
                     }
 
                     if (count($row_errors)) {
-                        $html .= BimpRender::renderAlerts($row_errors);
+                        $html .= '<tr>';
+                        $html .= '<td colspan="99">' . BimpRender::renderAlerts($row_errors) . '</td>';
+                        $html .= '</tr>';
                     }
                 }
 

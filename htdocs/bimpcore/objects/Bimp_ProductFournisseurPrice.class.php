@@ -17,7 +17,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
         $parent = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($parent)) {
-            return $parent->canCreate();
+            return ($parent->canCreate() && $parent->canEditPrices());
         }
 
         return parent::canCreate();
@@ -28,7 +28,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
         $parent = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($parent)) {
-            return $parent->canEdit();
+            return ($parent->canEdit() && $parent->canEditPrices());
         }
 
         return parent::canEdit();

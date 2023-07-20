@@ -172,6 +172,12 @@ params:
         cat: products
         type: bool
         def: 0
+    use_product_prices_perms: 
+        label: Vérifier les droits utilisateurs pour l'édition des PV / PA des produits (+ option "Pas de prix fixes")
+        cat: products
+        type: bool
+        info: Droit "bimpcommercial->use_product_prices_perms"
+        def: 0
     use_products_cur_pa_history:
         label: Activer l'historique des prix d'achat courants
         cat: products

@@ -192,9 +192,9 @@ class Bimp_Product extends BimpObject
     public function canEditPrices()
     {
         global $user;
-//        if ($user->admin) {
-//            return 1;
-//        }
+        if ($user->admin) {
+            return 1;
+        }
 
         if ((int) BimpCore::getConf('use_product_prices_perms', null, 'bimpcore')) {
             return $user->rights->bimpcommercial->edit_product_prices;

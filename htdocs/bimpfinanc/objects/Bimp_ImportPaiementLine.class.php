@@ -491,7 +491,7 @@ class Bimp_ImportPaiementLine extends BimpObject
                 foreach ($facs as $id_fac) {
                     $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
                     if (BimpObject::objectLoaded($fac)) {
-                        if (!in_array((int) $fac->getData('fk_statut'), array(0), 1, 2)) {
+                        if (!in_array((int) $fac->getData('fk_statut'), array(0, 1, 2))) {
                             $icon = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                             $html .= BimpRender::renderAlerts($icon . 'Le statut de la facture ' . $fac->getRef() . ' est invalide');
                         }

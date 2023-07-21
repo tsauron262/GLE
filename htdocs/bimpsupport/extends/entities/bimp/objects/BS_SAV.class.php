@@ -116,6 +116,11 @@ class BS_SAV_ExtEntity extends BS_SAV{
         return array('errors'=>array(), 'warnings'=>array());
     }
     
+    public function traiteVilleNameEcologic($name){
+        $name = str_replace('-', ' ', $name);
+        $name = str_replace('ç', 'c', $name);
+        $name = str_replace('é', 'e', $name);
+    }
     
     public function actionSendDemandeEcologic($data, &$success){
         $this->useNoTransactionsDb();
@@ -134,7 +139,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
             "Address2"=> "",
             "Address3"=> "",
             "Zip"=> $client->getData('zip'),
-            "City"=> str_replace('-', ' ', $client->getData('town')),
+            "City"=> $this->traiteVilleNameEcologic($client->getData('town')),
             "Country"=> "250",
             "Phone"=> "",
             "Email"=> "",

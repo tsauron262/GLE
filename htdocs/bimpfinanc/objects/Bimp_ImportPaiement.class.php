@@ -40,7 +40,7 @@ class Bimp_ImportPaiement extends BimpObject
         return $errors;
     }
 
-    function create_paiement_from_list($list)
+    function create_paiement_from_list($list, &$warnings = array(), &$nok = 0)
     {
         global $user;
         $errors = array();

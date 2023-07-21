@@ -187,6 +187,7 @@ class Bimp_ImportPaiementLine extends BimpObject
 
     function calc()
     {
+        $this->ok = false;
         $ln = $this->getData('data');
 
         $matches = array();
@@ -202,6 +203,14 @@ class Bimp_ImportPaiementLine extends BimpObject
         foreach ($this->getData('factures') as $idF) {
             $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idF);
 
+            if (!BimpObject::objectLoaded($obj)) {
+                return;
+            }
+            
+            if (!in_array((int) $obj->getData('fk_status'), array(0, 1, 2))) {
+                return;
+            }
+            
             $this->total_reste_a_paye += $obj->getData('remain_to_pay');
             $totalFact += $obj->getData('total_ttc');
         }

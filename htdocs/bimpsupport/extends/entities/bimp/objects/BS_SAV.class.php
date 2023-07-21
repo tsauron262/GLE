@@ -36,6 +36,20 @@ class BS_SAV_ExtEntity extends BS_SAV{
         return $asProd;
     }
     
+    public function findEcologicSupportAmount(){
+        $tabIdProd = json_decode(BimpCore::getConf('prod_ecologic', '', 'bimpsupport'));
+        if(is_array($tabIdProd)){
+            foreach ($this->getPropalLines() as $line) {
+                $dolLine = $line->getChildObject('line');
+                if(in_array($dolLine->fk_product, $tabIdProd)){
+                    return -$dolLine->total_ttc;
+                }
+            }
+        }
+        return 0;
+    }
+    
+    
     public function getIRISSymtoms($type = null){
         require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
@@ -195,7 +209,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
               "Currency"=> "EUR"
             ),
             "SupportAmount"=> array(
-              "Amount"=> 25.00,
+              "Amount"=> $this->findEcologicSupportAmount(),
               "Currency"=> "EUR"
             )
         );

@@ -206,11 +206,11 @@ class Bimp_ImportPaiementLine extends BimpObject
             if (!BimpObject::objectLoaded($obj)) {
                 return;
             }
-            
-            if (!in_array((int) $obj->getData('fk_status'), array(0, 1, 2))) {
+
+            if (!in_array((int) $obj->getData('fk_statut'), array(0, 1, 2))) {
                 return;
             }
-            
+
             $this->total_reste_a_paye += $obj->getData('remain_to_pay');
             $totalFact += $obj->getData('total_ttc');
         }
@@ -478,11 +478,30 @@ class Bimp_ImportPaiementLine extends BimpObject
             return $this->getData('price');
         } else {
             if ($this->getData('type') == 'vir') {
+                $html = '';
+
                 $manque = $this->getData('price') - $this->total_reste_a_paye;
                 if ($this->getData('traite') == 0) {
-                    return BimpRender::renderAlerts(price($this->getData('price')) . ' - ' . price($this->total_reste_a_paye) . ' = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
-                } else
-                    return BimpRender::renderAlerts(price($this->getData('price')) . ' €', ($manque == 0 ? 'success' : 'danger'));
+                    $html .= BimpRender::renderAlerts(price($this->getData('price')) . ' - ' . price($this->total_reste_a_paye) . ' = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
+                } else {
+                    $html .= BimpRender::renderAlerts(price($this->getData('price')) . ' €', ($manque == 0 ? 'success' : 'danger'));
+                }
+
+                $facs = $this->getData('factures');
+                foreach ($facs as $id_fac) {
+                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
+                    if (BimpObject::objectLoaded($fac)) {
+                        if (!in_array((int) $fac->getData('fk_statut'), array(0), 1, 2)) {
+                            $icon = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                            $html .= BimpRender::renderAlerts($icon . 'Le statut de la facture ' . $fac->getRef() . ' est invalide');
+                        }
+                    } else {
+                        $icon = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                        $html .= BimpRender::renderAlerts($icon . 'La facture #' . $id_fac) . 'n\'existe plus';
+                    }
+                }
+
+                return $html;
             }
             return 'Non géré';
         }

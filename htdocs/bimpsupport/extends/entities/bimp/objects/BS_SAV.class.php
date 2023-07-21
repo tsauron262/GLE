@@ -41,7 +41,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         if(is_array($tabIdProd)){
             foreach ($this->getPropalLines() as $line) {
                 $dolLine = $line->getChildObject('line');
-                if(in_array($dolLine->fk_product, $tabIdProd)){
+                if(in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0){
                     return -$dolLine->total_ttc;
                 }
             }

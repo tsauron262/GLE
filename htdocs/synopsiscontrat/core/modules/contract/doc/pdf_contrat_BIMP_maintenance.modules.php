@@ -22,7 +22,6 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
     private $have_save_mensuelle = false;
     private $have_save_annuelle = false;
     private $have_ass = false;
-    
 
     function __construct($db)
     {
@@ -45,7 +44,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
         $this->emetteur = $mysoc;
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);
-        
+
         parent::__construct($db);
     }
 
@@ -58,7 +57,14 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
     public function addLogo(&$pdf, $size, $pdf1 = null)
     {
         global $conf;
-        $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
+
+        $logo_name = $this->emetteur->logo;
+        
+        if (BimpCore::isEntity('actimac')) {
+            $logo_name = 'carre.png';
+        }
+
+        $logo = $conf->mycompany->dir_output . '/logos/' . $logo_name;
         $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);
         if (is_file($testFile))
             $logo = $testFile;
@@ -727,7 +733,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
 
                     $current_exemplaire++;
                     // Titre partie
-                    $this->titre_partie($pdf, 'Entre les partieees');
+                    $this->titre_partie($pdf, 'Entre les parties');
 //                $this->titre_partie($pdf1, 'Entre les parties');
                     // Entre les parties
                     $client->fetch($contrat->socid);

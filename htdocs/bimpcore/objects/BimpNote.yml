@@ -188,7 +188,7 @@ forms:
             - field: id_obj
 #            - field: type_dest
             - custom: 1
-              label: Type autheur
+              label: Type auteur
               input_name: type_author
               input:
                 type: select

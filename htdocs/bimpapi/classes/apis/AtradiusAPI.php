@@ -326,7 +326,7 @@ class AtradiusAPI extends BimpAPI
             'url_params' => $params_get
                 ), $errors, $response_headers, $response_code, array('customerId', 'policyId'));
 
-        if (is_array($data['errors']) and count($data['errors'])) {
+        if (isset($data['errors']) && is_array($data['errors']) and count($data['errors'])) {
             $errors = BimpTools::merge_array($errors, $data['errors']);
         }
 

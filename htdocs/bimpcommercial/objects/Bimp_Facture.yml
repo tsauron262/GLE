@@ -296,6 +296,10 @@ fields:
         type: datetime
     fk_mode_reglement: 
         history: 1
+    pdf_hide_livraisons: 
+        label: Masquer l'adresse de livraison dans le PDF
+        type: bool
+        default_value: 0
     
     # Validation d'avoir
     valid_avoir_fichier_joints:
@@ -962,6 +966,8 @@ fields_tables:
 #              edit: 1
 #            - field: pdf_hide_ttc
 #              edit: 1
+            - field: pdf_hide_livraisons
+              edit: 1
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton

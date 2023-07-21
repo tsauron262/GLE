@@ -86,6 +86,11 @@ class BS_SAV_ExtEntity extends BS_SAV{
     
     public function getEcologicProductId(){
         $label = $this->getEquipmentData('product_label');
+        
+        $equipement = $this->getChildObject('equipment');
+        if ((int) $equipement->getData('id_product')) {
+            $label .= $equipement->displayProduct('nom') . '<br/>';
+        }
         if(stripos($label, 'mac') !== false)
             return 'EEE.M2.044';
         if(stripos($label, 'ipad') !== false)

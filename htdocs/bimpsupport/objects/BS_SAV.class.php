@@ -4287,6 +4287,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $sms .= "\n" . $this->getData('ref');
             
             $sms = str_replace('ç', 'c', $sms);
+            $sms = str_replace('ê', 'e', $sms);
+            $sms = str_replace('ë', 'e', $sms);
+            $sms = str_replace('ô', 'o', $sms);
+            
             
             if(strlen($sms) > 150)
                 BimpCore::addlog('Attention SMS de '.strlen($sms). ' caractéres : '.$sms);

@@ -199,13 +199,15 @@ class BS_SAV_ExtEntity extends BS_SAV{
         if($totalSpare > $facture->getData('total_ht'))
             $totalSpare = $facture->getData('total_ht');
         
+        $prime = $this->findEcologicSupportAmount();
+        
         $data["Quote"] = array(
             "LaborCost"=> array(
               "Amount"=> round($facture->getData('total_ht') - $totalSpare,2),
               "Currency"=> "EUR"
             ),
             "SparePartsCost"=> array(
-              "Amount"=> round($totalSpare,2),
+              "Amount"=> round($totalSpare + $prime,2),
               "Currency"=> "EUR"
             ),
             "TravelCost"=> array(
@@ -213,11 +215,11 @@ class BS_SAV_ExtEntity extends BS_SAV{
               "Currency"=> "EUR"
             ),
             "TotalAmountExclVAT"=> array(
-              "Amount"=> round($facture->getData('total_ht'),2),
+              "Amount"=> round($facture->getData('total_ht') + ($prime/1.2),2),
               "Currency"=> "EUR"
             ),
             "TotalAmountInclVAT"=> array(
-              "Amount"=> round($facture->getData('total_ttc'),2),
+              "Amount"=> round($facture->getData('total_ttc') + $prime,2),
               "Currency"=> "EUR"
             ),
             "SupportAmount"=> array(

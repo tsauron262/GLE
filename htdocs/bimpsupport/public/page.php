@@ -32,7 +32,7 @@ function getSavsBySerial($serial) {
     ));
     
     foreach ($rows as $row) {
-        $sav = BimpObject::getInstance('bimpsupport', 'BS_Sav');
+        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
         $rows2 = $sav->getList(array(
             'id_equipment' => $row['id']
         ));

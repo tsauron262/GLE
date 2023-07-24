@@ -527,7 +527,7 @@ class GSX_v2 extends GSX_Const
                         if ($request_name !== 'authenticate') {
                             $this->displayDebug('Non authentifié');
                             if ($this->reauthenticate()) {
-                                return $this->exec($request_name, $params, $response_headers, $extra_headers);
+                                return $this->exec($request_name, $params, $response_headers);
                             }
                             return false;
                         } else {

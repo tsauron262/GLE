@@ -8,7 +8,8 @@ class BS_SAV_ExtEntity extends BS_SAV{
         -1          => array('label' => 'Non Applicable', 'icon' => 'fas_not-equal', 'classes' => array('important')),
         0           => array('label' => 'En attente', 'icon' => 'fas_times', 'classes' => array('danger')),
         1           => array('label' => 'Attente déclaration', 'icon' => 'fas_times', 'classes' => array('danger')),
-        99          => array('label' => 'Déclarré', 'icon' => 'arrow-right', 'classes' => array('danger'))
+        99          => array('label' => 'Déclarré', 'icon' => 'arrow-right', 'classes' => array('danger')),
+        1000          => array('label' => 'Payée', 'icon' => 'arrow-right', 'classes' => array('success'))
     );
     
     public function actionClose($data, &$success){
@@ -21,6 +22,9 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 $this->updateField('status_ecologic',-1);
             }
         }
+        
+        //si cote 45 et montant inférieur 180 - 45 = 135 erreur montant non éligible
+        
         return $return;
     }
     

@@ -4,6 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpsupport/objects/BS_SAV.class.php';
 
 class BS_SAV_ExtEntity extends BS_SAV{
     public static $status_ecologic_list = array(
+        -2          => array('label' => 'Refusée', 'icon' => 'fas_not-equal', 'classes' => array('important')),
         -1          => array('label' => 'Non Applicable', 'icon' => 'fas_not-equal', 'classes' => array('important')),
         0           => array('label' => 'En attente', 'icon' => 'fas_times', 'classes' => array('danger')),
         1           => array('label' => 'Attente déclaration', 'icon' => 'fas_times', 'classes' => array('danger')),

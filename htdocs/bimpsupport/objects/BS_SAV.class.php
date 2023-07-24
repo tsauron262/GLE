@@ -3983,6 +3983,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $mail_msg = '';
         $sms = '';
         $nomMachine = $this->getNomMachine();
+        $tabT = explode('(', $nomMachine);
+        $nomMachine = $tabT[0];
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
         $fromMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
@@ -4281,7 +4283,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             } elseif (testNumSms($client->dol_object->phone))
                 $to = $client->dol_object->phone;
 
-            $sms .= "\n" . $this->getData('ref');
+            if(stripos($sms, $this->getData('ref')) === false)
+                $sms .= "\n" . $this->getData('ref');
+            
+            if(strlen($sms) > 150)
+                BimpCore::addlog('Attention SMS de '.strlen($sms). ' caractéres : '.$sms);
             //$to = "0686691814";
             $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 

@@ -4295,7 +4295,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $sms = str_replace('ô', 'o', $sms);
             
             
-            if(strlen($sms) > 150)
+            if(strlen(str_replace('\n', '', $sms)) > 155)
                 BimpCore::addlog('Attention SMS de '.strlen($sms). ' caractéres : '.$sms);
             //$to = "0686691814";
             $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');

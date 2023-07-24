@@ -183,8 +183,7 @@ if (count($savs)) {
 }
 
 if ($id_sav) {
-    $sav = new BS_SAV($db);
-    $sav->fetch((int) $id_sav);
+    $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
     $equipment = $sav->getChildObject('equipment');
     if($serial == $equipment->getData("serial")){
     

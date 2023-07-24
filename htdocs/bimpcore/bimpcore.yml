@@ -314,3 +314,6 @@ params:
                       
     ftp_dir:
         label: Dossier sur le FTP
+        
+    mail_achat:
+        label: Email groupe achat

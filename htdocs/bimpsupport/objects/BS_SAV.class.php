@@ -3988,6 +3988,14 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $tabT = explode('"', $nomMachine);
         if(isset($tabT[1]))
             $nomMachine = $tabT[0].'"';
+        if(strlen($nomMachine) > 20){
+            if(stripos($nomMachine, 'imac'))
+                    $nomMachine = 'iMac';
+            elseif(stripos($nomMachine, 'iphone'))
+                    $nomMachine = 'iPhone';
+            else
+                    $nomMachine = 'matériel';
+        }
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
         $fromMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";

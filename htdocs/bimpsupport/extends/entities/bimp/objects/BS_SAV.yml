@@ -84,4 +84,19 @@ forms:
                           method: getRepairCodes
                           params:
                               - callback: getEcologicProductId
+                              
+    ecologicPaye:
+        rows:
+            ecologicPaye:
+                custom: 1
+                label: Codes
+                input_name: ecologicPaye
+                input:
+                    type: text
+                help: Séparé par des virgules
             
+            
+lists:
+    default:
+        header_buttons:
+            callback: getListHeaderExtraBtn

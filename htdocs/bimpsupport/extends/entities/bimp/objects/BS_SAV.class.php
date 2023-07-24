@@ -280,4 +280,42 @@ class BS_SAV_ExtEntity extends BS_SAV{
         }
         return $btn;
     }
+    
+    public function getListHeaderExtraBtn(){
+            $btn[] = array(
+                    'label'   => 'Ecologic Payée',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('ecologicPaye', array(), array(
+                        'form_name' => 'ecologicPaye'
+                    ))
+                );
+        return $btn;
+        
+    }
+    
+    public function actionEcologicPaye($data, &$success) {
+        $success = 'Ok';
+        $errors = $warnings = array();
+        
+        $tmp = $data['ecologicPaye'];
+        if(strlen($tmp) < 4)
+            $errors['Saisir les numéros'];
+        else{
+            $nums = explode(',', $tmp);
+            foreach($nums as $num){
+                $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('ecologic_data' =>array('operator'=> 'LIKE', 'value'=> '%"ClaimId":'.trim($num).'%')));
+                if(!$sav || !$sav->isLoaded())
+                    $errors[] = 'Code : '.$num.' introuvable';
+                else{
+                    $sav->updateField('status_ecologic',1000);
+                }
+            }
+        }
+        
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 }

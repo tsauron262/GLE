@@ -4286,6 +4286,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if(stripos($sms, $this->getData('ref')) === false)
                 $sms .= "\n" . $this->getData('ref');
             
+            $sms = str_replace('ç', 'c', $sms);
+            
             if(strlen($sms) > 150)
                 BimpCore::addlog('Attention SMS de '.strlen($sms). ' caractéres : '.$sms);
             //$to = "0686691814";

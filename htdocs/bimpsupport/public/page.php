@@ -132,7 +132,7 @@ if (count($savs)) {
     $first = true;
     foreach ($savs as $idSav) {
 
-        $sav = new BS_SAV($db);
+        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
         $sav->fetch($idSav);
 
         $check = false;

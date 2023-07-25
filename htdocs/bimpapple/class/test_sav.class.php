@@ -393,6 +393,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 
     function fetchEquipmentsImei($nb = 1, $modeLabel = 0)
     {
+        $errors = array();
         if (!class_exists('GSX_v2')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
         }

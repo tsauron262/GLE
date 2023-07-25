@@ -2412,7 +2412,8 @@ class BimpController
 
     protected function ajaxProcessSaveBimpDocumentation()
     {
-        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', ''), BimpTools::getValue('serializedMenu', ''));
+        $menu = BimpTools::getValue('serializedMenu', '').'.0';
+        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', ''), $menu);
         $BimpDocumentation->saveDoc(BimpTools::getValue('name', ''), BimpTools::getValue('html', ''));
         $return = $BimpDocumentation->displayDoc('array');
         $errors = $BimpDocumentation->errors;

@@ -32,7 +32,7 @@ function getSavsBySerial($serial) {
     ));
     
     foreach ($rows as $row) {
-        $sav = new BS_SAV($db);
+        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
         $rows2 = $sav->getList(array(
             'id_equipment' => $row['id']
         ));
@@ -132,7 +132,7 @@ if (count($savs)) {
     $first = true;
     foreach ($savs as $idSav) {
 
-        $sav = new BS_SAV($db);
+        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
         $sav->fetch($idSav);
 
         $check = false;
@@ -183,8 +183,7 @@ if (count($savs)) {
 }
 
 if ($id_sav) {
-    $sav = new BS_SAV($db);
-    $sav->fetch((int) $id_sav);
+    $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
     $equipment = $sav->getChildObject('equipment');
     if($serial == $equipment->getData("serial")){
     

@@ -3983,6 +3983,19 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $mail_msg = '';
         $sms = '';
         $nomMachine = $this->getNomMachine();
+        $tabT = explode('(', $nomMachine);
+        $nomMachine = $tabT[0];
+        $tabT = explode('"', $nomMachine);
+        if(isset($tabT[1]))
+            $nomMachine = $tabT[0].'"';
+        if(strlen($nomMachine) > 20){
+            if(stripos($nomMachine, 'imac'))
+                    $nomMachine = 'iMac';
+            elseif(stripos($nomMachine, 'iphone'))
+                    $nomMachine = 'iPhone';
+            else
+                    $nomMachine = 'matériel';
+        }
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
         $fromMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
@@ -4102,7 +4115,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $mail_msg = "Nous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. ";
                 $mail_msg .= "\n Voici notre diagnostique : " . $this->getData("diagnostic");
                 $mail_msg .= "\n Nous restons à votre disposition pour toutes questions au " . $tel;
-                $sms = "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci.\nL'équipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+                $sms = "Bonjour, la pièce nécessaire à votre réparation vient d'être commandée, nous vous contacterons dès réception de celle-ci.\nL'équipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
                 break;
 
             case 'repOk':
@@ -4124,7 +4137,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $subject = "Pieces recues " . $this->getData('ref');
                 $mail_msg = "La pièce/le produit que nous avions commandé pour votre \"$nomMachine\" est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil.\n";
                 $mail_msg .= "Vous serez prévenu dès qu'il sera prêt.";
-                $sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
+                $sms = "Bonjour, nous venons de recevoir la pièce  pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
                 break;
 
             case "commercialRefuse":
@@ -4281,7 +4294,17 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             } elseif (testNumSms($client->dol_object->phone))
                 $to = $client->dol_object->phone;
 
-            $sms .= "\n" . $this->getData('ref');
+            if(stripos($sms, $this->getData('ref')) === false)
+                $sms .= "\n" . $this->getData('ref');
+            
+            $sms = str_replace('ç', 'c', $sms);
+            $sms = str_replace('ê', 'e', $sms);
+            $sms = str_replace('ë', 'e', $sms);
+            $sms = str_replace('ô', 'o', $sms);
+            
+            
+            if(strlen(str_replace('\n', '', $sms)) > 155)
+                BimpCore::addlog('Attention SMS de '.strlen($sms). ' caractéres : '.$sms);
             //$to = "0686691814";
             $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 

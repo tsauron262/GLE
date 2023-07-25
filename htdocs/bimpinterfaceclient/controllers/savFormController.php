@@ -1332,7 +1332,8 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                 $html .= '</div>';
             } else {
                 $html .= '<div style="text-align: center; padding: 15px">';
-                $html .= '<span class="info">Il n\'y a aucun créneau horaire disponible dans les 7 prochains jours pour ce centre BIMP</span><br/><br/>';
+                global $conf;
+                $html .= '<span class="info">Il n\'y a aucun créneau horaire disponible dans les 7 prochains jours pour ce centre '.BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport').'</span><br/><br/>';
                 $html .= '<p>Vous pouvez toutefois valider ce formulaire et déposer votre matériel quand vous le souhaitez sans rendez-vous</p>';
                 $html .= '</div>';
 

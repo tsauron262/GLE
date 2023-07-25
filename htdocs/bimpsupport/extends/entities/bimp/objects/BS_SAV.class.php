@@ -4,10 +4,12 @@ require_once DOL_DOCUMENT_ROOT . '/bimpsupport/objects/BS_SAV.class.php';
 
 class BS_SAV_ExtEntity extends BS_SAV{
     public static $status_ecologic_list = array(
+        -2          => array('label' => 'Refusée', 'icon' => 'fas_not-equal', 'classes' => array('important')),
         -1          => array('label' => 'Non Applicable', 'icon' => 'fas_not-equal', 'classes' => array('important')),
         0           => array('label' => 'En attente', 'icon' => 'fas_times', 'classes' => array('danger')),
         1           => array('label' => 'Attente déclaration', 'icon' => 'fas_times', 'classes' => array('danger')),
-        99          => array('label' => 'Déclarré', 'icon' => 'arrow-right', 'classes' => array('danger'))
+        99          => array('label' => 'Déclarré', 'icon' => 'arrow-right', 'classes' => array('danger')),
+        1000          => array('label' => 'Payée', 'icon' => 'arrow-right', 'classes' => array('success'))
     );
     
     public function actionClose($data, &$success){
@@ -20,6 +22,9 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 $this->updateField('status_ecologic',-1);
             }
         }
+        
+        //si cote 45 et montant inférieur 180 - 45 = 135 erreur montant non éligible
+        
         return $return;
     }
     
@@ -29,12 +34,26 @@ class BS_SAV_ExtEntity extends BS_SAV{
         if(is_array($tabIdProd)){
             foreach ($this->getPropalLines() as $line) {
                 $dolLine = $line->getChildObject('line');
-                if(in_array($dolLine->fk_product, $tabIdProd))
+                if(in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0)
                         $asProd = true;
             }
         }
         return $asProd;
     }
+    
+    public function findEcologicSupportAmount(){
+        $tabIdProd = json_decode(BimpCore::getConf('prod_ecologic', '', 'bimpsupport'));
+        if(is_array($tabIdProd)){
+            foreach ($this->getPropalLines() as $line) {
+                $dolLine = $line->getChildObject('line');
+                if(in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0){
+                    return -$dolLine->total_ttc;
+                }
+            }
+        }
+        return 0;
+    }
+    
     
     public function getIRISSymtoms($type = null){
         require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
@@ -72,6 +91,11 @@ class BS_SAV_ExtEntity extends BS_SAV{
     
     public function getEcologicProductId(){
         $label = $this->getEquipmentData('product_label');
+        
+        $equipement = $this->getChildObject('equipment');
+        if ((int) $equipement->getData('id_product')) {
+            $label .= $equipement->displayProduct('nom') . '<br/>';
+        }
         if(stripos($label, 'mac') !== false)
             return 'EEE.M2.044';
         if(stripos($label, 'ipad') !== false)
@@ -102,6 +126,12 @@ class BS_SAV_ExtEntity extends BS_SAV{
         return array('errors'=>array(), 'warnings'=>array());
     }
     
+    public function traiteVilleNameEcologic($name){
+        $name = str_replace('-', ' ', $name);
+        $name = str_replace('ç', 'c', $name);
+        $name = str_replace('é', 'e', $name);
+        return $name;
+    }
     
     public function actionSendDemandeEcologic($data, &$success){
         $this->useNoTransactionsDb();
@@ -120,7 +150,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
             "Address2"=> "",
             "Address3"=> "",
             "Zip"=> $client->getData('zip'),
-            "City"=> str_replace('-', ' ', $client->getData('town')),
+            "City"=> $this->traiteVilleNameEcologic($client->getData('town')),
             "Country"=> "250",
             "Phone"=> "",
             "Email"=> "",
@@ -173,13 +203,15 @@ class BS_SAV_ExtEntity extends BS_SAV{
         if($totalSpare > $facture->getData('total_ht'))
             $totalSpare = $facture->getData('total_ht');
         
+        $prime = $this->findEcologicSupportAmount();
+        
         $data["Quote"] = array(
             "LaborCost"=> array(
               "Amount"=> round($facture->getData('total_ht') - $totalSpare,2),
               "Currency"=> "EUR"
             ),
             "SparePartsCost"=> array(
-              "Amount"=> round($totalSpare,2),
+              "Amount"=> round($totalSpare + $prime,2),
               "Currency"=> "EUR"
             ),
             "TravelCost"=> array(
@@ -187,15 +219,15 @@ class BS_SAV_ExtEntity extends BS_SAV{
               "Currency"=> "EUR"
             ),
             "TotalAmountExclVAT"=> array(
-              "Amount"=> round($facture->getData('total_ht'),2),
+              "Amount"=> round($facture->getData('total_ht') + ($prime/1.2),2),
               "Currency"=> "EUR"
             ),
             "TotalAmountInclVAT"=> array(
-              "Amount"=> round($facture->getData('total_ttc'),2),
+              "Amount"=> round($facture->getData('total_ttc') + $prime,2),
               "Currency"=> "EUR"
             ),
             "SupportAmount"=> array(
-              "Amount"=> 25.00,
+              "Amount"=> $this->findEcologicSupportAmount(),
               "Currency"=> "EUR"
             )
         );
@@ -247,5 +279,43 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 );
         }
         return $btn;
+    }
+    
+    public function getListHeaderExtraBtn(){
+            $btn[] = array(
+                    'label'   => 'Ecologic Payée',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('ecologicPaye', array(), array(
+                        'form_name' => 'ecologicPaye'
+                    ))
+                );
+        return $btn;
+        
+    }
+    
+    public function actionEcologicPaye($data, &$success) {
+        $success = 'Ok';
+        $errors = $warnings = array();
+        
+        $tmp = $data['ecologicPaye'];
+        if(strlen($tmp) < 4)
+            $errors['Saisir les numéros'];
+        else{
+            $nums = explode(',', $tmp);
+            foreach($nums as $num){
+                $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('ecologic_data' =>array('operator'=> 'LIKE', 'value'=> '%"ClaimId":'.trim($num).'%')));
+                if(!$sav || !$sav->isLoaded())
+                    $errors[] = 'Code : '.$num.' introuvable';
+                else{
+                    $sav->updateField('status_ecologic',1000);
+                }
+            }
+        }
+        
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 }

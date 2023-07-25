@@ -51,7 +51,7 @@ if ($fc !== 'doc') {
         . "if(document.cookie.match('publicerp') || window.self === window.top){ "
         . "}else{ "
         . "window.open('" . $url . "', '_blank'); "
-        . "if(window.location.href.indexOf('?') > 0 || window.location.href.indexOf('/b/') > 0) "
+        . "if(window.location.href.indexOf('?') > 0 || window.location.href.indexOf('/b/') > 0 || window.location.href.indexOf('/a/') > 0) "
         . "window.location.href = window.location.href + '&nav_not_compatible=true';"
         . "else "
         . "window.location.href = window.location.href + '?nav_not_compatible=true';"

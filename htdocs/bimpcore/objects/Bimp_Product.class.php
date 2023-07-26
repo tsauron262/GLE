@@ -1256,7 +1256,7 @@ class Bimp_Product extends BimpObject
 
         foreach ($fields as $field) {
             if ($this->field_exists($field)) {
-                $data[$field] = $this->getData($field);
+                $data[$field] = htmlentities($this->getData($field));
             }
         }
 

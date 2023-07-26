@@ -172,6 +172,12 @@ params:
         cat: products
         type: bool
         def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  product_validated_notif_email: 
+                      label: Adresse(s) e-mail pour envoi d'une notification à la validation d'un produit
+    
     use_product_prices_perms: 
         label: Vérifier les droits utilisateurs pour l'édition des PV / PA des produits (+ option "Pas de prix fixes")
         cat: products

@@ -2883,6 +2883,14 @@ class Bimp_Product extends BimpObject
             return $errors;
         }
 
+        $email = BimpCore::getConf('product_validated_notif_email', '', 'bimpcore');
+
+        if ($email) {
+            global $langs;
+            $msg = 'Bonjour, <br/><br/>Le produit ' . $this->getLink() . ' a été validé par ' . $user->getFullName($langs);
+            mailSyn2('Produit ' . $this->getRef() . ' validé', $email, '', $msg);
+        }
+
         // COMMAND
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
@@ -2904,6 +2912,7 @@ class Bimp_Product extends BimpObject
                 $userT->fetch($commande->fk_user_author);
                 $mailCreateur = $userT->email;
             }
+
             if ($mailCreateur && $mailCreateur != '')
                 $this->sendEmailCommandeValid($commande, $mailCreateur);
 
@@ -2928,7 +2937,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
@@ -2967,7 +2976,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);

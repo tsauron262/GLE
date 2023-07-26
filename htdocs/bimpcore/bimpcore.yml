@@ -199,6 +199,11 @@ params:
         cat: products
         type: bool
         def: 1
+    allow_duplicate_products: 
+        label: Autoriser le clonage des produits
+        cat: products
+        type: bool
+        def: 0
         
     # Tiers:
     check_solvabilite_client: 

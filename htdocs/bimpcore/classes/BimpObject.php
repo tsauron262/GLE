@@ -1276,7 +1276,7 @@ class BimpObject extends BimpCache
         if (!isset($this->params['fields'])) {
             return 0;
         }
-        
+
         if (!in_array($field_name, $this->params['fields']) && (!$this->use_commom_fields || !in_array($field_name, self::$common_fields))) {
             $infos = 'Le champ "' . $field_name . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
             return 0;
@@ -4995,7 +4995,9 @@ class BimpObject extends BimpCache
                     $errors[] = $msg;
 
                     if ($this->isDolObject()) {
-                        $errors[] = 'RES: ' . $result;
+                        if ((string) $result) {
+                            $errors[] = 'Code résultat: ' . $result;
+                        }
                         $errors = BimpTools::merge_array($errors, BimpTools::getErrorsFromDolObject($this->dol_object));
                     }
                 }

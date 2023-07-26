@@ -63,7 +63,7 @@ class Bimp_User extends BimpObject
         if ($this->id == $user->id) {
             return 1;
         }
-        
+
         if ($user->login == 'l.gay') {
             return 1;
         }
@@ -112,13 +112,13 @@ class Bimp_User extends BimpObject
         }
         return parent::canSetAction($action);
     }
-    
+
     public function canEditField($field_name)
     {
         switch ($field_name) {
-            case 'extra_materiel': 
+            case 'extra_materiel':
                 global $user;
-                
+
                 if ($user->admin || $user->login == 'l.gay') {
                     return 1;
                 }
@@ -341,6 +341,11 @@ class Bimp_User extends BimpObject
         }
 
         return $email;
+    }
+
+    public function getFullName()
+    {
+        return $this->getData('firstname') . ' ' . $this->getData('lastname');
     }
 
     // Getters Statics: 
@@ -1958,10 +1963,6 @@ class Bimp_User extends BimpObject
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
-    }
-    
-    public function getFullName(){
-        return $this->getData('firstname').' '.$this->getData('lastname');
     }
 
     public function actionAddRight($data, &$success)

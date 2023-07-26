@@ -1,0 +1,80 @@
+table: bv_rule
+icon: far_check-circle
+common_fields: 1
+
+labels: 
+    name: demande de validation
+    name_plur: demandes de validations
+    is_female: 1
+    
+objects:
+    user_author: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_author
+                
+    user_validate:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_validate
+                
+fields: 
+    status: 
+        label: Status
+        type: int
+        values: status_list
+        default_value: 0
+        
+    type_validation: 
+        label: Type de validation
+        values: 
+            array: typesValidations
+            
+    type_object: 
+        label: Type objet
+        values: 
+            array: typesObjects
+        required: 1
+    
+    id_object: 
+        label: ID objet
+        type: id
+        required: 1
+        
+    id_user_demande: 
+        label: Demandée par
+        type: id_object
+        object: user_author
+        default_value: 0
+        
+    validation_users: 
+        label: Utilisateurs
+        type: items_list
+        items_data_type: id_object
+        object: user
+        items_sortable: 1
+        items_braces: 1
+        
+    id_user_validate: 
+        label: Validée / refusée par
+        type: id_object
+        object: user_validate
+        default_value: 0
+        
+    date_validate: 
+        label: Date validation / refus
+        type: datetime
+        
+    comment: 
+        label: Commentaire
+        type: text
+        
+        
+        
+        
+    
+        
+    
+        

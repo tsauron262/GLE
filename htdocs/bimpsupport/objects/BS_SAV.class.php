@@ -3986,15 +3986,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $tabT = explode('(', $nomMachine);
         $nomMachine = $tabT[0];
         $tabT = explode('"', $nomMachine);
-        if(isset($tabT[1]))
-            $nomMachine = $tabT[0].'"';
-        if(strlen($nomMachine) > 20){
-            if(stripos($nomMachine, 'imac'))
-                    $nomMachine = 'iMac';
-            elseif(stripos($nomMachine, 'iphone'))
-                    $nomMachine = 'iPhone';
+        if (isset($tabT[1]))
+            $nomMachine = $tabT[0] . '"';
+        if (strlen($nomMachine) > 20) {
+            if (stripos($nomMachine, 'imac'))
+                $nomMachine = 'iMac';
+            elseif (stripos($nomMachine, 'iphone'))
+                $nomMachine = 'iPhone';
             else
-                    $nomMachine = 'matériel';
+                $nomMachine = 'matériel';
         }
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
@@ -4294,17 +4294,16 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             } elseif (testNumSms($client->dol_object->phone))
                 $to = $client->dol_object->phone;
 
-            if(stripos($sms, $this->getData('ref')) === false)
+            if (stripos($sms, $this->getData('ref')) === false)
                 $sms .= "\n" . $this->getData('ref');
-            
+
             $sms = str_replace('ç', 'c', $sms);
             $sms = str_replace('ê', 'e', $sms);
             $sms = str_replace('ë', 'e', $sms);
             $sms = str_replace('ô', 'o', $sms);
-            
-            
-            if(strlen(str_replace('\n', '', $sms)) > 155)
-                BimpCore::addlog('Attention SMS de '.strlen($sms). ' caractéres : '.$sms);
+
+            if (strlen(str_replace('\n', '', $sms)) > 155)
+                BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
             //$to = "0686691814";
             $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
@@ -5484,7 +5483,7 @@ ORDER BY a.val_max DESC");
                     $this->updateField('resolution', (string) $data['resolution'], null, true);
                 }
                 if ((int) $this->getData('status') !== self::BS_SAV_REP_EN_COURS) {
-                    $errors[] = 'Statut actuel invalide : status actuel : '.$this->getData('status');
+                    $errors[] = 'Statut actuel invalide : status actuel : ' . $this->getData('status');
                 } elseif ($this->needEquipmentAttribution()) {
                     $errors[] = 'Certains produits nécessitent encore l\'attribution d\'un équipement';
                 } else {
@@ -7601,84 +7600,84 @@ ORDER BY a.val_max DESC");
         return 0;
     }
 
-//    public function displayDocExtraInfos($doc_type)//ne semble plus utilisée.
-//    {
-//        global $conf;
-//
-//        $html = '';
-//
-//        if ($doc_type === 'sav_pc') {
-//            $equipment = $this->getChildObject('equipment');
-//
-//            if (BimpObject::objectLoaded($equipment)) {
-//                $html .= '<b>Numéro de série: </b>' . $equipment->getData('serial');
-//
-//                $product = $equipment->displayProduct('default', true, true);
-//
-//                if ($product) {
-//                    $html .= '<br/><b>Produit: </b>' . $product;
-//                }
-//            } else {
-//                $html .= '<span class="danger">non spécifié</span>';
-//            }
-//            $html .= '<br/><br/>';
-//
-//            $html .= '<b>Etat du matériel: </b>' . $this->displayData('etat_materiel', 'default', false) . '<br/>';
-//            $html .= '<b>Symptômes: </b>' . $this->getData('symptomes') . '<br/><br/>';
-//            $html .= '<b>Option de sauvegarde</b>: ' . $this->displayData('save_option', 'default', false);
-//
-//            if (BS_SAV::getSaveOptionDesc((int) $this->getData('save_option')) != null) {
-//                $html .= '<br/><span class="danger">' . BS_SAV::getSaveOptionDesc((int) $this->getData('save_option')) . '</span>';
-//            }
-//
-//            $cgv = "";
-//            $cgv .= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
-//
-//            $prixRefus = "49";
-//
-//            if ($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA") {
-//                $prixRefus = "39";
-//            }
-//
-//            $isIphone = false;
-//            $prioritaire = (int) $this->getData('prioritaire');
-//
-//            if (BimpObject::objectLoaded($equipment)) {
-//                $isIphone = $equipment->isIphone();
-//            }
-//
-//            if ($isIphone) {
-//                $prixRefus = "29";
-//            }
-//
-//            $cgv .= "- Les frais de prise en charge diagnotic de <b>" . $prixRefus . "€ TTC</b> sont à régler pour tout matériel  hors garantie. En cas d’acceptation du devis ces frais seront déduits.<br/><br/>";
-//            $cgv .= "- Les problèmes logiciels, la récupération de données ou la réparation matériel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts par la GARANTIE APPLE; Un devis sera alors établi et des frais de <b>" . $prixRefus . "€ TTC</b> seront facturés en cas de refus de celui-ci." . "<br/><br/>";
-//            $cgv .= "- Des frais de <b>" . $prixRefus . "€ TTC</b> seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contre façon ont été installées.<br/><br/>";
-//            $cgv .= "- Le client s’engage à venir récupérer son bien dans un délai d’un mois après mise à disposition,émission d’un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de <b>4€ par jour</b>.<br/><br/>";
-//            $cgv .= "- Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruit, après accord du tribunal.<br/><br/>";
-//            $cgv .= "- BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximun de 1000 €), en carte bleue.<br/><br/>";
-//
-//            if ($prioritaire && $isIphone) {
-//                $cgv .= '- J\'accepte les frais de 96 TTC de prise en charge urgente';
-//            }
-//
-//            $html .= '<div style="margin: 15px; padding: 15px; border: 1px solid #737373">';
-//            $html .= '<div style="text-align: center; margin-bottom: 10px">';
-//            $html .= '<h3 style="margin-top: 0">Conditions générales de prise en charge</h3>';
-//
-//            if ($prioritaire) {
-//                $html .= '<span class="danger">Prise en charge urgente</span>';
-//            }
-//
-//            $html .= '</div>';
-//
-//            $html .= $cgv;
-//
-//            $html .= '</div>';
-//        }
-//
-//        return $html;
-//    }
+    public function displaySignatureDocExtraInfos($doc_type)
+    {
+        global $conf;
+
+        $html = '';
+
+        if ($doc_type === 'sav_pc') {
+            $equipment = $this->getChildObject('equipment');
+
+            if (BimpObject::objectLoaded($equipment)) {
+                $html .= '<b>Numéro de série: </b>' . $equipment->getData('serial');
+
+                $product = $equipment->displayProduct('default', true, true);
+
+                if ($product) {
+                    $html .= '<br/><b>Produit: </b>' . $product;
+                }
+            } else {
+                $html .= '<span class="danger">non spécifié</span>';
+            }
+            $html .= '<br/><br/>';
+
+            $html .= '<b>Etat du matériel: </b>' . $this->displayData('etat_materiel', 'default', false) . '<br/>';
+            $html .= '<b>Symptômes: </b>' . $this->getData('symptomes') . '<br/><br/>';
+            $html .= '<b>Option de sauvegarde</b>: ' . $this->displayData('save_option', 'default', false);
+
+            if (BS_SAV::getSaveOptionDesc((int) $this->getData('save_option')) != null) {
+                $html .= '<br/><span class="danger">' . BS_SAV::getSaveOptionDesc((int) $this->getData('save_option')) . '</span>';
+            }
+
+            $cgv = "";
+            $cgv .= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
+
+            $prixRefus = "49";
+
+            if ($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA") {
+                $prixRefus = "39";
+            }
+
+            $isIphone = false;
+            $prioritaire = (int) $this->getData('prioritaire');
+
+            if (BimpObject::objectLoaded($equipment)) {
+                $isIphone = $equipment->isIphone();
+            }
+
+            if ($isIphone) {
+                $prixRefus = "29";
+            }
+
+            $cgv .= "- Les frais de prise en charge diagnotic de <b>" . $prixRefus . "€ TTC</b> sont à régler pour tout matériel  hors garantie. En cas d’acceptation du devis ces frais seront déduits.<br/><br/>";
+            $cgv .= "- Les problèmes logiciels, la récupération de données ou la réparation matériel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts par la GARANTIE APPLE; Un devis sera alors établi et des frais de <b>" . $prixRefus . "€ TTC</b> seront facturés en cas de refus de celui-ci." . "<br/><br/>";
+            $cgv .= "- Des frais de <b>" . $prixRefus . "€ TTC</b> seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contre façon ont été installées.<br/><br/>";
+            $cgv .= "- Le client s’engage à venir récupérer son bien dans un délai d’un mois après mise à disposition,émission d’un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de <b>4€ par jour</b>.<br/><br/>";
+            $cgv .= "- Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruit, après accord du tribunal.<br/><br/>";
+            $cgv .= "- BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximun de 1000 €), en carte bleue.<br/><br/>";
+
+            if ($prioritaire && $isIphone) {
+                $cgv .= '- J\'accepte les frais de 96 TTC de prise en charge urgente';
+            }
+
+            $html .= '<div style="margin: 15px; padding: 15px; border: 1px solid #737373">';
+            $html .= '<div style="text-align: center; margin-bottom: 10px">';
+            $html .= '<h3 style="margin-top: 0">Conditions générales de prise en charge</h3>';
+
+            if ($prioritaire) {
+                $html .= '<span class="danger">Prise en charge urgente</span>';
+            }
+
+            $html .= '</div>';
+
+            $html .= $cgv;
+
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
 
     public function onSigned($signature)
     {

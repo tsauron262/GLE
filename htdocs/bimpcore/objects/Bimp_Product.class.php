@@ -3056,7 +3056,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
@@ -3091,7 +3091,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);

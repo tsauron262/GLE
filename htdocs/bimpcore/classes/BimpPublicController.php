@@ -144,6 +144,15 @@ class BimpPublicController extends BimpController
                 } else {
                     if ($userClient->id == 276) {
                         echo '<pre>';
+                        print_r($_SESSION);
+                        echo '</pre>';
+                        echo '<pre>';
+                        print_r($_GET);
+                        echo '</pre>';
+                        echo '<pre>';
+                        print_r($_POST);
+                        echo '</pre>';
+                        echo '<pre>';
                         print_r($_REQUEST);
                         exit;
                     }

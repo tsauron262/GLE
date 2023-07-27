@@ -142,20 +142,6 @@ class BimpPublicController extends BimpController
                     unset($userClient);
                     $userClient = null;
                 } else {
-                    if ($userClient->id == 276) {
-                        echo '<pre>';
-                        print_r($_SESSION);
-                        echo '</pre>';
-                        echo '<pre>';
-                        print_r($_GET);
-                        echo '</pre>';
-                        echo '<pre>';
-                        print_r($_POST);
-                        echo '</pre>';
-                        echo '<pre>';
-                        print_r($_REQUEST);
-                        exit;
-                    }
                     global $public_entity;
                     if (!$public_entity) {
                         $public_entity = $userClient->getData('main_public_entity');

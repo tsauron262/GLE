@@ -9,9 +9,9 @@ global $public_entity;
 $public_entity = '';
 if (isset($_GET['e']) && (string) $_GET['e']) {
     $public_entity = $_GET['e'];
-    $_SESSON['public_entity'] = $public_entity;
+    $_SESSION['public_entity'] = $public_entity;
 } else {
-    $public_entity = (isset($_SESSION['public_entity']) ? $_SESSON['public_entity'] : '');
+    $public_entity = (isset($_SESSION['public_entity']) ? $_SESSION['public_entity'] : '');
 }
 
 if ($fc !== 'doc') { // Nécessaire pour l'affichage des docs PDF. 

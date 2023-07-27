@@ -82,12 +82,6 @@ class BimpPublicController extends BimpController
             $this->public_entity_name = $name;
         }
 
-        if (isset($_REQUEST['debug']) && (int) $_REQUEST['debug'] == 1234) {
-            echo 'ENTITE : ' . $public_entity .'<br/>';
-            echo 'NOM : ' . $this->public_entity_name .'<br/>';
-            exit;
-        }
-
         if (BimpTools::isSubmit('public_form_submit')) {
             $this->processPublicForm();
         } elseif (BimpTools::isSubmit('display_public_form')) {

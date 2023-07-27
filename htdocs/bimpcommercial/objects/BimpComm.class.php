@@ -257,18 +257,11 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0)
+                    if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0) {
                         $errors[] = 'Type de tiers obligatoire';
+                    }
 
-                    // Module de validation activé
-                    if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
-                        BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-
-                        // Non prit en charge par le module de validation
-                        if (ValidComm::getObjectClass($this) == -2)
-                            $errors = BimpTools::merge_array($errors, $this->checkContacts());
-                    } else
-                        $errors = BimpTools::merge_array($errors, $this->checkContacts());
+                    $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
                     // Vérif conditions de réglement: 
                     // Attention pas de conditions de reglement sur les factures acomptes

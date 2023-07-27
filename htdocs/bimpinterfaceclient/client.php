@@ -2,6 +2,10 @@
 
 // Todo: test cookie uniquement si on est dans le contexte d'une i-frame (Ajouter un param URL ?) 
 
+if (isset($_REQUEST['debug']) && (int) $_REQUEST['debug'] == 1234) {
+    die('ICI');
+}
+
 $fc = (isset($_GET['fc']) ? $_GET['fc'] : '');
 $_REQUEST['bimp_context'] = 'public';
 

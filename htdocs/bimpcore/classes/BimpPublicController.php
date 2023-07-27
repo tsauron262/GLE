@@ -57,13 +57,14 @@ class BimpPublicController extends BimpController
         }
 
         $this->initUserClient();
+        
+        global $public_entity;
 
         $name = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
         if (strpos($name, '{') === 0) {
             $names = json_decode($name, 1);
             $name = '';
-
-            global $public_entity;
+            
             if (!$public_entity) {
                 $public_entity = BimpCore::getConf('default_public_entity', null, 'bimpinterfaceclient');
             }
@@ -79,6 +80,12 @@ class BimpPublicController extends BimpController
             ));
         } else {
             $this->public_entity_name = $name;
+        }
+
+        if (isset($_REQUEST['debug']) && (int) $_REQUEST['debug'] == 1234) {
+            echo 'ENTITE : ' . $public_entity .'<br/>';
+            echo 'NOM : ' . $this->public_entity_name .'<br/>';
+            exit;
         }
 
         if (BimpTools::isSubmit('public_form_submit')) {

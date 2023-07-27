@@ -29,6 +29,7 @@ class BimpObject extends BimpCache
     public static $user_update_properties = array('user_update', 'fk_user_modif');
     public static $allowedDbNullValueDataTypes = array('date', 'datetime', 'time');
     public static $logo_properties = array('logo');
+    public static $secteur_properties = array('ef_type', 'secteur');
     public $use_commom_fields = false;
     public $use_positions = false;
     public $params_defs = array(
@@ -800,6 +801,17 @@ class BimpObject extends BimpCache
     public function getLogoProperty()
     {
         foreach (self::$logo_properties as $prop) {
+            if ($this->field_exists($prop)) {
+                return $prop;
+            }
+        }
+
+        return '';
+    }
+
+    public function getSecteurProperty()
+    {
+        foreach (static::$secteur_properties as $prop) {
             if ($this->field_exists($prop)) {
                 return $prop;
             }
@@ -1870,7 +1882,7 @@ class BimpObject extends BimpCache
     {
         $prop = $this->getRefProperty();
 
-        if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+        if (isset($this->data[$prop]) && $this->data[$prop]) {
             return $this->data[$prop];
         }
 
@@ -1927,7 +1939,7 @@ class BimpObject extends BimpCache
     {
         $prop = $this->getStatusProperty();
 
-        if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+        if (isset($this->data[$prop]) && (string) $this->data[$prop]) {
             return $this->data[$prop];
         }
 
@@ -1972,6 +1984,17 @@ class BimpObject extends BimpCache
         }
 
         return $url;
+    }
+
+    public function getSecteur()
+    {
+        $prop = $this->getSecteurProperty();
+
+        if (isset($this->data[$prop]) && (string) $this->data[$prop]) {
+            return $this->data[$prop];
+        }
+
+        return '';
     }
 
     public function getDolValue($field, $value)
@@ -9139,28 +9162,37 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
     }
 
-    public static function getPublicBaseUrl($internal = true)
+    public static function getPublicBaseUrl($internal = true, $entity = '')
     {
         if ($internal) {
             $url = BimpCore::getConf('public_base_url', '');
 
-            if ($url) {
-                return $url;
+            if (!$url) {
+                $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?';
             }
-
-            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?';
+        } else {
+            $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
         }
 
-        return BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
+
+        if (!preg_match('/^.*\?$/', $url)) {
+            $url .= '?';
+        }
+
+        if ($entity) {
+            $url .= 'e=' . $entity . '&';
+        }
+
+        return $url;
     }
 
-    public function getPublicUrl($internal = true)
+    public function getPublicUrl($internal = true, $entity = '')
     {
         if ($this->isLoaded()) {
             $params = $this->getPublicUrlParams();
 
             if ($params) {
-                $base = self::getPublicBaseUrl($internal);
+                $base = self::getPublicBaseUrl($internal, $entity);
 
                 if ($base) {
                     return $base . $params;

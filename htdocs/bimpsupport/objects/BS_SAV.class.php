@@ -1577,7 +1577,7 @@ class BS_SAV extends BimpObject
                 return $url;
             }
         }
-        return BimpCore::getConf('base_url', '', 'bimpinterfaceclient') . "a=ss&serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
+        return BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . "a=ss&serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
 //        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
     }
@@ -7239,7 +7239,7 @@ ORDER BY a.val_max DESC");
                                 $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
                             }
 
-                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpCore::getConf('base_url', '', 'bimpinterfaceclient') . '">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
+                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . '">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
                             $msg .= 'L’équipe technique ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
 //                            mailSyn2($subject, $to, '', $msg);
@@ -7411,7 +7411,7 @@ ORDER BY a.val_max DESC");
                 $msg .= '<b>des frais de garde de 4 € par jour</b> sont appliqués.<br/><br/>';
                 $msg .= 'Vous pouvez nous confier le recyclage de votre matériel en cliquant sur le lien ci-dessous : <br/><br/>';
 
-                $url = self::getPublicBaseUrl(false) . 'fc=generateDoc&dt=sav_destruct&ids=' . $sav->id . '&rs=' . urlencode($sav->getRef());
+                $url = self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S')) . 'fc=generateDoc&dt=sav_destruct&ids=' . $sav->id . '&rs=' . urlencode($sav->getRef());
                 $msg .= '<a href="' . $url . '">Demander la destruction de mon matériel</a>';
 
                 $msg .= '<br/><br/>La réception de ce document signé de votre part entraînera l\'annulation des frais de garde.';

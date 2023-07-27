@@ -1171,8 +1171,6 @@ class BimpTools
 
     public static function removeAllFilesRecursively($dir, $remove_dir = false)
     {
-        ini_set('display_errors', 1);
-
         if (is_dir($dir)) {
             if (!preg_match('/^.+\/$/', $dir)) {
                 $dir .= '/';

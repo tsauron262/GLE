@@ -781,8 +781,6 @@ class BR_Reservation extends BimpObject
 
     public function displayProductAvailableQty()
     {
-        ini_set('display_errors', 1);
-
         $product = $this->getChildObject('product');
         if (BimpObject::objectLoaded($product)) {
             $stocks = $product->getStocksForEntrepot((int) $this->getData('id_entrepot'));

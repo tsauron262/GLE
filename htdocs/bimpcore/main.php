@@ -2,6 +2,8 @@
 
 $context = (isset($_REQUEST['bimp_context']) && $_REQUEST['bimp_context'] ? $_REQUEST['bimp_context'] : '');
 
+ini_set('display_errors', 0);
+
 if ($context == 'public') {
     define("NOLOGIN",1);
     define("NOSESSION", 1);

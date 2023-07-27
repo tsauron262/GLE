@@ -632,7 +632,7 @@ class BimpSignature extends BimpObject
             $doc_title = strip_tags($this->displayDocTitle());
             $nom_piece = $obj->getLabel('the');
             $ref_piece = $obj->getRef();
-            $lien_espace_client = '<a href="' . self::getPublicBaseUrl(false) . '">espace client</a>';
+            $lien_espace_client = '<a href="' . self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj)) . '">espace client</a>';
 
             $i = 1;
             foreach ($signataires as $signataire) {
@@ -1804,7 +1804,7 @@ class BimpSignature extends BimpObject
             $this->displayDocTitle(),
             $obj->getLabel('the'),
             $obj->getRef(),
-            '<a href="' . self::getPublicBaseUrl(false) . '">espace client</a>'
+            '<a href="' . self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj)) . '">espace client</a>'
                 ), $email_content);
     }
 

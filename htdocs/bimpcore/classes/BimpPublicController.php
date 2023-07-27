@@ -13,27 +13,13 @@ class BimpPublicController extends BimpController
 
     public function init()
     {
-        $name = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
-        if (strpos($name, '{') === 0) {
-            $names = json_decode($name, 1);
-            $name = '';
-
-            global $public_entity;
-            if (!$public_entity) {
-                $public_entity = BimpCore::getConf('default_public_entity', null, 'bimpinterfaceclient');
-            }
-
-            if ($public_entity && isset($names[$public_entity])) {
-                $name = $names[$public_entity];
-            }
-        }
-
-        if (!$name) {
-            BimpCore::addlog('Aucun nom pour l\'interface publique', 4, 'bic', null, array(
-                'Entité' => ($public_entity ? $public_entity : 'aucune')
-            ));
+        global $public_entity;
+        $public_entity = '';
+        if (isset($_GET['e']) && (string) $_GET['e']) {
+            $public_entity = $_GET['e'];
+            $_SESSION['public_entity'] = $public_entity;
         } else {
-            $this->public_entity_name = $name;
+            $public_entity = (isset($_SESSION['public_entity']) ? $_SESSION['public_entity'] : '');
         }
 
         switch (BimpTools::getValue('back', '')) {
@@ -71,6 +57,29 @@ class BimpPublicController extends BimpController
         }
 
         $this->initUserClient();
+
+        $name = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
+        if (strpos($name, '{') === 0) {
+            $names = json_decode($name, 1);
+            $name = '';
+
+            global $public_entity;
+            if (!$public_entity) {
+                $public_entity = BimpCore::getConf('default_public_entity', null, 'bimpinterfaceclient');
+            }
+
+            if ($public_entity && isset($names[$public_entity])) {
+                $name = $names[$public_entity];
+            }
+        }
+
+        if (!$name) {
+            BimpCore::addlog('Aucun nom pour l\'interface publique', 4, 'bic', null, array(
+                'Entité' => ($public_entity ? $public_entity : 'aucune')
+            ));
+        } else {
+            $this->public_entity_name = $name;
+        }
 
         if (BimpTools::isSubmit('public_form_submit')) {
             $this->processPublicForm();
@@ -125,6 +134,14 @@ class BimpPublicController extends BimpController
                     $_SESSION['userClient'] = null;
                     unset($userClient);
                     $userClient = null;
+                } else {
+                    global $public_entity;
+                    if (!$public_entity) {
+                        $public_entity = $userClient->getData('main_public_entity');
+                        if ($public_entity) {
+                            $_SESSION['public_entity'] = $public_entity;
+                        }
+                    }
                 }
             }
         }
@@ -171,7 +188,7 @@ class BimpPublicController extends BimpController
     {
         return (string) BimpCache::getBdb()->getValue('bimp_c_secteur', 'public_entity', 'clef = \'' . $secteur . '\'');
     }
-    
+
     public static function getPublicEntityForObjectSecteur($object)
     {
         if (is_a($object, 'BimpObject')) {

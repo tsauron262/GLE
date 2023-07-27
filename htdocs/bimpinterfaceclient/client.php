@@ -9,15 +9,6 @@ if (isset($_REQUEST['debug']) && (int) $_REQUEST['debug'] == 1234) {
 $fc = (isset($_GET['fc']) ? $_GET['fc'] : '');
 $_REQUEST['bimp_context'] = 'public';
 
-global $public_entity;
-$public_entity = '';
-if (isset($_GET['e']) && (string) $_GET['e']) {
-    $public_entity = $_GET['e'];
-    $_SESSION['public_entity'] = $public_entity;
-} else {
-    $public_entity = (isset($_SESSION['public_entity']) ? $_SESSION['public_entity'] : '');
-}
-
 if ($fc !== 'doc') { // Nécessaire pour l'affichage des docs PDF. 
     header('x-frame-options: ALLOWALL', false);
     define('ALLOW_ALL_IFRAME', true);

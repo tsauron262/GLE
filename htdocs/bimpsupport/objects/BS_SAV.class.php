@@ -3998,6 +3998,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
+        
+        global $conf;
         $fromMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 
         $contact = null;
@@ -7699,7 +7701,7 @@ ORDER BY a.val_max DESC");
                     $filePath = $this->getSignatureDocFileDir('sav_pc') . $fileName;
 
                     if (file_exists($filePath)) {
-                        $subject = 'LDLDC - Votre bon de prise en charge PC-' . $this->getRef();
+                        $subject = 'Votre bon de prise en charge PC-' . $this->getRef();
 
                         $message = 'Bonjour, ' . "\n\n";
                         $message .= 'Vous trouverez ci-joint votre bon de prise en charge ' . $this->getLink(array(), 'public') . " \n\n";
@@ -7731,7 +7733,7 @@ ORDER BY a.val_max DESC");
                 }
 
                 // Mail client: 
-                $subject = 'LDLDC Apple - Confirmation de la destruction de votre matériel';
+                $subject = 'Confirmation de la destruction de votre matériel';
 
                 $message = 'Bonjour, ' . "\n\n";
                 $message .= 'Nous vous confirmons la prise en compte de votre demande de destruction de votre ';

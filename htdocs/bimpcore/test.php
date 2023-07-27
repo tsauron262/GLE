@@ -32,6 +32,10 @@ echo 'DEVIS SAV :' . BimpObject::getPublicBaseUrl(false, BimpPublicController::g
 $p = BimpCache::getBimpObjectInstance('bimpcommerical', 'Bimp_Propal', 457176);
 echo 'DEVIS COMM :' . BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($p)) .'<br/><br/>';
 
+
+echo '<pre>';
+print_r(scandir(DOL_DATA_ROOT.'/mycompany/logos'));
+echo '</pre>';
 echo '<br/>FIN';
 echo '</body></html>';
 

@@ -193,7 +193,10 @@ $nbofjobslaunchedok = 0;
 $nbofjobslaunchedko = 0;
 
 $rand = random_int(111111, 999999);
-$bimp_debug = "\n" . '***** BEGIN #' . $rand . ' : ' . date('d / m H:i:s') . "\n";
+$h = random_int(0, 255);
+$color = BimpTools::hslToHex(array($h, 100, 40));
+
+$bimp_debug = "<br/>" . '<span class="color: #'.$color.'; font-weight: bold">***** BEGIN #' . $rand . ' : ' . date('d / m H:i:s') . '</span><br/>';
 file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
 
 if (is_array($object->lines) && (count($object->lines) > 0)) {
@@ -262,7 +265,7 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
             }
             if (!$cronjob->processing) {
                 $begin_time = time();
-                $bimp_debug = 'Exec #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ')' . "\n";
+                $bimp_debug = '<span class="color: #'.$color.'">Exec #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ')</span><br/>';
                 file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
                 // Execute job
                 $result = $cronjob->run_jobs($userlogin);
@@ -279,7 +282,7 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
                 }
 
                 $end_time = time();
-                $bimp_debug = 'END EXEC #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ') => ' . ($end_time - $begin_time) . ' sec.' . "\n";
+                $bimp_debug = '<span class="color: #'.$color.'">END EXEC #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ') => ' . ($end_time - $begin_time) . ' sec.</span><br/>';
                 file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
                 echo " - run_jobs " . $resultstring . " result = " . $result;
 

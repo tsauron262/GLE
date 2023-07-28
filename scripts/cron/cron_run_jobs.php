@@ -194,7 +194,7 @@ $nbofjobslaunchedko = 0;
 
 $rand = random_int(111111, 999999);
 $h = random_int(0, 360);
-$offset = 50;
+$offset = 40;
 
 $recursive_hues = array(120, 250);
 while (1) {

@@ -200,7 +200,7 @@ if (!class_exists('BimpTools')) {
 }
 $color = BimpTools::hslToHex(array($h / 360, 1, 0.4));
 
-$bimp_debug = "<br/>" . '<span class="color: #' . $color . '; font-weight: bold">***** BEGIN #' . $rand . ' : ' . date('d / m H:i:s') . '</span><br/>';
+$bimp_debug = "<br/>" . '<span style="color: #' . $color . '; font-weight: bold">***** BEGIN #' . $rand . ' : ' . date('d / m H:i:s') . '</span><br/>';
 file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
 
 if (is_array($object->lines) && (count($object->lines) > 0)) {

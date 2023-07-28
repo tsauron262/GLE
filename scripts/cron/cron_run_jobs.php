@@ -194,8 +194,13 @@ $nbofjobslaunchedko = 0;
 
 $rand = random_int(111111, 999999);
 $h = random_int(0, 360);
-if (($h > 90 && $h < 130) || ($f > 210 && $h < 260)) {
-    $h = random_int(0, 360);
+
+for ($i = 0; $i < 3; $i++) {
+    if (($h > 90 && $h < 150) || ($f > 210 && $h < 260)) {
+        $h = random_int(0, 360);
+    } else {
+        break;
+    }
 }
 
 if (!class_exists('BimpTools')) {

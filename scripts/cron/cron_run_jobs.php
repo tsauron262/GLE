@@ -196,7 +196,7 @@ $rand = random_int(111111, 999999);
 $h = random_int(0, 360);
 $offset = 50;
 
-$recursive_hues = array(120, 250, 330);
+$recursive_hues = array(120, 250);
 while (1) {
     foreach ($recursive_hues as $rh) {
         if ($offset > 0 && $h > $rh - $offset && $h < $rh + $offset) {

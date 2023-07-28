@@ -194,6 +194,9 @@ $nbofjobslaunchedko = 0;
 
 $rand = random_int(111111, 999999);
 $h = random_int(0, 360);
+if (($h > 90 && $h < 130) || ($f > 210 && $h < 260)) {
+    $h = random_int(0, 360);
+}
 
 if (!class_exists('BimpTools')) {
     require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpTools.php';

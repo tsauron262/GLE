@@ -194,6 +194,19 @@ $nbofjobslaunchedko = 0;
 
 $rand = random_int(111111, 999999);
 $h = random_int(0, 360);
+$offset = 50;
+
+$recursive_hues = array(120, 250, 330);
+while (1) {
+    foreach ($recursive_hues as $rh) {
+        if ($offset > 0 && $h > $rh - $offset && $h < $rh + $offset) {
+            $offset -= 10;
+            continue 2;
+        }
+    }
+    
+    break;
+}
 
 for ($i = 0; $i < 3; $i++) {
     if (($h > 90 && $h < 150) || ($f > 210 && $h < 260)) {

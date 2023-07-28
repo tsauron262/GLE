@@ -201,19 +201,11 @@ while (1) {
     foreach ($recursive_hues as $rh) {
         if ($offset > 0 && $h > $rh - $offset && $h < $rh + $offset) {
             $offset -= 10;
+            $h = random_int(0, 360);
             continue 2;
         }
-    }
-    
+    }    
     break;
-}
-
-for ($i = 0; $i < 3; $i++) {
-    if (($h > 90 && $h < 150) || ($f > 210 && $h < 260)) {
-        $h = random_int(0, 360);
-    } else {
-        break;
-    }
 }
 
 if (!class_exists('BimpTools')) {

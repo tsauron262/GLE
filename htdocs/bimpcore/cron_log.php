@@ -36,7 +36,7 @@ if (file_exists($file)) {
             echo '<span class="success">Suppr ok</span>';
         }
     } else {
-        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=cron_logs/txt';
+        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=cron_logs.txt';
         echo '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
         echo 'Télécharger';
         echo '</span>';

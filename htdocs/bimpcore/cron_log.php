@@ -39,7 +39,9 @@ if (file_exists($file)) {
         $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=cron_logs.txt';
         echo '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
         echo 'Télécharger';
-        echo '</span>';
+        echo '</span><br/><br/>';
+        
+        echo file_get_contents($file);
     }
 } else {
     echo 'Fichier absent';

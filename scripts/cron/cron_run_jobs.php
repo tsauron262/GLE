@@ -193,12 +193,12 @@ $nbofjobslaunchedok = 0;
 $nbofjobslaunchedko = 0;
 
 $rand = random_int(111111, 999999);
-$h = random_int(0, 255);
+$h = random_int(0, 360);
 
 if (!class_exists('BimpTools')) {
     require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpTools.php';
 }
-$color = BimpTools::hslToHex(array($h, 100, 40));
+$color = BimpTools::hslToHex(array($h / 360, 1, 0.4));
 
 $bimp_debug = "<br/>" . '<span class="color: #' . $color . '; font-weight: bold">***** BEGIN #' . $rand . ' : ' . date('d / m H:i:s') . '</span><br/>';
 file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);

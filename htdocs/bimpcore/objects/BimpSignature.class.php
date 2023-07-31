@@ -447,7 +447,7 @@ class BimpSignature extends BimpObject
                 $errors = array();
                 $obj = $this->getObj();
                 if ($this->isObjectValid($errors, $obj)) {
-                    if (method_exists($obj, 'getSignatureEmailContent', $signature_type)) {
+                    if (method_exists($obj, 'getSignatureEmailContent')) {
                         return $obj->getSignatureEmailContent($signature_type);
                     }
                 }

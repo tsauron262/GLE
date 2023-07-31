@@ -299,7 +299,8 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
                 }
 
                 $end_time = time();
-                $bimp_debug = '<span style="color: #' . $color . '">END EXEC #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ') => ' . ($end_time - $begin_time) . ' sec.</span><br/>';
+                $duree = $end_time - $begin_time;
+                $bimp_debug = '<span style="color: #' . $color . ';' . ($duree > 60 ? ' font-weight: bold' : '') . '">END EXEC #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ') => ' . $duree . ' sec.</span>'.($duree > 60 ? ' ---------- /!\ ------------' : '').'<br/>';
                 file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
                 echo " - run_jobs " . $resultstring . " result = " . $result;
 

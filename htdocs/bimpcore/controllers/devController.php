@@ -51,6 +51,12 @@ class devController extends BimpController
             $html .= 'Espace client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
         }
+        
+        if (!BimpCore::isModeDev()) {
+            $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/cron_log.php" target="_blank">';
+            $html .= 'Logs CRONS client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+            $html .= '</a>';
+        }
 
         if (!BimpCore::isModeDev()) {
             $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/synopsistools/git_pull.php" target="_blank">';

@@ -36,9 +36,9 @@ if (file_exists($file)) {
             echo '<span class="success">Suppr ok</span>';
         }
     } else {
-        $html .= '<span class="btn btn-default" onclick="' . $_SERVER['PHP_SELF'] . '?delete_file=1">';
-        $html .= 'Suppimer fichier';
-        $html .= '</span>&nbsp;&nbsp;';
+        echo '<span class="btn btn-default" onclick="' . $_SERVER['PHP_SELF'] . '?delete_file=1">';
+        echo 'Suppimer fichier';
+        echo '</span>&nbsp;&nbsp;';
 
         $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=cron_logs.txt';
         echo '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';

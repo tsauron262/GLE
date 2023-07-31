@@ -302,8 +302,10 @@ class AtradiusAPI extends BimpAPI
                 $warnings[] = "Demande en cours d'arbitrage";
                 break;
             default:
+                if (!is_array($data)) {
+                    $data = array();
+                }
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-//                $errors[] = "Demande refusée";
                 $errors[] = "Echec de la requête auprès d'Atradius";
                 break;
         }

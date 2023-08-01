@@ -4371,7 +4371,7 @@ class Bimp_Facture extends BimpComm
             $this->set('fk_statut', 1);
             $this->checkIsPaid();
             $this->checkRemisesGlobales();
-            $this->checkMargin(true);
+            $this->checkMargin(true, true);
             $this->checkTotalAchat(true);
 
             $client = $this->getChildObject('client');
@@ -4381,6 +4381,8 @@ class Bimp_Facture extends BimpComm
                     $this->updateField('chorus_status', 0);
                 }
             }
+            
+            BimpCore::addlog('Fac on validate ok', 1, 'bimpcore', $this);
         }
 
         return array();
@@ -4469,8 +4471,8 @@ class Bimp_Facture extends BimpComm
                 $errors = BimpTools::merge_array($errors, $this->checkMargin());
                 $errors = BimpTools::merge_array($errors, $this->checkTotalAchat());
             } elseif (is_a($child, 'BimpRevalorisation')) {
-                $errors = BimpTools::merge_array($errors, $this->checkMargin(true));
-                $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true));
+                $errors = BimpTools::merge_array($errors, $this->checkMargin(true, true));
+                $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true, true));
             }
         }
 

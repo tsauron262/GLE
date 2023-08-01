@@ -4381,10 +4381,6 @@ class Bimp_Facture extends BimpComm
                     $this->updateField('chorus_status', 0);
                 }
             }
-
-            if (BimpCore::isEntity('actimac')) {
-                BimpCore::addlog('Fac on validate ok', 1, 'bimpcore', $this);
-            }
         }
 
         return array();

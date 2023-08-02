@@ -104,6 +104,10 @@ params:
         label: Ip Admin (pour fermeture ERP)
     git_branch:
         label: Branche GIT
+    cronjob_debug: 
+        label: Activer le débug des tâches CRON
+        type: bool
+        def: 0
     
     # Defaults: 
     default_id_entrepot: 

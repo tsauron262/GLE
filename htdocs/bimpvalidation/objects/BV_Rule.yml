@@ -62,6 +62,14 @@ fields:
         items_sortable: 1
         items_braces: 1
         
+    groups: 
+        label: Groupes
+        type: items_list
+        items_data_type: id_object
+        object: group
+        items_sortable: 1
+        items_braces: 1
+        
     active: 
         label: Active
         type: bool
@@ -99,5 +107,6 @@ lists:
             val_max: 
             extra_params: 
             users:
+            groups:
             
     

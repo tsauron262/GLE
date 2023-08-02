@@ -6,6 +6,10 @@ require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php';
 
+if (!defined('BV_LIB')) {
+    require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/BV_Lib.php';
+}
+
 /*
  * *** Mémo ajout signature pour un objet: ***
 
@@ -1595,7 +1599,7 @@ class BContract_contrat extends BimpDolObject
             $this->totalContrat = $montant;
             return $montant;
         }
-        return round($this->totalContrat,4);
+        return round($this->totalContrat, 4);
     }
 
     public function getCurrentTotal($taxe = 0)
@@ -2856,12 +2860,21 @@ class BContract_contrat extends BimpDolObject
         }
     }
 
-    public function tryToValidate(&$errors)
+    public function tryToValidate(&$errors = array(), &$infos = array(), &$successes = array())
     {
         global $user;
-        $success = [];
-        $validComm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-        $validComm->tryToValidate($this, $user, $errors, $success);
+
+        if (BimpCore::isModuleActive('bimpvalidation')) {
+            if (!BimpValidation::tryToValidate($this, $errors, $infos, $successes)) {
+                if (!count($errors)) {
+                    $errors[] = 'Vous ne pouvez pas valider complètement ce contrat';
+                }
+            }
+        } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
+            $validComm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+            $validComm->tryToValidate($this, $user, $errors, $successes);
+        }
+
 
         return $errors;
     }
@@ -4557,7 +4570,7 @@ class BContract_contrat extends BimpDolObject
         global $langs;
 
         $success = "PDF contrat généré avec Succes";
-        if($this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs) <= 0){
+        if ($this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs) <= 0) {
             $errors = BimpTools::getErrorsFromDolObject($this->dol_object, $error = null, $langs);
             $warnings[] = BimpTools::getMsgFromArray($errors, 'Echec de la création du fichier PDF');
         }
@@ -4943,18 +4956,22 @@ class BContract_contrat extends BimpDolObject
     public function renderDemandesList()
     {
         if ($this->isLoaded()) {
-            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-            $objectName = ValidComm::getObjectClass($this);
-            if ($objectName != -2) {
+            if (BimpCore::isModuleActive('bimpvalidation')) {
+                return BimpValidation::renderObjectDemandesList($this);
+            } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-                $demande = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'DemandeValidComm');
-                $list = new BC_ListTable($demande);
-                $list->addFieldFilterValue('type_de_piece', $objectName);
-                $list->addFieldFilterValue('id_piece', (int) $this->id);
+                $objectName = ValidComm::getObjectClass($this);
+                if ($objectName != -2) {
+                    BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                    $demande = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'DemandeValidComm');
+                    $list = new BC_ListTable($demande);
+                    $list->addFieldFilterValue('type_de_piece', $objectName);
+                    $list->addFieldFilterValue('id_piece', (int) $this->id);
 
-                return $list->renderHtml();
-            } else {
-                return '';
+                    return $list->renderHtml();
+                } else {
+                    return '';
+                }
             }
         }
 

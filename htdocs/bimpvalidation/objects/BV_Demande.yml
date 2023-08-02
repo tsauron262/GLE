@@ -1,4 +1,4 @@
-table: bv_rule
+table: bv_demande
 icon: far_check-circle
 common_fields: 1
 
@@ -13,6 +13,12 @@ objects:
         instance: 
             id_object: 
                 field_value: id_user_author
+                
+    user_affected: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_affected
                 
     user_validate:
         extends: user
@@ -31,6 +37,7 @@ fields:
         label: Type de validation
         values: 
             array: typesValidations
+        required: 1
             
     type_object: 
         label: Type objet
@@ -57,6 +64,12 @@ fields:
         items_sortable: 1
         items_braces: 1
         
+    id_user_affected: 
+        label: Demande affectée à
+        type: id_object
+        object: user_affected
+        default_value: 0
+        
     id_user_validate: 
         label: Validée / refusée par
         type: id_object
@@ -71,10 +84,48 @@ fields:
         label: Commentaire
         type: text
         
-        
-        
-        
-    
-        
-    
+filters_panels: 
+    default: 
+        filters: 
+            type_validation: 
+            type_object: 
+            status: 
+            id_user_demande:
+                
+lists_cols: 
+    obj: 
+        label: Pièce
+        value: 
+            callback: displayObj
+            
+lists: 
+    default: 
+        title: Demandes de validation
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les règles sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        filters_panel: default
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        edit_btn: 1
+        delete_btn: 1
+        modal_view: default
+        cols: 
+            type_validation: 
+            obj: 
+            status: 
+            id_user_demande: 
+            validation_users: 
+            id_user_validate: 
+            date_validate:
+                
+    obj: 
+        extends: default
+        cols: 
+            obj: unset
         

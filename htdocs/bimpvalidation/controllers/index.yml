@@ -5,6 +5,9 @@ objects:
     rule:
         instance: 
             bimp_object: BV_Rule
+    demande:
+        instance: 
+            bimp_object: BV_Demande
             
 sections:
     - type: tabs
@@ -16,3 +19,10 @@ sections:
                   list: 
                       panel: 1
                       object: rule
+        demandes:
+            label: Demandes de validation
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: demande

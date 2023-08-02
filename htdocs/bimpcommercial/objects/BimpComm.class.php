@@ -131,25 +131,42 @@ class BimpComm extends BimpDolObject
     {
         global $user;
 
-        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-        $type_de_piece = ValidComm::getObjectClass($this);
-
-        $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
-
-        if ($demands) {
-            if ($exclude_user_affected) {
-                foreach ($demands as $d) {
-                    if ((int) $d->getData('id_user_affected') == (int) $user->id) {
-                        return 0;
+        if (BimpCore::isModuleActive('bimpvalidation')) {
+            $demandes = BimpValidation::getObjectDemandes($this, 0);
+            if (count($demandes)) {
+                if ($exclude_user_affected) {
+                    foreach ($demandes as $demande) {
+                        $users = $demande->getData('validation_users');
+                        if (in_array($user->id, $users)) {
+                            return 0;
+                        }
                     }
                 }
-            }
 
-            // Soumis à des validations et possède des demandes de validation en brouillon
-            if ($type_de_piece != -2 and $demands) {
                 return 1;
             }
+        } else {
+            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+            $type_de_piece = ValidComm::getObjectClass($this);
+
+            $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
+
+            if ($demands) {
+                if ($exclude_user_affected) {
+                    foreach ($demands as $d) {
+                        if ((int) $d->getData('id_user_affected') == (int) $user->id) {
+                            return 0;
+                        }
+                    }
+                }
+
+                // Soumis à des validations et possède des demandes de validation en brouillon
+                if ($type_de_piece != -2 and $demands) {
+                    return 1;
+                }
+            }
         }
+
 
         return 0;
     }
@@ -257,18 +274,11 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0)
+                    if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0) {
                         $errors[] = 'Type de tiers obligatoire';
+                    }
 
-                    // Module de validation activé
-                    if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
-                        BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-
-                        // Non prit en charge par le module de validation
-                        if (ValidComm::getObjectClass($this) == -2)
-                            $errors = BimpTools::merge_array($errors, $this->checkContacts());
-                    } else
-                        $errors = BimpTools::merge_array($errors, $this->checkContacts());
+                    $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
                     // Vérif conditions de réglement: 
                     // Attention pas de conditions de reglement sur les factures acomptes
@@ -2011,12 +2021,22 @@ class BimpComm extends BimpDolObject
     public function renderHeaderExtraRight($no_div = false)
     {
         $html = '';
-        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-        $type_de_piece = ValidComm::getObjectClass($this);
 
-        // Soumis à des validations et possède des demandes de validation en brouillon
-        if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0)) {
-            $html = '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'En cours de validation</span>';
+        if (BimpCore::isModuleActive('bimpvalidation')) {
+            if (!(int) $this->getData('fk_statut')) {
+                $demandes = BimpValidation::getObjectDemandes($this, 0);
+                if (count($demandes)) {
+                    $html .= '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($demandes) . ' demande(s) de validation en attente</span>';
+                }
+            }
+        } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
+            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+            $type_de_piece = ValidComm::getObjectClass($this);
+
+            // Soumis à des validations et possède des demandes de validation en brouillon
+            if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0)) {
+                $html .= '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'En cours de validation</span>';
+            }
         }
 
         return $html;
@@ -2548,19 +2568,22 @@ class BimpComm extends BimpDolObject
     public function renderDemandesList()
     {
         if ($this->isLoaded()) {
-            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-            $objectName = ValidComm::getObjectClass($this);
-            if ($objectName != -2) {
+            if (BimpCore::isModuleActive('bimpvalidation')) {
+                return BimpValidation::renderObjectDemandesList($this);
+            } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-                $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
-                $list = new BC_ListTable($demande);
-                $list->addFieldFilterValue('type_de_piece', $objectName);
-                $list->addFieldFilterValue('id_piece', (int) $this->id);
+                $objectName = ValidComm::getObjectClass($this);
+                if ($objectName != -2) {
+                    BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                    $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
+                    $list = new BC_ListTable($demande);
+                    $list->addFieldFilterValue('type_de_piece', $objectName);
+                    $list->addFieldFilterValue('id_piece', (int) $this->id);
 
-                return $list->renderHtml();
-            } else {
-                return '';
+                    return $list->renderHtml();
+                }
             }
+            return '';
         }
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
@@ -4685,20 +4708,25 @@ class BimpComm extends BimpDolObject
             }
 
             // Suppression des demandes de validation liées à cet objet
-            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-            $type_de_piece = $valid_comm::getObjectClass($this);
-            $filters = array(
-                'type_de_piece' => (int) $type_de_piece,
-                'id_piece'      => (int) $this->id
-            );
-            $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+            $demandes_a_suppr = array();
+            if (BimpCore::isModuleActive('bimpvalidation')) {
+                $demandes_a_suppr = BimpValidation::getObjectDemandes($this);
+            } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
+                $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                $type_de_piece = $valid_comm::getObjectClass($this);
+                $filters = array(
+                    'type_de_piece' => (int) $type_de_piece,
+                    'id_piece'      => (int) $this->id
+                );
+                $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+            }
 
             foreach ($demandes_a_suppr as $d) {
                 $dem_warnings = array();
                 $dem_errors = $d->delete($dem_warnings, true);
 
                 if (count($dem_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($dem_errors, 'Echec de la suppression de la demande de validation #' . $rg->id);
+                    $warnings[] = BimpTools::getMsgFromArray($dem_errors, 'Echec de la suppression de la demande de validation #' . $d->id);
                 }
             }
         }

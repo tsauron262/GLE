@@ -108,6 +108,12 @@ params:
         label: Activer le débug des tâches CRON
         type: bool
         def: 0
+        
+    #ftp_dir => Eviter les noms trop "communs" pour les params de conf, 
+    # il faut qu'on puisse retrouver facilement les params dans le code lors des recherches globales.
+    exports_ldlc_ftp_dir:
+        label: Dossier FTP pour les exports LDLC
+        def: ''
     
     # Defaults: 
     default_id_entrepot: 
@@ -167,6 +173,10 @@ params:
         def: ''
     emails_notify_solvabilite_client_change_auto: 
         label: Adresse e-mail pour notification changement de solvabilité client (auto)
+        cat: emails
+        def: ''
+    mail_achat:
+        label: Email groupe achat
         cat: emails
         def: ''
         
@@ -326,9 +336,3 @@ params:
                       label: Logguer les doublons SQL
                       type: bool
                       def: 0
-                      
-    ftp_dir:
-        label: Dossier sur le FTP
-        
-    mail_achat:
-        label: Email groupe achat

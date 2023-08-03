@@ -186,7 +186,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 if ($this->isLoaded() && !$user->rights->bimpcommercial->changeEntrepot) {
                     return 0;
                 }
-                return 0;
+                return 1;
         }
         return parent::canEditField($field_name);
     }

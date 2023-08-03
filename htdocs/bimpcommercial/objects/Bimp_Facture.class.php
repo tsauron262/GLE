@@ -306,7 +306,7 @@ class Bimp_Facture extends BimpComm
                     'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
                     'close_code', 'close_note',
                     'date_irrecouvrable', 'id_user_irrecouvrable',
-                    'prelevement', 'ef_type', 'fk_mode_reglement', 'fk_cond_reglement', 
+                    'prelevement', 'ef_type', 'fk_mode_reglement', 'fk_cond_reglement',
                     'pdf_nb_decimal', 'pdf_hide_livraisons', 'litige', 'expertise'
                 ))) {
             return 1;
@@ -4371,7 +4371,7 @@ class Bimp_Facture extends BimpComm
             $this->set('fk_statut', 1);
             $this->checkIsPaid();
             $this->checkRemisesGlobales();
-            $this->checkMargin(true);
+            $this->checkMargin(true, true);
             $this->checkTotalAchat(true);
 
             $client = $this->getChildObject('client');
@@ -4469,8 +4469,8 @@ class Bimp_Facture extends BimpComm
                 $errors = BimpTools::merge_array($errors, $this->checkMargin());
                 $errors = BimpTools::merge_array($errors, $this->checkTotalAchat());
             } elseif (is_a($child, 'BimpRevalorisation')) {
-                $errors = BimpTools::merge_array($errors, $this->checkMargin(true));
-                $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true));
+                $errors = BimpTools::merge_array($errors, $this->checkMargin(true, true));
+                $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true, true));
             }
         }
 

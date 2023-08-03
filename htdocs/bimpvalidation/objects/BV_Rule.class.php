@@ -4,9 +4,9 @@ class BV_Rule extends BimpObject
 {
 
     public static $types = array(
-        'comm' => 'Commerciale (Remises)',
-        'fin'  => 'Financière (Encours)',
-        'rtp'  => 'Retard de paiement'
+        'comm' => array('label' => 'Commerciale (Remises)', 'val_label' => 'Remises (%)'),
+        'fin'  => array('label' => 'Financière (Encours)', 'val_label' => 'Encours client'),
+        'rtp'  => array('label' => 'Retard de paiement', 'val_lavel' => 'Total paiements en retard')
     );
     public static $objects_list = array(
         'propal'   => array('label' => 'Devis', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Propal'),
@@ -32,7 +32,7 @@ class BV_Rule extends BimpObject
 
     public function isUserAllowed($id_user)
     {
-        $users = $this->getData('users');
+        $users = $this->getValidationUsers();
 
         if (!empty($users) && in_array($id_user, $users)) {
             return 1;

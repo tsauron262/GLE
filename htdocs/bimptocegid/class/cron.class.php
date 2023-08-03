@@ -47,7 +47,7 @@
         public $output = '';
         
         public function __construct() {// Bien penssé a changer pour les test à /accountingtest/
-            $this->ldlc_ftp_path = "/".BimpCore::getConf('ftp_dir').'/accounting';
+            $this->ldlc_ftp_path = "/".BimpCore::getConf('exports_ldlc_ftp_dir').'/accounting';
             
             if($this->modeTest) {
                 $this->ldlc_ftp_path .= 'test/';

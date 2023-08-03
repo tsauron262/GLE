@@ -764,7 +764,7 @@ Merci d’avoir pris rendez-vous dans notre Centre de Services Agrée Apple, nou
 
                 $url = '';
                 if ($shipTo) {
-                    $url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
+                    $url = BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForSecteur('S'));
 
                     if ($url) {
                         $url .= 'fc=savForm&resgsx=' . $resId . '&ac=' . $ac->id . '&centre_id=' . $shipTo;

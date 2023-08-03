@@ -171,6 +171,7 @@ class Bimp_Product extends BimpObject
             case 'refuse':
             case 'merge':
             case 'mouvement':
+            case 'duplicate':
                 return $this->canValidate();
 
             case 'updatePrice':
@@ -303,6 +304,13 @@ class Bimp_Product extends BimpObject
                 if (!$this->isEditable())
                     return 0;
                 if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                return 1;
+
+            case 'duplicate':
+                if (!(int) BimpCore::getConf('allow_duplicate_products')) {
+                    $errors[] = 'La copie des produits n\'est pas activée';
                     return 0;
                 }
                 return 1;
@@ -858,6 +866,18 @@ class Bimp_Product extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('duplicate') && $this->canSetAction('duplicate')) {
+            $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+            $data = $this->getDuplicateData();
+            $buttons[] = array(
+                'label'   => 'Cloner',
+                'icon'    => 'fas_copy',
+                'onclick' => $prod_instance->getJsActionOnclick('duplicate', $data, array(
+                    'form_name' => 'default'
+                ))
+            );
+        }
+
 //        if ($this->isActionAllowed('refuse') && $this->canSetAction('refuse')) {
 //            $buttons[] = array(
 //                'label'   => 'Refuser',
@@ -1220,6 +1240,27 @@ class Bimp_Product extends BimpObject
             }
         }
         return '';
+    }
+
+    public function getDuplicateData()
+    {
+        $fields = array(
+            'label', 'description', 'fk_product_type', 'price', 'price_ttc', 'deee', 'default_vat_code',
+            'tva_tx', 'serialisable', 'remisable', 'type2', 'rpcp', 'localtax1_tx', 'localtax1_type',
+            'localtax2_tx', 'localtax2_type', 'fk_default_warehouse', 'no_fixe_prices', 'categorie',
+            'collection', 'nature', 'famille', 'gamme', 'cto', 'type_compta', 'duree', 'lock_admin', 'duree_i',
+            'renta_service', 'alerteActive'
+        );
+
+        $data = array();
+
+        foreach ($fields as $field) {
+            if ($this->field_exists($field)) {
+                $data[$field] = htmlentities($this->getData($field));
+            }
+        }
+
+        return $data;
     }
 
     // Getters stocks:
@@ -2883,6 +2924,14 @@ class Bimp_Product extends BimpObject
             return $errors;
         }
 
+        $email = BimpCore::getConf('product_validated_notif_email', '', 'bimpcore');
+
+        if ($email) {
+            global $langs;
+            $msg = 'Bonjour, <br/><br/>Le produit ' . $this->getLink() . ' a été validé par ' . $user->getFullName($langs);
+            mailSyn2('Produit ' . $this->getRef() . ' validé', $email, '', $msg);
+        }
+
         // COMMAND
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
@@ -2904,6 +2953,7 @@ class Bimp_Product extends BimpObject
                 $userT->fetch($commande->fk_user_author);
                 $mailCreateur = $userT->email;
             }
+
             if ($mailCreateur && $mailCreateur != '')
                 $this->sendEmailCommandeValid($commande, $mailCreateur);
 
@@ -2928,7 +2978,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
@@ -2967,7 +3017,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
@@ -3047,7 +3097,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
@@ -3082,7 +3132,7 @@ class Bimp_Product extends BimpObject
             }
 
             // Use main commercial Franck PINERI
-            if (!$email_sent) {
+            if (!$email_sent && BimpCore::isEntity('bimp')) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
@@ -3451,6 +3501,19 @@ class Bimp_Product extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function duplicate($data, &$errors = array(), &$warnings = array())
+    {
+        $new_prod = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+
+        $errors = $new_prod->validateArray($data);
+
+        if (!count($errors)) {
+            $errors = $new_prod->create($warnings, true);
+        }
+
+        return $new_prod;
     }
 
     // Stats
@@ -3918,6 +3981,31 @@ class Bimp_Product extends BimpObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionDuplicate($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = '';
+
+        $prod = $this->duplicate($data, $errors, $warnings);
+
+        if (BimpObject::objectLoaded($prod)) {
+            $success = 'Copie du produit effectuée avec succès';
+            $url = $prod->getUrl();
+
+            if ($url) {
+                $sc = 'window.open(\'' . $url . '\');';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
         );
     }
 

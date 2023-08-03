@@ -34,6 +34,9 @@ class BimpValidation
 
         $global_check = 1;
         foreach ($rules as $type => $type_rules) {
+            $type_errors = array();
+            $type_check = 0;
+
             // Vérif de l'existence d'une demande pour ce type de validation: 
             $demande = BimpCache::findBimpObjectInstance('bimpvalidation', 'BV_Demande', array(
                         'type_validation' => $type,
@@ -47,99 +50,101 @@ class BimpValidation
                     continue;
                 } else {
                     if (in_array($user->id, $demande->getData('validation_users'))) {
-                        // Acceptation directe de la demande
-                        $demande_errors = $demande->setAccepted();
+                        $type_check = 1;
+                    }
+                }
+            }
+
+            if (!$type_check) {
+                // Récupération des données de l'objet pour ce type de validation: 
+                $object_data = self::getObjectData($type, $object, $type_errors);
+
+                if (count($type_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($type_errors, 'Validation de type "' . BV_Rule::$types[$type]['label'] . '"');
+                    $global_check = 0;
+                    continue;
+                }
+
+                $val = $object_data['val'];
+                $extra_data = $object_data['extra_data'];
+
+                // Vérif d'un objet lié déjà validé pour ce type de validation:
+                if (self::checkValidatedLinkedObjects($type, $object, $val, $extra_data, $infos)) {
+                    $type_check = 1;
+                } else {
+                    $valid_rules = array();
+
+                    // Trie des règles selon leur priorité: 
+                    $type_rules = self::sortValidationTypeRules($type_rules, $type, $val, $extra_data);
+                    foreach ($type_rules as $rule) {
+                        if (self::checkRule($rule, $object_type, $secteur, $val, $extra_data)) {
+                            $valid_rules[] = $rule;
+                            if ($rule->isUserAllowed()) {
+                                $type_check = 1;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (empty($valid_rules)) {
+                        $type_check = 1;
+                    }
+
+                    if ($type_check) {
+                        if (BimpObject::objectLoaded($demande)) {
+                            // Acceptation directe de la demande :
+                            $demande_errors = $demande->setAccepted();
+
+                            if (count($demande_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de l\'acceptation de la demande pour la validation de type "' . $demande->displayDataDefault('type') . '"');
+                                $global_check = 0;
+                            } else {
+                                $successes[] = 'Validation de type "' . BV_Rule::$types[$type]['label'] . '" effectuée';
+                            }
+                        }
+                    } else {
+                        $global_check = 0;
+
+                        // Création d'une demande de validation : 
+                        $demande_errors = array();
+
+                        $log = '';
+                        $users = array();
+
+                        foreach ($valid_rules as $rule) {
+                            $users = $rule->getValidationUsers();
+
+                            if (!empty($users)) {
+                                break;
+                            }
+                        }
+
+                        if (!empty($users)) {
+                            $demande = BimpObject::createBimpObject('bimpvalidation', 'BV_Demande', array(
+                                        'type_validation'  => $type,
+                                        'type_object'      => $object_type,
+                                        'id_object'        => $object->id,
+                                        'id_user_demande'  => $user->id,
+                                        'validation_users' => $users,
+                                        'id_user_affected' => self::getFirstAvailableUser($users, $infos, $log)
+                                            ), true, $demande_errors);
+
+                            if (!count($demande_errors)) {
+                                $user_affected = self::getFirstAvailableUser($users, $infos, $log);
+                                $infos[$type] = 'Demande de validation de type "' . BV_Rule::$types[$type]['label'] . '" effectuée auprès de ' . $user_affected->getName();
+                                if ($log) {
+                                    $msg = 'Demande affectée à ' . $user_affected->getName() . ' pour le(s) motif(s) suivant(s): <br/>' . $log;
+                                    $demande->addObjectLog($msg);
+                                }
+                            }
+                        } else {
+                            $demande_errors[] = 'Aucun utilisateur disponible';
+                        }
 
                         if (count($demande_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de l\'acceptation de la demande pour la validation de type "' . $demande->displayDataDefault('type') . '"');
-                            $global_check = 0;
-                        } else {
-                            $successes[] = 'Validation de type "' . BV_Rule::$types[$type] . '" effectuée';
-                        }
-                        continue;
-                    }
-                }
-            }
-
-            $rule_errors = array();
-
-            // Récupération des données de l'objet pour ce type de validation: 
-            $object_data = self::getObjectData($type, $object, $rule_errors);
-
-            if (count($rule_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($rule_errors, 'Validation de type "' . BV_Rule::$types[$type] . '"');
-                $global_check = 0;
-                continue;
-            }
-
-            $val = $object_data['val'];
-            $extra_data = $object_data['extra_data'];
-
-            $rules_check = 0;
-            $valid_rules = array();
-            foreach ($type_rules as $rule) {
-                if (self::checkRule($rule, $object_type, $secteur, $val, $extra_data)) {
-                    $valid_rules[] = $rule;
-                    if ($rule->isUserAllowed()) {
-                        $rules_check = 1;
-                        break;
-                    }
-                }
-            }
-
-            if ($rules_check) {
-                if (BimpObject::objectLoaded($demande)) {
-                    // Acceptation directe de la demande :
-                    $demande_errors = $demande->setAccepted();
-
-                    if (count($demande_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de l\'acceptation de la demande pour la validation de type "' . $demande->displayDataDefault('type') . '"');
-                        $global_check = 0;
-                    } else {
-                        $successes[] = 'Validation de type "' . BV_Rule::$types[$type] . '" effectuée';
-                    }
-                }
-            } else {
-                $global_check = 0;
-
-                // Création d'une demande de validation : 
-                $demande_errors = array();
-
-                $log = '';
-                $users = array();
-
-                foreach ($valid_rules as $rule) {
-                    $users = $rule->getValidationUsers();
-
-                    if (!empty($users)) {
-                        break;
-                    }
-                }
-
-                if (!empty($users)) {
-                    $demande = BimpObject::createBimpObject('bimpvalidation', 'BV_Demande', array(
-                                'type_validation'  => $type,
-                                'type_object'      => $object_type,
-                                'id_object'        => $object->id,
-                                'id_user_demande'  => $user->id,
-                                'validation_users' => $users,
-                                'id_user_affected' => self::getFirstAvailableUser($users, $infos, $log)
-                                    ), true, $demande_errors);
-
-                    if (!count($demande_errors)) {
-                        $user_affected = self::getFirstAvailableUser($users, $infos, $log);
-                        $infos[$type] = 'Demande de validation de type "' . BV_Rule::$types[$type] . '" effectuée auprès de ' . $user_affected->getName();
-                        if ($log) {
-                            $msg = 'Demande affectée à ' . $user_affected->getName() . ' pour le(s) motif(s) suivant(s): <br/>' . $log;
-                            $demande->addObjectLog($msg);
+                            $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de la création d\'une demande de validation de type "' . $demande->displayDataDefault('type') . '"');
                         }
                     }
-                } else {
-                    $demande_errors[] = 'Aucun utilisateur disponible';
-                }
-
-                if (count($demande_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de la création d\'une demande de validation de type "' . $demande->displayDataDefault('type') . '"');
                 }
             }
         }
@@ -160,6 +165,82 @@ class BimpValidation
         }
 
         return $global_check;
+    }
+
+    public static function checkValidatedLinkedObjects($type_validation, $object, $val, $extra_data, $infos)
+    {
+        foreach (BimpTools::getDolObjectLinkedObjectsList($object->dol_object) as $item) {
+            if (!(int) $item['id_object']) {
+                continue;
+            }
+
+            $linked_obj = null;
+            $is_valid = false;
+            switch ($item['type']) {
+                case 'propal':
+                    $linked_obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
+                    if (BimpObject::objectLoaded($linked_obj)) {
+                        $is_valid = in_array((int) $linked_obj->getData('fk_statut'), array(1, 2, 4));
+                    }
+                    break;
+
+                case 'commande':
+                    $linked_obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
+                    if (BimpObject::objectLoaded($linked_obj)) {
+                        $is_valid = in_array((int) $linked_obj->getData('fk_statut'), array(1, 2, 3));
+                    }
+                    break;
+
+                case 'facture':
+                    $linked_obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
+                    if (BimpObject::objectLoaded($linked_obj)) {
+                        $is_valid = in_array((int) $linked_obj->getData('fk_statut'), array(1, 2));
+                    }
+                    break;
+            }
+
+            if (!BimpObject::objectLoaded($linked_obj)) {
+                continue;
+            }
+
+            $check = 0;
+            $linked_data = self::getObjectData($type_validation, $linked_obj);
+            $linked_val = BimpTools::getArrayValueFromPath($linked_data, 'val', 0);
+            $linked_extra_data = BimpTools::getArrayValueFromPath($linked_data, 'extra_data', 0);
+
+            if (($val >= 0 && $val <= $linked_val) || ($val < 0 && $val >= $linked_val)) {
+                $check = 1;
+                switch ($type_validation) {
+                    case 'comm':
+                        // Vérif marge: 
+                        $marge = (float) BimpTools::getArrayValueFromPath($extra_data, 'percent_marge', 0);
+                        $linked_marge = (float) BimpTools::getArrayValueFromPath($linked_extra_data, 'percent_marge', 0);
+
+                        if (($marge >= 0 && $marge > $linked_marge) || ($marge < 0 && $marge > $linked_marge)) {
+                            $check = 0;
+                        }
+                }
+            }
+
+            if ($check) {
+                if ($is_valid) {
+                    $infos[] = ucfirst($linked_obj->getLabel()) . ' ' . $linked_obj->getRef() . ' déjà entièrement validé' . $linked_obj->e();
+                    return 1;
+                }
+
+                $demandes = self::getObjectDemandes($linked_obj, array(
+                            'operator' => '>',
+                            'value'    => 0
+                                ), $type_validation);
+
+                if (!empty($demandes)) {
+                    $infos[] = 'Validation de type ' . BV_Rule::$types[$type]['label'] . ' déjà effectuée pour ' . $linked_obj->getLabel('the') . ' ' . $linked_obj->e();
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
     }
 
     public static function sortValidationTypeRules($rules, $validation_type, $val, $extra_data)
@@ -207,18 +288,28 @@ class BimpValidation
             return 0;
         }
 
-        if (!in_array($secteur, $rule->getData('secteurs'))) {
+        $secteurs = $rule->getData('secteurs');
+        if (!empty($secteurs) && !in_array($secteur, $secteurs)) {
             return 0;
         }
 
         // Vérif Val
         $type = $rule->getData('type');
+        $extra_params = $rule->getData('extra_params');
         if (in_array($type, array('comm', 'fin'))) {
             $val_min = (float) $rule->getData('val_min');
             $val_max = (float) $rule->getData('val_max');
 
-            if ($val < $val_min || $val > $val_max) {
-                return 0;
+            if ($type == 'comm' && (int) BimpTools::getArrayValueFromPath($extra_params, 'sur_marge', 0)) {
+                $percent_marge = (float) BimpTools::getArrayValueFromPath($extra_data, 'percent_marge', 0);
+
+                if ($percent_marge < $val_min || $percent_marge > $val_max) {
+                    return 0;
+                }
+            } else {
+                if ($val < $val_min || $val > $val_max) {
+                    return 0;
+                }
             }
         }
 
@@ -251,24 +342,49 @@ class BimpValidation
                                 unset($infos[$type]);
                             }
 
-                            $successes[] = 'La demande de validation de type "' . BV_Rule::$types[$type] . '" a été acceptée automatiquement pour le motif : "Paiement comptant"';
+                            $successes[] = 'La demande de validation de type "' . BV_Rule::$types[$type]['label'] . '" a été acceptée automatiquement pour le motif : "Paiement comptant"';
                         } else {
-                            $errors[] = BimpTools::getMsgFromArray($accept_errors, 'Echec accepation auto pour la validation de type ' . BV_Rule::$types[$type]);
+                            $errors[] = BimpTools::getMsgFromArray($accept_errors, 'Echec accepation auto pour la validation de type ' . BV_Rule::$types[$type]['label']);
                         }
                         continue;
-                    } elseif (method_exists($object, 'getClientFacture')) {
-                        $client_facture = $object->getClientFacture();
+                    } else {
+                        if (method_exists($object, 'getClientFacture')) {
+                            $client = $object->getClientFacture();
+                        } else {
+                            $client = $object->getData('client');
+                        }
 
-                        if (BimpObject::objectLoaded($client_facture)) {
-                            if ($client_facture->field_exists('validation_financiere') && !(int) $client_facture->getData('validation_financiere')) {
-                                $accept_errors = $demande->autoAccept('Validation financière non requise pour le client facturation ' . $object->getLabel('of_the'));
+                        if (BimpObject::objectLoaded($client)) {
+                            if ($client->field_exists('validation_financiere') && !(int) $client->getData('validation_financiere')) {
+                                $accept_errors = $demande->autoAccept('Validation financière non requise pour le client ' . $object->getLabel('of_the'));
                                 if (!count($accept_errors)) {
                                     if (isset($infos[$type])) {
                                         unset($infos[$type]);
                                     }
 
-                                    $successes[] = 'La demande de validation de type "' . BV_Rule::$types[$type] . '" a été acceptée automatiquement pour le motif : "Validation financière non requise pour le client facturation ' . $object->getLabel('of_the') . '"';
+                                    $successes[] = 'La demande de validation de type "' . BV_Rule::$types[$type]['label'] . '" a été acceptée automatiquement pour le motif : "Validation financière non requise pour le client facturation ' . $object->getLabel('of_the') . '"';
                                 }
+                            }
+                        }
+                    }
+                    break;
+
+                case 'rtp':
+                    if (method_exists($object, 'getClientFacture')) {
+                        $client = $object->getClientFacture();
+                    } else {
+                        $client = $object->getData('client');
+                    }
+
+                    if (BimpObject::objectLoaded($client)) {
+                        if ($client->field_exists('validation_impaye') && !(int) $client->getData('validation_impaye')) {
+                            $accept_errors = $demande->autoAccept('Validation des retards de paiement non requise pour le client ' . $object->getLabel('of_the'));
+                            if (!count($accept_errors)) {
+                                if (isset($infos[$type])) {
+                                    unset($infos[$type]);
+                                }
+
+                                $successes[] = 'La demande de validation de type "' . BV_Rule::$types[$type]['label'] . '" a été acceptée automatiquement pour le motif : "Validation des retards de paiement non requise pour le client facturation ' . $object->getLabel('of_the') . '"';
                             }
                         }
                     }
@@ -325,13 +441,76 @@ class BimpValidation
 
         switch ($type_validation) {
             case 'comm':
+                $extra_data['percent_marge'] = 0;
+                if (is_a($object, 'BimpComm')) {
+                    $remises_infos = $object->getRemisesInfos();
+                    $val = (float) $remises_infos['remise_total_percent'];
+
+                    $lines = $object->getLines('not_text');
+                    $remises_arrieres = $remise_service = $service_total_amount_ht = $service_total_ht_without_remises = 0;
+                    foreach ($lines as $line) {
+                        $remises_arrieres += (float) $line->getTotalRemisesArrieres(false);
+                        $product = $line->getProduct();
+                        if (BimpObject::objectLoaded($product)) {
+                            if ((int) $product->getData('fk_product_type') == 1) {
+                                $line_remise_service_info = $line->getRemiseTotalInfos();
+                                $service_total_amount_ht += $line_remise_service_info['total_amount_ht'];
+                                $service_total_ht_without_remises += $line_remise_service_info['total_ht_without_remises'];
+                            }
+                        }
+                    }
+
+                    // Percent de marge
+                    $margin_infos = $object->getMarginInfosArray();
+                    $marge_ini = $remises_infos['remise_total_amount_ht'] + $margin_infos['margin_on_products'] + $remises_arrieres;
+                    if ($marge_ini == 0) {
+                        $percent_marge = 0;
+                    } else {
+                        $percent_marge = 100 * $margin_infos['remise_total_amount_ht'] / $marge_ini;
+                    }
+
+                    if ($percent_marge > 100) {
+                        $percent_marge = 100;
+                    }
+
+                    $extra_data['percent_marge'] = $percent_marge;
+                }
                 break;
 
             case 'fin':
+                if (is_a($object, 'BimpComm')) {
+                    if ($object->field_exists('total_ht')) {
+                        $val = (float) $object->getData('total_ht');
+                    } elseif (method_exists($object, 'getCurrentTotal')) {
+                        $val = (float) $object->getCurrentTotal();
+                    }
 
+                    if ($val > 0) {
+                        if (method_exists($object, 'getClientFacture')) {
+                            $client = $object->getClientFacture();
+                        } else {
+                            $client = $object->getData('client');
+                        }
+                        
+                        if (BimpObject::objectLoaded($client)) {
+                            $val += (float) $client->getEncours() + $client->getEncoursNonFacture() - ((float) $client->getData('outstanding_limit') * 1.2);
+                        }
+                    } else {
+                        $val = 0;
+                    }
+                }
                 break;
 
             case 'rtp':
+                if (method_exists($object, 'getClientFacture')) {
+                    $client = $object->getClientFacture();
+                } else {
+                    $client = $object->getData('client');
+                }
+
+                if (BimpObject::objectLoaded($client)) {
+                    $val = $client->getTotalUnpayedTolerance();
+                }
                 break;
         }
 
@@ -413,7 +592,7 @@ class BimpValidation
         return 0;
     }
 
-    public static function getObjectDemandes($object, $status = null, $type = null)
+    public static function getObjectDemandes($object, $status_filter = null, $type_filter = null)
     {
         $obj_params = BimpValidation::getObjectParams($object);
         $obj_type = BimpTools::getArrayValueFromPath($obj_params, 'type', '');
@@ -424,12 +603,12 @@ class BimpValidation
                 'id_object'   => $object->id,
             );
 
-            if (!is_null($status)) {
-                $filters['status'] = $status;
+            if (!is_null($status_filter)) {
+                $filters['status'] = $status_filter;
             }
 
-            if (!is_null($type)) {
-                $filters['type'] = $type;
+            if (!is_null($type_filter)) {
+                $filters['type'] = $type_filter;
             }
 
             return BimpCache::getBimpObjectObjects('bimpvalidation', 'BV_Demande', $filters);

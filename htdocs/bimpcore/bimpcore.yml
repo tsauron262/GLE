@@ -104,6 +104,16 @@ params:
         label: Ip Admin (pour fermeture ERP)
     git_branch:
         label: Branche GIT
+    cronjob_debug: 
+        label: Activer le débug des tâches CRON
+        type: bool
+        def: 0
+        
+    #ftp_dir => Eviter les noms trop "communs" pour les params de conf, 
+    # il faut qu'on puisse retrouver facilement les params dans le code lors des recherches globales.
+    exports_ldlc_ftp_dir:
+        label: Dossier FTP pour les exports LDLC
+        def: ''
     
     # Defaults: 
     default_id_entrepot: 
@@ -165,6 +175,10 @@ params:
         label: Adresse e-mail pour notification changement de solvabilité client (auto)
         cat: emails
         def: ''
+    mail_achat:
+        label: Email groupe achat
+        cat: emails
+        def: ''
         
     # Produits
     use_valid_product: 
@@ -172,6 +186,12 @@ params:
         cat: products
         type: bool
         def: 0
+        sub_params: 
+            - if: 1
+              params: 
+                  product_validated_notif_email: 
+                      label: Adresse(s) e-mail pour envoi d'une notification à la validation d'un produit
+    
     use_product_prices_perms: 
         label: Vérifier les droits utilisateurs pour l'édition des PV / PA des produits (+ option "Pas de prix fixes")
         cat: products
@@ -193,6 +213,11 @@ params:
         cat: products
         type: bool
         def: 1
+    allow_duplicate_products: 
+        label: Autoriser le clonage des produits
+        cat: products
+        type: bool
+        def: 0
         
     # Tiers:
     check_solvabilite_client: 
@@ -311,9 +336,3 @@ params:
                       label: Logguer les doublons SQL
                       type: bool
                       def: 0
-                      
-    ftp_dir:
-        label: Dossier sur le FTP
-        
-    mail_achat:
-        label: Email groupe achat

@@ -1,2 +1,1 @@
-INSERT INTO llx_bimpcore_conf (`name`,`value`) VALUES ('exports_ldlc_ftp_dir', '');
-UPDATE llx_bimpcore_conf SET `value` = (SELECT `value` FROM llx_bimpcore_conf WHERE `name` = 'ftp_dir') WHERE `name` = 'exports_ldlc_ftp_dir';
+ALTER TABLE `llx_bimp_c_secteur` ADD `public_entity` VARCHAR(10) NOT NULL DEFAULT '';

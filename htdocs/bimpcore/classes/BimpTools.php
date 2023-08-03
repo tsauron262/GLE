@@ -503,8 +503,7 @@ class BimpTools
 
         if (BimpObject::objectLoaded($dol_object)) {
             if (is_null($bdb)) {
-                global $db;
-                $bdb = new BimpDb($db);
+                $bdb = BimpCache::getBdb();
             }
 
             $where = '(`fk_source` = ' . (int) $dol_object->id . ' AND `sourcetype` = \'' . $dol_object->element . '\')';
@@ -1171,8 +1170,6 @@ class BimpTools
 
     public static function removeAllFilesRecursively($dir, $remove_dir = false)
     {
-        ini_set('display_errors', 1);
-
         if (is_dir($dir)) {
             if (!preg_match('/^.+\/$/', $dir)) {
                 $dir .= '/';

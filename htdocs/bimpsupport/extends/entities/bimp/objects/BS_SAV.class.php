@@ -175,7 +175,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
             "ProductId"=> $this->getEcologicProductId(),
             "BrandId"=> "243",
             "CommercialRef"=> $prod->ref ,
-            "SerialNumber"=> $this->getSerial(),
+            "SerialNumber"=> $this->getSerial(true),
             "PurchaseDate"=> "",
             "IRISCondition"=> "",
             "IRISConditionEX"=> "",

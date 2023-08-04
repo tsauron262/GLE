@@ -206,8 +206,8 @@ class Bimp_Product extends BimpObject
     public function iAmAdminRedirect()
     {
         global $user;
-        if ($user->rights->bimpcommercial->validProd)
-            return 1;
+//        if ($user->rights->bimpcommercial->validProd)
+//            return 1;
 
         return parent::iAmAdminRedirect();
     }

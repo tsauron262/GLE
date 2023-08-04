@@ -128,7 +128,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
     
     public function traiteVilleNameEcologic($name){
         $tabName = explode('15', $name);
-        $anme = trim($tabName[0]);
+        $name = trim($tabName[0]);
         $name = str_replace('-', ' ', $name);
         $name = str_replace('ç', 'c', $name);
         $name = str_replace('é', 'e', $name);

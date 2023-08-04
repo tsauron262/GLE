@@ -29,7 +29,7 @@ fields:
             array: objects_list
         values: 
             callback: 
-                method: secteurs
+                method: getSecteursArray
                 params: 
                     - 1
                     - ''
@@ -62,13 +62,10 @@ fields:
         items_sortable: 1
         items_braces: 1
         
-    groups: 
-        label: Groupes
-        type: items_list
-        items_data_type: id_object
-        object: group
-        items_sortable: 1
-        items_braces: 1
+    active: 
+        label: Active
+        type: bool
+        default_value: 1
     
 filters_panels: 
     default: 
@@ -101,7 +98,6 @@ lists:
             val_min: 
             val_max: 
             extra_params: 
-            users: 
-            groups:
+            users:
             
     

@@ -62,6 +62,7 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 require_once $path . "../../htdocs/master.inc.php";
 require_once DOL_DOCUMENT_ROOT . "/cron/class/cronjob.class.php";
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 $conf->entity = 1;
 
@@ -193,13 +194,37 @@ $nbofjobslaunchedok = 0;
 $nbofjobslaunchedko = 0;
 
 $rand = random_int(111111, 999999);
-$bimp_debug = "\n" . '***** BEGIN #' . $rand . ' : ' . date('d / m H:i:s') . "\n";
-file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
+$h = random_int(0, 360);
+$offset = 40;
+
+$recursive_hues = array(120, 250);
+while (1) {
+    foreach ($recursive_hues as $rh) {
+        if ($offset > 0 && $h > $rh - $offset && $h < $rh + $offset) {
+            $offset -= 10;
+            $h = random_int(0, 360);
+            continue 2;
+        }
+    }
+    break;
+}
+
+$color = BimpTools::hslToHex(array($h / 360, 1, 0.4));
+
+$bimpdebug_active = (int) BimpCore::getConf('cronjob_debug');
+
+if ($bimpdebug_active) {
+    $bimp_debug = "<br/>" . '<span style="color: #' . $color . '; font-weight: bold">***** BEGIN #' . $rand . ' : ' . date('d / m H:i:s') . '</span><br/>';
+    file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
+}
 
 if (is_array($object->lines) && (count($object->lines) > 0)) {
     $savconf = dol_clone($conf);
 
     // Loop over job
+
+    $to_process = array();
+
     foreach ($object->lines as $line) {
         dol_syslog("cron_run_jobs.php cronjobid: " . $line->id . " priority=" . $line->priority . " entity=" . $line->entity . " label=" . $line->label, LOG_DEBUG);
         echo "cron_run_jobs.php cronjobid: " . $line->id . " priority=" . $line->priority . " entity=" . $line->entity . " label=" . $line->label;
@@ -261,38 +286,10 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
                 exit(-1);
             }
             if (!$cronjob->processing) {
-                $begin_time = time();
-                $bimp_debug = 'Exec #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ')' . "\n";
-                file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
-                // Execute job
-                $result = $cronjob->run_jobs($userlogin);
-                if ($result < 0) {
-                    echo "Error cronjobid: " . $line->id . " cronjob->run_job: " . $cronjob->error . "\n";
-                    echo "At least one job failed. Go on menu Home-Setup-Admin tools to see result for each job.\n";
-                    echo "You can also enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
-                    dol_syslog("cron_run_jobs.php::run_jobs Error " . $cronjob->error, LOG_ERR);
-                    $nbofjobslaunchedko++;
-                    $resultstring = 'KO';
-                } else {
-                    $nbofjobslaunchedok++;
-                    $resultstring = 'OK';
-                }
-
-                $end_time = time();
-                $bimp_debug = 'END EXEC #' . $rand . ' : ' . date('H:i:s') . ' (' . $line->label . ') => ' . ($end_time - $begin_time) . ' sec.' . "\n";
-                file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
-                echo " - run_jobs " . $resultstring . " result = " . $result;
-
-                // We re-program the next execution and stores the last execution time for this job
-                $result = $cronjob->reprogram_jobs($userlogin, $now);
-                if ($result < 0) {
-                    echo "Error cronjobid: " . $line->id . " cronjob->reprogram_job: " . $cronjob->error . "\n";
-                    echo "Enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
-                    dol_syslog("cron_run_jobs.php::reprogram_jobs Error " . $cronjob->error, LOG_ERR);
-                    exit(-1);
-                }
-
-                echo " - reprogrammed\n";
+                /* moddrsi */
+                $to_process[] = $cronjob;
+                $cronjobs_ids[] = $cronjob->id;
+                /* fmoddrsi */
             } else
                 echo " - processing\n";
         } else {
@@ -301,6 +298,65 @@ if (is_array($object->lines) && (count($object->lines) > 0)) {
             dol_syslog("cron_run_jobs.php job not qualified line->datenextrun:" . dol_print_date($line->datenextrun, 'dayhourrfc') . " line->datestart:" . dol_print_date($line->datestart, 'dayhourrfc') . " line->dateend:" . dol_print_date($line->dateend, 'dayhourrfc') . " now:" . dol_print_date($now, 'dayhourrfc'));
         }
     }
+
+    /* moddrsi */
+    $bimpDb = BimpCache::getBdb(true);
+    if (!empty($cronjobs_ids)) {
+        $bimpDb->update('cronjob', array(
+            'processing' => 1
+                ), 'rowid IN (' . implode(',', $cronjobs_ids) . ')');
+    }
+
+    foreach ($to_process as $cronjob) {
+        $begin_time = time();
+        if ($bimpdebug_active) {
+            $bimp_debug = '<span style="color: #' . $color . '">Exec #' . $rand . ' : ' . date('H:i:s') . ' (' . $cronjob->label . ')</span><br/>';
+            file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
+        }
+        // Execute job
+        $result = $cronjob->run_jobs($userlogin);
+        if ($result < 0) {
+            echo "Error cronjobid: " . $cronjob->id . " cronjob->run_job: " . $cronjob->error . "\n";
+            echo "At least one job failed. Go on menu Home-Setup-Admin tools to see result for each job.\n";
+            echo "You can also enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
+            dol_syslog("cron_run_jobs.php::run_jobs Error " . $cronjob->error, LOG_ERR);
+            $nbofjobslaunchedko++;
+            $resultstring = 'KO';
+        } else {
+            $nbofjobslaunchedok++;
+            $resultstring = 'OK';
+        }
+
+        $end_time = time();
+        $duree = $end_time - $begin_time;
+        if ($bimpdebug_active) {
+            $bimp_debug = '<span style="color: #' . $color . ';' . ($duree > 60 ? ' font-weight: bold' : '') . '">END EXEC #' . $rand . ' : ' . date('H:i:s') . ' (' . $cronjob->label . ') => ' . $duree . ' sec.</span>' . ($duree > 60 ? ' ---------- /!\ ------------' : '') . '<br/>';
+            file_put_contents(DOL_DATA_ROOT . '/bimpcore/cron_logs.txt', $bimp_debug, FILE_APPEND);
+        }
+        echo " - run_jobs " . $resultstring . " result = " . $result;
+
+        // We re-program the next execution and stores the last execution time for this job
+        $result = $cronjob->reprogram_jobs($userlogin, $now);
+        if ($result < 0) {
+            echo "Error cronjobid: " . $cronjob->id . " cronjob->reprogram_job: " . $cronjob->error . "\n";
+            echo "Enable module Log if not yet enabled, run again and take a look into dolibarr.log file\n";
+            dol_syslog("cron_run_jobs.php::reprogram_jobs Error " . $cronjob->error, LOG_ERR);
+            exit(-1);
+        }
+
+        $bimpDb->update('cronjob', array(
+            'processing' => 1
+                ), 'rowid = ' . $cronjob->id);
+
+        echo " - reprogrammed\n";
+    }
+
+    if (!empty($cronjobs_ids)) {
+        $bimpDb->update('cronjob', array(
+            'processing' => 0
+                ), 'rowid IN (' . implode(',', $cronjobs_ids) . ')');
+    }
+    /* fmoddrsi */
 
     $conf = $savconf;
 } else {

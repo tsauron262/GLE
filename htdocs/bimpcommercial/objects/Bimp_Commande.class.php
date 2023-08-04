@@ -181,6 +181,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     return 1;
                 }
                 return 0;
+                
+            case 'entrepot':
+                if ($this->isLoaded() && !$user->rights->bimpcommercial->changeEntrepot) {
+                    return 0;
+                }
+                return 1;
         }
         return parent::canEditField($field_name);
     }
@@ -364,13 +370,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
         if (!(int) parent::isFieldEditable($field, $force_edit)) {
             return 0;
         }
-
-        global $user;
+        
         switch ($field) {
             case 'entrepot':
                 if (!$force_edit) {
-                    // A modifier rapidement...
-                    if ($this->isLogistiqueActive() && !$user->rights->bimpcommercial->changeEntrepot) {
+                    if ($this->isLogistiqueActive()) {
                         return 0;
                     }
                 }

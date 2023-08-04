@@ -607,7 +607,7 @@ class BimpSignataire extends BimpObject
             }
 
             if (empty($users)) {
-                $msg .= 'Le client ne dispose d\'aucun compte utilisateur valide pour la signature à distance de ce document via l\'espace client ' . BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient') . '.<br/>';
+                $msg .= 'Le client ne dispose d\'aucun compte utilisateur valide pour la signature à distance de ce document via l\'espace client.<br/>';
                 $msg .= 'En sélectionnant "OUI" un compte utilisateur client sera automatiquement créé pour l\'adresse e-mail indiquée dans le champ ci-dessous.';
             } else {
                 $msg .= 'En sélectionnant "OUI" l\'accès à la signature électronique à distance pour ce document sera automatiquement ouvert pour tous les comptes utilisateurs de ce client ayant le rôle d\'administrateur';
@@ -1164,16 +1164,17 @@ class BimpSignataire extends BimpObject
                             }
                         }
                     } else {
-                        // Création du compte user: 
+                        // Création du compte user:
                         $where = 'id_client = ' . (int) $this->getData('id_client') . ' AND status = 1 AND role = 1';
                         $nAdmin = $this->db->getCount('bic_user', $where);
                         $u_err = array();
                         $bic_user = BimpObject::createBimpObject('bimpinterfaceclient', 'BIC_UserClient', array(
-                                    'id_client'  => (int) $client->id,
-                                    'id_contact' => (BimpObject::objectLoaded($contact) && $contact->getData('email') == $new_user_email ? $contact->id : 0),
-                                    'email'      => $new_user_email,
-                                    'role'       => ($nAdmin > 0 ? 0 : 1),
-                                    'status'     => 1
+                                    'id_client'          => (int) $client->id,
+                                    'id_contact'         => (BimpObject::objectLoaded($contact) && $contact->getData('email') == $new_user_email ? $contact->id : 0),
+                                    'email'              => $new_user_email,
+                                    'role'               => ($nAdmin > 0 ? 0 : 1),
+                                    'status'             => 1,
+                                    'main_public_entity' => BimpPublicController::getPublicEntityForObjectSecteur($obj)
                                         ), true, $u_err, $warnings);
 
                         if (count($u_err) || !BimpObject::objectLoaded($bic_user)) {
@@ -1314,13 +1315,13 @@ class BimpSignataire extends BimpObject
             if (!$date_signed) {
                 $date_signed = date('Y-m-d H:i:s');
             }
-            
+
             $errors = $this->validateArray(array(
                 'status'         => self::STATUS_SIGNED,
                 'date_signed'    => $date_signed,
                 'type_signature' => self::TYPE_PAPIER
             ));
-            
+
             if (!count($errors)) {
                 $errors = $this->update($warnings, true);
             }
@@ -1460,7 +1461,7 @@ class BimpSignataire extends BimpObject
                 $commercial_email = $this->getOnSignedNotificationEmail($use_comm_email_as_from);
                 $date_open = $this->getData('date_open');
                 $doc_label = $this->displayDocType() . ' ' . $this->displayDocRef();
-                $url = self::getPublicBaseUrl(false);
+                $url = self::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($obj));
 
                 $subject = 'Client ' . $client->getRef() . ' - ' . $doc_label . ' - Signature en attente';
 

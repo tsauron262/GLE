@@ -37,7 +37,6 @@ class cron extends BimpCron
 
     public function dailyProcess()
     {
-        mailSyn2('Lancement CRON dailyprocess contrats', 'f.martinez@bimp.fr', '', '...');
         $this->autoClose();
         $this->mailJourActivation();
         $this->relanceActivationProvisoire();

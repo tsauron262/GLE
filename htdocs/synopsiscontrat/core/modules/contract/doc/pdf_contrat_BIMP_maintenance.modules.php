@@ -60,9 +60,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
 
         $logo_name = $this->emetteur->logo;
         
-        if (BimpCore::isEntity('actimac')) {
-            $logo_name = 'carre.png';
-        }
+//        if (BimpCore::isEntity('actimac')) {
+//            $logo_name = 'carre.png';
+//        }
 
         $logo = $conf->mycompany->dir_output . '/logos/' . $logo_name;
         $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);

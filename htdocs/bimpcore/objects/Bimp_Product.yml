@@ -106,10 +106,12 @@ objects:
 fields: 
     ref: 
         label: Réf.
+        required: 1
         
     label: 
         label: Libellé
         user_edit: 1
+        required: 1
         
     description: 
         label: Description
@@ -637,20 +639,7 @@ forms:
             - field: 2hotline
             - field: duree
             - field: duree_i
-            # Measure
-#            - field: weight
-#            - field: weight_units
-#            - field: length
-#            - field: length_units
-#            - field: width
-#            - field: width_units
-#            - field: height
-#            - field: height_units
-#            - field: surface
-#            - field: surface_units
-#            - field: volume
-#            - field: volume_units
-
+        
     card:
         extends: default
         

@@ -69,10 +69,23 @@ class BimpComm extends BimpDolObject
 
     public function canEditField($field_name)
     {
+        global $user;
+        
         switch ($field_name) {
             case 'logs':
-                global $user;
                 return (BimpObject::objectLoaded($user) && $user->admin ? 1 : 0);
+
+            case 'zone_vente':
+                if (static::$use_zone_vente_for_tva) {
+                    if (!(int) $user->rights->bimpcommercial->priceVente && in_array($this->getData('ef_type'), static::$cant_edit_zone_vente_secteurs)) {
+                        return 0;
+                    }
+
+                    if (!$user->rights->bimpcommercial->edit_zone_vente) {
+                        return 0;
+                    }
+                }
+                return 1;
         }
 
         return (int) parent::canEditField($field_name);
@@ -97,10 +110,12 @@ class BimpComm extends BimpDolObject
     public function canSetAction($action)
     {
         global $user;
-//        if ($action == 'checkTotal' && !$user->admin)
-//            return 0;
-        if ($action == 'checkMarge' && !$user->admin)
-            return 0;
+
+        switch ($action) {
+            case 'checkMarge':
+                return ($user->admin ? 1 : 0);
+        }
+
         return parent::canSetAction($action);
     }
 
@@ -200,17 +215,9 @@ class BimpComm extends BimpDolObject
                 }
 
                 if (static::$use_zone_vente_for_tva) {
-                    global $user;
-                    if (!(int) $user->rights->bimpcommercial->priceVente && in_array($this->getData('ef_type'), static::$cant_edit_zone_vente_secteurs)) {
-                        return 0;
-                    }
-
                     if (!(int) $this->areLinesEditable()) {
                         return 0;
                     }
-
-                    if (!$user->rights->bimpcommercial->edit_zone_vente)
-                        return 0;
                 }
                 break;
         }
@@ -257,18 +264,11 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0)
+                    if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0) {
                         $errors[] = 'Type de tiers obligatoire';
+                    }
 
-                    // Module de validation activé
-                    if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
-                        BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-
-                        // Non prit en charge par le module de validation
-                        if (ValidComm::getObjectClass($this) == -2)
-                            $errors = BimpTools::merge_array($errors, $this->checkContacts());
-                    } else
-                        $errors = BimpTools::merge_array($errors, $this->checkContacts());
+                    $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
                     // Vérif conditions de réglement: 
                     // Attention pas de conditions de reglement sur les factures acomptes

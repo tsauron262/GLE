@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `llx_bv_rule` (
     `extra_params` TEXT NOT NULL DEFAULT '',
     `users` TEXT NOT NULL DEFAULT '',
     `groups` TEXT NOT NULL DEFAULT '',
+    `active` tinyint(1) NOT NULL DEFAULT 1,
     `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
     `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,

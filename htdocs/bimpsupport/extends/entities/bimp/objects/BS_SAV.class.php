@@ -267,21 +267,23 @@ class BS_SAV_ExtEntity extends BS_SAV{
     
     public function getViewExtraBtn() {
         $btn = parent::getViewExtraBtn();
-        if($this->asProdEcologic() && $this->getStatus() == 999 && $this->getData('status_ecologic') == 1){
-            $btn[] = array(
-                    'label'   => 'Envoyée a Ecologic',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('sendDemandeEcologic', array(), array(
-//                        'form_name' => 'cancel_rdv'
-                    ))
-                );
-            $btn[] = array(
-                    'label'   => 'Codes Ecologic',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('codeEcologic', array(), array(
-                        'form_name' => 'ecologic'
-                    ))
-                );
+        if($this->asProdEcologic() && in_array($this->getData('status_ecologic'), array(1, 0))){
+            if($this->getStatus() == 999)
+                $btn[] = array(
+                        'label'   => 'Envoyée a Ecologic',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('sendDemandeEcologic', array(), array(
+    //                        'form_name' => 'cancel_rdv'
+                        ))
+                    );
+            if(in_array($this->getStatus(), array(999,9)))
+                $btn[] = array(
+                        'label'   => 'Codes Ecologic',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('codeEcologic', array(), array(
+                            'form_name' => 'ecologic'
+                        ))
+                    );
         }
         return $btn;
     }

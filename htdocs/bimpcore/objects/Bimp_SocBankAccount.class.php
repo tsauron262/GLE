@@ -292,7 +292,7 @@ class Bimp_SocBankAccount extends BimpObject
     public function getNumSepa(&$errors = array())
     {
         if ($this->getData('rum') == "") {
-            $new = BimpTools::getNextRef('societe_rib', 'rum', 'FR02ZZZ008801-', 7, $errors);
+            $new = BimpTools::getNextRef('societe_rib', 'rum', BimpCore::getConf('code_ics').'-', 7, $errors);
             return $new;
         }
         return $this->getData('rum');

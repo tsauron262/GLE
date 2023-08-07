@@ -336,3 +336,7 @@ params:
                       label: Logguer les doublons SQL
                       type: bool
                       def: 0
+                      
+    code_ics:
+        label: Code ICS pour les RUM
+        

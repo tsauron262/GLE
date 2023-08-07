@@ -3536,6 +3536,7 @@ class BimpTools
 
     public static function lockNum($type, $nb = 0, $errors = array())
     {
+        return 1; //test 
         global $user, $langs;
         if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
             return;

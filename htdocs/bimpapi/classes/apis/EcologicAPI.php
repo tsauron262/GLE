@@ -164,7 +164,9 @@ class EcologicAPI extends BimpAPI
         
         if(isset($ecologicData['RequestId']) && isset($ecologicData['RequestOk']) && $ecologicData['RequestOk'] && !isset($ecologicData['ClaimId'])){//on créer le claim
             $params['url_params'] = array('RequestId' => $ecologicData['RequestId'], 'RepairEndDate' => $dateClose, 'ConsumerInvoiceNumber'=>$facRef, 'repairSiteId'=> $siteId, 'quoteNumber'=> $ref);
+            $this->options['log_errors'] = false;
             $return = $this->execCurl('createclaim', $params, $errors);
+            $this->options['log_errors'] = true;
             if(isset($return['ResponseData']) && isset($return['ResponseData']['ClaimId'])){
                 $warnings = BimpTools::merge_array($warnings, $errors);
                 $errors = array();

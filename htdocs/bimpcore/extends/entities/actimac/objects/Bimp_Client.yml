@@ -2,16 +2,23 @@ fields:
     kmTotal:
         type: int
         label: km aller/retour
+        
+    groupement:
+        label: groupement
 
 
 fields_tables: 
     infos_comm: 
         rows:
             kmTotal:
-                field: kmTotal            
+                field: kmTotal    
+            groupement:
+                field: groupement
 forms: 
     light: 
         rows:
             kmTotal:
                 field: kmTotal 
+            groupement:
+                field: groupement
             

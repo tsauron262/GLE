@@ -1,10 +1,10 @@
 fields:
     kmTotal:
         type: int
-        label: km aller/retour
+        label: Km aller/retour
         
     groupement:
-        label: groupement
+        label: Groupement
 
 
 fields_tables: 

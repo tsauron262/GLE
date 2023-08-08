@@ -1256,7 +1256,7 @@ class ObjectLine extends BimpObject
                         return (float) $product->getData('tva_tx');
                     }
                     if (is_null($tva_tx)) {
-                        $tva_tx = BimpTools::getDefaultTva();
+                        $tva_tx = BimpCache::cacheServeurFunction('getDefaultTva');
                     }
                     return (float) $tva_tx;
 
@@ -4393,7 +4393,7 @@ class ObjectLine extends BimpObject
             case 'tva_tx':
                 // ATTENTION $value contient la TVA du produit si celui-ci est sélectionné. 
                 if (is_null($value) && !$this->isLoaded()) {
-                    $value = $this->getDefaultTva();
+                    $value = BimpCache::cacheServeurFunction('getDefaultTva');
                 }
 
                 $parent = $this->getParentInstance();
@@ -4421,7 +4421,7 @@ class ObjectLine extends BimpObject
                     } else {
                         $tva_rates = BimpCache::getTaxesByRates(1);
                         if (is_null($value)) {
-                            $value = $this->getDefaultTva();
+                            $value = BimpCache::cacheServeurFunction('getDefaultTva');
                         }
                         $html = BimpInput::renderInput('select', $prefixe . 'tva_tx', (float) $value, array(
                                     'options' => $tva_rates

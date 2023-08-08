@@ -5431,15 +5431,20 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $this->reset();
 
+        $reTesteParentType = false;
         if (!is_null($parent) && is_object($parent)) {
-            if (is_a($parent, $this->getParentObjectName())) {
-//            if (!is_a($parent, $this->getParentObjectName())) {
-//                BimpCore::addlog('Instance parente invalide dans fetch()', 3, 'bimpcore', $this, array(
-//                    'Attendu' => $this->getParentObjectName(),
-//                    'Obtenu'  => get_class($parent)
-//                        ), true);
-//            } else {
+            if($this->getParentObjectName() == ''){//pour l'instant on garde, on retestera aprés l'instanciation
                 $this->parent = $parent;
+                $reTesteParentType = true;
+            }
+            elseif(is_a($parent, $this->getParentObjectName())){//tous vas bien, le parent est bien du type attendue
+                $this->parent = $parent;
+            }
+            else{//Attention, le parent ne correspond pas
+                BimpCore::addlog('Instance parente invalide dans fetch()', 3, 'bimpcore', $this, array(
+                    'Attendu' => $this->getParentObjectName(),
+                    'Obtenu'  => get_class($parent)
+                        ), true);
             }
         }
 
@@ -5477,6 +5482,14 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $this->initData = $this->data;
             $this->ref = $this->getRef();
+            
+            if($reTesteParentType && !is_a($parent, $this->getParentObjectName())){//Le premier test a échoué, et même aprés instanciation le parent ne correspond pas au type attendu.
+                BimpCore::addlog('Instance parente invalide dans fetch()', 3, 'bimpcore', $this, array(
+                    'Attendu' => $this->getParentObjectName(),
+                    'Obtenu'  => get_class($parent)
+                        ), true);
+                $this->parent = null;
+            }
 
             return true;
         }

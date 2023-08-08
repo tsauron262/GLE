@@ -67,7 +67,7 @@ class equipmentController extends BimpController
         $filter = array('or_field' => array($equipment->getData('serial')));
         if($equipment->getData('imei') != '')
             $filter['or_field'][] = $equipment->getData('imei');
-        $list->addFieldFilterValue('serial', array('or_field' => $filter));
+        $list->addFieldFilterValue('serial', $filter);
 
         return $list->renderHtml();
     }

@@ -29,7 +29,6 @@ class BIMP_Task extends BimpObject
             'dev' => array('label' => 'Développement')
         )
     );
-    public $mailReponse = 'reponse@bimp-groupe.net';
     private static $jsReload = 'if (typeof notifTask !== "undefined" && notifTask !== null) notifTask.reloadNotif();';
 
     // Droits users: 
@@ -1023,7 +1022,7 @@ class BIMP_Task extends BimpObject
         }
         $to = implode(',', $mails);
 
-        $this->sendMail($to, 'Tâche ERP<' . $this->mailReponse . '>', $subject, $message, $rappel, $files);
+        $this->sendMail($to, 'Tâche ERP<' . BimpCore::getConf('mailReponse', '', 'bimptask') . '>', $subject, $message, $rappel, $files);
     }
 
     public function sendMail($to, $from, $sujet, $msg, $rappel = true, $files = array())

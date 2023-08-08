@@ -26,17 +26,17 @@ sections:
                   list: 
                       panel: 1
                       object: inventory2
-        inventory:
-            label: OLD_Inventaires
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: inventory
-        inventory_sr:
-            label: OLD_Inventaires Show Room
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: inventorysr
+#        inventory:
+#            label: OLD_Inventaires
+#            sections:
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: inventory
+#        inventory_sr:
+#            label: OLD_Inventaires Show Room
+#            sections:
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: inventorysr

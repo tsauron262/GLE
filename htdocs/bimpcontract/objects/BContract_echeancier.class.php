@@ -1449,7 +1449,7 @@ class BContract_echeancier extends BimpObject
                     $new_first_line->date_from = $date_start;
                     $new_first_line->date_to = $date_end;
                     $new_first_line->pu_ht = $total_ht;
-                    $new_first_line->tva_tx = BimpTools::getDefaultTva();
+                    $new_first_line->tva_tx = BimpCache::cacheServeurFunction('getDefaultTva');
                     $new_first_line->pa_ht = $pa_ht;
 
                     $line_warnings = array();

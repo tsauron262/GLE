@@ -1156,7 +1156,7 @@ class BimpCommission extends BimpObject
                                         break;
 
                                     case 'ingram':
-                                        $tva_tx = BimpTools::getDefaultTva();
+                                        $tva_tx = BimpCache::cacheServeurFunction('getDefaultTva');
                                         $line_desc = '<b>' . $line_data[$keys['desc']] . '</b><br/>';
                                         $line_desc .= 'Ref AppleCare: ' . $line_data[$keys['ref_prod']] . '<br/>';
                                         $line_desc .= 'Ref CF : ' . $line_data[$keys['ref_cf']] . '<br/>';

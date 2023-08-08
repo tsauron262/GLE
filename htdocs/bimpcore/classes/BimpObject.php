@@ -2055,27 +2055,6 @@ class BimpObject extends BimpCache
         return (int) BimpCore::getConf('id_default_bank_account');
     }
 
-    public function getTaxeIdDefault()
-    {
-        return (int) BimpCore::getConf('id_default_tva_tx');
-    }
-
-    public function getDefaultTva()
-    {
-        $idDef = $this->getTaxeIdDefault();
-        if ($idDef) {
-            return self::getBdb()->getValue('c_tva', 'taux', '`rowid` = ' . $idDef);
-        }
-
-
-        global $mysoc;
-        // If France, show VAT mention if not applicable
-        if ($mysoc->tva_assuj)
-            return 20;
-        else
-            return 0;
-    }
-
     public function getInfoGraph($graphName = '')
     {
         return

@@ -373,11 +373,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
         
         switch ($field) {
             case 'entrepot':
-                if (!$force_edit) {
-                    if ($this->isLogistiqueActive()) {
-                        return 0;
-                    }
-                }
+//                if (!$force_edit) {
+//                    if ($this->isLogistiqueActive()) {
+//                        return 0;
+//                    }
+//                }
                 return 1;
         }
 

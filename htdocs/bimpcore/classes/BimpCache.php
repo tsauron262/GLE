@@ -76,8 +76,7 @@ class BimpCache
         
         $cache_key = 'fn_'.$method;
         if(self::cacheServerExists($cache_key)){
-            echo '<br/>'.self::getCacheServeur ($cache_key);
-            return self::getCacheServeur ($cache_key);
+            return self::getCacheServeur($cache_key);
         }
         else{
             $result = self::$method();

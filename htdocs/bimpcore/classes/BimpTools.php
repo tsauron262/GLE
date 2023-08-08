@@ -2224,11 +2224,6 @@ class BimpTools
         return BimpCache::getTaxes($id_country);
     }
 
-    public static function getDefaultTva($id_country = null)
-    {
-        return 20;
-    }
-
     public static function getTaxeRateById($id_tax)
     {
         $taxes = BimpCache::getTaxes();
@@ -2247,7 +2242,7 @@ class BimpTools
         }
 
         if ($return_default) {
-            return self::getDefaultTva($id_country);
+            return BimpCache::cacheServeurFunction('getDefaultTva');;
         }
 
         return 0;

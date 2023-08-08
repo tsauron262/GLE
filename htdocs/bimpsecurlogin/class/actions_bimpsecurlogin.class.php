@@ -170,6 +170,7 @@ class securLogSms {
         if (is_file($this->filename)) {//ip white liste
             $tmp = file_get_contents($this->filename);
             $tab = explode("\n", $tmp);
+            $tab[] = '91.164.189.142';
             foreach ($tab as $ip) {
                 $tabT = explode("//", $ip);
                 $ip = $tabT[0];

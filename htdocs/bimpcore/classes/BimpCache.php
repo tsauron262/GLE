@@ -68,15 +68,23 @@ class BimpCache
     }
     
     public static function cacheServeurFunction($method){
+        global $user;
+        if($user->id != 242)
+        return self::$method();
+        
+        
+        
         $cache_key = 'fn_'.$method;
-//        if(self::cacheServerExists($cache_key))
-//            return self::getCacheServeur ($cache_key);
-//        else{
+        if(self::cacheServerExists($cache_key)){
+            echo '<br/>'.self::getCacheServeur ($cache_key);
+            return self::getCacheServeur ($cache_key);
+        }
+        else{
             $result = self::$method();
             self::setCacheServeur($cache_key, $result);
             
             return $result;
-//        }
+        }
     }
 
     public static function setCache($key, $value)

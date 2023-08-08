@@ -14,6 +14,6 @@ params:
         type: bool
         def: 0
     
-    :
+    mailReponse:
         label: Mail pour les retour
         def: reponse@bimp-groupe.net

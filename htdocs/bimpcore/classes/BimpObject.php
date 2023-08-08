@@ -10439,10 +10439,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                                 $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
                                 if (isset($params['id_object']['field_value'])) {
                                     $field = $params['id_object']['field_value'];
-                                    if ($withObjectStatic)
-                                        $objectsResult[$mod][$name][$field] = $instance;
-                                    else
-                                        $objectsResult[$mod][$name][$field] = $field;
+                                    if($instance->field_exists($field)){
+                                        if ($withObjectStatic)
+                                            $objectsResult[$mod][$name][$field] = $instance;
+                                        else
+                                            $objectsResult[$mod][$name][$field] = $field;
+                                    }
                                 }
                             }
                         }

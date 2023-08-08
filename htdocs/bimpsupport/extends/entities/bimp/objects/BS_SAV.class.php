@@ -135,6 +135,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         $name = str_replace('ç', 'c', $name);
         $name = str_replace('é', 'e', $name);
         $name = str_replace('è', 'e', $name);
+        $name = str_replace('É', 'E', $name);
         return $name;
     }
     
@@ -272,9 +273,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
                 $btn[] = array(
                         'label'   => 'Envoyée a Ecologic',
                         'icon'    => 'fas_times',
-                        'onclick' => $this->getJsActionOnclick('sendDemandeEcologic', array(), array(
-    //                        'form_name' => 'cancel_rdv'
-                        ))
+                        'onclick' => $this->getJsActionOnclick('sendDemandeEcologic', array(), array())
                     );
             if(in_array($this->getStatus(), array(999,9)))
                 $btn[] = array(

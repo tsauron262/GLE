@@ -9167,7 +9167,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
 
-        if (!preg_match('/^.*\.php$/', $url)) {
+        if (preg_match('/^.*\.php$/', $url)) {
             $url .= '?';
         }
 

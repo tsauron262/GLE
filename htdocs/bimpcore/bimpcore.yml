@@ -87,7 +87,8 @@ params:
     public_base_url: 
         label: Base URL Publique
         info: Base de l'URL pour l'accès public à certaines pages de l'ERP.
-        warning: Différent de l'URL de l'espace client (cf bimpinterfaceclient)
+        warning: Différent de l'URL de l'espace client (cf bimpinterfaceclient).
+        help: Ne pas oublier le "?" si nécessaire
     date_archive: 
         label: Date archive
         def: ''

@@ -90,7 +90,7 @@ class BimpCoreCronExec extends BimpCron
 
                 foreach ($result['files'] as $fileName) {
                     if (!ftp_put($ftp, $ftp_dir . $fileName, $local_dir . $fileName)) {
-                        $errors[] = 'Echec de l\'envoi du fichier "' . $local_dir . $fileName . '"';
+                        $errors[] = 'Echec de l\'envoi du fichier "' . $local_dir . $fileName . '" vers "'.$ftp_dir . $fileName.'"';
                     }
                 }
             }
@@ -103,7 +103,7 @@ class BimpCoreCronExec extends BimpCron
                 'Erreurs' => $errors
             ));
 
-            $this->output = 'Echec envoi ftp (cf log)';
+            $this->output = 'Echec envoi ftp (cf log)'.print_r($errors,1);
             return -1;
         }
 

@@ -99,7 +99,7 @@
           }
       }
       
-      if($_COOKIE["bimp_ldlc_public_signature_bimptechnique"]) {
+      if(isset($_COOKIE["bimp_ldlc_public_signature_bimptechnique"]) && $_COOKIE["bimp_ldlc_public_signature_bimptechnique"]) {
           
           if($key != "") {
               require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';    

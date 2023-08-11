@@ -7194,6 +7194,7 @@ ORDER BY a.val_max DESC");
 
     public static function checkSavToCancel()
     {
+        global $conf;
         $bdb = self::getBdb();
         $centres = BimpCache::getCentres();
 

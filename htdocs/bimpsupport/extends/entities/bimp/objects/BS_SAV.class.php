@@ -136,6 +136,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         $name = str_replace('é', 'e', $name);
         $name = str_replace('è', 'e', $name);
         $name = str_replace('É', 'E', $name);
+        $name = str_replace('â', 'a', $name);
         return $name;
     }
     

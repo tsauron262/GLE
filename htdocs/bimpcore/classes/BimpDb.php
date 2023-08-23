@@ -100,6 +100,8 @@ class BimpDb
 
     public function execute($sql)
     {
+        global $conf;
+        $sql = str_replace('__entity__', $conf->entity, $sql);
         $result = $this->db->query($sql);
         if (!$result)
             $this->logSqlError($sql);

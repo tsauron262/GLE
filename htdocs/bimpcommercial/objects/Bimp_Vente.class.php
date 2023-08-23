@@ -482,7 +482,7 @@ Preferred Field
                                                     ($line_data['qty'] < 0 ? abs($line_data['qty']) : 0), // F
                                                     '',
                                                     $line_data['subprice'],
-                                                    $id_fac, // I
+                                                    $fac_data['ref'], // I
                                                     $line_data['position'], // J
                                                     $dt_fac->format('Ymd'),
                                                     '',

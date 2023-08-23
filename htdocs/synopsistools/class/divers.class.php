@@ -82,7 +82,7 @@ class synopsisHook
 
         $conf->global->MAIN_APPLICATION_TITLE = "BIMP-ERP";
         $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;
-        $conf->global->MAIN_MODULE_MULTICOMPANY = "1";
+        //$conf->global->MAIN_MODULE_MULTICOMPANY = "1";
         $conf->global->MAIN_MODULE_ORANGEHRM = "1";
 
         $conf->global->MAIN_MODULES_FOR_EXTERNAL .= ',synopsisficheinter,synopsisdemandeinterv';

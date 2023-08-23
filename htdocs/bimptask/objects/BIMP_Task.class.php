@@ -478,7 +478,7 @@ class BIMP_Task extends BimpObject
                 unset($users[$id_user]);
             }
 
-            if (in_array($id_user, $users_no_follow)) {
+            if (is_array($users_no_follow) && in_array($id_user, $users_no_follow)) {
                 unset($users[$id_user]);
             }
         }
@@ -488,7 +488,7 @@ class BIMP_Task extends BimpObject
                 continue;
             }
 
-            if (in_array($id_user, $users_no_follow)) {
+            if (is_array($users_no_follow) && in_array($id_user, $users_no_follow)) {
                 continue;
             }
 
@@ -509,7 +509,7 @@ class BIMP_Task extends BimpObject
 
         if (BimpObject::objectLoaded($parent_task)) {
             foreach ($parent_task->getUsersToNotify($excludeMe) as $id_user => $u) {
-                if (in_array($id_user, $users_no_follow)) {
+                if (is_array($users_no_follow) && in_array($id_user, $users_no_follow)) {
                     continue;
                 }
 

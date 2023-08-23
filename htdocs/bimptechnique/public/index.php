@@ -6,7 +6,7 @@
         $key = $_GET['key'];
     }
     
-    if($_GET['logout__button__bimp_validator'] == "ok") {
+    if(isset($_GET['logout__button__bimp_validator']) && $_GET['logout__button__bimp_validator'] == "ok") {
         setcookie("bimp_ldlc_public_signature_bimptechnique", "", time());
         header('Location: ' . DOL_URL_ROOT . '/bimptechnique/public/');
     }
@@ -99,7 +99,7 @@
           }
       }
       
-      if($_COOKIE["bimp_ldlc_public_signature_bimptechnique"]) {
+      if(isset($_COOKIE["bimp_ldlc_public_signature_bimptechnique"]) && $_COOKIE["bimp_ldlc_public_signature_bimptechnique"]) {
           
           if($key != "") {
               require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';    

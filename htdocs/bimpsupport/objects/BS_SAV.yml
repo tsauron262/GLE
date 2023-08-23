@@ -1352,6 +1352,7 @@ forms:
               values: 
                 LDLC: LDLC
                 BIMP: BIMP
+                ACTIMAC: ACTIMAC
                 AUTRE: Autre
                 
             other_name_reseller:

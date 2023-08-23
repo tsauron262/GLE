@@ -440,7 +440,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
                 //Frais d’inspection facturés
                 $name_reseller = BimpTools::getPostFieldValue('name_reseller');
                 if(!is_null($name_reseller)) {
-                    if($name_reseller == 'LDLC' or $name_reseller == 'BIMP')
+                    if($name_reseller == 'LDLC' or $name_reseller == 'BIMP' or $name_reseller == 'ACTIMAC')
                         $this->addCheck($pdf, 80.5, 66); // Checkbox à "Non"
                     else
                         $this->addCheck($pdf, 65.4, 66); // Checkbox à "Oui"

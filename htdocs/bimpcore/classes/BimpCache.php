@@ -525,12 +525,16 @@ class BimpCache
 
     public static function getExtraFieldsArray($element)
     {
-        $cache_key = 'dol_object_' . $element . '_extrafields_array';
+        $entitys = getEntity($element, 0);
+        
+        $cache_key = 'dol_object_' . $element . '_extrafields_array'.$entitys;
 
         $result = self::getCacheServeur($cache_key);
         if (!$result) {
 
             $where = '`elementtype` = \'' . $element . '\'';
+            if($entitys)
+                $where .= ' AND entity IN (0,'.$entitys.')';
             $rows = self::getBdb()->getRows('extrafields', $where, null, 'array', array('name', 'label'));
 
             $result = array();

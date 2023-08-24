@@ -3162,7 +3162,10 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
 
                 if ($hasToProcess) {
-                    $new_status = 1;
+                    if($this->getData('logistique_status') == 0)
+                        $new_status = 0;
+                    else
+                        $new_status = 1;
                 } elseif (!$isCompleted) {
                     $new_status = 2;
                 } else {

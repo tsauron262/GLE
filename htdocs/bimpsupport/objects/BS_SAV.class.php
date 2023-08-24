@@ -6333,7 +6333,8 @@ ORDER BY a.val_max DESC");
     {
         $errors = array();
         $warnings = array();
-        // Création de la facture d'acompte: 
+        // Création de la facture d'acompte:
+        if($data['acompte'] > 0){
         $this->updateField('acompte', $data['acompte'], null, true);
         $_POST['mode_paiement_acompte'] = $data['mode_paiement_acompte'];
         if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
@@ -6357,6 +6358,10 @@ ORDER BY a.val_max DESC");
                 mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 return $return;
             }
+        }
+        }
+        else{
+            $errors[] = 'Impossible d\'ajouter un acompte de 0€';
         }
         return array(
             'errors'   => $errors,

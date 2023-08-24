@@ -150,29 +150,36 @@ class Bimp_Vente extends BimpObject
         set_time_limit(600000);
         ignore_user_abort(0);
 
-        $id_category = (int) BimpCore::getConf('id_categorie_apple');
+//        $id_category = (int) BimpCore::getConf('id_categorie_apple');
+//
+//        $id_category = 1;
 
-        $id_category = 1;
-
-        if (!$id_category) {
-            $errors[] = 'ID de la catégorie "APPLE" non configurée';
-            return array(
-                'filename' => '',
-                'html'     => ''
-            );
-        }
+//        if (!$id_category) {
+//            $errors[] = 'ID de la catégorie "APPLE" non configurée';
+//            return array(
+//                'filename' => '',   
+//                'html'     => ''
+//            );
+//        }
 
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 
+//        $products_list = $product->getList(array(
+//            'ef.collection' => (int) $id_category
+//                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array(
+//            'ef' => array(
+//                'alias' => 'ef',
+//                'table' => 'product_extrafields',
+//                'on'    => 'a.rowid = ef.fk_object'
+//            )
+//        ));
+        
         $products_list = $product->getList(array(
-            'ef.collection' => (int) $id_category
-                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array(
-            'ef' => array(
-                'alias' => 'ef',
-                'table' => 'product_extrafields',
-                'on'    => 'a.rowid = ef.fk_object'
-            )
-        ));
+            'ref'     => array(
+                                    'operator' => 'like',
+                                    'value'    => 'app-'
+                                )
+                ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array());
 
         BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
         $entrepots = BimpCache::getEntrepotsShipTos(true);

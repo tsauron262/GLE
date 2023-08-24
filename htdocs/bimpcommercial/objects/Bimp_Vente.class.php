@@ -177,7 +177,7 @@ class Bimp_Vente extends BimpObject
         $products_list = $product->getList(array(
             'ref'     => array(
                                     'operator' => 'like',
-                                    'value'    => 'app-'
+                                    'value'    => 'app-%'
                                 )
                 ), null, null, 'rowid', 'asc', 'array', array('rowid', 'ref', 'price', 'no_fixe_prices', 'pmp', 'cur_pa_ht'), array());
 

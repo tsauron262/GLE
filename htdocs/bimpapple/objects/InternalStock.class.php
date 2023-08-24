@@ -19,6 +19,10 @@ class InternalStock extends PartStock
                 }
 
                 return 0;
+                break;
+            case 'correct':
+                return 1;
+                break;
         }
 
         return parent::canSetAction($action);

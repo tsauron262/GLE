@@ -50,7 +50,7 @@ class Paiement extends CommonObject
 	 */
 	public $table_element = 'paiement';
         
-        public $ismultientitymanaged = true;
+        public $ismultientitymanaged = 1;
 
 	/**
 	 * @var string String with name of icon for myobject. Must be the part after the 'object_' into object_myobject.png

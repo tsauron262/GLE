@@ -1894,12 +1894,16 @@ class Bimp_CommandeLine extends ObjectLine
             return 0;
         }
 
-        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+        $staticComm = BimpObject::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande');
         $sql = 'SELECT COUNT(DISTINCT l.id) as nb FROM ' . MAIN_DB_PREFIX . 'bimp_commande_line l';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande c ON c.rowid = l.id_obj';
         $sql .= ' WHERE l.' . $type . '_periodicity > 0 AND ';
         $sql .= '(l.next_date_' . $type . ' IS NULL OR l.next_date_' . $type . ' <= \'' . date('Y-m-d') . '\')';
         $sql .= ' AND c.fk_statut = 1 AND c.logistique_status IN (' . implode(',', Bimp_Commande::$logistique_active_status) . ')';
+        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+            if($staticComm->getEntity_name())
+                $sql .= ' AND entity IN ('.getEntity($staticComm->getEntity_name()).')';
+        }
 
         $result = self::getBdb()->executeS($sql, 'array');
 

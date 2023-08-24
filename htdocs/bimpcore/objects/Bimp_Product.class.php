@@ -1079,7 +1079,7 @@ class Bimp_Product extends BimpObject
                         }
                     }
                 } else {
-                    $tab_secteur = array("S", "M", "CO", "BP", "C"); //tous sauf E
+                    $tab_secteur = array("S", "M", "CO", "BP", "C", 'CT', 'CTC', 'CTE', 'P'); //tous sauf E
                     $ventes = $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product, $tab_secteur, false, true);
 
                     $data[$ship_to]['ventes'] += $ventes['qty'];

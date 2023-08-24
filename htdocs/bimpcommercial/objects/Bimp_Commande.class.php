@@ -3142,7 +3142,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 return;
             }
 
-            if (!in_array((int) $this->getData('logistique_status'), array(0, 4, 5))) {
+            if (!in_array((int) $this->getData('logistique_status'), array(4, 5))) {
                 $lines = $this->getLines('not_text');
 
                 $hasToProcess = false;

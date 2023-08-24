@@ -40,4 +40,4 @@ CREATE TABLE IF NOT EXISTS `llx_synopsisapple_shipment_parts` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=31 ;
 
 
-INSERT INTO `llx_document_model` (`rowid`, `nom`, `entity`, `type`, `libelle`, `description`) VALUES (NULL, 'appleretour', '1', 'synopsisapple', 'Doc retour', NULL);
+INSERT INTO `llx_document_model` (`rowid`, `nom`, `entity`, `type`, `libelle`, `description`) VALUES (NULL, 'appleretour', __entity__, 'synopsisapple', 'Doc retour', NULL);

@@ -3533,9 +3533,10 @@ class BimpTools
     {
 //        return 1; //test 
         global $user, $langs;
-        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
-            return;
-        }
+        //il faut débuggé, si ca pose probléme c'est grave
+//        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
+//            return;
+//        }
 
         if (in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
             return true;

@@ -165,6 +165,7 @@ class BimpDebug
                 
                 $msg .= self::renderDebugTimes();
                 mailSyn2('test', 'tommy@bimp.fr', null, $msg);
+                BimpCore::addlog('Page trop lourde '.microtime(1) - $bimp_start_time, Bimp_Log::BIMP_LOG_ALERTE, null, null, array('info'=>$msg));
             }
         }
         

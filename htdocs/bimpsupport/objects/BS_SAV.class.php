@@ -1517,17 +1517,17 @@ class BS_SAV extends BimpObject
 
     public function getSerial($first = false)
     {
-        if($first){
+        if ($first) {
             $equip = $this->getChildObject("equipment");
-            if ($equip->getData('old_serial') != ''){
+            if ($equip->getData('old_serial') != '') {
                 $tabSerial = explode('<br/>', $equip->getData('old_serial'));
-                foreach($tabSerial as $part){
-                    if(stripos($part, 'Serial : ') !== false)
+                foreach ($tabSerial as $part) {
+                    if (stripos($part, 'Serial : ') !== false)
                         return str_replace('Serial : ', '', $part);
                 }
             }
         }
-        
+
         $equipment = $this->getChildObject('equipment');
         if (BimpObject::objectLoaded($equipment)) {
             return (string) $equipment->getData('serial');
@@ -2909,7 +2909,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         }
 
                         if ((string) $propal->getData('libelle') !== $this->getRef()) {
-                                $infos .= 'Correction libelle<br/>';
+                            $infos .= 'Correction libelle<br/>';
                             $propal->set('libelle', $this->getRef());
                             $update = true;
                         }
@@ -2925,12 +2925,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             $prop_errors = $propal->update($warnings, true);
                             if (count($prop_errors)) {
 //                                dol_syslog(BimpTools::getMsgFromArray($prop_errors, 'Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"'), LOG_ERR);
-                                BimpCore::addlog('Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"<br/>'.$infos, Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+                                BimpCore::addlog('Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"<br/>' . $infos, Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
                                     'Erreurs' => $prop_errors
                                 ));
                             } else {
 //                                dol_syslog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', LOG_NOTICE);
-                                BimpCore::addlog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès<br/>'.$infos, Bimp_Log::BIMP_LOG_NOTIF, 'sav', $this);
+                                BimpCore::addlog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès<br/>' . $infos, Bimp_Log::BIMP_LOG_NOTIF, 'sav', $this);
                             }
                         }
                     }
@@ -4014,7 +4014,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
-        
+
         global $conf;
         $fromMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
 
@@ -6337,35 +6337,36 @@ ORDER BY a.val_max DESC");
     {
         $errors = array();
         $warnings = array();
+        
         // Création de la facture d'acompte:
-        if($data['acompte'] > 0){
-        $this->updateField('acompte', $data['acompte'], null, true);
-        $_POST['mode_paiement_acompte'] = $data['mode_paiement_acompte'];
-        if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
-            $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
-            if (count($fac_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
+        $amount = (float) BimpTools::getArrayValueFromPath($data, 'amount', 0);
+        if ($amount > 0) {
+            $_POST['mode_paiement_acompte'] = $data['mode_paiement_acompte'];
+            if ((int) $this->getData("id_facture_acompte") < 1) {
+                $fac_errors = $this->createAccompte($amount, false);
+                if (count($fac_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
+                } else {
+                    $this->updateField('acompte', $data['amount'], null, true);
+                    $client = $this->getChildObject('client');
+                    $centre = $this->getCentreData();
+                    $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+                    mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
+                    $success = "Acompte créer avec succés.";
+                }
             } else {
+                $propal = $this->getChildObject('propal');
                 $client = $this->getChildObject('client');
                 $centre = $this->getCentreData();
-                $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
-                mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
-                $success = "Acompte créer avec succés.";
+                $return = $propal->actionAddAcompte($data, $success);
+                if (!count($return['errors'])) {
+                    $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
+                    mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
+                    return $return;
+                }
             }
         } else {
-            $propal = $this->getChildObject('propal');
-            $client = $this->getChildObject('client');
-            $centre = $this->getCentreData();
-            $return = $propal->actionAddAcompte($data, $success);
-            if (!count($return['errors'])) {
-                $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
-                mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
-                return $return;
-            }
-        }
-        }
-        else{
-            $errors[] = 'Impossible d\'ajouter un acompte de 0€';
+            $errors[] = 'Impossible d\'ajouter un acompte de 0 €';
         }
         return array(
             'errors'   => $errors,

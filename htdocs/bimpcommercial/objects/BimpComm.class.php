@@ -3671,16 +3671,28 @@ class BimpComm extends BimpDolObject
                 if (count($tabConatact) < 1) {
                     $ok = false;
                     $tabComm = $client->dol_object->getSalesRepresentatives($user);
+                    
+                    if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+                        BimpDebug::addDebugTime('fingetSalesRepresentatives');
+                    }
 
                     // Il y a un commercial pour ce client
                     if (count($tabComm) > 0) {
                         $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                         $ok = true;
+                        
+                    if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+                        BimpDebug::addDebugTime('finAddContact1');
+                    }
 
                         // Il y a un commercial définit par défaut (bimpcore)
                     } elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial')) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
+                        
+                    if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+                        BimpDebug::addDebugTime('finAddContact2');
+                    }
                         // L'objet est une facture et elle a une facture d'origine
                     } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
                         $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
@@ -3697,12 +3709,19 @@ class BimpComm extends BimpDolObject
                         $errors[] = 'Pas de Commercial Suivi';
                     }
                 }
+                if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+                    BimpDebug::addDebugTime('debutContactSignataire');
+                }
 
                 // Vérif contact signataire: 
                 $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
                 if (count($tabConatact) < 1) {
                     $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
                 }
+                if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+                    BimpDebug::addDebugTime('finContactSignataire');
+                }
+                
             }
         }
         return $errors;

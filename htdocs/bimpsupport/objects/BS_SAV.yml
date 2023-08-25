@@ -10,6 +10,8 @@ list_page_url:
         id_entrepot: 
             field_value: id_entrepot
             
+entity_name: bs_sav
+            
 header_list_name: default
 header_edit_form: edit
 

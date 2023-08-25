@@ -2895,23 +2895,27 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                     // Vérif de la propale: 
                     if (BimpObject::objectLoaded($propal)) {
+                        $infos = '';
                         $update = false;
                         if (!(int) $propal->dol_object->array_options['options_entrepot']) {
                             if (!(int) $this->getData('id_entrepot')) {
                                 $this->msgs['errors'][] = 'Aucun entrepôt défini pour ce SAV';
                                 dol_syslog('Aucun entrepôt défini pour le SAV "' . $this->getRef() . '"', LOG_ERR);
                             } else {
+                                $infos .= 'Correction entrepot<br/>';
                                 $propal->set('entrepot', (int) $this->getData('id_entrepot'));
                                 $update = true;
                             }
                         }
 
                         if ((string) $propal->getData('libelle') !== $this->getRef()) {
+                                $infos .= 'Correction libelle<br/>';
                             $propal->set('libelle', $this->getRef());
                             $update = true;
                         }
 
                         if ((string) $propal->getData('ef_type') !== 'S') {
+                            $infos .= 'Correction secteur<br/>';
                             $propal->set('ef_type', 'S');
                             $update = true;
                         }
@@ -2921,12 +2925,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             $prop_errors = $propal->update($warnings, true);
                             if (count($prop_errors)) {
 //                                dol_syslog(BimpTools::getMsgFromArray($prop_errors, 'Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"'), LOG_ERR);
-                                BimpCore::addlog('Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+                                BimpCore::addlog('Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"<br/>'.$infos, Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
                                     'Erreurs' => $prop_errors
                                 ));
                             } else {
 //                                dol_syslog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', LOG_NOTICE);
-                                BimpCore::addlog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', Bimp_Log::BIMP_LOG_NOTIF, 'sav', $this);
+                                BimpCore::addlog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès<br/>'.$infos, Bimp_Log::BIMP_LOG_NOTIF, 'sav', $this);
                             }
                         }
                     }

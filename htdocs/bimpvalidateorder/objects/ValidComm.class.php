@@ -161,6 +161,9 @@ class ValidComm extends BimpObject
             return 0;
 
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Valid commercial');
+        }
         // Validation commerciale
         if (!is_a($bimp_object, 'BContract_contrat')) {
             if (($percent_pv != 0 or $percent_marge != 0) and in_array(self::TYPE_COMMERCIAL, $validations)) {
@@ -170,6 +173,9 @@ class ValidComm extends BimpObject
             }
         }
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Valid encours');
+        }
         // Validation encours
         if ($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS and in_array(self::TYPE_ENCOURS, $validations)) {
             
@@ -188,6 +194,9 @@ class ValidComm extends BimpObject
                         $valid_encours = (int) $this->tryValidateByType($user, self::TYPE_ENCOURS, $secteur, $class, $val_euros, $bimp_object, $errors);
                 }
             }
+        }
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Valid impayé');
         }
 
         // Validation impayé
@@ -208,6 +217,9 @@ class ValidComm extends BimpObject
         } elseif (!$rtp)
             $this->validatePayed($class, $bimp_object);
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Valid services');
+        }
         // Validation service
         if (($percent_service != 0)) {
             $valid_service = (int) $this->tryValidateByType($user, self::TYPE_SUR_SERVICE, $secteur, $class, $percent_service, $bimp_object, $errors);
@@ -255,6 +267,9 @@ class ValidComm extends BimpObject
         if ($this->nb_validation > 0)
             $this->sendMailValidation($bimp_object);
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Fin validations');
+        }
         return $ret;
     }
 

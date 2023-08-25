@@ -7,6 +7,8 @@ controller: shipment
 nom_url: 
     syntaxe: <name>
     
+entity_name: AppleShipment
+    
 list_page_url: 
     module: bimpsupport
     controller: index

@@ -32,10 +32,10 @@ class Interfacecreditsafe extends DolibarrTriggers {
         global $conf, $user;
         
         if($action == "ORDER_VALIDATE" || $action == "PROPAL_VALIDATE"){
-            if(!$this->testSiret($object)){
-                setEventMessages("Veuillez renseigner le numéro de siret", null, 'errors');
-                return -2;
-            }
+//            if(!$this->testSiret($object)){
+//                setEventMessages("Veuillez renseigner le numéro de siret", null, 'errors');
+//                return -2;
+//            }
         }
         
     }

@@ -2428,6 +2428,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
 
             $this->updateField('status_forced', array(), null, true);
+            $this->updateField('logistique_status', 1, null, true);
+            
             $this->checkLogistiqueStatus();
             $this->checkShipmentStatus();
             $this->checkInvoiceStatus();
@@ -3142,7 +3144,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 return;
             }
 
-            if (!in_array((int) $this->getData('logistique_status'), array(4, 5))) {
+            if (!in_array((int) $this->getData('logistique_status'), array(0, 4, 5))) {
                 $lines = $this->getLines('not_text');
 
                 $hasToProcess = false;
@@ -3162,10 +3164,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 }
 
                 if ($hasToProcess) {
-                    if($this->getData('logistique_status') == 0)
-                        $new_status = 0;
-                    else
-                        $new_status = 1;
+                    $new_status = 1;
                 } elseif (!$isCompleted) {
                     $new_status = 2;
                 } else {

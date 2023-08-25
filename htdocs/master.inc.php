@@ -200,14 +200,10 @@ if (!defined('NOSESSION')) {
             if(defined('EVEN_IF_ONLY_LOGIN_ALLOWED'))
                 session_destroy();
         }
-        
-        
-        
-        
-        
-        
-	session_name($sessionname);
-	session_start();	// This call the open and read of session handler
+        else{
+            session_name($sessionname);
+            session_start();	// This call the open and read of session handler
+        }
 	//exit;	// this exist generates a call to write and close
 }
 /*fmoddrsi*/

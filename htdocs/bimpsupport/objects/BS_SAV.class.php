@@ -3030,7 +3030,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $errors;
     }
 
-    public function createAccompte($acompte, $update = true, $id_mode_paiement = null)
+    public function createAccompte($acompte, $update = true, $id_mode_paiement = null, $id_account = null)
     {
         global $user, $langs;
 
@@ -3064,8 +3064,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $errors[] = 'Aucun client sélectionné pour ce SAV';
         }
         if ($acompte > 0 && !count($errors)) {
-            if (is_null($id_mode_paiement)) {
-                $id_mode_paiement = (int) BimpTools::getValue('mode_paiement_acompte', null, 'bimpsupport');
+            if (!(int) $id_mode_paiement) {
+                $id_mode_paiement = (int) BimpTools::getValue('mode_paiement_acompte', null);
             }
 
             if (!(int) $id_mode_paiement) {
@@ -3100,10 +3100,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if ($payement->create($user) <= 0) {
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
                     } else {
-                        if ($this->useCaisseForPayments) {
-                            $id_account = (int) $caisse->getData('id_account');
-                        } else {
-                            $id_account = (int) BimpCore::getConf('id_default_bank_account');
+                        if (!(int) $id_account) {
+                            if ($this->useCaisseForPayments) {
+                                $id_account = (int) $caisse->getData('id_account');
+                            } else {
+                                $id_account = (int) BimpCore::getConf('id_default_bank_account');
+                            }
                         }
 
                         // Ajout du paiement au compte bancaire: 
@@ -6335,24 +6337,31 @@ ORDER BY a.val_max DESC");
 
     public function actionAddAcompte($data, &$success)
     {
+        global $conf;
+        $success = "Acompte ajouté avec succés";
+
         $errors = array();
         $warnings = array();
-        
+
         // Création de la facture d'acompte:
         $amount = (float) BimpTools::getArrayValueFromPath($data, 'amount', 0);
         if ($amount > 0) {
-            $_POST['mode_paiement_acompte'] = $data['mode_paiement_acompte'];
+//            $_POST['mode_paiement_acompte'] = $data['mode_paiement_acompte'];
             if ((int) $this->getData("id_facture_acompte") < 1) {
-                $fac_errors = $this->createAccompte($amount, false);
+                $id_mode_paiement = 0;
+                if ($data['id_mode_paiement']) {
+                    $id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', 'code = \'' . $data['id_mode_paiement'] . '\'');
+                }
+                $fac_errors = $this->createAccompte($amount, false, $id_mode_paiement, (int) $data['bank_account']);
                 if (count($fac_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
                 } else {
+
                     $this->updateField('acompte', $data['amount'], null, true);
                     $client = $this->getChildObject('client');
                     $centre = $this->getCentreData();
                     $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
                     mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
-                    $success = "Acompte créer avec succés.";
                 }
             } else {
                 $propal = $this->getChildObject('propal');

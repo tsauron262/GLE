@@ -7,6 +7,8 @@ public_icon: pe_headphones
 nom_url: 
     syntaxe: <ticket_number>
     
+entity_name: bs_ticket
+    
 header_list_name: default
 header_btn: 
     callback: getHeaderButtons

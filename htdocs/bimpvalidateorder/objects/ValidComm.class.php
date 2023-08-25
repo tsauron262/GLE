@@ -479,6 +479,9 @@ class ValidComm extends BimpObject
     public function getObjectParams($object, &$errors = array(), $withRtp = true)
     {
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('getObjectParams');
+        }
         // Secteur
         $secteur = (!is_a($object, 'BContract_contrat')) ? $object->getData('ef_type') : $object->getData('secteur');
 
@@ -493,12 +496,19 @@ class ValidComm extends BimpObject
         }
 
 
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Get remise');
+        }
         $infos_remises = (!is_a($object, 'BContract_contrat')) ? $object->getRemisesInfos() : [];
 
         // Percent prix de vente %
         $percent_pv = (float) $infos_remises['remise_total_percent'];
 
         // Remises arrières : 
+        
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Get remise arriére');
+        }
         if (!is_a($object, 'BContract_contrat')) {
             $lines = $object->getLines('not_text');
             $remises_arrieres = $remise_service = $service_total_amount_ht =  $service_total_ht_without_remises = 0;
@@ -526,6 +536,9 @@ class ValidComm extends BimpObject
             }
 
         // Impayé
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Impayée');
+        }
         if (method_exists($object, 'getClientFacture')) {
             $client = $object->getClientFacture();
         } else
@@ -546,6 +559,9 @@ class ValidComm extends BimpObject
             $rtp = 0;
         
         
+        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Services');
+        }
         // Service
         if($service_total_ht_without_remises != 0)
             $percent_service = $service_total_amount_ht / $service_total_ht_without_remises * 100;

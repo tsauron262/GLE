@@ -3493,5 +3493,8 @@ class BimpController
         $nb = BimpTools::deloqueAll($file);
         if ($nb > 0 && !$asErrorFatal)
             BimpCore::addlog('Fin de script fichier non debloqué ' . $nb . ' ' . print_r($file, 1), Bimp_Log::BIMP_LOG_ALERTE);
+        if(class_exists('BimpDebug')){
+            BimpDebug::testLogDebug();
+        }
     }
 }

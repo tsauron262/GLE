@@ -539,6 +539,7 @@ class modBimpCommercial extends DolibarrModules
 	 */
 	public function init($options='')
 	{
+            global $conf;
 		$sql = array();
                 
                 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
@@ -560,20 +561,20 @@ class modBimpCommercial extends DolibarrModules
                 // Propales: 
                 //$sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'azur';";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevis', 1, 'propal', 'Devis BIMP', NULL);";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimployerdevis', 1, 'propal', 'Proposition loyer', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevis', ".$conf->entity.", 'propal', 'Devis BIMP', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimployerdevis', ".$conf->entity.", 'propal', 'Proposition loyer', NULL);";
                 
                 // Commande
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommande', 1, 'order', 'Commande', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommande', ".$conf->entity.", 'order', 'Commande', NULL);";
                 
                 //Facture
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'crabe';";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpfact', 1, 'invoice', 'Facture', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpfact', ".$conf->entity.", 'invoice', 'Facture', NULL);";
                 
                 // Commande fourn: 
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'muscadet';";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommandefourn', 1, 'order_supplier', 'Commande fournisseur', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpcommandefourn', ".$conf->entity.", 'order_supplier', 'Commande fournisseur', NULL);";
                 
                 // Dash board commercial
                 $sql[] = "UPDATE " . MAIN_DB_PREFIX . "menu SET `url`='/bimpcommercial/index.php?fc=tabCommercial&amp;mainmenu=commercial&amp;leftmenu=' WHERE `type` LIKE 'top' AND `mainmenu` LIKE 'commercial'";

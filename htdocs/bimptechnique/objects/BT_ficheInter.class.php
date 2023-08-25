@@ -3399,6 +3399,7 @@ class BT_ficheInter extends BimpDolObject
     public function timestamp_to_time($timestamp)
     {
         $heures = floor($timestamp / 3600);
+        $minutes = 0;
         if (($timestamp % 3600) >= 60) {
             $minutes = floor(($timestamp % 3600) / 60);
         }

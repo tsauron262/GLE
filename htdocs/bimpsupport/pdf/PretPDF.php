@@ -182,7 +182,7 @@ class PretPDF extends BimpDocumentPDF
 
                         $tva_tx = (float) $equipment->getData('vente_tva_tx');
                         if (!$tva_tx) {
-                            $tva_tx = BimpTools::getDefaultTva();
+                            $tva_tx = BimpCache::cacheServeurFunction('getDefaultTva');
                         }
 
                         $total_ttc = BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx);

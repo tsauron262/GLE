@@ -225,7 +225,10 @@ fields:
         label: Taux de TVA
         type: percent
         default_value: 
-            callback: getDefaultTva
+            callback: 
+                method: cacheServeurFunction
+                params:
+                    - getDefaultTva
         
     recuperableonly: 
         label: TVA récupérable seulement

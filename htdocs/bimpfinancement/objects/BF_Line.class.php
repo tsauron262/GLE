@@ -211,13 +211,13 @@ class BF_Line extends BimpObject
                         if (BimpObject::objectLoaded($product)) {
                             return (float) $product->getData('tva_tx');
                         }
-                        return BimpTools::getDefaultTva();
+                        return BimpCache::cacheServeurFunction('getDefaultTva');
 
                     case self::TYPE_FREE:
                         if (isset($this->data['tva_tx'])) {
                             return (float) $this->data['tva_tx'];
                         }
-                        return BimpTools::getDefaultTva();
+                        return BimpCache::cacheServeurFunction('getDefaultTva');
 
                     case self::TYPE_TEXT:
                         return 0;

@@ -2223,11 +2223,6 @@ class BimpTools
         return BimpCache::getTaxes($id_country);
     }
 
-    public static function getDefaultTva($id_country = null)
-    {
-        return 20;
-    }
-
     public static function getTaxeRateById($id_tax)
     {
         $taxes = BimpCache::getTaxes();
@@ -2246,7 +2241,7 @@ class BimpTools
         }
 
         if ($return_default) {
-            return self::getDefaultTva($id_country);
+            return BimpCache::cacheServeurFunction('getDefaultTva');;
         }
 
         return 0;
@@ -3535,10 +3530,12 @@ class BimpTools
 
     public static function lockNum($type, $nb = 0, $errors = array())
     {
+//        return 1; //test 
         global $user, $langs;
-        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
-            return;
-        }
+        //il faut débuggé, si ca pose probléme c'est grave
+//        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
+//            return;
+//        }
 
         if (in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
             return true;

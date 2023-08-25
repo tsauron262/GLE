@@ -13,3 +13,7 @@ params:
         label: Autoriser la création de tâche pour le signalement des bugs
         type: bool
         def: 0
+    
+    mailReponse:
+        label: Mail pour les retour
+        def: reponse@bimp-groupe.net

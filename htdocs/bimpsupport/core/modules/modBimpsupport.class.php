@@ -320,9 +320,9 @@ class modBimpsupport extends DolibarrModules {
 //        $extrafields = new ExtraFields($this->db);
         //$result1=$extrafields->addExtraField('myattr1', "New Attr 1 label", 'boolean', 1, 3, 'thirdparty');
         //$result2=$extrafields->addExtraField('myattr2', "New Attr 2 label", 'string', 1, 10, 'project');
-        
-        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevissav', 1, 'propal', 'Devis SAV', NULL);";
-        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpinvoicesav', 1, 'invoice', 'Facture SAV', NULL);";
+        global $conf;
+        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevissav', ".$conf->entity.", 'propal', 'Devis SAV', NULL);";
+        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpinvoicesav', ".$conf->entity.", 'invoice', 'Facture SAV', NULL);";
         
 //        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette1', 1, 'product', 'Etiquette Stock', NULL);";
 //        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette2', 1, 'product', 'Etiquette Client', NULL);";
@@ -340,8 +340,8 @@ class modBimpsupport extends DolibarrModules {
      */
     public function remove($options = '') {
         $sql = array();
-        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevissav';";
-        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpinvoicesav';";
+        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevissav' AND entity = ".$conf->entity.";";
+        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpinvoicesav' AND entity = ".$conf->entity.";";
         
 //        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette1';";
 //        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette2';";

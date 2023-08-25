@@ -127,9 +127,18 @@ class BS_SAV_ExtEntity extends BS_SAV{
     }
     
     public function traiteVilleNameEcologic($name){
+        $tabName = explode('1', $name);
+        $name = trim($tabName[0]);
+        $tabName = explode('2', $name);
+        $name = trim($tabName[0]);
         $name = str_replace('-', ' ', $name);
         $name = str_replace('ç', 'c', $name);
         $name = str_replace('é', 'e', $name);
+        $name = str_replace('è', 'e', $name);
+        $name = str_replace('É', 'E', $name);
+        $name = str_replace('â', 'a', $name);
+        $name = str_replace('St', 'Saint', $name);
+        $name = ucfirst(strtolower($name));
         return $name;
     }
     
@@ -170,7 +179,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
             "ProductId"=> $this->getEcologicProductId(),
             "BrandId"=> "243",
             "CommercialRef"=> $prod->ref ,
-            "SerialNumber"=> $this->getSerial(),
+            "SerialNumber"=> $this->getSerial(true),
             "PurchaseDate"=> "",
             "IRISCondition"=> "",
             "IRISConditionEX"=> "",
@@ -262,21 +271,21 @@ class BS_SAV_ExtEntity extends BS_SAV{
     
     public function getViewExtraBtn() {
         $btn = parent::getViewExtraBtn();
-        if($this->asProdEcologic() && $this->getStatus() == 999 && $this->getData('status_ecologic') == 1){
-            $btn[] = array(
-                    'label'   => 'Envoyée a Ecologic',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('sendDemandeEcologic', array(), array(
-//                        'form_name' => 'cancel_rdv'
-                    ))
-                );
-            $btn[] = array(
-                    'label'   => 'Codes Ecologic',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('codeEcologic', array(), array(
-                        'form_name' => 'ecologic'
-                    ))
-                );
+        if($this->asProdEcologic() && in_array($this->getData('status_ecologic'), array(1, 0))){
+            if($this->getStatus() == 999)
+                $btn[] = array(
+                        'label'   => 'Envoyée a Ecologic',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('sendDemandeEcologic', array(), array())
+                    );
+            if(in_array($this->getStatus(), array(999,9)))
+                $btn[] = array(
+                        'label'   => 'Codes Ecologic',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('codeEcologic', array(), array(
+                            'form_name' => 'ecologic'
+                        ))
+                    );
         }
         return $btn;
     }

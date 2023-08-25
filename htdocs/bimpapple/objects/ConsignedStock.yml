@@ -6,6 +6,8 @@ extends:
 
 table: bimp_apple_consigned_stock
 
+entity_name: ConsignedStock
+
 nom_url: 
     syntaxe: Stock consigné <part_number>
     

@@ -383,11 +383,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
         
         switch ($field) {
             case 'entrepot':
-                if (!$force_edit) {
-                    if ($this->isLogistiqueActive()) {
-                        return 0;
-                    }
-                }
+//                if (!$force_edit) {
+//                    if ($this->isLogistiqueActive()) {
+//                        return 0;
+//                    }
+//                }
                 return 1;
         }
 
@@ -2435,6 +2435,8 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
 
             $this->updateField('status_forced', array(), null, true);
+            $this->updateField('logistique_status', 1, null, true);
+            
             $this->checkLogistiqueStatus();
             $this->checkShipmentStatus();
             $this->checkInvoiceStatus();

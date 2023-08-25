@@ -66,6 +66,19 @@ class BimpCache
 
         return self::$bdb_noTransac;
     }
+    
+    public static function cacheServeurFunction($method){
+        $cache_key = 'fn_'.$method;
+        if(self::cacheServerExists($cache_key)){
+            return self::getCacheServeur($cache_key);
+        }
+        else{
+            $result = self::$method();
+            self::setCacheServeur($cache_key, $result);
+            
+            return $result;
+        }
+    }
 
     public static function setCache($key, $value)
     {
@@ -512,12 +525,16 @@ class BimpCache
 
     public static function getExtraFieldsArray($element)
     {
-        $cache_key = 'dol_object_' . $element . '_extrafields_array';
+        $entitys = getEntity($element, 0);
+        
+        $cache_key = 'dol_object_' . $element . '_extrafields_array'.$entitys;
 
         $result = self::getCacheServeur($cache_key);
         if (!$result) {
 
             $where = '`elementtype` = \'' . $element . '\'';
+            if($entitys)
+                $where .= ' AND entity IN (0,'.$entitys.')';
             $rows = self::getBdb()->getRows('extrafields', $where, null, 'array', array('name', 'label'));
 
             $result = array();
@@ -2665,6 +2682,30 @@ class BimpCache
         }
 
         return self::getCacheArray($cache_key, $include_empty);
+    }
+    
+    
+
+    public static function getTaxeIdDefault()
+    {
+        return (int) BimpCore::getConf('id_default_tva_tx');
+    }
+    
+
+    public static function getDefaultTva()
+    {
+        $idDef = self::getTaxeIdDefault();
+        if ($idDef) {
+            return self::getBdb()->getValue('c_tva', 'taux', '`rowid` = ' . $idDef);
+        }
+
+
+        global $mysoc;
+        // If France, show VAT mention if not applicable
+        if ($mysoc->tva_assuj)
+            return 20;
+        else
+            return 0;
     }
 
     public static function getCentres()

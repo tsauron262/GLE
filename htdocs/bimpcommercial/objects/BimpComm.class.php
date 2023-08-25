@@ -69,9 +69,10 @@ class BimpComm extends BimpDolObject
 
     public function canEditField($field_name)
     {
+        global $user;
+        
         switch ($field_name) {
             case 'logs':
-                global $user;
                 return (BimpObject::objectLoaded($user) && $user->admin ? 1 : 0);
 
             case 'zone_vente':

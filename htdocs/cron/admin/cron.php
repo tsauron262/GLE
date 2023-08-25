@@ -109,7 +109,7 @@ print '</tr>';
 print '</table>';
 
 print dol_get_fiche_end();
-
+$form = new Form($db);
 print $form->buttonsSaveCancel("Save", '');
 
 print '</form>';

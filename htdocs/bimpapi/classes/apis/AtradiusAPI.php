@@ -263,7 +263,7 @@ class AtradiusAPI extends BimpAPI
     }
 
     // Ne pas utiliser directement ! Passer par setCovers
-    private function updateCover($params = array(), &$errors = array(), &$success = '')
+    private function updateCover($params = array(), &$errors = array(), &$success = '', &$warnings = array())
     {
 
         global $user;
@@ -311,7 +311,7 @@ class AtradiusAPI extends BimpAPI
         }
 
         if ($data['data'][0]['response'] == 'Action has been refused.')
-            $errors[] = "Demande refusée";
+            $warnings[] = "Demande refusée";
 
         return $data;
     }
@@ -435,7 +435,7 @@ class AtradiusAPI extends BimpAPI
                 'customerRefNumber' => $params['customerRefNumber']
             );
 
-            return $this->updateCover($params_cl, $errors, $success);
+            return $this->updateCover($params_cl, $errors, $success, $warnings);
 
             // Réduction de la limite
         } elseif ($params['coverType'] != self::CREDIT_CHECK and (int) $cover['amount'] > $params['creditLimitAmount']) {
@@ -448,7 +448,7 @@ class AtradiusAPI extends BimpAPI
                 'customerRefNumber' => $params['customerRefNumber']
             );
 
-            return $this->updateCover($params_cl, $errors, $success);
+            return $this->updateCover($params_cl, $errors, $success, $warnings);
         } else {
             if ($params['coverType'] == self::CREDIT_CHECK)
                 $warnings[] = "Tentative de mettre à jour un crédit check";

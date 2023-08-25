@@ -38,7 +38,7 @@ class pdf_fi
         $this->marge_basse = 0;
         $this->option_logo = 1;
         $this->emetteur = $mysoc;
-        if (!$this->emetteur->pays_code)
+        if (!isset($this->emetteur) || !$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);
     }
 

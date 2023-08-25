@@ -4,6 +4,9 @@ common_fields: 1
 
 icon: fas_shopping-bag
 
+
+entity_name: bs_sac
+
 nom_url: 
     syntaxe: <ref>
     

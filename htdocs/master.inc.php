@@ -162,6 +162,55 @@ if (!defined('NOREQUIREDB')) {
 	}
 }
 
+
+/*moddrsi*/
+if (!defined('NOSESSION')) {
+	if (PHP_VERSION_ID < 70300) {
+		session_set_cookie_params(0, '/', null, ((empty($dolibarr_main_force_https) && isHTTPS() === false) ? false : true), true); // Add tag secure and httponly on session cookie (same as setting session.cookie_httponly into php.ini). Must be called before the session_start.
+	} else {
+		// Only available for php >= 7.3
+		$sessioncookieparams = array(
+			'lifetime' => 0,
+			'path' => '/',
+			//'domain' => '.mywebsite.com', // the dot at the beginning allows compatibility with subdomains
+			'secure' => ((empty($dolibarr_main_force_https) && isHTTPS() === false) ? false : true),
+			'httponly' => true,
+			'samesite' => 'Lax'	// None || Lax  || Strict
+		);
+		session_set_cookie_params($sessioncookieparams);
+	}
+        
+        
+        if(defined('USE_BDD_FOR_SESSION') && USE_BDD_FOR_SESSION){
+            global $db;
+
+
+            require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpSession.php';
+        // Démarrage de la session
+            if(class_exists('BimpCache')){
+                $bdb = BimpCache::getBdb(true);
+                $dbNoTransac = $bdb->db;
+            }
+            else{
+                $dbNoTransac = $db;
+            }
+
+
+            $session = new Session($dbNoTransac);
+            if(defined('EVEN_IF_ONLY_LOGIN_ALLOWED'))
+                session_destroy();
+        }
+        else{
+            session_name($sessionname);
+            session_start();	// This call the open and read of session handler
+        }
+	//exit;	// this exist generates a call to write and close
+}
+/*fmoddrsi*/
+
+
+
+
 // Now database connexion is known, so we can forget password
 //unset($dolibarr_main_db_pass); 	// We comment this because this constant is used in some other pages
 unset($conf->db->pass); // This is to avoid password to be shown in memory/swap dump

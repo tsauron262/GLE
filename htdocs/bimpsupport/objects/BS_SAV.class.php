@@ -1515,8 +1515,19 @@ class BS_SAV extends BimpObject
         return 0;
     }
 
-    public function getSerial()
+    public function getSerial($first = false)
     {
+        if($first){
+            $equip = $this->getChildObject("equipment");
+            if ($equip->getData('old_serial') != ''){
+                $tabSerial = explode('<br/>', $equip->getData('old_serial'));
+                foreach($tabSerial as $part){
+                    if(stripos($part, 'Serial : ') !== false)
+                        return str_replace('Serial : ', '', $part);
+                }
+            }
+        }
+        
         $equipment = $this->getChildObject('equipment');
         if (BimpObject::objectLoaded($equipment)) {
             return (string) $equipment->getData('serial');
@@ -2884,23 +2895,27 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                     // Vérif de la propale: 
                     if (BimpObject::objectLoaded($propal)) {
+                        $infos = '';
                         $update = false;
                         if (!(int) $propal->dol_object->array_options['options_entrepot']) {
                             if (!(int) $this->getData('id_entrepot')) {
                                 $this->msgs['errors'][] = 'Aucun entrepôt défini pour ce SAV';
                                 dol_syslog('Aucun entrepôt défini pour le SAV "' . $this->getRef() . '"', LOG_ERR);
                             } else {
+                                $infos .= 'Correction entrepot<br/>';
                                 $propal->set('entrepot', (int) $this->getData('id_entrepot'));
                                 $update = true;
                             }
                         }
 
                         if ((string) $propal->getData('libelle') !== $this->getRef()) {
+                                $infos .= 'Correction libelle<br/>';
                             $propal->set('libelle', $this->getRef());
                             $update = true;
                         }
 
                         if ((string) $propal->getData('ef_type') !== 'S') {
+                            $infos .= 'Correction secteur<br/>';
                             $propal->set('ef_type', 'S');
                             $update = true;
                         }
@@ -2910,12 +2925,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             $prop_errors = $propal->update($warnings, true);
                             if (count($prop_errors)) {
 //                                dol_syslog(BimpTools::getMsgFromArray($prop_errors, 'Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"'), LOG_ERR);
-                                BimpCore::addlog('Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+                                BimpCore::addlog('Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"<br/>'.$infos, Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
                                     'Erreurs' => $prop_errors
                                 ));
                             } else {
 //                                dol_syslog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', LOG_NOTICE);
-                                BimpCore::addlog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', Bimp_Log::BIMP_LOG_NOTIF, 'sav', $this);
+                                BimpCore::addlog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès<br/>'.$infos, Bimp_Log::BIMP_LOG_NOTIF, 'sav', $this);
                             }
                         }
                     }
@@ -3923,6 +3938,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $nbJours = (int) $extra_data['nbJours'];
         }
         $delai = ($nbJours > 0 ? "dans " . $nbJours . " jours" : "dès maintenant");
+        $delaiSms = ($nbJours > 0 ? "dans " . $nbJours . " jours" : "");
 
         $client = $this->getChildObject('client');
         if (is_null($client) || !$client->isLoaded()) {
@@ -4125,14 +4141,14 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $mail_msg = "Nous avons le plaisir de vous annoncer que la réparation de votre \"$nomMachine\" est finie.\n";
                 $mail_msg .= "Voici ce que nous avons fait : " . $this->getData("resolution") . "\n";
                 $mail_msg .= "Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel;
-                $sms = "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à " . $nomCentre . " " . $delai . ".\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
+                $sms = "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à " . $nomCentre . " " . $delaiSms . ".\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
                 break;
 
             case 'revPropRefu':
                 $subject = "Prise en charge " . $this->getData('ref') . " terminée";
                 $mail_msg = "la réparation de votre \"$nomMachine\" est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . "\n";
                 $mail_msg .= "Si vous souhaitez plus de renseignements, contactez le " . $tel;
-                $sms = "Bonjour, la réparation de votre \"$nomMachine\"  est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ".\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
+                $sms = "Bonjour, la réparation de votre \"$nomMachine\"  est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delaiSms . ".\nL'Equipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . ".";
                 break;
 
             case 'pieceOk':
@@ -4304,7 +4320,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $sms = str_replace('ë', 'e', $sms);
             $sms = str_replace('ô', 'o', $sms);
 
-            if (strlen(str_replace('\n', '', $sms)) > 155)
+            if (dol_strlen(str_replace('\n', '', $sms)) > 160)
                 BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
             //$to = "0686691814";
             $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
@@ -6321,7 +6337,8 @@ ORDER BY a.val_max DESC");
     {
         $errors = array();
         $warnings = array();
-        // Création de la facture d'acompte: 
+        // Création de la facture d'acompte:
+        if($data['acompte'] > 0){
         $this->updateField('acompte', $data['acompte'], null, true);
         $_POST['mode_paiement_acompte'] = $data['mode_paiement_acompte'];
         if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
@@ -6345,6 +6362,10 @@ ORDER BY a.val_max DESC");
                 mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 return $return;
             }
+        }
+        }
+        else{
+            $errors[] = 'Impossible d\'ajouter un acompte de 0€';
         }
         return array(
             'errors'   => $errors,
@@ -7182,6 +7203,7 @@ ORDER BY a.val_max DESC");
 
     public static function checkSavToCancel()
     {
+        global $conf;
         $bdb = self::getBdb();
         $centres = BimpCache::getCentres();
 

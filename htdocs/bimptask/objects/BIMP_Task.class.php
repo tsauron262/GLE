@@ -29,7 +29,6 @@ class BIMP_Task extends BimpObject
             'dev' => array('label' => 'Développement')
         )
     );
-    public $mailReponse = 'reponse@bimp-groupe.net';
     private static $jsReload = 'if (typeof notifTask !== "undefined" && notifTask !== null) notifTask.reloadNotif();';
 
     // Droits users: 
@@ -479,7 +478,7 @@ class BIMP_Task extends BimpObject
                 unset($users[$id_user]);
             }
 
-            if (in_array($id_user, $users_no_follow)) {
+            if (is_array($users_no_follow) && in_array($id_user, $users_no_follow)) {
                 unset($users[$id_user]);
             }
         }
@@ -489,7 +488,7 @@ class BIMP_Task extends BimpObject
                 continue;
             }
 
-            if (in_array($id_user, $users_no_follow)) {
+            if (is_array($users_no_follow) && in_array($id_user, $users_no_follow)) {
                 continue;
             }
 
@@ -510,7 +509,7 @@ class BIMP_Task extends BimpObject
 
         if (BimpObject::objectLoaded($parent_task)) {
             foreach ($parent_task->getUsersToNotify($excludeMe) as $id_user => $u) {
-                if (in_array($id_user, $users_no_follow)) {
+                if (is_array($users_no_follow) && in_array($id_user, $users_no_follow)) {
                     continue;
                 }
 
@@ -1023,7 +1022,7 @@ class BIMP_Task extends BimpObject
         }
         $to = implode(',', $mails);
 
-        $this->sendMail($to, 'Tâche ERP<' . $this->mailReponse . '>', $subject, $message, $rappel, $files);
+        $this->sendMail($to, 'Tâche ERP<' . BimpCore::getConf('mailReponse', '', 'bimptask') . '>', $subject, $message, $rappel, $files);
     }
 
     public function sendMail($to, $from, $sujet, $msg, $rappel = true, $files = array())

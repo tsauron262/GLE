@@ -6,6 +6,8 @@ extends:
 
 table: bimp_apple_internal_stock
 
+entity_name: InternalStock
+
 nom_url: 
     syntaxe: Stock interne <part_number>
     

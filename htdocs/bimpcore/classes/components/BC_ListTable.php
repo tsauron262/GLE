@@ -680,7 +680,7 @@ class BC_ListTable extends BC_List
                 $field_object = $this->object;
                 $errors = array();
 
-                if (!empty($children) && !empty($search_filter)) {
+                if (!empty($children) && (!empty($search_filter) || $search_filter === '0')) {
                     $errors = $this->object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
                 }
 

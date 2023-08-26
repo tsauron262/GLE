@@ -6337,6 +6337,7 @@ ORDER BY a.val_max DESC");
 
     public function actionAddAcompte($data, &$success)
     {
+        // Attention : deux formulaires différents pour cette action avec des noms de champs différents (oui c'est pas top)
         global $conf;
         $success = "Acompte ajouté avec succés";
 
@@ -6344,19 +6345,30 @@ ORDER BY a.val_max DESC");
         $warnings = array();
 
         // Création de la facture d'acompte:
-        $amount = (float) BimpTools::getArrayValueFromPath($data, 'amount', 0);
+        $amount = 0;
+        if (isset($data['amount'])) {
+            $amount = $data['amount'];
+        } elseif (isset($data['acompte'])) {
+            $amount = $data['acompte'];
+        }
+
         if ($amount > 0) {
-//            $_POST['mode_paiement_acompte'] = $data['mode_paiement_acompte'];
-            if ((int) $this->getData("id_facture_acompte") < 1) {
-                $id_mode_paiement = 0;
-                if ($data['id_mode_paiement']) {
-                    $id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', 'code = \'' . $data['id_mode_paiement'] . '\'');
-                }
-                $fac_errors = $this->createAccompte($amount, false, $id_mode_paiement, (int) $data['bank_account']);
+            $id_mode_paiement = 0;
+            if (isset($data['id_mode_paiement'])) {
+                $id_mode_paiement = $data['id_mode_paiement'];
+            } elseif (isset($data['mode_paiement_acompte'])) {
+                $id_mode_paiement = $data['mode_paiement_acompte'];
+            }
+
+            if ($id_mode_paiement && !preg_match('/^[0-9]+$/', $id_mode_paiement)) {
+                $id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', 'code = \'' . $id_mode_paiement . '\'');
+            }
+
+            if ((int) $this->getData("id_facture_acompte") < 1 && $this->isActionAllowed('validate_propal')) {
+                $fac_errors = $this->createAccompte($amount, false, $id_mode_paiement, BimpTools::getArrayValueFromPath($data, 'bank_account', null));
                 if (count($fac_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
                 } else {
-
                     $this->updateField('acompte', $data['amount'], null, true);
                     $client = $this->getChildObject('client');
                     $centre = $this->getCentreData();
@@ -6364,6 +6376,10 @@ ORDER BY a.val_max DESC");
                     mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 }
             } else {
+                $data['amount'] = $amount;
+                $data['id_mode_paiement'] = $id_mode_paiement;
+                $data['bank_account'] = (isset($data['bank_account']) ? (int) $data['bank_account'] : (int) BimpCore::getConf('id_default_bank_account'));
+                
                 $propal = $this->getChildObject('propal');
                 $client = $this->getChildObject('client');
                 $centre = $this->getCentreData();

@@ -3994,14 +3994,9 @@ class BimpObject extends BimpCache
         
         
         if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
-            if($this->getEntity_name())
-                $filters['entity'] = $this->getEntitysArray();
-            else{
-                $parent = $this->getNonFetchParent();
-                if($parent->getEntity_name()){
-                    $joins['parent'] = array("alias" => "parent", 'table' => $parent->getTable(), 'on' =>'a.'.$this->getParentIdProperty().' = parent.'.$parent->getPrimary());
-                    $filters['parent.entity'] = $parent->getEntitysArray();
-                }
+            $newJoins = array();
+            if($this->getEntityFilter($newJoins, $filters)){
+                $joins = BimpTools::merge_array($joins, $newJoins);
             }
         }
         

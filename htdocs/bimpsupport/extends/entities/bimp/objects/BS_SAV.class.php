@@ -324,6 +324,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         if(strlen($tmp) < 4)
             $errors['Saisir les numéros'];
         else{
+            $tmp = str_replace(' ', ',', $tmp);
             $nums = explode(',', $tmp);
             foreach($nums as $num){
                 $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('ecologic_data' =>array('operator'=> 'LIKE', 'value'=> '%"ClaimId":'.trim($num).'%')));

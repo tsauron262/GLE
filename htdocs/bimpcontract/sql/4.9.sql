@@ -1,1 +1,0 @@
-ALTER TABLE llx_contrat ADD `duree_initiale` int(11) DEFAULT NULL;

@@ -1595,7 +1595,7 @@ class BContract_contrat extends BimpDolObject
             $this->totalContrat = $montant;
             return $montant;
         }
-        return round($this->totalContrat,4);
+        return round($this->totalContrat, 4);
     }
 
     public function getCurrentTotal($taxe = 0)
@@ -3421,6 +3421,17 @@ class BContract_contrat extends BimpDolObject
         }
     }
 
+    public function calculateDureeInitiale()
+    {
+        $duree_initiale = $this->getDureeInitial();
+
+        if ($duree_initiale != $this->getInitData('duree_initiale')) {
+            return $this->updateField('duree_initiale', $duree_initiale);
+        }
+
+        return array();
+    }
+
     // Actions: 
 
     public function actionCreateFi($data, &$success)
@@ -4557,7 +4568,7 @@ class BContract_contrat extends BimpDolObject
         global $langs;
 
         $success = "PDF contrat généré avec Succes";
-        if($this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs) <= 0){
+        if ($this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs) <= 0) {
             $errors = BimpTools::getErrorsFromDolObject($this->dol_object, $error = null, $langs);
             $warnings[] = BimpTools::getMsgFromArray($errors, 'Echec de la création du fichier PDF');
         }
@@ -4866,6 +4877,44 @@ class BContract_contrat extends BimpDolObject
         }
 
         return parent::delete($warnings, $force_delete);
+    }
+
+    public function onSave(&$errors = [], &$warnings = [])
+    {
+        parent::onSave($errors, $warnings);
+
+        $this->calculateDureeInitiale();
+    }
+
+    public function onChildSave($child)
+    {
+        $this->calculateDureeInitiale();
+    }
+
+    public function onChildDelete($child, $id_child)
+    {
+        $this->calculateDureeInitiale();
+    }
+
+    // Méthodes statiques: 
+
+    public static function calculateDureeInitialeAll()
+    {
+        $errors = array();
+        $bdb = self::getBdb();
+
+        $where = 'duree_initiale IS NULL OR duree_initiale = 0';
+        $rows = $bdb->getRows('contrat', $where, null, 'array', array('rowid'));
+
+        foreach ($rows as $r) {
+            $contrat = BimpCache::getBimpObjectInstance('bimpcontract', '', (int) $r['rowid']);
+
+            if (BimpObject::objectLoaded($contrat)) {
+                $contrat->calculateDureeInitiale();
+            } else {
+                $errors[] = 'Contrat #' . $r['rowid'] . ' inexistant';
+            }
+        }
     }
 
     // Public: 

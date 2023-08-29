@@ -1595,7 +1595,7 @@ class BContract_contrat extends BimpDolObject
             $this->totalContrat = $montant;
             return $montant;
         }
-        return round($this->totalContrat,4);
+        return round($this->totalContrat, 4);
     }
 
     public function getCurrentTotal($taxe = 0)
@@ -2702,7 +2702,7 @@ class BContract_contrat extends BimpDolObject
             $contrat->set('relance_renouvellement', 1);
             $contrat->set('syntec', 0);
 
-            $errors = $contrat->create();
+             $errors = $contrat->create();
 
             if (!count($errors)) {
                 foreach ($data->services as $nb => $infos) {
@@ -4557,7 +4557,7 @@ class BContract_contrat extends BimpDolObject
         global $langs;
 
         $success = "PDF contrat généré avec Succes";
-        if($this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs) <= 0){
+        if ($this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs) <= 0) {
             $errors = BimpTools::getErrorsFromDolObject($this->dol_object, $error = null, $langs);
             $warnings[] = BimpTools::getMsgFromArray($errors, 'Echec de la création du fichier PDF');
         }

@@ -131,14 +131,28 @@ class BS_SAV_ExtEntity extends BS_SAV{
         $name = trim($tabName[0]);
         $tabName = explode('2', $name);
         $name = trim($tabName[0]);
+        $tabName = explode('3', $name);
+        $name = trim($tabName[0]);
+        $tabName = explode('4', $name);
+        $name = trim($tabName[0]);
+        $tabName = explode('5', $name);
+        $name = trim($tabName[0]);
+        $tabName = explode('6', $name);
+        $name = trim($tabName[0]);
+        $tabName = explode('7', $name);
+        $name = trim($tabName[0]);
+        $tabName = explode('8', $name);
+        $name = trim($tabName[0]);
+        $tabName = explode('9', $name);
+        $name = trim($tabName[0]);
         $name = str_replace('-', ' ', $name);
         $name = str_replace('ç', 'c', $name);
         $name = str_replace('é', 'e', $name);
         $name = str_replace('è', 'e', $name);
         $name = str_replace('É', 'E', $name);
         $name = str_replace('â', 'a', $name);
-        $name = str_replace('St', 'Saint', $name);
-        $name = ucfirst(strtolower($name));
+//        $name = str_replace('St', 'Saint', $name);
+//        $name = ucfirst(strtolower($name));
         return $name;
     }
     
@@ -310,6 +324,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
         if(strlen($tmp) < 4)
             $errors['Saisir les numéros'];
         else{
+            $tmp = str_replace(' ', ',', $tmp);
             $nums = explode(',', $tmp);
             foreach($nums as $num){
                 $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array('ecologic_data' =>array('operator'=> 'LIKE', 'value'=> '%"ClaimId":'.trim($num).'%')));

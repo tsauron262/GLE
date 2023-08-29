@@ -151,13 +151,13 @@ class ValidComm extends BimpObject
 
         // Création contact
         /* TODO Pourquoi ici ? TODO */
-        $bimp_object->dol_object->db = $this->db2;
-        $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
-        
-        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('finCheckContacts');
-        }
-        $bimp_object->dol_object->db = $this->db->db;
+//        $bimp_object->dol_object->db = $this->db2;
+//        $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
+//        
+//        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+//            BimpDebug::addDebugTime('finCheckContacts');
+//        }
+//        $bimp_object->dol_object->db = $this->db->db;
 
         list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp, $percent_service) = $this->getObjectParams($bimp_object, $errors);
 

@@ -1171,6 +1171,14 @@ forms:
 #                  field_name: acompte
 #                  hide_values: 0,
               value: 6
+            - custom: 1
+              label: Compte bancaire
+              input_name: bank_account
+              data_type: int
+              value: 
+                  callback: getDefaultBankAccount
+              input: 
+                    type: select_mysoc_account
               
     gsx_token: 
         title: Authentification GSX

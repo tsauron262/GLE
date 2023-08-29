@@ -720,7 +720,6 @@ class BC_Input extends BimpComponent
             $sortable = (isset($this->params['sortable']) ? (int) $this->params['sortable'] : 0);
             $autosave = (isset($this->params['auto_save']) ? (int) $this->params['auto_save'] : 0);
             $add_all_btn = (isset($this->params['add_all_btn']) ? (int) $this->params['add_all_btn'] : 0);
-
             $values = array();
 
             if (is_null($this->value)) {
@@ -754,7 +753,7 @@ class BC_Input extends BimpComponent
                     }
                 }
             }
-            $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable, 'none', '', array(), $add_all_btn);
+            $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable, 'none', array(), $add_all_btn);
         }
 
         $extra_data = $this->extraData;

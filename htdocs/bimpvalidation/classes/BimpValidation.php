@@ -34,6 +34,7 @@ class BimpValidation
 
         $global_check = 1;
         foreach ($rules as $type => $type_rules) {
+            echo 'CHECK ' . $type . ' : <br/>';
             $type_errors = array();
             $type_check = 0;
 
@@ -49,7 +50,7 @@ class BimpValidation
                     // La demande est déjà acceptée. 
                     continue;
                 } else {
-                    if (in_array($user->id, $demande->getData('validation_users'))) {
+                    if ($demande->canProcess()) {
                         $type_check = 1;
                     }
                 }
@@ -107,15 +108,13 @@ class BimpValidation
 
                         // Création d'une demande de validation : 
                         $demande_errors = array();
-
-                        $log = '';
                         $users = array();
 
                         foreach ($valid_rules as $rule) {
-                            $users = $rule->getValidationUsers();
-
-                            if (!empty($users)) {
-                                break;
+                            foreach ($rule->getValidationUsers() as $id_user) {
+                                if (!in_array($id_user, $users)) {
+                                    $users[] = $id_user;
+                                }
                             }
                         }
 
@@ -125,20 +124,10 @@ class BimpValidation
                                         'type_object'      => $object_type,
                                         'id_object'        => $object->id,
                                         'id_user_demande'  => $user->id,
-                                        'validation_users' => $users,
-                                        'id_user_affected' => self::getFirstAvailableUser($users, $infos, $log)
+                                        'validation_users' => $users
                                             ), true, $demande_errors);
-
-                            if (!count($demande_errors)) {
-                                $user_affected = self::getFirstAvailableUser($users, $infos, $log);
-                                $infos[$type] = 'Demande de validation de type "' . BV_Rule::$types[$type]['label'] . '" effectuée auprès de ' . $user_affected->getName();
-                                if ($log) {
-                                    $msg = 'Demande affectée à ' . $user_affected->getName() . ' pour le(s) motif(s) suivant(s): <br/>' . $log;
-                                    $demande->addObjectLog($msg);
-                                }
-                            }
                         } else {
-                            $demande_errors[] = 'Aucun utilisateur disponible';
+                            $demande_errors[] = 'Aucun utilisateur n\'a la possibilité d\'effectuer cette validation';
                         }
 
                         if (count($demande_errors)) {
@@ -150,16 +139,22 @@ class BimpValidation
         }
 
         if (!$global_check && !count($errors)) {
-            // Check des demandes: 
+            // Check des acceptations auto des demandes: 
             self::checkDemandesAutoAccept($object, $object_type, $errors, $infos, $successes);
 
             if (!count($errors)) {
                 $where = 'type_object = \'' . $object_type . '\' AND id_object = ' . $object->id;
                 $where .= 'status <= 0';
                 if (!(int) BimpCache::getBdb()->getCount('bv_demande', $where)) {
+                    // Il ne reste aucune demande de validation à traiter
                     $global_check = 1;
                 } else {
-                    self::notifyAffectedUsers($object, $object_type);
+                    // Affectation des demandes et notifications : 
+                    $demandes = self::getObjectDemandes($object, 0);
+
+                    foreach ($demandes as $demande) {
+                        $demande->checkAffectedUser(true);
+                    }
                 }
             }
         }
@@ -248,35 +243,44 @@ class BimpValidation
         // Trie des règles de validation par ordre de priorité: 
 
         if (in_array($validation_type, array('comm', 'fin', 'rtp'))) {
+            $function = '';
             if ($val >= 0) {
-
                 // On trie selon les val_max croissantes
-                function compareValidationRules($a, $b)
-                {
-                    if (is_a($a, 'BV_Rule') && is_a($b, 'BV_Rule')) {
-                        $a_val = (float) $a->getData('val_max');
-                        $b_val = (float) $b->getData('val_max');
-                        return ($a_val > $b_val ? 1 : ($a_val < $b_val ? -1 : 0));
-                    }
+                $function = 'bv_compareValidationRulesAsc';
 
-                    return 0;
+                if (!function_exists($function)) {
+
+                    function bv_compareValidationRulesAsc($a, $b)
+                    {
+                        if (is_a($a, 'BV_Rule') && is_a($b, 'BV_Rule')) {
+                            $a_val = (float) $a->getData('val_max');
+                            $b_val = (float) $b->getData('val_max');
+                            return ($a_val > $b_val ? 1 : ($a_val < $b_val ? -1 : 0));
+                        }
+
+                        return 0;
+                    }
                 }
             } else {
-
                 // On trie selon les val_min décroissantes
-                function compareValidationRules($a, $b)
-                {
-                    if (is_a($a, 'BV_Rule') && is_a($b, 'BV_Rule')) {
-                        $a_val = (float) $a->getData('val_min');
-                        $b_val = (float) $b->getData('val_min');
-                        return ($a_val > $b_val ? -1 : ($a_val < $b_val ? 1 : 0));
-                    }
+                $function = 'bv_compareValidationRulesDesc';
 
-                    return 0;
+                if (!function_exists($function)) {
+
+                    function bv_compareValidationRulesDesc($a, $b)
+                    {
+                        if (is_a($a, 'BV_Rule') && is_a($b, 'BV_Rule')) {
+                            $a_val = (float) $a->getData('val_min');
+                            $b_val = (float) $b->getData('val_min');
+                            return ($a_val > $b_val ? -1 : ($a_val < $b_val ? 1 : 0));
+                        }
+
+                        return 0;
+                    }
                 }
             }
 
-            usort($rules, 'compareValidationRules');
+            usort($rules, $function);
         }
 
         return $rules;
@@ -393,15 +397,6 @@ class BimpValidation
         }
     }
 
-    public static function notifyAffectedUsers($object)
-    {
-        $demandes = self::getObjectDemandes($object, 0);
-
-        foreach ($demandes as $demande) {
-            $demande->notifyAffectedUser();
-        }
-    }
-
     // Getters: 
 
     public static function getObjectParams($object, &$errors = array())
@@ -491,7 +486,7 @@ class BimpValidation
                         } else {
                             $client = $object->getData('client');
                         }
-                        
+
                         if (BimpObject::objectLoaded($client)) {
                             $val += (float) $client->getEncours() + $client->getEncoursNonFacture() - ((float) $client->getData('outstanding_limit') * 1.2);
                         }
@@ -523,17 +518,27 @@ class BimpValidation
     public static function getValidationsRules($object_type, $secteur = '')
     {
         $filters = array(
-            'active'  => 1,
-            'objects' => array(
-                'part_type' => 'middle',
-                'part'      => '[' . $object_type . ']'
-            )
+            'active' => 1,
+            'or_obj' => array(
+                'or' => array(
+                    'all_objects' => 1,
+                    'objects'     => array(
+                        'part_type' => 'middle',
+                        'part'      => '[' . $object_type . ']'
+                    )
+                )
+            ),
         );
 
         if ($secteur) {
-            $filters['secteurs'] = array(
-                'part_type' => 'middle',
-                'part'      => '[' . $secteur . ']'
+            $filters['or_secteur'] = array(
+                'or' => array(
+                    'all_secteurs' => 1,
+                    'secteurs'     => array(
+                        'part_type' => 'middle',
+                        'part'      => '[' . $secteur . ']'
+                    )
+                )
             );
         }
 
@@ -554,42 +559,6 @@ class BimpValidation
         }
 
         return $return;
-    }
-
-    public static function getFirstAvailableUser($users, &$infos = '', $superiors_depth = 2)
-    {
-        $bdb = BimpCache::getBdb();
-        BimpObject::loadClass('bimpcore', 'Bimp_User');
-
-        for ($n = 0; $n <= $superiors_depth; $n++) {
-            foreach ($users as $id_user) {
-                if ($n > 0) {
-                    // Recherche du supérieur de niveau $n
-                    for ($i = 0; $i < $n; $i++) {
-                        $id_user = (int) $bdb->getValue('user', 'fk_user', 'rowid = ' . $id_user);
-
-                        if (!$id_user) {
-                            break;
-                        }
-                    }
-
-                    if (!$id_user) {
-                        continue;
-                    }
-                }
-
-                $unavailable_reason = '';
-                $errors = array();
-                if (Bimp_User::isUserAvailable($id_user, null, $errors, $unavailable_reason)) {
-                    return $id_user;
-                }
-
-                $bimp_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-                $infos .= ($infos ? '<br/>' : '') . $bimp_user->getName() . ' est ' . $unavailable_reason;
-            }
-        }
-
-        return 0;
     }
 
     public static function getObjectDemandes($object, $status_filter = null, $type_filter = null)
@@ -617,7 +586,8 @@ class BimpValidation
         return array();
     }
 
-    // Rendus HTML : 
+    // Rendus HTML: 
+
     public static function renderObjectDemandesList($object)
     {
         if (!BimpObject::objectLoaded($object)) {

@@ -223,6 +223,26 @@ class Bimp_User extends BimpObject
         return 1;
     }
 
+    public function isUserSuperior($id_user_to_check, $max_depth = 100)
+    {
+        if ($this->isLoaded()) {
+            $id_user = $this->id;
+            for ($i = 0; $i < $max_depth; $i++) {
+                $id_user = (int) $this->db->getValue('user', 'fk_user', 'rowid = ' . $id_user);
+
+                if (!$id_user) {
+                    break;
+                }
+
+                if ($id_user == $id_user_to_check) {
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
+    }
+
     // Getters données: 
 
     public function getCardFields($card_name)

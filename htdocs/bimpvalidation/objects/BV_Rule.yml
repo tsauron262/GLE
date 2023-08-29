@@ -13,27 +13,40 @@ fields:
         values: 
             array: types
             
+    all_objects: 
+        label: Tous les objets
+        type: bool
+        default_value: 0
+        
     objects:
         label: Objets
         type: items_list
         items_braces: 1
-        required: 1
+        items_add_all_btn: 1
         values: 
-            array: objects_list
+            array: objects_list 
+        display_if: 
+            field_name: all_objects
+            show_values: 0
     
+    all_secteurs: 
+        label: Tous les secteurs
+        type: bool
+        default_value: 0
+        
     secteurs:
         label: Secteurs
         type: items_list
         items_braces: 1
-        values: 
-            array: objects_list
+        items_add_all_btn: 1
         values: 
             callback: 
                 method: getSecteursArray
                 params: 
-                    - 1
-                    - ''
-                    - Tous
+                    - 0
+        display_if: 
+            field_name: all_secteurs
+            show_values: 0
                     
     val_min: 
         label: Valeur minimale
@@ -48,11 +61,29 @@ fields:
     extra_params: 
         label: Paramètres supplémentaires
         type: json
+        displays: 
+            default: 
+                label: Par défaut
+                type: callback
+                method: displayExtraParams
         input: 
             type: custom
             content: 
                 callback: renderExtraParamsInput
         depends_on: type,objects,secteurs
+        
+    all_users: 
+        label: Tout le monde
+        type: bool
+        default_value: 0
+        
+    user_superior: 
+        label: Sup. hiérarchique du demandeur
+        type: bool
+        default_value: 0
+        display_if: 
+            field_name: all_users
+            show_values: 0
         
     users: 
         label: Utilisateurs
@@ -60,7 +91,12 @@ fields:
         items_data_type: id_object
         object: user
         items_sortable: 1
-        items_braces: 1
+        items_braces: 1 
+        input: 
+            type: search_user
+        display_if: 
+            field_name: all_users
+            show_values: 0
         
     groups: 
         label: Groupes
@@ -69,6 +105,11 @@ fields:
         object: group
         items_sortable: 1
         items_braces: 1
+        values: 
+            array: userGroups
+        display_if: 
+            field_name: all_users
+            show_values: 0
         
     active: 
         label: Active
@@ -81,6 +122,22 @@ filters_panels:
             type: 
             secteurs: 
             objects: 
+      
+lists_cols: 
+    col_objects: 
+        label: Objet
+        min_width: 100
+        value: 
+            callback: displayObjects        
+    col_secteurs: 
+        label: Secteurs
+        min_width: 120
+        value: 
+            callback: displaySecteurs
+    col_users: 
+        label: Utilisateurs
+        value: 
+            callback: displayUsers
             
 lists: 
     default: 
@@ -92,8 +149,8 @@ lists:
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         filters_panel: default
-        sort_field: date_create
-        sort_way: desc
+        sort_field: val_max
+        sort_way: asc
         n: 10
         add_form_name: default
         edit_btn: 1
@@ -101,12 +158,14 @@ lists:
         modal_view: default
         cols: 
             type: 
-            objects: 
-            secteurs: 
+            col_objects:
+            col_secteurs: 
+                
             val_min: 
             val_max: 
             extra_params: 
-            users:
+            col_users:
             groups:
-            
+            active: 
+                edit: 1
     

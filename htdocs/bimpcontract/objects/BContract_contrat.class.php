@@ -2702,7 +2702,7 @@ class BContract_contrat extends BimpDolObject
             $contrat->set('relance_renouvellement', 1);
             $contrat->set('syntec', 0);
 
-            $errors = $contrat->create();
+             $errors = $contrat->create();
 
             if (!count($errors)) {
                 foreach ($data->services as $nb => $infos) {
@@ -3419,17 +3419,6 @@ class BContract_contrat extends BimpDolObject
                 $this->updateField("statut", 2);
             }
         }
-    }
-
-    public function calculateDureeInitiale()
-    {
-        $duree_initiale = $this->getDureeInitial();
-
-        if ($duree_initiale != $this->getInitData('duree_initiale')) {
-            return $this->updateField('duree_initiale', $duree_initiale);
-        }
-
-        return array();
     }
 
     // Actions: 
@@ -4877,44 +4866,6 @@ class BContract_contrat extends BimpDolObject
         }
 
         return parent::delete($warnings, $force_delete);
-    }
-
-    public function onSave(&$errors = [], &$warnings = [])
-    {
-        parent::onSave($errors, $warnings);
-
-        $this->calculateDureeInitiale();
-    }
-
-    public function onChildSave($child)
-    {
-        $this->calculateDureeInitiale();
-    }
-
-    public function onChildDelete($child, $id_child)
-    {
-        $this->calculateDureeInitiale();
-    }
-
-    // Méthodes statiques: 
-
-    public static function calculateDureeInitialeAll()
-    {
-        $errors = array();
-        $bdb = self::getBdb();
-
-        $where = 'duree_initiale IS NULL OR duree_initiale = 0';
-        $rows = $bdb->getRows('contrat', $where, null, 'array', array('rowid'));
-
-        foreach ($rows as $r) {
-            $contrat = BimpCache::getBimpObjectInstance('bimpcontract', '', (int) $r['rowid']);
-
-            if (BimpObject::objectLoaded($contrat)) {
-                $contrat->calculateDureeInitiale();
-            } else {
-                $errors[] = 'Contrat #' . $r['rowid'] . ' inexistant';
-            }
-        }
     }
 
     // Public: 

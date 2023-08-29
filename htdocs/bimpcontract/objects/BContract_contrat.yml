@@ -231,9 +231,6 @@ fields:
         dol_extra_field: 1
         default_value: 12
         required: 1
-    duree_initiale: 
-        label: Durée initiale en mois
-        type: int        
     periodicity:
         label: Périodicité de facturation
         type: int

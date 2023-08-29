@@ -631,7 +631,7 @@ class Bimp_Product extends BimpObject
 
         if ((preg_match('.(applecare).', strtolower($this->getData('label')))
                 || preg_match('.(apple care).', strtolower($this->getData('label')))
-                ) && $this->getData('tva_tx') == 0) {
+                ) && ($this->getData('tva_tx') == 0 || $tva_null)) {
             return BimpCore::getConf('applecare_compte', null, 'bimptocegid');
         }
 

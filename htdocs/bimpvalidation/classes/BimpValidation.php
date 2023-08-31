@@ -29,7 +29,10 @@ class BimpValidation
 
         $object_params = self::getObjectParams($object, $errors);
 
-        if (is_null($object_params)) {
+        $secteur = $object_params['secteur'];
+        $object_type = $object_params['type'];
+
+        if (!$object_type) {
             return 1;
         }
 
@@ -41,8 +44,7 @@ class BimpValidation
             return 0;
         }
 
-        $secteur = $object_params['secteur'];
-        $object_type = $object_params['type'];
+
 
         $rules = self::getValidationsRulesByTypes($object_type, $secteur);
 
@@ -580,14 +582,12 @@ class BimpValidation
             }
         }
 
-        if (!$obj_type) {
-            return null;
-        }
-
-        if (is_a($object, 'BimpComm') && $object->field_exists('ef_type')) {
-            $secteur = $object->getData('ef_type');
-        } elseif (is_a($object, 'BContract_contrat' && $object->field_exists('secteur'))) {
-            $secteur = $object->getData('secteur');
+        if ($obj_type) {
+            if (is_a($object, 'BimpComm') && $object->field_exists('ef_type')) {
+                $secteur = $object->getData('ef_type');
+            } elseif (is_a($object, 'BContract_contrat' && $object->field_exists('secteur'))) {
+                $secteur = $object->getData('secteur');
+            }
         }
 
         return array(

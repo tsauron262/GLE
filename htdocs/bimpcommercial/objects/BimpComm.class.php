@@ -254,7 +254,7 @@ class BimpComm extends BimpDolObject
             return 0;
         }
 
-        if (BimpCore::isModuleActive('bimpvalidation')) {
+        if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande', 'Bimp_Facture')) && BimpCore::isModuleActive('bimpvalidation')) {
             BimpObject::loadClass('bimpvalidation', 'BV_Demande');
             $nb_refused = 0;
 

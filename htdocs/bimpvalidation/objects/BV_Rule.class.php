@@ -175,11 +175,65 @@ class BV_Rule extends BimpObject
         }
     }
 
+    public function getcol_secteursSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ($value == 'all') {
+            $filters[$main_alias . '.all_secteurs'] = 1;
+        } else {
+            $filters['or_secteur'] = array(
+                'or' => array(
+                    $main_alias . '.all_secteurs' => 1,
+                    $main_alias . '.secteurs'     => array(
+                        'part_type' => 'middle',
+                        'part'      => '[' . $value . ']'
+                    )
+                )
+            );
+        }
+    }
+
+    public function getcol_usersSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ($value == 'user_sup') {
+            $filters[$main_alias . '.user_superior'] = 1;
+        } elseif ($value == 'all') {
+            $filters[$main_alias . '.all_users'] = 1;
+        } else {
+            $filters['or_user'] = array(
+                'or' => array(
+                    $main_alias . '.all_users' => 1,
+                    $main_alias . '.users'     => array(
+                        'part_type' => 'middle',
+                        'part'      => '[' . $value . ']'
+                    )
+                )
+            );
+        }
+    }
+
     // Getters Array: 
 
     public function getSearchObjectsArray()
     {
         return BimpTools::merge_array(array('all' => 'Tous les objets'), self::$objects_list);
+    }
+
+    public function getSearchSecteursArray()
+    {
+        return BimpCache::getSecteursArray(true, 'all', 'Tous les secteurs');
+    }
+
+    public function getSearchUsersArray()
+    {
+        $users = array(
+            'all'           => 'Tout le monde',
+            'user_superior' => 'Sup. hiérarchique du demandeur');
+
+        foreach (BimpCache::getUsersArray(false) as $id_user => $name) {
+            $users[(string) $id_user] = $name;
+        }
+        
+        return $users;
     }
 
     // Affichges: 

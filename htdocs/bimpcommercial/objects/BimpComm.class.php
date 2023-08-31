@@ -70,7 +70,7 @@ class BimpComm extends BimpDolObject
     public function canEditField($field_name)
     {
         global $user;
-        
+
         switch ($field_name) {
             case 'logs':
                 return (BimpObject::objectLoaded($user) && $user->admin ? 1 : 0);
@@ -254,6 +254,16 @@ class BimpComm extends BimpDolObject
             return 0;
         }
 
+        if (BimpCore::isModuleActive('bimpvalidation')) {
+            BimpObject::loadClass('bimpvalidation', 'BV_Demande');
+            $nb_refused = 0;
+
+            if (BV_Demande::objectHasDemandesRefused($this, $nb_refused)) {
+                $errors[] = $nb_refused . ' demande(s) de validation refusée(s)';
+                return 0;
+            }
+        }
+
         // Vérif des lignes: 
         $lines = $this->getLines('not_text');
         if (!count($lines) && !is_a($this, 'BS_SavPropal')) {
@@ -318,10 +328,6 @@ class BimpComm extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if ($this->erreurFatal) {
-            return 0;
-        }
-
         switch ($action) {
             case 'addAcompte':
                 if (!$this->acomptes_allowed) {
@@ -329,17 +335,9 @@ class BimpComm extends BimpDolObject
                     return 0;
                 }
                 if (!$this->isLoaded()) {
-                    $errors[] = '(100) ID ' . $this->getLabel('of_the') . ' absent';
+                    $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
                     return 0;
                 }
-//                if ($this->object_name !== 'Bimp_Facture' && (int) $this->getData('fk_statut') > 0) {
-//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est plus au statut "brouillon"';
-//                    return 0;
-//                }
-//                if ($this->field_exists('invoice_status') && (int) $this->getData('invoice_status') === 2) {
-//                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est entièrement facturé' . $this->e();
-//                    return 0;
-//                }
 
                 $client = $this->getChildObject('client');
 
@@ -2031,9 +2029,27 @@ class BimpComm extends BimpDolObject
 
         if (BimpCore::isModuleActive('bimpvalidation')) {
             if (!(int) $this->getData('fk_statut')) {
-                $demandes = BimpValidation::getObjectDemandes($this, 0);
+                $demandes = BimpValidation::getObjectDemandes($this, array(
+                            'operator' => '!=',
+                            'value'    => -2
+                ));
                 if (count($demandes)) {
-                    $html .= '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($demandes) . ' demande(s) de validation en attente</span>';
+                    $has_refused = false;
+                    foreach ($demandes as $demande) {
+                        if ((int) $demande->getData('status') === BV_Demande::BV_REFUSED) {
+                            $has_refused = true;
+                            break;
+                        }
+                    }
+
+                    $html .= '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($demandes) . ' demande(s) de validation :</span><br/>';
+                    if ($has_refused) {
+                        $html .= '<span class="danger">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Il y a au moins une demand de validation refusée. ' . $this->getLabel('this') . ' ne peut pas être validée</span><br/>';
+                    }
+                }
+
+                foreach ($demandes as $demande) {
+                    $html .= $demande->renderQuickView();
                 }
             }
         } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
@@ -3701,7 +3717,7 @@ class BimpComm extends BimpDolObject
                 if (count($tabConatact) < 1) {
                     $ok = false;
                     $tabComm = $client->dol_object->getSalesRepresentatives($user);
-                    
+
                     if (class_exists('BimpDebug') && BimpDebug::isActive()) {
                         BimpDebug::addDebugTime('fingetSalesRepresentatives');
                     }
@@ -3710,19 +3726,19 @@ class BimpComm extends BimpDolObject
                     if (count($tabComm) > 0) {
                         $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                         $ok = true;
-                        
-                    if (class_exists('BimpDebug') && BimpDebug::isActive()) {
-                        BimpDebug::addDebugTime('finAddContact1');
-                    }
+
+                        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+                            BimpDebug::addDebugTime('finAddContact1');
+                        }
 
                         // Il y a un commercial définit par défaut (bimpcore)
                     } elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial')) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
-                        
-                    if (class_exists('BimpDebug') && BimpDebug::isActive()) {
-                        BimpDebug::addDebugTime('finAddContact2');
-                    }
+
+                        if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+                            BimpDebug::addDebugTime('finAddContact2');
+                        }
                         // L'objet est une facture et elle a une facture d'origine
                     } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
                         $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
@@ -3751,7 +3767,6 @@ class BimpComm extends BimpDolObject
                 if (class_exists('BimpDebug') && BimpDebug::isActive()) {
                     BimpDebug::addDebugTime('finContactSignataire');
                 }
-                
             }
         }
         return $errors;
@@ -4803,11 +4818,7 @@ class BimpComm extends BimpDolObject
         $warnings = array();
         $infos = array();
 
-        $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
-
-        if ($this->isLabelFemale()) {
-            $success .= 'e';
-        }
+        $success = BimpTools::ucfirst($this->getLabel('')) . ' validé' . $this->e();
 
         $success .= ' avec succès';
         $success_callback = 'bimp_reloadPage();';
@@ -4815,6 +4826,16 @@ class BimpComm extends BimpDolObject
         global $conf, $langs, $user;
 
         $result = $this->dol_object->valid($user);
+
+        $obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+        if (!empty($obj_warnings)) {
+            $warnings[] = BimpTools::getMsgFromArray($obj_warnings);
+        }
+
+        $obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
+        if (!empty($obj_infos)) {
+            $infos[] = BimpTools::getMsgFromArray($obj_infos);
+        }
 
         if ($result > 0) {
             if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
@@ -4827,23 +4848,16 @@ class BimpComm extends BimpDolObject
             if (!count($obj_errors)) {
                 $obj_errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' ne peut pas être validé' . $this->e();
             }
-            $errors[] = BimpTools::getMsgFromArray($obj_errors);
-        }
 
-        $obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
-
-        if (!empty($obj_warnings)) {
-            $warnings[] = BimpTools::getMsgFromArray($obj_warnings);
-        }
-
-        $obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
-        if (!empty($obj_infos)) {
-            $infos[] = BimpTools::getMsgFromArray($obj_infos);
+            if (count($obj_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($obj_errors);
+            }
         }
 
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
+            'infos'            => $infos,
             'success_callback' => $success_callback
         );
     }

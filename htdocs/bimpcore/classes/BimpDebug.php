@@ -22,6 +22,7 @@ class BimpDebug
         'ajax_result' => 'Réponse ajax',
         'gsx'         => 'GSX',
         'api'         => 'API',
+        'validations' => 'Validations',
         'divers'      => 'Divers'
     );
     public static $times = array();
@@ -151,24 +152,24 @@ class BimpDebug
             ));
         }
     }
-    
-    public static function testLogDebug(){
+
+    public static function testLogDebug()
+    {
         global $bimp_start_time;
-        $msg= '';
+        $msg = '';
         if (!(float) $bimp_start_time) {
             $msg .= 'Variable bimp_start_time absente du fichier index.php';
             mailSyn2('test', 'tommy@bimp.fr', null, $msg);
-        }
-        else{
-            if((microtime(1) - $bimp_start_time) > 40){
-                $msg .= (microtime(1) - $bimp_start_time).'oooooooooo';
-                
+        } else {
+            if ((microtime(1) - $bimp_start_time) > 40) {
+                $msg .= (microtime(1) - $bimp_start_time) . 'oooooooooo';
+
                 $msg .= self::renderDebugTimes();
                 mailSyn2('test', 'tommy@bimp.fr', null, $msg);
-                BimpCore::addlog('Page trop lourde '.microtime(1) - $bimp_start_time, Bimp_Log::BIMP_LOG_ALERTE, null, null, array('info'=>$msg));
+                BimpCore::addlog('Page trop lourde ' . microtime(1) - $bimp_start_time, Bimp_Log::BIMP_LOG_ALERTE, null, null, array('info' => $msg));
             }
         }
-        
+
 //        if($bimp_start_time - microtime(1))
     }
 

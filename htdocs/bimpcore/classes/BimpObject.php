@@ -33,7 +33,7 @@ class BimpObject extends BimpCache
     public $use_commom_fields = false;
     public $use_positions = false;
     public $params_defs = array(
-        'entity_name'               => array('default' => 0),
+        'entity_name'              => array('default' => 0),
         'abstract'                 => array('data_type' => 'bool', 'default' => 0),
         'use_clones'               => array('data_type' => 'bool', 'default' => 1),
         'table'                    => array('default' => ''),
@@ -93,21 +93,6 @@ class BimpObject extends BimpCache
     public $force_update = false;
 
     // Gestion instance:
-    
-    public function getEntity_name(){
-        $entity = $this->getConf('entity_name', 0);
-        if($entity == 0 && isset($this->dol_object) && $this->dol_object->ismultientitymanaged)
-            $entity = $this->dol_object->element;
-        
-        return $entity;
-    }
-    
-    public function getEntitysArray($withZero = true){
-        $tab = explode(',', getEntity($this->getEntity_name()));
-        if($withZero)
-            $tab[] = 0;
-        return $tab;
-    }
 
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {
@@ -680,12 +665,12 @@ class BimpObject extends BimpCache
     {
         return $this->getConf('parent_module', $this->module);
     }
-    
+
     public function getNonFetchParent()
     {
-        if(!is_null($this->parent))
+        if (!is_null($this->parent))
             return $this->parent;
-        else{
+        else {
             $module = $this->getParentModule();
             $object_name = $this->getParentObjectName();
             return $this->getBimpObjectInstance($module, $object_name);
@@ -1272,6 +1257,23 @@ class BimpObject extends BimpCache
         return array();
     }
 
+    public function getEntity_name()
+    {
+        $entity = $this->getConf('entity_name', 0);
+        if ($entity == 0 && isset($this->dol_object) && $this->dol_object->ismultientitymanaged)
+            $entity = $this->dol_object->element;
+
+        return $entity;
+    }
+
+    public function getEntitysArray($withZero = true)
+    {
+        $tab = explode(',', getEntity($this->getEntity_name()));
+        if ($withZero)
+            $tab[] = 0;
+        return $tab;
+    }
+
     // Getters boolééns:
 
     public function isLoaded(&$errors = array())
@@ -1713,9 +1715,9 @@ class BimpObject extends BimpCache
                 $data[$field] = $db_value;
             }
         }
-        
+
         global $conf;
-        if($this->getEntity_name())
+        if ($this->getEntity_name())
             $data['entity'] = $conf->entity;
 
         return $data;
@@ -1970,7 +1972,7 @@ class BimpObject extends BimpCache
     {
         $prop = $this->getStatusProperty();
 
-        if (isset($this->data[$prop]) && (string) $this->data[$prop]) {
+        if (isset($this->data[$prop])) {
             return $this->data[$prop];
         }
 
@@ -2159,7 +2161,7 @@ class BimpObject extends BimpCache
     {
         if ($this->isLoaded()) {
             $cache_key = 'bimp_object_' . $this->module . '_' . $this->object_name . '_' . $this->id;
-            if (self::cacheExists($cache_key) /*&& self::getCache($cache_key) == $this todo a voir pourquoi */) {
+            if (self::cacheExists($cache_key) /* && self::getCache($cache_key) == $this todo a voir pourquoi */) {
                 self::setCache($cache_key, null);
             }
         }
@@ -3888,20 +3890,17 @@ class BimpObject extends BimpCache
 
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
-        
-        
-        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
             $newJoins = array();
-            if($this->getEntityFilter($newJoins, $filters)){
+            if ($this->getEntityFilter($newJoins, $filters)) {
                 $joins = BimpTools::merge_array($joins, $newJoins);
             }
         }
-        
-        
+
+
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        
-        
 
         if ($order_by == 'rand') {
             $sql .= ' ORDER BY rand() ';
@@ -3915,6 +3914,7 @@ class BimpObject extends BimpCache
 //        if($this->cacheExists($cache_key))
 //            $rows = $this->getCache($cache_key);
 //        else{
+        
         $rows = $this->db->executeS($sql, $return);
 
         if (is_null($rows)) {
@@ -3942,23 +3942,22 @@ class BimpObject extends BimpCache
 
         return $rows;
     }
-    
-    public function getEntityFilter(&$joins, &$filters, $alias = 'a', $aliasParent = 'parent'){
-        if(strlen($aliasParent) > 100)
+
+    public function getEntityFilter(&$joins, &$filters, $alias = 'a', $aliasParent = 'parent')
+    {
+        if (strlen($aliasParent) > 100)
             die($aliasParent);
-        if($this->getEntity_name()){
+        if ($this->getEntity_name()) {
             $filters['entity'] = $this->getEntitysArray();
             return 1;
-        }
-        else{
+        } else {
             $parent = $this->getNonFetchParent();
-            if(get_class($parent) != 'BimpObject'){
-                $joins[$aliasParent] = array("alias" => $aliasParent, 'table' => $parent->getTable(), 'on' =>$alias.'.'.$this->getParentIdProperty().' = '.$aliasParent.'.'.$parent->getPrimary());
-                if($parent->getEntity_name()){
-                    $filters[$aliasParent.'.entity'] = $parent->getEntitysArray();
+            if (get_class($parent) != 'BimpObject') {
+                $joins[$aliasParent] = array("alias" => $aliasParent, 'table' => $parent->getTable(), 'on' => $alias . '.' . $this->getParentIdProperty() . ' = ' . $aliasParent . '.' . $parent->getPrimary());
+                if ($parent->getEntity_name()) {
+                    $filters[$aliasParent . '.entity'] = $parent->getEntitysArray();
                     return 1;
-                }
-                else{
+                } else {
                     return $parent->getEntityFilter($joins, $filters, $aliasParent, $aliasParent .= '_parent');
                 }
             }
@@ -3991,15 +3990,14 @@ class BimpObject extends BimpCache
         $filters = $this->checkSqlFilters($filters, $joins, 'a');
 
         $sql = 'SELECT COUNT(DISTINCT a.' . $primary . ') as nb_rows';
-        
-        
-        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
             $newJoins = array();
-            if($this->getEntityFilter($newJoins, $filters)){
+            if ($this->getEntityFilter($newJoins, $filters)) {
                 $joins = BimpTools::merge_array($joins, $newJoins);
             }
         }
-        
+
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
@@ -5487,14 +5485,12 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $reTesteParentType = false;
         if (!is_null($parent) && is_object($parent)) {
-            if($this->getParentObjectName() == ''){//pour l'instant on garde, on retestera aprés l'instanciation
+            if ($this->getParentObjectName() == '') {//pour l'instant on garde, on retestera aprés l'instanciation
                 $this->parent = $parent;
                 $reTesteParentType = true;
-            }
-            elseif(is_a($parent, $this->getParentObjectName())){//tous vas bien, le parent est bien du type attendue
+            } elseif (is_a($parent, $this->getParentObjectName())) {//tous vas bien, le parent est bien du type attendue
                 $this->parent = $parent;
-            }
-            else{//Attention, le parent ne correspond pas
+            } else {//Attention, le parent ne correspond pas
                 BimpCore::addlog('Instance parente invalide dans fetch()', 3, 'bimpcore', $this, array(
                     'Attendu' => $this->getParentObjectName(),
                     'Obtenu'  => get_class($parent)
@@ -5514,9 +5510,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         $where = '`' . $primary . '` = ' . (int) $id;
-        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
-            if($this->getEntity_name())
-                $where .= ' AND entity IN ('.getEntity($this->getEntity_name()).')';
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            if ($this->getEntity_name())
+                $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ')';
         }
         $row = $this->db->getRow($table, $where);
 
@@ -5541,8 +5537,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $this->initData = $this->data;
             $this->ref = $this->getRef();
-            
-            if($reTesteParentType && !is_a($parent, $this->getParentObjectName())){//Le premier test a échoué, et même aprés instanciation le parent ne correspond pas au type attendu.
+
+            if ($reTesteParentType && !is_a($parent, $this->getParentObjectName())) {//Le premier test a échoué, et même aprés instanciation le parent ne correspond pas au type attendu.
                 BimpCore::addlog('Instance parente invalide dans fetch()', 3, 'bimpcore', $this, array(
                     'Attendu' => $this->getParentObjectName(),
                     'Obtenu'  => get_class($parent)
@@ -6113,8 +6109,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
             return false;
         }
-        if(isset($this->dol_object->entity) && !in_array($this->dol_object->entity, $this->getEntitysArray()))
-                return false;
+        if (isset($this->dol_object->entity) && !in_array($this->dol_object->entity, $this->getEntitysArray()))
+            return false;
 
         $bimpObjectFields = array();
 
@@ -6122,9 +6118,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (!empty($bimpObjectFields)) {
             $where = '`' . $this->getPrimary() . '` = ' . (int) $id;
-            if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
-                if($this->getEntity_name())
-                    $where .= ' AND entity IN ('.getEntity($this->getEntity_name()).')';
+            if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+                if ($this->getEntity_name())
+                    $where .= ' AND entity IN (' . getEntity($this->getEntity_name()) . ')';
             }
             $result = $this->db->getRow($this->getTable(), $where, $bimpObjectFields, 'array');
             if (!is_null($result)) {
@@ -10526,7 +10522,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                                 $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
                                 if (isset($params['id_object']['field_value'])) {
                                     $field = $params['id_object']['field_value'];
-                                    if($instance->field_exists($field)){
+                                    if ($instance->field_exists($field)) {
                                         if ($withObjectStatic)
                                             $objectsResult[$mod][$name][$field] = $instance;
                                         else
@@ -10909,8 +10905,8 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         $cash_key = 'extra_list_' . $name . '_' . $type . '_' . (int) $withVide;
         if (!static::cacheServerExists($cash_key)) {
             $query = "SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'";
-            if($entitys)
-                $query .= ' AND entity IN (0,'.$entitys.')';
+            if ($entitys)
+                $query .= ' AND entity IN (0,' . $entitys . ')';
             $sql = self::getBdb()->db->query($query);
             while ($ln = self::getBdb()->db->fetch_object($sql)) {
                 $param = unserialize($ln->param);

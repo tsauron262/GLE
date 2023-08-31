@@ -1,18 +1,20 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/classes/BimpValidation.php';
+
 class BV_Rule extends BimpObject
 {
 
     public static $types = array(
-        'comm' => array('label' => 'Commerciale (Remises)', 'val_label' => 'Remises (%)', 'label2' => 'commerciale'),
-        'fin'  => array('label' => 'Financière (Encours)', 'val_label' => 'Encours client', 'label2' => 'financière'),
-        'rtp'  => array('label' => 'Retard de paiement', 'val_lavel' => 'Total paiements en retard', 'label2' => 'sur retards de paiement')
+        'comm' => array('label' => 'Commerciale (Remises)', 'icon' => 'fas_percentage', 'val_label' => 'Remises (%)', 'label2' => 'commerciale (remises)'),
+        'fin'  => array('label' => 'Financière (Encours)', 'icon' => 'fas_hand-holding-usd', 'val_label' => 'Encours client', 'label2' => 'financière (encours)'),
+        'rtp'  => array('label' => 'Retard de paiement', 'icon' => 'fas_comment-dollar', 'val_label' => 'Total paiements en retard', 'label2' => 'sur retards de paiement')
     );
     public static $objects_list = array(
-        'propal'   => array('label' => 'Devis', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Propal'),
-        'commande' => array('label' => 'Commande', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Commande'),
-        'facture'  => array('label' => 'Facture', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Facture'),
-        'contrat'  => array('label' => 'Contrat', 'module' => 'bimpcontract', 'object_name' => 'BContract_contrat'),
+        'propal'   => array('label' => 'Devis', 'icon' => 'fas_file-invoice', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Propal', 'table' => 'propal'),
+        'commande' => array('label' => 'Commande', 'icon' => 'fas_dolly', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Commande', 'table' => 'commande'),
+        'facture'  => array('label' => 'Facture', 'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Facture', 'table' => 'facture'),
+        'contrat'  => array('label' => 'Contrat', 'icon' => 'fas_file-signature', 'module' => 'bimpcontract', 'object_name' => 'BContract_contrat', 'table' => 'contrat'),
     );
 
     // Droits users: 
@@ -23,9 +25,24 @@ class BV_Rule extends BimpObject
         return (int) ($user->admin || $user->rights->BimpValidation->rule->admin);
     }
 
-    public function canView()
+    public function canEdit()
     {
         return $this->canCreate();
+    }
+
+    public function canDelete()
+    {
+        global $user;
+        if ($user->admin) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function canView()
+    {
+        return 1;
     }
 
     // Getters booléens: 
@@ -103,7 +120,47 @@ class BV_Rule extends BimpObject
         return $users;
     }
 
+    // Getters params: 
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'sur_marge':
+                $or_field = array();
+
+                foreach ($values as $value) {
+                    $or_field[] = array(
+                        'part_type' => 'middle',
+                        'part'      => '"sur_marge":' . $value
+                    );
+                }
+
+                $filters[$main_alias . '.extra_params'] = array(
+                    'or_field' => $or_field
+                );
+                break;
+
+            case 'is_sup':
+                $or_field = array();
+
+                foreach ($values as $value) {
+                    $or_field[] = array(
+                        'part_type' => 'middle',
+                        'part'      => '"if_sup_only":' . $value
+                    );
+                }
+
+                $filters[$main_alias . '.extra_params'] = array(
+                    'or_field' => $or_field
+                );
+                break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
+    }
+
     // Affichges: 
+
     public function displayObjects()
     {
         $html = '';

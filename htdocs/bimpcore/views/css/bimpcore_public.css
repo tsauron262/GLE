@@ -12021,25 +12021,39 @@ div.task_panel {
     border-radius: 8px;
     box-shadow: 0 0 2px #787878; }
 
+/*BimpValidation*/
+/* line 271, ../scss/bimpcore/_notifications.scss */
+div.bv_demandes_panel {
+  max-height: auto;
+  overflow-y: scroll;
+  padding: 0px;
+  line-height: 22px;
+  width: 800px; }
+  /* line 278, ../scss/bimpcore/_notifications.scss */
+  div.bv_demandes_panel .user_demande {
+    font-size: 11px;
+    font-style: italic;
+    color: #006AFF; }
+
 /* Les onglets */
-/* line 270, ../scss/bimpcore/_notifications.scss */
+/* line 286, ../scss/bimpcore/_notifications.scss */
 ul#nav_task > li {
   width: 48%; }
 
-/* line 274, ../scss/bimpcore/_notifications.scss */
+/* line 290, ../scss/bimpcore/_notifications.scss */
 ul#nav_task > li.reload {
   width: 2%; }
 
-/* line 278, ../scss/bimpcore/_notifications.scss */
+/* line 294, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a {
   padding-left: 0px;
   padding-right: 0px; }
 
-/* line 283, ../scss/bimpcore/_notifications.scss */
+/* line 299, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a > span {
   margin: 0px; }
 
-/* line 287, ../scss/bimpcore/_notifications.scss */
+/* line 303, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a:hover {
   background-color: unset !important;
   border-top-color: white;

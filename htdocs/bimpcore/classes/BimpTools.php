@@ -2241,7 +2241,8 @@ class BimpTools
         }
 
         if ($return_default) {
-            return BimpCache::cacheServeurFunction('getDefaultTva');;
+            return BimpCache::cacheServeurFunction('getDefaultTva');
+            ;
         }
 
         return 0;
@@ -3530,6 +3531,10 @@ class BimpTools
 
     public static function lockNum($type, $nb = 0, $errors = array())
     {
+        if (!(int) BimpCore::getConf('use_lock_num', null, 'bimpcommercial')) {
+            return 1;
+        }
+        
 //        return 1; //test 
         global $user, $langs;
         //il faut débuggé, si ca pose probléme c'est grave

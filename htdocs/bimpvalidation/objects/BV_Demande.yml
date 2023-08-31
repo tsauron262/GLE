@@ -7,12 +7,15 @@ labels:
     name_plur: demandes de validations
     is_female: 1
     
+header_btn: 
+    callback: getActionsButtons
+    
 objects:
-    user_author: 
+    user_demande: 
         extends: user
         instance: 
             id_object: 
-                field_value: id_user_author
+                field_value: id_user_demande
                 
     user_affected: 
         extends: user
@@ -30,7 +33,8 @@ fields:
     status: 
         label: Status
         type: int
-        values: status_list
+        values: 
+            array: status_list
         default_value: 0
         
     type_validation: 
@@ -53,11 +57,11 @@ fields:
     id_user_demande: 
         label: Demandée par
         type: id_object
-        object: user_author
+        object: user_demande
         default_value: 0
         
     validation_users: 
-        label: Utilisateurs
+        label: Utilisateurs autorisés
         type: items_list
         items_data_type: id_object
         object: user
@@ -65,7 +69,7 @@ fields:
         items_braces: 1
         
     id_user_affected: 
-        label: Demande affectée à
+        label: Chargé de validation
         type: id_object
         object: user_affected
         default_value: 0
@@ -84,6 +88,64 @@ fields:
         label: Commentaire
         type: text
         
+forms: 
+    refuse: 
+        title: Refus de la demande
+        rows: 
+            - custom: 1
+              label: Motif du refus
+              input_name: motif
+              input: 
+                  type: textarea
+                  auto_expand: 1
+                  rows: 3
+                  
+fields_tables: 
+    infos: 
+        title: Infos
+        rows: 
+            - field: type_validation
+            - label: Objet
+              value: 
+                  callback: displayObj
+            - label: Montant
+              value: 
+                  callback: displayObjVal
+            - label: Client
+              value: 
+                  callback: displayClient
+            - field: id_user_demande
+            - field: comment
+        
+    validation: 
+        title: Validation
+        rows: 
+            - field: id_user_affected
+            - field: validation_users
+            - field: id_user_validate
+            - field: date_validate
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: validation
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderLogsList
+                      
 filters_panels: 
     default: 
         filters: 
@@ -97,6 +159,17 @@ lists_cols:
         label: Pièce
         value: 
             callback: displayObj
+    val: 
+        label: Montant(s)
+        value: 
+            callback: displayObjVal
+    client: 
+        label: Client
+        value: 
+            callback: displayClient
+        search: 
+            input: 
+                type: search_societe
             
 lists: 
     default: 
@@ -104,23 +177,25 @@ lists:
         configurable: 1
         checkboxes: 1
         bulk_actions:
-            - label: supprimer les règles sélectionnées
+            - label: supprimer les demandes sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         filters_panel: default
         sort_field: date_create
         sort_way: desc
         n: 10
-        add_form_name: default
-        edit_btn: 1
+        edit_btn: 0
         delete_btn: 1
         modal_view: default
+        extra_btn: 
+            callback: getActionsButtons
         cols: 
             type_validation: 
             obj: 
             status: 
             id_user_demande: 
             validation_users: 
+            id_user_affected: 
             id_user_validate: 
             date_validate:
                 
@@ -128,4 +203,10 @@ lists:
         extends: default
         cols: 
             obj: unset
+            validation_users: unset
+            
+    user: 
+        extends: default
+        cols: 
+            validation_users: unset
         

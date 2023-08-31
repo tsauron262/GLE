@@ -150,29 +150,26 @@ class Bimp_Commande extends Bimp_CommandeTemp
                 return 0;
 
             case 'linesFactureQties':
-//                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-//                return (int) $facture->can('create');
                 return $user->rights->bimpcommercial->factureAnticipe;
 
             case 'sendMailLatePayment':
-//                if (BimpCore::isModuleActive('bimpvalidation')) {
-//                    // todo BV
-//                } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
-//                    $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-//                    $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_ENCOURS);
-//
-//                    if ($demande === 0)
-//                        $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_IMPAYE);
-//
-//                    // Encours
-//                    if (is_a($demande, 'DemandeValidComm')) {
-//                        list($secteur, $class,, $val_euros) = $vc->getObjectParams($this, $errors);
-//                        return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_ENCOURS, $class, $val_euros, $this)
-//                                or $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_IMPAYE, $class, $val_euros, $this);
-//                    }
-//                }
-//                return 0;
-                return 1;
+                if (BimpCore::isModuleActive('bimpvalidation')) {
+                    // todo BV
+                } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
+                    $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                    $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_ENCOURS);
+
+                    if ($demande === 0)
+                        $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_IMPAYE);
+
+                    // Encours
+                    if (is_a($demande, 'DemandeValidComm')) {
+                        list($secteur, $class,, $val_euros) = $vc->getObjectParams($this, $errors);
+                        return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_ENCOURS, $class, $val_euros, $this)
+                                or $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_IMPAYE, $class, $val_euros, $this);
+                    }
+                }
+                return 0;
         }
         return parent::canSetAction($action);
     }
@@ -187,7 +184,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     return 1;
                 }
                 return 0;
-                
+
             case 'entrepot':
                 if ($this->isLoaded() && !$user->rights->bimpcommercial->changeEntrepot) {
                     return 0;
@@ -380,7 +377,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
         if (!(int) parent::isFieldEditable($field, $force_edit)) {
             return 0;
         }
-        
+
         switch ($field) {
             case 'entrepot':
 //                if (!$force_edit) {
@@ -2436,7 +2433,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
             $this->updateField('status_forced', array(), null, true);
             $this->updateField('logistique_status', 1, null, true);
-            
+
             $this->checkLogistiqueStatus();
             $this->checkShipmentStatus();
             $this->checkInvoiceStatus();

@@ -251,7 +251,7 @@ div.task_panel {
         margin: 5px 0;
         font-style: italic;
     }
-    
+
     .task_subj {
         font-weight: bold;
     }
@@ -263,6 +263,22 @@ div.task_panel {
         border-color: #FFFFE1;
         border-radius: 8px;
         box-shadow: 0 0 2px #787878;
+    }
+}
+
+/*BimpValidation*/
+
+div.bv_demandes_panel {
+    max-height: auto;
+    overflow-y: scroll;
+    padding: 0px;
+    line-height: 22px;
+    width: 800px;
+
+    .user_demande {
+        font-size: 11px;
+        font-style: italic;
+        color: #006AFF;
     }
 }
 

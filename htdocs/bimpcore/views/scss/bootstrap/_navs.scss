@@ -108,6 +108,11 @@
                 border-bottom-color: transparent;
                 cursor: default;
             }
+            
+            .badge {
+                color: $primary!important;
+                background-color: #fff!important;
+            }
         }
     }
     // pulling this in mainly for less shorthand

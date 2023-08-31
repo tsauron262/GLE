@@ -1,16 +1,11 @@
 table: bimp_notification
 primary: id
 
-
 labels: 
     name: notification
     is_female: 1
-    
-objects:
-
                 
 fields:
-    
     label:
         label: Label
         type: string
@@ -39,8 +34,8 @@ fields:
         
 lists:
     default:
-        add_form_name: default
-        edit_btn: 1
+#        add_form_name: default
+#        edit_btn: 1
         cols:
             id:
             label:

@@ -23,22 +23,25 @@ class Interfacevalidate extends BimpCommTriggers
                         if ($bimpObject->isValidatable($errors)) {
                             if (BimpCore::isModuleActive('bimpvalidation')) {
                                 require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/BV_Lib.php';
-                                
+
                                 $infos = array();
-                                $successes = array();
+                                $warnings = array();
                                 $validation_errors = array();
-                                if (!BimpValidation::tryToValidate($bimpObject, $validation_errors, $infos, $successes)) {
+                                
+                                if (!BimpValidation::tryToValidate($bimpObject, $validation_errors, $infos, $warnings)) {
                                     if (count($validation_errors)) {
                                         $errors[] = BimpTools::getMsgFromArray($validation_errors, 'Echec de la tentative de validation');
                                     } else {
-                                        $errors[] = 'Vous ne pouvez pas valider complètement ' . $bimpObject->getLabel('this');
+                                        $errors[] = 'Vous ne pouvez pas valider ' . $bimpObject->getLabel('this');
                                     }
                                 }
+                                
                                 if (count($infos)) {
-                                    setEventMessages(BimpTools::getMsgFromArray($successes), null, 'warnings');
+                                    setEventMessages(BimpTools::getMsgFromArray($infos), null, 'mesgs');
                                 }
-                                if (count($successes)) {
-                                    setEventMessages(BimpTools::getMsgFromArray($successes), null, 'mesgs');
+                                
+                                if (count($warnings)) {
+                                    setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
                                 }
                             } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
                                 $validateur = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');

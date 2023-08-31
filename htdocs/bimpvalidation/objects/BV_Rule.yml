@@ -70,6 +70,7 @@ fields:
             type: custom
             content: 
                 callback: renderExtraParamsInput
+        searchable: 0
         depends_on: type,objects,secteurs
         
     all_users: 
@@ -116,12 +117,29 @@ fields:
         type: bool
         default_value: 1
     
+filters: 
+    sur_marge: 
+        label: Sur Marge
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+            
+    is_sup: 
+        label: Sup. hiérarchique seulement
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+            
 filters_panels: 
     default: 
         filters: 
             type: 
             secteurs: 
             objects: 
+            sur_marge: 
+            is_sup:
       
 lists_cols: 
     col_objects: 
@@ -155,7 +173,6 @@ lists:
         add_form_name: default
         edit_btn: 1
         delete_btn: 1
-        modal_view: default
         cols: 
             type: 
             col_objects:

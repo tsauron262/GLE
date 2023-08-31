@@ -4900,60 +4900,64 @@ tbody.collapse.in {
       border: 1px solid #fff;
       border-bottom-color: transparent;
       cursor: default; }
+    /* line 112, ../scss/bootstrap/_navs.scss */
+    .nav-tabs > li.active > a .badge {
+      color: #C11F2A !important;
+      background-color: #fff !important; }
 
-/* line 124, ../scss/bootstrap/_navs.scss */
+/* line 129, ../scss/bootstrap/_navs.scss */
 .nav-pills > li {
   float: left; }
-  /* line 128, ../scss/bootstrap/_navs.scss */
+  /* line 133, ../scss/bootstrap/_navs.scss */
   .nav-pills > li > a {
     border-radius: 0; }
-  /* line 131, ../scss/bootstrap/_navs.scss */
+  /* line 136, ../scss/bootstrap/_navs.scss */
   .nav-pills > li + li {
     margin-left: 2px; }
-  /* line 137, ../scss/bootstrap/_navs.scss */
+  /* line 142, ../scss/bootstrap/_navs.scss */
   .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
     color: #fff;
     background-color: #C11F2A; }
 
-/* line 150, ../scss/bootstrap/_navs.scss */
+/* line 155, ../scss/bootstrap/_navs.scss */
 .nav-stacked > li {
   float: none; }
-  /* line 152, ../scss/bootstrap/_navs.scss */
+  /* line 157, ../scss/bootstrap/_navs.scss */
   .nav-stacked > li + li {
     margin-top: 2px;
     margin-left: 0; }
 
-/* line 166, ../scss/bootstrap/_navs.scss */
+/* line 171, ../scss/bootstrap/_navs.scss */
 .nav-justified, .nav-tabs.nav-justified {
   width: 100%; }
-  /* line 169, ../scss/bootstrap/_navs.scss */
+  /* line 174, ../scss/bootstrap/_navs.scss */
   .nav-justified > li, .nav-tabs.nav-justified > li {
     float: none; }
-    /* line 171, ../scss/bootstrap/_navs.scss */
+    /* line 176, ../scss/bootstrap/_navs.scss */
     .nav-justified > li > a, .nav-tabs.nav-justified > li > a {
       text-align: center;
       margin-bottom: 5px; }
-  /* line 177, ../scss/bootstrap/_navs.scss */
+  /* line 182, ../scss/bootstrap/_navs.scss */
   .nav-justified > .dropdown .dropdown-menu {
     top: auto;
     left: auto; }
   @media (min-width: 1000px) {
-    /* line 183, ../scss/bootstrap/_navs.scss */
+    /* line 188, ../scss/bootstrap/_navs.scss */
     .nav-justified > li, .nav-tabs.nav-justified > li {
       display: table-cell;
       width: 1%; }
-      /* line 186, ../scss/bootstrap/_navs.scss */
+      /* line 191, ../scss/bootstrap/_navs.scss */
       .nav-justified > li > a, .nav-tabs.nav-justified > li > a {
         margin-bottom: 0; } }
 
-/* line 196, ../scss/bootstrap/_navs.scss */
+/* line 201, ../scss/bootstrap/_navs.scss */
 .nav-tabs-justified, .nav-tabs.nav-justified {
   border-bottom: 0; }
-  /* line 199, ../scss/bootstrap/_navs.scss */
+  /* line 204, ../scss/bootstrap/_navs.scss */
   .nav-tabs-justified > li > a, .nav-tabs.nav-justified > li > a {
     margin-right: 0;
     border-radius: 0; }
-  /* line 205, ../scss/bootstrap/_navs.scss */
+  /* line 210, ../scss/bootstrap/_navs.scss */
   .nav-tabs-justified > .active > a, .nav-tabs.nav-justified > .active > a,
   .nav-tabs-justified > .active > a:hover,
   .nav-tabs.nav-justified > .active > a:hover,
@@ -4961,11 +4965,11 @@ tbody.collapse.in {
   .nav-tabs.nav-justified > .active > a:focus {
     border: 1px solid #fff; }
   @media (min-width: 1000px) {
-    /* line 212, ../scss/bootstrap/_navs.scss */
+    /* line 217, ../scss/bootstrap/_navs.scss */
     .nav-tabs-justified > li > a, .nav-tabs.nav-justified > li > a {
       border-bottom: 1px solid #fff;
       border-radius: 0 0 0 0; }
-    /* line 216, ../scss/bootstrap/_navs.scss */
+    /* line 221, ../scss/bootstrap/_navs.scss */
     .nav-tabs-justified > .active > a, .nav-tabs.nav-justified > .active > a,
     .nav-tabs-justified > .active > a:hover,
     .nav-tabs.nav-justified > .active > a:hover,
@@ -4973,18 +4977,18 @@ tbody.collapse.in {
     .nav-tabs.nav-justified > .active > a:focus {
       border-bottom-color: #fff; } }
 
-/* line 229, ../scss/bootstrap/_navs.scss */
+/* line 234, ../scss/bootstrap/_navs.scss */
 .tab-content {
   padding: 10px;
   background-color: #fff; }
-  /* line 233, ../scss/bootstrap/_navs.scss */
+  /* line 238, ../scss/bootstrap/_navs.scss */
   .tab-content > .tab-pane {
     display: none; }
-  /* line 236, ../scss/bootstrap/_navs.scss */
+  /* line 241, ../scss/bootstrap/_navs.scss */
   .tab-content > .active {
     display: block; }
 
-/* line 246, ../scss/bootstrap/_navs.scss */
+/* line 251, ../scss/bootstrap/_navs.scss */
 .nav-tabs .dropdown-menu {
   margin-top: -1px;
   border-top-right-radius: 0;
@@ -12030,25 +12034,39 @@ div.task_panel {
     border-radius: 8px;
     box-shadow: 0 0 2px #787878; }
 
+/*BimpValidation*/
+/* line 271, ../scss/bimpcore/_notifications.scss */
+div.bv_demandes_panel {
+  max-height: auto;
+  overflow-y: scroll;
+  padding: 0px;
+  line-height: 22px;
+  width: 800px; }
+  /* line 278, ../scss/bimpcore/_notifications.scss */
+  div.bv_demandes_panel .user_demande {
+    font-size: 11px;
+    font-style: italic;
+    color: #006AFF; }
+
 /* Les onglets */
-/* line 270, ../scss/bimpcore/_notifications.scss */
+/* line 286, ../scss/bimpcore/_notifications.scss */
 ul#nav_task > li {
   width: 48%; }
 
-/* line 274, ../scss/bimpcore/_notifications.scss */
+/* line 290, ../scss/bimpcore/_notifications.scss */
 ul#nav_task > li.reload {
   width: 2%; }
 
-/* line 278, ../scss/bimpcore/_notifications.scss */
+/* line 294, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a {
   padding-left: 0px;
   padding-right: 0px; }
 
-/* line 283, ../scss/bimpcore/_notifications.scss */
+/* line 299, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a > span {
   margin: 0px; }
 
-/* line 287, ../scss/bimpcore/_notifications.scss */
+/* line 303, ../scss/bimpcore/_notifications.scss */
 .nav-tabs > li.reload > a:hover {
   background-color: unset !important;
   border-top-color: white;

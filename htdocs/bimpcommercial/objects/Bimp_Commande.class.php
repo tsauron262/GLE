@@ -154,7 +154,16 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
             case 'sendMailLatePayment':
                 if (BimpCore::isModuleActive('bimpvalidation')) {
-                    // todo BV
+                    $demande = BimpCache::findBimpObjectInstance('bimpvalidation', 'BV_Demande', array(
+                                'status'          => 0,
+                                'type_validation' => 'rtp',
+                                'type_object'     => 'commande',
+                                'id_object'       => $this->id
+                                    ), true);
+
+                    if (BimpObject::objectLoaded($demande)) {
+                        return $demande->canProcess();
+                    }
                 } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
                     $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                     $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_ENCOURS);
@@ -340,9 +349,13 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $errors[] = $invalide_error;
                     return 0;
                 }
+
                 // A une demande de validation de retard de paiement
                 if (BimpCore::isModuleActive('bimpvalidation')) {
-                    // todo BV
+                    if (!(int) $this->db->getCount('bv_demande', "type_validation = 'rtp' AND type_object = 'commande' AND id_object = $this->id AND status = 0")) {
+                        $errors[] = "Aucune demande de validation pour retard de paiement pour cette commande";
+                        return 0;
+                    }
                 } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
                     $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                     if ($vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE) === 0) {
@@ -360,11 +373,11 @@ class Bimp_Commande extends Bimp_CommandeTemp
                             return 0;
                         }
                     } else {
-                        $errors[] = "Client mal chargé";
+                        $errors[] = "Client absent";
                         return 0;
                     }
                 } else {
-                    $errors[] = "Client inconnu " . (int) $this->getData('fk_soc');
+                    $errors[] = "Client #" . (int) $this->getData('fk_soc') . " inexistant";
                     return 0;
                 }
                 return 1;
@@ -910,7 +923,29 @@ class Bimp_Commande extends Bimp_CommandeTemp
             // pour relancer le client si il y a des impayé
             if ($this->isActionAllowed('sendMailLatePayment') && $this->canSetAction('sendMailLatePayment')) {
                 if (BimpCore::isModuleActive('bimpvalidation')) {
-                    // todo BV
+                    $demande = BimpCache::findBimpObjectInstance('bimpvalidation', 'BV_Demande', array(
+                                'status'          => 0,
+                                'type_validation' => 'rtp',
+                                'type_object'     => 'commande',
+                                'id_object'       => $this->id
+                                    ), true);
+
+                    if (BimpObject::objectLoaded($demande)) {
+                        $user_ask = $demande->getChildObject('user_demande');
+                        if (BimpObject::objectLoaded($user_ask)) {
+                            $buttons[] = array(
+                                'label'   => 'Signaler retard paiement',
+                                'icon'    => 'envelope',
+                                'type'    => 'danger',
+                                'onclick' => $this->getJsActionOnclick('sendMailLatePayment', array(
+                                    'user_ask_firstname' => $user_ask->getData('firstname'),
+                                    'user_ask_email'     => $user_ask->getData('email')
+                                        ), array(
+                                    'confirm_msg' => "Confirmer l\'envoie de mail à " . $user_ask->getName()
+                                ))
+                            );
+                        }
+                    }
                 } elseif (BimpCore::isModuleActive('bimpvalidateorder')) {
                     BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
                     BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm');

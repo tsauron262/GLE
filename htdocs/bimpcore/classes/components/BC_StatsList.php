@@ -603,6 +603,15 @@ class BC_StatsList extends BC_List
 
         if (!empty($request_fields)) {
             $sql = BimpTools::getSqlSelect($request_fields, 'a');
+            
+            
+            if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+                $newJoins = array();
+                if($this->object->getEntityFilter($newJoins, $filters)){
+                    $joins = BimpTools::merge_array($joins, $newJoins);
+                }
+            }
+            
             $sql .= BimpTools::getSqlFrom($table, $joins, 'a');
             $sql .= BimpTools::getSqlWhere($filters, 'a');
             $sql .= ' GROUP BY ';
@@ -696,6 +705,13 @@ class BC_StatsList extends BC_List
         } else {
             $joins = $this->final_joins;
             $filters = $this->final_filters;
+        }
+        
+        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
+            $newJoins = array();
+            if($this->object->getEntityFilter($newJoins, $filters)){
+                $joins = BimpTools::merge_array($joins, $newJoins);
+            }
         }
 
         $sql .= BimpTools::getSqlFrom($table, $joins);

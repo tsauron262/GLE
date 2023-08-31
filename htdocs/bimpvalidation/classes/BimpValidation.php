@@ -66,6 +66,10 @@ class BimpValidation
         $global_check = 1;
         $demandes = array();
         foreach ($rules as $type => $type_rules) {
+            if ($type != 'rtp') {
+                continue;
+            }
+
             $debug .= ($debug ? '<br/><br/>' : '') . '<b>Validation de type "' . $type . '" :</b> ' . count($type_rules) . ' règle(s) correspondantes.<br/>';
             $type_errors = array();
             $type_check = 0;
@@ -90,6 +94,12 @@ class BimpValidation
                     if ($demande->canProcess()) {
                         $debug .= 'La demande existante #' . $demande->id . ' peut être acceptée par cet utilisateur.';
                         $type_check = 1;
+                    } else {
+                        // Demande en cours pour ce type
+                        $debug .= 'La demande existante #' . $demande->id . ' ne peut pas être acceptée par cet utilisateur.';
+                        $infos[] = 'Une demande de validation ' . $demande->displayValidationType() . ' a déjà été effectuée et est en attente de traitement';
+                        $global_check = 0;
+                        continue;
                     }
                 }
             }

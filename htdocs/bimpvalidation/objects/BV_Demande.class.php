@@ -36,9 +36,9 @@ class BV_Demande extends BimpObject
     public function canProcess()
     {
         global $user;
-        if ($user->admin) {
-            return 1;
-        }
+//        if ($user->admin) {
+//            return 1;
+//        }
 
         $users = $this->getData('validation_users');
 

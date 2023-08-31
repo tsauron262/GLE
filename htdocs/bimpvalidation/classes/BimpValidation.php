@@ -653,13 +653,7 @@ class BimpValidation
                 }
                 break;
 
-            case 'fin':
-                if (BimpCore::isModeDev()) {
-                    $val = 5000;
-                    $val_str = BimpTools::displayMoneyValue($val, 'EUR');
-                    break;
-                }
-                
+            case 'fin':                
                 if (is_a($object, 'BimpComm')) {
                     if ($object->field_exists('total_ttc')) {
                         $val = (float) $object->getData('total_ttc');

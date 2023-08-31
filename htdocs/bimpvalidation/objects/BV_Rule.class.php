@@ -17,7 +17,7 @@ class BV_Rule extends BimpObject
         'contrat'  => array('label' => 'Contrat', 'icon' => 'fas_file-signature', 'module' => 'bimpcontract', 'object_name' => 'BContract_contrat', 'table' => 'contrat'),
     );
 
-    // Droits users: 
+    // Droits users:
 
     public function canCreate()
     {

@@ -611,14 +611,6 @@ class BimpValidation
 
         switch ($type_validation) {
             case 'comm':
-                // A suppr: 
-                if (BimpCore::isModeDev()) {
-                    $extra_data['percent_marge'] = 75;
-                    $val = 75;
-                    $val_str = BimpTools::displayFloatValue($val, 4) . ' %';
-                    break;
-                }
-                // *******
                 $extra_data['percent_marge'] = 0;
                 if (is_a($object, 'BimpComm')) {
                     $remises_infos = $object->getRemisesInfos();
@@ -657,18 +649,11 @@ class BimpValidation
                 break;
 
             case 'fin':
-                // A suppr: 
-                if (BimpCore::isModeDev()) {
-                    $val = 25000;
-                    $val_str = BimpTools::displayMoneyValue($val, 'EUR');
-                    break;
-                }
-                // *******
                 if (is_a($object, 'BimpComm')) {
-                    if ($object->field_exists('total_ht')) {
-                        $val = (float) $object->getData('total_ht');
+                    if ($object->field_exists('total_ttc')) {
+                        $val = (float) $object->getData('total_ttc');
                     } elseif (method_exists($object, 'getCurrentTotal')) {
-                        $val = (float) $object->getCurrentTotal();
+                        $val = (float) $object->getCurrentTotal(1);
                     }
 
                     if ($val > 0) {
@@ -694,13 +679,6 @@ class BimpValidation
                 break;
 
             case 'rtp':
-                // A suppr: 
-                if (BimpCore::isModeDev()) {
-                    $val = 25000;
-                    $val_str = BimpTools::displayMoneyValue($val, 'EUR');
-                    break;
-                }
-                // *******
                 if (method_exists($object, 'getClientFacture')) {
                     $client = $object->getClientFacture();
                 } else {

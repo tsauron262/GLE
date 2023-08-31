@@ -158,10 +158,22 @@ lists_cols:
         min_width: 120
         value: 
             callback: displaySecteurs
+        search: 
+            input: 
+                type: select
+                options:
+                    options: 
+                        array: searchSecteurs
     col_users: 
         label: Utilisateurs
         value: 
             callback: displayUsers
+        search: 
+            input: 
+                type: select
+                options:
+                    options: 
+                        array: searchUsers
             
 lists: 
     default: 

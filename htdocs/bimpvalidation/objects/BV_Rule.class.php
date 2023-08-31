@@ -232,7 +232,7 @@ class BV_Rule extends BimpObject
         foreach (BimpCache::getUsersArray(false) as $id_user => $name) {
             $users[(string) $id_user] = $name;
         }
-        
+
         return $users;
     }
 

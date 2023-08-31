@@ -91,11 +91,7 @@ class BimpValidation
                         $debug .= 'La demande existante #' . $demande->id . ' peut être acceptée par cet utilisateur.';
                         $type_check = 1;
                     } else {
-                        // Demande en cours pour ce type
                         $debug .= 'La demande existante #' . $demande->id . ' ne peut pas être acceptée par cet utilisateur.';
-                        $infos[] = 'Une demande de validation ' . $demande->displayValidationType() . ' a déjà été effectuée et est en attente de traitement';
-                        $global_check = 0;
-                        continue;
                     }
                 }
             }
@@ -166,43 +162,48 @@ class BimpValidation
                 }
             } else {
                 $global_check = 0;
+                if (BimpObject::objectLoaded($demande)) {
+                    // Une demande existe déjà pour ce type et ne peut être acceptée
+                    $debug .= 'La demande existante #' . $demande->id . ' ne peut toujours pas être acceptée.';
+                    $infos[] = 'Une demande de validation ' . $demande->displayValidationType() . ' a déjà été effectuée et est en attente de traitement';
+                } else {
+                    // Création d'une demande de validation: 
+                    $demande_errors = array();
+                    $users = array();
 
-                // Création d'une demande de validation: 
-                $demande_errors = array();
-                $users = array();
-
-                foreach ($valid_rules as $rule) {
-                    foreach ($rule->getValidationUsers() as $id_user) {
-                        if (!in_array($id_user, $users)) {
-                            $users[] = $id_user;
+                    foreach ($valid_rules as $rule) {
+                        foreach ($rule->getValidationUsers() as $id_user) {
+                            if (!in_array($id_user, $users)) {
+                                $users[] = $id_user;
+                            }
                         }
                     }
-                }
 
-                if (!empty($users)) {
-                    $debug .= 'Création d\'une nouvelle demande.<br/>';
-                    $debug .= 'Utilisateurs : <pre>' . print_r($users, 1) . '</pre>';
+                    if (!empty($users)) {
+                        $debug .= 'Création d\'une nouvelle demande.<br/>';
+                        $debug .= 'Utilisateurs : <pre>' . print_r($users, 1) . '</pre>';
 
-                    $demande_warnings = array();
-                    $demande = BimpObject::createBimpObject('bimpvalidation', 'BV_Demande', array(
-                                'type_validation'  => $type,
-                                'type_object'      => $object_type,
-                                'id_object'        => $object->id,
-                                'id_user_demande'  => $user->id,
-                                'validation_users' => $users
-                                    ), true, $demande_errors, $demande_warnings, true);
-                } else {
-                    $msg = 'Aucun utilisateur n\'a la possibilité d\'effectuer cette validation';
-                    $demande_errors[] = $msg;
-                    $debug .= $msg . '<br/>';
-                }
+                        $demande_warnings = array();
+                        $demande = BimpObject::createBimpObject('bimpvalidation', 'BV_Demande', array(
+                                    'type_validation'  => $type,
+                                    'type_object'      => $object_type,
+                                    'id_object'        => $object->id,
+                                    'id_user_demande'  => $user->id,
+                                    'validation_users' => $users
+                                        ), true, $demande_errors, $demande_warnings, true);
+                    } else {
+                        $msg = 'Aucun utilisateur n\'a la possibilité d\'effectuer cette validation';
+                        $demande_errors[] = $msg;
+                        $debug .= $msg . '<br/>';
+                    }
 
-                if (count($demande_errors)) {
-                    $debug .= 'Erreurs : <pre>' . print_r($demande_errors, 1) . '</pre>';
-                    $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de la création d\'une demande de validation de type "' . $demande->displayDataDefault('type') . '"');
-                } else {
-                    $demandes[] = $demande;
-                    $debug .= 'OK (Demande #' . $demande->id . ').<br/>';
+                    if (count($demande_errors)) {
+                        $debug .= 'Erreurs : <pre>' . print_r($demande_errors, 1) . '</pre>';
+                        $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de la création d\'une demande de validation de type "' . $demande->displayDataDefault('type') . '"');
+                    } else {
+                        $demandes[] = $demande;
+                        $debug .= 'OK (Demande #' . $demande->id . ').<br/>';
+                    }
                 }
             }
         }
@@ -679,6 +680,10 @@ class BimpValidation
 
                         if (BimpObject::objectLoaded($client)) {
                             $val += (float) $client->getEncours() + $client->getEncoursNonFacture() - ((float) $client->getData('outstanding_limit') * 1.2);
+                        }
+
+                        if ($val < 0) {
+                            $val = 0;
                         }
                     } else {
                         $val = 0;

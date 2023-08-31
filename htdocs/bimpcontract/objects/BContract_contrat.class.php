@@ -2706,7 +2706,7 @@ class BContract_contrat extends BimpDolObject
             $contrat->set('relance_renouvellement', 1);
             $contrat->set('syntec', 0);
 
-            $errors = $contrat->create();
+             $errors = $contrat->create();
 
             if (!count($errors)) {
                 foreach ($data->services as $nb => $infos) {

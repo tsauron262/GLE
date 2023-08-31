@@ -214,8 +214,11 @@ class BimpPDF_Table
 
         $html .= '</tr>';
         $html .= '</table>';
-
-//        echo htmlentities($html) .'<br/><br/>';
+        
+//        global $user; 
+//        if ($user->login = 'f.martinez') {
+//            echo htmlentities($html);
+//        }
         
         $pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html . "", false, false, true, false, '');
     }

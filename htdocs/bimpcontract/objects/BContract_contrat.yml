@@ -1197,6 +1197,7 @@ fields_tables:
         rows:
             - field: show_fact_line_in_pdf
               edit: 1
+              
     facturation:
         panel: 1
         title: Informations sur la facturation du contrat
@@ -1211,6 +1212,7 @@ fields_tables:
             - label: Date de début de prochaine période de facturation
               value:
                   callback: displayDateNextFacture
+                  
     duration:
         panel: 1
         title: Informations sur la durée de validité du contrat

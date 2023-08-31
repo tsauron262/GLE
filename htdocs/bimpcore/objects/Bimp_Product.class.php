@@ -166,13 +166,17 @@ class Bimp_Product extends BimpObject
 
     public function canSetAction($action)
     {
+        global $user;
+        
         switch ($action) {
             case 'validate':
             case 'refuse':
             case 'merge':
-            case 'mouvement':
             case 'duplicate':
                 return $this->canValidate();
+
+            case 'mouvement':
+                return ($this->canValidate() || $user->rights->bimpcommercial->correct_stocks);
 
             case 'updatePrice':
                 return ($this->canValidate() && $this->canEditPrices());
@@ -207,7 +211,7 @@ class Bimp_Product extends BimpObject
     public function iAmAdminRedirect()
     {
         global $user;
-        if($user->id == 286)
+        if ($user->id == 286)
             return 1;
 //        if ($user->rights->bimpcommercial->validProd)
 //            return 1;
@@ -629,7 +633,8 @@ class Bimp_Product extends BimpObject
 
 
 
-        if (preg_match('.(applecare).', strtolower($this->getData('label')))) {
+        if ((preg_match('.(applecare).', strtolower($this->getData('label'))) || preg_match('.(apple care).', strtolower($this->getData('label')))
+                ) && ($this->getData('tva_tx') == 0 || $tva_null)) {
             return BimpCore::getConf('applecare_compte', null, 'bimptocegid');
         }
 

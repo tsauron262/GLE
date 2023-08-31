@@ -5021,7 +5021,7 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    public function checkMargin($recalculate_revals = false, $check_base_marge = false)
+    public function checkMargin($recalculate_revals = false, $check_base_marge = true)
     {
         $errors = array();
 

@@ -26,16 +26,20 @@ if (!$user->admin) {
     exit;
 }
 
-$p = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropal', 457173);
-echo 'DEVIS SAV :' . BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($p)) .'<br/><br/>';
+if (BimpCore::isModuleActive('bimpvalidateorder')) {
+    echo 'bimpvalidateorder actif.<br/>';
+} else {
+    echo 'bimpvalidateorder inactf.<br/>';
+}
 
-$p = BimpCache::getBimpObjectInstance('bimpcommerical', 'Bimp_Propal', 457176);
-echo 'DEVIS COMM :' . BimpObject::getPublicBaseUrl(false, BimpPublicController::getPublicEntityForObjectSecteur($p)) .'<br/><br/>';
+echo '<br/>';
 
+if (BimpCore::isModuleActive('bimpvalidation')) {
+    echo 'bimpvalidation actif.<br/>';
+} else {
+    echo 'bimpvalidation inactf.<br/>';
+}
 
-echo '<pre>';
-print_r(scandir(DOL_DATA_ROOT.'/mycompany/logos'));
-echo '</pre>';
 echo '<br/>FIN';
 echo '</body></html>';
 

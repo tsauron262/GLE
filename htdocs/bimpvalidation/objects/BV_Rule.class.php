@@ -13,7 +13,7 @@ class BV_Rule extends BimpObject
     public static $objects_list = array(
         'propal'   => array('label' => 'Devis', 'icon' => 'fas_file-invoice', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Propal', 'table' => 'propal'),
         'commande' => array('label' => 'Commande', 'icon' => 'fas_dolly', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Commande', 'table' => 'commande'),
-        'facture'  => array('label' => 'Facture', 'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Facture', 'table' => 'facture'),
+//        'facture'  => array('label' => 'Facture', 'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Facture', 'table' => 'facture'),
         'contrat'  => array('label' => 'Contrat', 'icon' => 'fas_file-signature', 'module' => 'bimpcontract', 'object_name' => 'BContract_contrat', 'table' => 'contrat'),
     );
 

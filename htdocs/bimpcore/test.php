@@ -26,6 +26,13 @@ if (!$user->admin) {
     exit;
 }
 
+if (Bimpcore::isModeDev()) {
+    echo 'MODE DEV ACTIF.<br/>';
+} else {
+    echo 'MODE DEV INACTIF.<br/>';
+}
+echo '<br/>';
+
 if (BimpCore::isModuleActive('bimpvalidateorder')) {
     echo 'bimpvalidateorder actif.<br/>';
 } else {

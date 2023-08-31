@@ -536,6 +536,7 @@ class BV_Demande extends BimpObject
         } else {
             require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/BV_Lib.php';
 
+            $id_main_user = (int) $users[0];
             $id_new_user_affected = (int) self::getFirstAvailableUser($users, $infos);
 
             if (!$id_new_user_affected) {
@@ -543,7 +544,7 @@ class BV_Demande extends BimpObject
             } elseif ($id_new_user_affected !== $id_cur_affected_user) {
                 $this->updateField('id_user_affected', $id_new_user_affected);
 
-                if ($notify_if_change) {
+                if ($notify_if_change && (!$id_cur_affected_user || $id_new_user_affected != $id_main_user)) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_new_user_affected);
 
                     if (!BimpObject::objectLoaded($user)) {
@@ -565,7 +566,8 @@ class BV_Demande extends BimpObject
                         } else {
                             $subject = 'Demande de validation ' . $types[$type]['label2'];
                             $msg = 'Bonjour, <br/><br/>';
-                            $msg .= 'La validation ' . $types[$type]['label2'] . ' <a href="">' . $obj->getLabel('of_the') . ' (PROV' . $obj->id . ')</a>';
+
+                            $msg .= 'La validation ' . $types[$type]['label2'] . ' <a href="' . $obj->getUrl() . '">' . $obj->getLabel('of_the') . ' (PROV' . $obj->id . ')</a>';
                             $msg .= ' est en attente.<br/>';
 
                             $user_demande = $this->getChildObject('user_demande');

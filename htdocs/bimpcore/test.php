@@ -26,26 +26,12 @@ if (!$user->admin) {
     exit;
 }
 
-if (Bimpcore::isModeDev()) {
-    echo 'MODE DEV ACTIF.<br/>';
-} else {
-    echo 'MODE DEV INACTIF.<br/>';
-}
-echo '<br/>';
+require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/classes/BimpValidationCronExec.class.php';
 
-if (BimpCore::isModuleActive('bimpvalidateorder')) {
-    echo 'bimpvalidateorder actif.<br/>';
-} else {
-    echo 'bimpvalidateorder inactf.<br/>';
-}
+$cron = new BimpValidationCronExec($db);
+echo 'Res : ' . $cron->checkAffectedUsers() . '<br/><br/>';
+echo $cron->output;
 
-echo '<br/>';
-
-if (BimpCore::isModuleActive('bimpvalidation')) {
-    echo 'bimpvalidation actif.<br/>';
-} else {
-    echo 'bimpvalidation inactf.<br/>';
-}
 
 echo '<br/>FIN';
 echo '</body></html>';

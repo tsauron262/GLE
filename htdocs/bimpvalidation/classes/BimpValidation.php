@@ -30,7 +30,7 @@ class BimpValidation
         $object_params = self::getObjectParams($object, $errors);
 
         if (is_null($object_params)) {
-            return 0;
+            return 1;
         }
 
         // Vérif de l'existance d'une demande refusée pour cet objet:
@@ -581,7 +581,7 @@ class BimpValidation
         }
 
         if (!$obj_type) {
-            $errors[] = 'Objet invalide';
+            return null;
         }
 
         if (is_a($object, 'BimpComm') && $object->field_exists('ef_type')) {

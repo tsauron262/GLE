@@ -653,7 +653,7 @@ class BimpValidation
                 }
                 break;
 
-            case 'fin':                
+            case 'fin':
                 if (is_a($object, 'BimpComm')) {
                     if ($object->field_exists('total_ttc')) {
                         $val = (float) $object->getData('total_ttc');
@@ -684,6 +684,11 @@ class BimpValidation
                 break;
 
             case 'rtp':
+                if (BimpCore::isModeDev()) {
+                    $val = 2500;
+                    $val_str = BimpTools::displayMoneyValue($val, 'EUR');
+                    break;
+                }
                 if (method_exists($object, 'getClientFacture')) {
                     $client = $object->getClientFacture();
                 } else {
@@ -693,11 +698,11 @@ class BimpValidation
                 if (BimpObject::objectLoaded($client)) {
                     $val = $client->getTotalUnpayedTolerance();
                 }
-                
+
                 if ($val < 0) {
                     $val = 0;
                 }
-                
+
                 $val_str = BimpTools::displayMoneyValue($val, 'EUR');
                 break;
         }

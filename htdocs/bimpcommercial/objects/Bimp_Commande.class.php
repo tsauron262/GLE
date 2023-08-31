@@ -452,7 +452,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     if (!in_array($user->id, array(232, 97, 1566, 512, 40))) {
                         $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
                         if ($available_discounts < $this->getData('total_ttc') && $this->getData('total_ttc') > 2)
-                            $errors[] = "Les clients sans encours doivent régler à la commande";
+                            $errors[] = "Les clients sans encours autorisé doivent régler à la commande";
                     }
                 }
             }

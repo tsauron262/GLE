@@ -37,11 +37,21 @@ class BV_Demande extends BimpObject
     {
         global $user;
 
+        $id_user_affected = (int) $this->getData('id_user_affected');
+
+        if ($id_user_affected && $user->id == $id_user_affected) {
+            return 1;
+        }
+
         $users = $this->getData('validation_users');
 
         if (!empty($users)) {
             if (in_array($user->id, $users)) {
                 return 1;
+            }
+
+            if ($id_user_affected && !in_array($id_user_affected, $users)) {
+                $users[] = $id_user_affected;
             }
 
             // Pour chaque user on vérifie que l'utilisateur n'est pas un supérieur (quelque soit le niveau hiérarchique) 
@@ -113,7 +123,7 @@ class BV_Demande extends BimpObject
         if (!BimpObject::objectLoaded($object)) {
             return 0;
         }
-        
+
         $type_obj = self::getObjectType($object);
         if ($type_obj) {
             $where = 'type_object = \'' . $type_obj . '\' AND id_object = ' . $object->id . ' AND status = ' . self::BV_REFUSED;

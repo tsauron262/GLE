@@ -693,6 +693,11 @@ class BimpValidation
                 if (BimpObject::objectLoaded($client)) {
                     $val = $client->getTotalUnpayedTolerance();
                 }
+                
+                if ($val < 0) {
+                    $val = 0;
+                }
+                
                 $val_str = BimpTools::displayMoneyValue($val, 'EUR');
                 break;
         }

@@ -146,7 +146,13 @@ lists_cols:
         label: Objet
         min_width: 100
         value: 
-            callback: displayObjects        
+            callback: displayObjects    
+        search: 
+            input: 
+                type: select
+                options:
+                    options: 
+                        array: searchObjects
     col_secteurs: 
         label: Secteurs
         min_width: 120

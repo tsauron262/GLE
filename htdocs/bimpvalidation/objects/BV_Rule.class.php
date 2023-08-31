@@ -158,6 +158,30 @@ class BV_Rule extends BimpObject
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
+    public function getcol_objectsSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ($value == 'all') {
+            $filters[$main_alias . '.all_objects'] = 1;
+        } else {
+            $filters['or_obj'] = array(
+                'or' => array(
+                    $main_alias . '.all_objects' => 1,
+                    $main_alias . '.objects'     => array(
+                        'part_type' => 'middle',
+                        'part'      => '[' . $value . ']'
+                    )
+                )
+            );
+        }
+    }
+
+    // Getters Array: 
+
+    public function getSearchObjectsArray()
+    {
+        return BimpTools::merge_array(array('all' => 'Tous les objets'), self::$objects_list);
+    }
+
     // Affichges: 
 
     public function displayObjects()

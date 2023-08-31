@@ -7,7 +7,7 @@ class BV_Rule extends BimpObject
 
     public static $types = array(
         'comm' => array('label' => 'Commerciale (Remises)', 'icon' => 'fas_percentage', 'val_label' => 'Remises (%)', 'label2' => 'commerciale (remises)'),
-        'fin'  => array('label' => 'Financière (Encours)', 'icon' => 'fas_hand-holding-usd', 'val_label' => 'Encours client', 'label2' => 'financière (encours)'),
+        'fin'  => array('label' => 'Financière (Encours)', 'icon' => 'fas_hand-holding-usd', 'val_label' => 'Dépassement encours client', 'label2' => 'financière (encours)'),
         'rtp'  => array('label' => 'Retard de paiement', 'icon' => 'fas_comment-dollar', 'val_label' => 'Total paiements en retard', 'label2' => 'sur retards de paiement')
     );
     public static $objects_list = array(

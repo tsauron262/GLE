@@ -684,11 +684,6 @@ class BimpValidation
                 break;
 
             case 'rtp':
-                if (BimpCore::isModeDev()) {
-                    $val = 2500;
-                    $val_str = BimpTools::displayMoneyValue($val, 'EUR');
-                    break;
-                }
                 if (method_exists($object, 'getClientFacture')) {
                     $client = $object->getClientFacture();
                 } else {

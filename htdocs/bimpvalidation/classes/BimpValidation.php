@@ -66,10 +66,6 @@ class BimpValidation
         $global_check = 1;
         $demandes = array();
         foreach ($rules as $type => $type_rules) {
-            if ($type != 'rtp') {
-                continue;
-            }
-
             $debug .= ($debug ? '<br/><br/>' : '') . '<b>Validation de type "' . $type . '" :</b> ' . count($type_rules) . ' règle(s) correspondantes.<br/>';
             $type_errors = array();
             $type_check = 0;

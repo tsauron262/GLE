@@ -113,33 +113,38 @@ class BimpValidation
                 $val = $object_data['val'];
                 $extra_data = $object_data['extra_data'];
 
-                // Vérif d'un objet lié déjà validé pour ce type de validation:
-                if (self::checkValidatedLinkedObjects($type, $object, $val, $extra_data, $infos)) {
-                    $debug .= 'Demande de validation non nécessaire car déjà effectuée pour un objet lié.<br/>';
+                if (!$val) {
+                    $debug .= 'Demande de validation non nécessaire car la valeur est à 0.<br/>';
                     $type_check = 1;
                 } else {
-                    $valid_rules = array();
-
-                    // Trie des règles selon leur priorité: 
-                    $type_rules = self::sortValidationTypeRules($type_rules, $type, $val, $extra_data);
-                    foreach ($type_rules as $rule) {
-                        $debug .= 'Règle #' . $rule->id . ' (min : ' . $rule->getData('val_min') . ' - max : ' . $rule->getData('val_max') . ') : ';
-                        if (self::checkRule($rule, $object_type, $secteur, $val, $extra_data, $debug)) {
-                            $debug .= 'OK.<br/>';
-                            $valid_rules[] = $rule;
-                            if ($rule->isUserAllowed($user->id)) {
-                                $debug .= 'L\'utilisateur peut valider la règle #' . $rule->id . '<br/>';
-                                $type_check = 1;
-                                break;
-                            }
-                        } else {
-                            $debug .= '.<br/>Règle non valide.<br/>';
-                        }
-                    }
-
-                    if (empty($valid_rules)) {
-                        $debug .= 'Aucune règle valide correspondante<br/>';
+                    // Vérif d'un objet lié déjà validé pour ce type de validation:
+                    if (self::checkValidatedLinkedObjects($type, $object, $val, $extra_data, $infos)) {
+                        $debug .= 'Demande de validation non nécessaire car déjà effectuée pour un objet lié.<br/>';
                         $type_check = 1;
+                    } else {
+                        $valid_rules = array();
+
+                        // Trie des règles selon leur priorité: 
+                        $type_rules = self::sortValidationTypeRules($type_rules, $type, $val, $extra_data);
+                        foreach ($type_rules as $rule) {
+                            $debug .= 'Règle #' . $rule->id . ' (min : ' . $rule->getData('val_min') . ' - max : ' . $rule->getData('val_max') . ') : ';
+                            if (self::checkRule($rule, $object_type, $secteur, $val, $extra_data, $debug)) {
+                                $debug .= 'OK.<br/>';
+                                $valid_rules[] = $rule;
+                                if ($rule->isUserAllowed($user->id)) {
+                                    $debug .= 'L\'utilisateur peut valider la règle #' . $rule->id . '<br/>';
+                                    $type_check = 1;
+                                    break;
+                                }
+                            } else {
+                                $debug .= '.<br/>Règle non valide.<br/>';
+                            }
+                        }
+
+                        if (empty($valid_rules)) {
+                            $debug .= 'Aucune règle valide correspondante<br/>';
+                            $type_check = 1;
+                        }
                     }
                 }
             }

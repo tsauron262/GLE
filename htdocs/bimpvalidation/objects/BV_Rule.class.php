@@ -90,10 +90,8 @@ class BV_Rule extends BimpObject
 
         foreach ($this->getData('users') as $id_user) {
             if (!in_array($id_user, $users)) {
-                if ($sup_only) {
-                    if (!$bimp_user->isUserSuperior($id_user, 100)) {
-                        continue;
-                    }
+                if ($sup_only && !$bimp_user->isUserSuperior($id_user, 100)) {
+                    continue;
                 }
 
                 $users[] = $id_user;

@@ -2130,6 +2130,34 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             }
         }
 
+        if (BimpCore::isModuleActive('bimpvalidation')) {
+            $propal = $this->getChildObject('propal');
+            if (BimpObject::objectLoaded($propal) && (int) $propal->getData('fk_statut') === 0) {
+                $demandes = BimpValidation::getObjectDemandes($propal, array(
+                            'operator' => '!=',
+                            'value'    => -2
+                ));
+                if (count($demandes)) {
+                    $has_refused = false;
+                    foreach ($demandes as $demande) {
+                        if ((int) $demande->getData('status') === BV_Demande::BV_REFUSED) {
+                            $has_refused = true;
+                            break;
+                        }
+                    }
+
+                    $html .= '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . count($demandes) . ' demande(s) de validation du devis:</span><br/>';
+                    if ($has_refused) {
+                        $html .= '<span class="danger">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Il y a au moins une demand de validation refusée. ' . $this->getLabel('this') . ' ne peut pas être validée</span><br/>';
+                    }
+                }
+
+                foreach ($demandes as $demande) {
+                    $html .= $demande->renderQuickView();
+                }
+            }
+        }
+
         return $html;
     }
 
@@ -5179,6 +5207,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $success = 'Devis validé avec succès';
         $errors = array();
         $warnings = array();
+        $infos = array();
 
         $create_signature = BimpTools::getArrayValueFromPath($data, 'create_signature', $this->needSignaturePropal());
 
@@ -5271,6 +5300,16 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($propal->dol_object, array(), $langs), 'Echec de la validation du devis');
                     }
 
+                    $obj_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+                    if (!empty($obj_warnings)) {
+                        $warnings[] = BimpTools::getMsgFromArray($obj_warnings);
+                    }
+
+                    $obj_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
+                    if (!empty($obj_infos)) {
+                        $infos[] = BimpTools::getMsgFromArray($obj_infos);
+                    }
+
                     if (!count($errors) && !$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)) {
                         $errors[] = "Impossible de générer le PDF validation impossible";
                         $propal->dol_object->reopen($user, 0);
@@ -5316,7 +5355,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'infos'    => $infos,
         );
     }
 
@@ -6379,7 +6419,7 @@ ORDER BY a.val_max DESC");
                 $data['amount'] = $amount;
                 $data['id_mode_paiement'] = $id_mode_paiement;
                 $data['bank_account'] = (isset($data['bank_account']) ? (int) $data['bank_account'] : (int) BimpCore::getConf('id_default_bank_account'));
-                
+
                 $propal = $this->getChildObject('propal');
                 $client = $this->getChildObject('client');
                 $centre = $this->getCentreData();

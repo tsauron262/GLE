@@ -691,7 +691,7 @@ class BimpValidation
                 }
 
                 if (BimpObject::objectLoaded($client)) {
-                    $val = $client->getTotalUnpayedTolerance();
+                    $val = $client->getTotalUnpayedTolerance(null, 31);//pour limiter la casse, passé a 31 jours de retard
                 }
 
                 if ($val < 0) {

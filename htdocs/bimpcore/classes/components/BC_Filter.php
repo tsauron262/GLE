@@ -96,15 +96,16 @@ class BC_Filter extends BimpComponent
 
         // Surchage des paramètres si le filtre appartient à un objet enfant:
         if ($this->filter_name !== $this->name) {
-            // Todo: déco lorsque les filtres customs enfants seront gérés: 
-//            if ($this->object->config->isDefined('filters/' . $this->filter_name)) {
-//                $errors = array();
-//                $override_params = self::fetchParamsStatic($this->object->config, 'filters/' . $this->filter_name, $this->params_def, $errors, true, true);
-//                
-//                if (!empty($override_params)) {
-//                    $this->params = BimpTools::overrideArray($this->params, $override_params, true, true);
-//                }
-//            }
+            // Todo: FLO déco lorsque les filtres customs enfants seront gérés:   TOMMY décommenter, ca semble bien géré, j'ai juste ajouté $this->config_path = 'filters/' . $this->filter_name;
+            if ($this->object->config->isDefined('filters/' . $this->filter_name)) {
+                $this->config_path = 'filters/' . $this->filter_name;
+                $errors = array();
+                $override_params = self::fetchParamsStatic($this->object->config, 'filters/' . $this->filter_name, $this->params_def, $errors, true, true);
+                
+                if (!empty($override_params)) {
+                    $this->params = BimpTools::overrideArray($this->params, $override_params, true, true);
+                }
+            }
 
             if ($this->base_object->config->isDefined('filters/' . $this->name)) {
                 $errors = array();

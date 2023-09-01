@@ -1,14 +1,21 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/BV_Lib.php';
 
 class BimpValidationCronExec extends BimpCron
 {
 
     public function sendRappels()
     {
+        if (in_array(date('N'), array(7))) {
+            $this->output = 'Pas d\'éxécution le dimanche';
+            return 0;
+        }
+        
         $this->current_cron_name = 'Rappel demandes de validation en attente';
         $this->output = '';
+        
         $errors = array();
 
         $bdb = BimpCache::getBdb();
@@ -80,6 +87,11 @@ class BimpValidationCronExec extends BimpCron
         $this->current_cron_name = 'Vérif disponibilité utilisateurs affectés aux demandes de validation';
         $this->output = '';
         $errors = array();
+        
+        if (in_array(date('N'), array(6,7))) {
+            $this->output = 'Pas d\'éxécution le week-end';
+            return 0;
+        }
 
         $bdb = BimpCache::getBdb();
 

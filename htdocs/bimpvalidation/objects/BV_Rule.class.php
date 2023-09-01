@@ -7,17 +7,17 @@ class BV_Rule extends BimpObject
 
     public static $types = array(
         'comm' => array('label' => 'Commerciale (Remises)', 'icon' => 'fas_percentage', 'val_label' => 'Remises (%)', 'label2' => 'commerciale (remises)'),
-        'fin'  => array('label' => 'Financière (Encours)', 'icon' => 'fas_hand-holding-usd', 'val_label' => 'Encours client', 'label2' => 'financière (encours)'),
+        'fin'  => array('label' => 'Financière (Encours)', 'icon' => 'fas_hand-holding-usd', 'val_label' => 'Dépassement encours client', 'label2' => 'financière (encours)'),
         'rtp'  => array('label' => 'Retard de paiement', 'icon' => 'fas_comment-dollar', 'val_label' => 'Total paiements en retard', 'label2' => 'sur retards de paiement')
     );
     public static $objects_list = array(
         'propal'   => array('label' => 'Devis', 'icon' => 'fas_file-invoice', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Propal', 'table' => 'propal'),
         'commande' => array('label' => 'Commande', 'icon' => 'fas_dolly', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Commande', 'table' => 'commande'),
-        'facture'  => array('label' => 'Facture', 'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Facture', 'table' => 'facture'),
+//        'facture'  => array('label' => 'Facture', 'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'object_name' => 'Bimp_Facture', 'table' => 'facture'),
         'contrat'  => array('label' => 'Contrat', 'icon' => 'fas_file-signature', 'module' => 'bimpcontract', 'object_name' => 'BContract_contrat', 'table' => 'contrat'),
     );
 
-    // Droits users: 
+    // Droits users:
 
     public function canCreate()
     {
@@ -72,9 +72,8 @@ class BV_Rule extends BimpObject
 
         global $user;
 
-        $extra_params = (int) $this->getData('extra_params');
+        $extra_params = $this->getData('extra_params');
         $sup_only = (int) BimpTools::getArrayValueFromPath($extra_params, 'if_sup_only', 0);
-
         $users = array();
 
         if ((int) $this->getData('user_superior')) {
@@ -157,6 +156,84 @@ class BV_Rule extends BimpObject
         }
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
+    }
+
+    public function getcol_objectsSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ($value == 'all') {
+            $filters[$main_alias . '.all_objects'] = 1;
+        } else {
+            $filters['or_obj'] = array(
+                'or' => array(
+                    $main_alias . '.all_objects' => 1,
+                    $main_alias . '.objects'     => array(
+                        'part_type' => 'middle',
+                        'part'      => '[' . $value . ']'
+                    )
+                )
+            );
+        }
+    }
+
+    public function getcol_secteursSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ($value == 'all') {
+            $filters[$main_alias . '.all_secteurs'] = 1;
+        } else {
+            $filters['or_secteur'] = array(
+                'or' => array(
+                    $main_alias . '.all_secteurs' => 1,
+                    $main_alias . '.secteurs'     => array(
+                        'part_type' => 'middle',
+                        'part'      => '[' . $value . ']'
+                    )
+                )
+            );
+        }
+    }
+
+    public function getcol_usersSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ($value == 'user_sup') {
+            $filters[$main_alias . '.user_superior'] = 1;
+        } elseif ($value == 'all') {
+            $filters[$main_alias . '.all_users'] = 1;
+        } else {
+            $filters['or_user'] = array(
+                'or' => array(
+                    $main_alias . '.all_users' => 1,
+                    $main_alias . '.users'     => array(
+                        'part_type' => 'middle',
+                        'part'      => '[' . $value . ']'
+                    )
+                )
+            );
+        }
+    }
+
+    // Getters Array: 
+
+    public function getSearchObjectsArray()
+    {
+        return BimpTools::merge_array(array('all' => 'Tous les objets'), self::$objects_list);
+    }
+
+    public function getSearchSecteursArray()
+    {
+        return BimpCache::getSecteursArray(true, 'all', 'Tous les secteurs');
+    }
+
+    public function getSearchUsersArray()
+    {
+        $users = array(
+            'all'           => 'Tout le monde',
+            'user_superior' => 'Sup. hiérarchique du demandeur');
+
+        foreach (BimpCache::getUsersArray(false) as $id_user => $name) {
+            $users[(string) $id_user] = $name;
+        }
+
+        return $users;
     }
 
     // Affichges: 

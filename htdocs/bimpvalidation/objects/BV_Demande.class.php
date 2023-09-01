@@ -36,15 +36,22 @@ class BV_Demande extends BimpObject
     public function canProcess()
     {
         global $user;
-//        if ($user->admin) {
-//            return 1;
-//        }
+
+        $id_user_affected = (int) $this->getData('id_user_affected');
+
+        if ($id_user_affected && $user->id == $id_user_affected) {
+            return 1;
+        }
 
         $users = $this->getData('validation_users');
 
         if (!empty($users)) {
             if (in_array($user->id, $users)) {
                 return 1;
+            }
+
+            if ($id_user_affected && !in_array($id_user_affected, $users)) {
+                $users[] = $id_user_affected;
             }
 
             // Pour chaque user on vérifie que l'utilisateur n'est pas un supérieur (quelque soit le niveau hiérarchique) 
@@ -116,7 +123,7 @@ class BV_Demande extends BimpObject
         if (!BimpObject::objectLoaded($object)) {
             return 0;
         }
-        
+
         $type_obj = self::getObjectType($object);
         if ($type_obj) {
             $where = 'type_object = \'' . $type_obj . '\' AND id_object = ' . $object->id . ' AND status = ' . self::BV_REFUSED;
@@ -529,6 +536,7 @@ class BV_Demande extends BimpObject
         } else {
             require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/BV_Lib.php';
 
+            $id_main_user = (int) $users[0];
             $id_new_user_affected = (int) self::getFirstAvailableUser($users, $infos);
 
             if (!$id_new_user_affected) {
@@ -536,7 +544,7 @@ class BV_Demande extends BimpObject
             } elseif ($id_new_user_affected !== $id_cur_affected_user) {
                 $this->updateField('id_user_affected', $id_new_user_affected);
 
-                if ($notify_if_change) {
+                if ($notify_if_change && (!$id_cur_affected_user || $id_new_user_affected != $id_main_user)) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_new_user_affected);
 
                     if (!BimpObject::objectLoaded($user)) {
@@ -558,7 +566,8 @@ class BV_Demande extends BimpObject
                         } else {
                             $subject = 'Demande de validation ' . $types[$type]['label2'];
                             $msg = 'Bonjour, <br/><br/>';
-                            $msg .= 'La validation ' . $types[$type]['label2'] . ' <a href="">' . $obj->getLabel('of_the') . ' (PROV' . $obj->id . ')</a>';
+
+                            $msg .= 'La validation ' . $types[$type]['label2'] . ' <a href="' . $obj->getUrl() . '">' . $obj->getLabel('of_the') . ' (PROV' . $obj->id . ')</a>';
                             $msg .= ' est en attente.<br/>';
 
                             $user_demande = $this->getChildObject('user_demande');

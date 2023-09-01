@@ -59,6 +59,9 @@ fields:
         type: id_object
         object: user_demande
         default_value: 0
+        search: 
+            input:
+                type: search_user
         
     validation_users: 
         label: Utilisateurs autorisés
@@ -67,18 +70,27 @@ fields:
         object: user
         items_sortable: 1
         items_braces: 1
+        search: 
+            input:
+                type: search_user
         
     id_user_affected: 
         label: Chargé de validation
         type: id_object
         object: user_affected
         default_value: 0
+        search: 
+            input:
+                type: search_user
         
     id_user_validate: 
         label: Validée / refusée par
         type: id_object
         object: user_validate
         default_value: 0
+        search: 
+            input:
+                type: search_user
         
     date_validate: 
         label: Date validation / refus

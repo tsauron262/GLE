@@ -91,11 +91,7 @@ class BimpValidation
                         $debug .= 'La demande existante #' . $demande->id . ' peut être acceptée par cet utilisateur.';
                         $type_check = 1;
                     } else {
-                        // Demande en cours pour ce type
                         $debug .= 'La demande existante #' . $demande->id . ' ne peut pas être acceptée par cet utilisateur.';
-                        $infos[] = 'Une demande de validation ' . $demande->displayValidationType() . ' a déjà été effectuée et est en attente de traitement';
-                        $global_check = 0;
-                        continue;
                     }
                 }
             }
@@ -117,33 +113,38 @@ class BimpValidation
                 $val = $object_data['val'];
                 $extra_data = $object_data['extra_data'];
 
-                // Vérif d'un objet lié déjà validé pour ce type de validation:
-                if (self::checkValidatedLinkedObjects($type, $object, $val, $extra_data, $infos)) {
-                    $debug .= 'Demande de validation non nécessaire car déjà effectuée pour un objet lié.<br/>';
+                if (!$val) {
+                    $debug .= 'Validation non nécessaire car la valeur est à 0.<br/>';
                     $type_check = 1;
                 } else {
-                    $valid_rules = array();
-
-                    // Trie des règles selon leur priorité: 
-                    $type_rules = self::sortValidationTypeRules($type_rules, $type, $val, $extra_data);
-                    foreach ($type_rules as $rule) {
-                        $debug .= 'Règle #' . $rule->id . ' (min : ' . $rule->getData('val_min') . ' - max : ' . $rule->getData('val_max') . ') : ';
-                        if (self::checkRule($rule, $object_type, $secteur, $val, $extra_data, $debug)) {
-                            $debug .= 'OK.<br/>';
-                            $valid_rules[] = $rule;
-                            if ($rule->isUserAllowed($user->id)) {
-                                $debug .= 'L\'utilisateur peut valider la règle #' . $rule->id . '<br/>';
-                                $type_check = 1;
-                                break;
-                            }
-                        } else {
-                            $debug .= '.<br/>Règle non valide.<br/>';
-                        }
-                    }
-
-                    if (empty($valid_rules)) {
-                        $debug .= 'Aucune règle valide correspondante<br/>';
+                    // Vérif d'un objet lié déjà validé pour ce type de validation:
+                    if (self::checkValidatedLinkedObjects($type, $object, $val, $extra_data, $infos)) {
+                        $debug .= 'Demande de validation non nécessaire car déjà effectuée pour un objet lié.<br/>';
                         $type_check = 1;
+                    } else {
+                        $valid_rules = array();
+
+                        // Trie des règles selon leur priorité: 
+                        $type_rules = self::sortValidationTypeRules($type_rules, $type, $val, $extra_data);
+                        foreach ($type_rules as $rule) {
+                            $debug .= 'Règle #' . $rule->id . ' (min : ' . $rule->getData('val_min') . ' - max : ' . $rule->getData('val_max') . ') : ';
+                            if (self::checkRule($rule, $object_type, $secteur, $val, $extra_data, $debug)) {
+                                $debug .= 'OK.<br/>';
+                                $valid_rules[] = $rule;
+                                if ($rule->isUserAllowed($user->id)) {
+                                    $debug .= 'L\'utilisateur peut valider la règle #' . $rule->id . '<br/>';
+                                    $type_check = 1;
+                                    break;
+                                }
+                            } else {
+                                $debug .= '.<br/>Règle non valide.<br/>';
+                            }
+                        }
+
+                        if (empty($valid_rules)) {
+                            $debug .= 'Aucune règle valide correspondante<br/>';
+                            $type_check = 1;
+                        }
                     }
                 }
             }
@@ -166,43 +167,48 @@ class BimpValidation
                 }
             } else {
                 $global_check = 0;
+                if (BimpObject::objectLoaded($demande)) {
+                    // Une demande existe déjà pour ce type et ne peut être acceptée
+                    $debug .= 'La demande existante #' . $demande->id . ' ne peut toujours pas être acceptée.';
+                    $infos[] = 'Une demande de validation ' . $demande->displayValidationType() . ' a déjà été effectuée et est en attente de traitement';
+                } else {
+                    // Création d'une demande de validation: 
+                    $demande_errors = array();
+                    $users = array();
 
-                // Création d'une demande de validation: 
-                $demande_errors = array();
-                $users = array();
-
-                foreach ($valid_rules as $rule) {
-                    foreach ($rule->getValidationUsers() as $id_user) {
-                        if (!in_array($id_user, $users)) {
-                            $users[] = $id_user;
+                    foreach ($valid_rules as $rule) {
+                        foreach ($rule->getValidationUsers() as $id_user) {
+                            if (!in_array($id_user, $users)) {
+                                $users[] = $id_user;
+                            }
                         }
                     }
-                }
 
-                if (!empty($users)) {
-                    $debug .= 'Création d\'une nouvelle demande.<br/>';
-                    $debug .= 'Utilisateurs : <pre>' . print_r($users, 1) . '</pre>';
+                    if (!empty($users)) {
+                        $debug .= 'Création d\'une nouvelle demande.<br/>';
+                        $debug .= 'Utilisateurs : <pre>' . print_r($users, 1) . '</pre>';
 
-                    $demande_warnings = array();
-                    $demande = BimpObject::createBimpObject('bimpvalidation', 'BV_Demande', array(
-                                'type_validation'  => $type,
-                                'type_object'      => $object_type,
-                                'id_object'        => $object->id,
-                                'id_user_demande'  => $user->id,
-                                'validation_users' => $users
-                                    ), true, $demande_errors, $demande_warnings, true);
-                } else {
-                    $msg = 'Aucun utilisateur n\'a la possibilité d\'effectuer cette validation';
-                    $demande_errors[] = $msg;
-                    $debug .= $msg . '<br/>';
-                }
+                        $demande_warnings = array();
+                        $demande = BimpObject::createBimpObject('bimpvalidation', 'BV_Demande', array(
+                                    'type_validation'  => $type,
+                                    'type_object'      => $object_type,
+                                    'id_object'        => $object->id,
+                                    'id_user_demande'  => $user->id,
+                                    'validation_users' => $users
+                                        ), true, $demande_errors, $demande_warnings, true);
+                    } else {
+                        $msg = 'Aucun utilisateur n\'a la possibilité d\'effectuer cette validation';
+                        $demande_errors[] = $msg;
+                        $debug .= $msg . '<br/>';
+                    }
 
-                if (count($demande_errors)) {
-                    $debug .= 'Erreurs : <pre>' . print_r($demande_errors, 1) . '</pre>';
-                    $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de la création d\'une demande de validation de type "' . $demande->displayDataDefault('type') . '"');
-                } else {
-                    $demandes[] = $demande;
-                    $debug .= 'OK (Demande #' . $demande->id . ').<br/>';
+                    if (count($demande_errors)) {
+                        $debug .= 'Erreurs : <pre>' . print_r($demande_errors, 1) . '</pre>';
+                        $errors[] = BimpTools::getMsgFromArray($demande_errors, 'Echec de la création d\'une demande de validation de type "' . $demande->displayDataDefault('type') . '"');
+                    } else {
+                        $demandes[] = $demande;
+                        $debug .= 'OK (Demande #' . $demande->id . ').<br/>';
+                    }
                 }
             }
         }
@@ -610,14 +616,6 @@ class BimpValidation
 
         switch ($type_validation) {
             case 'comm':
-                // A suppr: 
-                if (BimpCore::isModeDev()) {
-                    $extra_data['percent_marge'] = 75;
-                    $val = 75;
-                    $val_str = BimpTools::displayFloatValue($val, 4) . ' %';
-                    break;
-                }
-                // *******
                 $extra_data['percent_marge'] = 0;
                 if (is_a($object, 'BimpComm')) {
                     $remises_infos = $object->getRemisesInfos();
@@ -656,18 +654,11 @@ class BimpValidation
                 break;
 
             case 'fin':
-                // A suppr: 
-                if (BimpCore::isModeDev()) {
-                    $val = 25000;
-                    $val_str = BimpTools::displayMoneyValue($val, 'EUR');
-                    break;
-                }
-                // *******
                 if (is_a($object, 'BimpComm')) {
-                    if ($object->field_exists('total_ht')) {
-                        $val = (float) $object->getData('total_ht');
+                    if ($object->field_exists('total_ttc')) {
+                        $val = (float) $object->getData('total_ttc');
                     } elseif (method_exists($object, 'getCurrentTotal')) {
-                        $val = (float) $object->getCurrentTotal();
+                        $val = (float) $object->getCurrentTotal(1);
                     }
 
                     if ($val > 0) {
@@ -680,6 +671,10 @@ class BimpValidation
                         if (BimpObject::objectLoaded($client)) {
                             $val += (float) $client->getEncours() + $client->getEncoursNonFacture() - ((float) $client->getData('outstanding_limit') * 1.2);
                         }
+
+                        if ($val < 0) {
+                            $val = 0;
+                        }
                     } else {
                         $val = 0;
                     }
@@ -689,13 +684,6 @@ class BimpValidation
                 break;
 
             case 'rtp':
-                // A suppr: 
-                if (BimpCore::isModeDev()) {
-                    $val = 25000;
-                    $val_str = BimpTools::displayMoneyValue($val, 'EUR');
-                    break;
-                }
-                // *******
                 if (method_exists($object, 'getClientFacture')) {
                     $client = $object->getClientFacture();
                 } else {
@@ -705,6 +693,11 @@ class BimpValidation
                 if (BimpObject::objectLoaded($client)) {
                     $val = $client->getTotalUnpayedTolerance();
                 }
+
+                if ($val < 0) {
+                    $val = 0;
+                }
+
                 $val_str = BimpTools::displayMoneyValue($val, 'EUR');
                 break;
         }

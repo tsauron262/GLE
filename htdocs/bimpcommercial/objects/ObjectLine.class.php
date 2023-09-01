@@ -742,6 +742,17 @@ class ObjectLine extends BimpObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'marge_neg':
+                $line_alias = $main_alias . '___dol_line';
+                $joins[$line_alias] = array(
+                    'alias' => $line_alias,
+                    'table' => static::$dol_line_table,
+                    'on'    => $line_alias . '.rowid = ' . $main_alias . '.id_line'
+                );
+                $filters[$main_alias . '___marge_neg'] = array(
+                    'custom' => $line_alias.'.buy_price_ht > ('.$line_alias.'.subprice+1) AND '.$line_alias.'.subprice > 0'
+                );
+                break;
             case 'categ1':
             case 'categ2':
             case 'categ3':

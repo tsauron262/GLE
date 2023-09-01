@@ -618,7 +618,13 @@ filters:
         type: check_list
         items: 
             1: OUI
-            0: NON        
+            0: NON  
+            
+    marge_neg:
+        label: Marge négative (av reval)
+        type: check_list
+        items: 
+            1: OUI
             
 filters_panels: 
     default: 

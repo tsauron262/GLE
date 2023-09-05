@@ -576,6 +576,38 @@ class BimpModuleConf
                     $html .= '</div>';
                 }
             }
+            
+            foreach ($saved_params as $module => $params) {
+                if(!isset($config_params[$module])){
+                    $params = array();
+
+                    if (isset($saved_params[$module])) {
+                        foreach ($saved_params[$module] as $param_name => $param_value) {
+                            $name = $param_name;
+
+                            foreach ($search_words as $word) {
+                                $name = preg_replace('/' . preg_quote($word, '/') . '/i', '<span style="color: #178BCF">' . $word . '</span>', $name);
+                            }
+
+                            $params[$param_name] = array(
+                                'label'          => '',
+                                'displayed_name' => $name,
+                                'warning'        => 'Paramètre non défini dans le fichier de configuration YML',
+                                'type'           => 'string'
+                            );
+                        }
+                    }
+
+                    if (!empty($params)) {
+                        $has_params = true;
+                        $html .= '<div class="module_params_form" style="margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #000" data-module_name="' . $module . '">';
+                        $html .= '<h3>Module ' . $module . '</h3>';
+
+                        $html .= self::renderParamsTable($module, $params);
+                        $html .= '</div>';
+                    }
+                }
+            }
 
             if (!$has_params) {
                 $html .= BimpRender::renderAlerts('Aucun paramètre trouvé pour la recherche "' . $search . '"', 'warning');

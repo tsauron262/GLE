@@ -4331,37 +4331,41 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 
         if ($contact_pref === 3 && $sms) {
-            require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-            if (!is_null($contact) && $contact->isLoaded()) {
-                if (testNumSms($contact->dol_object->phone_mobile))
-                    $to = $contact->dol_object->phone_mobile;
-                elseif (testNumSms($contact->dol_object->phone_pro))
-                    $to = $contact->dol_object->phone_pro;
-                elseif (testNumSms($contact->dol_object->phone_perso))
-                    $to = $contact->dol_object->phone_perso;
-            } elseif (testNumSms($client->dol_object->phone))
-                $to = $client->dol_object->phone;
-
-            if (stripos($sms, $this->getData('ref')) === false)
-                $sms .= "\n" . $this->getData('ref');
-
-            $sms = str_replace('ç', 'c', $sms);
-            $sms = str_replace('ê', 'e', $sms);
-            $sms = str_replace('ë', 'e', $sms);
-            $sms = str_replace('ô', 'o', $sms);
-
-            if (dol_strlen(str_replace('\n', '', $sms)) > 160)
-                BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
-            //$to = "0686691814";
-            $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
-
-            $to = traiteNumMobile($to);
-            if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
-                $errors[] = 'Numéro invalide pour l\'envoi du sms';
+            if (!(int) BimpCore::getConf('send_sms')) {
+                $errors[] = 'Attention l\'envoi de SMS est désactivé pour le moment';
             } else {
-                $smsfile = new CSMSFile($to, $fromsms, $sms);
-                if (!$smsfile->sendfile()) {
-                    $errors[] = 'Echec de l\'envoi du sms';
+                require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+                if (!is_null($contact) && $contact->isLoaded()) {
+                    if (testNumSms($contact->dol_object->phone_mobile))
+                        $to = $contact->dol_object->phone_mobile;
+                    elseif (testNumSms($contact->dol_object->phone_pro))
+                        $to = $contact->dol_object->phone_pro;
+                    elseif (testNumSms($contact->dol_object->phone_perso))
+                        $to = $contact->dol_object->phone_perso;
+                } elseif (testNumSms($client->dol_object->phone))
+                    $to = $client->dol_object->phone;
+
+                if (stripos($sms, $this->getData('ref')) === false)
+                    $sms .= "\n" . $this->getData('ref');
+
+                $sms = str_replace('ç', 'c', $sms);
+                $sms = str_replace('ê', 'e', $sms);
+                $sms = str_replace('ë', 'e', $sms);
+                $sms = str_replace('ô', 'o', $sms);
+
+                if (dol_strlen(str_replace('\n', '', $sms)) > 160)
+                    BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
+                //$to = "0686691814";
+                $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
+
+                $to = traiteNumMobile($to);
+                if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
+                    $errors[] = 'Numéro invalide pour l\'envoi du sms';
+                } else {
+                    $smsfile = new CSMSFile($to, $fromsms, $sms);
+                    if (!$smsfile->sendfile()) {
+                        $errors[] = 'Echec de l\'envoi du sms';
+                    }
                 }
             }
         }

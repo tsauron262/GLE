@@ -3534,7 +3534,7 @@ class BimpTools
         if (!(int) BimpCore::getConf('use_lock_num', null, 'bimpcommercial')) {
             return 1;
         }
-        
+
 //        return 1; //test 
         global $user, $langs;
         //il faut débuggé, si ca pose probléme c'est grave
@@ -3762,16 +3762,21 @@ class BimpTools
         return 0;
     }
 
-    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14'))
+    public static function sendSmsAdmin($text, $tels = array('0628335081', '0686691814'))
     {
         $errors = array();
-        require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-        foreach ($tels as $tel) {
-            $tel = traiteNumMobile($tel);
-            $smsfile = new CSMSFile($tel, 'BIMP ADMIN', $text);
-            if (!$smsfile->sendfile()) {
-                $errors[] = 'Echec de l\'envoi du sms';
+
+        if ((int) BimpCore::getConf('send_sms')) {
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+            foreach ($tels as $tel) {
+                $tel = traiteNumMobile($tel);
+                $smsfile = new CSMSFile($tel, 'BIMP ADMIN', $text);
+                if (!$smsfile->sendfile()) {
+                    $errors[] = 'Echec de l\'envoi du sms';
+                }
             }
+        } else {
+            $errors[] = 'Envoi de sms désactivé';
         }
 
         return $errors;

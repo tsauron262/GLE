@@ -26,7 +26,7 @@ if (!$user->admin) {
     exit;
 }
 
-$type_test = BimpTools::getValue('test_type', '');
+$type_test = BimpTools::getValue('type', '');
 if (!$type_test) {
     echo BimpRender::renderAlerts('Type de test absent');
     exit;

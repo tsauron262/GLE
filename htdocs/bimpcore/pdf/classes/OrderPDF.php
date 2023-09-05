@@ -804,6 +804,14 @@ class BLPDF extends OrderPDF
             }
 
             if ($this->detail || $row['qte'] != 0) {
+                if (isset($row['desc']) && $row['desc']) {
+                    if (isset($row['desc']['content']) && is_string($row['desc']['content']) && $row['desc']['content']) {
+                        $row['desc']['content'] = $this->replaceHtmlStyles($row['desc']['content']);
+                    } elseif (is_string($row['desc']) && $row['desc']) {
+                        $row['desc'] = $this->replaceHtmlStyles($row['desc']);
+                    }
+                }
+                
                 $table->rows[] = $row;
             }
 

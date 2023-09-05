@@ -38,6 +38,7 @@ switch ($type_test) {
         if (!$num) {
             echo BimpRender::renderAlerts('Numéro de tel. absent (param url "num"');
         } else {
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
             $smsfile = new CSMSFile($num, 'TEST', 'Test');
             if (!$smsfile->sendfile()) {
                 echo BimpRender::renderAlerts('ECHEC');

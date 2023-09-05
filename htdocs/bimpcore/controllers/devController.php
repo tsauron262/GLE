@@ -46,12 +46,16 @@ class devController extends BimpController
             $html .= '</a>';
         }
 
+        $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/bimptests.php?type=sms" target="_blank">';
+        $html .= 'TEST SMS' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+        $html .= '</a>';
+
         if (BimpCore::isModuleActive('bimpinterfaceclient')) {
             $html .= '<a class="btn btn-default" href="' . BimpObject::getPublicBaseUrl(true) . '" target="_blank">';
             $html .= 'Espace client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
         }
-        
+
         if (!BimpCore::isModeDev()) {
             $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/cron_log.php" target="_blank">';
             $html .= 'Logs CRONS client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
@@ -107,7 +111,7 @@ class devController extends BimpController
         $lock_msg = BimpCore::getConf('git_pull_lock_msg');
         if ($lock_msg) {
             $html .= '<h4 class="danger">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'GIT PULL vérouillés</h4>';
-            $html .= 'Message : <b>' . $lock_msg .'</b>';
+            $html .= 'Message : <b>' . $lock_msg . '</b>';
 
             $onclick = 'saveBimpcoreConf(\'bimpcore\', \'git_pull_lock_msg\', \'\', null, function() {bimp_reloadPage();})';
 

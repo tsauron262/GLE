@@ -43,6 +43,11 @@ params:
             1: Code SMS écran
             2: Normal
         def: 0
+    send_sms: 
+        label: Activer l'envoi de SMS
+        type: bool
+        info: Désactive tous les envois de SMS (modules BIMP uniquement, sauf page de test)
+        def: 1
     use_bimp_object_instances_clones: 
         label: cloner les instances de base des BimpObject
         type: bool

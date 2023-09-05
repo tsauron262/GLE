@@ -3766,7 +3766,11 @@ class BimpTools
     {
         $errors = array();
 
-        if ((int) BimpCore::getConf('send_sms')) {
+        global $conf;
+
+        if (!empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
+            $errors[] = 'Envoi des SMS désactivé pour le moment';
+        } else {
             require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
             foreach ($tels as $tel) {
                 $tel = traiteNumMobile($tel);
@@ -3775,8 +3779,6 @@ class BimpTools
                     $errors[] = 'Echec de l\'envoi du sms';
                 }
             }
-        } else {
-            $errors[] = 'Envoi de sms désactivé';
         }
 
         return $errors;

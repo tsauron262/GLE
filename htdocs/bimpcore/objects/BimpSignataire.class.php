@@ -1976,54 +1976,60 @@ class BimpSignataire extends BimpObject
         $success = 'Code envoyé avec succès';
         $success_callback = '';
 
-        $num = BimpTools::getArrayValueFromPath($data, 'num_tel_selected', '');
-
-        if ($num == 'other') {
-            $num = BimpTools::getArrayValueFromPath($data, 'other_num', '');
-        }
-
-        if (!$num) {
-            $errors[] = 'Veuillez sélectionner ou saisir une numéro de téléphone mobile';
+        global $conf;
+        if (!empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
+            $errors[] = 'Envoi des SMS désactivé pour le moment';
         } else {
-            $num = str_replace(array(' ', '-', '/', '_', '.'), array('', '', '', '', ''), $num);
+            $num = BimpTools::getArrayValueFromPath($data, 'num_tel_selected', '');
 
-            if (preg_match('/^(\+33|0)((6|7)([0-9]{8}))$/', $num, $matches)) {
-                $num = '+33' . $matches[2];
-                $success .= ' (' . $num . ')';
+            if ($num == 'other') {
+                $num = BimpTools::getArrayValueFromPath($data, 'other_num', '');
+            }
+
+            if (!$num) {
+                $errors[] = 'Veuillez sélectionner ou saisir une numéro de téléphone mobile';
             } else {
-                $errors[] = 'Le numéro de téléphone sélectionné ou saisi ne semble par être un numéro de téléphone mobile valide';
+                $num = str_replace(array(' ', '-', '/', '_', '.'), array('', '', '', '', ''), $num);
+
+                if (preg_match('/^(\+33|0)((6|7)([0-9]{8}))$/', $num, $matches)) {
+                    $num = '+33' . $matches[2];
+                    $success .= ' (' . $num . ')';
+                } else {
+                    $errors[] = 'Le numéro de téléphone sélectionné ou saisi ne semble par être un numéro de téléphone mobile valide';
+                }
+            }
+
+            if (!count($errors)) {
+                $code = BimpTools::randomPassword(4);
+                require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+
+                $text = 'Votre code pour la signature à distance du document "' . strip_tags($this->displayDocTitle()) . '": ' . $code;
+
+                $smsfile = new CSMSFile($num, 'BIMP', $text);
+                if (!$smsfile->sendfile()) {
+                    $errors[] = 'Echec de l\'envoi du sms.';
+                } else {
+                    $infos = array(
+                        'code'         => $code,
+                        'num_tel'      => $num,
+                        'dt_send'      => date('Y-m-d H:i:s'),
+                        'dt_confirmed' => ''
+                    );
+
+                    $this->updateField('code_sms_infos', $infos);
+
+                    $w = array();
+                    $this->update($w, true);
+
+                    $success_callback = 'setTimeout(function() {';
+                    $success_callback .= $this->getJsActionOnclick('signDist', array(), array(
+                        'form_name' => 'sign_dist'
+                    ));
+                    $success_callback .= '}, 500);';
+                }
             }
         }
 
-        if (!count($errors)) {
-            $code = BimpTools::randomPassword(4);
-            require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-
-            $text = 'Votre code pour la signature à distance du document "' . strip_tags($this->displayDocTitle()) . '": ' . $code;
-
-            $smsfile = new CSMSFile($num, 'BIMP', $text);
-            if (!$smsfile->sendfile()) {
-                $errors[] = 'Echec de l\'envoi du sms.';
-            } else {
-                $infos = array(
-                    'code'         => $code,
-                    'num_tel'      => $num,
-                    'dt_send'      => date('Y-m-d H:i:s'),
-                    'dt_confirmed' => ''
-                );
-
-                $this->updateField('code_sms_infos', $infos);
-
-                $w = array();
-                $this->update($w, true);
-
-                $success_callback = 'setTimeout(function() {';
-                $success_callback .= $this->getJsActionOnclick('signDist', array(), array(
-                    'form_name' => 'sign_dist'
-                ));
-                $success_callback .= '}, 500);';
-            }
-        }
 
         return array(
             'errors'           => $errors,

@@ -4331,8 +4331,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 
         if ($contact_pref === 3 && $sms) {
-            if (!(int) BimpCore::getConf('send_sms')) {
-                $errors[] = 'Attention l\'envoi de SMS est désactivé pour le moment';
+            if (!empty($conf->global->MAIN_DISABLE_ALL_SMS)) {
+                $errors[] = 'Envoi des SMS désactivé pour le moment';
             } else {
                 require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
                 if (!is_null($contact) && $contact->isLoaded()) {

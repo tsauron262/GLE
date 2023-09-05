@@ -4358,15 +4358,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 //$to = "0686691814";
                 $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
+                global $user;
+                if ($user->login == 'f.martinez') {
+                    $to = '0686691814';
+                }
+
                 $to = traiteNumMobile($to);
                 if ($to == "" || (stripos($to, "+336") === false && stripos($to, "+337") === false)) {
                     $errors[] = 'Numéro invalide pour l\'envoi du sms';
                 } else {
-                    global $user;
-                    if ($user->login == 'f.martinez') {
-                        $to = '+33686691814';
-                    }
-
                     $smsfile = new CSMSFile($to, $fromsms, $sms);
                     if (!$smsfile->sendfile()) {
                         $errors[] = 'Echec de l\'envoi du sms';

@@ -642,7 +642,7 @@ class BimpValidation
                     if ($marge_ini == 0) {
                         $percent_marge = 0;
                     } else {
-                        $percent_marge = 100 * $margin_infos['remise_total_amount_ht'] / $marge_ini;
+                        $percent_marge = 100 * $remises_infos['remise_total_amount_ht'] / $marge_ini;
                     }
 
                     if ($percent_marge > 100) {
@@ -650,6 +650,8 @@ class BimpValidation
                     }
 
                     $extra_data['percent_marge'] = $percent_marge;
+                    $extra_data['marge_ini'] = $marge_ini;
+                    $extra_data['remise_total_amount_ht'] = $remises_infos['remise_total_amount_ht'];
                 }
                 break;
 

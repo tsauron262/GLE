@@ -108,7 +108,7 @@ class BTC_exportRibAndMandat extends BTC_export {
         $this->structure_mandat = Array(
             "FIXE" => $this->sizing("***", 3),
             "IDENTIFIANT" => $this->sizing("MDT", 3),
-            "ICS" => $this->sizing('FR02ZZZ008801', 35),
+            "ICS" => $this->sizing(BimpCore::getConf('code_ics'), 35),
             "RUM" => $this->sizing($rib->getData('rum'), 35),
             "LIBELLE" => $this->sizing(strtoupper($this->suppr_accents($client->getName())), 35),
             "IBAN" => $this->sizing(str_replace(" ", "", $rib->getIban(false)), 70),

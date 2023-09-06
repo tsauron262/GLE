@@ -155,6 +155,8 @@ class DocFinancementPDF extends BimpDocumentPDF
         foreach ($lines as $line) {
             $row = array();
             $desc = $line->displayDesc(false, true);
+            $desc = $this->cleanHtml($desc);
+            $desc = $this->replaceHtmlStyles($desc);
 
             if ((int) $line->getData('type') === BF_Line::TYPE_TEXT) {
                 $row['desc'] = array(

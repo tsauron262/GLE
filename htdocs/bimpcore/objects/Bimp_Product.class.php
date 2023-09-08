@@ -3984,11 +3984,26 @@ class Bimp_Product extends BimpObject
         }
 
         $this->hydrateFromDolObject();
+        
+        
+        $this->onUpdate();
 
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+    
+    public function onUpdate($updateOnBdd = true){
+        if($this->getData('cost_price_percent') > 0){
+            $newP = $this->getData('price') * $this->getData('cost_price_percent') / 100;
+            if($updateOnBdd)
+                $this->updateField('cost_price', $newP);
+            else
+                $this->set('cost_price', $newP);
+        }
+        if($this->getData('cost_price')>0)
+            $this->setCurrentPaHt ($this->getData('cost_price'),0, 'cost_price');
     }
 
     public function actionDuplicate($data, &$success)
@@ -4072,6 +4087,8 @@ class Bimp_Product extends BimpObject
         $init_tva_tx = (float) $this->getInitData('tva_tx');
         $new_tva_tx = (float) $this->getData('tva_tx');
         $updateToSerilisable = ($this->getInitData('serialisable') == 0 && $this->getData('serialisable') == 1);
+        
+        $this->onUpdate(false);
 
         $errors = parent::update($warnings, $force_update);
 

@@ -2648,7 +2648,7 @@ class gsxController extends BimpController
             $equipment = $sav->getChildObject('equipment');
             if (BimpObject::objectLoaded($equipment)) {
                 if (isset($data['identifiers']['serial']) && $data['identifiers']['serial'] === $equipment->getData('serial')) {
-                    if (!(int) $equipment->getData('id_product') && preg_match('/^\*+$/', $equipment->getData('product_label'))) {
+//                    if (!(int) $equipment->getData('id_product') && preg_match('/^\*+$/', $equipment->getData('product_label'))) {//Todo pourquoi ?
                         $update = false;
 
                         if (isset($data['productDescription']) && !preg_match('/^\*+$/', $data['productDescription'])) {
@@ -2666,7 +2666,7 @@ class gsxController extends BimpController
                                 (string) $data['warrantyInfo']['coverageEndDate'] &&
                                 !preg_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['coverageEndDate'])) {
                             $dt = new DateTime($data['warrantyInfo']['coverageEndDate']);
-                            $date = $dt->format('Y-m-d H:i:s');
+                            $date = $dt->format('Y-m-d');
                             if ($date !== $equipment->getData('date_warranty_end')) {
                                 $equipment->set('date_warranty_end', $date);
                                 $update = true;
@@ -2677,7 +2677,7 @@ class gsxController extends BimpController
                                 (string) $data['warrantyInfo']['purchaseDate'] &&
                                 !preg_match('/^1970\-01\-01.*$/', $data['warrantyInfo']['purchaseDate'])) {
                             $dt = new DateTime($data['warrantyInfo']['purchaseDate']);
-                            $date = $dt->format('Y-m-d H:i:s');
+                            $date = $dt->format('Y-m-d');
                             if ($date !== $equipment->getData('date_purchase')) {
                                 $equipment->set('date_purchase', $date);
                                 $update = true;
@@ -2688,7 +2688,7 @@ class gsxController extends BimpController
                             $warnings = array();
                             $equipment->update($warnings, true);
                         }
-                    }
+//                    }
                 }
             }
         }

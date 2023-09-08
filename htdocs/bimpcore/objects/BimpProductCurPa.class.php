@@ -7,7 +7,8 @@ class BimpProductCurPa extends BimpObject
         'commande_fourn' => 'Commande fournisseur',
         'facture_fourn'  => 'Facture fournisseur',
         'fourn_price'    => 'Prix d\'achat fournisseur',
-        'pmp'            => 'Prix moyen pondéré'
+        'pmp'            => 'Prix moyen pondéré',
+        'cost_price'     => 'Prix de reviens'
     );
 
     // Getters Static
@@ -154,8 +155,9 @@ class BimpProductCurPa extends BimpObject
                             return '<span class="danger">ID du prix d\'achat fournisseur absent</span>';
                         }
 
-                    case 'pmp':
-                        return self::$origin_types['pmp'];
+                    default:
+                        if(isset(self::$origin_types[$this->getData('origin')]))
+                            return self::$origin_types[$this->getData('origin')];
                 }
         }
 

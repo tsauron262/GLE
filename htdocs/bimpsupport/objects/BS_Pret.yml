@@ -72,11 +72,11 @@ fields:
         label: Référence
     date_begin: 
         label: Début du prêt
-        type: date
+        type: datetime
         required: 1
     date_end: 
         label: Fin du prêt
-        type: date
+        type: datetime
         required: 1
     returned: 
         label: Restitué

@@ -648,8 +648,8 @@ abstract class BDSProcess
             $this->Error('Aucun nom spécifié pour le fichier XML');
         } elseif (!file_exists($this->filesDir . $fileSubDir . $file)) {
             $this->Error('Fichier XML non trouvé: "' . $this->filesDir . $fileSubDir . $file . '"');
-        } elseif (!file_get_contents($this->filesDir . $fileSubDir . $file) == '') {
-            $this->Error('Fichier XML vide: "' . $this->filesDir . $fileSubDir . $file . '"');
+        } elseif (file_get_contents($this->filesDir . $fileSubDir . $file) == '') {
+            $this->Error('Fichier XML vide : "' . $this->filesDir . $fileSubDir . $file . '"');
         } else {
             $XML = simplexml_load_file($this->filesDir . $fileSubDir . $file, 'SimpleXMLElement', LIBXML_NOCDATA);
             if (is_null($XML) || !$XML) {

@@ -146,11 +146,14 @@ class BS_SAV_ExtEntity extends BS_SAV{
         $tabName = explode('9', $name);
         $name = trim($tabName[0]);
         $name = str_replace('-', ' ', $name);
+        $name = str_replace('\'', ' ', $name);
         $name = str_replace('ç', 'c', $name);
         $name = str_replace('é', 'e', $name);
         $name = str_replace('è', 'e', $name);
         $name = str_replace('É', 'E', $name);
         $name = str_replace('â', 'a', $name);
+        $name = str_replace('ê', 'e', $name);
+        $name = str_replace('ô', 'o', $name);
 //        $name = str_replace('St', 'Saint', $name);
 //        $name = ucfirst(strtolower($name));
         return $name;

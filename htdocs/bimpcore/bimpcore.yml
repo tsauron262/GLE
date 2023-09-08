@@ -215,10 +215,10 @@ params:
         type: bool
         def: 1
     not_decimal_product:
-        label: Pas de decimales pour les produit
+        label: Interdire les quantités décimales pour les produits non sérialisés
         cat: products
         type: bool
-        def: 1
+        def: 0
     allow_duplicate_products: 
         label: Autoriser le clonage des produits
         cat: products

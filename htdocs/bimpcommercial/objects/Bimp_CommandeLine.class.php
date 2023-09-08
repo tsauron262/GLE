@@ -37,6 +37,9 @@ class Bimp_CommandeLine extends ObjectLine
             case 'addToCommandeFourn':
                 $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
                 return $comm->can('create');
+
+            case 'processAllPeriodicOperations':
+                return 1;
         }
         return parent::canSetAction($action);
     }
@@ -187,7 +190,7 @@ class Bimp_CommandeLine extends ObjectLine
         if (in_array($field, array('echeance_notif_send'))) {
             return 1;
         }
-        
+
         if (in_array($field, array('exp_periodicity', 'exp_nb_periods', 'exp_periods_start'))) {
             if (!$this->isPeriodicityAllowed()) {
                 return 0;
@@ -272,6 +275,15 @@ class Bimp_CommandeLine extends ObjectLine
     public function hasAchatPeriodicity()
     {
         return (int) ($this->getData('achat_periodicity') > 0);
+    }
+
+    public function hasMoresLine()
+    {
+        $parent = $this->getParentInstance();
+        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+        $rows = $instance->getList(array('id_obj' => $parent->id));
+
+        return ($rows > 100) ? 1 : 0;
     }
 
     // Getters params:
@@ -501,9 +513,14 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         if ((float) $this->pa_ht && (int) $this->id_product) {
+            $id_fourn = null;
+
+            if ((int) $this->getData('achat_periodicity') && (int) $this->getData('achat_id_fourn')) {
+                $id_fourn = $this->getData('achat_id_fourn');
+            }
             $product = $this->getProduct();
             if (BimpObject::objectLoaded($product)) {
-                return (int) $product->getCurrentFournPriceId();
+                return (int) $product->getCurrentFournPriceId($id_fourn);
             }
         }
 
@@ -541,6 +558,43 @@ class Bimp_CommandeLine extends ObjectLine
                     'label'   => 'Facturation / Livraison périodique',
                     'icon'    => 'fas_calendar-alt',
                     'onclick' => $onclick
+                );
+            }
+        }
+
+        return $buttons;
+    }
+
+    public function getGeneralPeriodsListHeaderButtons($operation_type)
+    {
+        $buttons = array();
+
+        if ($this->canSetAction('periodicityMassprocess')) {
+            $label_extra = '';
+
+            switch ($operation_type) {
+                case 'exp':
+                    $label_extra = 'livraisons périodiques';
+                    break;
+
+                case 'fac':
+                    $label_extra = 'facturations périodiques';
+                    break;
+
+                case 'achat':
+                    $label_extra = 'achats périodiques';
+                    break;
+            }
+
+            if ($label_extra) {
+                $buttons[] = array(
+                    'label'   => 'Traitements en masse des ' . $label_extra,
+                    'icon'    => 'fas_cogs',
+                    'onclick' => $this->getJsActionOnclick('periodicityMassProcess', array(
+                        'operation_type' => $operation_type
+                            ), array(
+                        'form_name' => 'periodicity_mass_process'
+                    ))
                 );
             }
         }
@@ -850,14 +904,14 @@ class Bimp_CommandeLine extends ObjectLine
                 if (!is_null($id_facture) && ((int) $id_facture !== (int) $id_f)) {
                     continue;
                 }
-                
+
                 if ($invoices_validated_only && (int) $id_f !== -1) {
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_f);
                     if (!BimpObject::objectLoaded($facture) || (int) $facture->getData('fk_statut') === Facture::STATUS_DRAFT) {
                         continue;
                     }
                 }
-                
+
                 if (isset($facture_data['qty'])) {
                     $qty += (float) $facture_data['qty'];
                 }
@@ -1185,20 +1239,20 @@ class Bimp_CommandeLine extends ObjectLine
             return $ref;
         return '';
     }
-    
+
     public function getReservationsEquipmentsList()
     {
         $equipments = array();
-        
+
         $reservations = $this->getReservations();
-        
+
         foreach ($reservations as $res) {
             $id_eq = (int) $res->getData('id_equipment');
             if ($id_eq && !in_array($id_eq, $equipments)) {
                 $equipments[] = $id_eq;
             }
         }
-        
+
         return $equipments;
     }
 
@@ -1551,7 +1605,7 @@ class Bimp_CommandeLine extends ObjectLine
                 if (BimpObject::objectLoaded($product) && $product->isTypeProduct()) {
                     $base_unit = $fullQty / $nb_total_periods;
                     $round_unit = round($base_unit);
-                    if($round_unit < 1)
+                    if ($round_unit < 1)
                         $round_unit = 1;
                     $nb_periods_shipped = $qty_shipped / $round_unit;
 
@@ -1617,14 +1671,17 @@ class Bimp_CommandeLine extends ObjectLine
         return $data;
     }
 
-    public function getNbPeriodesToBoughtData($id_commande_fourn = null)
+    public function getNbPeriodesToBuyData($id_commande_fourn = null)
     {
         $data = array(
-            'nb_periods'        => 0,
-            'nb_periods_max'    => 0,
-            'nb_periods_today'  => 0,
-            'start_date'        => '',
-            'nb_periods_bought' => 0
+            'nb_total_periods'          => 0, // Nombre total de périodes
+            'nb_periods_bought'         => 0, // Nombre de périodes déjà achetées. 
+            'nb_periods_max'            => 0, // Nombre total de périodes restant à acheter. 
+            'nb_periods_until_today'    => 0, // Nombre total de périodes écoulées jusqu'à aujourd'hui. 
+            'nb_periods_tobuy_today'    => 0, // Nombre de périodes à acheter à date.  
+            'commande_fourn_nb_periods' => 0, // Nombre de période à acheter pour la commande fourn indiquée (nouvelle commande si null)
+            'qty_for_1_period'          => 0,
+            'start_date'                => ''
         );
 
         $fullQty = (float) $this->getFullQty();
@@ -1639,7 +1696,7 @@ class Bimp_CommandeLine extends ObjectLine
             if ((int) $this->getData('achat_periodicity') && (int) $this->getData('achat_nb_periods')) {
                 $periodicity = (int) $this->getData('achat_periodicity');
                 $nb_total_periods = (int) $this->getData('achat_nb_periods');
-                $nb_periods_today = 0;
+                $nb_periods_until_today = 0;
 
                 // Calcul du nombre total de périodes écoulées à la date du jour: 
                 $start = $this->getAchatStartPeriode();
@@ -1659,19 +1716,19 @@ class Bimp_CommandeLine extends ObjectLine
 
                             if ((int) $nb_month) {
                                 // Nombre de périodes écoulées: 
-                                $nb_periods_today = (int) floor($nb_month / $periodicity);
+                                $nb_periods_until_today = (int) floor($nb_month / $periodicity);
                             }
                         }
 
-                        $nb_periods_today += 1;
+                        $nb_periods_until_today += 1;
                     }
                 } else {
-                    $nb_periods_today = 1;
+                    $nb_periods_until_today = 1;
                 }
 
                 // Ajustement sur le nombre max de périodes facturables: 
-                if ($nb_periods_today > $nb_total_periods) {
-                    $nb_periods_today = $nb_total_periods;
+                if ($nb_periods_until_today > $nb_total_periods) {
+                    $nb_periods_until_today = $nb_total_periods;
                 }
 
                 // Retrait du nombre de périodes déjà facturées: 
@@ -1685,16 +1742,18 @@ class Bimp_CommandeLine extends ObjectLine
 
                 $nb_periods_bought = ($qty_bought / $fullQty) * $nb_total_periods;
 
-                $data['nb_periods_today'] = $nb_periods_today - $nb_periods_bought;
+                $data['nb_total_periods'] = $nb_total_periods;
+                $data['nb_periods_until_today'] = $nb_periods_until_today;
+                $data['nb_periods_tobuy_today'] = $nb_periods_until_today - $nb_periods_bought;
                 $data['nb_periods_max'] = $nb_total_periods - $nb_periods_bought;
                 $data['nb_periods_bought'] = $nb_periods_bought;
 
-                if ($data['nb_periods_today'] < 0) {
-                    $data['nb_periods_today'] = 0;
+                if ($data['nb_periods_tobuy_today'] < 0) {
+                    $data['nb_periods_tobuy_today'] = 0;
                 }
 
-                if ($data['nb_periods_today'] > $nb_total_periods) {
-                    $data['nb_periods_today'] = $nb_total_periods;
+                if ($data['nb_periods_tobuy_today'] > $nb_total_periods) {
+                    $data['nb_periods_tobuy_today'] = $nb_total_periods;
                 }
 
                 if ($data['nb_periods_max'] < 0) {
@@ -1706,16 +1765,16 @@ class Bimp_CommandeLine extends ObjectLine
                 }
 
                 if ($commande_qty) {
-                    $data['nb_periods'] = ($commande_qty / $fullQty) * $nb_total_periods;
-                    if ($data['nb_periods'] < 0) {
-                        $data['nb_periods'] = 0;
+                    $data['commande_fourn_nb_periods'] = ($commande_qty / $fullQty) * $nb_total_periods;
+                    if ($data['commande_fourn_nb_periods'] < 0) {
+                        $data['commande_fourn_nb_periods'] = 0;
                     }
 
-                    if ($data['nb_periods'] > $nb_total_periods) {
-                        $data['nb_periods'] = $nb_total_periods;
+                    if ($data['commande_fourn_nb_periods'] > $nb_total_periods) {
+                        $data['commande_fourn_nb_periods'] = $nb_total_periods;
                     }
                 } else {
-                    $data['nb_periods'] = $data['nb_periods_today'];
+                    $data['commande_fourn_nb_periods'] = $data['nb_periods_tobuy_today'];
                 }
             }
         }
@@ -1888,6 +1947,38 @@ class Bimp_CommandeLine extends ObjectLine
         return $qty;
     }
 
+    public function getPeriodicityExtraParam($param_name)
+    {
+        $params = $this->getData('periodicity_extra_params');
+
+        if (isset($params[$param_name])) {
+            return $params[$param_name];
+        }
+
+        switch ($param_name) {
+            case 'exp_id_contact':
+                return 0;
+
+            case 'achat_type_pa':
+                return 1;
+
+            case 'achat_id_fourn_price':
+                return $this->getCommandeFournIdPrice();
+
+            case 'achat_id_fourn':
+                return 0;
+
+            case 'achat_pa_ht':
+                $product = $this->getProduct();
+                return $product->getCurrentPaHt(BimpTools::getPostFieldValue('achat_id_fourn'));
+
+            case 'achat_tva_tx':
+                return 20;
+        }
+
+        return '';
+    }
+
     public static function getNbPeriodsToProcess($type)
     {
         if (!in_array($type, array('exp', 'fac', 'achat'))) {
@@ -1900,9 +1991,11 @@ class Bimp_CommandeLine extends ObjectLine
         $sql .= ' WHERE l.' . $type . '_periodicity > 0 AND ';
         $sql .= '(l.next_date_' . $type . ' IS NULL OR l.next_date_' . $type . ' <= \'' . date('Y-m-d') . '\')';
         $sql .= ' AND c.fk_statut = 1 AND c.logistique_status IN (' . implode(',', Bimp_Commande::$logistique_active_status) . ')';
-        if(BimpTools::isModuleDoliActif('MULTICOMPANY')){
-            if($staticComm->getEntity_name())
-                $sql .= ' AND entity IN ('.getEntity($staticComm->getEntity_name()).')';
+
+        if (BimpTools::isModuleDoliActif('MULTICOMPANY')) {
+            if ($staticComm->getEntity_name()) {
+                $sql .= ' AND entity IN (' . getEntity($staticComm->getEntity_name()) . ')';
+            }
         }
 
         $result = self::getBdb()->executeS($sql, 'array');
@@ -1912,6 +2005,94 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return 0;
+    }
+
+    public static function getPeriodicExpToProcess()
+    {
+        $data = array();
+
+        return $data;
+    }
+
+    public static function getPeriodicFacToProcess()
+    {
+        $data = array();
+
+        return $data;
+    }
+
+    public static function getPeriodicOperationLinesToProcess($type_operation, &$errors = array(), $id_fourn = null, $id_client = null, $id_product = null)
+    {
+        $lines = array();
+
+        if (!in_array($type_operation, array('exp', 'fac', 'achat'))) {
+            $errors[] = 'Type d\'opération invalide';
+            return array();
+        }
+
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+
+        $filters = array(
+            'c.fk_statut'         => 1,
+            'c.logistique_status' => Bimp_Commande::$logistique_active_status,
+            'a.achat_periodicity' => array(
+                'operator' => '>',
+                'value'    => 0
+            ),
+            'a.next_date_achat'   => array(
+                'or_field' => array(
+                    'IS_NULL',
+                    array(
+                        'operator' => '<=',
+                        'value'    => date('Y-m-d')
+                    )
+                )
+            )
+        );
+        $joins = array(
+            'c' => array(
+                'table' => 'commande',
+                'on'    => 'c.rowid = a.id_obj'
+            )
+        );
+
+//        if ($id_fourn) {
+//            $filters['a.achat_id_fourn'] = $id_fourn;
+//        }
+
+        if ($id_client) {
+            $filters['c.fk_soc'] = $id_client;
+        }
+
+        if ($id_product) {
+            $joins['cdet'] = array(
+                'table' => 'commandedet',
+                'on'    => 'cdet.rowid = a?id_line'
+            );
+            $filters['cdet.fk_product'] = $id_product;
+        }
+
+        $sql = BimpTools::getSqlFullSelectQuery('bimp_commande_line', array('DISTINCT a.id'), $filters, $joins, array(
+                    'order_by'  => 'id',
+                    'order_way' => 'desc',
+                    'n'         => 20,
+        ));
+
+//        die($sql);
+
+        $bdb = BimpCache::getBdb();
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (is_null($rows)) {
+            $errors[] = 'Echec de la récupération des achats périodiques à traiter - ' . $bdb->err();
+        } else {
+            foreach ($rows as $r) {
+                $lines[] = (int) $r['id'];
+            }
+        }
+
+        return $lines;
     }
 
     // Getters Array:
@@ -2279,7 +2460,7 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function displayReservationsStatus($hideMore = true)
     {
-        $html = '<div id="resa_ln_'.$this->id.'">';
+        $html = '<div id="resa_ln_' . $this->id . '">';
 
         $qty = (float) $this->getFullQty();
 
@@ -2344,13 +2525,12 @@ class Bimp_CommandeLine extends ObjectLine
                             }
 
                             $html .= '<td>';
-                            if($hideMore){
-                                $onClick = $this->getJsLoadCustomContent('displayReservationsStatus', '$(\'#resa_ln_'.$this->id.'\')', array(0), array('button' => ''));
-                                $html .= '<span class="bold hover showLines" onclick="'.$onClick.'">';
+                            if ($hideMore) {
+                                $onClick = $this->getJsLoadCustomContent('displayReservationsStatus', '$(\'#resa_ln_' . $this->id . '\')', array(0), array('button' => ''));
+                                $html .= '<span class="bold hover showLines" onclick="' . $onClick . '">';
                                 $html .= BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Afficher les lignes' . BimpRender::renderIcon('fas_caret-down', 'iconRight');
                                 $html .= '</span>';
-                            }
-                            else{
+                            } else {
                                 $html .= '<span class="bold hover showLines" onclick="$(this).findParentByClass(\'reservations_rows\').find(\'.Bimp_CommandeLine_reservation_row.status_' . $status . '\').show();$(this).hide().parent(\'td\').find(\'span.hideLines\').show();" style="display: none">';
                                 $html .= BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Afficher les lignes' . BimpRender::renderIcon('fas_caret-down', 'iconRight');
                                 $html .= '</span>';
@@ -2382,14 +2562,14 @@ class Bimp_CommandeLine extends ObjectLine
                                     'onclick' => $reservation->getJsLoadModalView('default')
                                 );
 
-                                $html .= '<tr class="Bimp_CommandeLine_reservation_row status_' . $status . '"' . /*($hidable ? ' style="display: none"' : '') .*/ '>';
+                                $html .= '<tr class="Bimp_CommandeLine_reservation_row status_' . $status . '"' . /* ($hidable ? ' style="display: none"' : '') . */ '>';
                                 $html .= '<td style="text-align: center; width: 45px">';
                                 $html .= '<input type="checkbox" name="reservation_check[]" value="' . $reservation->id . '" class="reservation_check"';
                                 $html .= ' data-id_commande_line="' . $this->id . '"';
                                 $html .= ' data-id_reservation="' . $reservation->id . '"';
                                 $html .= '/>';
                                 $html .= '</td>';
-    //                $html .= '<td>' . $reservation->getData('ref') . '</td>';
+                                //                $html .= '<td>' . $reservation->getData('ref') . '</td>';
                                 $html .= '<td style="width: 250px;">';
                                 $html .= $reservation->displayData('status');
                                 if ($serialisable && (int) $reservation->getData('status') >= 200) {
@@ -2660,12 +2840,22 @@ class Bimp_CommandeLine extends ObjectLine
         return 'ff';
     }
 
-    public function displayPeriodicity($no_html = false)
+    public function displayPeriodicity($no_html = false, $types = array())
     {
         $html = '';
 
         $shipment_same_values = false;
         $achat_same_values = false;
+
+        $display_fac = true;
+        $display_exp = true;
+        $display_achat = true;
+
+        if (!empty($types) && is_array($types)) {
+            $display_fac = in_array('fac', $types);
+            $display_exp = in_array('exp', $types);
+            $display_achat = in_array('achat', $types);
+        }
 
         if ((int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
             $periodicity = (int) $this->getData('fac_periodicity');
@@ -2682,31 +2872,39 @@ class Bimp_CommandeLine extends ObjectLine
                 $achat_same_values = true;
             }
 
-            if ($no_html) {
-                $html .= "\n" . 'Facturation ' . ($shipment_same_values ? '/ Livraison ' : '') . ($achat_same_values ? '/ Achat ' : '');
+            if ($display_fac ||
+                    ($shipment_same_values && $display_exp) ||
+                    ($achat_same_values && $display_achat)) {
+                $label = ($display_fac ? 'Facturation' : '');
+                $label .= ($shipment_same_values && $display_exp ? ($label ? ' /' : '') . 'Livraison' : '');
+                $label .= ($achat_same_values && $display_achat ? ($label ? ' /' : '') . 'Achat' : '');
 
-                if (isset(self::$periodicities[(int) $periodicity])) {
-                    if ($achat_same_values) {
-                        $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                if ($no_html) {
+                    $html .= "\n$label";
+
+                    if (isset(self::$periodicities[(int) $periodicity])) {
+                        if ($achat_same_values) {
+                            $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                        } else {
+                            $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                        }
                     } else {
-                        $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                        $html .= 'tous les ' . $periodicity . ' mois';
                     }
+                    $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
                 } else {
-                    $html .= 'tous les ' . $periodicity . ' mois';
-                }
-                $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
-            } else {
-                $html .= '<br/><strong>Facturation ' . ($shipment_same_values ? '/ Livraison ' : '') . ($achat_same_values ? '/ Achat ' : '');
-                if (isset(self::$periodicities[(int) $periodicity])) {
-                    if ($achat_same_values) {
-                        $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                    $html .= '<br/><b>' . $label;
+                    if (isset(self::$periodicities[(int) $periodicity])) {
+                        if ($achat_same_values) {
+                            $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                        } else {
+                            $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                        }
                     } else {
-                        $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                        $html .= 'tous les ' . $periodicity . ' mois';
                     }
-                } else {
-                    $html .= 'tous les ' . $periodicity . ' mois';
+                    $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</b>';
                 }
-                $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</strong>';
             }
         }
 
@@ -2723,8 +2921,13 @@ class Bimp_CommandeLine extends ObjectLine
                 $achat_same_values = true;
             }
 
+            if ($display_exp || ($achat_same_values && $display_achat)) {
+                $label = ($display_exp ? 'Livraison' : '');
+                $label .= ($achat_same_values && $display_achat ? ($label ? ' / ' : '') . 'Achat' : '');
+            }
+
             if ($no_html) {
-                $html .= "\n" . 'Livraison ' . ($achat_same_values_as_exp ? '/ Achat ' : '');
+                $html .= "\n$label";
                 if (isset(self::$periodicities[(int) $periodicity])) {
                     if ($achat_same_values_as_exp) {
                         $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
@@ -2736,7 +2939,7 @@ class Bimp_CommandeLine extends ObjectLine
                 }
                 $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
             } else {
-                $html .= '<br/><strong>Livraison ' . ($achat_same_values_as_exp ? '/ Achat ' : '');
+                $html .= '<br/><b>' . $label;
                 if (isset(self::$periodicities[(int) $periodicity])) {
                     if ($achat_same_values_as_exp) {
                         $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
@@ -2746,14 +2949,15 @@ class Bimp_CommandeLine extends ObjectLine
                 } else {
                     $html .= 'tous les ' . $periodicity . ' mois';
                 }
-                $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</strong>';
+                $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</b>';
             }
         }
 
-        if (!$achat_same_values && (int) $this->getData('achat_periodicity') && (int) $this->getData('achat_nb_periods')) {
+        if ($display_achat && !$achat_same_values && (int) $this->getData('achat_periodicity') && (int) $this->getData('achat_nb_periods')) {
             $periodicity = (int) $this->getData('achat_periodicity');
             $nb_periods = (int) $this->getData('achat_nb_periods');
             $nb_months = $periodicity * $nb_periods;
+            $id_fourn = (int) $this->getData('achat_id_fourn');
 
             if ($no_html) {
                 $html .= "\n" . 'Achat ';
@@ -2771,6 +2975,13 @@ class Bimp_CommandeLine extends ObjectLine
                     $html .= 'tous les ' . $periodicity . ' mois';
                 }
                 $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</strong>';
+            }
+
+            if ($id_fourn) {
+                $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $id_fourn);
+                if (BimpObject::objectLoaded($fourn)) {
+                    $html .= '<br/><b>Fournisseur : </b>' . ($no_html ? $fourn - getRef() . ' - ' . $fourn->getName() : $fourn->getLink());
+                }
             }
         }
 
@@ -2845,27 +3056,36 @@ class Bimp_CommandeLine extends ObjectLine
         return '';
     }
 
-    public function displayBoughtPeriods()
+    public function displayBoughtPeriods($single_line = false, $data = null)
     {
+        $html = '';
+
         if ($this->isLoaded() && (int) $this->getData('achat_periodicity')) {
-            $data = $this->getNbPeriodesToBoughtData(null);
+            if (is_null($data)) {
+                $data = $this->getNbPeriodesToBuyData(null);
+            }
 
             $total = (int) $this->getData('achat_nb_periods');
-            $bought = (isset($data['nb_periods_bought']) ? (int) $data['nb_periods_bought'] : 0);
+            $bought = BimpTools::getArrayValueFromPath($data, 'nb_periods_bought', 0);
+            $qty_for_1_period = BimpTools::getArrayValueFromPath($data, 'qty_for_1_period', 0);
 
-            return '<div style="text-align: center"><span class="' . ($total == $bought ? 'success' : (!$bought ? 'danger' : 'warning')) . '">' . $bought . ' / ' . $total . '</span></div>';
+            $s = ($bought > 1 ? 's' : '');
+
+            $html .= '<span class="' . ($total == $bought ? 'success' : (!$bought ? 'danger' : 'warning')) . '">' . $bought . ' / ' . $total . '</span>&nbsp;période' . $s;
+            $html .= ($single_line ? '&nbsp;' : '<br/>');
+            $html .= '<span class="small">(' . ($bought * $qty_for_1_period) . '&nbsp;unité' . $s . ')</span>';
         }
 
-        return '';
+        return $html;
     }
 
     public function displayNbPeriodsToBuy()
     {
         if ($this->isLoaded() && (int) $this->getData('achat_periodicity')) {
-            $data = $this->getNbPeriodesToBoughtData(null);
+            $data = $this->getNbPeriodesToBuyData(null);
 
-            if (isset($data['nb_periods'])) {
-                return '<div style="text-align: center"><span class="badge badge-' . ($data['nb_periods'] > 0 ? ($data['nb_periods'] > 1 ? 'important' : 'warning') : 'success') . '">' . $data['nb_periods'] . '</span></div>';
+            if (isset($data['nb_periods_tobuy_today'])) {
+                return '<div style="text-align: center"><span class="badge badge-' . ($data['nb_periods_tobuy_today'] > 0 ? ($data['nb_periods_tobuy_today'] > 1 ? 'important' : 'warning') : 'success') . '">' . $data['nb_periods_tobuy_today'] . '</span></div>';
             }
         }
 
@@ -3722,7 +3942,7 @@ class Bimp_CommandeLine extends ObjectLine
         if (BimpObject::objectLoaded($product)) {
             $ordered_qty = $this->getBoughtQty();
 
-            if ($product->isTypeProduct()) {
+            if ($product->isSerialisable() || (!(int) $this->getData('achat_periodicity') && $product->isTypeProduct())) {
                 $max = $this->getReservationsQties(0);
                 $min = 1;
                 $decimals = 0;
@@ -3737,9 +3957,9 @@ class Bimp_CommandeLine extends ObjectLine
             $qty_per_period = null;
 
             if ((int) $this->getData('achat_periodicity')) {
-                $periods_data = $this->getNbPeriodesToBoughtData();
+                $periods_data = $this->getNbPeriodesToBuyData();
                 $qty_per_period = $this->getAchatQtyFor1Periode();
-                $value = $qty_per_period * $periods_data['nb_periods_today'];
+                $value = $qty_per_period * $periods_data['nb_periods_tobuy_today'];
 
                 if ($min === 1) {
                     if ($value < 1 && $value > 0) {
@@ -3778,7 +3998,7 @@ class Bimp_CommandeLine extends ObjectLine
                     }
 
                     $msg .= '<b>Nombre d\'achat  déjà effectués: </b>' . $periods_data['nb_periods_bought'] . '<br/>';
-                    $msg .= '<b>Achats à effectuer à date: </b>' . $periods_data['nb_periods_today'] . ' (<b>' . ($qty_per_period * $periods_data['nb_periods_today']) . ' unité(s)</b>)<br/>';
+                    $msg .= '<b>Achats à effectuer à date: </b>' . $periods_data['nb_periods_tobuy_today'] . ' (<b>' . ($qty_per_period * $periods_data['nb_periods_tobuy_today']) . ' unité(s)</b>)<br/>';
                 } elseif ($ordered_qty > 0) {
                     if (($ordered_qty > 1)) {
                         $msg = $ordered_qty . ' unités ont déjà été commandées';
@@ -4275,7 +4495,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
-    public function renderFournPriceButtons()
+    public function renderFournPriceButtons($input_name = 'id_fourn_price')
     {
         $html = '';
 
@@ -4285,7 +4505,7 @@ class Bimp_CommandeLine extends ObjectLine
             $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
             $html .= BimpRender::renderIcon('fas_pencil-alt', 'iconLeft') . 'Editer les prix d\'achat';
             $html .= '</span>';
-            $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'id_fourn_price\');">';
+            $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'' . $input_name . '\');">';
             $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
             $html .= '</span>';
             $html .= '</div>';
@@ -4412,17 +4632,17 @@ class Bimp_CommandeLine extends ObjectLine
 
         switch ($type) {
             case 'exp':
-                $title = 'Produits à livraison périodique';
+                $title = 'Produits en commande à livraison périodique';
                 $list_name = 'general_periodes_exp';
                 break;
 
             case 'fac':
-                $title = 'Produits à facturation périodique';
+                $title = 'Produits en commande à facturation périodique';
                 $list_name = 'general_periodes_fac';
                 break;
 
             case 'achat':
-                $title = 'Produits à livraison périodique';
+                $title = 'Produits en commande à achat périodique';
                 $list_name = 'general_periodes_achat';
                 break;
 
@@ -4469,14 +4689,228 @@ class Bimp_CommandeLine extends ObjectLine
         }
         return '<input type="hidden" value="custom" name="achat_periodicity_same_values"/>Personnalisés';
     }
-    
-    public function hasMoresLine(){
-        $parent = $this->getParentInstance();
-        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-        $rows = $instance->getList(array('id_obj'=> $parent->id));
-        
-        
-        return ($rows > 100)? 1 : 0;
+
+    public function renderPeriodicityMassProcessInputs()
+    {
+        $html = '';
+        $errors = array();
+
+//        $operation_type = BimpTools::getPostFieldValue('operation_type', 'achat');
+        $operation_type = 'achat';
+
+        if (!$operation_type) {
+            $errors[] = 'Type d\'opération périodique non spécifiée';
+        } else {
+//            $method = 'renderPeriodic' . ucfirst($operation_type) . 'MassProcessInputs';
+            $method = 'renderPeriodicAchatMassProcessInputs';
+            if (!method_exists($this, $method)) {
+                $errors[] = 'Type d\'opération invalide';
+            } else {
+                $html = $this->{$method}($errors);
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+
+        return $html;
+    }
+
+    public function renderPeriodicAchatMassProcessInputs(&$errors = array())
+    {
+        $html = '';
+
+        $id_fourn = (int) BimpTools::getPostFieldValue('id_fourn', 0);
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
+        $id_product = (int) BimpTools::getPostFieldValue('id_product', 0);
+
+        $lines = self::getPeriodicOperationLinesToProcess('achat', $errors, $id_fourn, $id_client, $id_product);
+
+        // Trie par fournisseur: 
+        $lines_by_fourns = array();
+
+        foreach ($lines as $id_line) {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line);
+            if (!BimpObject::objectLoaded($line)) {
+                continue;
+            }
+
+            $line_errors = array();
+            $params = $line->getData('periodicity_extra_params');
+
+            $id_fourn = 0;
+            $pa_ht = 0;
+            $type_pa = (int) BimpTools::getArrayValueFromPath($params, 'achat_type_pa', 0);
+            $type_pa_label = '';
+            switch ($type_pa) {
+                case 1:
+                    $type_pa_label = 'PA fournisseur configuré';
+                    $id_pfp = (int) BimpTools::getArrayValueFromPath($params, 'achat_id_fourn_price', 0);
+                    if ($id_pfp) {
+                        $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_pfp);
+                        if (BimpObject::objectLoaded($pfp)) {
+                            $type_pa_label = 'Dernier PA fournisseur enregistré pour ce produit';
+                            $id_fourn = $pfp->getData('fk_soc');
+                            $pa_ht = $pfp->getData('price');
+                        } else {
+                            $line_errors[] = 'PA fournisseur #' . $id_pfp . ' n\'existe plus';
+                        }
+                    } else {
+                        $line_errors[] = 'PA fournisseur non défini';
+                    }
+                    break;
+
+                case 2:
+                    $type_pa_label = 'PA personnalisé';
+                    $id_fourn = (int) BimpTools::getArrayValueFromPath($params, 'achat_id_fourn', 0);
+                    $pa_ht = (float) BimpTools::getArrayValueFromPath($params, 'achat_pa_ht', 0);
+                    break;
+
+                default:
+                    $product = $line->getProduct();
+                    if (BimpObject::objectLoaded($product)) {
+                        $pfp = (int) $product->getLastFournPrice();
+                        if (BimpObject::objectLoaded($pfp)) {
+                            $type_pa_label = 'Dernier PA fournisseur enregistré pour ce produit';
+                            $id_fourn = (int) $pfp->getData('fk_soc');
+                            $pa_ht = (float) $pfp->getData('price');
+                            break;
+                        }
+                    }
+                    $line_errors[] = 'Aucun prix d\'achat configuré';
+                    break;
+            }
+
+            if ($id_fourn) {
+                if (!isset($lines_by_fourns[$id_fourn])) {
+                    $lines_by_fourns[$id_fourn] = array();
+                }
+
+                $lines_by_fourns[$id_fourn][$id_line] = array(
+                    'pa_ht'         => $pa_ht,
+                    'type_pa_label' => $type_pa_label,
+                    'errors'        => $line_errors
+                );
+            }
+        }
+
+        if (empty($lines_by_fourns)) {
+            $html .= BimpRender::renderIcon('fas_check', 'iconLeft') . '<span class = "success">Aucun achat périodique à effectuer à date</span>';
+        } else {
+            $html .= '<table class = "bimp_list_table">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th style="min-width: 30px; max-width: 30px; text-align: center"></th>';
+            $html .= '<th>Commande client</th>';
+            $html .= '<th>Produit / service</th>';
+            $html .= '<th>Quantités</th>';
+            $html .= '<th>Date prochain achat</th>';
+            $html .= '<th>Prix d\'achat</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+
+            $html .= '<tbody>';
+
+            foreach ($lines_by_fourns as $id_fourn => $fourn_lines) {
+                $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $id_fourn);
+                if (!BimpObject::objectLoaded($fourn)) {
+                    $html .= '<tr>';
+                    $html .= '<td colspan="99">' . BimpRender::renderAlerts('Le fournisseur #' . $id_fourn . ' n\'existe plus') . '</td>';
+                    $html .= '</tr>';
+                    continue; //temp
+                }
+                $html .= '<tr>';
+                $html .= '<td colspan="99" style="font-weight: bold; font-size: 14px; padding: 10px; background-color: #DCDCDC">';
+                $html .= 'Fournisseur : ' . $fourn->getLink();
+
+                $commandes = $this->getCommandesFournisseursArray();
+
+                $html .= '<div style="display: inline-block; max-width: 400px; margin-left: 30px; font-size: 12px; font-weight: normal">';
+                $html .= '<span class="small">Commande fournisseur : </span>';
+                $html .= BimpInput::renderInput('select', 'fourn_' . $id_fourn . '_commande_fourn', 'new', array(
+                            'options' => $commandes
+                ));
+                $html .= '</div>';
+
+                $html .= '</td>';
+                $html .= '</tr>';
+
+                foreach ($fourn_lines as $id_line => $line_data) {
+                    $html .= '<tr>';
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line);
+                    if (BimpObject::objectLoaded($line)) {
+                        $html .= '<td style="min-width: 30px; max-width: 30px; text-align: center">';
+                        BimpInput::renderInput('checkbox', 'line_check') . '</td>';
+                        $html .= '<input type="checkbox"/>';
+                        $html .= '</td>';
+
+                        $html .= '<td>';
+                        $commande = $line->getParentInstance();
+                        if (BimpObject::objectLoaded($commande)) {
+                            $html .= $commande->getLink();
+                        }
+                        $html .= '</td>';
+
+                        $html .= '<td>';
+                        $product = $line->getProduct();
+                        if (BimpObject::objectLoaded($product)) {
+                            $html .= $product->getLink() . '<br/>';
+                            $html .= $product->getName() . '<br/>';
+                            $html .= $line->displayPeriodicity(false, array('achat'));
+                        }
+                        $html .= '</td>';
+
+                        $line_errors = BimpTools::getArrayValueFromPath($line_data, 'errors', array());
+
+                        if (count($line_errors)) {
+                            $html .= '<td colspan="4">';
+                            $html .= BimpRender::renderAlerts($line_errors);
+                            $html .= '</td>';
+                        } else {
+                            $data = $this->getNbPeriodesToBuyData(null);
+
+                            $html .= '<td>';
+                            $html .= 'Déjà traité : ' . $line->displayBoughtPeriods(true, $data) . '<br/>';
+
+                            $class = ($data['nb_periods_tobuy_today'] > 0 ? ($data['nb_periods_tobuy_today'] > 1 ? 'important' : 'warning') : 'success');
+                            $s = ($data['nb_periods_tobuy_today'] > 1 ? 's' : '');
+                            $html .= 'A traiter aujoud\'hui : <span cass="' . $class . '">' . $data['nb_periods_tobuy_today'] . ' période' . $s . '</span>';
+                            $html .= '&nbsp;(' . ($data['nb_periods_tobuy_today'] * $data['qty_for_1_period']) . ' unité' . $s . ')<br/>';
+
+                            $html .= '</td>';
+                            $html .= '<td>';
+                            $html .= $line->displayNextPeriodDate('achat', true);
+                            $html .= '</td>';
+
+                            $html .= '<td>';
+                            $pa_ht = BimpTools::getArrayValueFromPath($line_data, 'pa_ht', 0);
+                            if ($pa_ht) {
+                                $html .= '<b>' . BimpTools::displayMoneyValue($pa_ht) . '</b>';
+
+                                $pa_label = BimpTools::getArrayValueFromPath($line_data, 'type_pa_label', '');
+                                if ($pa_label) {
+                                    $html .= '<br/><span class="small">' . $pa_label . '</span>';
+                                }
+                            }
+
+                            $html .= '</td>';
+                        }
+                    } else {
+                        $html .= '<td colspan="99">';
+                        $html .= BimpRender::renderAlerts('La ligne de commande #' . $id_line . ' n\'existe plus');
+                        $html .= '</td>';
+                    }
+                    $html .= '</tr>';
+                }
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+        }
+
+        return $html;
     }
 
     // Traitements réservations:
@@ -7010,7 +7444,8 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $errors = array();
 
-        if (BimpTools::isSubmit('has_fac_periodicity')) {
+        $periodicity_extra_params = $this->getData('periodicity_extra_params');
+        if (BimpTools::isPostFieldSubmit('has_fac_periodicity')) {
             if (!(int) BimpTools::getValue('has_fac_periodicity', 0)) {
                 $this->set('fac_periodicity', 0);
                 $this->set('fac_nb_periods', 0);
@@ -7019,23 +7454,47 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
-        if (BimpTools::isSubmit('has_exp_periodicity')) {
+        if (BimpTools::isPostFieldSubmit('has_exp_periodicity')) {
             if (!(int) BimpTools::getValue('has_exp_periodicity', 0)) {
                 $this->set('exp_periodicity', 0);
                 $this->set('exp_nb_periods', 0);
                 $this->set('exp_periods_start', null);
-            } elseif ((int) $this->getData('fac_periodicity') > 0 && BimpTools::getPostFieldValue('exp_periodicity_same_values', 0)) {
-                $this->set('exp_periodicity', $this->getData('fac_periodicity'));
-                $this->set('exp_nb_periods', $this->getData('fac_nb_periods'));
-                $this->set('exp_periods_start', $this->getData('fac_periods_start'));
+
+                if (isset($periodicity_extra_params['exp_id_contact'])) {
+                    unset($periodicity_extra_params['exp_id_contact']);
+                }
+            } else {
+                if ((int) $this->getData('fac_periodicity') > 0 && BimpTools::getPostFieldValue('exp_periodicity_same_values', 0)) {
+                    $this->set('exp_periodicity', $this->getData('fac_periodicity'));
+                    $this->set('exp_nb_periods', $this->getData('fac_nb_periods'));
+                    $this->set('exp_periods_start', $this->getData('fac_periods_start'));
+                }
+
+                if (BimpTools::isPostFieldSubmit('exp_id_contact')) {
+                    $periodicity_extra_params['exp_id_contact'] = (int) BimpTools::getPostFieldValue('exp_id_contact');
+                }
             }
         }
 
-        if (BimpTools::isSubmit('has_achat_periodicity')) {
+        if (BimpTools::isPostFieldSubmit('has_achat_periodicity')) {
             if (!(int) BimpTools::getValue('has_achat_periodicity', 0)) {
                 $this->set('achat_periodicity', 0);
                 $this->set('achat_nb_periods', 0);
                 $this->set('achat_periods_start', null);
+                $this->set('achat_id_fourn', 0);
+
+                if (isset($periodicity_extra_params['achat_id_fourn'])) {
+                    unset($periodicity_extra_params['achat_id_fourn']);
+                }
+                if (isset($periodicity_extra_params['achat_pa_ht'])) {
+                    unset($periodicity_extra_params['achat_pa_ht']);
+                }
+                if (isset($periodicity_extra_params['achat_tva_tx'])) {
+                    unset($periodicity_extra_params['achat_tva_tx']);
+                }
+                if (isset($periodicity_extra_params['achat_id_fourn_price'])) {
+                    unset($periodicity_extra_params['achat_id_fourn_price']);
+                }
             } else {
                 $params_mode = BimpTools::getPostFieldValue('achat_periodicity_same_values', '');
                 switch ($params_mode) {
@@ -7051,8 +7510,36 @@ class Bimp_CommandeLine extends ObjectLine
                         $this->set('achat_periods_start', $this->getData('exp_periods_start'));
                         break;
                 }
+
+                if (BimpTools::isPostFieldSubmit('achat_type_pa')) {
+                    $periodicity_extra_params['achat_type_pa'] = (int) BimpTools::getPostFieldValue('achat_type_pa');
+                    switch ($periodicity_extra_params['achat_type_pa']) {
+                        case 1: // PA fourn
+                            if (isset($periodicity_extra_params['achat_id_fourn'])) {
+                                unset($periodicity_extra_params['achat_id_fourn']);
+                            }
+                            if (isset($periodicity_extra_params['achat_pa_ht'])) {
+                                unset($periodicity_extra_params['achat_pa_ht']);
+                            }
+                            if (isset($periodicity_extra_params['achat_tva_tx'])) {
+                                unset($periodicity_extra_params['achat_tva_tx']);
+                            }
+                            $periodicity_extra_params['achat_id_fourn_price'] = (int) BimpTools::getPostFieldValue('achat_id_fourn_price');
+                            break;
+                        case 2: // PA custom
+                            if (isset($periodicity_extra_params['achat_id_fourn_price'])) {
+                                unset($periodicity_extra_params['achat_id_fourn_price']);
+                            }
+                            $periodicity_extra_params['achat_id_fourn'] = (int) BimpTools::getPostFieldValue('achat_id_fourn');
+                            $periodicity_extra_params['achat_pa_ht'] = (float) BimpTools::getPostFieldValue('achat_pa_ht');
+                            $periodicity_extra_params['achat_tva_tx'] = (float) BimpTools::getPostFieldValue('achat_tva_tx');
+                            break;
+                    }
+                }
             }
         }
+
+        $this->set('periodicity_extra_params', $periodicity_extra_params);
 
         if ((int) $this->getData('fac_periodicity') !== (int) $this->getInitData('fac_periodicity') ||
                 (int) $this->getData('fac_nb_periods') !== (int) $this->getInitData('fac_nb_periods')) {
@@ -7243,7 +7730,7 @@ class Bimp_CommandeLine extends ObjectLine
         if ((int) $this->qty === 0 && (int) $this->getData('qty_modif')) {
             $force_update = true;
         }
-        
+
         $errors = parent::update($warnings, $force_update);
 
         if (!is_null($prev_commande_status)) {

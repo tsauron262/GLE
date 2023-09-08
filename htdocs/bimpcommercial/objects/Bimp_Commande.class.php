@@ -1064,6 +1064,56 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         return $shipments;
     }
+    
+    public function getShipmentContactsArray()
+    {
+        $commande = $this->dol_object;
+
+        $contacts = array(
+            0 => 'Addresse de livraison de la commande'
+        );
+
+        if (!is_null($commande->socid) && $commande->socid) {
+            $where = '`fk_soc` = ' . (int) $commande->socid;
+            $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    $contacts[(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
+                }
+            }
+        }
+
+        BimpTools::loadDolClass('contact');
+
+        $bill_contacts = $commande->getIdContact('external', 'BILLING');
+        if (!is_null($bill_contacts) && count($bill_contacts)) {
+            foreach ($bill_contacts as $id_contact) {
+                if (!array_key_exists((int) $id_contact, $contacts)) {
+                    $contact = new Contact($this->db->db);
+                    if ($contact->fetch((int) $id_contact) > 0) {
+                        $contacts[(int) $id_contact] = $contact->firstname . ' ' . $contact->lastname;
+                    }
+                    unset($contact);
+                }
+            }
+        }
+
+        $ship_contacts = $commande->getIdContact('external', 'SHIPPING');
+        if (!is_null($ship_contacts) && count($ship_contacts)) {
+            foreach ($ship_contacts as $id_contact) {
+                if (!array_key_exists((int) $id_contact, $contacts)) {
+                    $contact = new Contact($this->db->db);
+                    if ($contact->fetch((int) $id_contact) > 0) {
+                        $contacts[(int) $id_contact] = $contact->firstname . ' ' . $contact->lastname;
+                    }
+                    unset($contact);
+                }
+            }
+        }
+
+        return $contacts;
+    }
 
     public function getInvoicesArray($editable_only = false, $include_empty = false, $empty_label = '')
     {

@@ -138,11 +138,11 @@ class FournObjectLine extends ObjectLine
             case 'id_fourn_price':
                 $value = $this->getValueByProduct('id_fourn_price');
                 $values = $this->getProductFournisseursPricesArray(true, 'Prix d\'achat exceptionnel');
-                if(!$value && count($values))
-                    foreach($values as $idP => $inut)
-                        if($idP > $value)
+                if (!$value && count($values))
+                    foreach ($values as $idP => $inut)
+                        if ($idP > $value)
                             $value = $idP;
-                        
+
                 if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
                     $html .= BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
                                 'options' => $values
@@ -263,16 +263,17 @@ class FournObjectLine extends ObjectLine
                         if (!BimpObject::objectLoaded($product)) {
                             $errors[] = 'Le produit d\'ID ' . $this->id_product . ' n\'existe pas';
                         } else {
-                            $statut = $product->getData('tobuy');
-                            if($statut == 0)
+                            if (!(int) $product->getData('tobuy')) {
                                 $errors[] = 'Le produit ' . $product->getData('ref') . ' est hors achat';
-                            else{
-                                if ((int) $product->getData('fk_product_type') === 0 && BimpCore::getConf('not_decimal_product', 1, 'bimpcore')) {
-                                    $qty_str = (string) $this->qty;
+                            }
 
-                                    if (preg_match('/.*\..*/', $qty_str)) {
-                                        $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service". Veuillez corriger';
-                                    }
+                            if ($product->isSerialisable()) {
+                                $errors[] = 'Les quantités décimales ne sont pas autorisées pour les produits sérialisés';
+                            } elseif ((int) $product->getData('fk_product_type') === 0 && BimpCore::getConf('not_decimal_product', 1, 'bimpcore')) {
+                                $qty_str = (string) $this->qty;
+
+                                if (preg_match('/.*\..*/', $qty_str)) {
+                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service"';
                                 }
                             }
                         }
@@ -347,7 +348,7 @@ class FournObjectLine extends ObjectLine
         }
         return $errors;
     }
-  
+
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();

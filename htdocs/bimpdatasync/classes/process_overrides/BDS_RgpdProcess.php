@@ -759,8 +759,8 @@ class BDS_RgpdProcess extends BDSProcess
 
         global $bimp_errors_handle_locked;
         $bimp_errors_handle_locked = true;
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
+//        error_reporting(E_ALL);
+//        ini_set('display_errors', 1);
 
         foreach ($list as $id_object) {
             $object = BimpCache::getBimpObjectInstance($params['module'], $params['object_name'], $id_object);
@@ -1133,8 +1133,8 @@ class BDS_RgpdProcess extends BDSProcess
             global $bimp_errors_handle_locked;
             $bimp_errors_handle_locked = true;
 
-            error_reporting(E_ALL);
-            ini_set('display_errors', 1);
+//            error_reporting(E_ALL);
+//            ini_set('display_errors', 1);
 
             // Déplacement fichiers + 5 ans dans dossier d'archives:
             foreach (self::$objects as $type => $params) {
@@ -1187,8 +1187,8 @@ class BDS_RgpdProcess extends BDSProcess
             global $bimp_errors_handle_locked;
             $bimp_errors_handle_locked = true;
 
-            error_reporting(E_ALL);
-            ini_set('display_errors', 1);
+//            error_reporting(E_ALL);
+//            ini_set('display_errors', 1);
 
             foreach (self::$objects as $type => $params) {
                 $params = $this->getObjectParams($type);

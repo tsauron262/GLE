@@ -193,6 +193,18 @@ fields:
         type: money
         default_value: 0
         
+    cost_price:
+        label: Prix de revient
+        type: money
+        default_value: 0
+        
+    cost_price_percent:
+        label: Pourcentage du cout de reviens
+        type: percent
+        default_value: 0
+        input:
+              help: Si renseigné est prioritaire pour le calcul du prix de revient
+        
     cur_pa_origin: 
         label: Type origine pa
         
@@ -916,6 +928,10 @@ fields_tables:
             - field: pmp
             - field: pa_prevu
             - field: infos_pa
+            - field: cost_price
+              edit: 1
+            - field: cost_price_percent
+              edit: 1
         
     stock:
         title: Options

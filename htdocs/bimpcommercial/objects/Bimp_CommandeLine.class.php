@@ -567,6 +567,8 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function getGeneralPeriodsListHeaderButtons($operation_type)
     {
+        return array();
+        
         $buttons = array();
 
         if ($this->canSetAction('periodicityMassprocess')) {

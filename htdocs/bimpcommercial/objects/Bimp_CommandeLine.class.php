@@ -567,8 +567,6 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function getGeneralPeriodsListHeaderButtons($operation_type)
     {
-        return array();
-        
         $buttons = array();
 
         if ($this->canSetAction('periodicityMassprocess')) {
@@ -2846,6 +2844,7 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $html = '';
 
+        $extra_params = $this->getData('periodicity_extra_params');
         $shipment_same_values = false;
         $achat_same_values = false;
 
@@ -2882,7 +2881,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $label .= ($achat_same_values && $display_achat ? ($label ? ' /' : '') . 'Achat' : '');
 
                 if ($no_html) {
-                    $html .= "\n$label";
+                    $html .= "\n" . $label . ' ';
 
                     if (isset(self::$periodicities[(int) $periodicity])) {
                         if ($achat_same_values) {
@@ -2895,7 +2894,7 @@ class Bimp_CommandeLine extends ObjectLine
                     }
                     $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
                 } else {
-                    $html .= '<br/><b>' . $label;
+                    $html .= '<br/><b>' . $label . ' ';
                     if (isset(self::$periodicities[(int) $periodicity])) {
                         if ($achat_same_values) {
                             $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
@@ -2926,32 +2925,32 @@ class Bimp_CommandeLine extends ObjectLine
             if ($display_exp || ($achat_same_values && $display_achat)) {
                 $label = ($display_exp ? 'Livraison' : '');
                 $label .= ($achat_same_values && $display_achat ? ($label ? ' / ' : '') . 'Achat' : '');
-            }
 
-            if ($no_html) {
-                $html .= "\n$label";
-                if (isset(self::$periodicities[(int) $periodicity])) {
-                    if ($achat_same_values_as_exp) {
-                        $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                if ($no_html) {
+                    $html .= "\n" . $label . ' ';
+                    if (isset(self::$periodicities[(int) $periodicity])) {
+                        if ($achat_same_values_as_exp) {
+                            $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                        } else {
+                            $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                        }
                     } else {
-                        $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                        $html .= 'tous les ' . $periodicity . ' mois';
                     }
+                    $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
                 } else {
-                    $html .= 'tous les ' . $periodicity . ' mois';
-                }
-                $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
-            } else {
-                $html .= '<br/><b>' . $label;
-                if (isset(self::$periodicities[(int) $periodicity])) {
-                    if ($achat_same_values_as_exp) {
-                        $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                    $html .= '<br/><b>' . $label . ' ';
+                    if (isset(self::$periodicities[(int) $periodicity])) {
+                        if ($achat_same_values_as_exp) {
+                            $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                        } else {
+                            $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                        }
                     } else {
-                        $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                        $html .= 'tous les ' . $periodicity . ' mois';
                     }
-                } else {
-                    $html .= 'tous les ' . $periodicity . ' mois';
+                    $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</b>';
                 }
-                $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</b>';
             }
         }
 
@@ -2959,7 +2958,6 @@ class Bimp_CommandeLine extends ObjectLine
             $periodicity = (int) $this->getData('achat_periodicity');
             $nb_periods = (int) $this->getData('achat_nb_periods');
             $nb_months = $periodicity * $nb_periods;
-            $id_fourn = (int) $this->getData('achat_id_fourn');
 
             if ($no_html) {
                 $html .= "\n" . 'Achat ';
@@ -2977,6 +2975,27 @@ class Bimp_CommandeLine extends ObjectLine
                     $html .= 'tous les ' . $periodicity . ' mois';
                 }
                 $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</strong>';
+            }
+        }
+
+        if ($display_exp) {
+            $id_contact = (int) BimpTools::getArrayValueFromPath($extra_params, 'exp_id_contact', 0);
+
+            if ($id_contact) {
+                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                if (BimpObject::objectLoaded($contact)) {
+                    $html .= '<br/><b>Contact livraison : </b>' . $contact->getName();
+                }
+            }
+        }
+
+        if ($display_achat) {
+            $id_fourn = (int) BimpTools::getArrayValueFromPath($extra_params, 'achat_id_fourn', 0);
+            if (!$id_fourn) {
+                $id_pfp = (int) BimpTools::getArrayValueFromPath($extra_params, 'achat_id_fourn_price', 0);
+                if ($id_pfp) {
+                    $id_fourn = (int) $this->db->getValue('product_fournisseur_price', 'fk_soc', 'rowid = ' . $id_pfp);
+                }
             }
 
             if ($id_fourn) {
@@ -2997,7 +3016,7 @@ class Bimp_CommandeLine extends ObjectLine
         switch ($field) {
             case 'desc':
             case 'desc_light':
-                $html .= $this->displayPeriodicity($no_html);
+                $html .= '<br/>' . $this->displayPeriodicity($no_html);
                 break;
         }
 
@@ -4860,7 +4879,7 @@ class Bimp_CommandeLine extends ObjectLine
                         if (BimpObject::objectLoaded($product)) {
                             $html .= $product->getLink() . '<br/>';
                             $html .= $product->getName() . '<br/>';
-                            $html .= $line->displayPeriodicity(false, array('achat'));
+                            $html .= $line->displayPeriodicity(false, array('exp'));
                         }
                         $html .= '</td>';
 
@@ -4871,9 +4890,13 @@ class Bimp_CommandeLine extends ObjectLine
                             $html .= BimpRender::renderAlerts($line_errors);
                             $html .= '</td>';
                         } else {
-                            $data = $this->getNbPeriodesToBuyData(null);
+                            $data = $line->getNbPeriodesToBuyData(null);
 
                             $html .= '<td>';
+//                            $html .= '<pre>';
+//                            $html .= print_r($data, 1);
+//                            $html .= '</pre>';
+
                             $html .= 'Déjà traité : ' . $line->displayBoughtPeriods(true, $data) . '<br/>';
 
                             $class = ($data['nb_periods_tobuy_today'] > 0 ? ($data['nb_periods_tobuy_today'] > 1 ? 'important' : 'warning') : 'success');

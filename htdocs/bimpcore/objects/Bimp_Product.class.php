@@ -4421,6 +4421,17 @@ class Bimp_Product extends BimpObject
 
         if ($this->canSetAction('bulkEditField')) {
             $actions[] = array(
+                'label'      => 'Editer pourcentage du prix de reviens',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'cost_price_percent',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+            $actions[] = array(
                 'label'      => 'Editer durée',
                 'icon'       => 'fas_pen',
                 'action'     => 'bulkEditField',

@@ -294,7 +294,7 @@ class Bimp_CommandeFourn_LdlcFiliale extends Bimp_CommandeFourn
                                 array("tag"      => "Customer", "attrs"    => array("identifiedby" => "code", 'linked_entity_code' => "PRO"),
                                     "children" => array(
                                         "Owner"          => "FILI",
-                                        "CustomerNumber" => "E69OLYSBI0095",
+                                        "CustomerNumber" => $this->CustomerNumber,
                                         "FirstName"      => "",
                                         "LastName"       => "",
                                         "PhoneNumber"    => "0812211211",

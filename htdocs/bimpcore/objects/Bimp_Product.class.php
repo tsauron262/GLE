@@ -3986,7 +3986,8 @@ class Bimp_Product extends BimpObject
         $this->hydrateFromDolObject();
         
         
-        $this->onUpdate();
+        if($this->getData('cost_price_percent') > 0)
+            $this->updateField('cost_price', $this->getData('price') * $this->getData('cost_price_percent') / 100);
 
         return array(
             'errors'   => $errors,
@@ -3994,17 +3995,27 @@ class Bimp_Product extends BimpObject
         );
     }
     
-    public function onUpdate($updateOnBdd = true){
-        if($this->getData('cost_price_percent') > 0){
-            $newP = $this->getData('price') * $this->getData('cost_price_percent') / 100;
-            if($updateOnBdd)
-                $this->updateField('cost_price', $newP);
-            else
-                $this->set('cost_price', $newP);
+    public function validateValue($field, $value) {
+        if($field == 'cost_price_percent'){
+            if($value > 0 && $value != $this->getData('cost_price_percent')
+                    || $this->getData('cost_price_percent') > 0){
+                $this->updateField('cost_price', $this->getData('price') * $value / 100);
+            }
         }
-        if($this->getData('cost_price')>0)
-            $this->setCurrentPaHt ($this->getData('cost_price'),0, 'cost_price');
+        elseif($field == 'cost_price'){
+            if($value > 0)
+                $this->setCurrentPaHt ($value,0, 'cost_price');
+            elseif($this->getInitData('cost_price') > 0){//repassser a zero si pa actuel = prix de reviens
+                $paO = $this->getCurrentPaObject();
+                if($paO && $paO->getData('origin') == 'cost_price'){
+                    $this->setCurrentPaHt ($value,0, 'cost_price');
+                }
+            }
+        }
+        
+        return parent::validateValue($field, $value);
     }
+  
 
     public function actionDuplicate($data, &$success)
     {
@@ -4087,8 +4098,6 @@ class Bimp_Product extends BimpObject
         $init_tva_tx = (float) $this->getInitData('tva_tx');
         $new_tva_tx = (float) $this->getData('tva_tx');
         $updateToSerilisable = ($this->getInitData('serialisable') == 0 && $this->getData('serialisable') == 1);
-        
-        $this->onUpdate(false);
 
         $errors = parent::update($warnings, $force_update);
 

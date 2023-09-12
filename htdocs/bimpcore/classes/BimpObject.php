@@ -10161,15 +10161,17 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             if (!BimpObject::objectLoaded($instance)) {
                                 $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe plus';
                             } else {
+                                
                                 $mode = BimpTools::getArrayValueFromPath($data, 'update_mode', 'udpate_object');
                                 $force_update = BimpTools::getArrayValueFromPath($data, 'force_update', false);
+                                $not_validate = BimpTools::getArrayValueFromPath($data, 'validate', false);
 
                                 $obj_warnings = array();
                                 $obj_errors = array();
 
                                 switch ($mode) {
                                     case 'update_field':
-                                        $obj_errors = $instance->updateField($field_name, $value, null, $force_update, $force_update);
+                                        $obj_errors = $instance->updateField($field_name, $value, null, $force_update, $not_validate);
                                         break;
 
                                     case 'update_object':

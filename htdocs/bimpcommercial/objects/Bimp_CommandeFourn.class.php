@@ -887,16 +887,15 @@ class Bimp_CommandeFourn extends BimpCommAchat
     public function getAdresseLivraison(&$warnings = array())
     {
         $result = array('name' => '', 'adress' => '', 'adress2' => '', 'adress3' => '', 'zip' => '', 'town' => '', 'contact' => '', 'country' => '');
-
+        
         switch ($this->getData('delivery_type')) {
             case Bimp_CommandeFourn::DELIV_ENTREPOT:
             default:
                 $entrepot = $this->getChildObject('entrepot');
                 if (BimpObject::objectLoaded($entrepot)) {
                     if ($entrepot->address) {
-                        $name = 'AGENCE BIMP';
-                        $result['name'] = $name;
-                        $result['contact'] = $name;
+                        $result['name'] = $this->agence_name;
+                        $result['contact'] = $this->agence_name;
                         $tabAdd = explode("<br/>", $entrepot->address);
                         $result['adress'] = $tabAdd[0];
                         if (isset($tabAdd[1]))

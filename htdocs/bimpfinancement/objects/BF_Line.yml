@@ -326,7 +326,7 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: position
         sort_way: asc
-        n: 0
+        n: 15
         single_cell:
             filters:
                 type: 3

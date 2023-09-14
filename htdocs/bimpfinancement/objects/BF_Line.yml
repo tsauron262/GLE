@@ -312,6 +312,7 @@ lists:
         n: 15
         extends: default
         filters_panel: default
+        pagination: 1
     default: 
         configurable: 1
         checkboxes: 1
@@ -326,7 +327,7 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: position
         sort_way: asc
-        n: 15
+        n: 0
         single_cell:
             filters:
                 type: 3

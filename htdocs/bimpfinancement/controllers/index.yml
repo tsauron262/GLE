@@ -42,4 +42,4 @@ sections:
                   - type: list
                     list: 
                         panel: 1
-                        object: refinanceurs
+                        object: lignes

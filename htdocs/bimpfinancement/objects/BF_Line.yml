@@ -308,6 +308,9 @@ lists_cols:
                     - 1
             
 lists: 
+    global:
+        n: 15
+        extends: default
     default: 
         filters_panel: default
         configurable: 1

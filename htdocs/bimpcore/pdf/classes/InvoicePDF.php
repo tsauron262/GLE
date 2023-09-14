@@ -545,9 +545,21 @@ class InvoicePDF extends BimpCommDocumentPDF
             $html .= '</p>';
         }
 //        }
-        $html .= $conf->global->INVOICE_FREE_TEXT;
 
         return $html;
+    }
+    
+    public function renderAfterLines(){
+        global $conf;
+        $html = '';
+        if(isset($conf->global->INVOICE_FREE_TEXT) && $conf->global->INVOICE_FREE_TEXT != ''){
+            $html .= '<p style="font-size: 6px; font-style: italic">';
+            $html .= $conf->global->INVOICE_FREE_TEXT;
+            $html .= '</p>';
+        }
+        if($html != '')
+            $this->writeContent($html);
+        parent::renderAfterLines();
     }
 
     public function getPaymentsHtml()

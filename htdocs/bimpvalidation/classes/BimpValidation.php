@@ -250,6 +250,7 @@ class BimpValidation
         }
 
         if ($debug && is_a($object, 'BimpObject')) {
+            $object->useNoTransactionsDb();
             $object->addObjectLog($debug, 'DEBUG_VALIDATION');
         }
 

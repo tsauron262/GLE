@@ -318,7 +318,7 @@ lists:
         positions: 1
         positions_open: 1
         enable_search: 0
-        enable_sort: 0
+#        enable_sort: 0
         pagination: 0
         bulk_actions:
             - label: supprimer les lignes sélectionnées

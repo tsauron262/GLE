@@ -312,14 +312,6 @@ filters_panels:
         
             
 lists: 
-    global:
-        n: 15
-        extends: default
-        filters_panel: default
-        pagination: 1
-        positions: 0
-        enable_search: 1
-        enable_sort: 1
     default: 
         configurable: 1
         checkboxes: 1
@@ -360,3 +352,11 @@ lists:
             remise: 
             total_ht: 
             total_ttc:
+    global:
+        n: 15
+        extends: default
+        filters_panel: default
+        pagination: 1
+        positions: 0
+        enable_search: 1
+        enable_sort: 1

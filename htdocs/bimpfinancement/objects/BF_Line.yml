@@ -313,6 +313,9 @@ lists:
         extends: default
         filters_panel: default
         pagination: 1
+        positions: 0
+        enable_search: 1
+        enable_sort: 1
     default: 
         configurable: 1
         checkboxes: 1

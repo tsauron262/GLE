@@ -249,6 +249,10 @@ class BimpValidation
             ));
         }
 
+        if ($debug && is_a($object, 'BimpValidation')) {
+            $object->addObjectLog($debug, 'DEBUG_VALIDATION');
+        }
+
         return $global_check;
     }
 
@@ -693,7 +697,7 @@ class BimpValidation
                 }
 
                 if (BimpObject::objectLoaded($client)) {
-                    $val = $client->getTotalUnpayedTolerance(null, 31);//pour limiter la casse, passé a 31 jours de retard
+                    $val = $client->getTotalUnpayedTolerance(null, 31); //pour limiter la casse, passé a 31 jours de retard
                 }
 
                 if ($val < 0) {

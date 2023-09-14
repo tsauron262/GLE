@@ -237,7 +237,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
               "Currency"=> "EUR"
             ),
             "SparePartsCost"=> array(
-              "Amount"=> round($totalSpare + $prime,2),
+              "Amount"=> round($totalSpare + ($prime/1.2),2),
               "Currency"=> "EUR"
             ),
             "TravelCost"=> array(

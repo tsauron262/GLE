@@ -100,7 +100,7 @@ class BimpValidation
                 // Récupération des données de l'objet pour ce type de validation: 
                 $object_data = self::getObjectData($type, $object, $type_errors, $debug);
 
-                $debug .= 'DONNEES OBJET : <pre>';
+                $debug .= '<br/>DONNEES OBJET : <pre>';
                 $debug .= print_r($object_data, 1);
                 $debug .= '</pre><br/>';
 

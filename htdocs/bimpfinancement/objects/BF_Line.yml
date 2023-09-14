@@ -360,3 +360,5 @@ lists:
         positions: 0
         enable_search: 1
         enable_sort: 1
+        sort_field: id
+        sort_way: desc

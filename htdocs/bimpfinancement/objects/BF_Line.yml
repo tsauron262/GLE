@@ -309,6 +309,7 @@ lists_cols:
             
 lists: 
     default: 
+        filters_panel: default
         configurable: 1
         checkboxes: 1
         positions: 1

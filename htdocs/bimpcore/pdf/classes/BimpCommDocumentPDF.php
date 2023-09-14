@@ -675,6 +675,11 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
         }
 
         $html .= '</table>';
+        if(is_a($this->bimpCommObject, 'BimpComm')){
+            if($this->bimpCommObject->getData('zone_vente') == 3)
+                $html .= '* TVA non applicable – art. 259-1 du CGI';
+        }
+        
         $html .= '<br/>';
 
         return $html . $htmlInfo;

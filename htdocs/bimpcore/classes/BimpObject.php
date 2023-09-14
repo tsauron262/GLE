@@ -2897,13 +2897,14 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function addObjectLog($msg, $code = '')
+    public function addObjectLog($msg, $code = '', $no_transactions_db = false)
     {
         $errors = array();
 
         if ($this->isLoaded($errors)) {
             global $user;
-
+            $w = array();
+            
             BimpObject::createBimpObject('bimpcore', 'BimpObjectLog', array(
                 'obj_module' => $this->module,
                 'obj_name'   => $this->object_name,
@@ -2912,7 +2913,7 @@ class BimpObject extends BimpCache
                 'code'       => $code,
                 'date'       => date('Y-m-d H:i:s'),
                 'id_user'    => (BimpObject::objectLoaded($user) ? $user->id : 0)
-                    ), true, $errors);
+                    ), true, $errors, $w, $no_transactions_db);
         } else
             BimpCore::addlog('Ajout historique objet non loadé');
 

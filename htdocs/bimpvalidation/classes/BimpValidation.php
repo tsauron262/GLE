@@ -98,7 +98,7 @@ class BimpValidation
 
             if (!$type_check) {
                 // Récupération des données de l'objet pour ce type de validation: 
-                $object_data = self::getObjectData($type, $object, $type_errors);
+                $object_data = self::getObjectData($type, $object, $type_errors, $debug);
 
                 $debug .= 'DONNEES OBJET : <pre>';
                 $debug .= print_r($object_data, 1);
@@ -250,7 +250,7 @@ class BimpValidation
         }
 
         if ($debug && is_a($object, 'BimpObject')) {
-            $object->addObjectLog($debug, 'DEBUG_VALIDATION');
+            $object->addObjectLog($debug, 'DEBUG_VALIDATION', true);
         }
 
         return $global_check;
@@ -612,7 +612,7 @@ class BimpValidation
         );
     }
 
-    public static function getObjectData($type_validation, $object, &$errors = array())
+    public static function getObjectData($type_validation, $object, &$errors = array(), &$debug = '')
     {
         $val = 0;
         $val_str = '';
@@ -676,6 +676,10 @@ class BimpValidation
 
                         if (BimpObject::objectLoaded($client)) {
                             $val += (float) $client->getEncours() + $client->getEncoursNonFacture() - ((float) $client->getData('outstanding_limit') * 1.2);
+                            
+                            if (isset($client->debug) && $client->debug) {
+                                $debug .= '<br/>' . $client->debug .'<br/><br/>';
+                            }
                         }
 
                         if ($val < 0) {

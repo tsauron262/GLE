@@ -249,7 +249,7 @@ class BimpValidation
             ));
         }
 
-        if ($debug && is_a($object, 'BimpValidation')) {
+        if ($debug && is_a($object, 'BimpObject')) {
             $object->addObjectLog($debug, 'DEBUG_VALIDATION');
         }
 

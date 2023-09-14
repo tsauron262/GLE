@@ -545,6 +545,7 @@ class InvoicePDF extends BimpCommDocumentPDF
             $html .= '</p>';
         }
 //        }
+        $html .= $conf->global->INVOICE_FREE_TEXT;
 
         return $html;
     }

@@ -230,8 +230,9 @@ class BS_SAV_ExtEntity extends BS_SAV{
             $totalSpare = $facture->getData('total_ht');
         
         $prime = $this->findEcologicSupportAmount();
+        $prime2 = $this->findEcologicSupportAmount();
         if($this->id == 578714)
-            $prime = 45;
+            $prime2 = 45;
         
         $data["Quote"] = array(
             "LaborCost"=> array(
@@ -255,7 +256,7 @@ class BS_SAV_ExtEntity extends BS_SAV{
               "Currency"=> "EUR"
             ),
             "SupportAmount"=> array(
-              "Amount"=> $prime,
+              "Amount"=> $prime2,
               "Currency"=> "EUR"
             )
         );

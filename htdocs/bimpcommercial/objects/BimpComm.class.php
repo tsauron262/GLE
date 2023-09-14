@@ -2826,7 +2826,7 @@ class BimpComm extends BimpDolObject
         if (count($copy_errors)) {
             $errors[] = BimpTools::getMsgFromArray($copy_errors, 'Echec de la copie ' . $this->getLabel('of_the'));
         } else {
-            $new_object->addObjectLog('Créé' . $new_object->e() . ' par clonage ' . $this->getLabel('of_the') . $this->getRef());
+            $new_object->addObjectLog('Créé' . $new_object->e() . ' par clonage ' . $this->getLabel('of_the') . ' '.$this->getRef());
             // Copie des contacts: 
             $new_object->copyContactsFromOrigin($this, $errors);
 

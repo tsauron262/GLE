@@ -306,6 +306,10 @@ lists_cols:
                 method: displayDesc
                 params: 
                     - 1
+                    
+filters_panels:
+    default:
+        
             
 lists: 
     global:

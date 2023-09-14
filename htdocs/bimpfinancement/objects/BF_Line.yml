@@ -311,8 +311,8 @@ lists:
     global:
         n: 15
         extends: default
-    default: 
         filters_panel: default
+    default: 
         configurable: 1
         checkboxes: 1
         positions: 1

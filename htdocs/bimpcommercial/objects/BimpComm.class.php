@@ -5368,6 +5368,10 @@ class BimpComm extends BimpDolObject
         $init_zone = '';
         $cur_zone = '';
         $new_zone = '';
+        
+        if($this->getInitData('id_client_facture') != $this->getData('id_client_facture')){
+            $this->addObjectLog('Client facturation modifié, de '.$this->getInitData('id_client_facture').' a '.$this->getData('id_client_facture'));
+        }
 
         if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente')) {
             $init_zone = $this->getInitData('zone_vente');

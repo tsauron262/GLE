@@ -2363,7 +2363,7 @@ class BimpCommDemandeFin extends BimpObject
                                     break;
 
                                 case 'papier':
-                                    $email_errors = array();//$signataire_locataire->sendEmail($email_content);
+                                    $email_errors = $signataire_locataire->sendEmail($email_content);
                                     if (count($email_errors)) {
                                         $warnings[] = BimpTools::getMsgFromArray($email_errors, 'Echec de l\'envoi de l\'e-mail au locataire');
                                     } else {

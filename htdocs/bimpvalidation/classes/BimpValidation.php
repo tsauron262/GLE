@@ -675,7 +675,7 @@ class BimpValidation
                         }
 
                         if (BimpObject::objectLoaded($client)) {
-                            $val += (float) $client->getEncours(true, $debug) + $client->getEncoursNonFacture() - ((float) $client->getData('outstanding_limit') * 1.2);
+                            $val += (float) $client->getEncours(true, $debug) + $client->getEncoursNonFacture(true, $debug) - ((float) $client->getData('outstanding_limit') * 1.2);
                         }
 
                         if ($val < 0) {

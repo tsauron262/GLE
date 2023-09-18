@@ -1468,6 +1468,19 @@ class Bimp_Facture extends BimpComm
                 'onclick' => $this->getJsBulkActionOnclick('generateZipPdf', array(), array('single_action' => true))
 //                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'generateBulkPdf\', {}, null, null)'
             );
+            global $user;
+            if($user->admin){
+                $actions[] = array(
+                    'label'   => 'Valider',
+                    'icon'    => 'check',
+                    'onclick' => $this->getJsBulkActionOnclick('validate', array(), array('single_action' => false))
+                );
+                $actions[] = array(
+                    'label'   => 'checkLines',
+                    'icon'    => 'check',
+                    'onclick' => $this->getJsBulkActionOnclick('checkLines', array(), array('single_action' => false))
+                );
+            }
         }
 
 
@@ -5959,6 +5972,21 @@ class Bimp_Facture extends BimpComm
         );
     }
 
+    public function actionCheckLines($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Check lines Ok';
+
+        $errors = $this->checkLines();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+
     public function actionExportToChorus($data, &$success)
     {
         $errors = array();
@@ -6691,7 +6719,7 @@ class Bimp_Facture extends BimpComm
 
             $id_default_user = (int) BimpCore::getConf('default_id_commercial', null);
             foreach ($rows as $r) {
-                $facture = BimpCache::getBimpObjectInstance('bimpcommmercial', 'Bimp_Facture', (int) $r['rowid']);
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
 
                 if (BimpObject::objectLoaded($facture)) {
                     $id_user = $facture->getIdContact('internal', 'SALESREPSIGN');
@@ -6709,11 +6737,13 @@ class Bimp_Facture extends BimpComm
 
                     $factures[$id_user][] = $facture->getLink();
                 }
+                else
+                    echo 'oups fact inc '.$r['rowid'];
             }
         }
 
         $i = 0;
-
+        
         if (!empty($factures)) {
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 

@@ -451,7 +451,7 @@ class BimpValidation
                         } else {
                             $errors[] = BimpTools::getMsgFromArray($accept_errors, 'Echec accepation auto pour la validation de type ' . BV_Rule::$types[$type]['label']);
                         }
-                        continue;
+//                        continue;//todo pourquoi ? break aprés le else
                     } else {
                         if (method_exists($object, 'getClientFacture')) {
                             $client = $object->getClientFacture();

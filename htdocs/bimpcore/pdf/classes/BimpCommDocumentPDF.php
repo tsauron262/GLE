@@ -1136,6 +1136,18 @@ class BimpCommDocumentPDF extends BimpDocumentPDF
 
             $this->writeContent($html);
         }
+        else{
+            if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv){
+                $html = '';
+                $html .= '<p style="font-size: 6px; font-style: italic">';
+                $html .= '<span style="font-weight: bold;">';
+                $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées';
+                $html .= "</span>";
+                $html .= "</p>";
+                $this->writeContent($html);
+            }
+            
+        }
     }
 
     // Traitements: 

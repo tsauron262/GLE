@@ -164,9 +164,15 @@ class BimpConcatPdf extends Fpdi
             $tplidx = $this->importPage($i + 1, '/MediaBox');
             $this->useTemplate($tplidx);
         }
-        $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv" . $type . ".pdf";
-        if (!is_file($file))
-            $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv.pdf";
+        $file = DOL_DATA_ROOT . "/bimpcore/pdf/cgv" . $type . ".pdf";
+        if (!is_file($file)){
+            $file = DOL_DATA_ROOT . "/bimpcore/pdf/cgv.pdf";
+            if (!is_file($file)){
+                $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv" . $type . ".pdf";
+                if (!is_file($file))
+                    $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv.pdf";
+            }
+        }
         $pagecount = $this->setSourceFile($file);
         for ($i = 0; $i < $pagecount; $i++) {
             $this->AddPage();

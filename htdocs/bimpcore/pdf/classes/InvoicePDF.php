@@ -195,6 +195,13 @@ class InvoicePDF extends BimpCommDocumentPDF
                         $this->fromCompany->name = "OLYS BIMP.PRO";
                     }
                 }
+                elseif(BimpCore::isEntity('actimac') && $secteur != 'S'){
+                    $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac.pdf";
+
+                    if ($cgv_file && file_exists($cgv_file)) {
+                        $this->pdf->extra_concat_files[] = $cgv_file;
+                    }
+                }
             } else {
                 $this->errors[] = 'Facture invalide (ID absent)';
             }

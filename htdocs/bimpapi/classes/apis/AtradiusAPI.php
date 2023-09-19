@@ -24,7 +24,7 @@ class AtradiusAPI extends BimpAPI
         ),
         'auth'    => array(
             'prod' => 'https://api.atradius.com/authenticate/v2/tokens', /* bug si auth sur l'url de prod */
-            'prod' => 'https://api-uat.atradius.com/authenticate/v1/tokens',
+//            'prod' => 'https://api-uat.atradius.com/authenticate/v1/tokens',
             'test' => 'https://api-uat.atradius.com/authenticate/v2/tokens'
         )
     );
@@ -611,13 +611,13 @@ class AtradiusAPI extends BimpAPI
 
             if (is_string($result)) {
                 $errors[] = $result;
-            } elseif (isset($result['data']) && isset($result['data']['accessToken']) && (string) $result['data']['accessToken']) {
+            } elseif (isset($result['data']) && isset($result['data']['access_token']) && (string) $result['data']['access_token']) {
                 $expires_in = (int) BimpTools::getArrayValueFromPath($result, 'expires_in', 3600);
 
                 $dt_now = new DateTime();
                 $dt_now->add(new DateInterval('PT' . $expires_in . 'S'));
 
-                $this->saveToken('access', $result['data']['accessToken'], $dt_now->format('Y-m-d H:i:s'));
+                $this->saveToken('access', $result['data']['access_token'], $dt_now->format('Y-m-d H:i:s'));
             } else {
                 $errors[] = 'Echec de la connexion pour une raison inconnue';
             }
@@ -643,9 +643,9 @@ class AtradiusAPI extends BimpAPI
 
             if ($client_id && $client_secret) {
                 if ($request_name == 'authenticate') {
-                    $client_id = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_id', '');
-                    $client_secret = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_secret', '');
-                    $apiKey = BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '');
+//                    $client_id = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_id', '');
+//                    $client_secret = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_secret', '');
+//                    $apiKey = BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '');
                     return array(
                         'Atradius-App-Key' => $apiKey,
                         'Authorization'    => 'Basic ' . base64_encode($client_id . ':' . $client_secret),

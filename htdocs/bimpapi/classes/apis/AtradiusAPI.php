@@ -648,7 +648,8 @@ class AtradiusAPI extends BimpAPI
                     $apiKey = BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '');
                     return array(
                         'Atradius-App-Key' => $apiKey,
-                        'Authorization'    => 'Basic ' . base64_encode($client_id . ':' . $client_secret)
+                        'Authorization'    => 'Basic ' . base64_encode($client_id . ':' . $client_secret),
+                        'Atradius-Correlation-Id' => ''
                     );
                 } else {
                     return array(

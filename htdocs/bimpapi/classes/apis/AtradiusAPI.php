@@ -25,7 +25,7 @@ class AtradiusAPI extends BimpAPI
         'auth'    => array(
             'prod' => 'https://api.atradius.com/authenticate/v2/tokens', /* bug si auth sur l'url de prod */
             'prod' => 'https://api-uat.atradius.com/authenticate/v1/tokens',
-            'test' => 'https://api-uat.atradius.com/authenticate/v1/tokens'
+            'test' => 'https://api-uat.atradius.com/authenticate/v2/tokens'
         )
     );
     public static $requests = array(

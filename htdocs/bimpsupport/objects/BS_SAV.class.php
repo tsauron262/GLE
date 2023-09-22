@@ -4267,7 +4267,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         global $user;
-        if ($user->id = 270) {
+        if ($user->id === 270) {
             $sms = '';
             $sms_only = false;
             $mail_msg = 'CECI EST UN TEST';
@@ -4313,7 +4313,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                 $mail_msg .= "\n" . $textSuivie . "\n\n Cordialement.\n\nL'équipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "\n\n" . $signature;
 
-                if ($user->id = 270) {
+                if ($user->id === 270) {
                     $toMail = 'f.martinez@bimp.fr';
                 }
                 

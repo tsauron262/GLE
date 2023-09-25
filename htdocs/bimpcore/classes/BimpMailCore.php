@@ -31,6 +31,13 @@ class BimpMailCore
         global $dolibarr_main_url_root, $conf, $user;
 
         if (is_object($parent)) {
+            if (method_exists($parent, 'getObjectForEmailsLogs')) {
+                $obj = $parent->getObjectForEmailsLogs();
+                if (is_object($obj)) {
+                    $parent = $obj;
+                }
+            }
+            
             $this->parent = $parent;
         } elseif ($parent !== 'none') {
             BimpCore::addlog('Pas d\'objet parent pour BimpMail');

@@ -11,6 +11,17 @@ class BS_SavPropal extends Bimp_Propal
             'bimpdevissav' => 'Devis SAV'
         );
     }
+    
+    public function getObjectForEmailsLogs()
+    {
+        $sav = $this->getSav();
+        
+        if (BimpObject::objectLoaded($sav)) {
+            return $sav;
+        }
+        
+        return $this;
+    }
 
     public function getLinesListHeaderExtraBtn()
     {

@@ -89,13 +89,13 @@ class BimpDebug
 
     public static function isActive()
     {
-//        if (!self::$active) {
-//            return 0;
-//        }
-//
-//        if (!self::checkUser()) {
-//            return 0;
-//        }
+        if (!self::$active) {
+            return 0;
+        }
+
+        if (!self::checkUser()) {
+            return 0;
+        }
 
         return 1;
     }

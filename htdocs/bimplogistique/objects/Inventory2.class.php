@@ -1165,9 +1165,9 @@ HAVING scan_exp != scan_det";
         foreach ($diff as $id_wt => $equip_data) {
 
             $wt_obj = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $id_wt);
-            
+
             if (!BimpObject::objectLoaded($wt_obj)) {
-                return BimpRender::renderAlerts('L\'entrepôt / type #' . $id_wt .' n\'existe plus');
+                return BimpRender::renderAlerts('L\'entrepôt / type #' . $id_wt . ' n\'existe plus');
             }
 
             $errors = '<h2>' . $wt_obj->renderName() . '</h2>';
@@ -1187,7 +1187,9 @@ HAVING scan_exp != scan_det";
                     $placeReel = $equipment->getCurrentPlace();
                     $msg = '';
 
-                    if ($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
+                    if (!BimpObject::objectLoaded($placeReel)) {
+                        $msg .= 'Aucun emplacement actuel pour l\'équipement ' . $equipment->getLink();
+                    } elseif ($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
                         $msg .= 'L\'équipement ' . $equipment->getNomUrl() . ' n\'est plus dans le dépot <strong>' . $wt_obj->displayData('fk_warehouse') . '</strong> mais dans le dépot <strong>' . $placeReel->displayData('id_entrepot') . '</strong>';
                     if ((int) $wt_obj->getData('type') != (int) $placeReel->getData('type')) {
                         if ($msg == '')

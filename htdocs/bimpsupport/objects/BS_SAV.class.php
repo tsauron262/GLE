@@ -4265,7 +4265,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (count($errors)) {
             return $errors;
         }
-        
+
         if (!$sms_only) {
             if ($mail_msg) {
                 $toMail = '';
@@ -4305,7 +4305,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
 
                 $mail_msg .= "\n" . $textSuivie . "\n\n Cordialement.\n\nL'équipe " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "\n\n" . $signature;
-                
+
                 $toMail = BimpTools::cleanEmailsStr($toMail);
 
                 if (BimpValidate::isEmail($toMail)) {
@@ -6420,7 +6420,7 @@ ORDER BY a.val_max DESC");
                 $data['amount'] = $amount;
                 $data['id_mode_paiement'] = $id_mode_paiement;
                 $data['bank_account'] = (isset($data['bank_account']) ? (int) $data['bank_account'] : (int) BimpCore::getConf('id_default_bank_account'));
-
+                
                 $propal = $this->getChildObject('propal');
                 $client = $this->getChildObject('client');
                 $centre = $this->getCentreData();
@@ -6428,8 +6428,9 @@ ORDER BY a.val_max DESC");
                 if (!count($return['errors'])) {
                     $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
                     mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
-                    return $return;
                 }
+
+                return $return;
             }
         } else {
             $errors[] = 'Impossible d\'ajouter un acompte de 0 €';

@@ -626,7 +626,7 @@ class BimpComm extends BimpDolObject
 
         // Message Achat:
         $id_group = BimpCore::getUserGroupId('achat');
-            $note = BimpObject::getInstance("bimpcore", "BimpNote");
+        $note = BimpObject::getInstance("bimpcore", "BimpNote");
         if ($id_group) {
             $buttons[] = array(
                 'label'   => 'Message achat',
@@ -2826,7 +2826,7 @@ class BimpComm extends BimpDolObject
         if (count($copy_errors)) {
             $errors[] = BimpTools::getMsgFromArray($copy_errors, 'Echec de la copie ' . $this->getLabel('of_the'));
         } else {
-            $new_object->addObjectLog('Créé' . $new_object->e() . ' par clonage ' . $this->getLabel('of_the') . ' '.$this->getRef());
+            $new_object->addObjectLog('Créé' . $new_object->e() . ' par clonage ' . $this->getLabel('of_the') . ' ' . $this->getRef());
             // Copie des contacts: 
             $new_object->copyContactsFromOrigin($this, $errors);
 
@@ -3261,11 +3261,17 @@ class BimpComm extends BimpDolObject
         $caisse = null;
         $id_caisse = 0;
 
-        $type_paiement = $id_mode_paiement;
-        $id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
-
         if (!$id_mode_paiement) {
             $id_mode_paiement = (int) $this->getData('fk_mode_reglement');
+        }
+        
+        $type_paiement = '';
+        if (preg_match('/^[0-9]+$/', $id_mode_paiement)) {
+            $id_mode_paiement = (int) $id_mode_paiement;
+            $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . $id_mode_paiement);
+        } else {
+            $type_paiement = $id_mode_paiement;
+            $id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
         }
 
         if (!$this->useCaisseForPayments) {
@@ -4980,6 +4986,14 @@ class BimpComm extends BimpDolObject
 
         $paye = isset($data['payee']) ? $data['payee'] : 0;
         $id_mode_paiement = isset($data['id_mode_paiement']) ? $data['id_mode_paiement'] : '';
+        $type_paiement = '';
+        if (preg_match('/^[0-9]+$/', $id_mode_paiement)) {
+            $id_mode_paiement = (int) $id_mode_paiement;
+            $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . $id_mode_paiement);
+        } else {
+            $type_paiement = $id_mode_paiement;
+            $id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
+        }
         $id_bank_account = isset($data['bank_account']) ? (int) $data['bank_account'] : 0;
         $amount = isset($data['amount']) ? (float) $data['amount'] : 0;
         $id_rib = 0;
@@ -4988,14 +5002,14 @@ class BimpComm extends BimpDolObject
             $errors[] = 'Date de paiement absent';
         }
 
-        if ($data['id_mode_paiement'] == 'VIR') {
+        if ($type_paiement == 'VIR') {
             BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
             if (!Bimp_Paiement::canCreateVirement()) {
                 $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
             } elseif (!$id_bank_account) {
                 $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
             }
-        } elseif ($data['id_mode_paiement'] == 'PRE') {
+        } elseif ($type_paiement == 'PRE') {
             $id_rib = (int) BimpTools::getArrayValueFromPath($data, 'id_rib', 0);
 
             if (!$id_rib) {
@@ -5022,12 +5036,12 @@ class BimpComm extends BimpDolObject
         $nom_emetteur = '';
         $banque_emetteur = '';
 
-        if (in_array($id_mode_paiement, array('CHQ', 'VIR'))) {
+        if (in_array($type_paiement, array('CHQ', 'VIR'))) {
             $num_paiement = isset($data['num_paiement']) ? $data['num_paiement'] : '';
             $nom_emetteur = isset($data['nom_emetteur']) ? $data['nom_emetteur'] : '';
         }
 
-        if ($id_mode_paiement === 'CHQ') {
+        if ($type_paiement === 'CHQ') {
             $banque_emetteur = isset($data['banque_emetteur']) ? $data['banque_emetteur'] : '';
         }
 
@@ -5368,9 +5382,9 @@ class BimpComm extends BimpDolObject
         $init_zone = '';
         $cur_zone = '';
         $new_zone = '';
-        
-        if($this->getInitData('id_client_facture') != $this->getData('id_client_facture')){
-            $this->addObjectLog('Client facturation modifié, de '.$this->getInitData('id_client_facture').' a '.$this->getData('id_client_facture'));
+
+        if ($this->getInitData('id_client_facture') != $this->getData('id_client_facture')) {
+            $this->addObjectLog('Client facturation modifié, de ' . $this->getInitData('id_client_facture') . ' a ' . $this->getData('id_client_facture'));
         }
 
         if (static::$use_zone_vente_for_tva && $this->field_exists('zone_vente')) {

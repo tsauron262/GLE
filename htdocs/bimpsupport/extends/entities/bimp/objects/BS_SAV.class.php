@@ -89,12 +89,15 @@ class BS_SAV_ExtEntity extends BS_SAV
         $result = $api->executereqWithCache('printproducttypewithlabellist');
 
         $resultList = array();
-        foreach ($result['ResponseData'] as $typeMat) {
-            if (is_null($type) || $typeMat['ProductId'] == $type) {
-                foreach ($typeMat['RepairCodes'] as $val)
-                    $resultList[$val['Code']] = $val['Label'];
+        if (isset($result['ResponseData']) && !empty($result['ResponseData'])) {
+            foreach ($result['ResponseData'] as $typeMat) {
+                if (is_null($type) || $typeMat['ProductId'] == $type) {
+                    foreach ($typeMat['RepairCodes'] as $val)
+                        $resultList[$val['Code']] = $val['Label'];
+                }
             }
         }
+
         return $resultList;
     }
 

@@ -4458,72 +4458,70 @@ class BF_Demande extends BimpObject
             $errors = $this->update($warnings, true);
 
             if (!count($errors)) {
-                if (!count($errors)) {
-                    $sources = $this->getChildrenObjects('sources');
-                    if (!empty($sources)) {
-                        $source = $this->getSource();
+                $sources = $this->getChildrenObjects('sources');
+                if (is_array($sources) && !empty($sources)) {
+                    $source = $this->getSource();
 
-                        if (BimpObject::objectLoaded($source)) {
-                            $source->updateField('cancel_submitted', 0);
-                            $source->updateField('refuse_submitted', 0);
-                            $errors = $this->checkStatus($warnings);
-                        } else {
-                            $errors[] = 'Source principale absente';
-                        }
+                    if (BimpObject::objectLoaded($source)) {
+                        $source->updateField('cancel_submitted', 0);
+                        $source->updateField('refuse_submitted', 0);
+                        $errors = $this->checkStatus($warnings);
+                    } else {
+                        $errors[] = 'Source principale absente';
+                    }
 
-                        if (!count($errors)) {
-                            foreach ($sources as $source) {
-                                $src_warnings = array();
-                                $src_errors = $source->reopenDemande((int) $this->getData('status'), $src_warnings);
+                    if (!count($errors)) {
+                        foreach ($sources as $source) {
+                            $src_warnings = array();
+                            $src_errors = $source->reopenDemande((int) $this->getData('status'), $src_warnings);
 
-                                if (count($src_errors)) {
-                                    $errors[] = BimpTools::getMsgFromArray($src_errors, 'Source "' . $source->displayName() . '"');
-                                }
+                            if (count($src_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($src_errors, 'Source "' . $source->displayName() . '"');
                             }
                         }
-                    } else {
-                        $errors = $this->checkStatus($warnings);
+                    }
+                } else {
+                    $errors = $this->checkStatus($warnings);
 
-                        $devis_status = 0;
-                        $dir = $this->getFilesDir();
-                        $signature = $this->getChildObject('signature_contrat');
+                    $devis_status = 0;
+                    $dir = $this->getFilesDir();
+                    $signature = $this->getChildObject('signature_contrat');
+                    if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
+                        $this->set('contrat_status', self::DOC_ACCEPTED);
+                        $devis_status = self::DOC_ACCEPTED;
+                    } else {
+                        $file = $this->getSignatureDocFileName('contrat');
+                        if (file_exists($dir . $file)) {
+                            $this->set('contrat_status', self::DOC_GENERATED);
+                            $devis_status = self::DOC_ACCEPTED;
+                        }
+                    }
+
+                    if (!$devis_status) {
+                        $signature = $this->getChildObject('signature_devis');
                         if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
-                            $this->set('contrat_status', self::DOC_ACCEPTED);
                             $devis_status = self::DOC_ACCEPTED;
                         } else {
-                            $file = $this->getSignatureDocFileName('contrat');
+                            $file = $this->getSignatureDocFileName('devis');
                             if (file_exists($dir . $file)) {
-                                $this->set('contrat_status', self::DOC_GENERATED);
-                                $devis_status = self::DOC_ACCEPTED;
+                                $devis_status = self::DOC_GENERATED;
                             }
                         }
-
-                        if (!$devis_status) {
-                            $signature = $this->getChildObject('signature_devis');
-                            if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
-                                $devis_status = self::DOC_ACCEPTED;
-                            } else {
-                                $file = $this->getSignatureDocFileName('devis');
-                                if (file_exists($dir . $file)) {
-                                    $devis_status = self::DOC_GENERATED;
-                                }
-                            }
-                        }
-                        $this->set('devis_status', $devis_status);
                     }
-
-                    $signature = $this->getChildObject('signature_pvr');
-                    if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
-                        $this->set('pvr_status', self::DOC_ACCEPTED);
-                    } else {
-                        $file = $this->getSignatureDocFileName('pvr');
-                        if (file_exists($dir . $file)) {
-                            $this->set('pvr_status', self::DOC_GENERATED);
-                        }
-                    }
-                    $errors = $this->update($warnings, true);
-                    $this->checkIsClosed();
+                    $this->set('devis_status', $devis_status);
                 }
+
+                $signature = $this->getChildObject('signature_pvr');
+                if (BimpObject::objectLoaded($signature) && $signature->isSigned()) {
+                    $this->set('pvr_status', self::DOC_ACCEPTED);
+                } else {
+                    $file = $this->getSignatureDocFileName('pvr');
+                    if (file_exists($dir . $file)) {
+                        $this->set('pvr_status', self::DOC_GENERATED);
+                    }
+                }
+                $errors = $this->update($warnings, true);
+                $this->checkIsClosed();
             }
         }
 

@@ -3327,6 +3327,7 @@ class BF_Demande extends BimpObject
     public function checkStatus(&$warnings = array())
     {
         $errors = array();
+        
         if ($this->isLoaded()) {
             if ((int) $this->getData('closed')) {
                 return;
@@ -3336,14 +3337,14 @@ class BF_Demande extends BimpObject
             switch ($cur_status) {
                 case self::STATUS_CANCELED:
                 case self::STATUS_CANCELED_BY_SOURCE:
-                    return;
+                    return array();
 
                 case self::STATUS_REFUSED:
                     if ((int) $this->getData('id_main_source')) {
                         $source = $this->getSource();
                         if (BimpObject::objectLoaded($source)) {
                             if ((int) $source->getData('refuse_submitted')) {
-                                return;
+                                return array();
                             }
                         }
                     }
@@ -3381,6 +3382,8 @@ class BF_Demande extends BimpObject
                 }
             }
         }
+        
+        return $errors;
     }
 
     public function checkIsClosed()

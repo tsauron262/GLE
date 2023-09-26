@@ -1165,6 +1165,10 @@ HAVING scan_exp != scan_det";
         foreach ($diff as $id_wt => $equip_data) {
 
             $wt_obj = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $id_wt);
+            
+            if (!BimpObject::objectLoaded($wt_obj)) {
+                return BimpRender::renderAlerts('L\'entrepôt / type #' . $id_wt .' n\'existe plus');
+            }
 
             $errors = '<h2>' . $wt_obj->renderName() . '</h2>';
             $has_diff = false;

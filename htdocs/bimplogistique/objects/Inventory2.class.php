@@ -1191,7 +1191,7 @@ HAVING scan_exp != scan_det";
                         $msg .= 'Aucun emplacement actuel pour l\'équipement ' . $equipment->getLink();
                     } elseif ($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
                         $msg .= 'L\'équipement ' . $equipment->getNomUrl() . ' n\'est plus dans le dépot <strong>' . $wt_obj->displayData('fk_warehouse') . '</strong> mais dans le dépot <strong>' . $placeReel->displayData('id_entrepot') . '</strong>';
-                    if ((int) $wt_obj->getData('type') != (int) $placeReel->getData('type')) {
+                    elseif ((int) $wt_obj->getData('type') != (int) $placeReel->getData('type')) {
                         if ($msg == '')
                             $msg .= 'L\'équipement ' . $equipment->getNomUrl() . ' n\'est plus en emplacement de type <strong>' . $wt_obj->displayData('type') . '</strong> mais de type <strong>' . $placeReel->displayData('type') . '</strong>';
                         else

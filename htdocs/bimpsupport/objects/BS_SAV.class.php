@@ -4266,6 +4266,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             return $errors;
         }
 
+        global $user;
+        if ($user->login == 'f.martinez') {
+            $sms_only = 1;
+        }
+
         if (!$sms_only) {
             if ($mail_msg) {
                 $toMail = '';
@@ -4352,7 +4357,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                 if (dol_strlen(str_replace('\n', '', $sms)) > 160)
                     BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
-                //$to = "0686691814";
+
+                if ($user->login == 'f.martinez') {
+                    $to = "0686691814";
+                }
                 $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
                 $to = traiteNumMobile($to);
@@ -6420,7 +6428,7 @@ ORDER BY a.val_max DESC");
                 $data['amount'] = $amount;
                 $data['id_mode_paiement'] = $id_mode_paiement;
                 $data['bank_account'] = (isset($data['bank_account']) ? (int) $data['bank_account'] : (int) BimpCore::getConf('id_default_bank_account'));
-                
+
                 $propal = $this->getChildObject('propal');
                 $client = $this->getChildObject('client');
                 $centre = $this->getCentreData();

@@ -1407,7 +1407,11 @@ AND i.id=' . (int) $this->id;
                 $equip = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equip);
                 BimpObject::loadClass('bimpcore', 'BimpNote');
                 // Cet équipement a été déplacé entre temps
-                if ((int) $equip->getPlaceByDate($date_opening, $errors) != (int) $equip->getCurrentPlace()->getData('id')) {
+                $place = $equip->getCurrentPlace();
+                if(!isset($place)){
+                    $this->addObjectLog("L'équipement " . $equip->getData('serial') . " na pas d'emplacement.");
+                }
+                elseif ((int) $equip->getPlaceByDate($date_opening, $errors) != (int) $place->getData('id')) {
                     $this->addObjectLog("L'équipement " . $equip->getData('serial') . " a été déplacé après la date d'ouverture de l'inventaire.");
 
                     // Cet équipement a été volé

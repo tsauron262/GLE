@@ -1167,7 +1167,8 @@ HAVING scan_exp != scan_det";
             $wt_obj = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $id_wt);
 
             if (!BimpObject::objectLoaded($wt_obj)) {
-                return BimpRender::renderAlerts('L\'entrepôt / type #' . $id_wt . ' n\'existe plus');
+                $html .= BimpRender::renderAlerts('L\'entrepôt / type #' . $id_wt . ' n\'existe plus');
+                continue;
             }
 
             $errors = '<h2>' . $wt_obj->renderName() . '</h2>';

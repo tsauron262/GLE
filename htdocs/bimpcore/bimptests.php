@@ -39,9 +39,14 @@ switch ($type_test) {
             echo BimpRender::renderAlerts('Numéro de tel. absent (param url "num"');
         } else {
             require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-            
+
             global $conf;
             $conf->global->MAIN_DISABLE_ALL_SMS = 0;
+            $conf->global->MAIN_SMS_DEBUG = 1;
+
+            $num = str_replace(" ", "", $num);
+            if (stripos($num, "+") === false)
+                $num = "+33" . substr($num, 1, 10);
             
             $smsfile = new CSMSFile($num, 'TEST', 'Test');
             if (!$smsfile->sendfile()) {

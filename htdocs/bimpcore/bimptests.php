@@ -42,6 +42,7 @@ switch ($type_test) {
 
             global $conf;
             $conf->global->MAIN_DISABLE_ALL_SMS = 0;
+            $conf->global->MAIN_SMS_DEBUG = 1;
 
             $num = str_replace(" ", "", $num);
             if (stripos($num, "+") === false)

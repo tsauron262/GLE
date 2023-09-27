@@ -48,11 +48,11 @@ switch ($type_test) {
             if (stripos($num, "+") === false)
                 $num = "+33" . substr($num, 1, 10);
             
-            $smsfile = new CSMSFile($num, 'TEST', 'Test');
+            $smsfile = new CSMSFile($num, 'BIMP', 'Test');
             if (!$smsfile->sendfile()) {
                 echo BimpRender::renderAlerts('ECHEC - ' . BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($smsfile)));
             } else {
-                echo BimpRender::renderAlerts('Envoi OK', 'success');
+                echo BimpRender::renderAlerts('Envoi OK a '.$num, 'success');
             }
         }
         break;

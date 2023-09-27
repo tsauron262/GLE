@@ -47,7 +47,7 @@ switch ($type_test) {
             if (!$smsfile->sendfile()) {
                 echo BimpRender::renderAlerts('ECHEC - ' . BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($smsfile)));
             } else {
-                echo BimpRender::renderAlerts('Envoi OK', 'success');
+                echo BimpRender::renderAlerts('Envoi OK a '.$num, 'success');
             }
         }
         break;

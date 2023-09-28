@@ -911,3 +911,4 @@ searches:
             - table: societe
               on: a.id_client = s.rowid
               alias: s
+        order_way: desc

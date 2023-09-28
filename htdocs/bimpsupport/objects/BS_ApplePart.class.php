@@ -556,7 +556,7 @@ class BS_ApplePart extends BimpObject
         if ($this->isLoaded() && is_a($line, 'ObjectLine')) {
             $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
 
-            if ((int) $this->getData('not_invoiced')) {
+            if ((int) $this->getData('not_invoiced')) {//Pour l'ajout des vices sur iPhones
                 $this->pa_ht = 0;
                 $line->pu_ht = 0;
             } else {
@@ -572,7 +572,7 @@ class BS_ApplePart extends BimpObject
 
         if ($this->isLoaded($errors)) {
             $not_invoiced = $this->checkIsNotInvoiced();
-            if ($not_invoiced !== (int) $this->getInitData('not_invoiced')) {
+            if ($not_invoiced !== (int) $this->getInitData('not_invoiced') && $this->getPrice() < 30) {//POUR ajouter les vis (VOIR 011-00212) gratuitement mais pas le reste
                 $this->set('not_invoiced', $not_invoiced);
                 $part_warnings = array();
                 $part_errors = $this->update($part_warnings);

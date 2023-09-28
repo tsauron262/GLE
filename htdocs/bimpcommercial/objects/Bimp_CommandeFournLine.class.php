@@ -2571,9 +2571,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         if ($this->qty != $init_qty) {
                             $diff = $init_qty - $this->qty;
                             if ($diff > 0) {
-                                $line->removeToReceiveQty($diff);
+//                                $line->removeToReceiveQty($diff);
                             } elseif ($diff) {
-                                $line->addToReceiveQty(abs($diff));
+//                                $line->addToReceiveQty(abs($diff));
                             }
                         }
                     }
@@ -2603,7 +2603,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         if (!count($errors)) {
             if (BimpObject::objectLoaded($line)) {
                 $line->onLinkedCommandeFournLineChange($this);
-                $line->removeToReceiveQty($qty);
+//                $line->removeToReceiveQty($qty);
             }
         }
 

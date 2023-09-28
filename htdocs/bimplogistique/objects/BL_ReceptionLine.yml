@@ -1,24 +1,24 @@
-table: bl_shipment_line
+table: bl_reception_line
 common_fields: 0
 
 labels: 
-    name: ligne d\'expédition
-    name_plur: lignes d\'expédition
+    name: ligne de réception
+    name_plur: lignes de réception
     is_female: 1
    
 parent_module: bimplogistique
-parent_object: BL_CommandeShipment
-parent_id_property: id_shipment
+parent_object: BL_CommandeFournReception
+parent_id_property: id_reception
 
 objects: 
-    commande_line: 
+    commande_fourn_line: 
         relation: hasOne
         instance: 
             bimp_object: 
                 module: bimpcommercial
-                name: Bimp_CommandeLine
+                name: Bimp_CommandeFournLine
             id_object: 
-                field_value: id_commande_line
+                field_value: id_commande_fourn_line
                
     equipment: 
         realation: none
@@ -33,21 +33,15 @@ associations:
         label: Equipements
             
 fields: 
-    id_shipment: 
-        label: Expédition
+    id_reception: 
+        label: Réception
         type: id_parent
         
-    id_commande_line: 
-        label: Ligne de commande
+    id_commande_fourn_line: 
+        label: Ligne de commande fournisseur
         type: id_object
         object: commande_line
         
-    id_entrepot_dest: 
-        label: Entrepôt de destination
-        object: entrepot_dest
-        input: 
-            type: search_entrepot
-            help: Entrepôt de destination pour le retour des produits non sérialisés
     qty: 
         label: Quantité
         type: float
@@ -68,14 +62,14 @@ lists:
         n: 0
         delete_btn: 1
         cols: 
-            id_shipment:
-            id_commande_line: 
+            id_reception:
+            id_commande_fourn_line: 
             qty:
                 
-    shipment: 
+    reception: 
         extends: default
         cols: 
-            id_shipment: unset
+            id_reception: unset
         
     
         

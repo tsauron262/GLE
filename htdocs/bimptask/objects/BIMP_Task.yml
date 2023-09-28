@@ -223,8 +223,8 @@ forms:
               
     addUser:
         extends: add
-        rows:
-            6: unset
+#        rows:
+#            6: unset
             
     newMail:
         rows:

@@ -5414,6 +5414,7 @@ class Bimp_CommandeLine extends ObjectLine
                     $html .= '<tr class="commande_contact_row" data-id_commande="' . $id_commande . '" data-id_contact="' . $id_contact . '">';
                     $html .= '<td colspan="99" style="font-size: 12px; padding: 10px; background-color: #DCDCDC">';
 
+                    $html .= '<div style="display: inline-block">';
                     $html .= '<b>Livraison à : </b><br/>';
 
                     if ($id_contact) {
@@ -5426,14 +5427,16 @@ class Bimp_CommandeLine extends ObjectLine
                     } else {
                         $html .= '<b>Adresse de livraison de la commande</b>';
                     }
+                    $html .= '</div>';
 
                     $html .= '<div style="display: inline-block; max-width: 400px; margin-left: 30px; font-size: 12px; font-weight: normal">';
-                    $html .= '<span class="small">Expédition : </span>';
+                    $html .= '<span class="small bold">Expédition : </span>';
                     $shipments = $line->getSelectShipmentsArray(true, 'Nouvelle expédition', $id_contact);
 
                     if (count($shipments) > 1) {
                         $html .= BimpInput::renderInput('select', 'commande_' . $id_commande . '_contact_' . $id_contact . '_shipment', 0, array(
-                                    'options' => $shipments
+                                    'options'     => $shipments,
+                                    'extra_class' => 'commande_shipment_select'
                         ));
                     } else {
                         $html .= 'Nouvelle expédition';

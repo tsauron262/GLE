@@ -466,9 +466,7 @@ class GSX_v2 extends GSX_Const
                     echo '<br/><br/>' . $infos;
                 }
 
-                if (BimpDebug::isActive()) {
-                    BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
-                }
+                BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
             }
             return false;
         }
@@ -512,9 +510,7 @@ class GSX_v2 extends GSX_Const
                 echo '<br/><br/>' . $infos;
             }
 
-            if (BimpDebug::isActive()) {
-                BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
-            }
+            BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
         }
 
         if (is_array($data) && isset($data['errors']) && count($data['errors'])) {
@@ -1207,9 +1203,7 @@ class GSX_v2 extends GSX_Const
             ));
         }
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebug('gsx', '<span class="danger">ERREUR init GSX</span>', BimpRender::renderAlerts($msg));
-        }
+        BimpDebug::addDebug('gsx', '<span class="danger">ERREUR init GSX</span>', BimpRender::renderAlerts($msg));
     }
 
     public function curlError($request_name, $msg, $code = '', $log_error = false)
@@ -1235,9 +1229,7 @@ class GSX_v2 extends GSX_Const
             ));
         }
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebug('gsx', '<span class="danger">ERREUR requête "' . $request_name . '"</span>', BimpRender::renderAlerts($msg . ' (CODE: ' . $code . ')'));
-        }
+        BimpDebug::addDebug('gsx', '<span class="danger">ERREUR requête "' . $request_name . '"</span>', BimpRender::renderAlerts($msg . ' (CODE: ' . $code . ')'));
     }
 
     public function displayDebug($msg)

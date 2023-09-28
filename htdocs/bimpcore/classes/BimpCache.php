@@ -3453,9 +3453,7 @@ class BimpCache
                         unset(self::$objects_keys[$idx]);
                     }
 
-                    if (BimpDebug::isActive()) {
-                        BimpDebug::addDebugTime('Dépassement 75% mémoire limite');
-                    }
+                    BimpDebug::addDebugTime('Dépassement 75% mémoire limite');
                     gc_collect_cycles();
                 } else {
                     // on suppr. du debug: 
@@ -3541,9 +3539,7 @@ class BimpCache
         }
 
         if ($n > 0) {
-            if (BimpDebug::isActive()) {
-                BimpDebug::addDebugTime('Retrait de ' . $n . ' objet(s) du cache');
-            }
+            BimpDebug::addDebugTime('Retrait de ' . $n . ' objet(s) du cache');
         }
     }
 }

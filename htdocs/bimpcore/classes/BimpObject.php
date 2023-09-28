@@ -1035,7 +1035,7 @@ class BimpObject extends BimpCache
                             if ($params['label_syntaxe']) {
                                 if (strpos($label, '<' . $field . '>') !== false) {
                                     if (isset($r[$field_name])) {
-                                        $label = str_replace('<' . $field . '>', $r[$field_name], $label);
+                                        $label = str_replace('<' . $field . '>', BimpTools::getDataLightWithPopover($r[$field_name], 40), $label);
                                     } else {
                                         $label = str_replace('<' . $field . '>', '', $label);
                                     }

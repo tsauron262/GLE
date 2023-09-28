@@ -1014,7 +1014,7 @@ class BimpObject extends BimpCache
 
                 $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 200);
 
-                $rows = $this->getList($filters, $max_results, 1, $params['order_by'], $params['order_way'], 'array', $params['fields_return'], $joins);
+                $rows = $this->getList($filters, $max_results, 1, $params['order_by'], $params['order_way'], 'array', $params['fields_return'], $joins, null, 'DESC');
 
                 if (is_array($rows)) {
                     foreach ($rows as $r) {

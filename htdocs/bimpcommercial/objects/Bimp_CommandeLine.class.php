@@ -5664,13 +5664,16 @@ class Bimp_CommandeLine extends ObjectLine
                     )) as $fac) {
                         $factures[$fac->id] = $fac->getRef() . ' (créée le ' . date('d / m / Y', strtotime($fac->getData('datec'))) . ')';
                     }
+                    
+                    $factures[1] = 'TEST';
 
                     $html .= '<div style="display: inline-block; max-width: 400px; margin-left: 30px; font-size: 12px; font-weight: normal">';
                     $html .= '<span class="small bold">Facture : </span>';
 
                     if (count($factures) > 1) {
                         $html .= BimpInput::renderInput('select', 'client_' . $id_client . '_fac_' . $fac_idx, 0, array(
-                                    'options' => $factures
+                                    'options'     => $factures,
+                                    'extra_class' => 'client_facture_select'
                         ));
                     } else {
                         $html .= 'Nouvelle facture';

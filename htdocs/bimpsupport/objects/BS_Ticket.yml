@@ -905,7 +905,8 @@ searches:
         fields_return: 
             - a.ticket_number
             - s.nom
-        label_syntaxe: '<a.ticket_number> (<s.nom>)'
+            - a.sujet
+        label_syntaxe: '<a.ticket_number> (<s.nom> : <a.sujet>)'
         joins: 
             - table: societe
               on: a.id_client = s.rowid

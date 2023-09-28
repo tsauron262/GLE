@@ -126,6 +126,15 @@ class Bimp_Fournisseur extends Bimp_Societe
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#fourn_factures_list_tab .nav_tab_ajax_result\')', array('products_fourn'), array('button' => ''))
         );
+        
+        if ((int) BimpCore::getConf('use_logistique_periodicity', null, 'bimpcommercial')) {
+            $tabs[] = array(
+            'id'            => 'fourn_periodicity_view_tab',
+            'title'         => BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Achats périodiques',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderPeriodicityView', '$(\'#fourn_periodicity_view_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
+        );
+        }
 
         return BimpRender::renderNavTabs($tabs, 'commercial_view');
     }
@@ -205,6 +214,19 @@ class Bimp_Fournisseur extends Bimp_Societe
         }
 
         return $html;
+    }
+    
+    public function renderPeriodicityView()
+    {
+        $errors = array();
+        if (!$this->isLoaded($errors)) {
+            return BimpRender::renderAlerts($errors);
+        }
+        
+        $commandeController = BimpController::getInstance('bimpcommercial', 'commandes');
+        return $commandeController->renderPeriodsTab(array(
+            'id_fourn' => $this->id
+        ));
     }
 
     // Traitements: 

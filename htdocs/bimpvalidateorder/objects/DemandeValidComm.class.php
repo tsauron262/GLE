@@ -236,10 +236,10 @@ class DemandeValidComm extends BimpObject
         return null;
     }
 
-    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false, $no_triggers = false)
     {
 
-        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
+        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate, $no_triggers);
 
         if ($field == 'status') {
 

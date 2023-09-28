@@ -241,7 +241,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return parent::isFieldEditable($field, $force_edit);
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getMinQty()
     {
@@ -2492,6 +2492,19 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     // Overrides: 
 
+    public function onSave(&$errors = [], &$warnings = [])
+    {
+        parent::onSave($errors, $warnings);
+
+        if ($this->getData('linked_object_name') == 'commande_line') {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+
+            if (BimpObject::objectLoaded($line)) {
+                $line->onLinkedCommandeFournLineChange($this);
+            }
+        }
+    }
+
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'updateField' && in_array($field, array('qty_total', 'qty_received', 'qty_to_receive'))) {
@@ -2542,10 +2555,30 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     public function update(&$warnings = array(), $force_update = false)
     {
+        $init_qty = (float) $this->db->getValue('commande_fournisseurdet', 'qty', 'rowid = ' . $this->getData('id_line'));
+
         $errors = parent::update($warnings, $force_update);
 
-        if (count($errors)) {
+        if (!count($errors)) {
             $this->checkQties();
+
+            if ($this->getData('linked_object_name') == 'commande_line') {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+
+                if (BimpObject::objectLoaded($line)) {
+                    $commande = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($commande) && (int) $commande->getData('fk_statut') == 0) {
+                        if ($this->qty != $init_qty) {
+                            $diff = $init_qty - $this->qty;
+                            if ($diff > 0) {
+//                                $line->removeToReceiveQty($diff);
+                            } elseif ($diff) {
+//                                $line->addToReceiveQty(abs($diff));
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return $errors;
@@ -2554,6 +2587,27 @@ class Bimp_CommandeFournLine extends FournObjectLine
     public function updatePrixAchat($new_pa_ht)
     {
         return array();
+    }
+
+    public function delete(&$warnings = [], $force_delete = false)
+    {
+        $line = null;
+        if ($this->getData('linked_object_name') == 'commande_line') {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+        }
+
+        $qty = $this->qty;
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            if (BimpObject::objectLoaded($line)) {
+                $line->onLinkedCommandeFournLineChange($this);
+//                $line->removeToReceiveQty($qty);
+            }
+        }
+
+        return $errors;
     }
 
     // Méthodes statiques: 

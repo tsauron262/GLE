@@ -329,11 +329,13 @@ class BimpObject extends BimpCache
         return 0;
     }
 
-    public function initBdd($mode = -1)
+    public function initBdd($no_transaction_db = -1)
     {
-        if ($mode < 0)
-            $mode = (int) $this->getConf('no_transaction_db', 0, false, 'bool');
-        $this->db = self::getBdb($mode, $this->modeArchive);
+        if ($no_transaction_db < 0) {
+            $no_transaction_db = (int) $this->getConf('no_transaction_db', 0, false, 'bool');
+        }
+
+        $this->db = self::getBdb($no_transaction_db, $this->modeArchive);
     }
 
     public function __construct($module, $object_name)
@@ -3915,7 +3917,7 @@ class BimpObject extends BimpCache
 //        if($this->cacheExists($cache_key))
 //            $rows = $this->getCache($cache_key);
 //        else{
-        
+
         $rows = $this->db->executeS($sql, $return);
 
         if (is_null($rows)) {
@@ -5275,7 +5277,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         return $errors;
     }
 
-    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false, $no_triggers = false)
     {
         BimpLog::actionStart('bimpobject_update_field', 'Mise à jour du champ "' . $field . '"', $this);
         BimpLog::actionData($value);
@@ -5376,19 +5378,21 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                     // Check des hastags: 
                     $warnings = BimpTools::merge_array($warnings, $this->checkFieldsHashtags(array($field)));
 
-                    $parent = $this->getParentInstance();
+                    if (!$no_triggers) {
+                        $parent = $this->getParentInstance();
 
-                    if (!is_null($parent)) {
-                        // Trigger sur le parent: 
-                        if (method_exists($parent, 'onChildSave')) {
-                            $warnings = BimpTools::merge_array($warnings, $parent->onChildSave($this));
+                        if (!is_null($parent)) {
+                            // Trigger sur le parent: 
+                            if (method_exists($parent, 'onChildSave')) {
+                                $warnings = BimpTools::merge_array($warnings, $parent->onChildSave($this));
+                            }
                         }
-                    }
 
-                    $this->onSave($errors, $warnings);
+                        $this->onSave($errors, $warnings);
 
-                    if (static::$check_on_update_field) {
-                        $this->checkObject('updateField', $field);
+                        if (static::$check_on_update_field) {
+                            $this->checkObject('updateField', $field);
+                        }
                     }
                 }
             }
@@ -8722,6 +8726,37 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $js .= 'false';
         }
+        $js .= ', ';
+        if (isset($params['on_form_submit'])) {
+            $js .= $params['on_form_submit'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        if (isset($params['success_callback'])) {
+            $js .= $params['success_callback'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        if (isset($params['result_container'])) {
+            $js .= $params['result_container'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', {';
+        $fl = true;
+        foreach ($params as $key => $value) {
+            if (!in_array($key, array('form_name', 'confirm_msg', 'single_action', 'on_form_submit', 'success_callback', 'result_container'))) {
+                if (!$fl) {
+                    $js .= ', ';
+                } else {
+                    $fl = false;
+                }
+                $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : '\'' . $value . '\'');
+            }
+        }
+        $js .= '}';
         $js .= ');';
 
         return $js;

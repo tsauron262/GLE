@@ -53,15 +53,4 @@ class Bimp_ApporteurFilter extends BimpObject{
                 
         return parent::isFieldEditable($field, $force_edit);
     }
-    
-    
-    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false) {
-        
-        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
-        
-//        if(empty($errors)) {
-//            
-//        }
-        
-    }
 }

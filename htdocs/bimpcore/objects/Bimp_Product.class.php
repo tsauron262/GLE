@@ -167,7 +167,7 @@ class Bimp_Product extends BimpObject
     public function canSetAction($action)
     {
         global $user;
-        
+
         switch ($action) {
             case 'validate':
             case 'refuse':
@@ -2500,6 +2500,16 @@ class Bimp_Product extends BimpObject
             );
         }
 
+        // Opérations périodiques
+        if (bimpcore::getConf('use_logistique_periodicity', null, 'bimpcommercial')) {
+            $tabs[] = array(
+                'id'            => 'product_periodicity_view_tab',
+                'title'         => BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Opérations périodiques',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderPeriodicityView', '$(\'#product_periodicity_view_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
+            );
+        }
+
         return BimpRender::renderNavTabs($tabs, 'commercial_view');
     }
 
@@ -2837,6 +2847,17 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
+    public function renderPeriodicityView()
+    {
+        if (!$this->isLoaded($errors)) {
+            return BimpRender::renderAlerts($errors);
+        }
+        
+        $commandeController = BimpController::getInstance('bimpcommercial', 'commandes');
+        return $commandeController->renderPeriodsTab(array(
+            'id_product' => $this->id
+        ));
+    }
     // Traitements: 
 
     public function addConfigExtraParams()
@@ -4098,6 +4119,8 @@ class Bimp_Product extends BimpObject
         $init_tva_tx = (float) $this->getInitData('tva_tx');
         $new_tva_tx = (float) $this->getData('tva_tx');
         $updateToSerilisable = ($this->getInitData('serialisable') == 0 && $this->getData('serialisable') == 1);
+
+//        $this->onUpdate(false);
 
         $errors = parent::update($warnings, $force_update);
 

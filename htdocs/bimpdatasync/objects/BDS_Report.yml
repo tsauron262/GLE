@@ -2,6 +2,8 @@ extends:
     module: bimpcore
     object_name: BimpReport
     
+# Attention BimpReport est en mode no_transaction_db
+
 table: bds_report
 controller: bds_report
 
@@ -91,8 +93,15 @@ lists:
         extends: default
         filters_panel: operation
         cols: 
-            id_process: unset
-            id_operation: unset
+            unextends: 1
+            type: 
+            title: 
+            begin: 
+            end: 
+            nb_successes: 
+            nb_errors: 
+            nb_warnings: 
+            nb_infos: 
             
     relances_clients: 
         extends: operation

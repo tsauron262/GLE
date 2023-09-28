@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_commande_line` ADD `achat_id_fourn` int(11) NOT NULL DEFAULT 0;

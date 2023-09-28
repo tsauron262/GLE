@@ -3,7 +3,7 @@ table: bimpcore_report
 common_fields: 0
 controller: report
 icon: fas_file-alt
-    
+no_transaction_db: 1
 
 list_page_url: 
     controller: reports
@@ -28,6 +28,8 @@ fields:
         values: 
             array: types
         required: 1
+    code: 
+        label: Code
     begin: 
         label: Début
         type: datetime

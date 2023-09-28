@@ -2816,7 +2816,7 @@ class BimpCache
         return self::getCacheArray($key, $include_empty);
     }
 
-    public static function getCondReglementsArray()
+    public static function getCondReglementsArray($include_empty = true, $empty_value = 0, $empty_label = '')
     {
         global $langs;
         $langs->load('bills');
@@ -2833,7 +2833,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray('cond_reglements_array', 1, '', '');
+        return self::getCacheArray('cond_reglements_array', $include_empty, $empty_value, $empty_label);
     }
 
     public static function getModeReglements($type = 2)

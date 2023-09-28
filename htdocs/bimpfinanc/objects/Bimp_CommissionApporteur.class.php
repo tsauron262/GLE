@@ -107,7 +107,7 @@ class Bimp_CommissionApporteur extends BimpObject
         );
     }
 
-    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false, $no_triggers = false)
     {
 
         switch ($field) {
@@ -120,7 +120,7 @@ class Bimp_CommissionApporteur extends BimpObject
                 break;
         }
 
-        return parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
+        return parent::updateField($field, $value, $id_object, $force_update, $do_not_validate, $no_triggers);
     }
 
     public function beforeValidate()

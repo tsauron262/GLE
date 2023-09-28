@@ -378,9 +378,9 @@ class UserConfig extends BimpObject
 
                     if (BimpObject::objectLoaded($group)) {
                         if ($nom_url) {
-                            $html .= ($html ? '<br/>' : '') . $group->getLink();
+                            return $group->getLink();
                         } else {
-                            $html .= ($html ? '<br/>' : '') . $group->getName();
+                            return $group->getName();
                         }
                     }
                 }

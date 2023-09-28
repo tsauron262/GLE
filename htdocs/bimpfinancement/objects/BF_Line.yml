@@ -306,6 +306,10 @@ lists_cols:
                 method: displayDesc
                 params: 
                     - 1
+                    
+filters_panels:
+    default:
+        
             
 lists: 
     default: 
@@ -348,3 +352,14 @@ lists:
             remise: 
             total_ht: 
             total_ttc:
+    global:
+        n: 15
+        extends: default
+        filters_panel: default
+        pagination: 1
+        positions: 0
+        positions_open: 0
+        enable_search: 1
+        enable_sort: 1
+        sort_field: id
+        sort_way: desc

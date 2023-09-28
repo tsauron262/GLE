@@ -1016,7 +1016,7 @@ class BimpObject extends BimpCache
 
                 $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 200);
 
-                $rows = $this->getList($filters, $max_results, 1, $params['order_by'], $params['order_way'], 'array', $params['fields_return'], $joins);
+                $rows = $this->getList($filters, $max_results, 1, $params['order_by'], $params['order_way'], 'array', $params['fields_return'], $joins, null, 'DESC');
 
                 if (is_array($rows)) {
                     foreach ($rows as $r) {
@@ -1037,7 +1037,7 @@ class BimpObject extends BimpCache
                             if ($params['label_syntaxe']) {
                                 if (strpos($label, '<' . $field . '>') !== false) {
                                     if (isset($r[$field_name])) {
-                                        $label = str_replace('<' . $field . '>', $r[$field_name], $label);
+                                        $label = str_replace('<' . $field . '>', BimpTools::getDataLightWithPopover($r[$field_name], 40), $label);
                                     } else {
                                         $label = str_replace('<' . $field . '>', '', $label);
                                     }
@@ -2899,13 +2899,14 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function addObjectLog($msg, $code = '')
+    public function addObjectLog($msg, $code = '', $no_transactions_db = false)
     {
         $errors = array();
 
         if ($this->isLoaded($errors)) {
             global $user;
-
+            $w = array();
+            
             BimpObject::createBimpObject('bimpcore', 'BimpObjectLog', array(
                 'obj_module' => $this->module,
                 'obj_name'   => $this->object_name,
@@ -2914,7 +2915,7 @@ class BimpObject extends BimpCache
                 'code'       => $code,
                 'date'       => date('Y-m-d H:i:s'),
                 'id_user'    => (BimpObject::objectLoaded($user) ? $user->id : 0)
-                    ), true, $errors);
+                    ), true, $errors, $w, $no_transactions_db);
         } else
             BimpCore::addlog('Ajout historique objet non loadé');
 
@@ -5481,9 +5482,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function fetch($id, $parent = null)
     {
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
-        }
+        BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
 
         $this->reset();
 
@@ -10196,15 +10195,17 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                             if (!BimpObject::objectLoaded($instance)) {
                                 $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe plus';
                             } else {
+                                
                                 $mode = BimpTools::getArrayValueFromPath($data, 'update_mode', 'udpate_object');
                                 $force_update = BimpTools::getArrayValueFromPath($data, 'force_update', false);
+                                $not_validate = BimpTools::getArrayValueFromPath($data, 'validate', false);
 
                                 $obj_warnings = array();
                                 $obj_errors = array();
 
                                 switch ($mode) {
                                     case 'update_field':
-                                        $obj_errors = $instance->updateField($field_name, $value, null, $force_update, $force_update);
+                                        $obj_errors = $instance->updateField($field_name, $value, null, $force_update, $not_validate);
                                         break;
 
                                     case 'update_object':

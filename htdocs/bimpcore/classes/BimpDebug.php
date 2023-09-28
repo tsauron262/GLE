@@ -89,13 +89,13 @@ class BimpDebug
 
     public static function isActive()
     {
-//        if (!self::$active) {
-//            return 0;
-//        }
-//
-//        if (!self::checkUser()) {
-//            return 0;
-//        }
+        if (!self::$active) {
+            return 0;
+        }
+
+        if (!self::checkUser()) {
+            return 0;
+        }
 
         return 1;
     }
@@ -308,9 +308,7 @@ class BimpDebug
             )
         );
 
-        if (self::isActive()) {
-            self::addDebugTime('Urgence - Suppression de toutes les infos debug');
-        }
+        self::addDebugTime('Urgence - Suppression de toutes les infos debug');
 
         if ($deactivate) {
             self::$active = false;

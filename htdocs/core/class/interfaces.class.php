@@ -177,7 +177,7 @@ class Interfaces
 				$dblevelbefore = $this->db->transaction_opened;
 
 				$result = 0;
-                                if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+                                if (class_exists('BimpDebug')) {
                                     BimpDebug::addDebugTime('Début Trigger '. get_class($objMod).' action '.$action);
                                 }
 				if (method_exists($objMod, 'runTrigger')) {	// New method to implement
@@ -189,7 +189,7 @@ class Interfaces
 				} else {
 					dol_syslog(get_class($this)."::run_triggers action=".$action." A trigger was declared for class ".get_class($objMod)." but method runTrigger was not found", LOG_ERR);
 				}
-                                if (class_exists('BimpDebug') && BimpDebug::isActive()) {
+                                if (class_exists('BimpDebug')) {
                                     BimpDebug::addDebugTime('Fin Trigger '. get_class($objMod).' action '.$action);
                                 }
 

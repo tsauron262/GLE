@@ -1,0 +1,1 @@
+UPDATE llx_bimpmail a SET a.obj_name = 'BS_SAV', a.id_obj = (SELECT s.id FROM llx_bs_sav s WHERE s.id_propal = a.id_obj) WHERE a.obj_name = 'BS_SavPropal';

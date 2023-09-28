@@ -1166,6 +1166,11 @@ HAVING scan_exp != scan_det";
 
             $wt_obj = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $id_wt);
 
+            if (!BimpObject::objectLoaded($wt_obj)) {
+                $html .= BimpRender::renderAlerts('L\'entrepôt / type #' . $id_wt . ' n\'existe plus');
+                continue;
+            }
+
             $errors = '<h2>' . $wt_obj->renderName() . '</h2>';
             $has_diff = false;
 
@@ -1183,9 +1188,11 @@ HAVING scan_exp != scan_det";
                     $placeReel = $equipment->getCurrentPlace();
                     $msg = '';
 
-                    if ($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
+                    if (!BimpObject::objectLoaded($placeReel)) {
+                        $msg .= 'Aucun emplacement actuel pour l\'équipement ' . $equipment->getLink();
+                    } elseif ($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
                         $msg .= 'L\'équipement ' . $equipment->getNomUrl() . ' n\'est plus dans le dépot <strong>' . $wt_obj->displayData('fk_warehouse') . '</strong> mais dans le dépot <strong>' . $placeReel->displayData('id_entrepot') . '</strong>';
-                    if ((int) $wt_obj->getData('type') != (int) $placeReel->getData('type')) {
+                    elseif ((int) $wt_obj->getData('type') != (int) $placeReel->getData('type')) {
                         if ($msg == '')
                             $msg .= 'L\'équipement ' . $equipment->getNomUrl() . ' n\'est plus en emplacement de type <strong>' . $wt_obj->displayData('type') . '</strong> mais de type <strong>' . $placeReel->displayData('type') . '</strong>';
                         else
@@ -1400,7 +1407,11 @@ AND i.id=' . (int) $this->id;
                 $equip = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equip);
                 BimpObject::loadClass('bimpcore', 'BimpNote');
                 // Cet équipement a été déplacé entre temps
-                if ((int) $equip->getPlaceByDate($date_opening, $errors) != (int) $equip->getCurrentPlace()->getData('id')) {
+                $place = $equip->getCurrentPlace();
+                if(!isset($place)){
+                    $this->addObjectLog("L'équipement " . $equip->getData('serial') . " na pas d'emplacement.");
+                }
+                elseif ((int) $equip->getPlaceByDate($date_opening, $errors) != (int) $place->getData('id')) {
                     $this->addObjectLog("L'équipement " . $equip->getData('serial') . " a été déplacé après la date d'ouverture de l'inventaire.");
 
                     // Cet équipement a été volé

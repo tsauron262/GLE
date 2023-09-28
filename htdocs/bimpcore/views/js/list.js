@@ -932,7 +932,9 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                 $button.addClass('disabled');
                 var i = 1;
                 $selected.each(function () {
-                    var id_object = $(this).data('id_object');
+                    elem = $(this);
+//                    setTimeout(function(elem, $list, object_name){
+                    var id_object = elem.data('id_object');
                     if (id_object) {
                         setObjectAction(null, {
                             module: $list.data('module'),
@@ -948,6 +950,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                         }
                         bimp_msg(msg, 'danger', null, true);
                     }
+//                    }, i * 5000, elem, $list, object_name);
                     i++;
                 });
                 $button.removeClass('disabled');

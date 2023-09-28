@@ -222,8 +222,8 @@ class BimpLayout
         $html .= BimpRender::renderIcon('far_window-restore');
         $html .= '</div>' . "\n";
 
+        BimpDebug::addDebugTime('Fin affichage page');
         if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Fin affichage page');
 
             $html .= BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
 

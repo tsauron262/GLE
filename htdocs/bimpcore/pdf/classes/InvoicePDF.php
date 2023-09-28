@@ -195,6 +195,13 @@ class InvoicePDF extends BimpCommDocumentPDF
                         $this->fromCompany->name = "OLYS BIMP.PRO";
                     }
                 }
+                elseif(BimpCore::isEntity('actimac') && $secteur != 'S'){
+                    $cgv_file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgvActimac3.pdf";
+
+                    if ($cgv_file && file_exists($cgv_file)) {
+                        $this->pdf->extra_concat_files[] = $cgv_file;
+                    }
+                }
             } else {
                 $this->errors[] = 'Facture invalide (ID absent)';
             }
@@ -547,6 +554,19 @@ class InvoicePDF extends BimpCommDocumentPDF
 //        }
 
         return $html;
+    }
+    
+    public function renderAfterLines(){
+        global $conf;
+        $html = '';
+        if(isset($conf->global->INVOICE_FREE_TEXT) && $conf->global->INVOICE_FREE_TEXT != ''){
+            $html .= '<p style="font-size: 6px; font-style: italic">';
+            $html .= $conf->global->INVOICE_FREE_TEXT;
+            $html .= '</p>';
+        }
+        if($html != '')
+            $this->writeContent($html);
+        parent::renderAfterLines();
     }
 
     public function getPaymentsHtml()

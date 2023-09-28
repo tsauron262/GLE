@@ -57,14 +57,14 @@ class BimpPublicController extends BimpController
         }
 
         $this->initUserClient();
-        
+
         global $public_entity;
 
         $name = BimpCore::getConf('nom_espace_client', null, 'bimpinterfaceclient');
         if (strpos($name, '{') === 0) {
             $names = json_decode($name, 1);
             $name = '';
-            
+
             if (!$public_entity) {
                 $public_entity = BimpCore::getConf('default_public_entity', null, 'bimpinterfaceclient');
             }
@@ -76,7 +76,8 @@ class BimpPublicController extends BimpController
 
         if (!$name) {
             BimpCore::addlog('Aucun nom pour l\'interface publique', 4, 'bic', null, array(
-                'Entité' => ($public_entity ? $public_entity : 'aucune')
+                'Entité'         => ($public_entity ? $public_entity : 'aucune'),
+                'Noms en config' => (isset($names) ? '<pre>' . print_r($names, 1) . '</pre>' : '')
             ));
         } else {
             $this->public_entity_name = $name;

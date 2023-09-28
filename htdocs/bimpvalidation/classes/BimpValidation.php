@@ -98,9 +98,9 @@ class BimpValidation
 
             if (!$type_check) {
                 // Récupération des données de l'objet pour ce type de validation: 
-                $object_data = self::getObjectData($type, $object, $type_errors);
+                $object_data = self::getObjectData($type, $object, $type_errors, $debug);
 
-                $debug .= 'DONNEES OBJET : <pre>';
+                $debug .= '<br/>DONNEES OBJET : <pre>';
                 $debug .= print_r($object_data, 1);
                 $debug .= '</pre><br/>';
 
@@ -247,6 +247,10 @@ class BimpValidation
             BimpDebug::addDebug('validations', 'Validation ' . $object->getLabel('of_the') . ' ' . $object->getRef(), $debug, array(
                 'open' => true
             ));
+        }
+
+        if ($debug && is_a($object, 'BimpObject')) {
+            $object->addObjectLog($debug, 'DEBUG_VALIDATION', true);
         }
 
         return $global_check;
@@ -447,7 +451,7 @@ class BimpValidation
                         } else {
                             $errors[] = BimpTools::getMsgFromArray($accept_errors, 'Echec accepation auto pour la validation de type ' . BV_Rule::$types[$type]['label']);
                         }
-                        continue;
+//                        continue;//todo pourquoi ? break aprés le else
                     } else {
                         if (method_exists($object, 'getClientFacture')) {
                             $client = $object->getClientFacture();
@@ -608,7 +612,7 @@ class BimpValidation
         );
     }
 
-    public static function getObjectData($type_validation, $object, &$errors = array())
+    public static function getObjectData($type_validation, $object, &$errors = array(), &$debug = '')
     {
         $val = 0;
         $val_str = '';
@@ -671,7 +675,7 @@ class BimpValidation
                         }
 
                         if (BimpObject::objectLoaded($client)) {
-                            $val += (float) $client->getEncours() + $client->getEncoursNonFacture() - ((float) $client->getData('outstanding_limit') * 1.2);
+                            $val += (float) $client->getEncours(true, $debug) + $client->getEncoursNonFacture(true, $debug) - ((float) $client->getData('outstanding_limit') * 1.2);
                         }
 
                         if ($val < 0) {
@@ -693,7 +697,7 @@ class BimpValidation
                 }
 
                 if (BimpObject::objectLoaded($client)) {
-                    $val = $client->getTotalUnpayedTolerance(null, 31);//pour limiter la casse, passé a 31 jours de retard
+                    $val = $client->getTotalUnpayedTolerance(null, 31); //pour limiter la casse, passé a 31 jours de retard
                 }
 
                 if ($val < 0) {

@@ -6,7 +6,8 @@ class BIMP_Task extends BimpObject
     public static $valSrc = array(); // définie dans l'extends entity
     public static $types_manuel = array(
         'dev'        => 'Développement',
-        'adminVente' => 'Administration des Ventes'
+        'adminVente' => 'Administration des Ventes',
+        'dispatch' => 'Dispatch'
     );
     public static $srcNotAttribute = array(/* 'sms-apple@bimp-groupe.net' */);
     public static $nbNonLu = 0;

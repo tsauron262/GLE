@@ -69,9 +69,7 @@ class BimpCore
 
             global $noBootstrap;
 
-            if (BimpDebug::isActive()) {
-                BimpDebug::addDebugTime('Début affichage page');
-            }
+            BimpDebug::addDebugTime('Début affichage page');
 
             // Commenté car pose problème
 //            if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {

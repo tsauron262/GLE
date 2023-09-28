@@ -566,7 +566,7 @@ class BS_Ticket extends BimpObject
         $longeur = 150;
 
         if ($this->getData('sujetInterne') != "") {
-            $data = $this->getData('sujet');
+            $data = $this->getData('sujetInterne');
             $dataTrunc = dol_trunc($this->getData('sujetInterne'), $longeur);
         } else {
             $data = $this->getData('sujet');

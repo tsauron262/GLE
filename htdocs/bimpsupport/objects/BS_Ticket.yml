@@ -893,3 +893,22 @@ views_lists:
         item_modal_view: default
         n: 5
         pagination: 1
+        
+        
+searches:
+    default: 
+        fields_search: 
+            - a.ticket_number
+            - s.nom
+            - a.sujet
+            - a.sujetInterne
+        fields_return: 
+            - a.ticket_number
+            - s.nom
+            - a.sujet
+        label_syntaxe: '<a.ticket_number> (<s.nom> : <a.sujet>)'
+        joins: 
+            - table: societe
+              on: a.id_client = s.rowid
+              alias: s
+        order_way: desc

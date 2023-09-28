@@ -25,6 +25,11 @@ class InventoryLine2 extends BimpObject {
         return 1;
     }
     
+    public function canEdit()
+    {
+        return 1;
+    }
+    
     public function canDelete(){
         global $user;
         

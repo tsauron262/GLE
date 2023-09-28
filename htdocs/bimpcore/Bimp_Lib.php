@@ -68,7 +68,7 @@ if (!defined('BIMP_LIB')) {
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
     BimpCore::setMaxExecutionTime(600);
-    BimpCore::setMemoryLimit(256);
+    BimpCore::setMemoryLimit(1024);
 
     BimpObject::loadClass('bimpcore', 'BimpNote');
     BimpObject::loadClass('bimpcore', 'Bimp_Log');

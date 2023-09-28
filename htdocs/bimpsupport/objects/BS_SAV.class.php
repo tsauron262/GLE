@@ -4266,6 +4266,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             return $errors;
         }
 
+        global $user;
+        if ($user->login == 'f.martinez') {
+            $sms_only = 1;
+        }
+
         if (!$sms_only) {
             if ($mail_msg) {
                 $toMail = '';
@@ -4309,9 +4314,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $toMail = BimpTools::cleanEmailsStr($toMail);
 
                 if (BimpValidate::isEmail($toMail)) {
-//                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
-//                    $errors[] = 'Echec envoi du mail';
-//                }
                     $bimpMail = new BimpMail($this, $subject, $toMail, $fromMail, $mail_msg);
                     $bimpMail->addFiles($files);
                     $bimpMail->setFromType('ldlc');
@@ -4355,7 +4357,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                 if (dol_strlen(str_replace('\n', '', $sms)) > 160)
                     BimpCore::addlog('Attention SMS de ' . strlen($sms) . ' caractéres : ' . $sms);
-                //$to = "0686691814";
+
+                if ($user->login == 'f.martinez') {
+                    $to = "0686691814";
+                }
                 $fromsms = 'SAV ' . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport');
 
                 $to = traiteNumMobile($to);
@@ -6431,8 +6436,9 @@ ORDER BY a.val_max DESC");
                 if (!count($return['errors'])) {
                     $toMail = "SAV " . BimpCore::getConf('default_name', $conf->global->MAIN_INFO_SOCIETE_NOM, 'bimpsupport') . "<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@' . BimpCore::getConf('default_domaine', '', 'bimpsupport')) . ">";
                     mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $amount . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
-                    return $return;
                 }
+
+                return $return;
             }
         } else {
             $errors[] = 'Impossible d\'ajouter un acompte de 0 €';

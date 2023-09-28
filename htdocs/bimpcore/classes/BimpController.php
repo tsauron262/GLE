@@ -88,9 +88,7 @@ class BimpController
             $main_controller = $this;
         }
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Début controller');
-        }
+        BimpDebug::addDebugTime('Début controller');
 
 
         $this->module = $module;
@@ -755,8 +753,8 @@ class BimpController
         $html .= BimpRender::renderIcon('far_window-restore');
         $html .= '</div>';
 
+        BimpDebug::addDebugTime('Fin affichage page');
         if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Fin affichage page');
 
             $html .= BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
 
@@ -806,8 +804,8 @@ class BimpController
 
     protected function ajaxProcess()
     {
+        BimpDebug::addDebugTime('Début affichage page');
         if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Début affichage page');
             BimpDebug::addParamsDebug();
         }
 
@@ -841,9 +839,9 @@ class BimpController
 
                 $result['warnings'] = BimpTools::merge_array($result['warnings'], static::getAndResetAjaxWarnings());
 
+                BimpDebug::addDebugTime('Fin affichage page');
                 if (BimpDebug::isActive()) {
                     BimpDebug::addDebug('ajax_result', '', '<pre>' . htmlentities(print_r($result, 1)) . '</pre>', array('foldable' => false));
-                    BimpDebug::addDebugTime('Fin affichage page');
                     $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
                 }
 
@@ -890,8 +888,8 @@ class BimpController
 
         $debug_content = '';
 
+        BimpDebug::addDebugTime('Fin affichage page');
         if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Fin affichage page');
             BimpDebug::addDebug('ajax_result', 'Erreurs', '<pre>' . htmlentities(print_r($errors, 1)) . '</pre>', array('foldable' => false));
             $debug_content = BimpDebug::renderDebug('ajax_' . $req_id);
         }

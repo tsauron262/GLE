@@ -9,4 +9,6 @@ class Bimp_CommandeFourn_ExtEntity extends Bimp_CommandeFourn_LdlcFiliale
     
     public $idLdlc = 230880;
     public $code_representant = "BIMP";
+    public $CustomerNumber = "E69OLYSBI0095";
+    public $agence_name = "AGENCE BIMP";
 }

@@ -7,6 +7,7 @@ class AtradiusAPI extends BimpAPI
 
     // atradius dev https://login-app.atradius.com/
     // page de demande d'identifiants https://group.atradius.com/api/register-now
+    // https://developer.atradius.com/
     // pass web documentation: 885xcMaS
 
     const CREDIT_CHECK = 'credit-check'; // Limité à 7000 euros
@@ -23,8 +24,8 @@ class AtradiusAPI extends BimpAPI
         ),
         'auth'    => array(
             'prod' => 'https://api.atradius.com/authenticate/v2/tokens', /* bug si auth sur l'url de prod */
-            'prod' => 'https://api-uat.atradius.com/authenticate/v1/tokens',
-            'test' => 'https://api-uat.atradius.com/authenticate/v1/tokens'
+//            'prod' => 'https://api-uat.atradius.com/authenticate/v1/tokens',
+            'test' => 'https://api-uat.atradius.com/authenticate/v2/tokens'
         )
     );
     public static $requests = array(
@@ -610,13 +611,13 @@ class AtradiusAPI extends BimpAPI
 
             if (is_string($result)) {
                 $errors[] = $result;
-            } elseif (isset($result['data']) && isset($result['data']['accessToken']) && (string) $result['data']['accessToken']) {
+            } elseif (isset($result['data']) && isset($result['data']['access_token']) && (string) $result['data']['access_token']) {
                 $expires_in = (int) BimpTools::getArrayValueFromPath($result, 'expires_in', 3600);
 
                 $dt_now = new DateTime();
                 $dt_now->add(new DateInterval('PT' . $expires_in . 'S'));
 
-                $this->saveToken('access', $result['data']['accessToken'], $dt_now->format('Y-m-d H:i:s'));
+                $this->saveToken('access', $result['data']['access_token'], $dt_now->format('Y-m-d H:i:s'));
             } else {
                 $errors[] = 'Echec de la connexion pour une raison inconnue';
             }
@@ -642,12 +643,13 @@ class AtradiusAPI extends BimpAPI
 
             if ($client_id && $client_secret) {
                 if ($request_name == 'authenticate') {
-                    $client_id = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_id', '');
-                    $client_secret = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_secret', '');
-                    $apiKey = BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '');
+//                    $client_id = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_id', '');
+//                    $client_secret = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_secret', '');
+//                    $apiKey = BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '');
                     return array(
                         'Atradius-App-Key' => $apiKey,
-                        'Authorization'    => 'Basic ' . base64_encode($client_id . ':' . $client_secret)
+                        'Authorization'    => 'Basic ' . base64_encode($client_id . ':' . $client_secret),
+                        'Atradius-Correlation-Id' => ''
                     );
                 } else {
                     return array(
@@ -739,49 +741,49 @@ class AtradiusAPI extends BimpAPI
                         ), true, $errors, $warnings);
 
         if (BimpObject::objectLoaded($api)) {
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'prod_oauth_client_id',
                         'title'  => 'ID Client OAuth en mode production'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'prod_oauth_client_secret',
                         'title'  => 'Secret client OAuth en mode production'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'prod_api_key',
                         'title'  => 'Clé API en mode production'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'test_oauth_client_id',
                         'title'  => 'ID Client OAuth en mode test'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'test_oauth_client_secret',
                         'title'  => 'Secret client OAuth en mode test'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'test_api_key',
                         'title'  => 'Clé API en mode test'
                             ), true, $warnings, $warnings);
 
-            $param = (int) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'customer_id',
                         'title'  => 'Id customer'
                             ), true, $warnings, $warnings);
 
-            $param = (string) BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                         'id_api' => $api->id,
                         'name'   => 'policy_id',
                         'title'  => 'Id policy'

@@ -442,7 +442,7 @@ class BDS_ConvertProcess extends BDSProcess
                                 if ($this->db->insert('bimpcore_objects_associations', $data) <= 0) {
                                     $this->Error('Echec asso equipement #' . $id_equipment . ' pour l\'expé #' . $id_shipment . ' - ' . $this->db->err(), $line);
                                 } else {
-                                    $this->Info('Aj asso equipement #' . $id_equipment . ' pour l\'expé #' . $id_shipment . ' OK', $line);
+//                                    $this->Info('Aj asso equipement #' . $id_equipment . ' pour l\'expé #' . $id_shipment . ' OK', $line);
                                 }
                             }
                         }

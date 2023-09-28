@@ -40,7 +40,7 @@ fields:
     id_commande_fourn_line: 
         label: Ligne de commande fournisseur
         type: id_object
-        object: commande_line
+        object: commande_fourn_line
         
     qty: 
         label: Quantité

@@ -465,7 +465,7 @@ class BDS_ConvertProcess extends BDSProcess
         $sql = BimpTools::getSqlSelect(array('a.id'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_fourn_line');
         $sql .= ' WHERE a.receptions != \'\' AND a.receptions != \'{}\' > 0';
-        $sql .= ' AND (SELECT COUNT(rl.id) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_founr_line = a.id) = 0';
+        $sql .= ' AND (SELECT COUNT(rl.id) FROM ' . MAIN_DB_PREFIX . 'bl_reception_line rl WHERE rl.id_commande_fourn_line = a.id) = 0';
         $sql .= ' ORDER BY a.id asc';
 
         if ((int) $this->getOption('test_one', 0)) {
@@ -497,7 +497,7 @@ class BDS_ConvertProcess extends BDSProcess
                 $line->id = (int) $r['id'];
                 $receptions = json_decode($r['receptions'], 1);
 
-                $this->DebugData(Rece, 'LIGNE #' . $r['id']);
+                $this->DebugData($receptions, 'LIGNE #' . $r['id']);
 
                 foreach ($receptions as $id_reception => $reception_data) {
                     $qty = (isset($reception_data['qty']) ? (float) $reception_data['qty'] : (isset($reception_data['equipments']) ? count($reception_data['equipments']) : 0));
@@ -506,38 +506,38 @@ class BDS_ConvertProcess extends BDSProcess
                         continue;
                     }
 
-                    if ((int) $this->db->getValue('bl_reception_line', 'id', 'id_receptiont = ' . $id_reception . ' AND id_commande_fourn_line = ' . $r['id'])) {
+                    if ((int) $this->db->getValue('bl_reception_line', 'id', 'id_reception = ' . $id_reception . ' AND id_commande_fourn_line = ' . $r['id'])) {
                         continue;
                     }
 
                     $this->incProcessed();
 
-                    $id_shipment_line = $this->db->insert('bl_shipment_line', array(
+                    $id_reception_line = $this->db->insert('bl_reception_line', array(
                         'id_reception'      => $id_reception ,
                         'id_commande_fourn_line' => $r['id'],
                         'qty'              => $qty
                             ), true);
 
-                    if ($id_shipment_line <= 0) {
+                    if ($id_reception_line <= 0) {
                         $this->incIgnored();
-                        $this->Error('Echec ajout de la ligne à l\'expédition #' . $id_shipment . ' - ' . $this->db->err(), $line);
+                        $this->Error('Echec ajout de la ligne à la réception #' . $id_reception . ' - ' . $this->db->err(), $line);
                     } else {
-                        $this->Success('Création de la ligne d\'expédition OK', $line);
+                        $this->Success('Création de la ligne de réception OK', $line);
                         $this->incCreated();
 
-                        if (isset($shipment_data['equipments']) && !empty($shipment_data['equipments'])) {
-                            $base_data = array(
+                        $base_data = array(
                                 'association'        => 'equipments',
                                 'src_object_module'  => 'bimplogistique',
-                                'src_object_name'    => 'BL_ShipmentLine',
+                                'src_object_name'    => 'BL_ReceptionLine',
                                 'src_object_type'    => 'bimp_object',
-                                'src_id_object'      => $id_shipment_line,
+                                'src_id_object'      => $id_reception_line,
                                 'dest_object_module' => 'bimpequipment',
                                 'dest_object_name'   => 'Equipment',
                                 'dest_object_type'   => 'bimp_object'
                             );
-
-                            foreach ($shipment_data['equipments'] as $id_equipment) {
+                        
+                        if (isset($reception_data['equipments']) && !empty($reception_data['equipments'])) {
+                            foreach ($reception_data['equipments'] as $id_equipment => $eq_data) {
                                 if (!(int) $id_equipment) {
                                     $this->Error('ID eq invalide', $line);
                                     break;
@@ -545,9 +545,23 @@ class BDS_ConvertProcess extends BDSProcess
                                 $data = $base_data;
                                 $data['dest_id_object'] = $id_equipment;
                                 if ($this->db->insert('bimpcore_objects_associations', $data) <= 0) {
-                                    $this->Error('Echec asso equipement #' . $id_equipment . ' pour l\'expé #' . $id_shipment . ' - ' . $this->db->err(), $line);
+                                    $this->Error('Echec asso equipement #' . $id_equipment . ' pour la récep #' . $id_reception . ' - ' . $this->db->err(), $line);
                                 } else {
-//                                    $this->Info('Aj asso equipement #' . $id_equipment . ' pour l\'expé #' . $id_shipment . ' OK', $line);
+                                    $this->Info('Aj asso equipement #' . $id_equipment . ' pour la récep #' . $id_reception . ' OK', $line);
+                                }
+                            }
+                        } elseif (isset($reception_data['return_equipments']) && !empty($reception_data['return_equipments'])) {
+                            foreach ($reception_data['return_equipments'] as $id_equipment => $eq_data) {
+                                if (!(int) $id_equipment) {
+                                    $this->Error('ID eq invalide', $line);
+                                    break;
+                                }
+                                $data = $base_data;
+                                $data['dest_id_object'] = $id_equipment;
+                                if ($this->db->insert('bimpcore_objects_associations', $data) <= 0) {
+                                    $this->Error('Echec asso equipement #' . $id_equipment . ' pour la récep #' . $id_reception . ' - ' . $this->db->err(), $line);
+                                } else {
+                                    $this->Info('Aj asso equipement #' . $id_equipment . ' pour la récep #' . $id_reception . ' OK', $line);
                                 }
                             }
                         }

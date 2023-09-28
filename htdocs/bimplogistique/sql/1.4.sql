@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `llx_bl_shipment_line` (
   KEY `commande_line` (`id_commande_line`)
 );
 
-CREATE TABLE IF NOT EXISTS `llx_bl_shipment_line` (
+CREATE TABLE IF NOT EXISTS `llx_bl_reception_line` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_reception` int(11) unsigned NOT NULL DEFAULT 0,
   `id_commande_fourn_line` int(11) unsigned NOT NULL DEFAULT 0,

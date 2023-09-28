@@ -1493,6 +1493,14 @@ function onPeriodicityMassProcessFormLoaded($form) {
         }
     });
 
+    $form.find('.commande_shipment_select').change(function () {
+        if (parseInt($(this).val())) {
+            $(this).findParentByClass('commande_contact_row').find('.exp_ref_container').stop().slideUp();
+        } else {
+            $(this).findParentByClass('commande_contact_row').find('.exp_ref_container').stop().slideDown();
+        }
+    });
+
     $form.find('.check_all_lines').click(function () {
         $form.find('.line_check').each(function () {
             $(this).prop('checked', true).change();

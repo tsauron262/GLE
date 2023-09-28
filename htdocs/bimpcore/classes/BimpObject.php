@@ -5478,9 +5478,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function fetch($id, $parent = null)
     {
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
-        }
+        BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
 
         $this->reset();
 

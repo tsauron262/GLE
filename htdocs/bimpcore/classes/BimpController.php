@@ -88,9 +88,7 @@ class BimpController
             $main_controller = $this;
         }
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Début controller');
-        }
+        BimpDebug::addDebugTime('Début controller');
 
 
         $this->module = $module;
@@ -755,8 +753,8 @@ class BimpController
         $html .= BimpRender::renderIcon('far_window-restore');
         $html .= '</div>';
 
+        BimpDebug::addDebugTime('Fin affichage page');
         if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Fin affichage page');
 
             $html .= BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
 
@@ -806,8 +804,8 @@ class BimpController
 
     protected function ajaxProcess()
     {
+        BimpDebug::addDebugTime('Début affichage page');
         if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Début affichage page');
             BimpDebug::addParamsDebug();
         }
 

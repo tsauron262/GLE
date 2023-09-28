@@ -623,9 +623,7 @@ abstract class BimpAPI
             dol_syslog($infos);
         }
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebug('api', 'API "' . $this->options['public_name'] . '" - Requête "' . $request_name . '"', $infos);
-        }
+        BimpDebug::addDebug('api', 'API "' . $this->options['public_name'] . '" - Requête "' . $request_name . '"', $infos);
 
         $this->addDebug($infos);
 

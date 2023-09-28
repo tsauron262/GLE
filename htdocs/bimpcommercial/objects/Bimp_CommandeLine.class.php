@@ -568,7 +568,7 @@ class Bimp_CommandeLine extends ObjectLine
     public function getGeneralPeriodsListHeaderButtons($operation_type)
     {
         return array();
-        
+
         $buttons = array();
 
         if ($this->canSetAction('periodicityMassprocess')) {
@@ -1972,7 +1972,10 @@ class Bimp_CommandeLine extends ObjectLine
 
             case 'achat_pa_ht':
                 $product = $this->getProduct();
-                return $product->getCurrentPaHt(BimpTools::getPostFieldValue('achat_id_fourn'));
+                if (BimpObject::objectLoaded($product)) {
+                    return $product->getCurrentPaHt(BimpTools::getPostFieldValue('achat_id_fourn'));
+                }
+                return 0;
 
             case 'achat_tva_tx':
                 return 20;

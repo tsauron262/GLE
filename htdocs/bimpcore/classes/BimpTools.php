@@ -3793,12 +3793,19 @@ class BimpTools
         if ($modeCSV) {
             return $data;
         } else {
-            $return = '<span class=" bs-popover"';
-            $return .= BimpRender::renderPopoverData($data, 'top', true);
-            $return .= '>';
-            $return .= substr($data, 0, $lenght) . '...';
-            $return .= '</span>';
-            return $return;
+            $data = preg_replace('`[<br />]*$`', '', $data);
+            $data = preg_replace('`[<br>]*$`', '', $data);
+            $data = preg_replace('`[<br/>]*$`', '', $data);
+            if(strlen($data) > $lenght){
+                $return = '<span class=" bs-popover"';
+                $return .= BimpRender::renderPopoverData($data, 'top', true);
+                $return .= '>';
+                $return .= substr($data, 0, $lenght) . '...';
+                $return .= '</span>';
+                return $return;
+            }
+            else
+                return $data;
         }
     }
 }

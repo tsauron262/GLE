@@ -5440,6 +5440,12 @@ class Bimp_CommandeLine extends ObjectLine
                         $html .= '<input type="hidden" name="commande_' . $id_commande . '_contact_' . $id_contact . '_shipment" value="0"/>';
                     }
 
+
+                    $html .= '<div class="exp_ref_container" style="margin-top: 10px">';
+                    $html .= '<span class="small bold">Réf. expédition : </span>';
+                    $html .= BimpInput::renderInput('text', 'commande_' . $id_commande . '_contact_' . $id_contact . '_shipment_ref', '');
+                    $html .= '</div>';
+
                     $html .= '</div>';
 
                     $html .= '</td>';
@@ -5689,8 +5695,10 @@ class Bimp_CommandeLine extends ObjectLine
                         }
                     }
 
-                    $html .= '<br/><br/><span class="small bold">Libellé facture : </span>';
+                    $html .= '<div class="fac_libelle_container" style="margin-top: 10px">';
+                    $html .= '<span class="small bold">Libellé facture : </span>';
                     $html .= BimpInput::renderInput('text', 'client_' . $id_client . '_fac_' . $fac_idx . '_libelle', $fac_libelle);
+                    $html .= '</div>';
 
                     $html .= '</div>';
 
@@ -8809,7 +8817,8 @@ class Bimp_CommandeLine extends ObjectLine
                                         $shipment = BimpObject::createBimpObject('bimplogistique', 'BL_CommandeShipment', array(
                                                     'id_commande_client' => $id_commande,
                                                     'id_contact'         => $id_contact,
-                                                    'id_entrepot'        => $commande->getData('entrepot')
+                                                    'id_entrepot'        => $commande->getData('entrepot'),
+                                                    'ref'                => BimpTools::getArrayValueFromPath($contact_data, 'ref_shipment', '')
                                                         ), true, $shipment_errors);
 
                                         if (count($shipment_errors)) {
@@ -9132,8 +9141,6 @@ class Bimp_CommandeLine extends ObjectLine
             $errors[] = 'Aucune ligne de commande client à traiter';
             return;
         }
-
-        global $user;
 
         $use_db_transaction = (int) BimpCore::getConf('use_db_transactions');
         if ($use_db_transaction) {

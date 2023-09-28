@@ -1530,6 +1530,7 @@ function onPeriodicExpMassProcessFormSubmit($form, extra_data) {
                 if (typeof (commandes[id_commande][id_contact]) === 'undefined') {
                     commandes[id_commande][id_contact] = {
                         'id_shipment': $form.find('[name="commande_' + id_commande + '_contact_' + id_contact + '_shipment"]').val(),
+                        'ref_shipment': $form.find('[name="commande_' + id_commande + '_contact_' + id_contact + '_shipment_ref"]').val(),
                         'lines': []
                     };
                 }

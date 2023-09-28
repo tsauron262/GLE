@@ -308,9 +308,7 @@ class BimpDebug
             )
         );
 
-        if (self::isActive()) {
-            self::addDebugTime('Urgence - Suppression de toutes les infos debug');
-        }
+        self::addDebugTime('Urgence - Suppression de toutes les infos debug');
 
         if ($deactivate) {
             self::$active = false;

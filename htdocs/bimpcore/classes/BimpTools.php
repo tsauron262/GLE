@@ -3800,7 +3800,7 @@ class BimpTools
                 $return = '<span class=" bs-popover"';
                 $return .= BimpRender::renderPopoverData($data, 'top', true);
                 $return .= '>';
-                $return .= substr($data, 0, $lenght) . '...';
+                $return .= substr(strip_tags($data), 0, $lenght) . '...';
                 $return .= '</span>';
                 return $return;
             }

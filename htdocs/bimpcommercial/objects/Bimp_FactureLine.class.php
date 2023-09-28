@@ -410,6 +410,10 @@ class Bimp_FactureLine extends ObjectLine
                     if (BimpObject::objectLoaded($commande)) {
                         $commande->processFacturesRemisesGlobales();
                     }
+                    
+                    if ((int) $commLine->getData('fac_periodicity') > 0) {
+                        $commLine->checkPeriodicityData('fac');
+                    }
                 }
             }
 

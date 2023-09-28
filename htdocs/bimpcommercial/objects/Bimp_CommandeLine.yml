@@ -46,6 +46,14 @@ objects:
             id_object: 
                 field_value: id_propal_renouv
 
+    achat_fourn: 
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Fournisseur
+            id_object: 
+                field_value: achat_id_fourn
+                
 fields: 
     id_obj: 
         label: Commande
@@ -162,6 +170,17 @@ fields:
         min: 0
         max: none
         decimals: 0
+        
+    achat_id_fourn: 
+        label: Fournisseur pour les achats périodiques
+        type: id_object
+        object: achat_fourn
+        default_value: 0
+        displays: 
+            default: 
+                label: Affichage par défaut
+                type: callback
+                method: displayAchatFourn
         
     achat_periods_start:
         label: Date 1er achat
@@ -597,7 +616,6 @@ forms:
                             params: 
                                 - achat_id_fourn_price
                 value: 
-#                  callback: getCommandeFournIdPrice
                     callback: 
                         method: getPeriodicityExtraParam
                         params: 
@@ -695,8 +713,75 @@ forms:
                 display_if: 
                     field_name: has_achat_periodicity
                     show_values: 1
+           
+    periodicity_process: 
+        rows: 
+            client: 
+                custom: 1
+                hidden: 1
+                label: Client
+                input_name: id_client
+                input: 
+                    type: hidden
+                value: 0
+                edit: 1
+            client_name: 
+                custom: 1
+                label: Client
+                input_name: client_name
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayClientNameInput
+                depends_on: id_client
+                display_if: 
+                    field_name: id_client
+                    hide_values: 0
+            fourn: 
+                custom: 1
+                hidden: 1
+                label: Fournisseur
+                input_name: id_fourn
+                input: 
+                    type: hidden
+                value: 0
+                edit: 1
+            fourn_name: 
+                custom: 1
+                label: Fournisseur
+                input_name: fourn_name
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayFournNameInput
+                depends_on: id_fourn
+                display_if: 
+                    field_name: id_fourn
+                    hide_values: 0
+            product: 
+                custom: 1
+                hidden: 1
+                label: Produit
+                input_name: id_product
+                input: 
+                    type: hidden
+                value: 0
+                edit: 1
+            prod_name: 
+                custom: 1
+                label: Produit
+                input_name: prod_name
+                input: 
+                    type: custom
+                    content: 
+                        callback: displayProductNameInput
+                depends_on: id_product
+                display_if: 
+                    field_name: id_product
+                    hide_values: 0
                     
     periodicity_mass_process: 
+        extends: periodicity_process
         modal_format: large
         rows: 
             type: 
@@ -717,6 +802,30 @@ forms:
                     type: custom
                     content: 
                         callback: renderPeriodicityMassProcessInputs
+                        
+    periodicity_check: 
+        extends: periodicity_process
+        rows: 
+            null_dates_only: 
+                custom: 1
+                label: Vérifier les dates nulles seulement
+                input_name: null_dates_only
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            types: 
+                custom: 1
+                label: Types d'opération périodique à vérifier
+                input_name: types
+                input: 
+                    type: check_list
+                    items: 
+                        exp: Livraisons
+                        fac: Facturations
+                        achat: Achats
+                value: 
+                    array: exp,fac,achat
             
 fields_tables: 
     resume:
@@ -774,6 +883,27 @@ filters:
         type: check_list
         items: 
             array: reservationsStatus
+            
+    periodic_exps_to_process: 
+        label: Livraisons périodiques à traiter aujourd'hui
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+            
+    periodic_facs_to_process: 
+        label: Facturation périodiques à traiter aujourd'hui
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+            
+    periodic_achats_to_process: 
+        label: Achats périodiques à traiter aujourd'hui
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
                     
 filters_panels: 
     default: 
@@ -813,18 +943,21 @@ filters_panels:
     exp_periods: 
         extends: periods
         filters: 
+            periodic_exps_to_process:
             next_date_exp: 
             exp_periodicity:
                 
     fac_periods: 
         extends: periods
         filters: 
+            periodic_facs_to_process:
             next_date_fac: 
             fac_periodicity:
                 
     achat_periods: 
         extends: periods
         filters: 
+            periodic_achats_to_process:
             next_date_achat: 
             achat_periodicity:
                         
@@ -1024,6 +1157,17 @@ lists:
         filters_panel: exp_periods
         sort_field: next_date_exp
         sort_way: asc
+        allow_large_n: 1
+        checkboxes: 
+            callback: 
+                method: canSetAction
+                params: 
+                    - periodicityMassprocess
+        bulk_actions: 
+            callback: 
+                method: getGeneralPeriodsListBulkActions
+                params: 
+                    - exp
         header_buttons: 
             callback: 
                 method: getGeneralPeriodsListHeaderButtons
@@ -1044,6 +1188,17 @@ lists:
         filters_panel: fac_periods
         sort_field: next_date_fac
         sort_way: asc
+        allow_large_n: 1
+        checkboxes: 
+            callback: 
+                method: canSetAction
+                params: 
+                    - periodicityMassprocess
+        bulk_actions: 
+            callback: 
+                method: getGeneralPeriodsListBulkActions
+                params: 
+                    - fac
         header_buttons: 
             callback: 
                 method: getGeneralPeriodsListHeaderButtons
@@ -1064,6 +1219,17 @@ lists:
         filters_panel: achat_periods
         sort_field: next_date_achat
         sort_way: asc
+        allow_large_n: 1
+        checkboxes: 
+            callback: 
+                method: canSetAction
+                params: 
+                    - periodicityMassprocess
+        bulk_actions: 
+            callback: 
+                method: getGeneralPeriodsListBulkActions
+                params: 
+                    - achat
         header_buttons: 
             callback: 
                 method: getGeneralPeriodsListHeaderButtons
@@ -1073,6 +1239,7 @@ lists:
             unextends: 1
             id_obj: 
             desc: 
+            achat_id_fourn:
             nb_periods_bought: 
             achat_periods_start: 
             nb_periods_tobuy:

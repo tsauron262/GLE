@@ -216,7 +216,7 @@ function setObjectAction($button, object_data, action, extra_data, $resultContai
         modal_format: 'medium', // Format modal (small / medium / large) 
         modal_scroll_bottom: true, // Auto scroll vers le bas de la modal du formulaire (à la validation) 
         use_bimpdatasync: false, // Utiliser BimpDataSync
-        use_report: false,
+        use_report: false, // Utiliser les rapports BimpDataSync
         display_processing: true,
         processing_msg: 'Traitement en cours'
     };

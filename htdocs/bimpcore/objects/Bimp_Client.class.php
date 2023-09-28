@@ -1437,16 +1437,15 @@ class Bimp_Client extends Bimp_Societe
             );
 
         // Atradius: 
-
 //        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 //        $api = BimpAPI::getApiInstance('atradius');
 //        if ($api && $api->isApiOk()) {
-            $tabs[] = array(
-                'id'            => 'client_atradius_list_tab',
-                'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
-                'ajax'          => 1,
-                'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
-            );
+        $tabs[] = array(
+            'id'            => 'client_atradius_list_tab',
+            'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
+        );
 //        }
 
         $html = BimpRender::renderNavTabs($tabs, 'card_view');
@@ -1503,6 +1502,17 @@ class Bimp_Client extends Bimp_Societe
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
             );
+
+        // Opérations périodiques : 
+
+        if ((int) BimpCore::getConf('use_logistique_periodicity', null, 'bimpcommercial')) {
+            $tabs[] = array(
+                'id'            => 'client_periodicity_view_tab',
+                'title'         => BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Opérations périodiques',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderPeriodicityView', '$(\'#client_periodicity_view_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
+            );
+        }
 
         // Avoirs client: 
         if ($this->isDolModuleActif('facture'))
@@ -2449,6 +2459,18 @@ class Bimp_Client extends Bimp_Societe
             $html .= "<p>Vous n'avez pas les droits requis pour créer un nouveau contrat.<p>";
         }
         return $html;
+    }
+
+    public function renderPeriodicityView()
+    {
+        if (!$this->isLoaded($err)) {
+            return BimpRender::renderAlerts($err);
+        }
+        
+        $commandeController = BimpController::getInstance('bimpcommercial', 'commandes');
+        return $commandeController->renderPeriodsTab(array(
+            'id_client' => $this->id
+        ));
     }
 
     // Traitements:

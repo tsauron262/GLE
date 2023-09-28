@@ -26,6 +26,8 @@ if (!$user->admin) {
     exit;
 }
 
+die('Script bloqué');
+
 $bdb = new BimpDb($db);
 $action = BimpTools::getValue('action', '');
 

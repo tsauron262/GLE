@@ -807,7 +807,7 @@ function setSelectedObjectsNewStatus($button, list_id, new_status, extra_data, c
     }
 }
 
-function setSelectedObjectsAction($button, list_id, action, extra_data, form_name, confirm_msg, single_action, on_form_submit, success_callback, $resultContainer) {
+function setSelectedObjectsAction($button, list_id, action, extra_data, form_name, confirm_msg, single_action, on_form_submit, success_callback, $resultContainer, options) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -911,7 +911,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                                 if (typeof (successCallback) === 'function') {
                                     successCallback(result);
                                 }
-                            }, $form.find('.ajaxResultContainer'));
+                            }, $form.find('.ajaxResultContainer'), options);
                         }
                     });
                 }
@@ -927,7 +927,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                     module: $list.data('module'),
                     object_name: object_name,
                     id_object: 0
-                }, action, extra_data, $resultContainer, success_callback);
+                }, action, extra_data, $resultContainer, success_callback, options);
             } else {
                 $button.addClass('disabled');
                 var i = 1;
@@ -938,7 +938,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                             module: $list.data('module'),
                             object_name: object_name,
                             id_object: id_object
-                        }, action, extra_data, $resultContainer);
+                        }, action, extra_data, $resultContainer, success_callback, options);
                     } else {
                         var msg = '';
                         if (object_labels[object_name]['is_female']) {

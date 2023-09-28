@@ -18,6 +18,7 @@ class BimpTools
             'no_html' => '$'
         )
     );
+    public static $sql_operators = array('>', '<', '>=', '<=', '!=');
     public static $bloquages = array();
 
     // Gestion GET / POST
@@ -1690,6 +1691,20 @@ class BimpTools
         return $sql;
     }
 
+    public static function addSqlFilterEntity(&$filters, $object, $alias = '', $entity_field = 'entity')
+    {
+        if (self::isModuleDoliActif('MULTICOMPANY') && is_a($object, 'BimpObject')) {
+            $entity_name = $object->getEntity_name();
+            if ($entity_name) {
+                if (is_string($filters)) {
+                    $filters .= ($filters ? ' AND ' : '') . ($alias ? $alias . '.' : '') . $entity_field . ' IN (' . getEntity($entity_name) . '';
+                } elseif (is_array($filters)) {
+                    $filters[($alias ? $alias . '.' : '') . $entity_field] = getEntity($entity_name);
+                }
+            }
+        }
+    }
+
     // Gestion de données:
 
     public static function checkValueByType($type, &$value, &$errors = array())
@@ -2723,7 +2738,7 @@ class BimpTools
             $value_str = number_format($float_number, 8);
 
             if ($value_str) {
-                if (preg_match('/^(\d+)\.(\d+)0*$/U', $value_str, $matches)) {
+                if (preg_match('/^(\d+)\.(\d*)0*$/U', $value_str, $matches)) {
                     return strlen($matches[2]);
                 }
             }
@@ -2878,7 +2893,7 @@ class BimpTools
         return $html;
     }
 
-    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false, $truncate = false, $no_html = false, $round_points = false, $spaces = true)
+    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false, $truncate = false, $no_html = false, $round_points = false, $spaces = true, $no_zeros_decimals = false)
     {
         // $decimals: indiquer 'full' pour afficher toutes les décimales. 
 
@@ -2911,6 +2926,11 @@ class BimpTools
         // Ajustement du nombre de décimales:
         if ($decimals === 'full') {
             $decimals = (int) self::getDecimalesNumber($value);
+        } elseif ($no_zeros_decimals) {
+            $true_decimals = (int) self::getDecimalesNumber(round($value, $decimals));
+            if ($true_decimals < $decimals) {
+                $decimals = $true_decimals;
+            }
         }
 
         // Arrondi: 
@@ -3755,13 +3775,13 @@ class BimpTools
     public static function isModuleDoliActif($module)
     {
         global $conf;
-        
+
         if (stripos($module, 'MAIN_MODULE_') === false)
             $module = 'MAIN_MODULE_' . $module;
-        
+
         if (isset($conf->global->$module) && $conf->global->$module)
             return 1;
-        
+
         return 0;
     }
 

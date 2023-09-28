@@ -1064,7 +1064,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
         return $shipments;
     }
-    
+
     public function getShipmentContactsArray()
     {
         $commande = $this->dol_object;
@@ -1246,6 +1246,24 @@ class Bimp_Commande extends Bimp_CommandeTemp
         }
 
         return (int) BimpCore::getConf('societe_id_default_mode_reglement', 0);
+    }
+
+    public function getShippingIdContact()
+    {
+        $id_contact = 0;
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact('external', 'SHIPPING');
+            if (isset($contacts[0]) && $contacts[0]) {
+                $id_contact = $contacts[0];
+            } else {
+                $contacts = $this->dol_object->getIdContact('external', 'CUSTOMER');
+                if (isset($contacts[0]) && $contacts[0]) {
+                    $id_contact = $contacts[0];
+                }
+            }
+        }
+
+        return $id_contact;
     }
 
     // Rendus HTML: 
@@ -2784,17 +2802,14 @@ class Bimp_Commande extends Bimp_CommandeTemp
         return $errors;
     }
 
-    public function addLinesToFacture($id_facture, $lines_data = null, $check_data = true, $new_qties = false)
+    public function addLinesToFacture($id_facture, $lines_data = null, $check_data = true, $new_qties = false, $commit_each_line = false, &$nOk = 0)
     {
+        // $commit_each_line : nécessaire pour le traitement des facturation périodiques. 
+
         BimpCore::setMaxExecutionTime(2400);
         ignore_user_abort(0);
 
         $errors = array();
-
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID de la commande client absent ou invalide';
-            return $errors;
-        }
 
         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
         $facture->checkLines();
@@ -2854,13 +2869,15 @@ class Bimp_Commande extends Bimp_CommandeTemp
             }
         }
 
-        $this->hold_process_factures_remises_globales = true;
+        $commandes_assos = array();
 
         foreach ($lines_data as $id_commande => $commande_lines_data) {
             $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
 
-            // Création de la ligne de l'intitulé de la commande d'origine si nécessaire: 
             if (BimpObject::objectLoaded($commande)) {
+                $commande->hold_process_factures_remises_globales = true;
+
+                // Création de la ligne de l'intitulé de la commande d'origine si nécessaire: 
                 $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
                             'id_obj'             => (int) $facture->id,
                             'linked_object_name' => 'commande_origin_label',
@@ -2877,16 +2894,28 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     ));
                     $fac_line->qty = 1;
                     $fac_line->desc = 'Selon notre commande ' . $commande->getRef();
+                    $libelle = $commande->getData('libelle');
+                    if ($libelle) {
+                        $fac_line->desc .= ' - ' . $libelle;
+                    }
                     $fac_line_warnings = array();
-                    $fac_line_errors = $fac_line->create($fac_line_warnings, true);
+                    $fac_line->create($fac_line_warnings, true);
                 }
             }
 
+            $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
+            $has_line_ok = false;
             foreach ($commande_lines_data as $id_line => $line_data) {
+                if ($use_db_transactions && $commit_each_line) {
+                    $this->db->db->begin();
+                }
+
                 $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
+                $line_label = 'Ligne n° ' . $line->getData('position') . (BimpObject::objectLoaded($commande) ? ' de la commande ' . $commande->getRef() : '');
 
                 $product = $line->getProduct();
-                $fac_line_errors = array();
+                $line_errors = array();
+                $line_warnings = array();
                 $line_qty = (float) $line_data['qty'];
                 $line_equipments = array();
 
@@ -2912,16 +2941,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
                         ));
                         $fac_line->qty = 1;
                         $fac_line->desc = $line->desc;
-                        $fac_line_warnings = array();
 
-                        $fac_line_errors = $fac_line->create($fac_line_warnings, true);
+                        $line_errors = $fac_line->create($line_warnings, true);
 
-                        $fac_line_errors = BimpTools::merge_array($fac_line_errors, $fac_line_warnings);
-
-                        if (count($fac_line_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la création de la ligne de texte depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, $line_label . ' : échec de la création de la ligne de texte');
+                            if ($use_db_transactions && $commit_each_line) {
+                                $this->db->db->rollback();
+                            }
+                        } else {
+                            if ($use_db_transactions && $commit_each_line) {
+                                $nOk++;
+                                $this->db->db->commit();
+                            }
                         }
-
                         continue;
                     }
 
@@ -2949,34 +2982,25 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     $fac_line->date_from = $line->date_from;
                     $fac_line->date_to = $line->date_to;
                     $fac_line->id_remise_except = $line->id_remise_except;
-
-                    $fac_line_warnings = array();
-
                     $fac_line->no_remises_arrieres_auto_create = true;
-                    $fac_line_errors = $fac_line->create($fac_line_warnings, true);
 
-                    $fac_line_errors = BimpTools::merge_array($fac_line_errors, $fac_line_warnings);
+                    $line_errors = $fac_line->create($line_warnings, true);
 
-                    if (count($fac_line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la création de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
-                    } else {
+                    if (!count($line_errors)) {
                         // Copie des remises: 
-
                         $remises_errors = $fac_line->copyRemisesFromOrigin($line, false, false);
 
                         if (count($remises_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($remises_errors, 'Erreurs lors de la copie des remises pour la ligne n°' . $line->getData('position'));
+                            $line_errors[] = BimpTools::getMsgFromArray($remises_errors, 'Erreurs lors de la copie des remises');
                         }
 
                         $remises_arr_errors = $fac_line->copyRemisesArrieresFromOrigine($line);
 
                         if (count($remises_arr_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($remises_arr_errors, 'Erreurs lors de la copie des remises arrières pour la ligne n°' . $line->getData('position'));
+                            $line_errors[] = BimpTools::getMsgFromArray($remises_arr_errors, 'Erreurs lors de la copie des remises arrières');
                         }
 
-                        $fac_line->set('deletable', 0);
-                        $fac_line_warnings = array();
-                        $fac_line->update($fac_line_warnings, true);
+                        $fac_line->updateField('deletable', 0);
                     }
                 } else {
                     if ($new_qties) {
@@ -2990,11 +3014,20 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
 
                     if (!$line_qty) {
-                        $fac_line_warnings = array();
-                        $line_errors = $fac_line->delete($fac_line_warnings, true);
-                        if (count($line_errors) && (int) $line->id_remise_except) {
-                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': échec de la suppression de la ligne de facture correspondante');
+                        // Suppression de la ligne de facture : 
+                        $line_errors = $fac_line->delete($line_warnings, true);
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, $line_label . ' : échec de la suppression de la ligne de facture correspondante');
+                            if ($use_db_transactions && $commit_each_line) {
+                                $this->db->db->rollback();
+                            }
+                        } else {
+                            if ($use_db_transactions && $commit_each_line) {
+                                $nOk++;
+                                $this->db->db->commit();
+                            }
                         }
+
                         continue;
                     }
 
@@ -3010,39 +3043,27 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
 
                     if (count($fac_line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la liste des équipements pour la ligne de facture n°' . $fac_line->getData('position'));
+                        $line_errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la liste des équipements');
                     } else {
                         $fac_line_warnings = array();
                         $fac_line_errors = $fac_line->update($fac_line_warnings, true);
-                        $fac_line_errors = BimpTools::merge_array($fac_line_errors, $fac_line_warnings);
 
                         if (count($fac_line_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
+                            $line_errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture');
                         }
                     }
                 }
 
-                if (!count($fac_line_errors)) {
+                if (!count($line_errors) && BimpObject::objectLoaded($fac_line)) {
                     // Assignation des équipements à la ligne de facture: 
                     $equipments_set = array();
                     if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
                         if (isset($line_data['equipments']) && is_array($line_data['equipments'])) {
+
                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment');
                             $equipment->updateFieldsMasse($line_data['equipments'], array('prix_achat' => $line->pa_ht, 'achat_tva_tx' => $line->tva_tx), array('prix_achat' => 0));
-                            foreach ($line_data['equipments'] as $id_equipment) {
-//                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-//
-//                                if (!BimpObject::objectLoaded($equipment)) {
-//                                    $errors[] = 'Ligne n°' . $line->getData('position') . ': l\'équipement d\'ID ' . $id_equipment . ' n\'existe plus';
-//                                    continue;
-//                                }
-//
-//                                if (!(float) $equipment->getData('prix_achat')) {
-//                                    $equipment->set('prix_achat', $line->pa_ht);
-//                                    $equipment->set('achat_tva_tx', $line->tva_tx);
-//                                    $equipment->update();
-//                                }
-//
+
+                            foreach ($line_data['equipments'] as $id_equipment) {//
                                 $line_equipments[] = array(
                                     'id_equipment' => (int) $id_equipment
                                 );
@@ -3051,28 +3072,47 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
                         $eq_errors = $fac_line->setEquipments($line_equipments, $equipments_set, false);
                         if (count($eq_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $line->getData('position'));
+                            $line_errors[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de l\'ajout des équipements à la ligne de facture');
                         }
                     }
+                }
 
-                    // Enregistrement des quantités facturées pour la ligne de commande: 
-                    $line_warnings = array();
-
+                if (!count($line_errors)) {
+                    // Enregistrement des quantités facturées pour la ligne de commande:
                     $line_errors = $line->setFactureData((int) $facture->id, $line_qty, $equipments_set, $line_warnings, false);
-                    $line_errors = BimpTools::merge_array($line_errors, $line_warnings);
-                    if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'enregistrement des quantités facturées pour la ligne n°' . $line->getData('position') . ' (ID: ' . $line->id . ')');
+                }
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, ucfirst($line_label));
+                    if ($use_db_transactions && $commit_each_line) {
+                        $this->db->db->rollback();
                     }
+                } else {
+                    $has_line_ok = true;
+                    if ($use_db_transactions && $commit_each_line) {
+                        $nOk++;
+                        $this->db->db->commit();
+                    }
+                }
+            }
+
+            if ($has_line_ok && !in_array($id_commande, $commandes_assos)) {
+                $commandes_assos[] = $id_commande;
+            }
+
+            if (BimpObject::objectLoaded($commande)) {
+                unset($commande->hold_process_factures_remises_globales);
+
+                if ($has_line_ok) {
+                    $commande->processFacturesRemisesGlobales();
                 }
             }
         }
 
-        unset($this->hold_process_factures_remises_globales);
-        $this->processFacturesRemisesGlobales();
-
-        if (!count($errors)) {
+        // Assos commandes / factures : 
+        if (count($commandes_assos) && (!count($errors) || ($use_db_transactions && $commit_each_line))) {
             $asso = new BimpAssociation($this, 'factures');
-            foreach ($orderedLines as $id_commande => $lines) {
+            foreach ($commandes_assos as $id_commande) {
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
 
                 if (BimpObject::objectLoaded($commande)) {

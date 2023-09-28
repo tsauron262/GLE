@@ -117,13 +117,13 @@ table.objectlistTable {
         }
 
         &.deactivated {
-            background-color: #B3B2B2!important;
-            border-color: #C8C8C8!important;
+            background-color: #D9D9D9!important;
+            border-color: #CCCCCC!important;
             color: #646464!important;
 
             & > td {
-                background-color: #B3B2B2!important;
-                border-color: #C8C8C8!important;
+                background-color: #D9D9D9!important;
+                border-color: #CCCCCC!important;
                 color: #646464!important;
             }
         }
@@ -169,10 +169,10 @@ table.objectlistTable {
         }
 
         &.deactivated:hover {
-            background-color: #BFBFBF!important;
+            background-color: #CCCCCC!important;
 
             & > td {
-                background-color: #BFBFBF!important;
+                background-color: #CCCCCC!important;
             }
         }
 

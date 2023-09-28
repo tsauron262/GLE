@@ -10,8 +10,7 @@ if (!defined('BV_LIB')) {
 
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
 
-class BimpDolObject extends BimpObject
-{
+class BimpDolObject extends BimpObject{
 
     public static $element_name = '';
     public static $dol_module = '';
@@ -474,6 +473,25 @@ class BimpDolObject extends BimpObject
         $list = $this->dol_object->liste_type_contact($type, 'position', 0, 0, $code);
         foreach ($list as $id => $inut)
             return $id;
+    }
+    
+    public function getContactsByCodes($source = 'external')
+    {
+        $contacts = array();
+        
+        if ($this->isLoaded()) {
+            $items = $this->dol_object->liste_contact(-1, $source);
+            
+            foreach ($items as $item) {
+                if (!isset($contacts[$item['code']])) {
+                    $contacts[$item['code']] = array();
+                }
+                
+                $contacts[$item['code']][] = $item['id'];
+            }
+        }
+        
+        return $contacts;
     }
 
     // Affichages: 
@@ -1263,10 +1281,11 @@ class BimpDolObject extends BimpObject
     {
         if ($this->isLoaded() && BimpObject::objectLoaded($origin) && is_a($origin, 'BimpDolObject')) {
             BimpTools::resetDolObjectErrors($this->dol_object);
-//            die('oooo');
+            
             if ($this->dol_object->copy_linked_contact($origin->dol_object, 'internal') < 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la copie des contacts internes');
             }
+            
             if ((int) $this->getData('fk_soc') === (int) $origin->getData('fk_soc')) {
                 BimpTools::resetDolObjectErrors($this->dol_object);
                 if ($this->dol_object->copy_linked_contact($origin->dol_object, 'external') < 0) {

@@ -750,7 +750,7 @@ class ObjectLine extends BimpObject
                     'on'    => $line_alias . '.rowid = ' . $main_alias . '.id_line'
                 );
                 $filters[$main_alias . '___marge_neg'] = array(
-                    'custom' => $line_alias.'.buy_price_ht > ('.$line_alias.'.subprice+1) AND '.$line_alias.'.subprice > 0'
+                    'custom' => $line_alias . '.buy_price_ht > (' . $line_alias . '.subprice+1) AND ' . $line_alias . '.subprice > 0'
                 );
                 break;
             case 'categ1':
@@ -1699,13 +1699,16 @@ class ObjectLine extends BimpObject
 
     public function getQtyDecimals()
     {
-        $product = $this->getProduct();
+        if ((int) BimpCore::getConf('not_decimal_product')) {
+            $product = $this->getProduct();
 
-        if (BimpObject::objectLoaded($product)) {
-            if ($product->getData('fk_product_type') === 0) {
-                return 1;
+            if (BimpObject::objectLoaded($product)) {
+                if ($product->getData('fk_product_type') === 0) {
+                    return 1;
+                }
             }
         }
+
 
         return 6;
     }
@@ -5818,9 +5821,9 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false, $no_triggers = false)
     {
-        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
+        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate, $no_triggers);
 
         if (!count($errors)) {
             if ($field === 'remisable' && !(int) $value) {

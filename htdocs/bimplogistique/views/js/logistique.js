@@ -1480,6 +1480,181 @@ function selectedReceptionsFactureFourn($button, list_id) {
     });
 }
 
+// Traitements en masse des opé périodiques : 
+
+function onPeriodicityMassProcessFormLoaded($form) {
+    $form.find('.line_check').change(function () {
+        var $row = $(this).findParentByClass('commande_line_row');
+
+        if ($(this).prop('checked')) {
+            $row.addClass('selected');
+        } else {
+            $row.removeClass('selected');
+        }
+    });
+
+    $form.find('.check_all_lines').click(function () {
+        $form.find('.line_check').each(function () {
+            $(this).prop('checked', true).change();
+        });
+    });
+    $form.find('.uncheck_all_lines').click(function () {
+        $form.find('.line_check').each(function () {
+            $(this).prop('checked', false).change();
+        });
+    });
+}
+
+function onPeriodicExpMassProcessFormSubmit($form, extra_data) {
+    var has_errors = false;
+    var commandes = {};
+
+    $form.find('tr.commande_line_row').each(function () {
+        var $line_row = $(this);
+
+        if ($line_row.find('.line_check').prop('checked')) {
+            var id_commande = parseInt($line_row.data('id_commande'));
+            var id_contact = parseInt($line_row.data('id_contact'));
+            var id_line = parseInt($line_row.data('id_line'));
+            var qty = parseInt($line_row.find($('input.line_qty')).val());
+
+            if (isNaN(qty)) {
+                bimp_msg('Ligne #' + id_line + ' : Qté invalide', 'danger');
+                has_errors = true;
+            } else if (qty > 0) {
+
+                if (typeof (commandes[id_commande]) === 'undefined') {
+                    commandes[id_commande] = {};
+                }
+
+                if (typeof (commandes[id_commande][id_contact]) === 'undefined') {
+                    commandes[id_commande][id_contact] = {
+                        'id_shipment': $form.find('[name="commande_' + id_commande + '_contact_' + id_contact + '_shipment"]').val(),
+                        'lines': []
+                    };
+                }
+
+
+                commandes[id_commande][id_contact]['lines'].push({
+                    'id_line': id_line,
+                    'qty': qty
+                });
+            }
+        }
+    });
+
+    if (has_errors) {
+        return false;
+    }
+
+    extra_data['commandes'] = commandes;
+    return extra_data;
+}
+
+function onPeriodicFacMassProcessFormSubmit($form, extra_data) {
+    var has_errors = false;
+    var clients = {};
+
+    $form.find('tr.commande_line_row').each(function () {
+        var $line_row = $(this);
+
+        if ($line_row.find('.line_check').prop('checked')) {
+            var id_client = parseInt($line_row.data('id_client'));
+            var fac_idx = parseInt($line_row.data('fac_idx'));
+            var id_line = parseInt($line_row.data('id_line'));
+            var qty = parseInt($line_row.find($('input.line_qty')).val());
+
+            if (isNaN(qty)) {
+                bimp_msg('Ligne #' + id_line + ' : Qté invalide', 'danger');
+                has_errors = true;
+            } else if (qty > 0) {
+
+                if (typeof (clients[id_client]) === 'undefined') {
+                    clients[id_client] = {};
+                }
+
+                if (typeof (clients[id_client][fac_idx]) === 'undefined') {
+                    var $client_fac_row = $('.client_fac_row[data-id_client=' + id_client + '][data-fac_idx=' + fac_idx + ']');
+
+                    clients[id_client][fac_idx] = {
+                        'id_facture': $form.find('[name="client_' + id_client + '_fac_' + fac_idx + '"]').val(),
+                        'libelle': $form.find('[name="client_' + id_client + '_fac_' + fac_idx + '_libelle"]').val(),
+                        'id_entrepot': $client_fac_row.data('id_entrepot'),
+                        'secteur': $client_fac_row.data('secteur'),
+                        'id_mode_reglement': $client_fac_row.data('id_mode_reglement'),
+                        'id_cond_reglement': $client_fac_row.data('id_cond_reglement'),
+                        'lines': []
+                    };
+                }
+
+
+                clients[id_client][fac_idx]['lines'].push({
+                    'id_line': id_line,
+                    'qty': qty
+                });
+            }
+        }
+    });
+
+    if (has_errors) {
+        return false;
+    }
+
+    console.log(clients);
+
+    extra_data['clients'] = clients;
+    return extra_data;
+}
+
+function onPeriodicAchatMassProcessFormSubmit($form, extra_data) {
+    var has_errors = false;
+    var fourns = {};
+
+    $form.find('tr.commande_line_row').each(function () {
+        var $line_row = $(this);
+
+        if ($line_row.find('.line_check').prop('checked')) {
+            var id_fourn = parseInt($line_row.data('id_fourn'));
+            var id_entrepot = parseInt($line_row.data('id_entrepot'));
+            var id_line = parseInt($line_row.data('id_line'));
+            var qty = parseInt($line_row.find($('input.line_qty')).val());
+
+            if (isNaN(qty)) {
+                bimp_msg('Ligne #' + id_line + ' : Qté invalide', 'danger');
+                has_errors = true;
+            } else if (qty > 0) {
+                var pa_ht = parseFloat($line_row.find($('input.line_pa_ht')).val());
+
+                if (typeof (fourns[id_fourn]) === 'undefined') {
+                    fourns[id_fourn] = {};
+                }
+
+                if (typeof (fourns[id_fourn][id_entrepot]) === 'undefined') {
+                    fourns[id_fourn][id_entrepot] = {
+                        'id_commande_fourn': $form.find('[name="fourn_' + id_fourn + '_entrepot_' + id_entrepot + '_commande_fourn"]').val(),
+                        'lines': []
+                    };
+                }
+
+
+                fourns[id_fourn][id_entrepot]['lines'].push({
+                    'id_line': id_line,
+                    'qty': qty,
+                    'pa_ht': pa_ht
+                });
+            }
+        }
+    });
+
+    if (has_errors) {
+        return false;
+    }
+
+    extra_data['fourns'] = fourns;
+
+    return extra_data;
+}
+
 $(document).ready(function () {
     $('body').on('viewLoaded', function (e) {
         if (e.$view.hasClass('Bimp_CommandeLine_view_shipments')) {
@@ -1501,17 +1676,26 @@ $(document).ready(function () {
         }
     });
 
-    $('body').on('listLoaded', function (e) {
-        if (e.$list.hasClass('Bimp_CommandeLine_list_table_logistique')) {
-            onCommandeLinesLogistiqueListLoaded(e.$list);
-        }
-    });
+//    $('body').on('listLoaded', function (e) {
+//        if (e.$list.hasClass('Bimp_CommandeLine_list_table_logistique')) {
+//            onCommandeLinesLogistiqueListLoaded(e.$list);
+//        }
+//    });
     $('body').on('listLoaded', function (e) {
         if (e.$list.hasClass('Bimp_CommandeLine_list_table_logistique')) {
             onCommandeLinesLogistiqueListLoaded(e.$list);
             e.$list.on('listRefresh', function () {
                 onCommandeLinesLogistiqueListLoaded($(this));
             });
+        }
+    });
+    $('body').on('formLoaded', function (e) {
+        if ($.isOk(e.$form)) {
+            if (e.$form.hasClass('Bimp_Client_form') || e.$form.hasClass('Bimp_Fournisseur_form') || e.$form.hasClass('Bimp_Societe_form')) {
+                onSocieteFormLoaded(e.$form);
+            } else if (e.$form.hasClass('Bimp_CommandeLine_form_periodicity_mass_process')) {
+                onPeriodicityMassProcessFormLoaded(e.$form);
+            }
         }
     });
 });

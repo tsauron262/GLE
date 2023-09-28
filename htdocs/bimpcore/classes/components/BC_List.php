@@ -36,6 +36,8 @@ class BC_List extends BC_Panel
         $this->params_def['pagination'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['n'] = array('data_type' => 'int', 'default' => 10, 'request' => true);
         $this->params_def['p'] = array('data_type' => 'int', 'default' => 1, 'request' => true);
+        
+        $this->params_def['allow_large_n'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->params_def['sort_field'] = array('data_type' => 'string', 'default' => 'id', 'request' => true);
         $this->params_def['sort_way'] = array('data_type' => 'string', 'default' => 'desc', 'request' => true);

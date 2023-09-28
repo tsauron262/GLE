@@ -4,6 +4,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 
 class BDS_ConvertProcess extends BDSProcess
 {
+
     public static $methods = array(
         'SignaturesToConvert'        => 'Conversion des signatures',
         'ProductRemisesCrtToConvert' => 'Conversion des remises CRT des produits',
@@ -38,7 +39,7 @@ class BDS_ConvertProcess extends BDSProcess
                         'label'                  => BimpTools::getArrayValueFromPath(self::$methods, $method, 'Conversion'),
                         'on_error'               => 'continue',
                         'elements'               => $elements,
-                        'nbElementsPerIteration' => (int) $this->getOption('nb_elements_per_iteration', 100)
+                        'nbElementsPerIteration' => (int) $this->getOption('nb_elements_per_iterations', 100)
                     )
                 );
             }
@@ -238,7 +239,7 @@ class BDS_ConvertProcess extends BDSProcess
 
         return array();
     }
-    
+
     public function findCommandesCrtToConvert(&$errors = array())
     {
         $sql = BimpTools::getSqlSelect(array('a.id'));
@@ -295,7 +296,7 @@ class BDS_ConvertProcess extends BDSProcess
 
         return array();
     }
-    
+
     public function findFacturesCrtToConvert(&$errors = array())
     {
         $sql = BimpTools::getSqlSelect(array('a.id'));
@@ -352,7 +353,109 @@ class BDS_ConvertProcess extends BDSProcess
 
         return array();
     }
-    
+
+    public function findShipmentsToConvert(&$errors = array())
+    {
+        $sql = BimpTools::getSqlSelect(array('a.id'));
+        $sql .= BimpTools::getSqlFrom('bimp_commande_line');
+        $sql .= ' WHERE a.shipments != \'\' AND a.shipments != \'{}\' > 0';
+        $sql .= ' AND (SELECT COUNT(sl.id) FROM ' . MAIN_DB_PREFIX . 'bl_shipment_line sl WHERE sl.id_commande_line = a.id) = 0';
+        $sql .= ' ORDER BY a.id asc';
+
+        if ((int) $this->getOption('test_one', 0)) {
+            $sql .= ' LIMIT 1';
+        }
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        $elems = array();
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $elems[] = (int) $r['id'];
+            }
+        } else {
+            $errors[] = $this->db->err();
+        }
+
+        return $elems;
+    }
+
+    public function execShipmentsToConvert(&$errors = array())
+    {
+        $rows = $this->db->getRows('bimp_commande_line', 'id IN (' . implode(',', $this->references) . ')', null, 'array', array('id', 'shipments'));
+
+        if (is_array($rows)) {
+            $this->setCurrentObjectData('bimplogistique', 'BL_ShipmentLine');
+            $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+            foreach ($rows as $r) {
+                $line->id = (int) $r['id'];
+                $shipments = json_decode($r['shipments'], 1);
+
+                $this->DebugData($shipments, 'LIGNE #' . $r['id']);
+
+                foreach ($shipments as $id_shipment => $shipment_data) {
+                    $qty = (isset($shipment_data['qty']) ? (int) $shipment_data['qty'] : (isset($shipment_data['equipments']) ? count($shipment_data['equipments']) : 0));
+
+                    if (!$qty) {
+                        continue;
+                    }
+
+                    if ((int) $this->db->getValue('bl_shipment_line', 'id', 'id_shipment = ' . $id_shipment . ' AND id_commande_line = ' . $r['id'])) {
+                        continue;
+                    }
+
+                    $this->incProcessed();
+
+                    $id_shipment_line = $this->db->insert('bl_shipment_line', array(
+                        'id_shipment'      => $id_shipment,
+                        'id_commande_line' => $r['id'],
+                        'id_entrepot_dest' => (isset($shipment_data['id_entrepot']) ? (int) $shipment_data['id_entrepot'] : 0),
+                        'qty'              => $qty
+                            ), true);
+
+                    if ($id_shipment_line <= 0) {
+                        $this->incIgnored();
+                        $this->Error('Echec ajout de la ligne à l\'expédition #' . $id_shipment . ' - ' . $this->db->err(), $line);
+                    } else {
+                        $this->Success('Création de la ligne d\'expédition OK', $line);
+                        $this->incCreated();
+
+                        if (isset($shipment_data['equipments']) && !empty($shipment_data['equipments'])) {
+                            $base_data = array(
+                                'association'        => 'equipments',
+                                'src_object_module'  => 'bimplogistique',
+                                'src_object_name'    => 'BL_ShipmentLine',
+                                'src_object_type'    => 'bimp_object',
+                                'src_id_object'      => $id_shipment_line,
+                                'dest_object_module' => 'bimpequipment',
+                                'dest_object_name'   => 'Equipment',
+                                'dest_object_type'   => 'bimp_object'
+                            );
+
+                            foreach ($shipment_data['equipments'] as $id_equipment) {
+                                if (!(int) $id_equipment) {
+                                    $this->Error('ID eq invalide', $line);
+                                    break;
+                                }
+                                $data = $base_data;
+                                $data['dest_id_object'] = $id_equipment;
+                                if ($this->db->insert('bimpcore_objects_associations', $data) <= 0) {
+                                    $this->Error('Echec asso equipement #' . $id_equipment . ' pour l\'expé #' . $id_shipment . ' - ' . $this->db->err(), $line);
+                                } else {
+                                    $this->Info('Aj asso equipement #' . $id_equipment . ' pour l\'expé #' . $id_shipment . ' OK', $line);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Erreur SQL - ' . $this->db->err();
+        }
+
+        return array();
+    }
+
     // install : 
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')

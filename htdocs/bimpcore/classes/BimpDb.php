@@ -201,8 +201,13 @@ class BimpDb
 
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
 
-        foreach ($joins as $join) {
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $join['alias'];
+        foreach ($joins as $key => $join) {
+            if (isset($join['alias'])) {
+                $join_alias = $join['alias'];
+            } else {
+                $join_alias = $key;
+            }
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $join_alias;
             $sql .= ' ON ' . $join['on'];
         }
 

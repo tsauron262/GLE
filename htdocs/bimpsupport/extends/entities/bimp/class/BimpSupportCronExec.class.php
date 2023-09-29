@@ -29,7 +29,7 @@ class BimpSupportCronExec extends BimpCron
             }
         }
         if($mail != ''){
-            mailSyn2('Probléme envoie ecologic', 'tommy@bimp.fr', null, $mail);
+            mailSyn2('Probléme envoie ecologic', 'tommy@bimp.fr,jc.cannet@bimp.fr', null, $mail);
         }
         return 0;
     }

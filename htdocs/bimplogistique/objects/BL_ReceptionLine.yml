@@ -1,0 +1,77 @@
+table: bl_reception_line
+common_fields: 0
+
+labels: 
+    name: ligne de réception
+    name_plur: lignes de réception
+    is_female: 1
+   
+parent_module: bimplogistique
+parent_object: BL_CommandeFournReception
+parent_id_property: id_reception
+
+objects: 
+    commande_fourn_line: 
+        relation: hasOne
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_CommandeFournLine
+            id_object: 
+                field_value: id_commande_fourn_line
+               
+    equipment: 
+        realation: none
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+                
+associations:
+    equipments:
+        object: equipment
+        label: Equipements
+            
+fields: 
+    id_reception: 
+        label: Réception
+        type: id_parent
+        
+    id_commande_fourn_line: 
+        label: Ligne de commande fournisseur
+        type: id_object
+        object: commande_fourn_line
+        
+    qty: 
+        label: Quantité
+        type: float
+        decimals: 8
+        
+lists: 
+    default: 
+        title: Lignes
+        configurable: 1
+        checkboxes: 1
+        positions: 1
+        bulk_actions:
+            - label: supprimer les lignes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: position
+        sort_way: as
+        n: 0
+        delete_btn: 1
+        cols: 
+            id_reception:
+            id_commande_fourn_line: 
+            qty:
+                
+    reception: 
+        extends: default
+        cols: 
+            id_reception: unset
+        
+    
+        
+    
+        

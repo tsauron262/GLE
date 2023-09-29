@@ -1,0 +1,83 @@
+table: bl_shipment_line
+common_fields: 0
+
+labels: 
+    name: ligne d\'expédition
+    name_plur: lignes d\'expédition
+    is_female: 1
+   
+parent_module: bimplogistique
+parent_object: BL_CommandeShipment
+parent_id_property: id_shipment
+
+objects: 
+    commande_line: 
+        relation: hasOne
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_CommandeLine
+            id_object: 
+                field_value: id_commande_line
+               
+    equipment: 
+        realation: none
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+                
+associations:
+    equipments:
+        object: equipment
+        label: Equipements
+            
+fields: 
+    id_shipment: 
+        label: Expédition
+        type: id_parent
+        
+    id_commande_line: 
+        label: Ligne de commande
+        type: id_object
+        object: commande_line
+        
+    id_entrepot_dest: 
+        label: Entrepôt de destination
+        object: entrepot_dest
+        input: 
+            type: search_entrepot
+            help: Entrepôt de destination pour le retour des produits non sérialisés
+    qty: 
+        label: Quantité
+        type: float
+        decimals: 8
+        
+lists: 
+    default: 
+        title: Lignes
+        configurable: 1
+        checkboxes: 1
+        positions: 1
+        bulk_actions:
+            - label: supprimer les lignes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: position
+        sort_way: as
+        n: 0
+        delete_btn: 1
+        cols: 
+            id_shipment:
+            id_commande_line: 
+            qty:
+                
+    shipment: 
+        extends: default
+        cols: 
+            id_shipment: unset
+        
+    
+        
+    
+        

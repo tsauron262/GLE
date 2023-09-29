@@ -4,7 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
 class BimpSupportCronExec extends BimpCron
 {
-    public function sendEcologic($mail = false)
+    public function sendEcologic($sendMail = false)
     {
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         
@@ -28,7 +28,7 @@ class BimpSupportCronExec extends BimpCron
                 }
             }
         }
-        if($mail != ''){
+        if($mail != '' && $sendMail){
             mailSyn2('Probléme envoie ecologic', 'tommy@bimp.fr,jc.cannet@bimp.fr', null, $mail);
         }
         return 0;

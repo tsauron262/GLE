@@ -64,10 +64,12 @@ lists:
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: position
-        sort_way: as
-        n: 0
+        sort_way: desc
+        n: 20
         delete_btn: 1
         cols: 
+            commande_line:id_obj:
+            commande_line:dol_line:fk_product:
             id_shipment:
             id_commande_line: 
             qty:
@@ -76,6 +78,7 @@ lists:
         extends: default
         cols: 
             id_shipment: unset
+            commande_line:id_obj:
         
     
         

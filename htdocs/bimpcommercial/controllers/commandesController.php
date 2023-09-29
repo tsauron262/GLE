@@ -104,6 +104,32 @@ class commandesController extends BimpController
         return $list->renderHtml();
     }
 
+    public function renderShipmentsLinesTab()
+    {
+        $this->getSocid();
+
+        $titre = 'Liste des lignes expéditions';
+        if ($this->socid) {
+            if (!BimpObject::objectLoaded($this->soc)) {
+                return BimpRender::renderAlerts('ID du client invalide');
+            }
+            //$list = 'client';
+            $titre .= ' du client ' . $this->soc->getData('code_client') . ' - ' . $this->soc->getData('nom');
+        }
+        $shipmentLn = BimpObject::getInstance('bimplogistique', 'BL_ShipmentLine');
+        $list = new BC_ListTable($shipmentLn, 'default', 1, null, $titre, 'fas_shipping-fast');
+
+//        if ($this->socid) {
+//            $list->addJoin('commande', 'a.id_commande_client = parent.rowid', 'parent');
+//            $list->addFieldFilterValue('parent.fk_soc', (int) $this->socid);
+//            //$list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
+//        }
+        return BimpRender::renderAlerts('Attention en cours de dév, les données sont celle du 28/09/2023')
+            . $list->renderHtml();
+    }
+    
+    
+
     public function renderProdsTabs()
     {
         $this->getSocid();

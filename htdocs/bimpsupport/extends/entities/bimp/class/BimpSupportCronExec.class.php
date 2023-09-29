@@ -4,7 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
 class BimpSupportCronExec extends BimpCron
 {
-    public function sendEcologic()
+    public function sendEcologic($mail = false)
     {
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         

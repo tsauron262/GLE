@@ -170,7 +170,7 @@ class BS_SAV_ExtEntity extends BS_SAV
         $name = str_replace('â', 'a', $name);
         $name = str_replace('ê', 'e', $name);
         $name = str_replace('ô', 'o', $name);
-//        $name = str_replace('St', 'Saint', $name);
+        $name = str_replace('Saint', 'St', $name);
 //        $name = ucfirst(strtolower($name));
         return $name;
     }

@@ -51,7 +51,7 @@ class BS_SAV_ExtEntity extends BS_SAV
             foreach ($this->getPropalLines() as $line) {
                 $dolLine = $line->getChildObject('line');
                 if (in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0) {
-                    return -$dolLine->total_ttc;
+                    return -$dolLine->subprice * 1.2;
                 }
             }
         }
@@ -247,9 +247,6 @@ class BS_SAV_ExtEntity extends BS_SAV
             $totalSpare = $facture->getData('total_ht');
 
         $prime = $this->findEcologicSupportAmount();
-        $prime2 = $this->findEcologicSupportAmount();
-        if ($this->id == 578714)
-            $prime2 = 45;
 
         $data["Quote"] = array(
             "LaborCost"          => array(
@@ -273,7 +270,7 @@ class BS_SAV_ExtEntity extends BS_SAV
                 "Currency" => "EUR"
             ),
             "SupportAmount"      => array(
-                "Amount"   => $prime2,
+                "Amount"   => $prime,
                 "Currency" => "EUR"
             )
         );

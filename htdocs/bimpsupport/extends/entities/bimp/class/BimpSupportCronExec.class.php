@@ -24,7 +24,7 @@ class BimpSupportCronExec extends BimpCron
                 }
                 $this->output .= ($this->output ? '<br/><br/>' : '').$msg;
                 if(count($result['errors']) || count($result['warnings'])){
-                    $mail = ($mail != '' ? '<br/><br/>' : '').$msg;
+                    $mail .= ($mail != '' ? '<br/><br/>' : '').$msg;
                 }
             }
         }

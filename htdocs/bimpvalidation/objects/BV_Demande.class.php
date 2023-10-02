@@ -658,6 +658,29 @@ class BV_Demande extends BimpObject
         $success_callback = 'bimp_reloadPage();';
 
         $this->setAccepted(true, $warnings, $success);
+        
+        
+        global $user;
+        if (!count($errors)) {
+            $this->addObjectLog('Demande accepté', 'ACCEPTED');
+
+            $user_demande = $this->getChildObject('user_demande');
+            $obj = $this->getObjInstance();
+
+            if (BimpObject::objectLoaded($user_demande) && BimpObject::objectLoaded($obj)) {
+                $email = BimpTools::cleanEmailsStr($user_demande->getData('email'));
+                if ($email) {
+                    global $langs;
+
+                    $subject = $this->getObjLabel(true) . ' - Validation ' . $this->displayValidationType() . ' refusée';
+                    $msg = 'Bonjour,<br/><br/>';
+                    $msg .= 'La validation ' . $this->displayValidationType() . ' ' . $obj->getLabel('of_the') . ' ' . $obj->getLink();
+                    $msg .= ' a été accepté par ' . $user->getFullName($langs) . '<br/><br/>';
+
+                    mailSyn2($subject, $email, '', $msg);
+                }
+            }
+        }
 
         return array(
             'errors'           => $errors,

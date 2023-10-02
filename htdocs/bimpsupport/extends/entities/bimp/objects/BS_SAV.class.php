@@ -174,6 +174,18 @@ class BS_SAV_ExtEntity extends BS_SAV
 //        $name = ucfirst(strtolower($name));
         return $name;
     }
+    
+    public function renderHeaderExtraLeft() {
+        $html = parent::renderHeaderExtraLeft();
+        
+        $client = $this->getChildObject('client');
+        $nomClient = str_replace('  ', ' ', $client->getData('nom'));
+        $tabName = explode(' ', $nomClient);
+        if((!isset($tabName[1]) || $tabName[1] == '' || $client->getData('fk_typent') != 8) && $this->asProdEcologic()){
+            $html .= BimpRender::renderAlerts('! Attention les PROS ne sont pas concernés par le programme QualiRepair !');
+        }
+        return $html;
+    }
 
     public function actionSendDemandeEcologic($data, &$success)
     {

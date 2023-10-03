@@ -323,7 +323,7 @@ class BimpValidation
                                 ), $type_validation);
 
                 if (!empty($demandes)) {
-                    $infos[] = 'Validation ' . BV_Rule::$types[$type]['label2'] . ' déjà effectuée pour ' . $linked_obj->getLabel('the') . ' ' . $linked_obj->e();
+                    $infos[] = 'Validation ' . BV_Rule::$types[$type]['label2'] . ' déjà effectuée pour ' . $linked_obj->getLabel('the') . ' ' . $linked_obj->getRef();
                     return 1;
                 }
             }

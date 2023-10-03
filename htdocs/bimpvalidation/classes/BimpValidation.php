@@ -576,7 +576,11 @@ class BimpValidation
                 $msg .= 'Vous devez à présent terminer manuellement la validation de ' . $object->getLabel('this');
             }
 
-            mailSyn2($subject, $to, '', $msg);
+            if (mailSyn2($subject, $to, '', $msg)) {
+                $object->addObjectLog('Notification de validation envoyée à "' . $to . '"');
+            } else {
+                $object->addObjectLog('Echec de l\'envoi de la notification de validation à "' . $to . '"');
+            }
         }
 
         return $errors;

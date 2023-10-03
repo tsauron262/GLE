@@ -658,8 +658,7 @@ class BV_Demande extends BimpObject
         $success_callback = 'bimp_reloadPage();';
 
         $this->setAccepted(true, $warnings, $success);
-        
-        
+
         global $user;
         if (!count($errors)) {
             $this->addObjectLog('Demande accepté', 'ACCEPTED');
@@ -672,12 +671,24 @@ class BV_Demande extends BimpObject
                 if ($email) {
                     global $langs;
 
-                    $subject = $this->getObjLabel(true) . ' - Validation ' . $this->displayValidationType() . ' refusée';
-                    $msg = 'Bonjour,<br/><br/>';
-                    $msg .= 'La validation ' . $this->displayValidationType() . ' ' . $obj->getLabel('of_the') . ' ' . $obj->getLink();
-                    $msg .= ' a été accepté par ' . $user->getFullName($langs) . '<br/><br/>';
+                    $validation_type = $this->displayValidationType();
+                    $subject = $this->getObjLabel(true) . ' - Validation ' . $validation_type . ' acceptée';
 
-                    mailSyn2($subject, $email, '', $msg);
+                    $msg = 'Bonjour,<br/><br/>';
+                    $msg .= 'La validation ' . $validation_type . ' ' . $obj->getLabel('of_the') . ' ' . $obj->getLink();
+                    $msg .= ' a été acceptée par ' . $user->getFullName($langs) . '<br/><br/>';
+
+                    $object = $this->getObjInstance();
+
+                    if (mailSyn2($subject, $email, '', $msg)) {
+                        if (is_a($object, 'BimpObject')) {
+                            $object->addObjectLog('Notification de validation envoyée à "' . $email . '"');
+                        }
+                    } else {
+                        if (is_a($object, 'BimpObject')) {
+                            $object->addObjectLog('Echec de l\'envoi de la notification de validation à "' . $email . '"');
+                        }
+                    }
                 }
             }
         }

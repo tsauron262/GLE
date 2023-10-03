@@ -556,7 +556,7 @@ function BimpNotification() {
 
         for (const [id_notification, value] of Object.entries(this.notificationActive)) {
             var notification = this;
-            $.getScript(DOL_URL_ROOT + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
+            $.getScript(dol_url_root + '/' + value.module + '/views/js/' + value.nom + '.js', function () {
                 eval('notification.notificationActive[' + id_notification + '].obj = new ' + value.nom + '(' + value.id_notification + ');');
             });
 

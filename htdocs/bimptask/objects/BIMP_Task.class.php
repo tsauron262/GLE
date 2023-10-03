@@ -28,6 +28,10 @@ class BIMP_Task extends BimpObject
         'dev' => array(
             'bug' => array('label' => 'Bug'),
             'dev' => array('label' => 'Développement')
+        ),
+        'dispatch' => array(
+            'disp1' => array('label' => 'Disp1'),
+            'disp2' => array('label' => 'Disp2')
         )
     );
     private static $jsReload = 'if (typeof notifTask !== "undefined" && notifTask !== null) notifTask.reloadNotif();';
@@ -382,7 +386,7 @@ class BIMP_Task extends BimpObject
         if (isset($type) && self::$sous_types[$type])
             return self::$sous_types[$type];
 
-        return array();
+        return array('nc'=>'Divers');
     }
 
     public function getAllSousTypesArray()

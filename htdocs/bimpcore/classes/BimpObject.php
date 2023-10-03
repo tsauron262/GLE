@@ -2903,6 +2903,10 @@ class BimpObject extends BimpCache
     {
         $errors = array();
 
+        if (!$no_transactions_db && $this->db->db->noTransaction) {
+            $no_transactions_db = true;
+        }
+        
         if ($this->isLoaded($errors)) {
             global $user;
             $w = array();

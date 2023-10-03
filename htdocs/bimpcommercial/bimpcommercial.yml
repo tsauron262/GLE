@@ -71,7 +71,7 @@ params:
     contact_facturation_required_for_commandes: 
         label: Contact facturation obligatoire pour les commandes
         type: bool
-        def: 1        
+        def: 0        
         
     use_free_objectline: 
         label: Autoriser les lignes libres dans les pièces

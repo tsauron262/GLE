@@ -3745,7 +3745,7 @@ class BContract_contrat extends BimpDolObject
         $errors = [];
         $success = 'Fiche inter créée avec succès';
 
-        if (count($data['techs'])) {
+        if (isset($data['techs']) && is_array($data['techs']) && count($data['techs'])) {
             $errors[] = "Vous ne pouvez pas plannifier une intervention sans au moins un techhnicien";
         } else {
             $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');

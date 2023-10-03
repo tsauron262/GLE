@@ -51,7 +51,7 @@ class BS_SAV_ExtEntity extends BS_SAV
             foreach ($this->getPropalLines() as $line) {
                 $dolLine = $line->getChildObject('line');
                 if (in_array($dolLine->fk_product, $tabIdProd) && $dolLine->qty > 0) {
-                    return -$dolLine->subprice * 1.2;
+                    return -$dolLine->subprice /** 1.2*/;
                 }
             }
         }
@@ -266,7 +266,7 @@ class BS_SAV_ExtEntity extends BS_SAV
                 "Currency" => "EUR"
             ),
             "SparePartsCost"     => array(
-                "Amount"   => round($totalSpare + ($prime / 1.2), 2),
+                "Amount"   => round($totalSpare + ($prime /*/ 1.2*/), 2),
                 "Currency" => "EUR"
             ),
             "TravelCost"         => array(
@@ -274,7 +274,7 @@ class BS_SAV_ExtEntity extends BS_SAV
                 "Currency" => "EUR"
             ),
             "TotalAmountExclVAT" => array(
-                "Amount"   => round($facture->getData('total_ht') + ($prime / 1.2), 2),
+                "Amount"   => round($facture->getData('total_ht') + ($prime /*/ 1.2*/), 2),
                 "Currency" => "EUR"
             ),
             "TotalAmountInclVAT" => array(

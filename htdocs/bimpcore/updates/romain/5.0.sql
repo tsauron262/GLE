@@ -1,1 +1,1 @@
-ALTER TABLE `llx_contrat` ADD `id_signature` INT NOT NULL DEFAULT '0', ADD `signature_params` TEXT NOT NULL DEFAULT '""' AFTER `id_signature`; 
+ALTER TABLE `llx_contrat` ADD `id_signature` INT NOT NULL DEFAULT '0', ADD `signature_params` TEXT NOT NULL; 

@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `llx_bl_commande_fourn_reception` (
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
-ALTER TABLE `llx_bimp_commande_fourn_line` ADD `receptions` LONGTEXT NOT NULL DEFAULT '' AFTER `force_qty_1`;
+ALTER TABLE `llx_bimp_commande_fourn_line` ADD `receptions` LONGTEXT NOT NULL;
 
 ALTER TABLE `llx_commande_fournisseur` ADD `fk_user_resp` INT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `llx_commande_fournisseur` ADD `attente_info` BOOLEAN NOT NULL DEFAULT FALSE;

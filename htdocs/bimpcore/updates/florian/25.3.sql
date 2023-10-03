@@ -1,1 +1,1 @@
-ALTER TABLE `llx_user` ADD `extra_materiel` TEXT NOT NULL DEFAULT '';
+ALTER TABLE `llx_user` ADD `extra_materiel` TEXT NOT NULL;

@@ -15,5 +15,5 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_hashtag` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `code` varchar(255) NOT NULL DEFAULT '',
   `label` varchar(255) NOT NULL DEFAULT '',
-  `description` TEXT NOT NULL DEFAULT ''
+  `description` TEXT NOT NULL
 );

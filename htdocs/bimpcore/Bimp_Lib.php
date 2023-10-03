@@ -6,6 +6,9 @@ if (!defined('BIMP_LIB')) {
     if (!defined('MOD_DEV')) {
         define('MOD_DEV', 0);
     }
+    if (!defined('ID_ERP')) {
+        define('ID_ERP', 1);
+    }
 
     global $bimp_start_time;
     $bimp_start_time = round(microtime(1), 4);

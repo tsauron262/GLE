@@ -418,7 +418,7 @@ class BimpLink extends BimpObject
 
     // Traitements statiques: 
 
-    public static function deleteAllForSource($src_object, $field_name, &$warnings = array())
+    public static function deleteAllForSource($src_object, $field_name, &$warnings = array(), $no_transactions_db = false)
     {
         $errors = array();
 
@@ -428,6 +428,11 @@ class BimpLink extends BimpObject
             foreach ($links as $link) {
                 $id_link = (int) $link->id;
                 $link_warnings = array();
+                
+                if ($no_transactions_db) {
+                    $link->useNoTransactionsDb();
+                }
+                
                 $link_errors = $link->delete($link_warnings, true);
 
                 if (count($link_warnings)) {
@@ -448,11 +453,13 @@ class BimpLink extends BimpObject
         $errors = array();
 
         if (is_a($src_object, 'BimpObject') && BimpObject::objectLoaded($src_object) && is_array($links)) {
+            $no_transactions = $src_object->db->db->noTransaction;
+            
             if (empty($links)) {
                 // Suppr de tous les liens éventuels pour cet objet source:
                 $del_warnings = array();
 
-                $del_errors = self::deleteAllForSource($src_object, $field_name, $del_warnings);
+                $del_errors = self::deleteAllForSource($src_object, $field_name, $del_warnings, $no_transactions);
 
                 if (count($del_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($del_errors, 'Erreurs lors de la suppression des hashtags du champ "' . $src_object->getConf('fields/' . $field_name . '/label', $field_name) . '"');
@@ -481,6 +488,11 @@ class BimpLink extends BimpObject
 
                     $del_warnings = array();
                     $id_cur_link = $cur_link->id;
+                    
+                    if ($no_transactions) {
+                        $cur_link->useNoTransactionsDb();
+                    }
+                    
                     $del_errors = $cur_link->delete($del_warnings, true);
 
                     if (count($del_errors)) {
@@ -521,7 +533,7 @@ class BimpLink extends BimpObject
                     $data['linked_file'] = (string) BimpTools::getArrayValueFromPath($link, 'obj_file', '');
                     $data['linked_id'] = (int) BimpTools::getArrayValueFromPath($link, 'id', 0);
 
-                    $newLink = BimpObject::createBimpObject('bimpcore', 'BimpLink', $data, true, $warnings, $src_object->db->db->noTransaction);
+                    $newLink = BimpObject::createBimpObject('bimpcore', 'BimpLink', $data, true, $warnings, $no_transactions);
 
                     if (BimpObject::objectLoaded($newLink)) {
                         $cur_links[] = $newLink;

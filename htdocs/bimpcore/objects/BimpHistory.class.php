@@ -6,6 +6,11 @@ class BimpHistory extends BimpObject
     public function add(BimpObject $object, $field, $value)
     {
         $this->reset();
+        
+        if ($object->db->db->noTransaction) {
+            $this->useNoTransactionsDb();
+        }
+        
         $errors = array();
         $baseErrorMsg = 'Echec de la mise à jour de l\'historique pour le champ "' . $field . '"';
 
@@ -39,7 +44,8 @@ class BimpHistory extends BimpObject
             $errors = $this->validateArray($data);
 
             if (!count($errors)) {
-                $errors = $this->create();
+                $warnings = array();
+                $errors = $this->create($warnings, true);
             }
         }
 

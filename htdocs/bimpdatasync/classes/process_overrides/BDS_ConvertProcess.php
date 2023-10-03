@@ -5,12 +5,16 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_ConvertProcess extends BDSProcess
 {
 
+    public static $current_version = 2;
     public static $methods = array(
+        ''                           => '',
         'SignaturesToConvert'        => 'Conversion des signatures',
         'ProductRemisesCrtToConvert' => 'Conversion des remises CRT des produits',
         'PropalesCrtToConvert'       => 'Conversion des remises CRT des lignes de propales',
         'CommandesCrtToConvert'      => 'Conversion des remises CRT des lignes de commandes',
         'FacturesCrtToConvert'       => 'Conversion des remises CRT des lignes de factures',
+        'ShipmentsToConvert'         => 'Conversion des lignes d\'expédition',
+        'ReceptionsToConvert'        => 'Conversion des lignes de réception'
     );
     public static $default_public_title = 'Scripts de conversions des données';
 
@@ -355,7 +359,7 @@ class BDS_ConvertProcess extends BDSProcess
     }
 
     // Données Expéditions :
-    
+
     public function findShipmentsToConvert(&$errors = array())
     {
         $sql = BimpTools::getSqlSelect(array('a.id'));
@@ -457,7 +461,7 @@ class BDS_ConvertProcess extends BDSProcess
 
         return array();
     }
-    
+
     // Données Réceptions :
 
     public function findReceptionsToConvert(&$errors = array())
@@ -513,9 +517,9 @@ class BDS_ConvertProcess extends BDSProcess
                     $this->incProcessed();
 
                     $id_reception_line = $this->db->insert('bl_reception_line', array(
-                        'id_reception'      => $id_reception ,
+                        'id_reception'           => $id_reception,
                         'id_commande_fourn_line' => $r['id'],
-                        'qty'              => $qty
+                        'qty'                    => $qty
                             ), true);
 
                     if ($id_reception_line <= 0) {
@@ -526,16 +530,16 @@ class BDS_ConvertProcess extends BDSProcess
                         $this->incCreated();
 
                         $base_data = array(
-                                'association'        => 'equipments',
-                                'src_object_module'  => 'bimplogistique',
-                                'src_object_name'    => 'BL_ReceptionLine',
-                                'src_object_type'    => 'bimp_object',
-                                'src_id_object'      => $id_reception_line,
-                                'dest_object_module' => 'bimpequipment',
-                                'dest_object_name'   => 'Equipment',
-                                'dest_object_type'   => 'bimp_object'
-                            );
-                        
+                            'association'        => 'equipments',
+                            'src_object_module'  => 'bimplogistique',
+                            'src_object_name'    => 'BL_ReceptionLine',
+                            'src_object_type'    => 'bimp_object',
+                            'src_id_object'      => $id_reception_line,
+                            'dest_object_module' => 'bimpequipment',
+                            'dest_object_name'   => 'Equipment',
+                            'dest_object_type'   => 'bimp_object'
+                        );
+
                         if (isset($reception_data['equipments']) && !empty($reception_data['equipments'])) {
                             foreach ($reception_data['equipments'] as $id_equipment => $eq_data) {
                                 if (!(int) $id_equipment) {
@@ -574,7 +578,7 @@ class BDS_ConvertProcess extends BDSProcess
 
         return array();
     }
-    
+
     // install : 
 
     public static function install(&$errors = array(), &$warnings = array(), $title = '')
@@ -651,5 +655,22 @@ class BDS_ConvertProcess extends BDSProcess
                 $warnings = array_merge($warnings, $op->addAssociates('options', $options));
             }
         }
+    }
+
+    public static function updateProcess($id_process, $cur_version, &$warnings = array())
+    {
+        $errors = array();
+
+        if ($cur_version < 2) {
+            $bdb = BimpCache::getBdb();
+            $bdb->update('bds_process_option', array(
+                'label'         => 'Type de conversion',
+                'type'          => 'select',
+                'select_values' => 'static::methods',
+                'info'          => ''
+                    ), 'id_process = ' . $id_process . ' AND name = \'method\'');
+        }
+
+        return $errors;
     }
 }

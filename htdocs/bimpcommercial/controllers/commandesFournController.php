@@ -2,6 +2,7 @@
 
 class commandesFournController extends BimpController
 {
+
     var $socid = "";
     var $soc = null;
 
@@ -10,8 +11,8 @@ class commandesFournController extends BimpController
         global $db, $langs, $user;
 
         $this->getSocid();
-        
-        if($this->socid > 0){
+
+        if ($this->socid > 0) {
             require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
             $head = societe_prepare_head($this->soc->dol_object);
             dol_fiche_head($head, 'bimpcomm', '');
@@ -21,22 +22,22 @@ class commandesFournController extends BimpController
             dol_banner_tab($this->soc->dol_object, 'id', $linkback, ($user->societe_id ? 0 : 1), 'rowid', 'nom', '', '&fc=commandes');
         }
     }
-    
-    public function getSocid(){
-        if($this->socid < 1){
+
+    public function getSocid()
+    {
+        if ($this->socid < 1) {
             if (BimpTools::getValue("socid") > 0) {
                 $this->socid = BimpTools::getValue("socid");
                 $this->soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
             }
         }
     }
-    
+
     public function renderProdsTab()
     {
         $this->getSocid();
         BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeFournLine');
 //        Bimp_CommandeFournLine::checkAllQties();
-        
         //        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
@@ -59,14 +60,13 @@ class commandesFournController extends BimpController
 
         return $bc_list->renderHtml();
     }
-    
-    
+
     public function renderCommandesTab()
     {
         $this->getSocid();
 //        BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeLine');
 //        Bimp_CommandeLine::checkAllQties();
-        
+
         $list = 'default';
         $titre = 'Commandes';
         if ($this->socid) {
@@ -79,40 +79,39 @@ class commandesFournController extends BimpController
 
         $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
 
-        
-        if(isset($_REQUEST['fk_statut'])){
+        if (isset($_REQUEST['fk_statut'])) {
             $filtres = explode(",", $_REQUEST['fk_statut']);
-            foreach($filtres as $val){
-                if(isset($propal::$status_list[$val]))
+            foreach ($filtres as $val) {
+                if (isset($propal::$status_list[$val]))
                     $labels[] = $propal::$status_list[$val]['label'];
             }
-            $titre .= ' au statut '.implode(' ou ', $labels);
+            $titre .= ' au statut ' . implode(' ou ', $labels);
         }
-        
-        
+
+
         $list = new BC_ListTable($propal, $list, 1, null, $titre);
 
         if ($this->socid) {
             $list->addFieldFilterValue('fk_soc', (int) $this->soc->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
         }
-        if(isset($_REQUEST['fk_statut'])){
+        if (isset($_REQUEST['fk_statut'])) {
             $filtres = explode(",", $_REQUEST['fk_statut']);
             $list->addFieldFilterValue('fk_statut', $filtres);
         }
 
         return $list->renderHtml();
     }
-    
-    
+
     public function renderReceptionsTab()
     {
         $this->getSocid();
 //        BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeLine');
 //        Bimp_CommandeLine::checkAllQties();
-        
+
         $list = 'default';
-        $titre = 'Recepetions';
+        $titre = 'Réceptions';
+
         if ($this->socid) {
             if (!BimpObject::objectLoaded($this->soc)) {
                 return BimpRender::renderAlerts('ID du client invalide');
@@ -133,6 +132,4 @@ class commandesFournController extends BimpController
 
         return $list->renderHtml();
     }
-
-
 }

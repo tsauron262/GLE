@@ -227,15 +227,17 @@ class BimpValidation
                     // Affectation des demandes et notifications:
 
                     foreach ($demandes as $demande) {
-                        $type_validation = $demande->getData('type_validation');
-                        $demande_errors = $demande->checkAffectedUser();
+                        if (!(int) $demande->getData('status')) {
+                            $type_validation = $demande->getData('type_validation');
+                            $demande_errors = $demande->checkAffectedUser();
 
-                        if (count($demande_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($demande_errors, 'Demande de validation ' . BV_Rule::$types[$type_validation]['label2']);
-                        } else {
-                            $affected_user = $demande->getChildObject('user_affected');
-                            if (BimpObject::objectLoaded($affected_user)) {
-                                $infos[] = 'Demande de <b>validation ' . BV_Rule::$types[$type_validation]['label2'] . '</b> effectuée auprès de <b>' . $affected_user->getName() . '</b>';
+                            if (count($demande_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($demande_errors, 'Demande de validation ' . BV_Rule::$types[$type_validation]['label2']);
+                            } else {
+                                $affected_user = $demande->getChildObject('user_affected');
+                                if (BimpObject::objectLoaded($affected_user)) {
+                                    $infos[] = 'Demande de <b>validation ' . BV_Rule::$types[$type_validation]['label2'] . '</b> effectuée auprès de <b>' . $affected_user->getName() . '</b>';
+                                }
                             }
                         }
                     }
@@ -323,7 +325,7 @@ class BimpValidation
                                 ), $type_validation);
 
                 if (!empty($demandes)) {
-                    $infos[] = 'Validation ' . BV_Rule::$types[$type]['label2'] . ' déjà effectuée pour ' . $linked_obj->getLabel('the') . ' ' . $linked_obj->e();
+                    $infos[] = 'Validation ' . BV_Rule::$types[$type]['label2'] . ' déjà effectuée pour ' . $linked_obj->getLabel('the') . ' ' . $linked_obj->getRef();
                     return 1;
                 }
             }
@@ -576,13 +578,17 @@ class BimpValidation
                 $msg .= 'Vous devez à présent terminer manuellement la validation de ' . $object->getLabel('this');
             }
 
-            mailSyn2($subject, $to, '', $msg);
+            if (mailSyn2($subject, $to, '', $msg)) {
+                $object->addObjectLog('Notification de validation complète envoyée à "' . $to . '"');
+            } else {
+                $object->addObjectLog('Echec de l\'envoi de la notification de validation complète à "' . $to . '"');
+            }
         }
 
         return $errors;
     }
 
-    // Getters: 
+    // Getters:
 
     public static function getObjectParams($object, &$errors = array())
     {

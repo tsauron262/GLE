@@ -4,11 +4,13 @@ if (!defined('BIMP_LIB')) {
     require_once __DIR__ . '/../Bimp_Lib.php';
 }
 
-if (!defined('BV_LIB')) {
+if (BimpCore::isModuleActive('bimpvalidation') && !defined('BV_LIB')) {
     require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/BV_Lib.php';
 }
 
-require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
+if (BimpCore::isModuleActive('bimptocegid')){
+	require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
+}
 
 class BimpDolObject extends BimpObject{
 

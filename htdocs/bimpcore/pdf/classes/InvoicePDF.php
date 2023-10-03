@@ -408,7 +408,7 @@ class InvoicePDF extends BimpCommDocumentPDF
                             $contact = null;
                         }
 
-                        $html .= str_replace("\n", "<br/>", /* $client->dol_object->nom . '<br/>' . */ pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (BimpObject::objectLoaded($contact) ? $contact->dol_object : ''), !is_null($contact) ? 1 : 0, 'target'));
+                        $html .= str_replace("\n", "<br/>",  $client->dol_object->nom . '<br/>' .  pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (BimpObject::objectLoaded($contact) ? $contact->dol_object : ''), !is_null($contact) ? 1 : 0, 'target'));
                         break 2;
                     }
                 }

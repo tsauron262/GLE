@@ -521,7 +521,7 @@ class BimpLink extends BimpObject
                     $data['linked_file'] = (string) BimpTools::getArrayValueFromPath($link, 'obj_file', '');
                     $data['linked_id'] = (int) BimpTools::getArrayValueFromPath($link, 'id', 0);
 
-                    $newLink = BimpObject::createBimpObject('bimpcore', 'BimpLink', $data, true, $warnings);
+                    $newLink = BimpObject::createBimpObject('bimpcore', 'BimpLink', $data, true, $warnings, $src_object->db->db->noTransaction);
 
                     if (BimpObject::objectLoaded($newLink)) {
                         $cur_links[] = $newLink;

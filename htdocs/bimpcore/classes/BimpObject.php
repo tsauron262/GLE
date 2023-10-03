@@ -6900,7 +6900,7 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         $note = BimpObject::getInstance('bimpcore', 'BimpNote');
-        $note->initBdd($this->getConf('no_transaction_db', 0, false, 'bool'));
+        $note->initBdd($this->db->db->noTransaction);
 
         if (is_string($fk_group_dest) && $fk_group_dest) {
             $fk_group_dest = BimpCore::getUserGroupId($fk_group_dest);

@@ -577,9 +577,9 @@ class BimpValidation
             }
 
             if (mailSyn2($subject, $to, '', $msg)) {
-                $object->addObjectLog('Notification de validation envoyée à "' . $to . '"');
+                $object->addObjectLog('Notification de validation complète envoyée à "' . $to . '"');
             } else {
-                $object->addObjectLog('Echec de l\'envoi de la notification de validation à "' . $to . '"');
+                $object->addObjectLog('Echec de l\'envoi de la notification de validation complète à "' . $to . '"');
             }
         }
 

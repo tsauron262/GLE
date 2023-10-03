@@ -682,11 +682,11 @@ class BV_Demande extends BimpObject
 
                     if (mailSyn2($subject, $email, '', $msg)) {
                         if (is_a($object, 'BimpObject')) {
-                            $object->addObjectLog('Notification de validation envoyée à "' . $email . '"');
+                            $object->addObjectLog('Notification de validation ' . $validation_type . ' envoyée à "' . $email . '"');
                         }
                     } else {
                         if (is_a($object, 'BimpObject')) {
-                            $object->addObjectLog('Echec de l\'envoi de la notification de validation à "' . $email . '"');
+                            $object->addObjectLog('Echec de l\'envoi de la notification de validation ' . $validation_type . ' à "' . $email . '"');
                         }
                     }
                 }

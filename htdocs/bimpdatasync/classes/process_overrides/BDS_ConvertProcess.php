@@ -7,6 +7,7 @@ class BDS_ConvertProcess extends BDSProcess
 
     public static $current_version = 2;
     public static $methods = array(
+        ''                           => '',
         'SignaturesToConvert'        => 'Conversion des signatures',
         'ProductRemisesCrtToConvert' => 'Conversion des remises CRT des produits',
         'PropalesCrtToConvert'       => 'Conversion des remises CRT des lignes de propales',

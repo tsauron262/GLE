@@ -2820,20 +2820,25 @@ class BimpCache
     {
         global $langs;
         $langs->load('bills');
-        if (!isset(self::$cache['cond_reglements_array'])) {
-            $rows = self::getBdb()->getRows('c_payment_term', '`active` > 0', null, 'array', array('rowid', 'libelle', 'code'), 'sortorder');
+        $entitys = getEntity('cond_regl', 0);
+        $cacheKey = 'cond_reglements_array'.$entitys;
+        if (!isset(self::$cache[$cacheKey])) {
+            $where = '';
+                if($entitys)
+                    $where .= ' AND entity IN (0,'.$entitys.')';
+            $rows = self::getBdb()->getRows('c_payment_term', '`active` > 0 '.$where, null, 'array', array('rowid', 'libelle', 'code'), 'sortorder');
 
             self::$cache['cond_reglements_array'] = array();
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     $label = $langs->transnoentities("PaymentCondition" . $r['code']) != ('PaymentCondition' . $r['code']) ? $langs->transnoentities("PaymentCondition" . $r['code']) : $r['libelle'];
 
-                    self::$cache['cond_reglements_array'][(int) $r['rowid']] = $label;
+                    self::$cache[$cacheKey][(int) $r['rowid']] = $label;
                 }
             }
         }
 
-        return self::getCacheArray('cond_reglements_array', $include_empty, $empty_value, $empty_label);
+        return self::getCacheArray($cacheKey, $include_empty, $empty_value, $empty_label);
     }
 
     public static function getModeReglements($type = 2)

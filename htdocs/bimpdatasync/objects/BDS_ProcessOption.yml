@@ -45,7 +45,7 @@ fields:
             show_values: select
         required_if: type=select
         input: 
-            help: Utilisez la syntaxe "nom_système=>nom_public". Séparez chaque entrée par une virgule (sans espace)
+            help: Utilisez la syntaxe "nom_système=>nom_public". Séparez chaque entrée par une virgule (sans espace).</br>Indiquer "static::nom_prop" si liste des valeurs dans une tableau static de la classe
     default_value: 
         label: Valeur par défaut
     required: 

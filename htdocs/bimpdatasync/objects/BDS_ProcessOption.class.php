@@ -51,11 +51,26 @@ class BDS_ProcessOption extends BimpObject
 
                 case 'select':
                     $values = array();
-                    foreach (explode(',', $this->getData('select_values')) as $item) {
-                        if (preg_match('/^(.*)=>(.*)$/', $item, $matches)) {
-                            $values[$matches[1]] = $matches[2];
+                    $values_str = $this->getData('select_values');
+                    if (preg_match('/^static::(.+)$/', $values_str, $matches)) {
+                        $prop = $matches[1];
+                        require_once DOL_DOCUMENT_ROOT.'/bimpdatasync/BDS_Lib.php';
+                        $id_process = (int) $this->db->getValue('bds_process_operation', 'id_process', 'id = ' . $id_operation);
+                        if ($id_process) {
+                            $process = BDSProcess::createProcessById($id_process);
+                            
+                            if (is_object($process) && property_exists($process, $prop) && is_array($process::${$prop})) {
+                                $values = $process::${$prop};
+                            }
+                        }
+                    } else {
+                        foreach (explode(',', $values_str) as $item) {
+                            if (preg_match('/^(.*)=>(.*)$/', $item, $matches)) {
+                                $values[$matches[1]] = $matches[2];
+                            }
                         }
                     }
+
                     $content .= BimpInput::renderInput('select', $field_name, $value, array(
                                 'options' => $values
                     ));

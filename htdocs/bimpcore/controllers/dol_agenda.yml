@@ -1,0 +1,21 @@
+bootstrap: 1
+title: Utilisateurs
+
+objects:              
+
+    actioncomm: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ActionComm
+                    
+sections:
+                - type: custom
+                  custom: 
+                    callback: 
+                        method: renderDolTabs
+                        object: actioncomm
+                - type: list
+                  list: 
+                      name: global
+                      object: actioncomm

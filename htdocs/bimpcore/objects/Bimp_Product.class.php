@@ -1296,11 +1296,13 @@ class Bimp_Product extends BimpObject
             }
 
             if (in_array($type, array('dispo', 'virtuel'))) {
-                BimpObject::loadClass('bimpreservation', 'BR_Reservation');
 
-                $reserved = BR_Reservation::getProductCounts($this->id, (int) $id_entrepot);
-                $stocks['total_reserves'] = $reserved['total'];
-                $stocks['reel_reserves'] = $reserved['reel'];
+                if(BimpCore::isModuleActive('bimpreservation')){
+                    BimpObject::loadClass('bimpreservation', 'BR_Reservation');
+                    $reserved = BR_Reservation::getProductCounts($this->id, (int) $id_entrepot);
+                    $stocks['total_reserves'] = $reserved['total'];
+                    $stocks['reel_reserves'] = $reserved['reel'];
+                }
 
                 $stocks['dispo'] = $stocks['reel'] - $stocks['reel_reserves'];
 

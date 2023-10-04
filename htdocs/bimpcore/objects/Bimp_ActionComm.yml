@@ -3,6 +3,8 @@ primary: id
 icon: fas_calendar-check
 common_fields: 0
 
+entity_name: agenda
+
 dol_object: 
     instance: 
         dol_object: 

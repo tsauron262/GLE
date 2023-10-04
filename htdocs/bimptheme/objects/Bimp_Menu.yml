@@ -6,6 +6,9 @@ common_fields: 0
 positions: 1
 position_insert: after
 
+
+entity_name: agenda
+
 labels: 
     name: ligne de menu
     name_plur: lignes de menu

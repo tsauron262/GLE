@@ -364,6 +364,8 @@ class BimpObject extends BimpCache
         }
 
         $this->addCommonFieldsConfig();
+        
+        $this->addEntityFieldConfig();
 
         $errors = array();
         $this->params = BimpComponent::fetchParamsStatic($this->config, '', $this->params_defs, $errors);
@@ -383,6 +385,7 @@ class BimpObject extends BimpCache
         } else {
             $this->config = BimpConfig::getObjectConfigInstance($this->module, $this->object_name, $this);
             $this->addCommonFieldsConfig();
+            $this->addEntityFieldConfig();
             $this->addConfigExtraParams();
         }
     }
@@ -395,6 +398,26 @@ class BimpObject extends BimpCache
     public function isDolObject()
     {
         return $this->config->isDefined('dol_object');
+    }
+    
+    protected function addEntityFieldConfig(){
+        if ($this->getEntity_name()){
+            $this->config->addParams('fields', array(
+                    'entity' => array(
+                        'label'    => 'Entité',
+                        'type'     => 'id',
+                        'values'  => array(
+                            'array' => 'entitiesCache'
+                        ), 
+    //            array: condReglements
+    //        input: 
+    //            type: select_cond_reglement
+    //        default_value: 
+    //            callback: getCondReglementBySociete
+                        'editable' => 0
+                    )
+                        ), 'initial');
+        }
     }
 
     protected function addCommonFieldsConfig()

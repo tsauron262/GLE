@@ -1,5 +1,5 @@
 <?php
-
+require_once DOL_DOCUMENT_ROOT.'/synopsistools/class/divers.class.php';
 class ActionsSynopsisTools {
 
     function doActions($parameters, &$object, &$action, $hookmanager) {

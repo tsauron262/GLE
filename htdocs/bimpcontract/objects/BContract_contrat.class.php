@@ -3638,7 +3638,7 @@ class BContract_contrat extends BimpDolObject
         return [
             'success'  => $success,
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => array()
         ];
     }
 

@@ -7121,6 +7121,18 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $html .= $this->renderHeaderExtraLeft();
                 $html .= '</div>';
             }
+            
+            if($this->isDolObject()&& isset($this->dol_object)){
+                global $hookmanager;
+                $hookmanager->initHooks(array($this->dol_object->element.'card', 'globalcard'));
+                $parameters = array();
+                $reshook = $hookmanager->executeHooks('moreHtmlRef', $parameters, $this->dol_object); // Note that $action and $object may have been modified by hook
+                if (empty($reshook)) {
+                        $html .= $hookmanager->resPrint;
+                } elseif ($reshook > 0) {
+                        $html .= $hookmanager->resPrint;
+                }
+            }
 
             // Messages: 
             $html .= $this->renderMsgs();

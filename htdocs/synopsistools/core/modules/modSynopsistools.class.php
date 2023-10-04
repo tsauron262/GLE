@@ -278,7 +278,7 @@ class modSynopsistools extends DolibarrModules
         $this->tabs = array('thirdparty:-document',
             'thirdparty:+allDoc:allDoc:synopsisGene@synopsistools:$user->rights->societe->lire:/synopsistools/allDocumentSoc.php?id=__ID__',
             'agenda:+team:Vue équipe:@synopsistools:$user->rights->agenda->myactions->read:/synopsistools/agenda/vue.php',
-            'agenda:+list:List:@synopsistools:$user->rights->agenda->myactions->read:/synopsistools/agenda/vue.php');
+            'agenda:+list:List:@synopsistools:$user->rights->agenda->myactions->read:/bimpcore/index.php?fc=dol_agenda');
         
         
 

@@ -1054,36 +1054,38 @@ class Bimp_Facture extends BimpComm
         }
 
         // Confirmation Chorus:
-        if ($this->isActionAllowed('confirmChorusExport') && $this->canSetAction('confirmChorusExport')) {
-            $buttons[] = array(
-                'label'   => 'Valider export Chorus',
-                'icon'    => 'fas_file-export',
-                'onclick' => $this->getJsActionOnclick('confirmChorusExport', array(), array(
-                    'form_name' => 'export_to_chorus'
-                ))
-            );
-        }
+        if(BimpCore::isModuleActive('bimpapi')){
+            if ($this->isActionAllowed('confirmChorusExport') && $this->canSetAction('confirmChorusExport')) {
+                $buttons[] = array(
+                    'label'   => 'Valider export Chorus',
+                    'icon'    => 'fas_file-export',
+                    'onclick' => $this->getJsActionOnclick('confirmChorusExport', array(), array(
+                        'form_name' => 'export_to_chorus'
+                    ))
+                );
+            }
 
-        // Marquer exporté vers Chorus: 
-        if ($this->isActionAllowed('forceChorusExported') && $this->canSetAction('forceChorusExported')) {
-            $buttons[] = array(
-                'label'   => 'Marquer exporté vers Chorus',
-                'icon'    => 'fas_file-export',
-                'onclick' => $this->getJsActionOnclick('forceChorusExported', array(), array(
-                    'confirm_msg' => 'Veuillez confirmer que la facture a bien été déposée manuellement sur Chorus'
-                ))
-            );
-        }
+            // Marquer exporté vers Chorus: 
+            if ($this->isActionAllowed('forceChorusExported') && $this->canSetAction('forceChorusExported')) {
+                $buttons[] = array(
+                    'label'   => 'Marquer exporté vers Chorus',
+                    'icon'    => 'fas_file-export',
+                    'onclick' => $this->getJsActionOnclick('forceChorusExported', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer que la facture a bien été déposée manuellement sur Chorus'
+                    ))
+                );
+            }
 
-        // Marquer envoyé par e-mail sans export Chorus: 
-        if ($this->isActionAllowed('markSendNoChorusExport') && $this->canSetAction('markSendNoChorusExport')) {
-            $buttons[] = array(
-                'label'   => 'Marquer envoyé par e-mail sans export CHORUS',
-                'icon'    => 'fas_file-export',
-                'onclick' => $this->getJsActionOnclick('markSendNoChorusExport', array(), array(
-                    'confirm_msg' => 'Veuillez confirmer que la facture a bien été envoyée par e-mail sans eport CHORUS'
-                ))
-            );
+            // Marquer envoyé par e-mail sans export Chorus: 
+            if ($this->isActionAllowed('markSendNoChorusExport') && $this->canSetAction('markSendNoChorusExport')) {
+                $buttons[] = array(
+                    'label'   => 'Marquer envoyé par e-mail sans export CHORUS',
+                    'icon'    => 'fas_file-export',
+                    'onclick' => $this->getJsActionOnclick('markSendNoChorusExport', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer que la facture a bien été envoyée par e-mail sans eport CHORUS'
+                    ))
+                );
+            }
         }
 
         // Editer une facture deja validee, sans paiement effectue et pas exportée en compta

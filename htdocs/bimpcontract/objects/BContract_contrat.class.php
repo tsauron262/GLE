@@ -3623,7 +3623,7 @@ class BContract_contrat extends BimpDolObject
         ];
     }
 
-    public function actionUpdateSyntec($data, &$success)
+    public function actionUpdateSyntec($data = array(), &$success = '')
     {
         $syntec = file_get_contents("https://syntec.fr/");
         

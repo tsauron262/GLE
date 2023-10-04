@@ -6090,6 +6090,10 @@ class Bimp_CommandeLine extends ObjectLine
     public function checkReservations()
     {
         $errors = array();
+        
+        
+        if(!BimpCore::isModuleActive('bimpreservation'))
+            return $errors;
 
         if ((float) $this->getFullQty() < 0) {
             return array();

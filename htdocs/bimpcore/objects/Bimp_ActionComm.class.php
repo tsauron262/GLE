@@ -39,6 +39,14 @@ class Bimp_ActionComm extends BimpObject
 
         return 0;
     }
+    
+    public function renderDolTabs(){
+        global $langs;
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
+        $head = calendars_prepare_head($paramnoaction);
+
+        dol_fiche_head($head, "list", $langs->trans('Agenda'), 0, 'action');
+    }
 
     public function canView()
     {

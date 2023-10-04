@@ -763,7 +763,8 @@ class Bimp_Product extends BimpObject
 
     public function getFilesDir()
     {
-        return DOL_DATA_ROOT . '/produit/' . dol_sanitizeFileName($this->getRef()) . '/';
+        global $conf;
+        return $conf->product->multidir_output[$this->dol_object->entity].'/' . dol_sanitizeFileName($this->getRef()) . '/';
     }
 
     public function getFileUrl($file_name, $page = 'document')
@@ -771,7 +772,7 @@ class Bimp_Product extends BimpObject
         $dir = $this->getFilesDir();
         if ($dir) {
             if (file_exists($dir . $file_name)) {
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=produit&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=produit&entity='.$this->dol_object->entity.'&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
             }
         }
 

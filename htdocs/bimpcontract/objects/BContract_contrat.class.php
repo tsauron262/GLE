@@ -3623,16 +3623,18 @@ class BContract_contrat extends BimpDolObject
         ];
     }
 
-    public function actionUpdateSyntec()
+    public function actionUpdateSyntec($data, &$success)
     {
         $syntec = file_get_contents("https://syntec.fr/");
+        
         if (preg_match('/<div class="indice-number"[^>]*>(.*)<\/div>/isU', $syntec, $matches)) {
             $indice = str_replace(' ', "", strip_tags($matches[0]));
-            BimpCore::setConf('current_indice_syntec', str_replace(' ', "", strip_tags($matches[0])));
+            BimpCore::setConf('current_indice_syntec', str_replace(' ', "", strip_tags($indice)));
             $success = "L'indice Syntec s'est mis à jours avec succès";
         } else {
-            return "Impossible de récupérer l'indice Syntec automatiquement, merci de le rensseigner manuellement";
+            $errors [] = "Impossible de récupérer l'indice Syntec automatiquement, merci de le rensseigner manuellement";
         }
+        
         return [
             'success'  => $success,
             'errors'   => $errors,

@@ -2889,6 +2889,18 @@ class BimpCache
 
         return self::getCacheArray($cache_key, 1, $empty_value, '');
     }
+    
+    public static function getEntitiesCacheArray(){
+        $cacheKey = 'entities';
+        if (!isset(self::$cache['$cacheKey'])) {
+            $result = self::getBdb()->getRows('entity', 'active =1', null, 'object', array('rowid', 'label'));
+            foreach ($result as $ent) {
+                self::$cache[$cacheKey][(int) $ent->rowid] = $ent->label;
+            }
+        }
+        return self::getCacheArray($cacheKey, 1);
+        
+    }
 
     public static function getAvailabilitiesArray()
     {

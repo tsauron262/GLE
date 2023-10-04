@@ -487,8 +487,9 @@ class Bimp_Societe extends BimpDolObject
 
     public function getFilesDir()
     {
+        global $conf;
         if ($this->isLoaded()) {
-            return DOL_DATA_ROOT . '/societe/' . $this->id . '/';
+            return $conf->societe->multidir_output[$this->dol_object->entity].'/' . $this->id . '/';
         } else {
             echo 'NOT LOADED';
             exit;
@@ -507,7 +508,7 @@ class Bimp_Societe extends BimpDolObject
 
         $file = $this->id . '/' . $file_name;
 
-        return DOL_URL_ROOT . '/' . $page . '.php?modulepart=societe&file=' . urlencode($file);
+        return DOL_URL_ROOT . '/' . $page . '.php?modulepart=societe&entity='.$this->dol_object->entity.'&file=' . urlencode($file);
     }
 
     public function getActionsButtons()

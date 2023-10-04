@@ -94,7 +94,7 @@ class ActionsBimpcore
         if(isset($_REQUEST['socid']))
             $_REQUEST['id'] = $_REQUEST['socid'];
 
-        if(stripos($url, '/admin/') === false && stripos($url, '/fourn/commande/dispatch.php') == false){
+        if(stripos($url, '/admin/') === false && stripos($url, '/fourn/commande/dispatch.php') === false){
             if(stripos($url, '/commande/') !== false)
                     $tabObj = array("bimpcommercial", "Bimp_Commande");
             if(stripos($url, '/compta/facture/') !== false)

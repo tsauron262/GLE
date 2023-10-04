@@ -238,7 +238,7 @@ class PropalPDF extends BimpCommDocumentPDF
                     $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
 
                     if (BimpObject::objectLoaded($contact)) {
-                        $html .= str_replace("\n", "<br/>", /*$this->thirdparty->nom . '<br/>' .*/ pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $contact->dol_object, 1, 'target'));
+                        $html .= str_replace("\n", "<br/>", $this->thirdparty->nom . '<br/>' . pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $contact->dol_object, 1, 'target'));
                     } else {
                         $html .= '<span class="danger">Erreur: le contact #' . $id_contact . ' n\'existe plus</span>';
                     }

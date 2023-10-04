@@ -133,7 +133,7 @@ class BimpCore
     {
         global $user, $conf;
         $vars = array(
-            'dol_url_root'    => '\'' . DOL_URL_ROOT . '\'',
+            'dol_url_root'    => (DOL_URL_ROOT != '') ? '\'' . DOL_URL_ROOT . '\'' : "'/'",
             'id_user'         => (BimpObject::objectLoaded($user) ? $user->id : 0),
             'bimp_context'    => '\'' . self::getContext() . '\'',
             'theme'           => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',

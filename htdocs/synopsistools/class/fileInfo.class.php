@@ -51,8 +51,8 @@ unset($_REQUEST['appli']);
                         }
                     }
                 }
+                closedir($MyDirectory);
             }
-            closedir($MyDirectory);
         }
     }
 

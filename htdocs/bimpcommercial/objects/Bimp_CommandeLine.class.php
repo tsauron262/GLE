@@ -943,49 +943,52 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function getReservedQties()
     {
-        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-        $qties = array(
-            'total'        => 0,
-            'not_reserved' => 0,
-            'reserved'     => 0,
-            'ordered'      => 0,
-            'status'       => array()
-        );
+        if(BimpCore::isModuleActive('bimpreservation')){
+            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+            $qties = array(
+                'total'        => 0,
+                'not_reserved' => 0,
+                'reserved'     => 0,
+                'ordered'      => 0,
+                'status'       => array()
+            );
 
-        foreach (BR_Reservation::$commande_status as $status) {
-            $qties['status'][$status] = 0;
-        }
+            foreach (BR_Reservation::$commande_status as $status) {
+                $qties['status'][$status] = 0;
+            }
 
-        if ($this->isLoaded()) {
-            $commande = $this->getParentInstance();
-            if (BimpObject::objectLoaded($commande)) {
-                $rows = $reservation->getList(array(
-                    'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
-                    'id_commande_client'      => (int) $commande->id,
-                    'id_commande_client_line' => $this->id
-                        ), null, null, 'id', 'asc', 'array', array('qty', 'status'));
+            if ($this->isLoaded()) {
+                $commande = $this->getParentInstance();
+                if (BimpObject::objectLoaded($commande)) {
+                    $rows = $reservation->getList(array(
+                        'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                        'id_commande_client'      => (int) $commande->id,
+                        'id_commande_client_line' => $this->id
+                            ), null, null, 'id', 'asc', 'array', array('qty', 'status'));
 
-                if (is_array($rows)) {
-                    foreach ($rows as $r) {
-                        $qties['total'] += (float) $r['qty'];
-                        if (!isset($qties['status'][(int) $r['status']])) {
-                            $qties['status'][(int) $r['status']] = 0;
-                        }
-                        $qties['status'][(int) $r['status']] += (float) $r['qty'];
-                        if ((int) $r['status'] === 300 || in_array((int) $r['status'], BR_Reservation::$unavailable_status)) {
-                            $qties['reserved'] += (float) $r['qty'];
-                        } else {
-                            $qties['not_reserved'] += (float) $r['qty'];
-                        }
-                        if (in_array((int) $r['status'], self::$reservations_ordered_status)) {
-                            $qties['ordered'] += (float) $r['qty'];
+                    if (is_array($rows)) {
+                        foreach ($rows as $r) {
+                            $qties['total'] += (float) $r['qty'];
+                            if (!isset($qties['status'][(int) $r['status']])) {
+                                $qties['status'][(int) $r['status']] = 0;
+                            }
+                            $qties['status'][(int) $r['status']] += (float) $r['qty'];
+                            if ((int) $r['status'] === 300 || in_array((int) $r['status'], BR_Reservation::$unavailable_status)) {
+                                $qties['reserved'] += (float) $r['qty'];
+                            } else {
+                                $qties['not_reserved'] += (float) $r['qty'];
+                            }
+                            if (in_array((int) $r['status'], self::$reservations_ordered_status)) {
+                                $qties['ordered'] += (float) $r['qty'];
+                            }
                         }
                     }
                 }
             }
-        }
 
-        return $qties;
+            return $qties;
+        }
+        return 0;
     }
 
     public function getReservationsQties($status = null)
@@ -6087,6 +6090,10 @@ class Bimp_CommandeLine extends ObjectLine
     public function checkReservations()
     {
         $errors = array();
+        
+        
+        if(!BimpCore::isModuleActive('bimpreservation'))
+            return $errors;
 
         if ((float) $this->getFullQty() < 0) {
             return array();

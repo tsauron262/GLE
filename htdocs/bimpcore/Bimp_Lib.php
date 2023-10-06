@@ -9,6 +9,9 @@ if (!defined('BIMP_LIB')) {
     if (!defined('ID_ERP')) {
         define('ID_ERP', 1);
     }
+    if (!defined('PATH_TMP')) {
+        define('PATH_TMP', DOL_DATA_ROOT);
+    }
 
     global $bimp_start_time;
     $bimp_start_time = round(microtime(1), 4);

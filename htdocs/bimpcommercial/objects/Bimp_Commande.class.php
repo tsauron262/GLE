@@ -448,7 +448,7 @@ class Bimp_Commande extends Bimp_CommandeTemp
                     }
                 }
                 global $user;
-                if ($client_facture->getData('outstanding_limit') < 1 && $this->getData('ef_type') != 'S' /* and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement') */ && !$this->asPreuvePaiment()) {
+                if (BimpCore::isModuleActive('bimpvalidation') && $client_facture->getData('outstanding_limit') < 1 && $this->getData('ef_type') != 'S' /* and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement') */ && !$this->asPreuvePaiment()) {
                     if (!in_array($user->id, array(232, 97, 1566, 512, 40))) {
                         $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
                         if ($available_discounts < $this->getData('total_ttc') && $this->getData('total_ttc') > 2)
@@ -489,10 +489,12 @@ class Bimp_Commande extends Bimp_CommandeTemp
 
     public function isLogistiqueActive()
     {
-        $forced = $this->getData('status_forced');
-        if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status) &&
-                (!in_array((int) $this->getData('logistique_status'), array(0, 6)) || (isset($forced['logistique']) && (int) $forced['logistique']))) {
-            return 1;
+        if(BimpCore::isModuleActive('bimplogistique')){
+            $forced = $this->getData('status_forced');
+            if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status) &&
+                    (!in_array((int) $this->getData('logistique_status'), array(0, 6)) || (isset($forced['logistique']) && (int) $forced['logistique']))) {
+                return 1;
+            }
         }
 
         return 0;
@@ -812,23 +814,25 @@ class Bimp_Commande extends Bimp_CommandeTemp
 //            }
 //
             // Prendre en charge logistique:
-            if ($this->isActionAllowed('processLogitique')) {
-                if ($this->canSetAction('processLogitique')) {
-                    $buttons[] = array(
-                        'label'   => 'Prendre en charge logistique',
-                        'icon'    => 'fas_truck-loading',
-                        'onclick' => $this->getJsActionOnclick('processLogitique', array(), array(
-                            'confirm_msg' => 'Veuillez confirmer la prise en charge de la logistique pour cette commande'
-                        ))
-                    );
-                } else {
-                    $buttons[] = array(
-                        'label'    => 'Prendre en charge logistique',
-                        'icon'     => 'plus-circle',
-                        'onclick'  => '',
-                        'disabled' => 1,
-                        'popover'  => 'Vous n\'avez pas la permission'
-                    );
+            if(BimpCore::isModuleActive('bimplogistique')){
+                if ($this->isActionAllowed('processLogitique')) {
+                    if ($this->canSetAction('processLogitique')) {
+                        $buttons[] = array(
+                            'label'   => 'Prendre en charge logistique',
+                            'icon'    => 'fas_truck-loading',
+                            'onclick' => $this->getJsActionOnclick('processLogitique', array(), array(
+                                'confirm_msg' => 'Veuillez confirmer la prise en charge de la logistique pour cette commande'
+                            ))
+                        );
+                    } else {
+                        $buttons[] = array(
+                            'label'    => 'Prendre en charge logistique',
+                            'icon'     => 'plus-circle',
+                            'onclick'  => '',
+                            'disabled' => 1,
+                            'popover'  => 'Vous n\'avez pas la permission'
+                        );
+                    }
                 }
             }
 

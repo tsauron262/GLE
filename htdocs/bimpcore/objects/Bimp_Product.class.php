@@ -763,7 +763,8 @@ class Bimp_Product extends BimpObject
 
     public function getFilesDir()
     {
-        return DOL_DATA_ROOT . '/produit/' . dol_sanitizeFileName($this->getRef()) . '/';
+        global $conf;
+        return $conf->product->multidir_output[$this->dol_object->entity].'/' . dol_sanitizeFileName($this->getRef()) . '/';
     }
 
     public function getFileUrl($file_name, $page = 'document')
@@ -771,7 +772,7 @@ class Bimp_Product extends BimpObject
         $dir = $this->getFilesDir();
         if ($dir) {
             if (file_exists($dir . $file_name)) {
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=produit&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=produit&entity='.$this->dol_object->entity.'&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
             }
         }
 
@@ -1295,11 +1296,13 @@ class Bimp_Product extends BimpObject
             }
 
             if (in_array($type, array('dispo', 'virtuel'))) {
-                BimpObject::loadClass('bimpreservation', 'BR_Reservation');
 
-                $reserved = BR_Reservation::getProductCounts($this->id, (int) $id_entrepot);
-                $stocks['total_reserves'] = $reserved['total'];
-                $stocks['reel_reserves'] = $reserved['reel'];
+                if(BimpCore::isModuleActive('bimpreservation')){
+                    BimpObject::loadClass('bimpreservation', 'BR_Reservation');
+                    $reserved = BR_Reservation::getProductCounts($this->id, (int) $id_entrepot);
+                    $stocks['total_reserves'] = $reserved['total'];
+                    $stocks['reel_reserves'] = $reserved['reel'];
+                }
 
                 $stocks['dispo'] = $stocks['reel'] - $stocks['reel_reserves'];
 

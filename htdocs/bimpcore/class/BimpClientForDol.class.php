@@ -35,7 +35,7 @@ class BimpClientForDol extends Bimp_Client
                                                         BimpNote::BN_MEMBERS, 0, 1, '', BimpNote::BN_AUTHOR_USER,
                                                         BimpNote::BN_DEST_GROUP, BimpCore::getUserGroupId('atradius'))));
 
-                $c->updateField('outstanding_limit_icba', 0);
+                $c->set('outstanding_limit_icba', 0);
                 $c->update();
 
                 $this->output .= $c->getNomUrl() . ' ' . $msg . '<br/>';

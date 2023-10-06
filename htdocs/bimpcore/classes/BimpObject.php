@@ -364,6 +364,8 @@ class BimpObject extends BimpCache
         }
 
         $this->addCommonFieldsConfig();
+        
+        $this->addEntityFieldConfig();
 
         $errors = array();
         $this->params = BimpComponent::fetchParamsStatic($this->config, '', $this->params_defs, $errors);
@@ -383,6 +385,7 @@ class BimpObject extends BimpCache
         } else {
             $this->config = BimpConfig::getObjectConfigInstance($this->module, $this->object_name, $this);
             $this->addCommonFieldsConfig();
+            $this->addEntityFieldConfig();
             $this->addConfigExtraParams();
         }
     }
@@ -395,6 +398,26 @@ class BimpObject extends BimpCache
     public function isDolObject()
     {
         return $this->config->isDefined('dol_object');
+    }
+    
+    protected function addEntityFieldConfig(){
+        if ($this->getEntity_name()){
+            $this->config->addParams('fields', array(
+                    'entity' => array(
+                        'label'    => 'Entité',
+                        'type'     => 'id',
+                        'values'  => array(
+                            'array' => 'entitiesCache'
+                        ), 
+    //            array: condReglements
+    //        input: 
+    //            type: select_cond_reglement
+    //        default_value: 
+    //            callback: getCondReglementBySociete
+                        'editable' => 0
+                    )
+                        ), 'initial');
+        }
     }
 
     protected function addCommonFieldsConfig()
@@ -7121,6 +7144,18 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
                 $html .= $this->renderHeaderExtraLeft();
                 $html .= '</div>';
             }
+            
+            if($this->isDolObject()&& isset($this->dol_object)){
+                global $hookmanager;
+                $hookmanager->initHooks(array($this->dol_object->element.'card', 'globalcard'));
+                $parameters = array();
+                $reshook = $hookmanager->executeHooks('moreHtmlRef', $parameters, $this->dol_object); // Note that $action and $object may have been modified by hook
+                if (empty($reshook)) {
+                        $html .= $hookmanager->resPrint;
+                } elseif ($reshook > 0) {
+                        $html .= $hookmanager->resPrint;
+                }
+            }
 
             // Messages: 
             $html .= $this->renderMsgs();
@@ -9946,8 +9981,9 @@ Nouvelle : ' . $this->displayData($champAddNote, 'default', false, true));
             $list_data['param_n'] = 0;
             $list_data['param_p'] = 1;
 
-            $dir = PATH_TMP . '/bimpcore';
-            $dir_error = BimpTools::makeDirectories(array(
+            global $conf;
+            $dir = $conf->bimpcore->multidir_output[$conf->entity];
+            $dir_error = BimpTools::makeDirectories(array(  
                         'lists_csv' => array(
                             $this->module => array(
                                 $this->object_name => $list_name

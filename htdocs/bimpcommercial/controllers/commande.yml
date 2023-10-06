@@ -29,12 +29,12 @@ sections:
                 url_params: 
                     id: 
                         request: id
-            prepacommande: 
-                label: Prepa/Commande
-                url: ../Synopsis_PrepaCommande/prepacommande.php?new=1
-                url_params: 
-                    id: 
-                        request: id
+#            prepacommande: 
+#                label: Prepa/Commande
+#                url: ../Synopsis_PrepaCommande/prepacommande.php?new=1
+#                url_params: 
+#                    id: 
+#                        request: id
             support:
                 label: Support
                 sections:

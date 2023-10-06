@@ -166,7 +166,7 @@ $js .= <<<EOF
  
         function save(calEvent){
             jQuery.ajax({
-                url: DOL_URL_ROOT + "/synopsistools/agenda/ajax.php",
+                url: dol_url_root + "/synopsistools/agenda/ajax.php",
                 type: "POST",
                 datatype: "xml",
                 data: "setUser=" + calEvent.userId + "&id=" + calEvent.id + "&start=" + calEvent.start.getTime() + "&end=" + calEvent.end.getTime() + "&clone="+calEvent.clone,
@@ -403,10 +403,10 @@ function initCopyColler(){
         
         
         $(".percent[value='-2']").each(function(){
-            $(this).parent().parent().css("background-image", "url("+DOL_URL_ROOT+"/synopsistools/agenda/barrer.png)");  
+            $(this).parent().parent().css("background-image", "url("+dol_url_root+"/synopsistools/agenda/barrer.png)");  
         });
         $(".percent[value='0']").each(function(){
-            $(this).parent().parent().css("background-image", "url("+DOL_URL_ROOT+"/synopsistools/agenda/point.png)");  
+            $(this).parent().parent().css("background-image", "url("+dol_url_root+"/synopsistools/agenda/point.png)");  
         });
 }
         

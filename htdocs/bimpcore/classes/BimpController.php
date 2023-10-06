@@ -556,7 +556,8 @@ class BimpController
         foreach ($tabs as $tab_name => $params) {
             $this->config->setCurrentPath($section_path . '/tabs/' . $tab_name);
             $show = $this->config->getFromCurrentPath('show', 1, false, 'bool');
-            if (!$show) {
+            $hide = $this->config->getFromCurrentPath('hide', 0, false, 'bool');
+            if (!$show || $hide) {
                 if ($this->current_tab === $tab_name) {
                     $this->current_tab = 'default';
                 }

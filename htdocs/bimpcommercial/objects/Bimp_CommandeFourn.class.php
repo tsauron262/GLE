@@ -804,7 +804,7 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
     public function getFactureReceptionsArray($id_facture = 0)
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && BimpCore::isModuleActive('bimplogistique')){
             BimpObject::loadClass('bimplogistique', 'BL_CommandeFournReception');
 
             $receptions = $this->getChildrenObjects('receptions', array(
@@ -1292,48 +1292,51 @@ class Bimp_CommandeFourn extends BimpCommAchat
 
         $lines = $this->getLines('not_text');
 
-        $receptions = $this->getChildrenList('receptions', array(
-            'status'     => BL_CommandeFournReception::BLCFR_RECEPTIONNEE,
-            'id_facture' => array(
-                'operator' => '>',
-                'value'    => 0
-            )
-        ));
+        
+        if(BimpCore::isModuleActive('bimplogistique')){
+            $receptions = $this->getChildrenList('receptions', array(
+                'status'     => BL_CommandeFournReception::BLCFR_RECEPTIONNEE,
+                'id_facture' => array(
+                    'operator' => '>',
+                    'value'    => 0
+                )
+            ));
 
-        if (count($lines)) {
-            $has_billed = 0;
-            $all_billed = 1;
+            if (count($lines)) {
+                $has_billed = 0;
+                $all_billed = 1;
 
-            foreach ($lines as $line) {
-                $line_qty = (float) $line->getFullQty();
-                $billed_qty = 0;
+                foreach ($lines as $line) {
+                    $line_qty = (float) $line->getFullQty();
+                    $billed_qty = 0;
 
-                foreach ($receptions as $id_reception) {
-                    $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
-                    if (BimpObject::objectLoaded($reception)) {
-                        $fac = $reception->getChildObject('facture_fourn');
-                        if (BimpObject::objectLoaded($fac)) {
-                            $reception_data = $line->getReceptionData((int) $id_reception);
-                            $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
-                            $has_billed = 1;
+                    foreach ($receptions as $id_reception) {
+                        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+                        if (BimpObject::objectLoaded($reception)) {
+                            $fac = $reception->getChildObject('facture_fourn');
+                            if (BimpObject::objectLoaded($fac)) {
+                                $reception_data = $line->getReceptionData((int) $id_reception);
+                                $billed_qty += isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
+                                $has_billed = 1;
+                            }
                         }
+                    }
+
+                    if (abs($line_qty) > abs($billed_qty)) {
+                        $all_billed = 0;
                     }
                 }
 
-                if (abs($line_qty) > abs($billed_qty)) {
-                    $all_billed = 0;
+                if ($all_billed) {
+                    $invoice_status = 2;
+                } elseif ($has_billed) {
+                    $invoice_status = 1;
+                } else {
+                    $invoice_status = 0;
                 }
-            }
-
-            if ($all_billed) {
-                $invoice_status = 2;
-            } elseif ($has_billed) {
-                $invoice_status = 1;
             } else {
                 $invoice_status = 0;
             }
-        } else {
-            $invoice_status = 0;
         }
 
         if ($invoice_status !== (int) $this->getInitData('invoice_status')) {

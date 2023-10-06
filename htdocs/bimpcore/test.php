@@ -26,11 +26,7 @@ if (!$user->admin) {
     exit;
 }
 
-//require_once DOL_DOCUMENT_ROOT . '/bimpvalidation/classes/BimpValidationCronExec.class.php';
-//
-//$cron = new BimpValidationCronExec($db);
-//echo 'Res : ' . $cron->checkAffectedUsers() . '<br/><br/>';
-//echo $cron->output;
+//echo BimpTools::makeDirectories('synopsistools/fileInfo');
 
 
 echo '<br/>FIN';

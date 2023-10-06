@@ -91,7 +91,7 @@ foreach ($rows as $r) {
     if ($bdb->update('societe', array(
                 'code_compta' => $r['new_code']
                     ), 'code_client = \'' . $r['ref'] . '\' AND code_compta = \'' . $r['old_code'] . '\'') <= 0) {
-        echo 'ECHEC insertion - ' . $r['ref'] . ' - ' . $bdb->err() . '<br/>';
+        echo 'ECHEC maj - ' . $r['ref'] . ' - ' . $bdb->err() . '<br/>';
         $nFails++;
     } else {
         $nOk++;
@@ -99,7 +99,7 @@ foreach ($rows as $r) {
 }
 
 echo '<br/>';
-echo $nOk . 'OK<br/>';
+echo $nOk . ' OK<br/>';
 echo $nFails . ' échecs <br/>';
 echo '<br/>FIN';
 

@@ -1313,8 +1313,10 @@ class BContract_echeancier extends BimpObject
     {
         global $user;
         $obj = json_decode($this->getData('facturesExterne_soldePeriode'));
+        if(!is_object($obj))
+            $obj = (object) array();
         $named = $data['date_start'] . '_' . $data['date_end'];
-        $obj->$named = Array('ref' => $data['factureExterne'], 'ht' => $data['total_ht'], 'by' => $user->id);
+        $obj->{$named} = Array('ref' => $data['factureExterne'], 'ht' => $data['total_ht'], 'by' => $user->id);
         $errors = $this->updateField('facturesExterne_soldePeriode', json_encode($obj));
         if (!count($errors))
             $success = 'Facture ' . $data['factureExterne'] . ' bien pris en compte pour cette periode';

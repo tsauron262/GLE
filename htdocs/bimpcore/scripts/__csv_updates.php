@@ -26,6 +26,9 @@ if (!$user->admin) {
     exit;
 }
 
+echo 'Désactivé';
+exit;
+
 global $bdb, $keys;
 
 $keys = array(

@@ -26,7 +26,7 @@ if (!$user->admin) {
     exit;
 }
 
-echo BimpTools::makeDirectories('synopsistools/fileInfo');
+//echo BimpTools::makeDirectories('synopsistools/fileInfo');
 
 
 echo '<br/>FIN';

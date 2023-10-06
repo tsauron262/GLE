@@ -62,9 +62,9 @@ foreach ($lines as $idx => $line) {
     $rows[] = $row;
 }
 
-echo '<pre>';
-print_r($rows);
-echo '</pre>';
+//echo '<pre>';
+//print_r($rows);
+//echo '</pre>';
 
 if (!(int) BimpTools::getValue('exec', 0)) {
     if (is_array($rows) && count($rows)) {

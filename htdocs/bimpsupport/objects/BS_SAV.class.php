@@ -5297,8 +5297,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $authorisation = ($client->getData('outstanding_limit') + $this->getUserLimitEncours()) * 1.2;
                         $besoin = $encoursActu + $propal->dol_object->total_ht;
 
-                        if ($besoin > ($authorisation + 1))
+                        if ($besoin > ($authorisation + 1)) {
                             $errors[] = 'Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)';
+                        }
                     }
                 }
 
@@ -5328,7 +5329,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         if (count($signature_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
                         }
-                        $this->addNote('Devis envoyé via signature elec le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                        $this->addNote('Devis envoyé via signature électronique le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                     }
                 }
             }
@@ -5352,11 +5353,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $sms_only = false;
                     }
                     $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis', $sms_only, $id_contact_notif));
-                    if(!$sms_only)
-                        $this->addNote('Devis envoyé via email le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                    if (!$sms_only)
+                        $this->addNote('Devis envoyé via e-mail le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
+                } else {
+                    $this->addNote('Devis validé sans envoi le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                 }
-                else
-                    $this->addNote('Devis validé sans envoie le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             }
         }
 

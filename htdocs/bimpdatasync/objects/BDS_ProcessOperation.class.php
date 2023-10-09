@@ -89,7 +89,7 @@ class BDS_ProcessOperation extends BimpObject
 
     // Rendus HTML: 
 
-    public function renderExecutionForm($panel = true)
+    public function renderExecutionForm($panel = true, $panel_open = true)
     {
         if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('ID de l\'opération absent');
@@ -184,7 +184,8 @@ class BDS_ProcessOperation extends BimpObject
         $html .= '<div class="col-xs-12 col-sm-12 col-md-6">';
         if ($panel) {
             $html .= BimpRender::renderPanel($title, $op_html, $op_footer, array(
-                        'type' => 'secondary'
+                        'type' => 'secondary',
+                        'open' => $panel_open
             ));
         } else {
             $html .= '<h3>' . $title . '</h3>';

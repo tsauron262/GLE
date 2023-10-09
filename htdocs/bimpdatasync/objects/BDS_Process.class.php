@@ -318,7 +318,7 @@ class BDS_Process extends BimpObject
 
             if (count($operations)) {
                 foreach ($operations as $operation) {
-                    $html .= $operation->renderExecutionForm(true);
+                    $html .= $operation->renderExecutionForm(true, (count($operations) <= 2));
                 }
             } else {
                 $errors[] = 'Aucune opération enregistrée pour ce processus';
@@ -438,8 +438,8 @@ class BDS_Process extends BimpObject
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
         );
     }

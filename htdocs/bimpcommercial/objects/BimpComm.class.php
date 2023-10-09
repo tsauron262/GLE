@@ -4030,7 +4030,7 @@ class BimpComm extends BimpDolObject
 
                 $marge = $margins['total_margin'];
 
-                if ((float) $marge != (float) $this->getData('marge')) {
+                if ((float) $marge !== (float) $this->getData('marge')) {
                     $old_marge = (float) $this->getData('marge');
                     $errors = $this->updateField('marge', $marge);
 

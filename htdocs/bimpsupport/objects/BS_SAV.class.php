@@ -5280,7 +5280,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
                 }
             } else {
-                $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                 $new_status = self::BS_SAV_ATT_CLIENT;
 
                 if ($propal->dol_object->cond_reglement_id == 20 && $propal->dol_object->mode_reglement_id != 2) {
@@ -5329,6 +5328,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         if (count($signature_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
                         }
+                        $this->addNote('Devis envoyé via signature elec le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                     }
                 }
             }
@@ -5352,7 +5352,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $sms_only = false;
                     }
                     $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis', $sms_only, $id_contact_notif));
+                    if(!$sms_only)
+                        $this->addNote('Devis envoyé via email le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                 }
+                else
+                    $this->addNote('Devis validé sans envoie le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
             }
         }
 

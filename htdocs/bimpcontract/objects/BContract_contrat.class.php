@@ -2437,13 +2437,13 @@ class BContract_contrat extends BimpDolObject
             $html .= "Nombre d'heures FI dans le contrat : " . $ficheInter->timestamp_to_time($total_tms) . '<br />';
             $html .= "Nombre d'heures FI hors du contrat : " . $ficheInter->timestamp_to_time($total_tms_not_contrat) . ' (non pris en compte)<br />';
             $html .= "Nombre d'heures de délégations restante : " . $this->getHeuresRestantesDelegation() . '<br/>';
-            $html .= "Coût technique: " . price($total_fis) . " € (" . BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique') . " €/h * " . $ficheInter->timestamp_to_time($total_tms) . ")<br />";
-            $html .= "Coût prévisionel: " . price($previsionelle) . " €<br />";
+            $html .= "Coût technique: " . BimpTools::displayMoneyValue($total_fis) . " (" . BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique') . " €/h * " . $ficheInter->timestamp_to_time($total_tms) . ")<br />";
+            $html .= "Coût prévisionel: " . BimpTools::displayMoneyValue($previsionelle) . "<br />";
             $html .= "Vendu: " . "<strong class='warning'>" . price($this->getTotalContrat()) . "€</strong><br />";
             $html .= "Marge: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />";
-            $html .= "Marge Prévisionelle: " . "<strong class='$class2'>" . BimpRender::renderIcon($icone2) . " " . price($marge_previsionelle) . "€</strong><br />";
+            $html .= "Marge Prévisionelle: " . "<strong class='$class2'>" . BimpRender::renderIcon($icone2) . " " . BimpTools::displayMoneyValue($marge_previsionelle) . "</strong><br />";
         } else {
-            $html .= "Contrat: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />";
+            $html .= "Contrat: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . BimpTools::displayMoneyValue($marge) . "</strong><br />";
         }
         $html .= '</strong>';
 

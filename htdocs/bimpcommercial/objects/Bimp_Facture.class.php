@@ -5062,7 +5062,7 @@ class Bimp_Facture extends BimpComm
 
                 $marge_finale = $margin + (float) $revals['accepted'];
 
-                if ($marge_finale != (float) $this->getData('marge_finale_ok')) {
+                if ((float) $marge_finale != (float) $this->getData('marge_finale_ok')) {
                     $old_marge = (float) $this->getData('marge_finale_ok');
                     $up_errors = $this->updateField('marge_finale_ok', $marge_finale);
 

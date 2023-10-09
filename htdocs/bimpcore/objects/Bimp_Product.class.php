@@ -10,12 +10,12 @@ class Bimp_Product extends BimpObject
         2 => 'Service contrat',
         3 => 'Déplacement inter',
         4 => 'Déplacement contrat',
-        5 => 'Logiciel'
+        5 => 'Logiciel (licence unique)',
+        6 => 'Licence avec abonnement'
     );
     public static $sousTypeDep = array(3, 4);
     public static $sousTypeContrat = array(1, 2);
     public static $product_type = array(
-//        "" => '',
         0 => array('label' => 'Produit', 'icon' => 'fas_box'),
         1 => array('label' => 'Service', 'icon' => 'fas_hand-holding')
     );
@@ -45,6 +45,25 @@ class Bimp_Product extends BimpObject
         self::TYPE_COMPTA_PORT    => "Considéré comme frais de port",
         self::TYPE_COMPTA_COMM    => "Considéré comme commission"
     ];
+    public static $achat_periodicities = array(
+        0  => 'Aucun achat',
+        -1 => 'Identique à la facturation',
+        1  => 'Mensuelle',
+        2  => 'Bimensuelle',
+        3  => 'Trimestrielle',
+        4  => 'Quadrimestrielle',
+        6  => 'Semestrielle',
+        12 => 'Annuelle'
+    );
+    public static $fac_periodicities = array(
+        0  => 'Non définie',
+        1  => 'Mensuelle',
+        2  => 'Bimensuelle',
+        3  => 'Trimestrielle',
+        4  => 'Quadrimestrielle',
+        6  => 'Semestrielle',
+        12 => 'Annuelle'
+    );
     public static $units_weight = array();
     public static $units_length = array();
     public static $units_surface = array();
@@ -527,13 +546,13 @@ class Bimp_Product extends BimpObject
 
     public function getCodeComptableAchat($zone_vente = 1, $force_type = -1, $tvaTaux = 1)
     {
-        
+
         if (preg_match('.(applecare).', strtolower($this->getData('label')))) {
             return BimpCore::getConf('achat_tva_null', null, 'bimptocegid');
         }
-        
-        
-        
+
+
+
         if ($force_type == -1) {
             if (!$this->isLoaded())//pas de type spécial et pas de produit loadé
                 return '';
@@ -544,44 +563,41 @@ class Bimp_Product extends BimpObject
         } else {
             $type = $force_type;
         }
-        
-        
+
+
         if ($type == 0) { // Produit
             $confName = 'achat_produit_';
         } elseif ($type == 1) { // Service
             $confName = 'achat_service_';
         } elseif ($type == 2) { // Frais de port
             $confName = 'frais_de_port_achat_';
-        }
-        elseif ($type == 3) {//commission
+        } elseif ($type == 3) {//commission
             $confName = 'achat_comissions_';
         }
-            
-        if($zone_vente == 1){
+
+        if ($zone_vente == 1) {
             $confName .= 'fr';
-        }
-        elseif($zone_vente == 2){
+        } elseif ($zone_vente == 2) {
             $confName .= 'ue';
-        }
-        elseif($zone_vente == 3){
+        } elseif ($zone_vente == 3) {
             $confName .= 'ex';
         }
-        
+
         if ($tvaTaux == 0 || ($tvaTaux == 1 && $this->getData('tva_tx') == 0)) {//exception pour les non tva
-            if($type == 0)
+            if ($type == 0)
                 $confName = 'achat_tva_null';
-            elseif($type == 1)
+            elseif ($type == 1)
                 $confName = 'achat_tva_null_service';
         }
-            
-        
-        if(BimpCore::getConf($confName, null, "bimptocegid"))
-                return BimpCore::getConf($confName, null, "bimptocegid");
-        else{
-            mailSyn2('Probléme compta', 'dev@bimp.fr', null, 'Attention code compta inconnue '.$confName);
+
+
+        if (BimpCore::getConf($confName, null, "bimptocegid"))
+            return BimpCore::getConf($confName, null, "bimptocegid");
+        else {
+            mailSyn2('Probléme compta', 'dev@bimp.fr', null, 'Attention code compta inconnue ' . $confName);
             die;
         }
-        
+
 //        
 //        if ($type == 0) { // Produit
 //            if ($zone_vente == 1) {
@@ -631,18 +647,18 @@ class Bimp_Product extends BimpObject
             if (!$this->isLoaded())
                 return '';
             $type = $this->getProductTypeCompta();
-            
+
             if ($zone_vente == 1)
                 $field = 'accountancy_code_sell';
             elseif ($zone_vente == 2)
                 $field = 'accountancy_code_sell_intra';
             elseif ($zone_vente == 3)
                 $field = 'accountancy_code_sell_export';
-            if(isset($field) && $this->getData($field) != '')
+            if (isset($field) && $this->getData($field) != '')
                 return $this->getData($field);
-            
-            
-            
+
+
+
 //            if ($zone_vente == 1 && $this->getData('accountancy_code_sell') != '')
 //                return $this->getData('accountancy_code_sell');
 //            elseif ($zone_vente == 2 && $this->getData('accountancy_code_sell_intra') != '')
@@ -651,44 +667,38 @@ class Bimp_Product extends BimpObject
 //                return $this->getData('accountancy_code_sell_export');
         } else//on force un type on prend les compte généraux
             $type = $force_type;
-        
-        
-        if($type < 2 && $zone_vente == 1 && $this->getData('tva_tx') == 0){//produit ou service tva null vendu en france
+
+
+        if ($type < 2 && $zone_vente == 1 && $this->getData('tva_tx') == 0) {//produit ou service tva null vendu en france
             $confName = 'vente_tva_null';
-        }
-        else{
+        } else {
             //debut du code
             if ($type == 0) {//Produit
                 $confName = 'vente_produit_';
-            }
-            elseif ($type == 1) {//service
+            } elseif ($type == 1) {//service
                 $confName = 'vente_service_';
-            }
-            elseif ($type == 2) {//Port
+            } elseif ($type == 2) {//Port
                 $confName = 'frais_de_port_vente_';
-            }
-            elseif ($type == 3) {//commission
+            } elseif ($type == 3) {//commission
                 $confName = 'comissions_';
             }
             //fin du code en fonction de la zone de vente
             if ($zone_vente == 1) {
                 $confName .= 'fr';
-            }
-            elseif ($zone_vente == 2 || $zone_vente == 4){
+            } elseif ($zone_vente == 2 || $zone_vente == 4) {
                 $confName .= 'ue';
-            }
-            elseif ($zone_vente == 3){
+            } elseif ($zone_vente == 3) {
                 $confName .= 'ex';
             }
         }
-        if(BimpCore::getConf($confName, null, "bimptocegid"))
-                return BimpCore::getConf($confName, null, "bimptocegid");
-        else{
-            mailSyn2('Probléme compta', 'dev@bimp.fr', null, 'Attention code compta inconnue '.$confName);
+        if (BimpCore::getConf($confName, null, "bimptocegid"))
+            return BimpCore::getConf($confName, null, "bimptocegid");
+        else {
+            mailSyn2('Probléme compta', 'dev@bimp.fr', null, 'Attention code compta inconnue ' . $confName);
             die;
         }
-        
-        
+
+
 //        if ($type == 0) {//Produit
 //            if ($zone_vente == 1) {
 //                if ($this->getData('tva_tx') == 0) {
@@ -2338,7 +2348,7 @@ class Bimp_Product extends BimpObject
         }
 
         // Evénements: 
-        if($this->isDolModuleActif('agenda'))
+        if ($this->isDolModuleActif('agenda'))
             $tabs[] = array(
                 'id'            => 'events_tab',
                 'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
@@ -2895,31 +2905,31 @@ class Bimp_Product extends BimpObject
         // COMMAND
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
-            if ((int) $commande->statut != (int) Commande::STATUS_DRAFT/* and (int) $commande->statut != (int) Commande::STATUS_CANCELED*/)
+            if ((int) $commande->statut != (int) Commande::STATUS_DRAFT/* and (int) $commande->statut != (int) Commande::STATUS_CANCELED */)
                 continue;
             $bimpCommande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $commande->id);
             $errorsCommandeValid = array();
-            if(!$bimpCommande->areLinesValid($errorsCommandeValid, false))//des lignes ne sont pas validables
+            if (!$bimpCommande->areLinesValid($errorsCommandeValid, false))//des lignes ne sont pas validables
                 continue;
 
             $email_sent = false;
             $list_contact = $commande->liste_contact(-1, 'internal');
-            
+
             //mail au créateur
             $mailCreateur = '';
-            if($commande->fk_user_author){
+            if ($commande->fk_user_author) {
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch($commande->fk_user_author);
                 $mailCreateur = $userT->email;
             }
-            if($mailCreateur && $mailCreateur != '')
+            if ($mailCreateur && $mailCreateur != '')
                 $this->sendEmailCommandeValid($commande, $mailCreateur);
-                    
+
             // Search responsible
             foreach ($list_contact as $contact) {
                 if ($contact['code'] == 'SALESREPFOLL' && !$email_sent) {
-                    if($contact['email'] != $mailCreateur)
+                    if ($contact['email'] != $mailCreateur)
                         $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
                     $email_sent = true;
                     break;
@@ -2929,7 +2939,7 @@ class Bimp_Product extends BimpObject
             // Search signatory
             if (!$email_sent) {
                 foreach ($list_contact as $contact) {
-                    if($contact['email'] != $mailCreateur)
+                    if ($contact['email'] != $mailCreateur)
                         $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
                     $email_sent = true;
                     break;
@@ -2941,8 +2951,8 @@ class Bimp_Product extends BimpObject
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
-                if($userT->email != $mailCreateur)
-                        $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $userT->email));
+                if ($userT->email != $mailCreateur)
+                    $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $userT->email));
                 $email_sent = true;
                 continue;
             }

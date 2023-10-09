@@ -1,0 +1,166 @@
+dol_object: 
+    instance: 
+        dol_object: 
+            module: contrat
+            file: contrat
+            class: ContratLigne
+            
+table: contratdet
+
+labels: 
+    name: ligne de contrat
+    name_plur: lignes de contrat
+    is_female: 1
+   
+parent_module: bimpcontrat
+parent_object: BCT_Contrat
+parent_id_property: fk_contrat
+
+objects: 
+    product: 
+        instance: 
+            id_object: 
+                field_value: fk_product
+    
+    fourn_price: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductFournisseurPrice
+            id_object: 
+                field_value: fk_product_fournisseur_price
+        
+    user_author: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_author
+                
+    user_ouverture: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_ouverture
+                
+    user_cloture: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_cloture
+                
+fields: 
+    fk_contrat: 
+        label: Contrat
+        type: id_parent
+        required: 1
+        
+    fk_product: 
+        label: Produit / service
+        type: id_object
+        object: product
+        
+    statut: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+    label: 
+        label: Libellé
+        
+    description: 
+        label: Description
+        type: html
+    
+    product_type: 
+        label: Type produit
+        type: int
+        values: 
+            0: Produit
+            1: Service
+            
+    qty: 
+        label: Qté
+        type: float
+        decimals: 8
+        
+    price_ht: 
+        label: Prix unitaire HT
+        type: money
+        
+    subprice: 
+        label: PU HT remisé
+        type: money
+        
+    tva_tx: 
+        label: Tx TVA
+        tpe: float
+        default_value: 
+            callback: getDefaultTva
+            
+    remise_percent: 
+        label: Remise (%)
+        type: percent
+        default_value: 0
+        
+    remise: 
+        label: Montant remise
+        type: money
+        
+    buy_price_ht: 
+        label: Prix d'achat HT
+        type: money
+        
+    fk_product_fournisseur_price: 
+        label: Prix d'achat fournisseur
+        type: id_object
+        object: fourn_price
+    
+    total_ht: 
+        label: Total HT
+        type: money
+    
+    total_tva: 
+        label: Total TVA
+        type: money
+        
+    total_ttc: 
+        label: Total TTC
+        type: money
+        
+    date_commande: 
+        label: Date commande
+        type: datetime
+        
+    date_ouverture_prevue: 
+        label: Date ouverture prévue
+        type: datetime
+        
+    date_ouverture: 
+        label: Date ouverture
+        type: datetime
+        
+    date_fin_validite: 
+        label: Date fin validité
+        type: datetime
+        
+    date_cloture: 
+        label: Date cloture
+        type: datetime
+        
+    fk_user_author: 
+        label: Créé par
+        type: id_object
+        object: user_author
+        
+    fk_user_ouverture: 
+        label: Ouvert par
+        type: id_object
+        object: user_ouverture
+        
+    fk_user_cloture: 
+        label: Clos par
+        type: id_object
+        object: user_cloture
+        

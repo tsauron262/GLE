@@ -589,7 +589,6 @@ fields:
 #            help: En secondes (1h = 3600s - 7h = 25200s)
         dol_extra_field: 1
         
-        
     renta_service:
         label: Rentabilitée €/h
         type: money
@@ -600,6 +599,27 @@ fields:
         label: Activer les alertes de stock
         type: bool
         default_value: 1
+        
+    achat_def_periodicity: 
+        label: périodicité d'achat par défaut
+        type: int
+        values: 
+            array: achat_periodicities
+        default_value: 0
+        
+    achat_def_id_fourn: 
+        label: Fournisseur par défaut
+        
+    fac_def_periodicity: 
+        label: Périodicité de facturation par défaut
+        type: int
+        values: 
+            array: fac_periodicities
+            
+    variable_qty: 
+        label: Abonnement à qté variable
+        type: bool
+        default_value: 0        
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 

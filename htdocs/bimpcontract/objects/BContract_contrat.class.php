@@ -2420,6 +2420,13 @@ class BContract_contrat extends BimpDolObject
             $class = 'danger';
             $icone = 'arrow-down';
         }
+        if ($marge_previsionelle > 0) {
+            $class2 = 'success';
+            $icone2 = 'arrow-up';
+        } elseif ($marge_previsionelle < 0) {
+            $class2 = 'danger';
+            $icone2 = 'arrow-down';
+        }
 
         $html .= "<strong>";
         if ($in_contrat) {
@@ -2434,7 +2441,7 @@ class BContract_contrat extends BimpDolObject
             $html .= "Coût prévisionel: " . price($previsionelle) . " €<br />";
             $html .= "Vendu: " . "<strong class='warning'>" . price($this->getTotalContrat()) . "€</strong><br />";
             $html .= "Marge: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />";
-            $html .= "Marge Prévisionelle: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge_previsionelle) . "€</strong><br />";
+            $html .= "Marge Prévisionelle: " . "<strong class='$class2'>" . BimpRender::renderIcon($icone2) . " " . price($marge_previsionelle) . "€</strong><br />";
         } else {
             $html .= "Contrat: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />";
         }

@@ -68,10 +68,11 @@ class BDS_VerifsProcess extends BDSProcess
                     foreach ($this->references as $id_fac) {
                         $this->incProcessed();
                         $fac_errors = array();
+                        $fac_infos = array();
                         $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
 
                         if (BimpObject::objectLoaded($fac)) {
-                            $fac_errors = $fac->checkMargin(true, true);
+                            $fac_errors = $fac->checkMargin(true, true, $fac_infos);
                             $fac_errors = BimpTools::merge_array($fac_errors, $fac->checkTotalAchat(false));
                         } else {
                             $fac_errors[] = 'Fac #' . $id_fac . ' non trouvée';
@@ -80,9 +81,9 @@ class BDS_VerifsProcess extends BDSProcess
                         if (count($fac_errors)) {
                             $this->incIgnored();
                             $this->Error(BimpTools::getMsgFromArray($fac_errors, 'Fac #' . $id_fac), $fac, $id_fac);
-                        } else {
+                        } elseif (count($fac_infos)) {
                             $this->incUpdated();
-                            $this->Success('Vérif marges OK', $fac, $id_fac);
+                            $this->Success(BimpTools::getMsgFromArray($fac_infos), $fac, $id_fac);
                         }
                     }
                 }

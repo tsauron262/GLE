@@ -5324,12 +5324,18 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $propal->dol_object->reopen($user, 0);
                     } elseif ($create_signature) {
                         $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
-                        $signature_errors = $propal->createSignature(false, true, (int) $this->getData('id_contact'), $email_content);
+                        $signature_warnings = array();
+                        $signature_errors = $propal->createSignature(false, true, (int) $this->getData('id_contact'), $email_content, $signature_warnings);
 
+                        if (count($signature_warnings)) {
+                            $this->addObjectLog(BimpTools::getMsgFromArray($signature_warnings, 'Erreurs lors de la création de la fiche signature'));
+                        }
                         if (count($signature_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
+                            $this->addObjectLog(BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature'));
+                        } else {
+                            $this->addNote('Devis envoyé via signature électronique le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                         }
-                        $this->addNote('Devis envoyé via signature électronique le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), BimpNote::BN_ALL);
                     }
                 }
             }

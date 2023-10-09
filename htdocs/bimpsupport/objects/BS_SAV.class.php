@@ -5345,7 +5345,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                 $propal->hydrateFromDolObject();
 
-                if (isset($data['send_msg']) && (int) $data['send_msg']) {
+                if (isset($data['send_msg']) && (int) $data['send_msg'] && !$this->allGarantie) {
                     $sms_only = $create_signature;
                     $id_contact_notif = BimpTools::getArrayValueFromPath($data, 'id_contact_notif', null);
                     if ((int) $id_contact != (int) $id_contact_notif) {

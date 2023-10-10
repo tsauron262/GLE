@@ -14,3 +14,11 @@ params:
         label: Utiliser l'id par default si pas de token
         type: bool
         def: 0
+        
+    gsx_version:
+        label: Version de GSX
+        def: 4
+        
+    gsx_user_beta:
+        label: User beta testeur
+        info: Tableau json de type [1,2]

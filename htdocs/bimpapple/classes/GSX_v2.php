@@ -384,7 +384,7 @@ class GSX_v2 extends GSX_Const
 
         if ($request_name !== 'authenticate') {
             $headers[] = 'X-Apple-Auth-Token: ' . $this->auth_token;
-            $headers[] = 'X-Apple-Service-Version: v4';
+            $headers[] = 'X-Apple-Service-Version: v'.static::getVersion();
         }
 
         if (isset($extra['headers']) && is_array($extra['headers'])) {
@@ -406,6 +406,14 @@ class GSX_v2 extends GSX_Const
         curl_setopt($this->ch, CURLOPT_HEADER, true);
 
         return 1;
+    }
+    
+    public static function getVersion(){
+        global $user;
+        if(in_array($user->id, json_decode(BimpCore::getConf('gsx_user_beta', 0, 'bimpapple'), true)))
+            return 5;
+        else
+            return BimpCore::getConf('gsx_version', 0, 'bimpapple');
     }
 
     public function exec($request_name, $params, &$response_headers = array(), $extra = array())
